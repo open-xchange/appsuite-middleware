@@ -53,6 +53,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import junit.framework.TestCase;
+
 import com.openexchange.database.Database;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
@@ -60,14 +62,10 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.resource.internal.ResourceCreate;
-import com.openexchange.resource.internal.ResourceUpdate;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.test.AjaxInit;
-
-import junit.framework.TestCase;
 
 /**
  * {@link ResourceUpdateTest}
@@ -216,6 +214,57 @@ public final class ResourceUpdateTest extends TestCase {
 
 	}
 
+	public void testResourceUpdateIncomplete() {
+		int id = -1;
+		try {
+			final Resource resource = createDummyResource(admin, ctx);
+			id = resource.getIdentifier();
+			assertTrue("Invalid ID detected: " + id + ". ID has not been properly set through creation", id != -1);
+			assertTrue("Invalid last-modified detected: " + resource.getLastModified()
+					+ ". Last-modified timestamp has not been properly set through creation", resource
+					.getLastModified() != null
+					&& resource.getLastModified().getTime() < System.currentTimeMillis());
+			final long beforeLastModified = resource.getLastModified().getTime();
+			final String displayNameBefore = resource.getDisplayName();
+			final String mailBefore = resource.getMail();
+			/*
+			 * Try to only update simple name
+			 */
+			resource.setSimpleName("Foobar-12334");
+			resource.removeDisplayName();
+			resource.removeMail();
+			resource.removeAvailable();
+			resource.removeDescription();
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource);
+			/*
+			 * Load via storage API
+			 */
+			Resource storageVersion = ResourceStorage.getInstance().getResource(id, ctx);
+
+			/*
+			 * Compare values
+			 */
+			assertTrue("Invalid last-modified timestamp", resource.getLastModified().getTime() > beforeLastModified
+					&& resource.getLastModified().getTime() == storageVersion.getLastModified().getTime());
+			assertTrue("Simple name has not been properly updated", resource.getSimpleName().equals(
+					storageVersion.getSimpleName()));
+			assertTrue("Display name has been updated, but shouldn't", storageVersion.getDisplayName().equals(
+					displayNameBefore));
+			assertTrue("Email address has been updated, but shouldn't", storageVersion.getMail().equals(mailBefore));
+
+			System.out.println("Resource successfully updated with ID " + id);
+		} catch (final ResourceException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		} catch (final LdapException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		} finally {
+			deleteResource(id, ctx.getContextId());
+		}
+
+	}
+
 	public void testResourceFail001() {
 		int id = -1;
 		try {
@@ -253,6 +302,10 @@ public final class ResourceUpdateTest extends TestCase {
 	}
 
 	public void testResourceFail006() {
+		if (user.getId() == admin.getId()) {
+			System.out.println("Logged in with context's admin. Skipping test with non-admin user");
+			return;
+		}
 		int id = -1;
 		try {
 			final Resource resource = createDummyResource(admin, ctx);
@@ -282,6 +335,24 @@ public final class ResourceUpdateTest extends TestCase {
 			fail("Update succeeded with missing mandatory field");
 		} catch (final ResourceException e) {
 			System.out.println("Update failed with missing mandatory field: " + e.getMessage());
+		} finally {
+			deleteResource(id, ctx.getContextId());
+		}
+
+	}
+
+	public void testResourceFail008() {
+		int id = -1;
+		try {
+			final Resource resource = createDummyResource(admin, ctx);
+			id = resource.getIdentifier();
+
+			resource.setSimpleName(null);
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource);
+
+			fail("Update succeeded with invalid string identifier");
+		} catch (final ResourceException e) {
+			System.out.println("Update failed with invalid string identifier: " + e.getMessage());
 		} finally {
 			deleteResource(id, ctx.getContextId());
 		}

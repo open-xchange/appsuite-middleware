@@ -51,6 +51,7 @@ package com.openexchange.resource;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import junit.framework.TestCase;
@@ -62,8 +63,6 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.resource.internal.ResourceCreate;
-import com.openexchange.resource.internal.ResourceDelete;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -147,6 +146,10 @@ public final class ResourceDeleteTest extends TestCase {
 		Init.stopServer();
 	}
 
+	private static final String SQL_SELECT_DELETE = "SELECT t.id, t.identifier FROM del_resource AS t WHERE t.cid = ? AND t.id = ?";
+
+	private static final String SQL_DELETE_DELETE = "DELETE FROM del_resource WHERE cid = ? AND id = ?";
+
 	public void testResourceDelete() {
 		int id = -1;
 		try {
@@ -168,9 +171,60 @@ public final class ResourceDeleteTest extends TestCase {
 			}
 			assertTrue("Resource has not been deleted", expected != null);
 
+			/*
+			 * Check backup table by hand
+			 */
+			final Connection con = Database.get(ctx, true);
+			try {
+				PreparedStatement stmt = con.prepareStatement(SQL_SELECT_DELETE);
+				ResultSet rs = null;
+				try {
+					stmt.setInt(1, ctx.getContextId());
+					stmt.setInt(2, id);
+					rs = stmt.executeQuery();
+					assertTrue("No entry found in backup table", rs.next() && rs.getInt(1) == id);
+					assertFalse("Duplicate entry found in backup table", rs.next());
+					rs.close();
+					rs = null;
+					/*
+					 * Remove from backup table
+					 */
+					stmt.close();
+					stmt = con.prepareStatement(SQL_DELETE_DELETE);
+					stmt.setInt(1, ctx.getContextId());
+					stmt.setInt(2, id);
+					stmt.executeUpdate();
+				} catch (final SQLException e) {
+					e.printStackTrace();
+					fail(e.getMessage());
+				} finally {
+					if (rs != null) {
+						try {
+							rs.close();
+						} catch (final SQLException e) {
+							e.printStackTrace();
+						}
+						rs = null;
+					}
+					try {
+						stmt.close();
+					} catch (final SQLException e) {
+						e.printStackTrace();
+					}
+				}
+			} catch (final SQLException e) {
+				e.printStackTrace();
+				fail(e.getMessage());
+			} finally {
+				Database.back(ctx, true, con);
+			}
+
 			System.out.println("Resource successfully deleted with ID: " + id);
 			id = -1;
 		} catch (final ResourceException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		} catch (final DBPoolingException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		} finally {
@@ -180,6 +234,10 @@ public final class ResourceDeleteTest extends TestCase {
 	}
 
 	public void testResourceFail006() {
+		if (user.getId() == admin.getId()) {
+			System.out.println("Logged in with context's admin. Skipping test with non-admin user");
+			return;
+		}
 		int id = -1;
 		try {
 			final Resource resource = createDummyResource(admin, ctx);
