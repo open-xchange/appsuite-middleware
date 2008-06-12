@@ -24,19 +24,20 @@ sub doRequest {
    	my $inSelf = shift;
     my $soap = SOAP::Lite->ns( $inSelf->{'serviceNs'} )->proxy( $inSelf->{'basisUrl'}."OXResourceService" );
     
-    my $name = "test4";
-    my $displayname = "test4";
+    my $name = "test5";
+    my $displayname = "test5";
     my $email = "xyz4\@bla.de";
     
     my $som_entry = 
-      $soap->create($inSelf->{'Context'},
+      $soap->change($inSelf->{'Context'},
     	      SOAP::Data->value("Resource")->value(\SOAP::Data->value(
-    	           # First the mandatory fields
+                   # First the mandatory fields
     	           SOAP::Data->name("name" => $name),
     	           SOAP::Data->name("displayname" => $displayname),
     	           SOAP::Data->name("email" => $email),
     	           # And here the optional fields
-    	           SOAP::Data->name("available" => "true")
+    	           SOAP::Data->name("available" => "true"),
+    	           SOAP::Data->name("description" => "description")
     	           )),
     	      $inSelf->{'creds'}
     	     );

@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-package Listresource;
+package Createresource;
 use strict;
 use Data::Dumper;
 use base qw(BasicCommandlineOptions);
@@ -9,7 +9,7 @@ use base qw(BasicCommandlineOptions);
 #use SOAP::Lite +trace => 'debug';
 use SOAP::Lite;
 
-my $test = new Listresource();
+my $test = new Createresource();
 $test->doRequest();
 
 sub new {
@@ -24,22 +24,21 @@ sub doRequest {
    	my $inSelf = shift;
     my $soap = SOAP::Lite->ns( $inSelf->{'serviceNs'} )->proxy( $inSelf->{'basisUrl'}."OXResourceService" );
     
-    my $pattern = SOAP::Data->value("*");
+    my $id = 12;
     
     my $som_entry = 
-      $soap->list($inSelf->{'Context'},$pattern,$inSelf->{'creds'});
+      $soap->delete($inSelf->{'Context'},
+    	      SOAP::Data->value("Resource")->value(\SOAP::Data->value(
+                   # First the mandatory fields
+    	           SOAP::Data->name("id" => $id)
+    	           )),
+    	      $inSelf->{'creds'}
+    	     );
     
     if ( $som_entry->fault() ) {
         $inSelf->fault_output($som_entry);
     } else {
-        my $fields = [ "id", "name", "displayname", "email", "available", "description" ]; 
-        
-        my @results = $som_entry->paramsall;
-        #print @results[0];
-        
-        my @data = $inSelf->SUPER::fetch_results($fields, \@results);
-        
-        $inSelf->doCSVOutput($fields, \@data);
+        print "Fine\n";
     }
 
 }
