@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail;
 
+import org.json.JSONArray;
+
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -100,11 +102,11 @@ public class PhishingHeaders implements PreferencesItemService {
 				if (null == phishingHeaders || phishingHeaders.length == 0) {
 					setting.setSingleValue("null");
 				} else {
-					final StringBuilder sb = new StringBuilder(phishingHeaders[0]);
-					for (int i = 1; i < phishingHeaders.length; i++) {
-						sb.append(',').append(phishingHeaders[i]);
+					final JSONArray jArray = new JSONArray();
+					for (final String phishingHeader : phishingHeaders) {
+						jArray.put(phishingHeader);
 					}
-					setting.setSingleValue(sb.toString());
+					setting.setSingleValue(jArray);
 				}
 			}
 		};
