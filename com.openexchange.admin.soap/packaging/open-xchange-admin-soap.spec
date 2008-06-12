@@ -69,4 +69,6 @@ ant -Ddestdir=%{buildroot} install
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/com.openexchange.axis2/services
+%dir /opt/open-xchange/etc/admindaemon/plugin
 /opt/open-xchange/bundles/com.openexchange.axis2/services/*
+%config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/open-xchange-admin-soap.properties
