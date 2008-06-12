@@ -67,6 +67,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -252,10 +253,9 @@ final class Update {
         storage.deleteMember(ctx, con, changed, tmp);
     }
 
-
     /**
-     * Inform the rest of the system about the new group.
-     * @throws GroupException 
+     * Inform the rest of the system about the changed group.
+     * @throws GroupException if something during propagate fails.
      */
     private void propagate() throws GroupException {
         int[] tmp = new int[addedMembers.size() + removedMembers.size()];
@@ -269,6 +269,41 @@ final class Update {
             tmp[i++] = iter.next().intValue();
         }
         GroupTools.invalidateUser(ctx, tmp);
-        // Update OXFolder
+        // The time stamp of folder must be increased. The GUI the reloads the
+        // folder. This must be done because through this change some folders
+        // may get visible or invisible.
+        final Connection con;
+        try {
+            con = DBPool.pickupWriteable(ctx);
+        } catch (final DBPoolingException e) {
+            throw new GroupException(Code.NO_CONNECTION, e);
+        }
+        try {
+            con.setAutoCommit(false);
+            propagate(con);
+            con.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw new GroupException(Code.SQL_ERROR, e);
+        } catch (final GroupException e) {
+            DBUtils.rollback(con);
+            throw e;
+        } finally {
+            try {
+                con.setAutoCommit(true);
+            } catch (SQLException e) {
+                LOG.error("Problem setting autocommit to true.", e);
+            }
+            DBPool.closeWriterSilent(ctx, con);
+        }
+    }
+
+    private void propagate(final Connection con) throws GroupException {
+        try {
+            OXFolderAdminHelper.propagateGroupModification(changed.getIdentifier(),
+                con, con, ctx.getContextId());
+        } catch (final SQLException e) {
+            throw new GroupException(Code.SQL_ERROR, e);
+        }
     }
 }

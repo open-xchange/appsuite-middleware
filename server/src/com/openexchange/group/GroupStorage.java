@@ -80,8 +80,21 @@ public abstract class GroupStorage {
      * @param group group to insert.
      * @throws GroupException if some problem occurs.
      */
-    public abstract void insertGroup(Context ctx, Connection con, Group group)
-        throws GroupException;
+    public final void insertGroup(Context ctx, Connection con, Group group)
+        throws GroupException {
+        insertGroup(ctx, con, group, StorageType.ACTIVE);
+    }
+
+    /**
+     * This method inserts a group without its members into the storage.
+     * @param ctx Context.
+     * @param con writable database connection.
+     * @param group group to insert.
+     * @param type defines if group is inserted ACTIVE or DELETED.
+     * @throws GroupException if some problem occurs.
+     */
+    public abstract void insertGroup(Context ctx, Connection con, Group group,
+        StorageType type) throws GroupException;
 
     /**
      * This method updates group field in the storage.
@@ -98,6 +111,17 @@ public abstract class GroupStorage {
 
     public abstract void deleteMember(Context ctx, Connection con, Group group,
         int[] members) throws GroupException;
+
+    /**
+     * This method deletes a group from the database. Before all its members
+     * must be removed.
+     * @param ctx Context.
+     * @param con writable database connection.
+     * @param groupId unique identifier of the group to delete.
+     * @throws GroupException if deleting fails.
+     */
+    public abstract void deleteGroup(Context ctx, Connection con, int groupId)
+        throws GroupException;
 
     /**
      * Reads a group from the persistent storage.
@@ -119,7 +143,7 @@ public abstract class GroupStorage {
      * group.
      * @param The context.
      * @return an array of groups that match the search pattern.
-     * @throws GroupException TODO
+     * @throws GroupException if searching has some storage related problem.
      */
     public abstract Group[] searchGroups(String pattern, Context context) throws GroupException;
 
@@ -171,5 +195,17 @@ public abstract class GroupStorage {
 
     public static GroupStorage getInstanceWithZero() {
         return instanceWithZero;
+    }
+
+    public static enum StorageType {
+        /**
+         * Storage type for currently active groups.
+         */
+        ACTIVE,
+        /**
+         * Storage type for deleted groups. This must be filled with deleted
+         * groups to inform synchronizing clients about not more existing groups.
+         */
+        DELETED
     }
 }

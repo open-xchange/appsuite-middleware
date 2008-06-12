@@ -49,6 +49,7 @@
 
 package com.openexchange.group.internal;
 
+import static com.openexchange.group.internal.SQLStrings.INSERT_GROUP;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 
@@ -91,11 +92,10 @@ public class RdbGroupStorage extends GroupStorage {
      */
     @Override
     public void insertGroup(final Context ctx, final Connection con,
-        final Group group) throws GroupException {
+        final Group group, final StorageType type) throws GroupException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO groups (cid,id,identifier,"
-                + "displayName,lastModified,gidNumber) VALUES (?,?,?,?,?,?)");
+            stmt = con.prepareStatement(INSERT_GROUP.get(type));
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, group.getIdentifier());
@@ -187,6 +187,26 @@ public class RdbGroupStorage extends GroupStorage {
             closeSQLStuff(null, stmt);
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void deleteGroup(final Context ctx, final Connection con,
+        final int groupId) throws GroupException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM groups WHERE cid=? AND id=?");
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, groupId);
+            stmt.execute();
+        } catch (final SQLException e) {
+            throw new GroupException(GroupException.Code.SQL_ERROR, e);
+        } finally {
+            closeSQLStuff(null, stmt);
+        }
+    }
+
     /**
      * {@inheritDoc}
      */

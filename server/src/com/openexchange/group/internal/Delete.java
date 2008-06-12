@@ -51,6 +51,7 @@ package com.openexchange.group.internal;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,6 +60,7 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupException;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.group.GroupException.Code;
+import com.openexchange.group.GroupStorage.StorageType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
@@ -70,7 +72,7 @@ import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- *
+ * This class integrates all operations to be done for deleting a group.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Delete {
@@ -106,10 +108,10 @@ public final class Delete {
     private transient Group orig;
 
     /**
-     * @param groupId 
-     * @param user 
-     * @param ctx 
-     * 
+     * Default constructor.
+     * @param ctx Context.
+     * @param user User for permission checks.
+     * @param groupId unique identifier of the group to delete.
      */
     Delete(final Context ctx, final User user, final int groupId) {
         super();
@@ -129,11 +131,16 @@ public final class Delete {
         return orig;
     }
 
+    /**
+     * This method integrates all several methods for the different operations
+     * of deleting a group.
+     * @throws GroupException if something during delete fails.
+     */
     void perform() throws GroupException {
         allowed();
         check();
         delete();
-        // TODO propagate();
+        propagate();
     }
 
     private void allowed() throws GroupException {
@@ -161,7 +168,8 @@ public final class Delete {
         }
         try {
             con.setAutoCommit(false);
-            update(con);
+            propagateDelete(con);
+            delete(con);
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
@@ -179,7 +187,7 @@ public final class Delete {
         }
     }
 
-    private void update(final Connection con) throws GroupException {
+    private void propagateDelete(final Connection con) throws GroupException {
         // Delete all references to that group.
         final DeleteEvent event = new DeleteEvent(getOrig(), groupId,
             DeleteEvent.TYPE_GROUP, ctx);
@@ -188,6 +196,27 @@ public final class Delete {
         } catch (final DeleteFailedException e) {
             throw new GroupException(e);
         }
+    }
+
+    private void delete(final Connection con) throws GroupException {
         // Delete the group.
+        storage.deleteMember(ctx, con, getOrig(), getOrig().getMember());
+        storage.deleteGroup(ctx, con, groupId);
+        // Remember as deleted group.
+        final Group del = new Group();
+        final Group orig = getOrig();
+        del.setIdentifier(orig.getIdentifier());
+        del.setDisplayName(orig.getDisplayName());
+        del.setSimpleName(orig.getSimpleName());
+        del.setLastModified(new Date());
+        storage.insertGroup(ctx, con, del, StorageType.DELETED);
+    }
+
+    /**
+     * Inform the rest of the system about the deleted group.
+     * @throws GroupException if something during propagate fails.
+     */
+    private void propagate() throws GroupException {
+        GroupTools.invalidateUser(ctx, getOrig().getMember());
     }
 }
