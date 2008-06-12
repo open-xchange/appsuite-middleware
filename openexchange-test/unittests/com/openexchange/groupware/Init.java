@@ -228,7 +228,7 @@ public final class Init {
 	}
 
 	private static void startAndInjectResourceService() {
-		ServerServiceRegistry.getInstance().addService(ResourceService.class, new ResourceServiceImpl());
+		ServerServiceRegistry.getInstance().addService(ResourceService.class, ResourceServiceImpl.getInstance());
 	}
 
 	private static void startAndInjectSessiondBundle() throws Exception {
