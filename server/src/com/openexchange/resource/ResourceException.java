@@ -174,9 +174,9 @@ public class ResourceException extends AbstractOXException {
 		 */
 		MANDATORY_FIELD("Missing mandatory field(s) in given resource.", Category.CODE_ERROR, Detail.ERROR, 8),
 		/**
-		 * User %s is not allowed to create a resource in context %s
+		 * No permission to modify resources in context %s
 		 */
-		PERMISSION("User %s is not allowed to create a resource in context %s", Category.PERMISSION, Detail.ERROR, 9),
+		PERMISSION("No permission to modify resources in context %s", Category.PERMISSION, Detail.ERROR, 9),
 		/**
 		 * Found resource(s) with same email address %s.
 		 */

@@ -152,8 +152,7 @@ public final class ResourceUpdate {
 		 * Check permission: By now caller must be context's admin
 		 */
 		if (ctx.getMailadmin() != user.getId()) {
-			throw new ResourceException(ResourceException.Code.PERMISSION, Integer.valueOf(user.getId()), Integer
-					.valueOf(ctx.getContextId()));
+			throw new ResourceException(ResourceException.Code.PERMISSION, Integer.valueOf(ctx.getContextId()));
 		}
 	}
 
