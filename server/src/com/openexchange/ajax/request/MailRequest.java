@@ -79,26 +79,12 @@ public final class MailRequest {
 			.getLog(MailRequest.class);
 
 	private static enum CollectableOperation {
-		MOVE("Move"), COPY("Copy"), STORE_FLAG("Store Flag"), COLOR_LABEL("Color Label");
-
-		private final String str;
-
-		private CollectableOperation(final String str) {
-			this.str = str;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.lang.Enum#toString()
-		 */
-		@Override
-		public String toString() {
-			return str;
-		}
+		MOVE, COPY, STORE_FLAG, COLOR_LABEL;
 	}
 
-	public static final Mail MAIL_SERVLET = new Mail();
+	private static final Mail MAIL_SERVLET = new Mail();
+
+	/* -------------- Fields -------------- */
 
 	private final Session session;
 
@@ -207,7 +193,15 @@ public final class MailRequest {
 
 	private void handleMultiple(final JSONObject jsonObject, final MailServletInterface mailInterface,
 			final CollectableOperation op) throws JSONException {
-		if (collectObj != null) {
+		if (collectObj == null) {
+			/*
+			 * Collect
+			 */
+			collectObj = new CollectObject(jsonObject, op);
+			collectObj.addMailID(new MailPath(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID), jsonObject
+					.getLong(AJAXServlet.PARAMETER_ID)));
+			contCollecting = true;
+		} else {
 			if (collectObj.collectable(jsonObject, op)) {
 				collectObj.addMailID(new MailPath(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID), jsonObject
 						.getLong(AJAXServlet.PARAMETER_ID)));
@@ -222,24 +216,17 @@ public final class MailRequest {
 						.getLong(AJAXServlet.PARAMETER_ID)));
 				contCollecting = false;
 			}
-		} else {
-			/*
-			 * Collect
-			 */
-			collectObj = new CollectObject(jsonObject, op);
-			collectObj.addMailID(new MailPath(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID), jsonObject
-					.getLong(AJAXServlet.PARAMETER_ID)));
-			contCollecting = true;
 		}
 	}
 
 	/**
-	 * Indicates if this MailRequest is collecting continuously
+	 * Indicates if this {@link MailRequest mail request} is collecting
+	 * contiguously
 	 * 
-	 * @return <code>true</code> if this MailRequest is collecting continuously;
-	 *         otherwise <code>false</code>
+	 * @return <code>true</code> if this {@link MailRequest mail request} is
+	 *         collecting contiguously; otherwise <code>false</code>
 	 */
-	public boolean isContinuousCollect() {
+	public boolean isContiguousCollect() {
 		return contCollecting;
 	}
 
@@ -249,9 +236,9 @@ public final class MailRequest {
 	 * <code>{@link #MailRequest(Session, Context, OXJSONWriter)}</code>
 	 * 
 	 * @param mailInterface
-	 *            - the mail interface
+	 *            The mail interface
 	 * @throws JSONException
-	 *             - if writing fails
+	 *             If writing JSON response fails
 	 */
 	public void performMultiple(final MailServletInterface mailInterface) throws JSONException {
 		if (collectObj != null) {
@@ -281,13 +268,12 @@ public final class MailRequest {
 			break;
 		default:
 			/*
-			 * Cannot occur since all enums are contained in
-			 * switch-case-statement
+			 * Cannot occur since all enums are covered in switch-case-statement
 			 */
 			throw new InternalError("Unknown collectable operation: " + collectObj.getOperation());
 		}
 		if (LOG.isDebugEnabled()) {
-			LOG.debug(new StringBuilder(100).append("Multiple '").append(collectObj.getOperation().toString()).append(
+			LOG.debug(new StringBuilder(100).append("Multiple '").append(getOpName(collectObj.getOperation())).append(
 					"' mail request successfully performed: ").append(System.currentTimeMillis() - start)
 					.append("msec").toString());
 		}
@@ -319,20 +305,30 @@ public final class MailRequest {
 
 		private final boolean flagValue;
 
-		public CollectObject(final JSONObject jsonObject, final CollectableOperation op) throws JSONException {
-			this.srcFld = jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID);
+		/**
+		 * Initializes a new {@link CollectObject}
+		 * 
+		 * @param dataObject
+		 *            The JSON object containing request's data and parameters
+		 * @param op
+		 *            The identified collectable operation
+		 * @throws JSONException
+		 *             If reading from provided JSON object fails
+		 */
+		public CollectObject(final JSONObject dataObject, final CollectableOperation op) throws JSONException {
+			this.srcFld = dataObject.getString(AJAXServlet.PARAMETER_FOLDERID);
 			if (CollectableOperation.MOVE.equals(op) || CollectableOperation.COPY.equals(op)) {
-				this.destFld = jsonObject.getJSONObject(DATA).getString(FolderFields.FOLDER_ID);
+				this.destFld = dataObject.getJSONObject(DATA).getString(FolderFields.FOLDER_ID);
 				flagInt = -1;
 				flagValue = false;
 			} else if (CollectableOperation.STORE_FLAG.equals(op)) {
 				this.destFld = null;
-				final JSONObject bodyObj = jsonObject.getJSONObject(DATA);
+				final JSONObject bodyObj = dataObject.getJSONObject(DATA);
 				flagInt = bodyObj.getInt(MailJSONField.FLAGS.getKey());
 				flagValue = bodyObj.getBoolean(MailJSONField.VALUE.getKey());
 			} else if (CollectableOperation.COLOR_LABEL.equals(op)) {
 				this.destFld = null;
-				flagInt = jsonObject.getJSONObject(DATA).getInt(CommonFields.COLORLABEL);
+				flagInt = dataObject.getJSONObject(DATA).getInt(CommonFields.COLORLABEL);
 				flagValue = false;
 			} else {
 				throw new InternalError("Unknown collectable operation: " + op);
@@ -341,33 +337,34 @@ public final class MailRequest {
 			this.op = op;
 		}
 
-		public CollectObject(final String srcFld, final String destFld, final CollectableOperation op) {
-			this.srcFld = srcFld;
-			this.destFld = destFld;
-			this.mailIDs = new ArrayList<MailPath>();
-			this.op = op;
-			flagInt = -1;
-			flagValue = false;
-		}
-
-		public boolean collectable(final JSONObject jsonObject, final CollectableOperation op) throws JSONException {
+		/**
+		 * Checks if given collectable operation can be further added to
+		 * previous collectable operation stored in this {@link CollectObject}
+		 * and thus needs no direct execution.
+		 * 
+		 * @param dataObject
+		 *            The JSON object containing request's data and parameters
+		 * @param op
+		 *            The identified collectable operation
+		 * @return <code>true</code> f given collectable operation can be
+		 *         further collected; otherwise <code>false</code>
+		 * @throws JSONException
+		 *             If reading from provided JSON object fails
+		 */
+		public boolean collectable(final JSONObject dataObject, final CollectableOperation op) throws JSONException {
 			if (CollectableOperation.MOVE.equals(op) || CollectableOperation.COPY.equals(op)) {
-				return collectable(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID), jsonObject.getJSONObject(DATA)
-						.getString(FolderFields.FOLDER_ID), op);
+				return (this.op.equals(op) && this.srcFld.equals(dataObject.getString(AJAXServlet.PARAMETER_FOLDERID)) && this.destFld
+						.equals(dataObject.getJSONObject(DATA).getString(FolderFields.FOLDER_ID)));
 			} else if (CollectableOperation.STORE_FLAG.equals(op)) {
-				final JSONObject bodyObj = jsonObject.getJSONObject(DATA);
-				return (this.op.equals(op) && this.srcFld.equals(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID))
+				final JSONObject bodyObj = dataObject.getJSONObject(DATA);
+				return (this.op.equals(op) && this.srcFld.equals(dataObject.getString(AJAXServlet.PARAMETER_FOLDERID))
 						&& flagInt == bodyObj.getInt(MailJSONField.FLAGS.getKey()) && flagValue == bodyObj
 						.getBoolean(MailJSONField.VALUE.getKey()));
 			} else if (CollectableOperation.COLOR_LABEL.equals(op)) {
-				return (this.op.equals(op) && this.srcFld.equals(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID)) && flagInt == jsonObject
+				return (this.op.equals(op) && this.srcFld.equals(dataObject.getString(AJAXServlet.PARAMETER_FOLDERID)) && flagInt == dataObject
 						.getJSONObject(DATA).getInt(CommonFields.COLORLABEL));
 			}
 			throw new InternalError("Unknown collectable operation: " + op);
-		}
-
-		private boolean collectable(final String srcFld, final String destFld, final CollectableOperation op) {
-			return (this.op.equals(op) && this.srcFld.equals(srcFld) && this.destFld.equals(destFld));
 		}
 
 		public String getDestFld() {
@@ -400,4 +397,19 @@ public final class MailRequest {
 
 	}
 
+	private static String getOpName(final CollectableOperation op) {
+		switch (op) {
+		case MOVE:
+			return "Move";
+		case COPY:
+			return "Copy";
+		case STORE_FLAG:
+			return "Store Flag";
+		case COLOR_LABEL:
+			return "Color Label";
+		default:
+			throw new InternalError("Unknown collectable operation: " + op);
+		}
+
+	}
 }

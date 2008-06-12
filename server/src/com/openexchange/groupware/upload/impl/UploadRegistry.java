@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.upload.impl;
 
+import java.util.Collection;
+
 import javax.servlet.http.HttpServletRequest;
 
 import com.openexchange.tools.servlet.UploadServletException;
@@ -63,43 +65,27 @@ import com.openexchange.tools.servlet.UploadServletException;
 public interface UploadRegistry {
 
 	/**
-	 * Adds a new <code>UploadListener</code> implementation to registry.
-	 * Before adding the listener to underlying collection method
-	 * <code>containsUploadListener()</code> should be called to verify that
-	 * no duplicate listener implementation is added
-	 */
-	public void addUploadListener(UploadListener uploadListener);
-
-	/**
-	 * Checks if given upload listener is already registered
-	 * 
-	 * @param uploadListener -
-	 *            the upload listener
-	 * @return <code>true</code> if given upload listener is already
-	 *         registered; <code>false</code> otherwise
-	 */
-	public boolean containsUploadListener(UploadListener uploadListener);
-
-	/**
 	 * Fires the upload event by delegating this event to all registered
 	 * listeners. Finally the <code>UploadEvent.cleanUp()</code> method is
 	 * invoked to delete temporary files from disk.
 	 * 
-	 * @param uploadEvent -
-	 *            the upload event
-	 * 
+	 * @param uploadEvent
+	 *            The upload event
+	 * @param uploadListeners
+	 *            The upload listeners for current upload event
 	 * @throws UploadServletException
 	 *             if an error like over quota occurs
 	 */
-	public void fireUploadEvent(UploadEvent uploadEvent) throws UploadServletException;
+	public void fireUploadEvent(UploadEvent uploadEvent, Collection<UploadListener> uploadListeners)
+			throws UploadServletException;
 
 	/**
 	 * Create an <code>UpdateEvent</code> object from incoming multipart form
 	 * data
 	 * 
-	 * @param req -
-	 *            the corresponding instance of <code>HttpServletRequest</code>
-	 * @return an <code>UpdateEvent</code> object from incoming multipart form
+	 * @param req
+	 *            The corresponding instance of <code>HttpServletRequest</code>
+	 * @return An <code>UpdateEvent</code> object from incoming multipart form
 	 *         data
 	 * @throws UploadException
 	 *             if an error like over quota occurs

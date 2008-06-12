@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.ajax.request.MailRequest.MAIL_SERVLET;
 import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getFolderName;
 import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
 
@@ -63,6 +62,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -78,8 +78,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -158,6 +156,8 @@ import com.openexchange.tools.versit.utility.VersitUtility;
  */
 public class Mail extends PermissionServlet implements UploadListener {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Mail.class);
+
 	private static final String MIME_MULTIPART = "multipart/";
 
 	private static final String PARAMETER_COL = "col";
@@ -195,13 +195,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 	private static final String STR_THREAD = "thread";
 
 	private static final long serialVersionUID = 1980226522220313667L;
-
-	private static final transient Log LOG = LogFactory.getLog(Mail.class);
-
-	/**
-	 * Error message if writing the response fails.
-	 */
-	private static final String RESPONSE_ERROR = "Error while writing response object.";
 
 	private static final AbstractOXException getWrappingOXException(final Throwable cause) {
 		return new AbstractOXException(EnumComponent.MAIL, Category.INTERNAL_ERROR, 9999, cause.getMessage(), cause);
@@ -2563,19 +2556,19 @@ public class Mail extends PermissionServlet implements UploadListener {
 					 * Append UploadListener instances
 					 */
 					final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-					((UploadListener) this).getRegistry().addUploadListener(
-							new UploadQuotaChecker(UserSettingMailStorage.getInstance().getUserSettingMail(
-									session.getUserId(), ctx), resp, actionStr));
-					((UploadListener) this).getRegistry().addUploadListener(MAIL_SERVLET);
+					final Collection<UploadListener> listeners = new ArrayList<UploadListener>(2);
+					listeners.add(new UploadQuotaChecker(UserSettingMailStorage.getInstance().getUserSettingMail(
+							session.getUserId(), ctx), resp, actionStr));
+					listeners.add(this);
 					/*
 					 * Create and fire upload event
 					 */
-					final UploadEvent uploadEvent = ((UploadListener) this).getRegistry().processUpload(req);
+					final UploadEvent uploadEvent = processUpload(req);
 					uploadEvent.setParameter(UPLOAD_PARAM_MAILINTERFACE, mailInterface);
 					uploadEvent.setParameter(UPLOAD_PARAM_WRITER, resp.getWriter());
 					uploadEvent.setParameter(UPLOAD_PARAM_SESSION, session);
 					uploadEvent.setParameter(PARAMETER_ACTION, actionStr);
-					((UploadListener) this).getRegistry().fireUploadEvent(uploadEvent);
+					fireUploadEvent(uploadEvent, listeners);
 				}
 			} finally {
 				if (mailInterface != null) {
@@ -2638,13 +2631,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 				&& req.getParameter(PARAMETER_ACTION).equalsIgnoreCase(ACTION_APPEND);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.groupware.upload.UploadListener#action(com.openexchange
-	 * .groupware.upload.UploadEvent)
-	 */
 	public boolean action(final UploadEvent uploadEvent) throws OXException {
 		if (uploadEvent.getAffiliationId() != UploadEvent.MAIL_UPLOAD) {
 			return false;

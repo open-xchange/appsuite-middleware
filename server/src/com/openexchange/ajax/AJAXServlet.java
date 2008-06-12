@@ -57,16 +57,12 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLDecoder;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -74,6 +70,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -116,8 +113,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 * 
 	 */
 	private static final long serialVersionUID = 718576864014891156L;
-
-	protected static final transient List<UploadListener> registeredUploadListeners = new ArrayList<UploadListener>();
 
 	private static final transient Log LOG = LogFactory.getLog(AJAXServlet.class);
 
@@ -288,9 +283,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static final String PARAMETER_ORDER = "order";
 
 	public static final String LEFT_HAND_LIMIT = "left_hand_limit";
-	
+
 	public static final String RIGHT_HAND_LIMIT = "right_hand_limit";
-	
+
 	public static final String PARAMETER_HARDDELETE = "harddelete";
 
 	/**
@@ -351,7 +346,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
 	/**
 	 * The content type if the response body contains javascript data. Set it
-	 * with <code>resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT)</code>.
+	 * with <code>resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT)</code>
+	 * .
 	 */
 	public static final String CONTENTTYPE_JAVASCRIPT = "text/javascript; charset=UTF-8";
 
@@ -373,8 +369,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	private static final String STR_ERROR = "error";
 
 	private static final String STR_ERROR_PARAMS = "error_params";
-
-	private static final transient Lock LOCK = new ReentrantLock();
 
 	// Javascript
 
@@ -481,7 +475,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
 	protected long getDateValue(final Date d, final User userObj) {
 		long retval = d.getTime();
-		final Calendar cal = GregorianCalendar.getInstance();
+		final Calendar cal = Calendar.getInstance();
 		cal.setTime(d);
 		if (cal.get(Calendar.HOUR_OF_DAY) != 0 || cal.get(Calendar.MINUTE) != 0) {
 			retval += (TimeZone.getTimeZone(userObj.getTimeZone()).getOffset(retval));
@@ -561,8 +555,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		 * final InputStream input = req.getInputStream(); final
 		 * ByteArrayOutputStream baos = new
 		 * ByteArrayOutputStream(input.available()); final byte[] buf = new
-		 * byte[8192]; int length = -1; while ((length = input.read(buf)) != -1) {
-		 * baos.write(buf, 0, length); } String characterEncoding =
+		 * byte[8192]; int length = -1; while ((length = input.read(buf)) != -1)
+		 * { baos.write(buf, 0, length); } String characterEncoding =
 		 * req.getCharacterEncoding(); if (null == characterEncoding) {
 		 * characterEncoding =
 		 * ServerConfig.getProperty(Property.DefaultEncoding);//"UTF-8"; }
@@ -587,8 +581,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	/**
 	 * Returns a <code>long</code> value with added time zone offset
 	 * 
-	 * @param d -
-	 *            the <code>java.util.Date</code> in GMT
+	 * @param d
+	 *            - the <code>java.util.Date</code> in GMT
 	 * @param session
 	 * @return a <code>long</code> value with added time zone offset
 	 * @throws ContextException
@@ -599,14 +593,14 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	}
 
 	/**
-	 * Returns a <code>java.util.Date</code> instance with subtracted time
-	 * zone offset
+	 * Returns a <code>java.util.Date</code> instance with subtracted time zone
+	 * offset
 	 * 
-	 * @param time -
-	 *            number of milliseconds in local timezone
+	 * @param time
+	 *            - number of milliseconds in local timezone
 	 * @param session
-	 * @return a <code>java.util.Date</code> instance with subtracted time
-	 *         zone offset
+	 * @return a <code>java.util.Date</code> instance with subtracted time zone
+	 *         offset
 	 * @throws ContextException
 	 *             If context cannot be loaded
 	 */
@@ -807,18 +801,13 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
 	/* --------------------- STUFF FOR UPLOAD --------------------- */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.groupware.upload.UploadRegistry#processUpload(javax.servlet.http.HttpServletRequest)
-	 */
 	public UploadEvent processUpload(final HttpServletRequest req) throws UploadException {
 		return processUploadStatic(req);
 	}
 
 	@SuppressWarnings("unchecked")
 	public static final UploadEvent processUploadStatic(final HttpServletRequest req) throws UploadException {
-		final boolean isMultipart = ServletFileUpload.isMultipartContent(new ServletRequestContext(req));
+		final boolean isMultipart = FileUploadBase.isMultipartContent(new ServletRequestContext(req));
 		if (isMultipart) {
 			/*
 			 * Create the upload event
@@ -914,52 +903,15 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.groupware.upload.UploadRegistry#addUploadListener(com.openexchange.groupware.upload.UploadListener)
-	 */
-	public void addUploadListener(final UploadListener uploadListener) {
-		if (!containsUploadListener(uploadListener)) {
-			registeredUploadListeners.add(uploadListener);
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.groupware.upload.UploadRegistry#containsUploadListener(com.openexchange.groupware.upload.UploadListener)
-	 */
-	public boolean containsUploadListener(final UploadListener uploadListener) {
-		final int size = registeredUploadListeners.size();
-		final Iterator<UploadListener> iter = registeredUploadListeners.iterator();
-		for (int i = 0; i < size; i++) {
-			final UploadListener ul = iter.next();
-			if (ul.getClass().equals(uploadListener.getClass())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.groupware.upload.UploadRegistry#fireUploadEvent(com.openexchange.groupware.upload.UploadEvent)
-	 */
-	public void fireUploadEvent(final UploadEvent uploadEvent) throws UploadServletException {
+	public void fireUploadEvent(final UploadEvent uploadEvent, final Collection<UploadListener> uploadListeners)
+			throws UploadServletException {
 		try {
-			final int size = registeredUploadListeners.size();
-			final Iterator<UploadListener> iter = registeredUploadListeners.iterator();
-			final StringBuilder errBuilder = new StringBuilder(100);
-			for (int i = 0; i < size; i++) {
-				final UploadListener uploadListener = iter.next();
+			for (final UploadListener uploadListener : uploadListeners) {
 				try {
 					uploadListener.action(uploadEvent);
 				} catch (final OXException e) {
-					LOG.error(errBuilder.append("ERROR: Upload method \"action()\" failed for UploadListener ").append(
-							uploadListener.getClass()), e);
-					errBuilder.setLength(0);
+					LOG.error(new StringBuilder(64).append("Failed upload listener: ")
+							.append(uploadListener.getClass()), e);
 				}
 			}
 		} finally {
@@ -991,15 +943,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
 	public static Date getCurrentTimestamp() throws Exception {
 		return new Date();
-	}
-
-	public static void registerUploadListener(final UploadListener ul) {
-		LOCK.lock();
-		try {
-			registeredUploadListeners.add(ul);
-		} finally {
-			LOCK.unlock();
-		}
 	}
 
 	protected boolean checkRequired(final HttpServletRequest req, final HttpServletResponse res, final boolean html,

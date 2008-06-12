@@ -433,7 +433,7 @@ public class Multiple extends SessionServlet {
 						mi = ((MailServletInterface) tmp);
 					}
 					mailrequest.action(action, jsonObj, mi);
-					if (mailrequest.isContinuousCollect()) {
+					if (mailrequest.isContiguousCollect()) {
 						/*
 						 * Put into attributes to further collect move/copy
 						 * requests and return a null reference to avoid writing
