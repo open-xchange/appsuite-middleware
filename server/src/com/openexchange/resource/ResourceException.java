@@ -188,11 +188,7 @@ public class ResourceException extends AbstractOXException {
 		/**
 		 * Invalid resource email address: %s
 		 */
-		INVALID_RESOURCE_MAIL("Invalid resource email address: %s", Category.USER_INPUT, Detail.ERROR, 12),
-		/**
-		 * Nothing is set in resource that can be updated
-		 */
-		NOTHING_TO_UPDATE("Nothing is set in resource that can be updated", Category.USER_INPUT, Detail.ERROR, 13);
+		INVALID_RESOURCE_MAIL("Invalid resource email address: %s", Category.USER_INPUT, Detail.ERROR, 12);
 
 		/**
 		 * Message of the exception.
