@@ -1,0 +1,47 @@
+#!/usr/bin/perl
+package Createresource;
+use strict;
+use Data::Dumper;
+use base qw(BasicCommandlineOptions);
+
+
+#Use the SOAP::Lite Perl module
+#use SOAP::Lite +trace => 'debug';
+use SOAP::Lite;
+
+my $test = new Createresource();
+$test->doRequest();
+
+sub new {
+	my ($inPkg) = @_;
+	my $self = BasicCommandlineOptions->new();
+	
+	bless $self, $inPkg;
+    return $self;
+}
+
+sub doRequest {
+   	my $inSelf = shift;
+    my $soap = SOAP::Lite->ns( $inSelf->{'serviceNs'} )->proxy( $inSelf->{'basisUrl'}."OXResourceService" );
+    
+    my $name = "test4";
+    my $displayname = "test4";
+    my $email = "xyz4\@bla.de";
+    
+    my $som_entry = 
+      $soap->create($inSelf->{'Context'},
+    	      SOAP::Data->value("Resource")->value(\SOAP::Data->value(SOAP::Data->name("name" => $name),
+    	      SOAP::Data->name("displayname" => $displayname),SOAP::Data->name("email" => $email))),
+    	      $inSelf->{'creds'}
+    	     );
+    
+    if ( $som_entry->fault() ) {
+        $inSelf->fault_output($som_entry);
+    } else {
+        print "Fine\n";
+    }
+
+}
+
+exit;
+
