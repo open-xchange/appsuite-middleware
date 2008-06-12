@@ -65,10 +65,14 @@ public final class Resource {
 	 */
 	private int identifier = -1;
 
+	private boolean identifierSet;
+
 	/**
 	 * This is the name of this resource that can have character restrictions.
 	 */
 	private String simpleName;
+
+	private boolean simpleNameSet;
 
 	/**
 	 * The display name of the resource. Currently the identifier is also used
@@ -77,31 +81,72 @@ public final class Resource {
 	 */
 	private String displayName;
 
+	private boolean displayNameSet;
+
 	/**
 	 * Mail address of this resource.
 	 */
 	private String mail;
+
+	private boolean mailSet;
 
 	/**
 	 * If a resource is not available, it can't be booked.
 	 */
 	private boolean available;
 
+	private boolean availableSet;
+
 	/**
 	 * Description of this resource.
 	 */
 	private String description;
+
+	private boolean descriptionSet;
 
 	/**
 	 * Timestamp of the last modification of this resource.
 	 */
 	private Date lastModified;
 
+	private boolean lastModifiedSet;
+
 	/**
 	 * Default constructor.
 	 */
 	public Resource() {
 		super();
+	}
+
+	/**
+	 * Fills this resource's non-set fields with the one from specified source
+	 * resource
+	 * 
+	 * @param src
+	 *            The source resource
+	 */
+	public void fill(final Resource src) {
+		if (!availableSet) {
+			setAvailable(src.isAvailable());
+		}
+		if (!descriptionSet) {
+			setDescription(src.getDescription());
+		}
+		if (!displayNameSet) {
+			setDisplayName(src.getDisplayName());
+		}
+		if (!identifierSet) {
+			setIdentifier(src.getIdentifier());
+		}
+		if (!mailSet) {
+			setMail(src.getMail());
+		}
+		if (!simpleNameSet) {
+			setSimpleName(src.getSimpleName());
+		}
+		if (!lastModifiedSet) {
+			setLastModified(src.getLastModified());
+		}
 	}
 
 	@Override
@@ -228,6 +273,25 @@ public final class Resource {
 	 */
 	public void setIdentifier(final int identifier) {
 		this.identifier = identifier;
+		identifierSet = true;
+	}
+
+	/**
+	 * Checks if identifier has been set
+	 * 
+	 * @return <code>true</code> if identifier has been set; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isIdentifierSet() {
+		return identifierSet;
+	}
+
+	/**
+	 * Removes identifier
+	 */
+	public void removeIdentifier() {
+		identifier = -1;
+		identifierSet = false;
 	}
 
 	/**
@@ -259,6 +323,24 @@ public final class Resource {
 	}
 
 	/**
+	 * Checks if available has been set
+	 * 
+	 * @return <code>true</code> if available has been set; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isAvailableSet() {
+		return availableSet;
+	}
+
+	/**
+	 * Removes available
+	 */
+	public void removeAvailable() {
+		available = false;
+		availableSet = false;
+	}
+
+	/**
 	 * Setter for displayName.
 	 * 
 	 * @param displayName
@@ -266,6 +348,25 @@ public final class Resource {
 	 */
 	public void setDisplayName(final String displayName) {
 		this.displayName = displayName;
+		displayNameSet = true;
+	}
+
+	/**
+	 * Checks if display name has been set
+	 * 
+	 * @return <code>true</code> if display name has been set; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isDisplayNameSet() {
+		return displayNameSet;
+	}
+
+	/**
+	 * Removes display name
+	 */
+	public void removeDisplayName() {
+		displayName = null;
+		displayNameSet = false;
 	}
 
 	/**
@@ -276,6 +377,7 @@ public final class Resource {
 	 */
 	public void setAvailable(final boolean available) {
 		this.available = available;
+		availableSet = true;
 	}
 
 	/**
@@ -286,6 +388,25 @@ public final class Resource {
 	 */
 	public void setDescription(final String description) {
 		this.description = description;
+		descriptionSet = true;
+	}
+
+	/**
+	 * Checks if description has been set
+	 * 
+	 * @return <code>true</code> if description has been set; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isDescriptionSet() {
+		return descriptionSet;
+	}
+
+	/**
+	 * Removes description
+	 */
+	public void removeDescription() {
+		description = null;
+		descriptionSet = false;
 	}
 
 	/**
@@ -300,10 +421,28 @@ public final class Resource {
 	/**
 	 * Getter for last-modified timestamp
 	 * 
-	 * @return Returns the lastModified.
+	 * @return Returns the lastModified timestamp.
 	 */
 	public Date getLastModified() {
 		return lastModified;
+	}
+
+	/**
+	 * Checks if last-modified timestamp has been set
+	 * 
+	 * @return <code>true</code> if last-modified timestamp has been set;
+	 *         otherwise <code>false</code>
+	 */
+	public boolean isLastModifiedSet() {
+		return lastModifiedSet;
+	}
+
+	/**
+	 * Removes last-modified timestamp
+	 */
+	public void removeLastModified() {
+		lastModified = null;
+		lastModifiedSet = false;
 	}
 
 	/**
@@ -314,6 +453,7 @@ public final class Resource {
 	 */
 	public void setLastModified(final Date lastModified) {
 		this.lastModified = lastModified;
+		lastModifiedSet = true;
 	}
 
 	/**
@@ -325,6 +465,7 @@ public final class Resource {
 	 */
 	public void setLastModified(final long lastModified) {
 		this.lastModified = new Date(lastModified);
+		lastModifiedSet = true;
 	}
 
 	/**
@@ -340,6 +481,25 @@ public final class Resource {
 	 */
 	public void setMail(final String mail) {
 		this.mail = mail;
+		mailSet = true;
+	}
+
+	/**
+	 * Checks if mail has been set
+	 * 
+	 * @return <code>true</code> if mail has been set; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isMailSet() {
+		return mailSet;
+	}
+
+	/**
+	 * Removes mail
+	 */
+	public void removeMail() {
+		mail = null;
+		mailSet = false;
 	}
 
 	/**
@@ -355,6 +515,25 @@ public final class Resource {
 	 */
 	public final void setSimpleName(final String simpleName) {
 		this.simpleName = simpleName;
+		simpleNameSet = true;
+	}
+
+	/**
+	 * Checks if simple name has been set
+	 * 
+	 * @return <code>true</code> if simple name has been set; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isSimpleNameSet() {
+		return simpleNameSet;
+	}
+
+	/**
+	 * Removes simple name
+	 */
+	public void removeSimpleName() {
+		simpleName = null;
+		simpleNameSet = false;
 	}
 
 	@Override

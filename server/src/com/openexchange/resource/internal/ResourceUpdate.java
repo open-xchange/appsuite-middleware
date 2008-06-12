@@ -81,6 +81,8 @@ public final class ResourceUpdate {
 
 	private final ResourceStorage storage;
 
+	private transient Resource orig;
+
 	/**
 	 * Initializes a new {@link ResourceUpdate}
 	 * 
@@ -99,6 +101,17 @@ public final class ResourceUpdate {
 		storage = ResourceStorage.getInstance();
 	}
 
+	private Resource getOrig() throws ResourceException {
+		if (null == orig) {
+			try {
+				orig = storage.getResource(resource.getIdentifier(), ctx);
+			} catch (final LdapException e) {
+				throw new ResourceException(e);
+			}
+		}
+		return orig;
+	}
+
 	/**
 	 * Performs the update.
 	 * <ol>
@@ -114,9 +127,26 @@ public final class ResourceUpdate {
 	 *             If update fails
 	 */
 	void perform() throws ResourceException {
+		allow();
 		check();
 		update();
 		propagate();
+	}
+
+	/**
+	 * Checks permission
+	 * 
+	 * @throws ResourceException
+	 *             If permission is denied
+	 */
+	private void allow() throws ResourceException {
+		/*
+		 * Check permission: By now caller must be context's admin
+		 */
+		if (ctx.getMailadmin() != user.getId()) {
+			throw new ResourceException(ResourceException.Code.PERMISSION, Integer.valueOf(user.getId()), Integer
+					.valueOf(ctx.getContextId()));
+		}
 	}
 
 	/**
@@ -130,46 +160,54 @@ public final class ResourceUpdate {
 			throw new ResourceException(ResourceException.Code.NULL);
 		}
 		/*
-		 * Check mandatory fields: identifier, displayName, and lastModified
+		 * Check mandatory fields
 		 */
-		if (-1 == resource.getIdentifier() || isEmpty(resource.getSimpleName()) || isEmpty(resource.getDisplayName())
-				|| isEmpty(resource.getMail())) {
+		if (!resource.isIdentifierSet() || -1 == resource.getIdentifier()) {
 			throw new ResourceException(ResourceException.Code.MANDATORY_FIELD);
 		}
 		/*
-		 * Check for invalid values
+		 * Check existence
 		 */
-		if (!ResourceTools.validateResourceIdentifier(resource.getSimpleName())) {
-			throw new ResourceException(ResourceException.Code.INVALID_RESOURCE_IDENTIFIER, resource.getSimpleName());
-		}
-		if (!ResourceTools.validateResourceEmail(resource.getMail())) {
-			throw new ResourceException(ResourceException.Code.INVALID_RESOURCE_MAIL, resource.getMail());
-		}
+		getOrig();
 		/*
-		 * Check permission: By now caller must be context's admin
+		 * Check values to update
 		 */
-		if (ctx.getMailadmin() != user.getId()) {
-			throw new ResourceException(ResourceException.Code.PERMISSION, Integer.valueOf(user.getId()), Integer
-					.valueOf(ctx.getContextId()));
-		}
-		/*
-		 * Load referenced resource to check existence and check if another
-		 * resource with the same textual identifier or email address exists in
-		 * storage
-		 */
+		boolean somethingSet = false;
 		try {
-			storage.getResource(resource.getIdentifier(), ctx);
-			Resource[] resources = storage.searchResources(resource.getSimpleName(), ctx);
-			if (resources.length > 1) {
-				throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT, resource.getSimpleName());
-			} else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
-				throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT, resource.getSimpleName());
+			if (resource.isSimpleNameSet()) {
+				if (isEmpty(resource.getSimpleName())) {
+					throw new ResourceException(ResourceException.Code.MANDATORY_FIELD);
+				}
+				if (!ResourceTools.validateResourceIdentifier(resource.getSimpleName())) {
+					throw new ResourceException(ResourceException.Code.INVALID_RESOURCE_IDENTIFIER, resource
+							.getSimpleName());
+				}
+				final Resource[] resources = storage.searchResources(resource.getSimpleName(), ctx);
+				if (resources.length > 1) {
+					throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT, resource.getSimpleName());
+				} else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
+					throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT, resource.getSimpleName());
+				}
+				somethingSet = true;
 			}
-			resources = storage.searchResourcesByMail(resource.getMail(), ctx);
-			if (resources.length > 1) {
-				throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT_MAIL, resource.getMail());
-			} else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
-				throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT_MAIL, resource.getMail());
+			if (resource.isMailSet()) {
+				if (isEmpty(resource.getMail())) {
+					throw new ResourceException(ResourceException.Code.MANDATORY_FIELD);
+				}
+				if (!ResourceTools.validateResourceEmail(resource.getMail())) {
+					throw new ResourceException(ResourceException.Code.INVALID_RESOURCE_MAIL, resource.getMail());
+				}
+				final Resource[] resources = storage.searchResourcesByMail(resource.getMail(), ctx);
+				if (resources.length > 1) {
+					throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT_MAIL, resource.getMail());
+				} else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
+					throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT_MAIL, resource.getMail());
+				}
+				somethingSet = true;
+			}
+			if (!somethingSet && !resource.isAvailableSet() && !resource.isDescriptionSet()
+					&& !resource.isDisplayNameSet()) {
+				throw new ResourceException(ResourceException.Code.NOTHING_TO_UPDATE);
 			}
 		} catch (final LdapException e) {
 			throw new ResourceException(e);
@@ -224,6 +262,10 @@ public final class ResourceUpdate {
 	 *             if some problem occurs.
 	 */
 	void update(final Connection con) throws ResourceException {
+		/*
+		 * Fill missing values to obtain a completely filled resource
+		 */
+		resource.fill(getOrig());
 		storage.updateResource(ctx, con, resource);
 	}
 

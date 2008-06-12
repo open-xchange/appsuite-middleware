@@ -77,6 +77,12 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class RdbResourceStorage extends ResourceStorage {
 
+	private static final String RPL_TABLE = "#TABLE#";
+
+	private static final String TABLE_ACTIVE = "resource";
+
+	private static final String TABLE_DELETED = "del_resource";
+
 	/**
 	 * Default constructor.
 	 * 
@@ -456,15 +462,16 @@ public class RdbResourceStorage extends ResourceStorage {
 		return res;
 	}
 
-	private static final String SQL_INSERT_RESOURCE = "INSERT INTO resource (cid,id,identifier,displayName,mail,available,description,lastModified) "
-			+ "VALUES (?,?,?,?,?,?,?,?)";
+	private static final String SQL_INSERT_RESOURCE = "INSERT INTO " + RPL_TABLE
+			+ " (cid,id,identifier,displayName,mail,available,description,lastModified) " + "VALUES (?,?,?,?,?,?,?,?)";
 
 	@Override
-	public void insertResource(final Context ctx, final Connection con, final Resource resource)
+	public void insertResource(final Context ctx, final Connection con, final Resource resource, final StorageType type)
 			throws ResourceException {
 		PreparedStatement stmt = null;
 		try {
-			stmt = con.prepareStatement(SQL_INSERT_RESOURCE);
+			stmt = con.prepareStatement(SQL_INSERT_RESOURCE.replaceFirst(RPL_TABLE,
+					StorageType.ACTIVE.equals(type) ? TABLE_ACTIVE : TABLE_DELETED));
 			int pos = 1;
 			stmt.setInt(pos++, ctx.getContextId()); // cid
 			stmt.setInt(pos++, resource.getIdentifier()); // id

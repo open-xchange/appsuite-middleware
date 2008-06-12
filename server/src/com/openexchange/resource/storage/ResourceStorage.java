@@ -69,6 +69,19 @@ import com.openexchange.resource.ResourceGroup;
  */
 public abstract class ResourceStorage {
 
+	public static enum StorageType {
+		/**
+		 * Storage type for currently active resources.
+		 */
+		ACTIVE,
+		/**
+		 * Storage type for deleted resources. This must be filled with deleted
+		 * resources to inform synchronizing clients about not more existing
+		 * resources.
+		 */
+		DELETED
+	}
+
 	/**
 	 * The search pattern to return all resources: "*"
 	 */
@@ -222,7 +235,27 @@ public abstract class ResourceStorage {
 	 * @throws ResourceException
 	 *             If resource insertion fails.
 	 */
-	public abstract void insertResource(Context ctx, Connection con, Resource resource) throws ResourceException;
+	public final void insertResource(Context ctx, Connection con, Resource resource) throws ResourceException {
+		insertResource(ctx, con, resource, StorageType.ACTIVE);
+	}
+
+	/**
+	 * This method inserts a resource into the storage.
+	 * 
+	 * @param ctx
+	 *            The context.
+	 * @param con
+	 *            A writable database connection.
+	 * @param resource
+	 *            The resource to insert.
+	 * @param type
+	 *            Defines if group is inserted {@link StorageType#ACTIVE ACTIVE}
+	 *            or {@link StorageType#DELETED DELETED}.
+	 * @throws ResourceException
+	 *             If resource insertion fails.
+	 */
+	public abstract void insertResource(Context ctx, Connection con, Resource resource, StorageType type)
+			throws ResourceException;
 
 	/**
 	 * This method updates the resource in storage referenced by

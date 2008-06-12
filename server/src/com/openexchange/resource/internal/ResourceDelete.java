@@ -53,11 +53,15 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.storage.ResourceStorage;
+import com.openexchange.resource.storage.ResourceStorage.StorageType;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.sql.DBUtils;
@@ -81,6 +85,8 @@ public final class ResourceDelete {
 
 	private final ResourceStorage storage;
 
+	private transient Resource orig;
+
 	/**
 	 * Initializes a new {@link ResourceDelete}
 	 * 
@@ -99,6 +105,17 @@ public final class ResourceDelete {
 		storage = ResourceStorage.getInstance();
 	}
 
+	private Resource getOrig() throws ResourceException {
+		if (null == orig) {
+			try {
+				orig = storage.getResource(resource.getIdentifier(), ctx);
+			} catch (final LdapException e) {
+				throw new ResourceException(e);
+			}
+		}
+		return orig;
+	}
+
 	/**
 	 * Performs the delete.
 	 * <ol>
@@ -114,9 +131,26 @@ public final class ResourceDelete {
 	 *             If delete fails
 	 */
 	void perform() throws ResourceException {
+		allow();
 		check();
 		delete();
 		propagate();
+	}
+
+	/**
+	 * Checks permission
+	 * 
+	 * @throws ResourceException
+	 *             If permission is denied
+	 */
+	private void allow() throws ResourceException {
+		/*
+		 * Check permission: By now caller must be context's admin
+		 */
+		if (ctx.getMailadmin() != user.getId()) {
+			throw new ResourceException(ResourceException.Code.PERMISSION, Integer.valueOf(user.getId()), Integer
+					.valueOf(ctx.getContextId()));
+		}
 	}
 
 	/**
@@ -130,26 +164,15 @@ public final class ResourceDelete {
 			throw new ResourceException(ResourceException.Code.NULL);
 		}
 		/*
-		 * Check mandatory fields: identifier, displayName, and lastModified
+		 * Check mandatory fields
 		 */
-		if (-1 == resource.getIdentifier()) {
+		if (!resource.isIdentifierSet() || -1 == resource.getIdentifier()) {
 			throw new ResourceException(ResourceException.Code.MANDATORY_FIELD);
-		}
-		/*
-		 * Check permission: By now caller must be context's admin
-		 */
-		if (ctx.getMailadmin() != user.getId()) {
-			throw new ResourceException(ResourceException.Code.PERMISSION, Integer.valueOf(user.getId()), Integer
-					.valueOf(ctx.getContextId()));
 		}
 		/*
 		 * Load referenced resource to check existence
 		 */
-		try {
-			storage.getResource(resource.getIdentifier(), ctx);
-		} catch (final LdapException e) {
-			throw new ResourceException(e);
-		}
+		getOrig();
 	}
 
 	/**
@@ -166,7 +189,8 @@ public final class ResourceDelete {
 		}
 		try {
 			con.setAutoCommit(false);
-			update(con);
+			propagateDelete(con);
+			delete(con);
 			con.commit();
 		} catch (final SQLException e) {
 			DBUtils.rollback(con);
@@ -178,6 +202,18 @@ public final class ResourceDelete {
 				LOG.error("Problem setting autocommit to true.", e);
 			}
 			DBPool.closeWriterSilent(ctx, con);
+		}
+	}
+
+	private void propagateDelete(final Connection con) throws ResourceException {
+		/*
+		 * Delete all references to resource
+		 */
+		final DeleteEvent event = new DeleteEvent(getOrig(), resource.getIdentifier(), DeleteEvent.TYPE_RESOURCE, ctx);
+		try {
+			DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
+		} catch (final DeleteFailedException e) {
+			throw new ResourceException(e);
 		}
 	}
 
@@ -199,8 +235,20 @@ public final class ResourceDelete {
 	 * @throws ResourceException
 	 *             if some problem occurs.
 	 */
-	void update(final Connection con) throws ResourceException {
+	void delete(final Connection con) throws ResourceException {
 		storage.deleteResource(ctx, con, resource);
+		/*
+		 * Put into delete table
+		 */
+		final Resource orig = getOrig();
+		resource.setAvailable(orig.isAvailable());
+		resource.setDescription(orig.getDescription());
+		resource.setDisplayName(orig.getDisplayName());
+		resource.setIdentifier(orig.getIdentifier());
+		resource.setMail(orig.getMail());
+		resource.setSimpleName(orig.getSimpleName());
+		resource.setLastModified(System.currentTimeMillis());
+		storage.insertResource(ctx, con, resource, StorageType.DELETED);
 	}
 
 }
