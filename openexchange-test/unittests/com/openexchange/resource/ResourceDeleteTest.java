@@ -161,7 +161,8 @@ public final class ResourceDeleteTest extends TestCase {
 					.getLastModified() != null
 					&& resource.getLastModified().getTime() < System.currentTimeMillis());
 
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).delete(admin, ctx, resource);
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).delete(admin, ctx, resource,
+					resource.getLastModified());
 
 			LdapException expected = null;
 			try {
@@ -243,7 +244,8 @@ public final class ResourceDeleteTest extends TestCase {
 			final Resource resource = createDummyResource(admin, ctx);
 			id = resource.getIdentifier();
 
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).delete(user, ctx, resource);
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).delete(user, ctx, resource,
+					resource.getLastModified());
 
 			fail("Delete succeeded with non-admin caller");
 		} catch (final ResourceException e) {
@@ -261,7 +263,8 @@ public final class ResourceDeleteTest extends TestCase {
 			id = resource.getIdentifier();
 
 			resource.setIdentifier(-1);
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).delete(admin, ctx, resource);
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).delete(admin, ctx, resource,
+					resource.getLastModified());
 
 			fail("Delete succeeded with missing mandatory field");
 		} catch (final ResourceException e) {

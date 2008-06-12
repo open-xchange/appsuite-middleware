@@ -162,7 +162,8 @@ public final class ResourceUpdateTest extends TestCase {
 			resource.setSimpleName("Foobar-12334");
 			resource.setDisplayName("The Foobar Display Name");
 			resource.setAvailable(false);
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource);
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource,
+					resource.getLastModified());
 			/*
 			 * Load via storage API
 			 */
@@ -185,7 +186,8 @@ public final class ResourceUpdateTest extends TestCase {
 			resource.setDisplayName("The Foobar Display Name qwertz");
 			resource.setMail("foobar@somewhere.org");
 			resource.setAvailable(true);
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource);
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource,
+					storageVersion.getLastModified());
 			/*
 			 * Load via storage API
 			 */
@@ -235,7 +237,8 @@ public final class ResourceUpdateTest extends TestCase {
 			resource.removeMail();
 			resource.removeAvailable();
 			resource.removeDescription();
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource);
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource,
+					resource.getLastModified());
 			/*
 			 * Load via storage API
 			 */
@@ -272,7 +275,8 @@ public final class ResourceUpdateTest extends TestCase {
 			id = resource.getIdentifier();
 
 			resource.setSimpleName("öäüß");
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource);
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource,
+					resource.getLastModified());
 
 			fail("Update succeeded with invalid string identifier");
 		} catch (final ResourceException e) {
@@ -290,7 +294,8 @@ public final class ResourceUpdateTest extends TestCase {
 			id = resource.getIdentifier();
 
 			resource.setMail("mytestresourcesomewhere.com");
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource);
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource,
+					resource.getLastModified());
 
 			fail("Update succeeded with invalid email address");
 		} catch (final ResourceException e) {
@@ -312,7 +317,8 @@ public final class ResourceUpdateTest extends TestCase {
 			id = resource.getIdentifier();
 
 			resource.setSimpleName("foobarfoobar");
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(user, ctx, resource);
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(user, ctx, resource,
+					resource.getLastModified());
 
 			fail("Update succeeded with non-admin caller");
 		} catch (final ResourceException e) {
@@ -330,7 +336,8 @@ public final class ResourceUpdateTest extends TestCase {
 			id = resource.getIdentifier();
 
 			resource.setSimpleName(null);
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource);
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource,
+					resource.getLastModified());
 
 			fail("Update succeeded with missing mandatory field");
 		} catch (final ResourceException e) {
@@ -348,7 +355,8 @@ public final class ResourceUpdateTest extends TestCase {
 			id = resource.getIdentifier();
 
 			resource.setSimpleName(null);
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource);
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource,
+					resource.getLastModified());
 
 			fail("Update succeeded with invalid string identifier");
 		} catch (final ResourceException e) {
