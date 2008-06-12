@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import java.util.Set;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -84,5 +86,19 @@ public interface AJAXRequestHandler {
 	 */
 	public AJAXRequestResult performAction(String action, JSONObject jsonObject, Session session, Context ctx)
 			throws AbstractOXException, JSONException;
+
+	/**
+	 * Gets this request handler's module
+	 * 
+	 * @return The module
+	 */
+	public String getModule();
+
+	/**
+	 * Gets this request handler's supported actions
+	 * 
+	 * @return The supported actions
+	 */
+	public Set<String> getSupportedActions();
 
 }

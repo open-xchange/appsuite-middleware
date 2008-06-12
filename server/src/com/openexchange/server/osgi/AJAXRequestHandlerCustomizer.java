@@ -86,12 +86,7 @@ public final class AJAXRequestHandlerCustomizer implements ServiceTrackerCustomi
 			LOG.warn("Added service is null!", new Throwable());
 		}
 		if (addedService instanceof AJAXRequestHandler) {
-			final Object module = reference.getProperty("module");
-			if (null == module) {
-				LOG.error("Missing module in AJAX request handler: " + addedService.getClass().getName());
-				return addedService;
-			}
-			ServerRequestHandlerRegistry.getInstance().addService(module.toString(), (AJAXRequestHandler) addedService);
+			ServerRequestHandlerRegistry.getInstance().addHandler((AJAXRequestHandler) addedService);
 		}
 		return addedService;
 	}
@@ -105,12 +100,7 @@ public final class AJAXRequestHandlerCustomizer implements ServiceTrackerCustomi
 	public void removedService(final ServiceReference reference, final Object service) {
 		try {
 			if (service instanceof AJAXRequestHandler) {
-				final Object module = reference.getProperty("module");
-				if (null == module) {
-					LOG.error("Missing module in AJAX request handler: " + service.getClass().getName());
-					return;
-				}
-				ServerRequestHandlerRegistry.getInstance().removeService(module.toString());
+				ServerRequestHandlerRegistry.getInstance().removeHandler((AJAXRequestHandler) service);
 			}
 		} finally {
 			context.ungetService(reference);

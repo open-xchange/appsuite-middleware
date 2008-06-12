@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.resource.servlet;
+package com.openexchange.ajax;
 
 import java.io.IOException;
 
@@ -59,26 +59,24 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.DataServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.request.ResourceRequest;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.resource.servlet.request.ResourceRequest;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONException;
 
 /**
- * {@link ResourceServlet} - The servlet handling requests to "/ajax/resource"
+ * {@link Resource} - The servlet handling requests to "/ajax/resource"
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class ResourceServlet extends DataServlet {
+public class Resource extends DataServlet {
 
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ResourceServlet.class);
+			.getLog(Resource.class);
 
 	/**
 	 * For serialization.
@@ -103,9 +101,9 @@ public class ResourceServlet extends DataServlet {
 			}
 
 			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-			final AJAXRequestResult result = new ResourceRequest().performAction(action, jsonObj, sessionObj, ctx);
-			final Object responseObj = result.getResultObject();
-			response.setTimestamp(result.getTimestamp());
+			final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, ctx);
+			final Object responseObj = resourceRequest.action(action, jsonObj);
+			response.setTimestamp(resourceRequest.getTimestamp());
 			response.setData(responseObj);
 		} catch (final AbstractOXException e) {
 			LOG.error(_doGet, e);
@@ -153,9 +151,9 @@ public class ResourceServlet extends DataServlet {
 				jsonObj.put(PARAMETER_DATA, jData);
 
 				final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-				final AJAXRequestResult result = new ResourceRequest().performAction(action, jsonObj, sessionObj, ctx);
-				final Object responseObj = result.getResultObject();
-				response.setTimestamp(result.getTimestamp());
+				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, ctx);
+				final Object responseObj = resourceRequest.action(action, jsonObj);
+				response.setTimestamp(resourceRequest.getTimestamp());
 				response.setData(responseObj);
 			} else {
 				JSONObject jData = null;
@@ -173,9 +171,9 @@ public class ResourceServlet extends DataServlet {
 				jsonObj.put(PARAMETER_DATA, jData);
 
 				final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-				final AJAXRequestResult result = new ResourceRequest().performAction(action, jsonObj, sessionObj, ctx);
-				final Object responseObj = result.getResultObject();
-				response.setTimestamp(result.getTimestamp());
+				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, ctx);
+				final Object responseObj = resourceRequest.action(action, jsonObj);
+				response.setTimestamp(resourceRequest.getTimestamp());
 				response.setData(responseObj);
 			}
 		} catch (final AbstractOXException e) {

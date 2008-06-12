@@ -71,9 +71,8 @@ import com.openexchange.ajax.request.InfostoreRequest;
 import com.openexchange.ajax.request.JSONSimpleRequest;
 import com.openexchange.ajax.request.MailRequest;
 import com.openexchange.ajax.request.ReminderRequest;
+import com.openexchange.ajax.request.ResourceRequest;
 import com.openexchange.ajax.request.TaskRequest;
-import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
@@ -82,7 +81,6 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
-import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.servlet.AjaxException;
@@ -168,7 +166,7 @@ public class Multiple extends SessionServlet {
 	}
 
 	protected static final void parseActionElement(final JSONArray respArr, final JSONArray dataArray, final int pos,
-			final Session sessionObj, final Context ctx, final HttpServletRequest req) throws JSONException,
+			final Session session, final Context ctx, final HttpServletRequest req) throws JSONException,
 			AjaxException, OXException {
 		final JSONObject jsonObj = dataArray.getJSONObject(pos);
 
@@ -189,7 +187,7 @@ public class Multiple extends SessionServlet {
 
 		final OXJSONWriter jWriter = new OXJSONWriter(respArr);
 
-		doAction(module, action, jsonObj, sessionObj, ctx, req, jWriter);
+		doAction(module, action, jsonObj, session, ctx, req, jWriter);
 	}
 
 	private static final void writeMailRequest(final HttpServletRequest req) throws JSONException {
@@ -210,12 +208,12 @@ public class Multiple extends SessionServlet {
 	}
 
 	protected static final void doAction(final String module, final String action, final JSONObject jsonObj,
-			final Session sessionObj, final Context ctx, final HttpServletRequest req, final OXJSONWriter jsonWriter)
+			final Session session, final Context ctx, final HttpServletRequest req, final OXJSONWriter jsonWriter)
 			throws AjaxException {
 		try {
 			if (module.equals(MODULE_CALENDAR)) {
 				writeMailRequest(req);
-				final AppointmentRequest appointmentRequest = new AppointmentRequest(sessionObj, ctx);
+				final AppointmentRequest appointmentRequest = new AppointmentRequest(session, ctx);
 				jsonWriter.object();
 				try {
 					final Object tmp = appointmentRequest.action(action, jsonObj);
@@ -242,7 +240,7 @@ public class Multiple extends SessionServlet {
 				}
 			} else if (module.equals(MODULE_CONTACT)) {
 				writeMailRequest(req);
-				final ContactRequest contactRequest = new ContactRequest(sessionObj, ctx);
+				final ContactRequest contactRequest = new ContactRequest(session, ctx);
 				jsonWriter.object();
 				try {
 					final Object tmp = contactRequest.action(action, jsonObj);
@@ -269,7 +267,7 @@ public class Multiple extends SessionServlet {
 				}
 			} else if (module.equals(MODULE_GROUP)) {
 				writeMailRequest(req);
-				final GroupRequest groupRequest = new GroupRequest(sessionObj, ctx);
+				final GroupRequest groupRequest = new GroupRequest(session, ctx);
 				jsonWriter.object();
 				try {
 					final Object tmp = groupRequest.action(action, jsonObj);
@@ -296,7 +294,7 @@ public class Multiple extends SessionServlet {
 				}
 			} else if (module.equals(MODULE_REMINDER)) {
 				writeMailRequest(req);
-				final ReminderRequest reminderRequest = new ReminderRequest(sessionObj, ctx);
+				final ReminderRequest reminderRequest = new ReminderRequest(session, ctx);
 				jsonWriter.object();
 				try {
 					final Object tmp = reminderRequest.action(action, jsonObj);
@@ -323,18 +321,14 @@ public class Multiple extends SessionServlet {
 				}
 			} else if (module.equals(MODULE_RESOURCE)) {
 				writeMailRequest(req);
-				final AJAXRequestHandler handler = ServerRequestHandlerRegistry.getInstance().getService(
-						MODULE_RESOURCE);
-				if (null == handler) {
-					throw new AjaxException(AjaxException.Code.MISSING_REQUEST_HANDLER, MODULE_RESOURCE);
-				}
+				final ResourceRequest resourceRequest = new ResourceRequest(session, ctx);
 				jsonWriter.object();
 				try {
-					final AJAXRequestResult result = handler.performAction(action, jsonObj, sessionObj, ctx);
+					final Object tmp = resourceRequest.action(action, jsonObj);
 					jsonWriter.key(Response.DATA);
-					jsonWriter.value(result.getResultObject());
-					if (null != result.getTimestamp()) {
-						jsonWriter.key(Response.TIMESTAMP).value(result.getTimestamp().getTime());
+					jsonWriter.value(tmp);
+					if (null != resourceRequest.getTimestamp()) {
+						jsonWriter.key(Response.TIMESTAMP).value(resourceRequest.getTimestamp().getTime());
 					}
 				} catch (final AbstractOXException exc) {
 					LOG.error(exc.getMessage(), exc);
@@ -354,7 +348,7 @@ public class Multiple extends SessionServlet {
 				}
 			} else if (module.equals(MODULE_TASK)) {
 				writeMailRequest(req);
-				final TaskRequest taskRequest = new TaskRequest(sessionObj, ctx);
+				final TaskRequest taskRequest = new TaskRequest(session, ctx);
 				jsonWriter.object();
 				try {
 					final Object tmp = taskRequest.action(action, jsonObj);
@@ -381,7 +375,7 @@ public class Multiple extends SessionServlet {
 				}
 			} else if (module.equals(MODULE_INFOSTORE)) {
 				writeMailRequest(req);
-				final InfostoreRequest infoRequest = new InfostoreRequest(sessionObj, ctx, jsonWriter);
+				final InfostoreRequest infoRequest = new InfostoreRequest(session, ctx, jsonWriter);
 				try {
 					infoRequest.action(action, new JSONSimpleRequest(jsonObj));
 				} catch (final OXPermissionException e) {
@@ -391,7 +385,7 @@ public class Multiple extends SessionServlet {
 				}
 			} else if (module.equals(MODULE_FOLDER)) {
 				writeMailRequest(req);
-				final FolderRequest folderequest = new FolderRequest(sessionObj, ctx, jsonWriter);
+				final FolderRequest folderequest = new FolderRequest(session, ctx, jsonWriter);
 				try {
 					folderequest.action(action, jsonObj);
 				} catch (final OXFolderException e) {
@@ -415,7 +409,7 @@ public class Multiple extends SessionServlet {
 					final MailRequest mailrequest;
 					Object tmp = req.getAttribute(ATTRIBUTE_MAIL_REQUEST);
 					if (tmp == null) {
-						mailrequest = new MailRequest(sessionObj, ctx, jsonWriter);
+						mailrequest = new MailRequest(session, ctx, jsonWriter);
 						storeMailRequest = true;
 					} else {
 						mailrequest = (MailRequest) tmp;
@@ -427,7 +421,7 @@ public class Multiple extends SessionServlet {
 					final MailServletInterface mi;
 					tmp = req.getAttribute(ATTRIBUTE_MAIL_INTERFACE);
 					if (tmp == null) {
-						mi = MailServletInterface.getInstance(sessionObj);
+						mi = MailServletInterface.getInstance(session);
 						req.setAttribute(ATTRIBUTE_MAIL_INTERFACE, mi);
 					} else {
 						mi = ((MailServletInterface) tmp);

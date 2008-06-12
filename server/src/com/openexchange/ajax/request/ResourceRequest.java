@@ -47,9 +47,7 @@
  *
  */
 
-package com.openexchange.resource.servlet.request;
-
-import static com.openexchange.resource.servlet.services.ResourceServletServiceRegistry.getServiceRegistry;
+package com.openexchange.ajax.request;
 
 import java.util.Date;
 
@@ -63,16 +61,15 @@ import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.OXConcurrentModificationException;
-import com.openexchange.api2.OXConcurrentModificationException.ConcurrentModificationCode;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.ResourceService;
+import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.ServiceException;
+import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -82,10 +79,16 @@ import com.openexchange.tools.servlet.AjaxException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class ResourceRequest implements AJAXRequestHandler {
+public class ResourceRequest {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ResourceRequest.class);
+
+	private final Session session;
+
+	private final Context ctx;
+
+	private Date timestamp;
 
 	/**
 	 * Initializes a new {@link ResourceRequest}
@@ -95,12 +98,16 @@ public class ResourceRequest implements AJAXRequestHandler {
 	 * @param ctx
 	 *            The context
 	 */
-	public ResourceRequest() {
+	public ResourceRequest(final Session session, final Context ctx) {
 		super();
+		this.session = session;
+		this.ctx = ctx;
 	}
 
-	public AJAXRequestResult performAction(final String action, final JSONObject jsonObject, final Session session,
-			final Context ctx) throws AbstractOXException, JSONException {
+	private static final String MODULE_RESOURCE = "resource";
+
+	public Object action(final String action, final JSONObject jsonObject) throws AbstractOXException,
+			JSONException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
 			return actionList(jsonObject, ctx);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
@@ -109,31 +116,34 @@ public class ResourceRequest implements AJAXRequestHandler {
 			return actionSearch(jsonObject, ctx);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
 			return actionAll(ctx);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
-			return actionNew(jsonObject, session, ctx);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
-			return actionUpdate(jsonObject, session, ctx);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
-			return actionDelete(jsonObject, session, ctx);
 		} else {
-			throw new AjaxException(AjaxException.Code.UnknownAction, action);
+			/*
+			 * Look-up manage request
+			 */
+			final AJAXRequestHandler handler = ServerRequestHandlerRegistry.getInstance().getHandler(MODULE_RESOURCE,
+					action);
+			if (null == handler) {
+				/*
+				 * No appropriate handler
+				 */
+				throw new AjaxException(AjaxException.Code.UnknownAction, action);
+			}
+			/*
+			 * ... and delegate to manage request
+			 */
+			final AJAXRequestResult result = handler.performAction(action, jsonObject, session, ctx);
+			timestamp = result.getTimestamp();
+			return result.getResultObject();
 		}
 	}
 
-	private AJAXRequestResult actionList(final JSONObject jsonObj, final Context ctx) throws AbstractOXException,
-			JSONException {
-		final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
-		if (null == resourceService) {
-			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ResourceService.class.getName());
-		}
-
+	private JSONArray actionList(final JSONObject jsonObj, final Context ctx) throws AbstractOXException, JSONException {
 		final JSONArray jsonResponseArray = new JSONArray();
 
 		UserStorage userStorage = null;
 
 		final JSONArray jsonArray = DataParser.checkJSONArray(jsonObj, AJAXServlet.PARAMETER_DATA);
 		final int len = jsonArray.length();
-		final Date timestamp;
 		if (len > 0) {
 			long lastModified = Long.MIN_VALUE;
 			for (int a = 0; a < len; a++) {
@@ -142,7 +152,7 @@ public class ResourceRequest implements AJAXRequestHandler {
 				com.openexchange.resource.Resource r = null;
 
 				try {
-					r = resourceService.getResource(id, ctx);
+					r = ResourceServiceImpl.getInstance().getResource(id, ctx);
 				} catch (final ResourceException exc) {
 					LOG.debug("resource not found try to find id in user table", exc);
 				}
@@ -171,20 +181,14 @@ public class ResourceRequest implements AJAXRequestHandler {
 			timestamp = new Date(0);
 		}
 
-		return new AJAXRequestResult(jsonResponseArray, timestamp);
+		return jsonResponseArray;
 	}
 
-	private AJAXRequestResult actionGet(final JSONObject jsonObj, final Context ctx) throws AbstractOXException,
-			JSONException {
-		final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
-		if (null == resourceService) {
-			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ResourceService.class.getName());
-		}
-
+	private JSONObject actionGet(final JSONObject jsonObj, final Context ctx) throws AbstractOXException, JSONException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		com.openexchange.resource.Resource r = null;
 		try {
-			r = resourceService.getResource(id, ctx);
+			r = ResourceServiceImpl.getInstance().getResource(id, ctx);
 		} catch (final ResourceException exc) {
 			LOG.debug("resource not found try to find id in user table", exc);
 		}
@@ -197,14 +201,14 @@ public class ResourceRequest implements AJAXRequestHandler {
 			r.setDisplayName(u.getDisplayName());
 			r.setLastModified(new Date(0));
 		}
+		timestamp = r.getLastModified();
 
-		return new AJAXRequestResult(com.openexchange.resource.json.ResourceWriter.writeResource(r), r
-				.getLastModified());
+		return com.openexchange.resource.json.ResourceWriter.writeResource(r);
 	}
 
-	private AJAXRequestResult actionSearch(final JSONObject jsonObj, final Context ctx) throws AbstractOXException,
+	private JSONArray actionSearch(final JSONObject jsonObj, final Context ctx) throws AbstractOXException,
 			JSONException {
-		final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
+		final ResourceService resourceService = ResourceServiceImpl.getInstance();
 		if (null == resourceService) {
 			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ResourceService.class.getName());
 		}
@@ -224,7 +228,6 @@ public class ResourceRequest implements AJAXRequestHandler {
 		}
 
 		final com.openexchange.resource.Resource[] resources = resourceService.searchResources(searchpattern, ctx);
-		final Date timestamp;
 		if (resources.length > 0) {
 			long lastModified = Long.MIN_VALUE;
 			for (final com.openexchange.resource.Resource resource : resources) {
@@ -238,7 +241,7 @@ public class ResourceRequest implements AJAXRequestHandler {
 			timestamp = new Date(0);
 		}
 
-		return new AJAXRequestResult(jsonResponseArray, timestamp);
+		return jsonResponseArray;
 	}
 
 	private static final String STR_ALL = "*";
@@ -250,16 +253,11 @@ public class ResourceRequest implements AJAXRequestHandler {
 	 * @throws AbstractOXException
 	 *             If all resources cannot be retrieved from resource storage
 	 */
-	private AJAXRequestResult actionAll(final Context ctx) throws AbstractOXException {
-		final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
-		if (null == resourceService) {
-			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ResourceService.class.getName());
-		}
-
+	private JSONArray actionAll(final Context ctx) throws AbstractOXException {
 		final JSONArray jsonResponseArray = new JSONArray();
 
-		final com.openexchange.resource.Resource[] resources = resourceService.searchResources(STR_ALL, ctx);
-		final Date timestamp;
+		final com.openexchange.resource.Resource[] resources = ResourceServiceImpl.getInstance().searchResources(
+				STR_ALL, ctx);
 		if (resources.length > 0) {
 			long lastModified = Long.MIN_VALUE;
 			for (final com.openexchange.resource.Resource resource : resources) {
@@ -273,124 +271,16 @@ public class ResourceRequest implements AJAXRequestHandler {
 			timestamp = new Date(0);
 		}
 
-		return new AJAXRequestResult(jsonResponseArray, timestamp);
+		return jsonResponseArray;
 	}
 
 	/**
-	 * Performs a create request
+	 * Gets the last-modified time stamp
 	 * 
-	 * @param jsonObj
-	 *            The JSON data object (containing "data", "timestamp", etc.)
-	 * @return The newly created resource's ID
-	 * @throws AbstractOXException
-	 *             If creation fails
-	 * @throws JSONException
-	 *             If a JsSON error occurs
+	 * @return The last-modified time stamp
 	 */
-	private AJAXRequestResult actionNew(final JSONObject jsonObj, final Session session, final Context ctx)
-			throws AbstractOXException, JSONException {
-		/*
-		 * Check for "data"
-		 */
-		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
-		/*
-		 * Parse resource out of JSON object
-		 */
-		final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser
-				.parseResource(jData);
-		/*
-		 * Create new resource
-		 */
-		final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
-		if (null == resourceService) {
-			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ResourceService.class.getName());
-		}
-		resourceService.create(UserStorage.getStorageUser(session.getUserId(), ctx), ctx, resource);
-		/*
-		 * Return its ID
-		 */
-		return new AJAXRequestResult(Integer.valueOf(resource.getIdentifier()));
-	}
-
-	/**
-	 * Performs an update request
-	 * 
-	 * @param jsonObj
-	 *            The JSON data object (containing "data", "timestamp", etc.)
-	 * @return The modified resource's JSON representation
-	 * @throws AbstractOXException
-	 *             If update fails
-	 * @throws JSONException
-	 *             If a JsSON error occurs
-	 */
-	private AJAXRequestResult actionUpdate(final JSONObject jsonObj, final Session session, final Context ctx)
-			throws AbstractOXException, JSONException {
-		final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
-		if (null == resourceService) {
-			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ResourceService.class.getName());
-		}
-		/*
-		 * Check for "data"
-		 */
-		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
-		final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser
-				.parseResource(jData);
-		if (jsonObj.has(AJAXServlet.PARAMETER_TIMESTAMP)
-				&& !jsonObj.isNull(AJAXServlet.PARAMETER_TIMESTAMP)
-				&& jsonObj.getLong(AJAXServlet.PARAMETER_TIMESTAMP) < resourceService.getResource(
-						resource.getIdentifier(), ctx).getLastModified().getTime()) {
-			throw new OXConcurrentModificationException(EnumComponent.RESOURCE,
-					ConcurrentModificationCode.CONCURRENT_MODIFICATION, new Object[0]);
-		}
-		/*
-		 * Update resource
-		 */
-		resourceService.update(UserStorage.getStorageUser(session.getUserId(), ctx), ctx, resource);
-		/*
-		 * Write updated resource
-		 */
-		return new AJAXRequestResult(com.openexchange.resource.json.ResourceWriter.writeResource(resource));
-	}
-
-	/**
-	 * Performs a delete request
-	 * 
-	 * @param jsonObj
-	 *            The JSON data object (containing "data", "timestamp", etc.)
-	 * @return The constant {@link JSONObject#NULL NULL} since nothing is
-	 *         intended to be returned to requester
-	 * @throws AbstractOXException
-	 *             If deletion fails
-	 * @throws JSONException
-	 *             If a JsSON error occurs
-	 */
-	private AJAXRequestResult actionDelete(final JSONObject jsonObj, final Session session, final Context ctx)
-			throws AbstractOXException, JSONException {
-		final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
-		if (null == resourceService) {
-			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ResourceService.class.getName());
-		}
-		/*
-		 * Check for "data"
-		 */
-		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
-		final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser
-				.parseResource(jData);
-		if (jsonObj.has(AJAXServlet.PARAMETER_TIMESTAMP)
-				&& !jsonObj.isNull(AJAXServlet.PARAMETER_TIMESTAMP)
-				&& jsonObj.getLong(AJAXServlet.PARAMETER_TIMESTAMP) < resourceService.getResource(
-						resource.getIdentifier(), ctx).getLastModified().getTime()) {
-			throw new OXConcurrentModificationException(EnumComponent.RESOURCE,
-					ConcurrentModificationCode.CONCURRENT_MODIFICATION, new Object[0]);
-		}
-		/*
-		 * Delete resource
-		 */
-		resourceService.delete(UserStorage.getStorageUser(session.getUserId(), ctx), ctx, resource);
-		/*
-		 * Write JSON null
-		 */
-		return new AJAXRequestResult(JSONObject.NULL);
+	public Date getTimestamp() {
+		return timestamp;
 	}
 
 }

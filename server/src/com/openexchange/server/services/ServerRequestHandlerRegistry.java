@@ -49,8 +49,10 @@
 
 package com.openexchange.server.services;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
@@ -74,14 +76,14 @@ public final class ServerRequestHandlerRegistry {
 		return INSTANCE;
 	}
 
-	private final Map<String, AJAXRequestHandler> requestHandlers;
+	private final Map<String, Map<String, AJAXRequestHandler>> requestHandlers;
 
 	/**
 	 * Initializes a new {@link ServerRequestHandlerRegistry}
 	 */
 	private ServerRequestHandlerRegistry() {
 		super();
-		requestHandlers = new ConcurrentHashMap<String, AJAXRequestHandler>();
+		requestHandlers = new ConcurrentHashMap<String, Map<String, AJAXRequestHandler>>();
 	}
 
 	/**
@@ -92,36 +94,83 @@ public final class ServerRequestHandlerRegistry {
 	}
 
 	/**
-	 * Removes a request handler bound to given module name from this registry
+	 * Removes a request handler bound to indicated module name and its
+	 * supported actions from this registry
 	 * 
-	 * @param moduleName
-	 *            The module name
-	 */
-	public void removeService(final String moduleName) {
-		requestHandlers.remove(moduleName);
-	}
-
-	/**
-	 * Adds a request handler bound to given module name to this registry
-	 * 
-	 * @param moduleName
-	 *            The module name
 	 * @param requestHandler
-	 *            The request handler
+	 *            The request handler to remove
 	 */
-	public void addService(final String moduleName, final AJAXRequestHandler requestHandler) {
-		requestHandlers.put(moduleName, requestHandler);
+	public void removeHandler(final AJAXRequestHandler requestHandler) {
+		final Map<String, AJAXRequestHandler> actionHandlers = requestHandlers.get(requestHandler.getModule());
+		if (actionHandlers != null) {
+			final Set<String> actions = requestHandler.getSupportedActions();
+			for (final String action : actions) {
+				actionHandlers.remove(action);
+			}
+			if (actionHandlers.isEmpty()) {
+				requestHandlers.remove(requestHandler.getModule());
+			}
+		}
 	}
 
 	/**
-	 * Gets the request handler by given module name
+	 * Adds a request handler bound to indicated module name and actions to this
+	 * registry.
+	 * <p>
+	 * Any existing boundaries are overwritten.
+	 * 
+	 * @param requestHandler
+	 *            The request handler to add
+	 */
+	public void addHandler(final AJAXRequestHandler requestHandler) {
+		Map<String, AJAXRequestHandler> actionHandlers = requestHandlers.get(requestHandler.getModule());
+		if (actionHandlers == null) {
+			synchronized (this) {
+				if ((actionHandlers = requestHandlers.get(requestHandler.getModule())) == null) {
+					actionHandlers = new ConcurrentHashMap<String, AJAXRequestHandler>();
+					requestHandlers.put(requestHandler.getModule(), actionHandlers);
+				}
+			}
+		}
+		final Set<String> actions = requestHandler.getSupportedActions();
+		for (final String action : actions) {
+			actionHandlers.put(action, requestHandler);
+		}
+	}
+
+	private static final AJAXRequestHandler[] EMPTY_ARR = new AJAXRequestHandler[0];
+
+	/**
+	 * Gets the request handlers by given module name
 	 * 
 	 * @param moduleName
 	 *            The module name
+	 * @return The request handlers
+	 */
+	public AJAXRequestHandler[] getModuleHandlers(final String moduleName) {
+		final Map<String, AJAXRequestHandler> actionHandlers = requestHandlers.get(moduleName);
+		if (actionHandlers == null) {
+			return EMPTY_ARR;
+		}
+		final Set<AJAXRequestHandler> set = new HashSet<AJAXRequestHandler>(actionHandlers.values());
+		return set.toArray(new AJAXRequestHandler[set.size()]);
+	}
+
+	/**
+	 * Gets the request handlers by given module and action
+	 * 
+	 * @param moduleName
+	 *            The module name
+	 * @param action
+	 *            The action identifier
 	 * @return The request handler if present; otherwise <code>null</code>
 	 */
-	public AJAXRequestHandler getService(final String moduleName) {
-		return requestHandlers.get(moduleName);
+	public AJAXRequestHandler getHandler(final String moduleName, final String action) {
+		final Map<String, AJAXRequestHandler> actionHandlers = requestHandlers.get(moduleName);
+		if (actionHandlers == null) {
+			return null;
+		}
+		return actionHandlers.get(action);
 	}
 
 	@Override
@@ -131,9 +180,10 @@ public final class ServerRequestHandlerRegistry {
 		if (requestHandlers.isEmpty()) {
 			sb.append("<empty>");
 		} else {
-			final Iterator<Map.Entry<String, AJAXRequestHandler>> iter = requestHandlers.entrySet().iterator();
+			final Iterator<Map.Entry<String, Map<String, AJAXRequestHandler>>> iter = requestHandlers.entrySet()
+					.iterator();
 			while (true) {
-				final Map.Entry<String, AJAXRequestHandler> e = iter.next();
+				final Map.Entry<String, Map<String, AJAXRequestHandler>> e = iter.next();
 				sb.append(e.getKey()).append(": ").append(e.getValue().getClass().getName());
 				if (iter.hasNext()) {
 					sb.append('\n');

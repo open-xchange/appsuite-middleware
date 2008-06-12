@@ -283,7 +283,8 @@ public final class ServerActivator extends DeferredActivator {
 				.add(context.registerService(CharsetProvider.class.getName(), new AliasCharsetProvider(), null));
 		registrationList.add(context.registerService(HttpService.class.getName(), new HttpServiceImpl(), null));
 		registrationList.add(context.registerService(GroupService.class.getName(), new GroupServiceImpl(), null));
-		registrationList.add(context.registerService(ResourceService.class.getName(), new ResourceServiceImpl(), null));
+		registrationList.add(context.registerService(ResourceService.class.getName(),
+				ResourceServiceImpl.getInstance(), null));
 	}
 
 	@Override

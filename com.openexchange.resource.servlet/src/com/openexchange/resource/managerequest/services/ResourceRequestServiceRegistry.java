@@ -47,18 +47,18 @@
  *
  */
 
-package com.openexchange.resource.servlet.services;
+package com.openexchange.resource.managerequest.services;
 
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
- * {@link ResourceServletServiceRegistry} - The service registry for resource
- * servlet
+ * {@link ResourceRequestServiceRegistry} - The service registry for
+ * resource-manage request
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ResourceServletServiceRegistry {
+public final class ResourceRequestServiceRegistry {
 
 	private static final ServiceRegistry INSTANCE = new ServiceRegistry(2);
 
@@ -72,9 +72,9 @@ public final class ResourceServletServiceRegistry {
 	}
 
 	/**
-	 * Initializes a new {@link ResourceServletServiceRegistry}
+	 * Initializes a new {@link ResourceRequestServiceRegistry}
 	 */
-	private ResourceServletServiceRegistry() {
+	private ResourceRequestServiceRegistry() {
 		super();
 	}
 

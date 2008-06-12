@@ -47,51 +47,41 @@
  *
  */
 
-package com.openexchange.resource.servlet.osgi;
+package com.openexchange.resource.managerequest.osgi;
 
-import static com.openexchange.resource.servlet.services.ResourceServletServiceRegistry.getServiceRegistry;
-
-import java.util.Dictionary;
-import java.util.Hashtable;
-
-import javax.servlet.ServletException;
+import static com.openexchange.resource.managerequest.services.ResourceRequestServiceRegistry.getServiceRegistry;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.resource.ResourceService;
-import com.openexchange.resource.servlet.ResourceServlet;
-import com.openexchange.resource.servlet.request.ResourceRequest;
+import com.openexchange.resource.managerequest.request.ResourceManageRequest;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
- * {@link ResourceServletActivator} - {@link BundleActivator Activator} for
+ * {@link ResourceRequestActivator} - {@link BundleActivator Activator} for
  * resource servlet.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ResourceServletActivator extends DeferredActivator {
+public final class ResourceRequestActivator extends DeferredActivator {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ResourceServletActivator.class);
-
-	private static final String SC_SRVLT_ALIAS = "ajax/resource";
+			.getLog(ResourceRequestActivator.class);
 
 	private ServiceRegistration serviceRegistration;
 
 	/**
-	 * Initializes a new {@link ResourceServletActivator}
+	 * Initializes a new {@link ResourceRequestActivator}
 	 */
-	public ResourceServletActivator() {
+	public ResourceRequestActivator() {
 		super();
 	}
 
-	private static final Class<?>[] NEEDED_SERVICES = { ResourceService.class, HttpService.class };
+	private static final Class<?>[] NEEDED_SERVICES = { ResourceService.class };
 
 	/*
 	 * (non-Javadoc)
@@ -106,20 +96,12 @@ public final class ResourceServletActivator extends DeferredActivator {
 
 	@Override
 	protected void handleUnavailability(final Class<?> clazz) {
-		/*
-		 * Unregister servlet on both absent HTTP service and resource service
-		 */
-		final HttpService httpService = getServiceRegistry().getService(HttpService.class);
-		if (httpService == null) {
-			LOG.error("HTTP service is null. Resource servlet cannot be unregistered");
-		} else {
+		if (serviceRegistration != null) {
 			/*
-			 * Unregister servlet
+			 * Unregister service
 			 */
-			httpService.unregister(SC_SRVLT_ALIAS);
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Resource servlet successfully unregistered");
-			}
+			serviceRegistration.unregister();
+			serviceRegistration = null;
 		}
 		getServiceRegistry().removeService(clazz);
 	}
@@ -130,22 +112,7 @@ public final class ResourceServletActivator extends DeferredActivator {
 		 * Register servlet on both available HTTP service and resource service
 		 */
 		getServiceRegistry().addService(clazz, getService(clazz));
-		final HttpService httpService = getServiceRegistry().getService(HttpService.class);
-		if (httpService != null) {
-			try {
-				/*
-				 * Register servlet
-				 */
-				httpService.registerServlet(SC_SRVLT_ALIAS, new ResourceServlet(), null, null);
-				if (LOG.isInfoEnabled()) {
-					LOG.info("Resource servlet successfully registered");
-				}
-			} catch (final ServletException e) {
-				LOG.error(e.getMessage(), e);
-			} catch (final NamespaceException e) {
-				LOG.error(e.getMessage(), e);
-			}
-		}
+		registerRequestHandler();
 	}
 
 	/*
@@ -170,40 +137,19 @@ public final class ResourceServletActivator extends DeferredActivator {
 					}
 				}
 			}
-			/*
-			 * Register request handler
-			 */
-			final Dictionary<String, String> dictionary = new Hashtable<String, String>();
-			dictionary.put("module", "resource");
-			serviceRegistration = context.registerService(AJAXRequestHandler.class.getName(), new ResourceRequest(),
-					dictionary);
-			/*
-			 * Register servlet to newly available HTTP service
-			 */
-			final HttpService httpService = getServiceRegistry().getService(HttpService.class);
-			if (httpService == null) {
-				LOG.error("HTTP service is null. Resource servlet cannot be registered");
-				return;
-			}
-			try {
-				/*
-				 * Register servlet
-				 */
-				httpService.registerServlet(SC_SRVLT_ALIAS, new ResourceServlet(), null, null);
-				if (LOG.isInfoEnabled()) {
-					LOG.info("Resource servlet successfully registered");
-				}
-			} catch (final ServletException e) {
-				// TODO: Generate ResourceServletException
-				throw e;
-			} catch (final NamespaceException e) {
-				// TODO: Generate ResourceServletException
-				throw e;
-			}
+			registerRequestHandler();
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw e;
 		}
+	}
+
+	private void registerRequestHandler() {
+		/*
+		 * Register request handler
+		 */
+		serviceRegistration = context.registerService(AJAXRequestHandler.class.getName(), new ResourceManageRequest(),
+				null);
 	}
 
 	/*
@@ -214,21 +160,6 @@ public final class ResourceServletActivator extends DeferredActivator {
 	@Override
 	protected void stopBundle() throws Exception {
 		try {
-			/*
-			 * Unregister servlet
-			 */
-			final HttpService httpService = getServiceRegistry().getService(HttpService.class);
-			if (httpService == null) {
-				LOG.error("HTTP service is null. Resource servlet cannot be unregistered");
-			} else {
-				/*
-				 * Unregister servlet
-				 */
-				httpService.unregister(SC_SRVLT_ALIAS);
-				if (LOG.isInfoEnabled()) {
-					LOG.info("Resource servlet successfully unregistered");
-				}
-			}
 			if (serviceRegistration != null) {
 				/*
 				 * Unregister service

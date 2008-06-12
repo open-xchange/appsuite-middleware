@@ -67,10 +67,21 @@ import com.openexchange.resource.storage.ResourceStorage;
  */
 public final class ResourceServiceImpl implements ResourceService {
 
+	private static final ResourceServiceImpl instance = new ResourceServiceImpl();
+
+	/**
+	 * Gets the singleton instance of {@link ResourceServiceImpl}
+	 * 
+	 * @return The singleton instance of {@link ResourceServiceImpl}
+	 */
+	public static ResourceServiceImpl getInstance() {
+		return instance;
+	}
+
 	/**
 	 * Initializes a new {@link ResourceServiceImpl}
 	 */
-	public ResourceServiceImpl() {
+	private ResourceServiceImpl() {
 		super();
 	}
 
