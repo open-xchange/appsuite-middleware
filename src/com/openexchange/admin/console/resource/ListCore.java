@@ -132,13 +132,16 @@ public abstract class ListCore extends ResourceAbstraction {
         columns.add("displayname");
         columns.add("email");
         columns.add("available");
+        columns.add("description");
         extendscvscolumns(columns);
     
         // Needed for csv output
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
     
         for (final Resource my_res : resourceList) {
-            data.add(makeCsvData(my_res));
+            final ArrayList<String> makeCsvData = makeCsvData(my_res);
+            makeCsvData.add(my_res.getDescription());
+            data.add(makeCsvData);
             printExtensionsError(my_res);
         }
         doCSVOutput(columns, data);
