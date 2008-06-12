@@ -48,10 +48,16 @@
  */
 package com.openexchange.admin.soap;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.Properties;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,16 +68,19 @@ import org.apache.commons.logging.LogFactory;
  */
 public abstract class OXSOAPRMIMapper {
 
-    public static final int MAX_RMI_CONNECT_ATTEMPTS    = 5;
+    private final String MAX_RMI_CONNECT_ATTEMPTS_PROP = "MAX_RMI_CONNECT_ATTEMPTS";
+    public int MAX_RMI_CONNECT_ATTEMPTS    = 5;
 
     /**
      * time in seconds to wait between connect attempts
      */
-    public static final int CONNECT_ATTEMPTS_DELAY_TIME = 5;
+    private final String CONNECT_ATTEMPTS_DELAY_TIME_PROP = "CONNECT_ATTEMPTS_DELAY_TIME";
+    public int CONNECT_ATTEMPTS_DELAY_TIME = 5;
 
-    public static final String RMI_HOSTNAME = "rmi://localhost:1099/";
+    private final String RMI_HOSTNAME_PROP = "RMI_HOSTNAME";
+    public String RMI_HOSTNAME = "rmi://localhost:1099/";
     
-    protected static Object rmistub = null;
+    protected Object rmistub = null;
     
 
     private Class<?> clazz = null;
@@ -84,7 +93,40 @@ public abstract class OXSOAPRMIMapper {
      */
     public OXSOAPRMIMapper(final Class<?> clazz) throws RemoteException{
         this.clazz = clazz;
+        
         reconnect();
+        final String classContainer = this.getClass().getProtectionDomain().getCodeSource().getLocation().toString();
+        final URL manifestUrl;
+        try {
+            manifestUrl = new URL("jar:" + classContainer + "!/META-INF/MANIFEST.MF");
+            final Manifest manifest = new Manifest(manifestUrl.openStream());
+            final Attributes attrs = manifest.getMainAttributes();
+            final String configFile = attrs.getValue("Config-File");
+
+            Properties props = new Properties();
+            props.load(new FileInputStream(configFile));
+            if( props.containsKey(MAX_RMI_CONNECT_ATTEMPTS_PROP) ) {
+                MAX_RMI_CONNECT_ATTEMPTS = Integer.parseInt((String)props.get(MAX_RMI_CONNECT_ATTEMPTS_PROP));
+            }
+            if( props.containsKey(CONNECT_ATTEMPTS_DELAY_TIME_PROP) ) {
+                CONNECT_ATTEMPTS_DELAY_TIME = Integer.parseInt((String)props.get(CONNECT_ATTEMPTS_DELAY_TIME_PROP));
+            }
+            if( props.containsKey(RMI_HOSTNAME_PROP) ) {
+                RMI_HOSTNAME = (String)props.get(RMI_HOSTNAME_PROP);
+            }
+            if( log.isDebugEnabled() ) {
+                log.debug("OXSOAPRMIMapper settings:");
+                log.debug("MAX_RMI_CONNECT_ATTEMPTS: " + MAX_RMI_CONNECT_ATTEMPTS);
+                log.debug("CONNECT_ATTEMPTS_DELAY_TIME: " + CONNECT_ATTEMPTS_DELAY_TIME);
+                log.debug("RMI_HOSTNAME: " + RMI_HOSTNAME);
+            }
+        } catch (MalformedURLException e) {
+            log.error(e.getMessage(), e);
+            throw new RemoteException(e.getMessage());
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new RemoteException(e.getMessage());
+        }
     }
 
     /**
@@ -123,6 +165,7 @@ public abstract class OXSOAPRMIMapper {
                 if( failed ) {
                     throw new RemoteException("failed to reconnect to RMI port of admin daemon");
                 }
+                //clazz.cast(rmistub);
             }
         } catch (SecurityException e) {
             log.error(e.getMessage(), e);
