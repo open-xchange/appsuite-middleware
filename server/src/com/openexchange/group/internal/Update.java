@@ -126,7 +126,7 @@ final class Update {
     Group getOrig() throws GroupException {
         if (null == orig) {
             try {
-                storage.getGroup(changed.getIdentifier(), ctx);
+                orig = storage.getGroup(changed.getIdentifier(), ctx);
             } catch (final LdapException e) {
                 throw new GroupException(e);
             }

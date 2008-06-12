@@ -123,7 +123,7 @@ public final class Delete {
     Group getOrig() throws GroupException {
         if (null == orig) {
             try {
-                storage.getGroup(groupId, ctx);
+                orig = storage.getGroup(groupId, ctx);
             } catch (final LdapException e) {
                 throw new GroupException(e);
             }
