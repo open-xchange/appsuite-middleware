@@ -51,6 +51,7 @@ package com.openexchange.group.internal;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -96,10 +97,12 @@ final class Update {
      */
     private final Group changed;
 
+    private final Date lastRead;
+
     /**
      * Storage API for groups.
      */
-    private final GroupStorage storage = GroupStorage.getInstance();
+    private static final GroupStorage storage = GroupStorage.getInstance();
 
     private Group orig;
 
@@ -116,11 +119,13 @@ final class Update {
     /**
      * Default constructor.
      */
-    Update(final Context ctx, final User user, final Group group) {
+    Update(final Context ctx, final User user, final Group group,
+        final Date lastRead) {
         super();
         this.ctx = ctx;
         this.user = user;
         this.changed = group;
+        this.lastRead = lastRead;
     }
 
     Group getOrig() throws GroupException {
@@ -152,8 +157,10 @@ final class Update {
         if (null == changed) {
             throw new GroupException(Code.NULL);
         }
-        // Does the group exist?
-        getOrig();
+        // Does the group exist? Are timestamps okay?
+        if (getOrig().getLastModified().after(lastRead)) {
+            throw new GroupException(Code.MODIFIED);
+        }
         Logic.checkMandatoryForUpdate(changed);
         Logic.validateSimpleName(changed);
         Logic.checkData(changed);
@@ -238,7 +245,7 @@ final class Update {
      * @throws GroupException if some problem occurs.
      */
     public void update(final Connection con) throws GroupException {
-        storage.updateGroup(ctx, con, changed);
+        storage.updateGroup(ctx, con, changed, lastRead);
         int[] tmp = new int[addedMembers.size()];
         Iterator<Integer> iter = addedMembers.iterator();
         for (int i = 0; iter.hasNext(); i++) {

@@ -70,18 +70,25 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.session.Session;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 
+/**
+ * Servlet implementing group requests.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
 public class Group extends DataServlet {
-	
+
 	/**
 	 * For serialization.
 	 */
 	private static final long serialVersionUID = 6699123983027304951L;
 	private static final Log LOG = LogFactory.getLog(Group.class);
-	
+
+	/**
+	 * {@inheritDoc}
+	 * @author Sebastian Kauss
+	 */
 	@Override
     protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
@@ -89,8 +96,8 @@ public class Group extends DataServlet {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			final Session session = getSessionObject(httpServletRequest);
 			JSONObject jsonObj;
-			
-			try {	
+
+			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
 			} catch (final JSONException e) {
 				LOG.error(e.getMessage(), e);
@@ -121,9 +128,6 @@ public class Group extends DataServlet {
         } catch (final GroupException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-		} catch (final SearchIteratorException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
 		} catch (final AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -197,9 +201,6 @@ public class Group extends DataServlet {
         } catch (final GroupException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-		} catch (final SearchIteratorException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
 		} catch (final AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);

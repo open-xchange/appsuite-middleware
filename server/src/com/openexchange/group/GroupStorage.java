@@ -80,8 +80,8 @@ public abstract class GroupStorage {
      * @param group group to insert.
      * @throws GroupException if some problem occurs.
      */
-    public final void insertGroup(Context ctx, Connection con, Group group)
-        throws GroupException {
+    public final void insertGroup(final Context ctx, final Connection con,
+        final Group group) throws GroupException {
         insertGroup(ctx, con, group, StorageType.ACTIVE);
     }
 
@@ -101,10 +101,11 @@ public abstract class GroupStorage {
      * @param ctx Context.
      * @param con writable database connection.
      * @param group group with fields to update.
+     * @param lastRead timestamp when the group has been read last.
      * @throws GroupException if updating does not finish successfully.
      */
-    public abstract void updateGroup(Context ctx, Connection con, Group group)
-        throws GroupException;
+    public abstract void updateGroup(Context ctx, Connection con, Group group,
+        Date lastRead) throws GroupException;
 
     public abstract void insertMember(Context ctx, Connection con, Group group,
         int[] members) throws GroupException;
@@ -118,10 +119,11 @@ public abstract class GroupStorage {
      * @param ctx Context.
      * @param con writable database connection.
      * @param groupId unique identifier of the group to delete.
+     * @param lastRead timestamp when the group has been read last.
      * @throws GroupException if deleting fails.
      */
-    public abstract void deleteGroup(Context ctx, Connection con, int groupId)
-        throws GroupException;
+    public abstract void deleteGroup(Context ctx, Connection con, int groupId,
+        Date lastRead) throws GroupException;
 
     /**
      * Reads a group from the persistent storage.

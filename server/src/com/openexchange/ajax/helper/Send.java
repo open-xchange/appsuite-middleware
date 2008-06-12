@@ -60,7 +60,6 @@ import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.AbstractOXException;
 
 /**
  * Contains methods for sending responses.
@@ -101,26 +100,6 @@ public final class Send {
         resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
         resp.getWriter().write(AJAXServlet.substitute(AJAXServlet.JS_FRAGMENT,
             "json", sWriter.toString(), "action", module));
-    }
-
-    /**
-     * Sends the GUI the exception in a normal response object.
-     * @param exception exception to send.
-     * @param resp http servlet response.
-     * @throws IOException if sending fails in some way.
-     */
-    public static void sendResponse(final AbstractOXException exception,
-        final HttpServletResponse resp) throws IOException {
-        final Response error = new Response();
-        error.setException(exception);
-        resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
-        try {
-            Response.write(error, resp.getWriter());
-        } catch (JSONException e) {
-            LOG.error(e.getMessage(), e);
-            sendError(resp);
-        }
     }
 
     /**

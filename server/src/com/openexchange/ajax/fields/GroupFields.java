@@ -47,47 +47,27 @@
  *
  */
 
-package com.openexchange.group;
-
-import java.util.Date;
-
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+package com.openexchange.ajax.fields;
 
 /**
- * This service defines the API to the groups component.
+ * Defines the JSON attribute names for groups.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface GroupService {
+public final class GroupFields {
 
     /**
-     * Creates a group.
-     * @param ctx Context.
-     * @param user User for permission checks.
-     * @param group group to create.
-     * @throws GroupException if some problem occurs.
+     * Prevent instantiation.
      */
-    void create(Context ctx, User user, Group group) throws GroupException;
+    private GroupFields() {
+        super();
+    }
 
-    /**
-     * Updates a group.
-     * @param ctx Context.
-     * @param user User for permission checks.
-     * @param group group to update.
-     * @param lastRead timestamp when the group to update has last been read.
-     * @throws GroupException if some problem occurs.
-     */
-    void update(Context ctx, User user, Group group, Date lastRead) throws
-        GroupException;
+    public static final String IDENTIFIER = "id";
+    
+    public static final String DISPLAY_NAME = "display_name";
 
-    /**
-     * Deletes a group.
-     * @param ctx Context.
-     * @param user User for permission checks.
-     * @param groupId unique identifier of the group to delete.
-     * @param lastModified timestamp when the group to delete has last been read.
-     * @throws GroupException if some problem occurs.
-     */
-    void delete(Context ctx, User user, int groupId, Date lastModified) throws
-        GroupException; 
+    public static final String MEMBERS = "members";
+
+    public static final String NAME = "name";
+
 }

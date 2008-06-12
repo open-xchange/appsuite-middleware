@@ -47,11 +47,9 @@
  *
  */
 
-
-
 package com.openexchange.ajax.writer;
 
-import com.openexchange.ajax.fields.ParticipantsFields;
+import com.openexchange.ajax.fields.GroupFields;
 import com.openexchange.group.Group;
 
 import org.json.JSONArray;
@@ -59,31 +57,28 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * GroupWriter
- *
+ * This class writes a group object into a JSON.
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public class GroupWriter extends DataWriter {
-	
-	public GroupWriter() {
-		
-	}
-	
-	public void writeGroup(final Group g, JSONObject jsonObj) throws JSONException {
-		writeParameter(ParticipantsFields.ID, g.getIdentifier(), jsonObj);
-		writeParameter(ParticipantsFields.DISPLAY_NAME, g.getDisplayName(), jsonObj);
-		
-		writeMembers(g, jsonObj);
-	}
-	
-	protected void writeMembers(final Group g, final JSONObject jsonObj) throws JSONException {
-		final JSONArray jsonArray = new JSONArray();
-		final int members[] = g.getMember();
-		for (int a = 0; a < members.length; a++) {
-			jsonArray.put(members[a]);
-		}
 
-		jsonObj.put("members", jsonArray);
-	}
+    public GroupWriter() {
+        super();
+    }
+
+    public void writeGroup(final Group group, final JSONObject jsonObj)
+        throws JSONException {
+        writeParameter(GroupFields.IDENTIFIER, group.getIdentifier(), jsonObj);
+        writeParameter(GroupFields.DISPLAY_NAME, group.getDisplayName(), jsonObj);
+        writeMembers(group, jsonObj);
+    }
+
+    protected void writeMembers(final Group group, final JSONObject jsonObj)
+        throws JSONException {
+        final JSONArray jsonArray = new JSONArray();
+        for (int member : group.getMember()) {
+            jsonArray.put(member);
+        }
+        jsonObj.put(GroupFields.MEMBERS, jsonArray);
+    }
 }

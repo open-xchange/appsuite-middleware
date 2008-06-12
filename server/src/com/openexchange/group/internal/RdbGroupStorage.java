@@ -115,19 +115,23 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public void updateGroup(Context ctx, Connection con, Group group)
-        throws GroupException {
+    public void updateGroup(final Context ctx, final Connection con,
+        final Group group, final Date lastRead) throws GroupException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE groups SET identifier=?,"
-                + "displayName=?,lastModified=? WHERE cid=? and id=?");
+                + "displayName=?,lastModified=? WHERE cid=? AND id=? AND lastModified<=?");
             int pos = 1;
             stmt.setString(pos++, group.getSimpleName());
             stmt.setString(pos++, group.getDisplayName());
             stmt.setLong(pos++, group.getLastModified().getTime());
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, group.getIdentifier());
-            stmt.execute();
+            stmt.setLong(pos++, lastRead.getTime());
+            final int rows = stmt.executeUpdate();
+            if (1 != rows) {
+                throw new GroupException(GroupException.Code.MODIFIED);
+            }
         } catch (final SQLException e) {
             throw new GroupException(GroupException.Code.SQL_ERROR, e);
         } finally {
@@ -193,13 +197,16 @@ public class RdbGroupStorage extends GroupStorage {
      */
     @Override
     public void deleteGroup(final Context ctx, final Connection con,
-        final int groupId) throws GroupException {
+        final int groupId, final Date lastRead) throws GroupException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("DELETE FROM groups WHERE cid=? AND id=?");
+            stmt = con.prepareStatement("DELETE FROM groups WHERE cid=? AND id=? AND lastModified<=?");
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, groupId);
-            stmt.execute();
+            final int rows = stmt.executeUpdate();
+            if (1 != rows) {
+                throw new GroupException(GroupException.Code.MODIFIED);
+            }
         } catch (final SQLException e) {
             throw new GroupException(GroupException.Code.SQL_ERROR, e);
         } finally {
@@ -212,7 +219,7 @@ public class RdbGroupStorage extends GroupStorage {
      */
     @Override
 	public Group getGroup(final int gid, final Context context) throws LdapException {
-        Connection con;
+        final Connection con;
         try {
             con = DBPool.pickup(context);
         } catch (final DBPoolingException e) {
@@ -254,7 +261,7 @@ public class RdbGroupStorage extends GroupStorage {
     @Override
 	public Group[] listModifiedGroups(final Date modifiedSince, final Context context)
         throws LdapException {
-        Connection con = null;
+        final Connection con;
         try {
             con = DBPool.pickup(context);
         } catch (Exception e) {
@@ -296,7 +303,7 @@ public class RdbGroupStorage extends GroupStorage {
      */
     @Override
 	public Group[] searchGroups(final String pattern, final Context context) throws GroupException {
-        Connection con = null;
+        final Connection con;
         try {
             con = DBPool.pickup(context);
         } catch (Exception e) {
@@ -339,7 +346,7 @@ public class RdbGroupStorage extends GroupStorage {
      */
     @Override
 	public Group[] getGroups(final Context context) throws LdapException {
-        Connection con = null;
+        final Connection con;
         try {
             con = DBPool.pickup(context);
         } catch (Exception e) {

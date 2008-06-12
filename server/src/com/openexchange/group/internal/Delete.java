@@ -97,10 +97,12 @@ public final class Delete {
      */
     private final int groupId;
 
+    private final Date lastRead;
+
     /**
      * Storage API for groups.
      */
-    private final GroupStorage storage = GroupStorage.getInstance();
+    private static final GroupStorage storage = GroupStorage.getInstance();
 
     /**
      * cache field for the group.
@@ -113,11 +115,13 @@ public final class Delete {
      * @param user User for permission checks.
      * @param groupId unique identifier of the group to delete.
      */
-    Delete(final Context ctx, final User user, final int groupId) {
+    Delete(final Context ctx, final User user, final int groupId,
+        final Date lastRead) {
         super();
         this.ctx = ctx;
         this.user = user;
         this.groupId = groupId;
+        this.lastRead = lastRead;
     }
 
     Group getOrig() throws GroupException {
@@ -201,7 +205,7 @@ public final class Delete {
     private void delete(final Connection con) throws GroupException {
         // Delete the group.
         storage.deleteMember(ctx, con, getOrig(), getOrig().getMember());
-        storage.deleteGroup(ctx, con, groupId);
+        storage.deleteGroup(ctx, con, groupId, lastRead);
         // Remember as deleted group.
         final Group del = new Group();
         final Group orig = getOrig();

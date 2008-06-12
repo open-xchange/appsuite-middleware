@@ -184,13 +184,13 @@ public final class GroupsWithGroupZero extends GroupStorage {
 
     @Override
     public void updateGroup(final Context ctx, final Connection con,
-        final Group group) throws GroupException {
-        delegate.updateGroup(ctx, con, group);
+        final Group group, final Date lastRead) throws GroupException {
+        delegate.updateGroup(ctx, con, group, lastRead);
     }
 
     @Override
     public void deleteGroup(final Context ctx, final Connection con,
-        final int groupId) throws GroupException {
-        delegate.deleteGroup(ctx, con, groupId);
+        final int groupId, final Date lastRead) throws GroupException {
+        delegate.deleteGroup(ctx, con, groupId, lastRead);
     }
 }

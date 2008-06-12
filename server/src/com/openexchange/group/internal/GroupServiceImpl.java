@@ -49,6 +49,8 @@
 
 package com.openexchange.group.internal;
 
+import java.util.Date;
+
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupException;
 import com.openexchange.group.GroupService;
@@ -80,15 +82,15 @@ public final class GroupServiceImpl implements GroupService {
     /**
      * {@inheritDoc}
      */
-    public void update(final Context ctx, final User user, final Group group)
-        throws GroupException {
-        final Update update = new Update(ctx, user, group);
+    public void update(final Context ctx, final User user, final Group group,
+        final Date lastRead) throws GroupException {
+        final Update update = new Update(ctx, user, group, lastRead);
         update.perform();
     }
 
-    public void delete(final Context ctx, final User user, final int groupId)
-        throws GroupException {
-        final Delete delete = new Delete(ctx, user, groupId);
+    public void delete(final Context ctx, final User user, final int groupId,
+        final Date lastRead) throws GroupException {
+        final Delete delete = new Delete(ctx, user, groupId, lastRead);
         delete.perform();
     }
 }

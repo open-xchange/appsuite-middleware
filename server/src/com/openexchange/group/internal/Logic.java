@@ -137,7 +137,7 @@ public final class Logic {
         // generated.
     }
 
-    private static final String allowedSimpleNameChars = "[$@%\\.+a-zA-Z0-9_-]";
+    private static final String ALLOWED_CHARS = "[$@%\\.+a-zA-Z0-9_-]";
 
     /**
      * Validates of the simple name of the group only contains allowed
@@ -153,7 +153,7 @@ public final class Logic {
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@
         final String groupName = group.getSimpleName();
-        final String illegal = groupName.replaceAll(allowedSimpleNameChars, "");
+        final String illegal = groupName.replaceAll(ALLOWED_CHARS, "");
         if (illegal.length() > 0) {
             throw new GroupException(Code.NOT_ALLOWED_SIMPLE_NAME, illegal);
         }

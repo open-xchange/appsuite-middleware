@@ -97,7 +97,7 @@ public final class Create {
     /**
      * Storage API for groups.
      */
-    private final GroupStorage storage = GroupStorage.getInstance();
+    private static final GroupStorage storage = GroupStorage.getInstance();
 
     /**
      * Default constructor.
@@ -185,9 +185,9 @@ public final class Create {
      */
     public void insert(final Connection con) throws GroupException {
         try {
-            final int id = IDGenerator.getId(ctx.getContextId(),
+            final int identifier = IDGenerator.getId(ctx.getContextId(),
                 Types.PRINCIPAL, con);
-            group.setIdentifier(id);
+            group.setIdentifier(identifier);
             storage.insertGroup(ctx, con, group);
             storage.insertMember(ctx, con, group, group.getMember());
         } catch (final SQLException e) {

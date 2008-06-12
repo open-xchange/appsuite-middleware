@@ -69,13 +69,30 @@ public class GroupException extends AbstractOXException {
      */
     public enum Detail {
         /**
+         * Detail information stating that a permission problem occurred.
+         */
+        PERMISSION,
+        /**
          * The requested data can not be found.
          */
         NOT_FOUND,
         /**
+         * Detail information stating that a mandatory field is not set.
+         */
+        MANDATORY_FIELD,
+        /**
+         * Detail information stating that the task has been changed in the
+         * between time.
+         */
+        CONCURRENT_MODIFICATION,
+        /**
          * Internal error.
          */
-        ERROR
+        ERROR,
+        /**
+         * Data has been truncated storing them in the database.
+         */
+        TRUNCATED
     }
 
     /**
@@ -248,7 +265,16 @@ public class GroupException extends AbstractOXException {
          * You are not allowed to create groups.
          */
         NO_CREATE_PERMISSION("You are not allowed to create groups.", Category
-            .PERMISSION, Detail.ERROR, 24);
+            .PERMISSION, Detail.PERMISSION, 24),
+        /**
+         * Edit Conflict. Your change cannot be completed because somebody else
+         * has made a conflicting change to the same item. Please refresh or
+         * synchronize and try again.
+         */
+        MODIFIED("Edit Conflict. Your change cannot be completed because "
+            + "somebody else has made a conflicting change to the same item. "
+            + "Please refresh or synchronize and try again.", Category
+            .CONCURRENT_MODIFICATION, Detail.CONCURRENT_MODIFICATION, 7);
 
 
         /**

@@ -47,47 +47,51 @@
  *
  */
 
-package com.openexchange.group;
+package com.openexchange.ajax.parser;
 
-import java.util.Date;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.ajax.fields.GroupFields;
+import com.openexchange.group.Group;
+import com.openexchange.tools.servlet.OXJSONException;
 
 /**
- * This service defines the API to the groups component.
+ * This class parses a JSON into a group object.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface GroupService {
+public class GroupParser extends DataParser {
 
     /**
-     * Creates a group.
-     * @param ctx Context.
-     * @param user User for permission checks.
-     * @param group group to create.
-     * @throws GroupException if some problem occurs.
+     * Default constructor.
      */
-    void create(Context ctx, User user, Group group) throws GroupException;
+    public GroupParser() {
+        super(true, null, null);
+    }
 
-    /**
-     * Updates a group.
-     * @param ctx Context.
-     * @param user User for permission checks.
-     * @param group group to update.
-     * @param lastRead timestamp when the group to update has last been read.
-     * @throws GroupException if some problem occurs.
-     */
-    void update(Context ctx, User user, Group group, Date lastRead) throws
-        GroupException;
+    public void parse(final Group group, final JSONObject json)
+        throws OXJSONException, JSONException {
+        if (json.has(GroupFields.IDENTIFIER)) {
+            group.setIdentifier(parseInt(json, GroupFields.IDENTIFIER));
+        }
+        if (json.has(GroupFields.DISPLAY_NAME)) {
+            group.setDisplayName(parseString(json, GroupFields.DISPLAY_NAME));
+        }
+        if (json.has(GroupFields.NAME)) {
+            group.setSimpleName(parseString(json, GroupFields.NAME));
+        }
+        if (json.has(GroupFields.MEMBERS)) {
+            group.setMember(parseMember(json));
+        }
+    }
 
-    /**
-     * Deletes a group.
-     * @param ctx Context.
-     * @param user User for permission checks.
-     * @param groupId unique identifier of the group to delete.
-     * @param lastModified timestamp when the group to delete has last been read.
-     * @throws GroupException if some problem occurs.
-     */
-    void delete(Context ctx, User user, int groupId, Date lastModified) throws
-        GroupException; 
+    private int[] parseMember(final JSONObject json) throws JSONException {
+        final JSONArray jmembers = json.getJSONArray(GroupFields.MEMBERS);
+        final int[] retval = new int[jmembers.length()];
+        for (int i = 0; i < jmembers.length(); i++) {
+            retval[i] = jmembers.getInt(i);
+        }
+        return retval;
+    }
 }
