@@ -172,7 +172,6 @@ public final class ResourceUpdate {
 		/*
 		 * Check values to update
 		 */
-		boolean somethingSet = false;
 		try {
 			if (resource.isSimpleNameSet()) {
 				if (isEmpty(resource.getSimpleName())) {
@@ -188,7 +187,6 @@ public final class ResourceUpdate {
 				} else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
 					throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT, resource.getSimpleName());
 				}
-				somethingSet = true;
 			}
 			if (resource.isMailSet()) {
 				if (isEmpty(resource.getMail())) {
@@ -203,11 +201,6 @@ public final class ResourceUpdate {
 				} else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
 					throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT_MAIL, resource.getMail());
 				}
-				somethingSet = true;
-			}
-			if (!somethingSet && !resource.isAvailableSet() && !resource.isDescriptionSet()
-					&& !resource.isDisplayNameSet()) {
-				throw new ResourceException(ResourceException.Code.NOTHING_TO_UPDATE);
 			}
 		} catch (final LdapException e) {
 			throw new ResourceException(e);
