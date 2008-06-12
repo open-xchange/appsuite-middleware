@@ -144,10 +144,13 @@ public interface ResourceService {
 	 *            The context.
 	 * @param resource
 	 *            The resource to update.
+	 * @param clientLastModified
+	 *            The client last-modified timestamp; may be <code>null</code>
+	 *            to omit timestamp comparison
 	 * @throws ResourceException
 	 *             If resource update fails
 	 */
-	public void update(User user, Context ctx, Resource resource) throws ResourceException;
+	public void update(User user, Context ctx, Resource resource, Date clientLastModified) throws ResourceException;
 
 	/**
 	 * Deletes a resource.
@@ -158,8 +161,11 @@ public interface ResourceService {
 	 *            The context.
 	 * @param resource
 	 *            The resource to delete.
+	 * @param clientLastModified
+	 *            The client last-modified timestamp; may be <code>null</code>
+	 *            to omit timestamp comparison
 	 * @throws ResourceException
 	 *             If resource deletion fails
 	 */
-	public void delete(User user, Context ctx, Resource resource) throws ResourceException;
+	public void delete(User user, Context ctx, Resource resource, Date clientLastModified) throws ResourceException;
 }

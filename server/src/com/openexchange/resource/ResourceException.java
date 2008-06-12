@@ -188,7 +188,12 @@ public class ResourceException extends AbstractOXException {
 		/**
 		 * Invalid resource email address: %s
 		 */
-		INVALID_RESOURCE_MAIL("Invalid resource email address: %s", Category.USER_INPUT, Detail.ERROR, 12);
+		INVALID_RESOURCE_MAIL("Invalid resource email address: %s", Category.USER_INPUT, Detail.ERROR, 12),
+		/**
+		 * The resource has been changed in the meantime
+		 */
+		CONCURRENT_MODIFICATION("The resource has been changed in the meantime", Category.CONCURRENT_MODIFICATION,
+				Detail.ERROR, 13);
 
 		/**
 		 * Message of the exception.

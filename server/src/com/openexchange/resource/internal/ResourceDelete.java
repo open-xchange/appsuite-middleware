@@ -51,6 +51,7 @@ package com.openexchange.resource.internal;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Date;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -85,6 +86,8 @@ public final class ResourceDelete {
 
 	private final ResourceStorage storage;
 
+	private final Date clientLastModified;
+
 	private transient Resource orig;
 
 	/**
@@ -94,14 +97,19 @@ public final class ResourceDelete {
 	 *            The context
 	 * @param resource
 	 *            The resource to update
+	 * @param clientLastModified
+	 *            The client last-modified timestamp; may be <code>null</code>
+	 *            to omit timestamp comparison
 	 * @throws ResourceException
 	 *             If initialization fails
 	 */
-	ResourceDelete(final User user, final Context ctx, final Resource resource) throws ResourceException {
+	ResourceDelete(final User user, final Context ctx, final Resource resource, final Date clientLastModified)
+			throws ResourceException {
 		super();
 		this.user = user;
 		this.ctx = ctx;
 		this.resource = resource;
+		this.clientLastModified = clientLastModified;
 		storage = ResourceStorage.getInstance();
 	}
 
@@ -170,9 +178,15 @@ public final class ResourceDelete {
 			throw new ResourceException(ResourceException.Code.MANDATORY_FIELD);
 		}
 		/*
-		 * Load referenced resource to check existence
+		 * Check existence
 		 */
 		getOrig();
+		/*
+		 * Check timestamp
+		 */
+		if (clientLastModified != null && clientLastModified.getTime() < getOrig().getLastModified().getTime()) {
+			throw new ResourceException(ResourceException.Code.CONCURRENT_MODIFICATION);
+		}
 	}
 
 	/**

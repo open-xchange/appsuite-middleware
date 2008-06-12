@@ -53,6 +53,7 @@ import static com.openexchange.resource.managerequest.services.ResourceRequestSe
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -63,10 +64,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.OXConcurrentModificationException;
-import com.openexchange.api2.OXConcurrentModificationException.ConcurrentModificationCode;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.ResourceService;
@@ -171,17 +169,16 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser
 				.parseResource(jData);
-		if (jsonObj.has(AJAXServlet.PARAMETER_TIMESTAMP)
-				&& !jsonObj.isNull(AJAXServlet.PARAMETER_TIMESTAMP)
-				&& jsonObj.getLong(AJAXServlet.PARAMETER_TIMESTAMP) < resourceService.getResource(
-						resource.getIdentifier(), ctx).getLastModified().getTime()) {
-			throw new OXConcurrentModificationException(EnumComponent.RESOURCE,
-					ConcurrentModificationCode.CONCURRENT_MODIFICATION, new Object[0]);
+		final Date clientLastModified;
+		if (jsonObj.has(AJAXServlet.PARAMETER_TIMESTAMP) && !jsonObj.isNull(AJAXServlet.PARAMETER_TIMESTAMP)) {
+			clientLastModified = new Date(jsonObj.getLong(AJAXServlet.PARAMETER_TIMESTAMP));
+		} else {
+			clientLastModified = null;
 		}
 		/*
 		 * Update resource
 		 */
-		resourceService.update(UserStorage.getStorageUser(session.getUserId(), ctx), ctx, resource);
+		resourceService.update(UserStorage.getStorageUser(session.getUserId(), ctx), ctx, resource, clientLastModified);
 		/*
 		 * Write updated resource
 		 */
@@ -212,17 +209,16 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser
 				.parseResource(jData);
-		if (jsonObj.has(AJAXServlet.PARAMETER_TIMESTAMP)
-				&& !jsonObj.isNull(AJAXServlet.PARAMETER_TIMESTAMP)
-				&& jsonObj.getLong(AJAXServlet.PARAMETER_TIMESTAMP) < resourceService.getResource(
-						resource.getIdentifier(), ctx).getLastModified().getTime()) {
-			throw new OXConcurrentModificationException(EnumComponent.RESOURCE,
-					ConcurrentModificationCode.CONCURRENT_MODIFICATION, new Object[0]);
+		final Date clientLastModified;
+		if (jsonObj.has(AJAXServlet.PARAMETER_TIMESTAMP) && !jsonObj.isNull(AJAXServlet.PARAMETER_TIMESTAMP)) {
+			clientLastModified = new Date(jsonObj.getLong(AJAXServlet.PARAMETER_TIMESTAMP));
+		} else {
+			clientLastModified = null;
 		}
 		/*
 		 * Delete resource
 		 */
-		resourceService.delete(UserStorage.getStorageUser(session.getUserId(), ctx), ctx, resource);
+		resourceService.delete(UserStorage.getStorageUser(session.getUserId(), ctx), ctx, resource, clientLastModified);
 		/*
 		 * Write JSON null
 		 */
