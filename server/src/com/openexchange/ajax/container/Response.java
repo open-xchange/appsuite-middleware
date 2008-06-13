@@ -63,6 +63,7 @@ import org.json.JSONObject;
 import org.json.JSONWriter;
 
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 
@@ -293,8 +294,8 @@ public final class Response {
 	 * <p>
 	 * For testing only.
 	 * 
-	 * @return <code>true</code> if the response contains an error message or
-	 *         a warning.
+	 * @return <code>true</code> if the response contains an error message or a
+	 *         warning.
 	 */
 	public boolean hasError() {
 		return exception != null;
@@ -328,7 +329,7 @@ public final class Response {
 		final String message = response.optString(ERROR, null);
 		final String code = response.optString(ERROR_CODE, null);
 		if (message != null || code != null) {
-			final EnumComponent component = parseComponent(code);
+			final Component component = parseComponent(code);
 			final int number = parseErrorNumber(code);
 			final int categoryCode = response.optInt(ERROR_CATEGORY, -1);
 			final Category category;
@@ -355,15 +356,20 @@ public final class Response {
 	 *            error code to parse.
 	 * @return the parsed component or {@link EnumComponent#NONE}.
 	 */
-	private static EnumComponent parseComponent(final String code) {
-		EnumComponent component = EnumComponent.NONE;
-		if (null != code && code.length() == 8) {
-			component = EnumComponent.byAbbreviation(code.substring(0, 3));
-			if (component == null) {
-				component = EnumComponent.NONE;
-			}
+	private static Component parseComponent(final String code) {
+		if (code == null || code.length() == 0) {
+			return EnumComponent.NONE;
 		}
-		return component;
+		final int pos = code.indexOf('-');
+		if (pos != -1) {
+			final String abbr = code.substring(0, pos);
+			final EnumComponent component = EnumComponent.byAbbreviation(abbr);
+			if (component != null) {
+				return component;
+			}
+			return new StringComponent(abbr);
+		}
+		return EnumComponent.NONE;
 	}
 
 	/**
@@ -374,11 +380,18 @@ public final class Response {
 	 * @return the parsed error number or 0.
 	 */
 	private static int parseErrorNumber(final String code) {
-		int number = 0;
-		if (null != code && code.length() == 8) {
-			number = Integer.parseInt(code.substring(4, 8));
+		if (code == null || code.length() == 0) {
+			return 0;
 		}
-		return number;
+		final int pos = code.indexOf('-');
+		if (pos != -1) {
+			try {
+				return Integer.parseInt(code.substring(pos + 1));
+			} catch (final NumberFormatException e) {
+				return 0;
+			}
+		}
+		return 0;
 	}
 
 	/**
@@ -441,15 +454,15 @@ public final class Response {
 	}
 
 	/**
-	 * Serializes a Response object to given instance of
-	 * <code>{@link JSONWriter}</code>.
+	 * Serializes a Response object to given instance of <code>
+	 * {@link JSONWriter}</code>.
 	 * 
-	 * @param response -
-	 *            the <code>{@link Response}</code> object to serialize.
-	 * @param writer -
-	 *            the <code>{@link JSONWriter}</code> to write to
-	 * @throws JSONException -
-	 *             if writing fails
+	 * @param response
+	 *            - the <code>{@link Response}</code> object to serialize.
+	 * @param writer
+	 *            - the <code>{@link JSONWriter}</code> to write to
+	 * @throws JSONException
+	 *             - if writing fails
 	 */
 	public static void write(final Response response, final JSONWriter writer) throws JSONException {
 		writer.object();
@@ -468,12 +481,12 @@ public final class Response {
 	 * instance of <code>JSONWriter</code> assuming that writer's mode is
 	 * already set to writing a JSON object
 	 * 
-	 * @param exception -
-	 *            the exception to write
-	 * @param writer -
-	 *            the writer to write to
-	 * @throws JSONException -
-	 *             if writing fails
+	 * @param exception
+	 *            - the exception to write
+	 * @param writer
+	 *            - the writer to write to
+	 * @throws JSONException
+	 *             - if writing fails
 	 */
 	public static void writeException(final AbstractOXException exception, final JSONWriter writer)
 			throws JSONException {
@@ -502,12 +515,12 @@ public final class Response {
 	 * into given instance of <code>JSONWriter</code> assuming that writer's
 	 * mode is already set to writing a JSON object
 	 * 
-	 * @param warning -
-	 *            the warning to write
-	 * @param writer -
-	 *            the writer to write to
-	 * @throws JSONException -
-	 *             if writing fails
+	 * @param warning
+	 *            - the warning to write
+	 * @param writer
+	 *            - the writer to write to
+	 * @throws JSONException
+	 *             - if writing fails
 	 */
 	public static void writeWarning(final AbstractOXException warning, final JSONWriter writer) throws JSONException {
 		writer.key(ERROR).value(warning.getOrigMessage());
@@ -591,5 +604,18 @@ public final class Response {
 	 */
 	public AbstractOXException getWarning() {
 		return isWarning ? exception : null;
+	}
+
+	private static final class StringComponent implements Component {
+		private final String abbr;
+
+		public StringComponent(final String abbr) {
+			super();
+			this.abbr = abbr;
+		}
+
+		public String getAbbreviation() {
+			return abbr;
+		}
 	}
 }
