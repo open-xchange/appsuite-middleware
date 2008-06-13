@@ -76,7 +76,7 @@ public class Axis2ServletInit implements Initialization {
     /*
      * redirect all requests with axis2 to the axis servlet
      */
-    private static final String SC_AXIS2_SRVLT_ALIAS = "/axis2/*";
+    private static final String SC_AXIS2_SRVLT_ALIAS = "servlet/axis2/*";
 
     /*
      *  path to the axis2.xml configuration file
