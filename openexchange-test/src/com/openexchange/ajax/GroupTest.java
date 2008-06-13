@@ -59,8 +59,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.group.GroupTools;
-import com.openexchange.ajax.group.actions.GetRequest;
-import com.openexchange.ajax.group.actions.GetResponse;
 import com.openexchange.ajax.group.actions.SearchRequest;
 import com.openexchange.ajax.group.actions.SearchResponse;
 import com.openexchange.group.Group;
@@ -83,18 +81,6 @@ public class GroupTest extends AbstractAJAXTest {
         final SearchResponse response = (SearchResponse) Executor.execute(
             new AJAXSession(conv, session), request, host);
         return response.getGroups();
-    }
-
-    /**
-     * @deprecated use {@link GroupTools#get(AJAXClient, GetRequest)}
-     */
-    public static Group loadGroup(final WebConversation conv, final int groupId,
-        final String host, final String session) throws AjaxException,
-        IOException, SAXException, JSONException, OXJSONException {
-        final GetRequest request = new GetRequest(groupId);
-        final GetResponse response = (GetResponse) Executor.execute(
-            new AJAXSession(conv, session), request, host);
-        return response.getGroup();
     }
 }
 
