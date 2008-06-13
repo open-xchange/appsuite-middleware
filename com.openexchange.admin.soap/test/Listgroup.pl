@@ -1,0 +1,60 @@
+#!/usr/bin/perl
+package Listresource;
+use strict;
+use Data::Dumper;
+use base qw(BasicCommandlineOptions);
+
+
+#Use the SOAP::Lite Perl module
+#use SOAP::Lite +trace => 'debug';
+use SOAP::Lite;
+
+my $test = new Listresource();
+$test->doRequest();
+
+sub new {
+	my ($inPkg) = @_;
+	my $self = BasicCommandlineOptions->new();
+	
+	bless $self, $inPkg;
+    return $self;
+}
+
+sub doRequest {
+   	my $inSelf = shift;
+    my $soap = SOAP::Lite->ns( $inSelf->{'serviceNs'} )->proxy( $inSelf->{'basisUrl'}."OXGroupService" );
+    
+    my $pattern = SOAP::Data->value("*");
+    
+    my $som_entry = 
+      $soap->list($inSelf->{'Context'},$pattern,$inSelf->{'creds'});
+    
+    if ( $som_entry->fault() ) {
+        $inSelf->fault_output($som_entry);
+    } else {
+        my $fields = [ "id", "name", "displayname", "members" ]; 
+        
+        my @results = $som_entry->paramsall;
+        #print @results[0];
+        
+        my @data = $inSelf->SUPER::fetch_results($fields, \@results);
+        
+        $inSelf->reformmembers(\@data);
+        
+        $inSelf->doCSVOutput($fields, \@data);
+    }
+
+}
+
+sub reformmembers {
+    my $inSelf = shift;
+    my $data = shift;
+    
+    for my $row (@$data) {
+        my $value = @$row[-1];
+        @$row[-1] = join(", ", @$value);
+    }
+}
+
+exit;
+
