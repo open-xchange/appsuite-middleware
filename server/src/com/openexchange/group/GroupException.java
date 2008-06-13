@@ -64,50 +64,12 @@ public class GroupException extends AbstractOXException {
     private static final long serialVersionUID = -6738209089912459855L;
 
     /**
-     * Detail information for the LdapException.
-     * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
-     */
-    public enum Detail {
-        /**
-         * Detail information stating that a permission problem occurred.
-         */
-        PERMISSION,
-        /**
-         * The requested data can not be found.
-         */
-        NOT_FOUND,
-        /**
-         * Detail information stating that a mandatory field is not set.
-         */
-        MANDATORY_FIELD,
-        /**
-         * Detail information stating that the task has been changed in the
-         * between time.
-         */
-        CONCURRENT_MODIFICATION,
-        /**
-         * Internal error.
-         */
-        ERROR,
-        /**
-         * Data has been truncated storing them in the database.
-         */
-        TRUNCATED
-    }
-
-    /**
-     * Detailed information for this exception.
-     */
-    private final Detail detail;
-
-    /**
      * Initializes a new {@link GroupException}
      * 
      * @param cause The cause
      */
     public GroupException(final AbstractOXException cause) {
     	super(cause);
-    	detail = Detail.ERROR;
     }
 
     /**
@@ -130,15 +92,7 @@ public class GroupException extends AbstractOXException {
         final Object... messageArgs) {
         super(EnumComponent.GROUP, code.category, code.detailNumber,
             code.message, cause);
-        this.detail = code.detail;
         setMessageArgs(messageArgs);
-    }
-
-    /**
-     * @return the detail
-     */
-    public Detail getDetail() {
-        return detail;
     }
 
     /**
@@ -147,125 +101,49 @@ public class GroupException extends AbstractOXException {
      */
     public enum Code {
         /**
-         * A property from the ldap.properties file is missing.
-         */
-        PROPERTY_MISSING("Cannot find property %s.", Category.SETUP_ERROR,
-            Detail.ERROR, 1),
-        /**
-         * A problem with distinguished names occurred.
-         */
-        DN_PROBLEM("Cannot build distinguished name from %s.",
-            Category.CODE_ERROR, Detail.ERROR, 2),
-        /**
-         * Class can not be found.
-         */
-        CLASS_NOT_FOUND("Class %s can not be loaded.", Category.SETUP_ERROR,
-            Detail.ERROR, 3),
-        /**
-         * An implementation can not be instantiated.
-         */
-        INSTANTIATION_PROBLEM("Cannot instantiate class %s.",
-            Category.SETUP_ERROR, Detail.ERROR, 4),
-        /**
          * A database connection Cannot be obtained.
          */
         NO_CONNECTION("Cannot get database connection.",
-            Category.SUBSYSTEM_OR_SERVICE_DOWN, Detail.ERROR, 5),
+            Category.SUBSYSTEM_OR_SERVICE_DOWN, 1),
         /**
-         * SQL Problem: "%s".
+         * SQL Problem: "%1$s".
          */
-        SQL_ERROR("SQL Problem: \"%s\"", Category.CODE_ERROR,
-            Detail.ERROR, 6),
-        /**
-         * Problem putting an object into the cache.
-         */
-        CACHE_PROBLEM("Problem putting/removing an object into/from the cache.",
-            Category.CODE_ERROR, Detail.ERROR, 7),
-        /**
-         * Hash algorithm %s isn't found.
-         */
-        HASH_ALGORITHM("Hash algorithm %s isn't found.",
-            Category.CODE_ERROR, Detail.ERROR, 8),
-        /**
-         * Encoding %s cannot be used.
-         */
-        UNSUPPORTED_ENCODING("Encoding %s cannot be used.",
-            Category.CODE_ERROR, Detail.ERROR, 9),
-        /**
-         * Cannot find resource group with identifier %d.
-         */
-        RESOURCEGROUP_NOT_FOUND(
-            "Cannot find resource group with identifier %d.",
-            Category.CODE_ERROR, Detail.ERROR, 10),
-        /**
-         * Found resource groups with same identifier %d.
-         */
-        RESOURCEGROUP_CONFLICT("Found resource groups with same identifier %d.",
-            Category.CODE_ERROR, Detail.ERROR, 11),
-        /**
-         * Cannot find resource with identifier %d.
-         */
-        RESOURCE_NOT_FOUND("Cannot find resource with identifier %d.",
-            Category.CODE_ERROR, Detail.ERROR, 12),
-        /**
-         * Found resources with same identifier %d.
-         */
-        RESOURCE_CONFLICT("Found resources with same identifier %d.",
-            Category.CODE_ERROR, Detail.ERROR, 13),
-        /**
-         * Cannot find user with email %s.
-         */
-        NO_USER_BY_MAIL("Cannot find user with email %s.",
-            Category.CODE_ERROR, Detail.ERROR, 14),
-        /**
-         * Cannot find user with identifier %1$s in context %2$d.
-         */
-        USER_NOT_FOUND("Cannot find user with identifier %1$s in context %2$d.",
-            Category.CODE_ERROR, Detail.NOT_FOUND, 15),
-        /**
-         * Found two user with same identifier %1$s in context %2$d.
-         */
-        USER_CONFLICT("Found two user with same identifier %1$s in context "
-            + "%2$d.", Category.CODE_ERROR, Detail.ERROR, 16),
-        /**
-         * Cannot find group with identifier %1$s in context %2$d.
-         */
-        GROUP_NOT_FOUND("Cannot find group with identifier %1$s in context %2$d.",
-            Category.CODE_ERROR, Detail.ERROR, 17),
+        SQL_ERROR("SQL Problem: \"%1$s\"", Category.CODE_ERROR,
+            2),
         /**
          * No group given.
          */
-        NULL("No group given.", Category.CODE_ERROR, Detail.ERROR, 18),
+        NULL("No group given.", Category.CODE_ERROR, 3),
         /**
-         * The mandatory field %s is not defined.
+         * The mandatory field %1$s is not defined.
          */
-        MANDATORY_MISSING("The mandatory field %s is not defined.", Category
-            .USER_INPUT, Detail.ERROR, 19),
+        MANDATORY_MISSING("The mandatory field %1$s is not defined.", Category
+            .USER_INPUT, 4),
         /**
          * The simple name contains this not allowed characters: "%s".
          */
         NOT_ALLOWED_SIMPLE_NAME("The simple name contains this not allowed "
-            + "characters: \"%s\".", Category.USER_INPUT, Detail.ERROR, 20),
+            + "characters: \"%1$s\".", Category.USER_INPUT, 5),
         /**
-         * Another group with same identifier name exists. ID: %d
+         * Another group with same identifier name exists: "%1$d".
          */
-        DUPLICATE("Another group with same identifier name exists. ID: %d",
-            Category.USER_INPUT, Detail.ERROR, 21),
+        DUPLICATE("Another group with same identifier name exists: \"%1$d\".",
+            Category.USER_INPUT, 6),
         /**
-         * Group contains a not existing member %d.
+         * Group contains a not existing member %1$d.
          */
-        NOT_EXISTING_MEMBER("Group contains a not existing member %d.", Category
-            .USER_INPUT, Detail.ERROR, 22),
+        NOT_EXISTING_MEMBER("Group contains a not existing member %1$d.", Category
+            .USER_INPUT, 7),
         /**
          * Group contains invalid data: "%1$s".
          */
         INVALID_DATA("Group contains invalid data: \"%1$s\".", Category
-            .USER_INPUT, Detail.ERROR, 23),
+            .USER_INPUT, 8),
         /**
          * You are not allowed to create groups.
          */
         NO_CREATE_PERMISSION("You are not allowed to create groups.", Category
-            .PERMISSION, Detail.PERMISSION, 24),
+            .PERMISSION, 9),
         /**
          * Edit Conflict. Your change cannot be completed because somebody else
          * has made a conflicting change to the same item. Please refresh or
@@ -274,8 +152,17 @@ public class GroupException extends AbstractOXException {
         MODIFIED("Edit Conflict. Your change cannot be completed because "
             + "somebody else has made a conflicting change to the same item. "
             + "Please refresh or synchronize and try again.", Category
-            .CONCURRENT_MODIFICATION, Detail.CONCURRENT_MODIFICATION, 7);
-
+            .CONCURRENT_MODIFICATION, 10),
+        /**
+         * You are not allowed to change groups.
+         */
+        NO_MODIFY_PERMISSION("You are not allowed to change groups.", Category
+            .PERMISSION, 11),
+        /**
+         * You are not allowed to delete groups.
+         */
+        NO_DELETE_PERMISSION("You are not allowed to delete groups.", Category
+            .PERMISSION, 12);
 
         /**
          * Message of the exception.
@@ -293,31 +180,20 @@ public class GroupException extends AbstractOXException {
         private final int detailNumber;
 
         /**
-         * Detail information for the exception.
-         */
-        private final Detail detail;
-
-        /**
          * Default constructor.
          * @param message message.
          * @param category category.
-         * @param detail detailed information for the exception.
          * @param detailNumber detail number.
          */
         private Code(final String message, final Category category,
-            final Detail detail, final int detailNumber) {
+            final int detailNumber) {
             this.message = message;
             this.category = category;
             this.detailNumber = detailNumber;
-            this.detail = detail;
         }
 
 		public Category getCategory() {
 			return category;
-		}
-
-		public Detail getDetail() {
-			return detail;
 		}
 
 		public int getDetailNumber() {

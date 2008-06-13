@@ -149,7 +149,7 @@ final class Update {
 
     private void allowed() throws GroupException {
         if (ctx.getMailadmin() != user.getId()) {
-            throw new GroupException(Code.NO_CREATE_PERMISSION);
+            throw new GroupException(Code.NO_MODIFY_PERMISSION);
         }
     }
 
