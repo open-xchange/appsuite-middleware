@@ -9,7 +9,11 @@
 
 package com.openexchange.ajax.user;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import com.openexchange.groupware.ldap.User;
 
@@ -115,6 +119,10 @@ public class UserImpl4Test implements User {
 	
 	public String[] getAliases() {
 		return null;
+	}
+
+	public Map<String, Set<String>> getAttributes() {
+		return Collections.unmodifiableMap(new HashMap<String, Set<String>>(0));
 	}
 	
 	public String getDisplayName() {
