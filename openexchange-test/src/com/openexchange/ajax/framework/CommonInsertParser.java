@@ -72,7 +72,7 @@ public class CommonInsertParser extends AbstractAJAXParser<CommonInsertResponse>
      * {@inheritDoc}
      */
     @Override
-    protected final CommonInsertResponse createResponse(final Response response)
+    protected CommonInsertResponse createResponse(final Response response)
         throws JSONException {
         final CommonInsertResponse retval = instantiateResponse(response);
         if (isFailOnError()) {
