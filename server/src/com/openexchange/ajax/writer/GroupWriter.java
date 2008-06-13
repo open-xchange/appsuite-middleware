@@ -66,19 +66,20 @@ public class GroupWriter extends DataWriter {
         super();
     }
 
-    public void writeGroup(final Group group, final JSONObject jsonObj)
+    public void writeGroup(final Group group, final JSONObject json)
         throws JSONException {
-        writeParameter(GroupFields.IDENTIFIER, group.getIdentifier(), jsonObj);
-        writeParameter(GroupFields.DISPLAY_NAME, group.getDisplayName(), jsonObj);
-        writeMembers(group, jsonObj);
+        writeParameter(GroupFields.IDENTIFIER, group.getIdentifier(), json);
+        writeParameter(GroupFields.DISPLAY_NAME, group.getDisplayName(), json);
+        writeParameter(GroupFields.NAME, group.getSimpleName(), json);
+        writeMembers(group, json);
     }
 
-    protected void writeMembers(final Group group, final JSONObject jsonObj)
+    protected void writeMembers(final Group group, final JSONObject json)
         throws JSONException {
         final JSONArray jsonArray = new JSONArray();
         for (int member : group.getMember()) {
             jsonArray.put(member);
         }
-        jsonObj.put(GroupFields.MEMBERS, jsonArray);
+        json.put(GroupFields.MEMBERS, jsonArray);
     }
 }

@@ -105,7 +105,7 @@ public class RdbGroupStorage extends GroupStorage {
             stmt.setInt(pos++, 65534);
             stmt.execute();
         } catch (final SQLException e) {
-            throw new GroupException(GroupException.Code.SQL_ERROR, e);
+            throw new GroupException(GroupException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -133,7 +133,7 @@ public class RdbGroupStorage extends GroupStorage {
                 throw new GroupException(GroupException.Code.MODIFIED);
             }
         } catch (final SQLException e) {
-            throw new GroupException(GroupException.Code.SQL_ERROR, e);
+            throw new GroupException(GroupException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -160,7 +160,7 @@ public class RdbGroupStorage extends GroupStorage {
             }
             stmt.executeBatch();
         } catch (final SQLException e) {
-            throw new GroupException(GroupException.Code.SQL_ERROR, e);
+            throw new GroupException(GroupException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -186,7 +186,7 @@ public class RdbGroupStorage extends GroupStorage {
             }
             stmt.execute();
         } catch (final SQLException e) {
-            throw new GroupException(GroupException.Code.SQL_ERROR, e);
+            throw new GroupException(GroupException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -203,12 +203,13 @@ public class RdbGroupStorage extends GroupStorage {
             stmt = con.prepareStatement("DELETE FROM groups WHERE cid=? AND id=? AND lastModified<=?");
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, groupId);
+            stmt.setLong(3, lastRead.getTime());
             final int rows = stmt.executeUpdate();
             if (1 != rows) {
                 throw new GroupException(GroupException.Code.MODIFIED);
             }
         } catch (final SQLException e) {
-            throw new GroupException(GroupException.Code.SQL_ERROR, e);
+            throw new GroupException(GroupException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }

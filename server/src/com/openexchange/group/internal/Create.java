@@ -164,7 +164,7 @@ public final class Create {
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw new GroupException(Code.SQL_ERROR, e);
+            throw new GroupException(Code.SQL_ERROR, e, e.getMessage());
         } catch (final GroupException e) {
             DBUtils.rollback(con);
             throw e;
@@ -191,7 +191,7 @@ public final class Create {
             storage.insertGroup(ctx, con, group);
             storage.insertMember(ctx, con, group, group.getMember());
         } catch (final SQLException e) {
-            throw new GroupException(Code.SQL_ERROR, e);
+            throw new GroupException(Code.SQL_ERROR, e, e.getMessage());
         }            
     }
 

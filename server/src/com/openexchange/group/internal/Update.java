@@ -225,7 +225,7 @@ final class Update {
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw new GroupException(Code.SQL_ERROR, e);
+            throw new GroupException(Code.SQL_ERROR, e, e.getMessage());
         } catch (final GroupException e) {
             DBUtils.rollback(con);
             throw e;
@@ -291,7 +291,7 @@ final class Update {
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw new GroupException(Code.SQL_ERROR, e);
+            throw new GroupException(Code.SQL_ERROR, e, e.getMessage());
         } catch (final GroupException e) {
             DBUtils.rollback(con);
             throw e;
@@ -310,7 +310,7 @@ final class Update {
             OXFolderAdminHelper.propagateGroupModification(changed.getIdentifier(),
                 con, con, ctx.getContextId());
         } catch (final SQLException e) {
-            throw new GroupException(Code.SQL_ERROR, e);
+            throw new GroupException(Code.SQL_ERROR, e, e.getMessage());
         }
     }
 }

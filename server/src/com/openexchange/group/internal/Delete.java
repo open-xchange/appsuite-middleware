@@ -177,7 +177,7 @@ public final class Delete {
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
-            throw new GroupException(Code.SQL_ERROR, e);
+            throw new GroupException(Code.SQL_ERROR, e, e.getMessage());
         } catch (final GroupException e) {
             DBUtils.rollback(con);
             throw e;

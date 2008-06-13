@@ -247,4 +247,24 @@ public class Group implements Cloneable {
     public final boolean isLastModifiedSet() {
         return lastModifiedSet;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("(Group ID:");
+        sb.append(getIdentifier());
+        sb.append(" name:");
+        sb.append(getSimpleName());
+        sb.append(" displayName:");
+        sb.append(getDisplayName());
+        sb.append(" member:");
+        for (int member : getMember()) {
+            sb.append(member);
+            sb.append(",");
+        }
+        sb.setCharAt(sb.length() - 1, ')');
+        return sb.toString();
+    }
 }

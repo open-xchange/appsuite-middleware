@@ -125,9 +125,9 @@ public class GroupException extends AbstractOXException {
         NOT_ALLOWED_SIMPLE_NAME("The simple name contains this not allowed "
             + "characters: \"%1$s\".", Category.USER_INPUT, 5),
         /**
-         * Another group with same identifier name exists: "%1$d".
+         * Another group with same identifier name exists: %1$d.
          */
-        DUPLICATE("Another group with same identifier name exists: \"%1$d\".",
+        DUPLICATE("Another group with same identifier name exists: %1$d.",
             Category.USER_INPUT, 6),
         /**
          * Group contains a not existing member %1$d.
