@@ -75,6 +75,7 @@ public class OXResource extends OXSOAPRMIMapper implements OXResourceInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Resource create(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
@@ -84,7 +85,7 @@ public class OXResource extends OXSOAPRMIMapper implements OXResourceInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public void delete(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
@@ -94,6 +95,7 @@ public class OXResource extends OXSOAPRMIMapper implements OXResourceInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Resource getData(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
@@ -103,7 +105,7 @@ public class OXResource extends OXSOAPRMIMapper implements OXResourceInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Resource[] getData(final Context ctx, final Resource[] resources, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
@@ -113,7 +115,7 @@ public class OXResource extends OXSOAPRMIMapper implements OXResourceInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Resource[] list(final Context ctx, final String pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
@@ -123,7 +125,7 @@ public class OXResource extends OXSOAPRMIMapper implements OXResourceInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Resource[] listAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
@@ -133,7 +135,7 @@ public class OXResource extends OXSOAPRMIMapper implements OXResourceInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Resource get(Context ctx, Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
@@ -143,7 +145,7 @@ public class OXResource extends OXSOAPRMIMapper implements OXResourceInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
 }

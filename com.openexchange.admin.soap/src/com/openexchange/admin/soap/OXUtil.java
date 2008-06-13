@@ -74,6 +74,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         } catch (ConnectException e) {
             reconnect(true);
         }
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public void changeFilestore(Filestore fstore, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -83,6 +84,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         } catch (ConnectException e) {
             reconnect(true);
         }
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public MaintenanceReason createMaintenanceReason(MaintenanceReason reason, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -92,7 +94,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         } catch (ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public void deleteMaintenanceReason(MaintenanceReason[] reasons, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -102,6 +104,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         } catch (ConnectException e) {
             reconnect(true);
         }
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Database[] listAllDatabase(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -111,7 +114,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         } catch (ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Filestore[] listAllFilestore(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -121,7 +124,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         } catch (ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public MaintenanceReason[] listAllMaintenanceReason(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -131,7 +134,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         } catch (ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Server[] listAllServer(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -141,7 +144,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         } catch (ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Database[] listDatabase(String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -151,7 +154,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         } catch (ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Filestore[] listFilestore(String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -161,7 +164,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         } catch (ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public MaintenanceReason[] listMaintenanceReason(String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -171,7 +174,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         } catch (ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Server[] listServer(String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -181,7 +184,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         } catch (ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Database registerDatabase(Database db, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -191,7 +194,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         } catch (ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Filestore registerFilestore(Filestore fstore, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -201,7 +204,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         } catch (ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Server registerServer(Server srv, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -211,7 +214,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         } catch (ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public void unregisterDatabase(Database dbhandle, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -221,6 +224,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         } catch (ConnectException e) {
             reconnect(true);
         }
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public void unregisterFilestore(Filestore store, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -230,6 +234,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         } catch (ConnectException e) {
             reconnect(true);
         }
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public void unregisterServer(Server serv, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -239,6 +244,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         } catch (ConnectException e) {
             reconnect(true);
         }
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
 }

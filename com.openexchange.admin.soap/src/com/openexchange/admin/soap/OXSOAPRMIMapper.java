@@ -77,6 +77,8 @@ public abstract class OXSOAPRMIMapper {
      */
     protected static final Lock LOCK = new ReentrantLock(true);
     
+    protected final String RMI_CONNECT_ERROR = "failed to reconnect to RMI port of admin daemon";
+    
     private final String MAX_RMI_CONNECT_ATTEMPTS_PROP = "MAX_RMI_CONNECT_ATTEMPTS";
     public int MAX_RMI_CONNECT_ATTEMPTS    = 5;
 
@@ -144,7 +146,7 @@ public abstract class OXSOAPRMIMapper {
     protected void reconnect(final boolean force) throws RemoteException {
 
         if( ! LOCK.tryLock() ) {
-            throw new RemoteException("failed to reconnect to RMI port of admin daemon");
+            throw new RemoteException(RMI_CONNECT_ERROR);
         }
 
         try {
@@ -176,7 +178,7 @@ public abstract class OXSOAPRMIMapper {
                     }
                 }
                 if( failed ) {
-                    throw new RemoteException("failed to reconnect to RMI port of admin daemon");
+                    throw new RemoteException(RMI_CONNECT_ERROR);
                 }
                 //clazz.cast(rmistub);
             }

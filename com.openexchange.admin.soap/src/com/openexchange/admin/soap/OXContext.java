@@ -82,6 +82,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public void changeModuleAccess(Context ctx, UserModuleAccess access, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
@@ -91,6 +92,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public void changeModuleAccess(Context ctx, String access_combination_name, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
@@ -100,6 +102,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Context create(Context ctx, User admin_user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
@@ -109,7 +112,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Context create(Context ctx, User admin_user, String access_combination_name, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
@@ -119,7 +122,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Context create(Context ctx, User admin_user, UserModuleAccess access, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
@@ -129,7 +132,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public void delete(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException {
@@ -139,6 +142,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public void disable(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchReasonException, OXContextException {
@@ -148,6 +152,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public void disableAll(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchReasonException {
@@ -157,6 +162,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public void downgrade(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException {
@@ -166,6 +172,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public void enable(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
@@ -175,6 +182,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public void enableAll(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException {
@@ -184,6 +192,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public String getAccessCombinationName(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
@@ -193,7 +202,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Context getData(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
@@ -203,7 +212,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public UserModuleAccess getModuleAccess(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
@@ -213,7 +222,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Context[] list(String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -223,7 +232,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Context[] listAll(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -233,7 +242,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Context[] listByDatabase(Database db, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
@@ -243,7 +252,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public Context[] listByFilestore(Filestore fs, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchFilestoreException {
@@ -253,7 +262,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
-        return null;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public int moveContextDatabase(Context ctx, Database dst_database_id, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
@@ -263,7 +272,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
-        return -1;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     public int moveContextFilestore(Context ctx, Filestore dst_filestore_id, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
@@ -273,7 +282,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         } catch( ConnectException e) {
             reconnect(true);
         }
-        return -1;
+        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
 }
