@@ -72,7 +72,6 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.tools.servlet.AjaxException;
 

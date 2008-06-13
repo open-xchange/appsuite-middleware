@@ -95,10 +95,7 @@ import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.ajax.task.actions.UpdatesRequest;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.search.Order;
-import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TaskException;
 import com.openexchange.tools.URLParameter;
 import com.openexchange.tools.servlet.AjaxException;
 
