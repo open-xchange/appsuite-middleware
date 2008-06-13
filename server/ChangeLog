@@ -1,3 +1,8 @@
+* 2008-06-13 - thorben.betten@open-xchange.com
+
+ - Bugfix #11417: Added position information to printf-formatted error
+   messages
+
 * 2008-06-10 - thorben.betten@open-xchange.com
 
  - Bugfix #11367: Sorting virtual owner folders appearing below
