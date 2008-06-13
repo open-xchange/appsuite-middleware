@@ -56,6 +56,8 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Properties;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -68,6 +70,13 @@ import org.apache.commons.logging.LogFactory;
  */
 public abstract class OXSOAPRMIMapper {
 
+    /*
+     * RMI connection attempts should only be done once at a time, because
+     * else every Instance of OXSOAPRMIMapper does a (re)connect at the same
+     * time which multiplies the time to wait for the remote end
+     */
+    protected static final Lock LOCK = new ReentrantLock(true);
+    
     private final String MAX_RMI_CONNECT_ATTEMPTS_PROP = "MAX_RMI_CONNECT_ATTEMPTS";
     public int MAX_RMI_CONNECT_ATTEMPTS    = 5;
 
@@ -94,7 +103,6 @@ public abstract class OXSOAPRMIMapper {
     public OXSOAPRMIMapper(final Class<?> clazz) throws RemoteException{
         this.clazz = clazz;
         
-        reconnect();
         final String classContainer = this.getClass().getProtectionDomain().getCodeSource().getLocation().toString();
         final URL manifestUrl;
         try {
@@ -134,6 +142,11 @@ public abstract class OXSOAPRMIMapper {
      * @throws RemoteException
      */
     protected void reconnect(final boolean force) throws RemoteException {
+
+        if( ! LOCK.tryLock() ) {
+            throw new RemoteException("failed to reconnect to RMI port of admin daemon");
+        }
+
         try {
             if( rmistub == null || force ) {
                 final String rmihost = RMI_HOSTNAME + clazz.getDeclaredField("RMI_NAME").get(this);
@@ -185,6 +198,8 @@ public abstract class OXSOAPRMIMapper {
         } catch (NotBoundException e) {
             log.error(e.getMessage(), e);
             throw new RemoteException(e.getMessage());
+        } finally {
+            LOCK.unlock();
         }
     }
     
