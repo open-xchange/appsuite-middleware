@@ -83,7 +83,7 @@ public class OXFolderException extends OXException {
 		 * denies visibility of folder in question
 		 * </p>
 		 */
-		NOT_VISIBLE("Folder %s not visible to user %s in context %s", Category.PERMISSION, 3),
+		NOT_VISIBLE("Folder %1$s not visible to user %2$s in context %3$s", Category.PERMISSION, 3),
 		/**
 		 * User %s has no access on shared folder %s in context %s due to user
 		 * configuration
