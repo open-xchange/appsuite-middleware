@@ -91,6 +91,8 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
+import com.openexchange.user.UserService;
+import com.openexchange.user.internal.UserServiceImpl;
 
 /**
  * {@link ServerActivator} - The activator for server bundle
@@ -285,6 +287,7 @@ public final class ServerActivator extends DeferredActivator {
 		registrationList.add(context.registerService(GroupService.class.getName(), new GroupServiceImpl(), null));
 		registrationList.add(context.registerService(ResourceService.class.getName(),
 				ResourceServiceImpl.getInstance(), null));
+		registrationList.add(context.registerService(UserService.class.getName(), new UserServiceImpl(), null));
 	}
 
 	@Override
