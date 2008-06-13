@@ -58,14 +58,17 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException.Code;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * This class implements the user storage using a relational database instead
@@ -85,8 +88,14 @@ public class RdbUserStorage extends UserStorage {
     /**
      * SQL statement for selecting aliases for a user.
      */
-    private static final String SELECT_ALIAS = "SELECT value FROM "
-        + "user_attribute WHERE cid=? AND " + IDENTIFIER + "=? AND name=?";
+    //private static final String SELECT_ALIAS = "SELECT value FROM "
+    //    + "user_attribute WHERE cid=? AND " + IDENTIFIER + "=? AND name=?";
+
+    /**
+     * SQL statement for selecting attributes for a user.
+     */
+    private static final String SELECT_ATTRS = "SELECT name, value FROM "
+        + "user_attribute WHERE cid=? AND " + IDENTIFIER + "=?";
 
     /**
      * SQL statement for loading the contact data of a user.
@@ -318,9 +327,11 @@ public class RdbUserStorage extends UserStorage {
             DBPool.closeReaderSilent(context, con);
         }
     }
-
+    
+    private static final String STR_ALIAS = "alias";
+    
     /**
-     * Reads the aliases of a user.
+     * Reads the attributes/aliases of a user.
      * @param user User object.
      * @throws LdapException if reading fails.
      */
@@ -334,17 +345,28 @@ public class RdbUserStorage extends UserStorage {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(SELECT_ALIAS);
+            stmt = con.prepareStatement(SELECT_ATTRS);
             int pos = 1;
             stmt.setInt(pos++, context.getContextId());
             stmt.setInt(pos++, user.getId());
-            stmt.setString(pos++, "alias");
             result = stmt.executeQuery();
             final List<String> aliases = new ArrayList<String>();
+            final Map<String, Set<String>> attrs = new HashMap<String, Set<String>>();
             while (result.next()) {
-                aliases.add(result.getString(1));
+            	final String name = result.getString(1);
+            	Set<String> set = attrs.get(name);
+            	if (null == set) {
+            		set = new HashSet<String>();
+            		attrs.put(name, set);
+            	}
+            	final String value = result.getString(2);
+            	set.add(value);
+            	if (STR_ALIAS.equals(name)) {
+            		aliases.add(value);
+            	}
             }
             user.setAliases(aliases.toArray(new String[aliases.size()]));
+            user.setAttributes(attrs);
         } catch (SQLException e) {
             throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                 e.getMessage());

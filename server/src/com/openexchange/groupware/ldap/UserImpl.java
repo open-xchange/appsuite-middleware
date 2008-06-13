@@ -50,7 +50,10 @@
 package com.openexchange.groupware.ldap;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.LocaleTools;
@@ -104,6 +107,11 @@ public class UserImpl implements Serializable, User, Cloneable {
      * E-Mail aliases.
      */
     private String[] aliases;
+
+    /**
+     * User attributes
+     */
+    private Map<String, Set<String>> attributes;
 
     /**
      * E-Mail domain.
@@ -516,6 +524,17 @@ public class UserImpl implements Serializable, User, Cloneable {
      */
     void setAliases(final String[] aliases) {
         this.aliases = aliases;
+    }
+
+    public Map<String, Set<String>> getAttributes() {
+    	return attributes;
+    }
+
+    /**
+     * @param attributes The attributes to set
+     */
+    void setAttributes(Map<String, Set<String>> attributes) {
+    	this.attributes = Collections.unmodifiableMap(attributes);
     }
 
     /**

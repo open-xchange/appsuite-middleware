@@ -50,6 +50,8 @@
 package com.openexchange.groupware.ldap;
 
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import com.openexchange.cache.dynamic.OXNoRefresh;
 
@@ -136,6 +138,15 @@ public interface User {
      * @return mail aliases.
      */
     String[] getAliases();
+
+    /**
+     * Gets the user attributes as an unmodifiable map.
+     * <p>
+     * Each attribute may point to multiple values.
+     * 
+     * @return user attributes
+     */
+    Map<String, Set<String>> getAttributes();
 
     /**
      * Getter for displayName.
