@@ -80,13 +80,13 @@ public abstract class OXSOAPRMIMapper {
     protected final String RMI_CONNECT_ERROR = "failed to reconnect to RMI port of admin daemon";
     
     private final String MAX_RMI_CONNECT_ATTEMPTS_PROP = "MAX_RMI_CONNECT_ATTEMPTS";
-    public int MAX_RMI_CONNECT_ATTEMPTS    = 5;
+    public int MAX_RMI_CONNECT_ATTEMPTS    = 2;
 
     /**
      * time in seconds to wait between connect attempts
      */
     private final String CONNECT_ATTEMPTS_DELAY_TIME_PROP = "CONNECT_ATTEMPTS_DELAY_TIME";
-    public int CONNECT_ATTEMPTS_DELAY_TIME = 5;
+    public int CONNECT_ATTEMPTS_DELAY_TIME = 1;
 
     private final String RMI_HOSTNAME_PROP = "RMI_HOSTNAME";
     public String RMI_HOSTNAME = "rmi://localhost:1099/";
