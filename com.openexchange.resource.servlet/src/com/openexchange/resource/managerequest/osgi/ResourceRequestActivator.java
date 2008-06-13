@@ -57,6 +57,7 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.managerequest.request.ResourceManageRequest;
+import com.openexchange.security.BundleAccessSecurityService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
@@ -81,7 +82,7 @@ public final class ResourceRequestActivator extends DeferredActivator {
 		super();
 	}
 
-	private static final Class<?>[] NEEDED_SERVICES = { ResourceService.class };
+	private static final Class<?>[] NEEDED_SERVICES = { ResourceService.class, BundleAccessSecurityService.class };
 
 	/*
 	 * (non-Javadoc)

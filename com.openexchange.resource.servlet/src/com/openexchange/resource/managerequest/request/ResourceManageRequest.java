@@ -68,6 +68,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.ResourceService;
+import com.openexchange.security.BundleAccessSecurityService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
@@ -99,6 +100,14 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 
 	public AJAXRequestResult performAction(final String action, final JSONObject jsonObject, final Session session,
 			final Context ctx) throws AbstractOXException, JSONException {
+		final BundleAccessSecurityService securityService = getServiceRegistry().getService(
+				BundleAccessSecurityService.class);
+		if (null == securityService) {
+			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, BundleAccessSecurityService.class
+					.getName());
+		}
+		securityService.checkPermission(new String[] { "com.openexchange.resource.*" },
+				"com.openexchange.resource.managerequest");
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
 			return actionNew(jsonObject, session, ctx);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
