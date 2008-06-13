@@ -47,54 +47,75 @@
  *
  */
 
-package com.openexchange.ajax;
+package com.openexchange.ajax.group;
 
 import java.io.IOException;
 
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 
-import com.meterware.httpunit.WebConversation;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.ajax.group.GroupTools;
+import com.openexchange.ajax.group.actions.ChangeRequest;
+import com.openexchange.ajax.group.actions.ChangeResponse;
+import com.openexchange.ajax.group.actions.CreateRequest;
+import com.openexchange.ajax.group.actions.CreateResponse;
+import com.openexchange.ajax.group.actions.DeleteRequest;
+import com.openexchange.ajax.group.actions.DeleteResponse;
 import com.openexchange.ajax.group.actions.GetRequest;
 import com.openexchange.ajax.group.actions.GetResponse;
+import com.openexchange.ajax.group.actions.ListRequest;
+import com.openexchange.ajax.group.actions.ListResponse;
 import com.openexchange.ajax.group.actions.SearchRequest;
 import com.openexchange.ajax.group.actions.SearchResponse;
-import com.openexchange.group.Group;
 import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
 
-public class GroupTest extends AbstractAJAXTest {
-
-    public GroupTest(final String name) {
-        super(name);
-    }
-
-    /**
-     * @deprecated use {@link GroupTools#search(AJAXClient, SearchRequest)}
-     */
-    public static final Group[] searchGroup(final WebConversation conv,
-        final String pattern, final String host, final String session) throws
-        AjaxException, IOException, SAXException, JSONException, OXJSONException {
-        final SearchRequest request = new SearchRequest(pattern);
-        final SearchResponse response = (SearchResponse) Executor.execute(
-            new AJAXSession(conv, session), request, host);
-        return response.getGroups();
-    }
+/**
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public final class GroupTools {
 
     /**
-     * @deprecated use {@link GroupTools#get(AJAXClient, GetRequest)}
+     * Prevent instantiation.
      */
-    public static Group loadGroup(final WebConversation conv, final int groupId,
-        final String host, final String session) throws AjaxException,
-        IOException, SAXException, JSONException, OXJSONException {
-        final GetRequest request = new GetRequest(groupId);
-        final GetResponse response = (GetResponse) Executor.execute(
-            new AJAXSession(conv, session), request, host);
-        return response.getGroup();
+    private GroupTools() {
+        super();
+    }
+
+    public static final GetResponse get(final AJAXClient client,
+        final GetRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (GetResponse) Executor.execute(client, request);
+    }
+
+    public static SearchResponse search(final AJAXClient client,
+        final SearchRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (SearchResponse) Executor.execute(client, request);
+    }
+
+    public static ListResponse list(final AJAXClient client,
+        final ListRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (ListResponse) Executor.execute(client, request);
+    }
+
+    public static CreateResponse create(final AJAXClient client,
+        final CreateRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (CreateResponse) Executor.execute(client, request);
+    }
+
+    public static DeleteResponse delete(final AJAXClient client,
+        final DeleteRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (DeleteResponse) Executor.execute(client, request);
+    }
+
+    public static ChangeResponse change(final AJAXClient client,
+        final ChangeRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (ChangeResponse) Executor.execute(client, request);
     }
 }
-

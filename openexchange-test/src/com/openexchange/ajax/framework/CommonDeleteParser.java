@@ -70,11 +70,16 @@ public class CommonDeleteParser extends AbstractAJAXParser<CommonDeleteResponse>
      * {@inheritDoc}
      */
     @Override
-    protected CommonDeleteResponse createResponse(final Response response)
+    protected final CommonDeleteResponse createResponse(final Response response)
         throws JSONException {
-        return new CommonDeleteResponse(response);
+        return instanciateResponse(response);
     }
 
+    /**
+     * Override this method to create your own response class.
+     * @param response the json response container.
+     * @return a {@link CommonDeleteResponse}
+     */
     protected CommonDeleteResponse instanciateResponse(final Response response) {
         return new CommonDeleteResponse(response);
     }

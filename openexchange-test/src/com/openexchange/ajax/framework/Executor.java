@@ -71,6 +71,7 @@ import com.openexchange.ajax.framework.AJAXRequest.FileParameter;
 import com.openexchange.ajax.framework.AJAXRequest.Method;
 import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.tools.URLParameter;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -104,9 +105,16 @@ public class Executor extends Assert {
         final AJAXRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
 		return execute(session, request,
-            AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL),
-            AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME));
+            AJAXConfig.getProperty(Property.PROTOCOL),
+            AJAXConfig.getProperty(Property.HOSTNAME));
 	}
+
+    public static AbstractAJAXResponse execute(final AJAXSession session,
+        final AJAXRequest request, final String hostname) throws AjaxException,
+        IOException, SAXException, JSONException {
+        return execute(session, request, AJAXConfig
+            .getProperty(Property.PROTOCOL), hostname);
+    }
 
 	public static AbstractAJAXResponse execute(final AJAXSession session, final AJAXRequest request,
 			final String protocol, final String hostname) throws AjaxException, IOException, SAXException,

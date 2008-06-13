@@ -47,49 +47,70 @@
  *
  */
 
-package com.openexchange.ajax.framework;
+package com.openexchange.ajax.group.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.AJAXServlet;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonInsertParser extends AbstractAJAXParser<CommonInsertResponse> {
+public final class SearchRequest extends AbstractGroupRequest {
+
+    private final String pattern;
+
+    private final boolean failOnError;
 
     /**
+     * @param pattern
      * @param failOnError
      */
-    public CommonInsertParser(boolean failOnError) {
-        super(failOnError);
+    public SearchRequest(final String pattern, final boolean failOnError) {
+        super();
+        this.pattern = pattern;
+        this.failOnError = failOnError;
+    }
+
+    /**
+     * @param pattern
+     */
+    public SearchRequest(final String pattern) {
+        this(pattern, true);
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected final CommonInsertResponse createResponse(final Response response)
-        throws JSONException {
-        final CommonInsertResponse retval = instantiateResponse(response);
-        if (isFailOnError()) {
-            final JSONObject data = (JSONObject) response.getData();
-            if (data.has(DataFields.ID)) {
-                final int objectId = data.getInt(DataFields.ID);
-                assertTrue("Problem while inserting object.", objectId > 0);
-                retval.setId(objectId);
-            } else {
-                fail("Missing created object identifier: " + response.getJSON());
-            }
-        }
-        return retval;
+    public Object getBody() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put(AJAXServlet.PARAMETER_SEARCHPATTERN, pattern);
+        return json;
     }
 
-    protected CommonInsertResponse instantiateResponse(
-        final Response response) {
-        return new CommonInsertResponse(response);
+    /**
+     * {@inheritDoc}
+     */
+    public Method getMethod() {
+        return Method.PUT;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Parameter[] getParameters() {
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH)
+        };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public SearchParser getParser() {
+        return new SearchParser(failOnError);
+    }
+
 }

@@ -47,49 +47,42 @@
  *
  */
 
-package com.openexchange.ajax.framework;
+package com.openexchange.ajax.group.actions;
 
+import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.parser.GroupParser;
+import com.openexchange.group.Group;
+import com.openexchange.tools.servlet.OXJSONException;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonInsertParser extends AbstractAJAXParser<CommonInsertResponse> {
+public final class ListResponse extends AbstractAJAXResponse {
+
+    private Group[] groups;
 
     /**
-     * @param failOnError
+     * @param response
      */
-    public CommonInsertParser(boolean failOnError) {
-        super(failOnError);
+    public ListResponse(final Response response) {
+        super(response);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected final CommonInsertResponse createResponse(final Response response)
-        throws JSONException {
-        final CommonInsertResponse retval = instantiateResponse(response);
-        if (isFailOnError()) {
-            final JSONObject data = (JSONObject) response.getData();
-            if (data.has(DataFields.ID)) {
-                final int objectId = data.getInt(DataFields.ID);
-                assertTrue("Problem while inserting object.", objectId > 0);
-                retval.setId(objectId);
-            } else {
-                fail("Missing created object identifier: " + response.getJSON());
+    public Group[] getGroups() throws OXJSONException, JSONException {
+        if (null == groups) {
+            final JSONArray json = (JSONArray) getData();
+            groups = new Group[json.length()];
+            final GroupParser parser = new GroupParser();
+            for (int i = 0; i < json.length(); i++) {
+                groups[i] = new Group();
+                parser.parse(groups[i], json.getJSONObject(i));
             }
         }
-        return retval;
-    }
-
-    protected CommonInsertResponse instantiateResponse(
-        final Response response) {
-        return new CommonInsertResponse(response);
+        return groups;
     }
 }

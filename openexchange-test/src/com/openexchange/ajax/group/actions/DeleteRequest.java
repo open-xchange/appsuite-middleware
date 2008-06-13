@@ -47,49 +47,77 @@
  *
  */
 
-package com.openexchange.ajax.framework;
+package com.openexchange.ajax.group.actions;
+
+import java.util.Date;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonInsertParser extends AbstractAJAXParser<CommonInsertResponse> {
+public final class DeleteRequest extends AbstractGroupRequest {
+
+    private final int groupId;
+
+    private final Date lastModified;
+
+    private final boolean failOnError;
 
     /**
+     * @param groupId
      * @param failOnError
      */
-    public CommonInsertParser(boolean failOnError) {
-        super(failOnError);
+    public DeleteRequest(final int groupId, final Date lastModified,
+        final boolean failOnError) {
+        super();
+        this.groupId = groupId;
+        this.lastModified = lastModified;
+        this.failOnError = failOnError;
+    }
+
+    /**
+     * @param groupId
+     */
+    public DeleteRequest(final int groupId, final Date lastModified) {
+        this(groupId, lastModified, true);
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected final CommonInsertResponse createResponse(final Response response)
-        throws JSONException {
-        final CommonInsertResponse retval = instantiateResponse(response);
-        if (isFailOnError()) {
-            final JSONObject data = (JSONObject) response.getData();
-            if (data.has(DataFields.ID)) {
-                final int objectId = data.getInt(DataFields.ID);
-                assertTrue("Problem while inserting object.", objectId > 0);
-                retval.setId(objectId);
-            } else {
-                fail("Missing created object identifier: " + response.getJSON());
-            }
-        }
-        return retval;
+    public Object getBody() throws JSONException {
+        final JSONObject json = new JSONObject();
+        json.put(DataFields.ID, groupId);
+        return json;
     }
 
-    protected CommonInsertResponse instantiateResponse(
-        final Response response) {
-        return new CommonInsertResponse(response);
+    /**
+     * {@inheritDoc}
+     */
+    public Method getMethod() {
+        return Method.PUT;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Parameter[] getParameters() {
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE),
+            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified)
+        };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public DeleteParser getParser() {
+        return new DeleteParser(failOnError);
     }
 }

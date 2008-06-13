@@ -47,24 +47,23 @@
  *
  */
 
-package com.openexchange.ajax.framework;
+package com.openexchange.ajax.group.actions;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonInsertParser extends AbstractAJAXParser<CommonInsertResponse> {
+public final class ChangeParser extends AbstractAJAXParser<ChangeResponse> {
 
     /**
      * @param failOnError
      */
-    public CommonInsertParser(boolean failOnError) {
+    public ChangeParser(final boolean failOnError) {
         super(failOnError);
     }
 
@@ -72,24 +71,8 @@ public class CommonInsertParser extends AbstractAJAXParser<CommonInsertResponse>
      * {@inheritDoc}
      */
     @Override
-    protected final CommonInsertResponse createResponse(final Response response)
+    protected ChangeResponse createResponse(final Response response)
         throws JSONException {
-        final CommonInsertResponse retval = instantiateResponse(response);
-        if (isFailOnError()) {
-            final JSONObject data = (JSONObject) response.getData();
-            if (data.has(DataFields.ID)) {
-                final int objectId = data.getInt(DataFields.ID);
-                assertTrue("Problem while inserting object.", objectId > 0);
-                retval.setId(objectId);
-            } else {
-                fail("Missing created object identifier: " + response.getJSON());
-            }
-        }
-        return retval;
-    }
-
-    protected CommonInsertResponse instantiateResponse(
-        final Response response) {
-        return new CommonInsertResponse(response);
+        return new ChangeResponse(response);
     }
 }
