@@ -68,7 +68,7 @@ public class UserException extends AbstractOXException {
      */
     private final Detail detail;
 
-    public UserException(AbstractOXException cause) {
+    public UserException(final AbstractOXException cause) {
     	super(cause);
     	detail = Detail.ERROR;
     }
