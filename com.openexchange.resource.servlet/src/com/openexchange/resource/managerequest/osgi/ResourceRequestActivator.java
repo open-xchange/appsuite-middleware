@@ -60,6 +60,7 @@ import com.openexchange.resource.managerequest.request.ResourceManageRequest;
 import com.openexchange.security.BundleAccessSecurityService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.user.UserService;
 
 /**
  * {@link ResourceRequestActivator} - {@link BundleActivator Activator} for
@@ -82,7 +83,8 @@ public final class ResourceRequestActivator extends DeferredActivator {
 		super();
 	}
 
-	private static final Class<?>[] NEEDED_SERVICES = { ResourceService.class, BundleAccessSecurityService.class };
+	private static final Class<?>[] NEEDED_SERVICES = { ResourceService.class, UserService.class,
+			BundleAccessSecurityService.class };
 
 	/*
 	 * (non-Javadoc)

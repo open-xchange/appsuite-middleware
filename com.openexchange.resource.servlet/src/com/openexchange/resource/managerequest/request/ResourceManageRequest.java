@@ -68,10 +68,12 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.ResourceService;
+import com.openexchange.security.BundleAccessException;
 import com.openexchange.security.BundleAccessSecurityService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.user.UserService;
 
 /**
  * {@link ResourceManageRequest} - Executes a resource-manage request
@@ -100,14 +102,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 
 	public AJAXRequestResult performAction(final String action, final JSONObject jsonObject, final Session session,
 			final Context ctx) throws AbstractOXException, JSONException {
-		final BundleAccessSecurityService securityService = getServiceRegistry().getService(
-				BundleAccessSecurityService.class);
-		if (null == securityService) {
-			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, BundleAccessSecurityService.class
-					.getName());
-		}
-		securityService.checkPermission(new String[] { "com.openexchange.resource.*" },
-				"com.openexchange.resource.managerequest");
+		checkPermission();
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
 			return actionNew(jsonObject, session, ctx);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
@@ -117,6 +112,30 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 		} else {
 			throw new AjaxException(AjaxException.Code.UnknownAction, action);
 		}
+	}
+
+	/**
+	 * Checks access permission to this request's methods
+	 * 
+	 * @throws ServiceException
+	 *             If a required service is missing
+	 * @throws BundleAccessException
+	 *             If access is not permitted
+	 */
+	private void checkPermission() throws ServiceException, BundleAccessException {
+		final BundleAccessSecurityService securityService = getServiceRegistry().getService(
+				BundleAccessSecurityService.class);
+		if (null == securityService) {
+			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, BundleAccessSecurityService.class
+					.getName());
+		}
+		// TODO: Get user's bundle names via UserService
+		final UserService userService = getServiceRegistry().getService(UserService.class);
+		if (null == userService) {
+			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, UserService.class.getName());
+		}
+		securityService.checkPermission(new String[] { "com.openexchange.resource.*" },
+				"com.openexchange.resource.managerequest");
 	}
 
 	/**
