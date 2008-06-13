@@ -442,7 +442,7 @@ public class AbstractOXException extends Exception {
      */
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder(100).append(getErrorCode()).append(" Category=").append(category.code);
+        final StringBuilder sb = new StringBuilder(256).append(getErrorCode()).append(" Category=").append(category.code);
         sb.append(" Message=");
         String msg = null;
         if (super.getMessage() != null) {
