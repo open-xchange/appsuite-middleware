@@ -57,9 +57,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -137,7 +139,7 @@ public class RdbUserStorage extends UserStorage {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
@@ -158,7 +160,7 @@ public class RdbUserStorage extends UserStorage {
                 throw new LdapException(EnumComponent.USER, Code.USER_CONFLICT,
                     uid, Integer.valueOf(context.getContextId()));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
@@ -176,7 +178,7 @@ public class RdbUserStorage extends UserStorage {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         UserImpl retval = null;
@@ -210,7 +212,7 @@ public class RdbUserStorage extends UserStorage {
                 throw new LdapException(EnumComponent.USER,
                     Code.USER_NOT_FOUND, Integer.valueOf(userId), Integer.valueOf(context.getContextId()));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
@@ -233,7 +235,7 @@ public class RdbUserStorage extends UserStorage {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
@@ -246,7 +248,7 @@ public class RdbUserStorage extends UserStorage {
             if (result.next()) {
                 user.setLoginInfo(result.getString(1));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
@@ -264,7 +266,7 @@ public class RdbUserStorage extends UserStorage {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
@@ -280,7 +282,7 @@ public class RdbUserStorage extends UserStorage {
                 user.setSurname(result.getString(pos++));
                 user.setDisplayName(result.getString(pos++));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
@@ -298,7 +300,7 @@ public class RdbUserStorage extends UserStorage {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
@@ -314,12 +316,12 @@ public class RdbUserStorage extends UserStorage {
             while (result.next()) {
                 tmp.add(Integer.valueOf(result.getInt(1)));
             }
-            int[] groups = new int[tmp.size()];
+            final int[] groups = new int[tmp.size()];
             for (int i = 0; i < groups.length; i++) {
                 groups[i] = tmp.get(i).intValue();
             }
             user.setGroups(groups);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
@@ -333,41 +335,60 @@ public class RdbUserStorage extends UserStorage {
     /**
      * Reads the attributes/aliases of a user.
      * @param user User object.
+     * @param context The context
      * @throws LdapException if reading fails.
      */
     private void loadAliases(final UserImpl user, final Context context) throws LdapException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(SELECT_ATTRS);
-            int pos = 1;
-            stmt.setInt(pos++, context.getContextId());
-            stmt.setInt(pos++, user.getId());
-            result = stmt.executeQuery();
-            final List<String> aliases = new ArrayList<String>();
-            final Map<String, Set<String>> attrs = new HashMap<String, Set<String>>();
-            while (result.next()) {
-            	final String name = result.getString(1);
-            	Set<String> set = attrs.get(name);
-            	if (null == set) {
-            		set = new HashSet<String>();
-            		attrs.put(name, set);
-            	}
-            	final String value = result.getString(2);
-            	set.add(value);
-            	if (STR_ALIAS.equals(name)) {
-            		aliases.add(value);
-            	}
-            }
-            user.setAliases(aliases.toArray(new String[aliases.size()]));
-            user.setAttributes(attrs);
-        } catch (SQLException e) {
+			stmt = con.prepareStatement(SELECT_ATTRS);
+			int pos = 1;
+			stmt.setInt(pos++, context.getContextId());
+			stmt.setInt(pos++, user.getId());
+			result = stmt.executeQuery();
+			final Map<String, Set<String>> attrs = new HashMap<String, Set<String>>();
+			/*
+			 * Gather attributes
+			 */
+			while (result.next()) {
+				final String name = result.getString(1);
+				Set<String> set = attrs.get(name);
+				if (null == set) {
+					set = new HashSet<String>();
+					attrs.put(name, set);
+				}
+				final String value = result.getString(2);
+				set.add(value);
+			}
+			/*
+			 * Check for aliases
+			 */
+			{
+				final Set<String> aliases = attrs.get(STR_ALIAS);
+				if (aliases == null) {
+					user.setAliases(new String[0]);
+				} else {
+					user.setAliases(aliases.toArray(new String[aliases.size()]));
+				}
+			}
+			/*
+			 * Apply attributes
+			 */
+			final Iterator<Map.Entry<String, Set<String>>> iter = attrs.entrySet().iterator();
+			final int size = attrs.size();
+			for (int i = 0; i < size; i++) {
+				final Map.Entry<String, Set<String>> e = iter.next();
+				e.setValue(Collections.unmodifiableSet(e.getValue()));
+			}
+			user.setAttributes(Collections.unmodifiableMap(attrs));
+		} catch (final SQLException e) {
             throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
@@ -384,7 +405,7 @@ public class RdbUserStorage extends UserStorage {
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(context);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
@@ -398,7 +419,7 @@ public class RdbUserStorage extends UserStorage {
             stmt.setInt(pos++, context.getContextId());
             stmt.setInt(pos++, user.getId());
             stmt.execute();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
@@ -416,7 +437,7 @@ public class RdbUserStorage extends UserStorage {
         Connection con;
         try {
             con = DBPool.pickup(context);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         try {
@@ -431,7 +452,7 @@ public class RdbUserStorage extends UserStorage {
                 if (result.next()) {
                     userId = result.getInt(1);
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                     e.getMessage());
             } finally {
@@ -456,7 +477,7 @@ public class RdbUserStorage extends UserStorage {
                         Code.NO_USER_BY_MAIL, email);
                 }
                 return getUser(userId, context);
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                     e.getMessage());
             } finally {
@@ -476,7 +497,7 @@ public class RdbUserStorage extends UserStorage {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         final String sql = "SELECT id FROM user LEFT JOIN prg_contacts ON "
@@ -499,7 +520,7 @@ public class RdbUserStorage extends UserStorage {
             for (int i = 0; i < users.length; i++) {
                 users[i] = tmp.get(i).intValue();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
@@ -519,7 +540,7 @@ public class RdbUserStorage extends UserStorage {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new UserException(UserException.Code.NO_CONNECTION, e);
         }
         final int[] users;
@@ -537,7 +558,7 @@ public class RdbUserStorage extends UserStorage {
             for (int i = 0; i < users.length; i++) {
                 users[i] = tmp.get(i).intValue();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e, e
                 .getMessage());
         } finally {
@@ -555,7 +576,7 @@ public class RdbUserStorage extends UserStorage {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new UserException(UserException.Code.NO_CONNECTION, e);
         }
         final int user;
@@ -577,7 +598,7 @@ public class RdbUserStorage extends UserStorage {
                 throw new UserException(UserException.Code.USER_CONFLICT,
                     imapLogin, Integer.valueOf(cid));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e, e
                 .getMessage());
         } finally {

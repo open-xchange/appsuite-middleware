@@ -66,6 +66,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.security.BundleAccessException;
@@ -88,21 +89,23 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 	private static final Set<String> ACTIONS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
 			AJAXServlet.ACTION_NEW, AJAXServlet.ACTION_UPDATE, AJAXServlet.ACTION_DELETE)));
 
+	private final String bundleSymbolicName;
+
 	/**
 	 * Initializes a new {@link ResourceManageRequest}
 	 * 
-	 * @param session
-	 *            The session providing needed user data
-	 * @param ctx
-	 *            The context
+	 * @param bundleSymbolicName
+	 *            The symbolic name of the bundle initializing/offering this
+	 *            request
 	 */
-	public ResourceManageRequest() {
+	public ResourceManageRequest(final String bundleSymbolicName) {
 		super();
+		this.bundleSymbolicName = bundleSymbolicName;
 	}
 
 	public AJAXRequestResult performAction(final String action, final JSONObject jsonObject, final Session session,
 			final Context ctx) throws AbstractOXException, JSONException {
-		checkPermission();
+		checkPermission(session, ctx);
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
 			return actionNew(jsonObject, session, ctx);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
@@ -117,12 +120,19 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 	/**
 	 * Checks access permission to this request's methods
 	 * 
+	 * @param session
+	 *            The session
+	 * @param ctx
+	 *            The context
 	 * @throws ServiceException
 	 *             If a required service is missing
 	 * @throws BundleAccessException
 	 *             If access is not permitted
+	 * @throws UserException
+	 *             If user permissions cannot be loaded
 	 */
-	private void checkPermission() throws ServiceException, BundleAccessException {
+	private void checkPermission(final Session session, final Context ctx) throws ServiceException,
+			BundleAccessException, UserException {
 		final BundleAccessSecurityService securityService = getServiceRegistry().getService(
 				BundleAccessSecurityService.class);
 		if (null == securityService) {
@@ -134,8 +144,14 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 		if (null == userService) {
 			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, UserService.class.getName());
 		}
-		securityService.checkPermission(new String[] { "com.openexchange.resource.*" },
-				"com.openexchange.resource.managerequest");
+		final Set<String> permissions = userService.getUser(session.getUserId(), ctx).getAttributes().get("permission");
+		if (permissions == null) {
+			throw new BundleAccessException(BundleAccessException.Code.ACCESS_DENIED, bundleSymbolicName);
+		}
+		securityService.checkPermission(permissions.toArray(new String[permissions.size()]), bundleSymbolicName);
+		// securityService.checkPermission(new String[] {
+		// "com.openexchange.resource.*" },
+		// bundleSymbolicName);
 	}
 
 	/**

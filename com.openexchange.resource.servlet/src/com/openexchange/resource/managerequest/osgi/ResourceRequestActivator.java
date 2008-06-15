@@ -151,8 +151,8 @@ public final class ResourceRequestActivator extends DeferredActivator {
 		/*
 		 * Register request handler
 		 */
-		serviceRegistration = context.registerService(AJAXRequestHandler.class.getName(), new ResourceManageRequest(),
-				null);
+		serviceRegistration = context.registerService(AJAXRequestHandler.class.getName(), new ResourceManageRequest(
+				context.getBundle().getSymbolicName()), null);
 	}
 
 	/*

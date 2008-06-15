@@ -50,7 +50,6 @@
 package com.openexchange.groupware.ldap;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -71,7 +70,8 @@ public class UserImpl implements Serializable, User, Cloneable {
      * 
      * @deprecated use {@link OCLPermission#ALL_GROUPS_AND_USERS} instead
      */
-    private static final int GROUP_ALL = 0;
+    @Deprecated
+	private static final int GROUP_ALL = 0;
 
     /**
      * For serialization.
@@ -452,7 +452,7 @@ public class UserImpl implements Serializable, User, Cloneable {
      */
     private static int[] addAllGroupsAndUsersGroup(final int[] groups) {
         boolean contained = false;
-        for (int group : groups) {
+        for (final int group : groups) {
             contained = group == GROUP_ALL;
         }
         final int[] retval;
@@ -531,10 +531,10 @@ public class UserImpl implements Serializable, User, Cloneable {
     }
 
     /**
-     * @param attributes The attributes to set
+     * @param attributes The attributes to set as an unmodifiable map
      */
-    void setAttributes(Map<String, Set<String>> attributes) {
-    	this.attributes = Collections.unmodifiableMap(attributes);
+    void setAttributes(final Map<String, Set<String>> attributes) {
+    	this.attributes = attributes;
     }
 
     /**
