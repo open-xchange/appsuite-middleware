@@ -73,35 +73,35 @@ public final class ElementEventHandler2JCS implements ElementEventHandler {
 		this.handler = handler;
 	}
 
-	public void handleElementEvent(ElementEvent event) {
+	public void handleElementEvent(final ElementEvent event) {
 		handler.handleElementEvent(new JCSElementEventDelegator(event));
 	}
 
-	public void onExceededIdletimeBackground(ElementEvent event) {
+	public void onExceededIdletimeBackground(final ElementEvent event) {
 		handler.handleElementEvent(new JCSElementEventDelegator(event));
 	}
 
-	public void onExceededIdletimeOnRequest(ElementEvent event) {
+	public void onExceededIdletimeOnRequest(final ElementEvent event) {
 		handler.handleElementEvent(new JCSElementEventDelegator(event));
 	}
 
-	public void onExceededMaxlifeBackground(ElementEvent event) {
+	public void onExceededMaxlifeBackground(final ElementEvent event) {
 		handler.handleElementEvent(new JCSElementEventDelegator(event));
 	}
 
-	public void onExceededMaxlifeOnRequest(ElementEvent event) {
+	public void onExceededMaxlifeOnRequest(final ElementEvent event) {
 		handler.handleElementEvent(new JCSElementEventDelegator(event));
 	}
 
-	public void onSpooledDiskAvailable(ElementEvent event) {
+	public void onSpooledDiskAvailable(final ElementEvent event) {
 		handler.handleElementEvent(new JCSElementEventDelegator(event));
 	}
 
-	public void onSpooledDiskNotAvailable(ElementEvent event) {
+	public void onSpooledDiskNotAvailable(final ElementEvent event) {
 		handler.handleElementEvent(new JCSElementEventDelegator(event));
 	}
 
-	public void onSpooledNotAllowed(ElementEvent event) {
+	public void onSpooledNotAllowed(final ElementEvent event) {
 		handler.handleElementEvent(new JCSElementEventDelegator(event));
 	}
 

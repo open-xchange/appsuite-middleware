@@ -70,7 +70,7 @@ public class ListBundles extends AbstractConsoleHandler {
 	/**
 	 * Initializes a new {@link ListBundles}
 	 */
-	public ListBundles(String args[]) {
+	public ListBundles(final String args[]) {
 		try {
 			init(args, true);
 			final ObjectName objectName = getObjectName();
@@ -80,7 +80,7 @@ public class ListBundles extends AbstractConsoleHandler {
 				final Map<String, String> data = bundleList.get(a);
 				System.out.println("bundlename: " + data.get("bundlename") + " status: " + data.get("status"));
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			final Throwable cause = exc.getCause();
 			if (cause != null) {
 				if (cause instanceof BundleNotFoundException) {
@@ -94,14 +94,14 @@ public class ListBundles extends AbstractConsoleHandler {
 		} finally {
 			try {
 				close();
-			} catch (Exception exc) {
+			} catch (final Exception exc) {
 				System.out.println("closing all connections failed: " + exc);
 				exc.printStackTrace();
 			}
 		}
 	}
 
-	public static void main(String args[]) {
+	public static void main(final String args[]) {
 		new ListBundles(args);
 	}
 

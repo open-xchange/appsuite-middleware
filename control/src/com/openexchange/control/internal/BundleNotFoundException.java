@@ -58,19 +58,24 @@ package com.openexchange.control.internal;
 public class BundleNotFoundException extends Exception
 {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3798426359092953192L;
+
 	public BundleNotFoundException() {
 		super();
 	}
 	
-	public BundleNotFoundException(String message) {
+	public BundleNotFoundException(final String message) {
 		super(message);
 	}
 	
-	public BundleNotFoundException(String message, Exception exc) {
+	public BundleNotFoundException(final String message, final Exception exc) {
 		super(message, exc);
 	}
 	
-	public BundleNotFoundException(Exception exc) {
+	public BundleNotFoundException(final Exception exc) {
 		super(exc);
 	}
 }

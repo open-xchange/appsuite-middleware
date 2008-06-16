@@ -78,7 +78,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 	private static final Log LOG = LogFactory.getLog(ConfigurationImpl.class);
 
 	private static final String EXT = ".properties";
-    private File dir;
+    private final File dir;
 
     private static final class PropertyFileFilter implements FileFilter {
 
@@ -253,11 +253,11 @@ public final class ConfigurationImpl implements ConfigurationService {
         return retval;
     }
 
-    public Properties getPropertiesInFolder(String folderName) {
+    public Properties getPropertiesInFolder(final String folderName) {
         return getPropertiesInFolder(folderName, null);
     }
 
-    public Properties getPropertiesInFolder(String folderName, PropertyListener listener) {
+    public Properties getPropertiesInFolder(String folderName, final PropertyListener listener) {
         final Properties retval = new Properties();
         final Iterator<Entry<String,String>> iter = propertiesFiles.entrySet().iterator();
         folderName = dir.getAbsolutePath()+"/"+folderName+"/"; 
@@ -281,7 +281,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 	 * @see com.openexchange.config.Configuration#getProperty(java.lang.String,
 	 *      boolean)
 	 */
-	public boolean getBoolProperty(String name, boolean defaultValue) {
+	public boolean getBoolProperty(final String name, final boolean defaultValue) {
 		if (properties.containsKey(name)) {
 			return Boolean.parseBoolean(properties.get(name));
 		}
@@ -294,7 +294,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 	 * @see com.openexchange.config.Configuration#getProperty(java.lang.String,
 	 *      int)
 	 */
-	public int getIntProperty(String name, int defaultValue) {
+	public int getIntProperty(final String name, final int defaultValue) {
 		if (properties.containsKey(name)) {
 			try {
 				return Integer.parseInt(properties.get(name));

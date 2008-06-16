@@ -49,15 +49,9 @@
 
 package com.openexchange.control.console;
 
-import javax.management.MBeanException;
-import javax.management.MBeanInfo;
-import javax.management.MBeanOperationInfo;
-import javax.management.MBeanParameterInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
-import com.openexchange.control.console.internal.ValueObject;
-import com.openexchange.control.console.internal.ValueParser;
 import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
@@ -73,11 +67,11 @@ public class RefreshBundles extends AbstractConsoleHandler {
 	/**
 	 * Initializes a new {@link RefreshBundles}
 	 */
-	public RefreshBundles(String args[]) {
+	public RefreshBundles(final String args[]) {
 		try {
 			init(args, true);
 			refresh();
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			final Throwable cause = exc.getCause();
 			if (cause != null) {
 				if (cause instanceof BundleNotFoundException) {
@@ -91,14 +85,14 @@ public class RefreshBundles extends AbstractConsoleHandler {
 		} finally {
 			try {
 				close();
-			} catch (Exception exc) {
+			} catch (final Exception exc) {
 				System.out.println("closing all connections failed: " + exc);
 				exc.printStackTrace();
 			}
 		}
 	}
 	
-	public RefreshBundles(String jmxHost, int jmxPort) throws Exception {
+	public RefreshBundles(final String jmxHost, final int jmxPort) throws Exception {
 		initJMX(jmxHost, jmxPort);
 	}
 	
@@ -108,7 +102,7 @@ public class RefreshBundles extends AbstractConsoleHandler {
 		mBeanServerConnection.invoke(objectName, "refresh", new Object[] {}, new String[] {});
 	}
 
-	public static void main(String args[]) {
+	public static void main(final String args[]) {
 		new RefreshBundles(args);
 	}
 

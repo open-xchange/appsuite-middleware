@@ -118,7 +118,7 @@ public class SessiondInit implements Initialization {
 		}
 		SessionCacheConfiguration.getInstance().stop();
 		SessionCache.releaseInstance();
-		Sessiond s = Sessiond.getInstance(config);
+		final Sessiond s = Sessiond.getInstance(config);
 		s.close();
 		started.set(false);
 	}

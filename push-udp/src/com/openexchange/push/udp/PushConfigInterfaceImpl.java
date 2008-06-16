@@ -136,7 +136,7 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 						remoteHostObject.setHost(InetAddress.getByName(addressAndPort[0]));
 						remoteHostObject.setPort(Integer.parseInt(addressAndPort[1]));
 					}
-				} catch (UnknownHostException exc) {
+				} catch (final UnknownHostException exc) {
 					LOG.error("problem with parsing remote host attribute: " + addressAndPort[0], exc);
 				}
 				
@@ -179,7 +179,7 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 			if (senderAddressString != null) {
 				senderAddress = InetAddress.getByName(senderAddressString);
 			} 
-		} catch (UnknownHostException exc) {
+		} catch (final UnknownHostException exc) {
 			LOG.error("problem with parsing sender address: "  + senderAddressString, exc);
 		}
 		
@@ -206,7 +206,7 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 		
 		try {
 			multicastAddress = InetAddress.getByName(multicastAddressString);
-		} catch (UnknownHostException exc) {
+		} catch (final UnknownHostException exc) {
 			LOG.error("problem with parsing multicast address: "  + multicastAddressString, exc);
 		}
 		
@@ -223,7 +223,7 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 		
 		try {
 			hostname = InetAddress.getByName(hostnameString);
-		} catch (UnknownHostException exc) {
+		} catch (final UnknownHostException exc) {
 			LOG.error("problem with parsing hostname: "  + hostnameString, exc);
 		}
 		

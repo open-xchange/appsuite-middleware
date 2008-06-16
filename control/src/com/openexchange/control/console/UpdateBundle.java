@@ -71,7 +71,7 @@ public class UpdateBundle extends AbstractConsoleHandler {
 	/**
 	 * Initializes a new {@link UpdateBundle}
 	 */
-	public UpdateBundle(String args[]) {
+	public UpdateBundle(final String args[]) {
 		try {
 			init(args);
 			final ValueParser valueParser = getParser();
@@ -86,7 +86,7 @@ public class UpdateBundle extends AbstractConsoleHandler {
 				showHelp();
 				exit();
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			final Throwable cause = exc.getCause();
 			if (cause != null) {
 				if (cause instanceof BundleNotFoundException) {
@@ -100,24 +100,24 @@ public class UpdateBundle extends AbstractConsoleHandler {
 		} finally {
 			try {
 				close();
-			} catch (Exception exc) {
+			} catch (final Exception exc) {
 				System.out.println("closing all connections failed: " + exc);
 				exc.printStackTrace();
 			}
 		}
 	}
 	
-	public UpdateBundle(String jmxHost, int jmxPort) throws Exception {
+	public UpdateBundle(final String jmxHost, final int jmxPort) throws Exception {
 		initJMX(jmxHost, jmxPort);
 	}
 	
-	public void update(String bundleName, boolean autorefresh) throws Exception {
+	public void update(final String bundleName, final boolean autorefresh) throws Exception {
 		final ObjectName objectName = getObjectName();
 		final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
 		mBeanServerConnection.invoke(objectName, "update", new Object[] { bundleName, autorefresh }, new String[] { "java.lang.String", "boolean" });
 	}
 	
-	public static void main(String args[]) {
+	public static void main(final String args[]) {
 		new UpdateBundle(args);
 	}
 

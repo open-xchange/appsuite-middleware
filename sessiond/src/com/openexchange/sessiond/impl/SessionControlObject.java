@@ -49,9 +49,9 @@
 
 package com.openexchange.sessiond.impl;
 
-import com.openexchange.session.*;
-
 import java.util.Date;
+
+import com.openexchange.session.Session;
 
 /**
  * {@link SessionControlObject} - The session control object

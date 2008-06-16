@@ -88,7 +88,7 @@ public final class FileWatcher {
 				timeStamp = newTimeStamp;
 				notifyListeners(false);
 			}
-		    } catch (Exception e) {
+		    } catch (final Exception e) {
 		        LOG.error(e.getMessage(), e);
 		    }
 		}

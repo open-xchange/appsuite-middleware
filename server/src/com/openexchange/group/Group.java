@@ -260,7 +260,7 @@ public class Group implements Cloneable {
         sb.append(" displayName:");
         sb.append(getDisplayName());
         sb.append(" member:");
-        for (int member : getMember()) {
+        for (final int member : getMember()) {
             sb.append(member);
             sb.append(",");
         }

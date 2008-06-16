@@ -99,20 +99,26 @@ public class RemoteHostObject {
      */
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+        if (this == obj) {
+			return true;
+		}
+        if (obj == null) {
+			return false;
+		}
+        if (getClass() != obj.getClass()) {
+			return false;
+		}
         final RemoteHostObject other = (RemoteHostObject) obj;
         if (host == null) {
-            if (other.host != null)
-                return false;
-        } else if (!host.getHostAddress().equals(other.host.getHostAddress()))
-            return false;
-        if (port != other.port)
-            return false;
+            if (other.host != null) {
+				return false;
+			}
+        } else if (!host.getHostAddress().equals(other.host.getHostAddress())) {
+			return false;
+		}
+        if (port != other.port) {
+			return false;
+		}
         return true;
     }
 

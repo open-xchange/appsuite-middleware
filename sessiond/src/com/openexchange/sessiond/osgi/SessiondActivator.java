@@ -69,8 +69,8 @@ import com.openexchange.sessiond.cache.SessionCacheConfiguration;
 import com.openexchange.sessiond.impl.SessionControlObject;
 import com.openexchange.sessiond.impl.SessionHandler;
 import com.openexchange.sessiond.impl.SessionImpl;
-import com.openexchange.sessiond.impl.SessiondServiceImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
+import com.openexchange.sessiond.impl.SessiondServiceImpl;
 
 /**
  * {@link SessiondActivator} - Activator for sessiond bundle

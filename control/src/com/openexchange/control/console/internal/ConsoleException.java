@@ -58,19 +58,24 @@ package com.openexchange.control.console.internal;
 public class ConsoleException extends Exception
 {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2896219569585713526L;
+
 	public ConsoleException() {
 		super();
 	}
 	
-	public ConsoleException(String message) {
+	public ConsoleException(final String message) {
 		super(message);
 	}
 	
-	public ConsoleException(String message, Exception exc) {
+	public ConsoleException(final String message, final Exception exc) {
 		super(message, exc);
 	}
 	
-	public ConsoleException(Exception exc) {
+	public ConsoleException(final Exception exc) {
 		super(exc);
 	}
 }

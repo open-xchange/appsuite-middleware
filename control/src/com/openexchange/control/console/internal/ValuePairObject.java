@@ -59,7 +59,7 @@ public class ValuePairObject extends AbstractValue {
 
 	protected String name;
 	
-	protected ValuePairObject(String name, String value) {
+	protected ValuePairObject(final String name, final String value) {
 		this.name = name;
 		this.value = value;
 	}

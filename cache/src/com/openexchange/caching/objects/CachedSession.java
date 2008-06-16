@@ -56,7 +56,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * {@link CachedSession} - Holding cache-able informations of a {@link Session}.
+ * {@link CachedSession} - Holding cache-able informations of a session.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -80,7 +80,7 @@ public final class CachedSession implements Serializable {
 
 	private final String secret;
 
-	private String randomToken;
+	private final String randomToken;
 
 	private final String localIp;
 

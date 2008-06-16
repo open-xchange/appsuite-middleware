@@ -65,11 +65,11 @@ public class ShutDown extends AbstractConsoleHandler {
 	/**
 	 * Initializes a new {@link ShutDown}
 	 */
-	public ShutDown(String args[]) {
+	public ShutDown(final String args[]) {
 		try {
 			init(args, true);
 			shutdown();
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			final Throwable cause = exc.getCause();
 			if (cause != null) {
 				if (cause instanceof BundleNotFoundException) {
@@ -83,14 +83,14 @@ public class ShutDown extends AbstractConsoleHandler {
 		} finally {
 			try {
 				close();
-			} catch (Exception exc) {
+			} catch (final Exception exc) {
 				System.out.println("closing all connections failed: " + exc);
 				exc.printStackTrace();
 			}
 		}
 	}
 	
-	public ShutDown(String jmxHost, int jmxPort) throws Exception {
+	public ShutDown(final String jmxHost, final int jmxPort) throws Exception {
 		initJMX(jmxHost, jmxPort);
 	}
 	
@@ -100,7 +100,7 @@ public class ShutDown extends AbstractConsoleHandler {
 		mBeanServerConnection.invoke(objectName, "shutdown", new Object[] {}, new String[] {});
 	}
 
-	public static void main(String args[]) {
+	public static void main(final String args[]) {
 		new ShutDown(args);
 	}
 

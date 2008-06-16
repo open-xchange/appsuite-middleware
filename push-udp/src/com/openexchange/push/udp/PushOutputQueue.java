@@ -92,7 +92,7 @@ public class PushOutputQueue implements Runnable {
 	
 	private static HashMap<PushObject, PushDelayedObject> existingPushObjects = new HashMap<PushObject, PushDelayedObject>();
 
-	public PushOutputQueue(PushConfigInterface pushConfigInterface) {
+	public PushOutputQueue(final PushConfigInterface pushConfigInterface) {
 		PushOutputQueue.pushConfigInterface = pushConfigInterface;
 
 		remoteHost = pushConfigInterface.getRemoteHost();
@@ -104,7 +104,7 @@ public class PushOutputQueue implements Runnable {
 
 			remoteHost = pushConfigInterface.getRemoteHost();
 
-			delay = (long) pushConfigInterface.getOutputQueueDelay();
+			delay = pushConfigInterface.getOutputQueueDelay();
 
 			remoteHostTimeOut = pushConfigInterface.getRemoteHostTimeOut();
 
@@ -235,7 +235,7 @@ public class PushOutputQueue implements Runnable {
 				try {
 					makePackage(sb.toString().getBytes(), registerObj.getHostAddress(), registerObj
 							.getPort());
-				} catch (Exception exc) {
+				} catch (final Exception exc) {
 					LOG.error("createPushPackage", exc);
 				}
 			}
@@ -276,7 +276,7 @@ public class PushOutputQueue implements Runnable {
 						}
 						iter.remove();
 					}
-				} catch (Exception exc) {
+				} catch (final Exception exc) {
 					LOG.error("createPushPackage", exc);
 				}
 			}
@@ -291,7 +291,7 @@ public class PushOutputQueue implements Runnable {
 			try {
 				makePackage(sb.toString().getBytes(), registerObject.getHostAddress(),
 						registerObject.getPort());
-			} catch (Exception exc) {
+			} catch (final Exception exc) {
 				LOG.error("createRegisterPackage", exc);
 			}
 		}
@@ -332,7 +332,7 @@ public class PushOutputQueue implements Runnable {
 						}
 						iter.remove();
 					}
-				} catch (Exception exc) {
+				} catch (final Exception exc) {
 					LOG.error("createRegisterPackage", exc);
 				}
 			}

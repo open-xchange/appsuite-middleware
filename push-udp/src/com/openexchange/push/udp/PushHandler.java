@@ -92,7 +92,7 @@ public class PushHandler implements EventHandler {
 		super();
 	}
 
-	public void handleEvent(Event event) {
+	public void handleEvent(final Event event) {
 		if (event.getProperty(CommonEvent.EVENT_KEY) == null) {
 			return ;
 		}
@@ -105,14 +105,14 @@ public class PushHandler implements EventHandler {
 		final Context ctx;
 		try {
 			ctx = ContextStorage.getInstance().getContext(contextId);
-		} catch (ContextException exc) {
+		} catch (final ContextException exc) {
 			LOG.error("cannot resolve context id: " + contextId, exc);
 			return;
 		}
 
 		final int module = genericEvent.getModule();
 
-		FolderObject parentFolder = (FolderObject) genericEvent.getSourceFolder();
+		final FolderObject parentFolder = (FolderObject) genericEvent.getSourceFolder();
 		if (parentFolder == null) {
 			LOG.warn("folder object in event is null");
 			return;
@@ -164,7 +164,7 @@ public class PushHandler implements EventHandler {
 			final PushObject pushObject = new PushObject(folderId, module, ctx.getContextId(),
 					users, false);
 			PushOutputQueue.add(pushObject);
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("event", exc);
 		}
 	}
@@ -188,7 +188,7 @@ public class PushHandler implements EventHandler {
 			}
 
 			return hashSet2Array(hs);
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("getAffectedUser4Object", exc);
 		}
 
@@ -214,7 +214,7 @@ public class PushHandler implements EventHandler {
 			}
 
 			return hashSet2Array(hs);
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("getAffectedUsers4Folder", exc);
 		}
 
@@ -229,10 +229,10 @@ public class PushHandler implements EventHandler {
 	}
 
 	protected int[] hashSet2Array(final Set<Integer> hs) {
-		int i[] = new int[hs.size()];
+		final int i[] = new int[hs.size()];
 
 		int counter = 0;
-		for (Integer integer : hs) {
+		for (final Integer integer : hs) {
 			i[counter++] = integer.intValue();
 		}
 

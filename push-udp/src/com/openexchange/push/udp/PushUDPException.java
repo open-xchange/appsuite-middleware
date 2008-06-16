@@ -84,7 +84,7 @@ public class PushUDPException extends AbstractOXException {
      * @param cause the cause.
      * @param msgArgs arguments for the exception message.
      */
-    public PushUDPException(Category category, String message, int detailNumber, Throwable cause) {
+    public PushUDPException(final Category category, final String message, final int detailNumber, final Throwable cause) {
         super(EnumComponent.PUSHUDP, category, detailNumber, message, cause);
     }
     
@@ -100,8 +100,8 @@ public class PushUDPException extends AbstractOXException {
         setMessageArgs(msgArgs);
     }
     
-	public PushUDPException(EnumComponent component, Category category,
-			int number, String message, Throwable cause, Object[] msgArgs) {
+	public PushUDPException(final EnumComponent component, final Category category,
+			final int number, final String message, final Throwable cause, final Object[] msgArgs) {
         super(component, category, number, message, cause);
         setMessageArgs(msgArgs);
 	}

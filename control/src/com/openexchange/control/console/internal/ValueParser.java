@@ -66,7 +66,7 @@ public class ValueParser {
 
 	final List<ValueObject> valueList = new ArrayList<ValueObject>();
 	
-	public ValueParser(final String[] args, String[] parameter) throws ConsoleException {
+	public ValueParser(final String[] args, final String[] parameter) throws ConsoleException {
 		final HashSet<String> parameterSet = new HashSet<String>();
 		
 		for (int a = 0; a < parameter.length; a++) {
@@ -86,10 +86,10 @@ public class ValueParser {
 		}
 	}
 	
-	protected ValuePairObject parseValuePair(final String name, String[] args, int pos) throws ConsoleException {
+	protected ValuePairObject parseValuePair(final String name, final String[] args, final int pos) throws ConsoleException {
 		if (pos < args.length-1) {
-			String value = args[pos+1];
-			ValuePairObject valuePairObject = new ValuePairObject(name, value);
+			final String value = args[pos+1];
+			final ValuePairObject valuePairObject = new ValuePairObject(name, value);
 			return valuePairObject;
 		} else {
 			throw new ConsoleException("missing value for parameter: " + name);
@@ -97,10 +97,10 @@ public class ValueParser {
 	}
 
 	public ValuePairObject[] getValuePairObjects() {
-		return (ValuePairObject[])valuePairObjectList.toArray(new ValuePairObject[valuePairObjectList.size()]);
+		return valuePairObjectList.toArray(new ValuePairObject[valuePairObjectList.size()]);
 	}
 
 	public ValueObject[] getValueObjects() {
-		return (ValueObject[])valueList.toArray(new ValueObject[valueList.size()]);
+		return valueList.toArray(new ValueObject[valueList.size()]);
 	}
 }

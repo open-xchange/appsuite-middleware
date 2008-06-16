@@ -57,7 +57,7 @@ package com.openexchange.control.console.internal;
  */
 public class ValueObject extends AbstractValue {
 
-	protected ValueObject(String value) {
+	protected ValueObject(final String value) {
 		this.value = value;
 	}
 

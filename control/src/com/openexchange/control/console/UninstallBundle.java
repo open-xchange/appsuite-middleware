@@ -49,10 +49,6 @@
 
 package com.openexchange.control.console;
 
-import javax.management.MBeanException;
-import javax.management.MBeanInfo;
-import javax.management.MBeanOperationInfo;
-import javax.management.MBeanParameterInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
@@ -73,7 +69,7 @@ public class UninstallBundle extends AbstractConsoleHandler {
 	/**
 	 * Initializes a new {@link UninstallBundle}
 	 */
-	public UninstallBundle(String args[]) {
+	public UninstallBundle(final String args[]) {
 		try {
 			init(args);
 			final ValueParser valueParser = getParser();
@@ -84,7 +80,7 @@ public class UninstallBundle extends AbstractConsoleHandler {
 				showHelp();
 				exit();
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			final Throwable cause = exc.getCause();
 			if (cause != null) {
 				if (cause instanceof BundleNotFoundException) {
@@ -98,25 +94,25 @@ public class UninstallBundle extends AbstractConsoleHandler {
 		} finally {
 			try {
 				close();
-			} catch (Exception exc) {
+			} catch (final Exception exc) {
 				System.out.println("closing all connections failed: " + exc);
 				exc.printStackTrace();
 			}
 		}
 	}
 
-	public UninstallBundle(String jmxHost, int jmxPort) throws Exception {
+	public UninstallBundle(final String jmxHost, final int jmxPort) throws Exception {
 		initJMX(jmxHost, jmxPort);
 	}
 	
-	public void Stop(String bundleName) throws Exception {
+	public void Stop(final String bundleName) throws Exception {
 		final ObjectName objectName = getObjectName();
 		final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
 		mBeanServerConnection.invoke(objectName, "uninstall", new Object[] { bundleName },
 				new String[] { "java.lang.String" });
 	}
 	
-	public static void main(String args[]) {
+	public static void main(final String args[]) {
 		new UninstallBundle(args);
 	}
 

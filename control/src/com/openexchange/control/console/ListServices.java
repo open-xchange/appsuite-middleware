@@ -52,15 +52,9 @@ package com.openexchange.control.console;
 import java.util.List;
 import java.util.Map;
 
-import javax.management.MBeanException;
-import javax.management.MBeanInfo;
-import javax.management.MBeanOperationInfo;
-import javax.management.MBeanParameterInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
-import com.openexchange.control.console.internal.ValueObject;
-import com.openexchange.control.console.internal.ValueParser;
 import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
@@ -76,7 +70,7 @@ public class ListServices extends AbstractConsoleHandler {
 	/**
 	 * Initializes a new {@link ListServices}
 	 */
-	public ListServices(String args[]) {
+	public ListServices(final String args[]) {
 		try {
 			init(args, true);
 			final ObjectName objectName = getObjectName();
@@ -95,7 +89,7 @@ public class ListServices extends AbstractConsoleHandler {
 					}
 				}
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			final Throwable cause = exc.getCause();
 			if (cause != null) {
 				if (cause instanceof BundleNotFoundException) {
@@ -109,14 +103,14 @@ public class ListServices extends AbstractConsoleHandler {
 		} finally {
 			try {
 				close();
-			} catch (Exception exc) {
+			} catch (final Exception exc) {
 				System.out.println("closing all connections failed: " + exc);
 				exc.printStackTrace();
 			}
 		}
 	}
 
-	public static void main(String args[]) {
+	public static void main(final String args[]) {
 		new ListServices(args);
 	}
 

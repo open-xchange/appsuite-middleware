@@ -75,7 +75,7 @@ public class SessiondTimer extends TimerTask {
 	public void run() {
 		try {
 			SessionHandler.cleanUp();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
 	}

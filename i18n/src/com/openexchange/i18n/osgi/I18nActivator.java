@@ -168,8 +168,9 @@ public class I18nActivator implements BundleActivator {
 
 	public void start(final BundleContext context) throws Exception {
 
-		if (LOG.isDebugEnabled())
+		if (LOG.isDebugEnabled()) {
 			LOG.debug("I18n Starting");
+		}
 
 		try {
 			csh = ConfigurationServiceHolder.newInstance();
@@ -188,13 +189,15 @@ public class I18nActivator implements BundleActivator {
 			throw e instanceof Exception ? (Exception) e : new Exception(e);
 		}
 
-		if (LOG.isDebugEnabled())
+		if (LOG.isDebugEnabled()) {
 			LOG.debug("I18n Started");
+		}
 	}
 
 	public void stop(final BundleContext context) throws Exception {
-		if (LOG.isDebugEnabled())
+		if (LOG.isDebugEnabled()) {
 			LOG.debug("Stopping I18n");
+		}
 
 		try {
 			csh.removeServiceHolderListenerByName(listener.getClass().getName());
@@ -217,8 +220,9 @@ public class I18nActivator implements BundleActivator {
 			LOG.error("I18nActivator: stop: ", e);
 			throw e instanceof Exception ? (Exception) e : new Exception(e);
 		}
-		if (LOG.isDebugEnabled())
+		if (LOG.isDebugEnabled()) {
 			LOG.debug("I18n stopped");
+		}
 	}
 
 }

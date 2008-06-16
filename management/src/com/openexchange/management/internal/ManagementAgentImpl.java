@@ -135,7 +135,7 @@ public class ManagementAgentImpl extends AbstractAgent implements ManagementServ
 						.append("\n").toString());
 			}
 			running.set(true);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
 	}
@@ -149,7 +149,7 @@ public class ManagementAgentImpl extends AbstractAgent implements ManagementServ
 			while (!objectNames.isEmpty()) {
 				unregisterMBean(objectNames.pop());
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
 		removeConnector(jmxURL);
@@ -162,7 +162,7 @@ public class ManagementAgentImpl extends AbstractAgent implements ManagementServ
 		}
 		try {
 			return InetAddress.getByName(host).getHostAddress();
-		} catch (UnknownHostException e) {
+		} catch (final UnknownHostException e) {
 			LOG.error(e.getMessage(), e);
 			return null;
 		}

@@ -96,7 +96,7 @@ public class PushSocket implements Runnable {
 					LOG.info("Push Register Socket is disabled");
 				}
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("PushSocket", exc);
 		}
 	}
@@ -117,11 +117,11 @@ public class PushSocket implements Runnable {
 				} else {
 					LOG.warn("recieved empty udp package: " + datagramSocket);
 				}
-			} catch (SocketException e) {
+			} catch (final SocketException e) {
 			    if (running) {
 			        LOG.error(e.getMessage(), e);
 			    }
-			} catch (IOException e) {
+			} catch (final IOException e) {
                 LOG.error(e.getMessage(), e);
 			}
 		}
@@ -136,7 +136,7 @@ public class PushSocket implements Runnable {
 	    if (null != thread) {
     	    try {
                 thread.join();
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 LOG.error(e.getMessage(), e);
             }
             thread = null;

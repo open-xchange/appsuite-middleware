@@ -74,11 +74,11 @@ public class PushMulticastSocket implements Runnable {
  
     private boolean running = true;
 	
-	private int multicastPort;
+	private final int multicastPort;
 	
-	private InetAddress multicastAddress;
+	private final InetAddress multicastAddress;
 	
-	public PushMulticastSocket(PushConfigInterface config) {
+	public PushMulticastSocket(final PushConfigInterface config) {
 		multicastPort = config.getMultiCastPort();
 		multicastAddress = config.getMultiCastAddress();
 		
@@ -98,7 +98,7 @@ public class PushMulticastSocket implements Runnable {
 					LOG.info("Multicast Socket is disabled");
 				}
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("MultiCastPushSocket", exc);
 		}
 	}
@@ -115,11 +115,11 @@ public class PushMulticastSocket implements Runnable {
 				} else {
 					LOG.warn("recieved empty multicast package: " + datagramPacket);
 				}
-			} catch (SocketException e) {
+			} catch (final SocketException e) {
 			    if (running) {
 			        LOG.error(e.getMessage(), e);
 			    }
-			} catch (IOException e) {
+			} catch (final IOException e) {
                 LOG.error(e.getMessage(), e);
             }
 		}
@@ -134,7 +134,7 @@ public class PushMulticastSocket implements Runnable {
 	    if (null != thread) {
     	    try {
                 thread.join();
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 LOG.error(e.getMessage(), e);
             }
             thread = null;

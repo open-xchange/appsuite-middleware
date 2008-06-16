@@ -79,7 +79,7 @@ public abstract class AbstractConfigWrapper {
 		if (tmp.trim().length() > 0) {
 			try {
 				return Integer.parseInt(tmp);
-			} catch (NumberFormatException ex) {
+			} catch (final NumberFormatException ex) {
 				LOG.warn("property no parsable: " + name + ':' + value);
 			}
 		}
@@ -98,12 +98,12 @@ public abstract class AbstractConfigWrapper {
 		final String tmp = prop.getProperty(name, "");
 		if (tmp.trim().length() > 0) {
 			final String s[] = tmp.split(",");
-			int ports[] = new int[s.length];
+			final int ports[] = new int[s.length];
 			
 			for (int a = 0; a < ports.length; a++) {
 				try {
 					ports[a] = Integer.parseInt(s[a]);
-				} catch (NumberFormatException ex) {
+				} catch (final NumberFormatException ex) {
 					LOG.warn("port in port range no parsable: " + s[a]);
 				}
 			}

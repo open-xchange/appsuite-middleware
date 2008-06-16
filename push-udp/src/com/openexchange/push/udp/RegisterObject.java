@@ -62,17 +62,17 @@ import java.util.Date;
 
 public class RegisterObject extends AbstractPushObject {
 	
-	private int userId;
+	private final int userId;
 	
-	private String hostAddress;
+	private final String hostAddress;
 	
-	private int port;
+	private final int port;
 	
 	private String userHash;
 	
-	private Date timestamp;
+	private final Date timestamp;
 	
-	public RegisterObject(int userId, int contextId, String hostAddress, int port, boolean isSync) {
+	public RegisterObject(final int userId, final int contextId, final String hostAddress, final int port, final boolean isSync) {
 		this.userId = userId;
 		this.contextId = contextId;
 		this.hostAddress = hostAddress;

@@ -88,7 +88,7 @@ public class GenericImpl implements ConfigJumpService {
             final String[] loginInfos = values.getContextInfos();
             replacedUrl = replacedUrl.replace("%c", extract(loginInfos, contextId));
             return new URL(replacedUrl);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             throw new ConfigJumpException(ConfigJumpException.Code.MALFORMED_URL,
                 e, replacedUrl);
         }

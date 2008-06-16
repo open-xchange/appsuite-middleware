@@ -96,7 +96,7 @@ public final class CacheElement2JCS implements CacheElement {
 		return cacheElement.getVal();
 	}
 
-	public void setElementAttributes(ElementAttributes attr) {
+	public void setElementAttributes(final ElementAttributes attr) {
 		cacheElement.setElementAttributes(new JCSElementAttributesDelegator(attr));
 
 	}

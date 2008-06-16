@@ -75,7 +75,7 @@ public class AbstractOXException extends Exception {
 
     private static AtomicInteger instanceCounter = new AtomicInteger(0);
 
-    private int counter = instanceCounter.incrementAndGet();
+    private final int counter = instanceCounter.incrementAndGet();
 
     /**
      * Logger.
@@ -189,7 +189,7 @@ public class AbstractOXException extends Exception {
         static {
             final Map<Integer, Category> tmp = new HashMap<Integer, Category>(
                 Category.values().length, 1F);
-            for(Category category : values()) {
+            for(final Category category : values()) {
                 tmp.put(Integer.valueOf(category.getCode()), category);
             }
             CODES = Collections.unmodifiableMap(tmp);
@@ -226,14 +226,16 @@ public class AbstractOXException extends Exception {
     /**
      * @deprecated use constructor with component, category and detail number.
      */
-    public AbstractOXException() {
+    @Deprecated
+	public AbstractOXException() {
         this(EnumComponent.NONE);
     }
 
     /**
      * @deprecated use constructor category.
      */
-    public AbstractOXException(final Component component) {
+    @Deprecated
+	public AbstractOXException(final Component component) {
         super();
         this.component = component;
         category = Category.SUBSYSTEM_OR_SERVICE_DOWN;
@@ -243,14 +245,16 @@ public class AbstractOXException extends Exception {
     /**
      * @deprecated use constructor with component, category and detail number.
      */
-    public AbstractOXException(final String message) {
+    @Deprecated
+	public AbstractOXException(final String message) {
         this(EnumComponent.NONE, message);
     }
 
     /**
      * @deprecated use constructor with component, category and detail number.
      */
-    public AbstractOXException(final Component component, final String message) {
+    @Deprecated
+	public AbstractOXException(final Component component, final String message) {
         super(message);
         this.component = component;
         category = Category.SUBSYSTEM_OR_SERVICE_DOWN;
@@ -273,14 +277,16 @@ public class AbstractOXException extends Exception {
     /**
      * @deprecated use constructor with component, category and detail number.
      */
-    public AbstractOXException(final Throwable cause) {
+    @Deprecated
+	public AbstractOXException(final Throwable cause) {
         this(EnumComponent.NONE, cause);
     }
 
     /**
      * @deprecated use constructor with component, category and detail number.
      */
-    public AbstractOXException(final Component component, final Throwable cause) {
+    @Deprecated
+	public AbstractOXException(final Component component, final Throwable cause) {
         super(cause);
         this.component = component;
         category = Category.SUBSYSTEM_OR_SERVICE_DOWN;
@@ -290,14 +296,16 @@ public class AbstractOXException extends Exception {
     /**
      * @deprecated use constructor with component, category and detail number.
      */
-    public AbstractOXException(final String message, final Throwable cause) {
+    @Deprecated
+	public AbstractOXException(final String message, final Throwable cause) {
         this(EnumComponent.NONE, message, cause);
     }
 
     /**
      * @deprecated use constructor with component, category and detail number.
      */
-    public AbstractOXException(final Component component, final String message,
+    @Deprecated
+	public AbstractOXException(final Component component, final String message,
         final Throwable cause) {
         super(message, cause);
         this.component = component;
@@ -449,10 +457,10 @@ public class AbstractOXException extends Exception {
             try {
                 msg = locale == null ? String.format(super.getMessage(), messageArgs) : String.format(locale, super
                         .getMessage(), messageArgs);
-            } catch (NullPointerException e) {
+            } catch (final NullPointerException e) {
                 LOG.error(e.getMessage(), e);
                 msg = super.getMessage();
-            } catch (IllegalFormatException e) {
+            } catch (final IllegalFormatException e) {
                 LOG.error(e.getMessage(), e);
                 final Exception logMe = new Exception(super.getMessage());
                 logMe.setStackTrace(super.getStackTrace());

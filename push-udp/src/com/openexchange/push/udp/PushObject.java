@@ -63,15 +63,15 @@ import com.openexchange.tools.StringCollection;
 
 public class PushObject extends AbstractPushObject {
 	
-	private int folderId;
+	private final int folderId;
 	
-	private int module;
+	private final int module;
 	
-	private int users[];
+	private final int users[];
 		
-	private Date creationDate = new Date();
+	private final Date creationDate = new Date();
 	
-	public PushObject(int folderId, int module, int contextId, int[] users, boolean isSync) throws Exception {
+	public PushObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isSync) throws Exception {
 		this.folderId = folderId;
 		this.module = module;
 		this.contextId = contextId;

@@ -67,14 +67,17 @@ import com.openexchange.sessiond.exception.SessiondException;
 
 public class DefaultSessionIdGenerator extends SessionIdGenerator {
 	
+	@Override
 	public String createSessionId(final String userId, final String data) throws SessiondException {
 		return getUniqueId(userId, data);
 	}
 	
+	@Override
 	public String createSecretId(final String userId, final String data) throws SessiondException {
 		return getUniqueId(userId, data);
 	}
 	
+	@Override
 	public String createRandomId() throws SessiondException {
 		return String.valueOf(System.currentTimeMillis());
 	}
@@ -96,7 +99,7 @@ public class DefaultSessionIdGenerator extends SessionIdGenerator {
 				md5.append(x);
 			}
 			return md5.toString();
-		} catch (NoSuchAlgorithmException exc) {
+		} catch (final NoSuchAlgorithmException exc) {
 			throw new SessiondException(SessiondException.Code.SESSIOND_EXCEPTION);
 		}
 	}

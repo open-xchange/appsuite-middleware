@@ -69,7 +69,7 @@ public class StartBundle extends AbstractConsoleHandler {
 	/**
 	 * Initializes a new {@link StartBundle}
 	 */
-	public StartBundle(String args[]) {
+	public StartBundle(final String args[]) {
 		try {
 			init(args);
 			final ValueParser valueParser = getParser();
@@ -81,7 +81,7 @@ public class StartBundle extends AbstractConsoleHandler {
 				showHelp();
 				exit();
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			final Throwable cause = exc.getCause();
 			if (cause != null) {
 				if (cause instanceof BundleNotFoundException) {
@@ -95,25 +95,25 @@ public class StartBundle extends AbstractConsoleHandler {
 		} finally {
 			try {
 				close();
-			} catch (Exception exc) {
+			} catch (final Exception exc) {
 				System.out.println("closing all connections failed: " + exc);
 				exc.printStackTrace();
 			}
 		}
 	}
 	
-	public StartBundle(String jmxHost, int jmxPort) throws Exception {
+	public StartBundle(final String jmxHost, final int jmxPort) throws Exception {
 		initJMX(jmxHost, jmxPort);
 	}
 	
-	public void start(String bundleName) throws Exception {
+	public void start(final String bundleName) throws Exception {
 		final ObjectName objectName = getObjectName();
 		final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
 		mBeanServerConnection.invoke(objectName, "start", new Object[] { bundleName },
 				new String[] { "java.lang.String" });
 	}
 
-	public static void main(String args[]) {
+	public static void main(final String args[]) {
 		new StartBundle(args);
 	}
 

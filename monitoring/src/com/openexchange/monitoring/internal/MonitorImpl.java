@@ -51,12 +51,7 @@
 
 package com.openexchange.monitoring.internal;
 
-import javax.management.MBeanRegistration;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
 import com.openexchange.monitoring.MonitorService;
-import com.openexchange.monitoring.MonitoringInfo;
 
 /**
  * 

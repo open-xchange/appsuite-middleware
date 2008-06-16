@@ -49,8 +49,6 @@
 
 package com.openexchange.contact;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class LdapServer {
 	
@@ -102,63 +100,63 @@ public class LdapServer {
 
 	}
 	
-	public void setLdapName(String ldap_name){
+	public void setLdapName(final String ldap_name){
 		this.ldap_name = ldap_name;
 	}
 	public String getServerName(){
 		return ldap_name;
 	}
 	
-	public void setServerIP(String server_ip){
+	public void setServerIP(final String server_ip){
 		this.server_ip = server_ip;
 	}
 	public String getServerIP(){
 		return server_ip;
 	}
 	
-	public void setPassword(String password){
+	public void setPassword(final String password){
 		this.password = password;
 	}
 	public String getPassword(){
 		return password;
 	}
 	
-	public void setBaseDN(String base_dn){
+	public void setBaseDN(final String base_dn){
 		this.base_dn = base_dn;
 	}
 	public String getBaseDN(){
 		return base_dn;
 	}
 	
-	public void setBindDN(String bind_dn){
+	public void setBindDN(final String bind_dn){
 		this.bind_dn = bind_dn;
 	}
 	public String getBindDN(){
 		return bind_dn;
 	}
 	
-	public void setPort(String port){
+	public void setPort(final String port){
 		this.port = port;
 	}
 	public String getPort(){
 		return port;
 	}
 	
-	public void setAddressbookDN(String addressbook_dn){
+	public void setAddressbookDN(final String addressbook_dn){
 		this.addressbook_dn = addressbook_dn;
 	}
 	public String getAddressbookDN(){
 		return addressbook_dn;
 	}
 	
-	public void setFolderId(int folder_id){
+	public void setFolderId(final int folder_id){
 		this.folder_id = folder_id;
 	}
 	public int getFolderId(){
 		return folder_id;
 	}
 	
-	public void setListFilter(String list_filter){
+	public void setListFilter(final String list_filter){
 		this.list_filter = list_filter;
 	}
 	
@@ -166,7 +164,7 @@ public class LdapServer {
 		return list_filter;
 	}
 	
-	public void setContactsFilter(String contacts_filter){
+	public void setContactsFilter(final String contacts_filter){
 		this.contacts_filter = contacts_filter;
 	}
 	
@@ -174,7 +172,7 @@ public class LdapServer {
 		return contacts_filter;
 	}
 	
-	public void setBirthdayTimeformat(String birthday_timeformat){
+	public void setBirthdayTimeformat(final String birthday_timeformat){
 		this.birthday_timeformat = birthday_timeformat;
 	}
 	
@@ -182,7 +180,7 @@ public class LdapServer {
 		return birthday_timeformat;
 	}
 	
-	public void setDateTimeformat(String date_timeformat){
+	public void setDateTimeformat(final String date_timeformat){
 		this.date_timeformat = date_timeformat;
 	}
 	
@@ -190,7 +188,7 @@ public class LdapServer {
 		return date_timeformat;
 	}
 	
-	public void setAuthType(int auth_type){
+	public void setAuthType(final int auth_type){
 		this.auth_type = auth_type;
 	}
 	
@@ -198,7 +196,7 @@ public class LdapServer {
 		return auth_type;
 	}
 
-	public void setFieldMapping(String[][] mapping) {
+	public void setFieldMapping(final String[][] mapping) {
 		this.field_mapping = mapping;
 	}
 	
@@ -206,11 +204,11 @@ public class LdapServer {
 		return field_mapping;
 	}
 	
-	public String[] getField(int field){
+	public String[] getField(final int field){
 		return field_mapping[field];
 	}
 	
-	public void activateSubfolderList(boolean subfolder){
+	public void activateSubfolderList(final boolean subfolder){
 		this.subfolder = subfolder;
 	}
 	
@@ -218,7 +216,7 @@ public class LdapServer {
 		return subfolder;
 	}
 
-	public void setBindUser(String bind_user) {
+	public void setBindUser(final String bind_user) {
 		this.bind_user = bind_user;
 	}
 	
@@ -226,7 +224,7 @@ public class LdapServer {
 		return bind_user;
 	}
 
-	public void setModifiedListFilter(String modified_filter) {
+	public void setModifiedListFilter(final String modified_filter) {
 		this.modified_filter = modified_filter;
 	}
 	
@@ -234,7 +232,7 @@ public class LdapServer {
 		return modified_filter;
 	}
 
-	public void setContext(String context) {
+	public void setContext(final String context) {
 		this.context = new Integer(context).intValue();
 	}
 	
@@ -242,7 +240,7 @@ public class LdapServer {
 		return context;
 	}
 
-	public void setSearchFilter(String search_filter) {
+	public void setSearchFilter(final String search_filter) {
 		this.search_filter = search_filter;
 	}
 

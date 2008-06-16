@@ -87,7 +87,7 @@ public class PushMulticastRequestTimer extends TimerTask {
 	
 	private static final Log LOG = LogFactory.getLog(PushMulticastRequestTimer.class);
 	
-	public PushMulticastRequestTimer(PushConfigInterface pushConfigInterface) {
+	public PushMulticastRequestTimer(final PushConfigInterface pushConfigInterface) {
 		this.pushConfigInterface = pushConfigInterface;
 		
 		InetAddress hostname = pushConfigInterface.getHostName();
@@ -95,7 +95,7 @@ public class PushMulticastRequestTimer extends TimerTask {
 		if (hostname == null) {
 			try {
 				hostname = InetAddress.getLocalHost();
-			} catch (UnknownHostException exc) {
+			} catch (final UnknownHostException exc) {
 				LOG.warn("unable to resolv local address", exc);
 			}
 		}
@@ -151,7 +151,7 @@ public class PushMulticastRequestTimer extends TimerTask {
 			final MulticastSocket multicastSocket = PushMulticastSocket.getPushMulticastSocket();
 			final DatagramPacket datagramPacket = new DatagramPacket(MULTICAST_REQUEST_BYTES, MULTICAST_REQUEST_BYTES.length, multicastAddress, multicastPort);
 			multicastSocket.send(datagramPacket);
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error(exc.getMessage(), exc);
 		}
 	}

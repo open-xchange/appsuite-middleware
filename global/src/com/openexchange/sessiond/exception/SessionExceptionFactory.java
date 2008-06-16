@@ -95,7 +95,7 @@ public class SessionExceptionFactory extends AbstractOXExceptionFactory<Sessiond
      */
     public SessiondException create(final int identifier, final Throwable cause,
         final Object... messageArgs) {
-        return (SessiondException) super.createException(identifier, cause,
+        return super.createException(identifier, cause,
             messageArgs);
     }
 

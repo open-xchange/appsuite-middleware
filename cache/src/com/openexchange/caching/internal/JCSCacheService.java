@@ -128,7 +128,7 @@ public final class JCSCacheService implements CacheService {
 	 * 
 	 * @see com.openexchange.caching.CacheService#newCacheKey(int, int)
 	 */
-	public CacheKey newCacheKey(int contextId, int objectId) {
+	public CacheKey newCacheKey(final int contextId, final int objectId) {
 		return new CacheKeyImpl(contextId, objectId);
 	}
 
@@ -138,7 +138,7 @@ public final class JCSCacheService implements CacheService {
 	 * @see com.openexchange.caching.CacheService#newCacheKey(int,
 	 *      java.io.Serializable)
 	 */
-	public CacheKey newCacheKey(int contextId, Serializable obj) {
+	public CacheKey newCacheKey(final int contextId, final Serializable obj) {
 		return new CacheKeyImpl(contextId, obj);
 	}
 

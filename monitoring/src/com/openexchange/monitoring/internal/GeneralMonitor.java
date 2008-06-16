@@ -146,7 +146,7 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
 	public Integer getNbObjects() {
 		try {
 			return Integer.valueOf((server.queryMBeans(new ObjectName("*:*"), null)).size());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return Integer.valueOf(-1);
 		}
 	}

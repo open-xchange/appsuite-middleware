@@ -85,7 +85,7 @@ public class SessiondException extends AbstractOXException {
      * @param cause the cause.
      * @param msgArgs arguments for the exception message.
      */
-    public SessiondException(Category category, String message, int detailNumber, Throwable cause) {
+    public SessiondException(final Category category, final String message, final int detailNumber, final Throwable cause) {
         super(EnumComponent.SESSION, category, detailNumber, message, cause);
     }
 
@@ -101,8 +101,8 @@ public class SessiondException extends AbstractOXException {
         setMessageArgs(msgArgs);
     }
 
-	public SessiondException(EnumComponent component, Category category,
-			int number, String message, Throwable cause, Object... msgArgs) {
+	public SessiondException(final EnumComponent component, final Category category,
+			final int number, final String message, final Throwable cause, final Object... msgArgs) {
         super(component, category, number, message, cause);
         setMessageArgs(msgArgs);
 	}

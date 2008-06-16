@@ -69,7 +69,7 @@ public class InstallBundle extends AbstractConsoleHandler {
 	/**
 	 * Initializes a new {@link InstallBundle}
 	 */
-	public InstallBundle(String args[]) {
+	public InstallBundle(final String args[]) {
 		try {
 			init(args);
 			final ValueParser valueParser = getParser();
@@ -81,7 +81,7 @@ public class InstallBundle extends AbstractConsoleHandler {
 				showHelp();
 				exit();
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			final Throwable cause = exc.getCause();
 			if (cause != null) {
 				if (cause instanceof BundleNotFoundException) {
@@ -95,25 +95,25 @@ public class InstallBundle extends AbstractConsoleHandler {
 		} finally {
 			try {
 				close();
-			} catch (Exception exc) {
+			} catch (final Exception exc) {
 				System.out.println("closing all connections failed: " + exc);
 				exc.printStackTrace();
 			}
 		}
 	}
 	
-	public InstallBundle(String jmxHost, int jmxPort) throws Exception {
+	public InstallBundle(final String jmxHost, final int jmxPort) throws Exception {
 		initJMX(jmxHost, jmxPort);
 	}
 	
-	public void install(String location) throws Exception {
+	public void install(final String location) throws Exception {
 		final ObjectName objectName = getObjectName();
 		final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
 		mBeanServerConnection.invoke(objectName, "install", new Object[] { location },
 				new String[] { "java.lang.String" });		
 	}
 
-	public static void main(String args[]) {
+	public static void main(final String args[]) {
 		new InstallBundle(args);
 	}
 

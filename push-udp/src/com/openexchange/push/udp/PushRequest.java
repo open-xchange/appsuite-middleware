@@ -185,7 +185,7 @@ public class PushRequest {
 				default:
 					throw new Exception("invalid type in push request: " + type);
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("PushRequest: " + exc, exc);
 		}
 	}
@@ -209,7 +209,7 @@ public class PushRequest {
 	
 	public int[] convertString2IntArray(final String s) {
 		final String tmp[] = s.split(",");
-		int i[] = new int[tmp.length];
+		final int i[] = new int[tmp.length];
 		for (int a = 0; a < i.length; a++) {
 			i[a] = Integer.parseInt(tmp[a]);
 		}

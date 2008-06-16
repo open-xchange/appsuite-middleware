@@ -82,11 +82,11 @@ public abstract class AbstractConsoleHandler {
 
 	protected ValueParser valueParser;
 
-	protected void init(String args[]) throws ConsoleException {
+	protected void init(final String args[]) throws ConsoleException {
 		init(args, false);
 	}
 	
-	protected void init(String args[], boolean noArgs) throws ConsoleException {
+	protected void init(final String args[], final boolean noArgs) throws ConsoleException {
 		if (!noArgs && args.length == 0) {
 			showHelp();
 			exit();
@@ -112,13 +112,13 @@ public abstract class AbstractConsoleHandler {
 				}
 
 				initJMX(jmxHost, jmxPort);
-			} catch (Exception exc) {
+			} catch (final Exception exc) {
 				throw new ConsoleException(exc);
 			}
 		}
 	}
 	
-	protected void initJMX(String jmxHost, int jmxPort) throws Exception {
+	protected void initJMX(final String jmxHost, final int jmxPort) throws Exception {
 		final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://"
 				+ jmxHost + ":" + jmxPort + "/server");
 
@@ -152,7 +152,7 @@ public abstract class AbstractConsoleHandler {
 			if (jmxConnector != null) {
 				jmxConnector.close();
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw new ConsoleException(exc);
 		}
 	}

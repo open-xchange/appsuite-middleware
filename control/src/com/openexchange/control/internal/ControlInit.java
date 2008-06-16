@@ -122,7 +122,7 @@ public final class ControlInit implements Initialization {
 			final GeneralControl generalControlBean = new GeneralControl(bundleContext);
 			managementAgent.registerMBean(new ObjectName("com.openexchange.control", "name", "Control"),
 					generalControlBean);
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("cannot register mbean", exc);
 		} finally {
 			msh.ungetService(managementAgent);
@@ -146,7 +146,7 @@ public final class ControlInit implements Initialization {
 		final ManagementService managementAgent = msh.getService();
 		try {
 			managementAgent.unregisterMBean(new ObjectName("com.openexchange.control", "name", "Control"));
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("cannot unregister mbean", exc);
 		} finally {
 			msh.ungetService(managementAgent);

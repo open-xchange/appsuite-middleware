@@ -116,11 +116,11 @@ public final class MonitoringInit implements Initialization {
 		final GeneralMonitor generalMonitorBean = new GeneralMonitor();
 		try {
 			managementAgent.registerMBean(getObjectName(), generalMonitorBean);
-		} catch (MalformedObjectNameException exc) {
+		} catch (final MalformedObjectNameException exc) {
 			LOG.error(exc.getLocalizedMessage(), exc);
-		} catch (NullPointerException exc) {
+		} catch (final NullPointerException exc) {
 			LOG.error(exc.getLocalizedMessage(), exc);
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error(exc.getLocalizedMessage(), exc);
 		}
 		if (LOG.isInfoEnabled()) {
@@ -143,11 +143,11 @@ public final class MonitoringInit implements Initialization {
 		if (managementAgent != null) {
 			try {
 				managementAgent.unregisterMBean(getObjectName());
-			} catch (MalformedObjectNameException exc) {
+			} catch (final MalformedObjectNameException exc) {
 				LOG.error(exc.getLocalizedMessage(), exc);
-			} catch (NullPointerException exc) {
+			} catch (final NullPointerException exc) {
 				LOG.error(exc.getLocalizedMessage(), exc);
-			} catch (Exception exc) {
+			} catch (final Exception exc) {
 				LOG.error(exc.getLocalizedMessage(), exc);
 			}
 			if (LOG.isInfoEnabled()) {

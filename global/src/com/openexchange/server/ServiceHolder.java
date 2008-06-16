@@ -105,7 +105,7 @@ public abstract class ServiceHolder<S> {
 					iter.remove();
 				}
 			}
-		    } catch (Exception e) {
+		    } catch (final Exception e) {
 		        LOG.error(e.getMessage(), e);
 		    }
 		}

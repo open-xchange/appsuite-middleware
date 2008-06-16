@@ -60,24 +60,24 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 public abstract class AbstractOXExceptionFactory<T> {
-    private int classId;
-    private EnumComponent component;
+    private final int classId;
+    private final EnumComponent component;
     
     private static final Log LOG = LogFactory.getLog(AbstractOXExceptionFactory.class);
 
-    private Map<Integer, ExceptionInfo> throwsMap = new HashMap<Integer, ExceptionInfo>();
+    private final Map<Integer, ExceptionInfo> throwsMap = new HashMap<Integer, ExceptionInfo>();
 
     private static final class ExceptionInfo {
         public Category category;
         public String message;
 
 
-        public ExceptionInfo(OXThrows throwsInfo) {
+        public ExceptionInfo(final OXThrows throwsInfo) {
             this.category = throwsInfo.category();
             this.message = throwsInfo.msg();
         }
 
-        public ExceptionInfo(OXThrowsMultiple throwsInfo, int index) {
+        public ExceptionInfo(final OXThrowsMultiple throwsInfo, final int index) {
             if(throwsInfo.category().length <= index) {
             	LOG.fatal("Missing Category for Exceptions near ids "+idList(throwsInfo.exceptionId()));
                 throw new IllegalArgumentException("Missing Category for Exceptions near ids "+idList(throwsInfo.exceptionId()));
@@ -92,13 +92,13 @@ public abstract class AbstractOXExceptionFactory<T> {
 
         private String idList(final int[] is) {
         	final StringBuilder b = new StringBuilder();
-            for(int i : is) { b.append(i).append(','); }
+            for(final int i : is) { b.append(i).append(','); }
             b.setLength(b.length()-1);
             return b.toString();
         }
     }
 
-    protected AbstractOXExceptionFactory(Class<?> clazz) {
+    protected AbstractOXExceptionFactory(final Class<?> clazz) {
     	final OXExceptionSource exceptionSource  = clazz.getAnnotation(OXExceptionSource.class);
         if(exceptionSource == null) {
         	LOG.fatal(clazz+" doesn't seem to be an OXExceptionSource");
@@ -119,14 +119,14 @@ public abstract class AbstractOXExceptionFactory<T> {
 
 
         final Method[] methods = clazz.getDeclaredMethods();
-        for(Method method : methods) {
+        for(final Method method : methods) {
             throwsInfo = method.getAnnotation(OXThrows.class);
             addThrows(throwsInfo, clazz);
             multiple = method.getAnnotation(OXThrowsMultiple.class);
             addMultiple(multiple,clazz);
         }
 
-        for(Constructor<?> constructor : clazz.getDeclaredConstructors()) {
+        for(final Constructor<?> constructor : clazz.getDeclaredConstructors()) {
             throwsInfo = constructor.getAnnotation(OXThrows.class);
             addThrows(throwsInfo, clazz);
             multiple = constructor.getAnnotation(OXThrowsMultiple.class);
