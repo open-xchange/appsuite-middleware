@@ -234,28 +234,6 @@ public final class ResourceDeleteTest extends TestCase {
 
 	}
 
-	public void testResourceFail006() {
-		if (user.getId() == admin.getId()) {
-			System.out.println("Logged in with context's admin. Skipping test with non-admin user");
-			return;
-		}
-		int id = -1;
-		try {
-			final Resource resource = createDummyResource(admin, ctx);
-			id = resource.getIdentifier();
-
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).delete(user, ctx, resource,
-					resource.getLastModified());
-
-			fail("Delete succeeded with non-admin caller");
-		} catch (final ResourceException e) {
-			System.out.println("Delete failed with non-admin caller: " + e.getMessage());
-		} finally {
-			deleteResource(id, ctx.getContextId());
-		}
-
-	}
-
 	public void testResourceFail007() {
 		int id = -1;
 		try {

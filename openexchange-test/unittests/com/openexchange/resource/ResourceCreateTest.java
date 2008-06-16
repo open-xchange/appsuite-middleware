@@ -281,31 +281,6 @@ public final class ResourceCreateTest extends TestCase {
 
 	}
 
-	public void testResourceFail006() {
-		if (user.getId() == admin.getId()) {
-			System.out.println("Logged in with context's admin. Skipping test with non-admin user");
-			return;
-		}
-		final Resource resource = new Resource();
-		resource.setAvailable(true);
-		resource.setDescription("My test resource");
-		resource.setDisplayName("MyTestResource");
-		resource.setMail("mytestresource@somewhere.com");
-		resource.setSimpleName("M-T-R");
-		int id = -1;
-		try {
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).create(user, ctx, resource);
-			id = resource.getIdentifier();
-
-			fail("Creation succeeded with non-admin caller");
-		} catch (final ResourceException e) {
-			System.out.println("Creation failed with non-admin caller: " + e.getMessage());
-		} finally {
-			deleteResource(id, ctx.getContextId());
-		}
-
-	}
-
 	public void testResourceFail007() {
 		final Resource resource = new Resource();
 		resource.setAvailable(true);
