@@ -183,7 +183,8 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 		/*
 		 * Write updated resource
 		 */
-		return new AJAXRequestResult(com.openexchange.resource.json.ResourceWriter.writeResource(resource));
+		return new AJAXRequestResult(com.openexchange.resource.json.ResourceWriter.writeResource(resource), resource
+				.getLastModified());
 	}
 
 	/**
