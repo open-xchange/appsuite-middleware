@@ -49,6 +49,8 @@
 
 package com.openexchange.security;
 
+import com.openexchange.security.permission.BundleAccessPermission;
+import com.openexchange.security.permission.BundleAccessPermissionCollection;
 
 /**
  * {@link BundleAccessSecurityService} - Security service for bundle access.
@@ -59,7 +61,12 @@ package com.openexchange.security;
 public interface BundleAccessSecurityService {
 
 	/**
-	 * Checks the specified permissions against given bundle symbolic name
+	 * Checks the specified permissions against given bundle symbolic name.
+	 * <p>
+	 * This method is intended to create the appropriate instances of
+	 * {@link BundleAccessPermissionCollection} and
+	 * {@link BundleAccessPermission} from specified arguments to delegate to
+	 * {@link #checkPermission(BundleAccessPermissionCollection, BundleAccessPermission)}.
 	 * 
 	 * @param names
 	 *            The symbolic names of permitted bundles
@@ -69,4 +76,17 @@ public interface BundleAccessSecurityService {
 	 *                If bundle access is not permitted
 	 */
 	public void checkPermission(String[] names, String bundleSymbolicName) throws BundleAccessException;
+
+	/**
+	 * Checks if the specified permissions is implied by given user permissions
+	 * 
+	 * @param userPermissions
+	 *            A collection of user permissions
+	 * @param permission
+	 *            The desired permission
+	 * @throws BundleAccessException
+	 *             If bundle access is not permitted
+	 */
+	public void checkPermission(BundleAccessPermissionCollection userPermissions, BundleAccessPermission permission)
+			throws BundleAccessException;
 }

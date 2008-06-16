@@ -52,6 +52,7 @@ package com.openexchange.security.internal;
 import com.openexchange.security.BundleAccessException;
 import com.openexchange.security.BundleAccessSecurityService;
 import com.openexchange.security.permission.BundleAccessPermission;
+import com.openexchange.security.permission.BundleAccessPermissionCollection;
 
 /**
  * {@link BundleAccessSecurityServiceImpl} - The
@@ -70,16 +71,26 @@ public final class BundleAccessSecurityServiceImpl implements BundleAccessSecuri
 	}
 
 	public void checkPermission(final String[] names, final String bundleSymbolicName) throws BundleAccessException {
-		final BundleAccessPermission p = new BundleAccessPermission(bundleSymbolicName);
-		for (final String name : names) {
-			if (new BundleAccessPermission(name).implies(p)) {
-				/*
-				 * Access granted
-				 */
-				return;
-			}
+		if (bundleSymbolicName == null || bundleSymbolicName.length() == 0) {
+			throw new IllegalArgumentException("bundleSymbolicName is null");
 		}
-		throw new BundleAccessException(BundleAccessException.Code.ACCESS_DENIED, bundleSymbolicName);
+		if (names == null) {
+			throw new BundleAccessException(BundleAccessException.Code.ACCESS_DENIED, bundleSymbolicName);
+		}
+		final BundleAccessPermission p = new BundleAccessPermission(bundleSymbolicName);
+		final BundleAccessPermissionCollection collection = (BundleAccessPermissionCollection) p
+				.newPermissionCollection();
+		for (final String name : names) {
+			collection.add(new BundleAccessPermission(name));
+		}
+		checkPermission(collection, p);
+	}
+
+	public void checkPermission(final BundleAccessPermissionCollection userPermissions,
+			final BundleAccessPermission permission) throws BundleAccessException {
+		if (!userPermissions.implies(permission)) {
+			throw new BundleAccessException(BundleAccessException.Code.ACCESS_DENIED, permission.getName());
+		}
 	}
 
 }

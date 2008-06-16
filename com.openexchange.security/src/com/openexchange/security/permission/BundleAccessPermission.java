@@ -51,6 +51,7 @@ package com.openexchange.security.permission;
 
 import java.security.BasicPermission;
 import java.security.Permission;
+import java.security.PermissionCollection;
 import java.util.regex.Pattern;
 
 /**
@@ -103,6 +104,11 @@ public final class BundleAccessPermission extends BasicPermission {
 		}
 		final BundleAccessPermission bp = (BundleAccessPermission) obj;
 		return getName().equals(bp.getName());
+	}
+
+	@Override
+	public PermissionCollection newPermissionCollection() {
+		return new BundleAccessPermissionCollection();
 	}
 
 	/**
