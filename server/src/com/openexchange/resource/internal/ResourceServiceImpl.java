@@ -67,6 +67,11 @@ import com.openexchange.resource.storage.ResourceStorage;
  */
 public final class ResourceServiceImpl implements ResourceService {
 
+	/**
+	 * The permission path to access create, update, and delete methods
+	 */
+	static final String PATH = "com.openexchange.resource.managerequest";
+
 	private static final ResourceServiceImpl instance = new ResourceServiceImpl();
 
 	/**

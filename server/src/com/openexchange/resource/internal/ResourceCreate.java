@@ -49,8 +49,11 @@
 
 package com.openexchange.resource.internal;
 
+import static com.openexchange.resource.internal.ResourceServiceImpl.PATH;
+
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Set;
 
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
@@ -60,8 +63,12 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.storage.ResourceStorage;
+import com.openexchange.security.BundleAccessException;
+import com.openexchange.security.BundleAccessSecurityService;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -124,15 +131,27 @@ public final class ResourceCreate {
 	}
 
 	/**
-	 * Check permission: By now caller must be context's admin
+	 * Check permission: Invoke
+	 * {@link BundleAccessSecurityService#checkPermission(String[], String)
+	 * checkPermission()} on {@link BundleAccessSecurityService security
+	 * service}
 	 * 
 	 * @throws ResourceException
 	 *             If permission is not granted
 	 */
 	private void allow() throws ResourceException {
-		// TODO: Should the security service be used instead?
-		if (ctx.getMailadmin() != user.getId()) {
-			throw new ResourceException(ResourceException.Code.PERMISSION, Integer.valueOf(ctx.getContextId()));
+		final BundleAccessSecurityService securityService = ServerServiceRegistry.getInstance().getService(
+				BundleAccessSecurityService.class);
+		if (securityService == null) {
+			throw new ResourceException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
+					BundleAccessSecurityService.class.getName()));
+		}
+		final Set<String> permissions = user.getAttributes().get("permission");
+		try {
+			securityService.checkPermission(permissions == null ? null : permissions.toArray(new String[permissions
+					.size()]), PATH);
+		} catch (final BundleAccessException e) {
+			throw new ResourceException(e);
 		}
 	}
 
