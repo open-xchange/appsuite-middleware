@@ -198,15 +198,10 @@ public final class BundleAccessPermissionCollection extends PermissionCollection
 		 * work our way up the tree...
 		 */
 		int last, offset;
-
 		offset = path.length() - 1;
-
 		while ((last = path.lastIndexOf(".", offset)) != -1) {
-
-			path = path.substring(0, last + 1) + "*";
-
+			path = path.substring(0, last + 1) + '*';
 			x = perms.get(path);
-
 			if (x != null) {
 				return x.implies(permission);
 			}
