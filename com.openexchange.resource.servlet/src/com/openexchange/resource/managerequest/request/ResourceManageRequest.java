@@ -144,7 +144,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 		/*
 		 * Return its ID
 		 */
-		return new AJAXRequestResult(Integer.valueOf(resource.getIdentifier()));
+		return new AJAXRequestResult(Integer.valueOf(resource.getIdentifier()), resource.getLastModified());
 	}
 
 	/**
