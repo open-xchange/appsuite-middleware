@@ -74,66 +74,66 @@ public class MailException extends AbstractOXException {
 
 	public static enum Code {
 		/**
-		 * Unexpected error: %s
+		 * Unexpected error: %1$s
 		 */
-		UNEXPECTED_ERROR("Unexpected error: %s", Category.INTERNAL_ERROR, 0),
+		UNEXPECTED_ERROR("Unexpected error: %1$s", Category.INTERNAL_ERROR, 0),
 		/**
-		 * Missing parameter %s
+		 * Missing parameter %1$s
 		 */
-		MISSING_PARAMETER("Missing parameter %s", Category.CODE_ERROR, 1),
+		MISSING_PARAMETER("Missing parameter %1$s", Category.CODE_ERROR, 1),
 		/**
-		 * Invalid permission values: fp=%d orp=%d owp=%d odp=%d
+		 * Invalid permission values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s
 		 */
-		INVALID_PERMISSION("Invalid permission values: fp=%d orp=%d owp=%d odp=%d", Category.CODE_ERROR, 2),
+		INVALID_PERMISSION("Invalid permission values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s", Category.CODE_ERROR, 2),
 		/**
-		 * A JSON error occurred: %s
+		 * A JSON error occurred: %1$s
 		 */
-		JSON_ERROR("A JSON error occurred: %s", Category.CODE_ERROR, 3),
+		JSON_ERROR("A JSON error occurred: %1$s", Category.CODE_ERROR, 3),
 		/**
-		 * Missing parameter in user's mail config: %s
+		 * Missing parameter in user's mail config: %1$s
 		 */
-		MISSING_CONNECT_PARAM("Missing parameter in user's mail config: %s", Category.CODE_ERROR, 4),
+		MISSING_CONNECT_PARAM("Missing parameter in user's mail config: %1$s", Category.CODE_ERROR, 4),
 		/**
-		 * Property error: %s
+		 * Property error: %1$s
 		 */
-		PROPERTY_ERROR("Property error: %s", Category.SETUP_ERROR, 5),
+		PROPERTY_ERROR("Property error: %1$s", Category.SETUP_ERROR, 5),
 		/**
 		 * Invalid multipart content. Number of enclosed contents is 0
 		 */
 		INVALID_MULTIPART_CONTENT("Invalid multipart content. Number of enclosed contents is 0", Category.CODE_ERROR, 6),
 		/**
-		 * A part's content could not be read from message %s in mail folder %s
+		 * A part's content could not be read from message %1$s in mail folder %2$s
 		 */
-		UNREADBALE_PART_CONTENT("A part's content could not be read from message %s in mail folder %s",
+		UNREADBALE_PART_CONTENT("A part's content could not be read from message %1$s in mail folder %2$s",
 				Category.INTERNAL_ERROR, 7),
 		/**
-		 * An I/O error occurred %s
+		 * An I/O error occurred %1$s
 		 */
-		IO_ERROR("An I/O error occurred %s", Category.CODE_ERROR, 8),
+		IO_ERROR("An I/O error occurred %1$s", Category.CODE_ERROR, 8),
 		/**
-		 * Invalid message path: %s
+		 * Invalid message path: %1$s
 		 */
-		INVALID_MAIL_IDENTIFIER("Invalid message path: %s", Category.CODE_ERROR, 9),
+		INVALID_MAIL_IDENTIFIER("Invalid message path: %1$s", Category.CODE_ERROR, 9),
 		/**
-		 * Unknown color label index: %d
+		 * Unknown color label index: %1$s
 		 */
-		UNKNOWN_COLOR_LABEL("Unknown color label: %s", Category.CODE_ERROR, 10),
+		UNKNOWN_COLOR_LABEL("Unknown color label: %1$s", Category.CODE_ERROR, 10),
 		/**
-		 * Cannot instantiate class %s.
+		 * Cannot instantiate class %1$s.
 		 */
-		INSTANTIATION_PROBLEM("Cannot instantiate class %s.", Category.SETUP_ERROR, 11),
+		INSTANTIATION_PROBLEM("Cannot instantiate class %1$s.", Category.SETUP_ERROR, 11),
 		/**
-		 * Cannot initialize
+		 * Cannot initialize mail module
 		 */
-		INITIALIZATION_PROBLEM("Cannot initialize", Category.SETUP_ERROR, 12),
+		INITIALIZATION_PROBLEM("Cannot initialize mail module", Category.SETUP_ERROR, 12),
 		/**
 		 * No mail module access permitted
 		 */
 		NO_MAIL_ACCESS("No mail module access permitted", Category.PERMISSION, 13),
 		/**
-		 * No mail account exists for admin user
+		 * No mail account exists for admin user in context %1$s
 		 */
-		ACCOUNT_DOES_NOT_EXIST("No mail account exists for admin user in context %d", Category.SETUP_ERROR, 14),
+		ACCOUNT_DOES_NOT_EXIST("No mail account exists for admin user in context %1$s", Category.SETUP_ERROR, 14),
 		/**
 		 * Process was interrupted while waiting for a free mail connection.
 		 * Please try again.
@@ -141,105 +141,105 @@ public class MailException extends AbstractOXException {
 		INTERRUPT_ERROR("Process was interrupted while waiting for a free mail connection. Please try again.",
 				Category.TRY_AGAIN, 15),
 		/**
-		 * Unsupported charset-encoding: %s
+		 * Unsupported charset-encoding: %1$s
 		 */
-		ENCODING_ERROR("Unsupported charset-encoding: %s", Category.CODE_ERROR, 16),
+		ENCODING_ERROR("Unsupported charset-encoding: %1$s", Category.CODE_ERROR, 16),
 		/**
-		 * Header %s could not be properly parsed
+		 * Header %1$s could not be properly parsed
 		 */
-		HEADER_PARSE_ERROR("Header %s could not be properly parsed", Category.CODE_ERROR, 17),
+		HEADER_PARSE_ERROR("Header %1$s could not be properly parsed", Category.CODE_ERROR, 17),
 		/**
-		 * Missing default %s folder in user mail settings
+		 * Missing default %1$s folder in user mail settings
 		 */
-		MISSING_DEFAULT_FOLDER_NAME("Missing default %s folder in user mail settings", Category.CODE_ERROR, 18),
+		MISSING_DEFAULT_FOLDER_NAME("Missing default %1$s folder in user mail settings", Category.CODE_ERROR, 18),
 		/**
-		 * Spam handler initialization failed: %s
+		 * Spam handler initialization failed: %1$s
 		 */
-		SPAM_HANDLER_INIT_FAILED("Spam handler initialization failed: %s", Category.SETUP_ERROR, 19),
+		SPAM_HANDLER_INIT_FAILED("Spam handler initialization failed: %1$s", Category.SETUP_ERROR, 19),
 		/**
-		 * Invalid Content-Type value: %s
+		 * Invalid Content-Type value: %1$s
 		 */
-		INVALID_CONTENT_TYPE("Invalid Content-Type value: %s", Category.CODE_ERROR, 20),
+		INVALID_CONTENT_TYPE("Invalid Content-Type value: %1$s", Category.CODE_ERROR, 20),
 		/**
-		 * Messaging error: %s
+		 * Messaging error: %1$s
 		 */
-		MESSAGING_ERROR("Messaging error: %s", Category.CODE_ERROR, 21),
+		MESSAGING_ERROR("Messaging error: %1$s", Category.CODE_ERROR, 21),
 		/**
-		 * Message field %s cannot be handled
+		 * Message field %1$s cannot be handled
 		 */
-		INVALID_FIELD("Message field %s cannot be handled", Category.CODE_ERROR, 22),
+		INVALID_FIELD("Message field %1$s cannot be handled", Category.CODE_ERROR, 22),
 		/**
-		 * Versit error: %s
+		 * Versit error: %1$s
 		 */
-		VERSIT_ERROR("Versit error: %s", Category.CODE_ERROR, 23),
+		VERSIT_ERROR("Versit error: %1$s", Category.CODE_ERROR, 23),
 		/**
-		 * No attachment was found with id %s in message
+		 * No attachment was found with id %1$s in message
 		 */
-		NO_ATTACHMENT_FOUND("No attachment was found with id %s in message", Category.USER_INPUT, 24),
+		NO_ATTACHMENT_FOUND("No attachment was found with id %1$s in message", Category.USER_INPUT, 24),
 		/**
 		 * Versit attachment could not be saved due to an unsupported MIME type:
-		 * %s
+		 * %1$s
 		 */
-		UNSUPPORTED_VERSIT_ATTACHMENT("Versit attachment could not be saved due to an unsupported MIME type: %s",
+		UNSUPPORTED_VERSIT_ATTACHMENT("Versit attachment could not be saved due to an unsupported MIME type: %1$s",
 				Category.USER_INPUT, 25),
 		/**
-		 * Invalid parameter name: %s
+		 * Invalid parameter name: %1$s
 		 */
-		INVALID_PARAMETER("Invalid parameter name: %s", Category.CODE_ERROR, 26),
+		INVALID_PARAMETER("Invalid parameter name: %1$s", Category.CODE_ERROR, 26),
 		/**
-		 * Could not create a PartModifier instance from name %s
+		 * Could not create a PartModifier instance from name %1$s
 		 */
-		PART_MODIFIER_CREATION_FAILED("Could not create a PartModifier instance from name %s", Category.CODE_ERROR, 27),
+		PART_MODIFIER_CREATION_FAILED("Could not create a PartModifier instance from name %1$s", Category.CODE_ERROR, 27),
 		/**
-		 * Upload quota (%d) exceeded for file %s (size=%d)
+		 * Upload quota (%1$s) exceeded for file %2$s (size=%3$s)
 		 */
-		UPLOAD_QUOTA_EXCEEDED_FOR_FILE("Upload quota (%d) exceeded for file %s (size=%d)", Category.USER_INPUT, 28),
+		UPLOAD_QUOTA_EXCEEDED_FOR_FILE("Upload quota (%1$s) exceeded for file %2$s (size=%3$s)", Category.USER_INPUT, 28),
 		/**
-		 * Upload quota (%d) exceeded
+		 * Upload quota (%1$s) exceeded
 		 */
-		UPLOAD_QUOTA_EXCEEDED("Upload quota (%d) exceeded", Category.USER_INPUT, 29),
+		UPLOAD_QUOTA_EXCEEDED("Upload quota (%1$s) exceeded", Category.USER_INPUT, 29),
 		/**
-		 * Missing parameter %s
+		 * Missing parameter %1$s
 		 */
-		MISSING_PARAM("Missing parameter %s", Category.CODE_ERROR, 30),
+		MISSING_PARAM("Missing parameter %1$s", Category.CODE_ERROR, 30),
 		/**
-		 * Invalid integer value %s
+		 * Invalid integer value %1$s
 		 */
-		INVALID_INT_VALUE("Invalid integer value %s", Category.CODE_ERROR, 31),
+		INVALID_INT_VALUE("Invalid integer value %1$s", Category.CODE_ERROR, 31),
 		/**
-		 * Mail(s) %s could not be found in folder %s
+		 * Mail(s) %1$s could not be found in folder %2$s
 		 */
-		MAIL_NOT_FOUND("Mail(s) %s could not be found in folder %s", Category.CODE_ERROR, 32),
+		MAIL_NOT_FOUND("Mail(s) %1$s could not be found in folder %2$s", Category.CODE_ERROR, 32),
 		/**
-		 * Action %s is not supported by %s
+		 * Action %1$s is not supported by %2$s
 		 */
-		UNSUPPORTED_ACTION("Action %s is not supported by %s", Category.CODE_ERROR, 33),
+		UNSUPPORTED_ACTION("Action %1$s is not supported by %2$s", Category.CODE_ERROR, 33),
 		/**
 		 * Message could not be sent
 		 */
 		SEND_FAILED_UNKNOWN("Message could not be sent", Category.CODE_ERROR, 35),
 		/**
-		 * Unknown action: %s
+		 * Unknown action: %1$s
 		 */
-		UNKNOWN_ACTION("Unknown or unsupported action: %s", Category.CODE_ERROR, 36),
+		UNKNOWN_ACTION("Unknown or unsupported action: %1$s", Category.CODE_ERROR, 36),
 		/**
-		 * Missing field %s
+		 * Missing field %1$s
 		 */
-		MISSING_FIELD("Missing field %s", Category.CODE_ERROR, 37),
+		MISSING_FIELD("Missing field %1$s", Category.CODE_ERROR, 37),
 		/**
-		 * Unsupported MIME type %s
+		 * Unsupported MIME type %1$s
 		 */
-		UNSUPPORTED_MIME_TYPE("Unsupported MIME type %s", Category.CODE_ERROR, 38),
+		UNSUPPORTED_MIME_TYPE("Unsupported MIME type %1$s", Category.CODE_ERROR, 38),
 		/**
 		 * Mail could not be moved to trash folder. Quota exceeded
 		 */
 		DELETE_FAILED_OVER_QUOTA("Mail could not be moved to trash folder. Quota exceeded",
 				Category.EXTERNAL_RESOURCE_FULL, 39),
 		/**
-		 * The message part with sequence ID %s could not be found in message %s
-		 * in folder %s
+		 * The message part with sequence ID %1$s could not be found in message %2$s
+		 * in folder %3$s
 		 */
-		PART_NOT_FOUND("The message part with sequence ID %s could not be found in message %s in folder %s",
+		PART_NOT_FOUND("The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s",
 				Category.CODE_ERROR, 40),
 		/**
 		 * No content available in mail part
@@ -260,34 +260,34 @@ public class MailException extends AbstractOXException {
 				"Message has been successfully sent, but a copy could not be placed in your sent folder.",
 				Category.EXTERNAL_RESOURCE_FULL, 43),
 		/**
-		 * No provider could be found for protocol/URL "%s"
+		 * No provider could be found for protocol/URL "%1$s"
 		 */
-		UNKNOWN_PROTOCOL("No provider could be found for protocol/URL \"%s\"", Category.SETUP_ERROR, 44),
+		UNKNOWN_PROTOCOL("No provider could be found for protocol/URL \"%1$s\"", Category.SETUP_ERROR, 44),
 		/**
-		 * Protocol cannot be parsed: %s
+		 * Protocol cannot be parsed: %1$s
 		 */
-		PROTOCOL_PARSE_ERROR("Protocol cannot be parsed: %s", Category.CODE_ERROR, 45),
+		PROTOCOL_PARSE_ERROR("Protocol cannot be parsed: %1$s", Category.CODE_ERROR, 45),
 		/**
-		 * Bad value %s in parameter %s
+		 * Bad value %1$s in parameter %2$s
 		 */
-		BAD_PARAM_VALUE("Bad value %s in parameter %s", Category.USER_INPUT, 46),
+		BAD_PARAM_VALUE("Bad value %1$s in parameter %2$s", Category.USER_INPUT, 46),
 		/**
 		 * No reply on multiple message possible
 		 */
 		NO_MULTIPLE_REPLY("No reply on multiple message possible", Category.USER_INPUT, 47),
 		/**
-		 * legal system flag argument %s. Flag must be to the power of 2
+		 * legal system flag argument %1$s. Flag must be to the power of 2
 		 */
-		ILLEGAL_FLAG_ARGUMENT("Illegal system flag argument %s. Flag must be to the power of 2", Category.CODE_ERROR,
+		ILLEGAL_FLAG_ARGUMENT("Illegal system flag argument %1$s. Flag must be to the power of 2", Category.CODE_ERROR,
 				48),
 		/**
-		 * Attachment %s not found inside mail %s of mail folder %s
+		 * Attachment %1$s not found inside mail %2$s of mail folder %3$s
 		 */
-		ATTACHMENT_NOT_FOUND("Attachment %s not found inside mail %s of mail folder %s", Category.CODE_ERROR, 49),
+		ATTACHMENT_NOT_FOUND("Attachment %1$s not found inside mail %2$s of mail folder %3$s", Category.CODE_ERROR, 49),
 		/**
-		 * Folder %s does not hold messages and is therefore not selectable
+		 * Folder %1$s does not hold messages and is therefore not selectable
 		 */
-		FOLDER_DOES_NOT_HOLD_MESSAGES("Folder %s does not hold messages and is therefore not selectable",
+		FOLDER_DOES_NOT_HOLD_MESSAGES("Folder %1$s does not hold messages and is therefore not selectable",
 				Category.PERMISSION, 50),
 		/**
 		 * Insufficient folder attributes: Either existence status or fullname
@@ -302,9 +302,9 @@ public class MailException extends AbstractOXException {
 		 */
 		NO_ROOT_FOLDER_MODIFY_DELETE("Root folder must not be modified or deleted", Category.CODE_ERROR, 52),
 		/**
-		 * No transport provider could be found for protocol/URL "%s"
+		 * No transport provider could be found for protocol/URL "%1$s"
 		 */
-		UNKNOWN_TRANSPORT_PROTOCOL("No transport provider could be found for protocol/URL \"%s\"",
+		UNKNOWN_TRANSPORT_PROTOCOL("No transport provider could be found for protocol/URL \"%1$s\"",
 				Category.SETUP_ERROR, 53),
 		/**
 		 * Missing mail folder fullname
