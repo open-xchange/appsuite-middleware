@@ -104,7 +104,7 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements
 	public SessiondConfigImpl(final ConfigurationService conf) {
 		this(conf, false);
 	}
-
+	
 	public SessiondConfigImpl(final ConfigurationService conf, final boolean ignoreIsInit) {
 		if (!ignoreIsInit && isInit) {
 			return;
@@ -113,7 +113,7 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements
 
 		isServerSocketEnabled = parseProperty(conf,
 				"com.openexchange.sessiond.isServerSocketEnabled",
-				isServerSocketEnabled);
+				false);
 		if (LOG.isDebugEnabled()) {
 			LOG
 					.debug("Sessiond property: com.openexchange.sessiond.isServerSocketEnabled="
@@ -123,7 +123,7 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements
 		isServerObjectStreamSocketEnabled = parseProperty(
 				conf,
 				"com.openexchange.sessiond.isServerObjectStreamSocketEnabled",
-				isServerObjectStreamSocketEnabled);
+				false);
 		if (LOG.isDebugEnabled()) {
 			LOG
 					.debug("Sessiond property: com.openexchange.sessiond.isServerObjectStreamSocketEnabled="
@@ -132,7 +132,7 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements
 
 		isTcpClientSocketEnabled = parseProperty(conf,
 				"com.openexchange.sessiond.isTcpClientSocketEnabled",
-				isTcpClientSocketEnabled);
+				false);
 		if (LOG.isDebugEnabled()) {
 			LOG
 					.debug("Sessiond property: com.openexchange.sessiond.isTcpClientSocketEnabled="
@@ -211,7 +211,7 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements
 
 		isSecureConnectionEnabled = parseProperty(conf,
 				"com.openexchange.sessiond.isSecureConnection",
-				isSecureConnectionEnabled);
+				false);
 		if (LOG.isDebugEnabled()) {
 			LOG
 					.debug("Sessiond property: com.openexchange.sessiond.isSecureConnection="
@@ -237,7 +237,7 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements
 		}
 
 		caFile = parseProperty(conf, "com.openexchange.sessiond.caFile",
-				caFile);
+				(String) null);
 		if (LOG.isDebugEnabled()) {
 			LOG
 					.debug("Sessiond property: com.openexchange.sessiond.caFile="
@@ -245,7 +245,7 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements
 		}
 
 		certFile = parseProperty(conf,
-				"com.openexchange.sessiond.certFile", certFile);
+				"com.openexchange.sessiond.certFile", (String) null);
 		if (LOG.isDebugEnabled()) {
 			LOG
 					.debug("Sessiond property: com.openexchange.sessiond.certFile="
@@ -253,7 +253,7 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements
 		}
 
 		keyFile = parseProperty(conf, "com.openexchange.sessiond.keyFile",
-				keyFile);
+				(String) null);
 		if (LOG.isDebugEnabled()) {
 			LOG
 					.debug("Sessiond property: com.openexchange.sessiond.keyFile="
