@@ -63,14 +63,10 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.GroupRequest;
-import com.openexchange.api.OXMandatoryFieldException;
-import com.openexchange.group.GroupException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.session.Session;
-import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 
 /**
@@ -83,7 +79,7 @@ public class Group extends DataServlet {
 	 * For serialization.
 	 */
 	private static final long serialVersionUID = 6699123983027304951L;
-	private static final Log LOG = LogFactory.getLog(Group.class);
+	private static final transient Log LOG = LogFactory.getLog(Group.class);
 
 	/**
 	 * {@inheritDoc}
@@ -111,29 +107,14 @@ public class Group extends DataServlet {
 			response.setTimestamp(groupRequest.getTimestamp());
 			response.setData(responseObj);
 			//response.setData(new JSONObject(sw.toString()));
-		} catch (final OXMandatoryFieldException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final OXJSONException exc) {
-            LOG.error(exc.getMessage(), exc);
-            response.setException(exc);
+		} catch (final AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
 		} catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-		} catch (final LdapException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-        } catch (final GroupException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
-		} catch (final AjaxException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-        } catch (final ContextException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
 		}
 		
 		writeResponse(response, httpServletResponse);
@@ -184,29 +165,14 @@ public class Group extends DataServlet {
 			} else {
 				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");
 			}
-		} catch (final OXMandatoryFieldException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final OXJSONException exc) {
-            LOG.error(exc.getMessage(), exc);
-            response.setException(exc);
+		} catch (final AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
 		} catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-		} catch (final LdapException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-        } catch (final GroupException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
-		} catch (final AjaxException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-        } catch (final ContextException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
 		}
 		
 		writeResponse(response, httpServletResponse);

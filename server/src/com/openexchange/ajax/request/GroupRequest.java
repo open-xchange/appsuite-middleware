@@ -64,6 +64,8 @@ import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.parser.GroupParser;
+import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.GroupWriter;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.group.Group;
@@ -71,10 +73,12 @@ import com.openexchange.group.GroupException;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.group.internal.GroupServiceImpl;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
@@ -101,7 +105,9 @@ public class GroupRequest {
         return timestamp;
     }
 
-    public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, LdapException, GroupException, JSONException, AjaxException, OXJSONException {
+    private static final String MODULE_GROUP = "group";
+
+    public Object action(final String action, final JSONObject jsonObject) throws AbstractOXException, JSONException {
         Object retval = null;
         if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
             retval = actionNew(jsonObject);
@@ -116,7 +122,23 @@ public class GroupRequest {
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_SEARCH)) {
             retval = actionSearch(jsonObject);
         } else {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+        	/*
+			 * Look-up manage request
+			 */
+			final AJAXRequestHandler handler = ServerRequestHandlerRegistry.getInstance().getHandler(MODULE_GROUP,
+					action);
+			if (null == handler) {
+				/*
+				 * No appropriate handler
+				 */
+				throw new AjaxException(AjaxException.Code.UnknownAction, action);
+			}
+			/*
+			 * ... and delegate to manage request
+			 */
+			final AJAXRequestResult result = handler.performAction(action, jsonObject, sessionObj, ctx);
+			timestamp = result.getTimestamp();
+			return result.getResultObject();
         }
         return retval;
     }
