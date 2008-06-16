@@ -90,7 +90,7 @@ public final class BundleAccessPermissionCollection extends PermissionCollection
 
 	/**
 	 * This is set to <code>true</code> if this BundleAccessPermissionCollection
-	 * contains a BasicPermission with '*' as its permission name.
+	 * contains a permission with '*' as its permission name.
 	 * 
 	 * @see #serialPersistentFields
 	 */
