@@ -670,7 +670,7 @@ public final class OXFolderAdminHelper {
 	 * @param cid
 	 *            The context ID
 	 * @param writeCon
-	 *            A writeable connection to (master) database
+	 *            A writable connection to (master) database
 	 * @throws OXException
 	 *             If user's default folders could not be created successfully
 	 */
