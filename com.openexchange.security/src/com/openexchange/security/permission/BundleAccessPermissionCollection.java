@@ -190,7 +190,7 @@ public final class BundleAccessPermissionCollection extends PermissionCollection
 		Permission x = perms.get(path);
 		if (x != null) {
 			/*
-			 * We have a direct hit!
+			 * Direct hit
 			 */
 			return x.implies(permission);
 		}
