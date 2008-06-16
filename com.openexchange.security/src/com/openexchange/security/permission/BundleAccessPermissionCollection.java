@@ -105,8 +105,7 @@ public final class BundleAccessPermissionCollection extends PermissionCollection
 	private Class<? extends Permission> permClass;
 
 	/**
-	 * Create an empty BundleAccessPermissionCollection object.
-	 * 
+	 * Create an empty {@link BundleAccessPermissionCollection}.
 	 */
 	public BundleAccessPermissionCollection() {
 		perms = new ConcurrentHashMap<String, Permission>(11);
@@ -121,7 +120,7 @@ public final class BundleAccessPermissionCollection extends PermissionCollection
 	 *            the Permission object to add.
 	 * 
 	 * @exception IllegalArgumentException
-	 *                - if the permission is not a BundleAccessPermission, or if
+	 *                If the permission is not a BundleAccessPermission, or if
 	 *                the permission is not of the same Class as the other
 	 *                permissions in this collection.
 	 * 
@@ -132,36 +131,34 @@ public final class BundleAccessPermissionCollection extends PermissionCollection
 	@Override
 	public void add(final Permission permission) {
 		if (!(permission instanceof BundleAccessPermission)) {
-			throw new IllegalArgumentException("invalid permission: " + permission);
+			throw new IllegalArgumentException("Invalid permission: " + permission);
 		}
 		if (isReadOnly()) {
-			throw new SecurityException("attempt to add a Permission to a readonly PermissionCollection");
+			throw new SecurityException("Attempt to add a permission to a read-only permission collection");
 		}
 		final BundleAccessPermission bp = (BundleAccessPermission) permission;
 		if (perms.size() == 0) {
 			permClass = bp.getClass();
 		} else {
 			if (bp.getClass() != permClass) {
-				throw new IllegalArgumentException("invalid permission: " + permission);
+				throw new IllegalArgumentException("Invalid permission: " + permission);
 			}
 		}
 		perms.put(bp.getName(), bp);
 		if (!all_allowed) {
-			if (bp.getName().equals("*")) {
-				all_allowed = true;
-			}
+			final String path = bp.getName();
+			all_allowed = (path.length() == 1 && path.charAt(0) == '*');
 		}
 	}
 
 	/**
-	 * Check and see if this set of permissions implies the permissions
-	 * expressed in "permission".
+	 * Check if this set of permissions implies the specified permission
 	 * 
 	 * @param p
-	 *            The Permission object to compare
+	 *            The permission to compare
 	 * 
-	 * @return <code>true</code> if "permission" is a proper subset of a
-	 *         permission in the set, <code>false</code> if not.
+	 * @return <code>true</code> if permission is a proper subset of a
+	 *         permission in the collection, <code>false</code> if not.
 	 */
 
 	@Override
@@ -195,7 +192,7 @@ public final class BundleAccessPermissionCollection extends PermissionCollection
 			return x.implies(permission);
 		}
 		/*
-		 * work our way up the tree...
+		 * Work our way up the tree...
 		 */
 		int last, offset;
 		offset = path.length() - 1;
@@ -223,7 +220,6 @@ public final class BundleAccessPermissionCollection extends PermissionCollection
 	 */
 	@Override
 	public Enumeration<Permission> elements() {
-		// Convert Iterator of Map values into an Enumeration
 		return Collections.enumeration(perms.values());
 	}
 
