@@ -66,11 +66,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.UserException;
-import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.ResourceService;
-import com.openexchange.security.BundleAccessException;
-import com.openexchange.security.BundleAccessSecurityService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
@@ -89,69 +86,29 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 	private static final Set<String> ACTIONS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
 			AJAXServlet.ACTION_NEW, AJAXServlet.ACTION_UPDATE, AJAXServlet.ACTION_DELETE)));
 
-	private final String bundleSymbolicName;
-
 	/**
 	 * Initializes a new {@link ResourceManageRequest}
-	 * 
-	 * @param bundleSymbolicName
-	 *            The symbolic name of the bundle initializing/offering this
-	 *            request
 	 */
-	public ResourceManageRequest(final String bundleSymbolicName) {
+	public ResourceManageRequest() {
 		super();
-		this.bundleSymbolicName = bundleSymbolicName;
 	}
 
 	public AJAXRequestResult performAction(final String action, final JSONObject jsonObject, final Session session,
 			final Context ctx) throws AbstractOXException, JSONException {
-		checkPermission(session, ctx);
-		if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
-			return actionNew(jsonObject, session, ctx);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
-			return actionUpdate(jsonObject, session, ctx);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
-			return actionDelete(jsonObject, session, ctx);
-		} else {
-			throw new AjaxException(AjaxException.Code.UnknownAction, action);
-		}
-	}
-
-	/**
-	 * Checks access permission to this request's methods
-	 * 
-	 * @param session
-	 *            The session
-	 * @param ctx
-	 *            The context
-	 * @throws ServiceException
-	 *             If a required service is missing
-	 * @throws BundleAccessException
-	 *             If access is not permitted
-	 * @throws UserException
-	 *             If user permissions cannot be loaded
-	 */
-	private void checkPermission(final Session session, final Context ctx) throws ServiceException,
-			BundleAccessException, UserException {
-		final BundleAccessSecurityService securityService = getServiceRegistry().getService(
-				BundleAccessSecurityService.class);
-		if (null == securityService) {
-			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, BundleAccessSecurityService.class
-					.getName());
-		}
-		// TODO: Get user's bundle names via UserService
 		final UserService userService = getServiceRegistry().getService(UserService.class);
 		if (null == userService) {
 			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, UserService.class.getName());
 		}
-		final Set<String> permissions = userService.getUser(session.getUserId(), ctx).getAttributes().get("permission");
-		if (permissions == null) {
-			throw new BundleAccessException(BundleAccessException.Code.ACCESS_DENIED, bundleSymbolicName);
+		final User user = userService.getUser(session.getUserId(), ctx);
+		if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
+			return actionNew(jsonObject, user, ctx);
+		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
+			return actionUpdate(jsonObject, user, ctx);
+		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
+			return actionDelete(jsonObject, user, ctx);
+		} else {
+			throw new AjaxException(AjaxException.Code.UnknownAction, action);
 		}
-		securityService.checkPermission(permissions.toArray(new String[permissions.size()]), bundleSymbolicName);
-		// securityService.checkPermission(new String[] {
-		// "com.openexchange.resource.*" },
-		// bundleSymbolicName);
 	}
 
 	/**
@@ -165,7 +122,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 	 * @throws JSONException
 	 *             If a JsSON error occurs
 	 */
-	private AJAXRequestResult actionNew(final JSONObject jsonObj, final Session session, final Context ctx)
+	private AJAXRequestResult actionNew(final JSONObject jsonObj, final User user, final Context ctx)
 			throws AbstractOXException, JSONException {
 		/*
 		 * Check for "data"
@@ -183,7 +140,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 		if (null == resourceService) {
 			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ResourceService.class.getName());
 		}
-		resourceService.create(UserStorage.getStorageUser(session.getUserId(), ctx), ctx, resource);
+		resourceService.create(user, ctx, resource);
 		/*
 		 * Return its ID
 		 */
@@ -201,7 +158,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 	 * @throws JSONException
 	 *             If a JsSON error occurs
 	 */
-	private AJAXRequestResult actionUpdate(final JSONObject jsonObj, final Session session, final Context ctx)
+	private AJAXRequestResult actionUpdate(final JSONObject jsonObj, final User user, final Context ctx)
 			throws AbstractOXException, JSONException {
 		final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
 		if (null == resourceService) {
@@ -222,7 +179,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 		/*
 		 * Update resource
 		 */
-		resourceService.update(UserStorage.getStorageUser(session.getUserId(), ctx), ctx, resource, clientLastModified);
+		resourceService.update(user, ctx, resource, clientLastModified);
 		/*
 		 * Write updated resource
 		 */
@@ -241,7 +198,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 	 * @throws JSONException
 	 *             If a JsSON error occurs
 	 */
-	private AJAXRequestResult actionDelete(final JSONObject jsonObj, final Session session, final Context ctx)
+	private AJAXRequestResult actionDelete(final JSONObject jsonObj, final User user, final Context ctx)
 			throws AbstractOXException, JSONException {
 		final ResourceService resourceService = getServiceRegistry().getService(ResourceService.class);
 		if (null == resourceService) {
@@ -262,7 +219,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 		/*
 		 * Delete resource
 		 */
-		resourceService.delete(UserStorage.getStorageUser(session.getUserId(), ctx), ctx, resource, clientLastModified);
+		resourceService.delete(user, ctx, resource, clientLastModified);
 		/*
 		 * Write JSON null
 		 */
