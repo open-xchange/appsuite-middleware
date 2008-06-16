@@ -83,7 +83,7 @@ public class CalendarCache {
             } catch (final CacheException ce) {
                 LOG.error("CalendarCache could not be initialized!", ce);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error("CalendarCache could not be initialized!", e);
         }
     }

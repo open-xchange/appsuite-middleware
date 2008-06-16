@@ -70,7 +70,6 @@ import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.Infostore;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.SearchFields;
-import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.parser.InfostoreParser;
 import com.openexchange.ajax.parser.InfostoreParser.UnknownMetadataException;
 import com.openexchange.ajax.writer.InfostoreWriter;
@@ -132,7 +131,7 @@ public class InfostoreRequest extends CommonRequest {
 
 	}
 
-	public static boolean hasPermission(UserConfiguration userConfig) {
+	public static boolean hasPermission(final UserConfiguration userConfig) {
 		return userConfig.hasInfostore();
 	}
 
@@ -735,7 +734,7 @@ public class InfostoreRequest extends CommonRequest {
 			}
 			w.endArray();
 
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		}
 	}
@@ -911,7 +910,7 @@ public class InfostoreRequest extends CommonRequest {
 		w.endObject();
 	}
 
-	protected void update(final int id, DocumentMetadata updated, final long timestamp, final Metadata[] presentFields) {
+	protected void update(final int id, final DocumentMetadata updated, final long timestamp, final Metadata[] presentFields) {
 		final InfostoreFacade infostore = getInfostore(updated.getFolderId());
 		final SearchEngine searchEngine = getSearchEngine();
 

@@ -54,18 +54,13 @@ package com.openexchange.webdav.xml;
 import java.io.OutputStream;
 import java.util.Date;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
 
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.xml.fields.DataFields;
 
@@ -91,12 +86,12 @@ public class DataWriter {
 	
 	protected User userObj;
 	
-	protected void writeResponseElement(Element e_prop, int object_id, int status, String description, XMLOutputter xo, OutputStream os) throws Exception {
-		Element e_response = new Element("response", dav);
+	protected void writeResponseElement(final Element e_prop, final int object_id, final int status, final String description, final XMLOutputter xo, final OutputStream os) throws Exception {
+		final Element e_response = new Element("response", dav);
 		e_response.addNamespaceDeclaration(Namespace.getNamespace(XmlServlet.PREFIX, XmlServlet.NAMESPACE));
 		e_response.addContent(new Element("href", dav).addContent(String.valueOf(object_id)));
 		
-		Element e_propstat = new Element("propstat", dav);
+		final Element e_propstat = new Element("propstat", dav);
 		e_response.addContent(e_propstat);
 		
 		e_propstat.addContent(e_prop);
@@ -106,7 +101,7 @@ public class DataWriter {
 		xo.output(e_response, os);
 	}
 	
-	protected void writeDataElements(DataObject dataobject, Element e_prop) throws Exception {
+	protected void writeDataElements(final DataObject dataobject, final Element e_prop) throws Exception {
 		if (dataobject.containsCreatedBy()) {
 			addElement(DataFields.CREATED_BY, dataobject.getCreatedBy(), e_prop);
 		}
@@ -128,42 +123,42 @@ public class DataWriter {
 		}
 	}
 	
-	public static void addElement(String name, String value, Element parent) throws Exception {
+	public static void addElement(final String name, final String value, final Element parent) throws Exception {
 		if (value != null) {
-			Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
+			final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
 			e.addContent(value);
 			parent.addContent(e);
 		}
 	}
 	
-	public static void addElement(String name, Date value, Element parent) throws Exception {
+	public static void addElement(final String name, final Date value, final Element parent) throws Exception {
 		if (value != null) {
-			Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
+			final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
 			e.addContent(String.valueOf(value.getTime()));
 			parent.addContent(e);
 		}
 	}
 	
-	public static void addElement(String name, int value, Element parent) throws Exception {
-		Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
+	public static void addElement(final String name, final int value, final Element parent) throws Exception {
+		final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
 		e.addContent(String.valueOf(value));
 		parent.addContent(e);
 	}
 	
-	public static void addElement(String name, float value, Element parent) throws Exception {
-		Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
+	public static void addElement(final String name, final float value, final Element parent) throws Exception {
+		final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
 		e.addContent(String.valueOf(value));
 		parent.addContent(e);
 	}
 	
-	public static void addElement(String name, long value, Element parent) throws Exception {
-		Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
+	public static void addElement(final String name, final long value, final Element parent) throws Exception {
+		final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
 		e.addContent(String.valueOf(value));
 		parent.addContent(e);
 	}
 	
-	public static void addElement(String name, boolean value, Element parent) throws Exception {
-		Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
+	public static void addElement(final String name, final boolean value, final Element parent) throws Exception {
+		final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
 		if (value) {
 			e.addContent("true");
 		} else {

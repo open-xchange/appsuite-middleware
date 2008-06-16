@@ -48,36 +48,37 @@
  */
 package com.openexchange.groupware.infostore;
 
-import com.openexchange.groupware.downgrade.DowngradeListener;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeFailedException;
+import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.StaticDBPoolProvider;
 import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.api2.OXException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class InfostoreDowngrade extends DowngradeListener {
-    public void downgradePerformed(DowngradeEvent event) throws DowngradeFailedException {
-        DBProvider provider = new StaticDBPoolProvider(event.getWriteCon());
+    @Override
+	public void downgradePerformed(final DowngradeEvent event) throws DowngradeFailedException {
+        final DBProvider provider = new StaticDBPoolProvider(event.getWriteCon());
 
-        ServerSession session = new ServerSessionAdapter(event.getSession(), event.getContext());
+        final ServerSession session = new ServerSessionAdapter(event.getSession(), event.getContext());
 
-        InfostoreFacade infostore = new InfostoreFacadeImpl(provider);
+        final InfostoreFacade infostore = new InfostoreFacadeImpl(provider);
         infostore.setTransactional(true);
         infostore.setCommitsTransaction(false);
         try {
 
-            OXFolderAccess access = new OXFolderAccess(event.getContext());
-            FolderObject fo = access.getDefaultFolder(event.getNewUserConfiguration().getUserId(), FolderObject.INFOSTORE);
-            int folderId = fo.getObjectID();
+            final OXFolderAccess access = new OXFolderAccess(event.getContext());
+            final FolderObject fo = access.getDefaultFolder(event.getNewUserConfiguration().getUserId(), FolderObject.INFOSTORE);
+            final int folderId = fo.getObjectID();
 
 
             infostore.startTransaction();
@@ -85,30 +86,31 @@ public class InfostoreDowngrade extends DowngradeListener {
             infostore.removeDocument(folderId, Long.MAX_VALUE, session);
 
             infostore.commit();
-        } catch (TransactionException e) {
+        } catch (final TransactionException e) {
             try {
                 infostore.rollback();
-            } catch (TransactionException e1) {
+            } catch (final TransactionException e1) {
                 //IGNORE
             }
             throw new DowngradeFailedException(e);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             try {
                 infostore.rollback();
-            } catch (TransactionException e1) {
+            } catch (final TransactionException e1) {
                 //IGNORE
             }
             throw new DowngradeFailedException(e);
         } finally {
             try {
                 infostore.finish();
-            } catch (TransactionException e) {
+            } catch (final TransactionException e) {
                 //IGNORE
             }
         }
     }
 
-    public int getOrder() {
+    @Override
+	public int getOrder() {
         return 2;
     }
 }

@@ -64,11 +64,11 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
 	protected final void fillStmt(final PreparedStatement stmt, final Metadata[] fields, final DocumentMetadata doc, final Object...additional) throws SQLException {
 		final GetSwitch get = new GetSwitch(doc);
 		int i = 1;
-		for(Metadata m : fields) {
+		for(final Metadata m : fields) {
 			stmt.setObject(i++, process(m, m.doSwitch(get)));
 		}
 		
-		for(Object o : additional) {
+		for(final Object o : additional) {
 			stmt.setObject(i++, o);
 		}
 	}

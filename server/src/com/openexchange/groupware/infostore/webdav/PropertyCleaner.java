@@ -56,19 +56,19 @@ import com.openexchange.api2.OXException;
 import com.openexchange.event.impl.FolderEventInterface;
 import com.openexchange.event.impl.InfostoreEventInterface;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.session.Session;
+import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.exceptions.LoggingLogic;
-import com.openexchange.session.Session;
 
 public class PropertyCleaner implements FolderEventInterface, InfostoreEventInterface {
 	
-	private PropertyStore infoProperties;
-	private PropertyStore folderProperties;
+	private final PropertyStore infoProperties;
+	private final PropertyStore folderProperties;
 	
 	private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(PropertyCleaner.class);
 	private static final Log LOG = LogFactory.getLog(PropertyCleaner.class);
@@ -85,7 +85,7 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
 
 	public void folderDeleted(final FolderObject folderObj, final Session session) {
 		try {
-            ServerSession sessionObj = new ServerSessionAdapter(session);
+            final ServerSession sessionObj = new ServerSessionAdapter(session);
             folderProperties.startTransaction();
 			folderProperties.removeAll(folderObj.getObjectID(), sessionObj.getContext());
 			folderProperties.commit();
@@ -96,7 +96,7 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
 				LOG.debug("I assume the user was deleted, so these properties are cleaned elsewhere.");
 			}
 			LL.log(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
-		} catch (ContextException e) {
+		} catch (final ContextException e) {
             LOG.error(e.getLocalizedMessage(), e);
         } finally {
 			try {
@@ -119,7 +119,7 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
 	public void infoitemDeleted(final DocumentMetadata metadata,
 			final Session session) {
 		try {
-            ServerSession sessionObject = new ServerSessionAdapter(session);
+            final ServerSession sessionObject = new ServerSessionAdapter(session);
             infoProperties.startTransaction();
 			infoProperties.removeAll(metadata.getId(), sessionObject.getContext());
 			infoProperties.commit();
@@ -130,7 +130,7 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
 				LOG.debug("I assume the user was deleted, so these properties are cleaned elsewhere.");
 			}
 			LL.log(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
-		} catch (ContextException e) {
+		} catch (final ContextException e) {
             LOG.error(e.getLocalizedMessage(), e);
         } finally {
 			try {

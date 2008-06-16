@@ -50,13 +50,7 @@
 package com.openexchange.webdav.action;
 
 import static com.openexchange.tools.io.IOTools.reallyBloodySkip;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavResource;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,10 +61,20 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavResource;
+
 public class WebdavGetAction extends WebdavHeadAction {
 	private static final Log LOG = LogFactory.getLog(WebdavGetAction.class);
 	private static final Pattern RANGE_PATTERN = Pattern.compile("bytes=(\\S+)");
 
+	@Override
 	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavException {
 		final WebdavResource resource = req.getResource();
 		if(!resource.exists()) {

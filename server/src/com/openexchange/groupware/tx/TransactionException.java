@@ -61,20 +61,20 @@ public class TransactionException extends OXException {
 	private static final long serialVersionUID = -8149589818960075908L;
 	private StackTraceElement[] elements;
 	
-	public TransactionException(AbstractOXException exc) {
+	public TransactionException(final AbstractOXException exc) {
 		super(exc);
 	}
 
-	public TransactionException(Category category, int number, String message, Throwable cause, Object...msgArgs) {
+	public TransactionException(final Category category, final int number, final String message, final Throwable cause, final Object...msgArgs) {
 		super(EnumComponent.TRANSACTION, category, number, message, cause);
 		setMessageArgs(msgArgs);
 	}
 
-	public TransactionException(EnumComponent component, String message) {
+	public TransactionException(final EnumComponent component, final String message) {
 		super(component, message);
 	}
 
-	public TransactionException(String arg0, StackTraceElement[] elements) {
+	public TransactionException(final String arg0, final StackTraceElement[] elements) {
 		this.elements = elements;
 	}
 	
@@ -87,7 +87,7 @@ public class TransactionException extends OXException {
 			System.err.println("No Stack Trace recorded");
 			return;
 		}
-		for(StackTraceElement element : elements) {
+		for(final StackTraceElement element : elements) {
 			System.err.println(element);
 		}
 	}

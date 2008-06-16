@@ -66,15 +66,15 @@ public class ContactException extends OXException {
 	public static final String INIT_CONNECTION_FROM_DBPOOL = "Unable to pick up a connection from the DBPool";
 	public static final String PFLAG_IN_PUBLIC_FOLDER = "A contact with private flag cannot be stored in a public folder. Folder: %1$d context %2$d user %3$d";
 	
-	public ContactException(Category category, int id, String message, Throwable cause, Object...msgParams){
+	public ContactException(final Category category, final int id, final String message, final Throwable cause, final Object...msgParams){
 		super(EnumComponent.CONTACT, category, id,message,cause,msgParams);
 	}
 
-	public ContactException(AbstractOXException cause){
+	public ContactException(final AbstractOXException cause){
 		super(cause);
 	}
 	
-	public ContactException(Category category, String message, int id, Object...msgParams){
+	public ContactException(final Category category, final String message, final int id, final Object...msgParams){
 		this(category,id,message, null,msgParams);
 	}
 	

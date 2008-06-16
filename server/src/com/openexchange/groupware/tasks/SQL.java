@@ -223,7 +223,7 @@ public final class SQL {
     static String getFields(final int[] columns, final boolean folder)
         throws TaskException {
         final StringBuilder sql = new StringBuilder();
-        for (int i : columns) {
+        for (final int i : columns) {
             final Mapper<?> mapper = Mapping.getMapping(i);
             if (null == mapper) {
                 switch (i) {
@@ -382,8 +382,8 @@ public final class SQL {
      */
     public static int[] findTruncated(final String[] fields) {
         final List<Integer> truncated = new ArrayList<Integer>();
-        for (String field : fields) {
-            for (Mapper<?> mapper : Mapping.MAPPERS) {
+        for (final String field : fields) {
+            for (final Mapper<?> mapper : Mapping.MAPPERS) {
                 if (mapper.getDBColumnName().equals(field)) {
                     truncated.add(Integer.valueOf(mapper.getId()));
                     break;
@@ -399,7 +399,7 @@ public final class SQL {
 
     static {
         final StringBuilder selectAll = new StringBuilder();
-        for (Mapper<?> mapper : Mapping.MAPPERS) {
+        for (final Mapper<?> mapper : Mapping.MAPPERS) {
             selectAll.append(mapper.getDBColumnName());
             selectAll.append(',');
         }
@@ -425,7 +425,7 @@ public final class SQL {
             + "AND @taskTable@.id=@participantTable@.task "
             + "WHERE @taskTable@.cid=? AND "
             + "(@taskTable@.created_from=? OR @taskTable@.changed_from=?)";
-        for (StorageType type : activeDelete) {
+        for (final StorageType type : activeDelete) {
             SEARCH_DELEGATED.put(type, sql.replace("@taskTable@", TASK_TABLES
                 .get(type)).replace("@participantTable@", PARTS_TABLES
                 .get(type)));
@@ -433,7 +433,7 @@ public final class SQL {
 
         sql = "INSERT INTO " + tableName + " (cid,task,user,group_id,accepted,"
             + "description) VALUES (?,?,?,?,?,?)";
-        for (StorageType type : activeDelete) {
+        for (final StorageType type : activeDelete) {
             INSERT_PARTS.put(type, sql.replace(tableName, PARTS_TABLES.get(type)));
         }
         INSERT_PARTS.put(StorageType.REMOVED,
@@ -450,81 +450,81 @@ public final class SQL {
             + "FROM del_task_participant WHERE cid=? AND task IN (");
         sql = "UPDATE " + tableName + " SET group_id=?, accepted=?, "
             + "description=? WHERE cid=? AND task=? AND user=?";
-        for (StorageType type : StorageType.values()) {
+        for (final StorageType type : StorageType.values()) {
             UPDATE_PARTS.put(type, sql.replace(tableName, PARTS_TABLES
                 .get(type)));
         }
         sql = "DELETE FROM " + tableName
             + " WHERE cid=? AND task=? AND user IN (";
-        for (StorageType type : StorageType.values()) {
+        for (final StorageType type : StorageType.values()) {
             DELETE_PARTS.put(type, sql.replace(tableName, PARTS_TABLES
                 .get(type)));
         }
         sql = "SELECT task FROM " + tableName + " WHERE cid=? AND user=?";
-        for (StorageType type : StorageType.values()) {
+        for (final StorageType type : StorageType.values()) {
             FIND_PARTICIPANT.put(type, sql.replace(tableName,
                 PARTS_TABLES.get(type)));
         }
         sql = "SELECT task FROM " + tableName + " WHERE cid=? AND group_id=?";
-        for (StorageType type : StorageType.values()) {
+        for (final StorageType type : StorageType.values()) {
             FIND_GROUP.put(type, sql.replace(tableName, PARTS_TABLES
                 .get(type)));
         }
         sql = "INSERT INTO " + tableName
             + " (cid,task,mail,display_name) VALUES (?,?,?,?)";
-        for (StorageType type : activeDelete) {
+        for (final StorageType type : activeDelete) {
             INSERT_EXTERNAL.put(type, sql.replace(tableName, EPARTS_TABLES
                 .get(type)));
         }
         sql = "DELETE FROM " + tableName
             + " WHERE cid=? AND task=? AND mail IN (";
-        for (StorageType type : activeDelete) {
+        for (final StorageType type : activeDelete) {
             DELETE_EXTERNAL.put(type, sql.replace(tableName, EPARTS_TABLES
                 .get(type)));
         }
         sql = "SELECT task,mail,display_name FROM " + tableName
             + " WHERE cid=? AND task IN (";
-        for (StorageType type : activeDelete) {
+        for (final StorageType type : activeDelete) {
             SELECT_EXTERNAL.put(type, sql.replace(tableName, EPARTS_TABLES
                 .get(type)));
         }
 
         sql = "INSERT INTO " + tableName + " (cid, id, folder, user) "
             + "VALUES (?,?,?,?)";
-        for (StorageType type : activeDelete) {
+        for (final StorageType type : activeDelete) {
             INSERT_FOLDER.put(type, sql.replace(tableName, FOLDER_TABLES
                 .get(type)));
         }
         sql = "DELETE FROM " + tableName
             + " WHERE cid=? AND id=? AND folder IN (";
-        for (StorageType type : activeDelete) {
+        for (final StorageType type : activeDelete) {
             DELETE_FOLDER.put(type, sql.replace(tableName, FOLDER_TABLES
                 .get(type)));
         }
         sql = "SELECT folder,user FROM " + tableName + " WHERE cid=? AND id=?";
-        for (StorageType type : activeDelete) {
+        for (final StorageType type : activeDelete) {
             SELECT_FOLDER.put(type, sql.replace(tableName, FOLDER_TABLES
                 .get(type)));
         }
         sql = "SELECT folder FROM " + tableName
             + " WHERE cid=? AND id=? AND user=?";
-        for (StorageType type : activeDelete) {
+        for (final StorageType type : activeDelete) {
             FOLDER_BY_USER.put(type, sql.replace(tableName, FOLDER_TABLES
                 .get(type)));
         }
         sql = "SELECT user FROM " + tableName
             + " WHERE cid=? AND id=? AND folder=?";
-        for (StorageType type : activeDelete) {
+        for (final StorageType type : activeDelete) {
             FOLDER_BY_ID.put(type, sql.replace(tableName, FOLDER_TABLES
                 .get(type)));
         }
         sql = "SELECT id FROM " + tableName + " WHERE cid=? AND folder=?";
-        for (StorageType type : activeDelete) {
+        for (final StorageType type : activeDelete) {
             TASK_IN_FOLDER.put(type, sql.replace(tableName, FOLDER_TABLES
                 .get(type)));
         }
         sql = "SELECT folder,id FROM " + tableName + " WHERE cid=? AND user=?";
-        for (StorageType type : activeDelete) {
+        for (final StorageType type : activeDelete) {
             SEARCH_FOLDER_BY_USER.put(type, sql.replace(tableName, FOLDER_TABLES
                 .get(type)));
         }

@@ -190,7 +190,8 @@ public abstract class ContextStorage {
      * @throws ContextException if initialization of contexts fails.
      * @deprecated use normal server startup with {@link Starter}.
      */
-    public static void init() throws ContextException {
+    @Deprecated
+	public static void init() throws ContextException {
         start();
     }
 

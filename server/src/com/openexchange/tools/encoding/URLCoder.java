@@ -99,7 +99,7 @@ public final class URLCoder {
 		final String retval = Charsets.toString(baos.toByteArray(), charset);
 		try {
 			baos.close();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.error(e.getMessage(), e);
 		}
 		return retval;

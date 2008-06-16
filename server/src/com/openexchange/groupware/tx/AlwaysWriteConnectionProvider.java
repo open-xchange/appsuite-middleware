@@ -55,9 +55,9 @@ import com.openexchange.groupware.contexts.Context;
 
 public class AlwaysWriteConnectionProvider implements DBProvider {
 
-	private DBProvider delegate;
+	private final DBProvider delegate;
 
-	public AlwaysWriteConnectionProvider(DBProvider delegate) {
+	public AlwaysWriteConnectionProvider(final DBProvider delegate) {
 		this.delegate = delegate;
 	}
 	

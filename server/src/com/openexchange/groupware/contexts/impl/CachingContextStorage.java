@@ -135,7 +135,7 @@ public class CachingContextStorage extends ContextStorage {
 				if (NOT_FOUND != contextId.intValue()) {
 					try {
 						cache.put(loginInfo, contextId);
-					} catch (CacheException e) {
+					} catch (final CacheException e) {
 						throw new ContextException(Code.CACHE_PUT, e);
 					}
 				}
@@ -229,7 +229,7 @@ public class CachingContextStorage extends ContextStorage {
 			cacheLock.lock();
 			try {
 				cache.remove(Integer.valueOf(contextId));
-			} catch (CacheException e) {
+			} catch (final CacheException e) {
 				throw new ContextException(ContextException.Code.CACHE_REMOVE, e, String.valueOf(contextId));
 			} finally {
 				cacheLock.unlock();
@@ -254,7 +254,7 @@ public class CachingContextStorage extends ContextStorage {
 			cacheLock.lock();
 			try {
 				cache.remove(loginContextInfo);
-			} catch (CacheException e) {
+			} catch (final CacheException e) {
 				throw new ContextException(ContextException.Code.CACHE_REMOVE, e, loginContextInfo);
 			} finally {
 				cacheLock.unlock();

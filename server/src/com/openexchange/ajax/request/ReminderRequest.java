@@ -50,8 +50,10 @@
 package com.openexchange.ajax.request;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
@@ -90,14 +92,12 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ReminderRequest {
     
-    private Session sessionObj;
+    private final Session sessionObj;
 
-    private Context ctx;
+    private final Context ctx;
     
     private final User userObj;
     
@@ -173,9 +173,9 @@ public class ReminderRequest {
                     reminderSql.deleteReminder(id);
                 }
             }
-        } catch(SQLException sqle) {
+        } catch(final SQLException sqle) {
             throw new OXException("SQLException occurred", sqle);
-        } catch(OXException oxe) {
+        } catch(final OXException oxe) {
             LOG.debug(oxe.getMessage(), oxe);
             
             if (oxe.getComponent().equals(EnumComponent.REMINDER) && oxe.getDetailNumber() == 9) {
@@ -183,7 +183,7 @@ public class ReminderRequest {
                 return jsonArray;
             }
             throw oxe;
-        } catch(AbstractOXException exc) {
+        } catch(final AbstractOXException exc) {
             throw new OXException(exc);
         }
         
@@ -228,7 +228,7 @@ public class ReminderRequest {
             }
             
             return jsonResponseArray;
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
         	throw new OXException(e);
         } finally {
             if (null != it) {
@@ -263,7 +263,7 @@ public class ReminderRequest {
                     
                     try {
                     	latestReminder = getLatestRecurringReminder(targetId, inFolder, sessionObj, end, oldReminderDate);
-                    } catch (OXObjectNotFoundException exc) {
+                    } catch (final OXObjectNotFoundException exc) {
                     	LOG.warn("Cannot load target object of this reminder");
                     	reminderSql.deleteReminder(targetId, userObj.getId(), reminderObj.getModule());
                     }
@@ -283,9 +283,9 @@ public class ReminderRequest {
             }
             
             return jsonResponseArray;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new OXException("SQLException occurred", e);
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             throw new OXException(e);
         } finally {
             if (null != it) {

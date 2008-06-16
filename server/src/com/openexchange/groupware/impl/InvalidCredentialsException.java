@@ -57,21 +57,27 @@ package com.openexchange.groupware.impl;
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  * @deprecated use LoginException.
  */
+@Deprecated
 public class InvalidCredentialsException extends Exception
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2624260348811449217L;
+
 	public InvalidCredentialsException() {
 		super();
 	}
 	
-	public InvalidCredentialsException(String message) {
+	public InvalidCredentialsException(final String message) {
 		super(message);
 	}
 	
-	public InvalidCredentialsException(String message, Exception exc) {
+	public InvalidCredentialsException(final String message, final Exception exc) {
 		super(message, exc);
 	}
 	
-	public InvalidCredentialsException(Exception exc) {
+	public InvalidCredentialsException(final Exception exc) {
 		super(exc);
 	}
 }

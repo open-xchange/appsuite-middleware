@@ -73,48 +73,48 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
     
     private static final Log LOG = LogFactory.getLog(CalendarAttachments.class);
     
-    public long attached(AttachmentEvent e) throws Exception {
-        CalendarSql csql = new CalendarSql(null);
+    public long attached(final AttachmentEvent e) throws Exception {
+        final CalendarSql csql = new CalendarSql(null);
         return csql.attachmentAction(e.getAttachedId(), e.getUser().getId(), e.getContext(), true);
     }
     
-    public long detached(AttachmentEvent e) throws Exception {
-        CalendarSql csql = new CalendarSql(null);
+    public long detached(final AttachmentEvent e) throws Exception {
+        final CalendarSql csql = new CalendarSql(null);
         return csql.attachmentAction(e.getAttachedId(), e.getUser().getId(), e.getContext(), false);
     }
     
-    public void checkMayAttach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
+    public void checkMayAttach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
         try {
-            Session so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, CalendarCommonCollection.getUniqueCalendarSessionName());
+            final Session so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, CalendarCommonCollection.getUniqueCalendarSessionName());
             if (!CalendarCommonCollection.getWritePermission(objectId, folderId, so, ctx)) {
                 throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSIONS_TO_ATTACH_DETACH);
             }
-        } catch (OXObjectNotFoundException oxonfe) {
+        } catch (final OXObjectNotFoundException oxonfe) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(StringCollection.convertArraytoString(new Object[] { "checkMayAttach failed. The object does not exists (cid:oid) : ",ctx.getContextId(),":",objectId } ));
             }
             throw oxonfe;
-        } catch(Exception e) {
+        } catch(final Exception e) {
             throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, 14);
         }
     }
     
-    public void checkMayDetach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
+    public void checkMayDetach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
         checkMayAttach(folderId, objectId, user, userConfig, ctx);
     }
     
-    public void checkMayReadAttachments(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
+    public void checkMayReadAttachments(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
         try {
-            Session so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, CalendarCommonCollection.getUniqueCalendarSessionName());
+            final Session so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, CalendarCommonCollection.getUniqueCalendarSessionName());
             if (!CalendarCommonCollection.getReadPermission(objectId, folderId, so, ctx)) {
                 throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSIONS_TO_READ);
             }
-        } catch (OXObjectNotFoundException oxonfe) {
+        } catch (final OXObjectNotFoundException oxonfe) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(StringCollection.convertArraytoString(new Object[] { "checkMayReadAttachments failed. The object does not exists (cid:oid) : ",ctx.getContextId(),":",objectId } ));
             }
             throw oxonfe;
-        } catch(Exception e) {
+        } catch(final Exception e) {
             throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, 15);
         }
     }

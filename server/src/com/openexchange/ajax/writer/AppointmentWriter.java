@@ -51,17 +51,19 @@
 
 package com.openexchange.ajax.writer;
 
-import com.openexchange.ajax.fields.AppointmentFields;
-import com.openexchange.groupware.calendar.CalendarCommonCollection;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.AppointmentObject;
 import java.util.Date;
 import java.util.TimeZone;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.openexchange.ajax.fields.AppointmentFields;
+import com.openexchange.groupware.calendar.CalendarCommonCollection;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.AppointmentObject;
 
 /**
  * AppointmentWriter
@@ -73,7 +75,7 @@ public class AppointmentWriter extends CalendarWriter {
 	
 	private static final Log LOG = LogFactory.getLog(AppointmentWriter.class);
 	
-	public AppointmentWriter(TimeZone timeZone) {
+	public AppointmentWriter(final TimeZone timeZone) {
 		this.timeZone = timeZone;
 	}
 	

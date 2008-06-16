@@ -77,7 +77,7 @@ public class ContactParser extends CommonParser {
 	
 	private static final Log LOG = LogFactory.getLog(ContactParser.class);
 	
-	public ContactParser(Session sessionObj) {
+	public ContactParser(final Session sessionObj) {
 		this.sessionObj = sessionObj;
 	}
 	
@@ -91,9 +91,9 @@ public class ContactParser extends CommonParser {
 				parseElementContact(contactobject, parser);
 				parser.nextTag();
 			}
-		} catch (XmlPullParserException exc) {
+		} catch (final XmlPullParserException exc) {
 			throw exc;
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw new OXException(exc);
 		}
 	}
@@ -436,7 +436,7 @@ public class ContactParser extends CommonParser {
 					
 				distributionlist.add(entry);	
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw new OXException(exc);
 		}
 		
@@ -489,7 +489,7 @@ public class ContactParser extends CommonParser {
 					
 				links.add(link);	
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw new OXException(exc);
 		}
 		

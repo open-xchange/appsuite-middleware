@@ -51,12 +51,11 @@ package com.openexchange.groupware.tx;
 
 import java.sql.Connection;
 
-
 import com.openexchange.groupware.contexts.Context;
 
 public class ReuseReadConProvider implements DBProvider {
 
-	private DBProvider provider;
+	private final DBProvider provider;
 	private Connection readCon;
 	private int refCount;
 

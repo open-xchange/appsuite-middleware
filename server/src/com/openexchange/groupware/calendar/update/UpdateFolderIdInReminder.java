@@ -49,22 +49,20 @@
 
 package com.openexchange.groupware.calendar.update;
 
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.CalendarCommonCollection;
-import com.openexchange.groupware.calendar.CalendarOperation;
-import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.database.Database;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.UpdateTask.UpdateTaskPriority;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+
+import com.openexchange.database.Database;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.calendar.CalendarCommonCollection;
+import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateTask;
 
 
 /**
@@ -92,7 +90,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
     
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         Connection writecon = null;
         Statement stmt = null;
         PreparedStatement pst = null;
@@ -109,40 +107,40 @@ public class UpdateFolderIdInReminder implements UpdateTask {
             writecon = Database.get(contextId, true);
             try {
                 stmt = writecon.createStatement();
-            } catch (SQLException ex) {
+            } catch (final SQLException ex) {
                 throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex);
             }
             if (stmt != null) {
                 try {
                     stmt.executeUpdate(DELETE_ZERO_REMINDERS);
-                } catch (SQLException ex) {
+                } catch (final SQLException ex) {
                     throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex);
                 }
             }
-            ArrayList update = new ArrayList(16);
-            ArrayList delete = new ArrayList(16);
-            ArrayList check = new ArrayList(16);
+            final ArrayList update = new ArrayList(16);
+            final ArrayList delete = new ArrayList(16);
+            final ArrayList check = new ArrayList(16);
             try {
                 pst = writecon.prepareStatement(FIND_REMINDERS, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
                 pst2 = writecon.prepareStatement(FIND_CURRENT_USER_FOLDER, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
                 pst.setInt(1, Types.APPOINTMENT);
                 rs = pst.executeQuery();
                 while (rs.next()) {
-                    int oid = rs.getInt(1);
-                    int cid = rs.getInt(2);
-                    int uid = rs.getInt(3);
-                    int fid = rs.getInt(4);
+                    final int oid = rs.getInt(1);
+                    final int cid = rs.getInt(2);
+                    final int uid = rs.getInt(3);
+                    final int fid = rs.getInt(4);
                     pst2.setInt(1, cid);
                     pst2.setInt(2, uid);
                     pst2.setInt(3, oid);
-                    ReminderUpdate ru = new ReminderUpdate();
+                    final ReminderUpdate ru = new ReminderUpdate();
                     ru.setOID(oid);
                     ru.setCID(cid);
                     ru.setUID(uid);
                     ru.setFID(fid);
                     rs2 = pst2.executeQuery();
                     if (rs2.next()) {
-                        int pfid = rs2.getInt(1);
+                        final int pfid = rs2.getInt(1);
                         if (pfid != fid) {
                             update.add(ru);
                         } else {
@@ -152,7 +150,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
                         delete.add(ru);
                     }
                 }
-            } catch (SQLException ex) {
+            } catch (final SQLException ex) {
                 throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex);
             }
             
@@ -160,17 +158,17 @@ public class UpdateFolderIdInReminder implements UpdateTask {
                 pst6 = writecon.prepareStatement(FIND_WITHOUT_REFERENCE, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
                 rs4 = pst6.executeQuery();
                 while (rs4.next()) {
-                    int oid = rs4.getInt(1);
-                    int cid = rs4.getInt(2);
-                    int uid = rs4.getInt(3);
-                    int fid = rs4.getInt(4);                    
-                    ReminderUpdate ru = new ReminderUpdate();
+                    final int oid = rs4.getInt(1);
+                    final int cid = rs4.getInt(2);
+                    final int uid = rs4.getInt(3);
+                    final int fid = rs4.getInt(4);                    
+                    final ReminderUpdate ru = new ReminderUpdate();
                     ru.setOID(oid);
                     if (rs4.next()) {
                         delete.add(ru);
                     }
                 }
-            } catch (SQLException ex) {
+            } catch (final SQLException ex) {
                 throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex);
             }            
             
@@ -178,7 +176,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
                 if (update.size() > 0) {
                     pst3 = writecon.prepareStatement(UPDATE_REMINDER);
                     for (int a = 0; a < update.size(); a++) {
-                        ReminderUpdate ru = (ReminderUpdate)delete.get(a);
+                        final ReminderUpdate ru = (ReminderUpdate)delete.get(a);
                         pst3.setInt(1, ru.getFID());
                         pst3.setInt(2, ru.getOID());
                         pst3.setInt(3, ru.getCID());
@@ -188,14 +186,14 @@ public class UpdateFolderIdInReminder implements UpdateTask {
                     }
                     pst3.executeBatch();
                 }
-            } catch (SQLException ex) {
+            } catch (final SQLException ex) {
                 throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex);
             }
             try {
                 if (delete.size() > 0)  {
                     pst4 = writecon.prepareStatement(DELETE_REMINDER);
                     for (int a = 0; a < delete.size(); a++) {
-                        ReminderUpdate ru = (ReminderUpdate)delete.get(a);
+                        final ReminderUpdate ru = (ReminderUpdate)delete.get(a);
                         pst4.setInt(1, ru.getCID());
                         pst4.setInt(2, ru.getOID());
                         pst4.setInt(3, ru.getUID());
@@ -204,7 +202,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
                     }
                     pst4.executeBatch();
                 }
-            } catch (SQLException ex) {
+            } catch (final SQLException ex) {
                 throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex);
             }
             
@@ -214,17 +212,17 @@ public class UpdateFolderIdInReminder implements UpdateTask {
                     pst5 = writecon.prepareStatement(CHECK_MAIN_OBJECT, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
                     if (update.size() > 0) {
                         for (int a = 0; a < update.size(); a++) {
-                            ReminderUpdate ru = (ReminderUpdate)update.get(a);
+                            final ReminderUpdate ru = (ReminderUpdate)update.get(a);
                             pst5.setInt(1, ru.getCID());
                             pst5.setInt(2, ru.getOID());
                             rs3 = pst5.executeQuery();
                             if (!rs3.next()) {
-                                PreparedStatement members = writecon.prepareStatement(DELETE_ENTRIES_MEMBERS);
+                                final PreparedStatement members = writecon.prepareStatement(DELETE_ENTRIES_MEMBERS);
                                 members.setInt(1, ru.getCID());
                                 members.setInt(2, ru.getOID());
                                 members.executeUpdate();
                                 CalendarCommonCollection.closePreparedStatement(members);
-                                PreparedStatement rights = writecon.prepareStatement(DELETE_ENTRIES_RIGTHS);
+                                final PreparedStatement rights = writecon.prepareStatement(DELETE_ENTRIES_RIGTHS);
                                 rights.setInt(1, ru.getCID());
                                 rights.setInt(2, ru.getOID());
                                 rights.executeUpdate();
@@ -234,17 +232,17 @@ public class UpdateFolderIdInReminder implements UpdateTask {
                     }
                     if (delete.size() > 0) {
                         for (int a = 0; a < delete.size(); a++) {
-                            ReminderUpdate ru = (ReminderUpdate)delete.get(a);
+                            final ReminderUpdate ru = (ReminderUpdate)delete.get(a);
                             pst5.setInt(1, ru.getCID());
                             pst5.setInt(2, ru.getOID());
                             rs3 = pst5.executeQuery();
                             if (!rs3.next()) {
-                                PreparedStatement members = writecon.prepareStatement(DELETE_ENTRIES_MEMBERS);
+                                final PreparedStatement members = writecon.prepareStatement(DELETE_ENTRIES_MEMBERS);
                                 members.setInt(1, ru.getCID());
                                 members.setInt(2, ru.getOID());
                                 members.executeUpdate();
                                 CalendarCommonCollection.closePreparedStatement(members);
-                                PreparedStatement rights = writecon.prepareStatement(DELETE_ENTRIES_RIGTHS);
+                                final PreparedStatement rights = writecon.prepareStatement(DELETE_ENTRIES_RIGTHS);
                                 rights.setInt(1, ru.getCID());
                                 rights.setInt(2, ru.getOID());
                                 rights.executeUpdate();
@@ -254,17 +252,17 @@ public class UpdateFolderIdInReminder implements UpdateTask {
                     }
                     if (check.size() > 0) {
                         for (int a = 0; a < check.size(); a++) {
-                            ReminderUpdate ru = (ReminderUpdate)check.get(a);
+                            final ReminderUpdate ru = (ReminderUpdate)check.get(a);
                             pst5.setInt(1, ru.getCID());
                             pst5.setInt(2, ru.getOID());
                             rs3 = pst5.executeQuery();
                             if (!rs3.next()) {
-                                PreparedStatement members = writecon.prepareStatement(DELETE_ENTRIES_MEMBERS);
+                                final PreparedStatement members = writecon.prepareStatement(DELETE_ENTRIES_MEMBERS);
                                 members.setInt(1, ru.getCID());
                                 members.setInt(2, ru.getOID());
                                 members.executeUpdate();
                                 CalendarCommonCollection.closePreparedStatement(members);
-                                PreparedStatement rights = writecon.prepareStatement(DELETE_ENTRIES_RIGTHS);
+                                final PreparedStatement rights = writecon.prepareStatement(DELETE_ENTRIES_RIGTHS);
                                 rights.setInt(1, ru.getCID());
                                 rights.setInt(2, ru.getOID());
                                 rights.executeUpdate();
@@ -273,7 +271,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
                         }
                     }
                 }
-            } catch (SQLException ex) {
+            } catch (final SQLException ex) {
                 throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex);
             }
         } finally {
@@ -299,25 +297,25 @@ public class UpdateFolderIdInReminder implements UpdateTask {
         private int uid;
         private int fid;
         private int cid;
-        private void setOID(int oid) {
+        private void setOID(final int oid) {
             this.oid = oid;
         }
         private int getOID() {
             return oid;
         }
-        private void setUID(int uid) {
+        private void setUID(final int uid) {
             this.uid = uid;
         }
         private int getUID() {
             return uid;
         }
-        private void setCID(int cid) {
+        private void setCID(final int cid) {
             this.cid = cid;
         }
         private int getCID() {
             return cid;
         }
-        private void setFID(int fid) {
+        private void setFID(final int fid) {
             this.fid = fid;
         }
         private int getFID() {

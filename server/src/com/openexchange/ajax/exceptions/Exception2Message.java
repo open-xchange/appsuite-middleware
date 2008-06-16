@@ -78,7 +78,7 @@ public class Exception2Message {
 			final JSONObject responseObject = new JSONObject();
 			responseObject.put("error", error);
 			final JSONArray params = new JSONArray();
-			for (String param : error_params) {
+			for (final String param : error_params) {
 				params.put(param);
 			}
 			responseObject.put("error_params", params);

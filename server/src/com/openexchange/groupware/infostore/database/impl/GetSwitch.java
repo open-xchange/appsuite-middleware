@@ -54,9 +54,9 @@ import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
 
 public class GetSwitch implements MetadataSwitcher {
 
-	private DocumentMetadata metadata;
+	private final DocumentMetadata metadata;
 
-	public GetSwitch(DocumentMetadata metadata){
+	public GetSwitch(final DocumentMetadata metadata){
 		this.metadata = metadata;
 	}
 	

@@ -76,13 +76,13 @@ public class LinkRequest {
 	
 	private static final String PARAMETER_MODULE = "module";
 	
-	private Session sessionObj;
+	private final Session sessionObj;
 	
 	private final User user;
 	
 	final JSONWriter jsonWriter;
 	
-	private Context ctx;
+	private final Context ctx;
 
 	public LinkRequest(final Session sessionObj, final Writer pw, final Context ctx) {
 		this.sessionObj = sessionObj;

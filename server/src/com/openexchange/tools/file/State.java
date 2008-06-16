@@ -140,27 +140,27 @@ class State {
                 unused.add(line);
                 line = reader.readLine();
             }
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             throw new FileStorageException(FileStorageException.Code.ENCODING,
                 e);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw new FileStorageException(FileStorageException.Code.NO_NUMBER,
                 e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
                 e, e.getMessage());
         } finally {
             if (null != reader) {
                 try {
                     reader.close();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
             if (null != isr) {
                 try {
                     isr.close();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
@@ -188,10 +188,10 @@ class State {
             writer.close();
             osw.close();
             return new ByteArrayInputStream(baos.toByteArray());
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             throw new FileStorageException(FileStorageException.Code.ENCODING,
                 e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
                 e, e.getMessage());
         }

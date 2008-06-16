@@ -91,6 +91,7 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
 	}
 
 	/* CHANGED METHODS */
+	@Override
 	public Object creationdate(final Object... objects) throws ContactException {
 		try {
 			return delegate.creationdate( makeDate(objects) );
@@ -103,6 +104,7 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
 		}
 	}
 
+	@Override
 	public Object anniversary(final Object... objects) throws ContactException {
 		try {
 			return delegate.anniversary( makeDate(objects) );
@@ -115,6 +117,7 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
 		}
 	}
 
+	@Override
 	public Object birthday(final Object... objects) throws ContactException {
 		try {
 			return delegate.birthday( makeDate(objects) );
@@ -127,6 +130,7 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
 		}
 	}
 
+	@Override
 	public Object imagelastmodified(final Object... objects) throws ContactException {
 		try {
 			return delegate.imagelastmodified( makeDate(objects) );
@@ -139,6 +143,7 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
 		}
 	}
 
+	@Override
 	public Object lastmodified(final Object... objects) throws ContactException {
 		try {
 			return delegate.lastmodified( makeDate(objects) );

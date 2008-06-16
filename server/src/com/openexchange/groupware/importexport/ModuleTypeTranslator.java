@@ -101,7 +101,7 @@ public class ModuleTypeTranslator {
 	/**
 	 * Translates a Types value to a FolderObject value
 	 */
-	public static int getFolderObjectConstant(int typeConstant) throws ImportExportException{
+	public static int getFolderObjectConstant(final int typeConstant) throws ImportExportException{
 		switch(typeConstant){
 			case Types.CONTACT:		return FolderObject.CONTACT;
 			case Types.INFOSTORE: 	return FolderObject.INFOSTORE;

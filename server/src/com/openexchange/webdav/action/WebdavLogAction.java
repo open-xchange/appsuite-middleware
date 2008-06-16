@@ -72,7 +72,7 @@ public class WebdavLogAction extends AbstractAction {
 		StringBuilder b = new StringBuilder();
 		try {
 			b.append("URL: "); b.append(req.getUrl()); b.append('\n');
-			for(String header : req.getHeaderNames()) {
+			for(final String header : req.getHeaderNames()) {
 				b.append(header); b.append(": "); b.append(req.getHeader(header)); b.append('\n');
 			}
 			final WebdavResource resource = req.getResource();
@@ -106,7 +106,7 @@ public class WebdavLogAction extends AbstractAction {
 				LOG.trace(((CapturingWebdavResponse)res).getBodyAsString());
 			}
 			
-		} catch (WebdavException x) {
+		} catch (final WebdavException x) {
 			b = new StringBuilder();
 			b.append("Status: "); b.append(x.getMessage()); b.append(' '); b.append(x.getStatus()); b.append('\n');
 			b.append("WebdavException: ");
@@ -116,7 +116,7 @@ public class WebdavLogAction extends AbstractAction {
 				LOG.error("The request: "+b.toString()+" caused an internal server error: "+x.getMessage(),x);
 			}
 			throw x;
-		} catch (RuntimeException x) {
+		} catch (final RuntimeException x) {
 			if (LOG.isErrorEnabled()) {
 				LOG.error("RuntimeException In WebDAV for request: "+b.toString(),x);
 			}
@@ -138,13 +138,13 @@ public class WebdavLogAction extends AbstractAction {
 				if (LOG.isTraceEnabled()) {
 					LOG.trace(b);
 				}
-			} catch (IOException x) {
+			} catch (final IOException x) {
 				LOG.debug("",x);
 			}finally {
 				if(reader != null) {
 					try {
 						reader.close();
-					} catch (IOException x2) {
+					} catch (final IOException x2) {
 						LOG.debug("",x2);
 					}
 				}

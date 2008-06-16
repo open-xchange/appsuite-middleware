@@ -147,7 +147,7 @@ public class LinksEventHandler  implements AppointmentEventInterface, TaskEventI
 		Context ct = null;
 		try {
 			ct = ContextStorage.getStorageContext(so.getContextId());
-		} catch (ContextException e) {
+		} catch (final ContextException e) {
 			//
 		}
 		
@@ -159,22 +159,22 @@ public class LinksEventHandler  implements AppointmentEventInterface, TaskEventI
 			del.execute("DELETE from prg_links WHERE (firstid = "+id+" AND firstmodule = "+type+" AND firstfolder = "+fid+") OR (secondid = "+id+" AND secondmodule = "+type+" AND secondfolder = "+fid+") AND cid = "+so.getContextId());
 			
 			writecon.commit();
-		} catch (Exception se) {
+		} catch (final Exception se) {
 			try {
 				writecon.rollback();
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Uable to rollback Link Delete", see);
 			}
 			LOG.error("ERROR: Unable to Delete Links from Object! cid="+so.getContextId()+" oid="+id+" fid="+fid,se);
 		} finally {
 			try{
 				del.close();
-			}catch (SQLException sq){
+			}catch (final SQLException sq){
 				LOG.error("UNABLE TO CLOSE STATEMENT ",sq);
 			}
 			try {
 				writecon.setAutoCommit(true);
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Uable to close Writeconnection", see);
 			}
 			if (writecon != null) {
@@ -193,7 +193,7 @@ public class LinksEventHandler  implements AppointmentEventInterface, TaskEventI
 		Context ct = null;
 		try {
 			ct = ContextStorage.getStorageContext(so.getContextId());
-		} catch (ContextException e) {
+		} catch (final ContextException e) {
 			//
 		}
 		
@@ -213,7 +213,7 @@ public class LinksEventHandler  implements AppointmentEventInterface, TaskEventI
 					updater = true;
 				}
 			}		
-		} catch (Exception e){
+		} catch (final Exception e){
 			LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid="+so.getContextId()+" uid="+id+" type="+type+" fid="+fid+')', e);
 		}  finally {
 			try{
@@ -223,7 +223,7 @@ public class LinksEventHandler  implements AppointmentEventInterface, TaskEventI
 				if (smt != null) {
 					smt.close();
 				}
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.warn("Unable to close Statement", see);
 			}
 			if (readcon != null) {
@@ -244,22 +244,22 @@ public class LinksEventHandler  implements AppointmentEventInterface, TaskEventI
 				upd.execute("UPDATE prg_links SET secondfolder = "+fid+" WHERE secondid = "+id+" AND secondmodule = "+type+" AND cid = "+so.getContextId());
 				
 				writecon.commit();
-			} catch (Exception se) {
+			} catch (final Exception se) {
 				try {
 					writecon.rollback();
-				} catch (SQLException see){
+				} catch (final SQLException see){
 					LOG.error("Uable to rollback Link Update", see);
 				}
 				LOG.error("ERROR: Unable to Update Links for Object! cid="+so.getContextId()+" oid="+id+" fid="+fid,se);
 			} finally {
 				try{
 					upd.close();
-				}catch (SQLException sq){
+				}catch (final SQLException sq){
 					LOG.error("UNABLE TO CLOSE STATEMENT ",sq);
 				}
 				try {
 					writecon.setAutoCommit(true);
-				} catch (SQLException see){
+				} catch (final SQLException see){
 					LOG.error("Uable to close Writeconnection", see);
 				}
 				if (writecon != null) {

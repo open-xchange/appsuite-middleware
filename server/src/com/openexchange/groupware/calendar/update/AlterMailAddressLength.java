@@ -49,17 +49,16 @@
 
 package com.openexchange.groupware.calendar.update;
 
-import com.openexchange.groupware.calendar.CalendarCommonCollection;
-import com.openexchange.groupware.calendar.OXCalendarException;
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.calendar.CalendarCommonCollection;
+import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.UpdateTask.UpdateTaskPriority;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 
 /**
@@ -81,25 +80,25 @@ public class AlterMailAddressLength implements UpdateTask {
         return 3;
     }
     
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         Connection writecon = null;
         Statement stmt = null;
         try {
             writecon = Database.get(contextId, true);
             try {
                 stmt = writecon.createStatement();
-            } catch (SQLException ex) {
+            } catch (final SQLException ex) {
                 throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex.getMessage());
             }
             if (stmt != null) {
                 try {
                     stmt.executeUpdate(UPDATE_PRG_DATE_RIGHTS);
-                } catch (SQLException ex) {
+                } catch (final SQLException ex) {
                     throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex.getMessage());
                 }
                 try {
                     stmt.executeUpdate(UPDATE_DEL_DATE_RIGHTS);
-                } catch (SQLException ex) {
+                } catch (final SQLException ex) {
                    throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, ex.getMessage());
                 }
             }

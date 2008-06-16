@@ -70,7 +70,7 @@ public class FolderRequest {
 	
 	private static final Folder FOLDER_SERVLET = new Folder();
 
-	public FolderRequest(Session session, final Context ctx, JSONWriter pw) {
+	public FolderRequest(final Session session, final Context ctx, final JSONWriter pw) {
 		super();
 		this.session = session;
 		this.ctx = ctx;

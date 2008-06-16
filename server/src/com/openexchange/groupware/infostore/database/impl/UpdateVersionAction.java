@@ -51,10 +51,9 @@ package com.openexchange.groupware.infostore.database.impl;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
@@ -77,7 +76,7 @@ public class UpdateVersionAction extends AbstractDocumentUpdateAction {
 		int counter = 0;
 		try {
 			counter = doUpdates(getQueryCatalog().getVersionUpdate(getModified()), getQueryCatalog().filterForVersion(getModified()), getOldDocuments());
-		} catch (UpdateException e) {
+		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(0, e.getSQLException(), e.getStatement());
 		}
 		
@@ -97,7 +96,7 @@ public class UpdateVersionAction extends AbstractDocumentUpdateAction {
 		int counter = 0;
 		try {
 			counter = doUpdates(getQueryCatalog().getVersionUpdate(getModified()), getQueryCatalog().filterForVersion(getModified()), getDocuments());
-		} catch (UpdateException e) {
+		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
 		}
 		setTimestamp(System.currentTimeMillis());
@@ -108,7 +107,7 @@ public class UpdateVersionAction extends AbstractDocumentUpdateAction {
 	}
 
 	@Override
-	protected Object[] getAdditionals(DocumentMetadata doc) {
+	protected Object[] getAdditionals(final DocumentMetadata doc) {
 		return new Object[]{getContext().getContextId(), doc.getId(), doc.getVersion(), getTimestamp()};
 	}
 

@@ -117,12 +117,12 @@ class UpdateData {
     /**
      * timestamp when the to update task was read last.
      */
-    private Date lastRead;
+    private final Date lastRead;
 
     /**
      * Which type of task to update.
      */
-    private StorageType type;
+    private final StorageType type;
 
     /**
      * The changed task.
@@ -397,7 +397,7 @@ class UpdateData {
         final Iterator<Folder> iter = addedFolder.iterator();
         while (iter.hasNext()) {
             final Folder addedFolder = iter.next();
-            for (Folder origFolder : origFolders) {
+            for (final Folder origFolder : origFolders) {
                 if (addedFolder.getUser() == origFolder.getUser()) {
                     iter.remove();
                 }
@@ -490,7 +490,7 @@ class UpdateData {
     private void generateUpdated() throws TaskException {
         updated = new Task();
         updated.setObjectID(getTaskId());
-        for (Mapper mapper : Mapping.MAPPERS) {
+        for (final Mapper mapper : Mapping.MAPPERS) {
             if (mapper.isSet(changed)) {
                 if (null != mapper.get(changed)) {
                     mapper.set(updated, mapper.get(changed));
@@ -642,7 +642,7 @@ class UpdateData {
         Connection con;
         try {
             con = DBPool.pickupWriteable(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new TaskException(Code.NO_CONNECTION, e);
         }
         try {
@@ -650,16 +650,16 @@ class UpdateData {
             updateTask(ctx, con, task, lastRead, modified, add, remove,
                 addFolder, removeFolder, type);
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
             throw new TaskException(Code.UPDATE_FAILED, e, e.getMessage());
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             rollback(con);
             throw e;
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 LOG.error("Problem setting auto commit to true.", e);
             }
             DBPool.closeWriterSilent(ctx, con);
@@ -726,9 +726,9 @@ class UpdateData {
         throws TaskException, OXException {
         try {
             new EventClient(session).modify(updated);
-        } catch (EventException e) {
+        } catch (final EventException e) {
             throw new TaskException(Code.EVENT, e);
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             throw new TaskException(Code.EVENT, e);
         }
     }
@@ -778,9 +778,9 @@ class UpdateData {
             TaskLogic.insertTask(ctx, task, parts, folders);
             try {
                 new EventClient(session).create(task);
-            } catch (EventException e) {
+            } catch (final EventException e) {
                 throw Tools.convert(new TaskException(Code.EVENT, e));
-            } catch (ContextException e) {
+            } catch (final ContextException e) {
                 throw Tools.convert(new TaskException(Code.EVENT, e));
             }
         }

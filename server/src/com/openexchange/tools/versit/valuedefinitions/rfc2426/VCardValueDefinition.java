@@ -68,19 +68,21 @@ public class VCardValueDefinition extends TextValueDefinition {
 
 	public static final ValueDefinition Default = new VCardValueDefinition();
 
+	@Override
 	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
 		return VCard.definition.parse(new ReaderScanner(new StringReader(
 				(String) super.createValue(s, property))));
 	}
 
+	@Override
 	public String writeValue(final Object value) {
 		try {
 			final ByteArrayOutputStream stream = new UnsynchronizedByteArrayOutputStream();
 			VCard.definition.write(VCard.definition.getWriter(stream,
 					"US-ASCII"), (VersitObject) value);
 			return new String(stream.toByteArray(), "US-ASCII");
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			return "";
 		}
 	}

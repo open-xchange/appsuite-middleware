@@ -141,7 +141,7 @@ public class PasswordMechUpdateTask implements UpdateTask {
 				stmt = writeCon.prepareStatement(SQL_UPDATE);
 				stmt.setString(1, SHA);
 				stmt.executeUpdate();
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				throw EXCEPTION.create(2, e, e.getMessage());
 			}
 		} finally {
@@ -182,7 +182,7 @@ public class PasswordMechUpdateTask implements UpdateTask {
 					found = COLUMN.equals(meta.getColumnName(i));
 				}
 				return found;
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				throw EXCEPTION.create(1, e, e.getMessage());
 			}
 		} finally {

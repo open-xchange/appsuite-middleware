@@ -49,6 +49,15 @@
 
 package com.openexchange.groupware.calendar;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
@@ -62,14 +71,6 @@ import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * CachedCalendarIterator
@@ -84,8 +85,8 @@ public class CachedCalendarIterator implements SearchIterator {
     private final boolean cache;
     private int counter;
     private boolean closed;
-    private Context c;
-    private int uid;
+    private final Context c;
+    private final int uid;
     private int[][] oids = null;
     private int cc = 0;
     private boolean oxonfe = false;
@@ -96,7 +97,7 @@ public class CachedCalendarIterator implements SearchIterator {
     
     private static final Log LOG = LogFactory.getLog(CachedCalendarIterator.class);
     
-    public CachedCalendarIterator(SearchIterator non_cached_iterator, Context c, int uid) throws SearchIteratorException, OXException, SQLException, DBPoolingException {
+    public CachedCalendarIterator(final SearchIterator non_cached_iterator, final Context c, final int uid) throws SearchIteratorException, OXException, SQLException, DBPoolingException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);
     	list = new ArrayList<CalendarDataObject>(16);
         this.non_cached_iterator = non_cached_iterator;
@@ -108,7 +109,7 @@ public class CachedCalendarIterator implements SearchIterator {
         }
     }
     
-    public CachedCalendarIterator(SearchIterator non_cached_iterator, Context c, int uid, int[][] oids) throws SearchIteratorException, OXException, SQLException, DBPoolingException {
+    public CachedCalendarIterator(final SearchIterator non_cached_iterator, final Context c, final int uid, final int[][] oids) throws SearchIteratorException, OXException, SQLException, DBPoolingException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);
     	if (non_cached_iterator.hasWarnings()) {
     		warnings.addAll(Arrays.asList(non_cached_iterator.getWarnings()));
@@ -144,7 +145,7 @@ public class CachedCalendarIterator implements SearchIterator {
         if (!oxonfe) {
             if (!cache) {
                 if (oids != null) {
-                    CalendarDataObject cdao = (CalendarDataObject)non_cached_iterator.next();
+                    final CalendarDataObject cdao = (CalendarDataObject)non_cached_iterator.next();
                     cc++;
                     return cdao;
                 } else {
@@ -153,7 +154,7 @@ public class CachedCalendarIterator implements SearchIterator {
             }
             if (hasNext()) {
                 if (oids != null) {
-                    CalendarDataObject cdao = (CalendarDataObject)getPreFilledResult();
+                    final CalendarDataObject cdao = (CalendarDataObject)getPreFilledResult();
                     cc++;
                     return cdao;
                 } else {
@@ -215,7 +216,7 @@ public class CachedCalendarIterator implements SearchIterator {
                     if (readcon == null && (cdao.fillParticipants() || cdao.fillUserParticipants() || (cdao.fillFolderID() && cdao.containsParentFolderID()))) {
                         try {
                             readcon = DBPool.pickup(c);
-                        } catch (DBPoolingException ex) {
+                        } catch (final DBPoolingException ex) {
                             throw new OXException(ex);
                         }
                     }
@@ -224,10 +225,10 @@ public class CachedCalendarIterator implements SearchIterator {
                     if (mn+pre_fetch > list.size()) {
                         mn = list.size()%MAX_PRE_FETCH;
                     }
-                    int arr[] = new int[mn];
+                    final int arr[] = new int[mn];
                     
                     for (int a = 0; a < mn; a++) {
-                        temp = (CalendarDataObject)list.get(pre_fetch++);
+                        temp = list.get(pre_fetch++);
                         arr[a] = temp.getObjectID();
                     }
                     
@@ -235,7 +236,7 @@ public class CachedCalendarIterator implements SearchIterator {
                     if  (cdao.fillUserParticipants() || cdao.fillFolderID()) {
                         try {
                             CalendarSql.getCalendarSqlImplementation().getUserParticipantsSQLIn(list, readcon, c.getContextId(), uid, sqlin);
-                        } catch (SQLException ex) {
+                        } catch (final SQLException ex) {
                             throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ex, 202);
                         }
                     }
@@ -243,7 +244,7 @@ public class CachedCalendarIterator implements SearchIterator {
                     if (cdao.fillParticipants()) {
                         try {
                             CalendarSql.getCalendarSqlImplementation().getParticipantsSQLIn(list, readcon, cdao.getContextID(), sqlin);
-                        } catch (SQLException ex) {
+                        } catch (final SQLException ex) {
                             throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ex, 203);
                         }
                     }
@@ -256,7 +257,7 @@ public class CachedCalendarIterator implements SearchIterator {
             
             // Security check for bug 10836 
             if (CACHED_ITERATOR_FAST_FETCH && (cdao.getFolderType() == FolderObject.PRIVATE || cdao.getFolderType() == FolderObject.SHARED)) {
-            	UserParticipant up[] = cdao.getUsers();
+            	final UserParticipant up[] = cdao.getUsers();
             	boolean found = false;
             	for (int a = 0; a < up.length; a++) {
             		if (up[a].getPersonalFolderId() == cdao.getParentFolderID()) {
@@ -273,7 +274,7 @@ public class CachedCalendarIterator implements SearchIterator {
             if (readcon != null) {
                 try {
                     DBPool.push(c, readcon);
-                } catch (DBPoolingException dbpe) {
+                } catch (final DBPoolingException dbpe) {
                     LOG.error(CalendarSql.ERROR_PUSHING_DATABASE ,dbpe);
                 }
             }

@@ -64,6 +64,7 @@ public class OldMAlarmPropertyDefinition extends OldAlarmPropertyDefinition {
 		super("EMAIL", null, paramNames, params, elements);
 	}
 
+	@Override
 	protected void parseProp(final OldScanner s, final Property prop, final VersitObject alarm)
 			throws VersitException {
 		Property property = new Property("ATTENDEE");

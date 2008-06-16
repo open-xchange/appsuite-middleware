@@ -51,10 +51,11 @@
 
 package com.openexchange.ajax.writer;
 
-import com.openexchange.ajax.fields.CommonFields;
-import com.openexchange.groupware.container.CommonObject;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.openexchange.ajax.fields.CommonFields;
+import com.openexchange.groupware.container.CommonObject;
 
 /**
  * CommonWriter
@@ -64,7 +65,7 @@ import org.json.JSONObject;
 
 public class CommonWriter extends DataWriter {
 	
-	public void writeCommonFields(CommonObject commonObj, JSONObject jsonObj) throws JSONException {
+	public void writeCommonFields(final CommonObject commonObj, final JSONObject jsonObj) throws JSONException {
 		if (commonObj.containsObjectID()) {
 			writeParameter(CommonFields.ID, commonObj.getObjectID(), jsonObj);
 		} 

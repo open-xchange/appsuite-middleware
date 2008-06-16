@@ -76,13 +76,12 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
-import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
-import com.openexchange.tools.session.ServerSession;
 
 @OXExceptionSource(
 classId=ImportExportExceptionClasses.VCARDEXPORTER,
@@ -224,7 +223,7 @@ category={
 		FolderObject fo;
 		try {
 			fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			return false;
 		}
 		//check format of folder
@@ -239,9 +238,9 @@ category={
 		EffectivePermission perm;
 		try {
 			perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw importExportExceptionFactory.create(2, folder);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw importExportExceptionFactory.create(2, folder);
 		}
 		
@@ -252,8 +251,8 @@ category={
 		return false;
 	}
 	
-	public SizedInputStream exportData(ServerSession sessObj, Format format, String folder, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+	public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
+		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		try {
 			if (fieldsToBeExported == null) {
 				fieldsToBeExported = _contactFields;
@@ -274,7 +273,7 @@ category={
 			}
 			
 			versitWriter.flush();
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw importExportExceptionFactory.create(3, exc, folder);
 		}
 		
@@ -284,8 +283,8 @@ category={
 				Format.VCARD);
 	}
 	
-	public SizedInputStream exportData(ServerSession sessObj, Format format, String folder, int objectId, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+	public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
+		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		try {
 			final VersitDefinition contactDef = Versit.getDefinition("text/vcard");
 			final VersitDefinition.Writer versitWriter = contactDef.getWriter(byteArrayOutputStream, "UTF-8");
@@ -295,7 +294,7 @@ category={
 			final ContactObject contactObj = contactSql.getObjectById(objectId, Integer.parseInt(folder));
 			
 			exportContact(oxContainerConverter, contactDef, versitWriter, contactObj);
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw importExportExceptionFactory.create(3, folder);
 		}
 		
@@ -305,8 +304,8 @@ category={
 				Format.VCARD);
 	}
 	
-	protected void exportContact(OXContainerConverter oxContainerConverter, VersitDefinition versitDef, VersitDefinition.Writer writer, ContactObject contactObj) throws Exception {
-		VersitObject versitObject = oxContainerConverter.convertContact(contactObj, "3.0");
+	protected void exportContact(final OXContainerConverter oxContainerConverter, final VersitDefinition versitDef, final VersitDefinition.Writer writer, final ContactObject contactObj) throws Exception {
+		final VersitObject versitObject = oxContainerConverter.convertContact(contactObj, "3.0");
 		versitDef.write(writer, versitObject);
 		writer.flush();
 	}

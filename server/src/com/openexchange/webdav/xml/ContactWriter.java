@@ -218,21 +218,21 @@ public class ContactWriter extends CommonWriter {
 		contactsql = new RdbContactSQLInterface(sessionObj, ctx);
 	}
 	
-	public void startWriter(int objectId, int folderId, OutputStream os) throws Exception {
+	public void startWriter(final int objectId, final int folderId, final OutputStream os) throws Exception {
 		final Element eProp = new Element("prop", "D", "DAV:");
 		final XMLOutputter xo = new XMLOutputter();
 		try {
 			final ContactObject contactobject = contactsql.getObjectById(objectId, folderId);
 			writeObject(contactobject, eProp, false, xo, os);
-		} catch (OXObjectNotFoundException exc) {
+		} catch (final OXObjectNotFoundException exc) {
 			writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
 		}
 	}
 	
-	public void startWriter(boolean bModified, boolean bDeleted, boolean bList, int folder_id, Date lastsync, OutputStream os) throws Exception {
-		XMLOutputter xo = new XMLOutputter();
+	public void startWriter(final boolean bModified, final boolean bDeleted, final boolean bList, final int folder_id, final Date lastsync, final OutputStream os) throws Exception {
+		final XMLOutputter xo = new XMLOutputter();
 		
 		if (bModified) {
 			SearchIterator<ContactObject> it = null;
@@ -271,17 +271,17 @@ public class ContactWriter extends CommonWriter {
 		}
 	}
 	
-	public void writeIterator(SearchIterator<ContactObject> it, boolean delete, XMLOutputter xo, OutputStream os) throws Exception {
+	public void writeIterator(final SearchIterator<ContactObject> it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
 		while (it.hasNext()) {
 			writeObject(it.next(), delete, xo, os);
 		}
 	}
 	
-	public void writeObject(ContactObject contactObj, boolean delete, XMLOutputter xo, OutputStream os) throws Exception {
+	public void writeObject(final ContactObject contactObj, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
 		writeObject(contactObj, new Element("prop", "D", "DAV:"), delete, xo, os); 
 	}
 	
-	public void writeObject(ContactObject contactObj, Element eProp, boolean delete, XMLOutputter xo, OutputStream os) throws Exception {
+	public void writeObject(final ContactObject contactObj, final Element eProp, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
 		int status = 200;
 		String description = "OK";
 		int object_id = 0;
@@ -289,12 +289,12 @@ public class ContactWriter extends CommonWriter {
 		try {
 			object_id = contactObj.getObjectID();
 			if (contactObj.containsImage1()&& !delete) {
-				ContactObject contactObjectWithImage = contactsql.getObjectById(object_id, contactObj.getParentFolderID());
+				final ContactObject contactObjectWithImage = contactsql.getObjectById(object_id, contactObj.getParentFolderID());
 				addContent2PropElement(eProp, contactObjectWithImage, delete);
 			} else {
 				addContent2PropElement(eProp, contactObj, delete);
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("writeObject", exc);
 			status = 500;
 			description = "Server Error: " + exc.getMessage();
@@ -304,11 +304,11 @@ public class ContactWriter extends CommonWriter {
 		writeResponseElement(eProp, object_id, status, description, xo, os);
 	}
 	
-	protected void addContent2PropElement(Element e, ContactObject contactobject, boolean delete) throws Exception {
+	protected void addContent2PropElement(final Element e, final ContactObject contactobject, final boolean delete) throws Exception {
 		addContent2PropElement(e, contactobject, delete, false);
 	}
 	
-	protected void addContent2PropElement(Element e, ContactObject contactobject, boolean delete, boolean externalUser) throws Exception {
+	protected void addContent2PropElement(final Element e, final ContactObject contactobject, final boolean delete, final boolean externalUser) throws Exception {
 		if (delete) {
 			addElement(ContactFields.OBJECT_ID, contactobject.getObjectID(), e);
 			addElement(ContactFields.LAST_MODIFIED, contactobject.getLastModified(), e);
@@ -335,7 +335,7 @@ public class ContactWriter extends CommonWriter {
 		}
 	}
 	
-	protected void writeContactElement(ContactObject contactobject, Element e) throws Exception {
+	protected void writeContactElement(final ContactObject contactobject, final Element e) throws Exception {
 		addElement("object_status", "CREATE", e);
 		addElement(ContactFields.LAST_NAME, contactobject.getSurName(), e);
 		addElement(ContactFields.FIRST_NAME, contactobject.getGivenName(), e);
@@ -432,18 +432,18 @@ public class ContactWriter extends CommonWriter {
 		addElement(ContactFields.DEFAULTADDRESS, contactobject.getDefaultAddress(), e);
 	}
 	
-	protected void writeLinks(ContactObject contactobject, Element e_prop) throws Exception {
-		Element e_links = new Element(ContactFields.LINKS, XmlServlet.NS);
+	protected void writeLinks(final ContactObject contactobject, final Element e_prop) throws Exception {
+		final Element e_links = new Element(ContactFields.LINKS, XmlServlet.NS);
 		
-		LinkEntryObject[] links = contactobject.getLinks();
+		final LinkEntryObject[] links = contactobject.getLinks();
 		for (int a = 0; a < links.length; a++) {
-			int id = links[a].getLinkID();
+			final int id = links[a].getLinkID();
 			String displayname = links[a].getLinkDisplayname();
 			if (displayname == null) {
 				displayname = String.valueOf(id);
 			}
 			
-			Element e = new Element("link", XmlServlet.NS);
+			final Element e = new Element("link", XmlServlet.NS);
 			e.addContent(String.valueOf(id));
 			e.setAttribute("displayname", displayname, XmlServlet.NS);
 			
@@ -453,19 +453,19 @@ public class ContactWriter extends CommonWriter {
 		e_prop.addContent(e_links);
 	}
 	
-	protected void writeDistributionList(ContactObject contactobject, Element e_prop) throws Exception {
-		Element e_distributionlist = new Element(ContactFields.DISTRIBUTIONLIST, XmlServlet.NS);
+	protected void writeDistributionList(final ContactObject contactobject, final Element e_prop) throws Exception {
+		final Element e_distributionlist = new Element(ContactFields.DISTRIBUTIONLIST, XmlServlet.NS);
 		
-		DistributionListEntryObject[] distributionlist = contactobject.getDistributionList();
+		final DistributionListEntryObject[] distributionlist = contactobject.getDistributionList();
 		for (int a = 0; a < distributionlist.length; a++) {
 			String displayname = distributionlist[a].getDisplayname();
-			String email = distributionlist[a].getEmailaddress();
+			final String email = distributionlist[a].getEmailaddress();
 			
 			if (displayname == null) {
 				displayname = email;
 			}
 			
-			Element e = new Element("email", XmlServlet.NS);
+			final Element e = new Element("email", XmlServlet.NS);
 			e.addContent(email);
 			e.setAttribute("id", String.valueOf(distributionlist[a].getEntryID()), XmlServlet.NS);
 			e.setAttribute(ContactFields.FOLDER_ID, String.valueOf(distributionlist[a].getFolderID()), XmlServlet.NS);
@@ -478,6 +478,7 @@ public class ContactWriter extends CommonWriter {
 		e_prop.addContent(e_distributionlist);
 	}
 	
+	@Override
 	protected int getModule() {
 		return Types.CONTACT;
 	}

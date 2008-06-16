@@ -74,7 +74,7 @@ public class NotificationConfig extends AbstractConfig implements Initialization
 		OBJECT_LINK("object_link");
 		
 		
-		private String name;
+		private final String name;
 		
 		private NotificationProperty(final String name){
 			this.name = name;

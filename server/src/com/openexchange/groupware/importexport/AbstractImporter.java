@@ -54,7 +54,6 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 
@@ -84,7 +83,7 @@ public abstract class AbstractImporter implements Importer {
 			final String separator = ", ";
 			final StringBuilder bob = new StringBuilder();
 			final int[] ids = oxEx.getTruncatedIds();			
-			for(int id : ids){
+			for(final int id : ids){
 				bob.append( getNameForFieldInTruncationError(id, oxEx) );
 				bob.append( separator );
 			}

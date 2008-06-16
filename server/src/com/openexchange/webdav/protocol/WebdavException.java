@@ -55,31 +55,31 @@ package com.openexchange.webdav.protocol;
 public class WebdavException extends Exception implements WebdavStatus<Object>{
 
 	private static final long serialVersionUID = 617401197355575125L;
-	private int status;
-	private WebdavPath url;
+	private final int status;
+	private final WebdavPath url;
 	private String message;
 
-    public WebdavException(WebdavPath url, int status) {
+    public WebdavException(final WebdavPath url, final int status) {
 		super();
 		this.url = url;
 		this.status = status;
 	}
 
-	public WebdavException(String arg0, WebdavPath url, int status) {
+	public WebdavException(final String arg0, final WebdavPath url, final int status) {
 		super(arg0);
 		this.message=arg0;
 		this.url = url;
 		this.status = status;
 	}
 
-	public WebdavException(String arg0, Throwable arg1, WebdavPath url, int status) {
+	public WebdavException(final String arg0, final Throwable arg1, final WebdavPath url, final int status) {
 		super(arg0, arg1);
 		this.message=arg0;
 		this.url = url;
 		this.status = status;
 	}
 
-	public WebdavException(Throwable arg0, WebdavPath url, int status) {
+	public WebdavException(final Throwable arg0, final WebdavPath url, final int status) {
 		super(arg0);
 		this.message = arg0.toString();
 		this.url = url;
@@ -98,6 +98,7 @@ public class WebdavException extends Exception implements WebdavStatus<Object>{
 		return null;
 	}
 	
+	@Override
 	public String toString(){
 		return "WebdavException: "+message+" "+getUrl()+" "+getStatus();
 	}

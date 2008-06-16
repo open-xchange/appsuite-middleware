@@ -89,7 +89,7 @@ public class QuotedPrintable {
 					sb.append('=').append(x);
 				}
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			System.out.println(new StringBuilder("encode error: ").append(exc).toString());
 		}
 
@@ -120,7 +120,7 @@ public class QuotedPrintable {
 					sb.append((char) b[a]);
 				}
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			System.out.println("decode error: " + exc);
 		}
 

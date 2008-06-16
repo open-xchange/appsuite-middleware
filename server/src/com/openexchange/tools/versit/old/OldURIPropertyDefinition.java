@@ -61,16 +61,17 @@ import com.openexchange.tools.versit.VersitException;
 
 public class OldURIPropertyDefinition extends OldShortPropertyDefinition {
 
-	public OldURIPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldURIPropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
+	@Override
 	protected Object parseValue(final Property property, final StringScanner s)
 			throws IOException {
 		try {
 			return new URI(s.getRest().trim());
-		} catch (URISyntaxException e) {
+		} catch (final URISyntaxException e) {
 			final VersitException ve = new VersitException(s, e.getMessage());
 			ve.initCause(e);
 			throw ve;

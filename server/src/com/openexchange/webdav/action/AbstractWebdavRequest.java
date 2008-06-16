@@ -66,9 +66,9 @@ import com.openexchange.webdav.protocol.WebdavResource;
 public abstract class AbstractWebdavRequest implements WebdavRequest {
 	private WebdavResource res;
 	private WebdavResource dest;
-	private WebdavFactory factory;
+	private final WebdavFactory factory;
 	
-	public AbstractWebdavRequest(WebdavFactory factory) {
+	public AbstractWebdavRequest(final WebdavFactory factory) {
 		this.factory = factory;
 	}
 

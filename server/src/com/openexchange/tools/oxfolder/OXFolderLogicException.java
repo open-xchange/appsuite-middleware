@@ -72,11 +72,11 @@ public class OXFolderLogicException extends OXException {
 		super(EnumComponent.FOLDER, Category.PERMISSION, code.getNumber(), code.getMessage(), null, messageArgs);
 	}
 
-	public OXFolderLogicException(final FolderCode code, String messagePrefix) {
+	public OXFolderLogicException(final FolderCode code, final String messagePrefix) {
 		this(code, messagePrefix, new Object[0]);
 	}
 
-	public OXFolderLogicException(final FolderCode code, String messagePrefix, final Object... messageArgs) {
+	public OXFolderLogicException(final FolderCode code, final String messagePrefix, final Object... messageArgs) {
 		super(EnumComponent.FOLDER, Category.PERMISSION, code.getNumber(), new StringBuilder().append(messagePrefix)
 				.append(code.getMessage()).toString(), null, messageArgs);
 	}

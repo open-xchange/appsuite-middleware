@@ -54,16 +54,21 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
 public class InfostoreException extends OXException {
-	public InfostoreException(Category category, int id, String message, Throwable cause, Object...msgParams){
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5757775872793698069L;
+
+	public InfostoreException(final Category category, final int id, final String message, final Throwable cause, final Object...msgParams){
 		super(EnumComponent.INFOSTORE, category, id, message,cause);
 		setMessageArgs(msgParams);
 	}
 
-	public InfostoreException(Category category, String message, int id, Object...msgParams){
+	public InfostoreException(final Category category, final String message, final int id, final Object...msgParams){
 		this(category,id,message, null,msgParams);
 	}
 
-	public InfostoreException(AbstractOXException e1) {
+	public InfostoreException(final AbstractOXException e1) {
 		super(e1);
 	}
 }

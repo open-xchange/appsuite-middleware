@@ -259,7 +259,7 @@ public class CSVContactImporter extends AbstractImporter implements Importer {
 					atLeastOneFieldWithWrongName = true;
 					wrongFields.add(fields.get(i));
 				} else {
-					String currEntry = entry.get(i);
+					final String currEntry = entry.get(i);
 					if(! currEntry.equals("")){
 						currField.doSwitch(conSet, contactObj, currEntry);
 					}
@@ -317,7 +317,7 @@ public class CSVContactImporter extends AbstractImporter implements Importer {
 
 
 	@Override
-	protected String getNameForFieldInTruncationError(int id, OXException unused) {
+	protected String getNameForFieldInTruncationError(final int id, final OXException unused) {
 		final ContactField field = ContactField.getByValue(id);
 		if(field == null){
 			return String.valueOf( id );

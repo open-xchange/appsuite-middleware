@@ -67,6 +67,7 @@ public class BooleanValueDefinition extends ValueDefinition {
 
 	public static final ValueDefinition Default = new BooleanValueDefinition();
 	
+	@Override
 	public Object createValue(final StringScanner s, final Property property) throws IOException {
 		if (s.imatch("TRUE")) {
 			return Boolean.TRUE;
@@ -77,6 +78,7 @@ public class BooleanValueDefinition extends ValueDefinition {
 		}
 	}
 	
+	@Override
 	public String writeValue(final Object value) {
 		return ((Boolean) value).booleanValue() ? "TRUE" : "FALSE";
 	}

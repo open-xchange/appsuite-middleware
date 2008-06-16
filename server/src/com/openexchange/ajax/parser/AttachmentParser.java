@@ -64,9 +64,9 @@ public class AttachmentParser {
     public static final class UnknownColumnException extends Exception {
 		private static final long serialVersionUID = -6760923740785771286L;
 
-		private String idString;
+		private final String idString;
 
-		public UnknownColumnException(String idString){
+		public UnknownColumnException(final String idString){
 			this.idString = idString;
 		}
 		
@@ -83,13 +83,13 @@ public class AttachmentParser {
 		if(parameterValues == null) {
 			return null;
 		}
-		AttachmentField[] columns = new AttachmentField[parameterValues.length];
+		final AttachmentField[] columns = new AttachmentField[parameterValues.length];
 		int i = 0;
-		for(String idString : parameterValues) {
+		for(final String idString : parameterValues) {
 			int id = -1;
 			try {
 				id = Integer.valueOf(idString);
-			} catch (NumberFormatException x) {
+			} catch (final NumberFormatException x) {
 				throw new UnknownColumnException(idString);
 			}
 			final AttachmentField f = AttachmentField.get(id);

@@ -62,8 +62,8 @@ import com.openexchange.tools.versit.VersitException;
 
 public class OldCompoundPropertyDefinition extends OldShortPropertyDefinition {
 
-	public OldCompoundPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldCompoundPropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
@@ -83,6 +83,7 @@ public class OldCompoundPropertyDefinition extends OldShortPropertyDefinition {
 		return sb.length() == 0 ? null : sb.toString().trim();
 	}
 
+	@Override
 	protected Object parseValue(final Property property, final StringScanner s)
 			throws IOException {
 		final ArrayList<String> al = new ArrayList<String>();
@@ -96,6 +97,7 @@ public class OldCompoundPropertyDefinition extends OldShortPropertyDefinition {
 		return al;
 	}
 
+	@Override
 	protected String writeValue(final Property property, final Object value) {
 		final StringBuffer sb = new StringBuffer();
 		final ArrayList al = (ArrayList) value;

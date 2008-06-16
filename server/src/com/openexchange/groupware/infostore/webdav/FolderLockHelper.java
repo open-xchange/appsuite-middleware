@@ -50,34 +50,34 @@
 package com.openexchange.groupware.infostore.webdav;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.impl.FolderLock;
 import com.openexchange.groupware.impl.FolderLockManager;
+import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.infostore.InfostoreException;
+import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 public class FolderLockHelper extends LockHelper {
 
-	private FolderLockManager lockManager;
-	private SessionHolder sessionHolder;
+	private final FolderLockManager lockManager;
+	private final SessionHolder sessionHolder;
 
-	public FolderLockHelper(FolderLockManager lockManager, SessionHolder sessionHolder, WebdavPath url) {
+	public FolderLockHelper(final FolderLockManager lockManager, final SessionHolder sessionHolder, final WebdavPath url) {
 		super(lockManager, sessionHolder, url);
 		this.lockManager = lockManager;
 		this.sessionHolder = sessionHolder;
 	}
 
 	@Override
-	protected WebdavLock toWebdavLock(Lock lock) {
+	protected WebdavLock toWebdavLock(final Lock lock) {
 		if (lock instanceof FolderLock) {
-			FolderLock folderLock = (FolderLock) lock;
-			WebdavLock l = new WebdavLock();
+			final FolderLock folderLock = (FolderLock) lock;
+			final WebdavLock l = new WebdavLock();
 			l.setDepth(folderLock.getDepth());
 			l.setTimeout(folderLock.getTimeout());
 			l.setToken("http://www.open-xchange.com/webdav/locks/"+folderLock.getId());
@@ -90,9 +90,9 @@ public class FolderLockHelper extends LockHelper {
 	}
 	
 	@Override
-	protected int saveLock(WebdavLock lock) throws OXException {
+	protected int saveLock(final WebdavLock lock) throws OXException {
         try {
-            ServerSession session = getSession();
+            final ServerSession session = getSession();
             return lockManager.lock(id,
                     (lock.getTimeout() == WebdavLock.NEVER) ? LockManager.INFINITE : lock.getTimeout(), //FIXME
                     lock.getScope().equals(WebdavLock.Scope.EXCLUSIVE_LITERAL) ? LockManager.Scope.EXCLUSIVE : LockManager.Scope.SHARED,
@@ -102,19 +102,19 @@ public class FolderLockHelper extends LockHelper {
                     session.getContext(),
                     UserStorage.getStorageUser(session.getUserId(), session.getContext()),
                     UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
-        } catch (ContextException x) {
+        } catch (final ContextException x) {
             throw new InfostoreException(x);
         }
 	}
 
 	@Override
-	protected void relock(WebdavLock lock) {
+	protected void relock(final WebdavLock lock) {
 		//TODO
 	}
 
 	@Override
-	protected Lock toLock(WebdavLock lock) {
-		FolderLock l = new FolderLock();
+	protected Lock toLock(final WebdavLock lock) {
+		final FolderLock l = new FolderLock();
 		l.setId(Integer.valueOf(lock.getToken().substring( 41 )));
 		//TODOl.setOwner(userid)
 		l.setOwnerDescription(lock.getOwner());

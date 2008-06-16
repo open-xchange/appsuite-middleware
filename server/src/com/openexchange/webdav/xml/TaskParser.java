@@ -72,7 +72,7 @@ public class TaskParser extends CalendarParser {
 	
 	private static final Log LOG = LogFactory.getLog(TaskParser.class);
 	
-	public TaskParser(Session sessionObj) {
+	public TaskParser(final Session sessionObj) {
 		this.sessionObj = sessionObj;
 	}
 	
@@ -86,9 +86,9 @@ public class TaskParser extends CalendarParser {
 				parseElementTask(taskobject, parser);	
 				parser.nextTag();
 			}
-		} catch (XmlPullParserException exc) {
+		} catch (final XmlPullParserException exc) {
 			throw exc;
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw new OXException(exc);
 		}
 	}
@@ -105,7 +105,7 @@ public class TaskParser extends CalendarParser {
 		if (isTag(parser, TaskFields.STATUS)) {
 			try {
 				taskobject.setStatus(getValueAsInt(parser));
-			} catch (NumberFormatException exc) {
+			} catch (final NumberFormatException exc) {
 				throw new OXConflictException(TaskFields.STATUS + " is not an integer");
 			}
 			
@@ -113,7 +113,7 @@ public class TaskParser extends CalendarParser {
 		} else if (isTag(parser, TaskFields.PERCENT_COMPLETED)) {
 			try {
 				taskobject.setPercentComplete(getValueAsInt(parser));
-			} catch (NumberFormatException exc) {
+			} catch (final NumberFormatException exc) {
 				throw new OXConflictException(TaskFields.PERCENT_COMPLETED + " is not an integer");
 			}
 			
@@ -121,7 +121,7 @@ public class TaskParser extends CalendarParser {
 		} else if (isTag(parser, TaskFields.PRIORITY)) {
 			try {
 				taskobject.setPriority(getValueAsInt(parser));
-			} catch (NumberFormatException exc) {
+			} catch (final NumberFormatException exc) {
 				throw new OXConflictException(TaskFields.PRIORITY + " is not an integer");
 			}
 			
@@ -129,7 +129,7 @@ public class TaskParser extends CalendarParser {
 		} else if (isTag(parser, TaskFields.TARGET_DURATION)) {
 			try {
 				taskobject.setTargetDuration(getValueAsLong(parser));
-			} catch (NumberFormatException exc) {
+			} catch (final NumberFormatException exc) {
 				throw new OXConflictException(TaskFields.TARGET_DURATION + " is not a long");
 			}
 			
@@ -137,7 +137,7 @@ public class TaskParser extends CalendarParser {
 		} else if (isTag(parser, TaskFields.TARGET_COSTS)) {
 			try {
 				taskobject.setTargetCosts(getValueAsFloat(parser));
-			} catch (NumberFormatException exc) {
+			} catch (final NumberFormatException exc) {
 				throw new OXConflictException(TaskFields.TARGET_COSTS + " is not a float");
 			}
 			
@@ -145,7 +145,7 @@ public class TaskParser extends CalendarParser {
 		} else if (isTag(parser, TaskFields.ACTUAL_DURATION)) {
 			try {
 				taskobject.setActualDuration(getValueAsLong(parser));
-			} catch (NumberFormatException exc) {
+			} catch (final NumberFormatException exc) {
 				throw new OXConflictException(TaskFields.ACTUAL_DURATION + " is not a long");
 			}
 			
@@ -153,7 +153,7 @@ public class TaskParser extends CalendarParser {
 		} else if (isTag(parser, TaskFields.ACTUAL_COSTS)) {
 			try {
 				taskobject.setActualCosts(getValueAsFloat(parser));
-			} catch (NumberFormatException exc) {
+			} catch (final NumberFormatException exc) {
 				throw new OXConflictException(TaskFields.ACTUAL_COSTS + " is not a float");
 			}
 			
@@ -161,7 +161,7 @@ public class TaskParser extends CalendarParser {
 		} else if (isTag(parser, TaskFields.DATE_COMPLETED)) {
 			try {
 				taskobject.setDateCompleted(getValueAsDate(parser));
-			} catch (NumberFormatException exc) {
+			} catch (final NumberFormatException exc) {
 				throw new OXConflictException(TaskFields.DATE_COMPLETED + " is not a long");
 			}
 			

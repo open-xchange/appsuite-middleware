@@ -59,10 +59,10 @@ public class MBoolean {
 	
 	boolean b = false;
 	
-	public MBoolean(boolean b) {
+	public MBoolean(final boolean b) {
 		this.b = b;
 	}
-	public void setMBoolen(boolean b) {
+	public void setMBoolen(final boolean b) {
 		this.b = b;
 	}
 	public boolean getMBoolean() {

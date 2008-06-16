@@ -169,14 +169,14 @@ abstract class TaskStorage {
      * @return a SearchIterator for iterating over all returned tasks.
      * @throws TaskException if an error occurs while listing tasks.
      */
-    final TaskIterator list(Context ctx, int folderId,
-        int from, int until, int orderBy, String orderDir, int[] columns,
-        boolean onlyOwn, int userId, boolean noPrivate) throws TaskException {
+    final TaskIterator list(final Context ctx, final int folderId,
+        final int from, final int until, final int orderBy, final String orderDir, final int[] columns,
+        final boolean onlyOwn, final int userId, final boolean noPrivate) throws TaskException {
         try {
             final Connection con = DBPool.pickup(ctx);
             return list(ctx, con, folderId, from, until, orderBy, orderDir,
                 columns, onlyOwn, userId, noPrivate);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new TaskException(e);
         }
     }
@@ -249,7 +249,7 @@ abstract class TaskStorage {
         Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new TaskException(Code.NO_CONNECTION, e);
         }
         try {

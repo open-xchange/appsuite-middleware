@@ -121,9 +121,9 @@ public class InfostoreQueryCatalog {
 		DEL_INFOSTORE_DOCUMENT(INFOSTORE_DOCUMENT_FIELDS, INFOSTORE_DOCUMENT_FIELDS_SET, "del_infostore_document");
 		
 		
-		private String tablename;
-		private Set<Metadata> fieldSet;
-		private Metadata[] fields;
+		private final String tablename;
+		private final Set<Metadata> fieldSet;
+		private final Metadata[] fields;
 
 		private Table(final Metadata[] fields, final Set<Metadata> fieldSet, final String tablename) {
 			this.fields = fields;

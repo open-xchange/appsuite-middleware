@@ -100,14 +100,14 @@ public class RdbFolderStorage extends FolderStorage {
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, taskId);
-            for (Folder folder : folders) {
+            for (final Folder folder : folders) {
                 pos = 3;
                 stmt.setInt(pos++, folder.getIdentifier());
                 stmt.setInt(pos++, folder.getUser());
                 stmt.addBatch();
             }
             stmt.executeBatch();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -131,7 +131,7 @@ public class RdbFolderStorage extends FolderStorage {
             while (result.next()) {
                 retval.add(new Folder(result.getInt(1), result.getInt(2)));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -159,7 +159,7 @@ public class RdbFolderStorage extends FolderStorage {
             if (result.next()) {
                 retval = new Folder(result.getInt(1), userId);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -187,7 +187,7 @@ public class RdbFolderStorage extends FolderStorage {
             if (result.next()) {
                 retval = new Folder(folderId, result.getInt(1));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -209,11 +209,11 @@ public class RdbFolderStorage extends FolderStorage {
             int counter = 1;
             stmt.setInt(counter++, ctx.getContextId());
             stmt.setInt(counter++, taskId);
-            for (int folderId : folderIds) {
+            for (final int folderId : folderIds) {
                 stmt.setInt(counter++, folderId);
             }
             deleted = stmt.executeUpdate();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -229,7 +229,7 @@ public class RdbFolderStorage extends FolderStorage {
      */
     @Override
     int[] getTasksInFolder(final Context ctx, final Connection con,
-        int folderId, final StorageType type) throws TaskException {
+        final int folderId, final StorageType type) throws TaskException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         final List<Integer> tasks = new ArrayList<Integer>();
@@ -242,7 +242,7 @@ public class RdbFolderStorage extends FolderStorage {
              while (result.next()) {
                  tasks.add(Integer.valueOf(result.getInt(1)));
              }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -271,7 +271,7 @@ public class RdbFolderStorage extends FolderStorage {
                 folderAndTask[1] = result.getInt(2);
                 tmp.add(folderAndTask);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);

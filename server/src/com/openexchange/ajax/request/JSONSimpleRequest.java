@@ -56,7 +56,7 @@ import org.json.JSONObject;
 
 public class JSONSimpleRequest implements SimpleRequest {
 
-	private JSONObject jsonObject;
+	private final JSONObject jsonObject;
 
 	public JSONSimpleRequest(final JSONObject object) {
 		this.jsonObject = object;

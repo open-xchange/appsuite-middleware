@@ -346,11 +346,11 @@ public class EnglishOutlookMapper implements ContactFieldMapper {
 
     }
 
-    public ContactField getFieldByName(String name){
+    public ContactField getFieldByName(final String name){
             return english2field.get(name);
     }
 
-    public String getNameOfField(ContactField field){
+    public String getNameOfField(final ContactField field){
     	return field2english.get(field);
     }
 

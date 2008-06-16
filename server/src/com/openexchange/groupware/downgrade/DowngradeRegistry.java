@@ -60,10 +60,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.openexchange.tools.oxfolder.downgrade.OXFolderDowngradeListener;
 import com.openexchange.groupware.calendar.CalendarAdministration;
 import com.openexchange.groupware.infostore.InfostoreDowngrade;
 import com.openexchange.groupware.tasks.TasksDowngrade;
+import com.openexchange.tools.oxfolder.downgrade.OXFolderDowngradeListener;
 
 /**
  * {@link DowngradeRegistry} - A registry for instances of

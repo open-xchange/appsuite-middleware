@@ -60,13 +60,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajp13.AJPv13ListenerThread;
-import com.openexchange.groupware.Component;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.contexts.Context;
-
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.contexts.Context;
 
 @OXExceptionSource(classId=Classes.COM_OPENEXCHANGE_GROUPWARE_TX_REQUESTDBPROVIDER, component= EnumComponent.TRANSACTION)
 
@@ -82,7 +80,7 @@ public class RequestDBProvider implements DBProvider {
 
 	private static final Log LOG = LogFactory.getLog(RequestDBProvider.class);
 	private static final TXExceptionFactory EXCEPTIONS = new TXExceptionFactory(RequestDBProvider.class);
-    private boolean commits;
+    private boolean commits = true;
 
 
     public static class DBTransaction {
@@ -268,8 +266,9 @@ public class RequestDBProvider implements DBProvider {
 		} catch (final SQLException e) {
 			return null;
 		}
-		if(tx != null && tx.ctx == null)
+		if(tx != null && tx.ctx == null) {
 			tx.ctx = ctx;
+		}
 		return tx.writeConnection;
 	}
 	
@@ -367,7 +366,7 @@ public class RequestDBProvider implements DBProvider {
 	}
 
 
-    public void setCommitsTransaction(boolean commits) {
+    public void setCommitsTransaction(final boolean commits) {
         this.commits = commits;
     }
 

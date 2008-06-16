@@ -63,12 +63,13 @@ import com.openexchange.tools.conf.GlobalConfig;
  * @author Benjamin Otterbach
  * @deprecated this class doesn't work anymore.
  */
+@Deprecated
 public class FormatDate {
 
-    private String language;
-    private String country;
+    private final String language;
+    private final String country;
 
-    private String[] originalPatternFormat;
+    private final String[] originalPatternFormat;
 
     /**
      * Initial Methode.<BR>
@@ -80,7 +81,7 @@ public class FormatDate {
      * @param String Sprach Code
      * @param String Laender Code
      */
-    public FormatDate(String language, String country) {
+    public FormatDate(final String language, final String country) {
 	this.language = language;
 	this.country = country;
 
@@ -97,7 +98,7 @@ public class FormatDate {
      * @param String Format des gewuenschten Datums.
      * @return String - Formatiertes Datum
      */
-    public String formatDate(String originalDate, String originalPattern, String wantedPattern) throws ParseException {
+    public String formatDate(final String originalDate, String originalPattern, final String wantedPattern) throws ParseException {
 	
 	if ((originalPattern == null) && (originalPattern.trim().length() <= 0)) {
 	    originalPattern = "MM.dd.yyyy HH:mm";
@@ -107,9 +108,9 @@ public class FormatDate {
 	    originalPattern = "dd.MM.yyyy HH:mm";
 	}
 
-	Locale l = new Locale(language,country);
-	SimpleDateFormat sdfi = new SimpleDateFormat(originalPattern);
-	SimpleDateFormat sdfo = new SimpleDateFormat (wantedPattern, l);
+	final Locale l = new Locale(language,country);
+	final SimpleDateFormat sdfi = new SimpleDateFormat(originalPattern);
+	final SimpleDateFormat sdfo = new SimpleDateFormat (wantedPattern, l);
 
 	return(sdfo.format(sdfi.parse(originalDate)));
 	
@@ -122,15 +123,15 @@ public class FormatDate {
      * @param boolean gibt an ob im Ausgabe Format die Zeitangabe mit enthalten sein soll.
      * @return String - Formatiertes Datum
      */
-    public String formatDateForPostgres(String originalDate, boolean withTime) throws ParseException {
+    public String formatDateForPostgres(final String originalDate, final boolean withTime) throws ParseException {
 	int timeCount = 0;
 	if (!withTime) {
 	    timeCount = 1;
 	}
 
-	Locale l = new Locale(language,country);
-	SimpleDateFormat sdfi = new SimpleDateFormat(originalPatternFormat[timeCount]);
-	SimpleDateFormat sdfo = new SimpleDateFormat (GlobalConfig.getDateTimePattern("DATABASE"), l);
+	final Locale l = new Locale(language,country);
+	final SimpleDateFormat sdfi = new SimpleDateFormat(originalPatternFormat[timeCount]);
+	final SimpleDateFormat sdfo = new SimpleDateFormat (GlobalConfig.getDateTimePattern("DATABASE"), l);
 
 	return(sdfo.format(sdfi.parse(originalDate)));	
     }
@@ -142,14 +143,14 @@ public class FormatDate {
      * @param boolean gibt an ob im Ausgabe Format die Zeitangabe mit enthalten sein soll.
      * @return String - Formatiertes Datum
      */
-    public String formatDateForPostgres(Date originalDate, boolean withTime) throws ParseException {
+    public String formatDateForPostgres(final Date originalDate, final boolean withTime) throws ParseException {
     	return formatDateForPostgres(getStringFromDate(originalDate, withTime), withTime);
     }
 
     /**
      * Wandelt ein Datum in einen String um.
      */
-    public String getStringFromDate(Date d, boolean time) throws ParseException {
+    public String getStringFromDate(final Date d, final boolean time) throws ParseException {
     	if (d == null) {
     		return null;
     	}
@@ -158,7 +159,7 @@ public class FormatDate {
     	    withTime = 0;
     	}
 
-    	Calendar cal = Calendar.getInstance();
+    	final Calendar cal = Calendar.getInstance();
      	cal.setTime(d);
     	
     	String actDate = cal.get(Calendar.DAY_OF_MONTH) + "." + (cal.get(Calendar.MONTH)+1) + "." + cal.get(Calendar.YEAR)

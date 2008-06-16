@@ -51,16 +51,14 @@ package com.openexchange.groupware.infostore.database.impl;
 
 import java.sql.SQLException;
 
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
-
-
-import com.openexchange.groupware.AbstractOXException;
 
 @OXExceptionSource(
 		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_CREATEVERSIONACTION,
@@ -79,7 +77,7 @@ public class CreateVersionAction extends AbstractDocumentListAction {
 	
 	@Override
 	protected void undoAction() throws AbstractOXException {
-		UpdateBlock update = new Update(getQueryCatalog().getVersionDelete(InfostoreQueryCatalog.Table.INFOSTORE_DOCUMENT, getDocuments())){
+		final UpdateBlock update = new Update(getQueryCatalog().getVersionDelete(InfostoreQueryCatalog.Table.INFOSTORE_DOCUMENT, getDocuments())){
 
 			@Override
 			public void fillStatement() throws SQLException {
@@ -90,7 +88,7 @@ public class CreateVersionAction extends AbstractDocumentListAction {
 		
 		try {
 			doUpdates(update);
-		} catch (UpdateException e) {
+		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(0, e.getSQLException(), e.getStatement());
 		}
 
@@ -104,13 +102,13 @@ public class CreateVersionAction extends AbstractDocumentListAction {
 	public void perform() throws AbstractOXException {
 		try {
 			doUpdates(getQueryCatalog().getVersionInsert(), getQueryCatalog().getVersionFields(), getDocuments());
-		} catch (UpdateException e) {
+		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
 		}
 	}
 
 	@Override
-	protected Object[] getAdditionals(DocumentMetadata doc) {
+	protected Object[] getAdditionals(final DocumentMetadata doc) {
 		return new Object[]{getContext().getContextId()};
 	}
 

@@ -63,11 +63,12 @@ public class OldDateTimeListPropertyDefinition extends
 	private static final OldShortPropertyDefinition PropDef = new OldDateTimePropertyDefinition(
 			new String[] {}, new OldParamDefinition[] {});
 
-	public OldDateTimeListPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldDateTimeListPropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
+	@Override
 	protected Object parseValue(final Property property, final StringScanner s)
 			throws IOException {
 		final ArrayList<Object> al = new ArrayList<Object>();
@@ -79,6 +80,7 @@ public class OldDateTimeListPropertyDefinition extends
 		return al;
 	}
 
+	@Override
 	protected String writeElement(final Property property, final Object value) {
 		return PropDef.writeValue(property, value);
 	}

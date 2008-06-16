@@ -54,15 +54,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.infostore.Classes;
 
 @OXExceptionSource(
 		classId=Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_CHECKSIZESWITCH,

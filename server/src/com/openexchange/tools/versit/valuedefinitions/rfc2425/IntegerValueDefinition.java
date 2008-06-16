@@ -69,6 +69,7 @@ public class IntegerValueDefinition extends ValueDefinition {
 	
 	private static Pattern IntegerPattern = Pattern.compile("[-+]?\\d+");
 
+	@Override
 	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
 		final String value = s.regex(IntegerPattern);

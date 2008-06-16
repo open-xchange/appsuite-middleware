@@ -53,7 +53,7 @@ package com.openexchange.tools.versit.old;
 
 public class VCard21 extends OldObjectDefinition {
 
-	public VCard21(String[] propertyNames, OldPropertyDefinition[] properties) {
+	public VCard21(final String[] propertyNames, final OldPropertyDefinition[] properties) {
 		super(propertyNames, properties);
 		Name = "VCARD";
 	}

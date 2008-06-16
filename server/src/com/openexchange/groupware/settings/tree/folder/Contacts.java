@@ -97,7 +97,7 @@ public class Contacts implements PreferencesItemService {
                 try {
                     setting.setSingleValue(Integer.valueOf(acc.getDefaultFolder(
                         user.getId(), FolderObject.CONTACT).getObjectID()));
-                } catch (OXException e) {
+                } catch (final OXException e) {
                     throw new SettingException(e);
                 }
             }

@@ -71,17 +71,17 @@ public class Protocol {
 	public static enum WEBDAV_METHOD {GET, PUT, MKCOL, DELETE, HEAD, OPTIONS, TRACE, PROPPATCH, PROPFIND, MOVE, COPY, LOCK, UNLOCK}
 	
 	public static final class Property {
-		private int id;
-		private String name;
-		private String namespace;
+		private final int id;
+		private final String name;
+		private final String namespace;
 		
-		private Property(int id, String namespace, String name) {
+		private Property(final int id, final String namespace, final String name) {
 			this.id = id;
 			this.name = name;
 			this.namespace = namespace;
 		}
 		
-		public Object doSwitch(PropertySwitch sw) throws WebdavException {
+		public Object doSwitch(final PropertySwitch sw) throws WebdavException {
 			switch(id) {
 			case CREATIONDATE : return sw.creationDate();
 			case DISPLAYNAME : return sw.displayName();
@@ -111,7 +111,7 @@ public class Protocol {
 		}
 		
 		public WebdavProperty getWebdavProperty(){
-			WebdavProperty p = new WebdavProperty();
+			final WebdavProperty p = new WebdavProperty();
 			p.setNamespace(namespace);
 			p.setName(name);
 			switch(id){
@@ -120,13 +120,15 @@ public class Protocol {
 			return p;
 		}
 		
+		@Override
 		public int hashCode(){
 			return id;
 		}
 		
-		public boolean equals(Object o) {
+		@Override
+		public boolean equals(final Object o) {
 			if (o instanceof Property) {
-				Property prop = (Property) o;
+				final Property prop = (Property) o;
 				return prop.getId() == id;
 			}
 			return false;
@@ -180,7 +182,7 @@ public class Protocol {
 		return VALUES;
 	}
 	
-	public Property get(int i) {
+	public Property get(final int i) {
 		switch(i) {
 		case CREATIONDATE : return CREATIONDATE_LITERAL;
 		case DISPLAYNAME : return DISPLAYNAME_LITERAL;
@@ -197,11 +199,12 @@ public class Protocol {
 		}
 	}
 	
-	public Property get(String namespace, String name) {
-		if(namespace == null)
+	public Property get(String namespace, final String name) {
+		if(namespace == null) {
 			namespace = DEFAULT_NAMESPACE;
-		List<Property> known = getKnownProperties();
-		for(Property prop : known) {
+		}
+		final List<Property> known = getKnownProperties();
+		for(final Property prop : known) {
 			if(prop.getNamespace().equals(namespace) && prop.getName().equals(name)) {
 				return prop;
 			}
@@ -209,10 +212,11 @@ public class Protocol {
 		return null;
 	}
 
-	public boolean isProtected(String namespaceURI, String name) {
-		Property p = get(namespaceURI, name);
-		if(p == null)
+	public boolean isProtected(final String namespaceURI, final String name) {
+		final Property p = get(namespaceURI, name);
+		if(p == null) {
 			return false;
+		}
 		switch(p.getId()) {
 		case CREATIONDATE: case GETETAG: case GETLASTMODIFIED: case RESOURCETYPE: case LOCKDISCOVERY: case SUPPORTEDLOCK: case SOURCE: return true;
 		default : return false;

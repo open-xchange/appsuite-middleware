@@ -100,29 +100,29 @@ public class AttachmentObject extends DataObject {
 	}
 	
 	// SET METHODS
-	public void setFilename( String filename ) {
+	public void setFilename( final String filename ) {
 		this.filename = filename;
 		b_filename = true;
 	}
 	
-	public void setMimeType( String mimetype ) {
+	public void setMimeType( final String mimetype ) {
 		this.mimetype = mimetype;
 		b_mimetype = true;
 	}
 	
-	public void setTargetID ( int target_id )
+	public void setTargetID ( final int target_id )
 	{
 		this.target_id = target_id;
 		b_target_id = true;
 	}
 	
-	public void setModule ( int module ) 
+	public void setModule ( final int module ) 
 	{
 		this.module = module;
 		b_module = true;
 	}
 	
-	public void setInputStream ( InputStream is )
+	public void setInputStream ( final InputStream is )
 	{
 		this.is = is;
 		b_is = true;
@@ -181,16 +181,18 @@ public class AttachmentObject extends DataObject {
 		return b_is;
 	}
 	
+	@Override
 	public int hashCode() {
 		int result = 17;
 		result = 37 * result + filename.hashCode();
 		return result;
 	}
 	
-	public boolean equals(Object o)
+	@Override
+	public boolean equals(final Object o)
 	{
 		if (o instanceof AttachmentObject) {
-			AttachmentObject attachmentobject = (AttachmentObject)o;
+			final AttachmentObject attachmentobject = (AttachmentObject)o;
 			
 			if (filename.equals(attachmentobject.getFilename())) {
 				return true;
@@ -202,6 +204,7 @@ public class AttachmentObject extends DataObject {
 		}
 	}
 	
+	@Override
 	public void reset() {
 		super.reset();
 		

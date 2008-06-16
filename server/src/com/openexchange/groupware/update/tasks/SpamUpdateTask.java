@@ -149,7 +149,7 @@ public class SpamUpdateTask implements UpdateTask {
 				stmt.setString(1, UserSettingMail.STD_CONFIRMED_SPAM);
 				stmt.setString(2, UserSettingMail.STD_CONFIRMED_HAM);
 				stmt.executeUpdate();
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				throw EXCEPTION.create(1, e, e.getMessage());
 			}
 		} finally {
@@ -184,7 +184,7 @@ public class SpamUpdateTask implements UpdateTask {
 					found = colName.equals(meta.getColumnName(i));
 				}
 				return found;
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				throw EXCEPTION.create(2, e, e.getMessage());
 			}
 		} finally {

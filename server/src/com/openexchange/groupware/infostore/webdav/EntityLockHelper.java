@@ -50,19 +50,19 @@
 package com.openexchange.groupware.infostore.webdav;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.infostore.InfostoreException;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 public class EntityLockHelper extends LockHelper {
 
-	private EntityLockManager entityLockManager;
+	private final EntityLockManager entityLockManager;
 	protected SessionHolder sessionHolder;
 	
 	
@@ -135,7 +135,7 @@ public class EntityLockHelper extends LockHelper {
     private ServerSession getSession() throws InfostoreException {
         try {
             return new ServerSessionAdapter(sessionHolder.getSessionObject());
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             throw new InfostoreException(e);
         }
     }

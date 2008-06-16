@@ -83,6 +83,7 @@ public class DurationValueDefinition extends ValueDefinition {
 	 *     	 
 	 * </pre>
 	 */
+	@Override
 	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
 		final DurationValue dur = new DurationValue();
@@ -166,6 +167,7 @@ public class DurationValueDefinition extends ValueDefinition {
 		dur.Seconds = num;
 	}
 
+	@Override
 	public String writeValue(final Object value) {
 		final DurationValue dur = (DurationValue) value;
 		final StringBuilder sb = new StringBuilder();

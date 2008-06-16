@@ -77,7 +77,7 @@ public final class Tools {
         throws SettingException {
         try {
             return ContextStorage.getInstance().getContext(contextId);
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             throw new SettingException(e);
         }
     }
@@ -86,7 +86,7 @@ public final class Tools {
         throws SettingException {
         try {
             return UserStorage.getInstance().getUser(userId, ctx);
-        } catch (LdapException e) {
+        } catch (final LdapException e) {
             throw new SettingException(e);
         }
     }
@@ -96,7 +96,7 @@ public final class Tools {
         try {
             return UserConfigurationStorage.getInstance().getUserConfiguration(
                 userId, ctx);
-        } catch (UserConfigurationException e) {
+        } catch (final UserConfigurationException e) {
             throw new SettingException(e);
         }
     }

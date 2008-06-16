@@ -87,7 +87,7 @@ public final class DowngradeEvent {
 	 * @param ctx
 	 *            The context
 	 */
-	public DowngradeEvent(UserConfiguration newUserConfiguration, Connection readCon, Connection writeCon, Context ctx) {
+	public DowngradeEvent(final UserConfiguration newUserConfiguration, final Connection readCon, final Connection writeCon, final Context ctx) {
 		super();
 		this.ctx = ctx;
 		this.newUserConfiguration = newUserConfiguration;
@@ -105,7 +105,7 @@ public final class DowngradeEvent {
 	 * @param ctx
 	 *            The context
 	 */
-	public DowngradeEvent(UserConfiguration newUserConfiguration, Connection con, Context ctx) {
+	public DowngradeEvent(final UserConfiguration newUserConfiguration, final Connection con, final Context ctx) {
 		super();
 		this.ctx = ctx;
 		this.newUserConfiguration = newUserConfiguration;

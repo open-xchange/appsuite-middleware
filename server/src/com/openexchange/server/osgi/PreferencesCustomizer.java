@@ -89,7 +89,7 @@ public class PreferencesCustomizer implements ServiceTrackerCustomizer {
             .getService(reference);
         try {
             ConfigTree.addPreferencesItem(item);
-        } catch (SettingException e) {
+        } catch (final SettingException e) {
             final StringBuilder sb = new StringBuilder();
             sb.append("Can't add service for preferences item. Path: ");
             final String[] path = item.getPath();

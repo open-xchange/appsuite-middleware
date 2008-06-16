@@ -58,20 +58,20 @@ import com.openexchange.event.impl.ContactEventInterface;
 import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class AttachmentCleaner implements AppointmentEventInterface, TaskEventInterface,
 		ContactEventInterface {
@@ -133,7 +133,7 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
 	private final void deleteAttachments(final int parentFolderID, final int objectID, final int type, final Session session) {
 		SearchIterator iter = null;
 		try {
-            ServerSession sessionObj = new ServerSessionAdapter(session);
+            final ServerSession sessionObj = new ServerSessionAdapter(session);
             ATTACHMENT_BASE.startTransaction();
 			final TimedResult rs = ATTACHMENT_BASE.getAttachments(parentFolderID,objectID,type,new AttachmentField[]{AttachmentField.ID_LITERAL},AttachmentField.ID_LITERAL,AttachmentBase.ASC,sessionObj.getContext(), null, null);
 			final List<Integer> ids = new ArrayList<Integer>();
@@ -144,44 +144,44 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
 			while(iter.hasNext()){
 				ids.add(Integer.valueOf(((AttachmentMetadata)iter.next()).getId()));
 			}
-			int[] idA = new int[ids.size()];
+			final int[] idA = new int[ids.size()];
 			
 			int i = 0;
-			for(int id : ids) {
+			for(final int id : ids) {
 				idA[i++] = id;
 			}
 			
 			ATTACHMENT_BASE.detachFromObject(parentFolderID, objectID, type, idA,sessionObj.getContext(), null, null);
 			ATTACHMENT_BASE.commit();
 		
-		} catch (TransactionException e) {
+		} catch (final TransactionException e) {
 			rollback(e);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			rollback(e);
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			rollback(e);
-		} catch (ContextException e) {
+		} catch (final ContextException e) {
             LL.log(e);
         } finally {
 			if(iter != null) {
 				try {
 					iter.close();
-				} catch (SearchIteratorException e) {
+				} catch (final SearchIteratorException e) {
 					LL.log(e);
 				}
 			}
 			try {
 				ATTACHMENT_BASE.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LL.log(e);
 			}
 		}
 	}
 
-	private void rollback(AbstractOXException x) {
+	private void rollback(final AbstractOXException x) {
 		try {
 			ATTACHMENT_BASE.rollback();
-		} catch (TransactionException e) {
+		} catch (final TransactionException e) {
 			LL.log(e);
 		}
 		LL.log(x);

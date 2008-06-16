@@ -75,23 +75,23 @@ public class ImportExportWriter extends DataWriter {
 		jsonwriter = new OXJSONWriter();
 	}
 	
-	public ImportExportWriter(OXJSONWriter jsonwriter) {
+	public ImportExportWriter(final OXJSONWriter jsonwriter) {
 		this.jsonwriter = jsonwriter;
 	}
 	
-	public void writeObject(ImportResult importResult) throws JSONException {
+	public void writeObject(final ImportResult importResult) throws JSONException {
 		jsonwriter.object();
 		writeParameter(DataFields.ID, importResult.getObjectId());
 		writeParameter(DataFields.LAST_MODIFIED, importResult.getDate());
 		writeParameter(CommonFields.FOLDER_ID, importResult.getFolder());
 		
 		if (importResult.hasError()) {
-			OXException exception = importResult.getException();
+			final OXException exception = importResult.getException();
 			writeParameter("error", exception.getOrigMessage());
 	        if (exception.getMessageArgs() != null) {
 	        	jsonwriter.key("error_params");
 	        	jsonwriter.array();
-	            for (Object tmp : exception.getMessageArgs()) {
+	            for (final Object tmp : exception.getMessageArgs()) {
 	            	jsonwriter.value(tmp);
 	            }
 	            jsonwriter.endArray();
@@ -106,6 +106,7 @@ public class ImportExportWriter extends DataWriter {
 	
 	
 	
+	@Override
 	public String toString(){
 		return getObject().toString();
 	}
@@ -114,7 +115,7 @@ public class ImportExportWriter extends DataWriter {
 		return ((OXJSONWriter) jsonwriter).getObject();
 	}
 
-	public void writeObjects(List<ImportResult> importResult) throws JSONException {
+	public void writeObjects(final List<ImportResult> importResult) throws JSONException {
 		jsonwriter.array();
 		for (int a = 0; a < importResult.size(); a++) {
 			writeObject(importResult.get(a));

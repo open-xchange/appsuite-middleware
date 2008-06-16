@@ -49,11 +49,6 @@
 
 package com.openexchange.tools.versit.converter;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.CalendarRecurringCollection;
-import com.openexchange.groupware.calendar.RecurringResults;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
@@ -76,6 +71,10 @@ import java.util.TimeZone;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.CalendarRecurringCollection;
+import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -1594,7 +1593,7 @@ public class OXContainerConverter {
 			RecurringResults result;
 			try {
 				result = CalendarRecurringCollection.calculateFirstRecurring(app);
-			} catch (OXException e) {
+			} catch (final OXException e) {
 				LOG.error(e.getMessage(), e);
 				throw new ConverterException(e);
 			}

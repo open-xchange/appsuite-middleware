@@ -86,7 +86,20 @@ import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.database.impl.*;
+import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
+import com.openexchange.groupware.infostore.database.impl.CreateVersionAction;
+import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
+import com.openexchange.groupware.infostore.database.impl.DeleteDocumentAction;
+import com.openexchange.groupware.infostore.database.impl.DeleteVersionAction;
+import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
+import com.openexchange.groupware.infostore.database.impl.GetSwitch;
+import com.openexchange.groupware.infostore.database.impl.InfostoreIterator;
+import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
+import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
+import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
+import com.openexchange.groupware.infostore.database.impl.SetSwitch;
+import com.openexchange.groupware.infostore.database.impl.UpdateDocumentAction;
+import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.validation.InvalidCharactersValidator;
 import com.openexchange.groupware.infostore.validation.ValidationChain;
@@ -110,7 +123,6 @@ import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.file.FileStorage;
@@ -121,6 +133,7 @@ import com.openexchange.tools.iterator.CombinedSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * DatabaseImpl
@@ -166,7 +179,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		setProvider(provider);
 	}
 
-    public void setSecurity(InfostoreSecurity security) {
+    public void setSecurity(final InfostoreSecurity security) {
         this.security = security;
         if(null != getProvider()) {
             setProvider(getProvider());
@@ -177,7 +190,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			final UserConfiguration userConfig) throws OXException {
 		try {
 			return security.getInfostorePermission(id, ctx, user, userConfig).canReadObject();
-		} catch (InfostoreException x) {
+		} catch (final InfostoreException x) {
 			if(x.getDetailNumber() == Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INFOSTORESECURITYIMPL*100) {
 				return false;
 			}
@@ -1426,11 +1439,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     private static enum ServiceMethod {
         COMMIT, FINISH, ROLLBACK, SET_REQUEST_TRANSACTIONAL, START_TRANSACTION, SET_PROVIDER;
 
-        public void call(Object o, Object...args) {
+        public void call(final Object o, final Object...args) {
             if(!(o instanceof DBService)) {
                 return;
             }
-            DBService service = (DBService) o;
+            final DBService service = (DBService) o;
             switch(this) {
                 default : return;
                 case SET_REQUEST_TRANSACTIONAL: service.setRequestTransactional((Boolean) args[0]); break;
@@ -1438,11 +1451,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             }
         }
 
-        public void callUnsafe(Object o, Object...args) throws TransactionException {
+        public void callUnsafe(final Object o, final Object...args) throws TransactionException {
             if(!(o instanceof DBService)) {
                 return;
             }
-            DBService service = (DBService) o;
+            final DBService service = (DBService) o;
             switch(this) {
                 default : call(o, args); break;
                 case COMMIT: service.commit(); break;
@@ -1550,9 +1563,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
 	private final class LockTimedResult implements TimedResult {
 
-		private long sequenceNumber;
+		private final long sequenceNumber;
 
-		private SearchIterator results;
+		private final SearchIterator results;
 
 		public LockTimedResult(final TimedResult delegate, final Context ctx, final User user,
 				final UserConfiguration userConfig) throws SearchIteratorException,
@@ -1575,11 +1588,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
 	private final class LockDelta implements Delta {
 
-		private long sequenceNumber;
+		private final long sequenceNumber;
 
-		private SearchIterator newIter;
+		private final SearchIterator newIter;
 
-		private SearchIterator modified;
+		private final SearchIterator modified;
 
 		private SearchIterator deleted;
 

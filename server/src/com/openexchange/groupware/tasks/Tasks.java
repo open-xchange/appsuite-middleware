@@ -88,16 +88,16 @@ public abstract class Tasks {
      * @deprecated use {@link #containsNotSelfCreatedTasks(Session, Connection, int)}
      */
     @Deprecated
-    public final boolean containsNotSelfCreatedTasks(Session session,
-        int folderId) throws OXException {
+    public final boolean containsNotSelfCreatedTasks(final Session session,
+        final int folderId) throws OXException {
         final Context ctx;
         final Connection con;
         try {
             ctx = Tools.getContext(session.getContextId());
             con = DBPool.pickup(ctx);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw Tools.convert(new TaskException(Code.NO_CONNECTION, e));
         }
         try {
@@ -125,16 +125,16 @@ public abstract class Tasks {
      * @deprecated use {@link #deleteTasksInFolder(Session, Connection, int)}
      */
     @Deprecated
-    public final void deleteTasksInFolder(Session session, int folderId)
+    public final void deleteTasksInFolder(final Session session, final int folderId)
         throws OXException {
         final Context ctx;
         final Connection con;
         try {
             ctx = Tools.getContext(session.getContextId());
             con = DBPool.pickup(ctx);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw Tools.convert(new TaskException(Code.NO_CONNECTION, e));
         }
         try {

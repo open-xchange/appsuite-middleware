@@ -175,7 +175,7 @@ public abstract class ResourceStorage {
 	 *             If an exception occurs while reading from the underlying
 	 *             persistent storage.
 	 */
-	public Resource[] getAllResources(Context context) throws LdapException {
+	public Resource[] getAllResources(final Context context) throws LdapException {
 		return searchResources(SEARCH_PATTERN_ALL, context);
 	}
 
@@ -235,7 +235,7 @@ public abstract class ResourceStorage {
 	 * @throws ResourceException
 	 *             If resource insertion fails.
 	 */
-	public final void insertResource(Context ctx, Connection con, Resource resource) throws ResourceException {
+	public final void insertResource(final Context ctx, final Connection con, final Resource resource) throws ResourceException {
 		insertResource(ctx, con, resource, StorageType.ACTIVE);
 	}
 

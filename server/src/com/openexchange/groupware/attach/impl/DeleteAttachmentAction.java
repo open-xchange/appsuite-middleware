@@ -53,8 +53,8 @@ import java.sql.SQLException;
 import java.util.Date;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.AttachmentExceptionFactory;

@@ -55,7 +55,7 @@ import com.openexchange.groupware.contexts.Context;
 
 public class StaticDBPoolProvider implements DBProvider{
 
-	private Connection writeCon;
+	private final Connection writeCon;
 	
 	
 

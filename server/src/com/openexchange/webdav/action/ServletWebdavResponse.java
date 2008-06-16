@@ -56,10 +56,10 @@ import javax.servlet.http.HttpServletResponse;
 
 public class ServletWebdavResponse implements WebdavResponse {
 
-	private HttpServletResponse res;
+	private final HttpServletResponse res;
 	private int status;
 
-	public ServletWebdavResponse(HttpServletResponse res) {
+	public ServletWebdavResponse(final HttpServletResponse res) {
 		this.res = res;
 	}
 	
@@ -67,11 +67,11 @@ public class ServletWebdavResponse implements WebdavResponse {
 		return res.getOutputStream();
 	}
 
-	public void setHeader(String header, String value) {
+	public void setHeader(final String header, final String value) {
 		res.setHeader(header, value);
 	}
 
-	public void setStatus(int status) {
+	public void setStatus(final int status) {
 		res.setStatus(status);
 		this.status = status;
 	}
@@ -80,7 +80,7 @@ public class ServletWebdavResponse implements WebdavResponse {
 		return status;
 	}
 
-	public void setContentType(String s) {
+	public void setContentType(final String s) {
 		res.setContentType(s);
 	}
 

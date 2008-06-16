@@ -82,7 +82,8 @@ public class GroupParticipant implements Participant, Comparable {
     /**
      * @deprecated Use {@link #GroupParticipant(int)}.
      */
-    public GroupParticipant() {
+    @Deprecated
+	public GroupParticipant() {
         this(0);
     }
 

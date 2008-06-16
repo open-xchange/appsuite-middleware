@@ -75,6 +75,7 @@ public class OldDaylightPropertyDefinition extends OldRecordPropertyDefinition {
 				new OldShortPropertyDefinition(NoNames, NoParams)});
 	}
 
+	@Override
 	protected Object parseValue(final Property property, final StringScanner s)
 			throws IOException {
 		final ArrayList<Object> al = new ArrayList<Object>();

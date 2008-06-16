@@ -51,9 +51,10 @@
 
 package com.openexchange.webdav.xml;
 
+import org.xmlpull.v1.XmlPullParser;
+
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.webdav.xml.fields.FolderChildFields;
-import org.xmlpull.v1.XmlPullParser;
 
 /**
  * FolderChildParser
@@ -63,7 +64,7 @@ import org.xmlpull.v1.XmlPullParser;
 
 public class FolderChildParser extends DataParser {
 	
-	protected void parseElementFolderChildObject(FolderChildObject folderchildobject, XmlPullParser parser) throws Exception {		
+	protected void parseElementFolderChildObject(final FolderChildObject folderchildobject, final XmlPullParser parser) throws Exception {		
 		if (isTag(parser, FolderChildFields.FOLDER_ID)) {
 			inFolder = getValueAsInt(parser);
 		} else if (isTag(parser, FolderChildFields.FOLDER)) {

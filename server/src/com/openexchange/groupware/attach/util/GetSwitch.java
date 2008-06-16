@@ -49,13 +49,14 @@
 
 package com.openexchange.groupware.attach.util;
 
-import com.openexchange.groupware.attach.*;
+import com.openexchange.groupware.attach.AttachmentField;
+import com.openexchange.groupware.attach.AttachmentMetadata;
 
 public class GetSwitch implements AttachmentField.AttachmentSwitch {
 
-	private AttachmentMetadata attachment;
+	private final AttachmentMetadata attachment;
 
-	public GetSwitch(AttachmentMetadata attachment) {
+	public GetSwitch(final AttachmentMetadata attachment) {
 		this.attachment = attachment;
 	}
 	

@@ -440,7 +440,7 @@ public final class MailProperties {
 		}
 
 		{
-			String phishingHdrsStr = configuration.getProperty("com.openexchange.mail.phishingHeader", "").trim();
+			final String phishingHdrsStr = configuration.getProperty("com.openexchange.mail.phishingHeader", "").trim();
 			if (null != phishingHdrsStr && phishingHdrsStr.length() > 0) {
 				phishingHeaders = phishingHdrsStr.split(" *, *");
 			} else {

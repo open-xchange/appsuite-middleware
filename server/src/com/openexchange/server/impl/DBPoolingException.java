@@ -71,7 +71,8 @@ public class DBPoolingException extends AbstractOXException {
      * @param message error message
      * @deprecated since all exceptions should have error codes.
      */
-    public DBPoolingException(final String message) {
+    @Deprecated
+	public DBPoolingException(final String message) {
         super(EnumComponent.DB_POOLING, message);
     }
 
@@ -79,7 +80,8 @@ public class DBPoolingException extends AbstractOXException {
      * @param exc the cause of the exception.
      * @deprecated since all exceptions should have error codes.
      */
-    public DBPoolingException(final Exception exc) {
+    @Deprecated
+	public DBPoolingException(final Exception exc) {
         super(EnumComponent.DB_POOLING, exc);
     }
 

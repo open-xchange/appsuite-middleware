@@ -54,15 +54,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.utils.Metadata;
-
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
 
 @OXExceptionSource(classId=0, component=EnumComponent.INFOSTORE)
 
@@ -80,23 +79,23 @@ public class ValidationChain {
 
 	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(ValidationChain.class);
 	
-	private List<InfostoreValidator> validators = new ArrayList<InfostoreValidator>();
+	private final List<InfostoreValidator> validators = new ArrayList<InfostoreValidator>();
 
-	public void add(InfostoreValidator validator) {
+	public void add(final InfostoreValidator validator) {
 		validators.add(validator);
 	}
 
-	public void validate(DocumentMetadata metadata) throws InfostoreException {
-		StringBuilder message = new StringBuilder();
+	public void validate(final DocumentMetadata metadata) throws InfostoreException {
+		final StringBuilder message = new StringBuilder();
 		boolean failed = false;
-		for(InfostoreValidator validator : validators) {
-			DocumentMetadataValidation validation = validator.validate(metadata);
+		for(final InfostoreValidator validator : validators) {
+			final DocumentMetadataValidation validation = validator.validate(metadata);
 			if(!validation.isValid()) {
 				failed = true;
-				Map<String, List<Metadata>> errors = new HashMap<String, List<Metadata>>();
+				final Map<String, List<Metadata>> errors = new HashMap<String, List<Metadata>>();
 				
-				for(Metadata field : validation.getInvalidFields()) {
-					String error = validation.getError(field);
+				for(final Metadata field : validation.getInvalidFields()) {
+					final String error = validation.getError(field);
 					List<Metadata> errorList = errors.get(error);
 					if(null == errorList) {
 						errorList = new ArrayList<Metadata>();
@@ -106,8 +105,8 @@ public class ValidationChain {
 				}
 				
 				message.append(validator.getName()).append(": ").append("(");
-				for(String error : errors.keySet()) {
-					for(Metadata field : errors.get(error)) {
+				for(final String error : errors.keySet()) {
+					for(final Metadata field : errors.get(error)) {
 						message.append(field.getName()).append(", ");
 					}
 					message.setLength(message.length()-2);

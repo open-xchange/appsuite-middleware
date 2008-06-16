@@ -51,13 +51,15 @@
 
 package com.openexchange.groupware.reminder;
 
-import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 
 /**
  * ReminderConfigImpl
@@ -75,7 +77,7 @@ public class ReminderConfigImpl extends AbstractConfigWrapper implements Reminde
 	
 	private static final Log LOG = LogFactory.getLog(ReminderConfigImpl.class);
 	
-	public ReminderConfigImpl(String propfile) {
+	public ReminderConfigImpl(final String propfile) {
 		if (isInit) {
 			return ;
 		}
@@ -93,9 +95,9 @@ public class ReminderConfigImpl extends AbstractConfigWrapper implements Reminde
 			
 			prop = new Properties();
 			prop.load(new FileInputStream(propfile));
-		} catch (FileNotFoundException exc) {
+		} catch (final FileNotFoundException exc) {
 			LOG.error("Cannot find propfile: " + propfile, exc);
-		} catch (IOException exc) {
+		} catch (final IOException exc) {
 			LOG.error("Cannot read propfile: " + propfile, exc);
 		}
 		

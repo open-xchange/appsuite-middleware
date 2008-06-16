@@ -80,6 +80,7 @@ public class StringScanner extends Scanner {
 		peek = readImpl();
 	}
 
+	@Override
 	protected int readImpl() {
 		if (pos < Text.length()) {
 			Column++;

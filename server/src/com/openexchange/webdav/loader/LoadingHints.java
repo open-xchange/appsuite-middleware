@@ -49,22 +49,22 @@
 
 package com.openexchange.webdav.loader;
 
-import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProperty;
-
 import java.util.HashSet;
 import java.util.Set;
+
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProperty;
 
 public class LoadingHints {
 	public static enum Property {ALL, SOME, NONE}
 
 	private Property property;
-	private Set<WebdavProperty> properties = new HashSet<WebdavProperty>();
+	private final Set<WebdavProperty> properties = new HashSet<WebdavProperty>();
 	private int depth;
 	private WebdavPath url;
 	private boolean loadLocks;
 
-	public void setProps(Property which) {
+	public void setProps(final Property which) {
 		this.property = which;
 	}
 	
@@ -72,7 +72,7 @@ public class LoadingHints {
 		return property;
 	}
 
-	public void addProperty(String namespaceURI, String name) {
+	public void addProperty(final String namespaceURI, final String name) {
 		properties.add(new WebdavProperty(namespaceURI, name));
 	}
 	
@@ -80,7 +80,7 @@ public class LoadingHints {
 		return properties;
 	}
 
-	public void setDepth(int depth) {
+	public void setDepth(final int depth) {
 		this.depth = depth;
 	}
 	
@@ -88,7 +88,7 @@ public class LoadingHints {
 		return depth;
 	}
 
-	public void setUrl(WebdavPath url) {
+	public void setUrl(final WebdavPath url) {
 		this.url = url;
 	}
 	
@@ -96,7 +96,7 @@ public class LoadingHints {
 		return url;
 	}
 
-	public void loadLocks(boolean b) {
+	public void loadLocks(final boolean b) {
 		this.loadLocks = b;
 	}
 	

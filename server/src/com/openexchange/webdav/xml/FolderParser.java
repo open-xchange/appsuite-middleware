@@ -75,7 +75,7 @@ public class FolderParser extends FolderChildParser {
 	
 	private static final Log LOG = LogFactory.getLog(FolderParser.class);
 	
-	public FolderParser(Session sessionObj) {
+	public FolderParser(final Session sessionObj) {
 		this.sessionObj = sessionObj;
 	}
 	
@@ -89,9 +89,9 @@ public class FolderParser extends FolderChildParser {
 				parseElementFolder(folderobject, parser);
 				parser.nextTag();
 			}
-		} catch (XmlPullParserException exc) {
+		} catch (final XmlPullParserException exc) {
 			throw exc;
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw new OXException(exc);
 		}
 	}
@@ -177,7 +177,7 @@ public class FolderParser extends FolderChildParser {
 				
 				permissions.add(oclp);
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw new OXException(exc);
 		}
 		

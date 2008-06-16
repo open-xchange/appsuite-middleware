@@ -51,14 +51,13 @@
 
 package com.openexchange.groupware.calendar.recurrence;
 
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.TimeZone;
+
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.container.CalendarObject;
-
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
 
 
 /**
@@ -84,7 +83,7 @@ public class RecurringCalculation {
     private boolean contains_month = false;
     private boolean contains_until = false;
     
-    private int recurrence_calculator;
+    private final int recurrence_calculator;
     
     private long diff;
     
@@ -106,7 +105,7 @@ public class RecurringCalculation {
     private static final int days_int[] = { CalendarObject.SUNDAY, CalendarObject.MONDAY, CalendarObject.TUESDAY, CalendarObject.WEDNESDAY, CalendarObject.THURSDAY, CalendarObject.FRIDAY, CalendarObject.SATURDAY };
     
     private int first_day_of_week = Calendar.MONDAY;
-    private boolean calc_until = false; // what the hell is this for?
+    private final boolean calc_until = false; // what the hell is this for?
     
     /**
      * <code>RecurringCalculation</code>
@@ -115,7 +114,7 @@ public class RecurringCalculation {
      * @param recurring_interval a <code>int</code>
      * @param diff a <code>long</code>
      */
-    public RecurringCalculation(int recurring_type, int recurring_interval, int recurrence_calculator) {
+    public RecurringCalculation(final int recurring_type, final int recurring_interval, final int recurrence_calculator) {
         this.recurring_type = recurring_type;
         this.recurring_interval = recurring_interval;
         this.recurrence_calculator = recurrence_calculator;
@@ -127,7 +126,7 @@ public class RecurringCalculation {
      *
      * @param recurring_days a <code>int</code>
      */
-    public void setDays(int recurring_days) {
+    public void setDays(final int recurring_days) {
         this.recurring_days = recurring_days;
         contains_days = true;
     }
@@ -138,7 +137,7 @@ public class RecurringCalculation {
      *
      * @param recurring_day_in_month a <code>int</code>
      */
-    public void setDayInMonth(int recurring_day_in_month) {
+    public void setDayInMonth(final int recurring_day_in_month) {
         this.recurring_day_in_month = recurring_day_in_month;
         contains_day_in_month = true;
     }
@@ -149,7 +148,7 @@ public class RecurringCalculation {
      *
      * @param recurring_month a <code>int</code>
      */
-    public void setMonth(int recurring_month) {
+    public void setMonth(final int recurring_month) {
         this.recurring_month = recurring_month;
         contains_month = true;
     }
@@ -160,7 +159,7 @@ public class RecurringCalculation {
      *
      * @param first_day_of_week a <code>int</code>
      */
-    public void setFirstDayOfWeek(int first_day_of_week) {
+    public void setFirstDayOfWeek(final int first_day_of_week) {
         this.first_day_of_week = first_day_of_week;
     }
     
@@ -172,7 +171,7 @@ public class RecurringCalculation {
      *
      * @param max_calc_value a <code>int</code>
      */
-    public void setMaxCalculation(int max_calc_value) {
+    public void setMaxCalculation(final int max_calc_value) {
         this.PMAXTC = max_calc_value;
     }
     
@@ -185,7 +184,7 @@ public class RecurringCalculation {
      *
      * @param calc_timezone a <code>int</code>
      */
-    public void setCalculationTimeZone(String calc_timezone) {
+    public void setCalculationTimeZone(final String calc_timezone) {
         this.calc_timezone = calc_timezone;
     }
     
@@ -198,7 +197,7 @@ public class RecurringCalculation {
      *
      * @param occurrence_value a <code>int</code>
      */
-    public void setOccurrence(int occurrence_value) {
+    public void setOccurrence(final int occurrence_value) {
         this.occurrence_value = occurrence_value;
         contains_occurrence = true;
     }
@@ -212,7 +211,7 @@ public class RecurringCalculation {
      *
      * @param pos a <code>int</code>
      */
-    public void setCalculationPosition(int pos) {
+    public void setCalculationPosition(final int pos) {
         this.pos = pos;
     }
     
@@ -226,7 +225,7 @@ public class RecurringCalculation {
      * @param range_start a <code>long</code>
      * @param range_end a <code>long</code>
      */
-    public void setRange(long range_start, long range_end) {
+    public void setRange(final long range_start, final long range_end) {
         this.range_start = range_start;
         this.range_end = range_end;
     }
@@ -240,7 +239,7 @@ public class RecurringCalculation {
      * @param change_exceptions a <code>String</code>
      * @param delete_exceptions a <code>String</code>
      */
-    public void setExceptions(String change_exceptions, String delete_exceptions) {
+    public void setExceptions(final String change_exceptions, final String delete_exceptions) {
         this.change_exceptions = change_exceptions;
         this.delete_exceptions = delete_exceptions;
     }
@@ -253,7 +252,7 @@ public class RecurringCalculation {
      * @param start a <code>long</code>
      * @param end a <code>long</code>
      */
-    public void setStartAndEndTime(long start, long end) {
+    public void setStartAndEndTime(final long start, final long end) {
         this.s = start;
         this.e = end;
         final long c1 = start % CalendarRecurringCollection.MILLI_DAY;
@@ -267,7 +266,7 @@ public class RecurringCalculation {
      *
      * @param rec_start a <code>long</code>
      */
-    public void setRecurringStart(long rec_start) {
+    public void setRecurringStart(final long rec_start) {
         this.sr = rec_start;
     }
     
@@ -277,7 +276,7 @@ public class RecurringCalculation {
      *
      * @param until a <code>long</code>
      */
-    public void setUntil(long until) {
+    public void setUntil(final long until) {
         this.e = until;
         this.until = until;
         contains_until = true;
@@ -315,7 +314,7 @@ public class RecurringCalculation {
         final Calendar calc = Calendar.getInstance(TimeZone.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(first_day_of_week);
         int ds_count = 1;
-        long sst = sr;
+        final long sst = sr;
         
         rs = new RecurringResults();
         calc.setTimeInMillis(s);
@@ -347,7 +346,7 @@ public class RecurringCalculation {
         final Calendar calc = Calendar.getInstance(TimeZone.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(first_day_of_week);
         int ds_count = 1;
-        long sst = sr;
+        final long sst = sr;
         
         
         calc.setTimeInMillis(s);
@@ -396,9 +395,9 @@ public class RecurringCalculation {
         Arrays.sort(r);
         if (contains_occurrence) {
             // find highes value and compare if sst.getDayOfWeek >= highest value. If not, we need to change e !!!
-            int hi = r[c-1];
+            final int hi = r[c-1];
             calc.setTimeInMillis(sst);
-            int sd = calc.get(Calendar.DAY_OF_WEEK);
+            final int sd = calc.get(Calendar.DAY_OF_WEEK);
             if (hi < sd) {
                 e = (e+(CalendarRecurringCollection.MILLI_DAY*(sd-hi)));
             }
@@ -440,7 +439,7 @@ public class RecurringCalculation {
         final Calendar calc = Calendar.getInstance(TimeZone.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(first_day_of_week);
         int ds_count = 1;
-        long sst = sr;
+        final long sst = sr;
         
         int a = recurring_days;
         final int monthly = recurring_interval;
@@ -632,7 +631,7 @@ public class RecurringCalculation {
         final Calendar calc = Calendar.getInstance(TimeZone.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(first_day_of_week);
         int ds_count = 1;
-        long sst = sr;
+        final long sst = sr;
         
         rs = new RecurringResults();
         

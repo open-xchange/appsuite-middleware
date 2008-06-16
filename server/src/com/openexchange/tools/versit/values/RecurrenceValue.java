@@ -152,7 +152,7 @@ public class RecurrenceValue {
 		 */
 		public int day;
 
-		public Weekday(int week, int day) {
+		public Weekday(final int week, final int day) {
 			this.week = week;
 			this.day = day;
 		}

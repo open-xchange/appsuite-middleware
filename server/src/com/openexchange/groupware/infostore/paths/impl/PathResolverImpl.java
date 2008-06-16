@@ -96,7 +96,7 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 	private final ThreadLocal<Map<Integer,WebdavPath>> docPathCache = new ThreadLocal<Map<Integer,WebdavPath>>();
 	private final ThreadLocal<Map<Integer,WebdavPath>> folderPathCache = new ThreadLocal<Map<Integer,WebdavPath>>();
 
-	private InfostoreFacade database;
+	private final InfostoreFacade database;
 	
 	public PathResolverImpl(final DBProvider provider, final InfostoreFacade database) {
 		setProvider(provider);
@@ -131,7 +131,7 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 		if(dm.getFileName() == null || dm.getFileName().equals("")) {
 			throw EXCEPTIONS.create(0, key);
 		}
-		WebdavPath path = getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, (int)dm.getFolderId(),ctx,user,userConfig).dup().append(dm.getFileName());
+		final WebdavPath path = getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, (int)dm.getFolderId(),ctx,user,userConfig).dup().append(dm.getFileName());
 		
 		cache.put(key, path);
 		resCache.put(path, new ResolvedImpl(path, documentId, true));
@@ -169,11 +169,11 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 		
 		
 		final int length = path.size();
-		WebdavPath thePath = new WebdavPath();
+		final WebdavPath thePath = new WebdavPath();
 		for(int i = length-1; i > -1; i--) {
 			folder = path.get(i);
 			thePath.append(folder.getFolderName());
-            WebdavPath current = thePath.dup();
+            final WebdavPath current = thePath.dup();
             cache.put(Integer.valueOf(folder.getObjectID()), current);
 			resCache.put(current, new ResolvedImpl(current, folder.getObjectID(), false));
 		}
@@ -204,19 +204,19 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
-		WebdavPath relpath = getPathForFolder(0, relativeToFolder, ctx, user, userConfig);
+		final WebdavPath relpath = getPathForFolder(0, relativeToFolder, ctx, user, userConfig);
 
 		Resolved resolved = new ResolvedImpl(relpath,relativeToFolder, false);
 		cache.put(resolved.getPath(), resolved);
 
-        WebdavPath current = new WebdavPath();
+        final WebdavPath current = new WebdavPath();
         try {
 			int parentId = relativeToFolder;
 			boolean dbMode = false;
 			int compCount = 0;
-			for(String component : path) {
+			for(final String component : path) {
 			    compCount++;
-                boolean last = compCount == path.size();
+                final boolean last = compCount == path.size();
                 current.append(component);
 
 				if(!dbMode) {
@@ -276,7 +276,7 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 		}
 	}
 	
-	public void invalidate(WebdavPath url, final int id , final Type type) {
+	public void invalidate(final WebdavPath url, final int id , final Type type) {
 
 		resolveCache.get().remove(url);
 		switch(type) {
@@ -324,7 +324,7 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 	
 	private final class CACHE_MODE implements Mode {
 
-		private DBProvider provider;
+		private final DBProvider provider;
 
 		public CACHE_MODE(final DBProvider provider) {
 			this.provider = provider;

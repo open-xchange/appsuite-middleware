@@ -104,7 +104,6 @@ import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -112,6 +111,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.session.ServerSession;
 
 @OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_DATABASEIMPL, component = EnumComponent.INFOSTORE)
 public class DatabaseImpl extends DBService {

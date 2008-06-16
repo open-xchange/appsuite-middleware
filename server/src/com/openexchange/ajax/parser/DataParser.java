@@ -158,7 +158,7 @@ public abstract class DataParser {
 		
 		try {
 			return Integer.parseInt(tmp);
-		} catch (NumberFormatException exc) {
+		} catch (final NumberFormatException exc) {
 			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
@@ -183,7 +183,7 @@ public abstract class DataParser {
 		
 		try {
 			return Float.parseFloat(tmp);
-		} catch (NumberFormatException exc) {
+		} catch (final NumberFormatException exc) {
 			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
@@ -200,7 +200,7 @@ public abstract class DataParser {
 		
 		try {
 			return Long.parseLong(tmp);
-		} catch (NumberFormatException exc) {
+		} catch (final NumberFormatException exc) {
 			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
@@ -249,7 +249,7 @@ public abstract class DataParser {
 		
         try {
             return Integer.parseInt(tmp);
-		} catch (NumberFormatException exc) {
+		} catch (final NumberFormatException exc) {
 			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
         }
 	}
@@ -270,7 +270,7 @@ public abstract class DataParser {
 		
 		try {
 			return Float.parseFloat(tmp);
-		} catch (NumberFormatException exc) {
+		} catch (final NumberFormatException exc) {
 			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
@@ -283,7 +283,7 @@ public abstract class DataParser {
 		
 		try {
 			return new Date(Long.parseLong(tmp));
-		} catch (NumberFormatException exc) {
+		} catch (final NumberFormatException exc) {
 			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
@@ -298,7 +298,7 @@ public abstract class DataParser {
 			final int offset = timeZone.getOffset(d.getTime());
 			d.setTime(d.getTime()-offset);
 			return d;
-		} catch (NumberFormatException exc) {
+		} catch (final NumberFormatException exc) {
 			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
@@ -336,7 +336,7 @@ public abstract class DataParser {
 			}
 		
 			return i;
-		} catch (NumberFormatException exc) {
+		} catch (final NumberFormatException exc) {
 			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
@@ -376,7 +376,7 @@ public abstract class DataParser {
 			}
 		
 			return d;
-		} catch (NumberFormatException exc) {
+		} catch (final NumberFormatException exc) {
 			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}

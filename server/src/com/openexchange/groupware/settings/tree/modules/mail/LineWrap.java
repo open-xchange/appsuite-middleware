@@ -88,7 +88,7 @@ public class LineWrap implements PreferencesItemService {
     public IValueHandler getSharedValue() {
         return new IValueHandler() {
             public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig,
+                final User user, final UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
                 final UserSettingMail settings = UserSettingMailStorage
                     .getInstance().getUserSettingMail(user.getId(), ctx);
@@ -115,9 +115,9 @@ public class LineWrap implements PreferencesItemService {
                             (String) setting.getSingleValue()));
                         storage.saveUserSettingMail(settings, user.getId(),
                                 ctx);
-                    } catch (NumberFormatException e) {
+                    } catch (final NumberFormatException e) {
                         throw new SettingException(Code.JSON_READ_ERROR, e);
-                    } catch (OXException e) {
+                    } catch (final OXException e) {
                         throw new SettingException(e);
                     }
                 }

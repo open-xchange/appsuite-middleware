@@ -68,7 +68,7 @@ public class OldParamDefinition {
 		super();
 	}
 	
-	public OldParamDefinition(String[] values) {
+	public OldParamDefinition(final String[] values) {
 		for (int i = 0; i < values.length; i++) {
 			Values.add(values[i]);
 		}

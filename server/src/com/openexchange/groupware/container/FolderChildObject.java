@@ -87,6 +87,7 @@ public abstract class FolderChildObject extends DataObject {
 		return b_parent_folder_id;
 	}
 
+	@Override
 	public void reset() {
 		super.reset();
 		parentFolderId = 0;

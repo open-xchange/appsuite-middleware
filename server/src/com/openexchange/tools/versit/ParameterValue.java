@@ -63,7 +63,7 @@ public class ParameterValue {
 		return Text;
 	}
 	
-	public ParameterValue(String text) {
+	public ParameterValue(final String text) {
 		Text = text;
 	}
 	

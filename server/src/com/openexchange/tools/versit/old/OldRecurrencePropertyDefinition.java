@@ -66,8 +66,8 @@ import com.openexchange.tools.versit.values.RecurrenceValue;
 
 public class OldRecurrencePropertyDefinition extends OldPropertyDefinition {
 
-	public OldRecurrencePropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldRecurrencePropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
@@ -81,6 +81,7 @@ public class OldRecurrencePropertyDefinition extends OldPropertyDefinition {
 
 	private static final Pattern Num = Pattern.compile("[0-9]{1,3}(?![0-9#])");
 
+	@Override
 	protected Object parseValue(final Property property, final OldScanner s, final byte[] value,
 			final String charset) throws IOException {
 		final StringScanner ss = new StringScanner(s, new String(value, charset)
@@ -182,7 +183,7 @@ public class OldRecurrencePropertyDefinition extends OldPropertyDefinition {
 				ss.skipWS();
 				val = ss.regex(Num);
 			}
-			int[] vs = new int[values.size()];
+			final int[] vs = new int[values.size()];
 			for (int i = 0; i < vs.length; i++) {
 				vs[i] = values.get(i).intValue();
 			}
@@ -223,6 +224,7 @@ public class OldRecurrencePropertyDefinition extends OldPropertyDefinition {
 		throw new VersitException(s, "Invalid recurrence: " + weekday);
 	}
 
+	@Override
 	protected String writeValue(final Property property) {
 		final StringBuilder sb = new StringBuilder();
 		final RecurrenceValue recur = (RecurrenceValue) property.getValue();

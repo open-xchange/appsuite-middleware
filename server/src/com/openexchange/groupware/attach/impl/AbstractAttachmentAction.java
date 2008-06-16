@@ -67,7 +67,7 @@ public abstract class AbstractAttachmentAction extends AbstractDBAction
 	protected int fillFields(final AttachmentMetadata attachment, final PreparedStatement stmt) throws SQLException {
 		final GetSwitch get = new GetSwitch(attachment);
 		int i = 1;
-		for(AttachmentField field : queryCatalog.getFields()) {
+		for(final AttachmentField field : queryCatalog.getFields()) {
 			Object value = field.doSwitch(get);
 			if(isDateField(field)) {
 				value = Long.valueOf(((Date)value).getTime());

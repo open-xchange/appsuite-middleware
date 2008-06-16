@@ -65,15 +65,15 @@ public class DocumentMetadataValidation {
 		return errors.isEmpty();
 	}
 
-	public boolean hasErrors(Metadata field) {
+	public boolean hasErrors(final Metadata field) {
 		return errors.containsKey(field);
 	}
 
-	public String getError(Metadata field) {
+	public String getError(final Metadata field) {
 		return errors.get(field);
 	}
 
-	public void setError(Metadata field, String error) {
+	public void setError(final Metadata field, final String error) {
 		errors.put(field, error);
 		errorFields.add(field);
 	}

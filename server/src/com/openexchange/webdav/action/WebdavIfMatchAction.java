@@ -56,7 +56,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavIfMatchAction extends AbstractAction {
 
-	public void perform(WebdavRequest req, WebdavResponse res)
+	public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws WebdavException {
 		check(req, true);
 		check(req, false);
@@ -64,27 +64,30 @@ public class WebdavIfMatchAction extends AbstractAction {
 		
 	}
 
-	private void check(WebdavRequest req,boolean mustMatch) throws WebdavException {
-		String header = mustMatch ? "If-Match" : "If-None-Match";
+	private void check(final WebdavRequest req,final boolean mustMatch) throws WebdavException {
+		final String header = mustMatch ? "If-Match" : "If-None-Match";
 		
 		if(req.getHeader(header) != null) {
-			WebdavResource res = req.getResource();
-			String etag = res.getETag();
+			final WebdavResource res = req.getResource();
+			final String etag = res.getETag();
 			
-			if(res.exists() && res.isCollection())
+			if(res.exists() && res.isCollection()) {
 				throw new WebdavException(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
+			}
 			
 			boolean foundMatch = false;
 			
 			if(res.exists()) {
-				for(String tag : req.getHeader(header).split("\\s*,\\s*")) {
-					if(etag.equals(tag) || tag.equals("*"))
+				for(final String tag : req.getHeader(header).split("\\s*,\\s*")) {
+					if(etag.equals(tag) || tag.equals("*")) {
 						foundMatch = true;
+					}
 				}
 			}
 			
-			if(foundMatch == mustMatch)
+			if(foundMatch == mustMatch) {
 				return;
+			}
 			
 			throw new WebdavException(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 		}

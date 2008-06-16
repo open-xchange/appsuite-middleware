@@ -152,7 +152,7 @@ public class TaskReminderFolderZero implements UpdateTask {
         final List<ReminderData> reminders = getReminder(contextId);
         final List<ReminderData> update = new ArrayList<ReminderData>();
         final List<ReminderData> remove = new ArrayList<ReminderData>();
-        for (ReminderData remind : reminders) {
+        for (final ReminderData remind : reminders) {
              final int folder = findFolder(remind.cid, remind.targetId,
                  remind.userid);
              if (-1 == folder) {
@@ -167,7 +167,7 @@ public class TaskReminderFolderZero implements UpdateTask {
         Connection con = null;
         try {
             con = Database.get(contextId, true);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw EXCEPTION.create(1, e);
         }
         try {
@@ -175,12 +175,12 @@ public class TaskReminderFolderZero implements UpdateTask {
             update(con, update);
             delete(con, remove);
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw EXCEPTION.create(2, e, e.getMessage());
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
             Database.back(contextId, true, con);
@@ -200,7 +200,7 @@ public class TaskReminderFolderZero implements UpdateTask {
         Connection con = null;
         try {
             con = Database.get(contextId, false);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw EXCEPTION.create(2, e);
         }
         PreparedStatement stmt = null;
@@ -218,7 +218,7 @@ public class TaskReminderFolderZero implements UpdateTask {
                 remind.folder = result.getInt(pos++);
                 retval.add(remind);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw EXCEPTION.create(4, e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(result, stmt);
@@ -238,7 +238,7 @@ public class TaskReminderFolderZero implements UpdateTask {
         Connection con = null;
         try {
             con = Database.get(contextId, false);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw EXCEPTION.create(6, e);
         }
         int retval = -1;
@@ -253,7 +253,7 @@ public class TaskReminderFolderZero implements UpdateTask {
             if (result.next()) {
                 retval = result.getInt(1);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw EXCEPTION.create(5, e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(result, stmt);
@@ -274,17 +274,17 @@ public class TaskReminderFolderZero implements UpdateTask {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(UPDATE_REMINDER);
-            for (ReminderData remind : update) {
+            for (final ReminderData remind : update) {
                 stmt.setInt(1, remind.folder);
                 stmt.setInt(2, remind.cid);
                 stmt.setInt(3, remind.reminderId);
                 stmt.addBatch();
             }
             final int[] updated = stmt.executeBatch();
-            for (int i : updated) {
+            for (final int i : updated) {
                 retval += i;
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw EXCEPTION.create(7, e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(null, stmt);
@@ -310,16 +310,16 @@ public class TaskReminderFolderZero implements UpdateTask {
         try {
             // DELETE FROM reminder WHERE cid=? AND object_id=?
             stmt = con.prepareStatement(DELETE_REMINDER);
-            for (ReminderData remind : remove) {
+            for (final ReminderData remind : remove) {
                 stmt.setInt(1, remind.cid);
                 stmt.setInt(2, remind.reminderId);
                 stmt.addBatch();
             }
             final int[] removed = stmt.executeBatch();
-            for (int i : removed) {
+            for (final int i : removed) {
                 retval += i;
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw EXCEPTION.create(8, e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(null, stmt);

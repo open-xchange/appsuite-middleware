@@ -63,6 +63,7 @@ public class OldAttachPropertyDefinition extends OldPropertyDefinition {
 		super(paramNames, params);
 	}
 
+	@Override
 	public Object parseValue(final Property property, final OldScanner s, final byte[] value, final String charset)
 			throws IOException {
 		final Parameter param = property.getParameter("VALUE");

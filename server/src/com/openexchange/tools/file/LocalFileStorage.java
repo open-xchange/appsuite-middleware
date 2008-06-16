@@ -56,10 +56,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.Set;
-import java.util.HashSet;
 
 import javax.activation.MimetypesFileTypeMap;
 
@@ -99,7 +99,12 @@ public class LocalFileStorage extends FileStorage {
      */
     private final File storage;
 
-    private static final Set<String> SPECIAL_FILENAMES = new HashSet(){{
+    private static final Set<String> SPECIAL_FILENAMES = new HashSet(){/**
+		 * 
+		 */
+		private static final long serialVersionUID = -1052533462069386445L;
+
+	{
         add(LOCK_FILENAME);
         add(STATEFILENAME);
     }};
@@ -231,7 +236,7 @@ public class LocalFileStorage extends FileStorage {
     private static final boolean delete(final File file) {
         boolean retval = true;
         if (file.isDirectory()) {
-            for (File sub : file.listFiles()) {
+            for (final File sub : file.listFiles()) {
                 retval &= delete(sub);
             }
             retval &= file.delete();
@@ -308,18 +313,18 @@ public class LocalFileStorage extends FileStorage {
      */
     @Override
     public SortedSet<String> getFileList() throws FileStorageException {
-        SortedSet<String> allIds = new TreeSet<String>();
+        final SortedSet<String> allIds = new TreeSet<String>();
         listRecursively(allIds, "", storage);
         return allIds;
     }
 
-    private void listRecursively(SortedSet<String> allIds, String prefix, File file) {
+    private void listRecursively(final SortedSet<String> allIds, final String prefix, final File file) {
         if(SPECIAL_FILENAMES.contains(file.getName())) {
             // Skip
             return;
         }
         if(file.isDirectory()) {
-            for(File subfile : file.listFiles()) {
+            for(final File subfile : file.listFiles()) {
                 listRecursively(allIds, prefix+"/"+file.getName(), subfile);  // Adds an illegal /storage_name/ in the beginning
             }
         } else {

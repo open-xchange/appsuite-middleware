@@ -69,7 +69,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
-import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
@@ -118,7 +117,7 @@ public class CSVLibrary {
 		FolderObject fo = null;
 		try {
 			fo = new OXFolderAccess(sessObj.getContext()).getFolderObject(folderId);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			throw EXCEPTIONS.create(0, folder);
 		}
 		return fo;
@@ -134,7 +133,7 @@ public class CSVLibrary {
 	public static int getFolderId(final String folderString) throws ImportExportException {
 		try{
 			return Integer.parseInt(folderString);
-		} catch (NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			throw EXCEPTIONS.create(1, folderString);
 		}
 	}
@@ -146,7 +145,7 @@ public class CSVLibrary {
 	  */
 	public static List<String> convertToList(final int[] cols) {
 		final List<String> l = new LinkedList<String>();
-		for(int col : cols){
+		for(final int col : cols){
 			l.add( Contacts.mapping[col].getReadableTitle() );
 		}
 		return l;
@@ -157,7 +156,7 @@ public class CSVLibrary {
 	 */
 	public static Set<Integer> transformIntArrayToSet(final int[] arr) {
 		final LinkedHashSet<Integer> s = new LinkedHashSet<Integer>();
-		for(int val : arr){
+		for(final int val : arr){
 			s.add(Integer.valueOf(val));
 		}
 		return s;
@@ -167,9 +166,9 @@ public class CSVLibrary {
 	 * ...because Java5, basic data types and Arrays don't mix
 	 */
 	public static int[] transformSetToIntArray(final Set<Integer> s) {
-		int[] ret = new int[s.size()];
+		final int[] ret = new int[s.size()];
 		int i = 0;
-		for(Integer val : s){
+		for(final Integer val : s){
 			ret[i++] = val.intValue();
 		}
 		return ret;
@@ -179,7 +178,7 @@ public class CSVLibrary {
 		BufferedReader br = null;
 		try {
 			br = new BufferedReader(new InputStreamReader(is, encoding));
-		} catch (UnsupportedEncodingException e1) {
+		} catch (final UnsupportedEncodingException e1) {
 			LOG.fatal(e1);
 			throw EXCEPTIONS.create(3);
 		}
@@ -190,12 +189,12 @@ public class CSVLibrary {
 				bob.append(buffer);
 				bob.append('\n');
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw EXCEPTIONS.create(2);
 		} finally {
 			try {
 				br.close();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				/* 
 				 * already closed
 				 */

@@ -64,7 +64,7 @@ public class ParameterDefinition {
 	public static final ParameterDefinition Default = new ParameterDefinition(
 			ParameterValueDefinition.Default);
 
-	public ParameterDefinition(ParameterValueDefinition value) {
+	public ParameterDefinition(final ParameterValueDefinition value) {
 		this.value = value;
 	}
 

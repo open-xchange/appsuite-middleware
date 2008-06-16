@@ -75,7 +75,7 @@ public abstract class ReadOnlyValue implements IValueHandler {
      * {@inheritDoc}
      */
     public final void writeValue(final Context ctx,
-        User user, final Setting setting) throws SettingException {
+        final User user, final Setting setting) throws SettingException {
         throw new SettingException(SettingException.Code.NO_WRITE, setting
             .getName());
     }

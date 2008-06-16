@@ -55,14 +55,14 @@ import java.util.List;
 import java.util.ListIterator;
 
 public class IfHeaderList implements List<IfHeaderEntity>{
-	private List<IfHeaderEntity> delegate;
+	private final List<IfHeaderEntity> delegate;
 	private String tag;
 	
-	public IfHeaderList(List<IfHeaderEntity> delegate) {
+	public IfHeaderList(final List<IfHeaderEntity> delegate) {
 		this.delegate = delegate;
 	}
 	
-	public IfHeaderList(String tag, List<IfHeaderEntity> delegate) {
+	public IfHeaderList(final String tag, final List<IfHeaderEntity> delegate) {
 		this.delegate = delegate;
 		this.tag = tag;
 	}
@@ -77,19 +77,19 @@ public class IfHeaderList implements List<IfHeaderEntity>{
 	
 	// Delegate Methods
 	
-	public boolean add(IfHeaderEntity arg0) {
+	public boolean add(final IfHeaderEntity arg0) {
 		return delegate.add(arg0);
 	}
 
-	public void add(int arg0, IfHeaderEntity arg1) {
+	public void add(final int arg0, final IfHeaderEntity arg1) {
 		delegate.add(arg0, arg1);
 	}
 
-	public boolean addAll(Collection<? extends IfHeaderEntity> arg0) {
+	public boolean addAll(final Collection<? extends IfHeaderEntity> arg0) {
 		return delegate.addAll(arg0);
 	}
 
-	public boolean addAll(int arg0, Collection<? extends IfHeaderEntity> arg1) {
+	public boolean addAll(final int arg0, final Collection<? extends IfHeaderEntity> arg1) {
 		return delegate.addAll(arg0, arg1);
 	}
 
@@ -97,27 +97,29 @@ public class IfHeaderList implements List<IfHeaderEntity>{
 		delegate.clear();
 	}
 
-	public boolean contains(Object arg0) {
+	public boolean contains(final Object arg0) {
 		return delegate.contains(arg0);
 	}
 
-	public boolean containsAll(Collection<?> arg0) {
+	public boolean containsAll(final Collection<?> arg0) {
 		return delegate.containsAll(arg0);
 	}
 
-	public boolean equals(Object arg0) {
+	@Override
+	public boolean equals(final Object arg0) {
 		return delegate.equals(arg0);
 	}
 
-	public IfHeaderEntity get(int arg0) {
+	public IfHeaderEntity get(final int arg0) {
 		return delegate.get(arg0);
 	}
 
+	@Override
 	public int hashCode() {
 		return delegate.hashCode();
 	}
 
-	public int indexOf(Object arg0) {
+	public int indexOf(final Object arg0) {
 		return delegate.indexOf(arg0);
 	}
 
@@ -129,7 +131,7 @@ public class IfHeaderList implements List<IfHeaderEntity>{
 		return delegate.iterator();
 	}
 
-	public int lastIndexOf(Object arg0) {
+	public int lastIndexOf(final Object arg0) {
 		return delegate.lastIndexOf(arg0);
 	}
 
@@ -137,27 +139,27 @@ public class IfHeaderList implements List<IfHeaderEntity>{
 		return delegate.listIterator();
 	}
 
-	public ListIterator<IfHeaderEntity> listIterator(int arg0) {
+	public ListIterator<IfHeaderEntity> listIterator(final int arg0) {
 		return delegate.listIterator(arg0);
 	}
 
-	public IfHeaderEntity remove(int arg0) {
+	public IfHeaderEntity remove(final int arg0) {
 		return delegate.remove(arg0);
 	}
 
-	public boolean remove(Object arg0) {
+	public boolean remove(final Object arg0) {
 		return delegate.remove(arg0);
 	}
 
-	public boolean removeAll(Collection<?> arg0) {
+	public boolean removeAll(final Collection<?> arg0) {
 		return delegate.removeAll(arg0);
 	}
 
-	public boolean retainAll(Collection<?> arg0) {
+	public boolean retainAll(final Collection<?> arg0) {
 		return delegate.retainAll(arg0);
 	}
 
-	public IfHeaderEntity set(int arg0, IfHeaderEntity arg1) {
+	public IfHeaderEntity set(final int arg0, final IfHeaderEntity arg1) {
 		return delegate.set(arg0, arg1);
 	}
 
@@ -165,7 +167,7 @@ public class IfHeaderList implements List<IfHeaderEntity>{
 		return delegate.size();
 	}
 
-	public List<IfHeaderEntity> subList(int arg0, int arg1) {
+	public List<IfHeaderEntity> subList(final int arg0, final int arg1) {
 		return delegate.subList(arg0, arg1);
 	}
 
@@ -173,7 +175,7 @@ public class IfHeaderList implements List<IfHeaderEntity>{
 		return delegate.toArray();
 	}
 
-	public <T> T[] toArray(T[] arg0) {
+	public <T> T[] toArray(final T[] arg0) {
 		return delegate.toArray(arg0);
 	}
 }

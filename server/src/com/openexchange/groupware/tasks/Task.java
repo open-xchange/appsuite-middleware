@@ -217,17 +217,17 @@ public class Task extends CalendarObject {
     }
 
     // SET METHODS
-    public void setProjectID(int project_id) {
+    public void setProjectID(final int project_id) {
         this.projectId = project_id;
         projectIdSet = true;
     }
 
-    public void setTargetCosts(float target_costs) {
+    public void setTargetCosts(final float target_costs) {
         this.targetCosts = target_costs;
         targetCostsSet = true;
     }
 
-    public void setActualCosts(float actual_costs) {
+    public void setActualCosts(final float actual_costs) {
         this.actualCosts = actual_costs;
         actualCostsSet = true;
     }
@@ -248,52 +248,52 @@ public class Task extends CalendarObject {
         actualDurationSet = true;
     }
 
-    public void setPriority(int priority) {
+    public void setPriority(final int priority) {
         this.priority = priority;
         prioritySet = true;
     }
 
-    public void setPercentComplete(int percent_complete) {
+    public void setPercentComplete(final int percent_complete) {
         this.percentComplete = percent_complete;
         percentCompleteSet = true;
     }
 
-    public void setCurrency(String currency) {
+    public void setCurrency(final String currency) {
         this.currency = currency;
         currencySet = true;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(final int status) {
         this.status = status;
         statusSet = true;
     }
 
-    public void setTripMeter(String trip_meter) {
+    public void setTripMeter(final String trip_meter) {
         this.tripMeter = trip_meter;
         tripMeterSet = true;
     }
 
-    public void setBillingInformation(String billing_information) {
+    public void setBillingInformation(final String billing_information) {
         this.billing_information = billing_information;
         billingInformationSet = true;
     }
 
-    public void setCompanies(String companies) {
+    public void setCompanies(final String companies) {
         this.companies = companies;
         companiesSet = true;
     }
 
-    public void setAfterComplete(Date afterComplete) {
+    public void setAfterComplete(final Date afterComplete) {
         this.afterComplete = afterComplete;
         afterCompleteSet = true;
     }
 
-    public void setDateCompleted(Date date_completed) {
+    public void setDateCompleted(final Date date_completed) {
         this.date_completed = date_completed;
         dateCompletedSet = true;
     }
 
-    public void setAlarm(Date alarm) {
+    public void setAlarm(final Date alarm) {
         this.alarm = alarm;
         bAlarm = true;
     }
@@ -435,7 +435,8 @@ public class Task extends CalendarObject {
         return bAlarm;
     }
 
-    public void reset() {
+    @Override
+	public void reset() {
         super.reset();
 
         projectId = 0;

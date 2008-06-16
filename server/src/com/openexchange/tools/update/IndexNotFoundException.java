@@ -57,15 +57,15 @@ public class IndexNotFoundException extends Exception {
 		super();
 	}
 
-	public IndexNotFoundException(String arg0) {
+	public IndexNotFoundException(final String arg0) {
 		super(arg0);
 	}
 
-	public IndexNotFoundException(Throwable arg0) {
+	public IndexNotFoundException(final Throwable arg0) {
 		super(arg0);
 	}
 
-	public IndexNotFoundException(String arg0, Throwable arg1) {
+	public IndexNotFoundException(final String arg0, final Throwable arg1) {
 		super(arg0, arg1);
 	}
 

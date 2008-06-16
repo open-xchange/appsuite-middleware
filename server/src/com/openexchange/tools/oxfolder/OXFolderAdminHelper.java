@@ -180,9 +180,9 @@ public final class OXFolderAdminHelper {
 				throw new OXFolderException(FolderCode.NO_ADMIN_USER_FOUND_IN_CONTEXT, Integer.valueOf(cid));
 			}
 			return retval;
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(cid));
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
 		}
 	}

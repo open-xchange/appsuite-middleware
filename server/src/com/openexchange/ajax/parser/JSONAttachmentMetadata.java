@@ -65,8 +65,8 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 
 	private static final Log LOG = LogFactory.getLog(JSONAttachmentMetadata.class);
 	
-	private JSONObject json;
-	public JSONAttachmentMetadata(String jsonString) throws JSONException {
+	private final JSONObject json;
+	public JSONAttachmentMetadata(final String jsonString) throws JSONException {
 		json = new JSONObject(jsonString);
 	}
 	
@@ -84,7 +84,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 	public void setCreatedBy(final int createdBy) {
 		try {
 			json.put(AttachmentField.CREATED_BY_LITERAL.getName(),createdBy);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.debug("",e);
 		}
 	}
@@ -102,7 +102,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 		} else if(creationDate != null) {
 			try {
 				json.put(AttachmentField.CREATION_DATE_LITERAL.getName(),creationDate.getTime());
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				LOG.debug("",e);
 			}
 		}
@@ -122,7 +122,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 		}
 		try {
 			json.put(AttachmentField.FILE_MIMETYPE_LITERAL.getName(),fileMIMEType);
-		} catch (JSONException e) {	
+		} catch (final JSONException e) {	
 			LOG.debug("",e);
 		}
 	}
@@ -141,7 +141,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 		}
 		try {
 			json.put(AttachmentField.FILENAME_LITERAL.getName(),filename);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.debug("",e);
 		}
 	}
@@ -157,7 +157,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 	public void setFilesize(final long filesize) {
 		try {
 			json.put(AttachmentField.FILE_SIZE_LITERAL.getName(),filesize);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.debug("",e);
 		}
 	}
@@ -173,7 +173,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 	public void setAttachedId(final int objectId) {
 		try {
 			json.put(AttachmentField.ATTACHED_ID_LITERAL.getName(),objectId);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.debug("",e);
 		}
 	}
@@ -185,7 +185,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 	public void setRtfFlag(final boolean rtfFlag) {
 		try {
 			json.put(AttachmentField.RTF_FLAG_LITERAL.getName(),rtfFlag);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.debug("",e);
 		}
 	}
@@ -201,7 +201,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 	public void setModuleId(final int moduleId) {
 		try {
 			json.put(AttachmentField.MODULE_ID_LITERAL.getName(),moduleId);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.debug("",e);
 		}
 	}
@@ -216,7 +216,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 	public void setId(final int id) {
 		try {
 			json.put(AttachmentField.ID_LITERAL.getName(),id);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.debug("",e);
 		}
 	}
@@ -224,7 +224,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 	public void setFolderId(final int folderId) {
 		try {
 			json.put(AttachmentField.FOLDER_ID_LITERAL.getName(),folderId);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.debug("",e);
 		}
 	}
@@ -250,13 +250,13 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 			try {
 				json.put(AttachmentField.COMMENT_LITERAL.getName(),JSONObject.NULL);
 				return;
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				LOG.debug("",e);
 			}
 		}
 		try {
 			json.put(AttachmentField.COMMENT_LITERAL.getName(),string);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.debug("",e);
 		}
 	}
@@ -274,13 +274,13 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 			try {
 				json.put(AttachmentField.COMMENT_LITERAL.getName(),JSONObject.NULL);
 				return;
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				LOG.debug("",e);
 			}
 		}
 		try {
 			json.put(AttachmentField.FILE_ID_LITERAL.getName(),string);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.debug("",e);
 		}
 	}

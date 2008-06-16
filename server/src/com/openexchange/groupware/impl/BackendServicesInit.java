@@ -85,6 +85,7 @@ public final class BackendServicesInit implements Initialization {
 	 * @deprecated
 	 * @throws AbstractOXException
 	 */
+	@Deprecated
 	public static void initAJP() throws AbstractOXException {
 		getInstance().start();
 	}

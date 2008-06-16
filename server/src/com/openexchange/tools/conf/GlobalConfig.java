@@ -60,6 +60,7 @@ import java.util.HashMap;
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  * @deprecated Use specialized config classes.
  */
+@Deprecated
 public class GlobalConfig {
 	
     private static final HashMap datePattern = new HashMap();

@@ -49,37 +49,49 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.infostore.*;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.infostore.database.impl.GetSwitch;
-import com.openexchange.groupware.infostore.database.impl.SetSwitch;
-import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
-import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.infostore.webdav.URLCache.Type;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.sessiond.impl.SessionHolder;
-import com.openexchange.webdav.protocol.Protocol.Property;
-import com.openexchange.webdav.protocol.*;
-import com.openexchange.webdav.protocol.impl.AbstractResource;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.infostore.Classes;
+import com.openexchange.groupware.infostore.ConflictException;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
+import com.openexchange.groupware.infostore.InfostoreException;
+import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
+import com.openexchange.groupware.infostore.database.impl.GetSwitch;
+import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
+import com.openexchange.groupware.infostore.database.impl.SetSwitch;
+import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.infostore.webdav.URLCache.Type;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.sessiond.impl.SessionHolder;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavLock;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.Protocol.Property;
+import com.openexchange.webdav.protocol.impl.AbstractResource;
 
 
 @OXExceptionSource(
@@ -331,7 +343,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			dumpMetadataToDB();
             if(propertyHelper.mustWrite()) {
                 final ServerSession session = getSession();
-                EffectiveInfostorePermission perm = security.getInfostorePermission(getId(),session.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()),
+                final EffectiveInfostorePermission perm = security.getInfostorePermission(getId(),session.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()),
 					UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
 							session.getContext()));
                 if(!perm.canWriteObject()) {
@@ -524,7 +536,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 				set.setValue(m.doSwitch(get));
 				m.doSwitch(set);
 			}
-        } catch (InfostoreException x) {
+        } catch (final InfostoreException x) {
             if(InfostoreExceptionFactory.isPermissionException(x)) {
                 metadata.setId(getId());
                 metadata.setFolderId(((OXWebdavResource)parent()).getId());
@@ -585,7 +597,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			} finally {
 				try {
 					database.finish();
-				} catch (OXException x) {
+				} catch (final OXException x) {
 					LOG.error("Couldn't finish transaction: ",x);
 				}
 			}
@@ -593,7 +605,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		
 	}
 	
-	private void dumpMetadataToDB(InputStream fileData, boolean guessSize) throws OXException, IllegalAccessException, ConflictException, WebdavException{
+	private void dumpMetadataToDB(final InputStream fileData, final boolean guessSize) throws OXException, IllegalAccessException, ConflictException, WebdavException{
 		if((exists || existsInDB) && !metadataChanged) {
 			return;
 		}
@@ -632,7 +644,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			} catch (final OXException x) {
 				try {
 					database.rollback();
-				} catch (TransactionException x2) {
+				} catch (final TransactionException x2) {
 					LOG.error("Couldn't roll back: ",x2);
 				}
 				throw x;
@@ -651,7 +663,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			} catch (final OXException x) {
 				try {
 					database.rollback();
-				} catch (TransactionException x2) {
+				} catch (final TransactionException x2) {
 					LOG.error("Can't roll back", x2);
 				}
 				throw x;
@@ -692,7 +704,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 throw EXCEPTIONS.create(0, Integer.valueOf(nd[0]));
             }
             database.commit();
-        } catch (OXException x) {
+        } catch (final OXException x) {
             database.rollback();
             throw x;
         } finally {
@@ -706,8 +718,9 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	}
 
 	public int getParentId() throws WebdavException {
-		if(metadata == null)
+		if(metadata == null) {
 			loadMetadata();
+		}
 		return (int) metadata.getFolderId();
 	}
 

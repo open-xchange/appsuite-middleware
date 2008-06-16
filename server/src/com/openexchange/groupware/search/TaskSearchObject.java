@@ -86,7 +86,7 @@ public class TaskSearchObject extends CalendarSearchObject {
         return priority;
     }
 
-    public void setPriority(int priority) {
+    public void setPriority(final int priority) {
         this.priority = priority;
     }
 
@@ -94,7 +94,7 @@ public class TaskSearchObject extends CalendarSearchObject {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(final int status) {
         this.status = status;
     }
 
@@ -102,7 +102,7 @@ public class TaskSearchObject extends CalendarSearchObject {
         return range;
     }
 
-    public void setRange(Date[] range) throws Exception {
+    public void setRange(final Date[] range) throws Exception {
         this.range = range;
     }
 }

@@ -53,7 +53,7 @@ public abstract class IfHeaderEntity {
 
 	public static class  LockToken extends IfHeaderEntity {
 
-		public LockToken(String payload) {
+		public LockToken(final String payload) {
 			super(payload);
 		}
 
@@ -71,23 +71,25 @@ public abstract class IfHeaderEntity {
 
 	public static class ETag extends IfHeaderEntity{
 		
-		public ETag(String etag) {
+		public ETag(final String etag) {
 			super(etag);
 		}
 		
+		@Override
 		public boolean isETag(){
 			return true;
 		}
 
+		@Override
 		public boolean isLockToken() {
 			return false;
 		}
 	}
 
-	private String payload;
+	private final String payload;
 	private boolean matches;
 
-	public IfHeaderEntity(String payload) {
+	public IfHeaderEntity(final String payload) {
 		this.payload = payload;
 	}
 
@@ -103,7 +105,7 @@ public abstract class IfHeaderEntity {
 		return matches;
 	}
 	
-	public void setMatches(boolean matches) {
+	public void setMatches(final boolean matches) {
 		this.matches = matches;
 	}
 

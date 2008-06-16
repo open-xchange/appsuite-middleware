@@ -80,6 +80,7 @@ public final class Searcher {
 	 *             If checking mail message against search term fails
 	 * @deprecated Invoke {@link SearchTerm#matches(MailMessage)} instead
 	 */
+	@Deprecated
 	public static boolean matches(final MailMessage mailMessage, final SearchTerm<?> searchTerm) throws MailException {
 		return searchTerm.matches(mailMessage);
 	}

@@ -68,14 +68,14 @@ public class SizeAwareInputStream extends FilterInputStream {
 
 	private long read = 0;
 	
-	public SizeAwareInputStream(InputStream delegate) {
+	public SizeAwareInputStream(final InputStream delegate) {
 		super(delegate);
 	}
 
 	
 	@Override
 	public int read() throws IOException {
-		int r = in.read();
+		final int r = in.read();
 		if(r != -1) {
 			read++;
 			size(read);
@@ -84,8 +84,8 @@ public class SizeAwareInputStream extends FilterInputStream {
 	}
 
 	@Override
-	public int read(byte[] arg0, int arg1, int arg2) throws IOException {
-		int r =  in.read(arg0, arg1, arg2);
+	public int read(final byte[] arg0, final int arg1, final int arg2) throws IOException {
+		final int r =  in.read(arg0, arg1, arg2);
 		if(r > 0) {
 			read += r;
 			size(read);
@@ -94,8 +94,8 @@ public class SizeAwareInputStream extends FilterInputStream {
 	}
 
 	@Override
-	public int read(byte[] arg0) throws IOException {
-		int r = in.read(arg0);
+	public int read(final byte[] arg0) throws IOException {
+		final int r = in.read(arg0);
 		if(r > 0) {
 			read += r;
 			size(read);			
@@ -109,11 +109,11 @@ public class SizeAwareInputStream extends FilterInputStream {
 	}
 	
 	@Override
-	public long skip(long arg0) throws IOException {
+	public long skip(final long arg0) throws IOException {
 		return in.skip(arg0);
 	}
 
-	public void size(long size) throws IOException {
+	public void size(final long size) throws IOException {
 		//Override me
 	}
 

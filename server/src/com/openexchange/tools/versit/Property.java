@@ -71,7 +71,7 @@ public class Property {
 	
 	private boolean invalid;
 
-	public Property(String name) {
+	public Property(final String name) {
 		this.name = name;
 		this.invalid = false;
 	}

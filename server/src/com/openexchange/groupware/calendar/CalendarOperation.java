@@ -125,11 +125,11 @@ public class CalendarOperation implements SearchIterator {
     
     private int oids[][];
     
-    final CalendarDataObject loadAppointment(final ResultSet load_resultset, final int oid, final int inFolder, final CalendarSqlImp cimp, final Connection readcon, final Session so, Context ctx, final int action, final int action_folder) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException {
+    final CalendarDataObject loadAppointment(final ResultSet load_resultset, final int oid, final int inFolder, final CalendarSqlImp cimp, final Connection readcon, final Session so, final Context ctx, final int action, final int action_folder) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException {
         return loadAppointment(load_resultset, oid, inFolder, cimp, readcon, so, ctx, action, action_folder, true);
     }
     
-    protected final CalendarDataObject loadAppointment(final ResultSet load_resultset, final int oid, final int inFolder, final CalendarSqlImp cimp, final Connection readcon, final Session so, Context ctx, final int action, final int action_folder, final boolean check_permissions) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException {
+    protected final CalendarDataObject loadAppointment(final ResultSet load_resultset, final int oid, final int inFolder, final CalendarSqlImp cimp, final Connection readcon, final Session so, final Context ctx, final int action, final int action_folder, final boolean check_permissions) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException {
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setObjectID(oid);
         cdao.setContext(ctx);
@@ -391,7 +391,7 @@ public class CalendarOperation implements SearchIterator {
         boolean action = true;
         if (cdao.getContext() != null) {
             
-            OXFolderAccess ofa = new OXFolderAccess(cdao.getContext());
+            final OXFolderAccess ofa = new OXFolderAccess(cdao.getContext());
             if (ofa.getFolderModule(inFolder) == FolderObject.CALENDAR) {
                 
                 
@@ -438,7 +438,7 @@ public class CalendarOperation implements SearchIterator {
                 
                 if (cdao.getFolderType() == FolderObject.PRIVATE) {
                     if (action || cdao.containsParticipants()) {
-                        UserParticipant up = new UserParticipant(uid);
+                        final UserParticipant up = new UserParticipant(uid);
                         up.setConfirm(CalendarDataObject.ACCEPT);
                         CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
                     }
@@ -451,14 +451,14 @@ public class CalendarOperation implements SearchIterator {
                     if (!action && !cdao.containsUserParticipants()) {
                         cdao.setUsers(edao.getUsers());
                     }
-                    UserParticipant up = new UserParticipant(cdao.getSharedFolderOwner());
+                    final UserParticipant up = new UserParticipant(cdao.getSharedFolderOwner());
                     if (action) {
                         up.setConfirm(CalendarDataObject.ACCEPT);
                     }
                     CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
                     
                 } else if (cdao.getFolderType() == FolderObject.PUBLIC) {
-                    UserParticipant up = new UserParticipant(uid);
+                    final UserParticipant up = new UserParticipant(uid);
                     up.setConfirm(CalendarDataObject.ACCEPT);
                     CalendarCommonCollection.checkAndConfirmIfUserUserIsParticipant(cdao, up);
                 }
@@ -488,7 +488,7 @@ public class CalendarOperation implements SearchIterator {
         
         simpleDataCheck(cdao, edao, uid);
         if (action && cdao.getParticipants() == null && cdao.getFolderType() == FolderObject.PUBLIC) {
-            Participant np[] = new Participant[1];
+            final Participant np[] = new Participant[1];
             final Participant p = new UserParticipant(uid);
             np[0] = p;
             cdao.setParticipants(np);
@@ -601,7 +601,7 @@ public class CalendarOperation implements SearchIterator {
                 if (!first) {
                     result_counter++;
                 }
-            } catch (SQLException sqle) {
+            } catch (final SQLException sqle) {
                 has_next = false;
                 LOG.error("Error while getting next result set", sqle);
             }
@@ -652,14 +652,14 @@ public class CalendarOperation implements SearchIterator {
                                             cdao.setGlobalFolderID(requested_folder);
                                             g++;
                                         } else {
-                                            int x = setInt(g++, co_rs);
+                                            final int x = setInt(g++, co_rs);
                                             if (x > 0) {
                                                 cdao.setGlobalFolderID(x);
                                             } else {
                                                 if (bbs) {
                                                     cdao.setGlobalFolderID(cdao.getEffectiveFolderId());
                                                 } else if (!CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
-                                                    Participants users = cimp.getUserParticipants(cdao, readcon, uid);
+                                                    final Participants users = cimp.getUserParticipants(cdao, readcon, uid);
                                                     cdao.setUsers(users.getUsers());
                                                     cdao.setGlobalFolderID(cdao.getEffectiveFolderId());
                                                 } else {
@@ -790,7 +790,7 @@ public class CalendarOperation implements SearchIterator {
                             default:
                                 throw new SearchIteratorException(SearchIteratorException.SearchIteratorCode.NOT_IMPLEMENTED, com.openexchange.groupware.EnumComponent.APPOINTMENT, cols[a]);
                         }
-                    } catch(SQLException sqle) {
+                    } catch(final SQLException sqle) {
                         throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
                     }
                 }
@@ -801,9 +801,9 @@ public class CalendarOperation implements SearchIterator {
                         CalendarCommonCollection.removeRecurringType(cdao);
                         if (cdao.getExceptions() != null) {
                             try {
-                                long exc = new Long(cdao.getExceptions()).longValue();
+                                final long exc = new Long(cdao.getExceptions()).longValue();
                                 cdao.setRecurrenceDatePosition(new Date(exc));
-                            } catch(NumberFormatException nfe) {
+                            } catch(final NumberFormatException nfe) {
                                 if (LOG.isWarnEnabled()) {
                                     LOG.warn("Unable to calculate exception oid:context:exceptions "+cdao.getObjectID()+":"+cdao.getContextID()+":"+cdao.getExceptions());
                                 }
@@ -831,12 +831,12 @@ public class CalendarOperation implements SearchIterator {
                         }
                     }
                 }
-                int check_folder_id = oids[index][1];
+                final int check_folder_id = oids[index][1];
                 if (!cdao.containsParticipants()) {
                     try {
-                        Participants participants = cimp.getParticipants(cdao, readcon);
+                        final Participants participants = cimp.getParticipants(cdao, readcon);
                         cdao.setParticipants(participants.getList());
-                    } catch (SQLException e) {
+                    } catch (final SQLException e) {
                         LOG.error("Error while checking special permissions", e);
                     }
                 }
@@ -856,7 +856,7 @@ public class CalendarOperation implements SearchIterator {
                 }
                 
                 if (!CalendarCommonCollection.checkPermissions(cdao, so, c, readcon, CalendarOperation.READ, check_folder_id)) {
-                    StringBuffer colss = new StringBuffer();
+                    final StringBuffer colss = new StringBuffer();
                     for (int a = 0; a < cols.length; a++) {
                         String fn = CalendarCommonCollection.getFieldName(cols[a]);
                         if (fn == null) {
@@ -883,7 +883,7 @@ public class CalendarOperation implements SearchIterator {
         return null;
     }
     
-    public final SearchIterator setResultSet(final ResultSet rs, final PreparedStatement prep, final int[] cols, final CalendarSqlImp cimp, final Connection readcon, final int from, final int to, final Session so, Context ctx) throws SQLException {
+    public final SearchIterator setResultSet(final ResultSet rs, final PreparedStatement prep, final int[] cols, final CalendarSqlImp cimp, final Connection readcon, final int from, final int to, final Session so, final Context ctx) throws SQLException {
         this.co_rs = rs;
         this.prep = prep;
         this.cols = cols;
@@ -911,20 +911,20 @@ public class CalendarOperation implements SearchIterator {
     }
     
     public static final void fillUserParticipants(final CalendarDataObject cdao) throws LdapException {
-        Participant participants[] = cdao.getParticipants();
+        final Participant participants[] = cdao.getParticipants();
         if (participants == null) {
             return;
         }
         Participants userparticipants = null;
         for (int a = 0; a < participants.length; a++) {
-            Participant p = participants[a];
+            final Participant p = participants[a];
             if (userparticipants == null) {
                 userparticipants = new Participants(cdao.getUsers());
             }
             if (p.getType() == Participant.GROUP) {
             	final GroupStorage gs = GroupStorage.getInstance(true);
-                Group g = gs.getGroup(p.getIdentifier(), cdao.getContext());
-                int m[] = g.getMember();
+                final Group g = gs.getGroup(p.getIdentifier(), cdao.getContext());
+                final int m[] = g.getMember();
                 for (int b = 0; b < m.length; b++) {
                     final UserParticipant up = new UserParticipant(m[b]);
                     if (!userparticipants.containsUserParticipant(up)) {
@@ -946,7 +946,7 @@ public class CalendarOperation implements SearchIterator {
     }
     
     static final Participant[] getNewParticipants(final Participant np[], final Participant op[]) {
-        Participants p = new Participants();
+        final Participants p = new Participants();
         for (int a = 0; a < np.length; a++ ) {
             if (Arrays.binarySearch(op, np[a]) < 0) {
                 p.add(np[a]);
@@ -956,7 +956,7 @@ public class CalendarOperation implements SearchIterator {
     }
     
     static final Participant[] getDeletedParticipants(final Participant np[], final Participant op[]) {
-        Participants p = new Participants();
+        final Participants p = new Participants();
         for (int a = 0; a < np.length; a++ ) {
             if (Arrays.binarySearch(op, np[a]) < 0) {
                 p.add(np[a]);
@@ -966,9 +966,9 @@ public class CalendarOperation implements SearchIterator {
     }
     
     static final Participants[] getModifiedUserParticipants(final UserParticipant np[], final UserParticipant op[], final int owner, final int uid, final boolean time_change, final CalendarDataObject cdao) throws OXPermissionException {
-        Participants p[] = new Participants[2];
+        final Participants p[] = new Participants[2];
         for (int a = 0; a < np.length; a++ ) {
-            int bs = Arrays.binarySearch(op, np[a]);
+            final int bs = Arrays.binarySearch(op, np[a]);
             if (bs < 0) {
                 if (p[0] == null) {
                     p[0] = new Participants(); // new
@@ -1090,7 +1090,7 @@ public class CalendarOperation implements SearchIterator {
     }
     
     public static final UserParticipant[] getDeletedUserParticipants(final UserParticipant np[], final UserParticipant op[], final int uid) {
-        Participants p = new Participants();
+        final Participants p = new Participants();
         for (int a = 0; a < np.length; a++ ) {
             if (Arrays.binarySearch(op, np[a]) < 0) {
                 if (np[a].getPersonalFolderId() != 0) {
@@ -1109,7 +1109,7 @@ public class CalendarOperation implements SearchIterator {
         if (co_rs != null) {
             try {
                 co_rs.close();
-            } catch (SQLException sqle) {
+            } catch (final SQLException sqle) {
                 LOG.error("Error closing ResultSet.", sqle);
             }
         }
@@ -1117,7 +1117,7 @@ public class CalendarOperation implements SearchIterator {
         if (prep != null) {
             try {
                 prep.close();
-            } catch(SQLException sqle) {
+            } catch(final SQLException sqle) {
                 LOG.error("Error closing PreparedStatement.", sqle);
             }
         }
@@ -1125,13 +1125,13 @@ public class CalendarOperation implements SearchIterator {
         if (readcon != null) {
             try {
                 DBPool.push(c, readcon);
-            } catch (DBPoolingException dbpe) {
+            } catch (final DBPoolingException dbpe) {
                 LOG.error(CalendarSql.ERROR_PUSHING_DATABASE, dbpe);
             }
         }
     }
     
-    private final void simpleDataCheck(final CalendarDataObject cdao, final CalendarDataObject edao, int uid) throws OXException {
+    private final void simpleDataCheck(final CalendarDataObject cdao, final CalendarDataObject edao, final int uid) throws OXException {
         if (cdao.containsStartDate() && cdao.containsEndDate() && cdao.getEndDate().getTime() < cdao.getStartDate().getTime()) {
             throw new OXCalendarException(OXCalendarException.Code.END_DATE_BEFORE_START_DATE);
         }
@@ -1180,14 +1180,14 @@ public class CalendarOperation implements SearchIterator {
         if (!edao.containsRecurrenceType() && !cdao.containsRecurrenceType()) {
             return CalendarRecurringCollection.RECURRING_NO_ACTION;
         } else if (edao.containsRecurrenceType() && edao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE && (!cdao.containsRecurrenceType() || cdao.getRecurrenceType() == edao.getRecurrenceType())) {
-            int ret = CalendarRecurringCollection.getRecurringAppoiontmentUpdateAction(cdao, edao);
+            final int ret = CalendarRecurringCollection.getRecurringAppoiontmentUpdateAction(cdao, edao);
             if (ret == CalendarRecurringCollection.RECURRING_NO_ACTION) {
                 // We have to check if something has been changed in the meantime!
                 if (!cdao.containsStartDate() && !cdao.containsEndDate()) {
-                    CalendarDataObject temp = (CalendarDataObject) edao.clone();
+                    final CalendarDataObject temp = (CalendarDataObject) edao.clone();
                     final RecurringResults rss = CalendarRecurringCollection.calculateFirstRecurring(temp);
                     if (rss != null) {
-                        RecurringResult rs = rss.getRecurringResult(0);
+                        final RecurringResult rs = rss.getRecurringResult(0);
                         if (rss != null) {
                             cdao.setStartDate(new Date(rs.getStart()));
                             cdao.setEndDate(new Date(rs.getEnd()));

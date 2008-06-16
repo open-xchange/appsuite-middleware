@@ -64,11 +64,12 @@ import com.openexchange.tools.versit.values.DateTimeValue;
 
 public class OldDateTimePropertyDefinition extends OldShortPropertyDefinition {
 
-	public OldDateTimePropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldDateTimePropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
+	@Override
 	protected Object parseValue(final Property property, final StringScanner ss)
 			throws IOException {
 		final DateTimeValue date = new DateTimeValue();
@@ -133,6 +134,7 @@ public class OldDateTimePropertyDefinition extends OldShortPropertyDefinition {
 		date.calendar.setTimeZone(TimeZone.getTimeZone(tz.toString()));
 	}
 
+	@Override
 	public String writeValue(final Property property, final Object value) {
 		final DateTimeValue dtval = (DateTimeValue) value;
 		final StringBuilder sb = new StringBuilder();

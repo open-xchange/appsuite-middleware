@@ -142,10 +142,10 @@ public class TasksDelete implements DeleteListener {
         throws TaskException {
         final Context ctx = event.getContext();
         final int userId = event.getId();
-        for (StorageType type : StorageType.values()) {
+        for (final StorageType type : StorageType.values()) {
             final int[] tasks = partStor.findTasksWithParticipant(ctx,
                 writeCon, userId, type);
-            for (int task : tasks) {
+            for (final int task : tasks) {
                 partStor.deleteInternal(ctx, writeCon, task, userId , type,
                     true);
             }
@@ -163,10 +163,10 @@ public class TasksDelete implements DeleteListener {
         final Session session = getSession(event);
         final Context ctx = event.getContext();
         final int userId = event.getId();
-        for (StorageType type : StorageType.TYPES_AD) {
+        for (final StorageType type : StorageType.TYPES_AD) {
             final int[][] result = foldStor.searchFolderByUser(ctx, con,
                 userId, type);
-            for (int[] folderAndTask : result) {
+            for (final int[] folderAndTask : result) {
                 final int folderId = folderAndTask[0];
                 FolderObject folder = null;
                 try {
@@ -236,10 +236,10 @@ public class TasksDelete implements DeleteListener {
         final Context ctx = event.getContext();
         final int userId = event.getId();
         final TaskStorage stor = TaskStorage.getInstance();
-        for (StorageType type : StorageType.TYPES_AD) {
+        for (final StorageType type : StorageType.TYPES_AD) {
             final int[] tasks = TaskSearch.getInstance().findDelegatedTasks(ctx,
                 writeCon, userId, type);
-            for  (int taskId : tasks) {
+            for  (final int taskId : tasks) {
                 final Task update = stor.selectTask(ctx, writeCon, taskId,
                     type);
                 final Date lastModified = update.getLastModified();
@@ -269,10 +269,10 @@ public class TasksDelete implements DeleteListener {
         final int groupId = event.getId();
         final ParticipantStorage partStor = ParticipantStorage.getInstance();
         try {
-            for (StorageType type : StorageType.values()) {
+            for (final StorageType type : StorageType.values()) {
                 final int[] tasks = partStor.findTasksWithGroup(ctx, readCon,
                     groupId, type);
-                for (int task : tasks) {
+                for (final int task : tasks) {
                     Set<InternalParticipant> participants = partStor
                         .selectInternal(ctx, readCon, task, type);
                     participants = TaskLogic.extractWithGroup(participants,
@@ -292,7 +292,7 @@ public class TasksDelete implements DeleteListener {
      * @param participants task internal participants.
      */
     private void removeGroup(final Set<InternalParticipant> participants) {
-        for (InternalParticipant participant : participants) {
+        for (final InternalParticipant participant : participants) {
             participant.setGroupId(null);
         }
     }

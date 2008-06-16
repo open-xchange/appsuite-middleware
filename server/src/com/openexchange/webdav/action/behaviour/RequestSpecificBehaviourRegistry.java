@@ -66,10 +66,10 @@ public class RequestSpecificBehaviourRegistry {
 	
 	
 	//Generic-o-rama! Is it just me or does Java start to gain the same aesthetic appeal as c++?
-	private Map<Class<? extends Object>, List<Behaviour>> registry = new HashMap<Class<? extends Object>, List<Behaviour>>();
+	private final Map<Class<? extends Object>, List<Behaviour>> registry = new HashMap<Class<? extends Object>, List<Behaviour>>();
 	
-	public void add(Behaviour behaviour) {
-		for(Class<? extends Object> clazz : behaviour.provides()) {
+	public void add(final Behaviour behaviour) {
+		for(final Class<? extends Object> clazz : behaviour.provides()) {
 			List<Behaviour> behaviours = registry.get(clazz);
 			if(behaviours == null) {
 				behaviours = new ArrayList<Behaviour>();
@@ -79,18 +79,18 @@ public class RequestSpecificBehaviourRegistry {
 		}
 	}
 	
-	public void addAll(Collection<Behaviour> behaviours) {
-		for(Behaviour behaviour : behaviours) { add (behaviour); }
+	public void addAll(final Collection<Behaviour> behaviours) {
+		for(final Behaviour behaviour : behaviours) { add (behaviour); }
 	}
 	
-	public void setBehaviours(Collection<Behaviour> behaviours) {
+	public void setBehaviours(final Collection<Behaviour> behaviours) {
 		registry.clear();
 		addAll(behaviours);
 	}
 
-	public <T> T get(WebdavRequest request, Class<T> clazz) {
-		List<Behaviour> behaviours = registry.get(clazz);
-		for(Behaviour behaviour : behaviours) {
+	public <T> T get(final WebdavRequest request, final Class<T> clazz) {
+		final List<Behaviour> behaviours = registry.get(clazz);
+		for(final Behaviour behaviour : behaviours) {
 			if(behaviour.matches(request)) {
 				return behaviour.get(clazz);
 			}
@@ -101,7 +101,7 @@ public class RequestSpecificBehaviourRegistry {
 	public void log() {
 		if(LOG.isInfoEnabled()) {
 			int sum = 0;
-			for(Map.Entry<Class<? extends Object>, List<Behaviour>> entry : registry.entrySet()) {
+			for(final Map.Entry<Class<? extends Object>, List<Behaviour>> entry : registry.entrySet()) {
 				sum += entry.getValue().size();
 			}
 			LOG.info("Using "+sum+" overrides for WebDAV");
@@ -109,8 +109,8 @@ public class RequestSpecificBehaviourRegistry {
 		
 		if(LOG.isDebugEnabled()) {
 			LOG.debug("Overrides for WebDAV:");
-			for(Map.Entry<Class<? extends Object>, List<Behaviour>> entry : registry.entrySet()) {
-				for(Behaviour behaviour : entry.getValue()) {
+			for(final Map.Entry<Class<? extends Object>, List<Behaviour>> entry : registry.entrySet()) {
+				for(final Behaviour behaviour : entry.getValue()) {
 					LOG.debug(behaviour+" provides override for "+entry.getKey());
 				}
 			}

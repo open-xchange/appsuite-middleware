@@ -52,7 +52,6 @@ package com.openexchange.groupware.importexport;
 import java.util.Map;
 
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**

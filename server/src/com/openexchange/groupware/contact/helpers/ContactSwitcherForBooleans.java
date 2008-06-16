@@ -68,35 +68,35 @@ public class ContactSwitcherForBooleans extends	AbstractContactSwitcherWithDeleg
 
 	public String[] trueValues = {"y", "yes", "true" , "privat", "private", "priv\u00e9", "1"};
 	
-	public Object[] determineBooleanValue(Object[] objects){
-		Object obj = objects[1];
+	public Object[] determineBooleanValue(final Object[] objects){
+		final Object obj = objects[1];
 		
 		boolean boolValue = false;
 		//check strings
 		try {
-			String comp = (String) obj;
-			for(String trueVal : trueValues){
+			final String comp = (String) obj;
+			for(final String trueVal : trueValues){
 				if(trueVal.equals(comp.toLowerCase())){
 					boolValue = true;
 				}
 			}
-		} catch(ClassCastException e){
+		} catch(final ClassCastException e){
 			//do nothing, keep on trying
 		}
 		
 		//check boolean object
 		try {
 			boolValue = (Boolean) obj;
-		} catch(ClassCastException e){
+		} catch(final ClassCastException e){
 			//do nothing, keep on trying
 		}
 		// check Integer object
 		try {
-			Integer comp = (Integer) obj;
+			final Integer comp = (Integer) obj;
 			if(comp.compareTo(0) > 0 ){
 				boolValue = true;
 			}
-		} catch(ClassCastException e){
+		} catch(final ClassCastException e){
 			//do nothing, keep on trying
 		}
 
@@ -106,7 +106,7 @@ public class ContactSwitcherForBooleans extends	AbstractContactSwitcherWithDeleg
 	}
 
 	@Override
-	public Object privateflag(Object... objects) throws ContactException {
+	public Object privateflag(final Object... objects) throws ContactException {
 		return delegate.privateflag( determineBooleanValue(objects) );
 		
 	}

@@ -106,7 +106,7 @@ public class WebdavLockAction extends AbstractAction {
             }
 
 			WebdavResource resource = req.getResource();
-			int status = HttpServletResponse.SC_OK;
+			final int status = HttpServletResponse.SC_OK;
 			 
 			
 			resource.lock(lock);

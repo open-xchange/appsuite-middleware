@@ -71,6 +71,7 @@ public class URIValueDefinition extends ValueDefinition {
 	
 	private static Pattern URIPattern = Pattern.compile("[^,]+");
 	
+	@Override
 	public Object createValue(final StringScanner s, final Property property) throws IOException {
 		final String value = s.regex(URIPattern);
 		if (value == null) {
@@ -78,7 +79,7 @@ public class URIValueDefinition extends ValueDefinition {
 		}
 		try {
 			return new URI(value);
-		} catch (URISyntaxException e) {
+		} catch (final URISyntaxException e) {
 			final VersitException ve = new VersitException(s, e.getMessage());
 			ve.initCause(e);
 			throw ve;

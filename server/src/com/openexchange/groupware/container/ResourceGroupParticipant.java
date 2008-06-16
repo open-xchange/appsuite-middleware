@@ -83,7 +83,8 @@ public class ResourceGroupParticipant implements Participant, Comparable
     /**
      * @deprecated Use {@link #ResourceGroupParticipant(int)}.
      */
-    public ResourceGroupParticipant() {
+    @Deprecated
+	public ResourceGroupParticipant() {
         super();
     }
 

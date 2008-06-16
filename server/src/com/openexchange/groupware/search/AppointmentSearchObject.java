@@ -63,7 +63,7 @@ public class AppointmentSearchObject extends CalendarSearchObject {
 		return range;
 	}
 
-	public void setRange(Date[] range) {
+	public void setRange(final Date[] range) {
 		this.range = range;
 	}
 

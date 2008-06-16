@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.settings.tree;
 
-import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.impl.AbstractMailFuncs;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.usersetting.UserSettingMail;

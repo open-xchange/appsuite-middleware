@@ -146,24 +146,24 @@ public class AppointmentRequest {
 		CalendarDataObject.TIMEZONE
 	};
 	
-	private Session sessionObj;
+	private final Session sessionObj;
 
-	private Context ctx;
+	private final Context ctx;
 	
 	private User user;
 	
 	private Date timestamp;
 	
-	private TimeZone timeZone;
+	private final TimeZone timeZone;
 	
 	private static final Log LOG = LogFactory.getLog(AppointmentRequest.class);
 	
-	public AppointmentRequest(Session sessionObj, Context ctx) {
+	public AppointmentRequest(final Session sessionObj, final Context ctx) {
 		this.sessionObj = sessionObj;
 		this.ctx = ctx;
 		try {
 			user = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
-		} catch (LdapException e) {
+		} catch (final LdapException e) {
 			/*
 			 * Cannot occur
 			 */
@@ -418,7 +418,7 @@ public class AppointmentRequest {
 			}
             
 			return jsonResponseArray;
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXException("SQLException occurred", e);
 		} finally {
 			if (it != null) {
@@ -445,7 +445,7 @@ public class AppointmentRequest {
 		
 		try {
 			appointmentsql.deleteAppointmentObject(appointmentObj, inFolder, timestamp);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXException("SQLException occurred", e);
 		}
 		
@@ -499,7 +499,7 @@ public class AppointmentRequest {
 		}
 		
 		final int size = objectIdMap.size();
-		int[][] objectIdAndFolderId = new int[size][2];
+		final int[][] objectIdAndFolderId = new int[size][2];
 		
 		final Iterator<Map.Entry<Integer, Integer>> iterator = objectIdMap.entrySet().iterator();
 		for (int i = 0; i < size; i++) {
@@ -589,9 +589,9 @@ public class AppointmentRequest {
 			}
 			
 			return jsonResponseArray;
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 		    throw e;
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             throw e;
 		} finally {
@@ -676,7 +676,7 @@ public class AppointmentRequest {
 			}
 			
 			return jsonResponseArray;
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXException("SQLException occurred", e);
 		} finally {
 			if (it != null) {
@@ -714,7 +714,7 @@ public class AppointmentRequest {
 			timestamp = appointmentobject.getLastModified();
 			
 			return jsonResponseObj;
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXException("SQLException occurred", e);
 		}
 	}
@@ -898,7 +898,7 @@ public class AppointmentRequest {
 			}
 			
 			return jsonResponseArray;
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXException("SQLException occurred", e);
 		} finally {
 			if (it != null) {
@@ -995,7 +995,7 @@ public class AppointmentRequest {
 			}
 			
 			return jsonResponseArray;
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXException("SQLException occurred", e);
 		} finally {
 			if (searchIterator != null) {
@@ -1051,7 +1051,7 @@ public class AppointmentRequest {
 		CalendarDataObject appointmentObj = null;
 		try {
 			appointmentObj = appointmentSql.getObjectById(id, inFolder);
-		} catch (SQLException exc) {
+		} catch (final SQLException exc) {
 			throw new OXException("SQLException occurred", exc);
 		}
 

@@ -110,7 +110,7 @@ public final class FolderWriter {
 	public static JSONObject writeMailFolder(final MailFolder folder, final MailConfig mailConfig) throws MailException {
 		final JSONObject jsonObject = new JSONObject();
 		final MailFolderFieldWriter[] writers = getMailFolderFieldWriter(ALL_FLD_FIELDS, mailConfig);
-		for (MailFolderFieldWriter writer : writers) {
+		for (final MailFolderFieldWriter writer : writers) {
 			writer.writeField(jsonObject, folder, true);
 		}
 		return jsonObject;

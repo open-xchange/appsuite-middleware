@@ -191,16 +191,16 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 	protected static final class AttachmentEventImpl implements AttachmentEvent {
 
 		private AttachmentMetadata attachment;
-		private int folderId;
-		private int attachedId;
-		private int moduleId;
-		private User user;
-		private Context ctx;
-		private DBProvider provider;
+		private final int folderId;
+		private final int attachedId;
+		private final int moduleId;
+		private final User user;
+		private final Context ctx;
+		private final DBProvider provider;
 		private Connection writeCon;
-		private AttachmentBase base;
+		private final AttachmentBase base;
 		private int[] detached = new int[0];
-		private UserConfiguration userConfig;
+		private final UserConfiguration userConfig;
 
 		
 		public AttachmentEventImpl(final AttachmentMetadata m, final int folderId, final int attachedId, final int moduleId, final User user, final UserConfiguration userConfig, final Context ctx, final DBProvider provider, final AttachmentBase base) {

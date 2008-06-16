@@ -51,7 +51,6 @@ package com.openexchange.tools.file;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
  * 
@@ -65,7 +64,7 @@ public class QuotaFileStorageException extends FileStorageException {
      */
     private static final long serialVersionUID = -1459280511961165849L;
 
-    public QuotaFileStorageException(AbstractOXException  x){
+    public QuotaFileStorageException(final AbstractOXException  x){
     	super(x);
     }
     
@@ -73,7 +72,7 @@ public class QuotaFileStorageException extends FileStorageException {
      * @param code
      * @param messageArgs
      */
-    public QuotaFileStorageException(Code code, Object... messageArgs) {
+    public QuotaFileStorageException(final Code code, final Object... messageArgs) {
         this(code, null, messageArgs);
     }
 
@@ -82,8 +81,8 @@ public class QuotaFileStorageException extends FileStorageException {
      * @param cause
      * @param messageArgs
      */
-    public QuotaFileStorageException(Code code, Throwable cause,
-        Object... messageArgs) {
+    public QuotaFileStorageException(final Code code, final Throwable cause,
+        final Object... messageArgs) {
         super(EnumComponent.FILESTORE, code.category, code.detailNumber,
             code.message, cause);
         setMessageArgs(messageArgs);

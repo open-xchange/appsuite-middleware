@@ -49,12 +49,12 @@
 
 package com.openexchange.ajax.writer;
 
-import com.openexchange.ajax.fields.GroupFields;
-import com.openexchange.group.Group;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.openexchange.ajax.fields.GroupFields;
+import com.openexchange.group.Group;
 
 /**
  * This class writes a group object into a JSON.
@@ -77,7 +77,7 @@ public class GroupWriter extends DataWriter {
     protected void writeMembers(final Group group, final JSONObject json)
         throws JSONException {
         final JSONArray jsonArray = new JSONArray();
-        for (int member : group.getMember()) {
+        for (final int member : group.getMember()) {
             jsonArray.put(member);
         }
         json.put(GroupFields.MEMBERS, jsonArray);

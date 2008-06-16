@@ -51,11 +51,11 @@ package com.openexchange.webdav.protocol;
 
 public class WebdavStatusImpl<T> implements WebdavStatus<T> {
 
-	private int status;
-	private T additional;
-	private WebdavPath url;
+	private final int status;
+	private final T additional;
+	private final WebdavPath url;
 	
-	public WebdavStatusImpl(int status, WebdavPath url, T additional) {
+	public WebdavStatusImpl(final int status, final WebdavPath url, final T additional) {
 		this.status = status;
 		this.url = url;
 		this.additional = additional;

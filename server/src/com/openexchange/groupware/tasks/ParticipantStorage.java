@@ -50,6 +50,7 @@
 package com.openexchange.groupware.tasks;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -153,7 +154,7 @@ abstract class ParticipantStorage {
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new TaskException(Code.NO_CONNECTION, e);
         }
         try {
@@ -178,7 +179,7 @@ abstract class ParticipantStorage {
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new TaskException(Code.NO_CONNECTION, e);
         }
         try {
@@ -338,7 +339,7 @@ abstract class ParticipantStorage {
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new TaskException(Code.NO_CONNECTION, e);
         }
         try {
@@ -424,7 +425,7 @@ abstract class ParticipantStorage {
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new TaskException(Code.NO_CONNECTION, e);
         }
         try {
@@ -466,7 +467,7 @@ abstract class ParticipantStorage {
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new TaskException(Code.NO_CONNECTION, e);
         }
         final Map<Integer, Set<InternalParticipant>> internals;
@@ -479,7 +480,7 @@ abstract class ParticipantStorage {
         }
         final Map<Integer, Set<TaskParticipant>> retval =
             new HashMap<Integer, Set<TaskParticipant>>();
-        for (Entry<Integer, Set<InternalParticipant>> entry : internals
+        for (final Entry<Integer, Set<InternalParticipant>> entry : internals
             .entrySet()) {
             Set<TaskParticipant> parts = retval.get(entry.getKey());
             if (null == parts) {
@@ -488,7 +489,7 @@ abstract class ParticipantStorage {
             }
             parts.addAll(entry.getValue());
         }
-        for (Entry<Integer, Set<ExternalParticipant>> entry : externals
+        for (final Entry<Integer, Set<ExternalParticipant>> entry : externals
             .entrySet()) {
             Set<TaskParticipant> parts = retval.get(entry.getKey());
             if (null == parts) {
@@ -523,7 +524,7 @@ abstract class ParticipantStorage {
         final Set<TaskParticipant> participants) {
         final Set<ExternalParticipant> retval =
             new HashSet<ExternalParticipant>();
-        for (TaskParticipant participant : participants) {
+        for (final TaskParticipant participant : participants) {
             if (Type.EXTERNAL == participant.getType()) {
                 retval.add((ExternalParticipant) participant);
             }
@@ -535,7 +536,7 @@ abstract class ParticipantStorage {
         final Set<TaskParticipant> participants) {
         final Set<InternalParticipant> retval =
             new HashSet<InternalParticipant>();
-        for (TaskParticipant participant : participants) {
+        for (final TaskParticipant participant : participants) {
             if (Type.INTERNAL == participant.getType()) {
                 retval.add((InternalParticipant) participant);
             }
@@ -546,7 +547,7 @@ abstract class ParticipantStorage {
     static InternalParticipant getParticipant(
         final Set<InternalParticipant> participants, final int userId) {
         InternalParticipant retval = null;
-        for (InternalParticipant participant : participants) {
+        for (final InternalParticipant participant : participants) {
             if (participant.getIdentifier() == userId) {
                 retval = participant;
                 break;

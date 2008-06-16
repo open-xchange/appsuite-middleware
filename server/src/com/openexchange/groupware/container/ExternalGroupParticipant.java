@@ -84,7 +84,8 @@ public class ExternalGroupParticipant implements Participant, Comparable
     /**
      * @deprecated Use {@link #ExternalGroupParticipant(String)}.
      */
-    public ExternalGroupParticipant() {
+    @Deprecated
+	public ExternalGroupParticipant() {
         this(null);
     }
 
@@ -152,11 +153,13 @@ public class ExternalGroupParticipant implements Participant, Comparable
 		return s1.compareTo(s2);
 	}
 
+	@Override
 	public int hashCode() {
 		return getHashString(getIdentifier(), getType()).hashCode();
 	}
 	
-	public boolean equals(Object o) {
+	@Override
+	public boolean equals(final Object o) {
 		return o.hashCode() == hashCode();
 	}
 	

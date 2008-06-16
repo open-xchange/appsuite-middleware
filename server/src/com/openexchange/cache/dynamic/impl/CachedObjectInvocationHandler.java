@@ -161,7 +161,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
                 cached = (T) tmp;
                 load = false;
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             load = true;
             LOG.error(e.getMessage(), e);
         } finally {
@@ -173,7 +173,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
             try {
                 cond.signalAll();
                 cache.put(factory.getKey(), (Serializable) cached);
-            } catch (CacheException e) {
+            } catch (final CacheException e) {
                 throw new OXCachingException(OXCachingException.Code.FAILED_PUT,
                     e);
             } finally {
@@ -186,9 +186,9 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
         try {
             EQUALS = Object.class.getMethod("equals",
                 new Class[] { Object.class });
-        } catch (SecurityException e) {
+        } catch (final SecurityException e) {
             throw new RuntimeException(e);
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }

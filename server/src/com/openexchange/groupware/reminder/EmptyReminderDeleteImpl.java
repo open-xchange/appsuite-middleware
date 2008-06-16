@@ -60,11 +60,11 @@ package com.openexchange.groupware.reminder;
 
 public class EmptyReminderDeleteImpl implements ReminderDeleteInterface {
 	
-	public void updateTargetObject(String targetId) {
+	public void updateTargetObject(final String targetId) {
 		
 	}
 
-	public void updateTargetObject(String targetId, int userId) {
+	public void updateTargetObject(final String targetId, final int userId) {
 		
 	}
 }

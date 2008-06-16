@@ -83,8 +83,9 @@ public class EventInit implements Initialization {
 	}
 
     public void start() throws AbstractOXException {
-        if(started)
-            return;
+        if(started) {
+			return;
+		}
         started = true;
         if (LOG.isInfoEnabled()) {
 			LOG.info("Parse Event properties");
@@ -95,14 +96,14 @@ public class EventInit implements Initialization {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Adding Notification Listener");
 		}
-        ParticipantNotify notify = new ParticipantNotify();
+        final ParticipantNotify notify = new ParticipantNotify();
 		EventQueue.addAppointmentEvent(notify);
 		EventQueue.addTaskEvent(notify);
 
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Adding LinkEventHandler");
 		}
-        LinksEventHandler linkHandler = new LinksEventHandler();
+        final LinksEventHandler linkHandler = new LinksEventHandler();
 		EventQueue.addAppointmentEvent(linkHandler);
 		EventQueue.addContactEvent(linkHandler);
 		EventQueue.addTaskEvent(linkHandler);
@@ -111,7 +112,7 @@ public class EventInit implements Initialization {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Adding AttachmentCleaner");
 		}
-        AttachmentCleaner attCleaner = new AttachmentCleaner();
+        final AttachmentCleaner attCleaner = new AttachmentCleaner();
 		EventQueue.addAppointmentEvent(attCleaner);
 		EventQueue.addContactEvent(attCleaner);
 		EventQueue.addTaskEvent(attCleaner);
@@ -119,14 +120,14 @@ public class EventInit implements Initialization {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Adding PropertiesCleaner");
 		}
-        PropertyCleaner propertyCleaner = new PropertyCleaner(new PropertyStoreImpl(new DBPoolProvider(), "oxfolder_property"), new PropertyStoreImpl(new DBPoolProvider(), "infostore_property"));
+        final PropertyCleaner propertyCleaner = new PropertyCleaner(new PropertyStoreImpl(new DBPoolProvider(), "oxfolder_property"), new PropertyStoreImpl(new DBPoolProvider(), "infostore_property"));
 		EventQueue.addFolderEvent(propertyCleaner);
 		EventQueue.addInfostoreEvent(propertyCleaner);
 
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Adding LockCleaner");
 		}
-        LockCleaner lockCleaner = new LockCleaner(new FolderLockManagerImpl(new DBPoolProvider()), new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock"));
+        final LockCleaner lockCleaner = new LockCleaner(new FolderLockManagerImpl(new DBPoolProvider()), new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock"));
 		EventQueue.addFolderEvent(lockCleaner);
 		EventQueue.addInfostoreEvent(lockCleaner);
     }

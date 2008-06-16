@@ -179,9 +179,9 @@ public class VCalendar10 extends OldObjectDefinition {
 					new OldAlarmObjectDefinition(new String[] {},
 							new OldPropertyDefinition[] {}) });
 
-	public VCalendar10(String[] propertyNames,
-			OldPropertyDefinition[] properties, String[] childNames,
-			OldObjectDefinition[] children) {
+	public VCalendar10(final String[] propertyNames,
+			final OldPropertyDefinition[] properties, final String[] childNames,
+			final OldObjectDefinition[] children) {
 		super(propertyNames, properties, childNames, children);
 		Name = "VCALENDAR";
 	}

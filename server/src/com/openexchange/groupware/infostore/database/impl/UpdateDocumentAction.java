@@ -79,7 +79,7 @@ public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
 		int counter = 0;
 		try {
 			counter = doUpdates(getQueryCatalog().getDocumentUpdate(getModified()), getQueryCatalog().filterForDocument(getModified()), getOldDocuments());
-		} catch (UpdateException e) {
+		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(0, e.getSQLException(), e.getStatement());
 		}
 		
@@ -97,7 +97,7 @@ public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
 		int counter = 0;
 		try {
 			counter = doUpdates(getQueryCatalog().getDocumentUpdate(getModified()), getQueryCatalog().filterForDocument(getModified()), getDocuments());
-		} catch (UpdateException e) {
+		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
 		}
 		setTimestamp(System.currentTimeMillis());
@@ -108,7 +108,7 @@ public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
 	}
 
 	@Override
-	protected Object[] getAdditionals(DocumentMetadata doc) {
+	protected Object[] getAdditionals(final DocumentMetadata doc) {
 		return new Object[]{getContext().getContextId(), doc.getId(), getTimestamp()};
 	}
 }

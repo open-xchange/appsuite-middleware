@@ -103,7 +103,7 @@ public class UpdaterImpl extends Updater {
 		UpdateProcess process;
 		try {
 			process = new UpdateProcess(context.getContextId());
-		} catch (SchemaException e) {
+		} catch (final SchemaException e) {
 			throw EXCEPTION.create(1, e, e.getMessage());
 		}
 		final Thread thread = new Thread(process);
@@ -136,7 +136,7 @@ public class UpdaterImpl extends Updater {
 		try {
 			final SchemaStore store = SchemaStore.getInstance(SchemaStoreImpl.class.getName());
 			schema = store.getSchema(context);
-		} catch (SchemaException e) {
+		} catch (final SchemaException e) {
 			throw new UpdateException(e);
 		}
 		return schema;
@@ -150,9 +150,9 @@ public class UpdaterImpl extends Updater {
 		try {
 			return SchemaStore.getInstance(SchemaStoreImpl.class.getName()).getSchema(
 					ConfigDBStorage.getOneContextFromSchema(schema, writePoolId)).isLocked();
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new UpdateException(e);
-		} catch (SchemaException e) {
+		} catch (final SchemaException e) {
 			throw new UpdateException(e);
 		}
 	}
@@ -165,9 +165,9 @@ public class UpdaterImpl extends Updater {
 		try {
 			return toUpdateInternal(SchemaStore.getInstance(SchemaStoreImpl.class.getName()).getSchema(
 					ConfigDBStorage.getOneContextFromSchema(schema, writePoolId)));
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new UpdateException(e);
-		} catch (SchemaException e) {
+		} catch (final SchemaException e) {
 			throw new UpdateException(e);
 		}
 	}

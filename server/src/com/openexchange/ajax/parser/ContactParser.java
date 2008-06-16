@@ -75,14 +75,14 @@ public class ContactParser extends CommonParser {
 
 	}
 
-	public ContactParser(Session sessionObj) {
+	public ContactParser(final Session sessionObj) {
 		this.sessionObj = sessionObj;
 	}
 	
 	public void parse(final ContactObject contactobject, final JSONObject jsonobject) throws OXException {
 		try {
 			parseElementContact(contactobject, jsonobject);
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw new OXException(exc);
 		}
 	}
@@ -107,7 +107,7 @@ public class ContactParser extends CommonParser {
 	
 	protected void parseDistributionList(final ContactObject oxobject, final JSONObject jsonobject) throws Exception {
 		final JSONArray jdistributionlist = jsonobject.getJSONArray(ContactFields.DISTRIBUTIONLIST);
-		DistributionListEntryObject[] distributionlist = new DistributionListEntryObject[jdistributionlist.length()];
+		final DistributionListEntryObject[] distributionlist = new DistributionListEntryObject[jdistributionlist.length()];
 		for (int a = 0; a < jdistributionlist.length(); a++) {
 			final JSONObject entry = jdistributionlist.getJSONObject(a);
 			distributionlist[a] = new DistributionListEntryObject();
@@ -132,7 +132,7 @@ public class ContactParser extends CommonParser {
 	
 	protected void parseLinks(final ContactObject oxobject, final JSONObject jsonobject) throws Exception {
 		final JSONArray jlinks = jsonobject.getJSONArray(ContactFields.LINKS);
-		LinkEntryObject[] links = new LinkEntryObject[jlinks.length()];
+		final LinkEntryObject[] links = new LinkEntryObject[jlinks.length()];
 		for (int a = 0; a < links.length; a++) {
 			links[a] = new LinkEntryObject();
 			final JSONObject entry = jlinks.getJSONObject(a);
@@ -151,7 +151,7 @@ public class ContactParser extends CommonParser {
 		throws Exception;
 	}
 	
-	private JSONAttributeMapper[] mapping = new JSONAttributeMapper[] {
+	private final JSONAttributeMapper[] mapping = new JSONAttributeMapper[] {
 		new JSONAttributeMapper() {
 			public boolean jsonObjectContains(final JSONObject jsonobject) {
 				return jsonobject.has(ContactFields.LAST_NAME);

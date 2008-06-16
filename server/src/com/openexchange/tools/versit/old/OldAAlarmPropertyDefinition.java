@@ -61,11 +61,12 @@ import com.openexchange.tools.versit.VersitObject;
 
 public class OldAAlarmPropertyDefinition extends OldAlarmPropertyDefinition {
 
-	public OldAAlarmPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params, OldShortPropertyDefinition[] elements) {
+	public OldAAlarmPropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params, final OldShortPropertyDefinition[] elements) {
 		super("AUDIO", null, paramNames, params, elements);
 	}
 
+	@Override
 	protected void parseProp(final OldScanner s, final Property prop, final VersitObject alarm)
 			throws VersitException {
 		final ArrayList values = (ArrayList) prop.getValue();

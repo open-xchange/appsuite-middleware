@@ -76,7 +76,7 @@ public class CommonEventImpl implements CommonEvent {
 
 	protected final int action;
 	
-	public CommonEventImpl(int userId, int contextId, int action, int module, Object actionObj, Object oldObj, Object sourceFolder, Object destinationFolder) {
+	public CommonEventImpl(final int userId, final int contextId, final int action, final int module, final Object actionObj, final Object oldObj, final Object sourceFolder, final Object destinationFolder) {
 		this.userId = userId;
 		this.contextId = contextId;
 		this.action = action;

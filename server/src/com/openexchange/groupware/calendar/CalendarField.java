@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.calendar;
 
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.AppointmentObject;
 
 /**
@@ -99,13 +100,13 @@ public enum CalendarField {
 	private String name; 			//this is the name of the internal variable (as used by setters & getters)
 	
 	
-	private CalendarField(int appointmentObjectID, String name){
+	private CalendarField(final int appointmentObjectID, final String name){
 		this.appointmentObjectID = appointmentObjectID;
 		this.name = name;
 	}
 	
-	public static CalendarField getByAppointmentObjectId(int id){
-		for(CalendarField field : values()){
+	public static CalendarField getByAppointmentObjectId(final int id){
+		for(final CalendarField field : values()){
 			if( id == field.getAppointmentObjectID() ){
 				return field;
 			}
@@ -113,8 +114,8 @@ public enum CalendarField {
 		return null;
 	}
 	
-	public static CalendarField getByName(String name){
-		for(CalendarField field : values()){
+	public static CalendarField getByName(final String name){
+		for(final CalendarField field : values()){
 			if( name.equals( field.getName() ) ){
 				return field;
 			}
@@ -127,7 +128,7 @@ public enum CalendarField {
 		return appointmentObjectID;
 	}
 
-	public void setAppointmentObjectID(int appointmentObjectID) {
+	public void setAppointmentObjectID(final int appointmentObjectID) {
 		this.appointmentObjectID = appointmentObjectID;
 	}
 
@@ -135,7 +136,7 @@ public enum CalendarField {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 	

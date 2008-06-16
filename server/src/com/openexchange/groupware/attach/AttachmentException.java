@@ -57,12 +57,12 @@ public class AttachmentException extends OXException {
 
 	private static final long serialVersionUID = -5210881621553596187L;
 
-	public AttachmentException(Category category, int number, String message, Throwable cause, Object[] msgArgs) {
+	public AttachmentException(final Category category, final int number, final String message, final Throwable cause, final Object[] msgArgs) {
 		super(EnumComponent.ATTACHMENT, category,number,message,cause);
 		setMessageArgs(msgArgs);
 	}
 
-	public AttachmentException(AbstractOXException e) {
+	public AttachmentException(final AbstractOXException e) {
 		super(e);
 	}
 

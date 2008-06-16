@@ -1,15 +1,19 @@
 package com.openexchange.webdav.protocol;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 public class WebdavPath implements Iterable<String>{
 
-    private List<String> components = new ArrayList<String>();
+    private final List<String> components = new ArrayList<String>();
 
-    public WebdavPath(CharSequence path) {
-        StringBuilder component = new StringBuilder();
+    public WebdavPath(final CharSequence path) {
+        final StringBuilder component = new StringBuilder();
         for(int i = 0; i < path.length(); i++) {
-            char c = path.charAt(i);
+            final char c = path.charAt(i);
             if(c == '/') {
                 if(component.length() > 0) {
                     components.add(component.toString());
@@ -24,11 +28,11 @@ public class WebdavPath implements Iterable<String>{
         }
     }
 
-    public WebdavPath(String...components) {
+    public WebdavPath(final String...components) {
         append(components);
     }
 
-    public WebdavPath(Collection<String> components) {
+    public WebdavPath(final Collection<String> components) {
         append(components);
     }
 
@@ -40,16 +44,16 @@ public class WebdavPath implements Iterable<String>{
         return components.size();
     }
 
-    public WebdavPath append(String...components) {
+    public WebdavPath append(final String...components) {
         return append(Arrays.asList(components));
     }
 
-    public WebdavPath append(Collection<String> strings) {
+    public WebdavPath append(final Collection<String> strings) {
         this.components.addAll(strings);
         return this;
     }
 
-    public WebdavPath append(WebdavPath webdavPath) {
+    public WebdavPath append(final WebdavPath webdavPath) {
         return append(webdavPath.components);
     }
 
@@ -61,8 +65,9 @@ public class WebdavPath implements Iterable<String>{
     }
 
     public String name(){
-        if(components.size() == 0)
-            return "";
+        if(components.size() == 0) {
+			return "";
+		}
         return  components.get(components.size()-1);
     }
 
@@ -71,22 +76,23 @@ public class WebdavPath implements Iterable<String>{
     }
 
 
-    public WebdavPath subpath(int from){
+    public WebdavPath subpath(final int from){
         return subpath(from, size());
     }
 
-    public WebdavPath subpath(int from, int to) {
+    public WebdavPath subpath(final int from, final int to) {
         return new WebdavPath(components.subList(from,to));
     }
 
-    public boolean equals(Object other) {
+    @Override
+	public boolean equals(final Object other) {
         if (!(other instanceof WebdavPath)) {
             return false;
         }
         return components.equals(((WebdavPath)other).components);
     }
 
-    public boolean startsWith(WebdavPath path) {
+    public boolean startsWith(final WebdavPath path) {
         if(path.size() > size()) {
             return false;
         }
@@ -99,25 +105,27 @@ public class WebdavPath implements Iterable<String>{
         return true;
     }
 
-    public int hashCode(){
+    @Override
+	public int hashCode(){
         return components.hashCode();
     }
 
-    public String toString(){
-        StringBuilder b = new StringBuilder("/");
-        for(String component : components) { b.append(component).append("/"); }
+    @Override
+	public String toString(){
+        final StringBuilder b = new StringBuilder("/");
+        for(final String component : components) { b.append(component).append("/"); }
         b.setLength(b.length()-1);
         return b.toString();
     }
 
     public String toEscapedString() {
-        StringBuilder b = new StringBuilder("/");
-        for(String component : components) { b.append(_escape(component)).append("/"); }
+        final StringBuilder b = new StringBuilder("/");
+        for(final String component : components) { b.append(_escape(component)).append("/"); }
         b.setLength(b.length()-1);
         return b.toString();
     }
 
-    private String _escape(String component) {
+    private String _escape(final String component) {
         if(!component.contains("/") && !component.contains("\\")) {
             return component;
         }

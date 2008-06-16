@@ -138,7 +138,7 @@ public class ServletRequestWrapper implements ServletRequest {
 	public void setParameter(final String name, final String value) {
 		if (parameters.containsKey(name)) {
 			final String[] oldValues = parameters.get(name);
-			String[] newValues = new String[oldValues.length + 1];
+			final String[] newValues = new String[oldValues.length + 1];
 			System.arraycopy(oldValues, 0, newValues, 0, oldValues.length);
 			newValues[newValues.length - 1] = value;
 			parameters.put(name, newValues);
@@ -161,7 +161,7 @@ public class ServletRequestWrapper implements ServletRequest {
 			 * Header may carry multiple values
 			 */
 			final String[] oldValues = headers.get(name);
-			String[] newValues = new String[oldValues.length + 1];
+			final String[] newValues = new String[oldValues.length + 1];
 			System.arraycopy(oldValues, 0, newValues, 0, oldValues.length);
 			newValues[newValues.length - 1] = value;
 			headers.put(name, newValues);
@@ -187,14 +187,14 @@ public class ServletRequestWrapper implements ServletRequest {
 				 */
 				try {
 					setCharacterEncoding(ServerConfig.getProperty(Property.DefaultEncoding));
-				} catch (UnsupportedEncodingException e) {
+				} catch (final UnsupportedEncodingException e) {
 					throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, ServerConfig
 							.getProperty(Property.DefaultEncoding));
 				}
 			} else {
 				try {
 					setCharacterEncoding(ct.getCharsetParameter());
-				} catch (UnsupportedEncodingException e) {
+				} catch (final UnsupportedEncodingException e) {
 					throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, ct.getCharsetParameter());
 				}
 			}
@@ -206,7 +206,7 @@ public class ServletRequestWrapper implements ServletRequest {
 			 */
 			try {
 				setCharacterEncoding(ServerConfig.getProperty(Property.DefaultEncoding));
-			} catch (UnsupportedEncodingException e) {
+			} catch (final UnsupportedEncodingException e) {
 				throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, ServerConfig
 						.getProperty(Property.DefaultEncoding));
 			}
@@ -451,7 +451,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
 		private final Iterator<?> iter;
 		
-		public IteratorEnumeration(Iterator<?> iter) {
+		public IteratorEnumeration(final Iterator<?> iter) {
 			this.iter = iter;
 		}
 		

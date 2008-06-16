@@ -106,7 +106,7 @@ public class OldQuotedPrintable implements OldEncoding {
 						"Invalid character in Quoted-Printable encoding");
 			}
 		}
-		byte[] retval = new byte[len];
+		final byte[] retval = new byte[len];
 		for (int i = 0; i < len; i++) {
 			retval[i] =  al.get(i).byteValue();
 		}
@@ -124,8 +124,8 @@ public class OldQuotedPrintable implements OldEncoding {
 	public void encode(final OldFoldingWriter fw, final byte[] b) throws IOException {
 		int len = fw.lineLength();
 		fw.rawStart();
-		byte[] Escape = { '=', 0, 0 };
-		byte[] Simple = { 0 };
+		final byte[] Escape = { '=', 0, 0 };
+		final byte[] Simple = { 0 };
 		for (int i = 0; i < b.length; i++) {
 			if (b[i] != '\t' && b[i] < 32 || b[i] == '=' || b[i] > 126
 					|| i == b.length - 1 && (b[i] == '\t' || b[i] == ' ')) {

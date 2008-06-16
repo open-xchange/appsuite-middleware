@@ -956,6 +956,7 @@ public class ContactObject extends CommonObject
 		return userfield20;
 	}
 
+	@Override
 	public int getNumberOfLinks( ) 
 	{
 		return number_of_links;
@@ -1561,6 +1562,7 @@ public class ContactObject extends CommonObject
 		this.number_of_images = number_of_images;
 	}
 	
+	@Override
 	public void setNumberOfLinks( final int number_of_links ) 
 	{
 		this.number_of_links = number_of_links;
@@ -2186,6 +2188,7 @@ public class ContactObject extends CommonObject
 		b_userfield20 = false;
 	}
 
+	@Override
 	public void removeNumberOfLinks( ) 
 	{
 		links = null;
@@ -2694,6 +2697,7 @@ public class ContactObject extends CommonObject
 		return (links != null);
 	}
 
+	@Override
 	public boolean containsNumberOfLinks() {
 		return b_number_of_links;
 	}

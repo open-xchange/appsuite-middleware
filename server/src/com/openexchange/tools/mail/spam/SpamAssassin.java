@@ -163,11 +163,11 @@ public class SpamAssassin {
 				return true;
 			}
 			return false;
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.error(e.getMessage(), e);
-		} catch (MessagingException e) {
+		} catch (final MessagingException e) {
 			LOG.error(e.getMessage(), e);
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			LOG.error(e.getMessage(), e);
 		}
 		return false;
@@ -202,9 +202,9 @@ public class SpamAssassin {
 	private static final void trainMessage(final Message msg, final boolean isSpam) {
 		try {
 			new TrainMessageThread(getRawMessageInputStream(msg), isSpam).start();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.error(e.getMessage(), e);
-		} catch (MessagingException e) {
+		} catch (final MessagingException e) {
 			LOG.error(e.getMessage(), e);
 		}
 	}
@@ -261,9 +261,9 @@ public class SpamAssassin {
 					LOG.info(new StringBuilder(STR_SPAMASSASSIN).append(isSpam ? STR_SPAM : STR_HAM).append(res)
 							.toString());
 				}
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				LOG.error(new StringBuilder(150).append(ERR_PREFIX).append(e.getMessage()).toString(), e);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				LOG.error(new StringBuilder(150).append(ERR_PREFIX).append(e.getMessage()).toString(), e);
 			}
 		}

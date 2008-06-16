@@ -66,6 +66,7 @@ public class PeriodValueDefinition extends ValueDefinition {
 
 	public static final ValueDefinition Default = new PeriodValueDefinition();
 
+	@Override
 	public Object createValue(final StringScanner s, final Property property) throws IOException {
 		final PeriodValue period = new PeriodValue();
 		period.Start = (DateTimeValue) DateTimeValueDefinition.Default.createValue(s, property);
@@ -81,6 +82,7 @@ public class PeriodValueDefinition extends ValueDefinition {
 		return period;
 	}
 
+	@Override
 	public String writeValue(final Object value) {
 		final PeriodValue period = (PeriodValue) value;
 		String end = null;

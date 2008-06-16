@@ -51,14 +51,16 @@
 
 package com.openexchange.webdav.xml;
 
+import java.util.Arrays;
+import java.util.Calendar;
+
+import org.jdom.Element;
+
 import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.webdav.xml.fields.CalendarFields;
-import java.util.Arrays;
-import java.util.Calendar;
-import org.jdom.Element;
 
 /**
  * CalendarWriter
@@ -70,7 +72,7 @@ public abstract class CalendarWriter extends CommonWriter {
 	
 	private static final String CONFIRM_ATTRIBUTE = "confirm";
 	
-	protected void writeCalendarElements(CalendarObject calendarobject, Element e_prop) throws Exception {
+	protected void writeCalendarElements(final CalendarObject calendarobject, final Element e_prop) throws Exception {
 		addElement(CalendarFields.TITLE, calendarobject.getTitle(), e_prop);
 		addElement(CalendarFields.NOTE, calendarobject.getNote(), e_prop);
 		
@@ -79,7 +81,7 @@ public abstract class CalendarWriter extends CommonWriter {
 		writeCommonElements(calendarobject, e_prop);
 	}
 	
-	public void addRecurrenceElements(CalendarObject calendarobject, Element e_prop) throws Exception {
+	public void addRecurrenceElements(final CalendarObject calendarobject, final Element e_prop) throws Exception {
 		if (calendarobject.containsRecurrenceID()) {
 			addElement(CalendarFields.RECURRENCE_ID, calendarobject.getRecurrenceID(), e_prop);
 		}
@@ -88,7 +90,7 @@ public abstract class CalendarWriter extends CommonWriter {
 			addElement(CalendarFields.RECURRENCE_POSITION, calendarobject.getRecurrencePosition(), e_prop);
 		}
 		
-		int recurrenceType = calendarobject.getRecurrenceType();
+		final int recurrenceType = calendarobject.getRecurrenceType();
 		
 		switch (recurrenceType) {
 			case CalendarObject.NONE:
@@ -130,7 +132,7 @@ public abstract class CalendarWriter extends CommonWriter {
 		
 		if (calendarobject.containsUntil()) {
 			if (calendarobject.containsOccurrence()) {
-				Calendar c = Calendar.getInstance();
+				final Calendar c = Calendar.getInstance();
 				c.setTime(calendarobject.getUntil());
 				c.add(Calendar.DAY_OF_YEAR, -1);
 				addElement(CalendarFields.UNTIL, c.getTime(), e_prop);
@@ -144,13 +146,13 @@ public abstract class CalendarWriter extends CommonWriter {
 		}
 	}
 	
-	public void addElementParticipants(CalendarObject calendarobject, Element e_prop) throws Exception {
+	public void addElementParticipants(final CalendarObject calendarobject, final Element e_prop) throws Exception {
 		boolean hasParticipants = false;
 		
-		Element e_participants = new Element(CalendarFields.PARTICIPANTS, XmlServlet.NS);
+		final Element e_participants = new Element(CalendarFields.PARTICIPANTS, XmlServlet.NS);
 		
-		Participant participant[] = calendarobject.getParticipants();
-		UserParticipant[] userparticipant = calendarobject.getUsers();
+		final Participant participant[] = calendarobject.getParticipants();
+		final UserParticipant[] userparticipant = calendarobject.getUsers();
 		
 		boolean hasUserParticipants = false;
 		
@@ -174,7 +176,7 @@ public abstract class CalendarWriter extends CommonWriter {
 						eParticipant.addContent(String.valueOf(participant[a].getIdentifier()));
 						
 						if (hasUserParticipants) {
-							int userPos = Arrays.binarySearch(userparticipant, participant[a]);
+							final int userPos = Arrays.binarySearch(userparticipant, participant[a]);
 							
 							if (userPos >= 0) {
 								if (userparticipant[userPos].getConfirm() == CalendarObject.NONE) {

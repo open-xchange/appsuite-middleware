@@ -51,15 +51,17 @@
 
 package com.openexchange.webdav.xml;
 
-import com.openexchange.groupware.container.DataObject;
-import com.openexchange.groupware.container.FolderChildObject;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.webdav.xml.fields.DataFields;
 import java.io.OutputStream;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
+
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * FolderChildWriter
@@ -94,7 +96,7 @@ public class FolderChildWriter extends DataWriter {
 			}
 			
 			eProp.addContent(eIds);
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("writeList", exc);
 			status = 500;
 			description = "Server Error: " + exc.getMessage();

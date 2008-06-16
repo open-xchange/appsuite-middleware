@@ -66,6 +66,7 @@ public class FloatingDateTimeValueDefinition extends DateTimeValueDefinition {
 
 	public static final ValueDefinition Default = new FloatingDateTimeValueDefinition();
 
+	@Override
 	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
 		final DateTimeValue retval = (DateTimeValue) super.createValue(s, property);

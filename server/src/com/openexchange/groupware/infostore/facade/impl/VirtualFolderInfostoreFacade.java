@@ -69,8 +69,8 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.results.TimedResultImpl;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.tools.session.ServerSession;
 
 @OXExceptionSource(
 		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_FACADE_IMPL_VIRTUALFOLDERINFOSTOREFACADE, 
@@ -228,7 +228,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 		
 	}
 
-    public void setCommitsTransaction(boolean commits) {
+    public void setCommitsTransaction(final boolean commits) {
         
     }
 

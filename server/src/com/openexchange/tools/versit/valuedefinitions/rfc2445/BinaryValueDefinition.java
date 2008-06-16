@@ -65,19 +65,21 @@ import com.openexchange.tools.versit.ValueDefinition;
  */
 public class BinaryValueDefinition extends ValueDefinition {
 
-	public BinaryValueDefinition(String[] encodingNames, Encoding[] encodings) {
+	public BinaryValueDefinition(final String[] encodingNames, final Encoding[] encodings) {
 		super(encodingNames, encodings);
 	}
 
+	@Override
 	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
 		return s.getRest().getBytes("ISO-8859-1");
 	}
 
+	@Override
 	public String writeValue(final Object value) {
 		try {
 			return new String((byte[]) value, "ISO-8859-1");
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			return e.getMessage();
 		}
 	}

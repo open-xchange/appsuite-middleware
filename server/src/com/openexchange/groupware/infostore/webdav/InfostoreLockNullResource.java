@@ -49,22 +49,6 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.infostore.webdav.URLCache.Type;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.sessiond.impl.SessionHolder;
-import com.openexchange.webdav.protocol.*;
-import com.openexchange.webdav.protocol.Protocol.Property;
-import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
-import com.openexchange.webdav.protocol.impl.AbstractCollection;
-import com.openexchange.webdav.protocol.impl.AbstractResource;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -74,6 +58,30 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.infostore.webdav.URLCache.Type;
+import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.sessiond.impl.SessionHolder;
+import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavLock;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.Protocol.Property;
+import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
+import com.openexchange.webdav.protocol.impl.AbstractCollection;
+import com.openexchange.webdav.protocol.impl.AbstractResource;
+
 public class InfostoreLockNullResource extends AbstractCollection implements OXWebdavResource{
 
 	private static final WEBDAV_METHOD[] OPTIONS = {WEBDAV_METHOD.PUT, WEBDAV_METHOD.MKCOL, WEBDAV_METHOD.OPTIONS, WEBDAV_METHOD.PROPFIND, WEBDAV_METHOD.LOCK, WEBDAV_METHOD.UNLOCK, WEBDAV_METHOD.TRACE};
@@ -82,13 +90,13 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 	private static final Log LOG = LogFactory.getLog(InfostoreLockNullResource.class);
 	
 	
-	private InfostoreWebdavFactory factory;
+	private final InfostoreWebdavFactory factory;
 	private AbstractResource resource;
-	private SessionHolder sessionHolder;
-	private EntityLockHelper lockHelper;
+	private final SessionHolder sessionHolder;
+	private final EntityLockHelper lockHelper;
 
 
-	private DBProvider provider;
+	private final DBProvider provider;
 
 
 	private boolean exists;
@@ -402,14 +410,14 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		} catch (final SQLException x) {
 			try {
 				writeCon.rollback();
-			} catch (SQLException x2) {
+			} catch (final SQLException x2) {
 				LOG.error("Can't roll back",x2);
 			}
 			throw x;
 		} catch (final TransactionException e) {
 			try {
 				writeCon.rollback();
-			} catch (SQLException x2) {
+			} catch (final SQLException x2) {
 				LOG.error("Can't roll back",x2);
 			}
 			throw e;

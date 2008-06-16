@@ -54,7 +54,6 @@ import java.util.Collections;
 import java.util.List;
 
 import com.openexchange.groupware.attach.AttachmentField;
-import com.openexchange.groupware.infostore.DocumentMetadata;
 
 public class Metadata {
 
@@ -160,8 +159,8 @@ public class Metadata {
 	public static final List<Metadata> HTTPAPI_VALUES = Collections.unmodifiableList(Arrays.asList(HTTPAPI_VALUES_ARRAY));
 	
 	
-	private String name;
-	private int id;
+	private final String name;
+	private final int id;
 	
 	private Metadata(final int id,final String name){
 		this.name = name;
@@ -206,8 +205,9 @@ public class Metadata {
 	
 	public static Metadata get(final String s){
 		for(final Metadata metadata : VALUES){
-			if(metadata.getName().equals(s))
+			if(metadata.getName().equals(s)) {
 				return metadata;
+			}
 		}
 		return null;
 	}

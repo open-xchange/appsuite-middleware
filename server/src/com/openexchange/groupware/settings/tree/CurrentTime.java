@@ -53,8 +53,8 @@ import java.util.TimeZone;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;

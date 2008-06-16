@@ -137,7 +137,7 @@ public abstract class FolderStorage {
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new TaskException(Code.NO_CONNECTION, e);
         }
         try {
@@ -180,7 +180,7 @@ public abstract class FolderStorage {
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new TaskException(Code.NO_CONNECTION, e);
         }
         try {
@@ -274,7 +274,7 @@ public abstract class FolderStorage {
     static Folder extractFolderOfUser(final Set<Folder> folders,
         final int userId) {
         Folder retval = null;
-        for (Folder folder : folders) {
+        for (final Folder folder : folders) {
             if (folder.getUser() == userId) {
                 retval = folder;
                 break;
@@ -285,7 +285,7 @@ public abstract class FolderStorage {
 
     static Folder getFolder(final Set<Folder> folders, final int folderId) {
         Folder retval = null;
-        for (Folder folder : folders) {
+        for (final Folder folder : folders) {
             if (folder.getIdentifier() == folderId) {
                 retval = folder;
                 break;

@@ -49,14 +49,6 @@
 
 package com.openexchange.webdav.action;
 
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.webdav.protocol.WebdavPath;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -67,18 +59,28 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavPath;
+
 public class ServletWebdavRequest extends AbstractWebdavRequest implements WebdavRequest {
-	private HttpServletRequest req;
-	private String urlPrefix;
-	private WebdavPath url;
+	private final HttpServletRequest req;
+	private final String urlPrefix;
+	private final WebdavPath url;
 	private WebdavPath destUrl;
 
 	private static final Log LOG = LogFactory.getLog(ServletWebdavRequest.class);
 	
-	public ServletWebdavRequest(WebdavFactory factory, HttpServletRequest req) {
+	public ServletWebdavRequest(final WebdavFactory factory, final HttpServletRequest req) {
 		super(factory);
 		this.req = req;
-		StringBuilder builder = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 		builder.append(req.getServletPath());
 		builder.append('/');
 		this.urlPrefix = builder.toString();
@@ -89,13 +91,13 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 		return req.getInputStream();
 	}
 
-	public String getHeader(String header) {
+	public String getHeader(final String header) {
 		return req.getHeader(header);
 	}
 
 	public List<String> getHeaderNames() {
-		List<String> headers = new ArrayList<String>();
-		Enumeration enumeration = req.getHeaderNames();
+		final List<String> headers = new ArrayList<String>();
+		final Enumeration enumeration = req.getHeaderNames();
 		while(enumeration.hasMoreElements()) {
 			headers.add(enumeration.nextElement().toString());
 		}
@@ -111,20 +113,22 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 	}
 
 	public WebdavPath getDestinationUrl() {
-		if(destUrl != null)
+		if(destUrl != null) {
 			return destUrl;
+		}
 		
 		return destUrl = toWebdavURL(req.getHeader("destination"));
 	}
 	
 	protected WebdavPath toWebdavURL(String url) {
-		if(url == null)
+		if(url == null) {
 			return null;
+		}
 		
 		try {
-			URL urlO = new URL(url);
+			final URL urlO = new URL(url);
 			url = urlO.getPath();
-		} catch (MalformedURLException x ){
+		} catch (final MalformedURLException x ){
 			LOG.debug("",x);
 		}
 		
@@ -132,16 +136,16 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 			url =  url.substring(req.getServletPath().length());
 		}
 		try {
-            String encoding = req.getCharacterEncoding() == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
-            WebdavPath path = new WebdavPath();
-            for(String component : url.split("/+")) {
+            final String encoding = req.getCharacterEncoding() == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
+            final WebdavPath path = new WebdavPath();
+            for(final String component : url.split("/+")) {
                 if(component.equals("")){
                     continue;
                 }
                 path.append(URLDecoder.decode(component,encoding));
             }
             return path;
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			return new WebdavPath(url);
 		}
 	}

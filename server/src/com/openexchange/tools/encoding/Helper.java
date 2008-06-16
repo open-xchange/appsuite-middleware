@@ -98,7 +98,7 @@ public class Helper {
                 try {
                     final Charset charset = Charset.forName(encoding);
                     encoded = URLCoder.encode(orig, charset);
-                } catch (UnsupportedCharsetException uce) {
+                } catch (final UnsupportedCharsetException uce) {
                     throw new UnsupportedEncodingException(uce.getMessage());
                 }
 			} else {
@@ -129,7 +129,7 @@ public class Helper {
             final String s = data.substring(i, end + 2);
             try {
                 sb.append(MimeUtility.decodeWord(s));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 sb.append(s);
             }
             start = end + 2;

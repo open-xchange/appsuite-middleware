@@ -152,14 +152,14 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 			int folderId = 0;
 			try {
 				folderId = Integer.parseInt(folder);
-			} catch (NumberFormatException exc) {
+			} catch (final NumberFormatException exc) {
 				throw importExportExceptionFactory.create(0, folder);
 			}
 
 			FolderObject fo;
 			try {
 				fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());
-			} catch (OXException e) {
+			} catch (final OXException e) {
 				return false;
 			}
 			
@@ -176,9 +176,9 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 			try {
 				perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage
 						.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
-			} catch (DBPoolingException e) {
+			} catch (final DBPoolingException e) {
 				throw importExportExceptionFactory.create(1, folder);
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				throw importExportExceptionFactory.create(1, folder);
 			}
 			
@@ -198,11 +198,11 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 		while (iterator.hasNext()) {
 			final String folder = iterator.next().toString();
 			
-			int folderId = Integer.parseInt(folder);
+			final int folderId = Integer.parseInt(folder);
 			FolderObject fo;
 			try {
 				fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());
-			} catch (OXException e) {
+			} catch (final OXException e) {
 				throw importExportExceptionFactory.create(4,folderId);
 			}
 			
@@ -215,24 +215,24 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 		final ContactSQLInterface contactInterface = new RdbContactSQLInterface(sessObj, sessObj.getContext());
 		OXContainerConverter oxContainerConverter = null;
 		
-		List<ImportResult> list = new ArrayList<ImportResult>();
+		final List<ImportResult> list = new ArrayList<ImportResult>();
 		
 		try {
             oxContainerConverter = new OXContainerConverter(sessObj);
-            VCardTokenizer tokenizer = new VCardTokenizer(is);
-			List<VCardFileToken> chunks = tokenizer.split();
+            final VCardTokenizer tokenizer = new VCardTokenizer(is);
+			final List<VCardFileToken> chunks = tokenizer.split();
             if (0 == chunks.size()) {
                 throw importExportExceptionFactory.create(8);
             }
-			for(VCardFileToken chunk: chunks){
-				VersitDefinition def = chunk.getVersitDefinition();
-				ImportResult importResult = new ImportResult();
+			for(final VCardFileToken chunk: chunks){
+				final VersitDefinition def = chunk.getVersitDefinition();
+				final ImportResult importResult = new ImportResult();
 				
 				if(def != null){
 					final VersitDefinition.Reader versitReader = def.getReader(
 							new ByteArrayInputStream(chunk.getContent()), "UTF-8");
 					try {
-						VersitObject versitObject = def.parse(versitReader);
+						final VersitObject versitObject = def.parse(versitReader);
 						
 						importResult.setFolder(String.valueOf(contactFolderId));
 						
@@ -248,10 +248,10 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 						}
 						importResult.setObjectId(String.valueOf(contactObj.getObjectID()));
 						importResult.setDate(contactObj.getLastModified());
-					} catch (ConverterException exc) {
+					} catch (final ConverterException exc) {
 						LOG.error("cannot convert contact object", exc);
 						importResult.setException(new OXException("cannot parse vcard object", exc));
-					} catch (VersitException exc) {
+					} catch (final VersitException exc) {
 						LOG.error("cannot parse contact object", exc);
 						importResult.setException(new OXException("cannot parse vcard object", exc));
 					} 
@@ -263,25 +263,26 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 				}
 				list.add(importResult);
 			}
-		} catch (UnsupportedEncodingException e){
+		} catch (final UnsupportedEncodingException e){
 			LOG.fatal(e);
 			throw importExportExceptionFactory.create(6);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.error(e);
 			throw importExportExceptionFactory.create(4, contactFolderId);
-		} catch (ConverterException e) {
+		} catch (final ConverterException e) {
             LOG.error(e);
 			throw importExportExceptionFactory.create(1, e);
         } finally {
-            if(oxContainerConverter != null)
-                oxContainerConverter.close();
+            if(oxContainerConverter != null) {
+				oxContainerConverter.close();
+			}
 		}
 		
 		return list;
 	}
 
 	@Override
-	protected String getNameForFieldInTruncationError(int id, OXException unused) {
+	protected String getNameForFieldInTruncationError(final int id, final OXException unused) {
 		final ContactField field = ContactField.getByValue(id);
 		if(field == null){
 			return String.valueOf( id );

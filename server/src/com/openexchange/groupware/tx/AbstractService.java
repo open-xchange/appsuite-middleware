@@ -54,8 +54,8 @@ import java.util.Map;
 
 public abstract class AbstractService implements Service {
 	
-	private Map<Long,Object> txIds = new HashMap<Long,Object>();
-	private Map<Long,StackTraceElement[]> startedTx = new HashMap<Long,StackTraceElement[]>();
+	private final Map<Long,Object> txIds = new HashMap<Long,Object>();
+	private final Map<Long,StackTraceElement[]> startedTx = new HashMap<Long,StackTraceElement[]>();
 	
 	protected abstract Object createTransaction()throws TransactionException;
 	protected abstract void commit(Object transaction) throws TransactionException;

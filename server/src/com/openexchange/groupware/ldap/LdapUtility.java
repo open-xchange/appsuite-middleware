@@ -177,7 +177,7 @@ public final class LdapUtility {
      * @param pattern pattern to modify.
      * @return the modified pattern.
      */
-    public static String prepareSearchPattern(String pattern) {
+    public static String prepareSearchPattern(final String pattern) {
         final StringBuilder modifiedPattern = new StringBuilder(pattern.replace(
             '*', '%'));
         if (modifiedPattern.length() == 0) {
@@ -229,7 +229,8 @@ public final class LdapUtility {
         /**
          * {@inheritDoc}
          */
-        public String replace(final String tag, final Object data) {
+        @Override
+		public String replace(final String tag, final Object data) {
             final TagFillerData temp = (TagFillerData) data;
             String retval = tag;
             if (temp.datamap != null && temp.datamap.containsKey(tag)) {
@@ -237,7 +238,7 @@ public final class LdapUtility {
             } else if (temp.values != null && tag.endsWith("BaseDN")) {
                 try {
                     retval = LdapUtility.getSearchBaseDN(tag, temp.values);
-                } catch (LdapException e) {
+                } catch (final LdapException e) {
                     retval = e.getMessage();
                 }
             } else {
@@ -248,7 +249,7 @@ public final class LdapUtility {
                         retval = LineParserUtility.parseLine(property, this,
                             data);
                     }
-                } catch (LdapException e) {
+                } catch (final LdapException e) {
                     LOG.error(e.getMessage(), e);
                     retval = tag;
                 }
@@ -325,7 +326,7 @@ public final class LdapUtility {
         final String className, final Class<U> clazz) throws LdapException {
         try {
             return Class.forName(className).asSubclass(clazz);
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             throw new LdapException(EnumComponent.LDAP, Code.CLASS_NOT_FOUND, e,
                 className);
         }
@@ -344,22 +345,22 @@ public final class LdapUtility {
         try {
             final Constructor< ? extends T> cons = clazz.getConstructor(new Class[0]);
             return cons.newInstance(new Object[0]);
-        } catch (SecurityException e) {
+        } catch (final SecurityException e) {
             throw new LdapException(EnumComponent.LDAP, Code.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
             throw new LdapException(EnumComponent.LDAP, Code.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
-        } catch (InstantiationException e) {
+        } catch (final InstantiationException e) {
             throw new LdapException(EnumComponent.LDAP, Code.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
-        } catch (IllegalAccessException e) {
+        } catch (final IllegalAccessException e) {
             throw new LdapException(EnumComponent.LDAP, Code.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             throw new LdapException(EnumComponent.LDAP, Code.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
-        } catch (InvocationTargetException e) {
+        } catch (final InvocationTargetException e) {
             throw new LdapException(EnumComponent.LDAP, Code.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
         }

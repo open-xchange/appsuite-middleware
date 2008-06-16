@@ -67,6 +67,7 @@ public class CalAddressParamValueDefinition extends ParameterValueDefinition {
 
 	public static final CalAddressParamValueDefinition Default = new CalAddressParamValueDefinition();
 
+	@Override
 	protected ParameterValue createValue(final Scanner s, final String text)
 			throws IOException {
 		final URIParamValue value = (URIParamValue) super.createValue(s, text);

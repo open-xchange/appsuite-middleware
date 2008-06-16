@@ -181,6 +181,7 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
 		return delegate.employeetype(objects);
 	}
 
+	@Override
 	public boolean equals(final Object obj) {
 		return delegate.equals(obj);
 	}
@@ -205,6 +206,7 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
 		return delegate.givenname(objects);
 	}
 
+	@Override
 	public int hashCode() {
 		return delegate.hashCode();
 	}
@@ -425,6 +427,7 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
 		return delegate.title(objects);
 	}
 
+	@Override
 	public String toString() {
 		return delegate.toString();
 	}

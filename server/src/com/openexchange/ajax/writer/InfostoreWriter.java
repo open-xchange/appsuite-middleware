@@ -114,8 +114,8 @@ public class InfostoreWriter extends TimedWriter {
 	private static final class WriterSwitch implements MetadataSwitcher{
 		
 		private DocumentMetadata dm;
-		private JSONWriter writer;
-		private TimeZone tz;
+		private final JSONWriter writer;
+		private final TimeZone tz;
 		
 		public WriterSwitch(final JSONWriter writer, final TimeZone tz) {
 			this.writer = writer;

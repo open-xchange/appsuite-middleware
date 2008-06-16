@@ -52,18 +52,15 @@ package com.openexchange.groupware.attach.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.AttachmentExceptionFactory;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Classes;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
 
 @OXExceptionSource(
 		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_FIREDETACHEDEVENTACTION,
@@ -84,9 +81,9 @@ public class FireAttachedEventAction extends AttachmentEventAction {
 	protected void undoAction() throws AbstractOXException {
 		try {
 			fireDetached(getAttachments(), getUser(), getUserConfiguration(), getContext(), getProvider());
-		} catch (AbstractOXException e) {
+		} catch (final AbstractOXException e) {
 			throw e;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw EXCEPTIONS.create(2,e);
 		}
 	}
@@ -98,17 +95,17 @@ public class FireAttachedEventAction extends AttachmentEventAction {
 			msg = { "Changes done to the object this attachment was added to could not be undone. Your database is probably inconsistent, run the consistency tool.","An error occurred attaching to the given object." }
 	)
 	public void perform() throws AbstractOXException {
-		List<AttachmentMetadata> processed = new ArrayList<AttachmentMetadata>();
+		final List<AttachmentMetadata> processed = new ArrayList<AttachmentMetadata>();
 		try {
 			fireAttached(getAttachments(), processed, getUser(), getUserConfiguration(), getContext(),getProvider());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			try {
 				fireDetached(processed, getUser(), getUserConfiguration(), getContext(), getProvider());
-			} catch (Exception e1) {
+			} catch (final Exception e1) {
 				throw EXCEPTIONS.create(0,e1);
 			}
 			if (e instanceof AbstractOXException) {
-				AbstractOXException aoe = (AbstractOXException) e;
+				final AbstractOXException aoe = (AbstractOXException) e;
 				throw aoe;
 			}
 			throw EXCEPTIONS.create(1,e);

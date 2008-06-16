@@ -64,9 +64,9 @@ import java.io.InputStream;
  */
 public class SizedInputStream extends InputStream{
 	
-	private InputStream in;
-	private long size;
-	private Format format; 
+	private final InputStream in;
+	private final long size;
+	private final Format format; 
 	
 	public SizedInputStream(final InputStream in, final long size, final Format format){
 		this.size = size;

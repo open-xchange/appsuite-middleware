@@ -118,18 +118,18 @@ public class Links {
 		
 		module[Types.APPOINTMENT] = new modules() {
 			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so) throws ContextException {
-				Context ct = ContextStorage.getStorageContext(so.getContextId());
+				final Context ct = ContextStorage.getStorageContext(so.getContextId());
 				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasCalendar()){
 					return false;
 				}
 				try{
 					return CalendarCommonCollection.getReadPermission(oid, fid, so, ct);
-				}catch (OXException ox){
+				}catch (final OXException ox){
 					return false;
 				}
 			}
 			public boolean hasModuleRights(final Session so) throws ContextException{
-				Context ct = ContextStorage.getStorageContext(so.getContextId());
+				final Context ct = ContextStorage.getStorageContext(so.getContextId());
 				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasCalendar()){
 					return false;
 				}
@@ -138,14 +138,14 @@ public class Links {
 		};
 		module[Types.TASK] = new modules() {
 			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so) throws ContextException {
-				Context ct = ContextStorage.getStorageContext(so.getContextId());
+				final Context ct = ContextStorage.getStorageContext(so.getContextId());
 				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasTask()){
 					return false;
 				}
 				return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, oid, fid);
 			}
 			public boolean hasModuleRights(final Session so) throws ContextException{
-				Context ct = ContextStorage.getStorageContext(so.getContextId());
+				final Context ct = ContextStorage.getStorageContext(so.getContextId());
 				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasTask()){
 					return false;
 				}
@@ -154,21 +154,21 @@ public class Links {
 		};
 		module[Types.CONTACT] = new modules() {
 			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so) throws ContextException {
-				Context ct = ContextStorage.getStorageContext(so.getContextId());
+				final Context ct = ContextStorage.getStorageContext(so.getContextId());
 				
 				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasContact()){
 					return false;
 				}
 				try{
 					return Contacts.performContactReadCheckByID(oid, user, group, ct, UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct));
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					//System.out.println("UNABLE TO CHECK CONTACT READRIGHT FOR LINK");
 					LOG.error("UNABLE TO CHECK CONTACT READRIGHT FOR LINK",e);
 					return false;
 				}
 			}
 			public boolean hasModuleRights(final Session so) throws ContextException{
-				Context ct = ContextStorage.getStorageContext(so.getContextId());
+				final Context ct = ContextStorage.getStorageContext(so.getContextId());
 				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasContact()){
 					return false;
 				}
@@ -178,15 +178,15 @@ public class Links {
 		module[Types.INFOSTORE] = new modules() {
 			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so) throws ContextException {				
 				final InfostoreFacade DATABASE = new InfostoreFacadeImpl(new DBPoolProvider());
-				Context ct = ContextStorage.getStorageContext(so.getContextId());
+				final Context ct = ContextStorage.getStorageContext(so.getContextId());
 				try {
 					return  DATABASE.exists(oid,InfostoreFacade.CURRENT_VERSION, ct, UserStorage.getStorageUser(so.getUserId(), ct), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct));
-				} catch (OXException e) {
+				} catch (final OXException e) {
 					return false;
 				}
 			}
 			public boolean hasModuleRights(final Session so) throws ContextException{
-				Context ct = ContextStorage.getStorageContext(so.getContextId());
+				final Context ct = ContextStorage.getStorageContext(so.getContextId());
 				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasInfostore()){
 					return false;
 				}
@@ -279,7 +279,7 @@ public class Links {
 	)
 	public static void performLinkStorage(final LinkObject l, final int user, final int[] group, final Session so, final Connection writecon) throws OXException, ContextException{
 		
-		Context ct = ContextStorage.getStorageContext(so.getContextId());
+		final Context ct = ContextStorage.getStorageContext(so.getContextId());
 		
 		if (!module[l.getFirstType()].isReadable(l.getFirstId(),l.getFirstFolder(),user,group,so) || !module[l.getSecondType()].isReadable(l.getSecondId(),l.getSecondFolder(), user, group, so)){
 			throw EXCEPTIONS.create(0,l.getFirstId(),l.getFirstFolder(),l.getSecondId(),l.getSecondFolder(),so.getContextId());
@@ -299,11 +299,11 @@ public class Links {
 				throw EXCEPTIONS.create(1,l.getFirstId(),l.getFirstFolder(),l.getSecondId(),l.getSecondFolder(),so.getContextId());
 				//throw new OXException("This Link allready exists");
 			}
-		} catch (DBPoolingException se) {
+		} catch (final DBPoolingException se) {
 			throw EXCEPTIONS.create(2,se);
-		} catch (SQLException se) {
+		} catch (final SQLException se) {
 			throw EXCEPTIONS.create(3,l.getFirstId(),l.getFirstFolder(),l.getSecondId(),l.getSecondFolder(),so.getContextId());
-		} catch (OXException se) {
+		} catch (final OXException se) {
 			throw se;
 			//throw new OXException("UNABLE TO SAVE LINK",se);
 		} finally {
@@ -314,7 +314,7 @@ public class Links {
 				if (stmt != null) {
 					stmt.close();
 				}
-			} catch (SQLException sqle){
+			} catch (final SQLException sqle){
 				LOG.error("Unable to close Statement or ResultSet",sqle);
 			}
 			if (readCon != null) {
@@ -333,7 +333,7 @@ public class Links {
 			ps.setInt(6,l.getSecondFolder());
 			ps.setInt(7,l.getContectId());
 			ps.execute();
-		} catch (SQLException se){
+		} catch (final SQLException se){
 			throw EXCEPTIONS.create(4,se,l.getFirstId(),l.getFirstFolder(),l.getSecondId(),l.getSecondFolder(),so.getContextId());
 			//throw new OXException("UNABLE TO SAVE LINK",se);
 		} finally {
@@ -341,7 +341,7 @@ public class Links {
 				if (ps != null) {
 					ps.close();
 				}
-			} catch (SQLException se) {
+			} catch (final SQLException se) {
 				LOG.error("Unable to close Statement",se);
 			}
 		}
@@ -389,7 +389,7 @@ public class Links {
 					//throw new OXException("THIS LINK IS NOT VISIBLE TO THE USER. MISSING READRIGHTS FOR ONE OR BOTH OBJECTS");
 				}
 			}
-		} catch (SQLException sql){
+		} catch (final SQLException sql){
 			throw EXCEPTIONS.create(7,sql,first_id,second_id,so.getContextId());
 			//throw new OXException("UNABLE TO LOAD LINKOBJECT ",sql);
 		} finally {
@@ -400,7 +400,7 @@ public class Links {
 				if (stmt != null) {
 					stmt.close();
 				}
-			} catch (SQLException sqle){
+			} catch (final SQLException sqle){
 				LOG.error("Unable to close Statement or ResultSet",sqle);
 			}
 		}
@@ -447,7 +447,7 @@ public class Links {
 					}
 			    }
 			} 
-		} catch (SQLException sql){
+		} catch (final SQLException sql){
 			throw EXCEPTIONS.create(9,sql,id,folder,user,so.getContextId());
 			//throw new OXException("UNABLE TO LOAD LINKOBJECT ",sql);
 		} finally {
@@ -458,7 +458,7 @@ public class Links {
 				if (stmt != null) {
 					stmt.close();
 				}
-			} catch (SQLException sqle){
+			} catch (final SQLException sqle){
 				LOG.error("Unable to close Statement or ResultSet",sqle);
 			}
 		}			
@@ -490,7 +490,7 @@ public class Links {
 		
 		if (!module[type].isReadable(id,folder,user,group,so)){		
 			//System.out.println("Unable to delete Link");
-            for (int[] tmp : data) {
+            for (final int[] tmp : data) {
                 resp.add(tmp);
             }
 		}
@@ -522,7 +522,7 @@ public class Links {
 							}
 							lms.iFDeleteLinkFromObject(del,second,id,type,folder,loadid,loadfolder,loadtype,so.getContextId());
                             cnt++;
-						} catch (OXException ox){
+						} catch (final OXException ox){
 							LOG.error("Unable to delete Link!",ox);
                             resp.add(new int[] {loadid, loadtype, loadfolder});
 						}
@@ -530,11 +530,11 @@ public class Links {
 				}
 			}
             if (cnt == 0) {
-                for (int[] tmp : data) {
+                for (final int[] tmp : data) {
                     resp.add(tmp);
                 }
             }
-		} catch (SQLException se){
+		} catch (final SQLException se){
 			throw EXCEPTIONS.create(11,se,id,folder,so.getContextId());
 			//throw new OXException("UNABLE TO DELETE LINKS",se);
 		} finally {
@@ -545,14 +545,14 @@ public class Links {
 				if (smt != null) {
 					smt.close();
 				}
-			} catch (SQLException sqle){
+			} catch (final SQLException sqle){
 				LOG.error("Unable to close Statement or ResultSet",sqle);
 			}
 			try{
 				if (del != null) {
 					del.close();
 				}
-			} catch (SQLException sqle){
+			} catch (final SQLException sqle){
 				LOG.error("Unable to close Statement",sqle);
 			}
 		}	
@@ -582,7 +582,7 @@ public class Links {
 			ps.setInt(4, type);
 			ps.setInt(5, cid);
 			ps.execute();
-		} catch (SQLException se){
+		} catch (final SQLException se){
 			throw EXCEPTIONS.create(12,se,id,cid);
 			//throw new OXException("UNABLE TO DELETE LINKS FROM OBJECT "+id, se);
 		} finally {
@@ -590,7 +590,7 @@ public class Links {
 				if (ps != null) {
 					ps.close();
 				}
-			} catch (SQLException sqle){
+			} catch (final SQLException sqle){
 				LOG.error("Unable to close Statement",sqle);
 			}
 		}

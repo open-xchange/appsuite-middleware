@@ -51,8 +51,9 @@
 
 package com.openexchange.groupware.reminder;
 
-import com.openexchange.groupware.container.SystemObject;
 import java.util.Date;
+
+import com.openexchange.groupware.container.SystemObject;
 
 /**
  * ReminderObject
@@ -165,7 +166,7 @@ public class ReminderObject extends SystemObject {
 		return folder;
 	}
 	
-	public void setLastModified(Date lastModified) {
+	public void setLastModified(final Date lastModified) {
 		this.lastModified = lastModified;
 	}
 	

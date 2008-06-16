@@ -86,7 +86,7 @@ import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
@@ -94,7 +94,6 @@ import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.ConverterPrivacyException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
-import com.openexchange.tools.session.ServerSession;
 
 @OXExceptionSource(
     classId=ImportExportExceptionClasses.ICALIMPORTER, 
@@ -160,19 +159,19 @@ public class ICalImporter extends AbstractImporter implements Importer {
 			int folderId = 0;
 			try {
 				folderId = Integer.parseInt(folder);
-			} catch (NumberFormatException exc) {
+			} catch (final NumberFormatException exc) {
 				throw EXCEPTIONS.create(0, folder);
 			}
 
 			FolderObject fo;
 			try {
 				fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());
-			} catch (OXException e) {
+			} catch (final OXException e) {
 				return false;
 			}
 			
 			//check format of folder
-			int module = fo.getModule(); 
+			final int module = fo.getModule(); 
 			if (module == FolderObject.CALENDAR) {
 				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasCalendar()) {
 					return false;
@@ -189,9 +188,9 @@ public class ICalImporter extends AbstractImporter implements Importer {
 			EffectivePermission perm;
 			try {
 				perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
-			} catch (DBPoolingException e) {
+			} catch (final DBPoolingException e) {
 				throw EXCEPTIONS.create(0, folder);
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				throw EXCEPTIONS.create(0, folder);
 			}
 			
@@ -216,7 +215,7 @@ public class ICalImporter extends AbstractImporter implements Importer {
 			FolderObject fo;
 			try {
 				fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());
-			} catch (OXException e) {
+			} catch (final OXException e) {
 				throw EXCEPTIONS.create(4,folderId);
 			}
 			if (fo.getModule() == FolderObject.CALENDAR) {
@@ -250,7 +249,7 @@ public class ICalImporter extends AbstractImporter implements Importer {
 		
 		OXContainerConverter oxContainerConverter = null;
 		
-		List<ImportResult> list = new ArrayList<ImportResult>();
+		final List<ImportResult> list = new ArrayList<ImportResult>();
 		
 		try {
             oxContainerConverter = new OXContainerConverter(sessObj);
@@ -263,12 +262,12 @@ public class ICalImporter extends AbstractImporter implements Importer {
 			boolean hasMoreObjects = true;
 			
 			while (hasMoreObjects) {
-				ImportResult importResult = new ImportResult();
+				final ImportResult importResult = new ImportResult();
 				try {
 					VersitObject versitObject = null;
 					try {
 						versitObject = def.parseChild(versitReader, rootVersitObject);
-					} catch (VersitException ve){
+					} catch (final VersitException ve){
 						LOG.info("Trying to import ICAL file, but:\n" + ve);
 						importResult.setException(EXCEPTIONS.create(5, ve.getLocalizedMessage()));
 						importResult.setDate(new Date(System.currentTimeMillis()));
@@ -290,10 +289,10 @@ public class ICalImporter extends AbstractImporter implements Importer {
 						CalendarDataObject appointmentObj = null;
 						try {
 							appointmentObj = oxContainerConverter.convertAppointment(versitObject);
-						} catch (ConverterPrivacyException e){
+						} catch (final ConverterPrivacyException e){
 							importResult.setException(EXCEPTIONS.create(6));
 							storeData = false;
-						} catch (ConverterException x) {
+						} catch (final ConverterException x) {
 							importResult.setException(EXCEPTIONS.create(10, x.getMessage()));
 							storeData = false;
 						}
@@ -315,10 +314,10 @@ public class ICalImporter extends AbstractImporter implements Importer {
 						Task taskObj = null;
 						try {
 							taskObj = oxContainerConverter.convertTask(versitObject);
-						} catch (ConverterPrivacyException e){
+						} catch (final ConverterPrivacyException e){
 							importResult.setException(EXCEPTIONS.create(6));
 							storeData = false;
-						} catch (ConverterException x) {
+						} catch (final ConverterException x) {
 							importResult.setException(EXCEPTIONS.create(10, x.getMessage()));
 							storeData = false;
 						}
@@ -352,26 +351,27 @@ public class ICalImporter extends AbstractImporter implements Importer {
 					exc = handleDataTruncation(exc); 
 					importResult.setException(exc);
 					list.add(importResult);
-				} catch (VersitException exc) {
+				} catch (final VersitException exc) {
 					LOG.error("cannot parse calendar object", exc);
 					importResult.setException(new OXException("cannot parse ical object", exc));
 					list.add(importResult);
 				}
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
             throw EXCEPTIONS.create(3, e, e.getMessage());
-        } catch (ConverterException e) {
+        } catch (final ConverterException e) {
             throw EXCEPTIONS.create(1, e);
         } finally {
-            if(oxContainerConverter != null)
-                oxContainerConverter.close();
+            if(oxContainerConverter != null) {
+				oxContainerConverter.close();
+			}
 		}
 		
 		return list;
 	}
 
 	@Override
-	protected String getNameForFieldInTruncationError(int id, OXException oxex) {
+	protected String getNameForFieldInTruncationError(final int id, final OXException oxex) {
 		if(oxex.getComponent() == EnumComponent.APPOINTMENT){
 			final CalendarField field = CalendarField.getByAppointmentObjectId(id);
 			if(field != null){

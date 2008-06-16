@@ -60,11 +60,12 @@ import com.openexchange.tools.versit.VersitObject;
 
 public class OldAgentPropertyDefinition extends OldPropertyDefinition {
 
-	public OldAgentPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldAgentPropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
+	@Override
 	protected Object parseValue(final Property property, final OldScanner s, final byte[] value,
 			final String charset) throws IOException {
 		final VersitObject object = VCard21.definition.parse(value.length == 0 ? s
@@ -76,6 +77,7 @@ public class OldAgentPropertyDefinition extends OldPropertyDefinition {
 		return object;
 	}
 
+	@Override
 	public void write(final OldFoldingWriter fw, final Property property)
 			throws IOException {
 		fw.write(property.name);

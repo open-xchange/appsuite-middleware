@@ -75,8 +75,8 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  */
 public class ConflictHandler {
     
-    private CalendarDataObject cdao;
-    private Session so;
+    private final CalendarDataObject cdao;
+    private final Session so;
     private boolean action = true;
     private int current_results;
     
@@ -181,7 +181,7 @@ public class ConflictHandler {
         final User user = Tools.getUser(so, ctx);
         try {
             readcon = DBPool.pickup(ctx);            
-            long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, user.getTimeZone());
+            final long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, user.getTimeZone());
             long whole_day_end = CalendarCommonCollection.getUserTimeUTCDate(end, user.getTimeZone());
             if (whole_day_end <= whole_day_start) {
                 whole_day_end = whole_day_start+CalendarRecurringCollection.MILLI_DAY;
@@ -267,7 +267,7 @@ public class ConflictHandler {
         final User user = Tools.getUser(so, ctx);
         try {
             readcon = DBPool.pickup(ctx);
-            long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, user.getTimeZone());
+            final long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, user.getTimeZone());
             long whole_day_end = CalendarCommonCollection.getUserTimeUTCDate(end, user.getTimeZone());
             if (whole_day_end <= whole_day_start) {
                 whole_day_end = whole_day_start+CalendarRecurringCollection.MILLI_DAY;

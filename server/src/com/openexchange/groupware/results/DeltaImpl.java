@@ -55,12 +55,12 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 
 public class DeltaImpl implements Delta {
 
-	private SearchIterator New;
-	private SearchIterator Modified;
-	private SearchIterator Deleted;
-	private long sequenceNumber;
+	private final SearchIterator New;
+	private final SearchIterator Modified;
+	private final SearchIterator Deleted;
+	private final long sequenceNumber;
 	
-	public DeltaImpl(SearchIterator New, SearchIterator Modified, SearchIterator Deleted, long sequenceNumber) {
+	public DeltaImpl(final SearchIterator New, final SearchIterator Modified, final SearchIterator Deleted, final long sequenceNumber) {
 		this.New = New;
 		this.Modified = Modified;
 		this.Deleted = Deleted;

@@ -228,17 +228,17 @@ public abstract class AbstractConfig {
         try {
             fis = new FileInputStream(propFile);
             props.load(fis);
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             throw new ConfigurationException(Code.FILE_NOT_FOUND,
                 propFile.getAbsolutePath(), e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new ConfigurationException(Code.READ_ERROR,
                 propFile.getAbsolutePath(), e);
         } finally {
             if (null != fis) {
                 try {
                     fis.close();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     IOUtils.closeStreamStuff(fis);
                 }
             }

@@ -83,7 +83,8 @@ public class ExternalUserParticipant implements Participant, Comparable
     /**
      * @deprecated Use {@link #ExternalUserParticipant(String)}.
      */
-    public ExternalUserParticipant() {
+    @Deprecated
+	public ExternalUserParticipant() {
         this(null);
     }
 

@@ -70,7 +70,7 @@ public class HttpErrorServlet extends HttpServlet {
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(HttpErrorServlet.class);
 
-	private String message;
+	private final String message;
 
 	public HttpErrorServlet(final String message) {
 		this.message = message;

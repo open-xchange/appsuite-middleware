@@ -618,7 +618,7 @@ public class OXFolderSQL {
 						stmt = null;
 					}
 				}
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				if (isAuto) {
 					writeCon.rollback();
 					writeCon.setAutoCommit(true);
@@ -730,7 +730,7 @@ public class OXFolderSQL {
 				stmt.executeBatch();
 				stmt.close();
 				stmt = null;
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				if (isAuto) {
 					writeCon.rollback();
 					writeCon.setAutoCommit(true);
@@ -819,7 +819,7 @@ public class OXFolderSQL {
 				pst.executeBatch();
 				pst.close();
 				pst = null;
-			} catch (SQLException se) {
+			} catch (final SQLException se) {
 				if (isAuto) {
 					writeCon.rollback();
 					writeCon.setAutoCommit(true);
@@ -864,7 +864,7 @@ public class OXFolderSQL {
 				pst.executeUpdate();
 				pst.close();
 				pst = null;
-			} catch (SQLException sqle) {
+			} catch (final SQLException sqle) {
 				if (isAuto) {
 					writeCon.rollback();
 					writeCon.setAutoCommit(true);
@@ -1002,7 +1002,7 @@ public class OXFolderSQL {
 			if (isAuto) {
 				writeCon.commit();
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			if (isAuto) {
 				writeCon.rollback();
 			}
@@ -1080,7 +1080,7 @@ public class OXFolderSQL {
 						DBPool.pushWrite(ctx, callWriteCon);
 					}
 				}
-			} catch (DBPoolingException e) {
+			} catch (final DBPoolingException e) {
 				if (isAuto && callWriteCon != null) {
 					callWriteCon.rollback(); // ROLLBACK
 					callWriteCon.setAutoCommit(true);
@@ -1099,7 +1099,7 @@ public class OXFolderSQL {
 		if (writeCon == null) {
 			try {
 				writeCon = DBPool.pickupWriteable(ctx);
-			} catch (DBPoolingException e) {
+			} catch (final DBPoolingException e) {
 				throw e;
 			}
 			closeWrite = true;
@@ -1126,7 +1126,7 @@ public class OXFolderSQL {
 			if (isAuto) {
 				writeCon.commit();
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			if (isAuto) {
 				writeCon.rollback();
 			}
@@ -1364,7 +1364,7 @@ public class OXFolderSQL {
 								readConArg, ctx);
 						deleteSingleEntityPermission(entity, fuid, permTable, wc, ctx);
 						updateSingleEntityPermission(mergedPerm, mailAdmin, fuid, permTable, wc, ctx);
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						LOG.error(e.getMessage(), e);
 						continue Next;
 					}
@@ -1376,7 +1376,7 @@ public class OXFolderSQL {
 					stmt.setInt(4, entity);
 					try {
 						stmt.executeUpdate();
-					} catch (SQLException e) {
+					} catch (final SQLException e) {
 						LOG.error(e.getMessage(), e);
 						continue Next;
 					} finally {

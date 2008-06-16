@@ -57,21 +57,27 @@ package com.openexchange.groupware.impl;
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  * @deprecated use LoginException.
  */
+@Deprecated
 public class PasswordExpiredException extends Exception
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5921811122390022440L;
+
 	public PasswordExpiredException() {
 		super();
 	}
 	
-	public PasswordExpiredException(String message) {
+	public PasswordExpiredException(final String message) {
 		super(message);
 	}
 	
-	public PasswordExpiredException(String message, Exception exc) {
+	public PasswordExpiredException(final String message, final Exception exc) {
 		super(message, exc);
 	}
 	
-	public PasswordExpiredException(Exception exc) {
+	public PasswordExpiredException(final Exception exc) {
 		super(exc);
 	}	
 }

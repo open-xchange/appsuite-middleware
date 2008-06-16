@@ -77,7 +77,7 @@ public class ReminderPool extends TimerTask {
 	
 	private static final Log LOG = LogFactory.getLog(ReminderPool.class);
 	
-	public ReminderPool(ReminderConfig reminderConfig) {
+	public ReminderPool(final ReminderConfig reminderConfig) {
 		if (reminderConfig.isReminderEnabled()) {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Starting ReminderPool");
@@ -94,6 +94,7 @@ public class ReminderPool extends TimerTask {
 		}
 	}
 	
+	@Override
 	public void run() {
 
 	}

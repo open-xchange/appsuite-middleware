@@ -232,7 +232,7 @@ final class Update {
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
             DBPool.closeWriterSilent(ctx, con);
@@ -265,7 +265,7 @@ final class Update {
      * @throws GroupException if something during propagate fails.
      */
     private void propagate() throws GroupException {
-        int[] tmp = new int[addedMembers.size() + removedMembers.size()];
+        final int[] tmp = new int[addedMembers.size() + removedMembers.size()];
         Iterator<Integer> iter = addedMembers.iterator();
         int i = 0;
         while (iter.hasNext()) {
@@ -298,7 +298,7 @@ final class Update {
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
             DBPool.closeWriterSilent(ctx, con);

@@ -84,10 +84,10 @@ public class Format implements Serializable {
 	public static transient final List<Format> VALUES = Collections.unmodifiableList(Arrays.asList(VALUES_ARRAY));
 
 	
-	private int id;
-	private String name;
-	private String mimeType;
-	private String extension;
+	private final int id;
+	private final String name;
+	private final String mimeType;
+	private final String extension;
 	
 	private Format(final int id, final String name, final String mimeType, final String extension){
 		this.id = id;

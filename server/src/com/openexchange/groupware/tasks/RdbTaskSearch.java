@@ -99,7 +99,7 @@ public class RdbTaskSearch extends TaskSearch {
             while (result.next()) {
                 tasks.add(Integer.valueOf(result.getInt(1)));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(TaskException.Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
@@ -198,11 +198,11 @@ public class RdbTaskSearch extends TaskSearch {
             }
             return new TaskIterator(ctx, userId, stmt.executeQuery(),
                 folderId, columns, type);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             DBUtils.closeSQLStuff(null, stmt);
             DBPool.closeWriterSilent(ctx, con);
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new TaskException(Code.NO_CONNECTION, e);
         }
     }

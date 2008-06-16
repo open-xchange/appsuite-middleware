@@ -53,7 +53,6 @@ package com.openexchange.tools.servlet;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
  * Exception for problems in servlets.

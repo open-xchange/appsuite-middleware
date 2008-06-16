@@ -68,8 +68,8 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 public class ServletRequestAdapter implements SimpleRequest {
 	
-	private HttpServletRequest req;
-	private HttpServletResponse res;
+	private final HttpServletRequest req;
+	private final HttpServletResponse res;
 	private PrintWriter w;
 	private Object body;
 	

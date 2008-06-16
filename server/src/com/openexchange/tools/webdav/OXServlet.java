@@ -88,6 +88,11 @@ import com.openexchange.tools.encoding.Base64;
 public abstract class OXServlet extends WebDavServlet {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 301910346402779362L;
+
+	/**
 	 * Logger.
 	 */
 	private static final transient Log LOG = LogFactory.getLog(OXServlet.class);
@@ -127,11 +132,11 @@ public abstract class OXServlet extends WebDavServlet {
 						+ getSession(req));
 			}
 			super.service(req, resp);
-		} catch (ServletException e) {
+		} catch (final ServletException e) {
 			throw e;
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw e;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new ServletException(e.getMessage(), e);
 		}
 	}
@@ -184,7 +189,7 @@ public abstract class OXServlet extends WebDavServlet {
 			}
 			try {
 				session = addSession(login, pass, req.getRemoteAddr());
-			} catch (AbstractOXException e) {
+			} catch (final AbstractOXException e) {
 				LOG.error(e.getMessage(), e);
 				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e
 						.getMessage());
@@ -372,7 +377,7 @@ public abstract class OXServlet extends WebDavServlet {
 				final UserStorage us = UserStorage.getInstance();
 				userId = us.getUserId(username, context);
 				u = us.getUser(userId, context);
-			} catch (LdapException ex) {
+			} catch (final LdapException ex) {
 				switch (ex.getDetail()) {
 				case ERROR:
 					throw new LoginException(LoginException.Code.UNKNOWN, ex);
@@ -395,17 +400,17 @@ public abstract class OXServlet extends WebDavServlet {
 					SessiondService.class);
 			final String sessionId = sessiondCon.addSession(userId, login, pass, context, ipAddress);
 			session = sessiondCon.getSession(sessionId);
-		} catch (LoginException e) {
+		} catch (final LoginException e) {
 			if (LoginException.Source.USER == e.getSource()) {
 				LOG.debug(e.getMessage(), e);
 			} else {
 				LOG.error(e.getMessage(), e);
 			}
-		} catch (UserNotFoundException e) {
+		} catch (final UserNotFoundException e) {
             throw new LoginException(LoginException.Code.INVALID_CREDENTIALS, e);
-		} catch (PasswordExpiredException e) {
+		} catch (final PasswordExpiredException e) {
             throw new LoginException(LoginException.Code.INVALID_CREDENTIALS, e);
-        } catch (UserNotActivatedException e) {
+        } catch (final UserNotActivatedException e) {
             throw new LoginException(LoginException.Code.INVALID_CREDENTIALS, e);
         }
 		return session;

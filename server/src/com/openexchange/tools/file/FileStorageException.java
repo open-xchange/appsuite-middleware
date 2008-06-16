@@ -63,7 +63,7 @@ public class FileStorageException extends AbstractOXException {
      */
     private static final long serialVersionUID = 7098813337802054897L;
 
-    public FileStorageException(AbstractOXException x) {
+    public FileStorageException(final AbstractOXException x) {
     	super(x);
     }
     

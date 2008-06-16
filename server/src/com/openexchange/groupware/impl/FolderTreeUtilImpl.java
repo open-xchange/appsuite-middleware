@@ -103,7 +103,7 @@ public class FolderTreeUtilImpl implements FolderTreeUtil {
 	
 	private static final class CACHE_MODE implements Mode {
 
-		private DBProvider provider;
+		private final DBProvider provider;
 
 		public CACHE_MODE(final DBProvider provider) {
 			this.provider = provider;

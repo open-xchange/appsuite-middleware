@@ -95,15 +95,15 @@ public class OldObjectDefinition implements VersitDefinition {
 
 	protected HashMap<String, OldObjectDefinition> Children = new HashMap<String, OldObjectDefinition>();
 
-	public OldObjectDefinition(String[] propertyNames,
-			OldPropertyDefinition[] properties) {
+	public OldObjectDefinition(final String[] propertyNames,
+			final OldPropertyDefinition[] properties) {
 		this(propertyNames, properties, new String[] {},
 				new OldObjectDefinition[] {});
 	}
 
-	public OldObjectDefinition(String[] propertyNames,
-			OldPropertyDefinition[] properties, String[] childNames,
-			OldObjectDefinition[] children) {
+	public OldObjectDefinition(final String[] propertyNames,
+			final OldPropertyDefinition[] properties, final String[] childNames,
+			final OldObjectDefinition[] children) {
 		for (int i = 0; i < propertyNames.length; i++) {
 			Properties.put(propertyNames[i].toUpperCase(), properties[i]);
 		}
@@ -112,8 +112,8 @@ public class OldObjectDefinition implements VersitDefinition {
 		}
 	}
 
-	private OldObjectDefinition(String name, HashMap<String, OldPropertyDefinition> properties,
-			HashMap<String, OldObjectDefinition> children) {
+	private OldObjectDefinition(final String name, final HashMap<String, OldPropertyDefinition> properties,
+			final HashMap<String, OldObjectDefinition> children) {
 		Name = name;
 		Properties.putAll(properties);
 		Children.putAll(children);
@@ -167,7 +167,8 @@ public class OldObjectDefinition implements VersitDefinition {
 	}
 
 	public VersitObject parse(final Reader reader) throws IOException {
-		VersitObject child, object = parseBegin(reader);
+		VersitObject child;
+		final VersitObject object = parseBegin(reader);
 		if (object != null) {
 			while ((child = parseChild(reader, object)) != null) {
 				object.addChild(child);
@@ -216,7 +217,8 @@ public class OldObjectDefinition implements VersitDefinition {
 				if (objdef == null) {
 					throw new VersitException(s, "Invalid element: " + type);
 				}
-				VersitObject grandchild, child = new VersitObject(type);
+				VersitObject grandchild;
+				final VersitObject child = new VersitObject(type);
 				while ((grandchild = objdef.parseChild(s, child)) != null) {
 					child.addChild(grandchild);
 				}

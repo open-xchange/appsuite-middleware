@@ -49,6 +49,11 @@
 
 package com.openexchange.groupware.update.exception;
 
+import com.openexchange.groupware.update.SchemaStore;
+import com.openexchange.groupware.update.SchemaStoreImpl;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.Updater;
+import com.openexchange.groupware.update.UpdaterImpl;
 import com.openexchange.groupware.update.tasks.NewAdminExtensionsUpdateTask;
 import com.openexchange.groupware.update.tasks.TaskReminderFolderZero;
 

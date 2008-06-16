@@ -100,13 +100,13 @@ public final class Task2Links {
             folder = Tools.getFolder(ctx, folderId);
             final TaskStorage storage = TaskStorage.getInstance();
             task = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             LOG.error("Problem while reading task from database.", e);
             return false;
         }
         try {
 			Permission.canReadInFolder(ctx, user, userConfig, folder, task);
-		} catch (TaskException e) {
+		} catch (final TaskException e) {
             return false;
         }
         return true;

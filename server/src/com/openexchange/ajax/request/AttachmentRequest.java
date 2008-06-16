@@ -64,7 +64,16 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.parser.AttachmentParser;
 import com.openexchange.ajax.parser.AttachmentParser.UnknownColumnException;
 import com.openexchange.ajax.writer.AttachmentWriter;
-import com.openexchange.groupware.attach.*;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentException;
+import com.openexchange.groupware.attach.AttachmentExceptionFactory;
+import com.openexchange.groupware.attach.AttachmentField;
+import com.openexchange.groupware.attach.AttachmentMetadata;
+import com.openexchange.groupware.attach.Classes;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -73,16 +82,12 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.session.Session;
+import com.openexchange.tools.exceptions.OXAborted;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.exceptions.OXAborted;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 @OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_AJAX_REQUEST_ATTACHMENTREQUEST, component = EnumComponent.ATTACHMENT)
 public class AttachmentRequest extends CommonRequest {
@@ -95,11 +100,11 @@ public class AttachmentRequest extends CommonRequest {
 	private static final Log LOG = LogFactory.getLog(AttachmentRequest.class);
 	private static final AttachmentExceptionFactory EXCEPTIONS = new AttachmentExceptionFactory(AttachmentRequest.class);
 
-    private UserConfiguration userConfig;
+    private final UserConfiguration userConfig;
 	private final User user;
-	private Context ctx;
+	private final Context ctx;
 
-    public AttachmentRequest(Session session, Context ctx, JSONWriter w) {
+    public AttachmentRequest(final Session session, final Context ctx, final JSONWriter w) {
         this(new ServerSessionAdapter(session,ctx),w);
     }
 
@@ -111,7 +116,7 @@ public class AttachmentRequest extends CommonRequest {
 				session.getContext());
 	}
 	
-	public static boolean hasPermission(UserConfiguration userConfig) {
+	public static boolean hasPermission(final UserConfiguration userConfig) {
 		return true; // FIXME
 	}
 	
@@ -143,7 +148,7 @@ public class AttachmentRequest extends CommonRequest {
 				long timestamp = -1;
                 try {
                     timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
-                } catch (NumberFormatException nfe) {
+                } catch (final NumberFormatException nfe) {
                     numberError(AJAXServlet.PARAMETER_TIMESTAMP, req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
                 }
 				
@@ -194,16 +199,16 @@ public class AttachmentRequest extends CommonRequest {
 
                 final JSONArray idsArray = (JSONArray) req.getBody();
 				
-				int[] ids = new int[idsArray.length()];
+				final int[] ids = new int[idsArray.length()];
 				for(int i = 0; i < idsArray.length(); i++) {
 					try {
 						ids[i] = idsArray.getInt(i);
-					} catch (JSONException e) {
+					} catch (final JSONException e) {
 						try {
 							ids[i] = Integer.parseInt(idsArray.getString(i));
-						} catch (NumberFormatException e1) {
+						} catch (final NumberFormatException e1) {
 							handle(e1);
-						} catch (JSONException e1) {
+						} catch (final JSONException e1) {
 							handle(e1);
 						}
 					}
@@ -221,28 +226,28 @@ public class AttachmentRequest extends CommonRequest {
 		/*catch (IOException x) {
 			LOG.info("Lost contact to client: ",x);
 		}*/
-		catch (UnknownColumnException e) {
+		catch (final UnknownColumnException e) {
 			handle(e);
-		} catch (OXAborted x) {
+		} catch (final OXAborted x) {
             return true;
         }
 		
 		return false;
 	}
 
-    private int requireNumber(SimpleRequest req, String parameter) {
-        String value = req.getParameter(parameter);
+    private int requireNumber(final SimpleRequest req, final String parameter) {
+        final String value = req.getParameter(parameter);
         try {
             return Integer.parseInt(value);            
-        } catch(NumberFormatException  nfe) {
+        } catch(final NumberFormatException  nfe) {
             numberError(parameter, value);
             throw new OXAborted();
         }
     }
 
     @OXThrows(category = AbstractOXException.Category.CODE_ERROR, desc = "", exceptionId = 1, msg = "Invalid parameter sent in request. Parameter '%s' was '%s' which does not look like a number")
-    public void numberError(String parameter, String value) {
-        AttachmentException t = EXCEPTIONS.create(1, parameter, value);
+    public void numberError(final String parameter, final String value) {
+        final AttachmentException t = EXCEPTIONS.create(1, parameter, value);
         handle(t);
     }
 
@@ -260,17 +265,17 @@ public class AttachmentRequest extends CommonRequest {
 			aWriter.endTimedResult();
 			
 			ATTACHMENT_BASE.commit();
-		} catch (Throwable t) {
+		} catch (final Throwable t) {
 			try {
 				ATTACHMENT_BASE.rollback();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
 			handle(t);
 		} finally {
 			try {
 				ATTACHMENT_BASE.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}
@@ -299,30 +304,30 @@ public class AttachmentRequest extends CommonRequest {
 			aWriter.endTimedResult();
 			//w.flush();
 			ATTACHMENT_BASE.commit();
-		} catch (Throwable t) {
+		} catch (final Throwable t) {
 			try {
 				ATTACHMENT_BASE.rollback();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
 			handle(t);
 		} finally {
 			try {
 				ATTACHMENT_BASE.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.error(e.getMessage(), e);
 			}
 			if (iter!=null) {
 				try {
 					iter.close();
-				} catch (SearchIteratorException e1) {
+				} catch (final SearchIteratorException e1) {
 					LOG.error(e1.getMessage(), e1);
 				}
 			}
 			if (iter2!=null) {
 				try {
 					iter2.close();
-				} catch (SearchIteratorException e) {
+				} catch (final SearchIteratorException e) {
 					LOG.error(e.getMessage(), e);
 				}
 			}
@@ -348,23 +353,23 @@ public class AttachmentRequest extends CommonRequest {
 			aWriter.endTimedResult();
 			//w.flush();
 			ATTACHMENT_BASE.commit();
-		} catch (Throwable t) {
+		} catch (final Throwable t) {
 			try {
 				ATTACHMENT_BASE.rollback();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
 			handle(t);
 		} finally {
 			try {
 				ATTACHMENT_BASE.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.error(e.getMessage(), e);
 			}
 			if (iter!=null) {
 				try {
 					iter.close();
-				} catch (SearchIteratorException e) {
+				} catch (final SearchIteratorException e) {
 					LOG.error(e.getMessage(), e);
 				}
 			}
@@ -379,10 +384,10 @@ public class AttachmentRequest extends CommonRequest {
 			timestamp = ATTACHMENT_BASE.detachFromObject(folderId,attachedId,moduleId,ids,ctx,user,userConfig);
 			
 			ATTACHMENT_BASE.commit();
-		} catch (Throwable t) {
+		} catch (final Throwable t) {
 			try {
 				ATTACHMENT_BASE.rollback();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("",e);
 			}
 			handle(t);
@@ -390,7 +395,7 @@ public class AttachmentRequest extends CommonRequest {
 		} finally {
 			try {
 				ATTACHMENT_BASE.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}
@@ -423,24 +428,24 @@ public class AttachmentRequest extends CommonRequest {
 			//w.flush();
 			
 			ATTACHMENT_BASE.commit();
-		} catch (Throwable t) {
+		} catch (final Throwable t) {
 			try {
 				ATTACHMENT_BASE.rollback();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.error(e.getMessage(), e);
 			}
 			handle(t);
 		} finally {
 			try {
 				ATTACHMENT_BASE.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.error(e.getMessage(), e);
 			}
 			
 			if (iter!=null) {
 				try {
 					iter.close();
-				} catch (SearchIteratorException e) {
+				} catch (final SearchIteratorException e) {
 					LOG.error(e.getMessage(), e);
 				}
 			}

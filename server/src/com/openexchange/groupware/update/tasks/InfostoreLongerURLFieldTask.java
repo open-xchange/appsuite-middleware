@@ -1,23 +1,22 @@
 package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.database.Database;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.database.Database;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.exception.Classes;
+import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
 @OXExceptionSource(
 	    classId = Classes.UPDATE_TASK,
 	    component = EnumComponent.UPDATE
@@ -41,11 +40,11 @@ public class InfostoreLongerURLFieldTask  implements UpdateTask {
             msg = "Error in SQL Statement",
             exceptionId = 1
     )
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         Connection writeCon = null;
         PreparedStatement stmt = null;
-        PreparedStatement checkAvailable = null;
-        ResultSet rs = null;
+        final PreparedStatement checkAvailable = null;
+        final ResultSet rs = null;
 
         try {
             writeCon = Database.get(contextId, true);
@@ -56,10 +55,10 @@ public class InfostoreLongerURLFieldTask  implements UpdateTask {
             stmt = writeCon.prepareStatement("ALTER TABLE del_infostore_document MODIFY url varchar(256)");
             stmt.executeUpdate();
             writeCon.commit();
-        } catch (SQLException x) {
+        } catch (final SQLException x) {
             try {
                 writeCon.rollback();
-            } catch (SQLException x2) {
+            } catch (final SQLException x2) {
                 LOG.error("Can't execute rollback.", x2);
             }
             EXCEPTIONS.create(1, x);
@@ -67,7 +66,7 @@ public class InfostoreLongerURLFieldTask  implements UpdateTask {
             if (stmt != null) {
                 try {
                     stmt.close();
-                } catch (SQLException x) {
+                } catch (final SQLException x) {
                     LOG.warn("Couldn't close statement", x);
                 }
             }
@@ -75,7 +74,7 @@ public class InfostoreLongerURLFieldTask  implements UpdateTask {
             if (null != rs) {
                 try {
                     rs.close();
-                } catch (SQLException x) {
+                } catch (final SQLException x) {
                     LOG.warn("Couldn't close result set", x);
                 }
             }
@@ -83,7 +82,7 @@ public class InfostoreLongerURLFieldTask  implements UpdateTask {
             if (writeCon != null) {
                 try {
                     writeCon.setAutoCommit(true);
-                } catch (SQLException x) {
+                } catch (final SQLException x) {
                     LOG.warn("Can't reset auto commit", x);
                 }
 

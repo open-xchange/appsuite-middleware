@@ -88,8 +88,9 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
     private InfostoreConfig() {}
 
     public static InfostoreConfig getInstance() {
-        if(singleton != null)
-            return singleton;
+        if(singleton != null) {
+			return singleton;
+		}
 
         return singleton = new InfostoreConfig();
     }

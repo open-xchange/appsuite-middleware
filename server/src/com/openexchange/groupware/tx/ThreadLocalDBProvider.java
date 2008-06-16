@@ -55,14 +55,14 @@ import com.openexchange.groupware.contexts.Context;
 
 public class ThreadLocalDBProvider implements DBProvider {
 
-	private ThreadLocal<Connection> readCon = new ThreadLocal<Connection>();
-	private ThreadLocal<Connection> writeCon = new ThreadLocal<Connection>();
+	private final ThreadLocal<Connection> readCon = new ThreadLocal<Connection>();
+	private final ThreadLocal<Connection> writeCon = new ThreadLocal<Connection>();
 	
-	public void setReadConnection(Connection con) {
+	public void setReadConnection(final Connection con) {
 		readCon.set(con);
 	}
 	
-	public void setWriteConnection(Connection con) {
+	public void setWriteConnection(final Connection con) {
 		writeCon.set(con);
 	}
 	
@@ -71,19 +71,19 @@ public class ThreadLocalDBProvider implements DBProvider {
 		writeCon.set(null);
 	}
 	
-	public Connection getReadConnection(Context ctx) {
+	public Connection getReadConnection(final Context ctx) {
 		return readCon.get();
 	}
 
-	public Connection getWriteConnection(Context ctx) {
+	public Connection getWriteConnection(final Context ctx) {
 		return writeCon.get();
 	}
 
-	public void releaseReadConnection(Context ctx, Connection con) {
+	public void releaseReadConnection(final Context ctx, final Connection con) {
 
 	}
 
-	public void releaseWriteConnection(Context ctx, Connection con) {
+	public void releaseWriteConnection(final Context ctx, final Connection con) {
 
 	}
 

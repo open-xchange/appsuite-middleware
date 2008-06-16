@@ -63,6 +63,7 @@ public class TextValueDefinition extends ValueDefinition {
 
 	public static final ValueDefinition Default = new TextValueDefinition();
 	
+	@Override
 	public Object createValue(final StringScanner s, final Property property) throws IOException {
 		final StringBuilder sb = new StringBuilder();
 		while (s.peek >= 0 && s.peek != ',' && s.peek != ';') {
@@ -89,6 +90,7 @@ public class TextValueDefinition extends ValueDefinition {
 		return sb.length() == 0 ? null : sb.toString();
 	}
 
+	@Override
 	public String writeValue(final Object value) {
 		final String str = (String) value;
 		final int length = str.length();

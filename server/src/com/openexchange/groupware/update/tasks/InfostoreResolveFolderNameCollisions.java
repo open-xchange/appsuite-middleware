@@ -1,11 +1,13 @@
 package com.openexchange.groupware.update.tasks;
 
 public class InfostoreResolveFolderNameCollisions extends InfostoreRenamePersonalInfostoreFolders{
-    public int addedWithVersion() {
+    @Override
+	public int addedWithVersion() {
         return 12;
     }
 
-    protected int getParentFolder() {
+    @Override
+	protected int getParentFolder() {
         return -1;
     }
 }

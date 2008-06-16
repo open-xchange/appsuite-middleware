@@ -77,29 +77,29 @@ public class WebdavProppatchAction extends AbstractAction {
 	private PropertyAction SET = null;
 	private static final PropertyAction REMOVE = new RemoveAction();
 	
-	private XMLOutputter outputter = new XMLOutputter();
+	private final XMLOutputter outputter = new XMLOutputter();
 
-	public WebdavProppatchAction(Protocol protocol) {
+	public WebdavProppatchAction(final Protocol protocol) {
 		SET = new SetAction(protocol);
 	}
 	
 	
-	public void perform(WebdavRequest req, WebdavResponse res) throws WebdavException {
+	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavException {
 		try {
-			Document requestDoc = req.getBodyAsDocument();
-			Document responseDoc = new Document();
-			Element multistatus = new Element("multistatus",DAV_NS);
+			final Document requestDoc = req.getBodyAsDocument();
+			final Document responseDoc = new Document();
+			final Element multistatus = new Element("multistatus",DAV_NS);
 			responseDoc.addContent(multistatus);
-			Element response = new Element("response", DAV_NS);
-			Element href = new Element("href", DAV_NS);
+			final Element response = new Element("response", DAV_NS);
+			final Element href = new Element("href", DAV_NS);
 			
 			href.setText(req.getURLPrefix()+req.getUrl());
 			response.addContent(href);
 			
 			multistatus.addContent(response);
 			
-			WebdavResource resource = req.getResource();
-			for(Element element : (List<Element>) requestDoc.getRootElement().getChildren()) {
+			final WebdavResource resource = req.getResource();
+			for(final Element element : (List<Element>) requestDoc.getRootElement().getChildren()) {
 				PropertyAction action = null;
 				if(element.getNamespace().equals(DAV_NS)) {
 					if("set".equals(element.getName())) {
@@ -113,7 +113,7 @@ public class WebdavProppatchAction extends AbstractAction {
 					continue;
 				}
 				
-				for(Element prop : (List<Element>) element.getChildren("prop", DAV_NS)) {
+				for(final Element prop : (List<Element>) element.getChildren("prop", DAV_NS)) {
 					response.addContent(action.perform(prop, resource));
 				}
 			}
@@ -122,10 +122,10 @@ public class WebdavProppatchAction extends AbstractAction {
 			outputter.output(responseDoc, res.getOutputStream());
 			
 			
-		} catch (JDOMException e) {
+		} catch (final JDOMException e) {
 			LOG.error("JDOMException: ",e);
 			throw new WebdavException(req.getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.debug("Client gone?" ,e);
 		}
 	}
@@ -136,27 +136,27 @@ public class WebdavProppatchAction extends AbstractAction {
 	}
 	
 	private static final class SetAction implements PropertyAction {
-		private XMLOutputter outputter = new XMLOutputter();
-		private Protocol protocol;
+		private final XMLOutputter outputter = new XMLOutputter();
+		private final Protocol protocol;
 
-		public SetAction(Protocol protocol) {
+		public SetAction(final Protocol protocol) {
 			this.protocol = protocol;
 		}
 		
-		public Element perform(Element propElement, WebdavResource resource) {
+		public Element perform(final Element propElement, final WebdavResource resource) {
 			int status = 200;
 			
 			if(propElement.getChildren().isEmpty()) {
-				Element propstat = new Element("propstat", DAV_NS);
+				final Element propstat = new Element("propstat", DAV_NS);
 				
-				Element statusElement = new Element("status", DAV_NS);
+				final Element statusElement = new Element("status", DAV_NS);
 				statusElement.setText("HTTP/1.1 "+status+" "+Utils.getStatusString(status));
 				propstat.addContent(statusElement);
 				return propstat;
 			}
 			
-			Element propertyElement = (Element) propElement.getChildren().get(0);
-			WebdavProperty property = new WebdavProperty();
+			final Element propertyElement = (Element) propElement.getChildren().get(0);
+			final WebdavProperty property = new WebdavProperty();
 			property.setNamespace(propertyElement.getNamespaceURI());
 			property.setName(propertyElement.getName());
 			if(protocol.isProtected(propertyElement.getNamespaceURI(), propertyElement.getName())) {
@@ -167,10 +167,10 @@ public class WebdavProppatchAction extends AbstractAction {
 				if(propertyElement.getChildren().size() > 0) {
 					property.setXML(true);
 					try {
-						StringWriter w = new StringWriter();
+						final StringWriter w = new StringWriter();
 						outputter.output(propertyElement.cloneContent(), w);
 						property.setValue(w.toString());
-					} catch (IOException e) {
+					} catch (final IOException e) {
 						status = 500;
 					}
 					
@@ -181,21 +181,21 @@ public class WebdavProppatchAction extends AbstractAction {
 				
 				try {
 					resource.putProperty(property);
-				} catch (WebdavException e) {
+				} catch (final WebdavException e) {
 					status = e.getStatus();
 				}
 			}
 			
-			Element propstat = new Element("propstat", DAV_NS);
+			final Element propstat = new Element("propstat", DAV_NS);
 			
-			Element prop = new Element("prop", DAV_NS);
-			Element propContent = new Element(property.getName(), Namespace.getNamespace(property.getNamespace()));
+			final Element prop = new Element("prop", DAV_NS);
+			final Element propContent = new Element(property.getName(), Namespace.getNamespace(property.getNamespace()));
 			prop.addContent(propContent);
 			
 			propstat.addContent(prop);
 			
 			
-			Element statusElement = new Element("status", DAV_NS);
+			final Element statusElement = new Element("status", DAV_NS);
 			statusElement.setText("HTTP/1.1 "+status+" "+Utils.getStatusString(status));
 			propstat.addContent(statusElement);
 			
@@ -206,34 +206,34 @@ public class WebdavProppatchAction extends AbstractAction {
 	
 	private static final class RemoveAction implements PropertyAction {
 
-		public Element perform(Element propElement, WebdavResource resource) {
+		public Element perform(final Element propElement, final WebdavResource resource) {
 			int status = 200;
 			if(propElement.getChildren().isEmpty()) {
-				Element propstat = new Element("propstat", DAV_NS);
+				final Element propstat = new Element("propstat", DAV_NS);
 				
-				Element statusElement = new Element("status", DAV_NS);
+				final Element statusElement = new Element("status", DAV_NS);
 				statusElement.setText("HTTP/1.1 "+status+" "+Utils.getStatusString(status));
 				propstat.addContent(statusElement);
 				return propstat;
 			}
-			Element propertyElement = (Element) propElement.getChildren().get(0);
+			final Element propertyElement = (Element) propElement.getChildren().get(0);
 			
 			try {
 				resource.removeProperty(propertyElement.getNamespaceURI(), propertyElement.getName());
-			} catch (WebdavException e) {
+			} catch (final WebdavException e) {
 				status = e.getStatus();
 			}
 			
-			Element propstat = new Element("propstat", DAV_NS);
+			final Element propstat = new Element("propstat", DAV_NS);
 			
-			Element prop = new Element("prop", DAV_NS);
-			Element propContent = new Element(propertyElement.getName(), Namespace.getNamespace(propertyElement.getNamespaceURI()));
+			final Element prop = new Element("prop", DAV_NS);
+			final Element propContent = new Element(propertyElement.getName(), Namespace.getNamespace(propertyElement.getNamespaceURI()));
 			prop.addContent(propContent);
 			
 			propstat.addContent(prop);
 			
 			
-			Element statusElement = new Element("status", DAV_NS);
+			final Element statusElement = new Element("status", DAV_NS);
 			statusElement.setText("HTTP/1.1 "+status+" "+Utils.getStatusString(status));
 			propstat.addContent(statusElement);
 			

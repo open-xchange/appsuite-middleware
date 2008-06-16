@@ -65,11 +65,12 @@ import com.openexchange.tools.versit.VersitException;
 
 public class OldMailAddrPropertyDefinition extends OldShortPropertyDefinition {
 
-	public OldMailAddrPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldMailAddrPropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
+	@Override
 	protected Object parseValue(final Property property, final StringScanner s)
 			throws IOException {
 		String str = s.getRest();
@@ -78,7 +79,7 @@ public class OldMailAddrPropertyDefinition extends OldShortPropertyDefinition {
 				|| !"URL".equalsIgnoreCase(param.getValue(0).getText())) {
 			try {
 				str = "mailto:" + new InternetAddress(str).getAddress();
-			} catch (AddressException e) {
+			} catch (final AddressException e) {
 				final VersitException ve = new VersitException(s, e.getMessage());
 				ve.initCause(e);
 				throw ve;
@@ -86,13 +87,14 @@ public class OldMailAddrPropertyDefinition extends OldShortPropertyDefinition {
 		}
 		try {
 			return new URI(str);
-		} catch (URISyntaxException e) {
+		} catch (final URISyntaxException e) {
 			final VersitException ve = new VersitException(s, e.getMessage());
 			ve.initCause(e);
 			throw ve;
 		}
 	}
 
+	@Override
 	protected String writeValue(final Property property, final Object value) {
 		return ((URI) value).getSchemeSpecificPart();
 	}

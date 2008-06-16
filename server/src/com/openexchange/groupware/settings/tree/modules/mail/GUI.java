@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail;
 
-import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.impl.SharedNode;
 
 /**

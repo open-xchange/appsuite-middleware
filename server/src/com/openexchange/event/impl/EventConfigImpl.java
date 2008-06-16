@@ -51,13 +51,15 @@
 
 package com.openexchange.event.impl;
 
-import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 
 /**
  * EventConfigImpl
@@ -79,7 +81,7 @@ public class EventConfigImpl extends AbstractConfigWrapper implements EventConfi
 		
 	}
 	
-	public EventConfigImpl(String propfile) {
+	public EventConfigImpl(final String propfile) {
 		if (isInit) {
 			return ;
 		}
@@ -97,9 +99,9 @@ public class EventConfigImpl extends AbstractConfigWrapper implements EventConfi
 			
 			prop = new Properties();
 			prop.load(new FileInputStream(propfile));
-		} catch (FileNotFoundException exc) {
+		} catch (final FileNotFoundException exc) {
 			LOG.error("Cannot find propfile: " + propfile, exc);
-		} catch (IOException exc) {
+		} catch (final IOException exc) {
 			LOG.error("Cannot read propfile: " + propfile, exc);
 		}
 		

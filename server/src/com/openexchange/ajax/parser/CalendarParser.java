@@ -51,7 +51,6 @@
 
 package com.openexchange.ajax.parser;
 
-import com.openexchange.groupware.container.ExternalUserParticipant;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -64,6 +63,7 @@ import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalGroupParticipant;
+import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
@@ -179,7 +179,7 @@ public class CalendarParser extends CommonParser {
 			final int id;
             try {
                 id = jparticipant.getInt(ParticipantsFields.ID);
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR,
                     e, jparticipant.get(ParticipantsFields.ID));
             }

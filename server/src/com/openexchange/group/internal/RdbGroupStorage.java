@@ -154,7 +154,7 @@ public class RdbGroupStorage extends GroupStorage {
                 + "member) VALUES (?,?,?)");
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, group.getIdentifier());
-            for (int member : members) {
+            for (final int member : members) {
                 stmt.setInt(3, member);
                 stmt.addBatch();
             }
@@ -181,7 +181,7 @@ public class RdbGroupStorage extends GroupStorage {
                 + "WHERE cid=? AND id=? AND member IN (", members.length));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, group.getIdentifier());
-            for (int member : members) {
+            for (final int member : members) {
                 stmt.setInt(3, member);
             }
             stmt.execute();
@@ -246,7 +246,7 @@ public class RdbGroupStorage extends GroupStorage {
                     Integer.valueOf(gid), Integer.valueOf(context.getContextId()));
             }
             group.setMember(selectMember(con, context, group.getIdentifier()));
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new LdapException(EnumComponent.GROUP, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
@@ -265,7 +265,7 @@ public class RdbGroupStorage extends GroupStorage {
         final Connection con;
         try {
             con = DBPool.pickup(context);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new LdapException(EnumComponent.GROUP, Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
@@ -289,7 +289,7 @@ public class RdbGroupStorage extends GroupStorage {
                 tmp.add(group);
             }
             groups = tmp.toArray(new Group[tmp.size()]);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new LdapException(EnumComponent.GROUP, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
@@ -307,7 +307,7 @@ public class RdbGroupStorage extends GroupStorage {
         final Connection con;
         try {
             con = DBPool.pickup(context);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new GroupException(GroupException.Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
@@ -332,7 +332,7 @@ public class RdbGroupStorage extends GroupStorage {
                     group.getIdentifier()));
                 groups.add(group);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new GroupException(GroupException.Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
@@ -350,7 +350,7 @@ public class RdbGroupStorage extends GroupStorage {
         final Connection con;
         try {
             con = DBPool.pickup(context);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new LdapException(EnumComponent.GROUP, Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
@@ -373,7 +373,7 @@ public class RdbGroupStorage extends GroupStorage {
                 tmp.add(group);
             }
             groups = tmp.toArray(new Group[tmp.size()]);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new LdapException(EnumComponent.GROUP, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
@@ -400,7 +400,7 @@ public class RdbGroupStorage extends GroupStorage {
         } finally {
             closeSQLStuff(result, stmt);
         }
-        int[] member = new int[tmp.size()];
+        final int[] member = new int[tmp.size()];
         for (int i = 0; i < member.length; i++) {
             member[i] = tmp.get(i).intValue();
         }

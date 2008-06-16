@@ -97,7 +97,7 @@ public class Hex {
 	 */	
 	public static byte[] toByteArray(final String hex) throws NumberFormatException {
 		final int length = hex.length() / 2;
-		byte[] retval = new byte[length];
+		final byte[] retval = new byte[length];
 		for (int i = 0; i < length; i++) {
 			retval[i] = toByte(hex.substring(i*2, i*2+2));
 		}

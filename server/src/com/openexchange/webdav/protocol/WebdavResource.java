@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.protocol;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;

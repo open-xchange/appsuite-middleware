@@ -239,7 +239,7 @@ public final class Tools {
 	public static void deleteCookies(final HttpServletRequest req, final HttpServletResponse resp) {
 		final Cookie[] cookies = req.getCookies();
 		if (cookies != null) {
-			for (Cookie cookie : cookies) {
+			for (final Cookie cookie : cookies) {
 				final String cookieName = cookie.getName();
 				if (cookieName.startsWith(Login.cookiePrefix)
 						|| cookieName.equals(AJPv13RequestHandler.JSESSIONID_COOKIE)) {

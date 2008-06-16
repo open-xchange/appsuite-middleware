@@ -203,7 +203,7 @@ public class GroupUserWriter extends ContactWriter {
 	
 	private static final Log LOG = LogFactory.getLog(GroupUserWriter.class);
 	
-	public GroupUserWriter(final User userObj, final Context ctx, final Session sessionObj, Element parent) throws Exception {
+	public GroupUserWriter(final User userObj, final Context ctx, final Session sessionObj, final Element parent) throws Exception {
 		super(userObj, ctx, sessionObj);
 		this.parent = parent;
 		
@@ -214,9 +214,9 @@ public class GroupUserWriter extends ContactWriter {
 		userStorage = UserStorage.getInstance();
 	}
 	
-	public void startWriter(boolean modified, boolean deleted, Date lastsync, OutputStream os) throws Exception {
-		ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
-		XMLOutputter xo = new XMLOutputter();
+	public void startWriter(final boolean modified, final boolean deleted, Date lastsync, final OutputStream os) throws Exception {
+		final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+		final XMLOutputter xo = new XMLOutputter();
 		
 		if (lastsync == null) {
 			lastsync = new Date(0);
@@ -247,9 +247,9 @@ public class GroupUserWriter extends ContactWriter {
 		}
 	}
 	
-	public void startWriter(String searchpattern, OutputStream os) throws Exception {
-		ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
-		XMLOutputter xo = new XMLOutputter();
+	public void startWriter(final String searchpattern, final OutputStream os) throws Exception {
+		final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+		final XMLOutputter xo = new XMLOutputter();
 		SearchIterator it = null;
 		try {
 			it = contactsql.searchContacts(searchpattern, false, FolderObject.SYSTEM_LDAP_FOLDER_ID, ContactObject.DISPLAY_NAME, "asc", changeFields);
@@ -261,34 +261,36 @@ public class GroupUserWriter extends ContactWriter {
 		}
 	}
 	
-	public void writeIterator(SearchIterator it, boolean delete, XMLOutputter xo, OutputStream os) throws Exception {
+	@Override
+	public void writeIterator(final SearchIterator it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
 		while (it.hasNext()) {
 			writeObject((ContactObject)it.next(), delete, xo, os);
 		}
 	}
 	
-	public void writeObject(ContactObject contactobject, boolean delete, XMLOutputter xo, OutputStream os) throws Exception {
-		Element e = new Element(parent.getName(), parent.getNamespace());
+	@Override
+	public void writeObject(final ContactObject contactobject, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
+		final Element e = new Element(parent.getName(), parent.getNamespace());
 		
 		try {
 			addContent2Element(e, contactobject, delete);
 			xo.output(e, os);
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("writeObject", exc);
 		}
 	}
 	
-	protected void addContent2Element(Element e, ContactObject contactobject, boolean delete) throws Exception {
+	protected void addContent2Element(final Element e, final ContactObject contactobject, final boolean delete) throws Exception {
 		if (delete) {
-			int userId = contactobject.getInternalUserId();
+			final int userId = contactobject.getInternalUserId();
 			
 			addElement("uid", userId, e);
 			addElement("object_id", contactobject.getObjectID(), e);
 			addElement("object_status", "DELETE", e);
 		} else {
-			int userId = contactobject.getInternalUserId();
+			final int userId = contactobject.getInternalUserId();
 			
-			User u = userStorage.getUser(userId, ctx);
+			final User u = userStorage.getUser(userId, ctx);
 			
 			addElement("uid", userId, e);
             addElement(ContactFields.OBJECT_ID, contactobject.getObjectID(), e);
@@ -307,11 +309,11 @@ public class GroupUserWriter extends ContactWriter {
 		}
 	}
 	
-	public void addElementMemberInGroups(Element eProp, User u) throws Exception {
-		Element eMemberInGroups = new Element("memberingroups", XmlServlet.NS);
-		int groupId[] = u.getGroups();
+	public void addElementMemberInGroups(final Element eProp, final User u) throws Exception {
+		final Element eMemberInGroups = new Element("memberingroups", XmlServlet.NS);
+		final int groupId[] = u.getGroups();
 		for (int a = 0; a < groupId.length; a++) {
-			Element eMember = new Element("member", XmlServlet.NS);
+			final Element eMember = new Element("member", XmlServlet.NS);
 			eMember.addContent(String.valueOf(groupId[a]));
 			eMemberInGroups.addContent(eMember);
 		}
@@ -319,7 +321,7 @@ public class GroupUserWriter extends ContactWriter {
 		eProp.addContent(eMemberInGroups);
 	}
 	
-	public void addElementAliases(Element eProp, User u) throws Exception {
+	public void addElementAliases(final Element eProp, final User u) throws Exception {
 		
 	}
 }

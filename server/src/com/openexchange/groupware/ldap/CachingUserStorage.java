@@ -168,7 +168,7 @@ public class CachingUserStorage extends UserStorage {
 				identifier = getUserStorage().getUserId(uid, context);
 				try {
 					cache.put(key, Integer.valueOf(identifier));
-				} catch (CacheException e) {
+				} catch (final CacheException e) {
 					throw new LdapException(EnumComponent.USER, Code.CACHE_PROBLEM, e);
 				}
 			} else {
@@ -208,7 +208,7 @@ public class CachingUserStorage extends UserStorage {
 	public int[] listAllUser(final Context context) throws UserException {
 		try {
 			return getUserStorage().listAllUser(context);
-		} catch (LdapException e) {
+		} catch (final LdapException e) {
 			throw new UserException(e);
 		}
 	}
@@ -222,7 +222,7 @@ public class CachingUserStorage extends UserStorage {
 		if (null == cacheService) {
 			try {
 				return getUserStorage().resolveIMAPLogin(imapLogin, context);
-			} catch (LdapException e) {
+			} catch (final LdapException e) {
 				throw new UserException(e);
 			}
 		}
@@ -234,12 +234,12 @@ public class CachingUserStorage extends UserStorage {
 			if (null == tmp) {
 				try {
 					identifier = getUserStorage().resolveIMAPLogin(imapLogin, context);
-				} catch (LdapException e) {
+				} catch (final LdapException e) {
 					throw new UserException(e);
 				}
 				try {
 					cache.put(key, Integer.valueOf(identifier));
-				} catch (CacheException e) {
+				} catch (final CacheException e) {
 					throw new UserException(UserException.Code.CACHE_PROBLEM, e);
 				}
 			} else {
@@ -255,7 +255,7 @@ public class CachingUserStorage extends UserStorage {
      * {@inheritDoc}
      */
     @Override
-    public void invalidateUser(Context ctx, int userId) throws UserException {
+    public void invalidateUser(final Context ctx, final int userId) throws UserException {
         final CacheService cacheService = ServerServiceRegistry.getInstance()
             .getService(CacheService.class);
         if (null != cacheService) {

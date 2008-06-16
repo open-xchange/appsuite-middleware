@@ -68,6 +68,7 @@ public class CalAddressValueDefinition extends URIValueDefinition {
 
 	public static final ValueDefinition Default = new CalAddressValueDefinition();
 	
+	@Override
 	public Object createValue(final StringScanner s, final Property property) throws IOException {
 		final URI retval = (URI)super.createValue(s, property);
 		if (!retval.getScheme().equalsIgnoreCase("MAILTO")) {

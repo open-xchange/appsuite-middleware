@@ -137,7 +137,7 @@ public class TaskRequest {
 	
 	private Date timestamp;
 	
-	private TimeZone timeZone;
+	private final TimeZone timeZone;
 	
 	private static final Log LOG = LogFactory.getLog(TaskRequest.class);
 	
@@ -252,7 +252,7 @@ public class TaskRequest {
 		final JSONArray jsonResponseArray = new JSONArray();
 		SearchIterator it = null;
 		try {
-			int[] internalColumns = new int[columns.length+1];
+			final int[] internalColumns = new int[columns.length+1];
 			System.arraycopy(columns, 0, internalColumns, 0, columns.length);
 			internalColumns[columns.length] = DataObject.LAST_MODIFIED;
 			
@@ -316,14 +316,14 @@ public class TaskRequest {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
 		final JSONArray jData = DataParser.checkJSONArray(jsonObj, DATA);
-		int[][] objectIdAndFolderId = new int[jData.length()][2];
+		final int[][] objectIdAndFolderId = new int[jData.length()][2];
 		for (int a = 0; a < objectIdAndFolderId.length; a++) {
 			final JSONObject jObject = jData.getJSONObject(a);
 			objectIdAndFolderId[a][0] = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_ID);
 			objectIdAndFolderId[a][1] = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_FOLDERID);
 		}
 
-		int[] internalColumns = new int[columns.length+1];
+		final int[] internalColumns = new int[columns.length+1];
 		System.arraycopy(columns, 0, internalColumns, 0, columns.length);
 		internalColumns[columns.length] = DataObject.LAST_MODIFIED;
 
@@ -365,7 +365,7 @@ public class TaskRequest {
 		final int leftHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.LEFT_HAND_LIMIT);
 		final int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
 		
-		int[] internalColumns = new int[columns.length+1];
+		final int[] internalColumns = new int[columns.length+1];
 		System.arraycopy(columns, 0, internalColumns, 0, columns.length);
 		internalColumns[columns.length] = DataObject.LAST_MODIFIED;
 
@@ -461,13 +461,13 @@ public class TaskRequest {
 		final Date end = DataParser.parseDate(jsonObj, AJAXServlet.PARAMETER_END);
 
 		if (start != null && end != null) {
-			Date[] dateRange = new Date[2];
+			final Date[] dateRange = new Date[2];
 			dateRange[0] = start;
 			dateRange[1] = end;
 			// FIXME 
 			try {
 				searchObj.setRange(dateRange);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				throw new OXException(e);
 			}
 
@@ -490,7 +490,7 @@ public class TaskRequest {
 			searchObj.setParticipants(CalendarParser.parseParticipants(jData, participants));
 		}
 		
-		int[] internalColumns = new int[columns.length+1];
+		final int[] internalColumns = new int[columns.length+1];
 		System.arraycopy(columns, 0, internalColumns, 0, columns.length);
 		internalColumns[columns.length] = DataObject.LAST_MODIFIED;
 

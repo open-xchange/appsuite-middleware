@@ -55,7 +55,7 @@ import com.openexchange.webdav.protocol.WebdavException;
 
 public class WebdavMkcolAction extends AbstractAction {
 
-	public void perform(WebdavRequest req, WebdavResponse res)
+	public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws WebdavException {
 		req.getCollection().create();
 		res.setStatus(HttpServletResponse.SC_CREATED);

@@ -49,16 +49,26 @@
 
 package com.openexchange.webdav.protocol.impl;
 
-import com.openexchange.tools.collections.Injector;
-import com.openexchange.tools.collections.OXCollections;
-import com.openexchange.webdav.protocol.Protocol.Property;
-import com.openexchange.webdav.protocol.*;
-
-import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
+
+import com.openexchange.tools.collections.Injector;
+import com.openexchange.tools.collections.OXCollections;
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavLock;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.Protocol.Property;
 
 public class DummyResource extends AbstractResource implements WebdavResource  {
 

@@ -54,15 +54,15 @@ import java.util.Collection;
 public class WebdavMultistatusException extends WebdavException {
 
 	private static final long serialVersionUID = 1L;
-	private WebdavException[] exceptions;
+	private final WebdavException[] exceptions;
 
 
-    public WebdavMultistatusException(WebdavPath url, WebdavException...exceptions) {
+    public WebdavMultistatusException(final WebdavPath url, final WebdavException...exceptions) {
         super(url, 207);
         this.exceptions = exceptions;
     }
 
-    public WebdavMultistatusException(WebdavPath url, Collection<WebdavException> exceptions){
+    public WebdavMultistatusException(final WebdavPath url, final Collection<WebdavException> exceptions){
         this(url, exceptions.toArray(new WebdavException[exceptions.size()]));
     }
 

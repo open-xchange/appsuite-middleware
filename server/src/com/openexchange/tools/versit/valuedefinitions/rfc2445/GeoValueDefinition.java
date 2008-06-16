@@ -68,6 +68,7 @@ public class GeoValueDefinition extends ValueDefinition {
 
 	private static Pattern FloatPattern = Pattern.compile("[-+]\\d+(\\.\\d+)?");
 
+	@Override
 	public Object createValue(final StringScanner s, final Property property) throws IOException {
 		final ArrayList<Double> geo = new ArrayList<Double>();
 		String str = s.regex(FloatPattern);
@@ -89,6 +90,7 @@ public class GeoValueDefinition extends ValueDefinition {
 
 	private static DecimalFormat Format = new DecimalFormat("0.################");
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public String writeValue(final Object value) {
 		final ArrayList<Double> geo = (ArrayList<Double>) value;

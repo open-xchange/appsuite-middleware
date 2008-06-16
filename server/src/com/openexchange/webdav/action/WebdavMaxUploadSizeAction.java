@@ -55,7 +55,7 @@ import com.openexchange.webdav.protocol.WebdavException;
 
 public class WebdavMaxUploadSizeAction extends AbstractAction {
 
-	public void perform(WebdavRequest req, WebdavResponse res) throws WebdavException {
+	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavException {
 		if(fits(req)) {
 			yield(req,res);
 		} else {
@@ -63,7 +63,7 @@ public class WebdavMaxUploadSizeAction extends AbstractAction {
 		}
 	}
 	
-	public boolean fits(WebdavRequest req){
+	public boolean fits(final WebdavRequest req){
 		return true;
 	}
 

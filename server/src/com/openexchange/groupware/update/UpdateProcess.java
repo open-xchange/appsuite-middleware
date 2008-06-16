@@ -135,7 +135,7 @@ public class UpdateProcess implements Runnable {
 					for (int i = 0; i < size; i++) {
 						try {
 							iter.next().perform(schema, contextId);
-						} catch (AbstractOXException e) {
+						} catch (final AbstractOXException e) {
 							LOG.error(e.getMessage(), e);
 						}
 					}
@@ -144,11 +144,11 @@ public class UpdateProcess implements Runnable {
 						unlockSchema(schema);
 					}
 				}
-			} catch (SchemaException e) {
+			} catch (final SchemaException e) {
 				LOG.error(e.getMessage(), e);
-			} catch (DBPoolingException e) {
+			} catch (final DBPoolingException e) {
 				LOG.error(e.getMessage(), e);
-			} catch (ContextException e) {
+			} catch (final ContextException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		} finally {
@@ -168,7 +168,7 @@ public class UpdateProcess implements Runnable {
 		final int[] contextIds = ConfigDBStorage.getContextsFromSchema(schema.getSchema(), Database.resolvePool(
 				contextId, true));
 		final ContextStorage contextStorage = ContextStorage.getInstance();
-		for (int cid : contextIds) {
+		for (final int cid : contextIds) {
 			contextStorage.invalidateContext(cid);
 		}
 	}

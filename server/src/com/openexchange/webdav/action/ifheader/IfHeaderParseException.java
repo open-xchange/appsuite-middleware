@@ -56,24 +56,24 @@ package com.openexchange.webdav.action.ifheader;
 public class IfHeaderParseException extends Exception {
 
 	private static final long serialVersionUID = 1L;
-	private int col;
+	private final int col;
 
-	public IfHeaderParseException(int col) {
+	public IfHeaderParseException(final int col) {
 		super();
 		this.col = col;
 	}
 
-	public IfHeaderParseException(String arg0, Throwable arg1, int col) {
+	public IfHeaderParseException(final String arg0, final Throwable arg1, final int col) {
 		super(arg0, arg1);
 		this.col = col;
 	}
 
-	public IfHeaderParseException(String arg0, int col) {
+	public IfHeaderParseException(final String arg0, final int col) {
 		super(arg0);
 		this.col = col;
 	}
 
-	public IfHeaderParseException(Throwable arg0, int col) {
+	public IfHeaderParseException(final Throwable arg0, final int col) {
 		super(arg0);
 		this.col = col;
 	}

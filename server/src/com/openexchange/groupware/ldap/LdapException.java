@@ -53,7 +53,6 @@ package com.openexchange.groupware.ldap;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.ldap.UserException.Detail;
 
 /**
  * This exception is used if problems occur in the ldap DAOs.

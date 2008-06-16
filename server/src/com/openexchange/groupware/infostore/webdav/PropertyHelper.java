@@ -49,18 +49,25 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
+
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.infostore.InfostoreException;
+import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.infostore.InfostoreException;
-
-import javax.servlet.http.HttpServletResponse;
-import java.util.*;
 
 public class PropertyHelper {
 	
@@ -70,11 +77,11 @@ public class PropertyHelper {
 	private boolean loadedAllProps;
 	private final List<WebdavProperty> changedProps = new ArrayList<WebdavProperty>();
 
-	private PropertyStore propertyStore;
-	private SessionHolder sessionHolder;
+	private final PropertyStore propertyStore;
+	private final SessionHolder sessionHolder;
 	
 	private int id;
-	private WebdavPath url;
+	private final WebdavPath url;
 
 	private boolean changed;
 	
@@ -190,7 +197,7 @@ public class PropertyHelper {
     private ServerSession getSession() throws OXException {
         try {
             return new ServerSessionAdapter(sessionHolder.getSessionObject());
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             throw new InfostoreException(e);
         }
     }

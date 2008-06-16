@@ -71,8 +71,9 @@ public class QuotaUsageDelete extends ContextDelete {
 	public void deletePerformed(final DeleteEvent sqlDelEvent, final Connection readCon, final Connection writeCon)
 			throws DeleteFailedException {
 
-		if (!isContextDelete(sqlDelEvent))
+		if (!isContextDelete(sqlDelEvent)) {
 			return;
+		}
 
 		PreparedStatement stmt = null;
 		try {
@@ -82,12 +83,13 @@ public class QuotaUsageDelete extends ContextDelete {
 		} catch (final SQLException e) {
 			throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
 		} finally {
-			if (stmt != null)
+			if (stmt != null) {
 				try {
 					stmt.close();
 				} catch (final SQLException e) {
 					LOG.error(e.getLocalizedMessage(), e);
 				}
+			}
 		}
 	}
 

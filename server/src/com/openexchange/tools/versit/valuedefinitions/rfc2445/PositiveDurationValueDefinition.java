@@ -66,6 +66,7 @@ public class PositiveDurationValueDefinition extends DurationValueDefinition {
 
 	public static final ValueDefinition Default = new PositiveDurationValueDefinition();
 
+	@Override
 	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
 		final DurationValue dur = (DurationValue) super.createValue(s, property);

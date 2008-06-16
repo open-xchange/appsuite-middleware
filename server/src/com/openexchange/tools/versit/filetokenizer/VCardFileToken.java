@@ -69,13 +69,13 @@ public class VCardFileToken {
 	public byte[] getContent() {
 		return content;
 	}
-	public void setContent(byte[] content) {
+	public void setContent(final byte[] content) {
 		this.content = content;
 	}
 	public VersitDefinition getVersitDefinition() {
 		return versitDefinition;
 	}
-	public void setVersitDefinition(VersitDefinition versitDefinition) {
+	public void setVersitDefinition(final VersitDefinition versitDefinition) {
 		this.versitDefinition = versitDefinition;
 	}
 	

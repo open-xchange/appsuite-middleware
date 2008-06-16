@@ -55,29 +55,29 @@ import com.openexchange.groupware.contexts.Context;
 
 public class SimpleDBProvider implements DBProvider {
 
-	private Connection writeCon;
-	private Connection readCon;
+	private final Connection writeCon;
+	private final Connection readCon;
 
-	public SimpleDBProvider(Connection readCon, Connection writeCon) {
+	public SimpleDBProvider(final Connection readCon, final Connection writeCon) {
 		this.readCon = readCon;
 		this.writeCon = writeCon;
 	}
 
-	public Connection getReadConnection(Context ctx)
+	public Connection getReadConnection(final Context ctx)
 			throws TransactionException {
 		return readCon;
 	}
 
-	public Connection getWriteConnection(Context ctx)
+	public Connection getWriteConnection(final Context ctx)
 			throws TransactionException {
 		return writeCon;
 	}
 
-	public void releaseReadConnection(Context ctx, Connection con) {
+	public void releaseReadConnection(final Context ctx, final Connection con) {
 
 	}
 
-	public void releaseWriteConnection(Context ctx, Connection con) {
+	public void releaseWriteConnection(final Context ctx, final Connection con) {
 
 	}
 

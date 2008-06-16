@@ -81,7 +81,7 @@ public class FolderParser {
 
 	private static final String STR_EMPTY = "";
 
-	public FolderParser(UserConfiguration userConfig) {
+	public FolderParser(final UserConfiguration userConfig) {
 		super();
 		this.userConfig = userConfig;
 	}
@@ -89,7 +89,7 @@ public class FolderParser {
 	public void parse(final FolderObject fo, final JSONObject jsonObj) throws OXException {
 		try {
 			parseElementFolder(fo, jsonObj);
-		} catch (JSONException exc) {
+		} catch (final JSONException exc) {
 			throw new OXFolderException(FolderCode.JSON_ERROR, exc, exc.getMessage());
 		}
 	}
@@ -154,7 +154,7 @@ public class FolderParser {
 		if (jsonObj.has(FolderFields.PERMISSIONS) && !jsonObj.isNull(FolderFields.PERMISSIONS)) {
 			final JSONArray jsonArr = jsonObj.getJSONArray(FolderFields.PERMISSIONS);
 			final int arrayLength = jsonArr.length();
-			OCLPermission[] perms = new OCLPermission[arrayLength];
+			final OCLPermission[] perms = new OCLPermission[arrayLength];
 			for (int i = 0; i < arrayLength; i++) {
 				final JSONObject elem = jsonArr.getJSONObject(i);
 				if (!elem.has(FolderFields.ENTITY)) {
@@ -163,11 +163,11 @@ public class FolderParser {
 				int entity;
 				try {
 					entity = elem.getInt(FolderFields.ENTITY);
-				} catch (JSONException e) {
+				} catch (final JSONException e) {
 					try {
 						final String entityStr = elem.getString(FolderFields.ENTITY);
 						entity = UserStorage.getInstance().getUserId(entityStr, userConfig.getContext());
-					} catch (LdapException e1) {
+					} catch (final LdapException e1) {
 						LOG.error(e.getMessage(), e);
 						throw new OXException(e1);
 					}
@@ -199,7 +199,7 @@ public class FolderParser {
 
 	private static final int[] parsePermissionBits(final int bitsArg) {
 		int bits = bitsArg;
-		int[] retval = new int[5];
+		final int[] retval = new int[5];
 		for (int i = retval.length - 1; i >= 0; i--) {
 			final int shiftVal = (i * 7); // Number of bits to be shifted
 			retval[i] = bits >> shiftVal;

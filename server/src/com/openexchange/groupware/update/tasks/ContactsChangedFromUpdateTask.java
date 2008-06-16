@@ -141,7 +141,7 @@ public final class ContactsChangedFromUpdateTask implements UpdateTask {
                 stmt = writeCon.prepareStatement(SQL_QUERY);
                 rs   = stmt.executeQuery();
                 while( rs.next() ) {
-                    StringBuilder sb = new StringBuilder();
+                    final StringBuilder sb = new StringBuilder();
                     final int id  = rs.getInt("created_from");
                     final int cid = rs.getInt("cid");
                     sb.append("UPDATE prg_contacts SET changed_from=");

@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
+import static com.openexchange.tools.sql.DBUtils.getStatement;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -64,10 +66,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfoDatabase;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
@@ -75,10 +79,6 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
-import com.openexchange.groupware.infostore.Classes;
-import com.openexchange.groupware.EnumComponent;
-
-import static com.openexchange.tools.sql.DBUtils.getStatement;
 
 @OXExceptionSource(
 		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INFODATABASEIMPL,

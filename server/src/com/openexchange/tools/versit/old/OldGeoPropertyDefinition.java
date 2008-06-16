@@ -60,12 +60,13 @@ import com.openexchange.tools.versit.VersitException;
 
 public class OldGeoPropertyDefinition extends OldPropertyDefinition {
 
-	public OldGeoPropertyDefinition(String[] paramNames, OldParamDefinition[] params) {
+	public OldGeoPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
 	private static Pattern FloatPattern = Pattern.compile("[ \t\r\n]*[-+]\\d+(\\.\\d+)?[ \t\r\n]*");
 
+	@Override
 	protected Object parseValue(final Property property, final OldScanner s, final byte[] value, final String charset)
 			throws IOException {
 		final StringScanner ss = new StringScanner(s, new String(value, charset));
@@ -89,6 +90,7 @@ public class OldGeoPropertyDefinition extends OldPropertyDefinition {
 
 	private static final DecimalFormat Format = new DecimalFormat("0.################");
 
+	@Override
 	protected String writeValue(final Property property) {
 		final ArrayList geo = (ArrayList) property.getValue();
 		return new StringBuilder().append(Format.format(((Double) geo.get(0)).doubleValue())).append(';').append(

@@ -181,7 +181,7 @@ public final class Response {
 			json.put(ERROR, exception.getOrigMessage());
 			if (exception.getMessageArgs() != null) {
 				final JSONArray array = new JSONArray();
-				for (Object tmp : exception.getMessageArgs()) {
+				for (final Object tmp : exception.getMessageArgs()) {
 					array.put(tmp);
 				}
 				json.put(ERROR_PARAMS, array);
@@ -192,7 +192,7 @@ public final class Response {
 			if (exception.getTruncatedIds().length > 0) {
 				final JSONArray array = new JSONArray();
 				json.put(TRUNCATED, array);
-				for (int i : exception.getTruncatedIds()) {
+				for (final int i : exception.getTruncatedIds()) {
 					array.put(i);
 				}
 			}
@@ -259,7 +259,7 @@ public final class Response {
 	public JSONArray getErrorParams() {
 		final JSONArray array = new JSONArray();
 		if (exception != null && null != exception.getMessageArgs()) {
-			for (Object arg : exception.getMessageArgs()) {
+			for (final Object arg : exception.getMessageArgs()) {
 				array.put(arg);
 			}
 		}
@@ -493,7 +493,7 @@ public final class Response {
 		writer.key(ERROR).value(exception.getOrigMessage());
 		if (exception.getMessageArgs() != null) {
 			final JSONArray array = new JSONArray();
-			for (Object tmp : exception.getMessageArgs()) {
+			for (final Object tmp : exception.getMessageArgs()) {
 				array.put(tmp);
 			}
 			writer.key(ERROR_PARAMS).value(array);
@@ -503,7 +503,7 @@ public final class Response {
 		writer.key(ERROR_ID).value(exception.getExceptionID());
 		if (exception.getTruncatedIds().length > 0) {
 			final JSONArray array = new JSONArray();
-			for (int i : exception.getTruncatedIds()) {
+			for (final int i : exception.getTruncatedIds()) {
 				array.put(i);
 			}
 			writer.key(TRUNCATED).value(array);
@@ -526,7 +526,7 @@ public final class Response {
 		writer.key(ERROR).value(warning.getOrigMessage());
 		if (warning.getMessageArgs() != null) {
 			final JSONArray array = new JSONArray();
-			for (Object tmp : warning.getMessageArgs()) {
+			for (final Object tmp : warning.getMessageArgs()) {
 				array.put(tmp);
 			}
 			writer.key(ERROR_PARAMS).value(array);
@@ -536,7 +536,7 @@ public final class Response {
 		writer.key(ERROR_ID).value(warning.getExceptionID());
 		if (warning.getTruncatedIds().length > 0) {
 			final JSONArray array = new JSONArray();
-			for (int i : warning.getTruncatedIds()) {
+			for (final int i : warning.getTruncatedIds()) {
 				array.put(i);
 			}
 			writer.key(TRUNCATED).value(array);
@@ -551,7 +551,7 @@ public final class Response {
 		final StringWriter writer = new StringWriter();
 		try {
 			write(this, writer);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			e.printStackTrace(new PrintWriter(writer));
 		}
 		return writer.toString();

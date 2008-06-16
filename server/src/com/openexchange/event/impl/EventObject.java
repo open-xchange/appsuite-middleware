@@ -51,6 +51,8 @@
 
 package com.openexchange.event.impl;
 
+import java.util.Date;
+
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
@@ -58,8 +60,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.session.Session;
-
-import java.util.Date;
 
 /**
  * EventObject

@@ -61,7 +61,7 @@ public abstract class Attachments {
 
 	
 	public static AttachmentBase getInstance(){
-		AttachmentBaseImpl impl = new AttachmentBaseImpl(new DBPoolProvider());
+		final AttachmentBaseImpl impl = new AttachmentBaseImpl(new DBPoolProvider());
 		impl.addAuthorization(new TaskAuthorization(), Types.TASK);
 		impl.registerAttachmentListener(new TaskAttachmentListener() ,Types.TASK);
 		impl.addAuthorization(new ContactsAttachment(), Types.CONTACT);

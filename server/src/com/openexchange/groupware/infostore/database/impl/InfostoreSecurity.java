@@ -1,12 +1,12 @@
 package com.openexchange.groupware.infostore.database.impl;
 
-import com.openexchange.groupware.OXThrows;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
-import com.openexchange.api2.OXException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.collections.Injector;
 

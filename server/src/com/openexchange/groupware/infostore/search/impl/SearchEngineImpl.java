@@ -355,10 +355,10 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 
 		private Object next;
 		private ResultSet rs ;
-		private Metadata[] columns;
-		private SearchEngineImpl s;
-		private Context ctx;
-		private Connection readCon;
+		private final Metadata[] columns;
+		private final SearchEngineImpl s;
+		private final Context ctx;
+		private final Connection readCon;
 		private Statement stmt;
 		private final List<AbstractOXException> warnings;
 		

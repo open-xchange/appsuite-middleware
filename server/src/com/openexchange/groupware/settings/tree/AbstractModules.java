@@ -51,8 +51,8 @@ package com.openexchange.groupware.settings.tree;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
@@ -81,7 +81,7 @@ public abstract class AbstractModules implements PreferencesItemService {
              * {@inheritDoc}
              */
             public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig,
+                final User user, final UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
                 setting.setSingleValue(Boolean.valueOf(getModule(userConfig)));
             }

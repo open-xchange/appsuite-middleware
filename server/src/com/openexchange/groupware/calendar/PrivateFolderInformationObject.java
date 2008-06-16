@@ -55,17 +55,17 @@ package com.openexchange.groupware.calendar;
  */
 public class PrivateFolderInformationObject {
     
-    private int object_id;
-    private int pfid;
-    private int uid;
+    private final int object_id;
+    private final int pfid;
+    private final int uid;
     
-    public PrivateFolderInformationObject(int object_id, int pfid, int uid) {
+    public PrivateFolderInformationObject(final int object_id, final int pfid, final int uid) {
         this.object_id = object_id;
         this.pfid = pfid;
         this.uid = uid;
     }
     
-    final boolean compareObjectId(int oid) {
+    final boolean compareObjectId(final int oid) {
         return oid == object_id;
     }
     

@@ -99,7 +99,7 @@ public abstract class SettingStorage {
     public static SettingStorage getInstance(final Session session) {
         try {
             return new RdbSettingStorage(session);
-        } catch (SettingException e) {
+        } catch (final SettingException e) {
             throw new RuntimeException(e);
         }
     }

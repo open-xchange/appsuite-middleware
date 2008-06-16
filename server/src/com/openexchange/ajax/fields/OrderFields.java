@@ -98,7 +98,7 @@ public final class OrderFields {
         WRITE_MAP.put(Order.ASCENDING, "asc");
         WRITE_MAP.put(Order.DESCENDING, "desc");
         final Map<String, Order> tmp = new HashMap<String, Order>();
-        for (Order order : Order.values()) {
+        for (final Order order : Order.values()) {
             tmp.put(WRITE_MAP.get(order), order);
         }
         PARSE_MAP = Collections.unmodifiableMap(tmp);

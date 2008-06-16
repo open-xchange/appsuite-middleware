@@ -154,7 +154,7 @@ public abstract class Refresher<T> {
                 retval = (T) tmp;
                 load = false;
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             load = true;
             LOG.error(e.getMessage(), e);
         } finally {
@@ -166,7 +166,7 @@ public abstract class Refresher<T> {
             try {
                 cond.signalAll();
                 cache.put(key, (Serializable) retval);
-            } catch (CacheException e) {
+            } catch (final CacheException e) {
                 throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e);
             } finally {
                 lock.unlock();

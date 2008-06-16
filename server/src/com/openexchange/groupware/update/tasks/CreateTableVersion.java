@@ -49,21 +49,12 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
-import com.openexchange.database.Database;
-import com.openexchange.database.Server;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.SchemaImpl;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.SchemaExceptionFactory;

@@ -52,4 +52,9 @@ package com.openexchange.tools.exceptions;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class OXAborted extends RuntimeException {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8334216056095164302L;
 }

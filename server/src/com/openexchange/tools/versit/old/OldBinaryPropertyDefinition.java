@@ -61,11 +61,12 @@ import com.openexchange.tools.versit.VersitException;
 
 public class OldBinaryPropertyDefinition extends OldPropertyDefinition {
 
-	public OldBinaryPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldBinaryPropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
+	@Override
 	protected Object parseValue(final Property property, final OldScanner s, final byte[] value,
 			final String charset) throws IOException {
 		final Parameter param = property.getParameter("VALUE");
@@ -75,7 +76,7 @@ public class OldBinaryPropertyDefinition extends OldPropertyDefinition {
 		} else if ("URL".equalsIgnoreCase(param.getValue(0).getText())) {
 			try {
 				return new URI(new String(value, charset).trim());
-			} catch (URISyntaxException e) {
+			} catch (final URISyntaxException e) {
 				final VersitException ve = new VersitException(s, e.getMessage());
 				ve.initCause(e);
 				throw ve;
@@ -85,6 +86,7 @@ public class OldBinaryPropertyDefinition extends OldPropertyDefinition {
 		}
 	}
 
+	@Override
 	public void write(final OldFoldingWriter fw, final Property property)
 			throws IOException {
 		writeType(fw, property);

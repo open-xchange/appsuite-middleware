@@ -70,13 +70,13 @@ public class PropertyDefinition {
 	public static final PropertyDefinition Default = new PropertyDefinition(
 			new ValueDefinition());
 
-	public PropertyDefinition(ValueDefinition value) {
+	public PropertyDefinition(final ValueDefinition value) {
 		this.value = value;
 	}
 
 	public PropertyDefinition(final ValueDefinition value, final String[] valueNames,
-			ValueDefinition[] values, String[] paramNames,
-			ParameterDefinition[] parameters) {
+			final ValueDefinition[] values, final String[] paramNames,
+			final ParameterDefinition[] parameters) {
 		this.value = value;
 		for (int i = 0; i < values.length; i++) {
 			addValue(valueNames[i], values[i]);
@@ -147,7 +147,7 @@ public class PropertyDefinition {
 		final int count = property.getParameterCount();
 		for (int i = 0; i < count; i++) {
 			final Parameter parameter = property.getParameter(i);
-			ParameterDefinition definition = getParameter(parameter.name);
+			final ParameterDefinition definition = getParameter(parameter.name);
 			definition.write(fw, parameter);
 		}
 		fw.write(":");

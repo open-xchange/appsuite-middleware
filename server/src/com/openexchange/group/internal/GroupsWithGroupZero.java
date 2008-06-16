@@ -95,7 +95,7 @@ public final class GroupsWithGroupZero extends GroupStorage {
         if (GroupTools.GROUP_ZERO.getIdentifier() == gid) {
             try {
                 retval = GroupTools.getGroupZero(ctx);
-            } catch (UserException e) {
+            } catch (final UserException e) {
                 throw new LdapException(e);
             }
         } else {
@@ -113,7 +113,7 @@ public final class GroupsWithGroupZero extends GroupStorage {
         final Group[] retval = new Group[groups.length + 1];
         try {
             retval[0] = GroupTools.getGroupZero(ctx);
-        } catch (UserException e) {
+        } catch (final UserException e) {
             throw new LdapException(e);
         }
         System.arraycopy(groups, 0, retval, 1, groups.length);
@@ -130,7 +130,7 @@ public final class GroupsWithGroupZero extends GroupStorage {
         final Group[] retval = new Group[groups.length + 1];
         try {
             retval[0] = GroupTools.getGroupZero(ctx);
-        } catch (UserException e) {
+        } catch (final UserException e) {
             throw new LdapException(e);
         }
         System.arraycopy(groups, 0, retval, 1, groups.length);

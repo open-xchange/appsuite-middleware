@@ -97,7 +97,8 @@ public class UserParticipant implements Participant, Comparable {
 	/**
      * @deprecated User {@link #UserParticipant(int)}.
 	 */
-    public UserParticipant() {
+    @Deprecated
+	public UserParticipant() {
 	}
 
     /**
@@ -117,7 +118,8 @@ public class UserParticipant implements Participant, Comparable {
 	/**
      * @deprecated Use {@link #UserParticipant(int)}.
 	 */
-    public void setIdentifier(final int id) {
+    @Deprecated
+	public void setIdentifier(final int id) {
 		this.id = id;
 		b_id = true;
 	}

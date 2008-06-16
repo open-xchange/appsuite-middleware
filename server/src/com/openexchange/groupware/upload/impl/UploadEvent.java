@@ -137,7 +137,7 @@ public class UploadEvent {
 					if (!uploadFile.getTmpFile().delete()) {
 						LOG.error(new StringBuilder(ERR_PREFIX).append(uploadFile.getTmpFile().getName()));
 					}
-				} catch (SecurityException e) {
+				} catch (final SecurityException e) {
 					LOG.error(new StringBuilder(ERR_PREFIX).append(uploadFile.getTmpFile().getName()), e);
 				}
 			}
@@ -265,7 +265,7 @@ public class UploadEvent {
 					if (!tmpFile.delete()) {
 						LOG.error(new StringBuilder(ERR_PREFIX).append(tmpFile.getName()));
 					}
-				} catch (SecurityException e) {
+				} catch (final SecurityException e) {
 					LOG.error(new StringBuilder(ERR_PREFIX).append(tmpFile.getName()), e);
 				}
 			}

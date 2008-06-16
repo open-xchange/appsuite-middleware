@@ -58,7 +58,6 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.UnixCrypt;
 
 /**
  * This interface provides methods to read data from users in the directory
@@ -265,7 +264,7 @@ public abstract class UserStorage {
      * @param userId unique identifier of the user.
      * @throws UserException if removing gives an exception.
      */
-    public void invalidateUser(Context ctx, int userId) throws UserException {
+    public void invalidateUser(final Context ctx, final int userId) throws UserException {
         // Only for caching.
     }
 
@@ -398,7 +397,7 @@ public abstract class UserStorage {
             UID = LdapUtility.findProperty(Names.USER_ATTRIBUTE_UID);
             USERPASSWORD = LdapUtility.findProperty(Names
                 .USER_ATTRIBUTE_PASSWORD);
-        } catch (LdapException e) {
+        } catch (final LdapException e) {
             throw new RuntimeException(e);
         }
     }

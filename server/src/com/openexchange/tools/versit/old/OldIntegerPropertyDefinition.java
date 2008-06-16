@@ -63,6 +63,7 @@ public class OldIntegerPropertyDefinition extends OldShortPropertyDefinition {
 		super(paramNames, params);
 	}
 
+	@Override
 	protected Object parseValue(final Property property, final StringScanner s) throws IOException {
 		return Integer.valueOf(s.getRest());
 	}

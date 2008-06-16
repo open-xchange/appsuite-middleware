@@ -75,7 +75,7 @@ public class CreateDocumentAction extends AbstractDocumentListAction {
 			msg = "Invalid SQL Query : %s")
 	@Override
 	protected void undoAction() throws AbstractOXException {
-		UpdateBlock update = new Update(getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.INFOSTORE, getDocuments())){
+		final UpdateBlock update = new Update(getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.INFOSTORE, getDocuments())){
 
 			@Override
 			public void fillStatement() throws SQLException {
@@ -86,7 +86,7 @@ public class CreateDocumentAction extends AbstractDocumentListAction {
 		
 		try {
 			doUpdates(update);
-		} catch (UpdateException e) {
+		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(0, e.getSQLException(), e.getStatement());
 		}
 	}
@@ -99,13 +99,13 @@ public class CreateDocumentAction extends AbstractDocumentListAction {
 	public void perform() throws AbstractOXException {
 		try {
 			doUpdates( getQueryCatalog().getDocumentInsert(), getQueryCatalog().getDocumentFields(), getDocuments());
-		} catch (UpdateException e) {
+		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
 		}
 	}
 
 	@Override
-	protected Object[] getAdditionals(DocumentMetadata doc) {
+	protected Object[] getAdditionals(final DocumentMetadata doc) {
 		return new Object[]{getContext().getContextId()};
 	}
 

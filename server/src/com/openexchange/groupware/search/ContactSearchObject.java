@@ -105,7 +105,7 @@ public class ContactSearchObject extends SearchObject {
 		return anniversaryRange;
 	}
 
-	public void setAnniversaryRange(Date[] anniversaryRange) {
+	public void setAnniversaryRange(final Date[] anniversaryRange) {
 		this.anniversaryRange = anniversaryRange;
 	}
 
@@ -113,7 +113,7 @@ public class ContactSearchObject extends SearchObject {
 		return birthdayRange;
 	}
 
-	public void setBirthdayRange(Date[] birthdayRange) {
+	public void setBirthdayRange(final Date[] birthdayRange) {
 		this.birthdayRange = birthdayRange;
 	}
 
@@ -121,7 +121,7 @@ public class ContactSearchObject extends SearchObject {
 		return businessPostalCodeRange;
 	}
 
-	public void setBusinessPostalCodeRange(String[] businessPostalCodeRange) {
+	public void setBusinessPostalCodeRange(final String[] businessPostalCodeRange) {
 		this.businessPostalCodeRange = businessPostalCodeRange;
 	}
 
@@ -129,7 +129,7 @@ public class ContactSearchObject extends SearchObject {
 		return company;
 	}
 
-	public void setCompany(String company) {
+	public void setCompany(final String company) {
 		this.company = company;
 	}
 
@@ -137,7 +137,7 @@ public class ContactSearchObject extends SearchObject {
 		return email1;
 	}
 
-	public void setEmail1(String email1) {
+	public void setEmail1(final String email1) {
 		this.email1 = email1;
 	}
 	
@@ -145,7 +145,7 @@ public class ContactSearchObject extends SearchObject {
 		return email2;
 	}
 
-	public void setEmail2(String email2) {
+	public void setEmail2(final String email2) {
 		this.email2 = email2;
 	}
 	
@@ -153,7 +153,7 @@ public class ContactSearchObject extends SearchObject {
 		return email3;
 	}
 
-	public void setEmail3(String email3) {
+	public void setEmail3(final String email3) {
 		this.email3 = email3;
 	}
 	
@@ -161,7 +161,7 @@ public class ContactSearchObject extends SearchObject {
 		return creationDateRange;
 	}
 
-	public void setCreationDateRange(Date[] creationDateRange) {
+	public void setCreationDateRange(final Date[] creationDateRange) {
 		this.creationDateRange = creationDateRange;
 	}
 
@@ -169,7 +169,7 @@ public class ContactSearchObject extends SearchObject {
 		return displayName;
 	}
 
-	public void setDisplayName(String displayName) {
+	public void setDisplayName(final String displayName) {
 		this.displayName = displayName;
 	}
 
@@ -177,7 +177,7 @@ public class ContactSearchObject extends SearchObject {
 		return dynamicSearchField;
 	}
 
-	public void setDynamicSearchField(int[] dynamicSearchField) {
+	public void setDynamicSearchField(final int[] dynamicSearchField) {
 		this.dynamicSearchField = dynamicSearchField;
 	}
 
@@ -185,7 +185,7 @@ public class ContactSearchObject extends SearchObject {
 		return dynamicSearchFieldValue;
 	}
 
-	public void setDynamicSearchFieldValue(String[] dynamicSearchFieldValue) {
+	public void setDynamicSearchFieldValue(final String[] dynamicSearchFieldValue) {
 		this.dynamicSearchFieldValue = dynamicSearchFieldValue;
 	}
 
@@ -201,15 +201,15 @@ public class ContactSearchObject extends SearchObject {
 		return ignoreOwn;
 	}
 	
-	public void setIgnoreOwn(int ignoreOwn){
+	public void setIgnoreOwn(final int ignoreOwn){
 		this.ignoreOwn = ignoreOwn;
 	}
 	
-	public void setAllFolderSQLINString(String allFolderSQLINString){
+	public void setAllFolderSQLINString(final String allFolderSQLINString){
 		this.allFolderSQLINString = allFolderSQLINString;
 	}
 	
-	public void setGivenName(String forename) {
+	public void setGivenName(final String forename) {
 		this.givenname = forename;
 	}
 
@@ -217,7 +217,7 @@ public class ContactSearchObject extends SearchObject {
 		return lastModifiedRange;
 	}
 
-	public void setLastModifiedRange(Date[] lastModifiedRange) {
+	public void setLastModifiedRange(final Date[] lastModifiedRange) {
 		this.lastModifiedRange = lastModifiedRange;
 	}
 
@@ -225,7 +225,7 @@ public class ContactSearchObject extends SearchObject {
 		return numberOfEmployeesRange;
 	}
 
-	public void setNumberOfEmployeesRange(String[] numberOfEmployeesRange) {
+	public void setNumberOfEmployeesRange(final String[] numberOfEmployeesRange) {
 		this.numberOfEmployeesRange = numberOfEmployeesRange;
 	}
 
@@ -233,7 +233,7 @@ public class ContactSearchObject extends SearchObject {
 		return otherPostalCodeRange;
 	}
 
-	public void setOtherPostalCodeRange(String[] otherPostalCodeRange) {
+	public void setOtherPostalCodeRange(final String[] otherPostalCodeRange) {
 		this.otherPostalCodeRange = otherPostalCodeRange;
 	}
 
@@ -241,7 +241,7 @@ public class ContactSearchObject extends SearchObject {
 		return privatePostalCodeRange;
 	}
 
-	public void setPrivatePostalCodeRange(String[] privatePostalCodeRange) {
+	public void setPrivatePostalCodeRange(final String[] privatePostalCodeRange) {
 		this.privatePostalCodeRange = privatePostalCodeRange;
 	}
 
@@ -249,7 +249,7 @@ public class ContactSearchObject extends SearchObject {
 		return salesVolumeRange;
 	}
 
-	public void setSalesVolumeRange(String[] salesVolumeRange) {
+	public void setSalesVolumeRange(final String[] salesVolumeRange) {
 		this.salesVolumeRange = salesVolumeRange;
 	}
 
@@ -257,11 +257,11 @@ public class ContactSearchObject extends SearchObject {
 		return surname;
 	}
 
-	public void setSurname(String surname) {
+	public void setSurname(final String surname) {
 		this.surname = surname;
 	}
 	
-	public void setEmailAutoComplete(boolean status){
+	public void setEmailAutoComplete(final boolean status){
 		this.emailAutoComplete = status;
 	}
 	
@@ -269,7 +269,7 @@ public class ContactSearchObject extends SearchObject {
 		return emailAutoComplete;
 	}
 	
-	public void setEmailAutoCompleteFolder(int folder){
+	public void setEmailAutoCompleteFolder(final int folder){
 		this.emailAutoCompleteFolder = folder;
 	}
 	

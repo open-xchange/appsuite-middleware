@@ -107,7 +107,7 @@ public final class FilestoreTools {
             return new URI(uri.getScheme(), uri.getAuthority(), uri.getPath()
                 + '/' + context.getFilestoreName(), uri.getQuery(),
                 uri.getFragment());
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             throw EXCEPTION.create(2, e);
         }
     }

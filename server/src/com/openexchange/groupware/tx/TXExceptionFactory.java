@@ -56,14 +56,14 @@ import com.openexchange.groupware.AbstractOXException.Category;
 
 public class TXExceptionFactory extends AbstractOXExceptionFactory {
 	
-	public TXExceptionFactory(Class clazz) {
+	public TXExceptionFactory(final Class clazz) {
 		super(clazz);
 	}
 
 	@Override
-	protected AbstractOXException buildException(EnumComponent component,
-			Category category, int number, String message, Throwable cause,
-			Object... msgArgs) {
+	protected AbstractOXException buildException(final EnumComponent component,
+			final Category category, final int number, final String message, final Throwable cause,
+			final Object... msgArgs) {
 		if(component != EnumComponent.TRANSACTION) {
 			throw new IllegalArgumentException("This factory can only build exceptions for the infostore");
 		}
@@ -75,11 +75,11 @@ public class TXExceptionFactory extends AbstractOXExceptionFactory {
 		return Classes.COM_OPENEXCHANGE_GROUPWARE_TX_TXEXCEPTIONFACTORY;
 	}
 	
-	public TransactionException create(int id, Object...msgArgs){
+	public TransactionException create(final int id, final Object...msgArgs){
 		return (TransactionException) createException(id,msgArgs);
 	}
 	
-	public TransactionException create(int id, Throwable cause, Object...msgArgs){
+	public TransactionException create(final int id, final Throwable cause, final Object...msgArgs){
 		return (TransactionException) createException(id,cause, msgArgs);
 	}
 

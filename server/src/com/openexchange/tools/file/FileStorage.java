@@ -50,6 +50,7 @@
 package com.openexchange.tools.file;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -184,22 +185,22 @@ public abstract class FileStorage {
                 new Object[] { args });
             retval.checkStorage();
             return retval;
-        } catch (InstantiationException e) {
+        } catch (final InstantiationException e) {
             throw new FileStorageException(FileStorageException.Code
                 .INSTANTIATIONERROR, e, initData[0]);
-        } catch (IllegalAccessException e) {
+        } catch (final IllegalAccessException e) {
             throw new FileStorageException(FileStorageException.Code
                 .INSTANTIATIONERROR, e, initData[0]);
-        } catch (SecurityException e) {
+        } catch (final SecurityException e) {
             throw new FileStorageException(FileStorageException.Code
                 .INSTANTIATIONERROR, e, initData[0]);
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
             throw new FileStorageException(FileStorageException.Code
                 .INSTANTIATIONERROR, e, initData[0]);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             throw new FileStorageException(FileStorageException.Code
                 .INSTANTIATIONERROR, e, initData[0]);
-        } catch (InvocationTargetException e) {
+        } catch (final InvocationTargetException e) {
             throw new FileStorageException(FileStorageException.Code
                 .INSTANTIATIONERROR, e, initData[0]);
         }
@@ -213,7 +214,7 @@ public abstract class FileStorage {
         return impl;
     }
 
-    public static void setImpl(Class<? extends FileStorage> impl) {
+    public static void setImpl(final Class<? extends FileStorage> impl) {
         FileStorage.impl = impl;
     }
 
@@ -315,7 +316,7 @@ public abstract class FileStorage {
         }
         try {
             save(nextentry, input);
-        } catch (FileStorageException ie) {
+        } catch (final FileStorageException ie) {
             delete(nextentry);
             lock(LOCK_TIMEOUT);
             try {
@@ -371,7 +372,8 @@ public abstract class FileStorage {
     /**
      * {@inheritDoc}
      */
-    protected void finalize() throws Throwable {
+    @Override
+	protected void finalize() throws Throwable {
         close();
         super.finalize();
     }
@@ -401,7 +403,7 @@ public abstract class FileStorage {
     private State loadState() throws FileStorageException {
         try {
             return new State(load(STATEFILENAME));
-        } catch (FileStorageException e) {
+        } catch (final FileStorageException e) {
             delete(STATEFILENAME);
             throw e;
         }
@@ -415,7 +417,7 @@ public abstract class FileStorage {
     private void saveState(final State state) throws FileStorageException {
         try {
             save(STATEFILENAME, state.saveState());
-        } catch (FileStorageException e) {
+        } catch (final FileStorageException e) {
             delete(STATEFILENAME);
             throw e;
         }
@@ -506,7 +508,7 @@ public abstract class FileStorage {
      */
     private String computeNextEntry(final String identifier)
         throws FileStorageException {
-        int[] entry = new int[depth];
+        final int[] entry = new int[depth];
         final StringTokenizer tokenizer = new StringTokenizer(identifier,
             File.separator);
         if (tokenizer.countTokens() != depth) {

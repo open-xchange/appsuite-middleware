@@ -88,7 +88,7 @@ final class TasksImpl extends Tasks {
             final Context ctx = Tools.getContext(session.getContextId());
             return TaskStorage.getInstance().containsNotSelfCreatedTasks(ctx,
                 con, session.getUserId(), folderId);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
     }
@@ -109,16 +109,16 @@ final class TasksImpl extends Tasks {
             ctx = Tools.getContext(session.getContextId());
             final int[] taskIds = foldStor.getTasksInFolder(ctx, con, folderId,
                 StorageType.ACTIVE);
-            for (int taskId : taskIds) {
+            for (final int taskId : taskIds) {
                 final UpdateData data = new UpdateData();
                 data.taskId = taskId;
                 removeParticipant.add(data);
             }
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
         try {
-            for (UpdateData data : removeParticipant) {
+            for (final UpdateData data : removeParticipant) {
                 final Set<Folder> folders = foldStor.selectFolder(ctx, con,
                     data.taskId, StorageType.ACTIVE);
                 if (folders.size() == 1) {
@@ -149,19 +149,19 @@ final class TasksImpl extends Tasks {
                     data.removeFolder.add(folder);
                 }
             }
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
         removeParticipant.removeAll(deleteTask);
         try {
-            for (int taskId : deleteTask) {
+            for (final int taskId : deleteTask) {
                 final Task task = GetTask.load(ctx, con, folderId, taskId,
                     StorageType.ACTIVE);
                 TaskLogic.deleteTask(ctx, con, userId, task,
                     task.getLastModified());
                 TaskLogic.informDelete(session, ctx, task);
             }
-            for (UpdateData data : removeParticipant) {
+            for (final UpdateData data : removeParticipant) {
                 if (deleteTask.contains(Integer.valueOf(data.taskId))) {
                     continue;
                 }
@@ -169,7 +169,7 @@ final class TasksImpl extends Tasks {
                     data.task, new Date(), data.modified, data.add,
                     data.remove, data.addFolder, data.removeFolder);
             }
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
     }
@@ -193,7 +193,7 @@ final class TasksImpl extends Tasks {
         final TaskStorage storage = TaskStorage.getInstance();
         try {
             return storage.countTasks(ctx, -1, folderId, false, false) == 0;
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
     }

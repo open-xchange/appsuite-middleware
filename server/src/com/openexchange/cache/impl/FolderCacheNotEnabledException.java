@@ -71,7 +71,7 @@ public class FolderCacheNotEnabledException extends OXFolderException {
 		setMessageArgs(FOLDER_CACHE_PROPFILE);
 	}
 
-	public FolderCacheNotEnabledException(Exception cause) {
+	public FolderCacheNotEnabledException(final Exception cause) {
 		super(FolderCode.CACHE_NOT_ENABLED, cause, FOLDER_CACHE_PROPFILE);
 	}
 

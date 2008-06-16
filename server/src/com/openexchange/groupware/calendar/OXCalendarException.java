@@ -60,11 +60,16 @@ import com.openexchange.groupware.EnumComponent;
 
 public class OXCalendarException extends OXException {
     
-    public OXCalendarException(final Code code, Object... messageArgs) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -33608409653330247L;
+
+	public OXCalendarException(final Code code, final Object... messageArgs) {
         this(code, null, messageArgs);
     }
     
-    public OXCalendarException(final Code code, Throwable throwable, Object... messageArgs) {
+    public OXCalendarException(final Code code, final Throwable throwable, final Object... messageArgs) {
         super(EnumComponent.APPOINTMENT, code.category, code.detailNumber, code.message, throwable);
         super.setMessageArgs(messageArgs);
     }

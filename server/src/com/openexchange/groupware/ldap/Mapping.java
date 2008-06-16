@@ -80,7 +80,7 @@ public final class Mapping {
     static Map<String, UserMapper> userMapping;
 
     static {
-        Map<String, UserMapper> mapping = new HashMap<String, UserMapper>();
+        final Map<String, UserMapper> mapping = new HashMap<String, UserMapper>();
         mapping.put(UserStorage.DISPLAYNAME, new UserMapper() {
             public void setInObject(final ResultSet result,
                 final int parameterIndex, final UserImpl user)

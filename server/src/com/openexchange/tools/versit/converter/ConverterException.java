@@ -58,7 +58,7 @@ public class ConverterException extends Exception {
 
 	private static final long serialVersionUID = -182564147592234886L;
 
-	public ConverterException(String message) {
+	public ConverterException(final String message) {
 		super(message);
 	}
 
@@ -66,11 +66,11 @@ public class ConverterException extends Exception {
 		super();
 	}
 
-	public ConverterException(String message, Throwable cause) {
+	public ConverterException(final String message, final Throwable cause) {
 		super(message, cause);
 	}
 
-	public ConverterException(Throwable cause) {
+	public ConverterException(final Throwable cause) {
 		super(cause);
 	}
 	

@@ -89,7 +89,7 @@ public class Addresses implements PreferencesItemService {
                 final Setting setting) throws SettingException {
                 final String[] aliases = user.getAliases();
                 if (null != aliases) {
-                    for (String alias : aliases) {
+                    for (final String alias : aliases) {
                         setting.addMultiValue(alias);
                     }
                 }

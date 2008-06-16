@@ -1217,7 +1217,7 @@ public final class Mapping {
 
     static {
         final Map<Integer, Mapper> tmp = new HashMap<Integer, Mapper>();
-        for (Mapper mapper : MAPPERS) {
+        for (final Mapper mapper : MAPPERS) {
             tmp.put(Integer.valueOf(mapper.getId()), mapper);
         }
         final Mapper identifier = new Mapper<Integer>() {
@@ -1258,11 +1258,11 @@ public final class Mapping {
         tmp2.add(Integer.valueOf(Task.ALARM));
         ALL_ATTRIBUTES = Collections.unmodifiableSet(tmp2);
         final List<Mapper<String>> tmp3 = new ArrayList<Mapper<String>>();
-        for (Mapper<?> mapper : Mapping.MAPPERS) {
-            for (Type t : mapper.getClass().getGenericInterfaces()) {
+        for (final Mapper<?> mapper : Mapping.MAPPERS) {
+            for (final Type t : mapper.getClass().getGenericInterfaces()) {
                 if (t instanceof ParameterizedType) {
                     final ParameterizedType pt = ((ParameterizedType) t);
-                    for (Type u : pt.getActualTypeArguments()) {
+                    for (final Type u : pt.getActualTypeArguments()) {
                         if (String.class.equals(u)) {
                             tmp3.add((Mapper<String>) mapper);
                         }

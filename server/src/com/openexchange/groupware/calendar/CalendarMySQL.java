@@ -246,8 +246,8 @@ class CalendarMySQL implements CalendarSqlImp {
 		return pst;
 	}
 
-    public final PreparedStatement getAllPrivateAppointmentAndFolderIdsForUser(Context c, int id, Connection readcon) throws SQLException {
-        PreparedStatement stmt = readcon.prepareStatement(SELECT_ALL_PRIVATE_FOLDERS_IN_WHICH_A_USER_IS_A_PARTICIPANT);
+    public final PreparedStatement getAllPrivateAppointmentAndFolderIdsForUser(final Context c, final int id, final Connection readcon) throws SQLException {
+        final PreparedStatement stmt = readcon.prepareStatement(SELECT_ALL_PRIVATE_FOLDERS_IN_WHICH_A_USER_IS_A_PARTICIPANT);
         stmt.setInt(1, id);
         stmt.setInt(2, c.getContextId());
         return stmt;
@@ -1124,7 +1124,7 @@ class CalendarMySQL implements CalendarSqlImp {
 				int lasttype = -1;
 				for (int a = 0; a < p.length; a++) {
 					if (p[a].getIdentifier() == 0 && p[a].getType() == Participant.EXTERNAL_USER && p[a].getEmailAddress() != null) {
-						ExternalUserParticipant eup = new ExternalUserParticipant(p[a].getEmailAddress());
+						final ExternalUserParticipant eup = new ExternalUserParticipant(p[a].getEmailAddress());
 						eup.setIdentifier(p[a].getEmailAddress().hashCode());
 						eup.setDisplayName(p[a].getDisplayName());
 						p[a] = eup;
@@ -1256,7 +1256,7 @@ class CalendarMySQL implements CalendarSqlImp {
 							pi.setNull(6, java.sql.Types.INTEGER);
 						}
 						if (up[a].getAlarmMinutes() >= 0 && up[a].getIdentifier() == uid) {
-							long la = up[a].getAlarmMinutes() * 60000L;
+							final long la = up[a].getAlarmMinutes() * 60000L;
 							changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), cdao.getEndDate(), new java.util.Date(cdao.getStartDate().getTime() - la), CalendarOperation.INSERT);
 						}
 						pi.setInt(7, cdao.getContextID());
@@ -1317,7 +1317,7 @@ class CalendarMySQL implements CalendarSqlImp {
 					if (rs.wasNull()) {
 						temp = null;
 					}
-					String temp2 = rs.getString(5);
+					final String temp2 = rs.getString(5);
 					if (!rs.wasNull()) {
 						participant = new ExternalUserParticipant(temp2);
 						if (temp != null) {
@@ -1331,7 +1331,7 @@ class CalendarMySQL implements CalendarSqlImp {
 					if (rs.wasNull()) {
 						temp = null;
 					}
-					String temp2 = rs.getString(5);
+					final String temp2 = rs.getString(5);
 					if (!rs.wasNull()) {
 						participant = new ExternalGroupParticipant(temp2);
 						if (temp != null) {
@@ -1384,7 +1384,7 @@ class CalendarMySQL implements CalendarSqlImp {
 					if (rs.wasNull()) {
 						temp = null;
 					}
-					String temp2 = rs.getString(4);
+					final String temp2 = rs.getString(4);
 					if (!rs.wasNull()) {
 						participant = new ExternalUserParticipant(temp2);
 						if (temp != null) {
@@ -1398,7 +1398,7 @@ class CalendarMySQL implements CalendarSqlImp {
 					if (rs.wasNull()) {
 						temp = null;
 					}
-					String temp2 = rs.getString(4);
+					final String temp2 = rs.getString(4);
 					if (!rs.wasNull()) {
 						participant = new ExternalGroupParticipant(temp2);
 						if (temp != null) {
@@ -1575,7 +1575,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		return participants;
 	}
 
-	public final CalendarDataObject loadObjectForUpdate(final CalendarDataObject cdao, final Session so, Context ctx, final int inFolder) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException {
+	public final CalendarDataObject loadObjectForUpdate(final CalendarDataObject cdao, final Session so, final Context ctx, final int inFolder) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException {
 		final CalendarOperation co = new CalendarOperation();
 		Connection readcon = null;
 		CalendarDataObject edao = null;
@@ -1614,7 +1614,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		return edao;
 	}
 
-	public final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
+	public final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
 		return updateAppointment(cdao, edao, writecon, so, ctx, inFolder, clientLastModified, true);
 	}
 
@@ -1670,8 +1670,8 @@ class CalendarMySQL implements CalendarSqlImp {
 			}
 			CalendarCommonCollection.purgeExceptionFieldsFromObject(cdao);
 		} else if (rec_action == CalendarRecurringCollection.RECURRING_EXCEPTION_DELETE_EXISTING) {
-			java.util.Date delete_exception_dates[] = cdao.getDeleteException();
-			ArrayList<Integer> delete_exceptions = new ArrayList<Integer>();
+			final java.util.Date delete_exception_dates[] = cdao.getDeleteException();
+			final ArrayList<Integer> delete_exceptions = new ArrayList<Integer>();
 			final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(edao, 0, 0, 0, 999, true);
 			if (rrs != null) {
 				for (int a = 0; a < delete_exception_dates.length; a++) {
@@ -1680,7 +1680,7 @@ class CalendarMySQL implements CalendarSqlImp {
 				}
 				if (!delete_exceptions.isEmpty()) {
 					final Object oids[] = delete_exceptions.toArray();
-					ArrayList<Integer> real_ids = getDeletedExceptionList(null, ctx, edao.getRecurrenceID(), StringCollection.getSqlInString(oids));
+					final ArrayList<Integer> real_ids = getDeletedExceptionList(null, ctx, edao.getRecurrenceID(), StringCollection.getSqlInString(oids));
 					final Object oids_to_delete[] = real_ids.toArray();
 					deleteAllRecurringExceptions(StringCollection.getSqlInString(oids_to_delete), so, writecon);
 					for (int a = 0; a < delete_exceptions.size(); a++) {
@@ -1728,7 +1728,7 @@ class CalendarMySQL implements CalendarSqlImp {
 
 		final int ucols[] = new int[26];
 		int uc = CalendarOperation.fillUpdateArray(cdao, edao, ucols);
-		MBoolean cup = new MBoolean(false);
+		final MBoolean cup = new MBoolean(false);
 		if (uc > 0 || CalendarCommonCollection.check(cdao.getUsers(), edao.getUsers())) {
 
 			ucols[uc++] = AppointmentObject.LAST_MODIFIED;
@@ -1870,7 +1870,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		}
 		cdao.setParentFolderID(cdao.getActionFolder());
 
-		boolean solo_reminder = CalendarCommonCollection.checkForSoloReminderUpdate(cdao, uc, cup);
+		final boolean solo_reminder = CalendarCommonCollection.checkForSoloReminderUpdate(cdao, uc, cup);
 		CalendarCommonCollection.checkAndRemovePastReminders(cdao, edao);
 		if (!solo_reminder) {
 			CalendarCommonCollection.triggerEvent(so, CalendarOperation.UPDATE, cdao);
@@ -1882,7 +1882,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		return null;
 	}
 
-	private final void updateParticipants(final CalendarDataObject cdao, final CalendarDataObject edao, final int uid, final int cid, final Connection writecon, MBoolean cup) throws SQLException, OXException, LdapException {
+	private final void updateParticipants(final CalendarDataObject cdao, final CalendarDataObject edao, final int uid, final int cid, final Connection writecon, final MBoolean cup) throws SQLException, OXException, LdapException {
 		final Participant participants[] = cdao.getParticipants();
 		UserParticipant users[] = cdao.getUsers();
 
@@ -1954,7 +1954,7 @@ class CalendarMySQL implements CalendarSqlImp {
 				int lasttype = -1;
 				for (int a = 0; a < new_participants.length; a++) {
 					if (new_participants[a].getIdentifier() == 0 && new_participants[a].getType() == Participant.EXTERNAL_USER && new_participants[a].getEmailAddress() != null) {
-						ExternalUserParticipant eup = new ExternalUserParticipant(new_participants[a].getEmailAddress());
+						final ExternalUserParticipant eup = new ExternalUserParticipant(new_participants[a].getEmailAddress());
 						eup.setIdentifier(new_participants[a].getEmailAddress().hashCode());
 						eup.setDisplayName(new_participants[a].getDisplayName());
 						new_participants[a] = eup;
@@ -2128,7 +2128,7 @@ class CalendarMySQL implements CalendarSqlImp {
 
 						if (new_userparticipants[a].getAlarmMinutes() >= 0 && new_userparticipants[a].containsAlarm()) {
 							pi.setInt(6, new_userparticipants[a].getAlarmMinutes());
-							long la = new_userparticipants[a].getAlarmMinutes() * 60000L;
+							final long la = new_userparticipants[a].getAlarmMinutes() * 60000L;
 							java.util.Date calc_date = null;
 							java.util.Date end_date = null;
 							if (cdao.containsStartDate()) {
@@ -2303,8 +2303,8 @@ class CalendarMySQL implements CalendarSqlImp {
 						if (folder_id <= 0) {
 							folder_id = cdao.getEffectiveFolderId();
 						}
-						long la = modified_userparticipants[a].getAlarmMinutes() * 60000L;
-						java.util.Date reminder = new java.util.Date(calc_date.getTime() - la);
+						final long la = modified_userparticipants[a].getAlarmMinutes() * 60000L;
+						final java.util.Date reminder = new java.util.Date(calc_date.getTime() - la);
 						changeReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), folder_id, cdao.getContext(), cdao.isSequence(true), end_date, reminder, CalendarOperation.UPDATE);
 					} else {
 						pu.setNull(4, java.sql.Types.INTEGER);
@@ -2456,7 +2456,7 @@ class CalendarMySQL implements CalendarSqlImp {
 
 	}
 
-	public final void setUserConfirmation(final int oid, final int uid, final int confirm, final String confirm_message, final Session so, Context ctx) throws OXException {
+	public final void setUserConfirmation(final int oid, final int uid, final int confirm, final String confirm_message, final Session so, final Context ctx) throws OXException {
 		Connection writecon = null;
 		int changes[];
 		PreparedStatement pu = null;
@@ -2815,7 +2815,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		}
 	}
 
-	public final void deleteAppointment(final int uid, final CalendarDataObject cdao, final Connection writecon, final Session so, Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
+	public final void deleteAppointment(final int uid, final CalendarDataObject cdao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
 		Connection readcon = null;
 		CalendarDataObject edao = null;
 		PreparedStatement prep = null;
@@ -2861,7 +2861,7 @@ class CalendarMySQL implements CalendarSqlImp {
 
 	}
 
-	public void deleteAppointmentsInFolder(final Session so, Context ctx, final ResultSet rs, final Connection readcon, final Connection writecon, final int foldertype, final int fid) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException {
+	public void deleteAppointmentsInFolder(final Session so, final Context ctx, final ResultSet rs, final Connection readcon, final Connection writecon, final int foldertype, final int fid) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException {
 		while (rs.next()) {
 			final int oid = rs.getInt(1);
 			final int owner = rs.getInt(2);
@@ -2869,7 +2869,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		}
 	}
 
-	private final void deleteSingleAppointment(final int cid, int oid, final int uid, final int owner, final int fid, Connection readcon, final Connection writecon, final int foldertype, final Session so, Context ctx, final int recurring_action, final CalendarDataObject cdao, final CalendarDataObject edao, final java.util.Date clientLastModified) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
+	private final void deleteSingleAppointment(final int cid, int oid, final int uid, final int owner, final int fid, Connection readcon, final Connection writecon, final int foldertype, final Session so, final Context ctx, final int recurring_action, final CalendarDataObject cdao, final CalendarDataObject edao, final java.util.Date clientLastModified) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
 
 		if (foldertype == FolderObject.PRIVATE && uid != owner) {
 			boolean close_read = false;
@@ -2895,10 +2895,10 @@ class CalendarMySQL implements CalendarSqlImp {
 						edao.setRecurrenceDatePosition(cdao.getRecurrenceDatePosition());
 						CalendarRecurringCollection.setRecurrencePositionOrDateInDAO(edao);
 
-						CalendarDataObject temp = (CalendarDataObject) edao.clone();
+						final CalendarDataObject temp = (CalendarDataObject) edao.clone();
 						final RecurringResults rss = CalendarRecurringCollection.calculateRecurring(temp, 0, 0, edao.getRecurrencePosition());
 						if (rss != null) {
-							RecurringResult rs = rss.getRecurringResult(0);
+							final RecurringResult rs = rss.getRecurringResult(0);
 							if (rss != null) {
 								edao.setStartDate(new Date(rs.getStart()));
 								edao.setEndDate(new Date(rs.getEnd()));
@@ -3145,7 +3145,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		}
 	}
 
-	private final void triggerDeleteEvent(final int oid, final int fid, final Session so, Context ctx, final CalendarDataObject edao, final Connection readcon) throws OXException, SQLException {
+	private final void triggerDeleteEvent(final int oid, final int fid, final Session so, final Context ctx, final CalendarDataObject edao, final Connection readcon) throws OXException, SQLException {
 		CalendarDataObject ao = null;
 		if (edao != null) {
 			ao = (CalendarDataObject) edao.clone();
@@ -3159,7 +3159,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		final ReminderSQLInterface rsql = new ReminderHandler(ctx);
 		try {
 			rsql.deleteReminder(oid, Types.APPOINTMENT);
-		} catch (AbstractOXException oxe) {
+		} catch (final AbstractOXException oxe) {
 			// this is wanted if Code = Code.NOT_FOUND
 			if (oxe.getDetailNumber() != Code.NOT_FOUND.getDetailNumber()) {
 				throw new OXException(oxe);
@@ -3167,7 +3167,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		}
 	}
 
-	private final void createSingleVirtualDeleteException(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final int oid, final int uid, final int fid, final Session so, Context ctx, final java.util.Date clientLastModified) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
+	private final void createSingleVirtualDeleteException(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final int oid, final int uid, final int fid, final Session so, final Context ctx, final java.util.Date clientLastModified) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
 		final CalendarDataObject udao = new CalendarDataObject();
 		udao.setObjectID(oid);
 		udao.setContext(ctx);
@@ -3348,7 +3348,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		}
 	}
 
-	private final void deleteAllReminderEntries(CalendarDataObject edao, int oid, int inFolder, Session so, Context ctx, Connection readcon) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
+	private final void deleteAllReminderEntries(CalendarDataObject edao, final int oid, final int inFolder, final Session so, final Context ctx, Connection readcon) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
 		UserParticipant up[] = null;
 		boolean close_read = false;
 		if (edao == null) {
@@ -3389,7 +3389,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		}
 		up = edao.getUsers();
 		for (int a = 0; a < up.length; a++) {
-			int uid = up[a].getIdentifier();
+			final int uid = up[a].getIdentifier();
 			int fid = 0;
 			if (up[a].getPersonalFolderId() > 0) {
 				fid = up[a].getPersonalFolderId();

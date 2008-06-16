@@ -56,13 +56,13 @@ package com.openexchange.groupware.calendar;
 
 public class RecurringResult {
     
-    private long normalized;
-    private long start;
-    private long diff;
-    private int length_offset;
-    private int position;
+    private final long normalized;
+    private final long start;
+    private final long diff;
+    private final int length_offset;
+    private final int position;
     
-    public RecurringResult(long start, long diff, int length_offset, int position) {
+    public RecurringResult(final long start, final long diff, final int length_offset, final int position) {
         this.start = start;
         normalized = CalendarRecurringCollection.normalizeLong(start);
         this.diff = diff;

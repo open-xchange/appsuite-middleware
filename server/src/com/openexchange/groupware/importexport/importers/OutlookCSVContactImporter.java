@@ -130,7 +130,7 @@ public class OutlookCSVContactImporter extends CSVContactImporter implements Imp
 	 * language mappers and sets the correct ContactFieldMapper for this
 	 * class.
 	 */
-	protected boolean checkFields(List<String> fields) {
+	protected boolean checkFields(final List<String> fields) {
 		int de = 0, fr = 0, en = 0;
 		final ContactFieldMapper 	deMap = new GermanOutlookMapper(), 
 									frMap = new FrenchOutlookMapper(), 
@@ -180,7 +180,7 @@ public class OutlookCSVContactImporter extends CSVContactImporter implements Imp
 	}
 
 	@Override
-	protected String getNameForFieldInTruncationError(int id, OXException notused) {
+	protected String getNameForFieldInTruncationError(final int id, final OXException notused) {
 		final ContactField field = ContactField.getByValue(id);
 		if(field == null){
 			return String.valueOf( id );

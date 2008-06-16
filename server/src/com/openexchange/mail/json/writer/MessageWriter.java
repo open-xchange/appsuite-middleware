@@ -160,7 +160,7 @@ public final class MessageWriter {
 			Fields: switch (fields[i]) {
 			case ID:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							if (withKey) {
@@ -176,7 +176,7 @@ public final class MessageWriter {
 				break Fields;
 			case FOLDER_ID:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							if (withKey) {
@@ -193,7 +193,7 @@ public final class MessageWriter {
 				break Fields;
 			case ATTACHMENT:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							if (withKey) {
@@ -210,7 +210,7 @@ public final class MessageWriter {
 				break Fields;
 			case FROM:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							if (withKey) {
@@ -227,7 +227,7 @@ public final class MessageWriter {
 				break Fields;
 			case TO:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							if (withKey) {
@@ -244,7 +244,7 @@ public final class MessageWriter {
 				break Fields;
 			case CC:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							if (withKey) {
@@ -261,7 +261,7 @@ public final class MessageWriter {
 				break Fields;
 			case BCC:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							if (withKey) {
@@ -278,7 +278,7 @@ public final class MessageWriter {
 				break Fields;
 			case SUBJECT:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							if (withKey) {
@@ -296,7 +296,7 @@ public final class MessageWriter {
 				break Fields;
 			case SIZE:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							if (withKey) {
@@ -312,7 +312,7 @@ public final class MessageWriter {
 				break Fields;
 			case SENT_DATE:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							if (withKey) {
@@ -345,7 +345,7 @@ public final class MessageWriter {
 				break Fields;
 			case RECEIVED_DATE:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							if (withKey) {
@@ -379,7 +379,7 @@ public final class MessageWriter {
 				break Fields;
 			case FLAGS:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							if (withKey) {
@@ -395,7 +395,7 @@ public final class MessageWriter {
 				break Fields;
 			case THREAD_LEVEL:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							if (withKey) {
@@ -412,7 +412,7 @@ public final class MessageWriter {
 				break Fields;
 			case DISPOSITION_NOTIFICATION_TO:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							final Object value;
@@ -436,7 +436,7 @@ public final class MessageWriter {
 				break Fields;
 			case PRIORITY:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							if (withKey) {
@@ -452,7 +452,7 @@ public final class MessageWriter {
 				break Fields;
 			case MSG_REF:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							if (withKey) {
@@ -470,7 +470,7 @@ public final class MessageWriter {
 				break Fields;
 			case COLOR_LABEL:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							final int colorLabel;
@@ -492,7 +492,7 @@ public final class MessageWriter {
 				break Fields;
 			case TOTAL:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							/*
@@ -511,7 +511,7 @@ public final class MessageWriter {
 				break Fields;
 			case NEW:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							/*
@@ -530,7 +530,7 @@ public final class MessageWriter {
 				break Fields;
 			case UNREAD:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							if (withKey) {
@@ -547,7 +547,7 @@ public final class MessageWriter {
 				break Fields;
 			case DELETED:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							/*
@@ -566,7 +566,7 @@ public final class MessageWriter {
 				break Fields;
 			default:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
 							throws MailException {
 						try {
 							/*
@@ -615,7 +615,7 @@ public final class MessageWriter {
 			return EMPTY_JSON_ARR;
 		}
 		final JSONArray jsonArr = new JSONArray();
-		for (InternetAddress address : addrs) {
+		for (final InternetAddress address : addrs) {
 			jsonArr.put(getAddressAsArray(address));
 		}
 		return jsonArr;

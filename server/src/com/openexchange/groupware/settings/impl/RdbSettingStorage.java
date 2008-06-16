@@ -164,7 +164,7 @@ public class RdbSettingStorage extends SettingStorage {
         final Connection con;
         try {
             con = DBPool.pickupWriteable(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new SettingException(Code.NO_CONNECTION, e);
         }
         try {
@@ -207,7 +207,7 @@ public class RdbSettingStorage extends SettingStorage {
                 stmt.setInt(pos++, userId);
                 stmt.setInt(pos++, setting.getId());
                 stmt.executeUpdate();
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw new SettingException(Code.SQL_ERROR, e);
             } finally {
                 closeSQLStuff(null, stmt);
@@ -230,7 +230,7 @@ public class RdbSettingStorage extends SettingStorage {
             Connection con;
             try {
                 con = DBPool.pickup(ctx);
-            } catch (DBPoolingException e) {
+            } catch (final DBPoolingException e) {
                 throw new SettingException(Code.NO_CONNECTION, e);
             }
             PreparedStatement stmt = null;
@@ -248,7 +248,7 @@ public class RdbSettingStorage extends SettingStorage {
                 } else {
                     setting.setSingleValue(null);
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw new SettingException(Code.SQL_ERROR, e);
             } finally {
                 closeSQLStuff(result, stmt);
@@ -267,7 +267,7 @@ public class RdbSettingStorage extends SettingStorage {
             if (reader.isAvailable(userConfig)) {
                 try {
                     reader.getValue(session, ctx, user, userConfig, setting);
-                } catch (SettingException e) {
+                } catch (final SettingException e) {
                     LOG.error("Problem while reading setting value.", e);
                 }
             } else {
@@ -289,7 +289,7 @@ public class RdbSettingStorage extends SettingStorage {
         Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new SettingException(Code.NO_CONNECTION, e);
         }
         boolean exists = false;
@@ -305,7 +305,7 @@ public class RdbSettingStorage extends SettingStorage {
             if (result.next()) {
                 exists = result.getInt(1) == 1;
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new SettingException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(result, stmt);
@@ -321,7 +321,7 @@ public class RdbSettingStorage extends SettingStorage {
      */
     private void readSubValues(final Setting setting)
         throws SettingException {
-        for (Setting subSetting : setting.getElements()) {
+        for (final Setting subSetting : setting.getElements()) {
             readValues(subSetting);
         }
         // During reading values all childs may be removed.
@@ -339,14 +339,14 @@ public class RdbSettingStorage extends SettingStorage {
         if (null != result) {
             try {
                 result.close();
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
         if (null != stmt) {
             try {
                 stmt.close();
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 LOG.error(e.getMessage(), e);
             }
         }

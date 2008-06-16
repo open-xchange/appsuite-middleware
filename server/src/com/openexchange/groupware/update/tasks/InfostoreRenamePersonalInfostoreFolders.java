@@ -65,12 +65,12 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.server.impl.DBPoolingException;
 
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
@@ -90,16 +90,16 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 		return UpdateTask.UpdateTaskPriority.NORMAL.priority;
 	}
 
-	public void perform(Schema schema, int contextId)
+	public void perform(final Schema schema, final int contextId)
 			throws AbstractOXException {
 		try {
-			List<NameCollision> collisions = NameCollision.getCollisions(contextId, getParentFolder());
+			final List<NameCollision> collisions = NameCollision.getCollisions(contextId, getParentFolder());
 			
-			for(NameCollision collision : collisions) {
+			for(final NameCollision collision : collisions) {
 				collision.resolve();
 			}
 			
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			LOG.error("Error resolving name collisions: ",e);
 			EXCEPTIONS.create(1, e.getLocalizedMessage(), e);
 		}
@@ -111,12 +111,12 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 
 
     private static final class NameCollision {
-		private String name;
-		private int contextId;
+		private final String name;
+		private final int contextId;
 		
 		private int nameCount = 1;
 		
-		public NameCollision(String name, int contextId) {
+		public NameCollision(final String name, final int contextId) {
 			this.name = name;
 			this.contextId = contextId;
 		}
@@ -139,9 +139,9 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 				checkAvailable.setInt(1, contextId);
 				
 				
-				List<Integer> rename = discoverIds(writeCon);
+				final List<Integer> rename = discoverIds(writeCon);
 			
-				for(int id : rename) {
+				for(final int id : rename) {
 					String newName = String.format("%s (%d)", name, nameCount++);
 					boolean free = false;
 					while(!free) {
@@ -150,8 +150,9 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 						free = !rs.next();
 						rs.close();
 						rs = null;
-						if(!free)
+						if(!free) {
 							newName = String.format("%s (%d)", name, nameCount++);
+						}
 					}
 					stmt.setString(1, newName);
 					stmt.setInt(3, id);
@@ -159,10 +160,10 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 				}
 				
 				writeCon.commit();
-			} catch (SQLException x) {
+			} catch (final SQLException x) {
 				try {
 					writeCon.rollback();
-				} catch (SQLException x2) {
+				} catch (final SQLException x2) {
 					LOG.error("Can't execute rollback.", x2);
 				}
 				throw x;
@@ -170,14 +171,14 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 				if(stmt != null) {
 					try {
 						stmt.close();
-					} catch (SQLException x) {
+					} catch (final SQLException x) {
 						LOG.warn("Couldn't close statement", x);
 					}
 				}
 				if(checkAvailable != null) {
 					try {
 						checkAvailable.close();
-					} catch (SQLException x) {
+					} catch (final SQLException x) {
 						LOG.warn("Couldn't close statement", x);
 					}
 				}
@@ -185,7 +186,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 				if(null != rs) {
 					try {
 						rs.close();
-					} catch (SQLException x) {
+					} catch (final SQLException x) {
 						LOG.warn("Couldn't close result set", x);
 					}
 				}
@@ -193,7 +194,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 				if(writeCon != null) {
 					try {
 						writeCon.setAutoCommit(true);
-					} catch (SQLException x){
+					} catch (final SQLException x){
 						LOG.warn("Can't reset auto commit", x);
 					}
 					
@@ -205,10 +206,10 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 		}
 		
 		
-		private List<Integer> discoverIds(Connection writeCon) throws SQLException {
+		private List<Integer> discoverIds(final Connection writeCon) throws SQLException {
 			PreparedStatement stmt = null;
 			ResultSet rs = null;
-			List<Integer> ids = new ArrayList<Integer>();
+			final List<Integer> ids = new ArrayList<Integer>();
 			try {
 				stmt = writeCon.prepareStatement("SELECT fuid FROM oxfolder_tree WHERE cid = ? and fname = ?");
 				stmt.setInt(1, contextId);
@@ -222,14 +223,14 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 				if(null != stmt) {
 					try {
 						stmt.close();
-					} catch (SQLException x) {
+					} catch (final SQLException x) {
 						LOG.warn("Couldn't close statement:",x);
 					}
 				}
 				if(rs != null){
 					try {
 						rs.close();
-					} catch (SQLException x) {
+					} catch (final SQLException x) {
 						LOG.warn("Couldn't close result set:",x);
 					}
 				}
@@ -250,8 +251,8 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 		
 		
 		
-		public static List<NameCollision> getCollisions(int contextId, int parentFolder) throws SQLException, DBPoolingException {
-			List<NameCollision> c = new ArrayList<NameCollision>();
+		public static List<NameCollision> getCollisions(final int contextId, final int parentFolder) throws SQLException, DBPoolingException {
+			final List<NameCollision> c = new ArrayList<NameCollision>();
 			Connection writeCon = null;
 			PreparedStatement stmt = null;
 			ResultSet rs = null;
@@ -269,7 +270,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 				rs = stmt.executeQuery();
 				
 				while(rs.next()) {
-					NameCollision nc = new NameCollision(rs.getString(1), rs.getInt(2));
+					final NameCollision nc = new NameCollision(rs.getString(1), rs.getInt(2));
 					c.add(nc);
 				}
 				
@@ -279,16 +280,17 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 				return c;
 			} finally {
 				
-				if(null != stmt)
+				if(null != stmt) {
 					try {
 						stmt.close();
-					} catch (SQLException x) {
+					} catch (final SQLException x) {
 						LOG.warn("Couldn't close statement", x);
 					}
+				}
 				if(null != rs) {
 					try {
 						rs.close();
-					} catch (SQLException x) {
+					} catch (final SQLException x) {
 						LOG.warn("Couldn't close result set", x);
 					}
 				}

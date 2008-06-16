@@ -64,7 +64,7 @@ public class PropfindAllPropsMarshaller extends PropertiesMarshaller {
 
 	private static final Log LOG = LogFactory.getLog(PropfindAllPropsMarshaller.class);
 	
-	public PropfindAllPropsMarshaller(String uriPrefix, String charset) {
+	public PropfindAllPropsMarshaller(final String uriPrefix, final String charset) {
 		super(uriPrefix,charset);
 	}
 
@@ -74,7 +74,7 @@ public class PropfindAllPropsMarshaller extends PropertiesMarshaller {
 		try {
 			final Iterable<WebdavProperty> iterable =  resource.getAllProps();
 			multistatus.addStatus(new WebdavStatusImpl<Iterable<WebdavProperty>>(HttpServletResponse.SC_OK, resource.getUrl(), iterable));
-		} catch (WebdavException e) {
+		} catch (final WebdavException e) {
 			LOG.debug(e);
 		}
 		return multistatus;

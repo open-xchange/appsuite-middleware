@@ -62,6 +62,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 

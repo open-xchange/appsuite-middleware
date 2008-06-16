@@ -121,7 +121,7 @@ public abstract class AbstractMailFuncs implements IValueHandler {
 		setValue(settings, (String) setting.getSingleValue());
 		try {
 			storage.saveUserSettingMail(settings, user.getId(), ctx);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			throw new SettingException(e);
 		}
 	}

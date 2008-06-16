@@ -160,7 +160,7 @@ public final class GetTask {
             } else {
                 try {
                     folder = Tools.getFolder(ctx, con, folderId);
-                } catch (OXFolderNotFoundException e) {
+                } catch (final OXFolderNotFoundException e) {
                     throw new TaskException(e);
                 }
             }

@@ -97,7 +97,7 @@ public class Infostore implements PreferencesItemService {
                 try {
                     setting.setSingleValue(Integer.valueOf(acc.getDefaultFolder(
                         user.getId(), FolderObject.INFOSTORE).getObjectID()));
-                } catch (OXException e) {
+                } catch (final OXException e) {
                     throw new SettingException(e);
                 }
             }

@@ -92,7 +92,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 
 	private Cache cache;
 
-	private Lock cacheWriteLock;
+	private final Lock cacheWriteLock;
 
 	/**
 	 * Default constructor

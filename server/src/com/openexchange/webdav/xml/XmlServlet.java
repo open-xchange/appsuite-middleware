@@ -94,6 +94,11 @@ import com.openexchange.webdav.xml.fields.DataFields;
 
 public abstract class XmlServlet extends PermissionServlet {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2484534357141516623L;
+
 	public static AttachmentBase attachmentBase = Attachments.getInstance();
 	
 	public static final int MODIFICATION_STATUS = 1000;
@@ -196,7 +201,7 @@ public abstract class XmlServlet extends PermissionServlet {
 				doError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "XML ERROR");
 				return ;
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("doProppatch", exc);
 			doError(req, resp);
 		}
@@ -259,7 +264,7 @@ public abstract class XmlServlet extends PermissionServlet {
 						if (eLastSync != null) {
 							lastsync = new Date(Long.parseLong(eLastSync.getText()));
 						}
-					} catch (NumberFormatException exc) {
+					} catch (final NumberFormatException exc) {
 						System.out.println("invalid value in element lastsync");
 					}
 					
@@ -267,7 +272,7 @@ public abstract class XmlServlet extends PermissionServlet {
 					if (eFolderId != null) {
 						try {
 							folder_id = Integer.parseInt(eFolderId.getText());
-						} catch (NumberFormatException exc) {
+						} catch (final NumberFormatException exc) {
 							throw new OXConflictException("invalid value in element folder_id: " + eFolderId.getText(), exc);
 						}
 					}
@@ -295,7 +300,7 @@ public abstract class XmlServlet extends PermissionServlet {
 				} else if (hasObjectId) {
 					try {
 						object_id = Integer.parseInt(eObjectId.getText());
-					} catch (NumberFormatException exc) {
+					} catch (final NumberFormatException exc) {
 						throw new OXConflictException("invalid value in element object_id: " + eObjectId.getText());
 					}
 					
@@ -303,7 +308,7 @@ public abstract class XmlServlet extends PermissionServlet {
 					if (eFolderId != null) {
 						try {
 							folder_id = Integer.parseInt(eFolderId.getText());
-						} catch (NumberFormatException exc) {
+						} catch (final NumberFormatException exc) {
 							throw new OXConflictException("invalid value in element folder_id: " + eFolderId.getText(), exc);
 						}
 					}
@@ -328,17 +333,17 @@ public abstract class XmlServlet extends PermissionServlet {
 			
 			os.write(("</D:multistatus>").getBytes());
 			os.flush();
-		} catch (OXPermissionException opexc) {
+		} catch (final OXPermissionException opexc) {
 			doError(req, resp, HttpServletResponse.SC_FORBIDDEN, opexc.getMessage());
-		} catch (OXConflictException ocexc) {
+		} catch (final OXConflictException ocexc) {
 			if (LOG.isErrorEnabled()) {
 				LOG.error(ocexc.getMessage(), ocexc);
 			}
 			doError(req, resp, HttpServletResponse.SC_CONFLICT, "Conflict: " + ocexc.getMessage());
-		} catch (org.jdom.JDOMException exc) {
+		} catch (final org.jdom.JDOMException exc) {
 			LOG.error("doPropFind", exc);
 			doError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "XML ERROR");
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("doPropFind", exc);
 			doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error");
 		}
@@ -356,7 +361,7 @@ public abstract class XmlServlet extends PermissionServlet {
 			
 			resp.sendError(code, msg);
 			resp.setContentType("text/html");
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("doError", exc);
 		}
 	}

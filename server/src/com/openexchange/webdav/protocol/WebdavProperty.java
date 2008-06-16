@@ -102,10 +102,12 @@ public class WebdavProperty {
 	}
 	
 	
+	@Override
 	public int hashCode(){
 		return name.hashCode()+namespace.hashCode();
 	}
 	
+	@Override
 	public boolean equals(final Object o){
 		if (o instanceof WebdavProperty) {
 			final WebdavProperty prop = (WebdavProperty) o;

@@ -51,11 +51,11 @@ package com.openexchange.groupware.attach;
 
 public class AttachmentAdapter implements AttachmentListener {
 
-	public long attached(AttachmentEvent e) {
+	public long attached(final AttachmentEvent e) {
 		return System.currentTimeMillis();
 	}
 
-	public long detached(AttachmentEvent e) {
+	public long detached(final AttachmentEvent e) {
 		return System.currentTimeMillis();
 	}
 

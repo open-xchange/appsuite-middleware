@@ -49,13 +49,14 @@
 
 package com.openexchange.groupware.calendar;
 
-import com.openexchange.groupware.container.FolderObject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.groupware.container.FolderObject;
 
 /**
  * CalendarFolderObject
@@ -64,8 +65,12 @@ import org.apache.commons.logging.LogFactory;
 
 public class CalendarFolderObject implements Serializable {
     
-    private int uid;
-    private int cid;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -2356348744702379243L;
+	private final int uid;
+    private final int cid;
     
     private ArrayList<Integer> privatefolder;
     private ArrayList<Integer> publicfolder;
@@ -86,7 +91,7 @@ public class CalendarFolderObject implements Serializable {
     private Object shared_read_own_sorted[];
     
     
-    private boolean fill_shared;
+    private final boolean fill_shared;
     private static final Object[] EMPTY = new Object[0];
     
     private static final transient Log LOG = LogFactory.getLog(CalendarCommonCollection.class);

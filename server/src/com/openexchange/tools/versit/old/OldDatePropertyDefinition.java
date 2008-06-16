@@ -59,11 +59,12 @@ import com.openexchange.tools.versit.values.DateTimeValue;
 
 public class OldDatePropertyDefinition extends OldDateTimePropertyDefinition {
 
-	public OldDatePropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldDatePropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
+	@Override
 	protected Object parseValue(final Property property, final StringScanner ss)
 			throws IOException {
 		final DateTimeValue date = new DateTimeValue();
@@ -72,6 +73,7 @@ public class OldDatePropertyDefinition extends OldDateTimePropertyDefinition {
 		return date;
 	}
 
+	@Override
 	public String writeValue(final Property property, final Object value) {
 		return writeDate((DateTimeValue) value);
 	}

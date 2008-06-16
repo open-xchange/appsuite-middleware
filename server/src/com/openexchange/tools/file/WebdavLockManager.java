@@ -58,13 +58,13 @@ public class WebdavLockManager {
 	
 	private String vmID = "";
 	
-	public WebdavLockManager(String vmID) {
+	public WebdavLockManager(final String vmID) {
 		this.vmID = vmID;
 	}
 	
 	public static final int POLL_TIME = 500;
 	
-	public void lock(WebdavResource lock, long timeout) throws IOException, InterruptedException {
+	public void lock(final WebdavResource lock, final long timeout) throws IOException, InterruptedException {
 		if(!lock.lockMethod(vmID+"::"+Thread.currentThread().getId(),120)) {
 			Thread.sleep(timeout);
 			if(!lock.lockMethod(vmID+"::"+Thread.currentThread().getId(),120)) {
@@ -73,7 +73,7 @@ public class WebdavLockManager {
 		}
 	}
 	
-	public void unlock(WebdavResource lock) throws IOException{
+	public void unlock(final WebdavResource lock) throws IOException{
 		lock.unlockMethod(lock.getHttpURL().getPath(), vmID+"::"+Thread.currentThread().getId());
 	}
 

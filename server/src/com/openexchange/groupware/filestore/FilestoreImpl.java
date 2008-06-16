@@ -52,6 +52,10 @@ package com.openexchange.groupware.filestore;
 import java.net.URI;
 
 public class FilestoreImpl implements Filestore {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -912578396776397210L;
 	private int id;
 	private URI uri;
 	private long size;
@@ -81,16 +85,16 @@ public class FilestoreImpl implements Filestore {
 	public URI getUri() {
 		return uri;
 	}
-	public void setId(int id) {
+	public void setId(final int id) {
 		this.id = id;
 	}
-	public void setMaxContext(long maxContext) {
+	public void setMaxContext(final long maxContext) {
 		this.maxContext = maxContext;
 	}
-	public void setSize(long size) {
+	public void setSize(final long size) {
 		this.size = size;
 	}
-	public void setUri(URI uri) {
+	public void setUri(final URI uri) {
 		this.uri = uri;
 	}
 	

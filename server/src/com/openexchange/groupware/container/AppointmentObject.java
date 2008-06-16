@@ -55,7 +55,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
-import com.openexchange.tools.StringCollection;
 
 /**
  * AppointmentObject
@@ -280,7 +279,7 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
 			appointmentobject.setOccurrence(getOccurrence());
 			appointmentobject.setTimezone(getTimezone());
 			return appointmentobject;
-		} catch (CloneNotSupportedException e) {
+		} catch (final CloneNotSupportedException e) {
 			/*
 			 * Cannot occur since we are cloneable
 			 */

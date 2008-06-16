@@ -61,29 +61,29 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 public class RecursiveMarshaller implements ResourceMarshaller {
 
-	private ResourceMarshaller delegate;
-	private int depth;
+	private final ResourceMarshaller delegate;
+	private final int depth;
 	
-	public RecursiveMarshaller(ResourceMarshaller delegate, int depth) {
+	public RecursiveMarshaller(final ResourceMarshaller delegate, final int depth) {
 		this.delegate = delegate;
 		this.depth = depth;
 	}
 
-	public List<Element> marshal(WebdavResource resource)  {
-		List<Element> list = new ArrayList<Element>();
-		List<Element> delegateMarshal = delegate.marshal(resource);
+	public List<Element> marshal(final WebdavResource resource)  {
+		final List<Element> list = new ArrayList<Element>();
+		final List<Element> delegateMarshal = delegate.marshal(resource);
 		list.addAll(delegateMarshal);
 		if(resource.isCollection()) {
 			try {
 				OXCollections.inject(list, resource.toCollection().toIterable(depth), new Injector<List<Element>, WebdavResource>(){
 
-					public List<Element> inject(List<Element> list, WebdavResource element) {
+					public List<Element> inject(final List<Element> list, final WebdavResource element) {
 						list.addAll(delegate.marshal(element));
 						return list;
 					}
 					
 				});
-			} catch (WebdavException e) {
+			} catch (final WebdavException e) {
 				return list;
 			}
 		}

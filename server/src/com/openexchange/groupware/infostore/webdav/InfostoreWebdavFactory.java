@@ -49,13 +49,32 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.impl.FolderLockManager;
-import com.openexchange.groupware.infostore.*;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreException;
+import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.PathResolver;
+import com.openexchange.groupware.infostore.Resolved;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -64,22 +83,21 @@ import com.openexchange.groupware.tx.DBProviderUser;
 import com.openexchange.groupware.tx.Service;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.webdav.loader.BulkLoader;
 import com.openexchange.webdav.loader.LoadingHints;
-import com.openexchange.webdav.protocol.*;
+import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavCollection;
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.impl.AbstractResource;
-import com.openexchange.server.impl.EffectivePermission;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.servlet.http.HttpServletResponse;
-import java.sql.Connection;
-import java.util.*;
 
 public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 	
@@ -198,7 +216,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		return PROTOCOL;
 	}
 
-    public WebdavCollection resolveCollection(WebdavPath url) throws WebdavException {
+    public WebdavCollection resolveCollection(final WebdavPath url) throws WebdavException {
         final State s = state.get();
 		if(s.folders.containsKey(url)) {
 			return s.folders.get(url);
@@ -230,7 +248,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		return (WebdavCollection) res;
     }
 
-    public WebdavResource resolveResource(WebdavPath url) throws WebdavException {
+    public WebdavResource resolveResource(final WebdavPath url) throws WebdavException {
         final State s = state.get();
 		if(s.resources.containsKey(url)) {
 			return s.resources.get(url);
@@ -405,7 +423,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		return database;
 	}
 
-    public void setSecurity(InfostoreSecurity security){
+    public void setSecurity(final InfostoreSecurity security){
         if(this.security instanceof Service) {
             removeService((Service) this.security);
         }
@@ -459,7 +477,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		}
 		final State s = state.get();
 		final ServerSession session = getSession();
-        EffectivePermission perm = collection.getEffectivePermission();
+        final EffectivePermission perm = collection.getEffectivePermission();
         if(!(perm.canReadAllObjects() || perm.canReadOwnObjects())) {
             return new ArrayList<OXWebdavResource>();
         }
@@ -579,7 +597,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
     public ServerSession getSession() throws OXException {
         try {
             return new ServerSessionAdapter(sessionHolder.getSessionObject());
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             throw new InfostoreException(e);
         }
     }

@@ -345,11 +345,11 @@ public class GermanOutlookMapper implements ContactFieldMapper {
 
         }
 
-        public ContactField getFieldByName(String name){
+        public ContactField getFieldByName(final String name){
                 return german2field.get(name);
         }
 
-        public String getNameOfField(ContactField field){
+        public String getNameOfField(final ContactField field){
             return field2german.get(field);
         }
 

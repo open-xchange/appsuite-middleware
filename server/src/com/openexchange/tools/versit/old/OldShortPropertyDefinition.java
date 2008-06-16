@@ -58,11 +58,12 @@ import com.openexchange.tools.versit.StringScanner;
 
 public class OldShortPropertyDefinition extends OldPropertyDefinition {
 
-	public OldShortPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldShortPropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
+	@Override
 	protected Object parseValue(final Property property, final OldScanner s, final byte[] value,
 			final String charset) throws IOException {
 		final StringScanner ss = new StringScanner(s, new String(value, charset)
@@ -75,6 +76,7 @@ public class OldShortPropertyDefinition extends OldPropertyDefinition {
 		return s.getRest();
 	}
 
+	@Override
 	protected String writeValue(final Property property) {
 		return writeValue(property, property.getValue());
 	}

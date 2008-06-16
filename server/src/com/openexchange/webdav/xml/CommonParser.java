@@ -51,9 +51,10 @@
 
 package com.openexchange.webdav.xml;
 
+import org.xmlpull.v1.XmlPullParser;
+
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.webdav.xml.fields.CommonFields;
-import org.xmlpull.v1.XmlPullParser;
 
 /**
  * XmlTaskParser
@@ -64,7 +65,7 @@ import org.xmlpull.v1.XmlPullParser;
 
 public class CommonParser extends FolderChildParser {
 		
-	protected void parseElementCommon(CommonObject commonobject, XmlPullParser parser) throws Exception {
+	protected void parseElementCommon(final CommonObject commonobject, final XmlPullParser parser) throws Exception {
 		if (isTag(parser, CommonFields.CATEGORIES)) {
 			commonobject.setCategories(getValue(parser));
 		} else if (isTag(parser, CommonFields.PRIVATE_FLAG)) {

@@ -57,14 +57,14 @@ import com.openexchange.groupware.AbstractOXException.Category;
 
 public abstract class LoggingLogic {
 
-	public static LoggingLogic getLoggingLogic(Class<?> klass) {
+	public static LoggingLogic getLoggingLogic(final Class<?> klass) {
 		// We could add hooks for custom logging logic for certain classes here, if needed. 
 		// For now everyone uses the default logic.
 		
 		return new DefaultLoggingLogic(LogFactory.getLog(klass));
 	}
 	
-	public static LoggingLogic getLoggingLogic(Class<?> klass, Log log) {
+	public static LoggingLogic getLoggingLogic(final Class<?> klass, final Log log) {
 		// We could add hooks for custom logging logic for certain classes here, if needed. 
 		// For now everyone uses the default logic.
 		
@@ -73,12 +73,12 @@ public abstract class LoggingLogic {
 	
 	protected Log LOG;
 	
-	public LoggingLogic(Log log) {
+	public LoggingLogic(final Log log) {
 		this.LOG = log;
 	}
 
-	public void log(AbstractOXException aox) {
-		Category cat =aox.getCategory();
+	public void log(final AbstractOXException aox) {
+		final Category cat =aox.getCategory();
 		if(Category.CODE_ERROR.equals(cat)) {
 			this.codeError(aox);
 		} else if (Category.CONCURRENT_MODIFICATION.equals(cat)) {

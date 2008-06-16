@@ -69,9 +69,9 @@ public class MetadataSorter {
 	
 	private static final class MetadataComparator implements Comparator<DocumentMetadata>{
 
-		private String field;
-		private int direction;
-		private Metadata metadataField;
+		private final String field;
+		private final int direction;
+		private final Metadata metadataField;
 		
 		public MetadataComparator(final String field, final int direction){
 			this.field = field;

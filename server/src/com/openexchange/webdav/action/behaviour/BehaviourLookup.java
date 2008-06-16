@@ -64,7 +64,7 @@ public class BehaviourLookup {
 	private RequestSpecificBehaviourRegistry registry = null;
 	
 	
-	public void setRequest(WebdavRequest req) {
+	public void setRequest(final WebdavRequest req) {
 		requestHolder.set(req);
 	}
 	
@@ -73,15 +73,15 @@ public class BehaviourLookup {
 		requestHolder.set(null);	
 	}
 	
-	public void setRegistry(RequestSpecificBehaviourRegistry reg) {
+	public void setRegistry(final RequestSpecificBehaviourRegistry reg) {
 		registry = reg;
 	}
 	
-	public <T> T get(Class<T> clazz) {
+	public <T> T get(final Class<T> clazz) {
 		if(null == registry) {
 			return null;
 		}
-		WebdavRequest req = requestHolder.get();
+		final WebdavRequest req = requestHolder.get();
 		if(req == null) {
 			return null;
 		}

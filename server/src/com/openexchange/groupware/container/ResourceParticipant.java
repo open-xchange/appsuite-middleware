@@ -83,7 +83,8 @@ public class ResourceParticipant implements Participant, Comparable
     /**
      * @deprecated Use {@link #ResourceParticipant(int)}.
      */
-    public ResourceParticipant() {
+    @Deprecated
+	public ResourceParticipant() {
         this(0);
     }
 

@@ -436,7 +436,7 @@ public final class MimeReply {
 		final InlineContentHandler handler = new InlineContentHandler(cids);
 		new MailMessageParser().parseMailMessage(originalMail, handler);
 		final List<MailPart> inlineContents = handler.getInlineContents();
-		for (MailPart mailPart : inlineContents) {
+		for (final MailPart mailPart : inlineContents) {
 			replyMail.addAdditionalParts(mailPart);
 		}
 	}

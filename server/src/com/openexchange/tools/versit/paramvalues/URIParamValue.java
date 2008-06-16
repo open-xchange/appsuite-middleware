@@ -68,7 +68,7 @@ public class URIParamValue extends ParameterValue {
 		return Uri;
 	}
 	
-	public URIParamValue(URI uri) {
+	public URIParamValue(final URI uri) {
 		super(uri.toString());
 		Uri = uri;
 	}

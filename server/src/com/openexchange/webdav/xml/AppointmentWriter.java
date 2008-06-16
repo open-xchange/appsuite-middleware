@@ -145,9 +145,9 @@ public class AppointmentWriter extends CalendarWriter {
 		try {
 			final AppointmentObject appointmentobject = appointmentsql.getObjectById(objectId, folderId);
 			writeObject(appointmentobject, eProp, false, xo, os);
-		} catch (OXObjectNotFoundException exc) {
+		} catch (final OXObjectNotFoundException exc) {
 			writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			LOG.error("startWriter", ex);
 			writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
 		}
@@ -211,7 +211,7 @@ public class AppointmentWriter extends CalendarWriter {
 		try {
 			object_id = appointmentobject.getObjectID();
 			addContent2PropElement(e_prop, appointmentobject, delete);
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("writeObject", exc);
 			status = 500;
 			description = "Server Error: " + exc.toString();

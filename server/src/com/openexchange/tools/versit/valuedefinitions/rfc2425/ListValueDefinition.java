@@ -72,6 +72,7 @@ public class ListValueDefinition extends ValueDefinition {
 		Definition = definition;
 	}
 
+	@Override
 	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
 		final ArrayList<Object> retval = new ArrayList<Object>();
@@ -88,6 +89,7 @@ public class ListValueDefinition extends ValueDefinition {
 		return retval;
 	}
 
+	@Override
 	public String writeValue(final Object value) {
 		final ArrayList list = (ArrayList) value;
 		final int count = list.size();

@@ -331,7 +331,7 @@ public class CSVContactExporter implements Exporter {
 					new ByteArrayInputStream ( ret.toString().getBytes("UTF-8")) ,  
 					ret.toString().getBytes().length,
 					Format.CSV);
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			LOG.fatal(e);
 			throw EXCEPTIONS.create(4);
 		}

@@ -90,12 +90,13 @@ public class ContactServices {
 	}
 	*/
 	
-	public ContactInterface getService(int folderId, int context_id){
-		ContactInterface contactInterface = services.get(folderId);
-			if (null == contactInterface || context_id != contactInterface.getLdapServer().getContext())
+	public ContactInterface getService(final int folderId, final int context_id){
+		final ContactInterface contactInterface = services.get(folderId);
+			if (null == contactInterface || context_id != contactInterface.getLdapServer().getContext()) {
 				return null;
-			else
+			} else {
 				return contactInterface;
+			}
 
 	}
 	

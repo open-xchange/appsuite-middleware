@@ -61,12 +61,13 @@ public class OldRecordPropertyDefinition extends OldCompoundPropertyDefinition {
 
 	protected final OldShortPropertyDefinition[] Elements;
 
-	public OldRecordPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params, OldShortPropertyDefinition[] elements) {
+	public OldRecordPropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params, final OldShortPropertyDefinition[] elements) {
 		super(paramNames, params);
 		Elements = elements;
 	}
 
+	@Override
 	protected Object parseValue(final Property property, final StringScanner s)
 			throws IOException {
 		final ArrayList<Object> al = new ArrayList<Object>();
@@ -82,6 +83,7 @@ public class OldRecordPropertyDefinition extends OldCompoundPropertyDefinition {
 		return al;
 	}
 
+	@Override
 	protected String writeValue(final Property property) {
 		final StringBuilder sb = new StringBuilder();
 		final ArrayList al = (ArrayList) property.getValue();

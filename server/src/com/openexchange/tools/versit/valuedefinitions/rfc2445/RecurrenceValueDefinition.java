@@ -76,6 +76,7 @@ public class RecurrenceValueDefinition extends ValueDefinition {
 	private static final String[] weekdays = { "SU", "MO", "TU", "WE", "TH",
 			"FR", "SA" };
 
+	@Override
 	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
 		final RecurrenceValue recur = new RecurrenceValue();
@@ -242,6 +243,7 @@ public class RecurrenceValueDefinition extends ValueDefinition {
 		throw new VersitException(s, "Invalid recurrence");
 	}
 
+	@Override
 	public String writeValue(final Object value) {
 		final RecurrenceValue recur = (RecurrenceValue) value;
 		final StringBuilder sb = new StringBuilder();

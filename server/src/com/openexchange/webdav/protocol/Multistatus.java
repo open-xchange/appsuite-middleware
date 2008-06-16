@@ -58,20 +58,20 @@ import java.util.Set;
 
 public class Multistatus<T> implements Iterable<WebdavStatus<T>>{
 	
-	private List<WebdavStatus<T>> stadi = new ArrayList<WebdavStatus<T>>();
-	private Map<Integer, List<WebdavStatus<T>>> rcMap = new HashMap<Integer, List<WebdavStatus<T>>>();
+	private final List<WebdavStatus<T>> stadi = new ArrayList<WebdavStatus<T>>();
+	private final Map<Integer, List<WebdavStatus<T>>> rcMap = new HashMap<Integer, List<WebdavStatus<T>>>();
 	
 	public Multistatus(){
 		
 	}
 	
-	public Multistatus(WebdavMultistatusException x){
-		for(WebdavException e : x.getExceptions()) {
+	public Multistatus(final WebdavMultistatusException x){
+		for(final WebdavException e : x.getExceptions()) {
 			addStatus((WebdavStatus<T>) e);
 		}
 	}
 	
-	public void addStatus(WebdavStatus<T> status) {
+	public void addStatus(final WebdavStatus<T> status) {
 		stadi.add(status);
 		List<WebdavStatus<T>> collocated = rcMap.get(status.getStatus());
 		if(null == collocated) { 
@@ -85,7 +85,7 @@ public class Multistatus<T> implements Iterable<WebdavStatus<T>>{
 		return stadi.iterator();
 	}
 	
-	public Iterable<WebdavStatus<T>> toIterable(int status) {
+	public Iterable<WebdavStatus<T>> toIterable(final int status) {
 		return rcMap.get(status);
 	}
 	

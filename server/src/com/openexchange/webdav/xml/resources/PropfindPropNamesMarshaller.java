@@ -56,13 +56,13 @@ import com.openexchange.webdav.protocol.WebdavProperty;
 
 public class PropfindPropNamesMarshaller extends PropfindAllPropsMarshaller {
 
-	public PropfindPropNamesMarshaller(String uriPrefix, String charset) {
+	public PropfindPropNamesMarshaller(final String uriPrefix, final String charset) {
 		super(uriPrefix, charset);
 	}
 
 	@Override
-	public Element marshalProperty(WebdavProperty property) {
-		Element propElement = new Element(property.getName(), Namespace.getNamespace(property.getNamespace()));
+	public Element marshalProperty(final WebdavProperty property) {
+		final Element propElement = new Element(property.getName(), Namespace.getNamespace(property.getNamespace()));
 		return propElement;
 	}
 	

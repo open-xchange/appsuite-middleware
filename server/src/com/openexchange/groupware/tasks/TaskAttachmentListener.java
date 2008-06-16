@@ -106,7 +106,7 @@ public class TaskAttachmentListener implements AttachmentListener {
             task.setNumberOfAttachments(oldTask.getNumberOfAttachments() + 1);
             UpdateData.updateTask(ctx, con, task, lastRead, UPDATE_FIELDS, null,
                 null, null, null);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
         if (LOG.isTraceEnabled()) {
@@ -141,7 +141,7 @@ public class TaskAttachmentListener implements AttachmentListener {
             task.setNumberOfAttachments(numOfAttachments);
             UpdateData.updateTask(ctx, con, task, lastRead, UPDATE_FIELDS, null,
                 null, null, null);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
         if (LOG.isTraceEnabled()) {

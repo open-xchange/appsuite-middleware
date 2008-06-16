@@ -83,7 +83,7 @@ public final class IOUtils {
         if (null != input) {
             try {
                 input.close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 LOG.error(e.getMessage(), e);
             }
         }

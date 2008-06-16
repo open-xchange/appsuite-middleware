@@ -63,11 +63,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.tools.exceptions.LoggingLogic;
 
 @OXExceptionSource(
@@ -205,7 +205,7 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider{
 	}
 
 
-    public void setCommitsTransaction(boolean mustCommit) {
+    public void setCommitsTransaction(final boolean mustCommit) {
         provider.setCommitsTransaction(false);
     }
 
@@ -247,7 +247,7 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider{
 			if(dbTransaction) {
 				try {
 					rollbackDBTransaction();
-				} catch (TransactionException x) {
+				} catch (final TransactionException x) {
 					LL.log(x);
 				}
 			}
@@ -256,7 +256,7 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider{
 			if(dbTransaction) {
 				try {
 					finishDBTransaction();
-				} catch (TransactionException x) {
+				} catch (final TransactionException x) {
 					LL.log(x);
 				}
 			}

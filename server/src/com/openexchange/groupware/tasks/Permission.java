@@ -96,7 +96,7 @@ public final class Permission {
         try {
             permission = new OXFolderAccess(ctx).getFolderPermission(folder
                 .getObjectID(), user.getId(), userConfig);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new TaskException(e);
         }
         if (!permission.canDeleteAllObjects() && !permission
@@ -150,7 +150,7 @@ public final class Permission {
         try {
             permission = new OXFolderAccess(ctx).getFolderPermission(folder
                 .getObjectID(), user.getId(), userConfig);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new TaskException(e);
         }
         if (!permission.canCreateObjects()) {
@@ -181,7 +181,7 @@ public final class Permission {
         try {
             permission = new OXFolderAccess(ctx).getFolderPermission(folder
                 .getObjectID(), user.getId(), userConfig);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new TaskException(e);
         }
         return permission.isFolderVisible() && !permission.canReadAllObjects()
@@ -234,7 +234,7 @@ public final class Permission {
         try {
             permission = new OXFolderAccess(con, ctx).getFolderPermission(folder
                 .getObjectID(), user.getId(), userConfig);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new TaskException(e);
         }
         if (!permission.canReadAllObjects() && !permission
@@ -309,7 +309,7 @@ public final class Permission {
         try {
             permission = new OXFolderAccess(ctx).getFolderPermission(folder
                 .getObjectID(), user.getId(), userConfig);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new TaskException(e);
         }
         if (!permission.canWriteAllObjects()

@@ -52,7 +52,6 @@ package com.openexchange.groupware.userconfiguration;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
 
 public class UserConfigurationException extends OXException {
 

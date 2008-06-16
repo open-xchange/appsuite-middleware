@@ -184,13 +184,13 @@ public final class CommandExecutor {
 				while ((line = br.readLine()) != null) {
 					buf.append(line).append('\n');
 				}
-			} catch (IOException ioe) {
+			} catch (final IOException ioe) {
 				LOG.error(ioe.getMessage(), ioe);
 			} finally {
 				if (br != null) {
 					try {
 						br.close();
-					} catch (IOException e) {
+					} catch (final IOException e) {
 						LOG.error(e.getMessage(), e);
 					}
 					br = null;
@@ -198,7 +198,7 @@ public final class CommandExecutor {
 				if (isr != null) {
 					try {
 						isr.close();
-					} catch (IOException e) {
+					} catch (final IOException e) {
 						LOG.error(e.getMessage(), e);
 					}
 					isr = null;

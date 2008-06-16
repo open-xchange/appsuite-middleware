@@ -51,10 +51,7 @@
 
 package com.openexchange.ajax.parser;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,9 +70,9 @@ public class InfostoreParser {
     public class UnknownMetadataException extends Exception {
 
 		private static final long serialVersionUID = 3260737756212968495L;
-		private String columnId;
+		private final String columnId;
 
-		public UnknownMetadataException(String id) {
+		public UnknownMetadataException(final String id) {
 			this.columnId = id;
 		}
 		
@@ -94,13 +91,13 @@ public class InfostoreParser {
 	}
 
 	public Metadata[] getColumns(final String[] parameterValues) throws UnknownMetadataException {
-		Metadata[] cols = new Metadata[parameterValues.length];
+		final Metadata[] cols = new Metadata[parameterValues.length];
 		int i = 0;
-		for(String idString : parameterValues) {
+		for(final String idString : parameterValues) {
 			int id = -1;
 			try {
 				id = Integer.parseInt(idString);
-			} catch (NumberFormatException x) {
+			} catch (final NumberFormatException x) {
 				throw new UnknownMetadataException(idString);
 			}
 			final Metadata m = Metadata.get(id);
@@ -115,7 +112,7 @@ public class InfostoreParser {
 	public Metadata[] findPresentFields(final String updateBody) throws UnknownMetadataException, JSONException{
 		final JSONObject obj = new JSONObject(updateBody);
 		
-		Metadata[] metadata = new Metadata[obj.length()];
+		final Metadata[] metadata = new Metadata[obj.length()];
 		int i = 0;
 		boolean shrink = false;
 		for(final Iterator iter = obj.keys(); iter.hasNext();) {

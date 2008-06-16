@@ -51,6 +51,8 @@
 
 package com.openexchange.webdav.xml;
 
+import org.xmlpull.v1.XmlPullParser;
+
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.CalendarObject;
@@ -62,7 +64,6 @@ import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.webdav.xml.fields.CalendarFields;
-import org.xmlpull.v1.XmlPullParser;
 
 /**
  * CalendarParser
@@ -74,7 +75,7 @@ public class CalendarParser extends CommonParser {
 	
 	protected int confirm = -1;
 	
-	protected void parseElementCalendar(CalendarObject calendarobject, XmlPullParser parser) throws Exception {
+	protected void parseElementCalendar(final CalendarObject calendarobject, final XmlPullParser parser) throws Exception {
 		if (isTag(parser, CalendarFields.RECURRENCE_ID)) {
 			calendarobject.setRecurrenceID(getValueAsInt(parser));
 			
@@ -136,7 +137,7 @@ public class CalendarParser extends CommonParser {
 			
 			return ;
 		} else if (isTag(parser, CalendarFields.CONFIRM)) {
-			String s = getValue(parser);
+			final String s = getValue(parser);
 			
 			if ("accept".equals(s)) {
 				confirm = CalendarObject.ACCEPT;
@@ -162,7 +163,7 @@ public class CalendarParser extends CommonParser {
 		}
 	}
 	
-	protected int parseRecurrenceType(String value) throws Exception {
+	protected int parseRecurrenceType(final String value) throws Exception {
 		if ("none".equals(value)) {
 			return CalendarObject.NONE;
 		} else if ("daily".equals(value)) {
@@ -178,8 +179,8 @@ public class CalendarParser extends CommonParser {
 		}
 	}
 	
-	protected void parseElementParticipants(CalendarObject calendarObj, XmlPullParser parser) throws OXException {
-		Participants participants = new Participants();
+	protected void parseElementParticipants(final CalendarObject calendarObj, final XmlPullParser parser) throws OXException {
+		final Participants participants = new Participants();
 		
 		try {
 			boolean isParticipant = true;
@@ -209,7 +210,7 @@ public class CalendarParser extends CommonParser {
 			
 			calendarObj.setParticipants(participants.getList());
 			calendarObj.setUsers(participants.getUsers());
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw new OXException(exc);
 		}
 	}
@@ -236,7 +237,7 @@ public class CalendarParser extends CommonParser {
 			getValue(parser);
 		} else {
 			final int userId = getValueAsInt(parser);
-			UserParticipant userparticipant = new UserParticipant(userId);
+			final UserParticipant userparticipant = new UserParticipant(userId);
 			
 			if (confirm != null) {
 				if ("accept".equals(confirm)) {
@@ -287,7 +288,7 @@ public class CalendarParser extends CommonParser {
 	}
 	
 	private void parseElementResource(final XmlPullParser parser, final Participants participants) throws Exception {
-		Participant p = new ResourceParticipant();
+		final Participant p = new ResourceParticipant();
 		p.setIdentifier(getValueAsInt(parser));
 		participants.add(p);
 	}

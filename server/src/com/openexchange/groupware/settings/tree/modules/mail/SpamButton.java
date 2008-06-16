@@ -90,7 +90,7 @@ public class SpamButton implements PreferencesItemService {
                 return userConfig.hasWebMail();
             }
             public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig,
+                final User user, final UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
                 final UserSettingMail settings = UserSettingMailStorage
                     .getInstance().getUserSettingMail(session.getUserId(), ctx);

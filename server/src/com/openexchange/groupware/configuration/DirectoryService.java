@@ -175,16 +175,16 @@ public final class DirectoryService {
             File propfile = null;
             try {
                 propfile = new File(SystemConfig.getProperty("LDAPPROPERTIES"));
-            } catch (NullPointerException e) {
+            } catch (final NullPointerException e) {
                 LOG.fatal("Config file ldap.properties is not set in "
                     + "ComfireConfig.");
             }
             props = new Properties();
             try {
-                FileInputStream fis = new FileInputStream(propfile);
+                final FileInputStream fis = new FileInputStream(propfile);
                 props.load(fis);
                 fis.close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 LOG.error("Cannot load properties for ldap!", e);
             }
         }
@@ -267,11 +267,11 @@ public final class DirectoryService {
     * This method reads the configuration parameters for the directory service.
     */
    private static void loadLdapConf() {
-      String configPath = SystemConfig.getProperty("CONFIGPATH");
-      File ldapConfFile = new File(configPath, LDAP_CONF_FILENAME);
+      final String configPath = SystemConfig.getProperty("CONFIGPATH");
+      final File ldapConfFile = new File(configPath, LDAP_CONF_FILENAME);
       if (ldapConfFile.exists()) {
          try {
-            String[] confValues = loadLdapConf(ldapConfFile);
+            final String[] confValues = loadLdapConf(ldapConfFile);
             if (null != confValues[3]) {
                uri = confValues[3];
             } else {
@@ -294,7 +294,7 @@ public final class DirectoryService {
                bindDN = confValues[4];
                bindPW = confValues[5];
             }
-         } catch (IOException e) {
+         } catch (final IOException e) {
             LOG.error("Error while reading writable directory service "
                 + "configuration.", e);
          }
@@ -310,12 +310,12 @@ public final class DirectoryService {
     * service will be used.
     */
    private static void loadWritableLdapConf() {
-      String configPath = SystemConfig.getProperty("CONFIGPATH");
-      File writableLdapConfFile = new File(configPath,
+      final String configPath = SystemConfig.getProperty("CONFIGPATH");
+      final File writableLdapConfFile = new File(configPath,
                WRITABLE_LDAP_CONF_FILENAME);
       if (writableLdapConfFile.exists()) {
          try {
-            String[] confValues = loadLdapConf(writableLdapConfFile);
+            final String[] confValues = loadLdapConf(writableLdapConfFile);
             if (null != confValues[3]) {
                writableURI = confValues[3];
             } else {
@@ -329,7 +329,7 @@ public final class DirectoryService {
                   }
                }
             }
-         } catch (IOException e) {
+         } catch (final IOException e) {
             LOG.error("Error while reading writable directory service "
                 + "configuration.", e);
          }
@@ -351,11 +351,11 @@ public final class DirectoryService {
     */
    private static String[] loadLdapConf(final File ldapConfFile)
       throws IOException {
-      BufferedReader br = new BufferedReader(new FileReader(ldapConfFile));
+      final BufferedReader br = new BufferedReader(new FileReader(ldapConfFile));
       String line = null;
-      String[] retval = new String[6];
+      final String[] retval = new String[6];
       while ((line = br.readLine()) != null) {
-         String detectable = line.trim().toLowerCase();
+         final String detectable = line.trim().toLowerCase();
          if (detectable.startsWith(BASE)) {
             retval[0] = line.substring(BASE.length()).trim();
          }

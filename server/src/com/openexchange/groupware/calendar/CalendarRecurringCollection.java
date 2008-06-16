@@ -50,15 +50,16 @@
 
 package com.openexchange.groupware.calendar;
 
+import java.util.Calendar;
+import java.util.Date;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.recurrence.RecurringCalculation;
 import com.openexchange.groupware.calendar.recurrence.RecurringException;
 import com.openexchange.groupware.container.CalendarObject;
-
-import java.util.Calendar;
-import java.util.Date;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * CalendarRecurringCollection
@@ -620,7 +621,7 @@ public final class CalendarRecurringCollection {
             } 
         }
         
-        RecurringCalculation rc = new RecurringCalculation(cdao.getRecurrenceType(), cdao.getInterval(), cdao.getRecurrenceCalculator());
+        final RecurringCalculation rc = new RecurringCalculation(cdao.getRecurrenceType(), cdao.getInterval(), cdao.getRecurrenceCalculator());
         rc.setCalculationTimeZone(calc_timezone);
         rc.setCalculationPosition(pos);
         rc.setRange(range_start, range_end);
@@ -651,7 +652,7 @@ public final class CalendarRecurringCollection {
         }
         try {
             return rc.calculateRecurrence();
-        } catch (RecurringException re) {
+        } catch (final RecurringException re) {
             if (re.getCode() == RecurringException.RECURRING_MISSING_INTERVAL) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_DAILY_INTERVAL, re.getValue());
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_INTERVAL) {

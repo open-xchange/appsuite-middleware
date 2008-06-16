@@ -70,7 +70,7 @@ public class OldFoldingWriter implements VersitDefinition.Writer {
 
 	int Break = 0;
 
-	public OldFoldingWriter(OutputStream stream, String charset) {
+	public OldFoldingWriter(final OutputStream stream, final String charset) {
 		w = stream;
 		this.charset = charset;
 		encoder = Charset.forName(this.charset).newEncoder();

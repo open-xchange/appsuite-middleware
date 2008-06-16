@@ -90,13 +90,13 @@ public enum TaskField {
 	private int taskID; //ID used in Task.*
 	private String name; //name used for getters & setters
 	
-	private TaskField(int taskID, String name){
+	private TaskField(final int taskID, final String name){
 		this.taskID = taskID;
 		this.name = name;
 	}
 
-	public static TaskField getByTaskID(int id){
-		for(TaskField field : values() ){
+	public static TaskField getByTaskID(final int id){
+		for(final TaskField field : values() ){
 			if(field.getTaskID() == id){
 				return field;
 			}
@@ -104,8 +104,8 @@ public enum TaskField {
 		return null;
 	}
 	
-	public static TaskField getByName(String name){
-		for(TaskField field : values() ){
+	public static TaskField getByName(final String name){
+		for(final TaskField field : values() ){
 			if(name.equals( field.getName() )){
 				return field;
 			}
@@ -117,7 +117,7 @@ public enum TaskField {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
@@ -125,7 +125,7 @@ public enum TaskField {
 		return taskID;
 	}
 
-	public void setTaskID(int taskID) {
+	public void setTaskID(final int taskID) {
 		this.taskID = taskID;
 	}
 	

@@ -65,7 +65,12 @@ import javax.servlet.http.HttpServletResponse;
  */
 public abstract class WebDavServlet extends HttpServlet {
 
-    protected int getDavClass() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 4869234414872430531L;
+
+	protected int getDavClass() {
         return 1;
     }
 

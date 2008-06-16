@@ -101,11 +101,11 @@ public class EventClient {
 	}
 
 	public void create(final AppointmentObject appointmentObj) throws EventException, OXException, ContextException {
-		Context ctx = ContextStorage.getInstance().getContext(contextId);
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = appointmentObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject folderObj = getFolder(folderId, ctx);
+			final FolderObject folderObj = getFolder(folderId, ctx);
 			create(appointmentObj, folderObj);
 		}
 	}
@@ -124,16 +124,16 @@ public class EventClient {
 	}
 	
 	public void modify(final AppointmentObject appointmentObj) throws EventException, OXException, ContextException {
-		Context ctx = ContextStorage.getInstance().getContext(contextId);
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = appointmentObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject folderObj = getFolder(folderId, ctx);
+			final FolderObject folderObj = getFolder(folderId, ctx);
 			modify(appointmentObj, null, folderObj);
 		}
 	}
 
-	public void modify(final AppointmentObject oldAppointmentObj, AppointmentObject newAppointmentObj, FolderObject folderObj) throws EventException {
+	public void modify(final AppointmentObject oldAppointmentObj, final AppointmentObject newAppointmentObj, final FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.APPOINTMENT, oldAppointmentObj, newAppointmentObj, folderObj, null);
 
 		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -147,11 +147,11 @@ public class EventClient {
 	}
 
 	public void delete(final AppointmentObject appointmentObj) throws EventException, OXException, ContextException {
-		Context ctx = ContextStorage.getInstance().getContext(contextId);
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
 		
         final int folderId = appointmentObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject folderObj = getFolder(folderId, ctx);
+			final FolderObject folderObj = getFolder(folderId, ctx);
 			delete(appointmentObj, folderObj);
 		}
 	}
@@ -169,7 +169,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 
-	public void move(final AppointmentObject appointmentObj, FolderObject sourceFolder, FolderObject destinationFolder) throws EventException {
+	public void move(final AppointmentObject appointmentObj, final FolderObject sourceFolder, final FolderObject destinationFolder) throws EventException {
 		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.MOVE, Types.APPOINTMENT, appointmentObj, null, sourceFolder, destinationFolder);
 
 		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -183,12 +183,12 @@ public class EventClient {
 	}
 
 	public void create(final Task taskObj) throws EventException, OXException, ContextException {
-		Context ctx = ContextStorage.getInstance().getContext(contextId);
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
 		
 		final int folderId = taskObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject folderObj = getFolder(folderId, ctx);
+			final FolderObject folderObj = getFolder(folderId, ctx);
 			create(taskObj, folderObj);
 		}
 	}
@@ -207,12 +207,12 @@ public class EventClient {
 	}
 
     public void modify(final Task taskObj) throws EventException, OXException, ContextException {
-		Context ctx = ContextStorage.getInstance().getContext(contextId);
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
 		
 		final int folderId = taskObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject folderObj = getFolder(folderId, ctx);
+			final FolderObject folderObj = getFolder(folderId, ctx);
 			modify(taskObj, folderObj);
 		}
 	}
@@ -231,12 +231,12 @@ public class EventClient {
 	}
 
     public void delete(final Task taskObj) throws EventException, OXException, ContextException {
-		Context ctx = ContextStorage.getInstance().getContext(contextId);
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
 		
 		final int folderId = taskObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject folderObj = getFolder(folderId, ctx);
+			final FolderObject folderObj = getFolder(folderId, ctx);
 			delete(taskObj, folderObj);
 		}
 	}
@@ -254,7 +254,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 	
-	public void move(final Task taskObj, FolderObject sourceFolder, FolderObject destinationFolder) throws EventException {
+	public void move(final Task taskObj, final FolderObject sourceFolder, final FolderObject destinationFolder) throws EventException {
 		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.MOVE, Types.TASK, taskObj, null, sourceFolder, destinationFolder);
 
 		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -268,11 +268,11 @@ public class EventClient {
 	}
 
 	public void create(final ContactObject contactObj) throws EventException, OXException, ContextException {
-		Context ctx = ContextStorage.getInstance().getContext(contextId);
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
 		final int folderId = contactObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject folderObj = getFolder(folderId, ctx);
+			final FolderObject folderObj = getFolder(folderId, ctx);
 			create(contactObj, folderObj);
 		}
 	}
@@ -291,11 +291,11 @@ public class EventClient {
 	}
 
 	public void modify(final ContactObject contactObj) throws EventException, OXException, ContextException {
-		Context ctx = ContextStorage.getInstance().getContext(contextId);
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
 		final int folderId = contactObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject folderObj = getFolder(folderId, ctx);
+			final FolderObject folderObj = getFolder(folderId, ctx);
 			modify(contactObj, folderObj);
 		}
 	}
@@ -314,11 +314,11 @@ public class EventClient {
 	}	
 
 	public void delete(final ContactObject contactObj) throws EventException, OXException, ContextException {
-		Context ctx = ContextStorage.getInstance().getContext(contextId);
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
 		
 		final int folderId = contactObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject folderObj = getFolder(folderId, ctx);
+			final FolderObject folderObj = getFolder(folderId, ctx);
 			delete(contactObj, folderObj);
 		}
 	}
@@ -350,11 +350,11 @@ public class EventClient {
 	}
 	
 	public void create(final FolderObject folderObj) throws EventException, OXException, ContextException {
-		Context ctx = ContextStorage.getInstance().getContext(contextId);
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
 		final int folderId = folderObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject parentFolderObj = getFolder(folderId, ctx);
+			final FolderObject parentFolderObj = getFolder(folderId, ctx);
 			create(folderObj, parentFolderObj);
 		}
 	}
@@ -373,11 +373,11 @@ public class EventClient {
 	}
 
 	public void modify(final FolderObject folderObj) throws EventException, OXException, ContextException {
-		Context ctx = ContextStorage.getInstance().getContext(contextId);
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
 		final int folderId = folderObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject parentFolderObj = getFolder(folderId, ctx);
+			final FolderObject parentFolderObj = getFolder(folderId, ctx);
 			modify(folderObj, parentFolderObj);
 		}
 	}
@@ -396,14 +396,14 @@ public class EventClient {
 	}
 
 	public void delete(final FolderObject folderObj) throws EventException, OXException, ContextException {
-		Context ctx = ContextStorage.getInstance().getContext(contextId);
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
 		
 		final int folderId = folderObj.getParentFolderID();
 		if (folderId > 0) {
 			FolderObject parentFolderObj = null;
 			try {
 				parentFolderObj = getFolder(folderId, ctx); 
-			} catch (OXFolderPermissionException exc) {
+			} catch (final OXFolderPermissionException exc) {
 				LOG.error("cannot load folder", exc);
 			}
 			delete(folderObj, parentFolderObj);
@@ -424,11 +424,11 @@ public class EventClient {
 	}
 
 	public void create(final DocumentMetadata document) throws EventException, OXException, ContextException {
-		Context ctx = ContextStorage.getInstance().getContext(contextId);
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
 		
 		final long folderId = document.getFolderId();
 		if (folderId > 0) {
-			FolderObject parentFolderObj = getFolder((int)folderId, ctx);
+			final FolderObject parentFolderObj = getFolder((int)folderId, ctx);
 			create(document, parentFolderObj);
 		}	
 	}
@@ -447,11 +447,11 @@ public class EventClient {
 	}
 
 	public void modify(final DocumentMetadata document) throws EventException, OXException, ContextException {
-		Context ctx = ContextStorage.getInstance().getContext(contextId);
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
 		
 		final long folderId = document.getFolderId();
 		if (folderId > 0) {
-			FolderObject parentFolderObj = getFolder((int)folderId, ctx);
+			final FolderObject parentFolderObj = getFolder((int)folderId, ctx);
 			modify(document, parentFolderObj);
 		}
 	}
@@ -470,12 +470,12 @@ public class EventClient {
 	}
 
 	public void delete(final DocumentMetadata document) throws EventException, OXException, ContextException {
-		Context ctx = ContextStorage.getInstance().getContext(contextId);
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
 		//FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
 		final long folderId = document.getFolderId();
 		if (folderId > 0) {
-			FolderObject parentFolderObj = getFolder((int)folderId, ctx);
+			final FolderObject parentFolderObj = getFolder((int)folderId, ctx);
 			delete(document, parentFolderObj);
 		}
 	}
@@ -493,7 +493,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 	
-	public void move(final DocumentMetadata document, FolderObject sourceFolder, FolderObject destinationFolder) throws EventException {
+	public void move(final DocumentMetadata document, final FolderObject sourceFolder, final FolderObject destinationFolder) throws EventException {
 		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.MOVE, Types.INFOSTORE, document, null, sourceFolder, destinationFolder);
 
 		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -506,7 +506,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 	
-	protected void triggerEvent(Event event) throws EventException {
+	protected void triggerEvent(final Event event) throws EventException {
 		final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
 		if (eventAdmin != null) {
 			eventAdmin.postEvent(event);
@@ -515,7 +515,7 @@ public class EventClient {
 		}
 	}
 
-    private FolderObject getFolder(int folderId, Context ctx) throws OXException {
+    private FolderObject getFolder(final int folderId, final Context ctx) throws OXException {
         return new OXFolderAccess(ctx).getFolderObject(folderId);
     }
 }

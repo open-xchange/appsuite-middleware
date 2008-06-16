@@ -172,7 +172,7 @@ public class OldPropertyDefinition {
 		try {
 			property.setValue(parseValue(property, s, encoding.decode(s),
 					MimeUtility.javaCharset(charset)));
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			final VersitException ve = new VersitException(s, "Unsupported charset");
 			ve.initCause(e);
 			throw (ve);

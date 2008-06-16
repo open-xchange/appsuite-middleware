@@ -67,6 +67,7 @@ public class TokenParamValueDefinition extends ParameterValueDefinition {
 
 	public static final TokenParamValueDefinition Default = new TokenParamValueDefinition();
 	
+	@Override
 	protected ParameterValue createValue(final Scanner s, final String text) throws IOException {
 		if (!text.matches("[-0-9A-Za-z]*")) {
 			throw new VersitException(s, "Token expected");

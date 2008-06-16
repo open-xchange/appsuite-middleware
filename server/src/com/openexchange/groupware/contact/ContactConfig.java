@@ -79,7 +79,8 @@ public class ContactConfig extends AbstractConfig implements Initialization {
     
     private static final Log LOG = LogFactory.getLog(ContactConfig.class);
     
-    protected String getPropertyFileName() throws ConfigurationException {
+    @Override
+	protected String getPropertyFileName() throws ConfigurationException {
         final String filename = SystemConfig.getProperty(KEY);
         if (null == filename) {
             throw new RuntimeException("Property " + KEY.getPropertyName()
@@ -89,8 +90,9 @@ public class ContactConfig extends AbstractConfig implements Initialization {
     }
 
     public static ContactConfig getInstance() {
-        if(singleton != null)
-            return singleton;
+        if(singleton != null) {
+			return singleton;
+		}
         return singleton = new ContactConfig();
     }
       

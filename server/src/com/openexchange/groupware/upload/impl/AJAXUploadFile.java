@@ -109,7 +109,7 @@ public final class AJAXUploadFile implements ManagedUploadFile {
 				this.cancel();
 				ServerTimer.getTimer().purge();
 			}
-		    } catch (Exception e) {
+		    } catch (final Exception e) {
 		        LOG.error(e.getMessage(), e);
 		    }
 		}

@@ -61,11 +61,12 @@ import com.openexchange.tools.versit.values.DurationValue;
 
 public class OldDurationPropertyDefinition extends OldShortPropertyDefinition {
 
-	public OldDurationPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldDurationPropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
+	@Override
 	protected Object parseValue(final Property property, final StringScanner ss)
 			throws IOException {
 		final DurationValue dur = new DurationValue();
@@ -122,6 +123,7 @@ public class OldDurationPropertyDefinition extends OldShortPropertyDefinition {
 		}
 	}
 
+	@Override
 	protected String writeValue(final Property property, final Object value) {
 		final DurationValue dur = (DurationValue) value;
 		final StringBuilder sb = new StringBuilder();

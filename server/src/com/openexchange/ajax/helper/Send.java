@@ -92,7 +92,7 @@ public final class Send {
         final StringWriter sWriter = new StringWriter();
         try {
             Response.write(response, sWriter);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             LOG.error(e.getMessage(), e);
             sendError(resp);
         }

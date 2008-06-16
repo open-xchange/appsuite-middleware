@@ -126,7 +126,7 @@ public class RdbTaskStorage extends TaskStorage {
         Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new TaskException(Code.NO_CONNECTION, e);
         }
         try {
@@ -164,7 +164,7 @@ public class RdbTaskStorage extends TaskStorage {
             if (1 != count) {
                 throw new TaskException(Code.MODIFIED);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -215,7 +215,7 @@ public class RdbTaskStorage extends TaskStorage {
             }
             return new TaskIterator(ctx, userId, stmt.executeQuery(),
                 folderId, columns, StorageType.ACTIVE);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             DBPool.closeWriterSilent(ctx, con);
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         }
@@ -249,7 +249,7 @@ public class RdbTaskStorage extends TaskStorage {
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new TaskException(Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
@@ -258,20 +258,20 @@ public class RdbTaskStorage extends TaskStorage {
             stmt = con.prepareStatement(sql.toString());
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
-            for (int i : all) {
+            for (final int i : all) {
                 stmt.setInt(pos++, i);
             }
-            for (int i : own) {
+            for (final int i : own) {
                 stmt.setInt(pos++, i);
             }
             if (own.size() > 0) {
                 stmt.setInt(pos++, userId);
             }
-            for (int i : shared) {
+            for (final int i : shared) {
                 stmt.setInt(pos++, i);
             }
             if (rangeCondition.length() > 0) {
-                for (Date date : search.getRange()) {
+                for (final Date date : search.getRange()) {
                     stmt.setTimestamp(pos++, new Timestamp(date.getTime()));
                 }
             }
@@ -288,7 +288,7 @@ public class RdbTaskStorage extends TaskStorage {
             result = stmt.executeQuery();
             return new TaskIterator(ctx, userId, result, -1, columns,
                 StorageType.ACTIVE);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(ctx, con);
             throw new TaskException(Code.SEARCH_FAILED, e, e.getMessage());
@@ -311,7 +311,7 @@ public class RdbTaskStorage extends TaskStorage {
         Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new TaskException(Code.NO_CONNECTION, e);
         }
         int number = 0;
@@ -336,7 +336,7 @@ public class RdbTaskStorage extends TaskStorage {
             }
             result.close();
             stmt.close();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             DBPool.closeReaderSilent(ctx, con);
@@ -355,7 +355,7 @@ public class RdbTaskStorage extends TaskStorage {
         insert.append(SQL.TASK_TABLES.get(type));
         insert.append(" (");
         int values = 0;
-        for (Mapper<?> mapper : Mapping.MAPPERS) {
+        for (final Mapper<?> mapper : Mapping.MAPPERS) {
             if (mapper.isSet(task)) {
                 insert.append(mapper.getDBColumnName());
                 insert.append(',');
@@ -379,9 +379,9 @@ public class RdbTaskStorage extends TaskStorage {
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, task.getObjectID());
             stmt.execute();
-        } catch (DataTruncation e) {
+        } catch (final DataTruncation e) {
             throw parseTruncated(e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -411,12 +411,12 @@ public class RdbTaskStorage extends TaskStorage {
             if (result.next()) {
                 task = new Task();
                 int pos = 1;
-                for (Mapper<?> mapper : Mapping.MAPPERS) {
+                for (final Mapper<?> mapper : Mapping.MAPPERS) {
                     mapper.fromDB(result, pos++, task);
                 }
                 task.setObjectID(taskId);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -449,7 +449,7 @@ public class RdbTaskStorage extends TaskStorage {
         sql.append("UPDATE ");
         sql.append(SQL.TASK_TABLES.get(type));
         sql.append(" SET ");
-        for (int i : modified) {
+        for (final int i : modified) {
             sql.append(Mapping.getMapping(i).getDBColumnName());
             sql.append("=?,");
         }
@@ -459,7 +459,7 @@ public class RdbTaskStorage extends TaskStorage {
         try {
             stmt = con.prepareStatement(sql.toString());
             int pos = 1;
-            for (int i : modified) {
+            for (final int i : modified) {
                 Mapping.getMapping(i).toDB(stmt, pos++, task);
             }
             stmt.setInt(pos++, ctx.getContextId());
@@ -469,9 +469,9 @@ public class RdbTaskStorage extends TaskStorage {
             if (0 == updatedRows) {
                 throw new TaskException(Code.MODIFIED);
             }
-        } catch (DataTruncation e) {
+        } catch (final DataTruncation e) {
             throw parseTruncated(e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -487,7 +487,7 @@ public class RdbTaskStorage extends TaskStorage {
     private TaskException parseTruncated(final DataTruncation exc) {
         final String[] fields = DBUtils.parseTruncatedFields(exc);
         final StringBuilder sFields = new StringBuilder();
-        for (String field : fields) {
+        for (final String field : fields) {
             sFields.append(field);
             sFields.append(", ");
         }
@@ -495,7 +495,7 @@ public class RdbTaskStorage extends TaskStorage {
         final TaskException tske = new TaskException(Code.TRUNCATED, exc,
             sFields.toString());
         final int[] truncated = SQL.findTruncated(fields);
-        for (int i : truncated) {
+        for (final int i : truncated) {
             tske.addTruncatedId(i);
         }
         return tske;
@@ -526,7 +526,7 @@ public class RdbTaskStorage extends TaskStorage {
             }
             result.close();
             stmt.close();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         }
         return retval;

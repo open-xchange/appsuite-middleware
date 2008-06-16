@@ -75,10 +75,10 @@ public class ContactServiceListener implements ServiceTrackerCustomizer{
 	public Object addingService(final ServiceReference reference) {
         final ContactInterface contactInterface = (ContactInterface)context.getService(reference); 
         
-        Object id = reference.getProperty(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE);
+        final Object id = reference.getProperty(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE);
         	
         if (id != null){
-        	int ix = new Integer(id.toString()).intValue();
+        	final int ix = new Integer(id.toString()).intValue();
         	LOG.info("Adding Service Bundle Contact Interface: " + reference.getBundle().getSymbolicName() + " for folder: "+ix);
         	services.addService(ix, contactInterface);
         }
@@ -93,7 +93,7 @@ public class ContactServiceListener implements ServiceTrackerCustomizer{
 	public void removedService(final ServiceReference reference, final Object service) {
         try {
             final ContactInterface contactInterface = (ContactInterface)context.getService(reference);
-            int[] overRiding = (int[])reference.getProperty(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE);
+            final int[] overRiding = (int[])reference.getProperty(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE);
             
 	        for (int a = 0; a < overRiding.length; a++) {
 	        	LOG.info("Removing Service Bundle Contact Interface: " + reference.getBundle().getSymbolicName() + " for folder: "+overRiding[a]);

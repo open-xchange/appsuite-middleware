@@ -78,7 +78,8 @@ public interface Participant
      * {@link ResourceParticipant#ResourceParticipant(int)},
      * {@link ResourceGroupParticipant#ResourceGroupParticipant(int)}
 	 */
-    public void setIdentifier( int name ) ;
+    @Deprecated
+	public void setIdentifier( int name ) ;
 	
 	public int getIdentifier( );
 	
@@ -91,7 +92,8 @@ public interface Participant
      * {@link ExternalUserParticipant#ExternalUserParticipant(String)},
      * {@link ExternalGroupParticipant#ExternalGroupParticipant(String)}
 	 */
-    public void setEmailAddress(String emailaddress);
+    @Deprecated
+	public void setEmailAddress(String emailaddress);
 	
 	public String getEmailAddress();
 	

@@ -58,17 +58,19 @@ import com.openexchange.tools.versit.StringScanner;
 
 public class OldTranspPropertyDefinition extends OldShortPropertyDefinition {
 
-	public OldTranspPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldTranspPropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
+	@Override
 	protected Object parseValue(final Property property, final StringScanner s)
 			throws IOException {
 		return Integer.parseInt(s.getRest().trim()) == 0 ? "OPAQUE"
 				: "TRANSPARENT";
 	}
 
+	@Override
 	protected String writeValue(final Property property, final Object value) {
 		return "OPAQUE".equalsIgnoreCase(value.toString()) ? "0" : "1";
 	}

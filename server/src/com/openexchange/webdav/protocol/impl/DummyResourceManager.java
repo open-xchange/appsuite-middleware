@@ -49,12 +49,18 @@
 
 package com.openexchange.webdav.protocol.impl;
 
-import com.openexchange.webdav.protocol.*;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavCollection;
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavResource;
 
 public class DummyResourceManager implements WebdavFactory {
 
@@ -79,7 +85,7 @@ public class DummyResourceManager implements WebdavFactory {
 	private final Map<WebdavPath,WebdavResource> resources = new HashMap<WebdavPath,WebdavResource>();
 	private final Map<WebdavPath,DummyLockNull> lockNullResources = new HashMap<WebdavPath,DummyLockNull>();
 
-    public WebdavResource resolveResource(WebdavPath url) {
+    public WebdavResource resolveResource(final WebdavPath url) {
         if(!resources.containsKey(url)) {
 			if(lockNullResources.containsKey(url)) {
 				final DummyLockNull lockNull = lockNullResources.get(url);
@@ -91,7 +97,7 @@ public class DummyResourceManager implements WebdavFactory {
 		return resources.get(url);
     }
 
-    public WebdavCollection resolveCollection(WebdavPath url) {
+    public WebdavCollection resolveCollection(final WebdavPath url) {
         if(!resources.containsKey(url)) {
 			if(lockNullResources.containsKey(url)) {
 				final DummyLockNull lockNull = lockNullResources.get(url);
@@ -111,12 +117,12 @@ public class DummyResourceManager implements WebdavFactory {
 		return resolveCollection(new WebdavPath(url));
 	}
 
-	public synchronized void save(WebdavPath url, final DummyResource res) {
+	public synchronized void save(final WebdavPath url, final DummyResource res) {
 		getParent(url).addChild(res);
 		resources.put(url,res);
 	}
 
-	public void remove(WebdavPath url, final DummyResource res) {
+	public void remove(final WebdavPath url, final DummyResource res) {
 		getParent(url).removeChild(res);
 		resources.remove(url);
 	}

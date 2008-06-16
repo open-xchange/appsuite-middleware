@@ -269,7 +269,7 @@ public class Index {
 
 	public static class NameFilter implements Filter<Index> {
 		
-		private String name;
+		private final String name;
 		
 		public NameFilter(final String name) {
 			this.name = name;
@@ -283,7 +283,7 @@ public class Index {
 	
 	public static class ContainsColumnFilter implements Filter<Index> {
 		
-		private String[] columns;
+		private final String[] columns;
 		
 		public ContainsColumnFilter(final String...columns) {
 			this.columns = columns;
@@ -308,7 +308,7 @@ public class Index {
 	
 	public static class ExactColumnFilter implements Filter<Index> {
 		
-		private String[] columns;
+		private final String[] columns;
 		
 		public ExactColumnFilter(final String...columns) {
 			this.columns = columns;

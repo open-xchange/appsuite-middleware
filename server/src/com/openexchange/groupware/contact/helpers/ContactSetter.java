@@ -90,8 +90,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "DisplayName");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setDisplayName(value);
     return conObj;
   }
@@ -100,8 +100,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "SurName");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setSurName(value);
     return conObj;
   }
@@ -110,8 +110,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "GivenName");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setGivenName(value);
     return conObj;
   }
@@ -120,8 +120,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "MiddleName");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setMiddleName(value);
     return conObj;
   }
@@ -130,8 +130,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "Suffix");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setSuffix(value);
     return conObj;
   }
@@ -140,8 +140,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "Title");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setTitle(value);
     return conObj;
   }
@@ -150,8 +150,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "StreetHome");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setStreetHome(value);
     return conObj;
   }
@@ -160,8 +160,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "PostalCodeHome");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setPostalCodeHome(value);
     return conObj;
   }
@@ -170,8 +170,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "CityHome");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setCityHome(value);
     return conObj;
   }
@@ -180,8 +180,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "StateHome");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setStateHome(value);
     return conObj;
   }
@@ -190,8 +190,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "CountryHome");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setCountryHome(value);
     return conObj;
   }
@@ -200,8 +200,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "MaritalStatus");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setMaritalStatus(value);
     return conObj;
   }
@@ -210,8 +210,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "NumberOfChildren");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setNumberOfChildren(value);
     return conObj;
   }
@@ -220,8 +220,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "Profession");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setProfession(value);
     return conObj;
   }
@@ -230,8 +230,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "Nickname");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setNickname(value);
     return conObj;
   }
@@ -240,8 +240,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "SpouseName");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setSpouseName(value);
     return conObj;
   }
@@ -250,8 +250,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "Note");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setNote(value);
     return conObj;
   }
@@ -260,8 +260,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "Company");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setCompany(value);
     return conObj;
   }
@@ -270,8 +270,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "Department");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setDepartment(value);
     return conObj;
   }
@@ -280,8 +280,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "Position");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setPosition(value);
     return conObj;
   }
@@ -290,8 +290,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "EmployeeType");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setEmployeeType(value);
     return conObj;
   }
@@ -300,8 +300,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "RoomNumber");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setRoomNumber(value);
     return conObj;
   }
@@ -310,8 +310,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "StreetBusiness");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setStreetBusiness(value);
     return conObj;
   }
@@ -320,8 +320,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "PostalCodeBusiness");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setPostalCodeBusiness(value);
     return conObj;
   }
@@ -330,8 +330,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "CityBusiness");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setCityBusiness(value);
     return conObj;
   }
@@ -340,8 +340,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "StateBusiness");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setStateBusiness(value);
     return conObj;
   }
@@ -350,8 +350,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "CountryBusiness");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setCountryBusiness(value);
     return conObj;
   }
@@ -360,8 +360,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "NumberOfEmployee");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setNumberOfEmployee(value);
     return conObj;
   }
@@ -370,8 +370,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "SalesVolume");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setSalesVolume(value);
     return conObj;
   }
@@ -380,8 +380,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "TaxID");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setTaxID(value);
     return conObj;
   }
@@ -390,8 +390,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "CommercialRegister");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setCommercialRegister(value);
     return conObj;
   }
@@ -400,8 +400,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "Branches");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setBranches(value);
     return conObj;
   }
@@ -410,8 +410,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "BusinessCategory");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setBusinessCategory(value);
     return conObj;
   }
@@ -420,8 +420,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "Info");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setInfo(value);
     return conObj;
   }
@@ -430,8 +430,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "ManagerName");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setManagerName(value);
     return conObj;
   }
@@ -440,8 +440,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "AssistantName");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setAssistantName(value);
     return conObj;
   }
@@ -450,8 +450,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "StreetOther");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setStreetOther(value);
     return conObj;
   }
@@ -460,8 +460,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "PostalCodeOther");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setPostalCodeOther(value);
     return conObj;
   }
@@ -470,8 +470,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "CityOther");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setCityOther(value);
     return conObj;
   }
@@ -480,8 +480,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "StateOther");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setStateOther(value);
     return conObj;
   }
@@ -490,8 +490,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "CountryOther");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setCountryOther(value);
     return conObj;
   }
@@ -500,8 +500,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "TelephoneAssistant");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setTelephoneAssistant(value);
     return conObj;
   }
@@ -510,8 +510,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "TelephoneBusiness1");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setTelephoneBusiness1(value);
     return conObj;
   }
@@ -520,8 +520,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "TelephoneBusiness2");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setTelephoneBusiness2(value);
     return conObj;
   }
@@ -530,8 +530,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "FaxBusiness");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setFaxBusiness(value);
     return conObj;
   }
@@ -540,8 +540,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "TelephoneCallback");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setTelephoneCallback(value);
     return conObj;
   }
@@ -550,8 +550,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "TelephoneCar");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setTelephoneCar(value);
     return conObj;
   }
@@ -560,8 +560,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "TelephoneCompany");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setTelephoneCompany(value);
     return conObj;
   }
@@ -570,8 +570,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "TelephoneHome1");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setTelephoneHome1(value);
     return conObj;
   }
@@ -580,8 +580,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "TelephoneHome2");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setTelephoneHome2(value);
     return conObj;
   }
@@ -590,8 +590,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "FaxHome");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setFaxHome(value);
     return conObj;
   }
@@ -600,8 +600,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "TelephoneISDN");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setTelephoneISDN(value);
     return conObj;
   }
@@ -610,8 +610,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "CellularTelephone1");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setCellularTelephone1(value);
     return conObj;
   }
@@ -620,8 +620,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "CellularTelephone2");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setCellularTelephone2(value);
     return conObj;
   }
@@ -630,8 +630,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "TelephoneOther");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setTelephoneOther(value);
     return conObj;
   }
@@ -640,8 +640,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "FaxOther");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setFaxOther(value);
     return conObj;
   }
@@ -650,8 +650,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "TelephonePager");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setTelephonePager(value);
     return conObj;
   }
@@ -660,8 +660,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "TelephonePrimary");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setTelephonePrimary(value);
     return conObj;
   }
@@ -670,8 +670,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "TelephoneRadio");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setTelephoneRadio(value);
     return conObj;
   }
@@ -680,8 +680,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "TelephoneTelex");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setTelephoneTelex(value);
     return conObj;
   }
@@ -690,8 +690,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "TelephoneTTYTTD");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setTelephoneTTYTTD(value);
     return conObj;
   }
@@ -700,8 +700,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "InstantMessenger1");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setInstantMessenger1(value);
     return conObj;
   }
@@ -710,8 +710,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "InstantMessenger2");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setInstantMessenger2(value);
     return conObj;
   }
@@ -720,8 +720,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "TelephoneIP");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setTelephoneIP(value);
     return conObj;
   }
@@ -730,8 +730,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "Email1");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setEmail1(value);
     return conObj;
   }
@@ -740,8 +740,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "Email2");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setEmail2(value);
     return conObj;
   }
@@ -750,8 +750,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "Email3");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setEmail3(value);
     return conObj;
   }
@@ -760,8 +760,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "URL");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setURL(value);
     return conObj;
   }
@@ -770,8 +770,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "Categories");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setCategories(value);
     return conObj;
   }
@@ -780,8 +780,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField01");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField01(value);
     return conObj;
   }
@@ -790,8 +790,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField02");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField02(value);
     return conObj;
   }
@@ -800,8 +800,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField03");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField03(value);
     return conObj;
   }
@@ -810,8 +810,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField04");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField04(value);
     return conObj;
   }
@@ -820,8 +820,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField05");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField05(value);
     return conObj;
   }
@@ -830,8 +830,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField06");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField06(value);
     return conObj;
   }
@@ -840,8 +840,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField07");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField07(value);
     return conObj;
   }
@@ -850,8 +850,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField08");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField08(value);
     return conObj;
   }
@@ -860,8 +860,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField09");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField09(value);
     return conObj;
   }
@@ -870,8 +870,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField10");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField10(value);
     return conObj;
   }
@@ -880,8 +880,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField11");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField11(value);
     return conObj;
   }
@@ -890,8 +890,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField12");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField12(value);
     return conObj;
   }
@@ -900,8 +900,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField13");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField13(value);
     return conObj;
   }
@@ -910,8 +910,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField14");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField14(value);
     return conObj;
   }
@@ -920,8 +920,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField15");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField15(value);
     return conObj;
   }
@@ -930,8 +930,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField16");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField16(value);
     return conObj;
   }
@@ -940,8 +940,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField17");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField17(value);
     return conObj;
   }
@@ -950,8 +950,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField18");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField18(value);
     return conObj;
   }
@@ -960,8 +960,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField19");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField19(value);
     return conObj;
   }
@@ -970,8 +970,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "UserField20");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setUserField20(value);
     return conObj;
   }
@@ -980,8 +980,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "ObjectID");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    int value = (Integer) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final int value = (Integer) objects[1];
     conObj.setObjectID(value);
     return conObj;
   }
@@ -990,8 +990,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "NumberOfDistributionLists");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    int value = (Integer) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final int value = (Integer) objects[1];
     conObj.setNumberOfDistributionLists(value);
     return conObj;
   }
@@ -1000,8 +1000,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "NumberOfLinks");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    int value = (Integer) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final int value = (Integer) objects[1];
     conObj.setNumberOfLinks(value);
     return conObj;
   }
@@ -1010,8 +1010,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "DistributionList");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    DistributionListEntryObject[] value = (DistributionListEntryObject[]) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final DistributionListEntryObject[] value = (DistributionListEntryObject[]) objects[1];
     conObj.setDistributionList(value);
     return conObj;
   }
@@ -1020,8 +1020,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "Links");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    LinkEntryObject[] value = (LinkEntryObject[]) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final LinkEntryObject[] value = (LinkEntryObject[]) objects[1];
     conObj.setLinks(value);
     return conObj;
   }
@@ -1030,8 +1030,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "ParentFolderID");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    int value = (Integer) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final int value = (Integer) objects[1];
     conObj.setParentFolderID(value);
     return conObj;
   }
@@ -1040,8 +1040,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "ContextId");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    int  value = (Integer) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final int  value = (Integer) objects[1];
     conObj.setContextId(value);
     return conObj;
   }
@@ -1050,8 +1050,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "PrivateFlag");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    boolean value = (Boolean) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final boolean value = (Boolean) objects[1];
     conObj.setPrivateFlag(value);
     return conObj;
   }
@@ -1060,8 +1060,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "CreatedBy");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    int  value = (Integer) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final int  value = (Integer) objects[1];
     conObj.setCreatedBy(value);
     return conObj;
   }
@@ -1070,8 +1070,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "ModifiedBy");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    int value = (Integer) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final int value = (Integer) objects[1];
     conObj.setModifiedBy(value);
     return conObj;
   }
@@ -1080,8 +1080,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "CreationDate");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    Date value = (Date) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final Date value = (Date) objects[1];
     conObj.setCreationDate(value);
     return conObj;
   }
@@ -1090,8 +1090,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "LastModified");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    Date value = (Date) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final Date value = (Date) objects[1];
     conObj.setLastModified(value);
     return conObj;
   }
@@ -1100,8 +1100,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "Birthday");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    Date value = (Date) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final Date value = (Date) objects[1];
     conObj.setBirthday(value);
     return conObj;
   }
@@ -1110,8 +1110,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "Anniversary");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    Date value = (Date) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final Date value = (Date) objects[1];
     conObj.setAnniversary(value);
     return conObj;
   }
@@ -1120,8 +1120,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "ImageLastModified");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    Date value = (Date) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final Date value = (Date) objects[1];
     conObj.setImageLastModified(value);
     return conObj;
   }
@@ -1130,8 +1130,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "InternalUserId");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    int value = (Integer) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final int value = (Integer) objects[1];
     conObj.setInternalUserId(value);
     return conObj;
   }
@@ -1140,8 +1140,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "Label");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    int value = (Integer) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final int value = (Integer) objects[1];
     conObj.setLabel(value);
     return conObj;
   }
@@ -1150,8 +1150,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "FileAs");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    String value = (String) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final String value = (String) objects[1];
     conObj.setFileAs(value);
     return conObj;
   }
@@ -1160,8 +1160,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "DefaultAddress");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    int value = (Integer) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final int value = (Integer) objects[1];
     conObj.setDefaultAddress(value);
     return conObj;
   }
@@ -1170,8 +1170,8 @@ public class ContactSetter implements ContactSwitcher {
     if(objects.length < 2){
       throw EXCEPTIONS.create(0, "NumberOfAttachments");
     }
-    ContactObject conObj = (ContactObject) objects[0];
-    int value = (Integer) objects[1];
+    final ContactObject conObj = (ContactObject) objects[0];
+    final int value = (Integer) objects[1];
     conObj.setNumberOfAttachments(value);
     return conObj;
   }

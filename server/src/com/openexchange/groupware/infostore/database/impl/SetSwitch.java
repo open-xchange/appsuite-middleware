@@ -70,7 +70,7 @@ public class SetSwitch implements MetadataSwitcher{
 	}
 	
 	private Object value;
-	private DocumentMetadata impl;
+	private final DocumentMetadata impl;
 	
 	public SetSwitch(final DocumentMetadata impl) {
 		this.impl = impl;

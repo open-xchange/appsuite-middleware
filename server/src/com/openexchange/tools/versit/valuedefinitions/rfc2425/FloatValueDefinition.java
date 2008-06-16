@@ -69,6 +69,7 @@ public class FloatValueDefinition extends ValueDefinition {
 
 	private static Pattern FloatPattern = Pattern.compile("[-+]\\d+(\\.\\d+)?");
 
+	@Override
 	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
 		final String value = s.regex(FloatPattern);
@@ -81,6 +82,7 @@ public class FloatValueDefinition extends ValueDefinition {
 	private static final DecimalFormat Format = new DecimalFormat(
 			"0.################");
 
+	@Override
 	public String writeValue(final Object value) {
 		return Format.format(((Double) value).doubleValue());
 	}

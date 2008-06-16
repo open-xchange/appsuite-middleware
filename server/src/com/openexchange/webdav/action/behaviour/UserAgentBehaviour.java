@@ -67,7 +67,7 @@ public class UserAgentBehaviour implements Behaviour{
 	private Map<Class<? extends Object>, Object> classes = null;
 	private Pattern pattern;
 	
-	public UserAgentBehaviour(String userAgentPattern, Object...implementations) throws ConfigurationException {
+	public UserAgentBehaviour(final String userAgentPattern, final Object...implementations) throws ConfigurationException {
 		setPattern(userAgentPattern);
 		setChanges(new HashSet<Object>(Arrays.asList(implementations)));
 	}
@@ -77,19 +77,19 @@ public class UserAgentBehaviour implements Behaviour{
 	}
 
 	
-	public void setPattern(String userAgentPattern) {
+	public void setPattern(final String userAgentPattern) {
 		pattern = Pattern.compile(userAgentPattern);
 	}
 	
-	public void setChanges(Set<Object> implementations) throws ConfigurationException {
+	public void setChanges(final Set<Object> implementations) throws ConfigurationException {
 		classes = new HashMap<Class<? extends Object>, Object>();
 		
-		for(Object object : implementations) {
+		for(final Object object : implementations) {
 			
 			Class<? extends Object> addMe = object.getClass();
 			while(addMe != null) {
-				Class[] interfaces = addMe.getInterfaces();
-				for(Class<? extends Object> iFace : interfaces) {
+				final Class[] interfaces = addMe.getInterfaces();
+				for(final Class<? extends Object> iFace : interfaces) {
 					if(classes.get(iFace) != null) {
 						throw new ConfigurationException(Code.INVALID_CONFIGURATION, "Two implemenations for "+iFace);
 					} 
@@ -100,17 +100,18 @@ public class UserAgentBehaviour implements Behaviour{
 		}
 	}
 	
-	public void setChange(Object implementation) throws ConfigurationException {
+	public void setChange(final Object implementation) throws ConfigurationException {
 		setChanges(new HashSet(Arrays.asList(implementation)));
 	}
 
-	public <T> T get(Class<T> clazz) {
+	public <T> T get(final Class<T> clazz) {
 		return (T) classes.get(clazz);
 	}
 
-	public boolean matches(WebdavRequest req) {
-		if(req.getHeader("user-agent") == null)
+	public boolean matches(final WebdavRequest req) {
+		if(req.getHeader("user-agent") == null) {
 			return false;
+		}
 		return pattern.matcher(req.getHeader("user-agent")).find();
 	}
 
@@ -118,6 +119,7 @@ public class UserAgentBehaviour implements Behaviour{
 		return classes.keySet();
 	}
 	
+	@Override
 	public String toString(){
 		return "UserAgent matcher: "+pattern.toString();
 	}

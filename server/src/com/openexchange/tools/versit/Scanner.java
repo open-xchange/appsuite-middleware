@@ -149,14 +149,14 @@ public abstract class Scanner implements VersitDefinition.Reader {
 				sign = -1;
 				read();
 			}
-			int i = parseNumber();
+			final int i = parseNumber();
 			list.add(Integer.valueOf(i * sign));
 			if (peek != ',') {
 				break;
 			}
 			read();
 		}
-		int[] retval = new int[list.size()];
+		final int[] retval = new int[list.size()];
 		for (int i = 0; i < retval.length; i++) {
 			retval[i] = ((Integer) list.get(i)).intValue();
 		}

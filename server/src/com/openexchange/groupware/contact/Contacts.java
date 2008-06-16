@@ -1091,11 +1091,11 @@ public class Contacts implements DeleteListener {
 	}
 
 	public static ContactObject getContactById(final int objectId, final Session session) throws OXException, ContextException, DBPoolingException{
-		Context ctx = ContextStorage.getStorageContext(session);
-		int[] groups = UserStorage.getStorageUser(session.getUserId(), ctx).getGroups();
-		Connection readCon = DBPool.pickup(ctx);
-		UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),ctx);
-		ContactObject co = getContactById(objectId, session.getUserId(), groups, ctx, uc, readCon);
+		final Context ctx = ContextStorage.getStorageContext(session);
+		final int[] groups = UserStorage.getStorageUser(session.getUserId(), ctx).getGroups();
+		final Connection readCon = DBPool.pickup(ctx);
+		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),ctx);
+		final ContactObject co = getContactById(objectId, session.getUserId(), groups, ctx, uc, readCon);
 		
 		try {
 			DBPool.closeReaderSilent(ctx, readCon);

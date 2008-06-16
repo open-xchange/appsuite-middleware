@@ -85,7 +85,7 @@ public class DefaultAddress implements PreferencesItemService {
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
             public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
+                final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
                 setting.setSingleValue(user.getMail());
             }
             public boolean isAvailable(final UserConfiguration userConfig) {

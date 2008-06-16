@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.filestore;
 
-import java.net.URI;
 import java.io.Serializable;
+import java.net.URI;
 
 import com.openexchange.cache.dynamic.OXNoRefresh;
 

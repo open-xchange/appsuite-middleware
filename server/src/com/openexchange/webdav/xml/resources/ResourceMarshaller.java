@@ -54,7 +54,6 @@ import java.util.List;
 
 import org.jdom.Element;
 
-import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public interface ResourceMarshaller {

@@ -57,7 +57,12 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.openexchange.webdav.protocol.*;
+import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavCollection;
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavMultistatusException;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.Protocol.Property;
 
 public class DummyCollection extends DummyResource implements WebdavCollection {
@@ -220,7 +225,7 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 	private static class ChildTreeIterator implements Iterator<WebdavResource> {
 		
 		private Iterator<WebdavResource> subIterator;
-		private Iterator<WebdavResource> childIterator;
+		private final Iterator<WebdavResource> childIterator;
 		
 		public ChildTreeIterator(final Iterator<WebdavResource> childIterator) {
 			this.childIterator = childIterator;

@@ -139,7 +139,7 @@ public class UpdateTaskCollection {
 	 */
 	private static final Comparator<UpdateTask> UPDATE_TASK_COMPARATOR = new Comparator<UpdateTask>() {
 
-		public int compare(UpdateTask o1, UpdateTask o2) {
+		public int compare(final UpdateTask o1, final UpdateTask o2) {
 			if (o1.addedWithVersion() > o2.addedWithVersion()) {
 				return 1;
 			} else if (o1.addedWithVersion() < o2.addedWithVersion()) {

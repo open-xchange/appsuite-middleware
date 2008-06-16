@@ -159,7 +159,7 @@ public class AttachmentField {
 	}
 	
 	
-	private int id;
+	private final int id;
 	private String name = "";
 	
 	

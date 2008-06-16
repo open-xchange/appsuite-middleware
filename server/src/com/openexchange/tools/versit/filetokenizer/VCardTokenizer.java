@@ -107,7 +107,7 @@ public class VCardTokenizer {
      *            Reader of the content of a VCard file. Reader will be closed.
      * @throws IOException
      */
-    public VCardTokenizer(InputStream is) throws IOException {
+    public VCardTokenizer(final InputStream is) throws IOException {
         streamAsBytes = new UnsynchronizedByteArrayOutputStream();
         vcard = new BufferedInputStream(is);
     }
@@ -124,7 +124,7 @@ public class VCardTokenizer {
         String currLine;
         try {
             while ((currLine = readLine()) != null) {
-                String compLine = currLine.trim().toUpperCase();
+                final String compLine = currLine.trim().toUpperCase();
 
                 if (compLine.startsWith("VERSION")) {
                     if (potentialCard && currLine.trim().endsWith(VCARD_V3)) {
@@ -160,7 +160,7 @@ public class VCardTokenizer {
                     currentChunk = new VCardFileToken();
                 }
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG
                 .error(
                     "IOException while trying to tokenize stream that was a VCARD (supposedly)",
@@ -168,7 +168,7 @@ public class VCardTokenizer {
             if (vcard != null) {
                 try {
                     vcard.close();
-                } catch (IOException e1) {
+                } catch (final IOException e1) {
                     LOG
                         .error(
                             "Tried to close stream of VCARD that was closed already",
@@ -214,8 +214,8 @@ public class VCardTokenizer {
         return null;
     }
 
-    protected byte[] toByteArray(List<Byte> list) {
-        byte[] returnValues = new byte[list.size()];
+    protected byte[] toByteArray(final List<Byte> list) {
+        final byte[] returnValues = new byte[list.size()];
         for (int i = 0; i < list.size(); i++) {
             returnValues[i] = list.get(i).byteValue();
         }

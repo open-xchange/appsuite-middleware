@@ -251,7 +251,7 @@ public class Starter implements Initialization {
 
 		dumpServerInfos();
 
-		for (Initialization init : inits) {
+		for (final Initialization init : inits) {
 			init.start();
 			started.push(init);
 		}
@@ -278,7 +278,7 @@ public class Starter implements Initialization {
 
 		dumpServerInfos();
 
-		for (Initialization init : adminInits) {
+		for (final Initialization init : adminInits) {
 			init.start();
 			started.push(init);
 		}
@@ -335,7 +335,7 @@ public class Starter implements Initialization {
 		while (!started.isEmpty()) {
 			try {
 				started.pop().stop();
-			} catch (AbstractOXException e) {
+			} catch (final AbstractOXException e) {
 				LOG.error("Component shutdown failed.", e);
 			}
 		}

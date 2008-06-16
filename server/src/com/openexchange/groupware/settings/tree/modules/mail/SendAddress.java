@@ -125,7 +125,7 @@ public class SendAddress implements PreferencesItemService {
                     settings.setSendAddr(newAlias);
                     try {
                         storage.saveUserSettingMail(settings, user.getId(), ctx);
-                    } catch (OXException e) {
+                    } catch (final OXException e) {
                         throw new SettingException(e);
                     }
                 }

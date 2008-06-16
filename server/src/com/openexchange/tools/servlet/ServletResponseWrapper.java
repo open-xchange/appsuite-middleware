@@ -245,7 +245,7 @@ public class ServletResponseWrapper implements ServletResponse {
 					writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(oxOutputStream,
 							getCharacterEncoding())), true);
 				}
-			} catch (UnsupportedEncodingException e) {
+			} catch (final UnsupportedEncodingException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		} else if (outputSelection == USE_OUTPUT_STREAM && oxOutputStream != null) {
@@ -405,7 +405,7 @@ public class ServletResponseWrapper implements ServletResponse {
 					writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(oxOutputStream,
 							getCharacterEncoding())), true);
 				}
-			} catch (UnsupportedEncodingException e) {
+			} catch (final UnsupportedEncodingException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}

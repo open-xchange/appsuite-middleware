@@ -82,14 +82,14 @@ import com.openexchange.groupware.contact.ContactExceptionFactory;
 public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherWithDelegate{
 
 	private static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(ContactSwitcherForSimpleDateFormat.class);
-	private List<SimpleDateFormat> dateFormats = new LinkedList<SimpleDateFormat>() ;
+	private final List<SimpleDateFormat> dateFormats = new LinkedList<SimpleDateFormat>() ;
 	
 	private Object[] makeDate(final Object... objects) throws ContactException{
-		for(SimpleDateFormat dateFormat: dateFormats){
+		for(final SimpleDateFormat dateFormat: dateFormats){
 			try {
 				objects[1] = dateFormat.parse( (String) objects[1] );
 				return objects;
-			} catch (ParseException e){
+			} catch (final ParseException e){
 				//try next parser
 			}
 		}
@@ -101,6 +101,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
 	}
 
 	/* CHANGED METHODS */
+	@Override
 	public Object creationdate(final Object... objects) throws ContactException {
 		try {
 			return delegate.creationdate( makeDate(objects) );
@@ -109,6 +110,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
 		}
 	}
 
+	@Override
 	public Object anniversary(final Object... objects) throws ContactException {
 		try {
 			return delegate.anniversary( makeDate(objects) );
@@ -117,6 +119,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
 		}
 	}
 
+	@Override
 	public Object birthday(final Object... objects) throws ContactException {
 		try {
 			return delegate.birthday( makeDate(objects) );
@@ -125,6 +128,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
 		}
 	}
 
+	@Override
 	public Object imagelastmodified(final Object... objects) throws ContactException {
 		try {
 			return delegate.imagelastmodified( makeDate(objects) );
@@ -133,6 +137,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
 		}
 	}
 
+	@Override
 	public Object lastmodified(final Object... objects) throws ContactException {
 		try {
 			return delegate.lastmodified( makeDate(objects) );

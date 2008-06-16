@@ -154,7 +154,7 @@ public final class Tools {
         try {
             folder = new OXFolderAccess(ctx).getDefaultFolder(userId,
                 FolderObject.TASK).getObjectID();
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new TaskException(e);
         }
         return folder;
@@ -172,9 +172,9 @@ public final class Tools {
         throws TaskException {
         try {
         	return new OXFolderAccess(ctx).getFolderObject(folderId);
-        } catch (FolderCacheNotEnabledException e) {
+        } catch (final FolderCacheNotEnabledException e) {
             throw new TaskException(e);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new TaskException(e);
         }
     }
@@ -205,7 +205,7 @@ public final class Tools {
 
     static void fillStandardFolders(final Context ctx,
         final Set<InternalParticipant> participants) throws TaskException {
-        for (InternalParticipant participant : participants) {
+        for (final InternalParticipant participant : participants) {
             if (UserParticipant.NO_PFID == participant.getFolderId()) {
                 participant.setFolderId(Tools.getUserTaskStandardFolder(ctx,
                     participant.getIdentifier()));
@@ -217,10 +217,10 @@ public final class Tools {
         final Set<Folder> folders, final boolean privat) throws TaskException {
         final Map<Integer, Folder> folderByUser = new HashMap<Integer, Folder>(
             folders.size(), 1);
-        for (Folder folder : folders) {
+        for (final Folder folder : folders) {
             folderByUser.put(Integer.valueOf(folder.getUser()), folder);
         }
-        for (TaskParticipant participant : participants) {
+        for (final TaskParticipant participant : participants) {
             if (Type.INTERNAL == participant.getType()) {
                 final InternalParticipant internal = (InternalParticipant)
                     participant;
@@ -242,7 +242,7 @@ public final class Tools {
     static Context getContext(final int contextId) throws TaskException {
         try {
             return ContextStorage.getStorageContext(contextId);
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             throw new TaskException(e);
         }
     }
@@ -258,7 +258,7 @@ public final class Tools {
         try {
             return UserConfigurationStorage.getInstance().getUserConfiguration(
                 userId, ctx);
-        } catch (UserConfigurationException e) {
+        } catch (final UserConfigurationException e) {
             throw new TaskException(e);
         }
     }
@@ -271,7 +271,7 @@ public final class Tools {
         throws TaskException {
         try {
             return UserStorage.getInstance().getUser(userId, ctx);
-        } catch (LdapException e) {
+        } catch (final LdapException e) {
             throw new TaskException(e);
         }
     }

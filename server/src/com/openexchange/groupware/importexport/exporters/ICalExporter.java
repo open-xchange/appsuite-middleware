@@ -81,13 +81,12 @@ import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
-import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
-import com.openexchange.tools.session.ServerSession;
 
 @OXExceptionSource(
 		classId=ImportExportExceptionClasses.ICALEXPORTER,
@@ -187,7 +186,7 @@ public class ICalExporter implements Exporter {
 			return false;
 		}
 		//check format of folder
-		int module = fo.getModule(); 
+		final int module = fo.getModule(); 
 		if (module == FolderObject.CALENDAR) {
 			if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasCalendar()) {
 				return false;

@@ -117,7 +117,7 @@ public class DelFolderTreeTableUpdateTask implements UpdateTask {
 			try {
 				stmt = writeCon.prepareStatement(SQL_MODIFY);
 				stmt.executeUpdate();
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				throw EXCEPTION.create(1, e, e.getMessage());
 			}
 		} finally {

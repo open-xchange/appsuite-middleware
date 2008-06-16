@@ -69,7 +69,7 @@ public class OldScanner extends Scanner {
 
 	public String DefaultCharset = "US-ASCII";
 
-	public OldScanner(InputStream is) throws IOException {
+	public OldScanner(final InputStream is) throws IOException {
 		r = new PushbackInputStream(is);
 		peek = readImpl();
 	}

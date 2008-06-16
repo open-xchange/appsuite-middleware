@@ -57,12 +57,12 @@ import com.openexchange.api2.OXException;
  */
 public class InfostoreException2Message extends Exception2Message {
 	@Override
-	protected ErrorMessage objectNotFound(OXObjectNotFoundException exception) {
+	protected ErrorMessage objectNotFound(final OXObjectNotFoundException exception) {
 		return new ErrorMessage("The object with the id %s could not be found",String.valueOf(exception.getId()));
 	}
 
 	@Override
-	protected ErrorMessage exception(OXException x) {
+	protected ErrorMessage exception(final OXException x) {
 		Throwable cause = x.getCause();
 		if(cause == null) {
 			cause = x;

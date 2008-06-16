@@ -1,21 +1,5 @@
 package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.database.Database;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
-import com.openexchange.groupware.update.exception.SchemaException;
-import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.tools.file.FileStorageException;
-import com.openexchange.tools.file.LocalFileStorage;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
@@ -27,13 +11,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.database.Database;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.exception.Classes;
+import com.openexchange.groupware.update.exception.SchemaException;
+import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.tools.file.FileStorageException;
+import com.openexchange.tools.file.LocalFileStorage;
+
 @OXExceptionSource(
 	    classId = Classes.UPDATE_TASK,
 	    component = EnumComponent.UPDATE
 	)
 public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 
-    private ThreadLocal<Map<Integer,LocalFileStorage>> filestorages = new ThreadLocal<Map<Integer,LocalFileStorage>>();
+    private final ThreadLocal<Map<Integer,LocalFileStorage>> filestorages = new ThreadLocal<Map<Integer,LocalFileStorage>>();
 
     private static final Log LOG = LogFactory.getLog(ClearLeftoverAttachmentsUpdateTask.class);
     private static final SchemaExceptionFactory EXCEPTIONS =
@@ -48,29 +49,29 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
     }
 
     @OXThrowsMultiple(category = { AbstractOXException.Category.CODE_ERROR,AbstractOXException.Category.SETUP_ERROR }, desc = { "" }, exceptionId = { 1,2 }, msg = { "An SQL error occurred while performing task ClearLeftoverAttachmentsUpdateTask: %1$s.", "Can't resolve filestore." })
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         try {
             filestorages.set(new HashMap<Integer,LocalFileStorage>());
-            for(LeftoverAttachment att : getLeftoverAttachmentsInSchema(contextId, schema)){
+            for(final LeftoverAttachment att : getLeftoverAttachmentsInSchema(contextId, schema)){
                 removeFile(att.getFileId(), att.getContextId()); //FIXME will not work during update
                 try {
                     removeDatabaseEntry(att.getId(),att.getContextId());
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     throw EXCEPTIONS.create(1, e, e.getMessage());
                 }
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw EXCEPTIONS.create(1, e, e.getMessage());
         } finally {
             filestorages.set(null);
         }
     }
 
-    private void removeDatabaseEntry(int id, int contextId) throws DBPoolingException, SQLException {
+    private void removeDatabaseEntry(final int id, final int contextId) throws DBPoolingException, SQLException {
         update(contextId, "DELETE FROM prg_attachment WHERE id = ? and cid = ?", id, contextId);
     }
 
-    private void update(int contextId, String sql, Object...args) throws DBPoolingException, SQLException {
+    private void update(final int contextId, final String sql, final Object...args) throws DBPoolingException, SQLException {
         Connection writeCon = null;
 		PreparedStatement stmt = null;
 
@@ -84,10 +85,10 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
             stmt.executeUpdate();
 
 
-		} catch (SQLException x) {
+		} catch (final SQLException x) {
 			try {
 				writeCon.rollback();
-			} catch (SQLException x2) {
+			} catch (final SQLException x2) {
 				LOG.error("Can't execute rollback.", x2);
 			}
 			throw x;
@@ -95,7 +96,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 			if(stmt != null) {
 				try {
 					stmt.close();
-				} catch (SQLException x) {
+				} catch (final SQLException x) {
 					LOG.warn("Couldn't close statement", x);
 				}
 			}
@@ -103,7 +104,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 			if(writeCon != null) {
 				try {
 					writeCon.setAutoCommit(true);
-				} catch (SQLException x){
+				} catch (final SQLException x){
 					LOG.warn("Can't reset auto commit", x);
 				}
 
@@ -114,13 +115,13 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         }
     }
 
-    private void removeFile(String fileId,int ctx_id) throws SQLException, DBPoolingException, FileStorageException, SchemaException {
+    private void removeFile(final String fileId,final int ctx_id) throws SQLException, DBPoolingException, FileStorageException, SchemaException {
         // We have to use the local file storage to bypass quota handling, which must remain
         // unaffected by these operations
 
         LocalFileStorage fs = filestorages.get().get(ctx_id);
         if(fs == null) {
-            URI uri = createURI(ctx_id);
+            final URI uri = createURI(ctx_id);
             if(uri == null) {
                 throw EXCEPTIONS.create(2);
             }
@@ -130,12 +131,12 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         }
         try {
             fs.deleteFile(fileId);
-        } catch (FileStorageException x) {
+        } catch (final FileStorageException x) {
             LOG.warn("Could not delete "+fileId+ "in context "+ctx_id+". The file might be gone already.");
         }
     }
 
-    private URI createURI(int ctx_id) throws DBPoolingException, SQLException {
+    private URI createURI(final int ctx_id) throws DBPoolingException, SQLException {
         // We need to select the filestore URI and the context subpath from the DB
         // We can't use the API, because the ContextStorage will throw exceptions
         // when we try to load a Context during the update process;
@@ -155,9 +156,9 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
                 return null;
             }
 
-            String filestore_name = rs.getString(2);
+            final String filestore_name = rs.getString(2);
 
-            int filestore_id = rs.getInt(1);
+            final int filestore_id = rs.getInt(1);
 
             rs.close();
             stmt.close();
@@ -171,22 +172,22 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
                 LOG.error("Context "+ctx_id+" doesn't seem to have a proper filestore");
                 return null;
             }
-            String uri_string = rs.getString(1);
-            URI uri = new URI(uri_string);
+            final String uri_string = rs.getString(1);
+            final URI uri = new URI(uri_string);
 
             return new URI(uri.getScheme(), uri.getAuthority(), uri.getPath()
                 + '/' + filestore_name, uri.getQuery(),
                 uri.getFragment());
 
 
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             LOG.error(e);
             return null;
         } finally {
 			if(stmt != null) {
 				try {
 					stmt.close();
-				} catch (SQLException x) {
+				} catch (final SQLException x) {
 					LOG.warn("Couldn't close statement", x);
 				}
 			}
@@ -194,7 +195,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
             if(rs != null) {
                 try {
                     rs.close();
-                } catch (SQLException x) {
+                } catch (final SQLException x) {
                     LOG.warn("Couldn't close result set");
                 }
             }
@@ -207,12 +208,12 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         }
     }
 
-    private List<LeftoverAttachment> getLeftoverAttachmentsInSchema(int contextId, Schema schema) throws SQLException, DBPoolingException {
+    private List<LeftoverAttachment> getLeftoverAttachmentsInSchema(final int contextId, final Schema schema) throws SQLException, DBPoolingException {
 
-        String query = "SELECT prg_attachment.cid, prg_attachment.id, prg_attachment.file_id FROM prg_attachment " +
+        final String query = "SELECT prg_attachment.cid, prg_attachment.id, prg_attachment.file_id FROM prg_attachment " +
                 "JOIN sequence_attachment ON prg_attachment.cid = sequence_attachment.cid  WHERE prg_attachment.id > sequence_attachment.id";
 
-        List<LeftoverAttachment> attachments = new ArrayList<LeftoverAttachment>();
+        final List<LeftoverAttachment> attachments = new ArrayList<LeftoverAttachment>();
         
         Connection readCon = null;
 		PreparedStatement stmt = null;
@@ -231,7 +232,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 			if(stmt != null) {
 				try {
 					stmt.close();
-				} catch (SQLException x) {
+				} catch (final SQLException x) {
 					LOG.warn("Couldn't close statement", x);
 				}
 			}
@@ -239,7 +240,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
             if(rs != null) {
                 try {
                     rs.close();
-                } catch (SQLException x) {
+                } catch (final SQLException x) {
                     LOG.warn("Couldn't close result set");
                 }
             }
@@ -257,7 +258,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         int id;
         int contextId;
 
-        private LeftoverAttachment(String fileId, int id, int contextId) {
+        private LeftoverAttachment(final String fileId, final int id, final int contextId) {
             this.fileId = fileId;
             this.id = id;
             this.contextId = contextId;

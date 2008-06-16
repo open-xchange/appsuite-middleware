@@ -60,11 +60,12 @@ import com.openexchange.tools.versit.VersitException;
 
 public class OldTZPropertyDefinition extends OldShortPropertyDefinition {
 
-	public OldTZPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldTZPropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
+	@Override
 	protected Object parseValue(final Property property, final StringScanner s)
 			throws IOException {
 		int sign = 1;
@@ -87,6 +88,7 @@ public class OldTZPropertyDefinition extends OldShortPropertyDefinition {
 
 	private static final DecimalFormat Format = new DecimalFormat("00");
 
+	@Override
 	protected String writeValue(final Property property, final Object value) {
 		final int offset = ((Integer) value).intValue();
 		return new StringBuilder().append((offset >= 0 ? '+' : '-')).append(Format.format(offset / 3600000)).append(

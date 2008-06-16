@@ -54,11 +54,11 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 
 public class EffectiveInfostorePermission {
-	private EffectivePermission permission;
+	private final EffectivePermission permission;
 
-	private User user;
+	private final User user;
 
-	private DocumentMetadata document;
+	private final DocumentMetadata document;
 
 	public EffectiveInfostorePermission(final EffectivePermission permission, final DocumentMetadata document,
 			final User user) {

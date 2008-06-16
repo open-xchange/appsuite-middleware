@@ -84,8 +84,9 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
     private AttachmentConfig(){}
 
     public static AttachmentConfig getInstance(){
-        if(singleton != null)
-            return singleton;
+        if(singleton != null) {
+			return singleton;
+		}
         return singleton = new AttachmentConfig();
     }
 

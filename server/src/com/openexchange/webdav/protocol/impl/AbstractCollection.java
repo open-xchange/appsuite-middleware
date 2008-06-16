@@ -57,7 +57,12 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.openexchange.webdav.protocol.*;
+import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavCollection;
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavMultistatusException;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavResource;
 
 public abstract class AbstractCollection extends AbstractResource implements
 		WebdavCollection {
@@ -110,16 +115,16 @@ public abstract class AbstractCollection extends AbstractResource implements
 	public void delete() throws WebdavException {
 		final List<WebdavResource> copy = new ArrayList<WebdavResource>(getChildren());
 		final List<WebdavException> exceptions = new ArrayList<WebdavException>();
-		for(WebdavResource res : copy) {
+		for(final WebdavResource res : copy) {
 			try {
 				res.delete();
-			} catch (WebdavException x) {
+			} catch (final WebdavException x) {
 				exceptions.add(x);
 			}
 		}
 		try {
 			internalDelete();
-		} catch (WebdavException x) {
+		} catch (final WebdavException x) {
 			exceptions.add(x);
 		}
 		if(exceptions.size() > 0) {
@@ -145,15 +150,15 @@ public abstract class AbstractCollection extends AbstractResource implements
 				copy = getFactory().resolveCollection(dest);
 			}
 			
-			for(WebdavResource res : new ArrayList<WebdavResource>(getChildren())) {
+			for(final WebdavResource res : new ArrayList<WebdavResource>(getChildren())) {
 				try {
 					res.copy(dest.dup().append(res.getUrl().name()));
-				} catch (WebdavException x) {
+				} catch (final WebdavException x) {
 					exceptions.add(x);
 				}
 			}
 			return copy;
-		} catch (WebdavException x) {
+		} catch (final WebdavException x) {
 			exceptions.add(x);
 		}
 		if(exceptions.size() > 0) {
@@ -185,7 +190,7 @@ public abstract class AbstractCollection extends AbstractResource implements
 	public Iterator<WebdavResource> iterator() {
 		try {
 			return new ChildTreeIterator(getChildren().iterator());
-		} catch (WebdavException e) {
+		} catch (final WebdavException e) {
 			return null;
 		}
 	}
@@ -207,9 +212,9 @@ public abstract class AbstractCollection extends AbstractResource implements
 	protected static class ChildTreeIterator implements Iterator<WebdavResource> {
 		
 		private Iterator<WebdavResource> subIterator;
-		private Iterator<WebdavResource> childIterator;
+		private final Iterator<WebdavResource> childIterator;
 		
-		public ChildTreeIterator(Iterator<WebdavResource> childIterator) {
+		public ChildTreeIterator(final Iterator<WebdavResource> childIterator) {
 			this.childIterator = childIterator;
 		}
 		

@@ -49,57 +49,74 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
+import java.sql.Connection;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
+import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.impl.EffectivePermission;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.*;
-import com.openexchange.webdav.protocol.*;
+import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
+import com.openexchange.tools.oxfolder.OXFolderPermissionException;
+import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavCollection;
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavLock;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.impl.AbstractCollection;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.servlet.http.HttpServletResponse;
-import java.sql.Connection;
-import java.sql.Timestamp;
-import java.util.*;
 
 public class FolderCollection extends AbstractCollection implements OXWebdavResource {
 
 	private static final Log LOG = LogFactory.getLog(FolderCollection.class);
-	private InfostoreWebdavFactory factory;
+	private final InfostoreWebdavFactory factory;
 	private WebdavPath url;
-	private PropertyHelper propertyHelper;
-	private SessionHolder sessionHolder;
-	private FolderLockHelper lockHelper;
+	private final PropertyHelper propertyHelper;
+	private final SessionHolder sessionHolder;
+	private final FolderLockHelper lockHelper;
 
 	private FolderObject folder = null;
 	private int id;
 	private boolean exists;
 	private boolean loaded;
-	private DBProvider provider;
+	private final DBProvider provider;
 	private final Set<OXWebdavResource> children = new HashSet<OXWebdavResource>();
 	
 	private boolean loadedChildren;
 	private ArrayList<OCLPermission> overrideNewACL;
-    private InfostoreSecurity security;
+    private final InfostoreSecurity security;
     
     public FolderCollection(final WebdavPath url, final InfostoreWebdavFactory factory) {
 		this(url,factory,null);
@@ -160,7 +177,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		final int lengthUrl = getUrl().size();
 
 		for(final WebdavResource res : getChildren()) {
-			WebdavPath toUrl = to.getUrl().dup().append(res.getUrl().subpath(lengthUrl));
+			final WebdavPath toUrl = to.getUrl().dup().append(res.getUrl().subpath(lengthUrl));
 			if(move) {
 				res.move(toUrl, false, overwrite);
 			} else {
@@ -265,6 +282,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		}
 	}
 
+	@Override
 	protected void internalDelete(){
 		throw new IllegalStateException("Should be called only by superclass");
 	}
@@ -383,7 +401,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			dumpToDB();
             if(propertyHelper.mustWrite()) {
                 final ServerSession session = getSession();
-                EffectivePermission perm = security.getFolderPermission(getId(),session.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()),
+                final EffectivePermission perm = security.getFolderPermission(getId(),session.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()),
 					UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
 							session.getContext()));
                 if(!perm.isFolderAdmin()) {
@@ -609,7 +627,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 
 			while(iter.hasNext()) {
 				final FolderObject folder = (FolderObject) iter.next();
-				WebdavPath newUrl = getUrl().dup().append(folder.getFolderName());
+				final WebdavPath newUrl = getUrl().dup().append(folder.getFolderName());
                 children.add(new FolderCollection(newUrl, factory, folder));
 			}
 			
@@ -686,7 +704,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
         try {
             con = provider.getReadConnection(ctx);
             return folder.getEffectiveUserPermission(session.getUserId(), userConfig, con);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new WebdavException(e.getMessage(), e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } finally {
 

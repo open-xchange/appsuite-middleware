@@ -68,6 +68,7 @@ public class ReaderScanner extends Scanner {
 		peek = readImpl();
 	}
 
+	@Override
 	protected int readImpl() throws IOException {
 		int c = r.read();
 		Column++;

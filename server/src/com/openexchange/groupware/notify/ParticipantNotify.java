@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.notify;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
@@ -63,12 +65,9 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
-import java.io.IOException;
-import java.io.InputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.event.impl.AppointmentEventInterface;
@@ -102,17 +101,17 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.session.Session;
+import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.exceptions.LoggingLogic;
-import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.Versit;
-import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
-import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
-import com.openexchange.session.Session;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import com.openexchange.tools.versit.Versit;
+import com.openexchange.tools.versit.VersitDefinition;
+import com.openexchange.tools.versit.VersitObject;
+import com.openexchange.tools.versit.converter.ConverterException;
+import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 public class ParticipantNotify implements AppointmentEventInterface, TaskEventInterface {
 	
@@ -127,7 +126,7 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 	public ParticipantNotify() {
 	}
 
-	protected void sendMessage(final String messageTitle, final String message, final List<String> name, final ServerSession session, final CalendarObject obj, int folderId, final State state, final boolean suppressOXReminderHeader, boolean internal) {
+	protected void sendMessage(final String messageTitle, final String message, final List<String> name, final ServerSession session, final CalendarObject obj, int folderId, final State state, final boolean suppressOXReminderHeader, final boolean internal) {
 		if(LOG.isDebugEnabled()) {
 			LOG.debug("Sending message to: "+name);
 			LOG.debug("=====["+messageTitle+"]====\n\n");
@@ -239,7 +238,7 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
         final ServerSession sessionObj;
         try {
             sessionObj = new ServerSessionAdapter(session);
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             LOG.error(e.getLocalizedMessage(),e);
             return;
         }
@@ -287,7 +286,7 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 			final StringHelper strings = new StringHelper(locale);
 			final Template createTemplate = new StringTemplate(strings.getString(msgKey));
 			
-			DateFormat df = state.getDateFormat(locale);
+			final DateFormat df = state.getDateFormat(locale);
 			final List<EmailableParticipant> participants = receivers.get(locale);
 			
 			for(final EmailableParticipant p : participants) {
@@ -341,12 +340,13 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 		
 	}
 
-	private boolean isUser(Context ctx, EmailableParticipant p) {
-		if(p.type == Participant.EXTERNAL_USER)
+	private boolean isUser(final Context ctx, final EmailableParticipant p) {
+		if(p.type == Participant.EXTERNAL_USER) {
 			return false;
+		}
 		try {
 			return resolveUsers(ctx, p.id) != null;
-		} catch (LdapException x) {
+		} catch (final LdapException x) {
 			if(x.getDetail() == LdapException.Detail.NOT_FOUND) {
 				return false;
 			}
@@ -707,7 +707,7 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 		static {
 			try {
 				hostname = InetAddress.getLocalHost().getCanonicalHostName();
-			} catch (UnknownHostException e) {
+			} catch (final UnknownHostException e) {
 				hostname = "localhost";
 				warnSpam = e;
 			}
@@ -734,8 +734,9 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 			}
 			
 			int folder = p.folderId;
-			if(folder == -1)
+			if(folder == -1) {
 				folder = obj.getParentFolderID();
+			}
 			
 			subst.put("folder", String.valueOf(folder));
 			subst.put("object", String.valueOf(obj.getObjectID()));
@@ -769,7 +770,7 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 			return Types.APPOINTMENT;
 		}
 
-        public DateFormat getDateFormat(Locale locale) {
+        public DateFormat getDateFormat(final Locale locale) {
 			return tryAppendingTimeZone(DateFormat.getDateTimeInstance(DateFormat.DEFAULT,DateFormat.DEFAULT,locale));
 		}
 		
@@ -782,18 +783,18 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 			return df;
 		}
 
-        public void modifyInternal(MailObject mail, CalendarObject obj, ServerSession sessObj) {
+        public void modifyInternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
             
         }
 
-        public void modifyExternal(MailObject mail, CalendarObject obj, ServerSession sessObj) {
+        public void modifyExternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
             addICALAttachment(mail, (AppointmentObject) obj, sessObj);
         }
 
-        private void addICALAttachment(MailObject mail, AppointmentObject obj, ServerSession sessObj) {
+        private void addICALAttachment(final MailObject mail, final AppointmentObject obj, final ServerSession sessObj) {
             try {
                 final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");
-                UnsynchronizedByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
+                final UnsynchronizedByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
                 final VersitDefinition.Writer versitWriter = versitDefinition.getWriter(byteArrayOutputStream, "UTF-8");
                 final VersitObject versitObjectContainer = OXContainerConverter.newCalendar("2.0");
                 versitDefinition.writeProperties(versitWriter, versitObjectContainer);
@@ -805,23 +806,23 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
                 versitDefinition.writeEnd(versitWriter, versitObjectContainer);
                 versitWriter.flush();
 
-                InputStream icalFile = new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray());
+                final InputStream icalFile = new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray());
 
-                ContentType ct = new ContentType();
+                final ContentType ct = new ContentType();
                 ct.setPrimaryType("text");
                 ct.setSubType("calendar");
                 ct.setCharsetParameter("utf-8");
 
-                String filename = "appointment.ics";
+                final String filename = "appointment.ics";
 
                 mail.addFileAttachment(ct, filename, icalFile);
 
 
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 LOG.error("Can't convert appointment for notification mail.", e);
-            } catch (ConverterException e) {
+            } catch (final ConverterException e) {
                 LOG.error("Can't convert appointment for notification mail.", e);
-            } catch (MailException e) {
+            } catch (final MailException e) {
                 LOG.error("Can't add attachment",e);
             }
         }
@@ -838,15 +839,15 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 			return Types.TASK;
 		}
 
-        public void modifyInternal(MailObject mail, CalendarObject obj, ServerSession sessObj) {
+        public void modifyInternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
 
         }
 
-        public void modifyExternal(MailObject mail, CalendarObject obj, ServerSession sessObj) {
+        public void modifyExternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
 
         }
 
-        public DateFormat getDateFormat(Locale locale) {
+        public DateFormat getDateFormat(final Locale locale) {
 			return DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
 		}
 		

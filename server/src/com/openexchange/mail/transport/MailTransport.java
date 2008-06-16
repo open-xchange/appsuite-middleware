@@ -125,7 +125,7 @@ public abstract class MailTransport {
 	 * @throws MailException
 	 *             If transport fails
 	 */
-	public MailMessage sendMailMessage(ComposedMailMessage transportMail, ComposeType sendType) throws MailException {
+	public MailMessage sendMailMessage(final ComposedMailMessage transportMail, final ComposeType sendType) throws MailException {
 		return sendMailMessage(transportMail, sendType, null);
 	}
 
@@ -163,7 +163,7 @@ public abstract class MailTransport {
 	 * @throws MailException
 	 *             If sending fails
 	 */
-	public MailMessage sendRawMessage(byte[] asciiBytes) throws MailException {
+	public MailMessage sendRawMessage(final byte[] asciiBytes) throws MailException {
 		return sendRawMessage(asciiBytes, null);
 	}
 

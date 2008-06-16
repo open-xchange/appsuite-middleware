@@ -50,6 +50,8 @@ package com.openexchange.groupware.attach.impl;
  */
 
 
+import java.sql.Connection;
+
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.delete.ContextDelete;
@@ -57,8 +59,6 @@ import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.tx.ThreadLocalDBProvider;
 import com.openexchange.tools.exceptions.LoggingLogic;
-
-import java.sql.Connection;
 
 
 public class AttachmentContextDelete extends ContextDelete {
@@ -69,7 +69,7 @@ public class AttachmentContextDelete extends ContextDelete {
     private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(AttachmentContextDelete.class);
 
 
-    public void deletePerformed(DeleteEvent deleteEvent, Connection readCon, Connection writeCon) throws DeleteFailedException {
+    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
         if(!isContextDelete(deleteEvent)) {
             return;
         }
@@ -77,7 +77,7 @@ public class AttachmentContextDelete extends ContextDelete {
         provider.setWriteConnection(writeCon);
         try{
             ATTACHMENT_BASE.deleteAll(deleteEvent.getContext());
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LL.log(e);
             throw new DeleteFailedException(DeleteFailedException.Code.UNKNOWN_TYPE,e);
         } finally {

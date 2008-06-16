@@ -134,10 +134,10 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
     	correctTable("del_contacts", contextId);    
     }
     
-    public void correctTable(String sqltable, final int contextId) throws AbstractOXException {
+    public void correctTable(final String sqltable, final int contextId) throws AbstractOXException {
         
     	
-    	HashMap<String,Integer> columnRefer = new HashMap<String, Integer>();  	
+    	final HashMap<String,Integer> columnRefer = new HashMap<String, Integer>();  	
     	columnRefer.put("field01", 320);
     	columnRefer.put("field02", 128);
     	columnRefer.put("field03", 128);
@@ -238,29 +238,29 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
     	columnRefer.put("field98", 64);
     	columnRefer.put("field99", 64);  	
 
-    	HashMap<String,Integer> toChange = new HashMap<String, Integer>();
-    	HashMap<String,Integer> toDelete = new HashMap<String, Integer>();
+    	final HashMap<String,Integer> toChange = new HashMap<String, Integer>();
+    	final HashMap<String,Integer> toDelete = new HashMap<String, Integer>();
     	
     	
     	if (LOG.isInfoEnabled()) {
             LOG.info(STR_INFO);
         }
         Connection writeCon = null;
-        PreparedStatement stmt = null;
+        final PreparedStatement stmt = null;
         Statement st = null;
-        ResultSet rs = null;
+        final ResultSet rs = null;
         try {
 
             writeCon = Database.get(contextId, true);
             try {
                 st = writeCon.createStatement();
 
-                DatabaseMetaData metadata = writeCon.getMetaData();
-                ResultSet resultSet = metadata.getColumns(null, null, sqltable, null);
+                final DatabaseMetaData metadata = writeCon.getMetaData();
+                final ResultSet resultSet = metadata.getColumns(null, null, sqltable, null);
                 while (resultSet.next()) {
-                	String name = resultSet.getString("COLUMN_NAME");
+                	final String name = resultSet.getString("COLUMN_NAME");
                 	//String type = resultSet.getString("TYPE_NAME");
-                	int size = resultSet.getInt("COLUMN_SIZE");
+                	final int size = resultSet.getInt("COLUMN_SIZE");
 				
                 	if (null != columnRefer.get(name)){               		
                 		if (name.equals("field91") || 
@@ -274,7 +274,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
                 			name.equals("field99") ){
                 			toDelete.put(name, 1);
                 		} else {
-                			int si = (Integer)columnRefer.get(name).intValue();
+                			final int si = (Integer)columnRefer.get(name).intValue();
                 			if (si != size){
                 				LOG.warn("CHANGE FIELD "+sqltable+"."+name+" WITH SIZE "+size+" TO NEW SIZE "+si);
                 				toChange.put(name, si);
@@ -295,13 +295,14 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
                 	StringBuilder sb2 = new StringBuilder("ALTER TABLE "+sqltable+" ");
                 	it = toDelete.keySet().iterator();
                 	while (it.hasNext()){
-                		String key = (String)it.next();
+                		final String key = (String)it.next();
                 		//int value = (Integer)toDelete.get(key).intValue();
                 		sb2.append("DROP COLUMN "+key+", ");
                 		done = true;
                 	}
-                	if (done)
-                		sb2 = new StringBuilder(sb2.substring(0, sb2.lastIndexOf(",")));  
+                	if (done) {
+						sb2 = new StringBuilder(sb2.substring(0, sb2.lastIndexOf(",")));
+					}  
                 	
                     LOG.warn("CHANGING SQL DELETE FIELDS-> "+sb2);
                 	st.addBatch(sb2.toString());
@@ -315,13 +316,14 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
                 	StringBuilder sb = new StringBuilder("ALTER TABLE "+sqltable+" ");
                 	it = toChange.keySet().iterator();
                 	while (it.hasNext()){
-                		String key = (String)it.next();
-                		int value = (Integer)toChange.get(key).intValue();
+                		final String key = (String)it.next();
+                		final int value = (Integer)toChange.get(key).intValue();
                 		sb.append("MODIFY "+key+" varchar("+value+"), ");
                 		done = true;
                 	}
-                	if (done)
-                		sb = new StringBuilder(sb.substring(0, sb.lastIndexOf(",")));
+                	if (done) {
+						sb = new StringBuilder(sb.substring(0, sb.lastIndexOf(",")));
+					}
                 
                     LOG.warn("CHANGING SQL FIELD SIZE-> "+sb);
                     st.addBatch(sb.toString());

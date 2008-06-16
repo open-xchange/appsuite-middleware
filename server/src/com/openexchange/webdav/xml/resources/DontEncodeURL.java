@@ -51,7 +51,7 @@ package com.openexchange.webdav.xml.resources;
 
 public class DontEncodeURL implements PropfindResponseUrlEncoder {
 
-	public String encode(String url) {
+	public String encode(final String url) {
 		return url;
 	}
 

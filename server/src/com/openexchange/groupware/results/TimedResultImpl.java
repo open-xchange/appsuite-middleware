@@ -53,10 +53,10 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 public class TimedResultImpl implements TimedResult {
 
-	private SearchIterator results;
-	private long sequenceNumber;
+	private final SearchIterator results;
+	private final long sequenceNumber;
 
-	public TimedResultImpl(SearchIterator results, long sequenceNumber) {
+	public TimedResultImpl(final SearchIterator results, final long sequenceNumber) {
 		this.results = results;
 		this.sequenceNumber = sequenceNumber;
 	}

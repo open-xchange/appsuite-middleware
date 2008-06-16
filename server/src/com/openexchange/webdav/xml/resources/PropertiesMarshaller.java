@@ -65,7 +65,12 @@ import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
 
 import com.openexchange.webdav.action.behaviour.BehaviourLookup;
-import com.openexchange.webdav.protocol.*;
+import com.openexchange.webdav.protocol.Multistatus;
+import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.WebdavStatus;
 import com.openexchange.webdav.protocol.util.Utils;
 
 public class PropertiesMarshaller implements ResourceMarshaller {
@@ -75,7 +80,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 	
 	private String uriPrefix;
 
-	private String charset;
+	private final String charset;
 
 	protected Multistatus<Iterable<WebdavProperty>> getProps(final WebdavResource resource) {
 		return new Multistatus<Iterable<WebdavProperty>>();
@@ -117,12 +122,13 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		return Arrays.asList(response);
 	}
 	
-	public Element marshalHREF(WebdavPath uri) {
+	public Element marshalHREF(final WebdavPath uri) {
 		final Element href = new Element("href", DAV_NS);
-        StringBuilder builder = new StringBuilder(uriPrefix);
-        if(builder.charAt(builder.length()-1) != '/')
-            builder.append("/");
-        for(String component : uri) {
+        final StringBuilder builder = new StringBuilder(uriPrefix);
+        if(builder.charAt(builder.length()-1) != '/') {
+			builder.append("/");
+		}
+        for(final String component : uri) {
             builder.append(escape(component)).append("/");
         }
         builder.setLength(builder.length()-1);
@@ -131,13 +137,13 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 	}
 	
 	private String escape(final String string) {
-		PropfindResponseUrlEncoder encoder = BehaviourLookup.getInstance().get(PropfindResponseUrlEncoder.class);
+		final PropfindResponseUrlEncoder encoder = BehaviourLookup.getInstance().get(PropfindResponseUrlEncoder.class);
 		if(null != encoder) {
 			return encoder.encode(string);
 		}
 		try {
 			return URLEncoder.encode(string,charset).replaceAll("\\+","%20");
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			LOG.fatal(e);
 			return string;
 		} 

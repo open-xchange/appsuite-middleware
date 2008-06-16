@@ -62,8 +62,8 @@ import com.openexchange.tools.versit.VersitObject;
 
 public class OldAlarmObjectDefinition extends OldObjectDefinition {
 
-	public OldAlarmObjectDefinition(String[] propertyNames,
-			OldPropertyDefinition[] properties) {
+	public OldAlarmObjectDefinition(final String[] propertyNames,
+			final OldPropertyDefinition[] properties) {
 		super(propertyNames, properties);
 	}
 
@@ -71,6 +71,7 @@ public class OldAlarmObjectDefinition extends OldObjectDefinition {
 		throw new VersitException(s, "Invalid element: VALARM");
 	}
 
+	@Override
 	public void write(final OldFoldingWriter fw, final VersitObject object)
 			throws IOException {
 		Property property = object.getProperty("ACTION");

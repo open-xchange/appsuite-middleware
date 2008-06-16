@@ -56,19 +56,24 @@ package com.openexchange.groupware.calendar;
  */
 public class CalendarConflictException extends Exception {
     
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4953159997895899719L;
+
 	public CalendarConflictException() {
 		super();
 	}
 	
-	public CalendarConflictException(String message) {
+	public CalendarConflictException(final String message) {
 		super(message);
 	}
 		
-	public CalendarConflictException(String message, Exception exc) {
+	public CalendarConflictException(final String message, final Exception exc) {
 		super(message, exc);
 	}
 	
-	public CalendarConflictException(Exception exc) {
+	public CalendarConflictException(final Exception exc) {
 		super(exc);
 	}    
     

@@ -57,8 +57,8 @@ import com.openexchange.tools.versit.Property;
 
 public class OldStatusPropertyDefinition extends OldPropertyDefinition {
 
-	public OldStatusPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldStatusPropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
@@ -68,6 +68,7 @@ public class OldStatusPropertyDefinition extends OldPropertyDefinition {
 	private static final String[] New = { "NEEDS-ACTION", "CANCELLED",
 			"IN-PROCESS" };
 
+	@Override
 	protected Object parseValue(final Property property, final OldScanner s,final  byte[] value,
 			final String charset) throws IOException {
 		final String val = new String(value, charset);
@@ -79,6 +80,7 @@ public class OldStatusPropertyDefinition extends OldPropertyDefinition {
 		return val;
 	}
 
+	@Override
 	protected String writeValue(final Property property) {
 		final String val = (String) property.getValue();
 		for (int i = 0; i < New.length; i++) {

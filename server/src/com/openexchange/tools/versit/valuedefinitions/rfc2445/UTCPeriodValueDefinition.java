@@ -66,6 +66,7 @@ public class UTCPeriodValueDefinition extends PeriodValueDefinition {
 
 	public static final ValueDefinition Default = new UTCPeriodValueDefinition();
 
+	@Override
 	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
 		final PeriodValue retval = (PeriodValue) super.createValue(s, property);

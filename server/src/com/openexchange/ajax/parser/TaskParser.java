@@ -51,11 +51,12 @@ package com.openexchange.ajax.parser;
 
 import java.util.TimeZone;
 
+import org.json.JSONObject;
+
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.tasks.Task;
-import org.json.JSONObject;
 
 /**
  * TaskParser
@@ -76,7 +77,7 @@ public class TaskParser extends CalendarParser {
         throws OXException {
         try {
             parseElementTask(taskobject, jsonobject);
-        } catch (Exception exc) {
+        } catch (final Exception exc) {
             throw new OXException(exc);
         }
     }

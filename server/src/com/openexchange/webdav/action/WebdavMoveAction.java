@@ -54,15 +54,15 @@ import com.openexchange.webdav.protocol.WebdavFactory;
 
 public class WebdavMoveAction extends WebdavStructureAction {
 
-	public WebdavMoveAction(WebdavFactory factory) {
+	public WebdavMoveAction(final WebdavFactory factory) {
 		super(factory);
 	}
 
-	public void perform(WebdavRequest req, WebdavResponse res)
+	public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws WebdavException {
 		checkOverwrite(req);
 		checkSame(req);
-		int rc = chooseReturnCode(req);
+		final int rc = chooseReturnCode(req);
 		req.getResource().move(req.getDestinationUrl());
 		res.setStatus(rc);
 	}

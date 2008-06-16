@@ -57,21 +57,27 @@ package com.openexchange.groupware.impl;
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  * @deprecated use LoginException.
  */
+@Deprecated
 public class UserNotActivatedException extends Exception
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4194856090798310328L;
+
 	public UserNotActivatedException() {
 		super();
 	}
 	
-	public UserNotActivatedException(String message) {
+	public UserNotActivatedException(final String message) {
 		super(message);
 	}
 	
-	public UserNotActivatedException(String message, Exception exc) {
+	public UserNotActivatedException(final String message, final Exception exc) {
 		super(message, exc);
 	}
 	
-	public UserNotActivatedException(Exception exc) {
+	public UserNotActivatedException(final Exception exc) {
 		super(exc);
 	}	
 }

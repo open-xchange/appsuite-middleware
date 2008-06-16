@@ -66,7 +66,7 @@ public class WebdavExistsAction extends AbstractAction {
         yield(req,res);
 	}
 
-    public void setTolerateLockNull(boolean b) {
+    public void setTolerateLockNull(final boolean b) {
         tolerateLockNull = b;
     }
 }

@@ -123,7 +123,7 @@ public class Setting {
         parent = toCopy.parent;
         if (null != toCopy.elements) {
             elements = new HashMap<String, Setting>(toCopy.elements.size());
-            for (Setting element : toCopy.elements.values()) {
+            for (final Setting element : toCopy.elements.values()) {
                 addElement(new Setting(element));
             }
         }

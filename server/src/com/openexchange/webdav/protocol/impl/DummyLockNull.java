@@ -49,22 +49,26 @@
 
 package com.openexchange.webdav.protocol.impl;
 
-import com.openexchange.webdav.protocol.*;
+import java.util.HashMap;
+
+import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavLock;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
-
-import java.util.HashMap;
 
 public class DummyLockNull extends DummyCollection {
 	
 	private static final WEBDAV_METHOD[] OPTIONS = {WEBDAV_METHOD.PUT, WEBDAV_METHOD.MKCOL, WEBDAV_METHOD.OPTIONS, WEBDAV_METHOD.PROPFIND, WEBDAV_METHOD.LOCK, WEBDAV_METHOD.UNLOCK, WEBDAV_METHOD.TRACE};
 	private WebdavResource realResource;
 	
-	public DummyLockNull(DummyResourceManager manager, WebdavPath url) {
+	public DummyLockNull(final DummyResourceManager manager, final WebdavPath url) {
 		super(manager, url);
 	}
 	
-	public void setRealResource(WebdavResource res) {
+	public void setRealResource(final WebdavResource res) {
 		this.realResource = res;
 	}
 
@@ -74,7 +78,7 @@ public class DummyLockNull extends DummyCollection {
 	}
 	
 	@Override
-	protected boolean isset(Property p) {
+	protected boolean isset(final Property p) {
 		switch(p.getId()) {
 		case Protocol.LOCKDISCOVERY : case Protocol.SUPPORTEDLOCK : case Protocol.DISPLAYNAME : 
 			return true;
@@ -83,7 +87,7 @@ public class DummyLockNull extends DummyCollection {
 	}
 	
 	@Override
-	public void unlock(String token) throws WebdavException {
+	public void unlock(final String token) throws WebdavException {
 		super.unlock(token);
 		if(getOwnLocks().isEmpty()) {
 			mgr.removeLockNull(this.getUrl());
@@ -102,10 +106,10 @@ public class DummyLockNull extends DummyCollection {
 
 	@Override
 	public void create() throws WebdavException {
-		WebdavResource res = getRealResource();
+		final WebdavResource res = getRealResource();
 		res.create();
 		if (res instanceof DummyResource) {
-			DummyResource dres = (DummyResource) res;
+			final DummyResource dres = (DummyResource) res;
 			dres.locks = new HashMap<String, WebdavLock>(locks);
 		}
 		

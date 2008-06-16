@@ -51,10 +51,11 @@
 
 package com.openexchange.groupware.container;
 
-import com.openexchange.groupware.contact.ContactConfig;
-import com.openexchange.tools.StringCollection;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+
+import com.openexchange.groupware.contact.ContactConfig;
+import com.openexchange.tools.StringCollection;
 
 /**
  * DistributionListObject
@@ -93,7 +94,7 @@ public class DistributionListEntryObject {
 
 	}
 	
-	public DistributionListEntryObject(String displayname, String emailaddress, int emailfield)
+	public DistributionListEntryObject(final String displayname, final String emailaddress, final int emailfield)
 	{
 		this.displayname = displayname;
 		this.emailaddress = emailaddress;
@@ -230,12 +231,14 @@ public class DistributionListEntryObject {
 		return b_folderid;
 	}
 	
+	@Override
 	public int hashCode() {
 		int result = 17;
 		result = 37 * result + emailaddress.hashCode();
 		return result;
 	}
 	
+	@Override
 	public boolean equals(final Object o)
 	{
 		if (o instanceof DistributionListEntryObject) {
@@ -325,7 +328,7 @@ public class DistributionListEntryObject {
 				final InternetAddress ia = new InternetAddress(emailaddress);
 				ia.validate();
 			}
-		}catch (AddressException ae){
+		}catch (final AddressException ae){
 				return false;
 		}		
 		return true;

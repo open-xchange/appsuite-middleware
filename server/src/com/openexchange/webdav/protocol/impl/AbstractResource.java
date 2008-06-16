@@ -49,18 +49,26 @@
 
 package com.openexchange.webdav.protocol.impl;
 
-import com.openexchange.webdav.protocol.*;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
+import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavCollection;
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavLock;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
 import com.openexchange.webdav.protocol.util.PropertySwitch;
 import com.openexchange.webdav.protocol.util.Utils;
 import com.openexchange.webdav.xml.WebdavLockWriter;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 public abstract class AbstractResource implements WebdavResource {
 	
@@ -71,11 +79,13 @@ public abstract class AbstractResource implements WebdavResource {
 	}
 	
 	protected void checkParentExists(final WebdavPath url) throws WebdavException {
-		WebdavPath check = new WebdavPath();
+		final WebdavPath check = new WebdavPath();
 
-        for(String comp : url) {
+        for(final String comp : url) {
 			check.append(url);
-            if(check.equals(url)) break;
+            if(check.equals(url)) {
+				break;
+			}
             final WebdavResource res = getFactory().resolveResource(check);
 			if(!res.exists() || !res.isCollection()) {
 				throw new WebdavException("Conflict with: "+res.getUrl()+" exists: "+res.exists()+" collection: "+res.isCollection(), getUrl(), HttpServletResponse.SC_CONFLICT);
@@ -119,7 +129,7 @@ public abstract class AbstractResource implements WebdavResource {
 		if(hasBody()) {
 			clone.putBody(getBody());
 		}
-		for(WebdavProperty prop : getAllProps()) {
+		for(final WebdavProperty prop : getAllProps()) {
 			clone.putProperty(prop);
 		}
 		clone.create();
@@ -153,7 +163,7 @@ public abstract class AbstractResource implements WebdavResource {
 	
 	public List<WebdavProperty> getAllProps() throws WebdavException{
 		final List<WebdavProperty> props = internalGetAllProps();
-		for(Property p : getFactory().getProtocol().getKnownProperties()){
+		for(final Property p : getFactory().getProtocol().getKnownProperties()){
 			final WebdavProperty prop = getProperty(p.getNamespace(),p.getName());
 			if(prop != null) {
 				props.add(prop);
@@ -180,8 +190,8 @@ public abstract class AbstractResource implements WebdavResource {
 	}
 	
 	protected void addParentLocks(final List<WebdavLock> lockList) throws WebdavException {
-		for(WebdavResource res : parents()) {
-			for(WebdavLock lock : res.getOwnLocks()) {
+		for(final WebdavResource res : parents()) {
+			for(final WebdavLock lock : res.getOwnLocks()) {
 				if(lock.locks(res, this)){
 					lockList.add(lock);
 				}
@@ -190,7 +200,7 @@ public abstract class AbstractResource implements WebdavResource {
 	}
 	
 	protected WebdavLock findParentLock(final String token) throws WebdavException {
-		for(WebdavResource res : parents()) {
+		for(final WebdavResource res : parents()) {
 			final WebdavLock lock = res.getOwnLock(token);
 			if(null != lock && lock.locks(res, this)) {
 				return lock;
@@ -205,10 +215,12 @@ public abstract class AbstractResource implements WebdavResource {
 	
 	protected List<WebdavCollection> parents() throws WebdavException{
 		final List<WebdavCollection> parents = new ArrayList<WebdavCollection>();
-		WebdavPath path = new WebdavPath();
-		for(String comp : getUrl()) {
+		final WebdavPath path = new WebdavPath();
+		for(final String comp : getUrl()) {
 			path.append(comp);
-            if(path.equals(getUrl())) break;
+            if(path.equals(getUrl())) {
+				break;
+			}
             final WebdavCollection res = getFactory().resolveCollection(path);
 			parents.add(res);
 
@@ -335,7 +347,7 @@ public abstract class AbstractResource implements WebdavResource {
 		public Object lockDiscovery() throws WebdavException {
 			final StringBuffer activeLocks = new StringBuffer();
 			final WebdavLockWriter writer = new WebdavLockWriter();
-			for(WebdavLock lock : getLocks()){
+			for(final WebdavLock lock : getLocks()){
 				activeLocks.append(writer.lock2xml(lock));
 			}
 			return activeLocks.toString();
@@ -353,9 +365,9 @@ public abstract class AbstractResource implements WebdavResource {
 	
 	public class SpecialSetSwitch implements PropertySwitch{
 
-		private String value;
+		private final String value;
 
-		public SpecialSetSwitch(String value) {
+		public SpecialSetSwitch(final String value) {
 			this.value = value;
 		}
 		

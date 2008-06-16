@@ -51,16 +51,17 @@
 
 package com.openexchange.ajax.parser;
 
+import java.util.TimeZone;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.tools.servlet.OXJSONException;
-
-import java.util.TimeZone;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * AppointmentParser
@@ -86,9 +87,9 @@ public class AppointmentParser extends CalendarParser {
 	public void parse(final AppointmentObject appointmentobject, final JSONObject jsonobject) throws OXConflictException, OXException {
 		try {
 			parseElementAppointment(appointmentobject, jsonobject);
-		} catch (OXConflictException exc) {
+		} catch (final OXConflictException exc) {
 			throw exc;
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw new OXException(exc);
 		}
 	}

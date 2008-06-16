@@ -54,7 +54,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Comparator;
 import java.util.SortedSet;
 
 import org.apache.commons.logging.Log;
@@ -77,8 +76,8 @@ public class QuotaFileStorage extends FileStorage {
 	private static final String UPDATE = "UPDATE filestore_usage SET used = ? WHERE cid = ?";
 	
 	private FileStorage delegate;
-	private DBProvider provider;
-	private Context ctx;
+	private final DBProvider provider;
+	private final Context ctx;
 	
 	private final ThreadLocal<LockMode> lockMode = new ThreadLocal<LockMode>();
 	
@@ -453,7 +452,8 @@ public class QuotaFileStorage extends FileStorage {
 		
 	}
 
-    public SortedSet<String> getFileList() throws FileStorageException {
+    @Override
+	public SortedSet<String> getFileList() throws FileStorageException {
         return delegate.getFileList();
     }
 
@@ -468,8 +468,8 @@ public class QuotaFileStorage extends FileStorage {
 	
 	protected static class NormalLockMode implements LockMode {
 
-		private FileStorage delegate;
-		private Context ctx;
+		private final FileStorage delegate;
+		private final Context ctx;
 
 		public NormalLockMode(final FileStorage delegate, final Context ctx){
 			this.delegate = delegate;
@@ -506,8 +506,8 @@ public class QuotaFileStorage extends FileStorage {
 	
 	protected static class OnlyUnlockMode implements LockMode {
 
-		private FileStorage delegate;
-		private Context ctx;
+		private final FileStorage delegate;
+		private final Context ctx;
 
 		public OnlyUnlockMode(final FileStorage delegate, final Context ctx){
 			this.delegate = delegate;

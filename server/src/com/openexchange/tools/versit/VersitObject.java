@@ -70,7 +70,7 @@ public class VersitObject {
 
 	private final ArrayList<VersitObject> Children = new ArrayList<VersitObject>();
 	
-	public VersitObject(String name) {
+	public VersitObject(final String name) {
 		this.name = name;
 	}
 	

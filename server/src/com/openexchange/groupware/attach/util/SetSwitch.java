@@ -51,11 +51,12 @@ package com.openexchange.groupware.attach.util;
 
 import java.util.Date;
 
-import com.openexchange.groupware.attach.*;
+import com.openexchange.groupware.attach.AttachmentField;
+import com.openexchange.groupware.attach.AttachmentMetadata;
 
 public class SetSwitch implements AttachmentField.AttachmentSwitch{
 	
-	private AttachmentMetadata attachment;
+	private final AttachmentMetadata attachment;
 	private Object value;
 
 	public SetSwitch(final AttachmentMetadata attachment) {

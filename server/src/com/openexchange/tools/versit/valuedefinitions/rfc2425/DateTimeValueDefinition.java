@@ -72,6 +72,7 @@ public class DateTimeValueDefinition extends ValueDefinition {
 
 	private static Pattern TZPattern = Pattern.compile("[-+]\\d{2}:?\\d{2}");
 
+	@Override
 	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
 		final DateTimeValue date = new DateTimeValue();
@@ -134,6 +135,7 @@ public class DateTimeValueDefinition extends ValueDefinition {
 		date.calendar.setTimeZone(TimeZone.getTimeZone(tz.toString()));
 	}
 
+	@Override
 	public String writeValue(final Object value) {
 		final DateTimeValue dtval = (DateTimeValue) value;
 		final StringBuilder sb = new StringBuilder();

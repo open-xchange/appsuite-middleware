@@ -51,15 +51,17 @@
 
 package com.openexchange.ajax.writer;
 
+import java.util.Date;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
-import java.util.Date;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * CalendarWriter

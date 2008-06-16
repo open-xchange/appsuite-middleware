@@ -107,22 +107,22 @@ public class TasksDowngrade extends DowngradeListener {
             // - All tasks in public folders that can be only edited by this user.
             try {
                 removeTasks(session, ctx, userConfig.getUserId(), con);
-            } catch (TaskException e) {
+            } catch (final TaskException e) {
                 throw new DowngradeFailedException(e);
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 throw new DowngradeFailedException(e);
-            } catch (SearchIteratorException e) {
+            } catch (final SearchIteratorException e) {
                 throw new DowngradeFailedException(e);
             }
         } else if (!userConfig.canDelegateTasks()) {
             // Remove all delegations of tasks that the user created.
             try {
                 removeDelegations(session, ctx, userConfig.getUserId(), userConfig, con);
-            } catch (TaskException e) {
+            } catch (final TaskException e) {
                 throw new DowngradeFailedException(e);
-            } catch (SearchIteratorException e) {
+            } catch (final SearchIteratorException e) {
                 throw new DowngradeFailedException(e);
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 throw new DowngradeFailedException(e);
             }
         }
@@ -148,10 +148,10 @@ public class TasksDowngrade extends DowngradeListener {
             iter.close();
         }
         // Remove all participations.
-        for (StorageType type : StorageType.TYPES_AD) {
+        for (final StorageType type : StorageType.TYPES_AD) {
             final int[] taskIds = partStor.findTasksWithParticipant(ctx, con,
                 userId, type);
-            for (int taskId : taskIds) {
+            for (final int taskId : taskIds) {
                 partStor.deleteInternal(ctx, con, taskId, userId, type, true);
                 final Set<Folder> folders = foldStor.selectFolder(ctx, con,
                     taskId, type);
@@ -209,10 +209,10 @@ public class TasksDowngrade extends DowngradeListener {
     private void removeTaskInPrivateFolder(final Session session,
         final Context ctx, final Connection con, final int userId,
         final FolderObject folder) throws TaskException {
-        for (StorageType type : StorageType.TYPES_AD) {
+        for (final StorageType type : StorageType.TYPES_AD) {
             final int[] taskIds = foldStor.getTasksInFolder(ctx, con,
                 folder.getObjectID(), type);
-            for (int taskId : taskIds) {
+            for (final int taskId : taskIds) {
                 final Set<Folder> folders = foldStor.selectFolder(ctx, con,
                     taskId, type);
                 if (0 == folders.size()) {
@@ -287,10 +287,10 @@ public class TasksDowngrade extends DowngradeListener {
 
     private void removeTaskInFolder(final Session session, final Context ctx,
         final Connection con, final FolderObject folder) throws TaskException {
-        for (StorageType type : StorageType.TYPES_AD) {
+        for (final StorageType type : StorageType.TYPES_AD) {
             final int[] taskIds = foldStor.getTasksInFolder(ctx, con, folder
                 .getObjectID(), type);
-            for (int taskId : taskIds) {
+            for (final int taskId : taskIds) {
                 TaskLogic.removeTask(session, ctx, con, folder.getObjectID(),
                     taskId, type);
             }
@@ -301,10 +301,10 @@ public class TasksDowngrade extends DowngradeListener {
         final Context ctx, final UserConfiguration userConfig,
         final Connection con, final User user, final FolderObject folder)
         throws TaskException {
-        for (StorageType type : StorageType.TYPES_AD) {
+        for (final StorageType type : StorageType.TYPES_AD) {
             final int[] taskIds = foldStor.getTasksInFolder(ctx, con, folder
                 .getObjectID(), type);
-            for (int taskId : taskIds) {
+            for (final int taskId : taskIds) {
                 final Task task = new Task();
                 task.setObjectID(taskId);
                 task.setParentFolderID(folder.getObjectID());
@@ -316,13 +316,13 @@ public class TasksDowngrade extends DowngradeListener {
                 if (StorageType.ACTIVE == type) {
                     try {
                         update.sentEvent(session);
-                    } catch (OXException e) {
+                    } catch (final OXException e) {
                         LOG.error("Problem triggering event for updated task.",
                             e);
                     }
                     try {
                         update.updateReminder();
-                    } catch (OXException e) {
+                    } catch (final OXException e) {
                         LOG.error("Problem while updating reminder for a task.",
                             e);
                     }

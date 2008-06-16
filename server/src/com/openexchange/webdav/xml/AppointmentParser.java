@@ -73,7 +73,7 @@ public class AppointmentParser extends CalendarParser {
 	
 	private static final Log LOG = LogFactory.getLog(AppointmentParser.class);
 	
-	public AppointmentParser(Session sessionObj) {
+	public AppointmentParser(final Session sessionObj) {
 		this.sessionObj = sessionObj;	
 	}
 	
@@ -87,9 +87,9 @@ public class AppointmentParser extends CalendarParser {
 				parseElementAppointment(appointmentobject, parser);	
 				parser.nextTag();
 			}
-		} catch (XmlPullParserException exc) {
+		} catch (final XmlPullParserException exc) {
 			throw exc;
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw new OXException(exc);
 		}
 	}
@@ -125,7 +125,7 @@ public class AppointmentParser extends CalendarParser {
 				ao.setDeleteExceptions(deleteExceptions);
 				
 				return ;
-			} catch (Exception exc) {
+			} catch (final Exception exc) {
 				throw new OXException(exc);
 			}
 		} else if (isTag(parser, AppointmentFields.FULL_TIME)) {

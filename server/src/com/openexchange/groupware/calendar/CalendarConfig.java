@@ -134,7 +134,8 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
      * @throws ConfigurationException
      * @deprecated use normal server startup through {@link Starter}.
      */
-    public static void init() throws ConfigurationException {
+    @Deprecated
+	public static void init() throws ConfigurationException {
         if (null == singleton) {
             reinit();
         }
@@ -153,11 +154,11 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
         if (check_max_pre_fetch_size != null){
             check_max_pre_fetch_size = check_max_pre_fetch_size.trim();
             try {
-                int mfs = Integer.valueOf(check_max_pre_fetch_size);
+                final int mfs = Integer.valueOf(check_max_pre_fetch_size);
                 if (mfs > 1 && mfs < 1000) {
                     CachedCalendarIterator.MAX_PRE_FETCH = mfs;
                 }
-            } catch(NumberFormatException nfe) {
+            } catch(final NumberFormatException nfe) {
                 LOG.error("Unable to parse config parameter MAX_PRE_FETCH: "+check_max_pre_fetch_size);
             }
         }

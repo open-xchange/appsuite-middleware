@@ -162,9 +162,9 @@ public class InfostoreIterator implements SearchIterator<Object> {
 	
 	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(InfostoreIterator.class);
 
-	private Object[] args;
-	private DBProvider provider;
-	private String query;
+	private final Object[] args;
+	private final DBProvider provider;
+	private final String query;
 	private boolean queried;
 	private boolean initNext;
 	private ResultSet rs;
@@ -172,11 +172,11 @@ public class InfostoreIterator implements SearchIterator<Object> {
 	private AbstractOXException exception;
 	private final List<AbstractOXException> warnings;
 
-	private Context ctx;
+	private final Context ctx;
 
-	private Metadata[] fields;
+	private final Metadata[] fields;
 
-	private FieldChooser chooser;
+	private final FieldChooser chooser;
 
 	
 	protected InfostoreIterator(final String query,final DBProvider provider, final Context ctx, final Metadata[] fields, final FieldChooser chooser, final Object...args){

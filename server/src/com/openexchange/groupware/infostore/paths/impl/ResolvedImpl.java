@@ -54,11 +54,11 @@ import com.openexchange.webdav.protocol.WebdavPath;
 
 public class ResolvedImpl implements Resolved {
 
-	private WebdavPath path;
-	private int id;
-	private boolean document;
+	private final WebdavPath path;
+	private final int id;
+	private final boolean document;
 
-	public ResolvedImpl(WebdavPath path, int id, boolean document) {
+	public ResolvedImpl(final WebdavPath path, final int id, final boolean document) {
 		this.path = path;
 		this.id = id;
 		this.document = document;

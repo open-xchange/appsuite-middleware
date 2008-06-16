@@ -85,7 +85,7 @@ public class CreateAttachmentAction extends AttachmentListQueryAction implements
 				}
 				
 			});
-		} catch (UpdateException e) {
+		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(0, e.getSQLException(), e.getStatement());
 		}
 	}
@@ -103,7 +103,7 @@ public class CreateAttachmentAction extends AttachmentListQueryAction implements
 		}
 		try {
 			doUpdates(getQueryCatalog().getInsert(), getAttachments(),false);
-		} catch (UpdateException e) {
+		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
 		}
 	}

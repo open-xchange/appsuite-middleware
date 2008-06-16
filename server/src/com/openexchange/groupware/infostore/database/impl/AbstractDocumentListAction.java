@@ -61,7 +61,7 @@ public abstract class AbstractDocumentListAction extends AbstractInfostoreAction
 	private List<DocumentMetadata> documents;
 
 	public int doUpdates(final String query, final Metadata[] fields , final List<DocumentMetadata> docs) throws UpdateException, TransactionException {
-		UpdateBlock[] updates = new UpdateBlock[docs.size()];
+		final UpdateBlock[] updates = new UpdateBlock[docs.size()];
 		int i = 0;
 				
 		for(final DocumentMetadata doc : docs){

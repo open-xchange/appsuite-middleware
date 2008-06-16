@@ -60,37 +60,37 @@ public class Lock {
 	public int getId() {
 		return id;
 	}
-	public void setId(int id) {
+	public void setId(final int id) {
 		this.id = id;
 	}
 	public EntityLockManager.Scope getScope() {
 		return scope;
 	}
-	public void setScope(EntityLockManager.Scope scope) {
+	public void setScope(final EntityLockManager.Scope scope) {
 		this.scope = scope;
 	}
 	public long getTimeout() {
 		return timeout;
 	}
-	public void setTimeout(long timeout) {
+	public void setTimeout(final long timeout) {
 		this.timeout = timeout;
 	}
 	public EntityLockManager.Type getType() {
 		return type;
 	}
-	public void setType(EntityLockManager.Type type) {
+	public void setType(final EntityLockManager.Type type) {
 		this.type = type;
 	}
 	public int getOwner() {
 		return owner;
 	}
-	public void setOwner(int userid) {
+	public void setOwner(final int userid) {
 		this.owner = userid;
 	}
 	public String getOwnerDescription() {
 		return ownerDescription;
 	}
-	public void setOwnerDescription(String ownerDescription) {
+	public void setOwnerDescription(final String ownerDescription) {
 		this.ownerDescription = ownerDescription;
 	}
 	

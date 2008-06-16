@@ -69,7 +69,7 @@ public class CalendarSearchObject extends SearchObject {
 		return participants;
 	}
 
-	public void setParticipants(Participant[] participants) {
+	public void setParticipants(final Participant[] participants) {
 		this.participants = participants;
 	}
 
@@ -77,7 +77,7 @@ public class CalendarSearchObject extends SearchObject {
 		return searchInNote;
 	}
 
-	public void setSearchInNote(boolean searchInNote) {
+	public void setSearchInNote(final boolean searchInNote) {
 		this.searchInNote = searchInNote;
 	}
 
@@ -85,7 +85,7 @@ public class CalendarSearchObject extends SearchObject {
 		return title;
 	}
 
-	public void setTitle(String title) {
+	public void setTitle(final String title) {
 		this.title = title;
 	}
 

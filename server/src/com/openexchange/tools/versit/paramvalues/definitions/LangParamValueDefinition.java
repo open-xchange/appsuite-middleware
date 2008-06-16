@@ -66,6 +66,7 @@ import com.openexchange.tools.versit.VersitException;
  */
 public class LangParamValueDefinition extends ParameterValueDefinition {
 	
+	@Override
 	protected ParameterValue createValue(final Scanner s, final String text) throws IOException {
 		if (!text.matches("[A-Za-z]{1,8}(-[A-Za-z]{1,8})*")) {
 			throw new VersitException(s, "Invalid language");

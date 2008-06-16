@@ -108,14 +108,14 @@ final class Reminder {
         throws OXException {
         final ReminderSQLInterface reminder = new ReminderHandler(ctx);
         final int taskId = task.getObjectID();
-        for (InternalParticipant participant : ParticipantStorage
+        for (final InternalParticipant participant : ParticipantStorage
             .extractInternal(removed)) {
             final int userId = participant.getIdentifier();
             if (reminder.existsReminder(taskId, userId, Types.TASK)) {
                 reminder.deleteReminder(taskId, userId, Types.TASK);
             }
         }
-        for (Folder folder : folders) {
+        for (final Folder folder : folders) {
             final int userId = folder.getUser();
             if (reminder.existsReminder(taskId, userId, Types.TASK)) {
                 final ReminderObject remind = reminder.loadReminder(taskId,
@@ -126,7 +126,7 @@ final class Reminder {
                         remind.setFolder(String.valueOf(folderId));
                         reminder.updateReminder(remind);
                     }
-                } catch (NumberFormatException nfe) {
+                } catch (final NumberFormatException nfe) {
                     LOG.error("Parsing reminder folder identifier failed.", nfe);
                 }
             }
@@ -177,17 +177,17 @@ final class Reminder {
         final Collection<Task> tasks) throws TaskException {
         final ReminderSQLInterface remStor = new ReminderHandler(ctx);
         final Map<Integer, Task> tmp = new HashMap<Integer, Task>();
-        for (Task task : tasks) {
+        for (final Task task : tasks) {
             tmp.put(Integer.valueOf(task.getObjectID()), task);
         }
         final ReminderObject[] reminders;
         try {
             reminders = remStor.loadReminder(Collections.toArray(tmp.keySet()),
                 userId, Types.TASK);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new TaskException(e);
         }
-        for (ReminderObject reminder : reminders) {
+        for (final ReminderObject reminder : reminders) {
             tmp.get(Integer.valueOf(reminder.getTargetId())).setAlarm(reminder
                 .getDate());
         }
@@ -210,7 +210,7 @@ final class Reminder {
                     userId, Types.TASK);
                 task.setAlarm(remind.getDate());
             }
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new TaskException(e);
         }
     }
@@ -219,12 +219,12 @@ final class Reminder {
         final ReminderSQLInterface reminder = new ReminderHandler(ctx);
         try {
             reminder.deleteReminder(task.getObjectID(), Types.TASK);
-        } catch (ReminderException e) {
+        } catch (final ReminderException e) {
             if (ReminderException.Code.NOT_FOUND.getDetailNumber() != e
                 .getDetailNumber()) {
                 throw new TaskException(e);
             }
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new TaskException(e);
         }
     }

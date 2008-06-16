@@ -55,7 +55,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 public class InfostoreConfigUtils {
 
 	public static long determineRelevantUploadSize(final UserSettingMail userSettingMail) {
-		long maxUploadSize = InfostoreConfig.getMaxUploadSize();
+		final long maxUploadSize = InfostoreConfig.getMaxUploadSize();
 		
 		long maxSize = 0;
 		maxSize = userSettingMail.getUploadQuota();

@@ -52,13 +52,10 @@ package com.openexchange.groupware.update.tasks;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Iterator;
 
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
@@ -73,7 +70,6 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
@@ -141,14 +137,14 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
     private static final String SQL_QUERY = "SELECT created_from,cid,intfield01 FROM prg_contacts WHERE fid = "+FolderObject.SYSTEM_LDAP_FOLDER_ID+" AND userid is NULL";
 
     
-    public void correctTable(String sqltable, final int contextId) throws AbstractOXException {
+    public void correctTable(final String sqltable, final int contextId) throws AbstractOXException {
         	
     	if (LOG.isInfoEnabled()) {
             LOG.info(STR_INFO);
         }
     	
         Connection writeCon = null;
-        PreparedStatement stmt = null;
+        final PreparedStatement stmt = null;
         Statement st = null;
         ResultSet resultSet = null;
         FolderObject des = null;

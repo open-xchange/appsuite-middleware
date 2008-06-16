@@ -171,7 +171,7 @@ public final class Create {
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
             DBPool.closeWriterSilent(ctx, con);

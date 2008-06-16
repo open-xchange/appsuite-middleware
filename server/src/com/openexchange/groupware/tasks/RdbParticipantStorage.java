@@ -109,7 +109,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 tasks.length));
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
-            for (int taskId : tasks) {
+            for (final int taskId : tasks) {
                 stmt.setInt(pos++, taskId);
             }
             result = stmt.executeQuery();
@@ -142,7 +142,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 }
                 participants.add(taskParticipant);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -163,7 +163,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(SQL.UPDATE_PARTS.get(type));
-            for (InternalParticipant participant : participants) {
+            for (final InternalParticipant participant : participants) {
                 int pos = 1;
                 if (null == participant.getGroupId()) {
                     stmt.setNull(pos++, Types.INTEGER);
@@ -178,7 +178,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 stmt.addBatch();
             }
             stmt.executeBatch();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -208,11 +208,11 @@ public class RdbParticipantStorage extends ParticipantStorage {
             int counter = 1;
             stmt.setInt(counter++, ctx.getContextId());
             stmt.setInt(counter++, taskId);
-            for (int user : users) {
+            for (final int user : users) {
                 stmt.setInt(counter++, user);
             }
             deleted = stmt.executeUpdate();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -242,7 +242,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             while (result.next()) {
                 tasks.add(Integer.valueOf(result.getInt(1)));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -268,7 +268,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             while (result.next()) {
                 tasks.add(Integer.valueOf(result.getInt(1)));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -295,7 +295,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 tasks.length));
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
-            for (int taskId : tasks) {
+            for (final int taskId : tasks) {
                 stmt.setInt(pos++, taskId);
             }
             result = stmt.executeQuery();
@@ -315,7 +315,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 }
                 participants.add(participant);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -341,11 +341,11 @@ public class RdbParticipantStorage extends ParticipantStorage {
             int counter = 1;
             stmt.setInt(counter++, ctx.getContextId());
             stmt.setInt(counter++, taskId);
-            for (String address : addresses) {
+            for (final String address : addresses) {
                 stmt.setString(counter++, address);
             }
             deleted = stmt.executeUpdate();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -374,7 +374,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, taskId);
-            for (ExternalParticipant participant : participants) {
+            for (final ExternalParticipant participant : participants) {
                 pos = 3;
                 stmt.setString(pos++, participant.getMail());
                 final String displayName = participant.getDisplayName();
@@ -386,13 +386,13 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 stmt.addBatch();
             }
             stmt.executeBatch();
-        } catch (DataTruncation e) {
+        } catch (final DataTruncation e) {
             final int truncated = -1; // No ID defined here
             final TaskException tske = new TaskException(Code.TRUNCATED, e,
                 "mail");
             tske.addTruncatedId(truncated);
             throw tske;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -415,7 +415,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, taskId);
-            for (InternalParticipant participant : participants) {
+            for (final InternalParticipant participant : participants) {
                 pos = 3;
                 stmt.setInt(pos++, participant.getIdentifier());
                 if (null == participant.getGroupId()) {
@@ -440,13 +440,13 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 stmt.addBatch();
             }
             stmt.executeBatch();
-        } catch (DataTruncation e) {
+        } catch (final DataTruncation e) {
             final int truncated = -1; // No ID defined here
             final TaskException tske = new TaskException(Code.TRUNCATED, e,
                 "description");
             tske.addTruncatedId(truncated);
             throw tske;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);

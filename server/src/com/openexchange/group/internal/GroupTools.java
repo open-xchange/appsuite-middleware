@@ -85,7 +85,7 @@ public final class GroupTools {
         final Group retval;
         try {
             retval = (Group) GROUP_ZERO.clone();
-        } catch (CloneNotSupportedException e) {
+        } catch (final CloneNotSupportedException e) {
             throw new UserException(UserException.Code.NOT_CLONEABLE, e,
                 Group.class.getName());
         }

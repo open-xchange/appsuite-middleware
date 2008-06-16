@@ -101,11 +101,11 @@ public abstract class SchemaStore {
 				}
 			}
 			return implementingClass.newInstance();
-		} catch (InstantiationException e) {
+		} catch (final InstantiationException e) {
 			throw EXCEPTION.create(2, e, className);
-		} catch (IllegalAccessException e) {
+		} catch (final IllegalAccessException e) {
 			throw EXCEPTION.create(2, e, className);
-		} catch (ClassNotFoundException e) {
+		} catch (final ClassNotFoundException e) {
 			throw EXCEPTION.create(1, e, className);
 		}
 	}

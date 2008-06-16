@@ -102,9 +102,9 @@ public abstract class Updater {
                 }
             }
             return implementingClass.newInstance();
-        } catch (InstantiationException e) {
+        } catch (final InstantiationException e) {
             throw EXCEPTION.create(1, e, implementingClass.getName());
-        } catch (IllegalAccessException e) {
+        } catch (final IllegalAccessException e) {
             throw EXCEPTION.create(1, e, implementingClass.getName());
         }
     }

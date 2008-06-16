@@ -63,7 +63,7 @@ public class Parameter {
 
 	private final ArrayList<ParameterValue> Values = new ArrayList<ParameterValue>();
 
-	public Parameter(String name) {
+	public Parameter(final String name) {
 		this.name = name;
 	}
 

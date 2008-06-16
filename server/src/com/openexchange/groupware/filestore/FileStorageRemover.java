@@ -92,9 +92,9 @@ public final class FileStorageRemover implements DeleteListener {
         try {
             final FileStorage stor = getFileStorage(ctx);
             stor.remove();
-        } catch (FileStorageException e) {
+        } catch (final FileStorageException e) {
             throw new DeleteFailedException(e);
-        } catch (FilestoreException e) {
+        } catch (final FilestoreException e) {
             throw new DeleteFailedException(e);
         }
     }

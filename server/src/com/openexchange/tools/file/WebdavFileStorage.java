@@ -68,8 +68,8 @@ public class WebdavFileStorage extends FileStorage {
 	
 	private String host;
 	private String path;
-	private String userName;
-	private String password;
+	private final String userName;
+	private final String password;
 	
 	private final ThreadLocal<WebdavResource> lock = new ThreadLocal<WebdavResource>();
 	
@@ -123,7 +123,7 @@ public class WebdavFileStorage extends FileStorage {
 			@Override
 			public char[] getRawPassword() {
 				// Fix for bug in http-client
-				char[] pw = super.getRawPassword();
+				final char[] pw = super.getRawPassword();
 				if (null == pw) {
 					return new char[0];
 				}
@@ -271,7 +271,7 @@ public class WebdavFileStorage extends FileStorage {
             if (!res.deleteMethod()) {
                 throw new FileStorageException(Code.NOT_ELIMINATED);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new FileStorageException(Code.IOERROR, e, e.getMessage());
         }
     }

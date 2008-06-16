@@ -49,33 +49,39 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
+
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.groupware.infostore.InfostoreException;
+import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 
-import javax.servlet.http.HttpServletResponse;
-import java.util.*;
-
 public abstract class LockHelper {
 	private final Map<String, WebdavLock> locks = new HashMap<String, WebdavLock>();
-	private WebdavPath url;
+	private final WebdavPath url;
 	protected int id;
 	
 	private final Set<String> removedLocks = new HashSet<String>();
 	private final Set<Integer> removedLockIDs = new HashSet<Integer>();
-	private SessionHolder sessionHolder;
-	private LockManager lockManager;
+	private final SessionHolder sessionHolder;
+	private final LockManager lockManager;
 	private boolean loadedLocks;
 
 
@@ -205,7 +211,7 @@ public abstract class LockHelper {
     private ServerSession getSession() throws OXException {
         try {
             return new ServerSessionAdapter(sessionHolder.getSessionObject());
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             throw new InfostoreException(e);
         }
     }

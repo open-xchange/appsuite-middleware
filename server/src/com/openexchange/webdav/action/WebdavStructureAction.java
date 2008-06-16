@@ -49,45 +49,51 @@
 
 package com.openexchange.webdav.action;
 
-import com.openexchange.webdav.loader.LoadingHints;
-import com.openexchange.webdav.protocol.*;
-
 import javax.servlet.http.HttpServletResponse;
+
+import com.openexchange.webdav.loader.LoadingHints;
+import com.openexchange.webdav.protocol.WebdavCollection;
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavResource;
 
 public abstract class WebdavStructureAction extends AbstractAction {
 
-	private WebdavFactory factory;
+	private final WebdavFactory factory;
 	
-	public WebdavStructureAction(WebdavFactory factory) {
+	public WebdavStructureAction(final WebdavFactory factory) {
 		this.factory = factory;
 	}
 
 	// Returns the status for a successful move/copy
-	protected void checkOverwrite(WebdavRequest req) throws WebdavException{
+	protected void checkOverwrite(final WebdavRequest req) throws WebdavException{
 		if(req.getHeader("Overwrite") != null && "F".equals(req.getHeader("Overwrite"))){
-			LoadingHints loadingHints = new LoadingHints();
+			final LoadingHints loadingHints = new LoadingHints();
 			loadingHints.setUrl(req.getDestinationUrl());
 			loadingHints.setDepth(WebdavCollection.INFINITY);
 			loadingHints.setProps(LoadingHints.Property.NONE);
 			preLoad(loadingHints);
 			
-			WebdavResource dest = req.getDestination();
+			final WebdavResource dest = req.getDestination();
 			
-			if(!dest.exists())
+			if(!dest.exists()) {
 				return;
+			}
 			
 			if(dest.isCollection()) {
-				int depth = req.getDepth(WebdavCollection.INFINITY);
+				final int depth = req.getDepth(WebdavCollection.INFINITY);
 				
-				int sourceUrlLength = req.getUrl().size();
-				WebdavPath destUrl = req.getDestinationUrl();
+				final int sourceUrlLength = req.getUrl().size();
+				final WebdavPath destUrl = req.getDestinationUrl();
 				
-				for(WebdavResource res : req.getCollection().toIterable(depth)) {
+				for(final WebdavResource res : req.getCollection().toIterable(depth)) {
 					WebdavPath url = res.getUrl();
 					url = destUrl.dup().append(url.subpath(sourceUrlLength));
-					WebdavResource d = factory.resolveResource(url);
-					if(d.exists() && !d.isCollection())
+					final WebdavResource d = factory.resolveResource(url);
+					if(d.exists() && !d.isCollection()) {
 						throw new WebdavException(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
+					}
 				}
 				
 			} else {
@@ -98,13 +104,14 @@ public abstract class WebdavStructureAction extends AbstractAction {
 		return;
 	}
 	
-	protected int chooseReturnCode(WebdavRequest req) throws WebdavException {
+	protected int chooseReturnCode(final WebdavRequest req) throws WebdavException {
 		return (req.getDestination().exists()) ? HttpServletResponse.SC_NO_CONTENT : HttpServletResponse.SC_CREATED;
 	}
 	
-	protected void checkSame(WebdavRequest req) throws WebdavException {
-		if(req.getUrl().equals(req.getDestinationUrl()))
+	protected void checkSame(final WebdavRequest req) throws WebdavException {
+		if(req.getUrl().equals(req.getDestinationUrl())) {
 			throw new WebdavException(req.getUrl(), HttpServletResponse.SC_FORBIDDEN);
+		}
 	}
 
 }

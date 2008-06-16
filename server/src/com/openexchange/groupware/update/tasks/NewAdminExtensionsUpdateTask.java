@@ -61,14 +61,14 @@ import java.util.Hashtable;
 
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
+import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.exception.Classes;
+import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.server.impl.DBPoolingException;
 
 /**
@@ -137,18 +137,18 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
             desc = { "", "" },
             exceptionId = { 1, 2 },
             msg = { "Cannot get database connection.", "SQL Problem: \"%s\"." })
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
+    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         if (LOG.isInfoEnabled()) {
             LOG.info(STR_INFO);
         }
 
-        Hashtable<String, ArrayList<String>> missingCols = missingColumns(contextId);
-        boolean deleteLastmodified = tableContainsColumn(contextId, "del_user", "lastModified");
+        final Hashtable<String, ArrayList<String>> missingCols = missingColumns(contextId);
+        final boolean deleteLastmodified = tableContainsColumn(contextId, "del_user", "lastModified");
 
         Connection writeCon = null;
         try {
             writeCon = Database.get(contextId, true);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw EXCEPTION.create(1, e);
         }
         try {
@@ -160,12 +160,12 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
                 removeColumnFromTable(writeCon, contextId, "lastModified", "del_user");
             }
             writeCon.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw EXCEPTION.create(2, e, e.getMessage());
         } finally {
             try {
                 writeCon.setAutoCommit(true);
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
             Database.back(contextId, true, writeCon);
@@ -182,9 +182,9 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
         Statement stmt = null;
         ResultSet rs = null;
 
-        Hashtable<String, ArrayList<String>> retTables = new Hashtable<String, ArrayList<String>>();
+        final Hashtable<String, ArrayList<String>> retTables = new Hashtable<String, ArrayList<String>>();
         for(final String table : new String[]{ TABLE_USER, TABLE_GROUPS, TABLE_DEL_USER, TABLE_DEL_GROUPS } ) {
-            ArrayList<String> ret = new ArrayList<String>();
+            final ArrayList<String> ret = new ArrayList<String>();
             ret.add(COL_GID_NUMBER);
             if( table.equals(TABLE_USER) || table.equals(TABLE_DEL_USER) ) {
                 ret.add(COL_UID_NUMBER);
@@ -199,7 +199,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
 
         try {
             readCon = Database.get(contextId, false);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw EXCEPTION.create(3, e);
         }
         try {
@@ -208,7 +208,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
                 rs = stmt.executeQuery("SELECT * FROM " + table);
                 final ResultSetMetaData meta = rs.getMetaData();
                 final int length = meta.getColumnCount();
-                ArrayList<String> colList = retTables.get(table);
+                final ArrayList<String> colList = retTables.get(table);
                 for (int i = 1; i <= length && colList.size() > 0; i++) {
                     for(final String col : new String[] { COL_GID_NUMBER, COL_UID_NUMBER,
                             COL_HOME_DIRECTORY, COL_LOGIN_SHELL, COL_PASSWORD_MECH} ) {
@@ -221,7 +221,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
             }
 
             return retTables;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw EXCEPTION.create(4, e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -245,7 +245,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
                 stmt.executeUpdate();
                 stmt.close();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw EXCEPTION.create(5, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -260,7 +260,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
         PreparedStatement stmt = null;
         try {
             for(final String table : missingCols.keySet() ) {
-                ArrayList<String> cols = missingCols.get(table);
+                final ArrayList<String> cols = missingCols.get(table);
                 if( cols.size() > 0 && 
                         ( table.equals(TABLE_USER) || table.equals(TABLE_DEL_USER) ) ) {
                     for( final String col : cols ) {
@@ -297,7 +297,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
                     }
                 }
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw EXCEPTION.create(6, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -312,7 +312,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
         PreparedStatement stmt = null;
         try {
             for(final String table : missingCols.keySet() ) {
-                ArrayList<String> cols = missingCols.get(table);
+                final ArrayList<String> cols = missingCols.get(table);
                 if( cols.size() > 0 && 
                         ( table.equals(TABLE_USER) || table.equals(TABLE_DEL_USER) ) ) {
                     for( final String col : cols ) {
@@ -355,7 +355,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
                     }
                 }
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw EXCEPTION.create(7, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -373,7 +373,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
 
         try {
             readCon = Database.get(contextId, false);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw EXCEPTION.create(8, e);
         }
         try {
@@ -389,7 +389,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
                     }
                 }
                 return found;
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw EXCEPTION.create(9, e, e.getMessage());
             }
         } finally {
@@ -410,7 +410,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
             stmt = con.prepareStatement("ALTER TABLE "+table+" DROP "+column);
             stmt.executeUpdate();
             stmt.close();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw EXCEPTION.create(10, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);

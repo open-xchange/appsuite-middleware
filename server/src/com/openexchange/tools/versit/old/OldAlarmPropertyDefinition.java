@@ -66,12 +66,13 @@ public class OldAlarmPropertyDefinition extends OldRecordPropertyDefinition {
 
 	public OldAlarmPropertyDefinition(final String action, final String value,
 			final String[] paramNames, final OldParamDefinition[] params,
-			OldShortPropertyDefinition[] elements) {
+			final OldShortPropertyDefinition[] elements) {
 		super(paramNames, params, elements);
 		Action = action;
 		Value = value;
 	}
 
+	@Override
 	public void parse(final OldScanner s, final String name, final VersitObject object)
 			throws IOException {
 		final Property prop = new Property(name);

@@ -53,8 +53,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.configuration.ConfigurationException.Code;
 import com.openexchange.tools.conf.AbstractConfig;
 
 /**

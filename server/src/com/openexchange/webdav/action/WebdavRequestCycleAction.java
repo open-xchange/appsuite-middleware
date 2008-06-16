@@ -57,7 +57,7 @@ import com.openexchange.webdav.protocol.WebdavException;
 public class WebdavRequestCycleAction extends AbstractAction {
 	private static final Log LOG = LogFactory.getLog(WebdavRequestCycleAction.class);
 	
-	public void perform(WebdavRequest req, WebdavResponse res)
+	public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws WebdavException {
 		
 		
@@ -67,7 +67,7 @@ public class WebdavRequestCycleAction extends AbstractAction {
 			yield(req,res);
 			req.getFactory().endRequest(200);
 			stopped = true;
-		} catch (WebdavException x) {
+		} catch (final WebdavException x) {
 			LOG.debug("Got Webdav Exception", x);
 			req.getFactory().endRequest(x.getStatus());
 			stopped = true;

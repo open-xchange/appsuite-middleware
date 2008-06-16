@@ -91,13 +91,13 @@ public class Calendar implements PreferencesItemService {
                 return userConfig.hasCalendar();
             }
             public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig,
+                final User user, final UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
                 final OXFolderAccess acc = new OXFolderAccess(ctx);
                 try {
                     setting.setSingleValue(Integer.valueOf(acc.getDefaultFolder(
                         user.getId(), FolderObject.CALENDAR).getObjectID()));
-                } catch (OXException e) {
+                } catch (final OXException e) {
                     throw new SettingException(e);
                 }
             }

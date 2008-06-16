@@ -49,11 +49,42 @@
 
 package com.openexchange.groupware.attach.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import javax.activation.MimetypesFileTypeMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.*;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.attach.*;
+import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.attach.AttachmentAuthorization;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentException;
+import com.openexchange.groupware.attach.AttachmentExceptionFactory;
+import com.openexchange.groupware.attach.AttachmentField;
+import com.openexchange.groupware.attach.AttachmentListener;
+import com.openexchange.groupware.attach.AttachmentMetadata;
+import com.openexchange.groupware.attach.Classes;
 import com.openexchange.groupware.attach.util.GetSwitch;
 import com.openexchange.groupware.attach.util.SetSwitch;
 import com.openexchange.groupware.contexts.Context;
@@ -78,15 +109,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.sql.DBUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.activation.MimetypesFileTypeMap;
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.*;
-import java.util.*;
-import java.util.Date;
 
 
 @OXExceptionSource(
@@ -372,23 +394,23 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 			exceptionId = { 16,17 },
 			msg = { "Could not delete files from filestore. Context: %d.", "Could not remove attachments from database. Context: %d." }
 	)
-    public void deleteAll(Context context) throws OXException {
+    public void deleteAll(final Context context) throws OXException {
         try {
             removeFiles(context);
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             LL.log(e);
             throw EXCEPTIONS.create(16,e,context.getContextId());
         }
         try {
             removeDatabaseEntries(context);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             LOG.error("SQL Exception: ",e);
             throw EXCEPTIONS.create(17,e,context.getContextId());
         }
 
     }
 
-    private void removeDatabaseEntries(Context context) throws TransactionException, SQLException {
+    private void removeDatabaseEntries(final Context context) throws TransactionException, SQLException {
         Connection writeCon = null;
         PreparedStatement stmt = null;
         try {
@@ -400,7 +422,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             if(stmt != null) {
                 try {
                     stmt.close();
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     LOG.error("Can't close statement", e);
                 }
             }
@@ -409,9 +431,9 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     }
 
-    private void removeFiles(Context context) throws AbstractOXException {
-        FileStorage fs = getFileStorage(context);
-        for(String fileId : this.getAttachmentFileStoreLocationsperContext(context)){
+    private void removeFiles(final Context context) throws AbstractOXException {
+        final FileStorage fs = getFileStorage(context);
+        for(final String fileId : this.getAttachmentFileStoreLocationsperContext(context)){
             fs.deleteFile(fileId);  
         }
     }
@@ -535,7 +557,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 		} catch(final SQLException x) {
 			try {
 				rollbackDBTransaction();
-			} catch (TransactionException x2) {
+			} catch (final TransactionException x2) {
 				LL.log(x2);
 			}
 			throw EXCEPTIONS.create(3,x,DBUtils.getStatement(stmt));
@@ -810,14 +832,14 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 	
 	
 	@OXThrows(category=Category.USER_INPUT, desc="", exceptionId=18, msg="Validation failed: %s")
-	private void checkCharacters(AttachmentMetadata attachment) throws OXException {
-		StringBuilder errors = new StringBuilder();
+	private void checkCharacters(final AttachmentMetadata attachment) throws OXException {
+		final StringBuilder errors = new StringBuilder();
 		boolean invalid = false;
-		GetSwitch get = new GetSwitch(attachment);
-		for(AttachmentField field : AttachmentField.VALUES_ARRAY) {
-			Object value = field.doSwitch(get);
+		final GetSwitch get = new GetSwitch(attachment);
+		for(final AttachmentField field : AttachmentField.VALUES_ARRAY) {
+			final Object value = field.doSwitch(get);
 			if(null != value && value instanceof String) {
-				String error = Check.containsInvalidChars((String)value);
+				final String error = Check.containsInvalidChars((String)value);
 				if(null != error) {
 					invalid = true;
 					errors.append(field.getName()).append(" ").append(error).append("\n");

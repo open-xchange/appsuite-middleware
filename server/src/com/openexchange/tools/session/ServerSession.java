@@ -50,7 +50,6 @@
 package com.openexchange.tools.session;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.session.Session;
 
 public interface ServerSession extends Session {

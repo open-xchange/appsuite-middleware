@@ -346,11 +346,11 @@ public class FrenchOutlookMapper implements ContactFieldMapper {
 
         }
 
-        public ContactField getFieldByName(String name){
+        public ContactField getFieldByName(final String name){
                 return french2field.get(name);
         }
 
-        public String getNameOfField(ContactField field){
+        public String getNameOfField(final ContactField field){
                 return field2french.get(field);
         }
 

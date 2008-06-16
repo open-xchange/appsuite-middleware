@@ -51,10 +51,9 @@
 
 package com.openexchange.server.impl;
 
-import com.openexchange.database.Database;
-
 import java.sql.Connection;
 
+import com.openexchange.database.Database;
 import com.openexchange.groupware.contexts.Context;
 
 /**

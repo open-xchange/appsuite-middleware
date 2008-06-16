@@ -111,7 +111,7 @@ public class EventQueue extends TimerTask {
 
 	private static boolean shutdownComplete;
 
-	public EventQueue(EventConfig config) {
+	public EventQueue(final EventConfig config) {
 		delay = config.getEventQueueDelay();
 
 		if (config.isEventQueueEnabled()) {
@@ -183,7 +183,7 @@ public class EventQueue extends TimerTask {
 				isFirst = true;
 				callEvent(queue2);
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error(exc.getMessage(), exc);
 		}
 		if (shuttingDown && queue1.isEmpty() && queue2.isEmpty()) {
@@ -237,7 +237,7 @@ public class EventQueue extends TimerTask {
 				try {
 					appointmentEventList.get(a).appointmentCreated((AppointmentObject) eventObj.getObject(),
 							eventObj.getSessionObject());
-				} catch (Throwable t) {
+				} catch (final Throwable t) {
 					LOG.error(t.getMessage(), t);
 				}
 			}
@@ -247,7 +247,7 @@ public class EventQueue extends TimerTask {
 				try {
 					appointmentEventList.get(a).appointmentModified((AppointmentObject) eventObj.getObject(),
 							eventObj.getSessionObject());
-				} catch (Throwable t) {
+				} catch (final Throwable t) {
 					LOG.error(t.getMessage(), t);
 				}
 			}
@@ -257,7 +257,7 @@ public class EventQueue extends TimerTask {
 				try {
 					appointmentEventList.get(a).appointmentDeleted((AppointmentObject) eventObj.getObject(),
 							eventObj.getSessionObject());
-				} catch (Throwable t) {
+				} catch (final Throwable t) {
 					LOG.error(t.getMessage(), t);
 				}
 			}
@@ -275,7 +275,7 @@ public class EventQueue extends TimerTask {
 				try {
 					contactEventList.get(a).contactCreated((ContactObject) eventObj.getObject(),
 							eventObj.getSessionObject());
-				} catch (Throwable t) {
+				} catch (final Throwable t) {
 					LOG.error(t.getMessage(), t);
 				}
 			}
@@ -285,7 +285,7 @@ public class EventQueue extends TimerTask {
 				try {
 					contactEventList.get(a).contactModified((ContactObject) eventObj.getObject(),
 							eventObj.getSessionObject());
-				} catch (Throwable t) {
+				} catch (final Throwable t) {
 					LOG.error(t.getMessage(), t);
 				}
 			}
@@ -295,7 +295,7 @@ public class EventQueue extends TimerTask {
 				try {
 					contactEventList.get(a).contactDeleted((ContactObject) eventObj.getObject(),
 							eventObj.getSessionObject());
-				} catch (Throwable t) {
+				} catch (final Throwable t) {
 					LOG.error(t.getMessage(), t);
 				}
 			}
@@ -312,7 +312,7 @@ public class EventQueue extends TimerTask {
 			for (int a = 0; a < taskEventList.size(); a++) {
 				try {
 					taskEventList.get(a).taskCreated((Task) eventObj.getObject(), eventObj.getSessionObject());
-				} catch (Throwable t) {
+				} catch (final Throwable t) {
 					LOG.error(t.getMessage(), t);
 				}
 			}
@@ -321,7 +321,7 @@ public class EventQueue extends TimerTask {
 			for (int a = 0; a < taskEventList.size(); a++) {
 				try {
 					taskEventList.get(a).taskModified((Task) eventObj.getObject(), eventObj.getSessionObject());
-				} catch (Throwable t) {
+				} catch (final Throwable t) {
 					LOG.error(t.getMessage(), t);
 				}
 			}
@@ -330,7 +330,7 @@ public class EventQueue extends TimerTask {
 			for (int a = 0; a < taskEventList.size(); a++) {
 				try {
 					taskEventList.get(a).taskDeleted((Task) eventObj.getObject(), eventObj.getSessionObject());
-				} catch (Throwable t) {
+				} catch (final Throwable t) {
 					LOG.error(t.getMessage(), t);
 				}
 			}
@@ -348,7 +348,7 @@ public class EventQueue extends TimerTask {
 				try {
 					folderEventList.get(a).folderCreated((FolderObject) eventObj.getObject(),
 							eventObj.getSessionObject());
-				} catch (Throwable t) {
+				} catch (final Throwable t) {
 					LOG.error(t.getMessage(), t);
 				}
 			}
@@ -358,7 +358,7 @@ public class EventQueue extends TimerTask {
 				try {
 					folderEventList.get(a).folderModified((FolderObject) eventObj.getObject(),
 							eventObj.getSessionObject());
-				} catch (Throwable t) {
+				} catch (final Throwable t) {
 					LOG.error(t.getMessage(), t);
 				}
 			}
@@ -368,7 +368,7 @@ public class EventQueue extends TimerTask {
 				try {
 					folderEventList.get(a).folderDeleted((FolderObject) eventObj.getObject(),
 							eventObj.getSessionObject());
-				} catch (Throwable t) {
+				} catch (final Throwable t) {
 					LOG.error(t.getMessage(), t);
 				}
 			}
@@ -386,7 +386,7 @@ public class EventQueue extends TimerTask {
 				try {
 					infostoreEventList.get(a).infoitemCreated((DocumentMetadata) eventObj.getObject(),
 							eventObj.getSessionObject());
-				} catch (Throwable t) {
+				} catch (final Throwable t) {
 					LOG.error(t.getMessage(), t);
 				}
 			}
@@ -396,7 +396,7 @@ public class EventQueue extends TimerTask {
 				try {
 					infostoreEventList.get(a).infoitemModified((DocumentMetadata) eventObj.getObject(),
 							eventObj.getSessionObject());
-				} catch (Throwable t) {
+				} catch (final Throwable t) {
 					LOG.error(t.getMessage(), t);
 				}
 			}
@@ -406,7 +406,7 @@ public class EventQueue extends TimerTask {
 				try {
 					infostoreEventList.get(a).infoitemDeleted((DocumentMetadata) eventObj.getObject(),
 							eventObj.getSessionObject());
-				} catch (Throwable t) {
+				} catch (final Throwable t) {
 					LOG.error(t.getMessage(), t);
 				}
 			}
@@ -470,11 +470,12 @@ public class EventQueue extends TimerTask {
 			}
 			shuttingDown = true;
 
-			if (queue1.isEmpty() && queue2.isEmpty()) // Must not wait for
-														// next run.
+			if (queue1.isEmpty() && queue2.isEmpty()) {
+				// next run.
 				return;
+			}
 			ALL_EVENTS_PROCESSED.await();
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		} finally {
 			// Just in case another Thread also stopped the queue, we have to

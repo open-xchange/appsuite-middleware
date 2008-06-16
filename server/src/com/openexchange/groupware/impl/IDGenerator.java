@@ -121,7 +121,7 @@ public final class IDGenerator {
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(context);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             final SQLException sexp = new SQLException(
                 "Cannot get connection from dbpool.");
             sexp.initCause(e);
@@ -132,7 +132,7 @@ public final class IDGenerator {
             con.setAutoCommit(false);
             newId = getId(context, type, con);
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             con.rollback();
             throw e;
         } finally {
@@ -264,7 +264,7 @@ public final class IDGenerator {
         }
 
         static {
-            Map<Integer, String> tmp = new HashMap<Integer, String>();
+            final Map<Integer, String> tmp = new HashMap<Integer, String>();
             tmp.put(-1, "{call get_configdb_id()}");
             tmp.put(Types.APPOINTMENT, "{call get_calendar_id(?)}");
             tmp.put(Types.CONTACT, "{call get_contact_id(?)}");
@@ -339,7 +339,7 @@ public final class IDGenerator {
         }
 
         static {
-            Map<Integer, String> tmp = new HashMap<Integer, String>();
+            final Map<Integer, String> tmp = new HashMap<Integer, String>();
             tmp.put(-1, "CALL get_configdb_id()");
             tmp.put(Types.APPOINTMENT, "CALL get_calendar_id(?)");
             tmp.put(Types.CONTACT, "CALL get_contact_id(?)");
@@ -415,7 +415,7 @@ public final class IDGenerator {
                 if (result.next()) {
                     newId = result.getInt(1);
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("SQL Problem: " + stmt);
                 }
@@ -448,7 +448,7 @@ public final class IDGenerator {
                 if (result.next()) {
                     newId = result.getInt(1);
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("SQL Problem: " + stmt);
                 }
@@ -464,7 +464,7 @@ public final class IDGenerator {
         }
 
         static {
-            Map<Integer, String> tmp = new HashMap<Integer, String>();
+            final Map<Integer, String> tmp = new HashMap<Integer, String>();
             tmp.put(-1, "configdb_sequence");
             tmp.put(Types.APPOINTMENT, "sequence_calendar");
             tmp.put(Types.CONTACT, "sequence_contact");

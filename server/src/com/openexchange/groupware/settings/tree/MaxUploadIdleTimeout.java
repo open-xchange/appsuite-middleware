@@ -53,8 +53,8 @@ import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
@@ -97,7 +97,7 @@ public final class MaxUploadIdleTimeout implements PreferencesItemService {
                 try {
                     setting.setSingleValue(Integer.valueOf(ServerConfig
                         .getInteger(ServerConfig.Property.MaxUploadIdleTimeMillis)));
-                } catch (ConfigurationException e) {
+                } catch (final ConfigurationException e) {
                     throw new SettingException(e);
                 }
             }

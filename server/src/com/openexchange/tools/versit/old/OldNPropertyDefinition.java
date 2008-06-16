@@ -65,11 +65,12 @@ import com.openexchange.tools.versit.StringScanner;
  */
 public class OldNPropertyDefinition extends OldCompoundPropertyDefinition {
 
-	public OldNPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldNPropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
+	@Override
 	protected Object parseValue(final Property property, final OldScanner s, final byte[] value,
 			final String charset) throws IOException {
 		final ArrayList<Object> al = new ArrayList<Object>();
@@ -88,6 +89,7 @@ public class OldNPropertyDefinition extends OldCompoundPropertyDefinition {
 		return al;
 	}
 
+	@Override
 	protected String writeValue(final Property property, final Object value) {
 		final StringBuilder sb = new StringBuilder();
 		final ArrayList al = (ArrayList) value;

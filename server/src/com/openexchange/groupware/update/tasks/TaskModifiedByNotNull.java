@@ -113,7 +113,7 @@ public class TaskModifiedByNotNull implements UpdateTask {
         Connection con = null;
         try {
             con = Database.get(contextId, true);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new TaskException(TaskException.Code.NO_CONNECTION, e);
         }
         try {
@@ -125,7 +125,7 @@ public class TaskModifiedByNotNull implements UpdateTask {
                 setModifiedBy(con, del_task_table);
                 alterModifiedBy(con, del_task_table);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(TaskException.Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {

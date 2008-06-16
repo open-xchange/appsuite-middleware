@@ -53,8 +53,8 @@ package com.openexchange.ajax.writer;
 
 import java.util.Date;
 import java.util.TimeZone;
-import org.json.JSONArray;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;

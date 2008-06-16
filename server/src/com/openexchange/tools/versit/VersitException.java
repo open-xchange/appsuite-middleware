@@ -60,7 +60,7 @@ public class VersitException extends IOException {
 
 	private static final long serialVersionUID = 3148214046185732355L;
 
-	public VersitException(Scanner s, String msg) {
+	public VersitException(final Scanner s, final String msg) {
 		super("Errot at line " + (s.getLine() + 1) + ", column " + (s.getColumn() + 1)
 				+ ": " + msg);
 	}

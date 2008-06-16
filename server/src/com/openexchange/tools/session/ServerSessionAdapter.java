@@ -1,22 +1,22 @@
 package com.openexchange.tools.session;
 
-import com.openexchange.session.Session;
-import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.upload.ManagedUploadFile;
+import com.openexchange.session.Session;
 
 public class ServerSessionAdapter implements ServerSession{
 
-    private Session session;
-    private Context ctx;
+    private final Session session;
+    private final Context ctx;
 
-    public ServerSessionAdapter(Session session) throws ContextException {
+    public ServerSessionAdapter(final Session session) throws ContextException {
         this.session = session;
         this.ctx = ContextStorage.getStorageContext(getContextId());
     }
 
-    public ServerSessionAdapter(Session session, Context ctx) {
+    public ServerSessionAdapter(final Session session, final Context ctx) {
         this.session = session;
         this.ctx = ctx;
     }
@@ -33,7 +33,7 @@ public class ServerSessionAdapter implements ServerSession{
         return session.getLoginName();
     }
 
-    public Object getParameter(String name) {
+    public Object getParameter(final String name) {
         return session.getParameter(name);
     }
 
@@ -53,7 +53,7 @@ public class ServerSessionAdapter implements ServerSession{
         return session.getSessionID();
     }
 
-    public ManagedUploadFile getUploadedFile(String id) {
+    public ManagedUploadFile getUploadedFile(final String id) {
         return session.getUploadedFile(id);
     }
 
@@ -65,23 +65,23 @@ public class ServerSessionAdapter implements ServerSession{
         return session.getUserlogin();
     }
 
-    public void putUploadedFile(String id, ManagedUploadFile uploadFile) {
+    public void putUploadedFile(final String id, final ManagedUploadFile uploadFile) {
         session.putUploadedFile(id, uploadFile);
     }
 
-    public ManagedUploadFile removeUploadedFile(String id) {
+    public ManagedUploadFile removeUploadedFile(final String id) {
         return session.removeUploadedFile(id);
     }
 
-    public void removeUploadedFileOnly(String id) {
+    public void removeUploadedFileOnly(final String id) {
         session.removeUploadedFileOnly(id);
     }
 
-    public void setParameter(String name, Object value) {
+    public void setParameter(final String name, final Object value) {
         session.setParameter(name, value);
     }
 
-    public boolean touchUploadedFile(String id) {
+    public boolean touchUploadedFile(final String id) {
         return session.touchUploadedFile(id);
     }
 

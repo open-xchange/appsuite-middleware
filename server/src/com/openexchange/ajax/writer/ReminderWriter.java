@@ -51,14 +51,16 @@
 
 package com.openexchange.ajax.writer;
 
+import java.util.Date;
+import java.util.TimeZone;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.ReminderFields;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.ajax.fields.CalendarFields;
-import java.util.Date;
-import java.util.TimeZone;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * ReminderWriter
@@ -68,7 +70,7 @@ import org.json.JSONObject;
 
 public class ReminderWriter extends DataWriter {
 	
-	public ReminderWriter(TimeZone timeZone) {
+	public ReminderWriter(final TimeZone timeZone) {
 		this.timeZone = timeZone;
 	}
 	

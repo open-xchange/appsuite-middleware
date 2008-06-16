@@ -75,12 +75,12 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 		int counter = 0;
 		try {
 			writeCon = getProvider().getWriteConnection(getContext());
-			for(UpdateBlock update : updates) {
+			for(final UpdateBlock update : updates) {
 				current = update;
 				counter += current.performUpdate(writeCon);
 				current.close();
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new UpdateException(e,current);
 		} finally {
 			if(current != null) {
@@ -122,7 +122,7 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 		protected String sql;
 		protected String statementString = null;
 		
-		public Update(String sql) {
+		public Update(final String sql) {
 			this.sql = sql;
 		}
 		
@@ -153,10 +153,10 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 	protected class UpdateException extends Exception {
 		
 		private static final long serialVersionUID = -3823990951502455901L;
-		private UpdateBlock update;
-		private SQLException sqle;
+		private final UpdateBlock update;
+		private final SQLException sqle;
 
-		public UpdateException(SQLException sqle, UpdateBlock update) {
+		public UpdateException(final SQLException sqle, final UpdateBlock update) {
 			super(sqle);
 			this.sqle = sqle;
 			this.update = update;

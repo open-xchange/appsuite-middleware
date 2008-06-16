@@ -162,10 +162,10 @@ public class OXFolderAccess {
 	 */
 	public final List<FolderObject> getFolderObjects(final int[] folderIDs) throws OXException {
 		final List<FolderObject> retval = new ArrayList<FolderObject>(folderIDs.length);
-		for (int fuid : folderIDs) {
+		for (final int fuid : folderIDs) {
 			try {
 				retval.add(getFolderObject(fuid));
-			} catch (OXFolderNotFoundException e) {
+			} catch (final OXFolderNotFoundException e) {
 				continue;
 			}
 		}
@@ -189,7 +189,7 @@ public class OXFolderAccess {
 		for (int i = 0; i < size; i++) {
 			try {
 				retval.add(getFolderObject(iter.next().intValue()));
-			} catch (OXFolderNotFoundException e) {
+			} catch (final OXFolderNotFoundException e) {
 				continue;
 			}
 		}
@@ -336,9 +336,9 @@ public class OXFolderAccess {
 		try {
 			final FolderObject fo = getFolderObject(folderId);
 			return fo.getEffectiveUserPermission(userId, userConfig, readCon);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		}
 	}
@@ -361,9 +361,9 @@ public class OXFolderAccess {
 						getUserName(userId, ctx), Integer.valueOf(ctx.getContextId()));
 			}
 			return getFolderObject(folderId);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		}
 	}
@@ -473,11 +473,11 @@ public class OXFolderAccess {
 				}
 			}
 			return false;
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
-		} catch (Throwable t) {
+		} catch (final Throwable t) {
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(ctx.getContextId()));
 		}
 	}

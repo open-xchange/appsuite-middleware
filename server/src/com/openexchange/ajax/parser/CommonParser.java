@@ -53,11 +53,12 @@ package com.openexchange.ajax.parser;
 
 import java.util.TimeZone;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.tools.servlet.OXJSONException;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * CommonParser
