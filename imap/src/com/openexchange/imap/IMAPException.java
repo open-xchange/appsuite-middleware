@@ -81,7 +81,7 @@ public final class IMAPException extends MIMEMailException {
 		 */
 		MISSING_PARAMETER(MailException.Code.MISSING_PARAMETER),
 		/**
-		 * A JSON error occured: %1$s
+		 * A JSON error occurred: %1$s
 		 */
 		JSON_ERROR(MailException.Code.JSON_ERROR),
 		/**
