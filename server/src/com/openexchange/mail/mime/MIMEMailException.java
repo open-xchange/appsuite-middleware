@@ -84,7 +84,15 @@ import com.sun.mail.iap.ConnectionException;
 import com.sun.mail.smtp.SMTPSendFailedException;
 
 /**
- * {@link MIMEMailException} - For MIME related errors
+ * {@link MIMEMailException} - For MIME related errors.
+ * <p>
+ * Taken from {@link MailException}:
+ * <p>
+ * The detail number range in subclasses generated in mail bundles is supposed
+ * to start with 2000 and may go up to 2999.
+ * <p>
+ * The detail number range in subclasses generated in transport bundles is
+ * supposed to start with 3000 and may go up to 3999.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -154,7 +162,8 @@ public class MIMEMailException extends MailException {
 		/**
 		 * Session attempts to instantiate a provider that doesn't exist: %1$s
 		 */
-		NO_SUCH_PROVIDER("Session attempts to instantiate a provider that doesn't exist: %1$s", Category.CODE_ERROR, 1007),
+		NO_SUCH_PROVIDER("Session attempts to instantiate a provider that doesn't exist: %1$s", Category.CODE_ERROR,
+				1007),
 		/**
 		 * Invalid email address %1$s
 		 */
@@ -245,7 +254,8 @@ public class MIMEMailException extends MailException {
 		/**
 		 * The IP address of host "%1$s" could not be determined
 		 */
-		UNKNOWN_HOST("The IP address of host \"%1$s\" could not be determined", Category.SUBSYSTEM_OR_SERVICE_DOWN, 1022),
+		UNKNOWN_HOST("The IP address of host \"%1$s\" could not be determined", Category.SUBSYSTEM_OR_SERVICE_DOWN,
+				1022),
 		/**
 		 * Messaging error: %1$s
 		 */
