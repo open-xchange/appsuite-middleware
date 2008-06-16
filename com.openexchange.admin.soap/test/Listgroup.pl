@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-package Listresource;
+package Listgroup;
 use strict;
 use Data::Dumper;
 use base qw(BasicCommandlineOptions);
@@ -9,7 +9,7 @@ use base qw(BasicCommandlineOptions);
 #use SOAP::Lite +trace => 'debug';
 use SOAP::Lite;
 
-my $test = new Listresource();
+my $test = new Listgroup();
 $test->doRequest();
 
 sub new {
