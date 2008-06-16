@@ -725,7 +725,6 @@ public final class OXFolderAdminHelper {
 			/*
 			 * Insert default calendar folder
 			 */
-			final List<Integer> stdFolderIDs = new ArrayList<Integer>(4);
 			final long creatingTime = System.currentTimeMillis();
 			final OCLPermission defaultPerm = new OCLPermission();
 			defaultPerm.setEntity(userId);
@@ -742,7 +741,6 @@ public final class OXFolderAdminHelper {
 			fo.setModule(FolderObject.CALENDAR);
 			int newFolderId = OXFolderSQL.getNextSerial(ctx, writeCon);
 			OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-			stdFolderIDs.add(Integer.valueOf(newFolderId));
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder("User's default CALENDAR folder successfully created").toString());
 			}
@@ -753,7 +751,6 @@ public final class OXFolderAdminHelper {
 			fo.setModule(FolderObject.CONTACT);
 			newFolderId = OXFolderSQL.getNextSerial(ctx, writeCon);
 			OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-			stdFolderIDs.add(Integer.valueOf(newFolderId));
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder("User's default CONTACT folder successfully created").toString());
 			}
@@ -764,7 +761,6 @@ public final class OXFolderAdminHelper {
 			fo.setModule(FolderObject.TASK);
 			newFolderId = OXFolderSQL.getNextSerial(ctx, writeCon);
 			OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-			stdFolderIDs.add(Integer.valueOf(newFolderId));
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder("User's default TASK folder successfully created").toString());
 			}
@@ -780,10 +776,9 @@ public final class OXFolderAdminHelper {
 			fo.setModule(FolderObject.INFOSTORE);
 			newFolderId = OXFolderSQL.getNextSerial(ctx, writeCon);
 			OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-			stdFolderIDs.add(Integer.valueOf(newFolderId));
 			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder("User's default INFOSTORE folder successfully created").toString());
-				LOG.info(new StringBuilder("All user default folders were successfully created").toString());
+				LOG.info("User's default INFOSTORE folder successfully created");
+				LOG.info("All user default folders were successfully created");
 				/*
 				 * TODO: Set standard special folders (projects, ...) located
 				 * beneath system user folder
