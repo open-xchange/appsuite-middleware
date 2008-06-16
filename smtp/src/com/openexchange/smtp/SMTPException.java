@@ -68,27 +68,27 @@ public final class SMTPException extends MIMEMailException {
 	public static enum Code {
 
 		/**
-		 * An I/O error occured: %s
+		 * An I/O error occurred: %1$s
 		 */
 		IO_ERROR(MailException.Code.IO_ERROR),
 		/**
-		 * Unsupported charset-encoding: %s
+		 * Unsupported charset-encoding: %1$s
 		 */
 		ENCODING_ERROR(MailException.Code.ENCODING_ERROR),
 		/**
-		 * The message part with sequence ID %s could not be found in message %s
-		 * in folder %s
+		 * The message part with sequence ID %1$s could not be found in message %2$s
+		 * in folder %3$s
 		 */
-		PART_NOT_FOUND("The message part with sequence ID %s could not be found in message %s in folder %s",
+		PART_NOT_FOUND("The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s",
 				Category.CODE_ERROR, 3003),
 		/**
-		 * Html-2-Text conversion failed: %s
+		 * Html-2-Text conversion failed: %1$s
 		 */
-		HTML2TEXT_CONVERTER_ERROR("Html-2-Text conversion failed: %s", Category.CODE_ERROR, 3004),
+		HTML2TEXT_CONVERTER_ERROR("Html-2-Text conversion failed: %1$s", Category.CODE_ERROR, 3004),
 		/**
-		 * An internal error occured: %s
+		 * An internal error occurred: %1$s
 		 */
-		INTERNAL_ERROR("An internal error occured: %s", Category.CODE_ERROR, 3005),
+		INTERNAL_ERROR("An internal error occurred: %1$s", Category.CODE_ERROR, 3005),
 		/**
 		 * No recipient(s) has been defined for new message
 		 */
@@ -99,10 +99,10 @@ public final class SMTPException extends MIMEMailException {
 		 */
 		COPY_TO_SENT_FOLDER_FAILED(MailException.Code.COPY_TO_SENT_FOLDER_FAILED),
 		/**
-		 * Receipt acknowledgment cannot be sent: missing header %s in message
-		 * %s
+		 * Receipt acknowledgment cannot be sent: missing header %1$s in message
+		 * %2$s
 		 */
-		MISSING_NOTIFICATION_HEADER("Receipt acknowledgment cannot be sent: missing header %s in message %s",
+		MISSING_NOTIFICATION_HEADER("Receipt acknowledgment cannot be sent: missing header %1$s in message %2$s",
 				Category.CODE_ERROR, 3008),
 		/**
 		 * No send address could be found in user configuration

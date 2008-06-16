@@ -101,24 +101,23 @@ public class MIMEMailException extends MailException {
 		/**
 		 * There was an issue in authenticating your E-Mail password. This may
 		 * be because of a recent password change. To continue please logout now
-		 * and then log back in with your most current password. (server=%s |
-		 * user=%s)
+		 * and then log back in with your most current password. (server=%1$s |
+		 * user=%2$s)
 		 */
 		LOGIN_FAILED(
 				"There was an issue in authenticating your E-Mail password. This may be because of a recent password change. "
-						+ "To continue please logout now and then log back in with your most current password. (server=%s | user=%s)",
+						+ "To continue please logout now and then log back in with your most current password. (server=%1$s | user=%2$s)",
 				Category.PERMISSION, 1000),
 		/**
-		 * Wrong or missing login data to access server %s: User: %s | Context:
-		 * %s
+		 * Wrong or missing login data to access server %1$s.
 		 */
-		INVALID_CREDENTIALS("Wrong or missing login data to access server %s.", Category.PERMISSION, 1001),
+		INVALID_CREDENTIALS("Wrong or missing login data to access server %1$s.", Category.PERMISSION, 1001),
 		/**
-		 * Mail folder %s could not be found
+		 * Mail folder %1$s could not be found
 		 */
-		FOLDER_NOT_FOUND("Mail folder could not be found: %s", Category.CODE_ERROR, 1002),
+		FOLDER_NOT_FOUND("Mail folder could not be found: %1$s", Category.CODE_ERROR, 1002),
 		/**
-		 * Folder is closed: %s
+		 * Folder is closed: %1$s
 		 * <p>
 		 * This exception is thrown when a method is invoked on a Messaging
 		 * object and the Folder that owns that object has died due to some
@@ -126,86 +125,86 @@ public class MIMEMailException extends MailException {
 		 * state.
 		 * </p>
 		 */
-		FOLDER_CLOSED("Folder is closed: %s", Category.CODE_ERROR, 1003),
+		FOLDER_CLOSED("Folder is closed: %1$s", Category.CODE_ERROR, 1003),
 		/**
-		 * Illegal write attempt: %s
+		 * Illegal write attempt: %1$s
 		 * <p>
 		 * The exception thrown when a write is attempted on a read-only
 		 * attribute of any Messaging object.
 		 * </p>
 		 */
-		ILLEGAL_WRITE("Illegal write attempt: %s", Category.CODE_ERROR, 1004),
+		ILLEGAL_WRITE("Illegal write attempt: %1$s", Category.CODE_ERROR, 1004),
 		/**
-		 * Invalid method on a expunged message: %s
+		 * Invalid method on a expunged message: %1$s
 		 * <p>
 		 * The exception thrown when an invalid method is invoked on an expunged
 		 * Message. The only valid methods on an expunged Message are
 		 * <code>isExpunged()</code> and <code>getMessageNumber()</code>.
 		 * </p>
 		 */
-		MESSAGE_REMOVED("Invalid method on an expunged message: %s", Category.CODE_ERROR, 1005),
+		MESSAGE_REMOVED("Invalid method on an expunged message: %1$s", Category.CODE_ERROR, 1005),
 		/**
-		 * Method not supported: %s
+		 * Method not supported: %1$s
 		 * <p>
 		 * The exception thrown when a method is not supported by the
 		 * implementation
 		 * </p>
 		 */
-		METHOD_NOT_SUPPORTED("Method not supported: %s", Category.CODE_ERROR, 1006),
+		METHOD_NOT_SUPPORTED("Method not supported: %1$s", Category.CODE_ERROR, 1006),
 		/**
-		 * Session attempts to instantiate a provider that doesn't exist: %s
+		 * Session attempts to instantiate a provider that doesn't exist: %1$s
 		 */
-		NO_SUCH_PROVIDER("Session attempts to instantiate a provider that doesn't exist: %s", Category.CODE_ERROR, 1007),
+		NO_SUCH_PROVIDER("Session attempts to instantiate a provider that doesn't exist: %1$s", Category.CODE_ERROR, 1007),
 		/**
-		 * Invalid email address %s
+		 * Invalid email address %1$s
 		 */
-		INVALID_EMAIL_ADDRESS("Invalid email address %s", Category.USER_INPUT, 1008),
+		INVALID_EMAIL_ADDRESS("Invalid email address %1$s", Category.USER_INPUT, 1008),
 		/**
-		 * Wrong message header: %s
+		 * Wrong message header: %1$s
 		 * <p>
 		 * The exception thrown due to an error in parsing RFC822 or MIME
 		 * headers
 		 * </p>
 		 */
-		PARSE_ERROR("Wrong message header: %s", Category.USER_INPUT, 1009),
+		PARSE_ERROR("Wrong message header: %1$s", Category.USER_INPUT, 1009),
 		/**
-		 * An attempt was made to open a read-only folder with read-write: %s
+		 * An attempt was made to open a read-only folder with read-write: %1$s
 		 */
-		READ_ONLY_FOLDER("An attempt was made to open a read-only folder with read-write: %s", Category.PERMISSION,
+		READ_ONLY_FOLDER("An attempt was made to open a read-only folder with read-write: %1$s", Category.PERMISSION,
 				1010),
 		/**
-		 * Invalid search expression: %s
+		 * Invalid search expression: %1$s
 		 */
-		SEARCH_ERROR("Invalid search expression: %s", Category.CODE_ERROR, 1011),
+		SEARCH_ERROR("Invalid search expression: %1$s", Category.CODE_ERROR, 1011),
 		/**
 		 * Message could not be sent because it is too large
 		 */
 		MESSAGE_TOO_LARGE("Message could not be sent because it is too large", Category.INTERNAL_ERROR, 1012),
 		/**
-		 * Message could not be sent to following recipients: %s
+		 * Message could not be sent to following recipients: %1$s
 		 * <p>
 		 * The exception includes those addresses to which the message could not
 		 * be sent as well as the valid addresses to which the message was sent
 		 * and valid addresses to which the message was not sent.
 		 * </p>
 		 */
-		SEND_FAILED("Message could not be sent to the following recipients: %s", Category.USER_INPUT, 1013),
+		SEND_FAILED("Message could not be sent to the following recipients: %1$s", Category.USER_INPUT, 1013),
 		/**
-		 * Store already closed: %s
+		 * Store already closed: %1$s
 		 */
-		STORE_CLOSED("Store already closed: %s", Category.CODE_ERROR, 1014),
+		STORE_CLOSED("Store already closed: %1$s", Category.CODE_ERROR, 1014),
 		/**
-		 * Could not bind mail connection to local port %s
+		 * Could not bind mail connection to local port %1$s
 		 * <p>
 		 * Signals that an error occurred while attempting to bind a socket to a
 		 * local address and port. Typically, the port is in use, or the
 		 * requested local address could not be assigned.
 		 * </p>
 		 */
-		BIND_ERROR("Could not bind connection to local port %s", Category.SETUP_ERROR, 1015),
+		BIND_ERROR("Could not bind connection to local port %1$s", Category.SETUP_ERROR, 1015),
 		/**
 		 * Connect error: Connection was refused or timed out while attempting
-		 * to connect to remote mail server %s for user %s
+		 * to connect to remote mail server %1$s for user %2$s
 		 * <p>
 		 * An error occurred while attempting to connect to remote mail server.
 		 * Typically, the connection was refused remotely (e.g., no process is
@@ -213,14 +212,14 @@ public class MIMEMailException extends MailException {
 		 * </p>
 		 */
 		CONNECT_ERROR(
-				"Connection was refused or timed out while attempting to connect to remote server %s for user %s",
+				"Connection was refused or timed out while attempting to connect to remote server %1$s for user %2$s",
 				Category.SUBSYSTEM_OR_SERVICE_DOWN, 1016),
 		/**
 		 * Connection was reset
 		 */
 		CONNECTION_RESET("Connection was reset. Please try again.", Category.TRY_AGAIN, 1017),
 		/**
-		 * No route to host: mail server %s cannot be reached
+		 * No route to host: mail server %1$s cannot be reached
 		 * <p>
 		 * Signals that an error occurred while attempting to connect to remote
 		 * mail server. Typically, the remote mail server cannot be reached
@@ -228,29 +227,29 @@ public class MIMEMailException extends MailException {
 		 * down.
 		 * </p>
 		 */
-		NO_ROUTE_TO_HOST("No route to host: server (%s) cannot be reached", Category.SUBSYSTEM_OR_SERVICE_DOWN, 1018),
+		NO_ROUTE_TO_HOST("No route to host: server (%1$s) cannot be reached", Category.SUBSYSTEM_OR_SERVICE_DOWN, 1018),
 		/**
-		 * Port %s was unreachable on remote mail server
+		 * Port %1$s was unreachable on remote mail server
 		 */
-		PORT_UNREACHABLE("Port %s was unreachable on remote server", Category.SUBSYSTEM_OR_SERVICE_DOWN, 1019),
+		PORT_UNREACHABLE("Port %1$s was unreachable on remote server", Category.SUBSYSTEM_OR_SERVICE_DOWN, 1019),
 		/**
 		 * Connection is broken due to a socket exception on remote mail server:
-		 * %s
+		 * %1$s
 		 */
-		BROKEN_CONNECTION("Connection is broken due to a socket exception on remote server: %s",
+		BROKEN_CONNECTION("Connection is broken due to a socket exception on remote server: %1$s",
 				Category.SUBSYSTEM_OR_SERVICE_DOWN, 1020),
 		/**
-		 * A socket error occurred: %s
+		 * A socket error occurred: %1$s
 		 */
-		SOCKET_ERROR("A socket error occurred: %s", Category.CODE_ERROR, 1021),
+		SOCKET_ERROR("A socket error occurred: %1$s", Category.CODE_ERROR, 1021),
 		/**
-		 * The IP address of host "%s" could not be determined
+		 * The IP address of host "%1$s" could not be determined
 		 */
-		UNKNOWN_HOST("The IP address of host \"%s\" could not be determined", Category.SUBSYSTEM_OR_SERVICE_DOWN, 1022),
+		UNKNOWN_HOST("The IP address of host \"%1$s\" could not be determined", Category.SUBSYSTEM_OR_SERVICE_DOWN, 1022),
 		/**
-		 * Messaging error: %s
+		 * Messaging error: %1$s
 		 */
-		MESSAGING_ERROR("Messaging error: %s", Category.CODE_ERROR, 1023),
+		MESSAGING_ERROR("Messaging error: %1$s", Category.CODE_ERROR, 1023),
 		/**
 		 * The quota on mail server is exceeded
 		 */
