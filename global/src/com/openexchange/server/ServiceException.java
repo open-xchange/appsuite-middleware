@@ -68,10 +68,10 @@ public final class ServiceException extends AbstractOXException {
 	public static enum Code {
 
 		/**
-		 * The required service %s is temporary not available. Please try again
+		 * The required service %1$s is temporary not available. Please try again
 		 * later.
 		 */
-		SERVICE_UNAVAILABLE("The required service %s is temporary not available. Please try again later.",
+		SERVICE_UNAVAILABLE("The required service %1$s is temporary not available. Please try again later.",
 				Category.TRY_AGAIN, 1),
 		/**
 		 * An I/O error occurred
