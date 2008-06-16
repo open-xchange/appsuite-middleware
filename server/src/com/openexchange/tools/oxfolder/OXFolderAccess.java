@@ -82,7 +82,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
- * OXFolderQuery
+ * {@link OXFolderAccess} - Provides access to OX folders
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
