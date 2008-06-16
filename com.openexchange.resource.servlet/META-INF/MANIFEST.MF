@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange Resource Servlet
+Bundle-Name: Open-Xchange Resource Manage Request
 Bundle-SymbolicName: com.openexchange.resource.managerequest
 Bundle-Version: 6.5.0
 Bundle-Vendor: Open-Xchange Inc.
