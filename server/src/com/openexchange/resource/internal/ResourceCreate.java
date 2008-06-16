@@ -104,8 +104,9 @@ public final class ResourceCreate {
 	/**
 	 * Performs the insert.
 	 * <ol>
-	 * <li>At first all necessary checks are performed: data completeness, data
-	 * validation, permission, and check for duplicate resources.</li>
+	 * <li>At first permission is checked</li>
+	 * <li>All necessary checks are performed: data completeness, data
+	 * validation, and check for duplicate resources.</li>
 	 * <li>Then the transaction-bounded insert into storage takes place</li>
 	 * <li>At last, the insert is propagated to system (cache invalidation,
 	 * etc.)</li>
@@ -116,9 +117,23 @@ public final class ResourceCreate {
 	 *             If insert fails
 	 */
 	void perform() throws ResourceException {
+		allow();
 		check();
 		insert();
 		propagate();
+	}
+
+	/**
+	 * Check permission: By now caller must be context's admin
+	 * 
+	 * @throws ResourceException
+	 *             If permission is not granted
+	 */
+	private void allow() throws ResourceException {
+		// TODO: Should the security service be used instead?
+		if (ctx.getMailadmin() != user.getId()) {
+			throw new ResourceException(ResourceException.Code.PERMISSION, Integer.valueOf(ctx.getContextId()));
+		}
 	}
 
 	/**
@@ -145,12 +160,6 @@ public final class ResourceCreate {
 		}
 		if (!ResourceTools.validateResourceEmail(resource.getMail())) {
 			throw new ResourceException(ResourceException.Code.INVALID_RESOURCE_MAIL, resource.getMail());
-		}
-		/*
-		 * Check permission: By now caller must be context's admin
-		 */
-		if (ctx.getMailadmin() != user.getId()) {
-			throw new ResourceException(ResourceException.Code.PERMISSION, Integer.valueOf(ctx.getContextId()));
 		}
 		/*
 		 * Check if another resource with the same textual identifier or email
