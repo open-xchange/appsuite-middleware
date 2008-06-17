@@ -142,7 +142,21 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 
 	/**
 	 * Gets the proper instance of {@link MailAccess} parameterized with given
-	 * session
+	 * session.
+	 * <p>
+	 * When starting to work with obtained {@link MailAccess mail access} at
+	 * first its {@link #connect()} method is supposed to be invoked. On
+	 * finished work the final {@link #close(boolean)} must be called:
+	 * 
+	 * <pre>
+	 * final MailAccess mailAccess = MailAccess.getInstance(session);
+	 * mailAccess.connect();
+	 * try {
+	 * 	// Do something
+	 * } finally {
+	 * 	mailAccess.close(putToCache)
+	 * }
+	 * </pre>
 	 * 
 	 * @param session
 	 *            The session
