@@ -130,7 +130,7 @@ public final class DatabasePasswordChange extends PasswordChangeService {
 	private void update(final Connection writeCon, final String encodedPassword, final int userId, final int cid)
 			throws SQLException {
 		PreparedStatement stmt = null;
-		ResultSet result = null;
+		final ResultSet result = null;
 		try {
 			stmt = writeCon.prepareStatement(SQL_UPDATE);
 			int pos = 1;

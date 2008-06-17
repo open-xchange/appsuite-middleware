@@ -49,14 +49,14 @@
 
 package com.openexchange.passwordchange.database.osgi;
 
+import static com.openexchange.passwordchange.database.services.DPWServiceRegistry.getServiceRegistry;
+
 import org.osgi.framework.ServiceRegistration;
 
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordchange.database.impl.DatabasePasswordChange;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.user.UserService;
-
-import static com.openexchange.passwordchange.database.services.DPWServiceRegistry.getServiceRegistry;
 
 /**
  * {@link DatabasePasswordChangeActivator}
