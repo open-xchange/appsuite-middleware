@@ -123,20 +123,22 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
      * @see com.openexchange.groupware.update.UpdateTask#perform(com.openexchange.groupware.update.Schema,
      *      int)
      */
-    @OXThrowsMultiple(category = { Category.CODE_ERROR },
-            desc = { "" },
-            exceptionId = { 1 },
-            msg = { "An SQL error occurred while performing task ContactsFieldSizeUpdateTask: %1$s." }
-    )
+
 
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
     	correctTable("prg_contacts", contextId);
     	correctTable("del_contacts", contextId);    
     }
     
+    
+    @OXThrowsMultiple(category = { Category.CODE_ERROR },
+            desc = { "" },
+            exceptionId = { 1 },
+            msg = { "An SQL error occurred while performing task ContactsFieldSizeUpdateTask: %1$s." }
+    )
+
     public void correctTable(final String sqltable, final int contextId) throws AbstractOXException {
-        
-    	
+
     	final HashMap<String,Integer> columnRefer = new HashMap<String, Integer>();  	
     	columnRefer.put("field01", 320);
     	columnRefer.put("field02", 128);

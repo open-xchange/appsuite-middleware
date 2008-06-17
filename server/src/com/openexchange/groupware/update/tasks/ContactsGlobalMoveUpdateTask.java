@@ -124,11 +124,6 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
      * @see com.openexchange.groupware.update.UpdateTask#perform(com.openexchange.groupware.update.Schema,
      *      int)
      */
-    @OXThrowsMultiple(category = { Category.CODE_ERROR },
-            desc = { "" },
-            exceptionId = { 1 },
-            msg = { "An SQL error occurred while performing task ContactsFieldSizeUpdateTask: %1$s." }
-    )
 
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
     	correctTable("prg_contacts", contextId);   
@@ -136,9 +131,15 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
     
     private static final String SQL_QUERY = "SELECT created_from,cid,intfield01 FROM prg_contacts WHERE fid = "+FolderObject.SYSTEM_LDAP_FOLDER_ID+" AND userid is NULL";
 
+
+    @OXThrowsMultiple(category = { Category.CODE_ERROR },
+            desc = { "" },
+            exceptionId = { 1 },
+            msg = { "An SQL error occurred while performing task ContactsFieldSizeUpdateTask: %1$s." }
+    )    
     
     public void correctTable(final String sqltable, final int contextId) throws AbstractOXException {
-        	
+
     	if (LOG.isInfoEnabled()) {
             LOG.info(STR_INFO);
         }
