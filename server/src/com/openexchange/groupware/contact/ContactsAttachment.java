@@ -103,7 +103,7 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
 			category=Category.USER_INPUT,
 			desc="",
 			exceptionId=0,
-			msg= "Number of  documents attached to this contact is below zero. You can not remove any more attachments."
+			msg= "Number of documents attached to this contact is below zero. You can not remove any more attachments."
 	)
 	public long detached(final AttachmentEvent e) throws OXException {
 		try{
