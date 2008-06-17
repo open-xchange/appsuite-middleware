@@ -270,7 +270,7 @@ public final class SessionHandler {
 			LOG.debug("changeSessionPassword <" + sessionid + '>');
 		}
 
-		// final Date timestamp = new Date();
+		// TODO: Check permission via security service
 
 		for (int a = 0; a < numberOfSessionContainers; a++) {
 			final Map<String, SessionControl> sessionContainer = sessionList.get(a);
