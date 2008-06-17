@@ -192,7 +192,12 @@ public class UserException extends AbstractOXException {
          * Problem putting an object into the cache.
          */
         CACHE_PROBLEM("Problem putting/removing an object into/from the cache.",
-            Category.CODE_ERROR, Detail.ERROR, 12);
+            Category.CODE_ERROR, Detail.ERROR, 12),
+        /**
+         * No permission to modify resources in context %1$s
+         */
+         PERMISSION("No permission to modify resources in context %1$s",
+            Category.PERMISSION, Detail.ERROR, 13);
 
         /**
          * Message of the exception.
