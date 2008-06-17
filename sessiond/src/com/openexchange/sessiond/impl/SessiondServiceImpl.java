@@ -70,6 +70,10 @@ public class SessiondServiceImpl implements SessiondService {
 		return SessionHandler.addSession(userId, loginName, password, context, clientHost);
 	}
 
+	public void changeSessionPassword(final String sessionId, final String newPassword) throws SessiondException {
+		SessionHandler.changeSessionPassword(sessionId, newPassword);
+	}
+
 	public boolean refreshSession(final String sessionId) {
 		return SessionHandler.refreshSession(sessionId);
 	}
@@ -79,7 +83,7 @@ public class SessiondServiceImpl implements SessiondService {
 	}
 
 	public Session getSession(final String sessionId) {
-		final SessionControlObject sessionControlObject = SessionHandler.getSession(sessionId, true);
+		final SessionControl sessionControlObject = SessionHandler.getSession(sessionId, true);
 		if (sessionControlObject != null) {
 			return sessionControlObject.getSession();
 		}
@@ -87,7 +91,7 @@ public class SessiondServiceImpl implements SessiondService {
 	}
 
 	public Session getCachedSession(final String secret, final String localIP) {
-		final SessionControlObject sessionControlObject = SessionHandler.getCachedSession(secret, localIP);
+		final SessionControl sessionControlObject = SessionHandler.getCachedSession(secret, localIP);
 		if (sessionControlObject != null) {
 			return sessionControlObject.getSession();
 		}

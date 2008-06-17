@@ -66,7 +66,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.sessiond.cache.SessionCacheConfiguration;
-import com.openexchange.sessiond.impl.SessionControlObject;
+import com.openexchange.sessiond.impl.SessionControl;
 import com.openexchange.sessiond.impl.SessionHandler;
 import com.openexchange.sessiond.impl.SessionImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
@@ -189,9 +189,9 @@ public final class SessiondActivator extends DeferredActivator {
 			/*
 			 * Put remaining sessions into cache for remote distribution
 			 */
-			final List<SessionControlObject> sessions = SessionHandler.getSessions();
+			final List<SessionControl> sessions = SessionHandler.getSessions();
 			try {
-				for (final SessionControlObject sessionControlObject : sessions) {
+				for (final SessionControl sessionControlObject : sessions) {
 					if (null != sessionControlObject) {
 						SessionCache.getInstance().putCachedSession(
 								((SessionImpl) (sessionControlObject.getSession())).createCachedSession());

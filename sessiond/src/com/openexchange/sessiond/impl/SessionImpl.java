@@ -74,7 +74,7 @@ public final class SessionImpl implements Session {
 
 	private final String loginName;
 
-	private final String password;
+	private String password;
 
 	private final int contextId;
 
@@ -264,4 +264,13 @@ public final class SessionImpl implements Session {
 		return password;
 	}
 
+	/**
+	 * Sets the password
+	 * 
+	 * @param password
+	 *            The password to set
+	 */
+	public void setPassword(final String password) {
+		this.password = password;
+	}
 }

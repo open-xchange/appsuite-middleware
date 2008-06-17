@@ -49,50 +49,82 @@
 
 package com.openexchange.sessiond.impl;
 
-import java.util.Date;
-
 import com.openexchange.session.Session;
 
 /**
- * {@link SessionControlObject} - The session control object
+ * {@link SessionControl} - Holds a {@link Session} instance and remembers
+ * life-cycle timestamps such as last-accessed, creation-time, etc.
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SessionControlObject {
+public class SessionControl {
 
-	private final Date creationTime;
+	private final long creationTime;
 
-	private final Date timestamp;
+	private long timestamp;
 
 	private final Session session;
 
 	private final int lifetime;
 
-	public SessionControlObject(final Session session, final int lifetime) {
+	/**
+	 * Initializes a new {@link SessionControl}
+	 * 
+	 * @param session
+	 *            The stored session
+	 * @param lifetime
+	 *            The session's life time
+	 */
+	public SessionControl(final Session session, final int lifetime) {
 		this.session = session;
 		this.lifetime = lifetime;
 
-		creationTime = new Date();
-		timestamp = new Date();
+		final long now = System.currentTimeMillis();
+		creationTime = now;
+		timestamp = now;
 	}
 
+	/**
+	 * Gets the stored session
+	 * 
+	 * @return The stored session
+	 */
 	public Session getSession() {
 		return session;
 	}
 
-	public Date getCreationTime() {
+	/**
+	 * Gets the creation-time timestamp
+	 * 
+	 * @return The creation-time timestamp
+	 */
+	public long getCreationTime() {
 		return creationTime;
 	}
 
-	public Date getTimestamp() {
+	/**
+	 * Gets the last-accessed timestamp
+	 * 
+	 * @return The last-accessed timestamp
+	 */
+	public long getTimestamp() {
 		return timestamp;
 	}
 
+	/**
+	 * Gets the session's life time in milliseconds
+	 * 
+	 * @return The session's life time in milliseconds
+	 */
 	public int getLifetime() {
 		return lifetime;
 	}
 
+	/**
+	 * Updates session's last-accessed timestamp
+	 */
 	public void updateTimestamp() {
-		timestamp.setTime(System.currentTimeMillis());
+		timestamp = System.currentTimeMillis();
 	}
 }
