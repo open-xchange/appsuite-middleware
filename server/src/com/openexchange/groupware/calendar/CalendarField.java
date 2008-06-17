@@ -93,7 +93,14 @@ public enum CalendarField {
 	OCCURRENCE ( AppointmentObject.RECURRING_OCCURRENCE , "Occurrence" ),
 	RECURRENCEDATEPOSITION ( AppointmentObject.RECURRENCE_DATE_POSITION , "RecurrenceDatePosition" ),
 	RECURRENCEPOSITION ( AppointmentObject.RECURRENCE_POSITION , "RecurrencePosition" ),
-	TIMEZONE ( AppointmentObject.TIMEZONE , "Timezone" );
+	TIMEZONE ( AppointmentObject.TIMEZONE , "Timezone" ),
+	CHANGEEXCEPTION ( AppointmentObject.CHANGE_EXCEPTIONS, "ChangeExceptions" ),
+	DELETEEXCEPTION ( AppointmentObject.DELETE_EXCEPTIONS, "DeleteExceptions" ),
+	PARTICIPANTS ( AppointmentObject.PARTICIPANTS, "Participants" ),
+	USERS ( AppointmentObject.USERS, "Users" ),
+	RECURRINGOCCURRENCE ( AppointmentObject.NOTIFICATION, "Notification"),
+	RECURRENCECALCULATOR ( AppointmentObject.RECURRENCE_CALCULATOR, "RecurrenceCalculator"),
+	ALARM ( AppointmentObject.ALARM, "Alarm");
 	
 	
 	private int appointmentObjectID; //this is the ID of AppointmentObject

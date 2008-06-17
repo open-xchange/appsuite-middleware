@@ -1,3 +1,8 @@
+* 2008-06-17 - thorben.betten@open-xchange.com
+
+ - Bugfix #10551: Extended calendar fields by missing constants used in
+   error messages in importer-exporter module
+
 * 2008-06-17 - ben.pahne@open-xchange.com
 
  - Bugfix #11274: Some contacts were not deletable 

@@ -76,7 +76,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.AbstractImporter;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
-import com.openexchange.groupware.importexport.Importer;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
@@ -86,6 +85,7 @@ import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -142,7 +142,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (changes to new interface, bugfixes, maintenance)
  */
-public class ICalImporter extends AbstractImporter implements Importer {
+public class ICalImporter extends AbstractImporter {
 	
 	private static final Log LOG = LogFactory.getLog(ICalImporter.class);
 	
@@ -152,9 +152,10 @@ public class ICalImporter extends AbstractImporter implements Importer {
 		if(!format.equals(Format.ICAL)){
 			return false;
 		}
-		final Iterator iterator = folders.iterator();
+		final OXFolderAccess folderAccess = new OXFolderAccess(sessObj.getContext());
+		final Iterator<String> iterator = folders.iterator();
 		while (iterator.hasNext()) {
-			final String folder = iterator.next().toString();
+			final String folder = iterator.next();
 			
 			int folderId = 0;
 			try {
@@ -165,7 +166,7 @@ public class ICalImporter extends AbstractImporter implements Importer {
 
 			FolderObject fo;
 			try {
-				fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());
+				fo = folderAccess.getFolderObject(folderId);
 			} catch (final OXException e) {
 				return false;
 			}
