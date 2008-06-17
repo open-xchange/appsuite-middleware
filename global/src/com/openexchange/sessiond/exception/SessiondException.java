@@ -119,7 +119,11 @@ public class SessiondException extends AbstractOXException {
     	/**
     	 * Unknown event topic %s
     	 */
-    	UNKNOWN_EVENT_TOPIC("Unknown event topic %s", 5, AbstractOXException.Category.CODE_ERROR);
+    	UNKNOWN_EVENT_TOPIC("Unknown event topic %s", 5, AbstractOXException.Category.CODE_ERROR),
+    	/**
+    	 * Password could not be changed
+    	 */
+    	PASSWORD_UPDATE_FAILED("Password could not be changed", 6, AbstractOXException.Category.CODE_ERROR);
 
 		/**
 		 * Message of the exception.
