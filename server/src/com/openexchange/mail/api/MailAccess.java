@@ -191,7 +191,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 					LOCK_CON_CONDITION.await();
 				}
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("Woke up & mail connection(s) may again be established");
+					LOG.debug("Woke up & mail access may again be established");
 				}
 				/*
 				 * Try to fetch from cache again
