@@ -1,6 +1,5 @@
-open-xchange-cache (6.5.0-1) unstable; urgency=low
+open-xchange-security (6.5.0-1) unstable; urgency=low
 
-  * Initial version
+  * Initial release.
 
- -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 29 Feb 2008 15:45:30 +0100
-
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 17 Jun 2008 09:48:15 +0200
