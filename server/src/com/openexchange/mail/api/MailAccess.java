@@ -205,11 +205,11 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 			} catch (final InterruptedException e) {
 				LOG.error(e.getMessage(), e);
 				throw new MailException(MailException.Code.INTERRUPT_ERROR, e, new Object[0]);
-			} catch (final CacheException e1) {
+			} catch (final CacheException e) {
 				/*
 				 * Fetching from cache failed
 				 */
-				LOG.error(e1.getLocalizedMessage(), e1);
+				LOG.error(e.getLocalizedMessage(), e);
 			} finally {
 				LOCK_CON.unlock();
 			}
