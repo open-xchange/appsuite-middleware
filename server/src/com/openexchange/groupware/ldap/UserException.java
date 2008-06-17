@@ -197,7 +197,12 @@ public class UserException extends AbstractOXException {
          * No permission to modify resources in context %1$s
          */
          PERMISSION("No permission to modify resources in context %1$s",
-            Category.PERMISSION, Detail.ERROR, 13);
+            Category.PERMISSION, Detail.ERROR, 13),
+         /**
+          * Missing or unknown password mechanism %1$s
+          */
+         MISSING_PASSWORD_MECH("Missing or unknown password mechanism %1$s",
+        	Category.CODE_ERROR, Detail.ERROR, 14);
 
         /**
          * Message of the exception.

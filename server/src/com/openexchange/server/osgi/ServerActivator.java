@@ -80,6 +80,7 @@ import com.openexchange.mail.osgi.MailProviderServiceTracker;
 import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.management.ManagementService;
+import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.security.BundleAccessSecurityService;
@@ -274,6 +275,9 @@ public final class ServerActivator extends DeferredActivator {
 			// Search for extensions of the preferences tree interface
 			serviceTrackerList.add(new ServiceTracker(context, PreferencesItemService.class.getName(),
 					new PreferencesCustomizer(context)));
+			// Search for UserPasswordChange service
+			serviceTrackerList.add(new ServiceTracker(context, PasswordChangeService.class.getName(),
+					new PasswordChangeCustomizer(context)));
 			// Start up server the usual way
 			starter.start();
 		}
