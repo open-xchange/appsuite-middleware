@@ -92,7 +92,7 @@ public class ContactMySql implements ContactSql {
 
 	private static final Log LOG = LogFactory.getLog(ContactMySql.class);
 
-	private String select = "SELECT co.intfield01" + ",co.sid," + "co.timestampfield01," + "co.field03,"
+	private String select = "SELECT co.intfield01" + ",co.cid," + "co.timestampfield01," + "co.field03,"
 			+ "co.field04," + "co.field06," + "co.field07," + "co.field09," + "co.field10," + "co.intfield03,"
 			+ "co.field79 FROM prg_contacts AS co ";
 
@@ -194,6 +194,7 @@ public class ContactMySql implements ContactSql {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(new StringBuilder("ContactSQL Query: ").append(sb.toString()));
 		}
+		//System.out.println("-> "+sb.toString());
 		final PreparedStatement ps = con.prepareStatement(sb.toString());
 		final int size = injectors.size();
 		for (int i = 0; i < size; i++) {
@@ -376,7 +377,7 @@ public class ContactMySql implements ContactSql {
 
 			/*********************** * search ranges * ***********************/
 
-			final String language = UserStorage.getStorageUser(so.getUserId(), ctx).getLocale().getLanguage();
+			final String language = UserStorage.getStorageUser(user, ctx).getLocale().getLanguage();
 
 			if (cso.getAnniversaryRange() != null && cso.getAnniversaryRange().length > 0) {
 				final Date[] d = cso.getAnniversaryRange();

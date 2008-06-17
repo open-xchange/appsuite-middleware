@@ -836,7 +836,7 @@ public class Contacts implements DeleteListener {
 				csql.setSearchHabit(" AND ");
 
 				try {
-					stmt = cs.getSqlStatement(readcon);
+					stmt = csql.getSqlStatement(readcon);
 					rs = ((PreparedStatement) stmt).executeQuery();
 					if (rs.next()) {
 						throw EXCEPTIONS.create(67, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co
