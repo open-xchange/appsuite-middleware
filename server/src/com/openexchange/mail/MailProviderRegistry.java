@@ -106,7 +106,7 @@ public final class MailProviderRegistry {
 			return provider;
 		}
 		provider = getMailProvider(protocol);
-		if (null == provider) {
+		if (null == provider || !provider.supportsProtocol(protocol)) {
 			throw new MailException(MailException.Code.UNKNOWN_PROTOCOL, MailConfig.getMailServerURL(session));
 		}
 		session.setParameter(MailSessionParameterNames.PARAM_MAIL_PROVIDER, provider);
