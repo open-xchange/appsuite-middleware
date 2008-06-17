@@ -118,7 +118,7 @@ public final class Protocol implements Component {
 		}
 		this.name = name.toLowerCase(Locale.ENGLISH);
 		aliases = null;
-		hashCode = 31 * 1 + ((name == null) ? 0 : name.hashCode());
+		hashCode = 31 * 1 + (name.hashCode());
 	}
 
 	/**
@@ -142,7 +142,7 @@ public final class Protocol implements Component {
 		} else {
 			aliases = new String[] { secureName.toLowerCase(Locale.ENGLISH) };
 		}
-		hashCode = 31 * 1 + ((name == null) ? 0 : name.hashCode());
+		hashCode = 31 * 1 + (name.hashCode());
 	}
 
 	/**
@@ -170,7 +170,7 @@ public final class Protocol implements Component {
 				this.aliases[i] = this.aliases[i].toLowerCase(Locale.ENGLISH);
 			}
 		}
-		hashCode = 31 * 1 + ((name == null) ? 0 : name.hashCode());
+		hashCode = 31 * 1 + (name.hashCode());
 	}
 
 	@Override
