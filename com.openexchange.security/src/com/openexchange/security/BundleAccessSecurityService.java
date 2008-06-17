@@ -61,32 +61,34 @@ import com.openexchange.security.permission.BundleAccessPermissionCollection;
 public interface BundleAccessSecurityService {
 
 	/**
-	 * Checks the specified permissions against given bundle symbolic name.
+	 * Checks if the specified desired path is covered by given paths.
 	 * <p>
-	 * This method is intended to create the appropriate instances of
+	 * This method is supposed to create the appropriate instances of
 	 * {@link BundleAccessPermissionCollection} and
 	 * {@link BundleAccessPermission} from specified arguments to delegate to
 	 * {@link #checkPermission(BundleAccessPermissionCollection, BundleAccessPermission)}.
 	 * 
-	 * @param names
-	 *            The symbolic names of permitted bundles
-	 * @param bundleSymbolicName
-	 *            The bundle symbolic name
+	 * @param paths
+	 *            The paths of permitted bundles such as "a.b.*", or "*".
+	 * @param desiredPath
+	 *            The desired path such as "a.b.c"
 	 * @exception BundleAccessException
 	 *                If bundle access is not permitted
 	 */
-	public void checkPermission(String[] names, String bundleSymbolicName) throws BundleAccessException;
+	public void checkPermission(String[] paths, String desiredPath) throws BundleAccessException;
 
 	/**
-	 * Checks if the specified permissions is implied by given user permissions
+	 * Checks if the specified permission is implied by given permissions
 	 * 
-	 * @param userPermissions
-	 *            A collection of user permissions
-	 * @param permission
+	 * @param permissions
+	 *            A collection of permissions
+	 * @param desiredPermission
 	 *            The desired permission
 	 * @throws BundleAccessException
 	 *             If bundle access is not permitted
+	 * @throws NullPointerException
+	 *             If permissions is <code>null</code>
 	 */
-	public void checkPermission(BundleAccessPermissionCollection userPermissions, BundleAccessPermission permission)
+	public void checkPermission(BundleAccessPermissionCollection permissions, BundleAccessPermission desiredPermission)
 			throws BundleAccessException;
 }

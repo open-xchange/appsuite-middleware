@@ -70,26 +70,29 @@ public final class BundleAccessSecurityServiceImpl implements BundleAccessSecuri
 		super();
 	}
 
-	public void checkPermission(final String[] names, final String bundleSymbolicName) throws BundleAccessException {
-		if (bundleSymbolicName == null || bundleSymbolicName.length() == 0) {
-			throw new IllegalArgumentException("bundleSymbolicName is null");
+	public void checkPermission(final String[] paths, final String desiredPath) throws BundleAccessException {
+		if (desiredPath == null || desiredPath.length() == 0) {
+			throw new IllegalArgumentException("desiredPath is null");
 		}
-		if (names == null) {
-			throw new BundleAccessException(BundleAccessException.Code.ACCESS_DENIED, bundleSymbolicName);
+		if (paths == null) {
+			/*
+			 * Obviously desired path is not covered by paths
+			 */
+			throw new BundleAccessException(BundleAccessException.Code.ACCESS_DENIED, desiredPath);
 		}
-		final BundleAccessPermission p = new BundleAccessPermission(bundleSymbolicName);
+		final BundleAccessPermission p = new BundleAccessPermission(desiredPath);
 		final BundleAccessPermissionCollection collection = (BundleAccessPermissionCollection) p
 				.newPermissionCollection();
-		for (final String name : names) {
-			collection.add(new BundleAccessPermission(name));
+		for (final String path : paths) {
+			collection.add(new BundleAccessPermission(path));
 		}
 		checkPermission(collection, p);
 	}
 
-	public void checkPermission(final BundleAccessPermissionCollection userPermissions,
-			final BundleAccessPermission permission) throws BundleAccessException {
-		if (!userPermissions.implies(permission)) {
-			throw new BundleAccessException(BundleAccessException.Code.ACCESS_DENIED, permission.getName());
+	public void checkPermission(final BundleAccessPermissionCollection permissions,
+			final BundleAccessPermission desiredPermission) throws BundleAccessException {
+		if (!permissions.implies(desiredPermission)) {
+			throw new BundleAccessException(BundleAccessException.Code.ACCESS_DENIED, desiredPermission.getName());
 		}
 	}
 
