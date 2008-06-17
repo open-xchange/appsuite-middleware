@@ -106,6 +106,14 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
 	private static final int DELEGATE_TASKS = 1 << 17;
 
+	private static final int EDIT_GROUP = 1 << 18;
+
+	private static final int EDIT_RESOURCE = 1 << 19;
+
+	private static final int EDIT_PASSWORD = 1 << 20;
+
+	private static final int COLLECT_EMAIL_ADDRESSES = 1 << 21;
+
 	/*
 	 * Field members
 	 */
@@ -720,6 +728,98 @@ public final class UserConfiguration implements Serializable, Cloneable {
 	 */
 	public void setDelegateTasks(final boolean enableDelegateTasks) {
 		setPermission(enableDelegateTasks, DELEGATE_TASKS);
+	}
+
+	/**
+	 * Checks if this user configuration indicates to collect email addresses
+	 * 
+	 * @return <code>true</code> if this user configuration indicates to collect
+	 *         email addresses; otherwise <code>false</code>
+	 */
+	public boolean isCollectEmailAddresses() {
+		return hasPermission(COLLECT_EMAIL_ADDRESSES);
+	}
+
+	/**
+	 * Sets if this user configuration indicates to collect email addresses
+	 * 
+	 * @param collectEmailAddresses
+	 *            <code>true</code> if this user configuration indicates to
+	 *            collect email addresses; otherwise <code>false</code>
+	 */
+	public void setCollectEmailAddresses(final boolean collectEmailAddresses) {
+		setPermission(collectEmailAddresses, COLLECT_EMAIL_ADDRESSES);
+	}
+
+	/**
+	 * Checks if this user configuration indicates that groups are allowed to be
+	 * edited
+	 * 
+	 * @return <code>true</code> if this user configuration indicates that
+	 *         groups are allowed to be edited; otherwise <code>false</code>
+	 */
+	public boolean isEditGroup() {
+		return hasPermission(EDIT_GROUP);
+	}
+
+	/**
+	 * Sets if this user configuration indicates that groups are allowed to be
+	 * edited
+	 * 
+	 * @param editGroup
+	 *            <code>true</code> if this user configuration indicates that
+	 *            groups are allowed to be edited; otherwise <code>false</code>
+	 */
+	public void setEditGroup(final boolean editGroup) {
+		setPermission(editGroup, EDIT_GROUP);
+	}
+
+	/**
+	 * Checks if this user configuration indicates that resources are allowed to
+	 * be edited
+	 * 
+	 * @return <code>true</code> if this user configuration indicates that
+	 *         resources are allowed to be edited; otherwise <code>false</code>
+	 */
+	public boolean isEditResource() {
+		return hasPermission(EDIT_RESOURCE);
+	}
+
+	/**
+	 * Sets if this user configuration indicates that resources are allowed to
+	 * be edited
+	 * 
+	 * @param editResource
+	 *            <code>true</code> if this user configuration indicates that
+	 *            resources are allowed to be edited; otherwise
+	 *            <code>false</code>
+	 */
+	public void setEditResource(final boolean editResource) {
+		setPermission(editResource, EDIT_RESOURCE);
+	}
+
+	/**
+	 * Checks if this user configuration indicates that user password is allowed
+	 * to be edited
+	 * 
+	 * @return <code>true</code> if this user configuration indicates that user
+	 *         password is allowed to be edited; otherwise <code>false</code>
+	 */
+	public boolean isEditPassword() {
+		return hasPermission(EDIT_PASSWORD);
+	}
+
+	/**
+	 * Sets if this user configuration indicates that user password is allowed
+	 * to be edited
+	 * 
+	 * @param editPassword
+	 *            <code>true</code> if this user configuration indicates that
+	 *            user password is allowed to be edited; otherwise
+	 *            <code>false</code>
+	 */
+	public void setEditPassword(final boolean editPassword) {
+		setPermission(editPassword, EDIT_PASSWORD);
 	}
 
 	private boolean hasPermission(final int permission) {

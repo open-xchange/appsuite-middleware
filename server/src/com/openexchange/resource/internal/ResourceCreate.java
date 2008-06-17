@@ -60,6 +60,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.storage.ResourceStorage;
@@ -131,6 +133,30 @@ public final class ResourceCreate {
 	}
 
 	/**
+	 * Check permission
+	 * 
+	 * @throws ResourceException
+	 *             If permission is not granted
+	 */
+	private void allow() throws ResourceException {
+		/*
+		 * At the moment security service is not used for timing reasons but is
+		 * ought to be used later on
+		 */
+		try {
+			if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditResource()) {
+				throw new ResourceException(ResourceException.Code.PERMISSION, Integer.valueOf(ctx.getContextId()));
+			}
+		} catch (final UserConfigurationException e1) {
+			throw new ResourceException(e1);
+		}
+		/*
+		 * TODO: Remove statements above and replace with commented call below
+		 */
+		// checkBySecurityService();
+	}
+
+	/**
 	 * Check permission: Invoke
 	 * {@link BundleAccessSecurityService#checkPermission(String[], String)
 	 * checkPermission()} on {@link BundleAccessSecurityService security
@@ -139,7 +165,7 @@ public final class ResourceCreate {
 	 * @throws ResourceException
 	 *             If permission is not granted
 	 */
-	private void allow() throws ResourceException {
+	private void checkBySecurityService() throws ResourceException {
 		final BundleAccessSecurityService securityService = ServerServiceRegistry.getInstance().getService(
 				BundleAccessSecurityService.class);
 		if (securityService == null) {
