@@ -93,8 +93,20 @@ public abstract class MailTransport {
 	}
 
 	/**
-	 * Gets the proper instance of {@link MailTransport} parameterized with
-	 * given session
+	 * Gets the proper instance of {@link MailTransport mail transport}
+	 * parameterized with given session.
+	 * <p>
+	 * Note: Don't forget to call final {@link #close()} on obtained
+	 * {@link MailTransport mail transport}:
+	 * 
+	 * <pre>
+	 * final MailTransport mailTransport = MailTransport.getInstance(session);
+	 * try {
+	 * 	// Do something
+	 * } finally {
+	 * 	mailTransport.close();
+	 * }
+	 * </pre>
 	 * 
 	 * @param session
 	 *            The session
@@ -125,7 +137,8 @@ public abstract class MailTransport {
 	 * @throws MailException
 	 *             If transport fails
 	 */
-	public MailMessage sendMailMessage(final ComposedMailMessage transportMail, final ComposeType sendType) throws MailException {
+	public MailMessage sendMailMessage(final ComposedMailMessage transportMail, final ComposeType sendType)
+			throws MailException {
 		return sendMailMessage(transportMail, sendType, null);
 	}
 
