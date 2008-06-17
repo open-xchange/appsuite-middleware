@@ -2701,11 +2701,12 @@ public class Contacts implements DeleteListener {
 					}
 					if (contactFolder.getType() == FolderObject.PRIVATE) {
 						delete = true;
-					}
+					}				
+
 				} catch (final Exception oe) {
 					if (LOG.isWarnEnabled()) {
 						LOG
-								.warn("WARNING: During the delete process 'delete all contacts from one user', a contacts was found who has no folder."
+								.warn("WARNING: During the delete process 'delete all contacts from one user', a contact was found who has no folder."
 										+ "This contact will be modified and can be found in the administrator address book."
 										+ "Context "
 										+ so.getContextId()
@@ -2728,7 +2729,7 @@ public class Contacts implements DeleteListener {
 						final FolderObject xx = oxfs.getDefaultFolder(mailadmin, FolderObject.CONTACT);
 
 						final int admin_folder = xx.getObjectID();
-						cs.iFgiveUserContacToAdmin(del, oid, so, admin_folder, ct);
+						cs.iFgiveUserContacToAdmin(del, oid, admin_folder, ct);
 					} catch (final Exception oxee) {
 						oxee.printStackTrace();
 						LOG
@@ -2748,10 +2749,15 @@ public class Contacts implements DeleteListener {
 				if (!folder_error) {
 					cs.iFtrashAllUserContacts(delete, del, so.getContextId(), oid, uid, rs, so);
 					final ContactObject co = new ContactObject();
-					co.setCreatedBy(created_from);
-					co.setParentFolderID(fid);
-					co.setObjectID(oid);
-					ec.delete(co);
+					try{
+						co.setCreatedBy(created_from);
+						co.setParentFolderID(fid);
+						co.setObjectID(oid);
+						ec.delete(co);
+					} catch (Exception e){
+						LOG.error("Unable to trigger delete event for contact delete: id="+co.getObjectID()+" cid="+co.getContextId(), e);
+						//e.printStackTrace();
+					}
 				}
 			}
 			if (uid == ct.getMailadmin()) {
@@ -2762,9 +2768,10 @@ public class Contacts implements DeleteListener {
 			// writecon.commit();
 		} catch (final ContextException d) {
 			throw new ContactException(d);
+			/*
 		} catch (final EventException ox) {
 			throw EXCEPTIONS.create(57, Integer.valueOf(so.getContextId()), Integer.valueOf(uid));
-			/*
+			
 			 * } catch (final OXException ox) { throw ox;
 			 */
 		} catch (final SQLException se) {
@@ -2798,7 +2805,7 @@ public class Contacts implements DeleteListener {
 		}
 	}
 
-	@OXThrows(category = Category.TRUNCATED, desc = "54", exceptionId = DATA_TRUNCATION, msg = "One or more fields contain too much information. Fields: %1$s Character Limit: %2$d Sent %3$d")
+	@OXThrows(category = Category.TRUNCATED, desc = "54", exceptionId = DATA_TRUNCATION, msg = "Import failed. Some data entered exceed the database field limit. Please shorten following entries: %1$s Character Limit: %2$d Sent %3$d")
 	public static OXException getTruncation(final DataTruncation se) {
 
 		final String[] fields = DBUtils.parseTruncatedFields(se);

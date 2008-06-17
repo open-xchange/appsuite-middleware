@@ -1077,13 +1077,12 @@ public class ContactMySql implements ContactSql {
 		}
 		smt.execute(tmp.toString());
 	}
-
-	public void iFgiveUserContacToAdmin(final Statement smt, final int oid, final Session so, final int admin_fid,
-			final Context ct) throws SQLException {
+	
+	public void iFgiveUserContacToAdmin(final Statement smt, final int oid, final int admin_fid, final Context ct) throws SQLException {
 		final StringBuilder tmp = new StringBuilder("UPDATE prg_contacts SET changed_from = ")
-				.append(ct.getMailadmin()).append(", created_from = ").append(ctx.getMailadmin()).append(
+				.append(ct.getMailadmin()).append(", created_from = ").append(ct.getMailadmin()).append(
 						", changing_date = ").append(System.currentTimeMillis()).append(", fid = ").append(admin_fid)
-				.append(" WHERE intfield01 = ").append(oid).append(" and cid = ").append(so.getContextId());
+				.append(" WHERE intfield01 = ").append(oid).append(" and cid = ").append(ct.getContextId());
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(tmp.toString());
 		}
