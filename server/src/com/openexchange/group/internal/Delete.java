@@ -67,6 +67,8 @@ import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.sql.DBUtils;
@@ -148,8 +150,12 @@ public final class Delete {
     }
 
     private void allowed() throws GroupException {
-        if (ctx.getMailadmin() != user.getId()) {
-            throw new GroupException(Code.NO_DELETE_PERMISSION);
+        try {
+            if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditGroup()) {
+                throw new GroupException(Code.NO_CREATE_PERMISSION);
+            }
+        } catch (final UserConfigurationException e) {
+            throw new GroupException(e);
         }
     }
 
