@@ -60,9 +60,9 @@ public class UserConfigurationException extends OXException {
 	public static enum UserConfigurationCode {
 
 		/**
-		 * A SQL error occurred: %1$s
+		 * An SQL error occurred: %1$s
 		 */
-		SQL_ERROR("A SQL error occurred: %1$s", Category.CODE_ERROR, 1),
+		SQL_ERROR("An SQL error occurred: %1$s", Category.CODE_ERROR, 1),
 		/**
 		 * A DBPooling error occurred
 		 */
