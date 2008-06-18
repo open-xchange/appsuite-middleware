@@ -102,7 +102,7 @@ public final class MIMEMessageUtility {
 					| Pattern.DOTALL);
 
 	/**
-	 * Detects if given html content contains inlined images
+	 * Detects if given HTML content contains inlined images
 	 * <p>
 	 * Example:
 	 * 
@@ -111,8 +111,8 @@ public final class MIMEMessageUtility {
 	 * </pre>
 	 * 
 	 * @param htmlContent
-	 *            The html content
-	 * @return <code>true</code> if given html content contains inlined images;
+	 *            The HTML content
+	 * @return <code>true</code> if given HTML content contains inlined images;
 	 *         otherwise <code>false</code>
 	 */
 	public static boolean hasEmbeddedImages(final String htmlContent) {
@@ -120,12 +120,12 @@ public final class MIMEMessageUtility {
 	}
 
 	/**
-	 * Gathers all occuring content IDs in html content and returns them as a
+	 * Gathers all occurring content IDs in HTML content and returns them as a
 	 * list
 	 * 
 	 * @param htmlContent
-	 *            The html content
-	 * @return an instance of <code>{@link List}</code> containing all occuring
+	 *            The HTML content
+	 * @return an instance of <code>{@link List}</code> containing all occurring
 	 *         content IDs
 	 */
 	public static List<String> getContentIDs(final String htmlContent) {
@@ -168,7 +168,7 @@ public final class MIMEMessageUtility {
 					| Pattern.DOTALL);
 
 	/**
-	 * Detects if given html content contains references to local image files
+	 * Detects if given HTML content contains references to local image files
 	 * <p>
 	 * Example:
 	 * 
@@ -177,10 +177,10 @@ public final class MIMEMessageUtility {
 	 * </pre>
 	 * 
 	 * @param htmlContent
-	 *            The html content
+	 *            The HTML content
 	 * @param session
 	 *            The user session
-	 * @return <code>true</code> if given html content contains references to
+	 * @return <code>true</code> if given HTML content contains references to
 	 *         local image files; otherwise <code>false</code>
 	 */
 	public static boolean hasReferencedLocalImages(final String htmlContent, final Session session) {
