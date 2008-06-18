@@ -173,7 +173,9 @@ public abstract class PasswordChangeService {
 		/*
 		 * Validate new password
 		 */
-		validatePassword(event.getNewPassword());
+		if (!validatePassword(event.getNewPassword())) {
+			throw new UserException(UserException.Code.INVALID_PASSWORD);
+		}
 	}
 
 	/**
