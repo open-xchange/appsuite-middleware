@@ -60,6 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.servlet.request.GroupManageRequest;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.user.UserService;
 
 /**
@@ -100,7 +101,15 @@ public class GroupManageActivator extends DeferredActivator {
      */
     @Override
     protected void startBundle() throws Exception {
-        // Nothing to do. We have to wait for services.
+        final ServiceRegistry registry = getServiceRegistry();
+        registry.clearRegistry();
+        for (final Class<?> tmp : getNeededServices()) {
+            final Object service = getService(tmp);
+            if (null != service) {
+                registry.addService(tmp, service);
+            }
+        }
+        registerService();
     }
 
     /**
