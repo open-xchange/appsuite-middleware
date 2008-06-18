@@ -396,6 +396,13 @@ public class AppointmentTest extends AbstractAJAXTest {
 			parameter.setParameter(AJAXServlet.RIGHT_HAND_LIMIT, rightHandLimit);
 		}
 		
+		return listAppointment(webCon, cols, parameter, userTimeZone, host, session);
+	}
+		
+	public static AppointmentObject[] listAppointment(WebConversation webCon, int[] cols, URLParameter parameter, TimeZone userTimeZone, String host, String session)
+		throws Exception {
+		host = appendPrefix(host);
+		
 		WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL
 				+ parameter.getURLParameters());
 		WebResponse resp = webCon.getResponse(req);
