@@ -202,7 +202,12 @@ public class UserException extends AbstractOXException {
           * Missing or unknown password mechanism %1$s
           */
          MISSING_PASSWORD_MECH("Missing or unknown password mechanism %1$s",
-        	Category.CODE_ERROR, Detail.ERROR, 14);
+        	Category.CODE_ERROR, Detail.ERROR, 14),
+         /**
+          * New password contains invalid characters
+          */
+         INVALID_PASSWORD("New password contains invalid characters",
+        	Category.USER_INPUT, Detail.ERROR, 15);
 
         /**
          * Message of the exception.
