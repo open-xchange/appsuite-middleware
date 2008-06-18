@@ -5,6 +5,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="/openexchange-test/lib/httpunit.jar"/>
+	<classpathentry kind="lib" path="/open-xchange-test/lib/httpunit-1.6.2.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
