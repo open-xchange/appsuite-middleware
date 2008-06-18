@@ -65,16 +65,16 @@ public interface SessiondService {
 	 * Creates a new session object in the sessiond storage with the given
 	 * session parameters
 	 * 
-	 * @param userId -
-	 *            The User ID
-	 * @param loginName -
-	 *            The login name of the user
-	 * @param password -
-	 *            The password of the user
-	 * @param context -
-	 *            The context of the user
-	 * @param clientHost -
-	 *            The hostname of the incoming client
+	 * @param userId
+	 *            - The User ID
+	 * @param loginName
+	 *            - The login name of the user
+	 * @param password
+	 *            - The password of the user
+	 * @param context
+	 *            - The context of the user
+	 * @param clientHost
+	 *            - The hostname of the incoming client
 	 * @return The session ID of the newly created session as a
 	 *         <code>String</code>
 	 * @throws SessiondException
@@ -83,20 +83,34 @@ public interface SessiondService {
 			final String clientHost) throws SessiondException;
 
 	/**
+	 * Replaces the currently stored password in session identified through
+	 * given session ID with specified <code>newPassword</code>.
+	 * 
+	 * @param sessionId
+	 *            The session ID
+	 * @param newPassword
+	 *            The new password to apply
+	 * @throws SessiondException
+	 *             If new password cannot be applied or corresponding session
+	 *             does not exist or is expired
+	 */
+	public void changeSessionPassword(String sessionId, String newPassword) throws SessiondException;
+
+	/**
 	 * Refreshes the timestamp of the session with the given session ID
 	 * 
-	 * @param sessionId -
-	 *            The Session ID
-	 * @return True if the session timestamp was updated or false if the session
-	 *         ID was invalid or exired
+	 * @param sessionId
+	 *            - The Session ID
+	 * @return <code>true</code> if the session timestamp was updated or
+	 *         <code>false</code> if the session ID was invalid or expired
 	 */
 	public boolean refreshSession(final String sessionId);
 
 	/**
 	 * Removes the session with the given session ID
 	 * 
-	 * @param sessionId -
-	 *            The Session ID
+	 * @param sessionId
+	 *            - The Session ID
 	 * @return True if the session was removed or false if the session ID
 	 *         doesn't exist
 	 */
@@ -105,8 +119,8 @@ public interface SessiondService {
 	/**
 	 * Get the session object related to the given session ID
 	 * 
-	 * @param sessionId -
-	 *            The Session ID
+	 * @param sessionId
+	 *            - The Session ID
 	 * @return Return the session object or null if no session exists for the
 	 *         given ID or if the session is expired
 	 */
@@ -115,8 +129,8 @@ public interface SessiondService {
 	/**
 	 * Get the session object related to the given random token
 	 * 
-	 * @param randomToken -
-	 *            The random token of the session
+	 * @param randomToken
+	 *            - The random token of the session
 	 * @return Return the session object or null if no session exists for the
 	 *         given random token or if the random token is already expired
 	 */
