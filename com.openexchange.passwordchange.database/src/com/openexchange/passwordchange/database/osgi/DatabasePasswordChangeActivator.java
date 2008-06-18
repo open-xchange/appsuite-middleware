@@ -56,6 +56,7 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordchange.database.impl.DatabasePasswordChange;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.user.UserService;
 
 /**
@@ -94,14 +95,36 @@ public final class DatabasePasswordChangeActivator extends DeferredActivator {
 
 	@Override
 	protected void startBundle() throws Exception {
-		serviceRegistration = context.registerService(PasswordChangeService.class.getName(),
-				new DatabasePasswordChange(), null);
+		/*
+		 * (Re-)Initialize service registry with available services
+		 */
+		{
+			final ServiceRegistry registry = getServiceRegistry();
+			registry.clearRegistry();
+			final Class<?>[] classes = getNeededServices();
+			for (int i = 0; i < classes.length; i++) {
+				final Object service = getService(classes[i]);
+				if (null != service) {
+					registry.addService(classes[i], service);
+				}
+			}
+		}
+		if (serviceRegistration == null) {
+			serviceRegistration = context.registerService(PasswordChangeService.class.getName(),
+					new DatabasePasswordChange(), null);
+		}
 	}
 
 	@Override
 	protected void stopBundle() throws Exception {
-		serviceRegistration.unregister();
-		serviceRegistration = null;
+		if (serviceRegistration != null) {
+			serviceRegistration.unregister();
+			serviceRegistration = null;
+		}
+		/*
+		 * Clear service registry
+		 */
+		getServiceRegistry().clearRegistry();
 	}
 
 }
