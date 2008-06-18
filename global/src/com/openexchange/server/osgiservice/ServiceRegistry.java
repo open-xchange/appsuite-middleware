@@ -129,8 +129,6 @@ public class ServiceRegistry {
 			 */
 			return null;
 		}
-		// TODO: Perform permission check here whether caller is allowed to
-		// obtain service or not
 		return clazz.cast(service);
 	}
 
