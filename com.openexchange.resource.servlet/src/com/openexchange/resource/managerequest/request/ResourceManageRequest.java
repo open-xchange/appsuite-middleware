@@ -49,6 +49,8 @@
 
 package com.openexchange.resource.managerequest.request;
 
+import static com.openexchange.json.ReadOnlyJSONArray.EMPTY_JSON_ARRAY;
+import static com.openexchange.json.ReanOnlyJSONObject.EMPTY_JSON_OBJECT;
 import static com.openexchange.resource.managerequest.services.ResourceRequestServiceRegistry.getServiceRegistry;
 
 import java.util.Arrays;
@@ -68,6 +70,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.ResourceService;
+import com.openexchange.resource.json.ResourceFields;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
@@ -142,9 +145,11 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 		}
 		resourceService.create(user, ctx, resource);
 		/*
-		 * Return its ID
+		 * Return its ID wrapped by a JSON object
 		 */
-		return new AJAXRequestResult(Integer.valueOf(resource.getIdentifier()), resource.getLastModified());
+		final JSONObject resultObject = new JSONObject();
+		resultObject.put(ResourceFields.ID, resource.getIdentifier());
+		return new AJAXRequestResult(resultObject, resource.getLastModified());
 	}
 
 	/**
@@ -181,10 +186,9 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 		 */
 		resourceService.update(user, ctx, resource, clientLastModified);
 		/*
-		 * Write updated resource
+		 * Write empty JSON object
 		 */
-		return new AJAXRequestResult(com.openexchange.resource.json.ResourceWriter.writeResource(resource), resource
-				.getLastModified());
+		return new AJAXRequestResult(EMPTY_JSON_OBJECT, resource.getLastModified());
 	}
 
 	/**
@@ -222,9 +226,9 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 		 */
 		resourceService.delete(user, ctx, resource, clientLastModified);
 		/*
-		 * Write JSON null
+		 * Write empty JSON array
 		 */
-		return new AJAXRequestResult(JSONObject.NULL);
+		return new AJAXRequestResult(EMPTY_JSON_ARRAY, clientLastModified);
 	}
 
 	public String getModule() {
