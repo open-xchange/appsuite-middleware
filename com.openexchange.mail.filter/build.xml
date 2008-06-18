@@ -52,6 +52,7 @@
 
     <!--                    TARGETS                      -->
     <target name="prepare">
+    	<delete dir="src/org/apache/jsieve/parser/generated"/>
         <!-- This target generated parts of the code out of the grammar file vor jjtree -->
         <mkdir dir="${src}${jsieveprefix}/jsieve/parser/generated"/>
         <java classname="jjtree" fork="yes" failonerror="true" dir="${src}">
