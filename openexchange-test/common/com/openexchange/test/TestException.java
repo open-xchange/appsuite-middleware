@@ -3,19 +3,24 @@ package com.openexchange.test;
 public class TestException extends Exception
 {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3793876245680533405L;
+
 	public TestException() {
 		super();
 	}
 	
-	public TestException(String message) {
+	public TestException(final String message) {
 		super(message);
 	}
 	
-	public TestException(String message, Exception exc) {
+	public TestException(final String message, final Exception exc) {
 		super(message, exc);
 	}
 	
-	public TestException(Exception exc) {
+	public TestException(final Exception exc) {
 		super(exc);
 	}
 	

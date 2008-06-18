@@ -94,7 +94,7 @@ public class AJAXConfig extends AbstractConfig {
         /**
          * Name of the property in the ajax.properties file.
          */
-        private String propertyName;
+        private final String propertyName;
 
         /**
          * Default constructor.

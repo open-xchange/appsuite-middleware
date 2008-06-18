@@ -1,11 +1,11 @@
 package com.openexchange.test;
 
-import java.util.Properties;
-import java.util.List;
-import java.util.ArrayList;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 public class AjaxInit {
     private static boolean ajaxPropertiesLoaded = false;
@@ -19,7 +19,7 @@ public class AjaxInit {
         try {
             ajaxProps.load(new FileInputStream(getFileName()));
         }
-        catch (IOException e) {
+        catch (final IOException e) {
             throw new RuntimeException(e);
         }
         ajaxPropertiesLoaded = true;
@@ -52,16 +52,16 @@ public class AjaxInit {
             ajaxPropertiesDir = new StringBuilder().append(ajaxPropertiesDir)
                     .append(System.getProperty("file.separator")).toString();
         }
-        File dir = new File(ajaxPropertiesDir);
+        final File dir = new File(ajaxPropertiesDir);
         File myFile;
         // Lese das Verzeichnis und packe alle Files in das Array ajaxPropFiles
         // Aber nur dann, wenn es ein File ist (kein Directory) und es auch
         // gelesen werden kann.
         if (dir.isDirectory()) {
             // Hilfsliste:
-            List<String> fileList = new ArrayList<String>();
+            final List<String> fileList = new ArrayList<String>();
             // Pruefe jeden im Verzeichnis vorhandenen Namen:
-            for (String fileName : dir.list()) {
+            for (final String fileName : dir.list()) {
                 myFile = new File(new StringBuilder().append(ajaxPropertiesDir)
                         .append(fileName).toString());
                 if (!myFile.isDirectory() && myFile.canRead()

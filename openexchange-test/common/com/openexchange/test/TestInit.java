@@ -1,8 +1,8 @@
 package com.openexchange.test;
 
-import java.util.Properties;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Properties;
 
 public class TestInit {
     private static boolean testPropertiesLoaded = false;
@@ -20,7 +20,7 @@ public class TestInit {
                 }
                 testProps.load(new FileInputStream(propfile));
             }
-            catch (IOException e) {
+            catch (final IOException e) {
                 throw new RuntimeException(e);
             }
             testPropertiesLoaded = true;

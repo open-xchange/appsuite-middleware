@@ -24,29 +24,29 @@ public class XMLCompare {
 	private static boolean inited;
 	private Set<String> checkTextNames = Collections.EMPTY_SET;
 	
-	public boolean compare(String expect, String got) throws UnsupportedEncodingException, JDOMException, IOException {
-		SAXBuilder builder = new SAXBuilder();
-		Document expectedDoc = builder.build(new ByteArrayInputStream(expect.getBytes("UTF-8")));
-		Document gotDoc = builder.build(new ByteArrayInputStream(got.getBytes("UTF-8")));
+	public boolean compare(final String expect, final String got) throws UnsupportedEncodingException, JDOMException, IOException {
+		final SAXBuilder builder = new SAXBuilder();
+		final Document expectedDoc = builder.build(new ByteArrayInputStream(expect.getBytes("UTF-8")));
+		final Document gotDoc = builder.build(new ByteArrayInputStream(got.getBytes("UTF-8")));
 		
 		return compareDocuments(expectedDoc.getRootElement(), gotDoc.getRootElement());
 	}
 	
-	public boolean compareDocuments(Element expectedDoc, Element gotDoc) {
+	public boolean compareDocuments(final Element expectedDoc, final Element gotDoc) {
 		//System.out.println(expectedDoc.getName()+" == "+gotDoc.getName()+" ? "+expectedDoc.getName().equals(gotDoc.getName()));
 		if(!expectedDoc.getName().equals(gotDoc.getName()) || !expectedDoc.getNamespace().equals(gotDoc.getNamespace())) {
 			return false;
 		}
-		String nodeName = expectedDoc.getName();
-		Method m = findCompareMethod(nodeName);
+		final String nodeName = expectedDoc.getName();
+		final Method m = findCompareMethod(nodeName);
 		if(m != null) {
 			try {
 				return (Boolean) m.invoke(this,expectedDoc, gotDoc);
-			} catch (IllegalArgumentException e) {
+			} catch (final IllegalArgumentException e) {
 				e.printStackTrace();
-			} catch (IllegalAccessException e) {
+			} catch (final IllegalAccessException e) {
 				e.printStackTrace();
-			} catch (InvocationTargetException e) {
+			} catch (final InvocationTargetException e) {
 				e.printStackTrace();
 			}
 		}
@@ -56,7 +56,7 @@ public class XMLCompare {
 		return compareChildElems(expectedDoc, gotDoc);
 	}
 	
-	protected boolean checkText(String nodeName) {
+	protected boolean checkText(final String nodeName) {
 		return getCheckTextNames().contains(nodeName);
 	}
 
@@ -64,15 +64,15 @@ public class XMLCompare {
 		return checkTextNames;
 	}
 	
-	public void setCheckTextNames(String...names) {
+	public void setCheckTextNames(final String...names) {
 		checkTextNames = new HashSet<String>(Arrays.asList(names));
 	}
 
-	protected boolean compareChildElems(Element expectedDoc, Element gotDoc){
-		Set<Element> expectedNodes = new HashSet<Element>(expectedDoc.getChildren());
-		Set<Element> gotNodes = new HashSet<Element>(gotDoc.getChildren());
-Expect: for(Element expect : expectedNodes) {
-			for(Element got : new HashSet<Element>(gotNodes)) {
+	protected boolean compareChildElems(final Element expectedDoc, final Element gotDoc){
+		final Set<Element> expectedNodes = new HashSet<Element>(expectedDoc.getChildren());
+		final Set<Element> gotNodes = new HashSet<Element>(gotDoc.getChildren());
+Expect: for(final Element expect : expectedNodes) {
+			for(final Element got : new HashSet<Element>(gotNodes)) {
 				if(compareDocuments(expect, got)) {
 					gotNodes.remove(got);
 					continue Expect;
@@ -84,22 +84,23 @@ Expect: for(Element expect : expectedNodes) {
 		return gotNodes.isEmpty();
 	}
 
-	protected Method findCompareMethod(String nodeName) {
+	protected Method findCompareMethod(final String nodeName) {
 		initMethods();
 		return methods.get(nodeName);
 	}
 
 	protected void initMethods() {
 		synchronized(methods) {
-			if(inited)
+			if(inited) {
 				return;
+			}
 			inited = true;
-			for(Method method : getClass().getMethods()) {
+			for(final Method method : getClass().getMethods()) {
 				if(method.isAccessible()) {
 					if(
 						method.getName().startsWith("compare")
 					) {
-						String name = method.getName().substring(8);
+						final String name = method.getName().substring(8);
 						methods.put(name,method);
 					}
 				}

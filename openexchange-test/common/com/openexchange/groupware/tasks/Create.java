@@ -51,8 +51,6 @@ package com.openexchange.groupware.tasks;
 
 import java.util.Date;
 
-import com.openexchange.groupware.tasks.Task;
-
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>

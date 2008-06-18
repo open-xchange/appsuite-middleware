@@ -5,57 +5,68 @@ import java.io.InputStream;
 
 public class DelayedInputStream extends InputStream {
 	private long delay = 0;
-	private InputStream delegate;
+	private final InputStream delegate;
 	
-	public DelayedInputStream(InputStream delegate, long delay) {
+	public DelayedInputStream(final InputStream delegate, final long delay) {
 		this.delegate = delegate;
 		this.delay = delay;
 	}
 
+	@Override
 	public int available() throws IOException {
 		return delegate.available();
 	}
 
+	@Override
 	public void close() throws IOException {
 		delegate.close();
 	}
 
-	public boolean equals(Object arg0) {
+	@Override
+	public boolean equals(final Object arg0) {
 		return delegate.equals(arg0);
 	}
 
+	@Override
 	public int hashCode() {
 		return delegate.hashCode();
 	}
 
-	public void mark(int arg0) {
+	@Override
+	public void mark(final int arg0) {
 		delegate.mark(arg0);
 	}
 
+	@Override
 	public boolean markSupported() {
 		return delegate.markSupported();
 	}
 
+	@Override
 	public int read() throws IOException {
 		sleep();
 		return delegate.read();
 	}
 
-	public int read(byte[] arg0, int arg1, int arg2) throws IOException {
+	@Override
+	public int read(final byte[] arg0, final int arg1, final int arg2) throws IOException {
 		sleep();
 		return delegate.read(arg0, arg1, arg2);
 	}
 
-	public int read(byte[] arg0) throws IOException {
+	@Override
+	public int read(final byte[] arg0) throws IOException {
 		sleep();
 		return delegate.read(arg0);
 	}
 
+	@Override
 	public void reset() throws IOException {
 		delegate.reset();
 	}
 
-	public long skip(long arg0) throws IOException {
+	@Override
+	public long skip(final long arg0) throws IOException {
 		sleep();
 		return delegate.skip(arg0);
 	}
@@ -63,10 +74,11 @@ public class DelayedInputStream extends InputStream {
 	private void sleep() {
 		try {
 			Thread.sleep(delay);
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 		}
 	}
 
+	@Override
 	public String toString() {
 		return delegate.toString();
 	}

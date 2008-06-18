@@ -1,11 +1,11 @@
 package com.openexchange.test;
 
-import java.util.Properties;
-import java.util.List;
-import java.util.ArrayList;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 public class JMXInit {
 	private static boolean jmxPropertiesLoaded;
@@ -21,7 +21,7 @@ public class JMXInit {
 		jmxProps = new Properties();
 		try {
 			jmxProps.load(new FileInputStream(getFileName()));
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 		jmxPropertiesLoaded = true;
@@ -54,16 +54,16 @@ public class JMXInit {
 			jmxPropertiesDir = new StringBuilder().append(jmxPropertiesDir)
 					.append(System.getProperty("file.separator")).toString();
 		}
-		File dir = new File(jmxPropertiesDir);
+		final File dir = new File(jmxPropertiesDir);
 		File myFile;
 		// Lese das Verzeichnis und packe alle Files in das Array ajaxPropFiles
 		// Aber nur dann, wenn es ein File ist (kein Directory) und es auch
 		// gelesen werden kann.
 		if (dir.isDirectory()) {
 			// Hilfsliste:
-			List<String> fileList = new ArrayList<String>();
+			final List<String> fileList = new ArrayList<String>();
 			// Pruefe jeden im Verzeichnis vorhandenen Namen:
-			for (String fileName : dir.list()) {
+			for (final String fileName : dir.list()) {
 				myFile = new File(new StringBuilder().append(jmxPropertiesDir).append(fileName).toString());
 				if (!myFile.isDirectory() && myFile.canRead() && !myFile.getName().startsWith(".")) {
 					fileList.add(myFile.getAbsolutePath());

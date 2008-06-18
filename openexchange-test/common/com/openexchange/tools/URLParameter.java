@@ -4,15 +4,15 @@
 package com.openexchange.tools;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.encoding.URLCoder;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 /**
  * This class provides methods to generate URL parameters.
@@ -44,7 +44,7 @@ public class URLParameter {
 		multivalueParameters = new HashMap<String, List<String>>();
 	}
 	
-	public URLParameter(boolean multivalue) {
+	public URLParameter(final boolean multivalue) {
 		super();
 		this.multivalue = multivalue;
 		parameters = new HashMap();
@@ -74,10 +74,10 @@ public class URLParameter {
 	private void setParameter2Map(final String name, final String value) {
 		if (multivalue) {
 			if (multivalueParameters.containsKey(name)) {
-				List l = multivalueParameters.get(name);
+				final List l = multivalueParameters.get(name);
 				l.add(value);
 			} else {
-				List<String> l = new ArrayList<String>();
+				final List<String> l = new ArrayList<String>();
 				l.add(value);
 				
 				multivalueParameters.put(name, l);
@@ -128,8 +128,8 @@ public class URLParameter {
 		return sb.toString();
 	}
 	
-	public static String colsArray2String(int cols[]) {
-		StringBuffer sb = new StringBuffer();
+	public static String colsArray2String(final int cols[]) {
+		final StringBuffer sb = new StringBuffer();
 		for (int a = 0; a  < cols.length; a++) {
 			if (a == 0) {
 				sb.append(cols[a]);

@@ -1,22 +1,22 @@
 package com.openexchange.test;
 
-import junit.framework.Assert;
-
-import java.util.Date;
-import java.io.InputStream;
-import java.io.IOException;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Date;
+
+import junit.framework.Assert;
 
 
 public class OXTestToolkit {
-    public static void assertEqualsAndNotNull(String message, Date expect, Date value) throws Exception {
+    public static void assertEqualsAndNotNull(final String message, final Date expect, final Date value) throws Exception {
         if (expect != null) {
             Assert.assertNotNull(message + " is null", value);
             Assert.assertEquals(message, expect.getTime(), value.getTime());
         }
     }
 
-    public static void assertEqualsAndNotNull(String message, byte[] expect, byte[] value) throws Exception {
+    public static void assertEqualsAndNotNull(final String message, final byte[] expect, final byte[] value) throws Exception {
         if (expect != null) {
             Assert.assertNotNull(message + " is null", value);
             Assert.assertEquals(message + " byte array size is not equals", expect.length, value.length);
@@ -26,14 +26,14 @@ public class OXTestToolkit {
         }
     }
 
-    public static void assertEqualsAndNotNull(String message, Object expect, Object value) throws Exception {
+    public static void assertEqualsAndNotNull(final String message, final Object expect, final Object value) throws Exception {
         if (expect != null) {
             Assert.assertNotNull(message + " is null", value);
             Assert.assertEquals(message, expect, value);
         }
     }
 
-    public static void assertSameContent(InputStream is1, InputStream is2) throws IOException {
+    public static void assertSameContent(final InputStream is1, final InputStream is2) throws IOException {
         int i = 0;
         while((i = is1.read()) != -1){
             Assert.assertEquals(i, is2.read());
@@ -41,10 +41,10 @@ public class OXTestToolkit {
         Assert.assertEquals(-1,is2.read());
     }
 
-    public static String readStreamAsString(InputStream is) throws IOException {
+    public static String readStreamAsString(final InputStream is) throws IOException {
         int len;
         byte[] buffer = new byte[0xFFFF];
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         while( (len = is.read(buffer)) != -1 ){
             baos.write(buffer, 0, len);
         }

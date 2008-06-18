@@ -56,7 +56,7 @@ public class RandomString {
     }
 
     public static String generateFixLetter(final int length) {
-        char[] value = new char[length];
+        final char[] value = new char[length];
         for (int i = 0; i < value.length; i++) {
             value[i] = letter[rand.nextInt(letter.length)];
         }
