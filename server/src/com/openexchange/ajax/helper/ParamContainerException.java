@@ -63,13 +63,13 @@ public class ParamContainerException extends AbstractOXException {
 	public static enum Code {
 
 		/**
-		 * Bad value %s in parameter %s
+		 * Bad value %1$s in parameter %2$s
 		 */
-		BAD_PARAM_VALUE("Bad value %s in parameter %s", Category.USER_INPUT, 1),
+		BAD_PARAM_VALUE("Bad value %1$s in parameter %2$s", Category.USER_INPUT, 1),
 		/**
-		 * Missing parameter %s
+		 * Missing parameter %1$s
 		 */
-		MISSING_PARAMETER("Missing parameter %s", Category.CODE_ERROR, 2);
+		MISSING_PARAMETER("Missing parameter %1$s", Category.CODE_ERROR, 2);
 
 		/**
 		 * Message of the exception.

@@ -107,40 +107,40 @@ public class ConfigurationException extends AbstractOXException {
         NO_FILENAME("Filename for property file is not defined.",
             Category.SETUP_ERROR, 1),
         /**
-         * File "%s" does not exist.
+         * File "%1$s" does not exist.
          */
-        FILE_NOT_FOUND("File \"%s\" does not exist.", Category.SETUP_ERROR, 2),
+        FILE_NOT_FOUND("File \"%1$s\" does not exist.", Category.SETUP_ERROR, 2),
         /**
-         * File "%s" is not readable.
+         * File "%1$s" is not readable.
          */
-        NOT_READABLE("File \"%s\" is not readable.", Category.SETUP_ERROR, 3),
+        NOT_READABLE("File \"%1$s\" is not readable.", Category.SETUP_ERROR, 3),
         /**
-         * Cannot read file "%s".
+         * Cannot read file "%1$s".
          */
-        READ_ERROR("Cannot read file \"%s\".", Category.SETUP_ERROR, 4),
+        READ_ERROR("Cannot read file \"%1$s\".", Category.SETUP_ERROR, 4),
         /**
-         * System Property "%s" is not defined.
+         * System Property "%1$s" is not defined.
          */
-        PROPERTY_MISSING("Property \"%s\" is not defined.",
+        PROPERTY_MISSING("Property \"%1$s\" is not defined.",
             Category.SETUP_ERROR, 5),
         /**
-         * Cannot load class "%s".
+         * Cannot load class "%1$s".
          */
-        CLASS_NOT_FOUND("Cannot load class \"%s\".", Category.SETUP_ERROR, 6),
+        CLASS_NOT_FOUND("Cannot load class \"%1$s\".", Category.SETUP_ERROR, 6),
         
         /**
-         * Invalid configuration: %s
+         * Invalid configuration: %1$s
          */
-        INVALID_CONFIGURATION("Invalid configuration: %s", Category.SETUP_ERROR, 7),
+        INVALID_CONFIGURATION("Invalid configuration: %1$s", Category.SETUP_ERROR, 7),
         
         /**
-         * Property %s is not an integer
+         * Property %1$s is not an integer
          */
-        PROPERTY_NOT_AN_INTEGER("Property %s is not an integer", Category.CODE_ERROR, 8),
+        PROPERTY_NOT_AN_INTEGER("Property %1$s is not an integer", Category.CODE_ERROR, 8),
         /**
-         * An I/O error occured: %s
+         * An I/O error occurred: %1$s
          */
-        IO_ERROR("An I/O error occured: %s", Category.CODE_ERROR, 9);
+        IO_ERROR("An I/O error occurred: %1$s", Category.CODE_ERROR, 9);
 
         /**
          * Message of the exception.

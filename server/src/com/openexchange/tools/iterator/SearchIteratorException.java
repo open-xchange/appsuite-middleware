@@ -66,30 +66,30 @@ public class SearchIteratorException extends AbstractOXException {
 	public static enum SearchIteratorCode {
 		
 		/**
-		 * An SQL error occurred: %s
+		 * An SQL error occurred: %1$s
 		 */
-		SQL_ERROR("An SQL error occurred: %s", Category.CODE_ERROR, 1),
+		SQL_ERROR("An SQL error occurred: %1$s", Category.CODE_ERROR, 1),
 		/**
-		 * A DBPool error occurred: %s
+		 * A DBPool error occurred: %1$s
 		 */
-		DBPOOLING_ERROR("A DBPool error occurred: %s", Category.CODE_ERROR, 2),
+		DBPOOLING_ERROR("A DBPool error occurred: 1$%s", Category.CODE_ERROR, 2),
 		/**
 		 * Operation not allowed on a closed SearchIterator
 		 */
 		CLOSED("Operation not allowed on a closed SearchIterator", Category.CODE_ERROR, 3),
         /**
-         * Not implemented
+         * Mapping for %1$d not implemented
          */
-        NOT_IMPLEMENTED("Mapping for %d not implemented", Category.CODE_ERROR, 4),
+        NOT_IMPLEMENTED("Mapping for %1$d not implemented", Category.CODE_ERROR, 4),
         
         /**
-         * FreeBusyResults Calc issue
+         * FreeBusyResults calculation problem with oid: %1$d
          */
-        CALCULATION_ERROR("FreeBusyResults calculation problem with oid: %d", Category.CODE_ERROR, 5),
+        CALCULATION_ERROR("FreeBusyResults calculation problem with oid: %1$d", Category.CODE_ERROR, 5),
         /**
-         * Invalid constructor argument. Instance of %s not supported
+         * Invalid constructor argument. Instance of %1$s not supported
          */
-        INVALID_CONSTRUCTOR_ARG("Invalid constructor argument. Instance of %s not supported", Category.CODE_ERROR, 6),
+        INVALID_CONSTRUCTOR_ARG("Invalid constructor argument. Instance of %1$s not supported", Category.CODE_ERROR, 6),
         /**
          * No such element.
          */

@@ -69,13 +69,13 @@ public class DowngradeFailedException extends AbstractOXException {
 	public static enum Code {
 
 		/**
-		 * A SQL error occurred: %s
+		 * A SQL error occurred: %1$s
 		 */
-		SQL_ERROR("A SQL error occurred: %s", Category.CODE_ERROR, 1),
+		SQL_ERROR("A SQL error occurred: %1$s", Category.CODE_ERROR, 1),
 		/**
-		 * An error occurred: %s
+		 * An error occurred: %1$s
 		 */
-		ERROR("An error occurred: %s", Category.CODE_ERROR, 2);
+		ERROR("An error occurred: %1$s", Category.CODE_ERROR, 2);
 
 		private final String message;
 

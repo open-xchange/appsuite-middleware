@@ -69,21 +69,21 @@ public final class CacheException extends AbstractOXException {
 	public static enum Code {
 
 		/**
-		 * A cache error occurred: %s
+		 * A cache error occurred: %1$s
 		 */
-		CACHE_ERROR("A cache error occurred: %s", Category.CODE_ERROR, 1),
+		CACHE_ERROR("A cache error occurred: %1$s", Category.CODE_ERROR, 1),
 		/**
-		 * Missing cache config file at location: %s
+		 * Missing cache config file at location: %1$s
 		 */
-		MISSING_CACHE_CONFIG_FILE("Missing cache config file at location: %s", Category.SETUP_ERROR, 2),
+		MISSING_CACHE_CONFIG_FILE("Missing cache config file at location: %1$s", Category.SETUP_ERROR, 2),
 		/**
-		 * An I/O error occurred: %s
+		 * An I/O error occurred: %1$s
 		 */
-		IO_ERROR("An I/O error occurred: %s", Category.CODE_ERROR, 3),
+		IO_ERROR("An I/O error occurred: %1$s", Category.CODE_ERROR, 3),
 		/**
-		 * Missing configuration property: %s
+		 * Missing configuration property: %1$s
 		 */
-		MISSING_CONFIGURATION_PROPERTY("Missing configuration property: %s", Category.SETUP_ERROR, 4),
+		MISSING_CONFIGURATION_PROPERTY("Missing configuration property: %1$s", Category.SETUP_ERROR, 4),
 		/**
 		 * The default element attributes could not be retrieved
 		 */

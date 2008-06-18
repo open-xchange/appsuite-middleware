@@ -65,17 +65,17 @@ public class DeleteFailedException extends AbstractOXException {
 	public static enum Code {
 
 		/**
-		 * Unknown delete event type: %d
+		 * Unknown delete event type: %1$d
 		 */
-		UNKNOWN_TYPE("Unknown delete event type: %d", Category.CODE_ERROR, 1),
+		UNKNOWN_TYPE("Unknown delete event type: %1$d", Category.CODE_ERROR, 1),
 		/**
-		 * A SQL error occurred: %s
+		 * A SQL error occurred: %1$s
 		 */
-		SQL_ERROR("A SQL error occurred: %s", Category.CODE_ERROR, 2),
+		SQL_ERROR("A SQL error occurred: %1$s", Category.CODE_ERROR, 2),
 		/**
-		 * An error occurred: %s
+		 * An error occurred: %1$s
 		 */
-		ERROR("An error occurred: %s", Category.CODE_ERROR, 3);
+		ERROR("An error occurred: %1$s", Category.CODE_ERROR, 3);
 
 		private final String message;
 
