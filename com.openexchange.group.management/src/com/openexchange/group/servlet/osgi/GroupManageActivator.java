@@ -69,13 +69,18 @@ import com.openexchange.user.UserService;
  */
 public class GroupManageActivator extends DeferredActivator {
 
+    private static final Class<?>[] NEEDED_SERVICES = new Class<?>[] { UserService.class, GroupService.class };
+
     private final Lock lock = new ReentrantLock();
 
     private ServiceRegistration registration;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, GroupService.class };
+        return NEEDED_SERVICES;
     }
 
     /**
@@ -121,13 +126,11 @@ public class GroupManageActivator extends DeferredActivator {
     }
 
     private void registerService() {
-        boolean needsRegistration = true;
+        final boolean needsRegistration;
         lock.lock();
         try {
             // Registration must only be done if all needed services are available
-            for (Class<?> test : getNeededServices()) {
-                needsRegistration &= (null != getServiceRegistry().getService(test));
-            }
+            needsRegistration = NEEDED_SERVICES.length == getServiceRegistry().size();
         } finally {
             lock.unlock();
         }
