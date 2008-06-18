@@ -169,6 +169,30 @@ public final class ReadOnlyJSONObject extends JSONObject {
 	 * <b>Not supported by this read-only JSON object</b>. Invocation will lead
 	 * to an {@link UnsupportedOperationException exception}.
 	 * <p>
+	 * Fills JSONObject with the given source string. This method is dedicated
+	 * for <b>re-using</b> a JSONObject in combination with the
+	 * <code>reset()</code> method, since it gives the same possibility as the
+	 * common-used <code>JSONObject(String string)</code> constructor to create
+	 * a JSONObject from a string.
+	 * 
+	 * @param string
+	 *            A string beginning with <code>{</code>&nbsp;<small>(left
+	 *            brace)</small> and ending with <code>}</code>
+	 *            &nbsp;<small>(right brace)</small>.
+	 * @return this.
+	 * @exception JSONException
+	 *                If there is a syntax error in the source string.
+	 * @see #reset()
+	 */
+	@Override
+	public JSONObject parseJSONString(final String string) throws JSONException {
+		throw new UnsupportedOperationException("ReadOnlyJSONObject.parseJSONString()");
+	}
+
+	/**
+	 * <b>Not supported by this read-only JSON object</b>. Invocation will lead
+	 * to an {@link UnsupportedOperationException exception}.
+	 * <p>
 	 * Accumulate values under a key. It is similar to the put method except
 	 * that if there is already an object stored under the key then a JSONArray
 	 * is stored under the key to hold all of the accumulated values. If there
@@ -185,7 +209,7 @@ public final class ReadOnlyJSONObject extends JSONObject {
 	 */
 	@Override
 	public JSONObject accumulate(final String key, final Object value) throws JSONException {
-		throw new UnsupportedOperationException("ReanOnlyJSONObject.accumulate() not supported");
+		throw new UnsupportedOperationException("ReadOnlyJSONObject.accumulate() not supported");
 	}
 
 	/**
@@ -208,7 +232,7 @@ public final class ReadOnlyJSONObject extends JSONObject {
 	 */
 	@Override
 	public JSONObject append(final String key, final Object value) throws JSONException {
-		throw new UnsupportedOperationException("ReanOnlyJSONObject.append() not supported");
+		throw new UnsupportedOperationException("ReadOnlyJSONObject.append() not supported");
 	}
 
 	/**
@@ -219,7 +243,7 @@ public final class ReadOnlyJSONObject extends JSONObject {
 	 */
 	@Override
 	public void reset() {
-		throw new UnsupportedOperationException("ReanOnlyJSONObject.reset() not supported");
+		throw new UnsupportedOperationException("ReadOnlyJSONObject.reset() not supported");
 	}
 
 	/**
@@ -238,7 +262,7 @@ public final class ReadOnlyJSONObject extends JSONObject {
 	 */
 	@Override
 	public JSONObject put(final String key, final boolean value) throws JSONException {
-		throw new UnsupportedOperationException("ReanOnlyJSONObject.put() not supported");
+		throw new UnsupportedOperationException("ReadOnlyJSONObject.put() not supported");
 	}
 
 	/**
@@ -257,7 +281,7 @@ public final class ReadOnlyJSONObject extends JSONObject {
 	 */
 	@Override
 	public JSONObject put(final String key, final double value) throws JSONException {
-		throw new UnsupportedOperationException("ReanOnlyJSONObject.put() not supported");
+		throw new UnsupportedOperationException("ReadOnlyJSONObject.put() not supported");
 	}
 
 	/**
@@ -276,7 +300,7 @@ public final class ReadOnlyJSONObject extends JSONObject {
 	 */
 	@Override
 	public JSONObject put(final String key, final int value) throws JSONException {
-		throw new UnsupportedOperationException("ReanOnlyJSONObject.put() not supported");
+		throw new UnsupportedOperationException("ReadOnlyJSONObject.put() not supported");
 	}
 
 	/**
@@ -295,7 +319,7 @@ public final class ReadOnlyJSONObject extends JSONObject {
 	 */
 	@Override
 	public JSONObject put(final String key, final long value) throws JSONException {
-		throw new UnsupportedOperationException("ReanOnlyJSONObject.put() not supported");
+		throw new UnsupportedOperationException("ReadOnlyJSONObject.put() not supported");
 	}
 
 	/**
@@ -314,8 +338,14 @@ public final class ReadOnlyJSONObject extends JSONObject {
 	 */
 	@Override
 	public JSONObject put(final String key, final Map<String, ? extends Object> value) throws JSONException {
-		throw new UnsupportedOperationException("ReanOnlyJSONObject.put() not supported");
+		throw new UnsupportedOperationException("ReadOnlyJSONObject.put() not supported");
 	}
+
+	private static final String DECLARING_CLASS = "org.json.JSONObject";
+
+	private static final String FILE_NAME = "JSONObject.java";
+
+	private static final String METHOD_NAME = "<init>";
 
 	/**
 	 * <b>Not supported by this read-only JSON object</b>. Invocation will lead
@@ -336,7 +366,18 @@ public final class ReadOnlyJSONObject extends JSONObject {
 	 */
 	@Override
 	public JSONObject put(final String key, final Object value) throws JSONException {
-		throw new UnsupportedOperationException("ReanOnlyJSONObject.put() not supported");
+		/*
+		 * Check for internal invocation from within constructor
+		 */
+		final StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+		for (int i = 3; i < elements.length; i++) {
+			final StackTraceElement element = elements[i];
+			if (METHOD_NAME.equals(element.getMethodName()) && DECLARING_CLASS.equals(element.getClassName())
+					&& FILE_NAME.equals(element.getFileName())) {
+				return super.put(key, value);
+			}
+		}
+		throw new UnsupportedOperationException("ReadOnlyJSONObject.put() not supported");
 	}
 
 	/**
@@ -358,7 +399,7 @@ public final class ReadOnlyJSONObject extends JSONObject {
 	 */
 	@Override
 	public JSONObject putOpt(final String key, final Object value) throws JSONException {
-		throw new UnsupportedOperationException("ReanOnlyJSONObject.put() not supported");
+		throw new UnsupportedOperationException("ReadOnlyJSONObject.put() not supported");
 	}
 
 	/**
@@ -374,7 +415,7 @@ public final class ReadOnlyJSONObject extends JSONObject {
 	 */
 	@Override
 	public Object remove(final String key) {
-		throw new UnsupportedOperationException("ReanOnlyJSONObject.remove() not supported");
+		throw new UnsupportedOperationException("ReadOnlyJSONObject.remove() not supported");
 	}
 
 	/**
@@ -406,4 +447,5 @@ public final class ReadOnlyJSONObject extends JSONObject {
 	public Set<Map.Entry<String, Object>> entrySet() {
 		return Collections.unmodifiableSet(super.entrySet());
 	}
+
 }
