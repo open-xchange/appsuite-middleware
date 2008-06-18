@@ -1043,6 +1043,19 @@ public class MIMEMessageFiller {
 	 * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	 */
 
+	/**
+	 * Creates a body part of type <code>text/plain</code> from given HTML
+	 * content
+	 * 
+	 * @param htmlContent
+	 *            The HTML content
+	 * @return A body part of type <code>text/plain</code> from given HTML
+	 *         content
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 */
 	protected final BodyPart createTextBodyPart(final String htmlContent) throws MessagingException, IOException {
 		/*
 		 * Convert html content to regular text. First: Create a body part for
@@ -1060,6 +1073,19 @@ public class MIMEMessageFiller {
 		return text;
 	}
 
+	/**
+	 * Creates a body part of type <code>text/html</code> from given HTML
+	 * content
+	 * 
+	 * @param htmlContent
+	 *            The HTML content
+	 * @return A body part of type <code>text/html</code> from given HTML
+	 *         content
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 * @throws MailException
+	 *             If an I/O error occurs
+	 */
 	protected final static BodyPart createHtmlBodyPart(final String htmlContent) throws MessagingException,
 			MailException {
 		final ContentType htmlCT = new ContentType(PAT_HTML_CT.replaceFirst(REPLACE_CS, MailConfig
@@ -1179,6 +1205,18 @@ public class MIMEMessageFiller {
 		return cid;
 	}
 
+	/**
+	 * Gets and removes the image attachment from specified mail whose
+	 * <code>Content-Id</code> matches given <code>cid</code> argument
+	 * 
+	 * @param cid
+	 *            The <code>Content-Id</code> of the image attachment
+	 * @param mail
+	 *            The mail containing the image attachment
+	 * @return The removed image attachment
+	 * @throws MailException
+	 *             If a mail error occurs
+	 */
 	protected final static MailPart getAndRemoveImageAttachment(final String cid, final ComposedMailMessage mail)
 			throws MailException {
 		final int size = mail.getEnclosedCount();
