@@ -53,6 +53,7 @@ package com.openexchange.ajax.request;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -68,6 +69,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.DateOrderObject;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.DataFields;
@@ -615,6 +617,15 @@ public class AppointmentRequest {
 		final int folderId = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
 		
 		final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
+		final boolean listOrder;
+		if (orderBy == CalendarObject.START_DATE || orderBy == CalendarObject.END_DATE) {
+			listOrder = true;
+		} else {
+			listOrder = false;
+		}
+		
+		final List<DateOrderObject> objectList = new ArrayList<DateOrderObject>();
+		
 		final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
 		
 		final boolean bRecurrenceMaster = DataParser.parseBoolean(jsonObj, RECURRENCE_MASTER);
@@ -661,17 +672,59 @@ public class AppointmentRequest {
 							appointmentobject.setEndDate(new Date(result.getEnd()));
 							appointmentobject.setRecurrencePosition(result.getPosition());
 							
-							appointmentwriter.writeArray(appointmentobject, columns, startUTC, endUTC, jsonResponseArray);
+							// add to order list
+							if (listOrder) {
+								final DateOrderObject dateOrderObject = new DateOrderObject(getDateByFieldId(orderBy, appointmentobject, timeZone), (AppointmentObject)appointmentobject.clone());
+								objectList.add(dateOrderObject);
+							} else {
+								appointmentwriter.writeArray(appointmentobject, columns, startUTC, endUTC, jsonResponseArray);
+							}
 						}
 					}
 				} else {
-					appointmentwriter.writeArray(appointmentobject, columns, startUTC, endUTC, jsonResponseArray);
+					// add to order list
+					if (listOrder) {
+						final DateOrderObject dateOrderObject = new DateOrderObject(getDateByFieldId(orderBy, appointmentobject, timeZone), (AppointmentObject)appointmentobject.clone());
+						objectList.add(dateOrderObject);
+					} else {
+						appointmentwriter.writeArray(appointmentobject, columns, startUTC, endUTC, jsonResponseArray);
+					}
 				}
 				
 				lastModified = appointmentobject.getLastModified();
 				
 				if (timestamp.getTime() < lastModified.getTime()) {
 					timestamp = lastModified;
+				}
+			}
+			
+			if (listOrder && !objectList.isEmpty()) {
+				final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
+				final DateOrderObject[] dateOrderObjectArray = objectList.toArray(new DateOrderObject[objectList.size()]);
+				Arrays.sort(dateOrderObjectArray);
+				
+				boolean asc; 
+				
+				if (orderDir == null) {
+					asc = true;
+				} else {
+					if (orderDir.equalsIgnoreCase("desc")) {
+						asc = false;
+					} else {
+						asc = true;
+					}
+				}
+				
+				if (asc) {
+					for (int a = 0; a < dateOrderObjectArray.length; a++) {
+						final AppointmentObject appointmentObj = (AppointmentObject)dateOrderObjectArray[a].getObject();
+						appointmentwriter.writeArray(appointmentObj, columns, startUTC, endUTC, jsonResponseArray);
+					}
+				} else {
+					for (int a = dateOrderObjectArray.length-1;  a >= 0; a--) {
+						final AppointmentObject appointmentObj = (AppointmentObject)dateOrderObjectArray[a].getObject();
+						appointmentwriter.writeArray(appointmentObj, columns, startUTC, endUTC, jsonResponseArray);
+					}
 				}
 			}
 			
@@ -1099,6 +1152,27 @@ public class AppointmentRequest {
 			}
 		} else {
 			appointmentList.add(appointmentObj);
+		}
+	}
+	
+	private Date getDateByFieldId(final int field, final AppointmentObject appointmentObj, final TimeZone timeZone) {
+		Date date = null; 
+		switch (field) {
+			case CalendarObject.START_DATE:
+				return appointmentObj.getStartDate();
+			case CalendarObject.END_DATE:
+				return appointmentObj.getEndDate();
+		}
+		
+		if (date == null) {
+			return null;
+		}
+		
+		if (appointmentObj.getFullTime()) {
+			return date;
+		} else {
+			final int offset = timeZone.getOffset(date.getTime());
+			return new Date(date.getTime()+offset);
 		}
 	}
 }
