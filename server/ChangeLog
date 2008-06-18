@@ -1,3 +1,8 @@
+* 2008-06-18 - sebastian.kauss@open-xchange.com
+
+ - Bugfix #11250: [L3] List of day and month view is not sorted 
+   correctly if there are serial appointments
+
 * 2008-06-17 - thorben.betten@open-xchange.com
 
  - Bugfix #10551: Extended calendar fields by missing constants used in
