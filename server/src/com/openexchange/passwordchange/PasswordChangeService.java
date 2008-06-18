@@ -51,6 +51,7 @@ package com.openexchange.passwordchange;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.regex.Pattern;
 
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginException;
@@ -169,6 +170,10 @@ public abstract class PasswordChangeService {
 			 */
 			throw new UserException(e);
 		}
+		/*
+		 * Validate new password
+		 */
+		validatePassword(event.getNewPassword());
 	}
 
 	/**
@@ -298,5 +303,33 @@ public abstract class PasswordChangeService {
 			return loginInfo;
 		}
 
+	}
+
+	/*
+	 * +++++++++++++++ Utility methods +++++++++++++++
+	 */
+
+	private static final Pattern PATTERN_ALLOWED_CHARS = Pattern.compile("[ $@%\\.+a-zA-Z0-9_-]+");
+
+	/**
+	 * Checks if specified password string contains invalid characters.
+	 * <p>
+	 * Valid characters are:<br>
+	 * &quot;<i>&nbsp;
+	 * abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_
+	 * -+.%$@<i>&quot;
+	 * 
+	 * @param password
+	 *            The password string to check
+	 * @return <code>true</code> if specified password string only consists of
+	 *         valid characters; otherwise <code>false</code>
+	 */
+	protected static final boolean validatePassword(final String password) {
+		/*
+		 * Check for allowed chars:
+		 * abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789
+		 * _-+.%$@
+		 */
+		return PATTERN_ALLOWED_CHARS.matcher(password).matches();
 	}
 }
