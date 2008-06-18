@@ -56,6 +56,7 @@ import static javax.mail.internet.MimeUtility.unfold;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -1819,9 +1820,62 @@ public final class MIMEMessageConverter {
 		mailPart.addHeaders(headerMap);
 	}
 
+	/**
+	 * Parses given headers' {@link InputStream input stream} into a {@link Map
+	 * map} until EOF or 2 subsequent CRLF occur.
+	 * <p>
+	 * This is a convenience method that delegates to
+	 * {@link #loadHeaders(byte[])}.
+	 * 
+	 * @param inputStream
+	 *            The headers' {@link InputStream input stream}
+	 * @return
+	 * @throws IOException
+	 */
+	public static Map<String, String> loadHeaders(final InputStream inputStream) throws IOException {
+		final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
+		final byte[] bbuf = new byte[8192];
+		int read = -1;
+		while ((read = inputStream.read(bbuf, 0, bbuf.length)) != -1) {
+			out.write(bbuf, 0, read);
+		}
+		return loadHeaders(out.toByteArray());
+	}
+
+	/**
+	 * Parses given headers' <code>byte</code> array into a {@link Map map}
+	 * until EOF or 2 subsequent CRLF occur.
+	 * <p>
+	 * This is a convenience method that delegates to
+	 * {@link #loadHeaders(String)}.
+	 * 
+	 * @param bytes
+	 *            The headers' <code>byte</code> array
+	 * @return The parsed headers as a {@link Map map}.
+	 */
+	public static Map<String, String> loadHeaders(final byte[] bytes) {
+		try {
+			return loadHeaders(new String(bytes, "US-ASCII"));
+		} catch (final UnsupportedEncodingException e) {
+			/*
+			 * Cannot occur
+			 */
+			LOG.error(e.getMessage(), e);
+			return new HashMap<String, String>(0);
+		}
+	}
+
 	private static final Pattern PATTERN_PARSE_HEADER = Pattern.compile("(\\S+):\\p{Blank}(.*)(?:(?:\r?\n)|(?:$))");
 
-	private static Map<String, String> loadHeaders(final String messageSrc) {
+	/**
+	 * Parses given message source's headers into a {@link Map map} until EOF or
+	 * 2 subsequent CRLF occur.
+	 * 
+	 * @param messageSrc
+	 *            The message source
+	 * @return The parsed headers as a {@link Map map}.
+	 */
+	public static Map<String, String> loadHeaders(final String messageSrc) {
 		/*
 		 * Determine position of double line break
 		 */
