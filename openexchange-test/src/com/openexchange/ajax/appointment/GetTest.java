@@ -9,8 +9,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.ContactTest;
-import com.openexchange.ajax.GroupTest;
 import com.openexchange.ajax.ResourceTest;
+import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;

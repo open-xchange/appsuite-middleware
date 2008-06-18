@@ -47,83 +47,42 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.actions;
+package com.openexchange.ajax.group;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 
 import org.json.JSONException;
+import org.xml.sax.SAXException;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.groupware.tasks.Task;
+import com.meterware.httpunit.WebConversation;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.group.actions.SearchRequest;
+import com.openexchange.ajax.group.actions.SearchResponse;
+import com.openexchange.group.Group;
+import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.OXJSONException;
 
-/**
- * Contains the data for a mail filter all request.
- * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
- */
-public class AllRequest extends AbstractMailFilterRequest {
+public class GroupTest {
 
-	public static final int[] GUI_COLUMNS = new int[] { Task.OBJECT_ID };
+    /**
+     * Prevent instantiation.
+     */
+    private GroupTest() {
+        super();
+    }
 
-	private final String servletPath;
-
-	private final int[] columns;
-
-	private final boolean failOnError;
-
-	/**
-	 * Default constructor.
-	 */
-	public AllRequest(final String servletPath, final int[] columns) {
-		this(servletPath, columns, true);
-	}
-
-	/**
-	 * Default constructor.
-	 */
-	public AllRequest(final String servletPath, final int[] columns, final boolean failOnError) {
-		super();
-		this.servletPath = servletPath;
-		this.columns = columns;
-		this.failOnError = failOnError;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getServletPath() {
-		return servletPath;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Object getBody() throws JSONException {
-		return null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Method getMethod() {
-		return Method.GET;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Parameter[] getParameters() {
-		final List<Parameter> params = new ArrayList<Parameter>();
-		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
-		params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
-		return params.toArray(new Parameter[params.size()]);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public AllParser getParser() {
-		return new AllParser(failOnError, columns);
-	}
+    /**
+     * @deprecated use {@link GroupTools#search(AJAXClient, SearchRequest)}
+     */
+    public static final Group[] searchGroup(final WebConversation conv,
+        final String pattern, final String host, final String session) throws
+        AjaxException, IOException, SAXException, JSONException, OXJSONException {
+        final SearchRequest request = new SearchRequest(pattern);
+        final SearchResponse response = (SearchResponse) Executor.execute(
+            new AJAXSession(conv, session), request, host);
+        return response.getGroups();
+    }
 }
+

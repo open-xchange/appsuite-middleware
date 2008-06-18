@@ -28,7 +28,7 @@ public class InterfaceTests {
 
 		tests.addTest(com.openexchange.ajax.contact.ContactAJAXSuite.suite());
 		tests.addTestSuite(com.openexchange.ajax.UserTest.class);
-		tests.addTestSuite(com.openexchange.ajax.GroupTest.class);
+		tests.addTestSuite(com.openexchange.ajax.group.FunctionTest.class);
 		tests.addTestSuite(com.openexchange.ajax.ResourceTest.class);
 		tests.addTestSuite(com.openexchange.ajax.LinkTest.class);
 		tests.addTestSuite(com.openexchange.ajax.MultipleTest.class);
