@@ -135,6 +135,7 @@
 
 			<test name="com.openexchange.ajax.contact.ContactAJAXSuite" todir="${test.xml.dir}" />
 			<test name="com.openexchange.ajax.UserTest" todir="${test.xml.dir}" />
+            <test name="com.openexchange.ajax.group.FunctionTest" todir="${test.xml.dir}" />
 			<test name="com.openexchange.ajax.GroupTest" todir="${test.xml.dir}" />
 			<test name="com.openexchange.ajax.ResourceTest" todir="${test.xml.dir}" />
 			<test name="com.openexchange.ajax.LinkTest" todir="${test.xml.dir}" />
