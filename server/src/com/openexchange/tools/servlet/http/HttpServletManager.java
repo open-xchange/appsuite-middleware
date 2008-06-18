@@ -154,12 +154,7 @@ public class HttpServletManager {
 			/*
 			 * A wildcard path
 			 */
-			final String _currentPath;
-			if (len == 1) {
-				_currentPath = "";
-			} else {
-				_currentPath = currentPath.substring(0, len - 1);
-			}
+			final String _currentPath = len == 1 ? "" : currentPath.substring(0, len - 1);
 			/*
 			 * Make sure ap.path is longer or equal length so a/b/ does imply
 			 * a/b
