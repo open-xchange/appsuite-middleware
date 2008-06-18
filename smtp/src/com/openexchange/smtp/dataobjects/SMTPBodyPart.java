@@ -68,7 +68,7 @@ public final class SMTPBodyPart extends TextBodyMailPart {
 	 * Constructor
 	 * 
 	 * @param mailBody
-	 *            The text body
+	 *            The text body as HTML content
 	 */
 	public SMTPBodyPart(final String mailBody) {
 		super(mailBody);

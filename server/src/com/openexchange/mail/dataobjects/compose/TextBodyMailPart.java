@@ -69,12 +69,20 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
  */
 public abstract class TextBodyMailPart extends MailPart implements ComposedMailPart {
 
+	private static final long serialVersionUID = 5748081743621854608L;
+
 	private final String mailBody;
 
 	private transient DataSource dataSource;
 
 	/**
-	 * Constructor
+	 * Constructs a new {@link TextBodyMailPart}
+	 * <p>
+	 * The body part is supposed to be HTML content which is ought to be
+	 * converted to appropriate MIME type on transport.
+	 * 
+	 * @param mailBody
+	 *            The mail body as HTML content
 	 */
 	public TextBodyMailPart(final String mailBody) {
 		super();
@@ -170,7 +178,8 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
+	 * @see
+	 * com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
 	 */
 	public ComposedPartType getType() {
 		return ComposedMailPart.ComposedPartType.BODY;

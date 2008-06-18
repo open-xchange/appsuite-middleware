@@ -234,7 +234,10 @@ public abstract class ComposedMailMessage extends MailMessage {
 	public abstract MailPart getEnclosedMailPart(final int index) throws MailException;
 
 	/**
-	 * Sets this composed message's body part
+	 * Sets this composed message's body part.
+	 * <p>
+	 * The body part's content is supposed to be HTML content which is ought to
+	 * be converted to appropriate MIME type on transport.
 	 * 
 	 * @param mailPart
 	 *            The body part
