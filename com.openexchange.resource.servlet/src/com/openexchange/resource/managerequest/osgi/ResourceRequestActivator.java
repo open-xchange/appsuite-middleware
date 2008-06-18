@@ -97,13 +97,7 @@ public final class ResourceRequestActivator extends DeferredActivator {
 
 	@Override
 	protected void handleUnavailability(final Class<?> clazz) {
-		if (serviceRegistration != null) {
-			/*
-			 * Unregister service
-			 */
-			serviceRegistration.unregister();
-			serviceRegistration = null;
-		}
+		unregisterRequestHandler();
 		getServiceRegistry().removeService(clazz);
 	}
 
@@ -113,7 +107,9 @@ public final class ResourceRequestActivator extends DeferredActivator {
 		 * Register servlet on both available HTTP service and resource service
 		 */
 		getServiceRegistry().addService(clazz, getService(clazz));
-		registerRequestHandler();
+		if (getServiceRegistry().size() == NEEDED_SERVICES.length) {
+			registerRequestHandler();
+		}
 	}
 
 	/*
@@ -153,6 +149,16 @@ public final class ResourceRequestActivator extends DeferredActivator {
 				null);
 	}
 
+	private void unregisterRequestHandler() {
+		if (serviceRegistration != null) {
+			/*
+			 * Unregister service
+			 */
+			serviceRegistration.unregister();
+			serviceRegistration = null;
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -161,13 +167,7 @@ public final class ResourceRequestActivator extends DeferredActivator {
 	@Override
 	protected void stopBundle() throws Exception {
 		try {
-			if (serviceRegistration != null) {
-				/*
-				 * Unregister service
-				 */
-				serviceRegistration.unregister();
-				serviceRegistration = null;
-			}
+			unregisterRequestHandler();
 			/*
 			 * Clear service registry
 			 */
