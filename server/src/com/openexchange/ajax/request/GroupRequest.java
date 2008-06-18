@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.request;
 
-import static com.openexchange.ajax.container.Response.DATA;
-
 import java.util.Date;
 
 import org.json.JSONArray;
@@ -59,25 +57,19 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.fields.GroupFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.ajax.parser.GroupParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.GroupWriter;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupException;
-import com.openexchange.group.GroupService;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
@@ -109,13 +101,7 @@ public class GroupRequest {
 
     public Object action(final String action, final JSONObject jsonObject) throws AbstractOXException, JSONException {
         Object retval = null;
-        if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
-            retval = actionNew(jsonObject);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
-            retval = actionDelete(jsonObject);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
-            retval = actionUpdate(jsonObject);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
+        if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
             retval = actionList(jsonObject);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
             retval = actionGet(jsonObject);
@@ -141,51 +127,6 @@ public class GroupRequest {
 			return result.getResultObject();
         }
         return retval;
-    }
-
-    public JSONObject actionNew(final JSONObject json) throws
-        OXMandatoryFieldException, AjaxException, JSONException, OXJSONException,
-        GroupException, LdapException {
-        final Group group = new Group();
-        final JSONObject jsonobject = DataParser.checkJSONObject(json, DATA);
-        final GroupParser groupParser = new GroupParser();
-        groupParser.parse(group, jsonobject);
-        final GroupServiceImpl groupService = new GroupServiceImpl();
-        final User user = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
-        groupService.create(ctx, user, group);
-        timestamp = group.getLastModified();
-        final JSONObject response = new JSONObject();
-        response.put(GroupFields.IDENTIFIER, group.getIdentifier());
-        return response;
-    }
-
-    public JSONArray actionDelete(final JSONObject json) throws
-        OXMandatoryFieldException, JSONException, OXJSONException, AjaxException,
-        LdapException, GroupException {
-        final JSONObject jsonobject = DataParser.checkJSONObject(json, DATA);
-        final int groupId = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_ID);
-        timestamp = DataParser.checkDate(json, AJAXServlet.PARAMETER_TIMESTAMP);
-        final GroupService groupService = new GroupServiceImpl();
-        final User user = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
-        groupService.delete(ctx, user, groupId, timestamp);
-        return new JSONArray();
-    }
-
-    public JSONObject actionUpdate(final JSONObject json) throws
-        OXMandatoryFieldException, JSONException, OXJSONException,
-        AjaxException, LdapException, GroupException {
-        final int identifier = DataParser.checkInt(json, AJAXServlet.PARAMETER_ID);
-        timestamp = DataParser.checkDate(json, AJAXServlet.PARAMETER_TIMESTAMP);
-        final JSONObject data = DataParser.checkJSONObject(json, DATA);
-        final Group group = new Group();
-        final GroupParser groupParser = new GroupParser();
-        groupParser.parse(group, data);
-        group.setIdentifier(identifier);
-        final GroupService groupService = new GroupServiceImpl();
-        final User user = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
-        groupService.update(ctx, user, group, timestamp);
-        timestamp = group.getLastModified();
-        return new JSONObject();
     }
 
     public JSONArray actionList(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException, OXJSONException, AjaxException {
