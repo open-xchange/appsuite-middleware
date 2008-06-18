@@ -185,10 +185,11 @@ public final class MIMEMessageUtility {
 	 */
 	public static boolean hasReferencedLocalImages(final String htmlContent, final Session session) {
 		final Matcher m = PATTERN_REF_IMG.matcher(htmlContent);
-		while (m.find()) {
-			if (session.touchUploadedFile(m.group(5))) {
-				return true;
-			}
+		if (m.find()) {
+			do {
+				session.touchUploadedFile(m.group(5));
+			} while (m.find());
+			return true;
 		}
 		return false;
 	}
