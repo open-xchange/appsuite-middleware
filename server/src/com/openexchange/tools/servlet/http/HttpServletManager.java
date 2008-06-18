@@ -144,7 +144,7 @@ public class HttpServletManager {
 			 */
 			final HttpServlet servletInst = createServletInstance(path);
 			if (servletInst == null) {
-				return new HttpErrorServlet(new StringBuilder(100).append("Servlet ").append(path).append(
+				return new HttpErrorServlet(new StringBuilder(64).append("Servlet ").append(path).append(
 						" could NOT be created").toString());
 			}
 			return servletInst;
