@@ -344,6 +344,9 @@ public class CalendarDataObject extends AppointmentObject {
     public Object clone() {
         final CalendarDataObject clone = new CalendarDataObject();
         clone.setContext(getContext());
+        if (containsObjectID()) {
+            clone.setObjectID(getObjectID());
+        }
         if (containsTitle()) {
             clone.setTitle(getTitle());
         }
@@ -391,6 +394,9 @@ public class CalendarDataObject extends AppointmentObject {
         }
         if (containsRecurrenceID()) {
             clone.setRecurrenceID(getRecurrenceID());
+        }
+        if (containsRecurrencePosition()) {
+            clone.setRecurrencePosition(getRecurrencePosition());
         }
         if (containsRecurrenceType()) {
             clone.setRecurrenceType(getRecurrenceType());
