@@ -1829,8 +1829,9 @@ public final class MIMEMessageConverter {
 	 * 
 	 * @param inputStream
 	 *            The headers' {@link InputStream input stream}
-	 * @return
+	 * @return The parsed headers as a {@link Map map}.
 	 * @throws IOException
+	 *             If an I/O error occurs.
 	 */
 	public static Map<String, String> loadHeaders(final InputStream inputStream) throws IOException {
 		final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
