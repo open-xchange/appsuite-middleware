@@ -52,10 +52,12 @@ package com.openexchange.tools.servlet.http;
 import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ConcurrentModificationException;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
@@ -114,19 +116,57 @@ public class HttpServletManager {
 				/*
 				 * Try through resolving
 				 */
-				final int size = SERVLET_POOL.size();
-				final Iterator<String> iter = SERVLET_POOL.keySet().iterator();
-				for (int i = 0; i < size; i++) {
-					final String currentPath = iter.next();
-					if (Pattern.compile(currentPath.replaceFirst("\\*", ".*"), Pattern.CASE_INSENSITIVE).matcher(path)
-							.matches()) {
-						pathStorage.append(currentPath);
-						retval = getServletInternal(currentPath);
+				try {
+					final int size = SERVLET_POOL.size();
+					final Iterator<String> iter = SERVLET_POOL.keySet().iterator();
+					boolean b = true;
+					for (int i = 0; i < size && b; i++) {
+						final String currentPath = iter.next();
+						if (implies(currentPath, path)) {
+							pathStorage.append(currentPath);
+							retval = getServletInternal(currentPath);
+							b = false;
+						}
 					}
+				} catch (final ConcurrentModificationException e) {
+					LOG.warn("Resolving servlet path failed. Trying again...", e);
+				} catch (final NoSuchElementException e) {
+					LOG.warn("Resolving servlet path failed. Trying again...", e);
 				}
 			}
 		} while (!RW_LOCK.releaseRead(state));
 		return retval;
+	}
+
+	/**
+	 * Checks if given <code>currentPath</code> implies given <code>path</code>
+	 * 
+	 * @param currentPath
+	 *            The path which might imply
+	 * @param path
+	 *            The path which might be implied
+	 * @return <code>true</code> if given <code>currentPath</code> implies given
+	 *         <code>path</code>; otherwise <code>false</code>
+	 */
+	private static boolean implies(final String currentPath, final String path) {
+		final int len = currentPath.length();
+		if (currentPath.charAt(len - 1) == '*') {
+			/*
+			 * A wildcard path
+			 */
+			final String _currentPath;
+			if (len == 1) {
+				_currentPath = "";
+			} else {
+				_currentPath = currentPath.substring(0, len - 1);
+			}
+			/*
+			 * Make sure ap.path is longer or equal length so a/b/ does imply
+			 * a/b
+			 */
+			return (path.length() >= _currentPath.length()) && path.startsWith(_currentPath);
+		}
+		return currentPath.equals(path);
 	}
 
 	/**
