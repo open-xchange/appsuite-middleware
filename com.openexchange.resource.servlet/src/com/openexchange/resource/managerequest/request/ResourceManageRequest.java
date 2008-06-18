@@ -119,7 +119,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 	 * 
 	 * @param jsonObj
 	 *            The JSON data object (containing "data", "timestamp", etc.)
-	 * @return The newly created resource's ID
+	 * @return The newly created resource's ID wrapped inside a JSON object
 	 * @throws AbstractOXException
 	 *             If creation fails
 	 * @throws JSONException
@@ -157,7 +157,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 	 * 
 	 * @param jsonObj
 	 *            The JSON data object (containing "data", "timestamp", etc.)
-	 * @return The modified resource's JSON representation
+	 * @return An empty JSON object
 	 * @throws AbstractOXException
 	 *             If update fails
 	 * @throws JSONException
@@ -196,8 +196,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 	 * 
 	 * @param jsonObj
 	 *            The JSON data object (containing "data", "timestamp", etc.)
-	 * @return The constant {@link JSONObject#NULL NULL} since nothing is
-	 *         intended to be returned to requester
+	 * @return An empty JSON array
 	 * @throws AbstractOXException
 	 *             If deletion fails
 	 * @throws JSONException
