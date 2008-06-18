@@ -11,7 +11,7 @@ public class ValidationChainTest extends TestCase{
 	
 	
 	public void testValidate(){
-		ValidationChain validators = new ValidationChain();
+		final ValidationChain validators = new ValidationChain();
 		
 		validators.add(new TestValidation1());
 		validators.add(new TestValidation2());
@@ -20,7 +20,7 @@ public class ValidationChainTest extends TestCase{
 		try {
 			validators.validate(null);
 			fail("No Exception thrown");
-		} catch (InfostoreException x) {
+		} catch (final InfostoreException x) {
 			assertEquals("TestValidation2: (title) sucks\nTestValidation3: (title, description) stinks\n", (String)x.getMessageArgs()[0]);
 		}
 		
@@ -31,7 +31,7 @@ public class ValidationChainTest extends TestCase{
 	
 	private static class TestValidation1 implements InfostoreValidator{
 
-		public DocumentMetadataValidation validate(DocumentMetadata metadata) {
+		public DocumentMetadataValidation validate(final DocumentMetadata metadata) {
 			return new DocumentMetadataValidation();
 		}
 		
@@ -43,8 +43,8 @@ public class ValidationChainTest extends TestCase{
 	
 	private static class TestValidation2 implements InfostoreValidator{
 
-		public DocumentMetadataValidation validate(DocumentMetadata metadata) {
-			DocumentMetadataValidation validation = new DocumentMetadataValidation();
+		public DocumentMetadataValidation validate(final DocumentMetadata metadata) {
+			final DocumentMetadataValidation validation = new DocumentMetadataValidation();
 			validation.setError(Metadata.TITLE_LITERAL, "sucks");
 			return validation;
 		}
@@ -57,8 +57,8 @@ public class ValidationChainTest extends TestCase{
 
 	private static class TestValidation3 implements InfostoreValidator{
 
-		public DocumentMetadataValidation validate(DocumentMetadata metadata) {
-			DocumentMetadataValidation validation = new DocumentMetadataValidation();
+		public DocumentMetadataValidation validate(final DocumentMetadata metadata) {
+			final DocumentMetadataValidation validation = new DocumentMetadataValidation();
 			validation.setError(Metadata.TITLE_LITERAL, "stinks");
 			validation.setError(Metadata.DESCRIPTION_LITERAL, "stinks");
 			return validation;

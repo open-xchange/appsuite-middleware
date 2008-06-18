@@ -1,19 +1,19 @@
 package com.openexchange.ajax.attach;
 
+import junit.framework.TestCase;
+
 import org.json.JSONException;
 
 import com.openexchange.ajax.parser.AttachmentParser;
 import com.openexchange.ajax.parser.AttachmentParser.UnknownColumnException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 
-import junit.framework.TestCase;
-
 public class AttachmentParserTest extends TestCase {
 
 	public void testParse() throws JSONException{
-		AttachmentParser parser = new AttachmentParser();
+		final AttachmentParser parser = new AttachmentParser();
 		
-		AttachmentMetadata attachment = parser.getAttachmentMetadata("{ \"filename\" : \"test.txt\", \"file_mimetype\" :\"text/plain\", \"file_size\" : 12345 , \"folder\" : 23, \"id\" : 24, \"module\" : 25, \"attached\" : 26, \"created_by\" : 27, \"creation_date\":230023 }");
+		final AttachmentMetadata attachment = parser.getAttachmentMetadata("{ \"filename\" : \"test.txt\", \"file_mimetype\" :\"text/plain\", \"file_size\" : 12345 , \"folder\" : 23, \"id\" : 24, \"module\" : 25, \"attached\" : 26, \"created_by\" : 27, \"creation_date\":230023 }");
 		
 		assertEquals("test.txt",attachment.getFilename());
 		assertEquals("text/plain", attachment.getFileMIMEType());
@@ -27,7 +27,7 @@ public class AttachmentParserTest extends TestCase {
 	}
 	
 	public void testNullColumns() throws UnknownColumnException {
-		AttachmentParser parser = new AttachmentParser();
+		final AttachmentParser parser = new AttachmentParser();
 		assertEquals(null, parser.getColumns(null));
 	}
 }

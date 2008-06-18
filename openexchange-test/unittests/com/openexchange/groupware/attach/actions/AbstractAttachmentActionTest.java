@@ -24,11 +24,12 @@ public abstract class AbstractAttachmentActionTest extends AbstractActionTest {
 
 	private User user;
 	private Context ctx;
-	private List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
+	private final List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
 	private AttachmentBase attachmentBase = null;
 	private AttachmentQueryCatalog queryCatalog = new AttachmentQueryCatalog();
 	private DBProvider provider;
 	
+	@Override
 	public void setUp() throws Exception {
 		Init.startServer();
 		provider = new DBPoolProvider();
@@ -40,6 +41,7 @@ public abstract class AbstractAttachmentActionTest extends AbstractActionTest {
 		initAttachments();
 	}
 	
+	@Override
 	public void tearDown() throws Exception {
 		Init.stopServer();
 	}
@@ -113,11 +115,11 @@ public abstract class AbstractAttachmentActionTest extends AbstractActionTest {
 	}
 
 	
-	public static final void assertEquals(AttachmentMetadata m1, AttachmentMetadata m2) {
-		GetSwitch get1 = new GetSwitch(m1);
-		GetSwitch get2 = new GetSwitch(m2);
+	public static final void assertEquals(final AttachmentMetadata m1, final AttachmentMetadata m2) {
+		final GetSwitch get1 = new GetSwitch(m1);
+		final GetSwitch get2 = new GetSwitch(m2);
 		
-		for(AttachmentField field : AttachmentField.VALUES) {
+		for(final AttachmentField field : AttachmentField.VALUES) {
 			assertEquals(field.doSwitch(get1), field.doSwitch(get2));
 		}
 	}

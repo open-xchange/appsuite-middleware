@@ -70,7 +70,7 @@ public final class DeleteParser extends CommonDeleteParser {
      * {@inheritDoc}
      */
     @Override
-    protected CommonDeleteResponse instanciateResponse(Response response) {
+    protected CommonDeleteResponse instanciateResponse(final Response response) {
         return new DeleteResponse(response);
     }
 }

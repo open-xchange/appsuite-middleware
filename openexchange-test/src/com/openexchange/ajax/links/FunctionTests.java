@@ -87,10 +87,10 @@ public final class FunctionTests extends AbstractAJAXSession {
      */
     public void testNew() throws Exception {
         final AJAXClient client = getClient();
-        int fid1 = client.getValues().getPrivateContactFolder();
+        final int fid1 = client.getValues().getPrivateContactFolder();
         int oid1;
         {
-            ContactObject co = new ContactObject();
+            final ContactObject co = new ContactObject();
             co.setSurName("Meier");
             co.setGivenName("Herbert");
             co.setDisplayName("Meier, Herbert");
@@ -100,20 +100,20 @@ public final class FunctionTests extends AbstractAJAXSession {
                 new com.openexchange.ajax.contact.action.InsertRequest(co));
             oid1 = response.getId();
         }
-        int fid2 = client.getValues().getPrivateAppointmentFolder();
+        final int fid2 = client.getValues().getPrivateAppointmentFolder();
         int oid2;
         {
-            AppointmentObject ao = new AppointmentObject();
+            final AppointmentObject ao = new AppointmentObject();
             ao.setTitle("Nasenmann");
-            Calendar c = Calendar.getInstance();
+            final Calendar c = Calendar.getInstance();
             c.set(Calendar.HOUR_OF_DAY, 8);
             c.set(Calendar.MINUTE, 0);
             c.set(Calendar.SECOND, 0);
             c.set(Calendar.MILLISECOND, 0);
             c.setTimeZone(TimeZone.getTimeZone("GMT"));
 
-            long startTime = c.getTimeInMillis();
-            long endTime = startTime + 3600000;
+            final long startTime = c.getTimeInMillis();
+            final long endTime = startTime + 3600000;
 
             ao.setStartDate(new Date(startTime));
             ao.setEndDate(new Date(endTime));
@@ -133,7 +133,7 @@ public final class FunctionTests extends AbstractAJAXSession {
          * 
          */
         
-        LinkObject lo = new LinkObject();
+        final LinkObject lo = new LinkObject();
         lo.setFirstFolder(fid1);
         lo.setFirstId(oid1);
         lo.setFirstType(com.openexchange.groupware.Types.CONTACT);

@@ -72,7 +72,7 @@ public final class NetsolTestMailMessageDelete extends AbstractNetsolTest {
 	 * 
 	 * @param name
 	 */
-	public NetsolTestMailMessageDelete(String name) {
+	public NetsolTestMailMessageDelete(final String name) {
 		super(name);
 	}
 

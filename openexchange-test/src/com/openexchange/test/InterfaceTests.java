@@ -1,17 +1,18 @@
 package com.openexchange.test;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import com.openexchange.SmokeTestSuite;
 import com.openexchange.ajax.reminder.ReminderAJAXSuite;
 import com.openexchange.ajax.reminder.ReminderBugTestSuite;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 
 public class InterfaceTests {
 
     public static Test suite() {
 
-		TestSuite tests = new TestSuite();
+		final TestSuite tests = new TestSuite();
 
         // First of all the smoke tests.
         tests.addTest(SmokeTestSuite.suite());

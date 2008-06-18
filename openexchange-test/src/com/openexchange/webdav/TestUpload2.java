@@ -52,6 +52,8 @@ package com.openexchange.webdav;
 import java.io.ByteArrayInputStream;
 import java.util.Properties;
 
+import junit.framework.TestCase;
+
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
@@ -60,8 +62,6 @@ import org.apache.commons.httpclient.methods.PutMethod;
 import com.meterware.httpunit.Base64;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.test.WebdavInit;
-
-import junit.framework.TestCase;
 
 /**
  * 
@@ -80,7 +80,7 @@ public class TestUpload2 extends TestCase {
     /**
      * @param name
      */
-    public TestUpload2(String name) {
+    public TestUpload2(final String name) {
         super(name);
         // TODO Auto-generated constructor stub
     }

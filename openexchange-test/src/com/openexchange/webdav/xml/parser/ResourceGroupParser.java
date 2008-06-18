@@ -44,10 +44,12 @@
 
 package com.openexchange.webdav.xml.parser;
 
+import java.util.List;
+
+import org.jdom.Element;
+
 import com.openexchange.resource.ResourceGroup;
 import com.openexchange.webdav.xml.XmlServlet;
-import java.util.List;
-import org.jdom.Element;
 
 /**
  * ResourceGroupParser
@@ -61,16 +63,16 @@ public class ResourceGroupParser extends DataParser {
 		
 	}
 	
-	public void parse(ResourceGroup resourcegroupObj, Element eProp) throws Exception {
+	public void parse(final ResourceGroup resourcegroupObj, final Element eProp) throws Exception {
 		resourcegroupObj.setId(getValueAsInt(eProp.getChild("uid", XmlServlet.NS)));
 		
 		parseMembers(resourcegroupObj, eProp.getChild("members", XmlServlet.NS));
 	}
 	
-	public void parseMembers(ResourceGroup resourcegroupObj, Element eMembers) throws Exception {
-		List memberList = eMembers.getChildren("memberuid", XmlServlet.NS);
+	public void parseMembers(final ResourceGroup resourcegroupObj, final Element eMembers) throws Exception {
+		final List memberList = eMembers.getChildren("memberuid", XmlServlet.NS);
 		
-		int[] member = new int[memberList.size()];
+		final int[] member = new int[memberList.size()];
 		
 		for (int a = 0; a < memberList.size(); a++) {
 			member[a] = Integer.parseInt(((Element)memberList.get(a)).getValue());

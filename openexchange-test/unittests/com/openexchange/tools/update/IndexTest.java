@@ -4,18 +4,19 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.server.impl.DBPool;
-
-import junit.framework.TestCase;
 
 public class IndexTest extends TestCase {
 	
 	private Context ctx = null;
 	private Connection con = null;
 	
+	@Override
 	public void setUp() throws Exception {
 		Init.startServer();
 		ContextStorage.start();
@@ -27,6 +28,7 @@ public class IndexTest extends TestCase {
 		_sql_update("CREATE TABLE test_index (id int, field01 varchar(10), field02 varchar(10), fid int, PRIMARY KEY (id, field01), INDEX named_index (fid), INDEX (fid, field01), INDEX (fid, id))");
 	}
 	
+	@Override
 	public void tearDown() throws Exception {
 		_sql_update("DROP TABLE test_index");
 		DBPool.closeWriterSilent(ctx, con);
@@ -34,7 +36,7 @@ public class IndexTest extends TestCase {
 	}
 	
 	public void testFindAllIndexes() throws Exception {
-		List<Index> indexes = Index.findAllIndexes(con, "test_index");
+		final List<Index> indexes = Index.findAllIndexes(con, "test_index");
 		System.out.println(indexes);
 		assertEquals(4, indexes.size());
 		assertNamedIndex(indexes, "PRIMARY", "id", "field01");
@@ -66,20 +68,20 @@ public class IndexTest extends TestCase {
 	}
 	
 	public void testFindIndexWithColumns() throws Exception {
-		List<Index> indexes = Index.findWithColumns(con, "test_index", "fid");
+		final List<Index> indexes = Index.findWithColumns(con, "test_index", "fid");
 		assertEquals(1, indexes.size());
 		assertNamedIndex(indexes,"named_index","fid");
 		
 	}
 	
 	public void testDropIndex() throws Exception {
-		Index id = Index.findByName(con, "test_index", "named_index");
+		final Index id = Index.findByName(con, "test_index", "named_index");
 		id.drop(con);
 		
 		try {
 			Index.findByName(con, "test_index", "named_index"); 
 			fail("Didn't remove index `named_index`");
-		} catch (IndexNotFoundException x) {
+		} catch (final IndexNotFoundException x) {
 			assertTrue(true);
 		}
 	}
@@ -96,51 +98,54 @@ public class IndexTest extends TestCase {
 		
 	}
 	
-	public void _sql_update(String sql) throws Exception {
+	public void _sql_update(final String sql) throws Exception {
 		Statement stmt = null;
 		try {
 			stmt = con.createStatement();
 			stmt.executeUpdate(sql);
 		} finally {
-			if(stmt != null)
+			if(stmt != null) {
 				stmt.close();
+			}
 		}
 	}
 	
-	public static void assertNamedIndex(List<Index> indexes, String name, String...columns) {
+	public static void assertNamedIndex(final List<Index> indexes, final String name, final String...columns) {
 		
-		for(Index id : indexes) {
-			if(_isNamedIndex(id, name, columns))
+		for(final Index id : indexes) {
+			if(_isNamedIndex(id, name, columns)) {
 				return;
+			}
 		}
 		fail("Index "+name+" with columns ("+ _join(columns)+") not found in list");
 	}
 	
-	public static void assertIndex(List<Index> indexes, String...columns) {
-		for(Index id : indexes) {
-			if(_isIndex(id, columns))
+	public static void assertIndex(final List<Index> indexes, final String...columns) {
+		for(final Index id : indexes) {
+			if(_isIndex(id, columns)) {
 				return;
+			}
 		}
 		fail("Index with columns ("+ _join(columns)+") not found in list");
 	}
 	
-	public static void assertNamedIndex(Index id, String name, String...columns) {
+	public static void assertNamedIndex(final Index id, final String name, final String...columns) {
 		assertTrue("Index "+name+" with columns ("+ _join(columns)+") expected but got "+id.toString(), _isNamedIndex(id, name, columns));
 	}
 	
-	public static void assertIndex(Index id, String...columns) {
+	public static void assertIndex(final Index id, final String...columns) {
 		assertTrue("Index with columns ("+ _join(columns)+") expected but got "+id.toString(), _isIndex(id, columns));
 	}
 
-	public static String _join(String...strings) {
-		StringBuffer b = new StringBuffer();
-		for(String s : strings) { b.append(s).append(","); }
+	public static String _join(final String...strings) {
+		final StringBuffer b = new StringBuffer();
+		for(final String s : strings) { b.append(s).append(","); }
 		b.setLength(b.length()-1);
 		return b.toString();
 	}
 	
 	
-	public static boolean _isNamedIndex(Index id, String name, String...columns ) {
+	public static boolean _isNamedIndex(final Index id, final String name, final String...columns ) {
 		
 		if(!id.getName().equals(name)) {
 			return false;
@@ -149,8 +154,8 @@ public class IndexTest extends TestCase {
 		return _isIndex(id,columns);
 	}
 	
-	public static boolean _isIndex(Index id, String...columns) {
-		List<String> cols = id.getColumns();
+	public static boolean _isIndex(final Index id, final String...columns) {
+		final List<String> cols = id.getColumns();
 		
 		if(cols.size() != columns.length) {
 			return false;

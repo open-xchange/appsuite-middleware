@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.task;
 
-import static com.openexchange.ajax.task.TaskTools.insertTask;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -110,7 +108,7 @@ public class TruncationTest extends AbstractTaskTest {
             .getTruncatedIds().length > 0);
         final StringBuilder sb = new StringBuilder();
         sb.append("Truncated attribute identifier: [");
-        for (int i : response.getTruncatedIds()) {
+        for (final int i : response.getTruncatedIds()) {
             sb.append(i);
             sb.append(',');
         }

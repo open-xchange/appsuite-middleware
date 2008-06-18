@@ -1,9 +1,6 @@
 package com.openexchange.groupware.attach.actions;
 
-import java.sql.Array;
-import java.sql.Blob;
 import java.sql.CallableStatement;
-import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -11,12 +8,10 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Savepoint;
 import java.sql.Statement;
-import java.sql.Struct;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import com.openexchange.groupware.attach.AttachmentEvent;
@@ -36,14 +31,14 @@ public abstract class AbstractAttachmentEventActionTest extends
 		Set<Integer> detached = new HashSet<Integer>();
 		
 		
-		public long attached(AttachmentEvent e) throws Exception{
+		public long attached(final AttachmentEvent e) throws Exception{
 			attached.add(e.getAttachment());
 			e.getWriteConnection();
 			return System.currentTimeMillis();
 		}
 		
-		public long detached(AttachmentEvent e) throws Exception{
-			for(int id : e.getDetached()) {
+		public long detached(final AttachmentEvent e) throws Exception{
+			for(final int id : e.getDetached()) {
 				detached.add(id);
 			}
 			e.getWriteConnection();
@@ -66,44 +61,44 @@ public abstract class AbstractAttachmentEventActionTest extends
 	
 	public static final class MockDBProvider implements DBProvider{
 
-		private Set<Integer> readIds = new HashSet<Integer>();
-		private Set<Integer> writeIds = new HashSet<Integer>();
+		private final Set<Integer> readIds = new HashSet<Integer>();
+		private final Set<Integer> writeIds = new HashSet<Integer>();
 		
 		private boolean ok = true;
 		private boolean called = false;
 		
-		private StringBuffer log = new StringBuffer();
+		private final StringBuffer log = new StringBuffer();
 		
-		public Connection getReadConnection(Context ctx) throws TransactionException {
-			StupidConnection stupid = new StupidConnection();
+		public Connection getReadConnection(final Context ctx) throws TransactionException {
+			final StupidConnection stupid = new StupidConnection();
 			readIds.add(stupid.getCounter());
 			log.append("Get ReadConnection: "+stupid.getCounter()+"\n");
 			called = true;
 			return stupid;
 		}
 
-		public Connection getWriteConnection(Context ctx) throws TransactionException {
-			StupidConnection stupid = new StupidConnection();
+		public Connection getWriteConnection(final Context ctx) throws TransactionException {
+			final StupidConnection stupid = new StupidConnection();
 			writeIds.add(stupid.getCounter());
 			log.append("Get WriteConnection: "+stupid.getCounter()+"\n");
 			called = true;
 			return stupid;
 		}
 
-		public void releaseReadConnection(Context ctx, Connection con) {
-			int counter = ((StupidConnection) con).getCounter();
+		public void releaseReadConnection(final Context ctx, final Connection con) {
+			final int counter = ((StupidConnection) con).getCounter();
 			ok(readIds.remove(counter));
 			log.append("Release ReadConnection: "+counter+"\n");
 
 		}
 
-		public void releaseWriteConnection(Context ctx, Connection con) {
-			int counter = ((StupidConnection) con).getCounter();
+		public void releaseWriteConnection(final Context ctx, final Connection con) {
+			final int counter = ((StupidConnection) con).getCounter();
 			ok(writeIds.remove(counter));
 			log.append("Release WriteConnection: "+counter+"\n");
 		}
 		
-		private void ok(boolean b) {
+		private void ok(final boolean b) {
 			this.ok = ok && b;
 		}
 		
@@ -125,7 +120,7 @@ public abstract class AbstractAttachmentEventActionTest extends
 
 		private static int COUNTER = 0;
 		
-		private int refCount;
+		private final int refCount;
 		
 		public StupidConnection(){
 			COUNTER++;
@@ -156,12 +151,12 @@ public abstract class AbstractAttachmentEventActionTest extends
 			return null;
 		}
 
-		public Statement createStatement(int arg0, int arg1) throws SQLException {
+		public Statement createStatement(final int arg0, final int arg1) throws SQLException {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public Statement createStatement(int arg0, int arg1, int arg2) throws SQLException {
+		public Statement createStatement(final int arg0, final int arg1, final int arg2) throws SQLException {
 			// TODO Auto-generated method stub
 			return null;
 		}
@@ -211,57 +206,57 @@ public abstract class AbstractAttachmentEventActionTest extends
 			return false;
 		}
 
-		public String nativeSQL(String arg0) throws SQLException {
+		public String nativeSQL(final String arg0) throws SQLException {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public CallableStatement prepareCall(String arg0) throws SQLException {
+		public CallableStatement prepareCall(final String arg0) throws SQLException {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public CallableStatement prepareCall(String arg0, int arg1, int arg2) throws SQLException {
+		public CallableStatement prepareCall(final String arg0, final int arg1, final int arg2) throws SQLException {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public CallableStatement prepareCall(String arg0, int arg1, int arg2, int arg3) throws SQLException {
+		public CallableStatement prepareCall(final String arg0, final int arg1, final int arg2, final int arg3) throws SQLException {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public PreparedStatement prepareStatement(String arg0) throws SQLException {
+		public PreparedStatement prepareStatement(final String arg0) throws SQLException {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public PreparedStatement prepareStatement(String arg0, int arg1) throws SQLException {
+		public PreparedStatement prepareStatement(final String arg0, final int arg1) throws SQLException {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public PreparedStatement prepareStatement(String arg0, int[] arg1) throws SQLException {
+		public PreparedStatement prepareStatement(final String arg0, final int[] arg1) throws SQLException {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public PreparedStatement prepareStatement(String arg0, String[] arg1) throws SQLException {
+		public PreparedStatement prepareStatement(final String arg0, final String[] arg1) throws SQLException {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public PreparedStatement prepareStatement(String arg0, int arg1, int arg2) throws SQLException {
+		public PreparedStatement prepareStatement(final String arg0, final int arg1, final int arg2) throws SQLException {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public PreparedStatement prepareStatement(String arg0, int arg1, int arg2, int arg3) throws SQLException {
+		public PreparedStatement prepareStatement(final String arg0, final int arg1, final int arg2, final int arg3) throws SQLException {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public void releaseSavepoint(Savepoint arg0) throws SQLException {
+		public void releaseSavepoint(final Savepoint arg0) throws SQLException {
 			// TODO Auto-generated method stub
 			
 		}
@@ -271,27 +266,27 @@ public abstract class AbstractAttachmentEventActionTest extends
 			
 		}
 
-		public void rollback(Savepoint arg0) throws SQLException {
+		public void rollback(final Savepoint arg0) throws SQLException {
 			// TODO Auto-generated method stub
 			
 		}
 
-		public void setAutoCommit(boolean arg0) throws SQLException {
+		public void setAutoCommit(final boolean arg0) throws SQLException {
 			// TODO Auto-generated method stub
 			
 		}
 
-		public void setCatalog(String arg0) throws SQLException {
+		public void setCatalog(final String arg0) throws SQLException {
 			// TODO Auto-generated method stub
 			
 		}
 
-		public void setHoldability(int arg0) throws SQLException {
+		public void setHoldability(final int arg0) throws SQLException {
 			// TODO Auto-generated method stub
 			
 		}
 
-		public void setReadOnly(boolean arg0) throws SQLException {
+		public void setReadOnly(final boolean arg0) throws SQLException {
 			// TODO Auto-generated method stub
 			
 		}
@@ -301,17 +296,17 @@ public abstract class AbstractAttachmentEventActionTest extends
 			return null;
 		}
 
-		public Savepoint setSavepoint(String arg0) throws SQLException {
+		public Savepoint setSavepoint(final String arg0) throws SQLException {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public void setTransactionIsolation(int arg0) throws SQLException {
+		public void setTransactionIsolation(final int arg0) throws SQLException {
 			// TODO Auto-generated method stub
 			
 		}
 
-		public void setTypeMap(Map<String, Class<?>> arg0) throws SQLException {
+		public void setTypeMap(final Map<String, Class<?>> arg0) throws SQLException {
 			// TODO Auto-generated method stub
 			
 		}

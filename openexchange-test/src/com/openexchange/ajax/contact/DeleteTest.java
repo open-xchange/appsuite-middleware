@@ -10,18 +10,19 @@ public class DeleteTest extends ContactTest {
 
 	private static final Log LOG = LogFactory.getLog(DeleteTest.class);
 	
-	public DeleteTest(String name) {
+	public DeleteTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 	
 	
 	public void testDelete() throws Exception {
-		ContactObject contactObj = createContactObject("testDelete");
-		int id = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
+		final ContactObject contactObj = createContactObject("testDelete");
+		final int id = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 		
 		deleteContact(getWebConversation(), id, contactFolderId, PROTOCOL + getHostName(), getSessionId());
 	}

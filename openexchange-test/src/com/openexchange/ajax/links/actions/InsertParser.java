@@ -64,7 +64,7 @@ public class InsertParser extends CommonInsertParser {
     /**
      * @param failOnError
      */
-    public InsertParser(boolean failOnError) {
+    public InsertParser(final boolean failOnError) {
         super(failOnError);
     }
 

@@ -83,6 +83,7 @@ public class Bug6335Test extends ContactTest {
     }
 
     
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
@@ -94,13 +95,13 @@ public class Bug6335Test extends ContactTest {
 		contactObj.setParentFolderID(contactFolderId);
 		
 		//final int objectId = insertContact(getWebConversation(), contactObj, getHostName(), getSessionId());
-		WebConversation webCon = getWebConversation();
+		final WebConversation webCon = getWebConversation();
 		String host = getHostName();
 		host = appendPrefix(host);
 		
 		final StringWriter stringWriter = new StringWriter();		
 		final JSONObject jsonObj = new JSONObject();
-		ContactWriter contactWriter = new ContactWriter(TimeZone.getDefault());
+		final ContactWriter contactWriter = new ContactWriter(TimeZone.getDefault());
 		contactWriter.writeContact(contactObj, jsonObj);
 		
 		stringWriter.write(jsonObj.toString());

@@ -47,7 +47,7 @@ import com.openexchange.tools.URLParameter;
 
 public class ContactTest extends AbstractAJAXTest {
 	
-	public ContactTest(String name) {
+	public ContactTest(final String name) {
 		super(name);
 	}
 	
@@ -178,6 +178,7 @@ public class ContactTest extends AbstractAJAXTest {
 	
 	private static final Log LOG = LogFactory.getLog(ContactTest.class);
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		
@@ -185,7 +186,7 @@ public class ContactTest extends AbstractAJAXTest {
 		contactFolderId = folderObj.getObjectID();
 		userId = folderObj.getCreatedBy();
 		
-		Calendar c = Calendar.getInstance();
+		final Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
 		c.set(Calendar.MINUTE, 0);
@@ -196,12 +197,12 @@ public class ContactTest extends AbstractAJAXTest {
 		dateTime = c.getTimeInMillis();
 	}
 	
-	protected int createContactWithDistributionList(String title, ContactObject contactEntry) throws Exception {
-		ContactObject contactObj = new ContactObject();
+	protected int createContactWithDistributionList(final String title, final ContactObject contactEntry) throws Exception {
+		final ContactObject contactObj = new ContactObject();
 		contactObj.setSurName(title);
 		contactObj.setParentFolderID(contactFolderId);
 		
-		DistributionListEntryObject[] entry = new DistributionListEntryObject[3];
+		final DistributionListEntryObject[] entry = new DistributionListEntryObject[3];
 		entry[0] = new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT);
 		entry[1] = new DistributionListEntryObject("displayname b", "b@b.de", DistributionListEntryObject.INDEPENDENT);
 		entry[2] = new DistributionListEntryObject(contactEntry.getDisplayName(), contactEntry.getEmail1(), DistributionListEntryObject.EMAILFIELD1);
@@ -211,12 +212,12 @@ public class ContactTest extends AbstractAJAXTest {
 		return insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	protected int createContactWithLinks(String title, ContactObject link1, ContactObject link2) throws Exception {
-		ContactObject contactObj = new ContactObject();
+	protected int createContactWithLinks(final String title, final ContactObject link1, final ContactObject link2) throws Exception {
+		final ContactObject contactObj = new ContactObject();
 		contactObj.setSurName(title);
 		contactObj.setParentFolderID(contactFolderId);
 		
-		LinkEntryObject[] links = new LinkEntryObject[2];
+		final LinkEntryObject[] links = new LinkEntryObject[2];
 		links[0] = new LinkEntryObject();
 		links[0].setLinkID(link1.getObjectID());
 		links[0].setLinkDisplayname(link1.getDisplayName());
@@ -229,7 +230,7 @@ public class ContactTest extends AbstractAJAXTest {
 		return insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	protected void compareObject(ContactObject contactObj1, ContactObject contactObj2) throws Exception {
+	protected void compareObject(final ContactObject contactObj1, final ContactObject contactObj2) throws Exception {
 		assertEquals("id is not equals", contactObj1.getObjectID(), contactObj2.getObjectID());
 		assertEquals("folder id is not equals", contactObj1.getParentFolderID(), contactObj2.getParentFolderID());
 		assertEquals("private flag is not equals", contactObj1.getPrivateFlag(), contactObj2.getPrivateFlag());
@@ -332,8 +333,8 @@ public class ContactTest extends AbstractAJAXTest {
 		OXTestToolkit.assertEqualsAndNotNull("distribution list is not equals", distributionlist2String(contactObj1.getDistributionList()), distributionlist2String(contactObj2.getDistributionList()));
 	}
 	
-	protected ContactObject createContactObject(String displayname) {
-		ContactObject contactObj = new ContactObject();
+	protected ContactObject createContactObject(final String displayname) {
+		final ContactObject contactObj = new ContactObject();
 		contactObj.setSurName("Meier");
 		contactObj.setGivenName("Herbert");
 		//contactObj.setDisplayName(displayname);
@@ -350,7 +351,7 @@ public class ContactTest extends AbstractAJAXTest {
 	}
 	
 	protected ContactObject createCompleteContactObject() throws Exception {
-		ContactObject contactObj = new ContactObject();
+		final ContactObject contactObj = new ContactObject();
 		contactObj.setPrivateFlag(true);
 		contactObj.setCategories("categories");
 		contactObj.setGivenName("given name");
@@ -449,14 +450,14 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		contactObj.setParentFolderID(contactFolderId);
 		
-		ContactObject link1 = createContactObject("link1");
-		ContactObject link2 = createContactObject("link2");
-		int linkId1 = insertContact(getWebConversation(), link1, PROTOCOL + getHostName(), getSessionId());
+		final ContactObject link1 = createContactObject("link1");
+		final ContactObject link2 = createContactObject("link2");
+		final int linkId1 = insertContact(getWebConversation(), link1, PROTOCOL + getHostName(), getSessionId());
 		link1.setObjectID(linkId1);
-		int linkId2 = insertContact(getWebConversation(), link2, PROTOCOL + getHostName(), getSessionId());
+		final int linkId2 = insertContact(getWebConversation(), link2, PROTOCOL + getHostName(), getSessionId());
 		link2.setObjectID(linkId2);
 		
-		LinkEntryObject[] links = new LinkEntryObject[2];
+		final LinkEntryObject[] links = new LinkEntryObject[2];
 		links[0] = new LinkEntryObject();
 		links[0].setLinkID(link1.getObjectID());
 		links[0].setLinkDisplayname(link1.getDisplayName());
@@ -466,7 +467,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		contactObj.setLinks(links);
 		
-		DistributionListEntryObject[] entry = new DistributionListEntryObject[2];
+		final DistributionListEntryObject[] entry = new DistributionListEntryObject[2];
 		entry[0] = new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT);
 		entry[1] = new DistributionListEntryObject(link1.getDisplayName(), link1.getEmail1(), DistributionListEntryObject.EMAILFIELD1);
 		entry[1].setEntryID(link1.getObjectID());
@@ -476,14 +477,14 @@ public class ContactTest extends AbstractAJAXTest {
 		return contactObj;
 	}
 	
-	public static int insertContact(WebConversation webCon, ContactObject contactObj, String host, String session) throws Exception {
+	public static int insertContact(final WebConversation webCon, final ContactObject contactObj, String host, final String session) throws Exception {
 		host = appendPrefix(host);
 		
 		int objectId = 0;
 		
 		final StringWriter stringWriter = new StringWriter();		
 		final JSONObject jsonObj = new JSONObject();
-		ContactWriter contactWriter = new ContactWriter(TimeZone.getDefault());
+		final ContactWriter contactWriter = new ContactWriter(TimeZone.getDefault());
 		contactWriter.writeContact(contactObj, jsonObj);
 		
 		stringWriter.write(jsonObj.toString());
@@ -499,13 +500,13 @@ public class ContactTest extends AbstractAJAXTest {
 		JSONObject jResponse = null;
 		
 		if (contactObj.containsImage1()) {
-			PostMethodWebRequest postReq = new PostMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
+			final PostMethodWebRequest postReq = new PostMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
 			postReq.setMimeEncoded(true);
 			
 			postReq.setParameter("json", stringWriter.toString());
 			
-			File f = File.createTempFile("open-xchange_image", ".jpg");
-			FileOutputStream fos = new FileOutputStream(f);
+			final File f = File.createTempFile("open-xchange_image", ".jpg");
+			final FileOutputStream fos = new FileOutputStream(f);
 			fos.write(contactObj.getImage1());
 			fos.flush();
 			fos.close();
@@ -532,7 +533,7 @@ public class ContactTest extends AbstractAJAXTest {
 			fail("json error: " + response.getErrorMessage());
 		}
 		
-		JSONObject data = (JSONObject)response.getData();
+		final JSONObject data = (JSONObject)response.getData();
 		if (data.has(DataFields.ID)) {
 			objectId = data.getInt(DataFields.ID);
 		}
@@ -540,12 +541,12 @@ public class ContactTest extends AbstractAJAXTest {
 		return objectId;
 	}
 	
-	public static void updateContact(WebConversation webCon, ContactObject contactObj, int objectId, int inFolder, String host, String session) throws Exception {
+	public static void updateContact(final WebConversation webCon, final ContactObject contactObj, final int objectId, final int inFolder, String host, final String session) throws Exception {
 		host = appendPrefix(host);
 		
 		final StringWriter stringWriter = new StringWriter();
 		final JSONObject jsonObj = new JSONObject();
-		ContactWriter contactWriter = new ContactWriter(TimeZone.getDefault());
+		final ContactWriter contactWriter = new ContactWriter(TimeZone.getDefault());
 		contactWriter.writeContact(contactObj, jsonObj);
 		
 		stringWriter.write(jsonObj.toString());
@@ -564,12 +565,12 @@ public class ContactTest extends AbstractAJAXTest {
 		JSONObject jResponse = null;
 		
 		if (contactObj.containsImage1()) {
-			PostMethodWebRequest postReq = new PostMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
+			final PostMethodWebRequest postReq = new PostMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
 			postReq.setMimeEncoded(true);
 			postReq.setParameter("json", stringWriter.toString());
 			
-			File f = File.createTempFile("open-xchange_image", ".jpg");
-			FileOutputStream fos = new FileOutputStream(f);
+			final File f = File.createTempFile("open-xchange_image", ".jpg");
+			final FileOutputStream fos = new FileOutputStream(f);
 			fos.write(contactObj.getImage1());
 			fos.flush();
 			fos.close();
@@ -580,7 +581,7 @@ public class ContactTest extends AbstractAJAXTest {
 			resp = webCon.getResource(req);
 			jResponse = extractFromCallback(resp.getText());
 		} else {
-			ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes("UTF-8"));
+			final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes("UTF-8"));
 			
 			req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
 			resp = webCon.getResponse(req);
@@ -597,7 +598,7 @@ public class ContactTest extends AbstractAJAXTest {
 		}
 	}
 	
-	public static void deleteContact(WebConversation webCon, int id, int inFolder, String host, String session) throws Exception {
+	public static void deleteContact(final WebConversation webCon, final int id, final int inFolder, String host, final String session) throws Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -605,13 +606,13 @@ public class ContactTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE);
 		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, new Date(System.currentTimeMillis()+1000000));
 		
-		JSONObject jsonObj = new JSONObject();
+		final JSONObject jsonObj = new JSONObject();
 		jsonObj.put(DataFields.ID, id);
 		jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
-		WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
-		WebResponse resp = webCon.getResponse(req);
+		final ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
+		final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
+		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
@@ -622,11 +623,11 @@ public class ContactTest extends AbstractAJAXTest {
 		}
 	}
 	
-	public static ContactObject[] listContact(WebConversation webCon, int inFolder, int[] cols, String host, String session) throws Exception {
+	public static ContactObject[] listContact(final WebConversation webCon, final int inFolder, final int[] cols, final String host, final String session) throws Exception {
 		 return listContact(webCon, inFolder, cols, -1, -1, host, session);
 	}
 
-	public static ContactObject[] listContact(WebConversation webCon, int inFolder, int[] cols, int leftHandLimit, int rightHandLimit, String host, String session) throws Exception {
+	public static ContactObject[] listContact(final WebConversation webCon, final int inFolder, final int[] cols, final int leftHandLimit, final int rightHandLimit, String host, final String session) throws Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -645,8 +646,8 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		//System.out.println(host + CONTACT_URL + parameter.getURLParameters());
 		
-		WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
-		WebResponse resp = webCon.getResponse(req);
+		final WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
+		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
@@ -663,11 +664,11 @@ public class ContactTest extends AbstractAJAXTest {
 		return jsonArray2ContactArray((JSONArray)response.getData(), cols);
 	}
 	
-	public static ContactObject[] searchContact(WebConversation webCon, String searchpattern, int inFolder, int[] cols, String host, String session) throws OXException, Exception {
+	public static ContactObject[] searchContact(final WebConversation webCon, final String searchpattern, final int inFolder, final int[] cols, final String host, final String session) throws OXException, Exception {
 		return searchContact(webCon, searchpattern, inFolder, cols, false, host, session);
 	}
 	
-	public static ContactObject[] searchContact(WebConversation webCon, String searchpattern, int inFolder, int[] cols, boolean startletter, String host, String session) throws OXException, Exception {
+	public static ContactObject[] searchContact(final WebConversation webCon, final String searchpattern, final int inFolder, final int[] cols, final boolean startletter, String host, final String session) throws OXException, Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -675,13 +676,13 @@ public class ContactTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
 		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
 		
-		JSONObject jsonObj = new JSONObject();
+		final JSONObject jsonObj = new JSONObject();
 		jsonObj.put("pattern", searchpattern);
 		jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
 		jsonObj.put("startletter", startletter);
 		
-		WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), new ByteArrayInputStream(jsonObj.toString().getBytes()), "text/javascript");
-		WebResponse resp = webCon.getResponse(req);
+		final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), new ByteArrayInputStream(jsonObj.toString().getBytes()), "text/javascript");
+		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
@@ -698,7 +699,7 @@ public class ContactTest extends AbstractAJAXTest {
 		return jsonArray2ContactArray((JSONArray)response.getData(), cols);
 	}
 	
-	public static ContactObject[] searchContactAdvanced(WebConversation webCon, ContactSearchObject cso,int folder, int[] cols, String host, String session) throws OXException, Exception {
+	public static ContactObject[] searchContactAdvanced(final WebConversation webCon, final ContactSearchObject cso,final int folder, final int[] cols, String host, final String session) throws OXException, Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -706,7 +707,7 @@ public class ContactTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
 		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
 	
-		JSONObject jsonObj = new JSONObject();
+		final JSONObject jsonObj = new JSONObject();
 		//jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, folder);
 		jsonObj.put(ContactFields.LAST_NAME,cso.getSurname());
 		jsonObj.put(ContactFields.FIRST_NAME ,cso.getGivenName());
@@ -720,8 +721,8 @@ public class ContactTest extends AbstractAJAXTest {
 			//parameter.setParameter("emailAutoComplete","true");
 		}
 		
-		WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), new ByteArrayInputStream(jsonObj.toString().getBytes()), "text/javascript");
-		WebResponse resp = webCon.getResponse(req);
+		final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), new ByteArrayInputStream(jsonObj.toString().getBytes()), "text/javascript");
+		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
@@ -738,7 +739,7 @@ public class ContactTest extends AbstractAJAXTest {
 		return jsonArray2ContactArray((JSONArray)response.getData(), cols);
 	}
 	
-	public static ContactObject[] listContact(WebConversation webCon, int[][] objectIdAndFolderId, int[] cols, String host, String session) throws Exception {
+	public static ContactObject[] listContact(final WebConversation webCon, final int[][] objectIdAndFolderId, final int[] cols, String host, final String session) throws Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -746,19 +747,19 @@ public class ContactTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
 		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String( cols ));
 		
-		JSONArray jsonArray = new JSONArray();
+		final JSONArray jsonArray = new JSONArray();
 		
 		for (int a = 0; a < objectIdAndFolderId.length; a++) {
-			int i[] = objectIdAndFolderId[a];
-			JSONObject jsonObj = new JSONObject();
+			final int i[] = objectIdAndFolderId[a];
+			final JSONObject jsonObj = new JSONObject();
 			jsonObj.put(DataFields.ID, i[0]);
 			jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, i[1]);
 			jsonArray.put(jsonObj);
 		}
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
-		WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
-		WebResponse resp = webCon.getResponse(req);
+		final ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
+		final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
+		final WebResponse resp = webCon.getResponse(req);
 		final Response response = Response.parse(resp.getText());
 		
 		if (response.hasError()) {
@@ -772,7 +773,7 @@ public class ContactTest extends AbstractAJAXTest {
 		return jsonArray2ContactArray((JSONArray)response.getData(), cols);
 	}
 	
-	public static ContactObject[] listUser(WebConversation webCon, int[] objectIdArray, int[] cols, String host, String session) throws Exception {
+	public static ContactObject[] listUser(final WebConversation webCon, final int[] objectIdArray, final int[] cols, String host, final String session) throws Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -780,15 +781,15 @@ public class ContactTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, ContactRequest.ACTION_LIST_USER);
 		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String( cols ));
 		
-		JSONArray jsonArray = new JSONArray();
+		final JSONArray jsonArray = new JSONArray();
 		
 		for (int a = 0; a < objectIdArray.length; a++) {
 			jsonArray.put(objectIdArray[a]);
 		}
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
-		WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
-		WebResponse resp = webCon.getResponse(req);
+		final ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
+		final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
+		final WebResponse resp = webCon.getResponse(req);
 		final Response response = Response.parse(resp.getText());
 		
 		if (response.hasError()) {
@@ -802,7 +803,7 @@ public class ContactTest extends AbstractAJAXTest {
 		return jsonArray2ContactArray((JSONArray)response.getData(), cols);
 	}
 	
-	public static ContactObject loadUser(WebConversation webCon, int userId, String host, String session) throws Exception {
+	public static ContactObject loadUser(final WebConversation webCon, final int userId, String host, final String session) throws Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -810,8 +811,8 @@ public class ContactTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, ContactRequest.ACTION_GET_USER);
 		parameter.setParameter(DataFields.ID, userId);
 		
-		WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
-		WebResponse resp = webCon.getResponse(req);
+		final WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
+		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
@@ -821,10 +822,10 @@ public class ContactTest extends AbstractAJAXTest {
 			fail("json error: " + response.getErrorMessage());
 		}
 		
-		ContactObject contactObj = new ContactObject();
+		final ContactObject contactObj = new ContactObject();
 		
 		final JSONObject jsonObj = (JSONObject)response.getData();
-		ContactParser contactParser = new ContactParser(null);
+		final ContactParser contactParser = new ContactParser(null);
 		contactParser.parse(contactObj, jsonObj);
 		
 		final int id = DataParser.parseInt(jsonObj, ContactFields.ID);
@@ -836,7 +837,7 @@ public class ContactTest extends AbstractAJAXTest {
 		return contactObj;
 	}
 
-	public static ContactObject loadContact(WebConversation webCon, int objectId, int inFolder, String host, String session) throws Exception {
+	public static ContactObject loadContact(final WebConversation webCon, final int objectId, final int inFolder, String host, final String session) throws Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -845,8 +846,8 @@ public class ContactTest extends AbstractAJAXTest {
 		parameter.setParameter(DataFields.ID, objectId);
 		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
 		
-		WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
-		WebResponse resp = webCon.getResponse(req);
+		final WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
+		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
@@ -856,16 +857,16 @@ public class ContactTest extends AbstractAJAXTest {
 			fail("json error: " + response.getErrorMessage());
 		}
 		
-		ContactObject contactObj = new ContactObject();
+		final ContactObject contactObj = new ContactObject();
 		
-		ContactParser contactParser = new ContactParser(null);
+		final ContactParser contactParser = new ContactParser(null);
 		contactParser.parse(contactObj, (JSONObject)response.getData());
 		
 		return contactObj;
 	}
 	
-	public static ContactObject loadUser(WebConversation webCon, int userId, int inFolder, String host, String session) throws Exception {
-		int[] cols = {
+	public static ContactObject loadUser(final WebConversation webCon, final int userId, final int inFolder, final String host, final String session) throws Exception {
+		final int[] cols = {
 			DataObject.OBJECT_ID,
 			DataObject.CREATED_BY,
 			DataObject.CREATION_DATE,
@@ -881,7 +882,7 @@ public class ContactTest extends AbstractAJAXTest {
 			ContactObject.INTERNAL_USERID
 		};
 		
-		ContactObject[] contactArray = listContact(webCon, inFolder, cols, host, session);
+		final ContactObject[] contactArray = listContact(webCon, inFolder, cols, host, session);
 		
 		for (int a = 0; a < contactArray.length; a++) {
 			if (contactArray[a].getInternalUserId() == userId) {
@@ -892,7 +893,7 @@ public class ContactTest extends AbstractAJAXTest {
 		return null;
 	}
 	
-	public static byte[] loadImage(WebConversation webCon, int objectId, int inFolder, String host, String session) throws Exception {
+	public static byte[] loadImage(final WebConversation webCon, final int objectId, final int inFolder, String host, final String session) throws Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -901,16 +902,16 @@ public class ContactTest extends AbstractAJAXTest {
 		parameter.setParameter(DataFields.ID, objectId);
 		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
 		
-		WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
-		WebResponse resp = webCon.getResponse(req);
+		final WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
+		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		InputStream is = resp.getInputStream();
+		final InputStream is = resp.getInputStream();
 		assertNotNull("response InputStream is null", is);
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		byte[] b = new byte[1024];
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final byte[] b = new byte[1024];
 		int i = 0;
 		while ((i = is.read(b)) != -1) {
 			baos.write(b, 0, i);
@@ -920,10 +921,10 @@ public class ContactTest extends AbstractAJAXTest {
 	}
 	
 	
-	public static ContactObject[] listModifiedAppointment(WebConversation webCon, int inFolder, Date modified, String host, String session) throws Exception {
+	public static ContactObject[] listModifiedAppointment(final WebConversation webCon, final int inFolder, final Date modified, String host, final String session) throws Exception {
 		host = appendPrefix(host);
 		
-		int[] cols = new int[]{ AppointmentObject.OBJECT_ID };
+		final int[] cols = new int[]{ AppointmentObject.OBJECT_ID };
 		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
@@ -933,8 +934,8 @@ public class ContactTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, modified);
 		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
 		
-		WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
-		WebResponse resp = webCon.getResponse(req);
+		final WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
+		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
@@ -951,10 +952,10 @@ public class ContactTest extends AbstractAJAXTest {
 		return jsonArray2ContactArray((JSONArray)response.getData(), cols);
 	}
 	
-	public static ContactObject[] listDeleteAppointment(WebConversation webCon, int inFolder, Date modified, String host, String session) throws Exception {
+	public static ContactObject[] listDeleteAppointment(final WebConversation webCon, final int inFolder, final Date modified, String host, final String session) throws Exception {
 		host = appendPrefix(host);
 		
-		int[] cols = new int[]{ AppointmentObject.OBJECT_ID };
+		final int[] cols = new int[]{ AppointmentObject.OBJECT_ID };
 		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
@@ -964,8 +965,8 @@ public class ContactTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, modified);
 		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
 		
-		WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
-		WebResponse resp = webCon.getResponse(req);
+		final WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
+		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
@@ -982,14 +983,14 @@ public class ContactTest extends AbstractAJAXTest {
 		return jsonArray2ContactArray((JSONArray)response.getData(), cols);
 	}
 	
-	private static ContactObject[] jsonArray2AppointmentArray(JSONArray jsonArray) throws Exception {
-		ContactObject[] contactArray = new ContactObject[jsonArray.length()];
+	private static ContactObject[] jsonArray2AppointmentArray(final JSONArray jsonArray) throws Exception {
+		final ContactObject[] contactArray = new ContactObject[jsonArray.length()];
 		
-		ContactParser contactParser = new ContactParser();
+		final ContactParser contactParser = new ContactParser();
 		
 		for (int a = 0; a < contactArray.length; a++) {
 			contactArray[a] = new ContactObject();
-			JSONObject jObj = jsonArray.getJSONObject(a);
+			final JSONObject jObj = jsonArray.getJSONObject(a);
 			
 			contactParser.parse(contactArray[a], jObj);
 		}
@@ -997,8 +998,8 @@ public class ContactTest extends AbstractAJAXTest {
 		return contactArray;
 	}
 	
-	private static ContactObject[] jsonArray2ContactArray(JSONArray jsonArray, int[] cols) throws Exception {
-		ContactObject[] contactArray = new ContactObject[jsonArray.length()];
+	private static ContactObject[] jsonArray2ContactArray(final JSONArray jsonArray, final int[] cols) throws Exception {
+		final ContactObject[] contactArray = new ContactObject[jsonArray.length()];
 		
 		for (int a = 0; a < contactArray.length; a++) {
 			contactArray[a] = new ContactObject();
@@ -1008,7 +1009,7 @@ public class ContactTest extends AbstractAJAXTest {
 		return contactArray;
 	}
 	
-	private static void parseCols(int[] cols, JSONArray jsonArray, ContactObject contactObj) throws Exception {
+	private static void parseCols(final int[] cols, final JSONArray jsonArray, final ContactObject contactObj) throws Exception {
 		assertEquals("compare array size with cols size", cols.length, jsonArray.length());
 		
 		for (int a = 0; a < cols.length; a++) {
@@ -1016,7 +1017,7 @@ public class ContactTest extends AbstractAJAXTest {
 		}
 	}
 	
-	private static void parse(int pos, int field, JSONArray jsonArray, ContactObject contactObj) throws Exception {
+	private static void parse(final int pos, final int field, final JSONArray jsonArray, final ContactObject contactObj) throws Exception {
 		switch (field) {
 			case ContactObject.OBJECT_ID:
 				contactObj.setObjectID(jsonArray.getInt(pos));
@@ -1046,7 +1047,7 @@ public class ContactTest extends AbstractAJAXTest {
 				contactObj.setGivenName(jsonArray.getString(pos));
 				break;
 			case ContactObject.ANNIVERSARY:
-				String lAnniversary = jsonArray.getString(pos);
+				final String lAnniversary = jsonArray.getString(pos);
 				if (lAnniversary != null && !lAnniversary.equals("null")) {
 					contactObj.setAnniversary(new Date(Long.parseLong(lAnniversary)));
 				} else {
@@ -1057,7 +1058,7 @@ public class ContactTest extends AbstractAJAXTest {
 				contactObj.setAssistantName(jsonArray.getString(pos));
 				break;
 			case ContactObject.BIRTHDAY:
-				String lBirthday = jsonArray.getString(pos);
+				final String lBirthday = jsonArray.getString(pos);
 				if (lBirthday != null && !lBirthday.equals("null")) {
 					contactObj.setBirthday(new Date(Long.parseLong(lBirthday)));
 				} else {
@@ -1351,11 +1352,11 @@ public class ContactTest extends AbstractAJAXTest {
 		}
 	}
 	
-	private static LinkEntryObject[] parseLinks(ContactObject contactObj, JSONArray jsonArray) throws Exception {
-		LinkEntryObject[] links = new LinkEntryObject[jsonArray.length()];
+	private static LinkEntryObject[] parseLinks(final ContactObject contactObj, final JSONArray jsonArray) throws Exception {
+		final LinkEntryObject[] links = new LinkEntryObject[jsonArray.length()];
 		for (int a = 0; a < links.length; a++) {
 			links[a] = new LinkEntryObject();
-			JSONObject entry = jsonArray.getJSONObject(a);
+			final JSONObject entry = jsonArray.getJSONObject(a);
 			if (entry.has(ContactFields.ID)) {
 				links[a].setLinkID(DataParser.parseInt(entry, ContactFields.ID));
 			}
@@ -1366,10 +1367,10 @@ public class ContactTest extends AbstractAJAXTest {
 		return links;
 	}
 	
-	private static DistributionListEntryObject[] parseDistributionList(ContactObject contactObj, JSONArray jsonArray) throws Exception {
-		DistributionListEntryObject[] distributionlist = new DistributionListEntryObject[jsonArray.length()];
+	private static DistributionListEntryObject[] parseDistributionList(final ContactObject contactObj, final JSONArray jsonArray) throws Exception {
+		final DistributionListEntryObject[] distributionlist = new DistributionListEntryObject[jsonArray.length()];
 		for (int a = 0; a < jsonArray.length(); a++) {
-			JSONObject entry = jsonArray.getJSONObject(a);
+			final JSONObject entry = jsonArray.getJSONObject(a);
 			distributionlist[a] = new DistributionListEntryObject();
 			if (entry.has(DistributionListFields.ID)) {
 				distributionlist[a].setEntryID(DataParser.parseInt(entry, DistributionListFields.ID));
@@ -1391,12 +1392,12 @@ public class ContactTest extends AbstractAJAXTest {
 		return distributionlist;
 	}
 	
-	private HashSet links2String(LinkEntryObject[] linkEntryObject) throws Exception {
+	private HashSet links2String(final LinkEntryObject[] linkEntryObject) throws Exception {
 		if (linkEntryObject == null) {
 			return null;
 		}
 		
-		HashSet hs = new HashSet();
+		final HashSet hs = new HashSet();
 		
 		for (int a = 0; a < linkEntryObject.length; a++) {
 			hs.add(link2String(linkEntryObject[a]));
@@ -1405,20 +1406,20 @@ public class ContactTest extends AbstractAJAXTest {
 		return hs;
 	}
 	
-	private String link2String(LinkEntryObject linkEntryObject) throws Exception {
-		StringBuffer sb = new StringBuffer();
+	private String link2String(final LinkEntryObject linkEntryObject) throws Exception {
+		final StringBuffer sb = new StringBuffer();
 		sb.append("ID" + linkEntryObject.getLinkID());
 		sb.append("DISPLAYNAME" + linkEntryObject.getLinkDisplayname());
 		
 		return sb.toString();
 	}
 	
-	private HashSet distributionlist2String(DistributionListEntryObject[] distributionListEntry) throws Exception {
+	private HashSet distributionlist2String(final DistributionListEntryObject[] distributionListEntry) throws Exception {
 		if (distributionListEntry == null) {
 			return null;
 		}
 		
-		HashSet hs = new HashSet();
+		final HashSet hs = new HashSet();
 		
 		for (int a = 0; a < distributionListEntry.length; a++) {
 			hs.add(entry2String(distributionListEntry[a]));
@@ -1427,8 +1428,8 @@ public class ContactTest extends AbstractAJAXTest {
 		return hs;
 	}
 	
-	private String entry2String(DistributionListEntryObject entry) throws Exception {
-		StringBuffer sb = new StringBuffer();
+	private String entry2String(final DistributionListEntryObject entry) throws Exception {
+		final StringBuffer sb = new StringBuffer();
 		sb.append("ID" + entry.getEntryID());
 		sb.append("D" + entry.getDisplayname());
 		sb.append("F" + entry.getEmailfield());

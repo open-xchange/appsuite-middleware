@@ -12,16 +12,17 @@ public class Bug6055Test extends AppointmentTest {
 	
 	private static final Log LOG = LogFactory.getLog(Bug6055Test.class);
 	
-	public Bug6055Test(String name) {
+	public Bug6055Test(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 	
 	public void testBug6055() throws Exception {
-		AppointmentObject appointmentObj = createAppointmentObject("testBug6055");
+		final AppointmentObject appointmentObj = createAppointmentObject("testBug6055");
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		
@@ -36,7 +37,7 @@ public class Bug6055Test extends AppointmentTest {
 		participants[3].setEmailAddress("externaluser3@ox6-test.tux");
 		appointmentObj.setParticipants(participants);
 		
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());

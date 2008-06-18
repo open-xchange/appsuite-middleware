@@ -49,18 +49,19 @@
 
 package com.openexchange.groupware.importexport;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.importexport.importers.ICalImporter;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.session.ServerSessionFactory;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 
 public class AbstractICalImportTest extends AbstractContactTest {
 

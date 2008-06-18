@@ -6,8 +6,8 @@ public class TraceTest extends ActionTestCase {
 	public void testBasic() throws Exception {
 		final WebdavPath INDEX_HTML_URL = testCollection.dup().append("index.html");
 		
-		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
-		MockWebdavResponse res = new MockWebdavResponse();
+		final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+		final MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setHeader("header1", "value1");
 		req.setHeader("header2", "value2");
@@ -17,7 +17,7 @@ public class TraceTest extends ActionTestCase {
 		
 		req.setUrl(INDEX_HTML_URL);
 		
-		WebdavAction action = new WebdavTraceAction();
+		final WebdavAction action = new WebdavTraceAction();
 		
 		action.perform(req,res);
 		

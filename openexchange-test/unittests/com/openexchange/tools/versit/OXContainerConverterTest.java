@@ -67,9 +67,9 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.versit.converter.ConverterPrivacyException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
-import com.openexchange.test.AjaxInit;
 
 /**
  * This test was only written to test additions that I made to 
@@ -81,11 +81,13 @@ import com.openexchange.test.AjaxInit;
  */
 public class OXContainerConverterTest extends TestCase {
 
-    public void setUp() throws Exception {
+    @Override
+	public void setUp() throws Exception {
         Init.startServer();
     }
 
-    public void tearDown() throws Exception {
+    @Override
+	public void tearDown() throws Exception {
         Init.stopServer();
     }
 
@@ -93,8 +95,8 @@ public class OXContainerConverterTest extends TestCase {
 
 		ContextStorage.start();
 		final UserStorage uStorage = UserStorage.getInstance();
-		int userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), new ContextImpl(1));
-		SessionObject sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-tests");
+		final int userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), new ContextImpl(1));
+		final SessionObject sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-tests");
 		return sessObj;
 	}
 
@@ -103,7 +105,7 @@ public class OXContainerConverterTest extends TestCase {
 	 * @throws Exception 
 	 */
 	public void test7472_forPrivate() throws Exception{
-		String versitData = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\nBEGIN:VEVENT\nCLASS:PRIVATE\nDTSTART:20070514T150000Z\nDTEND:20070514T163000Z\nLOCATION:Olpe\nSUMMARY:Simple iCal Appointment\nDESCRIPTION:Notes here...\nEND:VEVENT\nEND:VCALENDAR\n";
+		final String versitData = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\nBEGIN:VEVENT\nCLASS:PRIVATE\nDTSTART:20070514T150000Z\nDTEND:20070514T163000Z\nLOCATION:Olpe\nSUMMARY:Simple iCal Appointment\nDESCRIPTION:Notes here...\nEND:VEVENT\nEND:VCALENDAR\n";
 		isFlaggedAsPrivate(versitData);
 	}
 	
@@ -113,14 +115,14 @@ public class OXContainerConverterTest extends TestCase {
 	 */
 
 	public void test7472_forConfidential() {
-		String versitData = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\nBEGIN:VEVENT\nCLASS:CONFIDENTIAL\nDTSTART:20070514T150000Z\nDTEND:20070514T163000Z\nLOCATION:Olpe\nSUMMARY:Simple iCal Appointment\nDESCRIPTION:Notes here...\nEND:VEVENT\nEND:VCALENDAR\n";
+		final String versitData = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\nBEGIN:VEVENT\nCLASS:CONFIDENTIAL\nDTSTART:20070514T150000Z\nDTEND:20070514T163000Z\nLOCATION:Olpe\nSUMMARY:Simple iCal Appointment\nDESCRIPTION:Notes here...\nEND:VEVENT\nEND:VCALENDAR\n";
 		try {
 			isFlaggedAsPrivate(versitData);
 			fail("Should throw privacy exception");
-		} catch (ConverterPrivacyException e){
+		} catch (final ConverterPrivacyException e){
 			assertTrue("Should throw privacy exception" , true);
 			return;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			fail("Wanted ConverterPrivacyException");
 		}
 	}
@@ -130,7 +132,7 @@ public class OXContainerConverterTest extends TestCase {
 	 * @throws Exception 
 	 */
 	public void test7472_forPublic() throws Exception{
-		String versitData = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\nBEGIN:VEVENT\nCLASS:PUBLIC\nDTSTART:20070514T150000Z\nDTEND:20070514T163000Z\nLOCATION:Olpe\nSUMMARY:Simple iCal Appointment\nDESCRIPTION:Notes here...\nEND:VEVENT\nEND:VCALENDAR\n";
+		final String versitData = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\nBEGIN:VEVENT\nCLASS:PUBLIC\nDTSTART:20070514T150000Z\nDTEND:20070514T163000Z\nLOCATION:Olpe\nSUMMARY:Simple iCal Appointment\nDESCRIPTION:Notes here...\nEND:VEVENT\nEND:VCALENDAR\n";
 		assertFalse(isFlaggedAsPrivate(versitData));
 	}
 	
@@ -152,52 +154,52 @@ public class OXContainerConverterTest extends TestCase {
 			"END:VTODO\n" +
 			"END:VCALENDAR";
 		final Task task = convertTask(versitData);
-		Participant[] participants = task.getParticipants();
+		final Participant[] participants = task.getParticipants();
 		assertEquals(1,participants.length);
 		
 		try {
-			UserParticipant p = (UserParticipant) participants[0];
+			final UserParticipant p = (UserParticipant) participants[0];
 			assertEquals(testUser.getId() ,p.getIdentifier());
-		} catch (ClassCastException e){
+		} catch (final ClassCastException e){
 			fail("User with e-mail " + participantEmail + " should be internal user");
 		}
 	}
 	
-	public Task convertTask(String versitData) throws Exception{
-		VersitDefinition def = ICalendar.definition;
+	public Task convertTask(final String versitData) throws Exception{
+		final VersitDefinition def = ICalendar.definition;
 		
 		final VersitDefinition.Reader versitReader = def.getReader(
 				new ByteArrayInputStream(versitData.getBytes("UTF-8")), "UTF-8");
 		
-		VersitObject rootVersitObject = def.parseBegin(versitReader);
-		VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
+		final VersitObject rootVersitObject = def.parseBegin(versitReader);
+		final VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
 		
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter(getSession());
 		return oxContainerConverter.convertTask(versitObject);
 	}
 	
-	public AppointmentObject convertAppointment(String versitData) throws Exception{
-		VersitDefinition def = ICalendar.definition;
+	public AppointmentObject convertAppointment(final String versitData) throws Exception{
+		final VersitDefinition def = ICalendar.definition;
 		
 		final VersitDefinition.Reader versitReader = def.getReader(
 				new ByteArrayInputStream(versitData.getBytes("UTF-8")), "UTF-8");
 		
-		VersitObject rootVersitObject = def.parseBegin(versitReader);
-		VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
+		final VersitObject rootVersitObject = def.parseBegin(versitReader);
+		final VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
 		
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter(getSession());
 		return oxContainerConverter.convertAppointment(versitObject);
 	}
 
 	
-	public boolean isFlaggedAsPrivate(String versitData) throws Exception{
-		VersitDefinition def = ICalendar.definition;
+	public boolean isFlaggedAsPrivate(final String versitData) throws Exception{
+		final VersitDefinition def = ICalendar.definition;
 		
 		final VersitDefinition.Reader versitReader = def.getReader(
 				new ByteArrayInputStream(versitData.getBytes("UTF-8")), "UTF-8");
 		
-		VersitObject rootVersitObject = def.parseBegin(versitReader);
-		VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
+		final VersitObject rootVersitObject = def.parseBegin(versitReader);
+		final VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
 		
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter(getSession());
 		

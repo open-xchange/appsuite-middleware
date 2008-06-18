@@ -12,18 +12,19 @@ public class Bug8836Test extends AppointmentTest {
 
 	private static final Log LOG = LogFactory.getLog(Bug8836Test.class);
 	
-	public Bug8836Test(String name) {
+	public Bug8836Test(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 	
 	public void testBug8836() throws Exception {
-		AppointmentObject appointmentObj = createAppointmentObject("testBug8836");
+		final AppointmentObject appointmentObj = createAppointmentObject("testBug8836");
 		appointmentObj.setIgnoreConflicts(true);
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		
 		appointmentObj.setObjectID(objectId);
 		appointmentObj.setPrivateFlag(true);

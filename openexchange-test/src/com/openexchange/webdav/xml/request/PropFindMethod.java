@@ -50,10 +50,11 @@ public class PropFindMethod extends EntityEnclosingMethod {
 		super();
 	}
 	
-	public PropFindMethod(String url) {
+	public PropFindMethod(final String url) {
 		super(url);
 	}
 	
+	@Override
 	public String getName() {
 		return "PROPFIND";
 	}

@@ -58,22 +58,21 @@ import java.sql.SQLException;
 
 import junit.framework.JUnit4TestAdapter;
 
-import org.junit.Test;
 import org.junit.BeforeClass;
+import org.junit.Test;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.groupware.userconfiguration.OverridingUserConfigurationStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.groupware.userconfiguration.OverridingUserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
 /**
  * This class tests whether security checks for modularisation work
@@ -102,11 +101,12 @@ public class Bug8681forICAL extends AbstractICalImportTest {
     @Test public void checkAppointment() throws AbstractOXException, UnsupportedEncodingException, SQLException, OXException, LdapException {
 		folderId = createTestFolder(FolderObject.CALENDAR, sessObj,ctx, "bug8681 for ical appointments");
 		
-		UserConfigurationStorage original = UserConfigurationStorage.getInstance();
-        OverridingUserConfigurationStorage override = new OverridingUserConfigurationStorage(original) {
-            public UserConfiguration getOverride(int userId, int[] groups, Context ctx) throws UserConfigurationException {
-                UserConfiguration orig = delegate.getUserConfiguration(userId, ctx);
-                UserConfiguration copy = (UserConfiguration) orig.clone();
+		final UserConfigurationStorage original = UserConfigurationStorage.getInstance();
+        final OverridingUserConfigurationStorage override = new OverridingUserConfigurationStorage(original) {
+            @Override
+			public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws UserConfigurationException {
+                final UserConfiguration orig = delegate.getUserConfiguration(userId, ctx);
+                final UserConfiguration copy = (UserConfiguration) orig.clone();
                 copy.setCalendar(false);
                 return copy;
             }
@@ -114,7 +114,7 @@ public class Bug8681forICAL extends AbstractICalImportTest {
         override.override();
 		
 		try {
-			String ical = //from bug 7732
+			final String ical = //from bug 7732
 				"BEGIN:VCALENDAR\n" +
 				"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" +
 				"VERSION:2.0\n" +
@@ -140,7 +140,7 @@ public class Bug8681forICAL extends AbstractICalImportTest {
 			imp.canImport(sessObj, format, _folders(), null);
 			imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), _folders(), null);
 			fail("Could import appointment into Calendar module without permission");
-		} catch (ImportExportException e){
+		} catch (final ImportExportException e){
 			assertEquals(Category.PERMISSION, e.getCategory());
 			assertEquals("I_E-0507", e.getErrorCode());
 		} finally {
@@ -153,18 +153,19 @@ public class Bug8681forICAL extends AbstractICalImportTest {
     @Test public void checkTask() throws AbstractOXException, UnsupportedEncodingException, SQLException, OXException, LdapException {
 		folderId = createTestFolder(FolderObject.TASK, sessObj,ctx, "bug8681 for ical tasks");
 		
-		UserConfigurationStorage original = UserConfigurationStorage.getInstance();
-        OverridingUserConfigurationStorage override = new OverridingUserConfigurationStorage(original) {
-            public UserConfiguration getOverride(int userId, int[] groups, Context ctx) throws UserConfigurationException {
-                UserConfiguration orig = delegate.getUserConfiguration(userId, ctx);
-                UserConfiguration copy = (UserConfiguration) orig.clone();
+		final UserConfigurationStorage original = UserConfigurationStorage.getInstance();
+        final OverridingUserConfigurationStorage override = new OverridingUserConfigurationStorage(original) {
+            @Override
+			public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws UserConfigurationException {
+                final UserConfiguration orig = delegate.getUserConfiguration(userId, ctx);
+                final UserConfiguration copy = (UserConfiguration) orig.clone();
                 copy.setTask(false);
                 return copy;
             }
         };
         override.override();
 		try {
-			String ical = //from bug 7718
+			final String ical = //from bug 7718
 				"BEGIN:VCALENDAR\n" +
 				"PRODID:-//K Desktop Environment//NONSGML libkcal 3.2//EN\n" +
 				"VERSION:2.0\n" +
@@ -188,7 +189,7 @@ public class Bug8681forICAL extends AbstractICalImportTest {
 			imp.canImport(sessObj, format, _folders(), null);
 			imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), _folders(), null);
 			fail("Could import appointment into Calendar module without permission");
-		} catch (ImportExportException e){
+		} catch (final ImportExportException e){
 			assertEquals(Category.PERMISSION, e.getCategory());
 			assertEquals("I_E-0508", e.getErrorCode());
 		} finally {

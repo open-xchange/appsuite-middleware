@@ -18,14 +18,14 @@ import com.openexchange.tools.URLParameter;
 
 public class ResourceTest extends AbstractAJAXTest {
 	
-	public ResourceTest(String name) {
+	public ResourceTest(final String name) {
 		super(name);
 	}
 
 	private static final String RESOURCE_URL = "/ajax/resource";
 	
 	public void testSearch() throws Exception {
-		com.openexchange.resource.Resource resources[] = searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
+		final com.openexchange.resource.Resource resources[] = searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
 		assertTrue("resource array size is not > 0", resources.length > 0);
 	}
 	
@@ -33,7 +33,7 @@ public class ResourceTest extends AbstractAJAXTest {
 		com.openexchange.resource.Resource resources[] = searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
 		assertTrue("resource array size is not > 0", resources.length > 0);
 		
-		int[] id = new int[resources.length];
+		final int[] id = new int[resources.length];
 		for (int a = 0; a < id.length; a++) {
 			id[a] = resources[a].getIdentifier();
 		}
@@ -43,24 +43,24 @@ public class ResourceTest extends AbstractAJAXTest {
 	}
 	
 	public void testGet() throws Exception {
-		com.openexchange.resource.Resource resources[] = searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
+		final com.openexchange.resource.Resource resources[] = searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
 		assertTrue("resource array size is not > 0", resources.length > 0);
-		com.openexchange.resource.Resource r = loadResource(getWebConversation(), resources[0].getIdentifier(), PROTOCOL + getHostName(), getSessionId());
+		final com.openexchange.resource.Resource r = loadResource(getWebConversation(), resources[0].getIdentifier(), PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public static com.openexchange.resource.Resource[] searchResource(WebConversation webCon, String searchpattern, String host, String session) throws Exception {
+	public static com.openexchange.resource.Resource[] searchResource(final WebConversation webCon, final String searchpattern, String host, final String session) throws Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
 		
-		JSONObject jsonObj = new JSONObject();
+		final JSONObject jsonObj = new JSONObject();
 		jsonObj.put("pattern", searchpattern);
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
-		WebRequest req = new PutMethodWebRequest(host + RESOURCE_URL + parameter.getURLParameters(), bais, "text/javascript");
-		WebResponse resp = webCon.getResponse(req);
+		final ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
+		final WebRequest req = new PutMethodWebRequest(host + RESOURCE_URL + parameter.getURLParameters(), bais, "text/javascript");
+		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
@@ -72,10 +72,10 @@ public class ResourceTest extends AbstractAJAXTest {
 		
 		assertNotNull("timestamp is null", response.getTimestamp());
 		
-		JSONArray jsonArray = (JSONArray)response.getData();
-		com.openexchange.resource.Resource[] r = new com.openexchange.resource.Resource[jsonArray.length()];
+		final JSONArray jsonArray = (JSONArray)response.getData();
+		final com.openexchange.resource.Resource[] r = new com.openexchange.resource.Resource[jsonArray.length()];
 		for (int a = 0; a < r.length; a++) {
-			JSONObject jObj = jsonArray.getJSONObject(a);
+			final JSONObject jObj = jsonArray.getJSONObject(a);
 			r[a] = new com.openexchange.resource.Resource();
 			r[a].setIdentifier(jObj.getInt(ParticipantsFields.ID));
 			if (jObj.has(ParticipantsFields.DISPLAY_NAME)) {
@@ -86,23 +86,23 @@ public class ResourceTest extends AbstractAJAXTest {
 		return r;
 	}
 	
-	public static com.openexchange.resource.Resource[] listResource(WebConversation webCon, int[] id, String host, String session) throws Exception {
+	public static com.openexchange.resource.Resource[] listResource(final WebConversation webCon, final int[] id, String host, final String session) throws Exception {
 		host = appendPrefix(host);
 		
         final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
 		
-		JSONArray requestArray = new JSONArray();
+		final JSONArray requestArray = new JSONArray();
 		for (int a = 0; a < id.length; a++) {
-			JSONObject jData = new JSONObject();
+			final JSONObject jData = new JSONObject();
 			jData.put(DataFields.ID, id[a]);
 			requestArray.put(jData);
 		}
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(requestArray.toString().getBytes());
-		WebRequest req = new PutMethodWebRequest(host + RESOURCE_URL + parameter.getURLParameters(), bais, "text/javascript");
-		WebResponse resp = webCon.getResponse(req);
+		final ByteArrayInputStream bais = new ByteArrayInputStream(requestArray.toString().getBytes());
+		final WebRequest req = new PutMethodWebRequest(host + RESOURCE_URL + parameter.getURLParameters(), bais, "text/javascript");
+		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
@@ -114,10 +114,10 @@ public class ResourceTest extends AbstractAJAXTest {
 		
 		assertNotNull("timestamp", response.getTimestamp());
 		
-		JSONArray jsonArray = (JSONArray)response.getData();
-		com.openexchange.resource.Resource[] r = new com.openexchange.resource.Resource[jsonArray.length()];
+		final JSONArray jsonArray = (JSONArray)response.getData();
+		final com.openexchange.resource.Resource[] r = new com.openexchange.resource.Resource[jsonArray.length()];
 		for (int a = 0; a < r.length; a++) {
-			JSONObject jObj = jsonArray.getJSONObject(a);
+			final JSONObject jObj = jsonArray.getJSONObject(a);
 			r[a] = new com.openexchange.resource.Resource();
 			r[a].setIdentifier(jObj.getInt(ParticipantsFields.ID));
 			if (jObj.has(ParticipantsFields.DISPLAY_NAME)) {
@@ -128,7 +128,7 @@ public class ResourceTest extends AbstractAJAXTest {
 		return r;
 	}
 	
-	public static com.openexchange.resource.Resource loadResource(WebConversation webCon, int groupId, String host, String session) throws Exception {
+	public static com.openexchange.resource.Resource loadResource(final WebConversation webCon, final int groupId, String host, final String session) throws Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -136,8 +136,8 @@ public class ResourceTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET);
 		parameter.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(groupId));
 		
-		WebRequest req = new GetMethodWebRequest(host + RESOURCE_URL + parameter.getURLParameters());
-		WebResponse resp = webCon.getResponse(req);
+		final WebRequest req = new GetMethodWebRequest(host + RESOURCE_URL + parameter.getURLParameters());
+		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
@@ -149,9 +149,9 @@ public class ResourceTest extends AbstractAJAXTest {
 		
 		assertNotNull("timestamp is null", response.getTimestamp());
 		
-		JSONObject jsonObj = (JSONObject)response.getData();
+		final JSONObject jsonObj = (JSONObject)response.getData();
 		
-		com.openexchange.resource.Resource r = new com.openexchange.resource.Resource();
+		final com.openexchange.resource.Resource r = new com.openexchange.resource.Resource();
 		assertTrue("id is not in json object", jsonObj.has(ParticipantsFields.ID));
 		r.setIdentifier(jsonObj.getInt(ParticipantsFields.ID));
 		

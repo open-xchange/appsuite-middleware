@@ -17,10 +17,11 @@ public class Bug10733Test extends AppointmentTest {
 	
 	private static final Log LOG = LogFactory.getLog(Bug10733Test.class);
 	
-	public Bug10733Test(String name) {
+	public Bug10733Test(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
@@ -39,7 +40,7 @@ public class Bug10733Test extends AppointmentTest {
 		stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
 		stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
 	
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle(stringBuffer.toString());
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));

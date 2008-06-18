@@ -38,7 +38,7 @@ public class RedirectResponseParser extends AbstractAJAXParser<RedirectResponse>
         assertNotNull("Location for redirect is missing.", location);
         final String[] newCookies = resp.getNewCookieNames();
         boolean oxCookieFound = false;
-        for (String newCookie : newCookies) {
+        for (final String newCookie : newCookies) {
             if (newCookie.startsWith(Login.cookiePrefix)) {
                 oxCookieFound = true;
                 break;

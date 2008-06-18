@@ -420,7 +420,7 @@ public class MockUser implements User {
 	 * @return the groups this user is member of.
 	 */
 	public int[] getGroups() {
-		return (int[]) groups.clone();
+		return groups.clone();
 	}
 
 	/**
@@ -442,7 +442,7 @@ public class MockUser implements User {
 	 */
 	private static int[] addAllGroupsAndUsersGroup(final int[] groups) {
 		boolean contained = false;
-		for (int group : groups) {
+		for (final int group : groups) {
 			contained = group == GROUP_ALL;
 		}
 		if (contained) {
@@ -481,11 +481,11 @@ public class MockUser implements User {
 		return passwordMech;
 	}
 
-	public void setPasswordMech(String passwordMech) {
+	public void setPasswordMech(final String passwordMech) {
 		this.passwordMech = passwordMech;
 	}
 
-	public void setLoginInfo(String loginInfo) {
+	public void setLoginInfo(final String loginInfo) {
 		this.loginInfo = loginInfo;
 	}
 
@@ -495,7 +495,7 @@ public class MockUser implements User {
 
 	public Locale getLocale() {
 		if (locale == null && preferredLanguage != null) {
-			String[] lang = preferredLanguage.split("_");
+			final String[] lang = preferredLanguage.split("_");
 			if (lang.length == 2) {
 				locale = new Locale(lang[0], lang[1]);
 			} else {
@@ -505,7 +505,7 @@ public class MockUser implements User {
 		return locale;
 	}
 
-	public void setLocale(Locale locale) {
+	public void setLocale(final Locale locale) {
 		this.locale = locale;
 	}
 }

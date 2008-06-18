@@ -51,14 +51,14 @@ public class QuotaFileStorageTest extends TestCase {
         
         tempFile.delete();
         
-        TestQuotaFileStorage quotaStorage = (TestQuotaFileStorage) FileStorage.getInstance(3,256,new URI("file://"+tempFile.getAbsolutePath()),new ContextImpl(1),new DummyDBProvider());
+        final TestQuotaFileStorage quotaStorage = (TestQuotaFileStorage) FileStorage.getInstance(3,256,new URI("file://"+tempFile.getAbsolutePath()),new ContextImpl(1),new DummyDBProvider());
         quotaStorage.setQuota(10000);
         // And again, some lines from the original test
         final String fileContent = RandomString.generateLetter(100);
         final ByteArrayInputStream bais = new ByteArrayInputStream(fileContent
             .getBytes("UTF-8"));
        
-        String id = quotaStorage.saveNewFile(bais);
+        final String id = quotaStorage.saveNewFile(bais);
         
         assertEquals(fileContent.getBytes("UTF-8").length, quotaStorage.getUsage());
         assertEquals(fileContent.getBytes("UTF-8").length, quotaStorage.getFileSize(id));
@@ -77,7 +77,7 @@ public class QuotaFileStorageTest extends TestCase {
         
         tempFile.delete();
         
-        TestQuotaFileStorage quotaStorage = (TestQuotaFileStorage) FileStorage.getInstance(3,256,new URI("file://"+tempFile.getAbsolutePath()),new ContextImpl(1),new DummyDBProvider());
+        final TestQuotaFileStorage quotaStorage = (TestQuotaFileStorage) FileStorage.getInstance(3,256,new URI("file://"+tempFile.getAbsolutePath()),new ContextImpl(1),new DummyDBProvider());
         quotaStorage.setQuota(10000);
         
         final String fileContent = RandomString.generateLetter(100);
@@ -88,9 +88,9 @@ public class QuotaFileStorageTest extends TestCase {
 	        final ByteArrayInputStream bais = new ByteArrayInputStream(fileContent
 	                .getBytes("UTF-8"));
 	           
-	        String id = quotaStorage.saveNewFile(bais);
+	        final String id = quotaStorage.saveNewFile(bais);
 	        fail("Managed to exceed quota");
-        } catch (FileStorageException x) {
+        } catch (final FileStorageException x) {
         	assertTrue(true);
         }
 	}
@@ -103,17 +103,17 @@ public class QuotaFileStorageTest extends TestCase {
         
         tempFile.delete();
         
-        TestQuotaFileStorage quotaStorage = (TestQuotaFileStorage) FileStorage.getInstance(3,256,new URI("file://"+tempFile.getAbsolutePath()),new ContextImpl(1),new DummyDBProvider());
+        final TestQuotaFileStorage quotaStorage = (TestQuotaFileStorage) FileStorage.getInstance(3,256,new URI("file://"+tempFile.getAbsolutePath()),new ContextImpl(1),new DummyDBProvider());
         quotaStorage.setQuota(10000);
         quotaStorage.storeUsage(5000);
         
-        Thread[] threads = new Thread[100];
+        final Thread[] threads = new Thread[100];
         for(int i = 0; i < threads.length; i++) {
         	threads[i] = new AddAndRemoveThread(50,quotaStorage);
         }
         
-        for(Thread thread : threads) { thread.start(); }
-        for(Thread thread : threads) { thread.join(); }
+        for(final Thread thread : threads) { thread.start(); }
+        for(final Thread thread : threads) { thread.join(); }
         
         assertEquals(5000, quotaStorage.getUsage());
 	}
@@ -124,22 +124,22 @@ public class QuotaFileStorageTest extends TestCase {
         
         tempFile.delete();
         
-        TestQuotaFileStorage quotaStorage = (TestQuotaFileStorage) FileStorage.getInstance(3,256,new URI("file://"+tempFile.getAbsolutePath()),new ContextImpl(1),new DummyDBProvider());
+        final TestQuotaFileStorage quotaStorage = (TestQuotaFileStorage) FileStorage.getInstance(3,256,new URI("file://"+tempFile.getAbsolutePath()),new ContextImpl(1),new DummyDBProvider());
         quotaStorage.setQuota(10000);
         
-        int size = 1000;
-        int tests = 2;
-        long delay = 6000;
+        final int size = 1000;
+        final int tests = 2;
+        final long delay = 6000;
         
         quotaStorage.setQuota(size*tests);
         quotaStorage.storeUsage(0);
         
         
         
-        SaveFileThread[] saveFiles = new SaveFileThread[tests];
+        final SaveFileThread[] saveFiles = new SaveFileThread[tests];
         
         for(int i = 0; i < saveFiles.length; i++) {
-        	DelayedInputStream is = new DelayedInputStream(new ByteArrayInputStream(new byte[size]), delay);
+        	final DelayedInputStream is = new DelayedInputStream(new ByteArrayInputStream(new byte[size]), delay);
         	saveFiles[i] = new SaveFileThread(is, quotaStorage);
         	saveFiles[i].start();
         }
@@ -159,14 +159,14 @@ public class QuotaFileStorageTest extends TestCase {
 	
 	public static final class TestQuotaFileStorage extends QuotaFileStorage{
 
-		public TestQuotaFileStorage(Object...initData) throws FileStorageException {
+		public TestQuotaFileStorage(final Object...initData) throws FileStorageException {
 			super(initData);
 		}
 
 		private long usage;
 		private long quota;
 		
-		public void setQuota(long quota){
+		public void setQuota(final long quota){
 			this.quota = quota;
 		}
 
@@ -176,12 +176,12 @@ public class QuotaFileStorageTest extends TestCase {
 		}
 
 		@Override
-		protected long getUsage(boolean write) throws QuotaFileStorageException {
+		protected long getUsage(final boolean write) throws QuotaFileStorageException {
 			return usage;
 		}
 
 		@Override
-		protected void storeUsage(long usage) throws QuotaFileStorageException {
+		protected void storeUsage(final long usage) throws QuotaFileStorageException {
 			this.usage = usage;
 		}
 
@@ -189,12 +189,12 @@ public class QuotaFileStorageTest extends TestCase {
 	}
 	
 	private static final class AddAndRemoveThread extends Thread{
-		private int counter;
-		private FileStorage fs;
-		private byte[] bytes = new byte[10];
-		private Random r = new Random();
+		private final int counter;
+		private final FileStorage fs;
+		private final byte[] bytes = new byte[10];
+		private final Random r = new Random();
 		
-		public AddAndRemoveThread(int counter, FileStorage fs) {
+		public AddAndRemoveThread(final int counter, final FileStorage fs) {
 			super();
 			this.counter = counter;
 			this.fs = fs;
@@ -204,12 +204,12 @@ public class QuotaFileStorageTest extends TestCase {
 		public void run() {
 			for(int i = 0; i < counter; i++) {
 				try {
-					int w = r.nextInt(200);
-					String id = fs.saveNewFile(new ByteArrayInputStream(bytes));
+					final int w = r.nextInt(200);
+					final String id = fs.saveNewFile(new ByteArrayInputStream(bytes));
 					Thread.sleep(w);
 					fs.deleteFile(id);
 					//System.out.println(w);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -217,11 +217,11 @@ public class QuotaFileStorageTest extends TestCase {
 	}
 	
 	private static final class SaveFileThread extends Thread {
-		private InputStream data;
-		private FileStorage fs;
+		private final InputStream data;
+		private final FileStorage fs;
 		private Exception exception;
 		
-		public SaveFileThread(InputStream data, FileStorage fs){
+		public SaveFileThread(final InputStream data, final FileStorage fs){
 			this.data = data;
 			this.fs = fs;
 		}
@@ -232,7 +232,7 @@ public class QuotaFileStorageTest extends TestCase {
 		public void run() {
 			try {
 				fs.saveNewFile(data);
-			} catch (FileStorageException e) {
+			} catch (final FileStorageException e) {
 				exception = e;
 			}
 		}
@@ -241,11 +241,11 @@ public class QuotaFileStorageTest extends TestCase {
 	private static final class SendDataThread extends Thread {
 		
 		private long size;
-		private long delay;
-		private OutputStream output;
+		private final long delay;
+		private final OutputStream output;
 		private Exception e;
 		
-		public SendDataThread(OutputStream output, long size, long delay) {
+		public SendDataThread(final OutputStream output, final long size, final long delay) {
 			this.output = output;
 			this.delay = delay;
 			this.size = size;
@@ -257,14 +257,14 @@ public class QuotaFileStorageTest extends TestCase {
 				try {
 					output.write((int)size);
 					Thread.sleep(delay);
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					this.e = e;
-				} catch (InterruptedException e) {
+				} catch (final InterruptedException e) {
 					this.e = e;
 				} finally {
 					try {
 						output.close();
-					} catch (IOException e) {
+					} catch (final IOException e) {
 						//Ignore
 					}
 				}
@@ -278,22 +278,22 @@ public class QuotaFileStorageTest extends TestCase {
 	
 	private static final class DummyDBProvider implements DBProvider{
 
-		public Connection getReadConnection(Context ctx) throws TransactionException {
+		public Connection getReadConnection(final Context ctx) throws TransactionException {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public Connection getWriteConnection(Context ctx) throws TransactionException {
+		public Connection getWriteConnection(final Context ctx) throws TransactionException {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public void releaseReadConnection(Context ctx, Connection con) {
+		public void releaseReadConnection(final Context ctx, final Connection con) {
 			// TODO Auto-generated method stub
 			
 		}
 
-		public void releaseWriteConnection(Context ctx, Connection con) {
+		public void releaseWriteConnection(final Context ctx, final Connection con) {
 			// TODO Auto-generated method stub
 			
 		}

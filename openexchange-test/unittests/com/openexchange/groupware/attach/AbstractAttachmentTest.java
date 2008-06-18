@@ -1,8 +1,8 @@
 package com.openexchange.groupware.attach;
 
-import com.openexchange.groupware.Init;
-
 import junit.framework.TestCase;
+
+import com.openexchange.groupware.Init;
 
 public abstract class AbstractAttachmentTest extends TestCase {
 	private Mode mode;
@@ -20,8 +20,9 @@ public abstract class AbstractAttachmentTest extends TestCase {
     }
 
     protected Mode mode(){
-		if(mode==null)
+		if(mode==null) {
 			mode = getMode();
+		}
 		return mode;
 	}
 

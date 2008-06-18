@@ -24,27 +24,28 @@ public class ListTest extends AppointmentTest {
 	
 	private static final Log LOG = LogFactory.getLog(ListTest.class);
 	
-	public ListTest(String name) {
+	public ListTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 
 	public void testList() throws Exception {
-		AppointmentObject appointmentObj = createAppointmentObject("testList");
+		final AppointmentObject appointmentObj = createAppointmentObject("testList");
 		appointmentObj.setIgnoreConflicts(true);
 		
-		int id1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		int id2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		int id3 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final int id1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final int id2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final int id3 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		final int[][] objectIdAndFolderId = { { id1, appointmentFolderId }, { id2, appointmentFolderId }, { id3, appointmentFolderId } };
 		
 		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.USERS };
 		
-		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, cols, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, cols, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		assertEquals("check response array", 3, appointmentArray.length);
 		
@@ -54,17 +55,17 @@ public class ListTest extends AppointmentTest {
 	}
 	
 	public void testListWithNoEntries() throws Exception {
-		AppointmentObject appointmentObj = createAppointmentObject("testList");
+		final AppointmentObject appointmentObj = createAppointmentObject("testList");
 		appointmentObj.setIgnoreConflicts(true);
-		int id1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		int id2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		int id3 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final int id1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final int id2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final int id3 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		final int[][] objectIdAndFolderId = { };
 		
 		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.USERS };
 		
-		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, cols, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, cols, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		assertEquals("check response array", 0, appointmentArray.length);
 		
@@ -74,7 +75,7 @@ public class ListTest extends AppointmentTest {
 	}
 	
 	public void testListWithAllFields() throws Exception {
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testListWithAllFields");
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
@@ -87,11 +88,11 @@ public class ListTest extends AppointmentTest {
 		appointmentObj.setNote("note");
 		appointmentObj.setCategories("testcat1,testcat2,testcat3");
 		
-		int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
-		int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
-		int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		final int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
+		final int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		final int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		
-		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
+		final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
 		participants[0] = new UserParticipant();
 		participants[0].setIdentifier(userId);
 		participants[1] = new UserParticipant();
@@ -105,32 +106,32 @@ public class ListTest extends AppointmentTest {
 		appointmentObj.setIgnoreConflicts(true);
 		
 		try {
-			int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+			final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 			
 			final int[][] objectIdAndFolderId = { { objectId, appointmentFolderId } };
 			
-			AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, APPOINTMENT_FIELDS, timeZone, PROTOCOL + getHostName(), getSessionId());
+			final AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, APPOINTMENT_FIELDS, timeZone, PROTOCOL + getHostName(), getSessionId());
 			
 			assertEquals("check response array", 1, appointmentArray.length);
 			
-			AppointmentObject loadAppointment = appointmentArray[0];
+			final AppointmentObject loadAppointment = appointmentArray[0];
 			
-			Calendar c = Calendar.getInstance();
+			final Calendar c = Calendar.getInstance();
 			c.setTimeZone(TimeZone.getTimeZone("UTC"));
 			c.set(Calendar.HOUR_OF_DAY, 0);
 			c.set(Calendar.MINUTE, 0);
 			c.set(Calendar.SECOND, 0);
 			c.set(Calendar.MILLISECOND, 0);
 			
-			long newStartTime = c.getTimeInMillis();
-			long newEndTime = newStartTime + 86400000;
+			final long newStartTime = c.getTimeInMillis();
+			final long newEndTime = newStartTime + 86400000;
 			
 			appointmentObj.setObjectID(objectId);
 			appointmentObj.setParentFolderID(appointmentFolderId);
 			compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 			
 			deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
-		} catch (OXConflictException exc) {
+		} catch (final OXConflictException exc) {
 			LOG.warn("Conflict Exception found. Maybe test result is wrong: " + exc);
 		}
 	}
@@ -138,13 +139,13 @@ public class ListTest extends AppointmentTest {
 	public void testListWithRecurrencePosition() throws Exception {
 		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.USERS, AppointmentObject.RECURRENCE_POSITION };
 		
-		FolderObject folderObj = new FolderObject();
+		final FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testListWithRecurrencePosition" + System.currentTimeMillis());
 		folderObj.setParentFolderID(FolderObject.PUBLIC);
 		folderObj.setModule(FolderObject.CALENDAR);
 		folderObj.setType(FolderObject.PUBLIC);
 		
-		OCLPermission[] permission = new OCLPermission[] {
+		final OCLPermission[] permission = new OCLPermission[] {
 			com.openexchange.webdav.xml.FolderTest.createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
 		};
 		
@@ -152,14 +153,14 @@ public class ListTest extends AppointmentTest {
 		
 		final int publicFolderId = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword());
 		
-		Calendar c = Calendar.getInstance();
+		final Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
 		c.set(Calendar.MINUTE, 0);
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
 		
-		Date until = new Date(c.getTimeInMillis() + (15*dayInMillis));
+		final Date until = new Date(c.getTimeInMillis() + (15*dayInMillis));
 		
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testListWithRecurrencePosition");
@@ -182,7 +183,7 @@ public class ListTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		final int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
-		AppointmentObject[] appointmentList = new AppointmentObject[3];
+		final AppointmentObject[] appointmentList = new AppointmentObject[3];
 		appointmentList[0] = new AppointmentObject();
 		appointmentList[0].setObjectID(objectId1);
 		appointmentList[0].setParentFolderID(publicFolderId);
@@ -195,7 +196,7 @@ public class ListTest extends AppointmentTest {
 		appointmentList[2].setObjectID(objectId2);
 		appointmentList[2].setParentFolderID(appointmentFolderId);
 		
-		AppointmentObject[] appointmentArray = AppointmentTest.listAppointment(getWebConversation(), appointmentList, cols, timeZone, getHostName(), getSessionId());
+		final AppointmentObject[] appointmentArray = AppointmentTest.listAppointment(getWebConversation(), appointmentList, cols, timeZone, getHostName(), getSessionId());
 		
 		assertEquals("3 elements expected", 3, appointmentArray.length);
 		

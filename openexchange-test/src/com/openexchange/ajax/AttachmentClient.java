@@ -17,55 +17,55 @@ import com.openexchange.ajax.container.Response;
 public class AttachmentClient {
 	private static AttachmentTest delegate;
 
-	public static Response all(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int[] columns, int sort, String order) throws MalformedURLException, JSONException, IOException, SAXException {
+	public static Response all(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final int[] columns, final int sort, final String order) throws MalformedURLException, JSONException, IOException, SAXException {
 		return delegate.all(webConv, sessionId, folderId, attachedId, moduleId, columns, sort, order);
 	}
 
-	public static Response attach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, File upload, String filename, String mimeType) throws JSONException, IOException {
+	public static Response attach(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final File upload, final String filename, final String mimeType) throws JSONException, IOException {
 		return delegate.attach(webConv, sessionId, folderId, attachedId, moduleId, upload, filename, mimeType);
 	}
 
-	public static Response attach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, File upload) throws JSONException, IOException {
+	public static Response attach(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final File upload) throws JSONException, IOException {
 		return delegate.attach(webConv, sessionId, folderId, attachedId, moduleId, upload);
 	}
 
-	public static Response attach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, List<File> uploads, Map<File, String> filenames, Map<File, String> mimetypes) throws JSONException, IOException {
+	public static Response attach(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final List<File> uploads, final Map<File, String> filenames, final Map<File, String> mimetypes) throws JSONException, IOException {
 		return delegate.attach(webConv, sessionId, folderId, attachedId, moduleId, uploads, filenames, mimetypes);
 	}
 
-	public static Response attach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, List<File> uploads) throws JSONException, IOException {
+	public static Response attach(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final List<File> uploads) throws JSONException, IOException {
 		return delegate.attach(webConv, sessionId, folderId, attachedId, moduleId, uploads);
 	}
 
-	public static Response detach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int[] ids) throws MalformedURLException, JSONException, IOException, SAXException {
+	public static Response detach(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final int[] ids) throws MalformedURLException, JSONException, IOException, SAXException {
 		return delegate.detach(webConv, sessionId, folderId, attachedId, moduleId, ids);
 	}
 
-	public static InputStream document(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int id, String contentType) throws IOException {
+	public static InputStream document(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType) throws IOException {
 		return delegate.document(webConv, sessionId, folderId, attachedId, moduleId, id, contentType);
 	}
 
-	public static InputStream document(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int id) throws IOException {
+	public static InputStream document(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final int id) throws IOException {
 		return delegate.document(webConv, sessionId, folderId, attachedId, moduleId, id);
 	}
 
-	public static GetMethodWebRequest documentRequest(String sessionId, int folderId, int attachedId, int moduleId, int id, String contentType) {
+	public static GetMethodWebRequest documentRequest(final String sessionId, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType) {
 		return delegate.documentRequest(sessionId, folderId, attachedId, moduleId, id, contentType);
 	}
 
-	public static Response get(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int id) throws MalformedURLException, JSONException, IOException, SAXException {
+	public static Response get(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final int id) throws MalformedURLException, JSONException, IOException, SAXException {
 		return delegate.get(webConv, sessionId, folderId, attachedId, moduleId, id);
 	}
 	
-	public Response list(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int[] ids, int[] columns) throws JSONException, MalformedURLException, IOException, SAXException {
+	public Response list(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final int[] ids, final int[] columns) throws JSONException, MalformedURLException, IOException, SAXException {
 		return delegate.list(webConv, sessionId, folderId, attachedId, moduleId, ids, columns);
 	}
 
-	public Response quota(WebConversation webConv, String sessionId) throws MalformedURLException, JSONException, IOException, SAXException {
+	public Response quota(final WebConversation webConv, final String sessionId) throws MalformedURLException, JSONException, IOException, SAXException {
 		return delegate.quota(webConv, sessionId);
 	}
 
-	public Response updates(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, long timestamp, int[] columns, int sort, String order) throws MalformedURLException, JSONException, IOException, SAXException {
+	public Response updates(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final long timestamp, final int[] columns, final int sort, final String order) throws MalformedURLException, JSONException, IOException, SAXException {
 		return delegate.updates(webConv, sessionId, folderId, attachedId, moduleId, timestamp, columns, sort, order);
 	}
 }

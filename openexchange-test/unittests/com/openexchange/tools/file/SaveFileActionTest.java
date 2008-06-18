@@ -4,7 +4,6 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
@@ -54,7 +53,7 @@ public class SaveFileActionTest extends AbstractActionTest {
 	protected void verifyPerformed() throws Exception {
 		assertTrue(null != saveFile.getId());
 		InputStream in = null;
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
 			in = new BufferedInputStream(storage.getFile(saveFile.getId()));
 			int b = 0;
@@ -62,12 +61,14 @@ public class SaveFileActionTest extends AbstractActionTest {
 				out.write(b);
 			}
 		} finally {
-			if(in!=null)
+			if(in!=null) {
 				in.close();
-			if(out!=null)
+			}
+			if(out!=null) {
 				out.close();
+			}
 		}
-		String got = new String(out.toByteArray(), "UTF-8");
+		final String got = new String(out.toByteArray(), "UTF-8");
 		assertEquals(content, got);
 	}
 
@@ -76,7 +77,7 @@ public class SaveFileActionTest extends AbstractActionTest {
 		try {
 			storage.getFile(saveFile.getId());
 			fail("Expected Exception");
-		} catch (FileStorageException x) {
+		} catch (final FileStorageException x) {
 			assertTrue(true);
 		}
 	}

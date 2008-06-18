@@ -112,7 +112,7 @@ public class NewListTest extends AbstractAJAXSession {
         final MultipleResponse mInsert = Executor.multiple(getClient(), new MultipleRequest(inserts));
 
         // A now gets all of the folder.
-        int[] columns = new int[] { ContactObject.SUR_NAME, ContactObject.OBJECT_ID, ContactObject.FOLDER_ID };
+        final int[] columns = new int[] { ContactObject.SUR_NAME, ContactObject.OBJECT_ID, ContactObject.FOLDER_ID };
         
         
         final AllResponse allR = (AllResponse) Executor.execute(clientA, new AllRequest(folderA, columns, listStart, listEnd));
@@ -132,13 +132,13 @@ public class NewListTest extends AbstractAJAXSession {
         final CommonListResponse listR = (CommonListResponse) Executor.execute(
             clientA, new ListRequest(allR.getListIDs(), columns, true));
         
-        Iterator<Object[]> it = listR.iterator();
+        final Iterator<Object[]> it = listR.iterator();
         while (it.hasNext()) {
-        	Object[] ar = it.next();
+        	final Object[] ar = it.next();
         	
         	
-        	InsertResponse irr = (InsertResponse)mInsert.getResponse(DELETES);
-        	InsertResponse irr2 = (InsertResponse)mInsert.getResponse(DELETES+1);       	
+        	final InsertResponse irr = (InsertResponse)mInsert.getResponse(DELETES);
+        	final InsertResponse irr2 = (InsertResponse)mInsert.getResponse(DELETES+1);       	
         	
         	if ( ((Integer)ar[1]).intValue() == irr.getId() || ((Integer)ar[1]).intValue() == irr2.getId()){
         		assertFalse("Error: Object was found in list", true);

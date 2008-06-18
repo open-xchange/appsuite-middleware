@@ -63,9 +63,9 @@ import com.openexchange.tools.versit.VersitObject;
 
 public class VersitParserTest extends TestCase {
 
-	public List<VersitObject> parse(String data) throws IOException{
-		InputStream is = new ByteArrayInputStream( data.getBytes() );
-		List<VersitObject> ret = new LinkedList<VersitObject>();
+	public List<VersitObject> parse(final String data) throws IOException{
+		final InputStream is = new ByteArrayInputStream( data.getBytes() );
+		final List<VersitObject> ret = new LinkedList<VersitObject>();
 		
 		final VersitDefinition def = ICalendar.definition;
 		final VersitDefinition.Reader versitReader;
@@ -94,7 +94,7 @@ public class VersitParserTest extends TestCase {
 	 * Parsing of ATTENDEE property
 	 */
 	public void test7470() throws IOException{
-		String ical = 
+		final String ical = 
 			"BEGIN:VCALENDAR\n" +
 			"VERSION:2.0\n" +
 			"METHOD:REQUEST\n" +
@@ -115,7 +115,7 @@ public class VersitParserTest extends TestCase {
 	 * Parsing of RRULE with COUNT ("only ten times") 
 	 */
 	public void test7732() throws IOException{
-		String ical = 
+		final String ical = 
 			"BEGIN:VCALENDAR\n" +
 			"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" +
 			"VERSION:2.0\n" +
@@ -146,7 +146,7 @@ public class VersitParserTest extends TestCase {
 	 *
 	 */
 	public void test7735() throws IOException{
-		String ical = 
+		final String ical = 
 			"BEGIN:VCALENDAR\n" +
 			"VERSION:2.0\n" +
 			"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" +
@@ -158,7 +158,7 @@ public class VersitParserTest extends TestCase {
 			"RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=4\n" +
 			"END:VEVENT\n" +
 			"END:VCALENDAR";
-		List<VersitObject> list = parse(ical);
+		final List<VersitObject> list = parse(ical);
 		assertEquals("Two elements in list?" , list.size() , 2);
 	}
 	
@@ -187,8 +187,8 @@ public class VersitParserTest extends TestCase {
 				"TRANSP:OPAQUE\n" +
 			"END:VEVENT\n" +
 			"END:VCALENDAR"; 
-		List<VersitObject> list = parse(ical);
-		VersitObject obj = list.get(1);
+		final List<VersitObject> list = parse(ical);
+		final VersitObject obj = list.get(1);
 		assertEquals("Properties after empty are parsed?", "Added after empty element, but still parsed. Yeah!" , obj.getProperty("DESCRIPTION").getValue());
 		assertEquals("All properties are parsed?" , 10, obj.getPropertyCount() );
 		System.out.println(obj);

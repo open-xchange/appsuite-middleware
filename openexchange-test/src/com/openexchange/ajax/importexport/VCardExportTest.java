@@ -1,11 +1,13 @@
 package com.openexchange.ajax.importexport;
 
-import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.webdav.xml.ContactTest;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.webdav.xml.ContactTest;
 
 public class VCardExportTest extends AbstractVCardTest {
 	
@@ -13,11 +15,12 @@ public class VCardExportTest extends AbstractVCardTest {
 	
 	private static final Log LOG = LogFactory.getLog(ICalImportTest.class);
 	
-	public VCardExportTest(String name) {
+	public VCardExportTest(final String name) {
 		super(name);
 		simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
@@ -27,17 +30,17 @@ public class VCardExportTest extends AbstractVCardTest {
 	}
 	
 	public void testExportVCard() throws Exception {
-		String surname = "testImportVCard" + System.currentTimeMillis();
+		final String surname = "testImportVCard" + System.currentTimeMillis();
 		
-		ContactObject contactObj = new ContactObject();
+		final ContactObject contactObj = new ContactObject();
 		contactObj.setSurName(surname);
 		contactObj.setGivenName("givenName");
 		contactObj.setBirthday(simpleDateFormat.parse("2007-04-04"));
 		contactObj.setParentFolderID(contactFolderId);
 		
-		int objectId = ContactTest.insertContact(getWebConversation(), contactObj, getHostName(), getLogin(), getPassword());
+		final int objectId = ContactTest.insertContact(getWebConversation(), contactObj, getHostName(), getLogin(), getPassword());
 
-		ContactObject[] contactArray = exportContact(getWebConversation(), contactFolderId, emailaddress, timeZone, getHostName(), getSessionId());
+		final ContactObject[] contactArray = exportContact(getWebConversation(), contactFolderId, emailaddress, timeZone, getHostName(), getSessionId());
 		
 		boolean found = false;
 		for (int a = 0; a < contactArray.length; a++) {

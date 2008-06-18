@@ -152,7 +152,7 @@ public final class NetsolDeleteRequest implements AJAXRequest {
 		}
 
 		@Override
-		protected NetsolDeleteResponse createResponse(Response response) throws JSONException {
+		protected NetsolDeleteResponse createResponse(final Response response) throws JSONException {
 			return new NetsolDeleteResponse(response);
 		}
 

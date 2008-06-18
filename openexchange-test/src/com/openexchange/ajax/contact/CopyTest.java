@@ -24,25 +24,26 @@ public class CopyTest extends ContactTest {
 	
 	private static final Log LOG = LogFactory.getLog(CopyTest.class);
 	
-	public CopyTest(String name) {
+	public CopyTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 	
 	public void testCopy() throws Exception {
-		ContactObject contactObj = new ContactObject();
+		final ContactObject contactObj = new ContactObject();
 		contactObj.setSurName("testCopy");
 		contactObj.setParentFolderID(contactFolderId);
-		int objectId1 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
+		final int objectId1 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 		
-		String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
-		String password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
+		final String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
+		final String password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
 		
-		FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testCopy" + System.currentTimeMillis(), FolderObject.CONTACT, false);
-		int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password);
+		final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testCopy" + System.currentTimeMillis(), FolderObject.CONTACT, false);
+		final int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password);
 		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
@@ -51,11 +52,11 @@ public class CopyTest extends ContactTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_FOLDERID, contactFolderId);
 		parameter.setParameter(AppointmentFields.IGNORE_CONFLICTS, true);
 		
-		JSONObject jsonObj = new JSONObject();
+		final JSONObject jsonObj = new JSONObject();
 		jsonObj.put(FolderChildFields.FOLDER_ID, targetFolder);
-		ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes("UTF-8"));
-		WebRequest req = new PutMethodWebRequest(PROTOCOL + getHostName() + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
-		WebResponse resp = getWebConversation().getResponse(req);
+		final ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes("UTF-8"));
+		final WebRequest req = new PutMethodWebRequest(PROTOCOL + getHostName() + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
+		final WebResponse resp = getWebConversation().getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
@@ -67,7 +68,7 @@ public class CopyTest extends ContactTest {
 		
 		int objectId2 = 0;
 		
-		JSONObject data = (JSONObject)response.getData();
+		final JSONObject data = (JSONObject)response.getData();
 		if (data.has(DataFields.ID)) {
 			objectId2 = data.getInt(DataFields.ID);
 		}

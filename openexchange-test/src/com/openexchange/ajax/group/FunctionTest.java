@@ -90,7 +90,7 @@ public final class FunctionTest extends AbstractAJAXSession {
     }
 
     public void testRealSearch() throws Throwable {
-        Group[] groups = GroupTools.search(getClient(),
+        final Group[] groups = GroupTools.search(getClient(),
             new SearchRequest("*l*")).getGroups();
         LOG.info("Found " + groups.length + " groups.");
         assertNotNull(groups);

@@ -63,7 +63,7 @@ public final class SetParser extends AbstractAJAXParser<SetResponse> {
     /**
      * @param failOnError
      */
-    public SetParser(boolean failOnError) {
+    public SetParser(final boolean failOnError) {
         super(failOnError);
     }
 

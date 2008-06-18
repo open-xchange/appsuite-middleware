@@ -48,33 +48,38 @@
  */
 package com.openexchange.groupware.calendar;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+
 import junit.framework.TestCase;
-import com.openexchange.tools.events.TestEventAdmin;
-import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
-import com.openexchange.groupware.contexts.Context;
+
+import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api2.OXException;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.event.CommonEvent;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
-import com.openexchange.groupware.container.*;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.Participants;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeFailedException;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.session.Session;
-import com.openexchange.sessiond.impl.SessionObjectWrapper;
-import com.openexchange.api2.OXException;
-import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.event.CommonEvent;
-
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Date;
-import java.sql.SQLException;
-import java.sql.Connection;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.tools.events.TestEventAdmin;
+import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -94,7 +99,8 @@ public class CalendarDowngradeUserTest extends TestCase {
     private static CalendarContextToolkit tools = new CalendarContextToolkit();
     private static CalendarFolderToolkit folders = new CalendarFolderToolkit();
 
-    public void setUp() throws Exception {
+    @Override
+	public void setUp() throws Exception {
         Init.startServer();
         AJAXConfig.init();
         
@@ -108,29 +114,30 @@ public class CalendarDowngradeUserTest extends TestCase {
 
     }
 
-    public void tearDown() {
+    @Override
+	public void tearDown() {
         deleteAll();
         Init.stopServer();
     }
 
-    private void runDelete(int user) {
-        UserConfiguration config = new UserConfiguration(0, user, tools.getGroups(user, ctx) , ctx);
+    private void runDelete(final int user) {
+        final UserConfiguration config = new UserConfiguration(0, user, tools.getGroups(user, ctx) , ctx);
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(ctx);
-            DowngradeEvent event = new DowngradeEvent(config, con, ctx);
+            final DowngradeEvent event = new DowngradeEvent(config, con, ctx);
             new CalendarAdministration().downgradePerformed(event);
-        } catch (DBPoolingException x) {
+        } catch (final DBPoolingException x) {
             x.printStackTrace();
             fail(x.getMessage());
-        } catch (DowngradeFailedException x) {
+        } catch (final DowngradeFailedException x) {
             x.printStackTrace();
             fail(x.getMessage());
         } finally {
             if(con != null) {
                 try {
                     DBPool.pushWrite(ctx, con);
-                } catch (DBPoolingException e) {
+                } catch (final DBPoolingException e) {
                     //IGNORE
                     e.printStackTrace();
                 }
@@ -139,7 +146,7 @@ public class CalendarDowngradeUserTest extends TestCase {
     }
 
     public void testRemovePrivate() throws OXException {
-        CalendarDataObject cdao = createPrivateAppointment(user);
+        final CalendarDataObject cdao = createPrivateAppointment(user);
         runDelete(user);
 
         assertAppointmentNotFound(cdao.getParentFolderID(), cdao.getObjectID());
@@ -147,7 +154,7 @@ public class CalendarDowngradeUserTest extends TestCase {
     }
 
     public void testRemoveFromParticipants() throws OXException{
-        CalendarDataObject cdao = createPublicAppointmentWithSomeoneElse(user, other_user);
+        final CalendarDataObject cdao = createPublicAppointmentWithSomeoneElse(user, other_user);
         runDelete(user);
 
         assertNotInUserParticipants(cdao.getParentFolderID(), cdao.getObjectID(), user);
@@ -155,7 +162,7 @@ public class CalendarDowngradeUserTest extends TestCase {
     }
 
     public void testRemoveAppointmentWhenOnlyParticipant() throws OXException {
-        CalendarDataObject cdao = createPublicAppointmentWithOnlyOneParticipant(user);
+        final CalendarDataObject cdao = createPublicAppointmentWithOnlyOneParticipant(user);
         runDelete(user);
 
         assertAppointmentNotFound(cdao.getParentFolderID(), cdao.getObjectID());
@@ -166,18 +173,18 @@ public class CalendarDowngradeUserTest extends TestCase {
 
     // Helper Methods
 
-    private List<CalendarDataObject> clean = new LinkedList<CalendarDataObject>();
-    private List<FolderObject> cleanFolders = new LinkedList<FolderObject>();
+    private final List<CalendarDataObject> clean = new LinkedList<CalendarDataObject>();
+    private final List<FolderObject> cleanFolders = new LinkedList<FolderObject>();
 
     private void deleteAll() {
-        CalendarSql calendars = new CalendarSql(session);
+        final CalendarSql calendars = new CalendarSql(session);
         
-        for(CalendarDataObject cdao : clean) {
+        for(final CalendarDataObject cdao : clean) {
             try {
                 calendars.deleteAppointmentObject(cdao, cdao.getParentFolderID(), new Date(Long.MAX_VALUE));
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 // IGNORE
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 // IGNORE
             }
         }
@@ -187,18 +194,18 @@ public class CalendarDowngradeUserTest extends TestCase {
         try {
             writecon = DBPool.pickupWriteable(ctx);
             final OXFolderManager oxma = new OXFolderManagerImpl(session, writecon, writecon);
-            for(FolderObject folder : cleanFolders) {
+            for(final FolderObject folder : cleanFolders) {
                 oxma.deleteFolder(folder,false, Long.MAX_VALUE);
             }
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             // IGNORE
-        } catch (OXException e) {
+        } catch (final OXException e) {
             // IGNORE
         } finally {
             if(writecon != null) {
                 try {
                     DBPool.pushWrite(ctx, writecon);
-                } catch (DBPoolingException e) {
+                } catch (final DBPoolingException e) {
                     e.printStackTrace();
                 }
             }
@@ -208,8 +215,8 @@ public class CalendarDowngradeUserTest extends TestCase {
 
     }
 
-    private CalendarDataObject newAppointment(String title, int folder, Context ctx) {
-        CalendarDataObject cdao = new CalendarDataObject();
+    private CalendarDataObject newAppointment(final String title, final int folder, final Context ctx) {
+        final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTitle(title);
         cdao.setParentFolderID(folder);
         cdao.setIgnoreConflicts(true);
@@ -219,9 +226,9 @@ public class CalendarDowngradeUserTest extends TestCase {
         return cdao;
     }
 
-    private CalendarDataObject createPrivateAppointment(int userId) throws OXException {
-        CalendarDataObject cdao = newAppointment("Private appointment", folders.getStandardFolder(userId, ctx), ctx);
-        CalendarSql csql = new CalendarSql(session);        
+    private CalendarDataObject createPrivateAppointment(final int userId) throws OXException {
+        final CalendarDataObject cdao = newAppointment("Private appointment", folders.getStandardFolder(userId, ctx), ctx);
+        final CalendarSql csql = new CalendarSql(session);        
         csql.insertAppointmentObject(cdao);
 
         clean.add(cdao);
@@ -229,13 +236,13 @@ public class CalendarDowngradeUserTest extends TestCase {
         return cdao;
     }
 
-    private CalendarDataObject createPublicAppointmentWithSomeoneElse(int user, int other_user) throws OXException {
-        int publicFolder = createPublicFolder();
+    private CalendarDataObject createPublicAppointmentWithSomeoneElse(final int user, final int other_user) throws OXException {
+        final int publicFolder = createPublicFolder();
 
-        CalendarDataObject cdao = newAppointment("Public appointment  with two participants", publicFolder, ctx);
+        final CalendarDataObject cdao = newAppointment("Public appointment  with two participants", publicFolder, ctx);
         setParticipants(cdao, user, other_user);
 
-        CalendarSql csql = new CalendarSql(session);
+        final CalendarSql csql = new CalendarSql(session);
         csql.insertAppointmentObject(cdao);
 
         clean.add(cdao);
@@ -243,14 +250,14 @@ public class CalendarDowngradeUserTest extends TestCase {
         return cdao;
     }
 
-    private CalendarDataObject createPublicAppointmentWithOnlyOneParticipant(int user) throws OXException {
+    private CalendarDataObject createPublicAppointmentWithOnlyOneParticipant(final int user) throws OXException {
 
-        int publicFolder = createPublicFolder();
+        final int publicFolder = createPublicFolder();
 
-        CalendarDataObject cdao = newAppointment("Public appointment with only one participant", publicFolder, ctx);
+        final CalendarDataObject cdao = newAppointment("Public appointment with only one participant", publicFolder, ctx);
         setParticipants(cdao, user);
 
-        CalendarSql csql = new CalendarSql(session);
+        final CalendarSql csql = new CalendarSql(session);
         csql.insertAppointmentObject(cdao);
 
         clean.add(cdao);
@@ -266,7 +273,7 @@ public class CalendarDowngradeUserTest extends TestCase {
         try {
             writecon = DBPool.pickupWriteable(ctx);
             final OXFolderManager oxma = new OXFolderManagerImpl(session, writecon, writecon);
-            OCLPermission oclp = new OCLPermission();
+            final OCLPermission oclp = new OCLPermission();
             oclp.setEntity(user);
             oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
             oclp.setFolderAdmin(true);
@@ -279,77 +286,77 @@ public class CalendarDowngradeUserTest extends TestCase {
             fo = oxma.createFolder(fo, true, System.currentTimeMillis());
             cleanFolders.add( fo );
             return publicFolderId = fo.getObjectID();
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             e.printStackTrace();
             return -1;
         } finally {
             if(writecon != null) {
                 try {
                     DBPool.pushWrite(ctx, writecon);
-                } catch (DBPoolingException e) {
+                } catch (final DBPoolingException e) {
                     e.printStackTrace();
                 }
             }
         }
     }
 
-    private void setParticipants(CalendarDataObject cdao, int...users) {
-        Participants participants = new Participants();
+    private void setParticipants(final CalendarDataObject cdao, final int...users) {
+        final Participants participants = new Participants();
 
-        for(int uid : users) {
+        for(final int uid : users) {
             participants.add(new UserParticipant(uid));            
         }
 
         cdao.setParticipants(participants.getList());
     }
 
-    private void assertAppointmentNotFound(int parentFolderID, int objectID) {
-        CalendarSql csql = new CalendarSql(session);
+    private void assertAppointmentNotFound(final int parentFolderID, final int objectID) {
+        final CalendarSql csql = new CalendarSql(session);
         try {
             csql.getObjectById(objectID, parentFolderID);
             fail("The appointment exists!");
-        } catch(OXObjectNotFoundException x) {
+        } catch(final OXObjectNotFoundException x) {
 
-        } catch (OXException x) {
+        } catch (final OXException x) {
             x.printStackTrace();
             fail(x.toString());
-        } catch (SQLException x) {
+        } catch (final SQLException x) {
             x.printStackTrace();
             fail(x.toString());
         }
     }
 
-    private void assertNotInUserParticipants(int parentFolderID, int objectID, int user) {
-        CalendarSql csql = new CalendarSql(session);
+    private void assertNotInUserParticipants(final int parentFolderID, final int objectID, final int user) {
+        final CalendarSql csql = new CalendarSql(session);
         try {
-            CalendarDataObject cdao = csql.getObjectById(objectID, parentFolderID);
-            for(Participant participant : cdao.getParticipants()) {
+            final CalendarDataObject cdao = csql.getObjectById(objectID, parentFolderID);
+            for(final Participant participant : cdao.getParticipants()) {
                 if(participant.getType() == Participant.USER && user == participant.getIdentifier()) {
                     fail("Participants should not contain user "+user);
                 }
             }
-        } catch (OXException x) {
+        } catch (final OXException x) {
             x.printStackTrace();
             fail(x.toString());
-        } catch (SQLException x) {
+        } catch (final SQLException x) {
             x.printStackTrace();
             fail(x.toString());
         }
     }
     
-    private void assertDeleteEvent(int parentFolderID, int objectID) {
+    private void assertDeleteEvent(final int parentFolderID, final int objectID) {
          assertEvent(CommonEvent.DELETE, parentFolderID, objectID);
     }
 
-    private void assertModificationEvent(int parentFolderID, int objectID) {
+    private void assertModificationEvent(final int parentFolderID, final int objectID) {
         assertEvent(CommonEvent.UPDATE, parentFolderID, objectID);
     }
 
-    private void assertEvent(int action, int parentFolderID, int objectID) {
-        TestEventAdmin events = TestEventAdmin.getInstance();
+    private void assertEvent(final int action, final int parentFolderID, final int objectID) {
+        final TestEventAdmin events = TestEventAdmin.getInstance();
 
-        CommonEvent event = events.getNewest();
-        AppointmentObject appointment = (AppointmentObject) event.getActionObj();
+        final CommonEvent event = events.getNewest();
+        final AppointmentObject appointment = (AppointmentObject) event.getActionObj();
 
         assertEquals(action, event.getAction());
         assertEquals(parentFolderID, appointment.getParentFolderID());

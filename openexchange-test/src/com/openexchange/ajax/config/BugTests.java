@@ -53,7 +53,6 @@ import static com.openexchange.ajax.config.ConfigTools.readSetting;
 import static com.openexchange.ajax.config.ConfigTools.storeSetting;
 
 import com.meterware.httpunit.WebConversation;
-import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.SetResponse;
@@ -148,10 +147,10 @@ public class BugTests extends AbstractAJAXSession {
      * @throws Throwable if an exception occurs.
      */
     public void testBug6462() throws Throwable {
-        for (String path : new String[] { CAL_NOT_PATH, TASK_NOT_PATH }) {
+        for (final String path : new String[] { CAL_NOT_PATH, TASK_NOT_PATH }) {
             final String origValue = readSetting(getWebConversation(),
                 getHostName(), getSessionId(), path);
-            for (boolean test : new boolean[] { true, false }) {
+            for (final boolean test : new boolean[] { true, false }) {
                 storeSetting(getWebConversation(), getHostName(),
                     getSessionId(), path, Boolean.toString(test));
                 final String testValue = readSetting(getWebConversation(),

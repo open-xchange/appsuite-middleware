@@ -37,7 +37,6 @@
 
 package com.openexchange.webdav.xml.types;
 
-import com.openexchange.groupware.container.DataObject;
 
 /**
  * Response

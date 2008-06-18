@@ -24,35 +24,36 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.URLParameter;
 import com.openexchange.test.TestInit;
+import com.openexchange.tools.URLParameter;
 
 public class LockTest extends InfostoreAJAXTest {
 	
 	protected File testFile;
 	
-	public LockTest(String name){
+	public LockTest(final String name){
 		super(name);
 	}
 	
+	@Override
 	public void setUp() throws Exception{
 		testFile = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		sessionId = getSessionId();
 		// Copied-without-thinking from FolderTest
 		final int userId = FolderTest.getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
-		FolderObject myInfostore = FolderTest.getMyInfostoreFolder(getWebConversation(), getHostName(), getSessionId(), userId);
+		final FolderObject myInfostore = FolderTest.getMyInfostoreFolder(getWebConversation(), getHostName(), getSessionId(), userId);
 		folderId = FolderTest.insertFolder(getWebConversation(), getHostName(), getSessionId(), userId, false,
 		myInfostore.getObjectID(), "NewInfostoreFolder"+System.currentTimeMillis(), "infostore", FolderObject.PUBLIC, -1, true);
 		updateFolder(getWebConversation(),getHostName(),sessionId,getLogin(),getSeconduser(),folderId,System.currentTimeMillis(),false);
 		
 		//folderId=228;
-		Map<String,String> create = m(
+		final Map<String,String> create = m(
 				"folder_id" 		,	((Integer)folderId).toString(),
 				"title"  		,  	"test knowledge",
 				"description" 	, 	"test knowledge description"
 		);
 		
-		int c = this.createNew(getWebConversation(),getHostName(),sessionId,create, testFile, "text/plain");
+		final int c = this.createNew(getWebConversation(),getHostName(),sessionId,create, testFile, "text/plain");
 		
 		clean.add(c);
 		
@@ -70,6 +71,7 @@ public class LockTest extends InfostoreAJAXTest {
 		
 	}
 	
+	@Override
 	public void tearDown() throws Exception{
 		super.tearDown();
 		
@@ -79,7 +81,7 @@ public class LockTest extends InfostoreAJAXTest {
 	public void testLock() throws Exception{
 		
 		Response res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
-		Date ts = res.getTimestamp();
+		final Date ts = res.getTimestamp();
 		
 		res = lock(getWebConversation(),getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
@@ -92,15 +94,15 @@ public class LockTest extends InfostoreAJAXTest {
 		
 		res = updates(getWebConversation(), getHostName(), sessionId, folderId, new int[]{Metadata.ID}, ts.getTime());
 		
-		JSONArray modAndDel = (JSONArray) res.getData();
-		JSONArray mod = modAndDel.getJSONArray(0);
+		final JSONArray modAndDel = (JSONArray) res.getData();
+		final JSONArray mod = modAndDel.getJSONArray(0);
 		
 		assertEquals(1, mod.length());
 		System.out.println(mod);
 		assertEquals(clean.get(0), (Integer) mod.getInt(0));
 		
 		
-		String sessionId2 = this.getSecondSessionId();
+		final String sessionId2 = this.getSecondSessionId();
 		
 		// Object may not be modified
 		res = update(getSecondWebConversation(),getHostName(),sessionId2, clean.get(0), System.currentTimeMillis(), m("title" , "Hallo"));
@@ -109,8 +111,8 @@ public class LockTest extends InfostoreAJAXTest {
 		// Bug #????
 		// Object may not be moved
 		
-		int userId2 = FolderTest.getUserId(getSecondWebConversation(), getHostName(), getSeconduser(), getPassword());
-		int folderId2 = FolderTest.getMyInfostoreFolder(getSecondWebConversation(),getHostName(),sessionId2,userId2).getObjectID();
+		final int userId2 = FolderTest.getUserId(getSecondWebConversation(), getHostName(), getSeconduser(), getPassword());
+		final int folderId2 = FolderTest.getMyInfostoreFolder(getSecondWebConversation(),getHostName(),sessionId2,userId2).getObjectID();
 		
 		res = update(getSecondWebConversation(),getHostName(),sessionId2, clean.get(0), System.currentTimeMillis(), m("folder_id" , ""+folderId2));
 		assertTrue(res.hasError());
@@ -141,7 +143,7 @@ public class LockTest extends InfostoreAJAXTest {
 		assertNoError(res);
 		
 		res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
-		JSONObject o = (JSONObject) res.getData();
+		final JSONObject o = (JSONObject) res.getData();
 		
 		assertEquals("Hallo",o.get("title"));
 		
@@ -176,7 +178,7 @@ public class LockTest extends InfostoreAJAXTest {
 		assertNoError(res);
 		assertUnlocked((JSONObject)res.getData());
 		
-		String sessionId2 = getSecondSessionId();
+		final String sessionId2 = getSecondSessionId();
 		
 		res = lock(getSecondWebConversation(),getHostName(), sessionId2, clean.get(0));
 		assertNoError(res);
@@ -195,12 +197,12 @@ public class LockTest extends InfostoreAJAXTest {
 		
 	}
 	
-	public static void assertLocked(JSONObject o) throws JSONException{
-		long locked = o.getInt(Metadata.LOCKED_UNTIL_LITERAL.getName());
+	public static void assertLocked(final JSONObject o) throws JSONException{
+		final long locked = o.getInt(Metadata.LOCKED_UNTIL_LITERAL.getName());
 		assertFalse("This must be != 0: "+locked, 0 == locked);
 	}
 	
-	public static void assertUnlocked(JSONObject o) throws JSONException{
+	public static void assertUnlocked(final JSONObject o) throws JSONException{
 		assertEquals(0, o.getInt(Metadata.LOCKED_UNTIL_LITERAL.getName()));
 	}
 	
@@ -209,9 +211,9 @@ public class LockTest extends InfostoreAJAXTest {
 	
 	public static boolean updateFolder(final WebConversation conversation, final String hostname, final String sessionId,
 			final String entity, final String secondEntity, final int folderId, final long timestamp, final boolean printOutput) throws JSONException, MalformedURLException, IOException, SAXException {
-			JSONObject jsonFolder = new JSONObject();
+			final JSONObject jsonFolder = new JSONObject();
 			jsonFolder.put("id", folderId);
-			JSONArray perms = new JSONArray();
+			final JSONArray perms = new JSONArray();
 			JSONObject jsonPermission = new JSONObject();
 			jsonPermission.put("entity", entity);
 			jsonPermission.put("group", false);
@@ -223,26 +225,28 @@ public class LockTest extends InfostoreAJAXTest {
 			jsonPermission.put("bits", createPermissionBits(8, 8, 8, 8, true));
 			perms.put(jsonPermission);
 			jsonFolder.put("permissions", perms);
-			URLParameter urlParam = new URLParameter();
+			final URLParameter urlParam = new URLParameter();
 			urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE);
 			urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
 			urlParam.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(folderId));
 			urlParam.setParameter("timestamp", String.valueOf(timestamp));
-			byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
-			ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+			final byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
+			final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 			final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostname + FOLDER_URL + urlParam.getURLParameters(), bais,
 				"text/javascript; charset=UTF-8");
 			final WebResponse resp = conversation.getResponse(req);
-			JSONObject respObj = new JSONObject(resp.getText());
-			if (printOutput)
+			final JSONObject respObj = new JSONObject(resp.getText());
+			if (printOutput) {
 				System.out.println(respObj.toString());
-			if (respObj.has("error"))
+			}
+			if (respObj.has("error")) {
 				return false;
+			}
 			return true;
 		}
 	
-	private static int createPermissionBits(int fp, int orp, int owp, int odp, boolean adminFlag) {
-		int[] perms = new int[5];
+	private static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) {
+		final int[] perms = new int[5];
 		perms[0] = fp;
 		perms[1] = orp;
 		perms[2] = owp;
@@ -251,11 +255,11 @@ public class LockTest extends InfostoreAJAXTest {
 		return createPermissionBits(perms);
 	}
 	
-	private static int createPermissionBits(int[] permission) {
+	private static int createPermissionBits(final int[] permission) {
 		int retval = 0;
 		boolean first = true;
 		for (int i = permission.length - 1; i >= 0; i--) {
-			int exponent = (i * 7); // Number of bits to be shifted
+			final int exponent = (i * 7); // Number of bits to be shifted
 			if (first) {
 				retval += permission[i] << exponent;
 				first = false;

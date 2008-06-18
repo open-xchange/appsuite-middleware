@@ -45,15 +45,17 @@
 
 package com.openexchange.webdav.xml.parser;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jdom.Element;
+
 import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.FolderFields;
-import java.util.ArrayList;
-import java.util.List;
-import org.jdom.Element;
 
 /**
  * FolderParser
@@ -67,13 +69,13 @@ public class FolderParser extends FolderChildParser {
 		
 	}
 	
-	public void parse(FolderObject folderObj, Element eProp) throws Exception {
+	public void parse(final FolderObject folderObj, final Element eProp) throws Exception {
 		if (hasElement(eProp.getChild(FolderFields.TITLE, XmlServlet.NS))) {
 			folderObj.setFolderName(getValue(eProp.getChild(FolderFields.TITLE, XmlServlet.NS)));
 		}
 		
 		if (hasElement(eProp.getChild(FolderFields.TYPE, XmlServlet.NS))) {
-			String type = getValue(eProp.getChild(FolderFields.TYPE, XmlServlet.NS));
+			final String type = getValue(eProp.getChild(FolderFields.TYPE, XmlServlet.NS));
 			if (type.equals("private") || type.equals("shared")) {
 				folderObj.setType(FolderObject.PRIVATE);
 			} else if (type.equals("public")) {
@@ -84,7 +86,7 @@ public class FolderParser extends FolderChildParser {
 		}
 		
 		if (hasElement(eProp.getChild(FolderFields.MODULE, XmlServlet.NS))) {
-			String module = eProp.getChild(FolderFields.MODULE, XmlServlet.NS).getValue();
+			final String module = eProp.getChild(FolderFields.MODULE, XmlServlet.NS).getValue();
 			if (module.equals("calendar")) {
 				folderObj.setModule(FolderObject.CALENDAR);
 			} else if (module.equals("contact")) {
@@ -109,21 +111,21 @@ public class FolderParser extends FolderChildParser {
 		parseElementFolderChildObject(folderObj, eProp);
 	}
 	
-	protected void parseElementPermissions(FolderObject folderObj, Element ePermissions) throws Exception {
-		ArrayList permissions = new ArrayList();
+	protected void parseElementPermissions(final FolderObject folderObj, final Element ePermissions) throws Exception {
+		final ArrayList permissions = new ArrayList();
 		
 		try {
-			int entity = 0;
+			final int entity = 0;
 			
-			List elementPermissions = ePermissions.getChildren();
+			final List elementPermissions = ePermissions.getChildren();
 			for (int a = 0; a < elementPermissions.size(); a++) {
-				Element e = (Element)elementPermissions.get(a);
+				final Element e = (Element)elementPermissions.get(a);
 				
 				if (!e.getNamespace().equals(XmlServlet.NS)) {
 					continue;
 				}
 				
-				OCLPermission oclp = new OCLPermission();
+				final OCLPermission oclp = new OCLPermission();
 				
 				if (e.getName().equals("user")) {
 					parseElementPermissionAttributes(oclp, e);
@@ -138,32 +140,32 @@ public class FolderParser extends FolderChildParser {
 				
 				permissions.add(oclp);
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw new TestException(exc);
 		}
 		
 		folderObj.setPermissions(permissions);
 	}
 	
-	protected void parseEntity(OCLPermission oclp, Element e) throws Exception {
+	protected void parseEntity(final OCLPermission oclp, final Element e) throws Exception {
 		oclp.setEntity( getValueAsInt(e));
 	}
 	
-	protected void parseElementPermissionAttributes(OCLPermission oclp, Element e) throws Exception {
-		int fp = getPermissionAttributeValue(e, "folderpermission");
-		int orp = getPermissionAttributeValue(e, "objectreadpermission");
-		int owp = getPermissionAttributeValue(e, "objectwritepermission");
-		int odp = getPermissionAttributeValue(e, "objectdeletepermission");
+	protected void parseElementPermissionAttributes(final OCLPermission oclp, final Element e) throws Exception {
+		final int fp = getPermissionAttributeValue(e, "folderpermission");
+		final int orp = getPermissionAttributeValue(e, "objectreadpermission");
+		final int owp = getPermissionAttributeValue(e, "objectwritepermission");
+		final int odp = getPermissionAttributeValue(e, "objectdeletepermission");
 		
 		oclp.setAllPermission(fp, orp, owp, odp);
 		oclp.setFolderAdmin(getPermissionAdminFlag(e));
 	}
 	
-	protected int getPermissionAttributeValue(Element e, String name) throws Exception {
+	protected int getPermissionAttributeValue(final Element e, final String name) throws Exception {
 		return Integer.parseInt(e.getAttributeValue(name, XmlServlet.NS));
 	}
 
-	protected boolean getPermissionAdminFlag(Element e) throws Exception {
+	protected boolean getPermissionAdminFlag(final Element e) throws Exception {
 		return Boolean.parseBoolean(e.getAttributeValue("admin_flag", XmlServlet.NS));
 	}
 }

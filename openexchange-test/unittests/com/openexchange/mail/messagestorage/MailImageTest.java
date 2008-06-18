@@ -77,7 +77,7 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
  */
 public final class MailImageTest extends AbstractMailTest {
 
-	private String MSG_WITH_INLINE_IMG = "Return-Path: <thorben@dev-prototyp.open-xchange.com>\n"
+	private final String MSG_WITH_INLINE_IMG = "Return-Path: <thorben@dev-prototyp.open-xchange.com>\n"
 			+ "Received: from dev-prototyp.open-xchange.com ([unix socket])\n"
 			+ "	 by dev-prototyp (Cyrus v2.2.13-Debian-2.2.13-10) with LMTPA;\n"
 			+ "	 Mon, 07 Jan 2008 10:33:31 +0100\n" + "X-Sieve: CMU Sieve 2.2\n"

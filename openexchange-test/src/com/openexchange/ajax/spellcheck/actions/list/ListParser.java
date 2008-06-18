@@ -68,7 +68,7 @@ public final class ListParser extends AbstractAJAXParser<ListResponse> {
 	 * 
 	 * @param failOnError
 	 */
-	public ListParser(boolean failOnError) {
+	public ListParser(final boolean failOnError) {
 		super(failOnError);
 	}
 

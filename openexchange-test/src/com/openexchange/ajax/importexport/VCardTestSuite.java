@@ -55,7 +55,7 @@ import junit.framework.TestSuite;
 public class VCardTestSuite extends TestSuite{
 	
 	public static Test suite(){
-		TestSuite tests = new TestSuite();
+		final TestSuite tests = new TestSuite();
 		tests.addTestSuite( VCardImportTest.class );
 		tests.addTestSuite( VCardExportTest.class );
         tests.addTestSuite(Bug9209Test.class);

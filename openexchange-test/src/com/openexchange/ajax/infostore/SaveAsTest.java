@@ -16,15 +16,15 @@ import com.openexchange.test.OXTestToolkit;
 
 public class SaveAsTest extends InfostoreAJAXTest {
 	
-	private TaskAttachmentTest attachmentTest = new TaskAttachmentTest("TaskAttachmentTest");
+	private final TaskAttachmentTest attachmentTest = new TaskAttachmentTest("TaskAttachmentTest");
 	
-	public SaveAsTest(String name) {
+	public SaveAsTest(final String name) {
 		super(name);
 	}
 	
 	public void testBasic() throws Exception {
-		AttachmentMetadata attachment = attachmentTest.getAttachment(0);
-		int id = saveAs(getWebConversation(), getHostName(), sessionId,attachment.getFolderId(), attachment.getAttachedId(),attachment.getModuleId(), attachment.getId(), m(
+		final AttachmentMetadata attachment = attachmentTest.getAttachment(0);
+		final int id = saveAs(getWebConversation(), getHostName(), sessionId,attachment.getFolderId(), attachment.getAttachedId(),attachment.getModuleId(), attachment.getId(), m(
 				"folder_id"			,		""+folderId,
 				"title"				,		"My Attachment",
 				"description"		,		"An attachment cum InfoItem"
@@ -32,10 +32,10 @@ public class SaveAsTest extends InfostoreAJAXTest {
 		
 		clean.add(id);
 		
-		Response res = get(getWebConversation(),getHostName(), sessionId, id);
-		JSONObject obj = (JSONObject) res.getData();
+		final Response res = get(getWebConversation(),getHostName(), sessionId, id);
+		final JSONObject obj = (JSONObject) res.getData();
 		
-		File upload = attachmentTest.getTestFile();
+		final File upload = attachmentTest.getTestFile();
 		
 		assertEquals("My Attachment",obj.getString("title"));
 		assertEquals("An attachment cum InfoItem",obj.getString("description"));
@@ -50,18 +50,20 @@ public class SaveAsTest extends InfostoreAJAXTest {
 			is2 = document(getWebConversation(),getHostName(),sessionId, id, 1);
 			OXTestToolkit.assertSameContent(is,is2);
 		} finally {
-			if(is!=null)
+			if(is!=null) {
 				is.close();
-			if(is2!=null)
+			}
+			if(is2!=null) {
 				is2.close();
+			}
 		}
 	}
 	
 	//Bug 4269
 	public void testVirtualFolder() throws Exception {
-		AttachmentMetadata attachment = attachmentTest.getAttachment(0);
+		final AttachmentMetadata attachment = attachmentTest.getAttachment(0);
 		try {
-			int id = saveAs(getWebConversation(), getHostName(), sessionId,attachment.getFolderId(), attachment.getAttachedId(),attachment.getModuleId(), attachment.getId(), m(
+			final int id = saveAs(getWebConversation(), getHostName(), sessionId,attachment.getFolderId(), attachment.getAttachedId(),attachment.getModuleId(), attachment.getId(), m(
 					"folder_id"			,		""+FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID,
 					"title"				,		"My Attachment",
 					"description"		,		"An attachment cum InfoItem"
@@ -69,18 +71,20 @@ public class SaveAsTest extends InfostoreAJAXTest {
 			
 			clean.add(id);
 			fail("Expected IOException when trying to save attachment in virtual infostore folder");
-		} catch (JSONException x) {
+		} catch (final JSONException x) {
 			assertTrue(x.getMessage(), x.getMessage().contains("virt"));
 		}
 		
 	}
 	
+	@Override
 	public void setUp() throws Exception{
 		attachmentTest.setUp();
 		attachmentTest.upload();
 		super.setUp();
 	}
 	
+	@Override
 	public void tearDown() throws Exception {
 		attachmentTest.tearDown();
 		super.tearDown();

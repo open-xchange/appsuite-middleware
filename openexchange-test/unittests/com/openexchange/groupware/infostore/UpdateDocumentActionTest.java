@@ -9,6 +9,7 @@ public class UpdateDocumentActionTest extends AbstractInfostoreActionTest {
 
 	CreateDocumentAction create = new CreateDocumentAction();
 	
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		create.setProvider(getProvider());
@@ -18,6 +19,7 @@ public class UpdateDocumentActionTest extends AbstractInfostoreActionTest {
 		create.perform();
 	}
 	
+	@Override
 	public void tearDown() throws Exception {
 		create.undo();
 		super.tearDown();
@@ -25,7 +27,7 @@ public class UpdateDocumentActionTest extends AbstractInfostoreActionTest {
 	
 	@Override
 	protected UndoableAction getAction() throws Exception {
-		UpdateDocumentAction update = new UpdateDocumentAction();
+		final UpdateDocumentAction update = new UpdateDocumentAction();
 		update.setProvider(getProvider());
 		update.setContext(getContext());
 		update.setDocuments(getUpdatedDocuments());
@@ -38,14 +40,14 @@ public class UpdateDocumentActionTest extends AbstractInfostoreActionTest {
 
 	@Override
 	protected void verifyPerformed() throws Exception {
-		for(DocumentMetadata doc : getUpdatedDocuments()) {
+		for(final DocumentMetadata doc : getUpdatedDocuments()) {
 			assertResult("SELECT 1 FROM infostore WHERE color_label = ? and cid = ? and id = ?", doc.getColorLabel(), getContext().getContextId(), doc.getId());
 		}
 	}
 
 	@Override
 	protected void verifyUndone() throws Exception {
-		for(DocumentMetadata doc : getDocuments()) {
+		for(final DocumentMetadata doc : getDocuments()) {
 			assertResult("SELECT 1 FROM infostore WHERE color_label = ? and cid = ? and id = ?", doc.getColorLabel(), getContext().getContextId(), doc.getId());
 		}
 	}

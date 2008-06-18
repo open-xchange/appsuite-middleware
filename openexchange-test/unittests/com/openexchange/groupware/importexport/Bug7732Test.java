@@ -49,7 +49,8 @@
 
 package com.openexchange.groupware.importexport;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
@@ -64,7 +65,6 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.impl.DBPoolingException;
 
@@ -76,8 +76,8 @@ public class Bug7732Test extends AbstractICalImportTest {
 	
 	
 	@Test public void test7732() throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException, LdapException {
-		int count = 10;
-		String ical = 
+		final int count = 10;
+		final String ical = 
 			"BEGIN:VCALENDAR\n" +
 			"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" +
 			"VERSION:2.0\n" +
@@ -100,14 +100,14 @@ public class Bug7732Test extends AbstractICalImportTest {
 				"END:VEVENT\n" +
 			"END:VCALENDAR";
 
-		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7732", ctx, false);
+		final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7732", ctx, false);
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
 		final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
 		assertEquals(count + " occurences found?" , count , appointmentObj.getOccurrence());
 	}
 	
 	@Test public void testMeaningfulParserMessage() throws Exception {
-		String ical = 
+		final String ical = 
 			"BEGIN:VCALENDAR\n"+
 			"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n"+
 			"VERSION:2.0\n"+
@@ -120,9 +120,9 @@ public class Bug7732Test extends AbstractICalImportTest {
 			"UID:RExample01\n"+
 			"END:VEVENT\n"+
 			"END:VCALENDAR";
-		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7732-b", ctx, true);
+		final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7732-b", ctx, true);
 		assertTrue(res.hasError());
-		OXException x = res.getException();
+		final OXException x = res.getException();
 		x.printStackTrace();
 		
 		assertEquals("RRULE without DTSTART", x.getMessageArgs()[0]);

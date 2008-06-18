@@ -7,35 +7,40 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
 
     protected UserConfigurationStorage delegate = null;
 
-    public OverridingUserConfigurationStorage(UserConfigurationStorage delegate) {
+    public OverridingUserConfigurationStorage(final UserConfigurationStorage delegate) {
         this.delegate = delegate;
     }
 
-    protected void startInternal() throws AbstractOXException {
+    @Override
+	protected void startInternal() throws AbstractOXException {
         delegate.startInternal();
     }
 
-    protected void stopInternal() throws AbstractOXException {
+    @Override
+	protected void stopInternal() throws AbstractOXException {
         delegate.stopInternal();
     }
 
-    public UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx) throws UserConfigurationException {
-        UserConfiguration config = getOverride(userId, groups, ctx);
+    @Override
+	public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws UserConfigurationException {
+        final UserConfiguration config = getOverride(userId, groups, ctx);
         if( config != null) {
             return config;
         }
         return delegate.getUserConfiguration(userId, groups, ctx);
     }
 
-    public void clearStorage() throws UserConfigurationException {
+    @Override
+	public void clearStorage() throws UserConfigurationException {
         delegate.clearStorage();
     }
 
-    public void removeUserConfiguration(int userId, Context ctx) throws UserConfigurationException {
+    @Override
+	public void removeUserConfiguration(final int userId, final Context ctx) throws UserConfigurationException {
         delegate.removeUserConfiguration(userId,ctx);
     } 
 
-    public UserConfiguration getOverride(int userId, int[] groups, Context ctx) throws UserConfigurationException {
+    public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws UserConfigurationException {
         return null;
     }
 

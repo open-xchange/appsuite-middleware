@@ -2,7 +2,6 @@ package com.openexchange.groupware.infostore;
 
 import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.CreateVersionAction;
-import com.openexchange.groupware.infostore.database.impl.UpdateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.tx.UndoableAction;
@@ -12,6 +11,7 @@ public class UpdateVersionActionTest extends AbstractInfostoreActionTest {
 	CreateDocumentAction create = new CreateDocumentAction();
 	CreateVersionAction create2 = new CreateVersionAction();
 	
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		create.setProvider(getProvider());
@@ -28,6 +28,7 @@ public class UpdateVersionActionTest extends AbstractInfostoreActionTest {
 		
 	}
 	
+	@Override
 	public void tearDown() throws Exception {
 		create2.undo();
 		create.undo();
@@ -36,7 +37,7 @@ public class UpdateVersionActionTest extends AbstractInfostoreActionTest {
 	
 	@Override
 	protected UndoableAction getAction() throws Exception {
-		UpdateVersionAction update = new UpdateVersionAction();
+		final UpdateVersionAction update = new UpdateVersionAction();
 		update.setProvider(getProvider());
 		update.setContext(getContext());
 		update.setDocuments(getUpdatedDocuments());
@@ -49,14 +50,14 @@ public class UpdateVersionActionTest extends AbstractInfostoreActionTest {
 
 	@Override
 	protected void verifyPerformed() throws Exception {
-		for(DocumentMetadata doc : getUpdatedDocuments()) {
+		for(final DocumentMetadata doc : getUpdatedDocuments()) {
 			assertResult("SELECT 1 FROM infostore_document WHERE filename = ? and cid = ? and infostore_id = ?", doc.getFileName(), getContext().getContextId(), doc.getId());
 		}
 	}
 
 	@Override
 	protected void verifyUndone() throws Exception {
-		for(DocumentMetadata doc : getDocuments()) {
+		for(final DocumentMetadata doc : getDocuments()) {
 			assertResult("SELECT 1 FROM infostore_document WHERE filename = ? and cid = ? and infostore_id = ?", doc.getFileName(), getContext().getContextId(), doc.getId());
 		}
 	}

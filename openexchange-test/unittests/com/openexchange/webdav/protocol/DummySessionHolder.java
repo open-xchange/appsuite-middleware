@@ -16,7 +16,7 @@ public class DummySessionHolder implements SessionHolder{
 
 	private final Context ctx;
 	
-	public DummySessionHolder(String username, Context ctx) throws LdapException {
+	public DummySessionHolder(final String username, final Context ctx) throws LdapException {
 		session =  SessionObjectWrapper.createSessionObject(UserStorage.getInstance().getUserId(username, ctx)  , ctx,"12345");
 		this.ctx = ctx;
 	}

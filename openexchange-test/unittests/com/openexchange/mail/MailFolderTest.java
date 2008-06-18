@@ -79,11 +79,11 @@ public class MailFolderTest extends AbstractMailTest {
 
 	public void testGetINBOXFolder() {
 		try {
-			SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()),
+			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()),
 					"mail-test-session");
 			session.setPassword(getPassword());
 
-			MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
 			try {
 				final MailFolder inboxFolder = mailAccess.getFolderStorage().getFolder("INBOX");
@@ -100,10 +100,10 @@ public class MailFolderTest extends AbstractMailTest {
 
 	public void testGetSubfolders() {
 		try {
-			SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()),
+			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()),
 					"mail-test-session");
 			session.setPassword(getPassword());
-			MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect(/* mailConfig */);
 			try {
 				final MailFolder[] flds = mailAccess.getFolderStorage().getSubfolders("default", true);

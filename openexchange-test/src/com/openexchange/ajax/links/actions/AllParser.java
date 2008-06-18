@@ -66,7 +66,7 @@ public final class AllParser extends AbstractAJAXParser<AllResponse> {
     /**
      * @param failOnError
      */
-    public AllParser(boolean failOnError) {
+    public AllParser(final boolean failOnError) {
         super(failOnError);
     }
 

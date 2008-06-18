@@ -19,15 +19,15 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.ReminderFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.test.TestException;
 import com.openexchange.test.OXTestToolkit;
+import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
 
 public class ReminderTest extends AbstractAJAXTest {
 	
 	private static final String REMINDER_URL = "/ajax/reminder";
 	
-	public ReminderTest(String name) {
+	public ReminderTest(final String name) {
 		super(name);
 	}
 	
@@ -35,20 +35,20 @@ public class ReminderTest extends AbstractAJAXTest {
 		
 	}
 	
-	public static ReminderObject[] listReminder(WebConversation webConversation, Date end, TimeZone timeZone, String host, String sessionId) throws Exception, TestException {
+	public static ReminderObject[] listReminder(final WebConversation webConversation, final Date end, final TimeZone timeZone, String host, final String sessionId) throws Exception, TestException {
 		host = appendPrefix(host);
 		
-		URLParameter parameter = new URLParameter();
+		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_RANGE);
 		parameter.setParameter(AJAXServlet.PARAMETER_END, end);
 		
-		WebRequest webRequest = new GetMethodWebRequest(host + REMINDER_URL + parameter.getURLParameters());
-		WebResponse webResponse = webConversation.getResponse(webRequest);
+		final WebRequest webRequest = new GetMethodWebRequest(host + REMINDER_URL + parameter.getURLParameters());
+		final WebResponse webResponse = webConversation.getResponse(webRequest);
 		
 		assertEquals(200, webResponse.getResponseCode());
 		
-		JSONObject jsonObj = new JSONObject(webResponse.getText());
+		final JSONObject jsonObj = new JSONObject(webResponse.getText());
 		
 		if (jsonObj.has(jsonTagError)) {
 			throw new TestException("server error: " + jsonObj.get(jsonTagError));
@@ -58,10 +58,10 @@ public class ReminderTest extends AbstractAJAXTest {
 			throw new TestException("no data in JSON object!");
 		}
 		
-		JSONArray jsonArray = jsonObj.getJSONArray(jsonTagData);
-		ReminderObject[] reminderObj = new ReminderObject[jsonArray.length()];
+		final JSONArray jsonArray = jsonObj.getJSONArray(jsonTagData);
+		final ReminderObject[] reminderObj = new ReminderObject[jsonArray.length()];
 		for (int a = 0; a < jsonArray.length(); a++) {
-			JSONObject jsonReminder = jsonArray.getJSONObject(a);
+			final JSONObject jsonReminder = jsonArray.getJSONObject(a);
 			reminderObj[a] = new ReminderObject();
 			
 			reminderObj[a].setObjectId(DataParser.parseInt(jsonReminder, ReminderFields.ID));
@@ -76,20 +76,20 @@ public class ReminderTest extends AbstractAJAXTest {
 		return reminderObj;
 	}
 	
-	public static ReminderObject[] listUpdates(WebConversation webConversation, Date lastModified, String host, String sessionId) throws Exception, TestException {
+	public static ReminderObject[] listUpdates(final WebConversation webConversation, final Date lastModified, String host, final String sessionId) throws Exception, TestException {
 		host = appendPrefix(host);
 		
-		URLParameter parameter = new URLParameter();
+		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES);
 		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified);
 		
-		WebRequest webRequest = new GetMethodWebRequest(host + REMINDER_URL + parameter.getURLParameters());
-		WebResponse webResponse = webConversation.getResponse(webRequest);
+		final WebRequest webRequest = new GetMethodWebRequest(host + REMINDER_URL + parameter.getURLParameters());
+		final WebResponse webResponse = webConversation.getResponse(webRequest);
 		
 		assertEquals(200, webResponse.getResponseCode());
 		
-		JSONObject jsonObj = new JSONObject(webResponse.getText());
+		final JSONObject jsonObj = new JSONObject(webResponse.getText());
 		
 		if (jsonObj.has(jsonTagError)) {
 			throw new TestException("server error: " + jsonObj.get(jsonTagError));
@@ -99,10 +99,10 @@ public class ReminderTest extends AbstractAJAXTest {
 			throw new TestException("no data in JSON object!");
 		}
 		
-		JSONArray jsonArray = jsonObj.getJSONArray(jsonTagData);
-		ReminderObject[] reminderObj = new ReminderObject[jsonArray.length()];
+		final JSONArray jsonArray = jsonObj.getJSONArray(jsonTagData);
+		final ReminderObject[] reminderObj = new ReminderObject[jsonArray.length()];
 		for (int a = 0; a < jsonArray.length(); a++) {
-			JSONObject jsonReminder = jsonArray.getJSONObject(a);
+			final JSONObject jsonReminder = jsonArray.getJSONObject(a);
 			reminderObj[a] = new ReminderObject();
 			
 			reminderObj[a].setObjectId(DataParser.parseInt(jsonReminder, ReminderFields.ID));
@@ -117,24 +117,24 @@ public class ReminderTest extends AbstractAJAXTest {
 		return reminderObj;
 	}
 	
-	public static int[] deleteReminder(WebConversation webConversation, int objectId, String host, String sessionId) throws Exception, TestException {
+	public static int[] deleteReminder(final WebConversation webConversation, final int objectId, String host, final String sessionId) throws Exception, TestException {
 		host = appendPrefix(host);
 		
-		URLParameter parameter = new URLParameter();
+		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE);
 		
-		JSONObject jsonObj = new JSONObject();
+		final JSONObject jsonObj = new JSONObject();
 		jsonObj.put(DataFields.ID, objectId);
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
-		WebRequest webRequest = new PutMethodWebRequest(host + REMINDER_URL + parameter.getURLParameters(), bais, "text/javascript");
-		WebResponse webResponse = webConversation.getResponse(webRequest);
-		JSONObject jsonobject = new JSONObject(webResponse.getText());
+		final ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
+		final WebRequest webRequest = new PutMethodWebRequest(host + REMINDER_URL + parameter.getURLParameters(), bais, "text/javascript");
+		final WebResponse webResponse = webConversation.getResponse(webRequest);
+		final JSONObject jsonobject = new JSONObject(webResponse.getText());
 		
 		assertEquals(200, webResponse.getResponseCode());
 		
-		JSONObject jsonResponse = new JSONObject(webResponse.getText());
+		final JSONObject jsonResponse = new JSONObject(webResponse.getText());
 				
 		if (jsonResponse.has(jsonTagError)) {
 			throw new TestException("server error: " + jsonResponse.get(jsonTagError));
@@ -152,7 +152,7 @@ public class ReminderTest extends AbstractAJAXTest {
 		return new int[] { };
 	}
 	
-	public void compareReminder(ReminderObject reminderObj1, ReminderObject reminderObj2) throws Exception {
+	public void compareReminder(final ReminderObject reminderObj1, final ReminderObject reminderObj2) throws Exception {
 		assertEquals("id", reminderObj1.getObjectId(), reminderObj2.getObjectId());
 		OXTestToolkit.assertEqualsAndNotNull("folder", reminderObj1.getFolder(), reminderObj2.getFolder());
 		OXTestToolkit.assertEqualsAndNotNull("alarm", reminderObj1.getDate(), reminderObj2.getDate());

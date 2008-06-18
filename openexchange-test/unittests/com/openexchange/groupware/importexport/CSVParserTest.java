@@ -49,16 +49,18 @@
 
 package com.openexchange.groupware.importexport;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.List;
+
+import junit.framework.JUnit4TestAdapter;
 
 import org.junit.Test;
 
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-
-import junit.framework.JUnit4TestAdapter;
 
 /**
  * 
@@ -107,7 +109,7 @@ public class CSVParserTest {
 		parser.setTolerant(false);
 		try {
 			parser.parse();
-		} catch (ImportExportException e){
+		} catch (final ImportExportException e){
 			assertTrue("Exception caught" , true);
 			assertEquals("Correct exception thrown" , "I_E-1000" , e.getErrorCode());
 			return;
@@ -116,12 +118,12 @@ public class CSVParserTest {
 	}
 
 	 @Test public void parseBuggedIntolerant2() {
-		String bla = "1\n2,3"; 
+		final String bla = "1\n2,3"; 
 		parser = new CSVParser(bla );
 		parser.setTolerant(false);
 		try {
 			parser.parse();
-		} catch (ImportExportException e){
+		} catch (final ImportExportException e){
 			assertTrue("Exception caught" , true);
 			assertEquals("Correct exception thrown" , "I_E-1000" , e.getErrorCode());
 			return;
@@ -130,23 +132,23 @@ public class CSVParserTest {
 	}
 	 
 	@Test public void parseBuggedTolerant() throws ImportExportException {
-		List<List<String>> result = doAsserts(UNEVEN_TEST , "Bugged lines with tolerant parser", 3, 2, true);
+		final List<List<String>> result = doAsserts(UNEVEN_TEST , "Bugged lines with tolerant parser", 3, 2, true);
 		assertEquals("checking last element" , "content22" , result.get(2).get(1));
 	}
 	
 	@Test public void umlauts() throws ImportExportException {
 		final String umlaut = "Ümlaut title\nSonderßeichen cell";
-		List<List<String>> result = doAsserts(umlaut, "Checking umlauts", 2, 1, false);
+		final List<List<String>> result = doAsserts(umlaut, "Checking umlauts", 2, 1, false);
 		assertEquals("Ü in title", "Ümlaut title" , result.get(0).get(0));
 		assertEquals("ß in cell", "Sonderßeichen cell" , result.get(1).get(0));
 	}
 	
-	protected List<List<String>> doAsserts(String line, String comment, int lines, int cells, boolean isTolerant) throws ImportExportException{
+	protected List<List<String>> doAsserts(final String line, final String comment, final int lines, final int cells, final boolean isTolerant) throws ImportExportException{
 		parser = new CSVParser(line);
 		parser.setTolerant(isTolerant);
 		result = parser.parse();
 		assertEquals(comment + ":: Number of lines", lines, result.size());
-		for(List<String> currList : result){
+		for(final List<String> currList : result){
 			assertEquals(comment + ":: Number of cells", cells, currList.size());
 		}
 		return result;

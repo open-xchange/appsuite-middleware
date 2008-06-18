@@ -69,7 +69,7 @@ public final class SmokeTestSuite {
      * @return a test suite containing smoke tests.
      */
     public static Test suite() {
-        TestSuite smoke = new TestSuite();
+        final TestSuite smoke = new TestSuite();
         smoke.addTestSuite(com.openexchange.ajax.task.SmokeTest.class);
         return smoke;
     }

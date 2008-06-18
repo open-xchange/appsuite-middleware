@@ -52,6 +52,9 @@ package com.openexchange.groupware.tasks;
 import java.sql.Connection;
 import java.util.Iterator;
 
+import junit.framework.AssertionFailedError;
+import junit.framework.TestCase;
+
 import com.mysql.jdbc.AssertionFailedException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
@@ -77,9 +80,6 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
-
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -97,7 +97,7 @@ public class DowngradeTest extends TestCase {
     /**
      * @param name
      */
-    public DowngradeTest(String name) {
+    public DowngradeTest(final String name) {
         super(name);
     }
 
@@ -248,7 +248,7 @@ public class DowngradeTest extends TestCase {
             if (null != parts && parts.length > 0) {
                 throw new AssertionFailedError("Task has participants.");
             }
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw new AssertionFailedException(e);
         }
     }
@@ -261,7 +261,7 @@ public class DowngradeTest extends TestCase {
             if (null == parts || parts.length == 0) {
                 throw new AssertionFailedError("Task has no participants.");
             }
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw new AssertionFailedException(e);
         }
     }

@@ -218,7 +218,7 @@ public final class MailJSONHandlerTest extends AbstractMailTest {
 
 			final MailMessage mail = MIMEMessageConverter.convertMessage(SRC.getBytes("US-ASCII"));
 
-			JSONMessageHandler handler = new JSONMessageHandler("INBOX/123", DisplayMode.DISPLAY, session,
+			final JSONMessageHandler handler = new JSONMessageHandler("INBOX/123", DisplayMode.DISPLAY, session,
 					UserSettingMailStorage.getInstance()
 							.getUserSettingMail(session.getUserId(), session.getContextId()));
 			new MailMessageParser().parseMailMessage(mail, handler);

@@ -3,9 +3,9 @@ package com.openexchange.groupware.ldap;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.usersetting.UserSettingMail;
 
 /**
@@ -14,23 +14,23 @@ import com.openexchange.mail.usersetting.UserSettingMail;
  */
 public class UserConfigurationFactory {
 	
-	private Map<Integer,UserConfiguration> configs = new HashMap<Integer,UserConfiguration>();
+	private final Map<Integer,UserConfiguration> configs = new HashMap<Integer,UserConfiguration>();
 	
-	private Map<Integer,UserSettingMail> settings = new HashMap<Integer,UserSettingMail>();
+	private final Map<Integer,UserSettingMail> settings = new HashMap<Integer,UserSettingMail>();
 	
-	public UserConfiguration getConfiguration(int userId) {
+	public UserConfiguration getConfiguration(final int userId) {
 		return configs.get(userId);
 	}
 	
-	public UserSettingMail getSetting(int userId) {
+	public UserSettingMail getSetting(final int userId) {
 		return settings.get(userId);
 	}
 	
 	public UserConfigurationFactory() {
 		try {
-		Context ctx = new ContextImpl(1);
-		int permissions = 262143;
-		MockUserLookup users = new MockUserLookup();
+		final Context ctx = new ContextImpl(1);
+		final int permissions = 262143;
+		final MockUserLookup users = new MockUserLookup();
 		
 		
 		User user = users.getUser(1);
@@ -123,7 +123,7 @@ public class UserConfigurationFactory {
 		configs.put(10,config);
 		settings.put(10, mailSetting);
 		
-		}  catch (LdapException x){
+		}  catch (final LdapException x){
 			throw new RuntimeException(x);
 		}
 	}

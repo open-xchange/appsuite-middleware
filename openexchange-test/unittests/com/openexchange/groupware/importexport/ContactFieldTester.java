@@ -49,9 +49,9 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.groupware.contact.helpers.ContactField;
-
 import junit.framework.TestCase;
+
+import com.openexchange.groupware.contact.helpers.ContactField;
 
 public class ContactFieldTester extends TestCase {
 	public void testNumbers(){
@@ -60,25 +60,25 @@ public class ContactFieldTester extends TestCase {
 	}
 	
 	public void testAjax(){
-		String value = "anniversary";
+		final String value = "anniversary";
 		assertEquals(value, ContactField.ANNIVERSARY.getAjaxName());
 		assertEquals(ContactField.ANNIVERSARY, ContactField.getByAjaxName(value));
 	}
 	
 	public void testDatabase(){
-		String value = "ANNIVERSARY";
+		final String value = "ANNIVERSARY";
 		assertEquals(value, ContactField.ANNIVERSARY.getDBName());
 		assertEquals(ContactField.ANNIVERSARY, ContactField.getByDBFieldName(value));
 	}
 	
 	public void testReadableName(){
-		String value = "Anniversay";
+		final String value = "Anniversay";
 		assertEquals(value, ContactField.ANNIVERSARY.getReadableName());
 		assertEquals(ContactField.ANNIVERSARY, ContactField.getByDisplayName(value));
 	}
 	
 	public void testFieldName(){
-		String value = "timestampfield02";
+		final String value = "timestampfield02";
 		assertEquals(value, ContactField.ANNIVERSARY.getFieldName());
 		assertEquals(ContactField.ANNIVERSARY, ContactField.getByFieldName(value));
 	}

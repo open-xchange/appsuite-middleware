@@ -55,7 +55,8 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class DocumentMetadataImplTest extends DocumentMetadataTest {
-    public DocumentMetadata getImplementation() {
+    @Override
+	public DocumentMetadata getImplementation() {
         return new DocumentMetadataImpl();
     }
 }

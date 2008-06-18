@@ -66,9 +66,9 @@ public class NewAppointmentSearchResponse extends AbstractAJAXResponse {
 
 	private AppointmentObject[] appointmentObj;
 	
-	private int[] columns;
+	private final int[] columns;
 	
-	private TimeZone timeZone;
+	private final TimeZone timeZone;
 
     /**
      * @param response

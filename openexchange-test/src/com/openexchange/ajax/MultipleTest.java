@@ -17,14 +17,14 @@ import com.openexchange.tools.URLParameter;
 
 public class MultipleTest extends AbstractAJAXTest {
 	
-	public MultipleTest(String name) {
+	public MultipleTest(final String name) {
 		super(name);
 	}
 
 	private static final String MULTIPLE_URL = "/ajax/multiple";
 	
 	public void testMultiple() throws Exception {
-		int folderId = FolderTest.getStandardContactFolder(getWebConversation(), getHostName(), getSessionId()).getObjectID();
+		final int folderId = FolderTest.getStandardContactFolder(getWebConversation(), getHostName(), getSessionId()).getObjectID();
 		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
@@ -60,14 +60,14 @@ public class MultipleTest extends AbstractAJAXTest {
 		jsonObj.put("data", jsonDataObj);
 		jsonArray.put(jsonObj);
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
-		WebRequest req = new PutMethodWebRequest(PROTOCOL + getHostName() + MULTIPLE_URL + parameter.getURLParameters(), bais, "text/javascript");
-		WebResponse resp = getWebConversation().getResponse(req);
+		final ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
+		final WebRequest req = new PutMethodWebRequest(PROTOCOL + getHostName() + MULTIPLE_URL + parameter.getURLParameters(), bais, "text/javascript");
+		final WebResponse resp = getWebConversation().getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		jsonArray = new JSONArray(resp.getText());
 		for (int a = 0; a < jsonArray.length(); a++) {
-			Response response = Response.parse(jsonArray.getJSONObject(a).toString());
+			final Response response = Response.parse(jsonArray.getJSONObject(a).toString());
 			
 			if (response.hasError()) {
 				fail("json error: " + response.getErrorMessage());

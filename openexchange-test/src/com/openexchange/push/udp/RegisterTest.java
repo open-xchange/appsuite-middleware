@@ -29,11 +29,11 @@ public class RegisterTest extends TestCase {
 	
 	private int contextId = 0;
 	
-	public RegisterTest(String name) {
+	public RegisterTest(final String name) {
 		super(name);
 	}
 	
-	public RegisterTest(String name, DatagramSocket datagramSocket, int userId, int contextId) {
+	public RegisterTest(final String name, final DatagramSocket datagramSocket, final int userId, final int contextId) {
 		super(name);
 		this.datagramSocket = datagramSocket;
 		this.userId = userId;
@@ -48,22 +48,22 @@ public class RegisterTest extends TestCase {
 		register(datagramSocket, userId, contextId, host, port);
 	}
 	
-	public static void register(DatagramSocket datagramSocket, int userId, int contextId, String host, int port) throws Exception {
-		StringBuffer body = new StringBuffer();
+	public static void register(final DatagramSocket datagramSocket, final int userId, final int contextId, final String host, final int port) throws Exception {
+		final StringBuffer body = new StringBuffer();
 		body.append(REGISTER);
 		body.append('\1');
 		body.append(userId);
 		body.append('\1');
 		body.append(contextId);
 		
-		StringBuffer requestData = new StringBuffer();
+		final StringBuffer requestData = new StringBuffer();
 		requestData.append(MAGIC);
 		requestData.append('\1');
 		requestData.append(body.length());
 		requestData.append('\1');
 		requestData.append(body);
 		
-		byte b[] = requestData.toString().getBytes();
+		final byte b[] = requestData.toString().getBytes();
 		
 		DatagramPacket datagramPacket = new DatagramPacket(b, b.length, InetAddress.getByName(host), port);
 		
@@ -73,7 +73,7 @@ public class RegisterTest extends TestCase {
 		datagramPacket = new DatagramPacket(responseByte, responseByte.length);
 		datagramSocket.receive(datagramPacket);
 		responseByte = datagramPacket.getData();
-		byte[] responseData = new byte[datagramPacket.getLength()];
+		final byte[] responseData = new byte[datagramPacket.getLength()];
 		System.arraycopy(responseByte, 0, responseData, 0, responseData.length);
 		
 		assertEquals("unexpected response", "OK\1", new String(responseData));

@@ -16,7 +16,7 @@ import com.openexchange.groupware.container.ContactObject;
 
 public class MultipleTest extends ContactTest {
 	
-	public MultipleTest(String name) {
+	public MultipleTest(final String name) {
 		super(name);
 	}
 	
@@ -30,7 +30,7 @@ public class MultipleTest extends ContactTest {
 	}
 	
 	public void testMultipleInsert() throws Exception {
-		ContactObject contactObj = new ContactObject();
+		final ContactObject contactObj = new ContactObject();
 		contactObj.setSurName("testMultipleInsert");
 		contactObj.setParentFolderID(contactFolderId);
 		

@@ -8,7 +8,7 @@ import com.openexchange.webdav.xml.TaskTest;
 
 public class ConfirmTest extends TaskTest {
 	
-	public ConfirmTest(String name) {
+	public ConfirmTest(final String name) {
 		super(name);
 	}
 	
@@ -20,18 +20,18 @@ public class ConfirmTest extends TaskTest {
 		final FolderObject sharedFolderObject = FolderTest.getTaskDefaultFolder(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 		final int secondUserId = sharedFolderObject.getCreatedBy();
 		
-        Task TaskObj = createTask("testConfirm");
+        final Task TaskObj = createTask("testConfirm");
 		UserParticipant[] participants = new UserParticipant[1];
 		participants[0] = new UserParticipant();
 		participants[0].setIdentifier(secondUserId);
 		
 		TaskObj.setParticipants(participants);
 
-        int objectId = insertTask(getWebConversation(), TaskObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+        final int objectId = insertTask(getWebConversation(), TaskObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 
         confirmTask(getSecondWebConversation(), objectId, Task.ACCEPT, null, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 		
-		Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
 		boolean found = false;
 		

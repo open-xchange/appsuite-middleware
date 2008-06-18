@@ -27,31 +27,31 @@ public class UserImpl4Test implements User {
 	
 	private String userPassword;
 	
-	private String passwordMech = null;
+	private final String passwordMech = null;
 	
-	private boolean mailEnabled = false;
+	private final boolean mailEnabled = false;
 	
-	private int shadowLastChange = -1;
+	private final int shadowLastChange = -1;
 	
-	private String imapServer = null;
+	private final String imapServer = null;
 	
-	private String imapLogin = null;
+	private final String imapLogin = null;
 	
-	private String smtpServer = null;
+	private final String smtpServer = null;
 	
-	private String mailDomain = null;
+	private final String mailDomain = null;
 	
-	private String givenName = null;
+	private final String givenName = null;
 	
-	private String surName = null;
+	private final String surName = null;
 	
 	private String mail = null;
 	
-	private String displayName = null;
+	private final String displayName = null;
 	
-	private String timezone = null;
+	private final String timezone = null;
 	
-	private String preferedLanguage = null;
+	private final String preferedLanguage = null;
 	
 	private String loginInfo = null;
 	
@@ -65,11 +65,11 @@ public class UserImpl4Test implements User {
 		return id;
 	}
 	
-	public void setId(int id) {
+	public void setId(final int id) {
 		this.id = id;
 	}
 	
-	public void setMail(String mail) {
+	public void setMail(final String mail) {
 		this.mail = mail;
 	}
 	
@@ -149,7 +149,7 @@ public class UserImpl4Test implements User {
 		return loginInfo;
 	}
 	
-	public void setLoginInfo(String loginInfo) {
+	public void setLoginInfo(final String loginInfo) {
 		this.loginInfo = loginInfo;
 	}
 
@@ -157,7 +157,7 @@ public class UserImpl4Test implements User {
 		return locale;
 	}
 
-	public void setLocale(Locale locale) {
+	public void setLocale(final Locale locale) {
 		this.locale = locale;
 	}
 }

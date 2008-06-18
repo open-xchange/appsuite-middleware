@@ -14,8 +14,8 @@ import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.TestInit;
 import com.openexchange.test.OXTestToolkit;
+import com.openexchange.test.TestInit;
 
 
 public class NewTest extends InfostoreAJAXTest {
@@ -24,7 +24,7 @@ public class NewTest extends InfostoreAJAXTest {
 	
 	private static final byte[] megabyte = new byte[1000000];
 	
-	public NewTest(String name) {
+	public NewTest(final String name) {
 		super(name);
 	}
 	
@@ -33,7 +33,7 @@ public class NewTest extends InfostoreAJAXTest {
 	}
 	
 	public void testUpload() throws Exception{
-		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		int id = createNew(
 				getWebConversation(),
 				getHostName(),
@@ -70,10 +70,12 @@ public class NewTest extends InfostoreAJAXTest {
 			
 			OXTestToolkit.assertSameContent(is,is2);
 		} finally {
-			if(is!=null)
+			if(is!=null) {
 				is.close();
-			if(is2!=null)
+			}
+			if(is2!=null) {
 				is2.close();
+			}
 		}
 		
 		id = createNew(
@@ -98,7 +100,7 @@ public class NewTest extends InfostoreAJAXTest {
 	
 	
 	public void testLargeFileUpload() throws Exception{
-		File largeFile = File.createTempFile("test","bin");
+		final File largeFile = File.createTempFile("test","bin");
 		largeFile.deleteOnExit();
 		
 		BufferedOutputStream out = null;
@@ -109,12 +111,13 @@ public class NewTest extends InfostoreAJAXTest {
 				out.flush();
 			}
 		} finally {
-			if(out != null)
+			if(out != null) {
 				out.close();
+			}
 		}
 		
 		try {
-			int id = createNew(
+			final int id = createNew(
 					getWebConversation(),
 					getHostName(),
 					sessionId,
@@ -126,7 +129,7 @@ public class NewTest extends InfostoreAJAXTest {
 			);
 			clean.add(id);
 			fail("Uploaded Large File and got no error");
-		} catch (Exception x) {
+		} catch (final Exception x) {
 			System.out.println(x.getMessage());
 			assertTrue(true);
 		}
@@ -134,9 +137,9 @@ public class NewTest extends InfostoreAJAXTest {
 	
 	// Bug 3877
 	public void testEnforceFolderType() throws Exception {
-		int folderId = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), sessionId).getObjectID();
+		final int folderId = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), sessionId).getObjectID();
 		try {
-			int id = createNew(
+			final int id = createNew(
 					getWebConversation(),
 					getHostName(),
 					sessionId,
@@ -148,7 +151,7 @@ public class NewTest extends InfostoreAJAXTest {
 				);
 			clean.add(id);
 			fail("Could save infoitem in calendar folder");
-		} catch (Exception x) {
+		} catch (final Exception x) {
 			assertTrue(true);
 		}
 				
@@ -156,8 +159,8 @@ public class NewTest extends InfostoreAJAXTest {
 	
 	// Bug 3928
 	public void testVersionCommentForNewDocument() throws Exception {
-		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-		int id = createNew(
+		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+		final int id = createNew(
 				getWebConversation(),
 				getHostName(),
 				sessionId,
@@ -170,26 +173,26 @@ public class NewTest extends InfostoreAJAXTest {
 		);
 		clean.add(id);
 		
-		Response res = get(getWebConversation(),getHostName(), sessionId, id);
-		JSONObject obj = (JSONObject) res.getData();
+		final Response res = get(getWebConversation(),getHostName(), sessionId, id);
+		final JSONObject obj = (JSONObject) res.getData();
 		assertEquals(1,obj.getInt("version"));
 		assertEquals("Version Comment", obj.getString("version_comment"));
 	}
 
 //	Bug 4120
 	public void testUniqueFilenamesOnUpload() throws Exception {
-		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		
-		int id = clean.get(0);
+		final int id = clean.get(0);
 		
-		Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain");
+		final Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain");
 		assertNoError(res);
 		
 		try {
-			int id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title" , "otherFile", "description","other_desc", "folder_id" ,	((Integer)folderId).toString()), upload, "text/plain");
+			final int id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title" , "otherFile", "description","other_desc", "folder_id" ,	((Integer)folderId).toString()), upload, "text/plain");
 			clean.add(id2);
 			fail("Excepted exception");
-		} catch (IOException x) {
+		} catch (final IOException x) {
 			assertTrue(true);
 		}
 	}
@@ -201,19 +204,19 @@ public class NewTest extends InfostoreAJAXTest {
 		virtualFolder(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
 	}
 	
-	public void virtualFolder(int folderId) throws Exception {
+	public void virtualFolder(final int folderId) throws Exception {
 		try {
 			createNew(getWebConversation(), getHostName(), sessionId, m("folder_id" , ""+folderId));
 			fail("Expected exception because we can't create a document in this virtual folder");
-		} catch (JSONException x) {
+		} catch (final JSONException x) {
 			assertTrue(x.getMessage(), x.getMessage().contains("virt"));
 		}
 	}
 
 	
 	public void testTitleFromFilename() throws Exception {
-		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-		int id = createNew(
+		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+		final int id = createNew(
 				getWebConversation(),
 				getHostName(),
 				sessionId,
@@ -223,8 +226,8 @@ public class NewTest extends InfostoreAJAXTest {
 		);
 		clean.add(id);
 		
-		Response res = get(getWebConversation(),getHostName(), sessionId, id);
-		JSONObject obj = (JSONObject) res.getData();
+		final Response res = get(getWebConversation(),getHostName(), sessionId, id);
+		final JSONObject obj = (JSONObject) res.getData();
 		
 		assertEquals(upload.getName(),obj.getString("title"));
 	}

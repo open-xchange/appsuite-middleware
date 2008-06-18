@@ -10,7 +10,7 @@ public class CreateDocumentActionTest extends AbstractInfostoreActionTest {
 
 	@Override
 	protected UndoableAction getAction() throws Exception {
-		CreateDocumentAction createAction = new CreateDocumentAction();
+		final CreateDocumentAction createAction = new CreateDocumentAction();
 		createAction.setProvider(getProvider());
 		createAction.setContext(getContext());
 		createAction.setDocuments(getDocuments());
@@ -20,23 +20,23 @@ public class CreateDocumentActionTest extends AbstractInfostoreActionTest {
 
 	@Override
 	protected void verifyPerformed() throws Exception {	
-		for(DocumentMetadata doc : getDocuments()) {
+		for(final DocumentMetadata doc : getDocuments()) {
 			checkInDocTable(doc);
 		}
 	}
 
 	@Override
 	protected void verifyUndone() throws Exception {
-		for(DocumentMetadata doc : getDocuments()) {
+		for(final DocumentMetadata doc : getDocuments()) {
 			checkNotInDocTable(doc);
 		}
 	}
 
-	private void checkNotInDocTable(DocumentMetadata doc) throws TransactionException, SQLException {
+	private void checkNotInDocTable(final DocumentMetadata doc) throws TransactionException, SQLException {
 		assertNoResult("SELECT 1 FROM infostore WHERE id = ? and cid = ?", doc.getId(), getContext().getContextId());	
 	}
 	
-	private void checkInDocTable(DocumentMetadata doc) throws TransactionException, SQLException {
+	private void checkInDocTable(final DocumentMetadata doc) throws TransactionException, SQLException {
 		assertResult("SELECT 1 FROM infostore WHERE id = ? and cid = ?", doc.getId(), getContext().getContextId());
 	}
 

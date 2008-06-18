@@ -14,9 +14,10 @@ import com.openexchange.groupware.tx.UndoableAction;
 
 public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
 
-	private CreateAttachmentAction createAction = new CreateAttachmentAction();
+	private final CreateAttachmentAction createAction = new CreateAttachmentAction();
 	private int delCountStart;
 	
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		
@@ -31,6 +32,7 @@ public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
 		
 	}
 	
+	@Override
 	public void tearDown() throws Exception {
 		createAction.undo();
 		super.tearDown();
@@ -40,7 +42,7 @@ public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
 	
 	@Override
 	protected UndoableAction getAction() throws Exception {
-		DeleteAttachmentAction deleteAction = new DeleteAttachmentAction();
+		final DeleteAttachmentAction deleteAction = new DeleteAttachmentAction();
 		deleteAction.setAttachments(getAttachments());
 		deleteAction.setQueryCatalog(getQueryCatalog());
 		deleteAction.setProvider(getProvider());
@@ -56,27 +58,27 @@ public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
 	
 	@Override
 	protected void verifyUndone() throws Exception {
-		for(AttachmentMetadata attachment : getAttachments()) {
-			AttachmentMetadata loaded = getAttachmentBase().getAttachment(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(),  attachment.getId(), getContext(), getUser(), null);
+		for(final AttachmentMetadata attachment : getAttachments()) {
+			final AttachmentMetadata loaded = getAttachmentBase().getAttachment(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(),  attachment.getId(), getContext(), getUser(), null);
 			assertEquals(attachment, loaded);
 		}
 		checkRemovedFromDel();
 	}
 	
 	private void checkRemovedFromNormalTable() {
-		for(AttachmentMetadata attachment : getAttachments()) {
+		for(final AttachmentMetadata attachment : getAttachments()) {
 			try {
 				getAttachmentBase().getAttachment(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(),  attachment.getId(), getContext(), getUser(), null);
 				fail("Found attachment");
-			} catch (OXException x) {
+			} catch (final OXException x) {
 				assertTrue(true);
 			}
 		}
 	}
 	
 	private int countDel() throws TransactionException, SQLException{
-		StringBuilder in = new StringBuilder();
-		for(AttachmentMetadata m : getAttachments()) {
+		final StringBuilder in = new StringBuilder();
+		for(final AttachmentMetadata m : getAttachments()) {
 			in.append(m.getId()).append(",");
 		}
 		in.setLength(in.length()-1);
@@ -89,16 +91,20 @@ public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
 			stmt = readCon.prepareStatement("SELECT count(*) FROM del_attachment WHERE cid = ? and id in ("+in.toString()+")");
 			stmt.setInt(1, getContext().getContextId());
 			rs = stmt.executeQuery();
-			if(!rs.next())
+			if(!rs.next()) {
 				return -1;
+			}
 			return rs.getInt(1);
 		} finally {
-			if(stmt != null)
+			if(stmt != null) {
 				stmt.close();
-			if(rs != null)
+			}
+			if(rs != null) {
 				rs.close();
-			if(readCon != null)
+			}
+			if(readCon != null) {
 				getProvider().releaseReadConnection(getContext(), readCon);
+			}
 		}
 	}
 

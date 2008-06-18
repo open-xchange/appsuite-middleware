@@ -14,10 +14,11 @@ public class Bug8317Test extends AppointmentTest {
 	
 	private static final Log LOG = LogFactory.getLog(Bug8317Test.class);
 	
-	public Bug8317Test(String name) {
+	public Bug8317Test(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
@@ -37,7 +38,7 @@ public class Bug8317Test extends AppointmentTest {
          */
 	public void testBug8317() throws Exception {
 		
-		Calendar calendar = Calendar.getInstance(timeZone);
+		final Calendar calendar = Calendar.getInstance(timeZone);
 		calendar.setTimeInMillis(startTime);
 		
 		calendar.add(Calendar.DAY_OF_MONTH, 5);
@@ -59,7 +60,7 @@ public class Bug8317Test extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setShownAs(AppointmentObject.ABSENT);
 		appointmentObj.setIgnoreConflicts(true);
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		
 		calendar.set(year, month, day, 0, 30, 0);
 		startDate = calendar.getTime();
@@ -76,9 +77,9 @@ public class Bug8317Test extends AppointmentTest {
 		appointmentObj.setIgnoreConflicts(false);
                 
 		try {
-			int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+			final int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 			fail("conflict exception expected!");
-		} catch (OXConflictException exc) {
+		} catch (final OXConflictException exc) {
 			// Perfect. The insertAppointment throws a OXConflictException
             // And this is what we expect here !!!
 		}

@@ -50,8 +50,8 @@ public class SizedInputStreamTest {
 	
 	@Test public void normalReading() throws IOException{
 		int l;
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		byte[] buffer = new byte[0x1];
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final byte[] buffer = new byte[0x1];
 		while( (l = testStream.read(buffer)) != -1){
 			baos.write(buffer, 0, l);
 		}
@@ -62,9 +62,9 @@ public class SizedInputStreamTest {
 	}
 	
 	@Test public void readingViaGetSize() throws IOException{
-		byte[] buffer = new byte[(int) testStream.getSize()];
+		final byte[] buffer = new byte[(int) testStream.getSize()];
 		testStream.read(buffer);
-		String test2 = new String(buffer, ENCODING);
+		final String test2 = new String(buffer, ENCODING);
 		assertEquals("Content comparison", test2, TEXT);
 	}
 }

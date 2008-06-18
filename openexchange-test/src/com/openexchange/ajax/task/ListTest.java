@@ -106,7 +106,7 @@ public class ListTest extends AbstractTaskTest {
         final MultipleResponse mInsert = (MultipleResponse) Executor.execute(
             getClient(), new MultipleRequest(inserts));
         
-        int[][] tasks = new int[NUMBER][2];
+        final int[][] tasks = new int[NUMBER][2];
         for (int i = 0; i < tasks.length; i++) {
             final InsertResponse insertR = (InsertResponse) mInsert.getResponse(i);
             tasks[i] = new int[] { insertR.getFolderId(), insertR.getId() };
@@ -116,15 +116,15 @@ public class ListTest extends AbstractTaskTest {
         final CommonListResponse listR = TaskTools.list(getClient(),
             new ListRequest(tasks, columns));
         StringBuilder output = new StringBuilder();
-        for (int column : columns) {
+        for (final int column : columns) {
             output.append(column);
             output.append(',');
         }
         output.setLength(output.length() - 1);
         LOG.info(output);
-        for (Object[] values : listR) {
+        for (final Object[] values : listR) {
             output = new StringBuilder(); 
-            for (Object value : values) {
+            for (final Object value : values) {
                 output.append(value);
                 output.append(',');
             }
@@ -179,7 +179,7 @@ public class ListTest extends AbstractTaskTest {
         }
 
         // A now gets all of the folder.
-        int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.FOLDER_ID };
+        final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.FOLDER_ID };
         final AllResponse allR = TaskTools.all(clientA, new AllRequest(
             folderA, columns, Task.TITLE, Order.ASCENDING));
         

@@ -14,30 +14,31 @@ public class AllTest extends AppointmentTest {
 
 	private static final Log LOG = LogFactory.getLog(AllTest.class);
 	
-	public AllTest(String name) {
+	public AllTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 	
 	public void testShowAppointmentsBetween() throws Exception {
-		Date start = new Date(System.currentTimeMillis()-(dayInMillis*7));
-		Date end = new Date(System.currentTimeMillis()+(dayInMillis*7));
+		final Date start = new Date(System.currentTimeMillis()-(dayInMillis*7));
+		final Date end = new Date(System.currentTimeMillis()+(dayInMillis*7));
 		
 		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID };
 		
-		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, false, PROTOCOL + getHostName(), getSessionId());
+		final AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, false, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testShowAllAppointmentWhereIAmParticipant() throws Exception {
-		Date start = new Date(System.currentTimeMillis()-(dayInMillis*7));
-		Date end = new Date(System.currentTimeMillis()+(dayInMillis*7));
+		final Date start = new Date(System.currentTimeMillis()-(dayInMillis*7));
+		final Date end = new Date(System.currentTimeMillis()+(dayInMillis*7));
 		
 		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID };
 		
-		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, true, PROTOCOL + getHostName(), getSessionId());
+		final AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, true, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testShowFullTimeAppointments() throws Exception {
@@ -56,12 +57,12 @@ public class AllTest extends AppointmentTest {
 		
 		final Date endDate = calendar.getTime();
 		
-		AppointmentObject appointmentObj = createAppointmentObject("testShowFullTimeAppointments");
+		final AppointmentObject appointmentObj = createAppointmentObject("testShowFullTimeAppointments");
 		appointmentObj.setStartDate(startDate);
 		appointmentObj.setEndDate(endDate);
 		appointmentObj.setFullTime(true);
 		appointmentObj.setIgnoreConflicts(true);
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		
 		calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		calendar.set(Calendar.HOUR_OF_DAY, 0);

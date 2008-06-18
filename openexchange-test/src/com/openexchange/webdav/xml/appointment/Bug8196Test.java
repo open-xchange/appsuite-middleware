@@ -1,33 +1,36 @@
 package com.openexchange.webdav.xml.appointment;
 
+import java.util.Date;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.FolderTest;
-import java.util.Date;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class Bug8196Test extends AppointmentTest {
 	
 	private static final Log LOG = LogFactory.getLog(Bug8196Test.class);
 	
-	public Bug8196Test(String name) {
+	public Bug8196Test(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 	
 	public void testBug8196() throws Exception {
-		FolderObject folderObj = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), getHostName(), getSecondLogin(), getPassword());
-		int secondAppointmentFolderId = folderObj.getObjectID();
-		int secondUserId = folderObj.getCreatedBy();
+		final FolderObject folderObj = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), getHostName(), getSecondLogin(), getPassword());
+		final int secondAppointmentFolderId = folderObj.getObjectID();
+		final int secondUserId = folderObj.getCreatedBy();
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testBug8196");
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);

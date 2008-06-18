@@ -11,6 +11,7 @@ public class CreateVersionActionTest extends AbstractInfostoreActionTest {
 
 	CreateDocumentAction create = new CreateDocumentAction();
 	
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		create.setProvider(getProvider());
@@ -20,6 +21,7 @@ public class CreateVersionActionTest extends AbstractInfostoreActionTest {
 		create.perform();
 	}
 	
+	@Override
 	public void tearDown() throws Exception {
 		create.undo();
 		super.tearDown();
@@ -27,7 +29,7 @@ public class CreateVersionActionTest extends AbstractInfostoreActionTest {
 	
 	@Override
 	protected UndoableAction getAction() throws Exception {
-		CreateVersionAction createAction = new CreateVersionAction();
+		final CreateVersionAction createAction = new CreateVersionAction();
 		createAction.setProvider(getProvider());
 		createAction.setContext(getContext());
 		createAction.setDocuments(getDocuments());
@@ -37,7 +39,7 @@ public class CreateVersionActionTest extends AbstractInfostoreActionTest {
 
 	@Override
 	protected void verifyPerformed() throws Exception {
-		for(DocumentMetadata doc : getDocuments()) {
+		for(final DocumentMetadata doc : getDocuments()) {
 			checkInVersionTable(doc);
 		}
 	}
@@ -45,16 +47,16 @@ public class CreateVersionActionTest extends AbstractInfostoreActionTest {
 
 	@Override
 	protected void verifyUndone() throws Exception {
-		for(DocumentMetadata doc : getDocuments()) {
+		for(final DocumentMetadata doc : getDocuments()) {
 			checkNotInVersionTable(doc);
 		}
 	}
 
-	private void checkInVersionTable(DocumentMetadata doc) throws TransactionException, SQLException {
+	private void checkInVersionTable(final DocumentMetadata doc) throws TransactionException, SQLException {
 		assertResult("SELECT 1 FROM infostore_document WHERE infostore_id = ? and cid = ?", doc.getId(), getContext().getContextId());
 	}
 
-	private void checkNotInVersionTable(DocumentMetadata doc) throws TransactionException, SQLException {
+	private void checkNotInVersionTable(final DocumentMetadata doc) throws TransactionException, SQLException {
 		assertNoResult("SELECT 1 FROM infostore_document WHERE infostore_id = ? and cid = ?", doc.getId(), getContext().getContextId());	
 	}
 

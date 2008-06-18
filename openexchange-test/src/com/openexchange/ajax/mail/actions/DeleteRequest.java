@@ -93,7 +93,7 @@ public class DeleteRequest extends AbstractMailRequest {
 	public AbstractAJAXParser<DeleteResponse> getParser() {
 		return new AbstractAJAXParser<DeleteResponse>(failOnError) {
 			@Override
-			protected DeleteResponse createResponse(Response response) throws JSONException {
+			protected DeleteResponse createResponse(final Response response) throws JSONException {
 				return new DeleteResponse(response);
 			}
 		};

@@ -165,9 +165,9 @@ public final class BundleTestEventAdmin extends AbstractBundleTest {
 		return json;
 	}
 
-	private static AppointmentObject createAppointmentObject(String title, long startTime, long endTime,
-			int appointmentFolderId) {
-		AppointmentObject appointmentobject = new AppointmentObject();
+	private static AppointmentObject createAppointmentObject(final String title, final long startTime, final long endTime,
+			final int appointmentFolderId) {
+		final AppointmentObject appointmentobject = new AppointmentObject();
 		appointmentobject.setTitle(title);
 		appointmentobject.setStartDate(new Date(startTime));
 		appointmentobject.setEndDate(new Date(endTime));

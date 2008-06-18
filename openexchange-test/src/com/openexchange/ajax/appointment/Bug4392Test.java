@@ -43,10 +43,11 @@ public class Bug4392Test extends AppointmentTest {
 
 	private static final Log LOG = LogFactory.getLog(Bug4392Test.class);
 	
-	public Bug4392Test(String name) {
+	public Bug4392Test(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
@@ -79,7 +80,7 @@ public class Bug4392Test extends AppointmentTest {
 		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
 		try {
 			compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
-		} catch (TestException exc) {
+		} catch (final TestException exc) {
 			fail("exception: " + exc.toString());
 		}
 	}

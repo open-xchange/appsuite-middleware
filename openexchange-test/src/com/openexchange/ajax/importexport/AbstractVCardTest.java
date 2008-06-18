@@ -1,5 +1,16 @@
 package com.openexchange.ajax.importexport;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TimeZone;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -11,27 +22,16 @@ import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
-import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TimeZone;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class AbstractVCardTest extends AbstractAJAXTest {
 	
@@ -49,10 +49,11 @@ public class AbstractVCardTest extends AbstractAJAXTest {
 	
 	private static final Log LOG = LogFactory.getLog(AbstractVCardTest.class);
 	
-	public AbstractVCardTest(String name) {
+	public AbstractVCardTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		
@@ -70,14 +71,14 @@ public class AbstractVCardTest extends AbstractAJAXTest {
 		LOG.debug(new StringBuilder().append("use timezone: ").append(
 				timeZone).toString());
 		
-		ContactObject contactObj = ContactTest.loadUser(getWebConversation(), userId, FolderObject.SYSTEM_LDAP_FOLDER_ID, getHostName(), getSessionId());
+		final ContactObject contactObj = ContactTest.loadUser(getWebConversation(), userId, FolderObject.SYSTEM_LDAP_FOLDER_ID, getHostName(), getSessionId());
 		emailaddress = contactObj.getEmail1();
 	}
 	
-	public static ImportResult[] importVCard(WebConversation webCon, ContactObject[] contactObj, int folderId, TimeZone timeZone, String emailaddress, String host, String session) throws Exception, TestException {
+	public static ImportResult[] importVCard(final WebConversation webCon, final ContactObject[] contactObj, final int folderId, final TimeZone timeZone, final String emailaddress, String host, final String session) throws Exception, TestException {
 		host = appendPrefix(host);
 		
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		
 		final VersitDefinition contactDef = Versit.getDefinition("text/vcard");
 		final VersitDefinition.Writer versitWriter = contactDef.getWriter(byteArrayOutputStream, "UTF-8");
@@ -86,7 +87,7 @@ public class AbstractVCardTest extends AbstractAJAXTest {
 		
 		if (contactObj != null) {
 			for (int a = 0; a < contactObj.length; a++) {
-				VersitObject versitObject = oxContainerConverter.convertContact(contactObj[a], "3.0");
+				final VersitObject versitObject = oxContainerConverter.convertContact(contactObj[a], "3.0");
 				contactDef.write(versitWriter, versitObject);
 			}
 		}
@@ -98,7 +99,7 @@ public class AbstractVCardTest extends AbstractAJAXTest {
 		return importVCard(webCon, new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), folderId, timeZone, emailaddress, host, session);
 	}
 	
-	public static ImportResult[] importVCard(WebConversation webCon, ByteArrayInputStream byteArrayInputStream, int folderId, TimeZone timeZone, String emailaddress, String host, String session) throws Exception, TestException {
+	public static ImportResult[] importVCard(final WebConversation webCon, final ByteArrayInputStream byteArrayInputStream, final int folderId, final TimeZone timeZone, final String emailaddress, String host, final String session) throws Exception, TestException {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter(true);
@@ -106,32 +107,32 @@ public class AbstractVCardTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, Format.VCARD.getConstantName());
 		parameter.setParameter("folder", folderId);
 		
-		WebRequest req = new PostMethodWebRequest(host + "/ajax/import" + parameter.getURLParameters());
+		final WebRequest req = new PostMethodWebRequest(host + "/ajax/import" + parameter.getURLParameters());
 		
 		((PostMethodWebRequest)req).setMimeEncoded(true);
 		req.selectFile("file", "vcard-test.vcf", byteArrayInputStream, Format.VCARD.getMimeType());
 		
-		WebResponse resp = webCon.getResource(req);
+		final WebResponse resp = webCon.getResource(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		JSONObject response = extractFromCallback( resp.getText() );
+		final JSONObject response = extractFromCallback( resp.getText() );
 		
-		JSONArray jsonArray = response.getJSONArray("data");
+		final JSONArray jsonArray = response.getJSONArray("data");
 		
 		assertNotNull("json array in response is null", jsonArray);
 		
-		ImportResult[] importResult = new ImportResult[jsonArray.length()];
+		final ImportResult[] importResult = new ImportResult[jsonArray.length()];
 		for (int a = 0; a < jsonArray.length(); a++) {
-			JSONObject jsonObj = jsonArray.getJSONObject(a);
+			final JSONObject jsonObj = jsonArray.getJSONObject(a);
 			
 			if (jsonObj.has("error")) {
 				importResult[a] = new ImportResult();
 				importResult[a].setException(new OXException(jsonObj.getString("error")));
 			} else {
-				String objectId = jsonObj.getString("id");
-				String folder = jsonObj.getString("folder_id");
-				long timestamp = jsonObj.getLong("last_modified");
+				final String objectId = jsonObj.getString("id");
+				final String folder = jsonObj.getString("folder_id");
+				final long timestamp = jsonObj.getLong("last_modified");
 				
 				importResult[a] = new ImportResult(objectId, folder, timestamp);
 			}
@@ -140,7 +141,7 @@ public class AbstractVCardTest extends AbstractAJAXTest {
 		return importResult;
 	}
 	
-	public ContactObject[] exportContact(WebConversation webCon, int inFolder, String mailaddress, TimeZone timeZone, String host, String session) throws Exception, TestException {
+	public ContactObject[] exportContact(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session) throws Exception, TestException {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter(true);
@@ -148,8 +149,8 @@ public class AbstractVCardTest extends AbstractAJAXTest {
 		parameter.setParameter("folder", inFolder);
 		parameter.setParameter("action", Format.VCARD.getConstantName());
 		 
-		WebRequest req = new GetMethodWebRequest(host + "/ajax/export" + parameter.getURLParameters());
-		WebResponse resp = webCon.getResponse(req);
+		final WebRequest req = new GetMethodWebRequest(host + "/ajax/export" + parameter.getURLParameters());
+		final WebResponse resp = webCon.getResponse(req);
 		 
 		assertEquals(200, resp.getResponseCode());
 
@@ -169,7 +170,7 @@ public class AbstractVCardTest extends AbstractAJAXTest {
 	 
 				versitObject = def.parse(versitReader);
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw new Exception(exc);
 		}
 		 

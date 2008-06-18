@@ -1,5 +1,10 @@
 package com.openexchange.webdav.xml.appointment;
 
+import java.util.Date;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
@@ -7,18 +12,16 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.resource.Resource;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.GroupUserTest;
-import java.util.Date;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class Bug8123Test extends AppointmentTest {
 	
 	private static final Log LOG = LogFactory.getLog(Bug8123Test.class);
 	
-	public Bug8123Test(String name) {
+	public Bug8123Test(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
@@ -30,7 +33,7 @@ public class Bug8123Test extends AppointmentTest {
 			fail("no resource found for this test");
 		}
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testBug8123");
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
@@ -38,7 +41,7 @@ public class Bug8123Test extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		
-		Participant[] participant = new Participant[2];
+		final Participant[] participant = new Participant[2];
 		participant[0] = new UserParticipant();
 		participant[0].setIdentifier(userId);
 		participant[1] = new ResourceParticipant();
@@ -46,7 +49,7 @@ public class Bug8123Test extends AppointmentTest {
 		
 		appointmentObj.setParticipants(participant);
 
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());

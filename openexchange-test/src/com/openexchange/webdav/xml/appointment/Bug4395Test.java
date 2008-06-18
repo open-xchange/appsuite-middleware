@@ -1,32 +1,32 @@
 package com.openexchange.webdav.xml.appointment;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.FolderTest;
-import com.openexchange.webdav.xml.XmlServlet;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class Bug4395Test extends AppointmentTest {
 	
 	private static final Log LOG = LogFactory.getLog(Bug4395Test.class);
 	
-	public Bug4395Test(String name) {
+	public Bug4395Test(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 	
 	public void testBug4395() throws Exception {
 		final FolderObject sharedFolderObject = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword());
-		int secondUserId = sharedFolderObject.getCreatedBy();
+		final int secondUserId = sharedFolderObject.getCreatedBy();
 		
-		FolderObject folderObj = new FolderObject();
+		final FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testBug4395" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.CALENDAR);
 		folderObj.setType(FolderObject.PRIVATE);
@@ -51,7 +51,7 @@ public class Bug4395Test extends AppointmentTest {
 		
 		FolderTest.updateFolder(getSecondWebConversation(), folderObj, getHostName(), getSecondLogin(), getPassword());
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testBug4395");
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
@@ -62,7 +62,7 @@ public class Bug4395Test extends AppointmentTest {
 		final int appointmentObjectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		appointmentObj.setObjectID(appointmentObjectId);
 
-		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), appointmentObjectId, parentFolderId, getHostName(), getLogin(), getPassword());
+		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), appointmentObjectId, parentFolderId, getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		
 		FolderTest.deleteFolder(getSecondWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getSecondLogin(), getPassword());

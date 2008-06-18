@@ -10,10 +10,11 @@ import com.openexchange.groupware.tx.UndoableAction;
 
 public class UpdateAttachmentsActionTest  extends AbstractAttachmentActionTest{
 	
-	private CreateAttachmentAction createAction = new CreateAttachmentAction();
+	private final CreateAttachmentAction createAction = new CreateAttachmentAction();
 	private AttachmentMetadata update;
 	private AttachmentMetadata original;
 	
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		
@@ -29,6 +30,7 @@ public class UpdateAttachmentsActionTest  extends AbstractAttachmentActionTest{
 		update.setFilename("otherfile.txt");
 	}
 	
+	@Override
 	public void tearDown() throws Exception {
 		createAction.undo();
 		super.tearDown();
@@ -36,7 +38,7 @@ public class UpdateAttachmentsActionTest  extends AbstractAttachmentActionTest{
 	
 	@Override
 	protected UndoableAction getAction() throws Exception {
-		UpdateAttachmentAction updateAction = new UpdateAttachmentAction();
+		final UpdateAttachmentAction updateAction = new UpdateAttachmentAction();
 		updateAction.setAttachments(Arrays.asList(update));
 		updateAction.setOldAttachments(Arrays.asList(original));
 		updateAction.setQueryCatalog(getQueryCatalog());
@@ -48,13 +50,13 @@ public class UpdateAttachmentsActionTest  extends AbstractAttachmentActionTest{
 
 	@Override
 	protected void verifyPerformed() throws Exception {
-		AttachmentMetadata loaded = getAttachmentBase().getAttachment(update.getFolderId(), update.getAttachedId(), update.getModuleId(), update.getId(), getContext(), getUser(), null);
+		final AttachmentMetadata loaded = getAttachmentBase().getAttachment(update.getFolderId(), update.getAttachedId(), update.getModuleId(), update.getId(), getContext(), getUser(), null);
 		assertEquals(update,loaded);
 	}
 
 	@Override
 	protected void verifyUndone() throws Exception {
-		AttachmentMetadata loaded = getAttachmentBase().getAttachment(update.getFolderId(), update.getAttachedId(), update.getModuleId(), update.getId(), getContext(), getUser(), null);
+		final AttachmentMetadata loaded = getAttachmentBase().getAttachment(update.getFolderId(), update.getAttachedId(), update.getModuleId(), update.getId(), getContext(), getUser(), null);
 		assertEquals(original,loaded);
 	}
 

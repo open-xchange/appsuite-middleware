@@ -12,7 +12,7 @@ public class Bug9497Test extends AbstractRecurrenceTest {
 	
 	private static final Log LOG = LogFactory.getLog(Bug9497Test.class);
 	
-	public Bug9497Test(String name) {
+	public Bug9497Test(final String name) {
 		super(name);
 	}
 	
@@ -36,8 +36,8 @@ public class Bug9497Test extends AbstractRecurrenceTest {
 		appointmentObj.setDayInMonth(28);
 		appointmentObj.setMonth(Calendar.DECEMBER);
 		appointmentObj.setIgnoreConflicts(true);
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
-		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, 39,  appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, 39,  appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 	}
 }

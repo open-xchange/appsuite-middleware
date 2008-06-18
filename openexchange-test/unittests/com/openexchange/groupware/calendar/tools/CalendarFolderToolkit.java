@@ -48,22 +48,22 @@
  */
 package com.openexchange.groupware.calendar.tools;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class CalendarFolderToolkit {
 
-    public int getStandardFolder(int user, Context ctx) {
-        OXFolderAccess access = new OXFolderAccess(ctx);
+    public int getStandardFolder(final int user, final Context ctx) {
+        final OXFolderAccess access = new OXFolderAccess(ctx);
         FolderObject fo = null;
         try {
             fo = access.getDefaultFolder(user, FolderObject.CALENDAR);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
             return -1;
         }

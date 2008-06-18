@@ -69,22 +69,22 @@ import com.openexchange.groupware.importexport.Format;
  */
 public class ICalImportExportServletTest extends AbstractImportExportServletTest {
 
-	public ICalImportExportServletTest(String name) {
+	public ICalImportExportServletTest(final String name) {
 		super(name);
 	}
 
 	public void testIcalMessage() throws Exception{
-		InputStream is = new ByteArrayInputStream("BEGIN:VCALENDAR".getBytes());
-		WebConversation webconv = getWebConversation();
+		final InputStream is = new ByteArrayInputStream("BEGIN:VCALENDAR".getBytes());
+		final WebConversation webconv = getWebConversation();
 		final Format format = Format.ICAL;
 		final int folderId = createFolder("ical-empty-file-" + System.currentTimeMillis(),FolderObject.CONTACT);
 		try {
-			WebRequest req = new PostMethodWebRequest(
+			final WebRequest req = new PostMethodWebRequest(
 					getCSVColumnUrl(IMPORT_SERVLET, folderId, format));
 			((PostMethodWebRequest)req).setMimeEncoded(true);
 			req.selectFile("file", "empty.ics", is, format.getMimeType());
-			WebResponse webRes = webconv.getResource(req);
-			JSONObject response = extractFromCallback( webRes.getText() );
+			final WebResponse webRes = webconv.getResource(req);
+			final JSONObject response = extractFromCallback( webRes.getText() );
 			assertEquals("Must contain error ", "I_E-1303", response.optString("code"));
 		} finally {
 			removeFolder(folderId);

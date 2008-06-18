@@ -15,13 +15,14 @@ import com.openexchange.test.TestInit;
 
 public class DetachTest extends InfostoreAJAXTest {
 
-	public DetachTest(String name){
+	public DetachTest(final String name){
 		super(name);
 	}
 	
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		Response res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m(), upload, "text/plain");
 		assertNoError(res);
 		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m(), upload, "text/plain");
@@ -35,14 +36,14 @@ public class DetachTest extends InfostoreAJAXTest {
 	}
 	
 	public void testBasic() throws Exception {
-		int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,2,3,4,5});
+		final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,2,3,4,5});
 		assertEquals(0, notDetached.length);
 		
 		checkNoVersions();
 	}
 	
 	public void testRevert() throws Exception {
-		Response res = revert(getWebConversation(),getHostName(), sessionId, System.currentTimeMillis(), clean.get(0));
+		final Response res = revert(getWebConversation(),getHostName(), sessionId, System.currentTimeMillis(), clean.get(0));
 		assertNoError(res);
 		checkNoVersions();
 	}
@@ -56,12 +57,12 @@ public class DetachTest extends InfostoreAJAXTest {
 		
 		assertEquals(0, obj.getInt("version"));
 		
-		int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,2,3});
+		final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,2,3});
 		
-		Set<Integer> versions = new HashSet<Integer>(Arrays.asList(new Integer[]{1,2,3}));
+		final Set<Integer> versions = new HashSet<Integer>(Arrays.asList(new Integer[]{1,2,3}));
 		
 		assertEquals(versions.size(), notDetached.length);
-		for(int id : notDetached) {
+		for(final int id : notDetached) {
 			assertTrue(versions.remove(id));
 		}
 		assertTrue(versions.isEmpty());
@@ -77,7 +78,7 @@ public class DetachTest extends InfostoreAJAXTest {
 	}
 	
 	public void testSpotted() throws Exception {
-		int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,3,5});
+		final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,3,5});
 		assertEquals(0, notDetached.length);
 		
 		Response res = versions(getWebConversation(),getHostName(),sessionId, clean.get(0), new int[]{Metadata.VERSION,Metadata.CURRENT_VERSION});
@@ -88,13 +89,13 @@ public class DetachTest extends InfostoreAJAXTest {
 		res = get(getWebConversation(),getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
 		
-		JSONObject obj = (JSONObject)res.getData();
+		final JSONObject obj = (JSONObject)res.getData();
 		
 		assertEquals(4,obj.getInt("version"));
 	}
 	
 	public void testDetachVersion0() throws Exception {
-		int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{0});
+		final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{0});
 		assertEquals(1, notDetached.length);
 		assertEquals(0,notDetached[0]);
 	}
@@ -104,33 +105,33 @@ public class DetachTest extends InfostoreAJAXTest {
 		Response res = update(getWebConversation(), getHostName(), sessionId, clean.get(0), Long.MAX_VALUE, m("description","current_description"));
 		assertNoError(res);
 		
-		int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[]{5,4,3});
+		final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[]{5,4,3});
 		assertEquals(0, notDetached.length);
 		
 		res = get(getWebConversation(), getHostName(),sessionId, clean.get(0), 0);
 		assertNoError(res);
 		
-		JSONObject document = (JSONObject) res.getData();
+		final JSONObject document = (JSONObject) res.getData();
 		assertEquals("current_description", document.get("description"));
 	}
 	
 //	Bug 4120
 	public void testUniqueFilenames() throws Exception {
-		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		
-		int id = clean.get(0);
+		final int id = clean.get(0);
 		
 		
-		Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m("filename" , "blupp.properties"));
+		final Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m("filename" , "blupp.properties"));
 		assertNoError(res);
 		
-		int id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title" , "otherFile", "description","other_desc", "folder_id" ,	((Integer)folderId).toString()), upload, "text/plain");
+		final int id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title" , "otherFile", "description","other_desc", "folder_id" ,	((Integer)folderId).toString()), upload, "text/plain");
 		clean.add(id2);
 		
 		try {
-			int[] nd = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[]{5});
+			final int[] nd = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[]{5});
 			fail("Expected Exception.");
-		} catch (IOException x) {
+		} catch (final IOException x) {
 			assertTrue(true);
 		}
 	}

@@ -6,7 +6,7 @@ public class MockAction extends AbstractAction {
 
 	private boolean activated;
 
-	public void perform(WebdavRequest req, WebdavResponse res)
+	public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws WebdavException {
 		activated = true;
 	}
@@ -15,7 +15,7 @@ public class MockAction extends AbstractAction {
 		return activated;
 	}
 
-	public void setActivated(boolean activated) {
+	public void setActivated(final boolean activated) {
 		this.activated = activated;
 	}
 

@@ -64,7 +64,7 @@ public class CommonInsertParser extends AbstractAJAXParser<CommonInsertResponse>
     /**
      * @param failOnError
      */
-    public CommonInsertParser(boolean failOnError) {
+    public CommonInsertParser(final boolean failOnError) {
         super(failOnError);
     }
 

@@ -50,7 +50,6 @@
 package com.openexchange.mail;
 
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.sessiond.impl.SessionObject;
@@ -74,7 +73,7 @@ public final class MailAccessTest extends AbstractMailTest {
 	/**
 	 * @param name
 	 */
-	public MailAccessTest(String name) {
+	public MailAccessTest(final String name) {
 		super(name);
 	}
 
@@ -96,21 +95,21 @@ public final class MailAccessTest extends AbstractMailTest {
 			 */
 			try {
 				mailAccess = MailAccess.getInstance(session);
-				MailConfig mailConfig = mailAccess.getMailConfig();
+				final MailConfig mailConfig = mailAccess.getMailConfig();
 				mailConfig.setLogin(getLogin());
 				mailConfig.setPassword(getPassword());
 				mailConfig.setServer(getServer());
 				mailConfig.setPort(getPort());
 				mailAccess.connect();
 				System.out.println("Active connections: " + MailAccess.getCounter());
-			} catch (Exception e) {
+			} catch (final Exception e) {
 			} finally {
 				try {
 					/*
 					 * close
 					 */
 					mailAccess.close(false);
-				} catch (Exception e2) {
+				} catch (final Exception e2) {
 				}
 			}
 			
@@ -167,7 +166,7 @@ public final class MailAccessTest extends AbstractMailTest {
 				threads[i] = new Thread(runnable);
 			}
 			
-			for (Thread thread : threads) {
+			for (final Thread thread : threads) {
 				thread.start();
 			}
 			

@@ -43,10 +43,11 @@ public class UpdatesTest extends AppointmentTest {
 
 	private static final Log LOG = LogFactory.getLog(UpdatesTest.class);
 	
-	public UpdatesTest(String name) {
+	public UpdatesTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
@@ -64,17 +65,17 @@ public class UpdatesTest extends AppointmentTest {
 	}
 	
 	public void testModifiedWithoutFolderId() throws Exception {
-		Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
-		Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
+		final Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
+		final Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
 		
-		AppointmentObject appointmentObj = createAppointmentObject("testModifiedWithoutFolderId");
+		final AppointmentObject appointmentObj = createAppointmentObject("testModifiedWithoutFolderId");
 		appointmentObj.setIgnoreConflicts(true);
-		int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+		final int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		
 		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
 		final Date modified = loadAppointment.getLastModified();		
 		
-		AppointmentObject[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, modified, _appointmentFields, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final AppointmentObject[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, modified, _appointmentFields, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		assertTrue("no appointment object in response", appointmentArray.length > 0);
 		boolean found = false;
@@ -91,12 +92,12 @@ public class UpdatesTest extends AppointmentTest {
 	}
 	
 	public void testModifiedWithoutFolderIdExtended() throws Exception {
-		Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
-		Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
+		final Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
+		final Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
 		
-		AppointmentObject appointmentObj = createAppointmentObject("testModifiedWithoutFolderIdExtended");
+		final AppointmentObject appointmentObj = createAppointmentObject("testModifiedWithoutFolderIdExtended");
 		appointmentObj.setIgnoreConflicts(true);
-		int objectId1 = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+		final int objectId1 = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId1, appointmentFolderId, timeZone, getHostName(), getSessionId());
 		Date modified = loadAppointment.getLastModified();	
@@ -114,7 +115,7 @@ public class UpdatesTest extends AppointmentTest {
 		
 		assertTrue("created object not found in response", found1);
 		
-		int objectId2 = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+		final int objectId2 = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		
 		loadAppointment = loadAppointment(getWebConversation(), objectId2, appointmentFolderId, timeZone, getHostName(), getSessionId());
 		modified = loadAppointment.getLastModified();	
@@ -142,17 +143,17 @@ public class UpdatesTest extends AppointmentTest {
 	
 	
 	public void testModifiedWithoutFolderIdWithFutureTimestamp() throws Exception {
-		Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
-		Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
+		final Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
+		final Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
 		
-		AppointmentObject appointmentObj = createAppointmentObject("testModifiedWithoutFolderIdWithFutureTimestamp");
+		final AppointmentObject appointmentObj = createAppointmentObject("testModifiedWithoutFolderIdWithFutureTimestamp");
 		appointmentObj.setIgnoreConflicts(true);
-		int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+		final int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		
-		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
-		Date modified = new Date(loadAppointment.getLastModified().getTime() + (7 * dayInMillis));	
+		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
+		final Date modified = new Date(loadAppointment.getLastModified().getTime() + (7 * dayInMillis));	
 		
-		AppointmentObject[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, modified, _appointmentFields, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final AppointmentObject[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, modified, _appointmentFields, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		assertEquals("unexpected data in response", 0, appointmentArray.length);
 		
@@ -160,19 +161,19 @@ public class UpdatesTest extends AppointmentTest {
 	}
 	
 	public void testModifiedRecurrenceAppointment() throws Exception {
-		Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
-		Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
+		final Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
+		final Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
 		
-		AppointmentObject appointmentObj = createAppointmentObject("testModifiedRecurrenceAppointment");
+		final AppointmentObject appointmentObj = createAppointmentObject("testModifiedRecurrenceAppointment");
 		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setOccurrence(5);
 		appointmentObj.setIgnoreConflicts(true);
-		int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+		final int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		
 		appointmentObj.setObjectID(objectId);
 		
-		AppointmentObject[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, new Date(0), _appointmentFields, timeZone, getHostName(), getSessionId());
+		final AppointmentObject[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, new Date(0), _appointmentFields, timeZone, getHostName(), getSessionId());
 		
 		boolean found = false;
 		

@@ -303,7 +303,7 @@ public final class TaskTools extends Assert {
             lastUpdate);
         try {
             TaskTools.delete(client, request);
-        } catch (AjaxException e) {
+        } catch (final AjaxException e) {
             throw new JSONException(e);
         }
     }
@@ -332,7 +332,7 @@ public final class TaskTools extends Assert {
         req.setParameter(AJAXServlet.PARAMETER_FOLDERID,
             String.valueOf(folderId));
         final StringBuilder columnSB = new StringBuilder();
-        for (int i : columns) {
+        for (final int i : columns) {
             columnSB.append(i);
             columnSB.append(',');
         }

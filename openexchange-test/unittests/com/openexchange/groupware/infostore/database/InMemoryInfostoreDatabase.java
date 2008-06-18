@@ -48,31 +48,33 @@
  */
 package com.openexchange.groupware.infostore.database;
 
-import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.webdav.EntityLockManager;
-import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.Undoable;
-import com.openexchange.groupware.filestore.FilestoreException;
-import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.results.Delta;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.api2.OXException;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.FileStorageException;
-
-import java.util.*;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.filestore.FilestoreException;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
+import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.infostore.webdav.EntityLockManager;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.results.Delta;
+import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.groupware.tx.Undoable;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.FileStorageException;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -80,78 +82,85 @@ import java.sql.Connection;
  */
 public class InMemoryInfostoreDatabase extends DatabaseImpl {
 
-    private Map<Context,Map<Integer, List<DocumentMetadata>>> data = new HashMap<Context, Map<Integer, List<DocumentMetadata>>>();
+    private final Map<Context,Map<Integer, List<DocumentMetadata>>> data = new HashMap<Context, Map<Integer, List<DocumentMetadata>>>();
 
-    private Map<Context, List<DocumentMetadata>> changes = new HashMap<Context, List<DocumentMetadata>>();
+    private final Map<Context, List<DocumentMetadata>> changes = new HashMap<Context, List<DocumentMetadata>>();
 
-    private Map<Context, List<DocumentMetadata>> deletions = new HashMap<Context, List<DocumentMetadata>>();
+    private final Map<Context, List<DocumentMetadata>> deletions = new HashMap<Context, List<DocumentMetadata>>();
 
-    private Map<Context, List<DocumentMetadata>> creations = new HashMap<Context, List<DocumentMetadata>>();
+    private final Map<Context, List<DocumentMetadata>> creations = new HashMap<Context, List<DocumentMetadata>>();
         
 
-    public void put(Context ctx, DocumentMetadata dm) {
-        List<DocumentMetadata> versions = getVersions(ctx,dm.getId());
+    public void put(final Context ctx, final DocumentMetadata dm) {
+        final List<DocumentMetadata> versions = getVersions(ctx,dm.getId());
         assureSize(versions, dm.getVersion());
         versions.set(dm.getVersion(), dm);
     }
 
-    private void assureSize(List<DocumentMetadata> versions, int index) {
+    private void assureSize(final List<DocumentMetadata> versions, final int index) {
         while(index >= versions.size()) {
             versions.add(null);
         }
     }
 
-    public int getNextVersionNumber(Context ctx, int id) {
+    public int getNextVersionNumber(final Context ctx, final int id) {
         return getVersions(ctx, id).size();
     }
 
-    private List<DocumentMetadata> getVersions(Context ctx, int id) {
-        Map<Integer, List<DocumentMetadata>> ctxMap = getCtxMap(ctx);
+    private List<DocumentMetadata> getVersions(final Context ctx, final int id) {
+        final Map<Integer, List<DocumentMetadata>> ctxMap = getCtxMap(ctx);
         if(ctxMap.containsKey(id)) {
             return ctxMap.get(id);
         }
-        List<DocumentMetadata> dms = new ArrayList<DocumentMetadata>();
+        final List<DocumentMetadata> dms = new ArrayList<DocumentMetadata>();
         ctxMap.put(id, dms);
         return dms;
     }
 
-    private Map<Integer, List<DocumentMetadata>> getCtxMap(Context ctx) {
+    private Map<Integer, List<DocumentMetadata>> getCtxMap(final Context ctx) {
         if(data.containsKey(ctx)) {
             return data.get(ctx);
         }
-        Map<Integer, List<DocumentMetadata>> versions = new HashMap<Integer, List<DocumentMetadata>>();
+        final Map<Integer, List<DocumentMetadata>> versions = new HashMap<Integer, List<DocumentMetadata>>();
         data.put(ctx, versions);
         return versions;
     }
 
-    public boolean exists(int id, int version, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+    @Override
+	public boolean exists(final int id, final int version, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public DocumentMetadata getDocumentMetadata(int id, int version, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+    @Override
+	public DocumentMetadata getDocumentMetadata(final int id, final int version, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public List<DocumentMetadata> getAllVersions(Context ctx, Metadata[] columns, String where) throws OXException {
+    @Override
+	public List<DocumentMetadata> getAllVersions(final Context ctx, final Metadata[] columns, final String where) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public List<DocumentMetadata> getAllDocuments(Context ctx, Metadata[] columns, String where) throws OXException {
+    @Override
+	public List<DocumentMetadata> getAllDocuments(final Context ctx, final Metadata[] columns, final String where) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public InputStream getDocument(int id, int version, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+    @Override
+	public InputStream getDocument(final int id, final int version, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public Set<Integer> removeDocuments(Set<Integer> ids, long date, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+    @Override
+	public Set<Integer> removeDocuments(final Set<Integer> ids, final long date, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public int[] removeDocument(String identifier, Context ctx) throws OXException {
-        for(List<DocumentMetadata> versions : getCtxMap(ctx).values()) {
-            for(DocumentMetadata metadata : versions) {
-                String location = metadata.getFilestoreLocation();
+    @Override
+	public int[] removeDocument(final String identifier, final Context ctx) throws OXException {
+        for(final List<DocumentMetadata> versions : getCtxMap(ctx).values()) {
+            for(final DocumentMetadata metadata : versions) {
+                final String location = metadata.getFilestoreLocation();
                 if(location != null && location.equals(identifier)) {
                     deletions.get(ctx).add(metadata);
                     return new int[]{1,1};
@@ -161,14 +170,16 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
         return new int[]{1,1};
     }
 
-    public int[] removeDelDocument(String identifier, Context ctx) throws OXException {
+    @Override
+	public int[] removeDelDocument(final String identifier, final Context ctx) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public int modifyDocument(String oldidentifier, String newidentifier, String description, String mimetype, Context ctx) throws OXException {
-        for(List<DocumentMetadata> versions : getCtxMap(ctx).values()) {
-            for(DocumentMetadata metadata : versions) {
-                String location = metadata.getFilestoreLocation();
+    @Override
+	public int modifyDocument(final String oldidentifier, final String newidentifier, final String description, final String mimetype, final Context ctx) throws OXException {
+        for(final List<DocumentMetadata> versions : getCtxMap(ctx).values()) {
+            for(final DocumentMetadata metadata : versions) {
+                final String location = metadata.getFilestoreLocation();
                 if(location != null && location.equals(oldidentifier)) {
                     metadata.setFilestoreLocation(newidentifier);
                     metadata.setDescription(description);
@@ -181,30 +192,35 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
         return -1;
     }
 
-    public int modifyDelDocument(String oldidentifier, String newidentifier, String description, String mimetype, Context ctx) throws OXException {
+    @Override
+	public int modifyDelDocument(final String oldidentifier, final String newidentifier, final String description, final String mimetype, final Context ctx) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public int[] saveDocumentMetadata(String identifier, DocumentMetadata document, User user, Context ctx) throws OXException {
+    @Override
+	public int[] saveDocumentMetadata(final String identifier, final DocumentMetadata document, final User user, final Context ctx) throws OXException {
         document.setFilestoreLocation(identifier);
         creations.get(ctx).add(document);
         return new int[]{1,1,1};
 
     }
 
-    public List<Integer> removeVersion(int id, int[] versionId, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+    @Override
+	public List<Integer> removeVersion(final int id, final int[] versionId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public TimedResult getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, boolean onlyOwnObjects, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+    @Override
+	public TimedResult getDocuments(final long folderId, final Metadata[] columns, final Metadata sort, final int order, final boolean onlyOwnObjects, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public SortedSet<String> getDocumentFileStoreLocationsperContext(Context ctx) throws OXException {
-       SortedSet<String> locations = new TreeSet<String>();
-        for(List<DocumentMetadata> versions : getCtxMap(ctx).values()) {
-            for(DocumentMetadata metadata : versions) {
-                String location = metadata.getFilestoreLocation();
+    @Override
+	public SortedSet<String> getDocumentFileStoreLocationsperContext(final Context ctx) throws OXException {
+       final SortedSet<String> locations = new TreeSet<String>();
+        for(final List<DocumentMetadata> versions : getCtxMap(ctx).values()) {
+            for(final DocumentMetadata metadata : versions) {
+                final String location = metadata.getFilestoreLocation();
                 if(location != null) {
                     locations.add(location);
                 }
@@ -213,130 +229,155 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
         return locations;
     }
 
-    public SortedSet<String> getDelDocumentFileStoreLocationsperContext(Context ctx) throws OXException {
+    @Override
+	public SortedSet<String> getDelDocumentFileStoreLocationsperContext(final Context ctx) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public TimedResult getVersions(int id, Metadata[] columns, Metadata sort, int order, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+    @Override
+	public TimedResult getVersions(final int id, final Metadata[] columns, final Metadata sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public TimedResult getDocuments(int[] ids, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+    @Override
+	public TimedResult getDocuments(final int[] ids, final Metadata[] columns, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public Delta getDelta(long folderId, long updateSince, Metadata[] columns, Metadata sort, int order, boolean onlyOwnObjects, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+    @Override
+	public Delta getDelta(final long folderId, final long updateSince, final Metadata[] columns, final Metadata sort, final int order, final boolean onlyOwnObjects, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public int countDocuments(long folderId, boolean onlyOwnObjects, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+    @Override
+	public int countDocuments(final long folderId, final boolean onlyOwnObjects, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public int countDocumentsperContext(Context ctx) throws OXException {
+    @Override
+	public int countDocumentsperContext(final Context ctx) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public boolean hasFolderForeignObjects(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+    @Override
+	public boolean hasFolderForeignObjects(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public boolean isFolderEmpty(long folderId, Context ctx) throws OXException {
+    @Override
+	public boolean isFolderEmpty(final long folderId, final Context ctx) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public void removeUser(int id, Context ctx, ServerSession session, EntityLockManager locks) throws OXException {
+    @Override
+	public void removeUser(final int id, final Context ctx, final ServerSession session, final EntityLockManager locks) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    protected FileStorage getFileStorage(Context ctx) throws FileStorageException, FilestoreException {
+    @Override
+	protected FileStorage getFileStorage(final Context ctx) throws FileStorageException, FilestoreException {
         throw new UnsupportedOperationException();
     }
 
-    public void startTransaction() throws TransactionException {
+    @Override
+	public void startTransaction() throws TransactionException {
         //IGNORE
     }
 
-    public void commit() throws TransactionException {
+    @Override
+	public void commit() throws TransactionException {
         //IGNORE
     }
 
-    public void finish() throws TransactionException {
+    @Override
+	public void finish() throws TransactionException {
         // IGNORE
     }
 
-    public void rollback() throws TransactionException {
+    @Override
+	public void rollback() throws TransactionException {
         throw new UnsupportedOperationException();
     }
 
-    public int getMaxActiveVersion(int id, Context context) throws OXException {
+    @Override
+	public int getMaxActiveVersion(final int id, final Context context) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public DBProvider getProvider() {
+    @Override
+	public DBProvider getProvider() {
         throw new UnsupportedOperationException();
     }
 
-    public void setProvider(DBProvider provider) {
+    @Override
+	public void setProvider(final DBProvider provider) {
         //IGNORE
     }
 
-    public Connection getReadConnection(Context ctx) throws TransactionException {
+    @Override
+	public Connection getReadConnection(final Context ctx) throws TransactionException {
         throw new UnsupportedOperationException();
     }
 
-    public Connection getWriteConnection(Context ctx) throws TransactionException {
+    @Override
+	public Connection getWriteConnection(final Context ctx) throws TransactionException {
         throw new UnsupportedOperationException();
     }
 
-    public void releaseReadConnection(Context ctx, Connection con) {
+    @Override
+	public void releaseReadConnection(final Context ctx, final Connection con) {
         throw new UnsupportedOperationException();
     }
 
-    public void releaseWriteConnection(Context ctx, Connection con) {
+    @Override
+	public void releaseWriteConnection(final Context ctx, final Connection con) {
         throw new UnsupportedOperationException();
     }
 
-    public void commitDBTransaction() throws TransactionException {
+    @Override
+	public void commitDBTransaction() throws TransactionException {
         throw new UnsupportedOperationException();
     }
 
-    public void commitDBTransaction(Undoable undo) throws TransactionException {
+    @Override
+	public void commitDBTransaction(final Undoable undo) throws TransactionException {
         throw new UnsupportedOperationException();
     }
 
-    public void rollbackDBTransaction() throws TransactionException {
+    @Override
+	public void rollbackDBTransaction() throws TransactionException {
         throw new UnsupportedOperationException();
     }
 
-    public void startDBTransaction() throws TransactionException {
+    @Override
+	public void startDBTransaction() throws TransactionException {
         throw new UnsupportedOperationException();
     }
 
-    public void forgetChanges(Context ctx) {
+    public void forgetChanges(final Context ctx) {
         changes.put(ctx, new ArrayList<DocumentMetadata>());
     }
 
-    public List<DocumentMetadata> getChanges(Context ctx) {
+    public List<DocumentMetadata> getChanges(final Context ctx) {
         if(!changes.containsKey(ctx)) {
             return new ArrayList<DocumentMetadata>();
         }
         return changes.get(ctx);
     }
 
-    public void forgetDeletions(Context ctx) {
+    public void forgetDeletions(final Context ctx) {
         deletions.put(ctx, new ArrayList<DocumentMetadata>());
     }
 
-    public List<DocumentMetadata> getDeletions(Context ctx) {
+    public List<DocumentMetadata> getDeletions(final Context ctx) {
         return deletions.get(ctx);
     }
 
-    public void forgetCreated(Context ctx) {
+    public void forgetCreated(final Context ctx) {
         creations.put(ctx, new ArrayList<DocumentMetadata>());
     }
 
-    public List<DocumentMetadata> getCreated(Context ctx) {
+    public List<DocumentMetadata> getCreated(final Context ctx) {
         return creations.get(ctx);
     }
 }

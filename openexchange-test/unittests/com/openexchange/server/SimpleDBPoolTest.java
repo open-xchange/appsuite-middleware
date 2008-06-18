@@ -1,44 +1,48 @@
 
 package com.openexchange.server;
 
-import com.openexchange.groupware.*;
+import java.sql.Connection;
+
+import junit.framework.TestCase;
+
+import com.openexchange.groupware.CalendarTest;
+import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.server.impl.DBPool;
 
-import java.sql.Connection;
-import junit.framework.TestCase;
-
 public class SimpleDBPoolTest extends TestCase {
     
     
-    protected void setUp() throws Exception {        
+    @Override
+	protected void setUp() throws Exception {        
         super.setUp();
         Init.startServer();
     }
     
-    protected void tearDown() throws Exception {
+    @Override
+	protected void tearDown() throws Exception {
         Init.stopServer();
         super.tearDown();
     }
     
     public void testBasicPoolFunctions() throws Throwable {
-        Context context = new ContextImpl(CalendarTest.contextid);
+        final Context context = new ContextImpl(CalendarTest.contextid);
 
-        int testsize = 50; // DBPool.getSize(context, true);
-        Connection con[] = new Connection[testsize];
+        final int testsize = 50; // DBPool.getSize(context, true);
+        final Connection con[] = new Connection[testsize];
         for (int a = 0; a < con.length; a++) {
             try {
                 con[a] = DBPool.pickup(context);                
-            } catch(Exception e) {
+            } catch(final Exception e) {
                 e.printStackTrace();
             }
         }
         for (int a = 0; a < con.length; a++) {
             try {                
-                Connection tc = con[a];
+                final Connection tc = con[a];
                 DBPool.push(context, tc);
-            } catch(Exception e) {
+            } catch(final Exception e) {
                 e.printStackTrace();
             }
         }              
@@ -47,16 +51,16 @@ public class SimpleDBPoolTest extends TestCase {
     }
     
     public void testClosedConnectionsInPool() throws Throwable {
-        Context context = new ContextImpl(CalendarTest.contextid);
+        final Context context = new ContextImpl(CalendarTest.contextid);
 
-        int testsize = 50; // DBPool.getSize(context, true);
-        Connection con[] = new Connection[testsize];
+        final int testsize = 50; // DBPool.getSize(context, true);
+        final Connection con[] = new Connection[testsize];
         for (int a = 0; a < con.length; a++) {
             try {
                 con[a] = DBPool.pickup(context);
                 con[a].close();
                 con[a] = null;
-            } catch(Exception e) {
+            } catch(final Exception e) {
                 e.printStackTrace();
             }
         }
@@ -65,16 +69,16 @@ public class SimpleDBPoolTest extends TestCase {
                 Connection tc = con[a];
                 DBPool.push(context, tc);
                 tc = null;
-            } catch(Exception e) {
+            } catch(final Exception e) {
                 e.printStackTrace();
             }
         }              
         
         for (int a = 0; a < con.length; a++) {
             try {                
-                Connection tc = con[a];
+                final Connection tc = con[a];
                 assertTrue(con != null);
-            } catch(Exception e) {
+            } catch(final Exception e) {
                 e.printStackTrace();
             }
         }              

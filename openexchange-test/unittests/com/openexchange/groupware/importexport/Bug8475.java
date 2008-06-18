@@ -62,12 +62,10 @@ import org.junit.Test;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.server.impl.DBPoolingException;
@@ -94,15 +92,15 @@ public class Bug8475 extends AbstractICalImportTest{
 			"DUE:20070618T080000Z\n" +
 			"END:VTODO\n" +
 			"END:VCALENDAR";
-		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", ctx, false);
+		final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", ctx, false);
 		
 		final TasksSQLInterface tasks = new TasksSQLInterfaceImpl(sessObj);
-		Task task = tasks.getTaskById(Integer.valueOf( res.getObjectId()), Integer.valueOf(res.getFolder()) );
+		final Task task = tasks.getTaskById(Integer.valueOf( res.getObjectId()), Integer.valueOf(res.getFolder()) );
 		
-		Participant[] participants = task.getParticipants();
+		final Participant[] participants = task.getParticipants();
 		assertEquals("One participant?" , 1, participants.length);
 		boolean found = false;
-		for(Participant p : participants){
+		for(final Participant p : participants){
 			if("tobias.prinz@open-xchange.com".equals( p.getEmailAddress() ) ){
 				found = true;
 			}
@@ -126,12 +124,12 @@ public class Bug8475 extends AbstractICalImportTest{
 			"DUE:20070618T080000Z\n" +
 			"END:VTODO\n" +
 			"END:VCALENDAR";
-		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", ctx, false);
+		final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", ctx, false);
 		
 		final TasksSQLInterface tasks = new TasksSQLInterfaceImpl(sessObj);
-		Task task = tasks.getTaskById(Integer.valueOf( res.getObjectId()), Integer.valueOf(res.getFolder()) );
+		final Task task = tasks.getTaskById(Integer.valueOf( res.getObjectId()), Integer.valueOf(res.getFolder()) );
 		
-		Participant[] participants = task.getParticipants();
+		final Participant[] participants = task.getParticipants();
 		assertEquals("One participant?" , 1, participants.length);
 		final Participant p =  participants[0];
 		assertEquals("User loaded is well-known internal user", testUser.getId() , p.getIdentifier());

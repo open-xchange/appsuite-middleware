@@ -67,8 +67,8 @@ import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.impl.DBPoolingException;
 
@@ -143,17 +143,17 @@ public class Bug8527 extends AbstractICalImportTest {
 					"END:VALARM\n" +
 				"END:VEVENT\n" +
 				"END:VCALENDAR";
-        Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext")) ;
-        ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "8475",ctx, false);
+        final Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext")) ;
+        final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "8475",ctx, false);
 		
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
 		final int oid = Integer.valueOf( res.getObjectId() );
 		final AppointmentObject appointmentObj = appointmentSql.getObjectById(oid, folderId);
 		assertTrue("Has participants" , appointmentObj.containsParticipants());
-		Participant[] participants = appointmentObj.getParticipants();
+		final Participant[] participants = appointmentObj.getParticipants();
 		assertEquals("Has three participants", 3, participants.length);
 		boolean foundSteve = false, foundStephan = false;
-		for(Participant p : participants){
+		for(final Participant p : participants){
 			if( "Steve.Dumbleton@colt.net".equals( p.getEmailAddress()) && !foundSteve){
 				foundSteve = true;
 			}

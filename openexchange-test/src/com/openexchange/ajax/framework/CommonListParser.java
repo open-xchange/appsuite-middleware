@@ -63,7 +63,7 @@ public class CommonListParser extends AbstractAJAXParser<CommonListResponse> {
     /**
      * @param failOnError
      */
-    public CommonListParser(boolean failOnError) {
+    public CommonListParser(final boolean failOnError) {
         super(failOnError);
     }
 

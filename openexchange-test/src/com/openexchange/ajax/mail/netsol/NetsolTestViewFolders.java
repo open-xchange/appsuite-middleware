@@ -66,7 +66,7 @@ public final class NetsolTestViewFolders extends AbstractNetsolTest {
 	 * 
 	 * @param name
 	 */
-	public NetsolTestViewFolders(String name) {
+	public NetsolTestViewFolders(final String name) {
 		super(name);
 	}
 

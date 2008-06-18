@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.messagestorage;
 
-import com.openexchange.groupware.container.mail.MailObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.MailException;
@@ -106,9 +105,9 @@ public final class MailGetTest extends AbstractMailTest {
 			try {
 				try {
 					mailAccess.getMessageStorage().getMessage("INBOX", System.currentTimeMillis(), true);	
-				} catch (MailException e) {
+				} catch (final MailException e) {
 					assertEquals("Wrong Error Code in Exception", "MSG-0032", e.getErrorCode());
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					fail("getMessage throws an exception: " + e.getMessage());
 				}
 				

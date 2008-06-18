@@ -37,13 +37,14 @@
 
 package com.openexchange.ajax.config;
 
-import static com.openexchange.ajax.config.ConfigTools.*;
+import static com.openexchange.ajax.config.ConfigTools.getUserId;
+import static com.openexchange.ajax.config.ConfigTools.readSetting;
+import static com.openexchange.ajax.config.ConfigTools.storeSetting;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.AbstractAJAXTest;
-import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.tree.TimeZone;
 
 /**

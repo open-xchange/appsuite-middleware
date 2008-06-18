@@ -3,6 +3,7 @@ package com.openexchange.push.udp;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+
 import junit.framework.TestCase;
 
 public class PushResponseTest extends TestCase {
@@ -17,11 +18,11 @@ public class PushResponseTest extends TestCase {
 	
 	private int contextId = 0;
 	
-	public PushResponseTest(String name) {
+	public PushResponseTest(final String name) {
 		super(name);
 	}
 	
-	public PushResponseTest(String name, DatagramSocket datagramSocket, int folderId, int contextId) {
+	public PushResponseTest(final String name, final DatagramSocket datagramSocket, final int folderId, final int contextId) {
 		super(name);
 		this.datagramSocket = datagramSocket;
 		this.folderId = folderId;
@@ -36,13 +37,13 @@ public class PushResponseTest extends TestCase {
 		getResponse(datagramSocket, folderId, contextId);
 	}
 	
-	public static void getResponse(DatagramSocket datagramSocket, int folderId, int contextId) throws Exception {
+	public static void getResponse(final DatagramSocket datagramSocket, final int folderId, final int contextId) throws Exception {
 		byte[] responseByte = new byte[1024];
 		
-		DatagramPacket datagramPacket = new DatagramPacket(responseByte, responseByte.length);
+		final DatagramPacket datagramPacket = new DatagramPacket(responseByte, responseByte.length);
 		datagramSocket.receive(datagramPacket);
 		responseByte = datagramPacket.getData();
-		byte[] responseData = new byte[datagramPacket.getLength()];
+		final byte[] responseData = new byte[datagramPacket.getLength()];
 		System.arraycopy(responseByte, 0, responseData, 0, responseData.length);
 		
 		assertEquals("unexpected response", folderId + "\1", new String(responseData));

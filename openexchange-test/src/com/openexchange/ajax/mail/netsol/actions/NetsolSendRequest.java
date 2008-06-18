@@ -95,7 +95,7 @@ public class NetsolSendRequest implements AJAXRequest {
 	/*
 	 * Mail object settings
 	 */
-	private BodyContentType contentType = BodyContentType.ALTERNATIVE;
+	private final BodyContentType contentType = BodyContentType.ALTERNATIVE;
 	
 	private String recipientTo;
 
@@ -168,7 +168,7 @@ public class NetsolSendRequest implements AJAXRequest {
 		}
 
 		@Override
-		protected NetsolSendResponse createResponse(Response response) throws JSONException {
+		protected NetsolSendResponse createResponse(final Response response) throws JSONException {
 			return new NetsolSendResponse(response);
 		}
 

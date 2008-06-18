@@ -48,14 +48,15 @@
  */
 package com.openexchange.groupware.infostore.database;
 
-import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.ajax.parser.JSONDocumentMetadata;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class JSONDocumentMetadataTest extends DocumentMetadataTest {
-    public DocumentMetadata getImplementation() {
+    @Override
+	public DocumentMetadata getImplementation() {
         return new JSONDocumentMetadata();
     }
 }

@@ -15,16 +15,16 @@ import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.test.TestInit;
 import com.openexchange.test.OXTestToolkit;
+import com.openexchange.test.TestInit;
 
 public class CopyTest extends InfostoreAJAXTest {
 	
-	public CopyTest(String name){
+	public CopyTest(final String name){
 		super(name);
 	}
 	
-	private Set<String> skipKeys = new HashSet<String>(Arrays.asList(
+	private final Set<String> skipKeys = new HashSet<String>(Arrays.asList(
 			Metadata.ID_LITERAL.getName(),
 			Metadata.CREATION_DATE_LITERAL.getName(),
 			Metadata.LAST_MODIFIED_LITERAL.getName(),
@@ -35,23 +35,23 @@ public class CopyTest extends InfostoreAJAXTest {
 	));
 	
 	public void testCopy() throws Exception {
-		int id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), System.currentTimeMillis(), m());
+		final int id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), System.currentTimeMillis(), m());
 		clean.add(id);
 		
 		Response res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
 		
-		JSONObject orig = (JSONObject) res.getData();
+		final JSONObject orig = (JSONObject) res.getData();
 		
 		res = get(getWebConversation(), getHostName(), sessionId, id);
 		assertNoError(res);
 		
-		JSONObject copy = (JSONObject) res.getData();
+		final JSONObject copy = (JSONObject) res.getData();
 		
 		assertEquals(orig.length(), copy.length());
 		
-		for(Iterator keys = orig.keys(); keys.hasNext();) {
-			String key = keys.next().toString();
+		for(final Iterator keys = orig.keys(); keys.hasNext();) {
+			final String key = keys.next().toString();
 			if(!skipKeys.contains(key)) {
 				assertEquals(orig.get(key).toString(), copy.get(key).toString());
 			}
@@ -59,8 +59,8 @@ public class CopyTest extends InfostoreAJAXTest {
 	}
 	
 	public void testCopyFile() throws Exception {
-		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-		int id = createNew(
+		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+		final int id = createNew(
 				getWebConversation(),
 				getHostName(),
 				sessionId,
@@ -72,16 +72,16 @@ public class CopyTest extends InfostoreAJAXTest {
 		);
 		clean.add(id);
 		//FIXME Bug 4120
-		int copyId = copy(getWebConversation(),getHostName(),sessionId,id, System.currentTimeMillis(), m("filename" , "other.properties"));
+		final int copyId = copy(getWebConversation(),getHostName(),sessionId,id, System.currentTimeMillis(), m("filename" , "other.properties"));
 		clean.add(copyId);
 		
 		Response res = get(getWebConversation(),getHostName(), sessionId, id);
 		assertNoError(res);
-		JSONObject orig = (JSONObject) res.getData();
+		final JSONObject orig = (JSONObject) res.getData();
 		
 		res = get(getWebConversation(),getHostName(), sessionId, copyId);
 		assertNoError(res);
-		JSONObject copy = (JSONObject) res.getData();
+		final JSONObject copy = (JSONObject) res.getData();
 		
 		assertEquals("other.properties", copy.get("filename"));
 		assertEquals(orig.get("file_size"), copy.get("file_size"));
@@ -101,31 +101,33 @@ public class CopyTest extends InfostoreAJAXTest {
 			
 			OXTestToolkit.assertSameContent(is,is2);
 		} finally {
-			if(is!=null)
+			if(is!=null) {
 				is.close();
-			if(is2!=null)
+			}
+			if(is2!=null) {
 				is2.close();
+			}
 		}
 	}
 	
 	public void testModifyingCopy() throws Exception {
-		int id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), System.currentTimeMillis(), m("title" , "copy"));
+		final int id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), System.currentTimeMillis(), m("title" , "copy"));
 		clean.add(id);
 		
 		Response res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
 		
-		JSONObject orig = (JSONObject) res.getData();
+		final JSONObject orig = (JSONObject) res.getData();
 		
 		res = get(getWebConversation(), getHostName(), sessionId, id);
 		assertNoError(res);
 		
-		JSONObject copy = (JSONObject) res.getData();
+		final JSONObject copy = (JSONObject) res.getData();
 		
 		assertEquals(orig.length(), copy.length());
 		
-		for(Iterator keys = orig.keys(); keys.hasNext();) {
-			String key = keys.next().toString();
+		for(final Iterator keys = orig.keys(); keys.hasNext();) {
+			final String key = keys.next().toString();
 			if(!skipKeys.contains(key) && !key.equals("title")) {
 				assertEquals(orig.get(key).toString(), copy.get(key).toString());
 			} else if (key.equals("title")) {
@@ -135,14 +137,14 @@ public class CopyTest extends InfostoreAJAXTest {
 	}
 	
 	public void testUploadCopy() throws Exception {
-		File upload = new File(TestInit.getTestProperty("webdavPropertiesFile"));
-		int id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m("title" , "copy"), upload, "text/plain");
+		final File upload = new File(TestInit.getTestProperty("webdavPropertiesFile"));
+		final int id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m("title" , "copy"), upload, "text/plain");
 		clean.add(id);
 		
-		Response res = get(getWebConversation(), getHostName(), sessionId, id);
+		final Response res = get(getWebConversation(), getHostName(), sessionId, id);
 		assertNoError(res);
 		
-		JSONObject copy = (JSONObject) res.getData();
+		final JSONObject copy = (JSONObject) res.getData();
 		
 		assertEquals(upload.getName(),copy.get("filename"));
 		assertEquals("text/plain", copy.get("file_mimetype"));
@@ -151,10 +153,10 @@ public class CopyTest extends InfostoreAJAXTest {
 	//Bug 4269
 	public void testVirtualFolder() throws Exception{
 		try {
-			int id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), System.currentTimeMillis(), m("folder_id" , ""+FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
+			final int id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), System.currentTimeMillis(), m("folder_id" , ""+FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
 			clean.add(id);	
 			fail("Expected IOException");
-		} catch (JSONException x) {
+		} catch (final JSONException x) {
 			assertTrue(x.getMessage(), x.getMessage().contains("virt"));
 		}
 		

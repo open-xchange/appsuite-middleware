@@ -1,20 +1,13 @@
 package com.openexchange.ajax.importexport;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
 
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.TaskTest;
 
@@ -22,10 +15,11 @@ public class ICalImportTest extends AbstractICalTest {
 	
 	private static final Log LOG = LogFactory.getLog(ICalImportTest.class);
 	
-	public ICalImportTest(String name) {
+	public ICalImportTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
@@ -35,21 +29,21 @@ public class ICalImportTest extends AbstractICalTest {
 	}
 	
 	public void _notestImportICalWithAppointment() throws Exception {
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testImportICalWithAppointment" + System.currentTimeMillis());
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
 		appointmentObj.setShownAs(AppointmentObject.RESERVED);
-		ImportResult[] importResult = importICal(getWebConversation(), new AppointmentObject[]  {appointmentObj}, appointmentFolderId, timeZone, emailaddress, getHostName(), getSessionId());
+		final ImportResult[] importResult = importICal(getWebConversation(), new AppointmentObject[]  {appointmentObj}, appointmentFolderId, timeZone, emailaddress, getHostName(), getSessionId());
 		
 		assertEquals("import result size is not 1", 1, importResult.length);
 		assertTrue("server errors of server", importResult[0].isCorrect());
 		
-		int objectId = Integer.parseInt(importResult[0].getObjectId());
+		final int objectId = Integer.parseInt(importResult[0].getObjectId());
 		
 		assertTrue("object id is 0", objectId > 0);
 		
-		AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, emailaddress, timeZone, getHostName(), getSessionId());
+		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, emailaddress, timeZone, getHostName(), getSessionId());
 		
 		boolean found = false;
 		
@@ -68,20 +62,20 @@ public class ICalImportTest extends AbstractICalTest {
 	}
 	
 	public void _notestImportICalWithTask() throws Exception {
-		Task taskObj = new Task();
+		final Task taskObj = new Task();
 		taskObj.setTitle("testImportICalWithTask" + System.currentTimeMillis());
 		taskObj.setStartDate(startTime);
 		taskObj.setEndDate(endTime);
-		ImportResult[] importResult = importICal(getWebConversation(), new Task[] { taskObj }, taskFolderId, timeZone, emailaddress, getHostName(), getSessionId());
+		final ImportResult[] importResult = importICal(getWebConversation(), new Task[] { taskObj }, taskFolderId, timeZone, emailaddress, getHostName(), getSessionId());
 		
 		assertEquals("import result size is not 1", 1, importResult.length);
 		assertTrue("server errors of server", importResult[0].isCorrect());
 		
-		int objectId = Integer.parseInt(importResult[0].getObjectId());
+		final int objectId = Integer.parseInt(importResult[0].getObjectId());
 		
 		assertTrue("object id is 0", objectId > 0);
 		
-		Task[] taskArray = exportTask(getWebConversation(), taskFolderId, emailaddress, timeZone, getHostName(), getSessionId());
+		final Task[] taskArray = exportTask(getWebConversation(), taskFolderId, emailaddress, timeZone, getHostName(), getSessionId());
 		
 		boolean found = false;
 		
@@ -138,7 +132,7 @@ public class ICalImportTest extends AbstractICalTest {
 
 		stringBuffer.append("END:VCALENDAR").append('\n');
 		
-		ImportResult[] importResult = importICal(getWebConversation(), new ByteArrayInputStream(stringBuffer.toString().getBytes()), appointmentFolderId, -1, timeZone, emailaddress, getHostName(), getSessionId());
+		final ImportResult[] importResult = importICal(getWebConversation(), new ByteArrayInputStream(stringBuffer.toString().getBytes()), appointmentFolderId, -1, timeZone, emailaddress, getHostName(), getSessionId());
 		
 		assertEquals("invalid import result array size", 3, importResult.length);
 		
@@ -146,7 +140,7 @@ public class ICalImportTest extends AbstractICalTest {
 		assertTrue("server errors of server", importResult[1].hasError());
 		assertTrue("server errors of server", importResult[2].isCorrect());
 		
-		AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, emailaddress, timeZone, getHostName(), getSessionId());
+		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, emailaddress, timeZone, getHostName(), getSessionId());
 		
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[2].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());

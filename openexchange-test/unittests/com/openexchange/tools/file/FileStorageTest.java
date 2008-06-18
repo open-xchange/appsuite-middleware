@@ -40,12 +40,12 @@ package com.openexchange.tools.file;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 
+import junit.framework.TestCase;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.tools.RandomString;
-
-import junit.framework.TestCase;
 
 /**
  * Test for the file storage.
@@ -124,14 +124,14 @@ public class FileStorageTest extends TestCase {
         try {
         	storage.getFile(identifier);
         	fail("Expected IOException");
-        } catch (FileStorageException x) {
+        } catch (final FileStorageException x) {
         	// Everything fine. Error is discovered.
         }
 
         try {
         	storage.saveNewFile(baos);
             fail("Expected IOException");
-        } catch (FileStorageException x) {
+        } catch (final FileStorageException x) {
         	// Everything fine. Error is discovered.
         }
     }
@@ -144,14 +144,14 @@ public class FileStorageTest extends TestCase {
         try {
         	storage.getFile("00/00/01");
         	fail("Expected IOException");
-        } catch (FileStorageException x) {
+        } catch (final FileStorageException x) {
         	// Everything fine. Error is discovered.
         }
     }
 
-	private void rmdir(File tempFile) {
+	private void rmdir(final File tempFile) {
 		if(tempFile.isDirectory()) {
-			for(File f : tempFile.listFiles()) {
+			for(final File f : tempFile.listFiles()) {
 				rmdir(f);
 			}
 		} 

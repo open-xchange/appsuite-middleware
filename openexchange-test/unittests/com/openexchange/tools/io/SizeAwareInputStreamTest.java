@@ -10,23 +10,23 @@ import junit.framework.TestCase;
 public class SizeAwareInputStreamTest extends TestCase {
 	
 	public void testCountSimpleRead() throws IOException{
-		ByteArrayInputStream b = new ByteArrayInputStream(new byte[23]);
-		TestSizeAwareInputStream testStream = new TestSizeAwareInputStream(b);
+		final ByteArrayInputStream b = new ByteArrayInputStream(new byte[23]);
+		final TestSizeAwareInputStream testStream = new TestSizeAwareInputStream(b);
 		while(testStream.read() != -1){}
 		
 		assertEquals(23, testStream.getSize());
 	}
 	
 	public void testCountReadBuffer() throws IOException{
-		ByteArrayInputStream b = new ByteArrayInputStream(new byte[23]);
-		TestSizeAwareInputStream testStream = new TestSizeAwareInputStream(b);
+		final ByteArrayInputStream b = new ByteArrayInputStream(new byte[23]);
+		final TestSizeAwareInputStream testStream = new TestSizeAwareInputStream(b);
 		while(testStream.read(new byte[5]) != -1){}
 		assertEquals(23, testStream.getSize());	
 	}
 	
 	public void testCountReadBufferComplicated() throws IOException {
-		ByteArrayInputStream b = new ByteArrayInputStream(new byte[23]);
-		TestSizeAwareInputStream testStream = new TestSizeAwareInputStream(b);
+		final ByteArrayInputStream b = new ByteArrayInputStream(new byte[23]);
+		final TestSizeAwareInputStream testStream = new TestSizeAwareInputStream(b);
 		while(testStream.read(new byte[5],2,2) != -1){}
 		assertEquals(23, testStream.getSize());	
 		
@@ -36,11 +36,12 @@ public class SizeAwareInputStreamTest extends TestCase {
 
 		private long size;
 		
-		public TestSizeAwareInputStream(InputStream delegate) {
+		public TestSizeAwareInputStream(final InputStream delegate) {
 			super(delegate);
 		}
 		
-		public void size(long size) {
+		@Override
+		public void size(final long size) {
 			this.size = size;
 		}
 		

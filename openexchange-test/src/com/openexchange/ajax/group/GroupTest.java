@@ -76,7 +76,8 @@ public class GroupTest {
     /**
      * @deprecated use {@link GroupTools#search(AJAXClient, SearchRequest)}
      */
-    public static final Group[] searchGroup(final WebConversation conv,
+    @Deprecated
+	public static final Group[] searchGroup(final WebConversation conv,
         final String pattern, final String host, final String session) throws
         AjaxException, IOException, SAXException, JSONException, OXJSONException {
         final SearchRequest request = new SearchRequest(pattern);

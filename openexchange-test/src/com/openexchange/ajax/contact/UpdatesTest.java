@@ -11,10 +11,11 @@ public class UpdatesTest extends ContactTest {
 
 	private static final Log LOG = LogFactory.getLog(UpdateTest.class);
 	
-	public UpdatesTest(String name) {
+	public UpdatesTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}

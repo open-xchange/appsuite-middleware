@@ -68,7 +68,7 @@ public final class SuggestionsParser extends AbstractAJAXParser<SuggestionsRespo
 	 * 
 	 * @param failOnError
 	 */
-	public SuggestionsParser(boolean failOnError) {
+	public SuggestionsParser(final boolean failOnError) {
 		super(failOnError);
 	}
 

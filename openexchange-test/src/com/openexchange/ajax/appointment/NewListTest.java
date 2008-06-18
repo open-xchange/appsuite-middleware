@@ -50,9 +50,9 @@
 package com.openexchange.ajax.appointment;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Date;
 
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AllResponse;
@@ -121,7 +121,7 @@ public class NewListTest extends AbstractAJAXSession {
         }
 
         // A now gets all of the folder.
-        int[] columns = new int[] { AppointmentObject.TITLE, AppointmentObject
+        final int[] columns = new int[] { AppointmentObject.TITLE, AppointmentObject
             .OBJECT_ID, AppointmentObject.FOLDER_ID };
         final AllResponse allR = (AllResponse) Executor.execute(clientA,
             new AllRequest(folderA, columns, listStart, listEnd));

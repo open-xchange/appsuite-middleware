@@ -50,15 +50,16 @@ package com.openexchange.groupware.calendar.tools;
 
 
 
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.container.ResourceParticipant;
-import com.openexchange.groupware.container.Participant;
-import java.util.Set;
-import java.util.HashSet;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.fail;
 
-import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.fail;
+import java.util.HashSet;
+import java.util.Set;
+
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.ResourceParticipant;
+import com.openexchange.groupware.container.UserParticipant;
 
 
 /**
@@ -66,28 +67,28 @@ import static junit.framework.TestCase.fail;
  */
 public class CalendarAssertions {
 
-    public static void assertUserParticipants(CalendarDataObject cdao, String...users) {
+    public static void assertUserParticipants(final CalendarDataObject cdao, final String...users) {
         assertParticipants(cdao, users, new String[0]);
     }
 
-    public static void assertResourceParticipants(CalendarDataObject cdao, String...resources) {
+    public static void assertResourceParticipants(final CalendarDataObject cdao, final String...resources) {
         assertParticipants(cdao, new String[0], resources);
     }
 
-    public static void assertParticipants(CalendarDataObject cdao, String[] users, String[] resources) {
+    public static void assertParticipants(final CalendarDataObject cdao, final String[] users, final String[] resources) {
         assertNotNull("Participants should be set! ", cdao.getParticipants());
 
-        CalendarContextToolkit tools = new CalendarContextToolkit();
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
 
-        Set<UserParticipant> userParticipants = new HashSet<UserParticipant>(tools.users(cdao.getContext(), users));
-        Set<ResourceParticipant> resourceParticipants = new HashSet<ResourceParticipant>(tools.resources(cdao.getContext(), resources));
-        Set<Participant> unexpected = new HashSet<Participant>();
-        for(Participant participant : cdao.getParticipants()) {
+        final Set<UserParticipant> userParticipants = new HashSet<UserParticipant>(tools.users(cdao.getContext(), users));
+        final Set<ResourceParticipant> resourceParticipants = new HashSet<ResourceParticipant>(tools.resources(cdao.getContext(), resources));
+        final Set<Participant> unexpected = new HashSet<Participant>();
+        for(final Participant participant : cdao.getParticipants()) {
             if(!(userParticipants.remove(participant)) && !(resourceParticipants.remove(participant))) {
                unexpected.add( participant );
             }
         }
-        StringBuilder problems = new StringBuilder();
+        final StringBuilder problems = new StringBuilder();
         boolean mustFail = false;
         if(!unexpected.isEmpty()) {
             mustFail = true;
@@ -104,9 +105,9 @@ public class CalendarAssertions {
         if( mustFail ) { fail( problems.toString() ); }
     }
 
-    private static String stringify(Set<? extends Participant> unexpected) {
-        StringBuilder bob = new StringBuilder();
-        for(Participant p : unexpected) {
+    private static String stringify(final Set<? extends Participant> unexpected) {
+        final StringBuilder bob = new StringBuilder();
+        for(final Participant p : unexpected) {
             bob.append(p.getIdentifier()).append(": ").append(p.getDisplayName()).append(" | ");    
         }
         return bob.toString();

@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import junit.framework.TestCase;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONWriter;
@@ -16,8 +18,6 @@ import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
-
-import junit.framework.TestCase;
 
 public class AttachmentWriterTest extends TestCase {
 	private static final List<AttachmentMetadata> DUMMY_VALUES = new ArrayList<AttachmentMetadata>();
@@ -50,15 +50,15 @@ public class AttachmentWriterTest extends TestCase {
 	}
 	
 	public void testWriteList() throws Exception{
-		StringWriter result = new StringWriter();
-		AttachmentWriter writer = new AttachmentWriter(new JSONWriter(new PrintWriter(result)));
+		final StringWriter result = new StringWriter();
+		final AttachmentWriter writer = new AttachmentWriter(new JSONWriter(new PrintWriter(result)));
 		
 		writer.writeAttachments(new SearchIteratorAdapter(DUMMY_VALUES.iterator()), new AttachmentField[]{AttachmentField.ID_LITERAL, AttachmentField.FILENAME_LITERAL, AttachmentField.CREATION_DATE_LITERAL},TimeZone.getTimeZone("utc"));
 		
-		JSONArray arrayOfarrays = new JSONArray(result.toString());
+		final JSONArray arrayOfarrays = new JSONArray(result.toString());
 		
 		for(int i = 0; i < arrayOfarrays.length(); i++) {
-			JSONArray array = arrayOfarrays.getJSONArray(i);
+			final JSONArray array = arrayOfarrays.getJSONArray(i);
 			assertEquals(10+i,array.getInt(0));
 			assertEquals("test"+(i+1)+".txt",array.getString(1));
 			assertEquals(230023,array.getLong(2));
@@ -66,12 +66,12 @@ public class AttachmentWriterTest extends TestCase {
 	}
 	
 	public void testWriteObject() throws Exception {
-		StringWriter result = new StringWriter();
-		AttachmentWriter writer = new AttachmentWriter(new JSONWriter(new PrintWriter(result)));
+		final StringWriter result = new StringWriter();
+		final AttachmentWriter writer = new AttachmentWriter(new JSONWriter(new PrintWriter(result)));
 		
 		writer.write(DUMMY_VALUES.get(0),TimeZone.getTimeZone("utc"));
 		
-		JSONObject object = new JSONObject(result.toString());
+		final JSONObject object = new JSONObject(result.toString());
 		
 		assertEquals(1, object.getInt(AttachmentField.ATTACHED_ID_LITERAL.getName()));
 		assertEquals(2, object.getInt(AttachmentField.CREATED_BY_LITERAL.getName()));
@@ -86,11 +86,11 @@ public class AttachmentWriterTest extends TestCase {
 	}
 	
 	public void testTimeZone() throws Exception {
-		StringWriter result = new StringWriter();
-		AttachmentWriter writer = new AttachmentWriter(new JSONWriter(new PrintWriter(result)));
+		final StringWriter result = new StringWriter();
+		final AttachmentWriter writer = new AttachmentWriter(new JSONWriter(new PrintWriter(result)));
 		writer.write(DUMMY_VALUES.get(0),TimeZone.getTimeZone("Europe/Berlin"));
 		
-		JSONObject object = new JSONObject(result.toString());
+		final JSONObject object = new JSONObject(result.toString());
 		
 		assertEquals(3830023, object.getInt(AttachmentField.CREATION_DATE_LITERAL.toString()));
 		

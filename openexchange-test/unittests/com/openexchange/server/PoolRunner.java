@@ -7,12 +7,12 @@
 
 package com.openexchange.server;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.impl.DBPool;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.impl.DBPool;
 
 /**
  *
@@ -20,8 +20,8 @@ import java.sql.SQLException;
  */
 public class PoolRunner implements Runnable {
     
-    private Context c;
-    private boolean close_connections;
+    private final Context c;
+    private final boolean close_connections;
     private Thread run;
     private int current_run = 0;
     
@@ -33,7 +33,7 @@ public class PoolRunner implements Runnable {
     private int modrunner = 0;
 
     
-    public PoolRunner(Context c, boolean close_connections) {
+    public PoolRunner(final Context c, final boolean close_connections) {
         this.c = c;
         this.close_connections = close_connections;
         this.start();
@@ -47,10 +47,10 @@ public class PoolRunner implements Runnable {
     public void run() {
         while (current_run < TEST_RUNS) {
             try {                
-                Connection con = DBPool.pickup(c);
+                final Connection con = DBPool.pickup(c);
                 try {
                     run.sleep(WAIT_TIME);
-                } catch(java.lang.InterruptedException ie) { }
+                } catch(final java.lang.InterruptedException ie) { }
                 if (close_connections) {
                     if (modrunner % 8 == 0) {
                         con.close();
@@ -65,7 +65,7 @@ public class PoolRunner implements Runnable {
                 DBPool.push(c, con);
                 
                 current_run++;                
-            } catch(Exception e) {
+            } catch(final Exception e) {
                 e.printStackTrace();
             }
         }
@@ -73,9 +73,9 @@ public class PoolRunner implements Runnable {
         run.interrupt();
     }
 
-    private void simpleAction(Connection con) throws SQLException {
+    private void simpleAction(final Connection con) throws SQLException {
         if (con != null && !con.isClosed()) {
-            ResultSet rs = con.createStatement().executeQuery(TEST_QUERY);
+            final ResultSet rs = con.createStatement().executeQuery(TEST_QUERY);
             int counter = 0;
             while (rs.next()) {
                 counter++;

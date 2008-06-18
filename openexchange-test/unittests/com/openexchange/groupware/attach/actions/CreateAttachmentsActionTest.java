@@ -9,7 +9,7 @@ public class CreateAttachmentsActionTest extends AbstractAttachmentActionTest{
 
 	@Override
 	protected UndoableAction getAction() throws Exception {
-		CreateAttachmentAction action = new CreateAttachmentAction();
+		final CreateAttachmentAction action = new CreateAttachmentAction();
 		action.setAttachments(getAttachments());
 		action.setQueryCatalog(getQueryCatalog());
 		action.setProvider(getProvider());
@@ -19,8 +19,8 @@ public class CreateAttachmentsActionTest extends AbstractAttachmentActionTest{
 
 	@Override
 	protected void verifyPerformed() throws Exception {
-		for(AttachmentMetadata attachment : getAttachments()) {
-			AttachmentMetadata loaded = getAttachmentBase().getAttachment(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(),  attachment.getId(), getContext(), getUser(), null);
+		for(final AttachmentMetadata attachment : getAttachments()) {
+			final AttachmentMetadata loaded = getAttachmentBase().getAttachment(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(),  attachment.getId(), getContext(), getUser(), null);
 			assertEquals(attachment, loaded);
 		}
 		
@@ -28,11 +28,11 @@ public class CreateAttachmentsActionTest extends AbstractAttachmentActionTest{
 	
 	@Override
 	protected void verifyUndone() throws Exception {
-		for(AttachmentMetadata attachment : getAttachments()) {
+		for(final AttachmentMetadata attachment : getAttachments()) {
 			try {
 				getAttachmentBase().getAttachment(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(),  attachment.getId(), getContext(), getUser(), null);
 				fail("The attachment "+attachment.getId()+" was not removed on undo");
-			} catch (OXException x) {
+			} catch (final OXException x) {
 				assertTrue(true);
 			}
 		}

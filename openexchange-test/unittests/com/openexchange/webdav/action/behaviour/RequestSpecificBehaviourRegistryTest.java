@@ -4,12 +4,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import junit.framework.TestCase;
+
 import com.openexchange.webdav.action.MockWebdavRequest;
 import com.openexchange.webdav.action.WebdavRequest;
-import com.openexchange.webdav.action.behaviour.Behaviour;
-import com.openexchange.webdav.action.behaviour.RequestSpecificBehaviourRegistry;
-
-import junit.framework.TestCase;
 
 public class RequestSpecificBehaviourRegistryTest extends TestCase {
 
@@ -23,13 +21,13 @@ public class RequestSpecificBehaviourRegistryTest extends TestCase {
 
 	public class TestBehaviour implements Behaviour {
 
-		private TestImplementation implementation;
+		private final TestImplementation implementation;
 
-		public TestBehaviour(TestImplementation implementation) {
+		public TestBehaviour(final TestImplementation implementation) {
 			this.implementation = implementation;
 		}
 
-		public boolean matches(WebdavRequest req) {
+		public boolean matches(final WebdavRequest req) {
 			return true;
 		}
 
@@ -38,22 +36,22 @@ public class RequestSpecificBehaviourRegistryTest extends TestCase {
 
 		}
 
-		public <T> T get(Class<T> clazz) {
+		public <T> T get(final Class<T> clazz) {
 			return (T) implementation;
 		}
 
 	}
 
 	public void testBasic() {
-		RequestSpecificBehaviourRegistry registry = new RequestSpecificBehaviourRegistry();
+		final RequestSpecificBehaviourRegistry registry = new RequestSpecificBehaviourRegistry();
 		
-		TestImplementation orig = new TestImplementation();
+		final TestImplementation orig = new TestImplementation();
 		
-		Behaviour behaviour = new TestBehaviour(orig);
+		final Behaviour behaviour = new TestBehaviour(orig);
 		
 		registry.add(behaviour);
 		
-		TestInterface t = registry.get(new MockWebdavRequest(null, ""), TestInterface.class);
+		final TestInterface t = registry.get(new MockWebdavRequest(null, ""), TestInterface.class);
 		
 		assertTrue(t == orig);
 	}

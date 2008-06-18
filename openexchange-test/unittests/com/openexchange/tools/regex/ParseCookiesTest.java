@@ -49,12 +49,10 @@
 
 package com.openexchange.tools.regex;
 
+import junit.framework.TestCase;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.tools.regex.RFC2616Regex;
-
-import junit.framework.TestCase;
 
 /**
  *

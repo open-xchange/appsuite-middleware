@@ -26,36 +26,36 @@ import com.openexchange.tools.URLParameter;
 
 public class LinkTest extends AbstractAJAXTest {
 		
-	public LinkTest(String name) {
+	public LinkTest(final String name) {
 		super(name);
 	}
 
 	private static final String LINK_URL = "/ajax/link";
 
-	public static int[] insertLink(WebConversation webCon, String host, String session) throws Exception {
+	public static int[] insertLink(final WebConversation webCon, final String host, final String session) throws Exception {
 
 		FolderObject fo = FolderTest.getStandardContactFolder(webCon, host, session);
-		int  fid1 = fo.getObjectID();
-		ContactObject co = new ContactObject();
+		final int  fid1 = fo.getObjectID();
+		final ContactObject co = new ContactObject();
 		co.setSurName("Meier");
 		co.setGivenName("Herbert");
 		co.setDisplayName("Meier, Herbert");
 		co.setParentFolderID(fid1);
-		int oid1 = ContactTest.insertContact(webCon,co, PROTOCOL+host, session);
+		final int oid1 = ContactTest.insertContact(webCon,co, PROTOCOL+host, session);
 		
 		fo = FolderTest.getStandardCalendarFolder(webCon, host, session);
-		int fid2 = fo.getObjectID();
-		AppointmentObject ao = new AppointmentObject();
+		final int fid2 = fo.getObjectID();
+		final AppointmentObject ao = new AppointmentObject();
 		ao.setTitle("Nasenmann");
-		Calendar c = Calendar.getInstance();
+		final Calendar c = Calendar.getInstance();
 		c.set(Calendar.HOUR_OF_DAY, 8);
 		c.set(Calendar.MINUTE, 0);
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
 		c.setTimeZone(TimeZone.getTimeZone("GMT"));
 		
-		long startTime = c.getTimeInMillis();
-		long endTime = startTime + 3600000;
+		final long startTime = c.getTimeInMillis();
+		final long endTime = startTime + 3600000;
 		
 		ao.setStartDate(new Date(startTime));
 		ao.setEndDate(new Date(endTime));
@@ -64,16 +64,16 @@ public class LinkTest extends AbstractAJAXTest {
 		ao.setParentFolderID(fid2);
 		ao.setIgnoreConflicts(true);
 		
-		int oid2 =	AppointmentTest.insertAppointment(webCon, ao, TimeZone.getDefault(), PROTOCOL+host, session);
+		final int oid2 =	AppointmentTest.insertAppointment(webCon, ao, TimeZone.getDefault(), PROTOCOL+host, session);
 		
-		int[] repo = {oid1,fid1,oid2,fid2};
+		final int[] repo = {oid1,fid1,oid2,fid2};
 		
 		/*
 		 *  Now Build The Link Object
 		 * 
 		 */
 		
-		LinkObject lo = new LinkObject();
+		final LinkObject lo = new LinkObject();
 		lo.setFirstFolder(fid1);
 		lo.setFirstId(oid1);
 		lo.setFirstType(com.openexchange.groupware.Types.CONTACT);
@@ -81,10 +81,10 @@ public class LinkTest extends AbstractAJAXTest {
 		lo.setSecondId(oid2);
 		lo.setSecondType(com.openexchange.groupware.Types.APPOINTMENT);
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrintWriter pw = new PrintWriter(baos);
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final PrintWriter pw = new PrintWriter(baos);
 
-		JSONWriter jsonwriter = new JSONWriter(pw);
+		final JSONWriter jsonwriter = new JSONWriter(pw);
 		jsonwriter.object();
 		jsonwriter.key("id1").value(lo.getFirstId());
 		jsonwriter.key("module1").value(lo.getFirstType());
@@ -102,9 +102,9 @@ public class LinkTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		WebRequest req = new PutMethodWebRequest(PROTOCOL + host+ LINK_URL + parameter.getURLParameters(), bais, "text/javascript");
-		WebResponse resp = webCon.getResponse(req);
+		final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		final WebRequest req = new PutMethodWebRequest(PROTOCOL + host+ LINK_URL + parameter.getURLParameters(), bais, "text/javascript");
+		final WebResponse resp = webCon.getResponse(req);
 		
 		jResponse = new JSONObject(resp.getText());
 		
@@ -121,7 +121,7 @@ public class LinkTest extends AbstractAJAXTest {
 	
 	public void testAll() throws Exception {
 		
-		int[] go = insertLink(getWebConversation(),getHostName(),getSessionId());
+		final int[] go = insertLink(getWebConversation(),getHostName(),getSessionId());
 		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
@@ -130,8 +130,8 @@ public class LinkTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_ID, go[0]);
 		parameter.setParameter("module", com.openexchange.groupware.Types.CONTACT);
 		
-		WebRequest req = new GetMethodWebRequest(PROTOCOL + getHostName() + LINK_URL + parameter.getURLParameters());
-		WebResponse resp = getWebConversation().getResponse(req);
+		final WebRequest req = new GetMethodWebRequest(PROTOCOL + getHostName() + LINK_URL + parameter.getURLParameters());
+		final WebResponse resp = getWebConversation().getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
@@ -143,13 +143,13 @@ public class LinkTest extends AbstractAJAXTest {
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		JSONArray data = (JSONArray)response.getData();
+		final JSONArray data = (JSONArray)response.getData();
 		
 		for (int i=0;i<data.length();i++){
-			JSONObject jo = data.getJSONObject(i);
+			final JSONObject jo = data.getJSONObject(i);
 			
 			if (jo.getInt("id2") == go[2] && jo.getInt("folder2") == go[3] && jo.getInt("module2") == com.openexchange.groupware.Types.APPOINTMENT){
-				int iii  = 0;
+				final int iii  = 0;
 			}else{
 				fail("json error: OBJECT MISSMATCH");
 			}
@@ -158,17 +158,17 @@ public class LinkTest extends AbstractAJAXTest {
 	
 	public void testDelete() throws Exception {
 		
-		int[] go = insertLink(getWebConversation(),getHostName(),getSessionId());
+		final int[] go = insertLink(getWebConversation(),getHostName(),getSessionId());
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrintWriter pw = new PrintWriter(baos);
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final PrintWriter pw = new PrintWriter(baos);
 		
-		JSONWriter jsonwriter = new JSONWriter(pw);
+		final JSONWriter jsonwriter = new JSONWriter(pw);
 
 		jsonwriter.object();
 		
-		JSONArray jo1 = new JSONArray();
-		JSONArray jo2 = new JSONArray();
+		final JSONArray jo1 = new JSONArray();
+		final JSONArray jo2 = new JSONArray();
 		
 		jo2.put(0,go[2]);
 		jo2.put(1,com.openexchange.groupware.Types.APPOINTMENT);
@@ -181,7 +181,7 @@ public class LinkTest extends AbstractAJAXTest {
 		
 		pw.flush();
 
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
@@ -190,8 +190,8 @@ public class LinkTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_ID, go[0]);
 		parameter.setParameter("module", com.openexchange.groupware.Types.CONTACT);
 		
-		WebRequest req = new PutMethodWebRequest(PROTOCOL + getHostName() + LINK_URL + parameter.getURLParameters(), bais, "text/javascript");
-		WebResponse resp = getWebConversation().getResponse(req);
+		final WebRequest req = new PutMethodWebRequest(PROTOCOL + getHostName() + LINK_URL + parameter.getURLParameters(), bais, "text/javascript");
+		final WebResponse resp = getWebConversation().getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 
@@ -201,8 +201,8 @@ public class LinkTest extends AbstractAJAXTest {
 			fail("json error: " + response.getErrorMessage());
 		}
 		
-		JSONArray data = (JSONArray)response.getData();
-		JSONArray jo = data.optJSONArray(0);		
+		final JSONArray data = (JSONArray)response.getData();
+		final JSONArray jo = data.optJSONArray(0);		
 		
 		if (jo != null){
 			fail("json error: DATA MISSMATCH");
@@ -213,7 +213,7 @@ public class LinkTest extends AbstractAJAXTest {
 	
 	public void testWrongDelete() throws Exception {
 	
-		int[] go = insertLink(getWebConversation(),getHostName(),getSessionId());
+		final int[] go = insertLink(getWebConversation(),getHostName(),getSessionId());
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
@@ -222,8 +222,8 @@ public class LinkTest extends AbstractAJAXTest {
 
 		jsonwriter.object();
 		
-		JSONArray jo1 = new JSONArray();
-		JSONArray jo2 = new JSONArray();
+		final JSONArray jo1 = new JSONArray();
+		final JSONArray jo2 = new JSONArray();
 		
 		jo2.put(0,go[2]);
 		jo2.put(1,com.openexchange.groupware.Types.APPOINTMENT);

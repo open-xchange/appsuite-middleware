@@ -48,27 +48,28 @@
  */
 package com.openexchange.groupware.infostore;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import junit.framework.TestCase;
+
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.Init;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.groupware.Init;
 import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.test.TestInit;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.test.TestInit;
-import com.openexchange.api2.OXException;
-
-import java.util.List;
-import java.util.ArrayList;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -140,10 +141,10 @@ public class SearchEngineTest extends TestCase {
         assertSurvivesOrder(new Metadata[]{Metadata.FOLDER_ID_LITERAL, Metadata.TITLE_LITERAL});
     }
 
-    private void assertSurvivesOrder(Metadata[] metadata) {
+    private void assertSurvivesOrder(final Metadata[] metadata) {
         try {
            searchEngine.search("*",metadata,folderId,metadata[0],SearchEngine.ASC, 0, 10, ctx, user, userConfig); 
-        } catch (Exception x) {
+        } catch (final Exception x) {
             fail(x.getMessage());
             x.printStackTrace();
         }

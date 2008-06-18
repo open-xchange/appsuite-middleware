@@ -49,27 +49,6 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.contact.Contacts;
-import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.mail.MailException;
-import com.openexchange.mail.api.MailConfig;
-import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.tools.versit.Versit;
-import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
-import junit.framework.JUnit4TestAdapter;
-import static org.junit.Assert.assertTrue;
-import org.junit.Test;
-
-import java.io.ByteArrayOutputStream;
-import java.sql.Connection;
 
 /**
  * Note: This is not a good test. This is supposed to test MessageFiller.getUserVCard,

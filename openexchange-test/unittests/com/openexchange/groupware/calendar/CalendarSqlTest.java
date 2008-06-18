@@ -48,29 +48,29 @@
  */
 package com.openexchange.groupware.calendar;
 
+import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertResourceParticipants;
+import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertUserParticipants;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 import junit.framework.TestCase;
+
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.CalendarTest;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
-import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
-import com.openexchange.groupware.calendar.tools.CommonAppointments;
 import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
-import com.openexchange.groupware.container.*;
+import com.openexchange.groupware.calendar.tools.CommonAppointments;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.configuration.AJAXConfig;
-
-import static com.openexchange.groupware.calendar.tools.CalendarAssertions.*;
-
-import java.util.*;
-import java.sql.SQLException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class CalendarSqlTest extends TestCase {
 
-    private List<CalendarDataObject> clean = new ArrayList<CalendarDataObject>();
+    private final List<CalendarDataObject> clean = new ArrayList<CalendarDataObject>();
         
 
     private String participant1, participant2, participant3;
@@ -83,15 +83,16 @@ public class CalendarSqlTest extends TestCase {
     private Context ctx;
     private CommonAppointments appointments;
 
-    public void setUp() throws Exception {
+    @Override
+	public void setUp() throws Exception {
         Init.startServer();
 
-        CalendarTestConfig config = new CalendarTestConfig();
+        final CalendarTestConfig config = new CalendarTestConfig();
 
         user = config.getUser();
         secondUser = config.getSecondUser();
 
-        CalendarContextToolkit tools = new CalendarContextToolkit();
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
         ctx = tools.getDefaultContext();
 
         appointments = new CommonAppointments(ctx, user);
@@ -105,25 +106,26 @@ public class CalendarSqlTest extends TestCase {
         resource3 = config.getResource3();
 
         group = config.getGroup();
-        int groupid = tools.resolveGroup(group, ctx);
-        int memberid = tools.loadGroup(groupid, ctx).getMember()[0];
+        final int groupid = tools.resolveGroup(group, ctx);
+        final int memberid = tools.loadGroup(groupid, ctx).getMember()[0];
         member = tools.loadUser(memberid, ctx).getLoginInfo();
 
         appointments.deleteAll(ctx);
     }
 
-    public void tearDown() throws OXException, SQLException {
+    @Override
+	public void tearDown() throws OXException, SQLException {
         Init.stopServer();
         appointments.removeAll(user, clean);
     }
 
     // Bug #11148
     public void testUpdateWithInvalidRecurrencePatternShouldFail() throws OXException, SQLException {
-        CalendarDataObject cdao = appointments.buildRecurringAppointment();
+        final CalendarDataObject cdao = appointments.buildRecurringAppointment();
         appointments.save( cdao );
         clean.add( cdao );
 
-        CalendarDataObject modified = new CalendarDataObject();
+        final CalendarDataObject modified = new CalendarDataObject();
         modified.setObjectID(cdao.getObjectID());
         modified.setParentFolderID(cdao.getParentFolderID());
         modified.setRecurrenceType(CalendarDataObject.MONTHLY);
@@ -133,18 +135,18 @@ public class CalendarSqlTest extends TestCase {
         try {
             appointments.save( modified );
             fail("Could save invalid dayInMonth value");
-        } catch (OXException x) {
+        } catch (final OXException x) {
             // Passed. The invalid value wasn't accepted.       
         }
     }
 
     // Bug #11148
     public void testShouldRebuildEntireRecurrencePatternOnUpdate() throws SQLException, OXException {
-        CalendarDataObject cdao = appointments.buildRecurringAppointment();
+        final CalendarDataObject cdao = appointments.buildRecurringAppointment();
         appointments.save( cdao );
         clean.add( cdao );
 
-        CalendarDataObject modified = new CalendarDataObject();
+        final CalendarDataObject modified = new CalendarDataObject();
         modified.setObjectID(cdao.getObjectID());
         modified.setParentFolderID(cdao.getParentFolderID());
         modified.setContext(cdao.getContext());
@@ -156,16 +158,16 @@ public class CalendarSqlTest extends TestCase {
         try {
             appointments.save( modified );
             
-            CalendarDataObject reloaded = appointments.reload( modified );
+            final CalendarDataObject reloaded = appointments.reload( modified );
 
             assertEquals(0, reloaded.getDays());
             assertEquals(12, reloaded.getDayInMonth());
             assertEquals(2, reloaded.getInterval());
             assertEquals(CalendarObject.MONTHLY, reloaded.getRecurrenceType());
-        } catch (OXException x) {
+        } catch (final OXException x) {
             x.printStackTrace();
             fail(x.toString());
-        } catch (SQLException x) {
+        } catch (final SQLException x) {
             x.printStackTrace();
             fail(x.toString());
         }
@@ -173,11 +175,11 @@ public class CalendarSqlTest extends TestCase {
 
     // Bug #11148
     public void testShouldOnlyUpdateRecurrencePatternIfNeeded() throws SQLException, OXException {
-        CalendarDataObject cdao = appointments.buildRecurringAppointment();
+        final CalendarDataObject cdao = appointments.buildRecurringAppointment();
         appointments.save( cdao );
         clean.add( cdao );
 
-        CalendarDataObject modified = new CalendarDataObject();
+        final CalendarDataObject modified = new CalendarDataObject();
         modified.setObjectID(cdao.getObjectID());
         modified.setParentFolderID(cdao.getParentFolderID());
         modified.setContext(cdao.getContext());
@@ -186,16 +188,16 @@ public class CalendarSqlTest extends TestCase {
         try {
             appointments.save( modified );
 
-            CalendarDataObject reloaded = appointments.reload( modified );
+            final CalendarDataObject reloaded = appointments.reload( modified );
 
             assertEquals(cdao.getDays(), reloaded.getDays());
             assertEquals(cdao.getDayInMonth(), reloaded.getDayInMonth());
             assertEquals(cdao.getInterval(), reloaded.getInterval());
             assertEquals(cdao.getRecurrenceType(), reloaded.getRecurrenceType());
-        } catch (OXException x) {
+        } catch (final OXException x) {
             x.printStackTrace();
             fail(x.toString());
-        } catch (SQLException x) {
+        } catch (final SQLException x) {
             x.printStackTrace();
             fail(x.toString());
         }
@@ -203,95 +205,95 @@ public class CalendarSqlTest extends TestCase {
 
     // Node 1077
     public void testShouldSupplyConflictingUserParticipants() throws SQLException, OXException {
-        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant2);
+        final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant2);
         appointments.save( appointment ); clean.add( appointment );
-        CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant3);
+        final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant3);
         conflictingAppointment.setIgnoreConflicts(false);
-        CalendarDataObject[] conflicts = appointments.save( conflictingAppointment );
+        final CalendarDataObject[] conflicts = appointments.save( conflictingAppointment );
 
         assertNotNull(conflicts);
         assertEquals(1, conflicts.length);
-        CalendarDataObject conflict = conflicts[0];
+        final CalendarDataObject conflict = conflicts[0];
         assertEquals(appointment.getObjectID(), conflict.getObjectID());
         assertUserParticipants(conflict, user, participant1);
     }
 
     // Node 1077
     public void testShouldSupplyConflictingResourceParticipants() throws SQLException, OXException {
-        CalendarDataObject appointment = appointments.buildAppointmentWithResourceParticipants(resource1, resource2);
+        final CalendarDataObject appointment = appointments.buildAppointmentWithResourceParticipants(resource1, resource2);
         appointments.save( appointment );  clean.add( appointment );
-        CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithResourceParticipants(resource1, resource3);
+        final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithResourceParticipants(resource1, resource3);
         conflictingAppointment.setIgnoreConflicts(false);
-        CalendarDataObject[] conflicts = appointments.save( conflictingAppointment );
+        final CalendarDataObject[] conflicts = appointments.save( conflictingAppointment );
 
         assertNotNull(conflicts);
         assertEquals(1, conflicts.length);
-        CalendarDataObject conflict = conflicts[0];
+        final CalendarDataObject conflict = conflicts[0];
         assertEquals(appointment.getObjectID(), conflict.getObjectID());
         assertResourceParticipants(conflict, resource1);
     }
 
     // Node 1077
     public void testShouldSupplyConflictingUserParticipantsInGroup() throws OXException {
-        CalendarDataObject appointment = appointments.buildAppointmentWithGroupParticipants(group);
+        final CalendarDataObject appointment = appointments.buildAppointmentWithGroupParticipants(group);
         appointments.save( appointment ); clean.add( appointment );
 
-        CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants( member );
+        final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants( member );
         conflictingAppointment.setIgnoreConflicts( false );
 
-        CalendarDataObject[] conflicts = appointments.save( conflictingAppointment );
+        final CalendarDataObject[] conflicts = appointments.save( conflictingAppointment );
 
         assertNotNull(conflicts);
         assertEquals(1, conflicts.length);
-        CalendarDataObject conflict = conflicts[0];
+        final CalendarDataObject conflict = conflicts[0];
         assertEquals(appointment.getObjectID(), conflict.getObjectID());
         assertUserParticipants(conflict, user, member ); // Current User is added by default, so always conflicts
     }
 
     // Node 1077
     public void testShouldSupplyTitleIfPermissionsAllowIt() throws OXException {
-        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2);
+        final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2);
         appointments.save( appointment ); clean.add( appointment );
-        CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(participant1, participant3);
+        final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(participant1, participant3);
         conflictingAppointment.setIgnoreConflicts(false);
-        CalendarDataObject[] conflicts = appointments.save( conflictingAppointment );
+        final CalendarDataObject[] conflicts = appointments.save( conflictingAppointment );
 
         assertNotNull(conflicts);
         assertEquals(1, conflicts.length);
-        CalendarDataObject conflict = conflicts[0];
+        final CalendarDataObject conflict = conflicts[0];
         assertEquals(appointment.getTitle(), conflict.getTitle());
     }
 
     // Node 1077    
     public void testShouldSuppressTitleIfPermissionsDenyIt() throws OXException {
-        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2);
+        final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2);
         appointments.save( appointment ); clean.add( appointment );
 
         appointments.switchUser( secondUser );
         
-        CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(participant1, participant3);
+        final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(participant1, participant3);
         conflictingAppointment.setIgnoreConflicts(false);
-        CalendarDataObject[] conflicts = appointments.save( conflictingAppointment );
+        final CalendarDataObject[] conflicts = appointments.save( conflictingAppointment );
 
         assertNotNull(conflicts);
         assertEquals(1, conflicts.length);
-        CalendarDataObject conflict = conflicts[0];
+        final CalendarDataObject conflict = conflicts[0];
         assertNull(conflict.getTitle());
     }
 
     //Bug 11269
 
     public void testShouldIncludeCurrentUserInConflictsWithCurrentUserOnly() throws OXException {
-        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user);
+        final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user);
         appointments.save( appointment ); clean.add( appointment );
 
-        CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(user);
+        final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(user);
         conflictingAppointment.setIgnoreConflicts(false);
-        CalendarDataObject[] conflicts = appointments.save( conflictingAppointment );
+        final CalendarDataObject[] conflicts = appointments.save( conflictingAppointment );
 
         assertNotNull(conflicts);
         assertEquals(1, conflicts.length);
-        CalendarDataObject conflict = conflicts[0];
+        final CalendarDataObject conflict = conflicts[0];
         assertEquals(appointment.getTitle(), conflict.getTitle());
         assertUserParticipants(conflict, user ); 
 

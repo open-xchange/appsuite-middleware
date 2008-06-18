@@ -13,7 +13,7 @@ import com.openexchange.groupware.reminder.ReminderObject;
 
 public class Bug5128Test extends ReminderTest {
 
-	public Bug5128Test(String name) {
+	public Bug5128Test(final String name) {
 		super(name);
 	}
 	
@@ -21,7 +21,7 @@ public class Bug5128Test extends ReminderTest {
 		final int userId = ConfigTools.getUserId(getWebConversation(), getHostName(), getSessionId());
 		final TimeZone timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
 		
-		Calendar c = Calendar.getInstance();
+		final Calendar c = Calendar.getInstance();
 		c.setTimeZone(timeZone);
 		c.set(Calendar.HOUR_OF_DAY, 8);
 		c.set(Calendar.MINUTE, 0);
@@ -30,13 +30,13 @@ public class Bug5128Test extends ReminderTest {
 		
 		long startTime = c.getTimeInMillis();
 		startTime += timeZone.getOffset(startTime);
-		long endTime = startTime + 3600000;
+		final long endTime = startTime + 3600000;
 		
 		
 		final FolderObject folderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
 		final int folderId = folderObj.getObjectID();
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testBug5128");
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
@@ -48,7 +48,7 @@ public class Bug5128Test extends ReminderTest {
 		final int targetId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		final String target = String.valueOf(targetId);
 		
-		ReminderObject reminderObj = new ReminderObject();
+		final ReminderObject reminderObj = new ReminderObject();
 		reminderObj.setTargetId(targetId);
 		reminderObj.setFolder(String.valueOf(folderId));
 		reminderObj.setDate(new Date(startTime-(45*60*1000)));

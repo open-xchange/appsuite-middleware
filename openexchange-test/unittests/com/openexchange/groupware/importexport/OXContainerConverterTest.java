@@ -80,6 +80,7 @@ public class OXContainerConverterTest extends TestCase {
 	protected OXContainerConverter converter;
 	protected VersitParserTest parser;
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		session = SessionHelper.getSession();
@@ -87,22 +88,22 @@ public class OXContainerConverterTest extends TestCase {
 		parser = new VersitParserTest();
 	}
 	
-	public Task convertTask(VersitObject obj) throws ConverterException{
+	public Task convertTask(final VersitObject obj) throws ConverterException{
 		return converter.convertTask(obj);
 	}
 
-	public AppointmentObject convertAppointment(VersitObject obj) throws ConverterException{
+	public AppointmentObject convertAppointment(final VersitObject obj) throws ConverterException{
 		return converter.convertAppointment(obj);
 	}
 
-	public ContactObject convertContact(VersitObject obj) throws ConverterException{
+	public ContactObject convertContact(final VersitObject obj) throws ConverterException{
 		return converter.convertContact(obj);
 	}
 	
 	public void test8411() throws ConverterException{
-		AppointmentObject app = new AppointmentObject();
+		final AppointmentObject app = new AppointmentObject();
 		app.setTitle("Tierlieb's birthday");
-		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		app.setTimezone("UTC");
 		cal.set(1981, 3, 1, 0, 0);
 		app.setStartDate(cal.getTime());
@@ -118,19 +119,19 @@ public class OXContainerConverterTest extends TestCase {
 		app.setInterval(1);
 		app.setCreatedBy(session.getUserId());
 		
-		VersitObject  ical = converter.convertAppointment(app);
+		final VersitObject  ical = converter.convertAppointment(app);
 		
 		Property prop = ical.getProperty("SUMMARY");
 		assertEquals("Summary is correct" , "Tierlieb's birthday" , prop.getValue());
 		
 		prop = ical.getProperty("RRULE");
-		RecurrenceValue rv = (RecurrenceValue) prop.getValue();
+		final RecurrenceValue rv = (RecurrenceValue) prop.getValue();
 		assertEquals("Interval is correct" , rv.Freq, RecurrenceValue.YEARLY);
 	
 	}
 	
 	public void test7470() throws IOException, ConverterException{
-		String ical2 = 
+		final String ical2 = 
 			"BEGIN:VCALENDAR\n" +
 			"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" +
 			"VERSION:2.0\n" +
@@ -170,9 +171,9 @@ public class OXContainerConverterTest extends TestCase {
 			"END:VCALENDAR\n";
 		
 		
-		List<VersitObject> list = parser.parse(ical2);
-		AppointmentObject obj = convertAppointment( list.get(1) );
-		Participant[] participants = obj.getParticipants();
+		final List<VersitObject> list = parser.parse(ical2);
+		final AppointmentObject obj = convertAppointment( list.get(1) );
+		final Participant[] participants = obj.getParticipants();
 		assertEquals("One participant?" , participants.length, 1);
 		assertEquals("User is the right one?" , "cbartkowiak@oxhemail.open-xchange.com", participants[0].getEmailAddress());
 	}

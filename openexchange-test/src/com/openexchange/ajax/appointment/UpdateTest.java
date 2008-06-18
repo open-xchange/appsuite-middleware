@@ -53,18 +53,19 @@ public class UpdateTest extends AppointmentTest {
 		CalendarDataObject.RECURRENCE_START
 	};
 	
-	public UpdateTest(String name) {
+	public UpdateTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 
 	public void testSimple() throws Exception {
-		AppointmentObject appointmentObj = createAppointmentObject("testSimple");
+		final AppointmentObject appointmentObj = createAppointmentObject("testSimple");
 		appointmentObj.setIgnoreConflicts(true);
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		appointmentObj.setShownAs(AppointmentObject.RESERVED);
 		appointmentObj.setFullTime(true);
@@ -77,20 +78,20 @@ public class UpdateTest extends AppointmentTest {
 	}
 	
 	public void testUpdateAppointmentWithParticipant() throws Exception {
-		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentWithParticipants");
+		final AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentWithParticipants");
 		appointmentObj.setIgnoreConflicts(true);
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		appointmentObj.setShownAs(AppointmentObject.RESERVED);
 		appointmentObj.setFullTime(true);
 		appointmentObj.setLocation(null);
 		appointmentObj.setObjectID(objectId);
 		
-		int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
-		int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
-		int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		final int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
+		final int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		final int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		
-		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
+		final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
 		participants[0] = new UserParticipant(userId);
 		participants[1] = new UserParticipant(userParticipantId);
 		participants[2] = new GroupParticipant(groupParticipantId);
@@ -105,16 +106,16 @@ public class UpdateTest extends AppointmentTest {
 	}
 	
 	public void testUpdateRecurrenceWithPosition() throws Exception {
-		Calendar c = Calendar.getInstance();
+		final Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
 		c.set(Calendar.MINUTE, 0);
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
 		
-		Date until = new Date(c.getTimeInMillis() + (15*dayInMillis));
+		final Date until = new Date(c.getTimeInMillis() + (15*dayInMillis));
 		
-		int changeExceptionPosition = 3;
+		final int changeExceptionPosition = 3;
 		
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testUpdateRecurrence");
@@ -125,13 +126,13 @@ public class UpdateTest extends AppointmentTest {
 		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		compareObject(appointmentObj, loadAppointment, startTime, endTime);
 		
-		long newStartTime = startTime + 60*60*1000;
-		long newEndTime = endTime + 60*60*1000;
+		final long newStartTime = startTime + 60*60*1000;
+		final long newEndTime = endTime + 60*60*1000;
 		
 		appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testUpdateRecurrence - exception");
@@ -142,7 +143,7 @@ public class UpdateTest extends AppointmentTest {
 		appointmentObj.setRecurrencePosition(changeExceptionPosition);
 		appointmentObj.setIgnoreConflicts(true);
 		
-		int newObjectId = updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final int newObjectId = updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		assertFalse("object id of the update is equals with the old object id", newObjectId == objectId);
 		appointmentObj.setObjectID(newObjectId);
 		
@@ -155,20 +156,20 @@ public class UpdateTest extends AppointmentTest {
     // Node 356
 
     public void testShiftRecurrenceAppointment() throws Exception {
-		Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
-		Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
+		final Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
+		final Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
 		
-		AppointmentObject appointmentObj = createAppointmentObject("testShiftRecurrenceAppointment");
+		final AppointmentObject appointmentObj = createAppointmentObject("testShiftRecurrenceAppointment");
 		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setOccurrence(5);
 		appointmentObj.setIgnoreConflicts(true);
-		int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+		final int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		
 		appointmentObj.setObjectID(objectId);
 		
-		Date startDate = appointmentObj.getStartDate();
-		Date endDate = appointmentObj.getEndDate();
+		final Date startDate = appointmentObj.getStartDate();
+		final Date endDate = appointmentObj.getEndDate();
 		
 		final Calendar calendarStart = Calendar.getInstance(timeZone);
 		final Calendar calendarEnd = Calendar.getInstance(timeZone);
@@ -201,7 +202,7 @@ public class UpdateTest extends AppointmentTest {
         loadAppointment.removeUntil();   // TODO add expected until
         compareObject(appointmentObj, loadAppointment);
 		
-		AppointmentObject[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, new Date(0), _appointmentFields, timeZone, getHostName(), getSessionId());
+		final AppointmentObject[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, new Date(0), _appointmentFields, timeZone, getHostName(), getSessionId());
 		
 		boolean found = false;
 		

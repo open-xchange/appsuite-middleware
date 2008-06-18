@@ -1,28 +1,29 @@
 package com.openexchange.webdav.action;
 
+import javax.servlet.http.HttpServletResponse;
+
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
-
-import javax.servlet.http.HttpServletResponse;
 
 public class MoveTest extends StructureTest {
 
 	//TODO noroot
 	
+	@Override
 	public void testResource() throws Exception {
 		final WebdavPath INDEX_HTML_URL = testCollection.dup().append("index.html");
 		final WebdavPath MOVED_INDEX_HTML_URL = testCollection.dup().append("moved_index.html");
 		
-		String content = getContent(INDEX_HTML_URL);
+		final String content = getContent(INDEX_HTML_URL);
 		
-		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
-		MockWebdavResponse res = new MockWebdavResponse();
+		final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+		final MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setUrl(INDEX_HTML_URL);
 		req.setHeader("Destination", MOVED_INDEX_HTML_URL.toString());
 		
-		WebdavAction action = new WebdavMoveAction(factory);
+		final WebdavAction action = new WebdavMoveAction(factory);
 		action.perform(req, res);
 		
 		assertEquals(HttpServletResponse.SC_CREATED, res.getStatus());
@@ -37,7 +38,7 @@ public class MoveTest extends StructureTest {
 	}
 	
 	@Override
-	public WebdavAction getAction(WebdavFactory factory) {
+	public WebdavAction getAction(final WebdavFactory factory) {
 		return new WebdavMoveAction(factory);
 	}
 }

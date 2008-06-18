@@ -71,7 +71,7 @@ public final class SpellCheckTestSuite extends TestSuite {
 	 * @return a test suite containing smoke tests.
 	 */
 	public static Test suite() {
-		TestSuite suite = new TestSuite();
+		final TestSuite suite = new TestSuite();
 		suite.addTestSuite(com.openexchange.ajax.spellcheck.CheckTest.class);
 		suite.addTestSuite(com.openexchange.ajax.spellcheck.SuggestionsTest.class);
 		suite.addTestSuite(com.openexchange.ajax.spellcheck.UserWordTest.class);

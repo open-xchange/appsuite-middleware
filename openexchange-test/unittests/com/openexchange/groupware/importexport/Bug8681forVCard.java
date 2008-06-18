@@ -49,27 +49,30 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.groupware.userconfiguration.OverridingUserConfigurationStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.impl.DBPoolingException;
-import junit.framework.JUnit4TestAdapter;
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.junit.BeforeClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
+
+import junit.framework.JUnit4TestAdapter;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.importexport.exceptions.ImportExportException;
+import com.openexchange.groupware.userconfiguration.OverridingUserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
 public class Bug8681forVCard extends AbstractVCardTest {
 
@@ -90,11 +93,12 @@ public class Bug8681forVCard extends AbstractVCardTest {
 		//creating folder before changing permissions...
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "vcard7719Folder");
 		
-		UserConfigurationStorage original = UserConfigurationStorage.getInstance();
-        OverridingUserConfigurationStorage override = new OverridingUserConfigurationStorage(original) {
-            public UserConfiguration getOverride(int userId, int[] groups, Context ctx) throws UserConfigurationException {
-                UserConfiguration orig = delegate.getUserConfiguration(userId, ctx);
-                UserConfiguration copy = (UserConfiguration) orig.clone();
+		final UserConfigurationStorage original = UserConfigurationStorage.getInstance();
+        final OverridingUserConfigurationStorage override = new OverridingUserConfigurationStorage(original) {
+            @Override
+			public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws UserConfigurationException {
+                final UserConfiguration orig = delegate.getUserConfiguration(userId, ctx);
+                final UserConfiguration copy = (UserConfiguration) orig.clone();
                 copy.setContact(false);
                 return copy;
             }
@@ -107,7 +111,7 @@ public class Bug8681forVCard extends AbstractVCardTest {
 			try{
 				imp.canImport(sessObj, Format.VCARD, folders, null);
 				fail("Could import Contacts without permission on Contact module!");
-			} catch(ImportExportException e) {
+			} catch(final ImportExportException e) {
 				assertEquals(Category.PERMISSION, e.getCategory());
 				assertEquals("I_E-0607" , e.getErrorCode() );
 			}

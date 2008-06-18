@@ -12,10 +12,10 @@ import com.openexchange.groupware.ldap.LdapException.Code;
  */
 public class MockUserLookup {
 	
-	private Map<Integer, User> users = new HashMap<Integer, User>();
+	private final Map<Integer, User> users = new HashMap<Integer, User>();
 	
 	
-	public User getUser(int uid) throws LdapException {
+	public User getUser(final int uid) throws LdapException {
 		if(!users.containsKey(uid)) {
 			throw new LdapException(EnumComponent.USER, Code.USER_NOT_FOUND, uid,
                 -1);
@@ -25,7 +25,7 @@ public class MockUserLookup {
 	
 	public MockUserLookup() {
 		
-		String tz = "Europe/Berlin";
+		final String tz = "Europe/Berlin";
 		
 		int i = 0;
 		MockUser user = new MockUser();
@@ -120,7 +120,7 @@ public class MockUserLookup {
   		
     }
 
-	private void addUser(User user) {
+	private void addUser(final User user) {
 		users.put(user.getId(),user);
 	}
 

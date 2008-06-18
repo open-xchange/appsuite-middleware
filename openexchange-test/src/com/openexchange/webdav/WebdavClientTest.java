@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import junit.framework.TestCase;
+
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpURL;
@@ -21,8 +23,6 @@ import com.meterware.httpunit.WebRequest;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.test.WebdavInit;
 
-import junit.framework.TestCase;
-
 public class WebdavClientTest extends TestCase {
 	protected Properties webdavProps;
 	protected String login;
@@ -31,6 +31,7 @@ public class WebdavClientTest extends TestCase {
 	
 	protected List<String> clean = new ArrayList<String>();
 
+	@Override
 	public void setUp() throws Exception {
 		// Copied from AbstractWebdavTest
 		webdavProps = WebdavInit.getWebdavProperties();
@@ -40,58 +41,59 @@ public class WebdavClientTest extends TestCase {
 		
 	}
 	
+	@Override
 	public void tearDown() throws Exception {
-		for(String url : clean) {
+		for(final String url : clean) {
 			getResource(url).deleteMethod();
 		}
 	}
 	
-	protected WebdavResource getResource(String url, String login, String password) throws HttpException, IOException{
-		HttpURL httpUrl = new HttpURL("http://"+hostname+"/servlet/webdav.infostore/"+url);
+	protected WebdavResource getResource(final String url, final String login, final String password) throws HttpException, IOException{
+		final HttpURL httpUrl = new HttpURL("http://"+hostname+"/servlet/webdav.infostore/"+url);
 		httpUrl.setUserinfo(login, password);
-		WebdavResource res = new WebdavResource(httpUrl, 0, WebdavResource.NOACTION);
+		final WebdavResource res = new WebdavResource(httpUrl, 0, WebdavResource.NOACTION);
 		return res;
 	}
 	
-	protected WebdavResource getResource(String url) throws HttpException, IOException {
+	protected WebdavResource getResource(final String url) throws HttpException, IOException {
 		return getResource(url, login, password);
 	}
 	
-	public void mkdir(String path) throws HttpException, IOException {
+	public void mkdir(final String path) throws HttpException, IOException {
 		getResource(path).mkcolMethod();
 	}
 	
-	public void save(String path, String data) throws HttpException, IOException {
+	public void save(final String path, final String data) throws HttpException, IOException {
 		getResource(path).putMethod(data);
 	}
 	
-	public void cp(String from, String to) throws HttpException, IOException {
+	public void cp(final String from, final String to) throws HttpException, IOException {
 		getResource(from).copyMethod("http://"+hostname+"/servlet/webdav.infostore"+to);
 	}
 	
-	public void mv(String from, String to) throws HttpException, IOException {
+	public void mv(final String from, final String to) throws HttpException, IOException {
 		getResource(from).moveMethod("http://"+hostname+"/servlet/webdav.infostore"+to);
 	}
 	
-	public void assertContent(String path, String...names) throws HttpException, IOException {
-		WebdavResource res = getResource(path);
-		WebdavResources resources = res.getChildResources();
-		Set<String> expected = new HashSet<String>(Arrays.asList(names));
+	public void assertContent(final String path, final String...names) throws HttpException, IOException {
+		final WebdavResource res = getResource(path);
+		final WebdavResources resources = res.getChildResources();
+		final Set<String> expected = new HashSet<String>(Arrays.asList(names));
 		
-		Enumeration enumeration = resources.getResourceNames();
+		final Enumeration enumeration = resources.getResourceNames();
 		while(enumeration.hasMoreElements()){
-			String name = (String) enumeration.nextElement();
+			final String name = (String) enumeration.nextElement();
 			assertTrue(name+" not expected", expected.remove(name));
 		}
 		assertTrue(expected.toString(), expected.isEmpty());
 	}
 	
-	public void assertBody(String path, InputStream body) throws HttpException, IOException {
-		InputStream is = getResource(path).getMethodData();
+	public void assertBody(final String path, final InputStream body) throws HttpException, IOException {
+		final InputStream is = getResource(path).getMethodData();
 		assertEqualContent(is, body);
 	}
 	
-	public void assertEqualContent(InputStream is, InputStream body) throws IOException {
+	public void assertEqualContent(final InputStream is, final InputStream body) throws IOException {
 		int i = 0;
 		int j = 0;
 		while((i = is.read()) != -1) {
@@ -101,26 +103,26 @@ public class WebdavClientTest extends TestCase {
 		assertEquals(-1, body.read());
 	}
 
-	public void assertBody(String path, String content) throws HttpException, IOException {
+	public void assertBody(final String path, final String content) throws HttpException, IOException {
 		assertEquals(content, getResource(path).getMethodDataAsString());
 	}
 	
 	// Many thanks to offspring for this snippet
-	public void setAuth(WebRequest req) {
+	public void setAuth(final WebRequest req) {
 		if (password == null) {
 			password = "";
 		}
 		
-		String authData =  new String(Base64.encode(login + ":" + password)); 
+		final String authData =  new String(Base64.encode(login + ":" + password)); 
 		req.setHeaderField("authorization", "Basic " + authData);
 	}
 	
-	public void setAuth(HttpMethodBase method) {
+	public void setAuth(final HttpMethodBase method) {
 		if (password == null) {
 			password = "";
 		}
 		
-		String authData =  new String(Base64.encode(login + ":" + password)); 
+		final String authData =  new String(Base64.encode(login + ":" + password)); 
 		
 		method.setDoAuthentication(true);
 		method.setRequestHeader("authorization", "Basic " + authData);

@@ -121,7 +121,7 @@ public final class NetsolTestMailMessageOpen extends AbstractNetsolTest {
 			/*
 			 * "Open" 25kb mail
 			 */
-			NetsolGetResponse resp = ((NetsolGetResponse) Executor.execute(getSession(),
+			final NetsolGetResponse resp = ((NetsolGetResponse) Executor.execute(getSession(),
 					new NetsolGetRequest(mailPath)));
 			assertTrue("Get failed", resp.getMail(getTimeZone()) != null);
 			assertTrue("Duration corrupt", resp.getRequestDuration() > 0);

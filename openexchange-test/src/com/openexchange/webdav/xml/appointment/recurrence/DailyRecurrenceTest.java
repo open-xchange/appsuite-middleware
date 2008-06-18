@@ -1,21 +1,22 @@
 package com.openexchange.webdav.xml.appointment.recurrence;
 
-import com.openexchange.groupware.container.AppointmentObject;
 import java.util.Date;
+
+import com.openexchange.groupware.container.AppointmentObject;
 
 public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 	
-	public DailyRecurrenceTest(String name) {
+	public DailyRecurrenceTest(final String name) {
 		super(name);
 	}
 
 	public void testDailyRecurrenceFromWinter2SummerTime() throws Exception {
-		Date until = simpleDateFormatUTC.parse("2007-04-01 00:00:00");
+		final Date until = simpleDateFormatUTC.parse("2007-04-01 00:00:00");
 		
-		Date startDate = simpleDateFormatUTC.parse("2007-03-01 08:00:00");
-		Date endDate = simpleDateFormatUTC.parse("2007-03-01 10:00:00");
+		final Date startDate = simpleDateFormatUTC.parse("2007-03-01 08:00:00");
+		final Date endDate = simpleDateFormatUTC.parse("2007-03-01 10:00:00");
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testDailyRecurrenceFromWinter2SummerTime");
 		appointmentObj.setStartDate(startDate);
 		appointmentObj.setEndDate(endDate);
@@ -25,7 +26,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
@@ -40,12 +41,12 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 	}	
 	
 	public void testDailyRecurrenceFromSummer2WinterTime() throws Exception {
-		Date until = simpleDateFormatUTC.parse("2007-11-01 00:00:00");
+		final Date until = simpleDateFormatUTC.parse("2007-11-01 00:00:00");
 		
-		Date startDate = simpleDateFormatUTC.parse("2007-10-01 08:00:00");
-		Date endDate = simpleDateFormatUTC.parse("2007-10-01 10:00:00");
+		final Date startDate = simpleDateFormatUTC.parse("2007-10-01 08:00:00");
+		final Date endDate = simpleDateFormatUTC.parse("2007-10-01 10:00:00");
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testDailyRecurrenceFromSummer2WinterTime");
 		appointmentObj.setStartDate(startDate);
 		appointmentObj.setEndDate(endDate);
@@ -55,7 +56,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());

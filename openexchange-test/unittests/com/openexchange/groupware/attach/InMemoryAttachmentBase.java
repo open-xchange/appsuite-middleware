@@ -48,81 +48,85 @@
  */
 package com.openexchange.groupware.attach;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.results.Delta;
-import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.api2.OXException;
-
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.results.Delta;
+import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class InMemoryAttachmentBase implements AttachmentBase{
-    private Map<Context, Map<Integer, AttachmentMetadata>> data = new HashMap<Context, Map<Integer, AttachmentMetadata>>();
-    private Map<Context, List<AttachmentMetadata>> changes = new HashMap<Context, List<AttachmentMetadata>>();
-    private Map<Context, List<AttachmentMetadata>> deletions = new HashMap<Context, List<AttachmentMetadata>>();
+    private final Map<Context, Map<Integer, AttachmentMetadata>> data = new HashMap<Context, Map<Integer, AttachmentMetadata>>();
+    private final Map<Context, List<AttachmentMetadata>> changes = new HashMap<Context, List<AttachmentMetadata>>();
+    private final Map<Context, List<AttachmentMetadata>> deletions = new HashMap<Context, List<AttachmentMetadata>>();
     
-    public long attachToObject(AttachmentMetadata attachment, InputStream data, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+    public long attachToObject(final AttachmentMetadata attachment, final InputStream data, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public long detachFromObject(int folderId, int objectId, int moduleId, int[] ids, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+    public long detachFromObject(final int folderId, final int objectId, final int moduleId, final int[] ids, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public AttachmentMetadata getAttachment(int folderId, int objectId, int moduleId, int id, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+    public AttachmentMetadata getAttachment(final int folderId, final int objectId, final int moduleId, final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public InputStream getAttachedFile(int folderId, int attachedId, int moduleId, int id, Context context, User user, UserConfiguration userConfig) throws OXException {
+    public InputStream getAttachedFile(final int folderId, final int attachedId, final int moduleId, final int id, final Context context, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public SortedSet<String> getAttachmentFileStoreLocationsperContext(Context ctx) {
-        SortedSet<String> locations = new TreeSet<String>();
-        for(AttachmentMetadata metadata : getCtxMap(ctx).values()) {
+    public SortedSet<String> getAttachmentFileStoreLocationsperContext(final Context ctx) {
+        final SortedSet<String> locations = new TreeSet<String>();
+        for(final AttachmentMetadata metadata : getCtxMap(ctx).values()) {
             locations.add(metadata.getFileId());
         }
         return locations;
     }
 
-    public TimedResult getAttachments(int folderId, int attachedId, int moduleId, Context context, User user, UserConfiguration userConfig) throws OXException {
+    public TimedResult getAttachments(final int folderId, final int attachedId, final int moduleId, final Context context, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public TimedResult getAttachments(int folderId, int attachedId, int moduleId, AttachmentField[] columns, AttachmentField sort, int order, Context context, User user, UserConfiguration userConfig) throws OXException {
+    public TimedResult getAttachments(final int folderId, final int attachedId, final int moduleId, final AttachmentField[] columns, final AttachmentField sort, final int order, final Context context, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public TimedResult getAttachments(int folderId, int attachedId, int moduleId, int[] idsToFetch, AttachmentField[] fields, Context context, User user, UserConfiguration userConfig) throws OXException {
+    public TimedResult getAttachments(final int folderId, final int attachedId, final int moduleId, final int[] idsToFetch, final AttachmentField[] fields, final Context context, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public Delta getDelta(int folderId, int attachedId, int moduleId, long ts, boolean ignoreDeleted, Context context, User user, UserConfiguration userConfig) throws OXException {
+    public Delta getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final Context context, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public Delta getDelta(int folderId, int attachedId, int moduleId, long ts, boolean ignoreDeleted, AttachmentField[] fields, AttachmentField sort, int order, Context context, User user, UserConfiguration userConfig) throws OXException {
+    public Delta getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final AttachmentField[] fields, final AttachmentField sort, final int order, final Context context, final User user, final UserConfiguration userConfig) throws OXException {
         throw new UnsupportedOperationException();
     }
 
-    public void registerAttachmentListener(AttachmentListener listener, int moduleId) {
+    public void registerAttachmentListener(final AttachmentListener listener, final int moduleId) {
         throw new UnsupportedOperationException();
     }
 
-    public void removeAttachmentListener(AttachmentListener listener, int moduleId) {
+    public void removeAttachmentListener(final AttachmentListener listener, final int moduleId) {
         throw new UnsupportedOperationException();
     }
 
-    public int[] removeAttachment(String file_id, Context ctx) throws OXException {
-        for(AttachmentMetadata attachment : getCtxMap(ctx).values()) {
-            String location = attachment.getFileId();
+    public int[] removeAttachment(final String file_id, final Context ctx) throws OXException {
+        for(final AttachmentMetadata attachment : getCtxMap(ctx).values()) {
+            final String location = attachment.getFileId();
             if(location != null && location.equals(file_id)){
                 deletions.get(ctx).add(attachment);
                 return new int[]{1,1};
@@ -131,9 +135,9 @@ public class InMemoryAttachmentBase implements AttachmentBase{
         return new int[]{1,1};
     }
 
-    public int modifyAttachment(String file_id, String new_file_id, String new_comment, String new_mime, Context ctx) throws OXException {
-        for(AttachmentMetadata attachment : getCtxMap(ctx).values()) {
-            String location = attachment.getFileId();
+    public int modifyAttachment(final String file_id, final String new_file_id, final String new_comment, final String new_mime, final Context ctx) throws OXException {
+        for(final AttachmentMetadata attachment : getCtxMap(ctx).values()) {
+            final String location = attachment.getFileId();
             if(location != null && location.equals(file_id)){
                 attachment.setFileId(new_file_id);
                 attachment.setComment(new_comment);
@@ -145,15 +149,15 @@ public class InMemoryAttachmentBase implements AttachmentBase{
         return -1;
     }
 
-    public void addAuthorization(AttachmentAuthorization authz, int moduleId) {
+    public void addAuthorization(final AttachmentAuthorization authz, final int moduleId) {
         throw new UnsupportedOperationException();
     }
 
-    public void removeAuthorization(AttachmentAuthorization authz, int moduleId) {
+    public void removeAuthorization(final AttachmentAuthorization authz, final int moduleId) {
         throw new UnsupportedOperationException();
     }
 
-    public void deleteAll(Context context) throws OXException {
+    public void deleteAll(final Context context) throws OXException {
         throw new UnsupportedOperationException();
     }
 
@@ -173,47 +177,47 @@ public class InMemoryAttachmentBase implements AttachmentBase{
         //IGNORE
     }
 
-    public void setTransactional(boolean transactional) {
+    public void setTransactional(final boolean transactional) {
         //IGNORE
     }
 
-    public void setRequestTransactional(boolean transactional) {
+    public void setRequestTransactional(final boolean transactional) {
         throw new UnsupportedOperationException();
     }
 
-    public void setCommitsTransaction(boolean commits) {
+    public void setCommitsTransaction(final boolean commits) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public void put(Context ctx, AttachmentMetadata attachment) {
+    public void put(final Context ctx, final AttachmentMetadata attachment) {
         getCtxMap(ctx).put(attachment.getId(), attachment);
     }
 
-    private Map<Integer, AttachmentMetadata> getCtxMap(Context ctx) {
+    private Map<Integer, AttachmentMetadata> getCtxMap(final Context ctx) {
         if(data.containsKey(ctx)) {
             return data.get(ctx);
         }
-        Map<Integer, AttachmentMetadata> attachments = new HashMap<Integer, AttachmentMetadata>();
+        final Map<Integer, AttachmentMetadata> attachments = new HashMap<Integer, AttachmentMetadata>();
         data.put(ctx, attachments);
         return attachments;
     }
 
-    public void forgetChanges(Context ctx) {
+    public void forgetChanges(final Context ctx) {
         changes.put(ctx, new ArrayList<AttachmentMetadata>());
     }
 
-    public List<AttachmentMetadata> getChanges(Context ctx) {
+    public List<AttachmentMetadata> getChanges(final Context ctx) {
         if(!changes.containsKey(ctx)) {
             return new ArrayList<AttachmentMetadata>();
         }
         return changes.get(ctx);
     }
 
-    public void forgetDeletions(Context ctx) {
+    public void forgetDeletions(final Context ctx) {
         deletions.put(ctx, new ArrayList<AttachmentMetadata>());
     }
 
-    public List<AttachmentMetadata> getDeletions(Context ctx) {
+    public List<AttachmentMetadata> getDeletions(final Context ctx) {
         return deletions.get(ctx);
     }
 }

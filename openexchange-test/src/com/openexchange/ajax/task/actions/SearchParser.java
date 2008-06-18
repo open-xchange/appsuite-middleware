@@ -62,7 +62,7 @@ public class SearchParser extends CommonSearchParser {
      * @param failOnError
      * @param columns
      */
-    public SearchParser(boolean failOnError, int[] columns) {
+    public SearchParser(final boolean failOnError, final int[] columns) {
         super(failOnError, columns);
     }
 

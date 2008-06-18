@@ -1,8 +1,20 @@
 package com.openexchange.ajax.importexport;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
-import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -11,10 +23,8 @@ import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.config.ConfigTools;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -28,17 +38,6 @@ import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class AbstractICalTest extends AbstractAJAXTest {
 	
@@ -62,10 +61,11 @@ public class AbstractICalTest extends AbstractAJAXTest {
 	
 	private static final Log LOG = LogFactory.getLog(AbstractICalTest.class);
 	
-	public AbstractICalTest(String name) {
+	public AbstractICalTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		
@@ -87,10 +87,10 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		LOG.debug(new StringBuilder().append("use timezone: ").append(
 				timeZone).toString());
 		
-		ContactObject contactObj = ContactTest.loadUser(getWebConversation(), userId, FolderObject.SYSTEM_LDAP_FOLDER_ID, getHostName(), getSessionId());
+		final ContactObject contactObj = ContactTest.loadUser(getWebConversation(), userId, FolderObject.SYSTEM_LDAP_FOLDER_ID, getHostName(), getSessionId());
 		emailaddress = contactObj.getEmail1();
 		
-		Calendar c = Calendar.getInstance();
+		final Calendar c = Calendar.getInstance();
 		c.setTimeZone(timeZone);
 		c.set(Calendar.HOUR_OF_DAY, 8);
 		c.set(Calendar.MINUTE, 0);
@@ -102,37 +102,37 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		endTime = new Date(startTime.getTime() + 3600000);
 	}
 	
-	public static ImportResult[] importICal(WebConversation webCon, AppointmentObject[] appointmentObj, int folderId, TimeZone timeZone, String emailaddress, String host, String session) throws Exception, TestException {
+	public static ImportResult[] importICal(final WebConversation webCon, final AppointmentObject[] appointmentObj, final int folderId, final TimeZone timeZone, final String emailaddress, final String host, final String session) throws Exception, TestException {
 		return importICal(webCon, appointmentObj, null, folderId, -1, timeZone, emailaddress, host, session);
 	}
 	
-	public static ImportResult[] importICal(WebConversation webCon, Task[] taskObj, int folderId, TimeZone timeZone, String emailaddress, String host, String session) throws Exception, TestException {
+	public static ImportResult[] importICal(final WebConversation webCon, final Task[] taskObj, final int folderId, final TimeZone timeZone, final String emailaddress, final String host, final String session) throws Exception, TestException {
 		return importICal(webCon, null, taskObj, -1, folderId, timeZone, emailaddress, host, session);
 	}
 	
-	public static ImportResult[] importICal(WebConversation webCon, AppointmentObject[] appointmentObj, Task[] taskObj, int appointmentFolderId, int taskFolderId, TimeZone timeZone, String emailaddress, String host, String session) throws Exception, TestException {
+	public static ImportResult[] importICal(final WebConversation webCon, final AppointmentObject[] appointmentObj, final Task[] taskObj, final int appointmentFolderId, final int taskFolderId, final TimeZone timeZone, final String emailaddress, String host, final String session) throws Exception, TestException {
 		host = appendPrefix(host);
 		
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		
 		final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");
-		VersitDefinition.Writer versitWriter = versitDefinition.getWriter(byteArrayOutputStream, "UTF-8");
+		final VersitDefinition.Writer versitWriter = versitDefinition.getWriter(byteArrayOutputStream, "UTF-8");
 		final VersitObject versitObjectContainer = OXContainerConverter.newCalendar("2.0");
 		versitDefinition.writeProperties(versitWriter, versitObjectContainer);
 		final VersitDefinition eventDef = versitDefinition.getChildDef("VEVENT");
 		final VersitDefinition taskDef = versitDefinition.getChildDef("VTODO");
-		OXContainerConverter oxContainerConverter = new OXContainerConverter(timeZone, emailaddress);
+		final OXContainerConverter oxContainerConverter = new OXContainerConverter(timeZone, emailaddress);
 		
 		if (appointmentObj != null) {
 			for (int a = 0; a < appointmentObj.length; a++) {
-				VersitObject versitObject = oxContainerConverter.convertAppointment(appointmentObj[a]);
+				final VersitObject versitObject = oxContainerConverter.convertAppointment(appointmentObj[a]);
 				eventDef.write(versitWriter, versitObject);
 			}
 		}
 		
 		if (taskObj != null) {
 			for (int a = 0; a < taskObj.length; a++) {
-				VersitObject versitObject = oxContainerConverter.convertTask(taskObj[a]);
+				final VersitObject versitObject = oxContainerConverter.convertTask(taskObj[a]);
 				taskDef.write(versitWriter, versitObject);
 			}
 		}
@@ -145,7 +145,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		return importICal(webCon, new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), appointmentFolderId, taskFolderId, timeZone, emailaddress, host, session);
 	}
 		
-	public static ImportResult[] importICal(WebConversation webCon, ByteArrayInputStream byteArrayInputStream, int appointmentFolderId, int taskFolderId, TimeZone timeZone, String emailaddress, String host, String session) throws Exception, TestException {
+	public static ImportResult[] importICal(final WebConversation webCon, final ByteArrayInputStream byteArrayInputStream, final int appointmentFolderId, final int taskFolderId, final TimeZone timeZone, final String emailaddress, String host, final String session) throws Exception, TestException {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter(true);
@@ -159,32 +159,32 @@ public class AbstractICalTest extends AbstractAJAXTest {
 			parameter.setParameter("folder", taskFolderId);
 		}
 		
-		WebRequest req = new PostMethodWebRequest(host + "/ajax/import" + parameter.getURLParameters());
+		final WebRequest req = new PostMethodWebRequest(host + "/ajax/import" + parameter.getURLParameters());
 		
 		((PostMethodWebRequest)req).setMimeEncoded(true);
 		req.selectFile("file", "ical-test.ics", byteArrayInputStream, Format.ICAL.getMimeType());
 		
-		WebResponse resp = webCon.getResource(req);
+		final WebResponse resp = webCon.getResource(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		JSONObject response = extractFromCallback( resp.getText() );
+		final JSONObject response = extractFromCallback( resp.getText() );
 		
-		JSONArray jsonArray = response.getJSONArray("data");
+		final JSONArray jsonArray = response.getJSONArray("data");
 		
 		assertNotNull("json array in response is null", jsonArray);
 		
-		ImportResult[] importResult = new ImportResult[jsonArray.length()];
+		final ImportResult[] importResult = new ImportResult[jsonArray.length()];
 		for (int a = 0; a < jsonArray.length(); a++) {
-			JSONObject jsonObj = jsonArray.getJSONObject(a);
+			final JSONObject jsonObj = jsonArray.getJSONObject(a);
 			
 			if (jsonObj.has("error")) {
 				importResult[a] = new ImportResult();
 				importResult[a].setException(new OXException( jsonObj.getString("error")));
 			} else {
-				String objectId = jsonObj.getString("id");
-				String folder = jsonObj.getString("folder_id");
-				long timestamp = jsonObj.getLong("last_modified");
+				final String objectId = jsonObj.getString("id");
+				final String folder = jsonObj.getString("folder_id");
+				final long timestamp = jsonObj.getLong("last_modified");
 			
 				importResult[a] = new ImportResult(objectId, folder, timestamp);
 			} 
@@ -193,7 +193,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		return importResult;
 	}
 	
-	public AppointmentObject[] exportAppointment(WebConversation webCon, int inFolder, String mailaddress, TimeZone timeZone, String host, String session) throws Exception, TestException {
+	public AppointmentObject[] exportAppointment(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session) throws Exception, TestException {
 		host = appendPrefix(host);
 		
 		final String contentType = "text/calendar";
@@ -203,8 +203,8 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		parameter.setParameter("folder", appointmentFolderId);
 		parameter.setParameter("action", Format.ICAL.getConstantName());
 		
-		WebRequest req = new GetMethodWebRequest(host + "/ajax/export" + parameter.getURLParameters());
-		WebResponse resp = webCon.getResponse(req);
+		final WebRequest req = new GetMethodWebRequest(host + "/ajax/export" + parameter.getURLParameters());
+		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
@@ -231,14 +231,14 @@ public class AbstractICalTest extends AbstractAJAXTest {
 				
 				versitObject = def.parseChild(versitReader, rootVersitObject);
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			System.out.println("error: " + exc);
 		}
 		
 		return exportData.toArray(new AppointmentObject[exportData.size()]);
 	}
 	
-	public Task[] exportTask(WebConversation webCon, int inFolder, String mailaddress, TimeZone timeZone, String host, String session) throws Exception, TestException {
+	public Task[] exportTask(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session) throws Exception, TestException {
 		host = appendPrefix(host);
 		
 		final String contentType = "text/calendar";
@@ -249,8 +249,8 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		parameter.setParameter("folder", taskFolderId);
 		parameter.setParameter("type", Types.TASK);
 		
-		WebRequest req = new GetMethodWebRequest(host + EXPORT_URL + parameter.getURLParameters());
-		WebResponse resp = webCon.getResponse(req);
+		final WebRequest req = new GetMethodWebRequest(host + EXPORT_URL + parameter.getURLParameters());
+		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
@@ -277,7 +277,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
 				
 				versitObject = def.parseChild(versitReader, rootVersitObject);
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			System.out.println("error: " + exc);
 		}
 		

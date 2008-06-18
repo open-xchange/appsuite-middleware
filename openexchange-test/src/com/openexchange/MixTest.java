@@ -52,9 +52,9 @@ package com.openexchange;
 import java.io.IOException;
 import java.util.Random;
 
-import org.xml.sax.SAXException;
-
 import junit.framework.AssertionFailedError;
+
+import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.AuthorizationRequiredException;
 import com.meterware.httpunit.HeadMethodWebRequest;

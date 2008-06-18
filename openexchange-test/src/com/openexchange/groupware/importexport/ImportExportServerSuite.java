@@ -49,14 +49,14 @@
 
 package com.openexchange.groupware.importexport;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import com.openexchange.ajax.importexport.CSVImportExportServletTest;
 import com.openexchange.ajax.importexport.ICalExportTest;
 import com.openexchange.ajax.importexport.ICalImportTest;
 import com.openexchange.ajax.importexport.VCardExportTest;
 import com.openexchange.ajax.importexport.VCardImportTest;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * This suite is meant to be used with a running OX.
@@ -66,7 +66,7 @@ import junit.framework.TestSuite;
 public class ImportExportServerSuite extends TestSuite {
 
 	public static Test suite(){
-		TestSuite tests = new TestSuite();
+		final TestSuite tests = new TestSuite();
 	
 		//ICAL
 		tests.addTestSuite( ICalExportTest.class );

@@ -8,10 +8,11 @@ import com.openexchange.groupware.tx.UndoableAction;
 public class DeleteVersionActionTest extends AbstractInfostoreActionTest {
 
 
-	private CreateDocumentAction create = new CreateDocumentAction();
-	private CreateVersionAction create2 = new CreateVersionAction();
+	private final CreateDocumentAction create = new CreateDocumentAction();
+	private final CreateVersionAction create2 = new CreateVersionAction();
 	
 	
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		create.setProvider(getProvider());
@@ -29,6 +30,7 @@ public class DeleteVersionActionTest extends AbstractInfostoreActionTest {
 	
 	}
 	
+	@Override
 	public void tearDown() throws Exception {
 		create2.undo();
 		create.undo();
@@ -37,7 +39,7 @@ public class DeleteVersionActionTest extends AbstractInfostoreActionTest {
 	
 	@Override
 	protected UndoableAction getAction() throws Exception {
-		DeleteVersionAction deleteAction = new DeleteVersionAction();
+		final DeleteVersionAction deleteAction = new DeleteVersionAction();
 		deleteAction.setProvider(getProvider());
 		deleteAction.setContext(getContext());
 		deleteAction.setDocuments(getDocuments());
@@ -47,7 +49,7 @@ public class DeleteVersionActionTest extends AbstractInfostoreActionTest {
 
 	@Override
 	protected void verifyPerformed() throws Exception {
-		for(DocumentMetadata doc : getDocuments()) {
+		for(final DocumentMetadata doc : getDocuments()) {
 			assertNoResult("SELECT 1 FROM infostore_document WHERE cid = ? and infostore_id = ? and version_number = ?", getContext().getContextId(), doc.getId(), doc.getVersion());
 		}
 	}
@@ -55,14 +57,14 @@ public class DeleteVersionActionTest extends AbstractInfostoreActionTest {
 
 	@Override
 	protected void verifyUndone() throws Exception {
-		for(DocumentMetadata doc : getDocuments()) {
+		for(final DocumentMetadata doc : getDocuments()) {
 			assertResult("SELECT 1 FROM infostore_document WHERE cid = ? and infostore_id = ? and version_number = ?", getContext().getContextId(), doc.getId(), doc.getVersion());
 		}
 	}
 	
 	// Bug 9061
 	public void testPossibleToTryMoreThanOnce() throws Exception {
-		UndoableAction action = getAction();
+		final UndoableAction action = getAction();
 		action.perform();
 		action.perform();
 	}

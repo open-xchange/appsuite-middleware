@@ -13,7 +13,7 @@ import com.openexchange.groupware.reminder.ReminderObject;
 
 public class Bug6408Test extends ReminderTest {
 
-	public Bug6408Test(String name) {
+	public Bug6408Test(final String name) {
 		super(name);
 	}
 	
@@ -21,7 +21,7 @@ public class Bug6408Test extends ReminderTest {
 		final int userId = ConfigTools.getUserId(getWebConversation(), getHostName(), getSessionId());
 		final TimeZone timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
 		
-		Calendar c = Calendar.getInstance();
+		final Calendar c = Calendar.getInstance();
 		c.setTimeZone(timeZone);
 		c.add(Calendar.DAY_OF_MONTH, +2);
 		
@@ -32,14 +32,14 @@ public class Bug6408Test extends ReminderTest {
 		
 		long startTime = c.getTimeInMillis();
 		startTime += timeZone.getOffset(startTime);
-		long endTime = startTime + 3600000;
+		final long endTime = startTime + 3600000;
 		
 		final FolderObject folderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
 		final int folderId = folderObj.getObjectID();
 		
-		int alarmMinutes = 60;
+		final int alarmMinutes = 60;
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testBug6408");
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
@@ -51,7 +51,7 @@ public class Bug6408Test extends ReminderTest {
 		final int targetId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		final String target = String.valueOf(targetId);
 		
-		ReminderObject reminderObj = new ReminderObject();
+		final ReminderObject reminderObj = new ReminderObject();
 		reminderObj.setTargetId(targetId);
 		reminderObj.setFolder(String.valueOf(folderId));
 		reminderObj.setDate(new Date(startTime-(alarmMinutes*60*1000)));
@@ -67,12 +67,12 @@ public class Bug6408Test extends ReminderTest {
 			}
 		}
 		
-		int newAlarmMinutes = 60*24*7*4;
+		final int newAlarmMinutes = 60*24*7*4;
 		
 		appointmentObj.removeParentFolderID();
 		appointmentObj.setAlarm(newAlarmMinutes);
 		
-		long alarmInMillies = newAlarmMinutes*60*1000L;
+		final long alarmInMillies = newAlarmMinutes*60*1000L;
 		
 		reminderObj.setDate(new Date(startTime-alarmInMillies));
 		

@@ -19,6 +19,7 @@ public class LockInteractionTest extends TestCase {
 	static protected final Random RANDOM = new Random();
 	private WebdavPath testCollection;
 	
+	@Override
 	public void setUp() throws Exception {
 		TestWebdavFactoryBuilder.setUp();
 		FACTORY = TestWebdavFactoryBuilder.buildFactory();
@@ -28,14 +29,15 @@ public class LockInteractionTest extends TestCase {
 		FACTORY.resolveCollection(testCollection).create();
 	}
 	
+	@Override
 	public void tearDown() throws Exception {
 		FACTORY.resolveCollection(testCollection).delete();
 		FACTORY.endRequest(200);
 		TestWebdavFactoryBuilder.tearDown();
 	}
 	
-	private WebdavLock getLock(int depth) {
-		WebdavLock lock = new WebdavLock();
+	private WebdavLock getLock(final int depth) {
+		final WebdavLock lock = new WebdavLock();
 		lock.setDepth(depth);
 		lock.setOwner("me");
 		lock.setScope(Scope.EXCLUSIVE_LITERAL);
@@ -45,14 +47,14 @@ public class LockInteractionTest extends TestCase {
 		return lock;
 	}
 	
-	public void lockInheritanceTest(int depth, int lockNumber) throws Exception {
-		WebdavLock lock = getLock(depth);
+	public void lockInheritanceTest(final int depth, final int lockNumber) throws Exception {
+		final WebdavLock lock = getLock(depth);
 		
-		WebdavCollection collection = FACTORY.resolveCollection(testCollection);
+		final WebdavCollection collection = FACTORY.resolveCollection(testCollection);
 		
 		collection.lock(lock);
 		
-		WebdavResource res = collection.resolveResource(new WebdavPath("test.txt"));
+		final WebdavResource res = collection.resolveResource(new WebdavPath("test.txt"));
 		res.create();
 		assertEquals(lockNumber, res.getLocks().size());
 
@@ -71,9 +73,9 @@ public class LockInteractionTest extends TestCase {
 	}
 	
 	public void testDeleteLocked() throws Exception {
-		WebdavLock lock = getLock(0);
+		final WebdavLock lock = getLock(0);
 		
-		WebdavCollection collection = FACTORY.resolveCollection(testCollection);
+		final WebdavCollection collection = FACTORY.resolveCollection(testCollection);
 		
 		WebdavResource res = collection.resolveResource(new WebdavPath("test.txt"));
 		res.create();
@@ -86,9 +88,9 @@ public class LockInteractionTest extends TestCase {
 	}
 
 	public void testMoveLocked() throws Exception {
-		WebdavLock lock = getLock(0);
+		final WebdavLock lock = getLock(0);
 		
-		WebdavCollection collection = FACTORY.resolveCollection(testCollection);
+		final WebdavCollection collection = FACTORY.resolveCollection(testCollection);
 		
 		WebdavResource res = collection.resolveResource(new WebdavPath("test.txt"));
 		res.create();
@@ -100,9 +102,9 @@ public class LockInteractionTest extends TestCase {
 	}
 	
 	public void testCreateLockNullResource() throws Exception {
-		WebdavLock lock = getLock(0);
+		final WebdavLock lock = getLock(0);
 		
-		WebdavCollection collection = FACTORY.resolveCollection(testCollection);
+		final WebdavCollection collection = FACTORY.resolveCollection(testCollection);
 		WebdavResource res = collection.resolveResource(new WebdavPath("test.txt"));
 		res.lock(lock);
 		res = collection.resolveResource(new WebdavPath("test.txt"));
@@ -113,9 +115,9 @@ public class LockInteractionTest extends TestCase {
 	}
 	
 	public void testRemoveLockNullResource() throws Exception {
-		WebdavLock lock = getLock(0);
+		final WebdavLock lock = getLock(0);
 		
-		WebdavCollection collection = FACTORY.resolveCollection(testCollection);
+		final WebdavCollection collection = FACTORY.resolveCollection(testCollection);
 		WebdavResource res = collection.resolveResource(new WebdavPath("test.txt"));
 		res.lock(lock);
 		res = collection.resolveResource(new WebdavPath("test.txt"));
@@ -129,7 +131,7 @@ public class LockInteractionTest extends TestCase {
 	
 	public void testLockNullProperties() throws Exception {
 		testCreateLockNullResource();
-		WebdavResource res = FACTORY.resolveResource(testCollection.dup().append("test.txt"));
+		final WebdavResource res = FACTORY.resolveResource(testCollection.dup().append("test.txt"));
 		
 		assertNull(res.getProperty("DAV:", "creationdate"));
 		assertNull(res.getProperty("DAV:", "getcontentlanguage"));
@@ -147,22 +149,22 @@ public class LockInteractionTest extends TestCase {
 	}
 	
 	public void testLockNullOptions() throws Exception {
-		WebdavLock lock = getLock(0);
+		final WebdavLock lock = getLock(0);
 		
-		WebdavCollection collection = FACTORY.resolveCollection(testCollection);
+		final WebdavCollection collection = FACTORY.resolveCollection(testCollection);
 		WebdavResource res = collection.resolveResource(new WebdavPath("test.txt"));
 		res.lock(lock);
 		res = collection.resolveResource(new WebdavPath("test.txt"));
 		
-		WEBDAV_METHOD[] methods = res.getOptions();
-		List<WEBDAV_METHOD> expect = Arrays.asList(WEBDAV_METHOD.PUT, WEBDAV_METHOD.MKCOL, WEBDAV_METHOD.OPTIONS, WEBDAV_METHOD.PROPFIND, WEBDAV_METHOD.LOCK, WEBDAV_METHOD.UNLOCK, WEBDAV_METHOD.TRACE);
+		final WEBDAV_METHOD[] methods = res.getOptions();
+		final List<WEBDAV_METHOD> expect = Arrays.asList(WEBDAV_METHOD.PUT, WEBDAV_METHOD.MKCOL, WEBDAV_METHOD.OPTIONS, WEBDAV_METHOD.PROPFIND, WEBDAV_METHOD.LOCK, WEBDAV_METHOD.UNLOCK, WEBDAV_METHOD.TRACE);
 		
 		AbstractResourceTest.assertOptions(expect, methods);
 	}
 	
 	public void testTransformLockNullResource() throws Exception {
-		WebdavLock lock = getLock(0);
-		WebdavCollection collection = FACTORY.resolveCollection(testCollection);
+		final WebdavLock lock = getLock(0);
+		final WebdavCollection collection = FACTORY.resolveCollection(testCollection);
 		WebdavResource res = collection.resolveResource(new WebdavPath("test.txt"));
 		res.lock(lock);
 		res = collection.resolveResource(new WebdavPath("test.txt"));
@@ -183,9 +185,9 @@ public class LockInteractionTest extends TestCase {
 	}
 	
 	public void testTransformLockNullCollection() throws Exception {
-		WebdavLock lock = getLock(0);
+		final WebdavLock lock = getLock(0);
 		
-		WebdavCollection collection = FACTORY.resolveCollection(testCollection);
+		final WebdavCollection collection = FACTORY.resolveCollection(testCollection);
 		WebdavResource res = collection.resolveResource(new WebdavPath("test"));
 		res.lock(lock);
 		res = collection.resolveCollection(new WebdavPath("test"));

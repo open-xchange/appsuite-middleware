@@ -14,22 +14,23 @@ public class Bug4541Test extends AppointmentTest {
 	
 	private static final Log LOG = LogFactory.getLog(Bug4541Test.class);
 	
-	public Bug4541Test(String name) {
+	public Bug4541Test(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 	
 	public void testBug4541() throws Exception {
-		FolderObject folderObj = new FolderObject();
+		final FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testBug4541" + System.currentTimeMillis());
 		folderObj.setParentFolderID(FolderObject.PRIVATE);
 		folderObj.setModule(FolderObject.CALENDAR);
 		folderObj.setType(FolderObject.PRIVATE);
 		
-		OCLPermission[] permission = new OCLPermission[] {
+		final OCLPermission[] permission = new OCLPermission[] {
 			FolderTest.createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
 		};
 		
@@ -37,17 +38,17 @@ public class Bug4541Test extends AppointmentTest {
 		
 		final int newFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword());
 
-		AppointmentObject appointmentObj = createAppointmentObject("testBug4541");
+		final AppointmentObject appointmentObj = createAppointmentObject("testBug4541");
 		appointmentObj.setParentFolderID(newFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		
-		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[1];
+		final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[1];
 		participants[0] = new UserParticipant();
 		participants[0].setIdentifier(userId);
 		
 		appointmentObj.setParticipants(participants);
 		
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, timeZone, getHostName(), getSessionId());

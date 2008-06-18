@@ -13,10 +13,11 @@ public class ConfirmTest extends AppointmentTest {
 
 	private static final Log LOG = LogFactory.getLog(ConfirmTest.class);
 	
-	public ConfirmTest(String name) {
+	public ConfirmTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
@@ -29,8 +30,8 @@ public class ConfirmTest extends AppointmentTest {
 		final FolderObject sharedFolderObject = FolderTest.getStandardCalendarFolder(getSecondWebConversation(), getHostName(), getSecondSessionId());
 		final int secondUserId = sharedFolderObject.getCreatedBy();
 		
-        AppointmentObject appointmentObj = createAppointmentObject("testConfirm");
-		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
+        final AppointmentObject appointmentObj = createAppointmentObject("testConfirm");
+		final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
 		participants[0] = new UserParticipant();
 		participants[0].setIdentifier(userId);
 		participants[1] = new UserParticipant();
@@ -40,15 +41,15 @@ public class ConfirmTest extends AppointmentTest {
 		
 		appointmentObj.setIgnoreConflicts(true);
 
-        int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
         
         confirmAppointment(getSecondWebConversation(), objectId, AppointmentObject.ACCEPT, null, PROTOCOL + getHostName(), getSecondSessionId());
 		
-		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		boolean found = false;
 		
-		UserParticipant[] users = loadAppointment.getUsers();
+		final UserParticipant[] users = loadAppointment.getUsers();
 		for (int a = 0; a < users.length; a++) {
 			if (users[a].getIdentifier() == secondUserId) {
 				found = true;

@@ -54,7 +54,6 @@ import java.util.TimeZone;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
-import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;

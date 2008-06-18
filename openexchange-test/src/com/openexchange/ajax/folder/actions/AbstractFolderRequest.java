@@ -89,7 +89,7 @@ abstract class AbstractFolderRequest implements AJAXRequest {
         final JSONObject jsonFolder = new JSONObject();
         jsonFolder.put(FolderFields.TITLE, folder.getFolderName());
         final JSONArray jsonPerms = new JSONArray();
-        for (OCLPermission perm : folder.getPermissions()) {
+        for (final OCLPermission perm : folder.getPermissions()) {
             final JSONObject jsonPermission = new JSONObject();
             jsonPermission.put(FolderFields.ENTITY, perm.getEntity());
             jsonPermission.put(FolderFields.GROUP, perm.isGroupPermission());

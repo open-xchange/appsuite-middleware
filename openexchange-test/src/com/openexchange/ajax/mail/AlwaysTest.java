@@ -146,7 +146,7 @@ public class AlwaysTest extends AbstractAJAXTest {
             listMails(folderId, MAX);
         }
         final Map<String, String> subRights = getIMAPRights(client, folderId);
-        for (Entry<String, String> entry : subRights.entrySet()) {
+        for (final Entry<String, String> entry : subRights.entrySet()) {
             recListFolder(entry.getKey(), entry.getValue());
         }
     }
@@ -186,7 +186,7 @@ public class AlwaysTest extends AbstractAJAXTest {
             parent, new int[] { FolderObject.OBJECT_ID, FolderObject.OWN_RIGHTS
             }, false));
         final Map<String, String> retval = new HashMap<String, String>();
-        for (Object[] row : listR) {
+        for (final Object[] row : listR) {
             retval.put(row[0].toString(), row[1].toString());
         }
         return retval;

@@ -10,7 +10,7 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 public class PermissionTest extends AppointmentTest {
 	
-	public PermissionTest(String name) {
+	public PermissionTest(final String name) {
 		super(name);
 	}
 	
@@ -19,13 +19,13 @@ public class PermissionTest extends AppointmentTest {
 	}
 	
 	public void testInsertAppointmentInPrivateFolderWithoutPermission() throws Exception {
-		FolderObject folderObj = new FolderObject();
+		final FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testInsertAppointmentInPrivateFolderWithoutPermission" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.CALENDAR);
 		folderObj.setType(FolderObject.PRIVATE);
 		folderObj.setParentFolderID(1);
 		
-		OCLPermission[] permission = new OCLPermission[] { 
+		final OCLPermission[] permission = new OCLPermission[] { 
 			FolderTest.createPermission( userId, false, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.DELETE_OWN_OBJECTS),
 		};
 		
@@ -33,7 +33,7 @@ public class PermissionTest extends AppointmentTest {
 		
 		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testInsertAppointmentInPrivateFolderWithoutPermission");
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
@@ -44,7 +44,7 @@ public class PermissionTest extends AppointmentTest {
 		try {
 			final int appointmentObjectId = insertAppointment(getSecondWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
-		} catch (TestException exc) {
+		} catch (final TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
 		}
 		
@@ -52,13 +52,13 @@ public class PermissionTest extends AppointmentTest {
 	}
 	
 	public void testInsertAppointmentInPublicFolderWithoutPermission() throws Exception {
-		FolderObject folderObj = new FolderObject();
+		final FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testInsertAppointmentInPublicFolderWithoutPermission" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.CALENDAR);
 		folderObj.setType(FolderObject.PUBLIC);
 		folderObj.setParentFolderID(2);
 		
-		OCLPermission[] permission = new OCLPermission[] { 
+		final OCLPermission[] permission = new OCLPermission[] { 
 			FolderTest.createPermission( userId, false, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.DELETE_OWN_OBJECTS)
 		};
 		
@@ -66,7 +66,7 @@ public class PermissionTest extends AppointmentTest {
 		
 		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testInsertAppointmentInPublicFolderWithoutPermission");
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
@@ -77,7 +77,7 @@ public class PermissionTest extends AppointmentTest {
 		try {
 			final int appointmentObjectId = insertAppointment(getSecondWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
-		} catch (TestException exc) {
+		} catch (final TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
 		}
 		
@@ -85,13 +85,13 @@ public class PermissionTest extends AppointmentTest {
 	}
 	
 	public void testUpdateAppointmentInPrivateFolderWithoutPermission() throws Exception {
-		FolderObject folderObj = new FolderObject();
+		final FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testInsertAppointmentInPrivateFolderWithoutPermission" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.CALENDAR);
 		folderObj.setType(FolderObject.PRIVATE);
 		folderObj.setParentFolderID(1);
 		
-		OCLPermission[] permission = new OCLPermission[] { 
+		final OCLPermission[] permission = new OCLPermission[] { 
 			FolderTest.createPermission( userId, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.DELETE_OWN_OBJECTS),
 		};
 		
@@ -99,7 +99,7 @@ public class PermissionTest extends AppointmentTest {
 		
 		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testInsertAppointmentInPrivateFolderWithoutPermission");
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
@@ -113,7 +113,7 @@ public class PermissionTest extends AppointmentTest {
 		try {
 			updateAppointment(getSecondWebConversation(), appointmentObj, appointmentObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
-		} catch (TestException exc) {
+		} catch (final TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
 		}
 		
@@ -121,13 +121,13 @@ public class PermissionTest extends AppointmentTest {
 	}
 	
 	public void testUpdateAppointmentInPublicFolderWithoutPermission() throws Exception {
-		FolderObject folderObj = new FolderObject();
+		final FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testUpdateAppointmentInPublicFolderWithoutPermission" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.CALENDAR);
 		folderObj.setType(FolderObject.PUBLIC);
 		folderObj.setParentFolderID(2);
 		
-		OCLPermission[] permission = new OCLPermission[] { 
+		final OCLPermission[] permission = new OCLPermission[] { 
 			FolderTest.createPermission( userId, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.DELETE_OWN_OBJECTS)
 		};
 		
@@ -135,7 +135,7 @@ public class PermissionTest extends AppointmentTest {
 		
 		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testUpdateAppointmentInPublicFolderWithoutPermission");
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
@@ -149,7 +149,7 @@ public class PermissionTest extends AppointmentTest {
 		try {
 			updateAppointment(getSecondWebConversation(), appointmentObj, appointmentObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
-		} catch (TestException exc) {
+		} catch (final TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
 		}
 		
@@ -157,13 +157,13 @@ public class PermissionTest extends AppointmentTest {
 	}
 	
 	public void testDeleteAppointmentInPrivateFolderWithoutPermission() throws Exception {
-		FolderObject folderObj = new FolderObject();
+		final FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testDeleteAppointmentInPrivateFolderWithoutPermission" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.CALENDAR);
 		folderObj.setType(FolderObject.PRIVATE);
 		folderObj.setParentFolderID(1);
 		
-		OCLPermission[] permission = new OCLPermission[] { 
+		final OCLPermission[] permission = new OCLPermission[] { 
 			FolderTest.createPermission( userId, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.DELETE_OWN_OBJECTS),
 		};
 		
@@ -171,7 +171,7 @@ public class PermissionTest extends AppointmentTest {
 		
 		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testDeleteAppointmentInPrivateFolderWithoutPermission");
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
@@ -185,7 +185,7 @@ public class PermissionTest extends AppointmentTest {
 		try {
 			deleteAppointment(getSecondWebConversation(), appointmentObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
-		} catch (TestException exc) {
+		} catch (final TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
 		}
 		
@@ -193,13 +193,13 @@ public class PermissionTest extends AppointmentTest {
 	}
 	
 	public void testDeleteAppointmentInPublicFolderWithoutPermission() throws Exception {
-		FolderObject folderObj = new FolderObject();
+		final FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testDeleteAppointmentInPublicFolderWithoutPermission" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.CALENDAR);
 		folderObj.setType(FolderObject.PUBLIC);
 		folderObj.setParentFolderID(2);
 		
-		OCLPermission[] permission = new OCLPermission[] { 
+		final OCLPermission[] permission = new OCLPermission[] { 
 			FolderTest.createPermission( userId, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.DELETE_OWN_OBJECTS)
 		};
 		
@@ -207,7 +207,7 @@ public class PermissionTest extends AppointmentTest {
 		
 		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testDeleteAppointmentInPublicFolderWithoutPermission");
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
@@ -221,7 +221,7 @@ public class PermissionTest extends AppointmentTest {
 		try {
 			deleteAppointment(getSecondWebConversation(), appointmentObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
-		} catch (TestException exc) {
+		} catch (final TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
 		}
 		

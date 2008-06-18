@@ -72,7 +72,7 @@ public final class NetsolTestEmptyTrash extends AbstractNetsolTest {
 	 * 
 	 * @param name
 	 */
-	public NetsolTestEmptyTrash(String name) {
+	public NetsolTestEmptyTrash(final String name) {
 		super(name);
 	}
 
@@ -130,7 +130,7 @@ public final class NetsolTestEmptyTrash extends AbstractNetsolTest {
 			/*
 			 * ... and empty trash
 			 */
-			NetsolClearResponse resp = (NetsolClearResponse) Executor.execute(getSession(), new NetsolClearRequest(
+			final NetsolClearResponse resp = (NetsolClearResponse) Executor.execute(getSession(), new NetsolClearRequest(
 					getTrashFolder()));
 			assertTrue("List failed", resp.getFailed().length() == 0);
 			assertTrue("Duration corrupt", resp.getRequestDuration() > 0);

@@ -62,7 +62,7 @@ public class AppointmentParser extends CalendarParser {
 		
 	}
 	
-	protected void parse(AppointmentObject appointmentObj, Element eProp) throws Exception {
+	protected void parse(final AppointmentObject appointmentObj, final Element eProp) throws Exception {
 		if (hasElement(eProp.getChild(AppointmentFields.SHOW_AS, XmlServlet.NS))) {
 			appointmentObj.setShownAs(getValueAsInt(eProp.getChild(AppointmentFields.SHOW_AS, XmlServlet.NS)));
 		}
@@ -88,8 +88,8 @@ public class AppointmentParser extends CalendarParser {
 		}
 		
 		if (hasElement(eProp.getChild(AppointmentFields.DELETE_EXCEPTIONS, XmlServlet.NS))) {
-			String[] tmp = getValue(eProp.getChild(AppointmentFields.DELETE_EXCEPTIONS, XmlServlet.NS)).split(",");
-			java.util.Date[] delete_exceptions = new java.util.Date[tmp.length];
+			final String[] tmp = getValue(eProp.getChild(AppointmentFields.DELETE_EXCEPTIONS, XmlServlet.NS)).split(",");
+			final java.util.Date[] delete_exceptions = new java.util.Date[tmp.length];
 			
 			for (int a = 0; a < delete_exceptions.length; a++) {
 				delete_exceptions[a] = new java.util.Date(Long.valueOf(tmp[a]));
@@ -99,8 +99,8 @@ public class AppointmentParser extends CalendarParser {
 		}
 
 		if (hasElement(eProp.getChild(AppointmentFields.CHANGE_EXCEPTIONS, XmlServlet.NS))) {
-			String[] tmp = getValue(eProp.getChild(AppointmentFields.CHANGE_EXCEPTIONS, XmlServlet.NS)).split(",");
-			java.util.Date[] change_exceptions = new java.util.Date[tmp.length];
+			final String[] tmp = getValue(eProp.getChild(AppointmentFields.CHANGE_EXCEPTIONS, XmlServlet.NS)).split(",");
+			final java.util.Date[] change_exceptions = new java.util.Date[tmp.length];
 
 			
 			for (int a = 0; a < change_exceptions.length; a++) {

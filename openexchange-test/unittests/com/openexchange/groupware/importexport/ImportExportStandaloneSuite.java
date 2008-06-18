@@ -49,10 +49,10 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.tools.versit.filetokenizer.VCardTokenizerTest;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import com.openexchange.tools.versit.filetokenizer.VCardTokenizerTest;
 
 /**
  * This suite is meant for tests without a running OX instance
@@ -63,7 +63,7 @@ import junit.framework.TestSuite;
 public class ImportExportStandaloneSuite extends TestSuite {
 	
 	public static Test suite(){
-		TestSuite tests = new TestSuite();
+		final TestSuite tests = new TestSuite();
 		//basics
 		tests.addTestSuite( ImportExportWriterTest.class );
 		tests.addTestSuite( VCardTokenizerTest.class );

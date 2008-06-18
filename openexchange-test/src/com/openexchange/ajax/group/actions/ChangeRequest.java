@@ -70,7 +70,7 @@ public final class ChangeRequest extends AbstractGroupRequest {
      * @param group
      * @param failOnError
      */
-    public ChangeRequest(Group group, boolean failOnError) {
+    public ChangeRequest(final Group group, final boolean failOnError) {
         super();
         this.group = group;
         this.failOnError = failOnError;
@@ -79,7 +79,7 @@ public final class ChangeRequest extends AbstractGroupRequest {
     /**
      * @param group
      */
-    public ChangeRequest(Group group) {
+    public ChangeRequest(final Group group) {
         this(group, true);
     }
 

@@ -5,44 +5,37 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.tasks.InfostoreRenamePersonalInfostoreFolders;
-import com.openexchange.groupware.update.tasks.InfostoreResolveFolderNameCollisions;
 import com.openexchange.server.impl.DBPoolingException;
-
-import junit.framework.TestCase;
 
 public class RenamePersonalInfostoreFoldersTest extends UpdateTest {
 
     private UpdateTask updateTask = null;
 
-    private int parent = FolderObject.SYSTEM_INFOSTORE_FOLDER_ID;
-	private int module = FolderObject.INFOSTORE;
-	private int type = FolderObject.PUBLIC;
+    private final int parent = FolderObject.SYSTEM_INFOSTORE_FOLDER_ID;
+	private final int module = FolderObject.INFOSTORE;
+	private final int type = FolderObject.PUBLIC;
 	
 	private final int start_ids = 2000;
 	
 	private int idcount = start_ids;
 
-    public void setUp() throws Exception {
+    @Override
+	public void setUp() throws Exception {
         super.setUp();
         updateTask = new InfostoreRenamePersonalInfostoreFolders();
         
     }
 
-    public void tearDown() throws Exception {
+    @Override
+	public void tearDown() throws Exception {
         exec("DELETE FROM oxfolder_tree WHERE cid = ? and fuid >= ?", existing_ctx_id, start_ids);
         super.tearDown();
     }
@@ -95,9 +88,9 @@ public class RenamePersonalInfostoreFoldersTest extends UpdateTest {
 	
 	public void notestManyManyMany() throws AbstractOXException, SQLException{
 		createMany();
-		long start = System.currentTimeMillis();
+		final long start = System.currentTimeMillis();
 		updateTask.perform(schema, existing_ctx_id);
-		long stop = System.currentTimeMillis();
+		final long stop = System.currentTimeMillis();
 		System.out.println(stop-start);
 	}
 	
@@ -106,27 +99,27 @@ public class RenamePersonalInfostoreFoldersTest extends UpdateTest {
 		assertEquals(0, countCollisions());
 	}
 	
-	public void assertFolderNames(String...expected) throws DBPoolingException, SQLException {
-		List<String> folders = loadFolderNames();
+	public void assertFolderNames(final String...expected) throws DBPoolingException, SQLException {
+		final List<String> folders = loadFolderNames();
 		assertEquals(folders.toString(), expected.length, folders.size());
 		
-		for(String fname : expected) {
+		for(final String fname : expected) {
 			assertTrue(fname+" not found", folders.remove(fname));
 		}
 	}
 	
 	
-	private final void createFolder(String fname) throws DBPoolingException, SQLException {
+	private final void createFolder(final String fname) throws DBPoolingException, SQLException {
 		exec("INSERT INTO oxfolder_tree (fuid, cid, parent, fname, module, type, default_flag,creating_date,changing_date,created_from, changed_from, permission_flag, subfolder_flag) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",idcount++, existing_ctx_id, parent, fname, module, type, 1, 0, 0, user_id, user_id,3,0);
 	}
 	
 	private int countCollisions() throws DBPoolingException, SQLException{
 		
-		Set<String> seen = new HashSet<String>();
-		List<String> folderNames = loadFolderNames();
+		final Set<String> seen = new HashSet<String>();
+		final List<String> folderNames = loadFolderNames();
 		int collisionCount = 0;
 		
-		for(String fname : folderNames) {
+		for(final String fname : folderNames) {
 			if(!seen.add(fname)) {
 				collisionCount++;
 			}
@@ -139,7 +132,7 @@ public class RenamePersonalInfostoreFoldersTest extends UpdateTest {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
-		List<String> names = new ArrayList<String>();
+		final List<String> names = new ArrayList<String>();
 		try {
 			con = Database.get(existing_ctx_id, true);
 			stmt = con.prepareStatement("SELECT fname FROM oxfolder_tree WHERE cid = ? and parent = ? and module = ? and fuid >= ?");

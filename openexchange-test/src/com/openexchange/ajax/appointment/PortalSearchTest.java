@@ -21,7 +21,7 @@ public class PortalSearchTest extends AppointmentTest {
 
 	private static final Log LOG = LogFactory.getLog(PortalSearchTest.class);
 	
-	private int[] columns = {
+	private final int[] columns = {
 		DataObject.OBJECT_ID,
 		FolderChildObject.FOLDER_ID,
 		CommonObject.PRIVATE_FLAG,
@@ -37,10 +37,11 @@ public class PortalSearchTest extends AppointmentTest {
 		AppointmentObject.COLOR_LABEL
 	};
 	
-	public PortalSearchTest(String name) {
+	public PortalSearchTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}

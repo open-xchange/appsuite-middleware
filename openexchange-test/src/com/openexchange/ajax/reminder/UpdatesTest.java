@@ -14,10 +14,11 @@ import com.openexchange.groupware.reminder.ReminderObject;
 
 public class UpdatesTest extends ReminderTest {
 	
-	public UpdatesTest(String name) {
+	public UpdatesTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	public void testDummy() {
 		
 	}
@@ -26,7 +27,7 @@ public class UpdatesTest extends ReminderTest {
 		final int userId = ConfigTools.getUserId(getWebConversation(), getHostName(), getSessionId());
 		final TimeZone timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
 		
-		Calendar c = Calendar.getInstance();
+		final Calendar c = Calendar.getInstance();
 		c.setTimeZone(timeZone);
 		c.set(Calendar.HOUR_OF_DAY, 8);
 		c.set(Calendar.MINUTE, 0);
@@ -35,13 +36,13 @@ public class UpdatesTest extends ReminderTest {
 		
 		long startTime = c.getTimeInMillis();
 		startTime += timeZone.getOffset(startTime);
-		long endTime = startTime + 3600000;
+		final long endTime = startTime + 3600000;
 		
 		
 		final FolderObject folderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
 		final int folderId = folderObj.getObjectID();
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testRange");
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
@@ -52,7 +53,7 @@ public class UpdatesTest extends ReminderTest {
 		
 		final int targetId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		final String target = String.valueOf(targetId);
-		ReminderObject[] reminderObj = listUpdates(getWebConversation(), new Date(System.currentTimeMillis()-5000), getHostName(), getSessionId());
+		final ReminderObject[] reminderObj = listUpdates(getWebConversation(), new Date(System.currentTimeMillis()-5000), getHostName(), getSessionId());
 
 		int pos = -1;
 		for (int a = 0; a < reminderObj.length; a++) {

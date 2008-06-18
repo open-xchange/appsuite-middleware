@@ -69,7 +69,7 @@ public final class NetsolFolderResponse extends AbstractAJAXResponse {
 	 * Initializes a new {@link NetsolFolderResponse}
 	 * @param response
 	 */
-	public NetsolFolderResponse(Response response) {
+	public NetsolFolderResponse(final Response response) {
 		super(response);
 	}
 

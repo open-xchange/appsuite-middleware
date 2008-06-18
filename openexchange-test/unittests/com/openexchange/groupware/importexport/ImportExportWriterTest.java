@@ -49,9 +49,11 @@
 
 package com.openexchange.groupware.importexport;
 
-import java.util.Date;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+
+import junit.framework.TestCase;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -61,26 +63,24 @@ import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.writer.ImportExportWriter;
 
-import junit.framework.TestCase;
-
 public class ImportExportWriterTest extends TestCase {
 
 	public void testWriteObject() throws JSONException {
-		ImportExportWriter writer = new ImportExportWriter();
-		ImportResult result = new ImportResult("1", "3" , new Date() );
+		final ImportExportWriter writer = new ImportExportWriter();
+		final ImportResult result = new ImportResult("1", "3" , new Date() );
 		writer.writeObject(result);
-		JSONObject temp = (JSONObject) writer.getObject();
+		final JSONObject temp = (JSONObject) writer.getObject();
 		assertEquals("ID is incorrect" , "1" , temp.get(DataFields.ID) );
 		assertEquals("Folder is incorrect" , "3" , temp.get(CommonFields.FOLDER_ID) );
 	}
 
 	public void testWriteObjects() throws JSONException {
-		ImportExportWriter writer = new ImportExportWriter();
-		List<ImportResult> results = Arrays.asList(
+		final ImportExportWriter writer = new ImportExportWriter();
+		final List<ImportResult> results = Arrays.asList(
 				new ImportResult("1", "3" , new Date() ), 
 				new ImportResult("2", "4", new Date() ) );
 		writer.writeObjects(results);
-		JSONArray resArr = (JSONArray) writer.getObject();
+		final JSONArray resArr = (JSONArray) writer.getObject();
 		JSONObject temp = resArr.getJSONObject(0); 
 		assertEquals("ID is incorrect" , "1" , temp.get(DataFields.ID) );
 		assertEquals("Folder is incorrect" , "3" , temp.get(CommonFields.FOLDER_ID) );

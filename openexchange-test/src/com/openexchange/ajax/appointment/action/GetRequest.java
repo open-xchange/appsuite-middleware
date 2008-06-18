@@ -76,7 +76,7 @@ public class GetRequest extends AbstractAppointmentRequest {
 	/**
 	 * Recurrence position 
 	 */
-	private int recurrencePosition; 
+	private final int recurrencePosition; 
 	
     /**
      * Default constructor.

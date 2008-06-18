@@ -83,7 +83,7 @@ public final class ParticipantTools {
             ContactObject.INTERNAL_USERID }, AbstractAJAXTest.PROTOCOL
             + hostName, sessionId);
         final List<Participant> participants = new ArrayList<Participant>();
-        for (ContactObject userContact : userContacts) {
+        for (final ContactObject userContact : userContacts) {
             final UserParticipant user = new UserParticipant(userContact
                 .getInternalUserId());
             participants.add(user);
@@ -93,7 +93,7 @@ public final class ParticipantTools {
 
     public static List<Participant> createParticipants(final int... userIds) {
         final List<Participant> participants = new ArrayList<Participant>();
-        for (int userId : userIds) {
+        for (final int userId : userIds) {
             participants.add(new UserParticipant(userId));
         }
         return participants;

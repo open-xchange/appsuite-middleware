@@ -71,7 +71,7 @@ public final class MailTestSuite extends TestSuite {
      * @return a test suite containing smoke tests.
      */
     public static Test suite() {
-        TestSuite mailSuite = new TestSuite();
+        final TestSuite mailSuite = new TestSuite();
         mailSuite.addTestSuite(com.openexchange.ajax.mail.AllTest.class);
         mailSuite.addTestSuite(com.openexchange.ajax.mail.ListTest.class);
         mailSuite.addTestSuite(com.openexchange.ajax.mail.GetTest.class);

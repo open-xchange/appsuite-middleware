@@ -8,19 +8,19 @@ import org.json.JSONObject;
 
 public class JSONWriterTest extends TestCase{
 	public void testEmptyObject(){
-		OXJSONWriter json = new OXJSONWriter();
+		final OXJSONWriter json = new OXJSONWriter();
 		
 		try {
 			json.object();
 			json.endObject();
 			assertEquals("{}", json.getObject().toString());
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			fail(e.getLocalizedMessage());
 		}
 	}
 	
 	public void testObjectWithScalars(){
-		OXJSONWriter json = new OXJSONWriter();
+		final OXJSONWriter json = new OXJSONWriter();
 		
 		try {
 			json.object();
@@ -33,31 +33,31 @@ public class JSONWriterTest extends TestCase{
 			json.key("boolean");
 			json.value(true);
 			json.endObject();
-			JSONObject object = (JSONObject) json.getObject();
+			final JSONObject object = (JSONObject) json.getObject();
 			assertEquals("String", object.optString("string"));
 			assertEquals(23, object.optLong("integer"));
 			assertEquals(3.14, object.optDouble("float"));
 			assertTrue(object.optBoolean("boolean"));
 			
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			fail(e.getLocalizedMessage());
 		}
 	}
 	
 	public void testEmptyArray(){
-		OXJSONWriter json = new OXJSONWriter();
+		final OXJSONWriter json = new OXJSONWriter();
 		
 		try {
 			json.array();
 			json.endArray();
 			assertEquals("[]", json.getObject().toString());
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			fail(e.getLocalizedMessage());
 		}
 	}
 	
 	public void testArrayWithScalars(){
-		OXJSONWriter json = new OXJSONWriter();
+		final OXJSONWriter json = new OXJSONWriter();
 		
 		try {
 			json.array();
@@ -66,19 +66,19 @@ public class JSONWriterTest extends TestCase{
 			json.value(3.14);
 			json.value(true);
 			json.endArray();
-			JSONArray arr = (JSONArray) json.getObject();
+			final JSONArray arr = (JSONArray) json.getObject();
 			assertEquals("string", arr.getString(0));
 			assertEquals(23, arr.getLong(1));
 			assertEquals(3.14, arr.getDouble(2));
 			assertTrue(arr.getBoolean(3));
 			
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			fail(e.getLocalizedMessage());
 		}
 	}
 	
 	public void testObjectWithObjects(){
-		OXJSONWriter json = new OXJSONWriter();
+		final OXJSONWriter json = new OXJSONWriter();
 		
 		try {
 			json.object();
@@ -97,9 +97,9 @@ public class JSONWriterTest extends TestCase{
 			json.value("von Testeringen");
 			json.endObject();
 			json.endObject();
-			JSONObject object = json.isJSONObject() ? (JSONObject) json.getObject() : null;
-			JSONObject object1 = object.getJSONObject("object1");
-			JSONObject object2 = object.getJSONObject("object2");
+			final JSONObject object = json.isJSONObject() ? (JSONObject) json.getObject() : null;
+			final JSONObject object1 = object.getJSONObject("object1");
+			final JSONObject object2 = object.getJSONObject("object2");
 			
 			assertEquals("Tester", object1.optString("first"));
 			assertEquals("von Testingen", object1.optString("last"));
@@ -107,13 +107,13 @@ public class JSONWriterTest extends TestCase{
 			assertEquals("von Testeringen", object2.optString("last"));
 			
 			
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			fail(e.getLocalizedMessage());
 		}
 	}
 	
 	public void testObjectWithArrays(){
-		OXJSONWriter json = new OXJSONWriter();
+		final OXJSONWriter json = new OXJSONWriter();
 		
 		try {
 			json.object();
@@ -128,9 +128,9 @@ public class JSONWriterTest extends TestCase{
 			json.value("von Testeringen");
 			json.endArray();
 			json.endObject();
-			JSONObject object = (JSONObject) json.getObject();
-			JSONArray arr1 = object.getJSONArray("array1");
-			JSONArray arr2 = object.getJSONArray("array2");
+			final JSONObject object = (JSONObject) json.getObject();
+			final JSONArray arr1 = object.getJSONArray("array1");
+			final JSONArray arr2 = object.getJSONArray("array2");
 			
 			assertEquals("Tester", arr1.getString(0));
 			assertEquals("von Testingen", arr1.getString(1));
@@ -138,14 +138,14 @@ public class JSONWriterTest extends TestCase{
 			assertEquals("von Testeringen", arr2.getString(1));
 			
 			
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			e.printStackTrace();
 			fail(e.getLocalizedMessage());
 		}
 	}
 	
 	public void testArrayWithObjects(){
-		OXJSONWriter json = new OXJSONWriter();
+		final OXJSONWriter json = new OXJSONWriter();
 		
 		try {
 			json.array();
@@ -162,23 +162,23 @@ public class JSONWriterTest extends TestCase{
 			json.value("von Testeringen");
 			json.endObject();
 			json.endArray();
-			JSONArray arr = (JSONArray) json.getObject();
+			final JSONArray arr = (JSONArray) json.getObject();
 			
-			JSONObject object1 = arr.getJSONObject(0);
-			JSONObject object2 = arr.getJSONObject(1);
+			final JSONObject object1 = arr.getJSONObject(0);
+			final JSONObject object2 = arr.getJSONObject(1);
 			
 			assertEquals("Tester", object1.optString("first"));
 			assertEquals("von Testingen", object1.optString("last"));
 			assertEquals("Testerine", object2.optString("first"));
 			assertEquals("von Testeringen", object2.optString("last"));
 			
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			fail(e.getLocalizedMessage());
 		}
 	}
 	
 	public void testDeepLevelObjects() {
-		OXJSONWriter json = new OXJSONWriter();
+		final OXJSONWriter json = new OXJSONWriter();
 
 		try {
 
@@ -201,16 +201,16 @@ public class JSONWriterTest extends TestCase{
 
 			json.getObject().toString();
 
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			e.printStackTrace();
 			fail(e.getLocalizedMessage());
 		}
 	}
 	
 	public void testArrayInitializedWriter() {
-		JSONArray ja = new JSONArray().put("Value01").put("Value02");
+		final JSONArray ja = new JSONArray().put("Value01").put("Value02");
 		try {
-			OXJSONWriter json = new OXJSONWriter(ja);
+			final OXJSONWriter json = new OXJSONWriter(ja);
 			
 			json.array().value("Foo").value("Bar").endArray();
 			json.value("Value03");
@@ -221,7 +221,7 @@ public class JSONWriterTest extends TestCase{
 			json.endArray();
 			
 			assertEquals(ja.toString(), json.getObject().toString());
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			e.printStackTrace();
 			fail(e.getLocalizedMessage());
 		}
@@ -230,10 +230,10 @@ public class JSONWriterTest extends TestCase{
 	
 	public void testObjectInitializedWriter() {
 		try {
-			JSONObject jo = new JSONObject().put("Key01", "Value01").put("Key02", "Value02");
+			final JSONObject jo = new JSONObject().put("Key01", "Value01").put("Key02", "Value02");
 			
 			
-			OXJSONWriter json = new OXJSONWriter(jo);
+			final OXJSONWriter json = new OXJSONWriter(jo);
 			
 			json.key("InnerArr");
 			json.array().value("Foo").value("Bar").endArray();
@@ -247,7 +247,7 @@ public class JSONWriterTest extends TestCase{
 			
 			assertEquals(jo.toString(), json.getObject().toString());
 			
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			e.printStackTrace();
 			fail(e.getLocalizedMessage());
 		}

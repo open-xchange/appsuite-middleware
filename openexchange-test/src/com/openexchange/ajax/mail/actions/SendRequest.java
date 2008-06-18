@@ -95,7 +95,7 @@ public class SendRequest implements AJAXRequest {
 	/*
 	 * Mail object settings
 	 */
-	private BodyContentType contentType = BodyContentType.ALTERNATIVE;
+	private final BodyContentType contentType = BodyContentType.ALTERNATIVE;
 	
 	private String recipientTo;
 
@@ -168,7 +168,7 @@ public class SendRequest implements AJAXRequest {
 		}
 
 		@Override
-		protected SendResponse createResponse(Response response) throws JSONException {
+		protected SendResponse createResponse(final Response response) throws JSONException {
 			return new SendResponse(response);
 		}
 

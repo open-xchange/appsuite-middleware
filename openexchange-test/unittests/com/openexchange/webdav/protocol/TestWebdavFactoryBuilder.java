@@ -1,19 +1,19 @@
 package com.openexchange.webdav.protocol;
 
 
-import com.openexchange.groupware.impl.FolderLockManagerImpl;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.impl.FolderLockManagerImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.webdav.protocol.impl.DummyResourceManager;
-import com.openexchange.test.TestInit;
 import com.openexchange.test.AjaxInit;
+import com.openexchange.test.TestInit;
+import com.openexchange.webdav.protocol.impl.DummyResourceManager;
 
 public class TestWebdavFactoryBuilder {
 
@@ -36,8 +36,8 @@ public class TestWebdavFactoryBuilder {
 
 	private static WebdavFactory buildInfoFactory() throws Exception{
 		
-		InfostoreWebdavFactory factory = new InfostoreWebdavFactory();
-        InfostoreFacadeImpl database = new InfostoreFacadeImpl();
+		final InfostoreWebdavFactory factory = new InfostoreWebdavFactory();
+        final InfostoreFacadeImpl database = new InfostoreFacadeImpl();
         factory.setDatabase(database);
         factory.setSecurity(database.getSecurity());
         factory.setFolderLockManager(new FolderLockManagerImpl());
@@ -62,8 +62,9 @@ public class TestWebdavFactoryBuilder {
 	}
 	
 	public static void tearDown() throws Exception {
-		if(mode == INFO)
-			Init.stopServer(); 
+		if(mode == INFO) {
+			Init.stopServer();
+		} 
 	}
 
 }

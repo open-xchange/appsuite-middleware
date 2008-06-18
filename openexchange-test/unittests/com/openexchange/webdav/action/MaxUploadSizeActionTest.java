@@ -10,20 +10,21 @@ public class MaxUploadSizeActionTest extends ActionTestCase {
 	private MockAction mockAction;
     private WebdavPath INDEX_HTML_URL;
 
-    public void setUp() throws Exception {
+    @Override
+	public void setUp() throws Exception {
 		super.setUp();
 		mockAction = new MockAction();
         INDEX_HTML_URL = testCollection.dup().append("index_new.html");
     }
 	
 	public void testPassThru() throws WebdavException{
-		MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost/");
-		MockWebdavResponse res = new MockWebdavResponse();
+		final MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost/");
+		final MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setUrl(INDEX_HTML_URL);
 		req.setHeader("content-length", "9");
 		
-		WebdavMaxUploadSizeAction action = new TestMaxUploadSizeAction();
+		final WebdavMaxUploadSizeAction action = new TestMaxUploadSizeAction();
 		action.setNext(mockAction);
 		
 		action.perform(req,res);
@@ -32,18 +33,18 @@ public class MaxUploadSizeActionTest extends ActionTestCase {
 	}
 	
 	public void testDeny(){
-		MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost/");
-		MockWebdavResponse res = new MockWebdavResponse();
+		final MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost/");
+		final MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setUrl(INDEX_HTML_URL);
 		req.setHeader("content-length", "11");
 		
-		WebdavMaxUploadSizeAction action = new TestMaxUploadSizeAction();
+		final WebdavMaxUploadSizeAction action = new TestMaxUploadSizeAction();
 		action.setNext(mockAction);
 		
 		try {
 			action.perform(req,res);
-		} catch (WebdavException x) {
+		} catch (final WebdavException x) {
 			assertEquals(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, x.getStatus());
 		}
 			
@@ -54,7 +55,7 @@ public class MaxUploadSizeActionTest extends ActionTestCase {
 	
 	public static final class TestMaxUploadSizeAction extends WebdavMaxUploadSizeAction {
 		@Override
-		public boolean fits(WebdavRequest req) {
+		public boolean fits(final WebdavRequest req) {
 			return Long.valueOf(req.getHeader("content-length")) < 10;
 		}
 	}

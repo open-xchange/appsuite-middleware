@@ -90,7 +90,7 @@ public class ForwardInlineOrAttachmentTest extends AbstractAJAXTest {
     public void testForwardParameter() throws Throwable {
         final String forward = readSetting(getWebConversation(), getHostName(),
             getSessionId(), PATH);
-        for (String testString : new String[] { INLINE, ATTACHMENT, forward }) {
+        for (final String testString : new String[] { INLINE, ATTACHMENT, forward }) {
             storeSetting(getWebConversation(), getHostName(), getSessionId(),
                 PATH, testString);
             assertEquals("Written setting isn't returned from server.",

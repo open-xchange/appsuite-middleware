@@ -118,7 +118,7 @@ public final class NetsolClearRequest implements AJAXRequest {
 		}
 
 		@Override
-		protected NetsolClearResponse createResponse(Response response) throws JSONException {
+		protected NetsolClearResponse createResponse(final Response response) throws JSONException {
 			return new NetsolClearResponse(response);
 		}
 

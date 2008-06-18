@@ -33,17 +33,18 @@ public class CalendarDeleteTest extends TestCase {
     
     private static boolean init = false;
     
-    protected void setUp() throws Exception {        
+    @Override
+	protected void setUp() throws Exception {        
         super.setUp();
-        EventConfigImpl event = new EventConfigImpl();
+        final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
         context = new ContextImpl(contextid);
         userid = CalendarTest.getUserId();
-        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");                
+        final String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");                
         deleteuserid = resolveUser(user2);        
         
         try {
-            CalendarTest ct = new CalendarTest();
+            final CalendarTest ct = new CalendarTest();
             ct.dontDelete();
             ct.testWholeDayWithDB();
             ct.testMultiSpanWholeDay();
@@ -55,7 +56,7 @@ public class CalendarDeleteTest extends TestCase {
             ct.testInsertUpdateAlarm();
             ct.testAlarmAndUpdate();
             
-            AppointmentBugTests abt = new AppointmentBugTests();
+            final AppointmentBugTests abt = new AppointmentBugTests();
             abt.testBug4467();
             abt.testBug4497();
             abt.testBug4276();
@@ -64,7 +65,7 @@ public class CalendarDeleteTest extends TestCase {
             abt.testBug5012();
             abt.testBug5144();
             
-        } catch (Throwable ex) {
+        } catch (final Throwable ex) {
             throw new Exception(ex.getMessage(), ex);
         } finally {
             CalendarTest.doDelete();
@@ -73,16 +74,17 @@ public class CalendarDeleteTest extends TestCase {
     }
     
     private Properties getAJAXProperties() {
-        Properties properties = AjaxInit.getAJAXProperties();
+        final Properties properties = AjaxInit.getAJAXProperties();
         return properties;
     }      
     
-    private int resolveUser(String user) throws Exception {
-        UserStorage uStorage = UserStorage.getInstance();
+    private int resolveUser(final String user) throws Exception {
+        final UserStorage uStorage = UserStorage.getInstance();
         return uStorage.getUserId(user, context);
     }    
     
-    protected void tearDown() throws Exception {
+    @Override
+	protected void tearDown() throws Exception {
         if (init) {
             init = false;
             Init.stopServer();
@@ -91,29 +93,29 @@ public class CalendarDeleteTest extends TestCase {
     }
     
     public void testDeleteUserData() throws Throwable {
-        Connection readcon = DBPool.pickup(context);
-        Connection writecon = DBPool.pickupWriteable(context);
-        SessionObject so = SessionObjectWrapper.createSessionObject(deleteuserid, context.getContextId(), "deleteAllUserApps");
+        final Connection readcon = DBPool.pickup(context);
+        final Connection writecon = DBPool.pickupWriteable(context);
+        final SessionObject so = SessionObjectWrapper.createSessionObject(deleteuserid, context.getContextId(), "deleteAllUserApps");
         
-        DeleteEvent delEvent = new DeleteEvent(this, so.getUserId(), DeleteEvent.TYPE_USER, ContextStorage.getInstance().getContext(so.getContextId()));
+        final DeleteEvent delEvent = new DeleteEvent(this, so.getUserId(), DeleteEvent.TYPE_USER, ContextStorage.getInstance().getContext(so.getContextId()));
 
-        CalendarAdministration ca = new CalendarAdministration();
+        final CalendarAdministration ca = new CalendarAdministration();
         ca.deletePerformed(delEvent, readcon, writecon);
         
-        Statement stmt = readcon.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd, prg_dates_members pdm WHERE pd.intfield01 = pdm.object_id AND pdm.member_uid = "+deleteuserid+" AND pd.cid = "+contextid);
+        final Statement stmt = readcon.createStatement();
+        final ResultSet rs = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd, prg_dates_members pdm WHERE pd.intfield01 = pdm.object_id AND pdm.member_uid = "+deleteuserid+" AND pd.cid = "+contextid);
         assertTrue("Test that no appointment exists for user "+deleteuserid, rs.next() != true);
         rs.close();
 
-        ResultSet rs2 = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd WHERE pd.created_from = "+deleteuserid+" AND pd.cid = "+contextid);
+        final ResultSet rs2 = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd WHERE pd.created_from = "+deleteuserid+" AND pd.cid = "+contextid);
         assertTrue("Test that no cerated_from exists for user "+deleteuserid, rs2.next() != true);
         rs2.close();
 
-        ResultSet rs3 = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd WHERE pd.changed_from = "+deleteuserid+" AND pd.cid = "+contextid);
+        final ResultSet rs3 = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd WHERE pd.changed_from = "+deleteuserid+" AND pd.cid = "+contextid);
         assertTrue("Test that no changed_from exists for user "+deleteuserid, rs3.next() != true);
         rs3.close();
         
-        ResultSet rs4 = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd, prg_date_rights pdr WHERE pd.intfield01 = pdr.object_id AND pdr.id = "+deleteuserid+" AND pdr.type = "+Participant.USER+" AND pd.cid = "+contextid);
+        final ResultSet rs4 = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd, prg_date_rights pdr WHERE pd.intfield01 = pdr.object_id AND pdr.id = "+deleteuserid+" AND pdr.type = "+Participant.USER+" AND pd.cid = "+contextid);
         assertTrue("Test that no user_right entry exists for user "+deleteuserid, rs4.next() != true);
         rs4.close();
         
@@ -124,17 +126,17 @@ public class CalendarDeleteTest extends TestCase {
     }
 
      public void testDeleteGroup() throws Throwable {
-        Connection readcon = DBPool.pickup(context);
-        Connection writecon = DBPool.pickupWriteable(context);
-        SessionObject so = SessionObjectWrapper.createSessionObject(deleteuserid, context.getContextId(), "deleteAllUserApps");
+        final Connection readcon = DBPool.pickup(context);
+        final Connection writecon = DBPool.pickupWriteable(context);
+        final SessionObject so = SessionObjectWrapper.createSessionObject(deleteuserid, context.getContextId(), "deleteAllUserApps");
         
-        DeleteEvent delEvent = new DeleteEvent(this, groupid, DeleteEvent.TYPE_GROUP, ContextStorage.getInstance().getContext(so.getContextId()));
+        final DeleteEvent delEvent = new DeleteEvent(this, groupid, DeleteEvent.TYPE_GROUP, ContextStorage.getInstance().getContext(so.getContextId()));
 
-        CalendarAdministration ca = new CalendarAdministration();
+        final CalendarAdministration ca = new CalendarAdministration();
         ca.deletePerformed(delEvent, readcon, writecon);
         
-        Statement stmt = readcon.createStatement();        
-        ResultSet rs = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd, prg_date_rights pdr WHERE pd.intfield01 = pdr.object_id AND pdr.id = "+groupid+" AND pdr.type = "+Participant.GROUP+" AND pd.cid = "+contextid);
+        final Statement stmt = readcon.createStatement();        
+        final ResultSet rs = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd, prg_date_rights pdr WHERE pd.intfield01 = pdr.object_id AND pdr.id = "+groupid+" AND pdr.type = "+Participant.GROUP+" AND pd.cid = "+contextid);
         assertTrue("Test that no user_right entry exists for group "+deleteuserid, rs.next() != true);
         rs.close();
         
@@ -145,17 +147,17 @@ public class CalendarDeleteTest extends TestCase {
     }
 
     public void testDeleteResource() throws Throwable {
-        Connection readcon = DBPool.pickup(context);
-        Connection writecon = DBPool.pickupWriteable(context);
-        SessionObject so = SessionObjectWrapper.createSessionObject(deleteuserid, context.getContextId(), "deleteAllUserApps");
+        final Connection readcon = DBPool.pickup(context);
+        final Connection writecon = DBPool.pickupWriteable(context);
+        final SessionObject so = SessionObjectWrapper.createSessionObject(deleteuserid, context.getContextId(), "deleteAllUserApps");
         
-        DeleteEvent delEvent = new DeleteEvent(this, resourceid, DeleteEvent.TYPE_RESOURCE, ContextStorage.getInstance().getContext(so.getContextId()));
+        final DeleteEvent delEvent = new DeleteEvent(this, resourceid, DeleteEvent.TYPE_RESOURCE, ContextStorage.getInstance().getContext(so.getContextId()));
 
-        CalendarAdministration ca = new CalendarAdministration();
+        final CalendarAdministration ca = new CalendarAdministration();
         ca.deletePerformed(delEvent, readcon, writecon);
         
-        Statement stmt = readcon.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd, prg_date_rights pdr WHERE pd.intfield01 = pdr.object_id AND pdr.id = "+resourceid+" AND pdr.type = "+Participant.RESOURCE+" AND pd.cid = "+contextid);
+        final Statement stmt = readcon.createStatement();
+        final ResultSet rs = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd, prg_date_rights pdr WHERE pd.intfield01 = pdr.object_id AND pdr.id = "+resourceid+" AND pdr.type = "+Participant.RESOURCE+" AND pd.cid = "+contextid);
         assertTrue("Test that no user_right entry exists for resource "+deleteuserid, rs.next() != true);
         rs.close();
         

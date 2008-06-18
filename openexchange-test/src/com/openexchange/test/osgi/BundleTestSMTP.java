@@ -154,7 +154,7 @@ public final class BundleTestSMTP extends AbstractBundleTest {
 	}
 
 	private static JSONObject sendMail(final WebConversation conversation, final String hostname,
-			final String sessionId, JSONObject mailObj, final boolean setCookie) throws Exception {
+			final String sessionId, final JSONObject mailObj, final boolean setCookie) throws Exception {
 		return sendMail(conversation, hostname, sessionId, mailObj.toString(), setCookie);
 	}
 
@@ -171,7 +171,7 @@ public final class BundleTestSMTP extends AbstractBundleTest {
 			/*
 			 * Add cookie
 			 */
-			CookieJar cookieJar = new CookieJar();
+			final CookieJar cookieJar = new CookieJar();
 			cookieJar.putCookie(Login.cookiePrefix + sessionId, sessionId);
 		}
 
@@ -189,8 +189,8 @@ public final class BundleTestSMTP extends AbstractBundleTest {
 
 	private static Pattern CALLBACK_ARG_PATTERN = Pattern.compile("callback\\s*\\((\\{.*?)\\);");
 
-	private static JSONObject extractFromCallback(String html) throws JSONException {
-		Matcher matcher = CALLBACK_ARG_PATTERN.matcher(html);
+	private static JSONObject extractFromCallback(final String html) throws JSONException {
+		final Matcher matcher = CALLBACK_ARG_PATTERN.matcher(html);
 		if (matcher.find()) {
 			final String jsonString = matcher.group(1);
 			return new JSONObject(jsonString);

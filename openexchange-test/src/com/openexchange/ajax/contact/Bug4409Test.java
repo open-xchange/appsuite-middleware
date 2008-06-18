@@ -10,10 +10,11 @@ public class Bug4409Test extends ContactTest {
 
 	private static final Log LOG = LogFactory.getLog(Bug4409Test.class);
 	
-	public Bug4409Test(String name) {
+	public Bug4409Test(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}

@@ -37,14 +37,12 @@
 
 package com.openexchange.groupware.contexts;
 
+import junit.framework.TestCase;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.Init;
-//import com.openexchange.groupware.contexts.impl.LoginInfo;
-import com.openexchange.test.AjaxInit;
-
-import junit.framework.TestCase;
 
 /**
  * This test case tests the login process.
@@ -65,12 +63,14 @@ public class LoginTest extends TestCase {
     /**
      * {@inheritDoc}
      */
-    protected void setUp() throws Exception {
+    @Override
+	protected void setUp() throws Exception {
         super.setUp();
         Init.startServer();
     }
 
-    protected void tearDown() throws Exception {
+    @Override
+	protected void tearDown() throws Exception {
         Init.stopServer();
         super.tearDown();
     }

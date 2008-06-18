@@ -16,10 +16,11 @@ public class Bug9089Test extends AppointmentTest {
 
 	private static final Log LOG = LogFactory.getLog(Bug9089Test.class);
 	
-	public Bug9089Test(String name) {
+	public Bug9089Test(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
@@ -56,7 +57,7 @@ public class Bug9089Test extends AppointmentTest {
 		try {
 			updateAppointment(getWebConversation(), appointmentObj, objectId, newFolderId, modified, timeZone, getHostName(), getSessionId());
 			fail("exception expected");
-		} catch (TestException exc) {
+		} catch (final TestException exc) {
 			assertTrue(true);
 		}
 		

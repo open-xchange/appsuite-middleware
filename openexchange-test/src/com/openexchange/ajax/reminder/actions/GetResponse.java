@@ -91,7 +91,7 @@ public class GetResponse extends AbstractAJAXResponse {
                     final ReminderObject reminder = new ReminderObject();
                     parser.parse(reminder, jremind);
                     reminders.add(reminder);
-                } catch (JSONException e) {
+                } catch (final JSONException e) {
                     throw new OXJSONException(OXJSONException.Code
                         .JSON_READ_ERROR, e, array.toString());
                 }

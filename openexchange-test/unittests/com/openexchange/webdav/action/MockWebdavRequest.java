@@ -1,13 +1,5 @@
 package com.openexchange.webdav.action;
 
-import com.openexchange.webdav.action.ifheader.IfHeader;
-import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
-import com.openexchange.webdav.action.ifheader.IfHeaderParser;
-import com.openexchange.webdav.protocol.*;
-import org.jdom.Document;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,43 +9,60 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.jdom.Document;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
+
+import com.openexchange.webdav.action.ifheader.IfHeader;
+import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
+import com.openexchange.webdav.action.ifheader.IfHeaderParser;
+import com.openexchange.webdav.protocol.WebdavCollection;
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavResource;
+
 public class MockWebdavRequest implements WebdavRequest {
 
 	private WebdavPath url;
 	private String uriPrefix = null;
-	private WebdavFactory factory;
+	private final WebdavFactory factory;
 	private String content;
-	private Map<String,String> headers = new HashMap<String,String>();
+	private final Map<String,String> headers = new HashMap<String,String>();
 	private WebdavResource res = null;
 	private WebdavResource dest;
 	
-	public MockWebdavRequest(WebdavFactory factory, String prefix) {
+	public MockWebdavRequest(final WebdavFactory factory, final String prefix) {
 		this.factory = factory;
 		this.uriPrefix = prefix;
 	}
 	
 
-    public void setUrl(WebdavPath url) {
+    public void setUrl(final WebdavPath url) {
         this.url = url;
     }
 
     public WebdavResource getResource() throws WebdavException {
-		if(res != null)
+		if(res != null) {
 			return res;
+		}
 		return res = factory.resolveResource(url);
 	}
 	
 	public WebdavResource getDestination() throws WebdavException {
-		if(null == getHeader("destination"))
+		if(null == getHeader("destination")) {
 			return null;
-		if(dest != null)
+		}
+		if(dest != null) {
 			return dest;
+		}
 		return dest = factory.resolveResource(getHeader("destination"));
 	}
 	
 	public WebdavCollection getCollection() throws WebdavException {
-		if(res != null)
+		if(res != null) {
 			return (WebdavCollection) res;
+		}
 		return (WebdavCollection) (res = factory.resolveCollection(url));
 	}
 	
@@ -65,24 +74,24 @@ public class MockWebdavRequest implements WebdavRequest {
 		return url;
 	}
 
-	public void setBodyAsString(String content) {
+	public void setBodyAsString(final String content) {
 		this.content = content;
 	}
 	
 	public InputStream getBody(){
 		try {
 			return new ByteArrayInputStream(content.getBytes("UTF-8"));
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
 
-	public void setHeader(String header, String value) {
+	public void setHeader(final String header, final String value) {
 		headers .put(header.toLowerCase(), value);
 	}
 
-	public String getHeader(String header) {
+	public String getHeader(final String header) {
 		return headers.get(header.toLowerCase());
 	}
 
@@ -99,16 +108,18 @@ public class MockWebdavRequest implements WebdavRequest {
 	}
 
 	public IfHeader getIfHeader() throws IfHeaderParseException {
-		String ifHeader = getHeader("If");
-		if(ifHeader == null)
+		final String ifHeader = getHeader("If");
+		if(ifHeader == null) {
 			return null;
+		}
 		return new IfHeaderParser().parse(getHeader("If"));
 	}
 
-	public int getDepth(int def) {
-		String depth = getHeader("depth");
-		if(null == depth)
+	public int getDepth(final int def) {
+		final String depth = getHeader("depth");
+		if(null == depth) {
 			return def;
+		}
 		return "Infinity".equalsIgnoreCase(depth) ? WebdavCollection.INFINITY : new Integer(depth);
 	}
 

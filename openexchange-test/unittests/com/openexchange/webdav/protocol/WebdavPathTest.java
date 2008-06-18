@@ -1,8 +1,8 @@
 package com.openexchange.webdav.protocol;
 
-import junit.framework.TestCase;
-
 import java.util.Arrays;
+
+import junit.framework.TestCase;
 
 /*
  *
@@ -64,7 +64,7 @@ public class WebdavPathTest extends TestCase {
     }
 
     public void testStringsConstuctor() {
-        WebdavPath path = new WebdavPath("i","am","a","path");
+        final WebdavPath path = new WebdavPath("i","am","a","path");
         assertComponents(path, "i","am","a","path");
     }
 
@@ -83,20 +83,20 @@ public class WebdavPathTest extends TestCase {
     }
 
     public void testToString(){
-        WebdavPath path = new WebdavPath("i","am","a","path");
+        final WebdavPath path = new WebdavPath("i","am","a","path");
         assertEquals("/i/am/a/path", path.toString());
 
     }
 
     public void testToEscapedString() {
-        WebdavPath path = new WebdavPath("with/slash","with\\backslash");
+        final WebdavPath path = new WebdavPath("with/slash","with\\backslash");
         assertEquals("/with\\/slash/with\\\\backslash", path.toEscapedString());
     }
 
     public void testEquals(){
-        WebdavPath path = new WebdavPath("/i/am/a/path");
-        WebdavPath path2 = new WebdavPath("i","am","a","path");
-        WebdavPath path3 = new WebdavPath();
+        final WebdavPath path = new WebdavPath("/i/am/a/path");
+        final WebdavPath path2 = new WebdavPath("i","am","a","path");
+        final WebdavPath path3 = new WebdavPath();
         assertEquals(path, path2);
         assertEquals(path.hashCode(), path2.hashCode());
         assertFalse(path.equals(path3));
@@ -104,35 +104,35 @@ public class WebdavPathTest extends TestCase {
     }
 
     public void testParent() {
-        WebdavPath path = new WebdavPath("/i/am/a/path");
+        final WebdavPath path = new WebdavPath("/i/am/a/path");
         assertComponents(path.parent(), "i","am","a");
     }
 
     public void testName() {
-        WebdavPath path = new WebdavPath("/i/am/a/path");
+        final WebdavPath path = new WebdavPath("/i/am/a/path");
         assertEquals("path", path.name());
     }
 
     public void testStartsWith(){
-        WebdavPath path = new WebdavPath("/i/am/a/path");
-        WebdavPath path2 = new WebdavPath("/i/am/a");
-        WebdavPath path3 = new WebdavPath("/i/am/a/path/below");
-        WebdavPath path4 = new WebdavPath("/i/am/elsewhere");
+        final WebdavPath path = new WebdavPath("/i/am/a/path");
+        final WebdavPath path2 = new WebdavPath("/i/am/a");
+        final WebdavPath path3 = new WebdavPath("/i/am/a/path/below");
+        final WebdavPath path4 = new WebdavPath("/i/am/elsewhere");
         assertTrue(path.startsWith(path2));
         assertFalse(path.startsWith(path3));
         assertFalse(path.startsWith(path4));
     }
 
     public void testSubpath() {
-        WebdavPath path = new WebdavPath("i","am", "a", "path");
+        final WebdavPath path = new WebdavPath("i","am", "a", "path");
         assertComponents(path.subpath(1),"am","a","path");
         assertComponents(path.subpath(0,2),"i", "am");
     }
 
-    public static void assertComponents(WebdavPath path, String...components) {
+    public static void assertComponents(final WebdavPath path, final String...components) {
         assertEquals(components.length,path.size());
         int i = 0;
-        for(String component : path) {
+        for(final String component : path) {
             assertEquals(components[i++], component);
         }
     }

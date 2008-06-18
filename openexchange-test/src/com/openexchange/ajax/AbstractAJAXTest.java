@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import junit.framework.TestCase;
 
@@ -73,12 +72,12 @@ public abstract class AbstractAJAXTest extends TestCase {
 	
 	protected static final int APPEND_MODIFIED = 1000000;
 	
-	public AbstractAJAXTest(String name) {
+	public AbstractAJAXTest(final String name) {
 		super(name);
 
 		try {
 			AJAXConfig.init();
-		} catch (ConfigurationException ex) {
+		} catch (final ConfigurationException ex) {
 			ex.printStackTrace();
 		}
 	}
@@ -211,90 +210,93 @@ public abstract class AbstractAJAXTest extends TestCase {
 	
 	// Query methods
 	
-	protected String putS(WebConversation webConv, String url, String body) throws MalformedURLException, IOException, SAXException {
-		PutMethodWebRequest m = new PutMethodWebRequest(url, new ByteArrayInputStream(body.getBytes("UTF-8")), "text/javascript; charset=UTF-8");
-		WebResponse resp = webConv.getResponse(m);
+	protected String putS(final WebConversation webConv, final String url, final String body) throws MalformedURLException, IOException, SAXException {
+		final PutMethodWebRequest m = new PutMethodWebRequest(url, new ByteArrayInputStream(body.getBytes("UTF-8")), "text/javascript; charset=UTF-8");
+		final WebResponse resp = webConv.getResponse(m);
 		return resp.getText();
 	}
 	
-	protected JSONObject put(WebConversation webConv, String url, String body) throws MalformedURLException, JSONException, IOException, SAXException {
-		JSONObject o = new JSONObject(putS(webConv,url, body));
+	protected JSONObject put(final WebConversation webConv, final String url, final String body) throws MalformedURLException, JSONException, IOException, SAXException {
+		final JSONObject o = new JSONObject(putS(webConv,url, body));
 		return o;
 	}
 	
-	protected void putN(WebConversation webConv, String url, String body) throws MalformedURLException, IOException, SAXException  {
+	protected void putN(final WebConversation webConv, final String url, final String body) throws MalformedURLException, IOException, SAXException  {
 		putS(webConv,url, body);
 	}
 	
-	protected JSONArray putA(WebConversation webConv, String url, String body) throws MalformedURLException, JSONException, IOException, SAXException  {
-		JSONArray a = new JSONArray(putS(webConv,url, body));
+	protected JSONArray putA(final WebConversation webConv, final String url, final String body) throws MalformedURLException, JSONException, IOException, SAXException  {
+		final JSONArray a = new JSONArray(putS(webConv,url, body));
 		return a;
 	}
 	
-	protected String gS(WebConversation webConv, String url) throws MalformedURLException, IOException, SAXException {
-		GetMethodWebRequest m = new GetMethodWebRequest(url);
-		WebResponse resp = webConv.getResponse(m);
+	protected String gS(final WebConversation webConv, final String url) throws MalformedURLException, IOException, SAXException {
+		final GetMethodWebRequest m = new GetMethodWebRequest(url);
+		final WebResponse resp = webConv.getResponse(m);
 		return resp.getText();
 	}
 	
-	protected JSONObject g(WebConversation webConv, String url) throws MalformedURLException, JSONException, IOException, SAXException {
-		JSONObject o = new JSONObject(gS(webConv, url));
+	protected JSONObject g(final WebConversation webConv, final String url) throws MalformedURLException, JSONException, IOException, SAXException {
+		final JSONObject o = new JSONObject(gS(webConv, url));
 		return o;
 	}
 	
-	protected JSONArray gA(WebConversation webConv, String url) throws MalformedURLException, JSONException, IOException, SAXException {
-		JSONArray a = new JSONArray(gS(webConv, url));
+	protected JSONArray gA(final WebConversation webConv, final String url) throws MalformedURLException, JSONException, IOException, SAXException {
+		final JSONArray a = new JSONArray(gS(webConv, url));
 		return a;
 	}
 	
-	protected String pS(WebConversation webConv, String url, Map<String,String> data) throws MalformedURLException, IOException, SAXException {
-		PostMethodWebRequest m = new PostMethodWebRequest(url);
+	protected String pS(final WebConversation webConv, final String url, final Map<String,String> data) throws MalformedURLException, IOException, SAXException {
+		final PostMethodWebRequest m = new PostMethodWebRequest(url);
 		
-		for(String key : data.keySet()) {
+		for(final String key : data.keySet()) {
 			m.setParameter(key,data.get(key));
 		}
-		WebResponse resp = webConv.getResponse(m);
+		final WebResponse resp = webConv.getResponse(m);
 		return resp.getText();
 	}
 	
-	protected JSONObject p(WebConversation webConv, String url, Map<String,String> data) throws MalformedURLException, JSONException, IOException, SAXException {
-		JSONObject o = new JSONObject(pS(webConv,url, data));
+	protected JSONObject p(final WebConversation webConv, final String url, final Map<String,String> data) throws MalformedURLException, JSONException, IOException, SAXException {
+		final JSONObject o = new JSONObject(pS(webConv,url, data));
 		return o;
 	}
 	
-	protected JSONArray pA(WebConversation webConv, String url, Map<String,String> data) throws MalformedURLException, JSONException, IOException, SAXException {
+	protected JSONArray pA(final WebConversation webConv, final String url, final Map<String,String> data) throws MalformedURLException, JSONException, IOException, SAXException {
 		return new JSONArray(pS(webConv,url, data));
 	}
 	
-	protected Response gT(WebConversation webConv, String url) throws MalformedURLException, JSONException, IOException, SAXException {
-		String res = gS(webConv, url);
-		if("".equals(res.trim()))
+	protected Response gT(final WebConversation webConv, final String url) throws MalformedURLException, JSONException, IOException, SAXException {
+		final String res = gS(webConv, url);
+		if("".equals(res.trim())) {
 			return null;
+		}
 		return Response.parse(res);
 		
 	}
 	
-	protected Response pT(WebConversation webConv, String url, Map<String,String> data) throws MalformedURLException, JSONException, IOException, SAXException {
-		String res = pS(webConv,url, data);
-		if("".equals(res.trim()))
+	protected Response pT(final WebConversation webConv, final String url, final Map<String,String> data) throws MalformedURLException, JSONException, IOException, SAXException {
+		final String res = pS(webConv,url, data);
+		if("".equals(res.trim())) {
 			return null;
+		}
 		return Response.parse(res);
 		
 	}
 	
-	protected Response putT(WebConversation webConv, String url, String data) throws MalformedURLException, JSONException, IOException, SAXException  {
-		String res = putS(webConv,url, data);
-		if("".equals(res.trim()))
+	protected Response putT(final WebConversation webConv, final String url, final String data) throws MalformedURLException, JSONException, IOException, SAXException  {
+		final String res = putS(webConv,url, data);
+		if("".equals(res.trim())) {
 			return null;
+		}
 		return Response.parse(res);
 	}
 	
-	public static void assertNoError(Response res) {
+	public static void assertNoError(final Response res) {
 		assertFalse(res.getErrorMessage()+" : "+res.getErrorParams(),res.hasError());
 	}
 
-    public static JSONObject extractFromCallback(String html) throws JSONException {
-		Matcher matcher = AbstractUploadParser.CALLBACK_ARG_PATTERN.matcher(html);
+    public static JSONObject extractFromCallback(final String html) throws JSONException {
+		final Matcher matcher = AbstractUploadParser.CALLBACK_ARG_PATTERN.matcher(html);
 		if(matcher.find()){
 			return new JSONObject(matcher.group(1));
 		}
@@ -302,11 +304,12 @@ public abstract class AbstractAJAXTest extends TestCase {
 	}
 	
 	// A poor mans hash literal
-	protected Map<String,String> m(String ...pairs){
-		if(pairs.length % 2 != 0)
+	protected Map<String,String> m(final String ...pairs){
+		if(pairs.length % 2 != 0) {
 			throw new IllegalArgumentException("Must contain matching pairs");
+		}
 		
-		Map<String,String> m = new HashMap<String,String>();
+		final Map<String,String> m = new HashMap<String,String>();
 		
 		for(int i = 0; i < pairs.length; i++) {
 			m.put(pairs[i], pairs[++i]);
@@ -316,7 +319,7 @@ public abstract class AbstractAJAXTest extends TestCase {
 		
 	}
 	
-	public static String appendPrefix(String host) {
+	public static String appendPrefix(final String host) {
 		if (host.startsWith("http://")) {
 			return host;
 		}

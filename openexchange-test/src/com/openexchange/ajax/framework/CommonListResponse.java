@@ -81,7 +81,7 @@ public class CommonListResponse extends AbstractAJAXResponse implements
     /**
      * @param array the array to set
      */
-    void setArray(Object[][] array) {
+    void setArray(final Object[][] array) {
         this.array = array;
     }
 

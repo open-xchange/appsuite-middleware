@@ -14,18 +14,18 @@ import com.openexchange.groupware.tx.UndoableAction;
 
 public class FireAttachedEventActionTest extends AbstractAttachmentEventActionTest {
 
-	private MockAttachmentListener listener = new MockAttachmentListener();
-	private MockDBProvider provider = new MockDBProvider();
+	private final MockAttachmentListener listener = new MockAttachmentListener();
+	private final MockDBProvider provider = new MockDBProvider();
 	
 	@Override
 	protected UndoableAction getAction() throws Exception {
-		FireAttachedEventAction fireAttached = new FireAttachedEventAction();
+		final FireAttachedEventAction fireAttached = new FireAttachedEventAction();
 		fireAttached.setAttachments(getAttachments());
 		fireAttached.setContext(getContext());
 		fireAttached.setUser(getUser());
 		fireAttached.setUserConfiguration(null);
 		fireAttached.setProvider(provider);
-		List<AttachmentListener> listeners = new ArrayList<AttachmentListener>();
+		final List<AttachmentListener> listeners = new ArrayList<AttachmentListener>();
 		listeners.add(listener);
 		fireAttached.setAttachmentListeners(listeners);
 		fireAttached.setSource(getAttachmentBase());
@@ -34,17 +34,17 @@ public class FireAttachedEventActionTest extends AbstractAttachmentEventActionTe
 
 	@Override
 	protected void verifyPerformed() throws Exception {
-		List<AttachmentMetadata> m = listener.getAttached();
-		Map<Integer, AttachmentMetadata> attachmentMap = new HashMap<Integer, AttachmentMetadata>();
-		Set<AttachmentMetadata> attachmentSet = new HashSet<AttachmentMetadata>();
+		final List<AttachmentMetadata> m = listener.getAttached();
+		final Map<Integer, AttachmentMetadata> attachmentMap = new HashMap<Integer, AttachmentMetadata>();
+		final Set<AttachmentMetadata> attachmentSet = new HashSet<AttachmentMetadata>();
 		
-		for(AttachmentMetadata att : getAttachments()) {
+		for(final AttachmentMetadata att : getAttachments()) {
 			attachmentMap.put(att.getId(),att);
 			attachmentSet.add(att);
 		}
 		
-		for(AttachmentMetadata attached : m) {
-			AttachmentMetadata orig = attachmentMap.get(attached.getId());
+		for(final AttachmentMetadata attached : m) {
+			final AttachmentMetadata orig = attachmentMap.get(attached.getId());
 			assertEquals(orig, attached);
 			assertTrue(attachmentSet.remove(attached));
 		}
@@ -58,11 +58,11 @@ public class FireAttachedEventActionTest extends AbstractAttachmentEventActionTe
 
 	@Override
 	protected void verifyUndone() throws Exception {
-		Set<Integer> ids = new HashSet<Integer>();
-		for(AttachmentMetadata m : getAttachments()) {
+		final Set<Integer> ids = new HashSet<Integer>();
+		for(final AttachmentMetadata m : getAttachments()) {
 			ids.add(m.getId());
 		}
-		for(int id : listener.getDetached()) {
+		for(final int id : listener.getDetached()) {
 			assertTrue(ids.remove(id));
 		}
 		assertTrue(ids.isEmpty());

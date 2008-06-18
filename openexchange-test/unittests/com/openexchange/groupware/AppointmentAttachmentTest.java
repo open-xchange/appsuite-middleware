@@ -29,34 +29,36 @@ public class AppointmentAttachmentTest extends TestCase {
     private int userid = 11;
     private Context context;
     
-    protected void setUp() throws Exception {        
+    @Override
+	protected void setUp() throws Exception {        
         super.setUp();
-        EventConfigImpl event = new EventConfigImpl();
+        final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);        
         userid = CalendarTest.getUserId();
         context = CalendarTest.getContext();
     }
     
-    protected void tearDown() throws Exception {
+    @Override
+	protected void tearDown() throws Exception {
         super.tearDown();
     }
     
     public void testAttachAndDetachToAppointment() throws Exception {
-        CalendarDataObject cdao = new CalendarDataObject();
+        final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(context);
         cdao.setTitle("testAttachAndDetachToAppointment");
         
-        Connection readcon = DBPool.pickup(context);       
-        int fid = OXFolderTools.getCalendarDefaultFolder(userid, cdao.getContext(), readcon);
+        final Connection readcon = DBPool.pickup(context);       
+        final int fid = OXFolderTools.getCalendarDefaultFolder(userid, cdao.getContext(), readcon);
         DBPool.push(context, readcon);
         
         cdao.setParentFolderID(fid);
         CalendarTest.fillDatesInDao(cdao);
-        SessionObject sessionobject = SessionObjectWrapper.createSessionObject(userid, context, "AttachmentTestId");
-        CalendarSql csql = new CalendarSql(sessionobject);
+        final SessionObject sessionobject = SessionObjectWrapper.createSessionObject(userid, context, "AttachmentTestId");
+        final CalendarSql csql = new CalendarSql(sessionobject);
         cdao.setIgnoreConflicts(true);
-        CalendarDataObject conflicts[] = csql.insertAppointmentObject(cdao);
-        int oid = cdao.getObjectID();
+        final CalendarDataObject conflicts[] = csql.insertAppointmentObject(cdao);
+        final int oid = cdao.getObjectID();
         
         assertTrue("Got no object_id", oid != 0);
         assertTrue("Got no conflicts ", conflicts == null);
@@ -73,10 +75,10 @@ public class AppointmentAttachmentTest extends TestCase {
         
         long last_modified = 0;
         try {
-            long check_modified = System.currentTimeMillis();
+            final long check_modified = System.currentTimeMillis();
             last_modified = csql.attachmentAction(oid, userid, context, false);
             assertTrue("Check for last_modified ", last_modified >= check_modified);
-        } catch(Exception e) {
+        } catch(final Exception e) {
             return; 
         }
         throw new Exception("Test failed because detach should not be possible!");

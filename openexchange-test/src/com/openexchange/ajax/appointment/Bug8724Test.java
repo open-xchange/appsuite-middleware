@@ -41,10 +41,11 @@ public class Bug8724Test extends AppointmentTest {
 
 	private static final Log LOG = LogFactory.getLog(Bug8724Test.class);
 	
-	public Bug8724Test(String name) {
+	public Bug8724Test(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
@@ -64,7 +65,7 @@ public class Bug8724Test extends AppointmentTest {
 		
 		try {
 			listAppointment(getWebConversation(), new AppointmentObject[] { appointmentListObject }, _appointmentFields, timeZone, getHostName(), getSessionId());
-		} catch (TestException exc) {
+		} catch (final TestException exc) {
 			assertTrue(true);
 		}
 		
@@ -95,7 +96,7 @@ public class Bug8724Test extends AppointmentTest {
 		
 		try {
 			listAppointment(getWebConversation(), appointmentArray, _appointmentFields, timeZone, getHostName(), getSessionId());
-		} catch (TestException exc) {
+		} catch (final TestException exc) {
 			assertTrue(true);
 		}
 		

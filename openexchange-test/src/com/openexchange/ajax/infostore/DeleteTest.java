@@ -11,18 +11,18 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class DeleteTest extends InfostoreAJAXTest {
 
-	public DeleteTest(String name) {
+	public DeleteTest(final String name) {
 		super(name);
 	}
 	
 	public void testBasic() throws Exception{
 		tearDown();
 		
-		Response res = this.all(getWebConversation(),getHostName(),sessionId, folderId, new int[]{Metadata.ID});
+		final Response res = this.all(getWebConversation(),getHostName(),sessionId, folderId, new int[]{Metadata.ID});
 		
 		assertNoError(res);
 		
-		JSONArray a = (JSONArray) res.getData();
+		final JSONArray a = (JSONArray) res.getData();
 		
 		assertEquals(0, a.length());
 		
@@ -31,7 +31,7 @@ public class DeleteTest extends InfostoreAJAXTest {
 	
 	public void testConflict() throws Exception{
 	
-		int[][] toDelete = new int[clean.size()][2];
+		final int[][] toDelete = new int[clean.size()][2];
 		
 		for(int i = 0; i < toDelete.length; i++) {
 			toDelete[i][0] = folderId; 
@@ -43,7 +43,7 @@ public class DeleteTest extends InfostoreAJAXTest {
 		
 		Set<Integer> notDeletedExpect = new HashSet<Integer>(clean);
 		
-		for(int i : notDeleted) {
+		for(final int i : notDeleted) {
 			assertTrue(notDeletedExpect.remove(i));
 		}
 		assertTrue(notDeletedExpect.isEmpty());
@@ -56,7 +56,7 @@ public class DeleteTest extends InfostoreAJAXTest {
 		assertEquals(toDelete.length,notDeleted.length);
 		
 		
-		for(int i : notDeleted) {
+		for(final int i : notDeleted) {
 			assertTrue(notDeletedExpect.remove(i));
 		}
 		assertTrue(notDeletedExpect.isEmpty());

@@ -9,12 +9,9 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
-import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.URLParameter;
 
@@ -27,17 +24,18 @@ public class Bug11250Test extends AppointmentTest {
 
 	private static final Log LOG = LogFactory.getLog(Bug11250Test.class);
 	
-	public Bug11250Test(String name) {
+	public Bug11250Test(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 	
 	public void testBug11250() throws Exception {
-		FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testBug11250" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
-		int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword());
+		final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testBug11250" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
+		final int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword());
 		
 		AppointmentObject appointmentObj = createAppointmentObject("testBug11250_1");
 		appointmentObj.setIgnoreConflicts(true);

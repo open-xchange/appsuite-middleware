@@ -49,6 +49,7 @@
 package com.openexchange.groupware.infostore.database;
 
 import junit.framework.TestCase;
+
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
 /**
@@ -57,7 +58,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 public abstract class DocumentMetadataTest extends TestCase {
     
     public void testDefaultMimetype() {
-        DocumentMetadata impl = getImplementation();
+        final DocumentMetadata impl = getImplementation();
         impl.setFileMIMEType(null);
         assertEquals("application/octet-stream", impl.getFileMIMEType());
     }

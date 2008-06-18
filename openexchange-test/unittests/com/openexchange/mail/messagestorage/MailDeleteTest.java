@@ -128,7 +128,7 @@ public final class MailDeleteTest extends AbstractMailTest {
 				 */
 				try {
 					mailAccess.getMessageStorage().deleteMessages("INBOX", new long[] { System.currentTimeMillis() }, false);		
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					fail("No Exception should be thrown here. Exception was " + e.getMessage());
 				}
 				
@@ -136,7 +136,7 @@ public final class MailDeleteTest extends AbstractMailTest {
 				
 				try{
 					mailAccess.getMessageStorage().deleteMessages("INBOX", new long[] { System.currentTimeMillis() }, false);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					fail(e.getMessage());
 				}
 

@@ -8,22 +8,22 @@ import java.util.Map;
 
 public class MockWebdavResponse implements WebdavResponse {
 
-	private ByteArrayOutputStream out = new ByteArrayOutputStream();
+	private final ByteArrayOutputStream out = new ByteArrayOutputStream();
 	
-	private Map<String,String> headers = new HashMap<String,String>();
+	private final Map<String,String> headers = new HashMap<String,String>();
 
 	private int status;
 	
 	public String getResponseBodyAsString() {
 		try {
 			return new String(out.toByteArray(),"UTF-8");
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return e.toString();
 		}
 	}
 
-	public String getHeader(String headerName) {
+	public String getHeader(final String headerName) {
 		return headers.get(headerName.toUpperCase());
 	}
 
@@ -31,7 +31,7 @@ public class MockWebdavResponse implements WebdavResponse {
 		return out;
 	}
 
-	public void setHeader(String header, String value) {
+	public void setHeader(final String header, final String value) {
 		headers.put(header.toUpperCase(),value);
 	}
 
@@ -39,7 +39,7 @@ public class MockWebdavResponse implements WebdavResponse {
 		return status;
 	}
 	
-	public void setStatus(int status) {
+	public void setStatus(final int status) {
 		this.status = status;
 	}
 
@@ -47,7 +47,7 @@ public class MockWebdavResponse implements WebdavResponse {
 		return out.toByteArray();
 	}
 
-	public void setContentType(String s) {
+	public void setContentType(final String s) {
 		setHeader("Content-Type", s);
 	}
 

@@ -49,6 +49,21 @@
 
 package com.openexchange.groupware.importexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
+import java.sql.SQLException;
+import java.util.List;
+
+import junit.framework.JUnit4TestAdapter;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
@@ -66,18 +81,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.session.ServerSessionFactory;
-import junit.framework.JUnit4TestAdapter;
-import org.junit.After;
-import org.junit.AfterClass;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
-import java.util.List;
 
 public class Bug7470Test extends AbstractContactTest {
 	public final Format format = Format.ICAL;
@@ -118,9 +121,9 @@ public class Bug7470Test extends AbstractContactTest {
 	 */
 	@Test public void test7470() throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException, LdapException {
 		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, ctx, "ical7470Folder");
-		String email = "cbartkowiak@oxhemail.open-xchange.com";
-		String cn = "Camil Bartkowiak (cbartkowiak@oxhemail.open-xchange.com)";
-		String ical = 
+		final String email = "cbartkowiak@oxhemail.open-xchange.com";
+		final String cn = "Camil Bartkowiak (cbartkowiak@oxhemail.open-xchange.com)";
+		final String ical = 
 			"BEGIN:VCALENDAR\n" +
 			"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" +
 			"VERSION:2.0\n" +
@@ -161,19 +164,19 @@ public class Bug7470Test extends AbstractContactTest {
 			"END:VCALENDAR";
 		
 		assertTrue("Can import?" ,  imp.canImport(sessObj, format, _folders(), null));
-		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), _folders(), null);
+		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), _folders(), null);
 		assertEquals("One import?" , 1 , results.size());
-		ImportResult res = results.get(0);
+		final ImportResult res = results.get(0);
 		assertEquals("Shouldn't have error" , null, res.getException());
 		
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
 		final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
 		assertTrue("Exists" , appointmentObj != null);
-		Participant[] participants = appointmentObj.getParticipants();
+		final Participant[] participants = appointmentObj.getParticipants();
 		assertEquals("Number of attendees?" , 2, participants.length);
 		
 		boolean containsAttendee = false;
-		for(Participant p : participants){
+		for(final Participant p : participants){
 			if(cn.equals( p.getDisplayName() ) && email.equals( p.getEmailAddress())){
 				containsAttendee = true;
 			}

@@ -19,22 +19,23 @@ public class SearchTest extends InfostoreAJAXTest {
 	protected String[] all = null;
 	private static final int[] COLS = new int[]{Metadata.TITLE, Metadata.DESCRIPTION};
 		
-	public SearchTest(String name) {
+	public SearchTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	public void setUp() throws Exception{
 		
 		this.sessionId = getSessionId();
-		int userId = FolderTest.getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
+		final int userId = FolderTest.getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
 		this.folderId = FolderTest.getMyInfostoreFolder(getWebConversation(),getHostName(),sessionId,userId).getObjectID();
 		
 		all = new String[26];
 		
-		char[] alphabet = new char[]{'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
+		final char[] alphabet = new char[]{'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
 		
 		for(int i = 0; i < 26; i++) {
-			int id = createNew(getWebConversation(),getHostName(), sessionId, m(
+			final int id = createNew(getWebConversation(),getHostName(), sessionId, m(
 				"title"	, "Test "+i,
 				"description", "this is document "+alphabet[i],
 				"folder_id" , ""+folderId
@@ -46,7 +47,7 @@ public class SearchTest extends InfostoreAJAXTest {
 	
 	
 	public void testBasic() throws Exception {
-		Response res = search(getWebConversation(),getHostName(), sessionId, "5", COLS);
+		final Response res = search(getWebConversation(),getHostName(), sessionId, "5", COLS);
 		assertNoError(res);
 		
 		assertTitles(res,
@@ -70,14 +71,14 @@ public class SearchTest extends InfostoreAJAXTest {
 	}
 	
 	public void testAll() throws Exception {
-		Response res = search(getWebConversation(), getHostName(), sessionId, "", COLS);
+		final Response res = search(getWebConversation(), getHostName(), sessionId, "", COLS);
 		assertNoError(res);
 		assertTitles(res,all);
 	}
 	
 	
 	public void testCaseInsensitive() throws Exception {
-		Response res = search(getWebConversation(), getHostName(), sessionId, "test", COLS);
+		final Response res = search(getWebConversation(), getHostName(), sessionId, "test", COLS);
 		assertNoError(res);
 		assertTitles(res,all);
 	}
@@ -122,10 +123,10 @@ public class SearchTest extends InfostoreAJAXTest {
 	}
 	
 	public void testLimit() throws Exception {
-		Response res = search(getWebConversation(), getHostName(), sessionId,"5", COLS, -1, Metadata.DESCRIPTION, "ASC",1);
+		final Response res = search(getWebConversation(), getHostName(), sessionId,"5", COLS, -1, Metadata.DESCRIPTION, "ASC",1);
 		assertNoError(res);
 		
-		JSONArray arrayOfarrays = (JSONArray) res.getData();
+		final JSONArray arrayOfarrays = (JSONArray) res.getData();
 		assertEquals(1, arrayOfarrays.length());
 		assertTitle(0,arrayOfarrays, "Test 5");
 			
@@ -153,9 +154,9 @@ public class SearchTest extends InfostoreAJAXTest {
 	}
 	
 	public void testVersions() throws Exception {
-		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		
-		int id = clean.get(0);
+		final int id = clean.get(0);
 		
 		Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m("title" , "File"), upload, "text/plain");
 		assertNoError(res);
@@ -176,7 +177,7 @@ public class SearchTest extends InfostoreAJAXTest {
 
     // Tests functionality that no one requested yet
     public void notestEscape() throws Exception{
-		int id = clean.get(0);
+		final int id = clean.get(0);
 		Response res = update(getWebConversation(),getHostName(),sessionId,id, System.currentTimeMillis(), m("title" , "The mysterious ?"));
 		assertNoError(res);
 		
@@ -197,13 +198,13 @@ public class SearchTest extends InfostoreAJAXTest {
 	
 	
 	public void testPermissions() throws Exception {
-		String sessionId2 = this.getSecondSessionId();
-		Response res = search(getSecondWebConversation(), getHostName(), sessionId2, "*", COLS);
+		final String sessionId2 = this.getSecondSessionId();
+		final Response res = search(getSecondWebConversation(), getHostName(), sessionId2, "*", COLS);
 		assertTitles(res);
 	}
 	
 	public void testCategories() throws Exception {
-		int id = clean.get(0);
+		final int id = clean.get(0);
 		
 		Response res = update(getWebConversation(),getHostName(),sessionId,id, System.currentTimeMillis(), m("categories" , "[\"curiosity\", \"cat\", \"danger\"]"));
 		assertNoError(res);
@@ -216,18 +217,18 @@ public class SearchTest extends InfostoreAJAXTest {
 	}
 	
 	
-	public static void assertTitle(int index, JSONArray results, String title) throws JSONException {
-		JSONArray entry = results.getJSONArray(index);
+	public static void assertTitle(final int index, final JSONArray results, final String title) throws JSONException {
+		final JSONArray entry = results.getJSONArray(index);
 		assertEquals(title,entry.getString(0));
 	}
 	
-	public static void assertTitles(Response res, String...titles) throws JSONException {
-		JSONArray arrayOfarrays = (JSONArray) res.getData();
+	public static void assertTitles(final Response res, final String...titles) throws JSONException {
+		final JSONArray arrayOfarrays = (JSONArray) res.getData();
 		assertEquals(titles.length, arrayOfarrays.length());
 		
-		Set<String> titlesSet = new HashSet<String>(Arrays.asList(titles));
+		final Set<String> titlesSet = new HashSet<String>(Arrays.asList(titles));
 		for(int i = 0; i < arrayOfarrays.length(); i++) {
-			JSONArray entry = arrayOfarrays.getJSONArray(i);
+			final JSONArray entry = arrayOfarrays.getJSONArray(i);
 			assertTrue(titlesSet.remove(entry.getString(0)));
 		}
 	}

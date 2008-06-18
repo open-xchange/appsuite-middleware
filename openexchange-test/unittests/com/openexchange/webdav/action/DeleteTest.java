@@ -9,11 +9,11 @@ public class DeleteTest extends ActionTestCase {
 		final WebdavPath DEVELOPMENT_GUI_INDEX3_HTML_URL = testCollection.dup().append("development/gui/index3.html");
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
-		MockWebdavResponse res = new MockWebdavResponse();
+		final MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setUrl(INDEX_HTML_URL);
 		
-		WebdavAction action = new WebdavDeleteAction();
+		final WebdavAction action = new WebdavDeleteAction();
 		
 		action.perform(req,res);
 		

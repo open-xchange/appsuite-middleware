@@ -84,7 +84,7 @@ public class CalendarTestConfig {
         return user;
     }
 
-    public void setUser(String user) {
+    public void setUser(final String user) {
         this.user = user;
     }
 
@@ -92,7 +92,7 @@ public class CalendarTestConfig {
         return secondUser;
     }
 
-    public void setSecondUser(String secondUser) {
+    public void setSecondUser(final String secondUser) {
         this.secondUser = secondUser;
     }
 
@@ -100,7 +100,7 @@ public class CalendarTestConfig {
         return participant1;
     }
 
-    public void setParticipant1(String participant1) {
+    public void setParticipant1(final String participant1) {
         this.participant1 = participant1;
     }
 
@@ -108,7 +108,7 @@ public class CalendarTestConfig {
         return participant2;
     }
 
-    public void setParticipant2(String participant2) {
+    public void setParticipant2(final String participant2) {
         this.participant2 = participant2;
     }
 
@@ -116,7 +116,7 @@ public class CalendarTestConfig {
         return participant3;
     }
 
-    public void setParticipant3(String participant3) {
+    public void setParticipant3(final String participant3) {
         this.participant3 = participant3;
     }
 
@@ -124,7 +124,7 @@ public class CalendarTestConfig {
         return resource1;
     }
 
-    public void setResource1(String resource1) {
+    public void setResource1(final String resource1) {
         this.resource1 = resource1;
     }
 
@@ -132,7 +132,7 @@ public class CalendarTestConfig {
         return resource2;
     }
 
-    public void setResource2(String resource2) {
+    public void setResource2(final String resource2) {
         this.resource2 = resource2;
     }
 
@@ -140,7 +140,7 @@ public class CalendarTestConfig {
         return resource3;
     }
 
-    public void setResource3(String resource3) {
+    public void setResource3(final String resource3) {
         this.resource3 = resource3;
     }
 
@@ -148,7 +148,7 @@ public class CalendarTestConfig {
         return group;
     }
 
-    public void setGroup(String group) {
+    public void setGroup(final String group) {
         this.group = group;
     }
 }

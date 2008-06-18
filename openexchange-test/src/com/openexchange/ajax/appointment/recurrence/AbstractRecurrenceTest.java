@@ -49,17 +49,18 @@ public class AbstractRecurrenceTest extends AppointmentTest {
 		CalendarDataObject.TIMEZONE
 	};
 	
-	public AbstractRecurrenceTest(String name) {
+	public AbstractRecurrenceTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		simpleDateFormatUTC.setTimeZone(timeZoneUTC);
 		simpleDateFormat.setTimeZone(timeZone);
 	}
 	
-	protected Occurrence getOccurrenceByPosition(Occurrence[] occurrenceArray, int position) {
+	protected Occurrence getOccurrenceByPosition(final Occurrence[] occurrenceArray, final int position) {
 		for (int a = 0; a < occurrenceArray.length; a++) {
 			if (occurrenceArray[a].getPosition() == position) {
 				return occurrenceArray[a];
@@ -68,11 +69,11 @@ public class AbstractRecurrenceTest extends AppointmentTest {
 		return null;
 	}
 	
-	public static void assertOccurrence(int expectedPosition, Date expectedStartDate, Date expectedEndDate, Occurrence occurrence) throws Exception {
+	public static void assertOccurrence(final int expectedPosition, final Date expectedStartDate, final Date expectedEndDate, final Occurrence occurrence) throws Exception {
 		assertOccurrence(expectedPosition, expectedStartDate, expectedEndDate, occurrence, timeZoneUTC);
 	}
 	
-	public static void assertOccurrence(int expectedPosition, Date expectedStartDate, Date expectedEndDate, Occurrence occurrence, TimeZone timeZone) throws Exception {
+	public static void assertOccurrence(final int expectedPosition, final Date expectedStartDate, final Date expectedEndDate, final Occurrence occurrence, final TimeZone timeZone) throws Exception {
 		assertNotNull("occurrence is null", occurrence);
 		assertEquals("position is not equals", expectedPosition, occurrence.getPosition());
 		OXTestToolkit.assertEqualsAndNotNull("start date is not equals at position: " + expectedPosition, addOffsetToDate(expectedStartDate, timeZone), addOffsetToDate(occurrence.getStartDate(), timeZone));

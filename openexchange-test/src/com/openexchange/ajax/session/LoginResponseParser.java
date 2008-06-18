@@ -44,7 +44,7 @@ public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
         }
         final String[] newCookies = resp.getNewCookieNames();
         boolean oxCookieFound = false;
-        for (String newCookie : newCookies) {
+        for (final String newCookie : newCookies) {
             if (newCookie.startsWith(Login.cookiePrefix)) {
                 oxCookieFound = true;
                 break;

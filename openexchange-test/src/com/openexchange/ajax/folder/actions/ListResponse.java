@@ -89,7 +89,7 @@ public class ListResponse extends CommonListResponse {
 
     public Iterator<FolderObject> getFolder() throws OXException {
         final List<FolderObject> folders = new ArrayList<FolderObject>(); 
-        for (Object[] rows : this) {
+        for (final Object[] rows : this) {
             final FolderObject folder = new FolderObject();
             for (int columnPos = 0; columnPos < columns.length; columnPos++) {
                 Parser.parse(rows[columnPos], columns[columnPos], folder);

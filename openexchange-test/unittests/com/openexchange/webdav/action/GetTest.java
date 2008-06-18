@@ -1,34 +1,36 @@
 package com.openexchange.webdav.action;
 
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavPath;
-
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+
+import javax.servlet.http.HttpServletResponse;
+
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavPath;
 
 
 public class GetTest extends ActionTestCase {
 
     private WebdavPath INDEX_HTML_URL = null;
 
-    public void setUp() throws Exception {
+    @Override
+	public void setUp() throws Exception {
         super.setUp();
         INDEX_HTML_URL = testCollection.dup().append("index.html");
 
     }
 
     public void testBasic() throws Exception {
-		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
-		MockWebdavResponse res = new MockWebdavResponse();
+		final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+		final MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setUrl(INDEX_HTML_URL);
 		
-		WebdavAction action = new WebdavGetAction();
+		final WebdavAction action = new WebdavGetAction();
 		
 		action.perform(req,res);
 		
-		String content = getContent(INDEX_HTML_URL);
+		final String content = getContent(INDEX_HTML_URL);
 		
 		assertEquals(getContent(INDEX_HTML_URL), res.getResponseBodyAsString());
 		assertEquals(content.getBytes("UTF-8").length, (int) new Integer(res.getHeader("content-length")));
@@ -40,17 +42,17 @@ public class GetTest extends ActionTestCase {
 	}
 	
 	public void testNotFound() throws Exception {
-		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
-		MockWebdavResponse res = new MockWebdavResponse();
+		final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+		final MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setUrl(new WebdavPath("iDontExist"));
 		
-		WebdavAction action = new WebdavGetAction();
+		final WebdavAction action = new WebdavGetAction();
 		
 		try {
 			action.perform(req,res);
 			fail("Expected 404 not found");
-		} catch (WebdavException x) {
+		} catch (final WebdavException x) {
 			assertEquals(HttpServletResponse.SC_NOT_FOUND, x.getStatus());
 		}
 		
@@ -94,34 +96,34 @@ public class GetTest extends ActionTestCase {
 		try {
 			rangeTest(INDEX_HTML_URL, "23-25", getBytes(INDEX_HTML_URL, 0, 10));
 			fail();
-		} catch (WebdavException x) {
+		} catch (final WebdavException x) {
 			assertEquals(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE, x.getStatus());
 		}
 	}
 	
 	public void testMultipleRanges() throws Exception {
 		assertEquals((Long) 11l, factory.resolveResource(INDEX_HTML_URL).getLength());
-		byte[] all = getBytes(INDEX_HTML_URL, 0, 10);
-		byte[] expect = new byte[]{all[0], all[10]};
+		final byte[] all = getBytes(INDEX_HTML_URL, 0, 10);
+		final byte[] expect = new byte[]{all[0], all[10]};
 		rangeTest(INDEX_HTML_URL, "0-0,-1", expect);
 		
 	}
 	
-	private void rangeTest(WebdavPath url, String byteHeader, byte[] expect) throws WebdavException {
-		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
-		MockWebdavResponse res = new MockWebdavResponse();
+	private void rangeTest(final WebdavPath url, final String byteHeader, final byte[] expect) throws WebdavException {
+		final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+		final MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setUrl(url);
 		req.setHeader("Bytes", byteHeader);
 		
 		
-		WebdavAction action = new WebdavGetAction();
+		final WebdavAction action = new WebdavGetAction();
 		
 		action.perform(req,res);
 		
 		assertEquals(HttpServletResponse.SC_PARTIAL_CONTENT, res.getStatus());
 		
-		byte[] bytes = res.getResponseBytes();
+		final byte[] bytes = res.getResponseBytes();
 		assertEquals(expect.length+"", res.getHeader("Content-Length"));
 		assertEquals(expect.length, bytes.length);
 		for(int i = 0; i < expect.length; i++) {
@@ -129,17 +131,18 @@ public class GetTest extends ActionTestCase {
 		}
 	}
 	
-	private byte[] getBytes(WebdavPath url, int start, int stop) throws WebdavException, IOException {
+	private byte[] getBytes(final WebdavPath url, final int start, final int stop) throws WebdavException, IOException {
 		InputStream is = null;
 		try {
 			is = factory.resolveResource(url).getBody();
 			is.skip(start);
-			byte[] bytes = new byte[stop-start+1];
+			final byte[] bytes = new byte[stop-start+1];
 			is.read(bytes);
 			return bytes;
 		} finally {
-			if(is != null)
+			if(is != null) {
 				is.close();
+			}
 		}
 	}
 }

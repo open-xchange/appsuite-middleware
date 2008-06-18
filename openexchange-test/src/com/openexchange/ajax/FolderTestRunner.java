@@ -9,12 +9,12 @@ public class FolderTestRunner {
 
 
 	public static Test createFolderTestSuite() {
-		TestSuite testSuite = new TestSuite();
+		final TestSuite testSuite = new TestSuite();
 		testSuite.addTest(new FolderTest("testGetUserId"));
 		return testSuite;
 	}
 	
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		TestRunner.run(createFolderTestSuite());
 	}
 }

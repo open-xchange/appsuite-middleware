@@ -48,65 +48,67 @@
  */
 package com.openexchange.groupware.calendar.tools;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupException;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.ldap.*;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
-import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
+import com.openexchange.groupware.container.ResourceParticipant;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
-
-import java.util.List;
-import java.util.ArrayList;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class CalendarContextToolkit {
 
-    public int resolveUser(String username) {
+    public int resolveUser(final String username) {
         return resolveUser(username, getDefaultContext());
     }
 
-    public int resolveUser(String username, Context ctx) {
+    public int resolveUser(final String username, final Context ctx) {
         UserStorage uStorage = null;
         try {
             uStorage = UserStorage.getInstance();
             return uStorage.getUserId(username, ctx);
-        } catch (LdapException e) {
+        } catch (final LdapException e) {
             e.printStackTrace();
             return -1;
         }
     }
 
-    public int resolveResource(String resource) {
+    public int resolveResource(final String resource) {
         return resolveResource(resource, getDefaultContext());
     }
 
-    public int resolveResource(String resource, Context ctx) {
+    public int resolveResource(final String resource, final Context ctx) {
         ResourceStorage rStorage = null;
         try {
             rStorage = ResourceStorage.getInstance();
             return rStorage.searchResources(resource, ctx)[0].getIdentifier();
-        } catch (LdapException e) {
+        } catch (final LdapException e) {
             e.printStackTrace();
             return -1;
         }
     }
 
-    public int resolveGroup(String group) {
+    public int resolveGroup(final String group) {
         return resolveGroup(group, getDefaultContext());
     }
 
-    public int resolveGroup(String group, Context ctx) {
+    public int resolveGroup(final String group, final Context ctx) {
        GroupStorage gStorage = null;
         try {
             gStorage = GroupStorage.getInstance();
@@ -120,76 +122,76 @@ public class CalendarContextToolkit {
     public Context getDefaultContext() {
         try {
             return ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public int[] getGroups(int user, Context ctx) {
+    public int[] getGroups(final int user, final Context ctx) {
         try {
             return UserConfigurationStorage.getInstance().getUserConfiguration(user,ctx).getGroups();
-        } catch (UserConfigurationException e) {
+        } catch (final UserConfigurationException e) {
             e.printStackTrace();
             return new int[0];
         }
     }
 
-    public Session getSessionForUser(String user, Context ctx) {
-        int userId = resolveUser(user, ctx);
+    public Session getSessionForUser(final String user, final Context ctx) {
+        final int userId = resolveUser(user, ctx);
         return SessionObjectWrapper.createSessionObject(userId,ctx,"session for "+user);    
     }
 
-    public Group loadGroup(int id, Context ctx) {
+    public Group loadGroup(final int id, final Context ctx) {
         GroupStorage gStorage = null;
         try {
             gStorage = GroupStorage.getInstance();
             return gStorage.getGroup(id, ctx);
-        } catch (LdapException e) {
+        } catch (final LdapException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public User loadUser(int userId, Context ctx) {
+    public User loadUser(final int userId, final Context ctx) {
         UserStorage uStorage = null;
         try {
             uStorage = UserStorage.getInstance();
             return uStorage.getUser(userId, ctx);
-        } catch (LdapException e) {
+        } catch (final LdapException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public List<UserParticipant> users(Context ctx, String...users) {
-        List<UserParticipant> participants = new ArrayList<UserParticipant>(users.length);
-        CalendarContextToolkit tools = new CalendarContextToolkit();
-        for(String user : users) {
-            int id = tools.resolveUser(user, ctx);
-            UserParticipant participant = new UserParticipant(id);
+    public List<UserParticipant> users(final Context ctx, final String...users) {
+        final List<UserParticipant> participants = new ArrayList<UserParticipant>(users.length);
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        for(final String user : users) {
+            final int id = tools.resolveUser(user, ctx);
+            final UserParticipant participant = new UserParticipant(id);
             participants.add( participant );
         }
         return participants;
     }
 
-    public List<ResourceParticipant> resources(Context ctx, String...resources) {
-        List<ResourceParticipant> participants = new ArrayList<ResourceParticipant>(resources.length);
-        CalendarContextToolkit tools = new CalendarContextToolkit();
-        for(String resource : resources) {
-            int id = tools.resolveResource(resource, ctx);
-            ResourceParticipant participant = new ResourceParticipant(id);
+    public List<ResourceParticipant> resources(final Context ctx, final String...resources) {
+        final List<ResourceParticipant> participants = new ArrayList<ResourceParticipant>(resources.length);
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        for(final String resource : resources) {
+            final int id = tools.resolveResource(resource, ctx);
+            final ResourceParticipant participant = new ResourceParticipant(id);
             participants.add( participant );
         }
         return participants;
     }
 
-    public List<GroupParticipant> groups(Context ctx, String...groups) {
-        List<GroupParticipant> participants = new ArrayList<GroupParticipant>(groups.length);
-        CalendarContextToolkit tools = new CalendarContextToolkit();
-        for(String group : groups) {
-            int id = tools.resolveGroup(group, ctx);
-            GroupParticipant participant = new GroupParticipant(id);
+    public List<GroupParticipant> groups(final Context ctx, final String...groups) {
+        final List<GroupParticipant> participants = new ArrayList<GroupParticipant>(groups.length);
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        for(final String group : groups) {
+            final int id = tools.resolveGroup(group, ctx);
+            final GroupParticipant participant = new GroupParticipant(id);
             participants.add( participant );
         }
         return participants;

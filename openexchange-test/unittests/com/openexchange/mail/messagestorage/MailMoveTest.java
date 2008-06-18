@@ -149,7 +149,7 @@ public final class MailMoveTest extends AbstractMailTest {
 						try {
 							tmpCopy = mailAccess.getMessageStorage().moveMessages("INBOX", fullname,
 									new long[] { System.currentTimeMillis() }, false);
-						} catch (Exception e) {
+						} catch (final Exception e) {
 							fail("No exception should be thrown here");
 						}
 						assertNotNull("Move returned no IDs", tmpCopy);
@@ -167,7 +167,7 @@ public final class MailMoveTest extends AbstractMailTest {
 						try {
 							assertNull("No ids should be returned", mailAccess.getMessageStorage().moveMessages(
 									"INBOX", tmpFolderName, uids, false));
-						} catch (MailException e) {
+						} catch (final MailException e) {
 							assertEquals("Wrong Exception is thrown.", "IMAP-1002", e.getErrorCode());
 						}
 					}
@@ -179,7 +179,7 @@ public final class MailMoveTest extends AbstractMailTest {
 						try {
 							assertNull("No ids should be returned", mailAccess.getMessageStorage().moveMessages(
 									"MichGibtEsHoffentlichNicht", fullname, uids, false));
-						} catch (MailException e) {
+						} catch (final MailException e) {
 							assertEquals("Wrong Exception is thrown.", "IMAP-1002", e.getErrorCode());
 						}
 					}

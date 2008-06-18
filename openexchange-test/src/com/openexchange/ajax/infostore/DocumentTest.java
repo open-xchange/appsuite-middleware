@@ -7,18 +7,19 @@ import java.io.InputStream;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.InfostoreAJAXTest;
-import com.openexchange.test.TestInit;
 import com.openexchange.test.OXTestToolkit;
+import com.openexchange.test.TestInit;
 
 public class DocumentTest extends InfostoreAJAXTest {
 	
 	protected File upload;
 	protected int id;
 	
-	public DocumentTest(String name){
+	public DocumentTest(final String name){
 		super(name);
 	}
 	
+	@Override
 	public void setUp() throws Exception{
 		super.setUp();
 		upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
@@ -44,10 +45,12 @@ public class DocumentTest extends InfostoreAJAXTest {
 			
 			OXTestToolkit.assertSameContent(is,is2);
 		} finally {
-			if(is!=null)
+			if(is!=null) {
 				is.close();
-			if(is2!=null)
+			}
+			if(is2!=null) {
 				is2.close();
+			}
 		}
 	}
 	

@@ -9,15 +9,15 @@ import com.openexchange.webdav.xml.WebdavLockWriter;
 
 public class LockWriterTest extends TestCase {
 	
-	private XMLCompare xmlCompare = new XMLCompare();
+	private final XMLCompare xmlCompare = new XMLCompare();
 	
 	
 	public void testWriteLock() throws Exception {
 		xmlCompare.setCheckTextNames("depth", "owner", "timeout", "href");
 		
-		WebdavLockWriter writer = new WebdavLockWriter();
+		final WebdavLockWriter writer = new WebdavLockWriter();
 
-		WebdavLock lock = new TestLock();
+		final WebdavLock lock = new TestLock();
 		
 		lock.setType(WebdavLock.Type.WRITE_LITERAL);
 		lock.setScope(WebdavLock.Scope.EXCLUSIVE_LITERAL);
@@ -64,11 +64,13 @@ public class LockWriterTest extends TestCase {
 
     private static final class TestLock extends WebdavLock {
         private long timeout;
-        public long getTimeout() {
+        @Override
+		public long getTimeout() {
             return timeout;
         }
 
-        public void setTimeout(long timeout) {
+        @Override
+		public void setTimeout(final long timeout) {
             this.timeout = timeout;
         }
         

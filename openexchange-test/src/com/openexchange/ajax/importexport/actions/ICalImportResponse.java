@@ -88,7 +88,7 @@ public final class ICalImportResponse extends AbstractAJAXResponse {
     public boolean hasError() {
         boolean retval = super.hasError();
         if (null != imports) {
-            for (Response response : imports) {
+            for (final Response response : imports) {
                 retval = retval || response.hasError();
             }
         }

@@ -242,8 +242,9 @@ public abstract class AbstractBundleTest extends TestCase {
 
 		final WebResponse resp = conversation.getResponse(req);
 		final JSONObject respObj = new JSONObject(resp.getText());
-		if (printOutput)
+		if (printOutput) {
 			System.out.println(respObj.toString());
+		}
 		if (respObj.has("error") && !respObj.isNull("error")) {
 			throw new OXException("Error occured: " + respObj.getString("error"));
 		}
@@ -266,8 +267,9 @@ public abstract class AbstractBundleTest extends TestCase {
 			subfolder.setFolderName(arr.getString(2));
 			subfolder.setSubfolderFlag(arr.getBoolean(3));
 			subfolder.setDefaultFolder(arr.getBoolean(4));
-			if (!arr.isNull(5))
+			if (!arr.isNull(5)) {
 				subfolder.setCreatedBy(arr.getInt(5));
+			}
 			folders.add(subfolder);
 		}
 		return folders;

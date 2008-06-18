@@ -85,7 +85,7 @@ public final class SearchRequest extends AbstractGroupRequest {
      * {@inheritDoc}
      */
     public Object getBody() throws JSONException {
-        JSONObject json = new JSONObject();
+        final JSONObject json = new JSONObject();
         json.put(AJAXServlet.PARAMETER_SEARCHPATTERN, pattern);
         return json;
     }

@@ -48,25 +48,24 @@
  */
 package com.openexchange.tools.file;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
-
-import java.io.InputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Map;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Map;
+
+import com.openexchange.groupware.contexts.Context;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class InMemoryFileStorage extends FileStorage{
 
-    private Map<Context, Map<String, byte[]>>  data = new HashMap<Context, Map<String, byte[]>>();
+    private final Map<Context, Map<String, byte[]>>  data = new HashMap<Context, Map<String, byte[]>>();
 
-    private Map<Context, List<String>> deletions = new HashMap<Context, List<String>>();
+    private final Map<Context, List<String>> deletions = new HashMap<Context, List<String>>();
 
     private Context ctx;
 
@@ -75,15 +74,17 @@ public class InMemoryFileStorage extends FileStorage{
 
     }
 
-    protected boolean delete(String name) throws FileStorageException {
+    @Override
+	protected boolean delete(final String name) throws FileStorageException {
         getCtxMap().put(name,null);
         deletions.get(ctx).add(name);
         return true;
     }
 
-    protected void save(String name, InputStream input) throws FileStorageException {
-        List<Byte> bytes = new ArrayList<Byte>();
-        byte[] buffer = new byte[1024];
+    @Override
+	protected void save(final String name, final InputStream input) throws FileStorageException {
+        final List<Byte> bytes = new ArrayList<Byte>();
+        final byte[] buffer = new byte[1024];
         int length = -1;
         try {
             while((length = input.read(buffer)) != -1) {
@@ -91,68 +92,76 @@ public class InMemoryFileStorage extends FileStorage{
                     bytes.add(buffer[i]);
                 }
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR, e);
         }
 
-        byte[] data = new byte[bytes.size()];
+        final byte[] data = new byte[bytes.size()];
         int i = 0;
-        for(byte b : bytes) {
+        for(final byte b : bytes) {
             data[i++] = b;
         }
         put(name, data);
     }
 
-    protected InputStream load(String name) throws FileStorageException {
+    @Override
+	protected InputStream load(final String name) throws FileStorageException {
 
-        byte[] bytes = get(name);
+        final byte[] bytes = get(name);
         if(bytes == null) {
             return null;
         }
         return new ByteArrayInputStream(bytes);
     }
 
-    protected long length(String name) throws FileStorageException {
+    @Override
+	protected long length(final String name) throws FileStorageException {
         return get(name).length;
     }
 
-    protected String type(String name) throws FileStorageException {
+    @Override
+	protected String type(final String name) throws FileStorageException {
         return "";
     }
 
-    protected boolean exists(String name) throws FileStorageException {
+    @Override
+	protected boolean exists(final String name) throws FileStorageException {
         return getCtxMap().containsKey(name);
     }
 
-    protected void eliminate() throws FileStorageException {
+    @Override
+	protected void eliminate() throws FileStorageException {
 
     }
 
-    protected void lock(long timeout) throws FileStorageException {
+    @Override
+	protected void lock(final long timeout) throws FileStorageException {
 
     }
     
-    protected void unlock() throws FileStorageException {
+    @Override
+	protected void unlock() throws FileStorageException {
 
     }
 
-    protected void closeImpl() {
+    @Override
+	protected void closeImpl() {
 
     }
 
-    public void put(Context ctx, String filestoreId, byte[] bytes) {
+    public void put(final Context ctx, final String filestoreId, final byte[] bytes) {
         getCtxMap(ctx).put(filestoreId, bytes);
     }
 
-    public void setContext(Context ctx) {
+    public void setContext(final Context ctx) {
         this.ctx = ctx;
     }
 
-    private Map<String, byte[]> getCtxMap(Context ctx) {
+    private Map<String, byte[]> getCtxMap(final Context ctx) {
         if(data.containsKey(ctx)) {
             return data.get(ctx);
         }
-        Map<String, byte[]> fileData = new HashMap<String, byte[]>();
+        final Map<String, byte[]> fileData = new HashMap<String, byte[]>();
         data.put(ctx, fileData);
         return fileData;
     }
@@ -161,19 +170,19 @@ public class InMemoryFileStorage extends FileStorage{
         return getCtxMap(ctx);
     }
 
-    private byte[] get(String name) {
+    private byte[] get(final String name) {
         return getCtxMap().get(name);
     }
 
-    private void put(String name, byte[] bytes) {
+    private void put(final String name, final byte[] bytes) {
         getCtxMap().put(name, bytes);
     }
 
-    public void forgetDeleted(Context ctx) {
+    public void forgetDeleted(final Context ctx) {
         deletions.put(ctx, new ArrayList<String>());
     }
 
-    public List<String> getDeleted(Context ctx) {
+    public List<String> getDeleted(final Context ctx) {
         return deletions.get(ctx);
     }
 }

@@ -207,7 +207,7 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
 		} catch (final IOException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
@@ -233,10 +233,10 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
 		} catch (final IOException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
-		} catch (SAXException e) {
+		} catch (final SAXException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}

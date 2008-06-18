@@ -117,7 +117,7 @@ public class CSVContactExportTest extends AbstractContactTest {
 	}
 	
 	@Test public void exportHead() throws ImportExportException, IOException{
-		InputStream is = exp.exportData(sessObj, Format.CSV, String.valueOf( folderId ), TEST1_BASE, null);
+		final InputStream is = exp.exportData(sessObj, Format.CSV, String.valueOf( folderId ), TEST1_BASE, null);
 		assertEquals("Head only", TEST1_RESULT, OXTestToolkit.readStreamAsString(is) );
 	}
 	
@@ -127,19 +127,19 @@ public class CSVContactExportTest extends AbstractContactTest {
 		
 		//importing prior to export test
 		is = new ByteArrayInputStream( TEST2_RESULT.getBytes() ); 
-		Map <String, Integer>folderMappings = new HashMap<String, Integer>();
+		final Map <String, Integer>folderMappings = new HashMap<String, Integer>();
 		folderMappings.put(Integer.toString(folderId), new Integer(Types.CONTACT) );
-		List<ImportResult> results = imp.importData(sessObj, Format.CSV, is, new LinkedList<String>( folderMappings.keySet()), null);
+		final List<ImportResult> results = imp.importData(sessObj, Format.CSV, is, new LinkedList<String>( folderMappings.keySet()), null);
 		
 		//exporting and asserting
 		is = exp.exportData(sessObj, Format.CSV, String.valueOf( folderId ),TEST2_BASE, null);
-		CSVParser parser = new CSVParser();
-		String resStr = OXTestToolkit.readStreamAsString(is);
+		final CSVParser parser = new CSVParser();
+		final String resStr = OXTestToolkit.readStreamAsString(is);
 		assertEquals("Two imports", parser.parse(TEST2_RESULT), parser.parse(resStr) );
 		
 		//cleaning up
 		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
-		for(ImportResult res : results){
+		for(final ImportResult res : results){
 			contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
 		}
 	}
@@ -150,19 +150,19 @@ public class CSVContactExportTest extends AbstractContactTest {
 		
 		//importing prior to export test
 		is = new ByteArrayInputStream( TEST_EMPTY_RESULT.getBytes() ); 
-		Map <String, Integer>folderMappings = new HashMap<String, Integer>();
+		final Map <String, Integer>folderMappings = new HashMap<String, Integer>();
 		folderMappings.put(Integer.toString(folderId), new Integer(Types.CONTACT) );
-		List<ImportResult> results = imp.importData(sessObj, Format.CSV, is, new LinkedList<String>( folderMappings.keySet()), null);
+		final List<ImportResult> results = imp.importData(sessObj, Format.CSV, is, new LinkedList<String>( folderMappings.keySet()), null);
 		
 		//exporting and asserting
 		is = exp.exportData(sessObj, Format.CSV, String.valueOf( folderId ),TEST_EMPTY_BASE, null);
-		CSVParser parser = new CSVParser();
-		String resStr = OXTestToolkit.readStreamAsString(is);
+		final CSVParser parser = new CSVParser();
+		final String resStr = OXTestToolkit.readStreamAsString(is);
 		assertEquals("Two imports", parser.parse(TEST_EMPTY_RESULT), parser.parse(resStr) );
 		
 		//cleaning up
 		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
-		for(ImportResult res : results){
+		for(final ImportResult res : results){
 			contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
 		}
 	}

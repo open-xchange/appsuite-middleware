@@ -134,7 +134,7 @@ public final class BundleTestIMAP extends AbstractBundleTest {
 			 * Set cookie cause a request has already been fired before with the
 			 * same session id.
 			 */
-			CookieJar cookieJar = new CookieJar();
+			final CookieJar cookieJar = new CookieJar();
 			cookieJar.putCookie(Login.cookiePrefix + sessionId, sessionId);
 		}
 		getReq.setParameter(Mail.PARAMETER_SESSION, sessionId);
@@ -142,7 +142,7 @@ public final class BundleTestIMAP extends AbstractBundleTest {
 		getReq.setParameter(Mail.PARAMETER_MAILFOLDER, folder);
 		final String colsStr;
 		if (cols != null && cols.length > 0) {
-			StringBuilder sb = new StringBuilder();
+			final StringBuilder sb = new StringBuilder();
 			sb.append(cols[0]);
 			for (int i = 1; i < cols.length; i++) {
 				// sb.append("%2C").append(cols[i]);
@@ -155,7 +155,7 @@ public final class BundleTestIMAP extends AbstractBundleTest {
 		getReq.setParameter(Mail.PARAMETER_COLUMNS, colsStr);
 		getReq.setParameter(Mail.PARAMETER_SORT, "610");
 		getReq.setParameter(Mail.PARAMETER_ORDER, "asc");
-		WebResponse resp = conversation.getResponse(getReq);
+		final WebResponse resp = conversation.getResponse(getReq);
 		final JSONObject jResponse = new JSONObject(resp.getText());
 		return jResponse;
 	}

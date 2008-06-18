@@ -117,7 +117,7 @@ public class LoginTest extends AbstractAJAXTest {
         final JSONObject json;
         try {
             json = new JSONObject(body);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             LOG.error("Can't parse this body to JSON: \"" + body + '\"');
             throw e;
         }

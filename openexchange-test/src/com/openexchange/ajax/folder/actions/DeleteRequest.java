@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import java.util.Arrays;
 import java.util.Date;
 
 import org.json.JSONArray;
@@ -86,7 +85,7 @@ public class DeleteRequest extends AbstractFolderRequest {
      */
     public Object getBody() throws JSONException {
         final JSONArray array = new JSONArray();
-        for (int folderId : folderIds) {
+        for (final int folderId : folderIds) {
             array.put(folderId);
         }
         return array;

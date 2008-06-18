@@ -7,7 +7,7 @@ import junit.framework.TestSuite;
 public class InfostoreAJAXSuite extends TestSuite{
 	public static Test suite(){
 		
-		TestSuite tests = new TestSuite();
+		final TestSuite tests = new TestSuite();
 		tests.addTestSuite( AllTest.class );
 		tests.addTestSuite( DeleteTest.class );
 		tests.addTestSuite( GetTest.class );

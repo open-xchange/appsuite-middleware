@@ -1,11 +1,12 @@
 package com.openexchange.webdav.action;
 
+import org.jdom.Namespace;
+
 import com.openexchange.test.XMLCompare;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavResource;
-import org.jdom.Namespace;
 
 public class ProppatchTest extends ActionTestCase {
 	
@@ -13,7 +14,8 @@ public class ProppatchTest extends ActionTestCase {
 
     private WebdavPath INDEX_HTML_URL = null;
 
-    public void setUp() throws Exception {
+    @Override
+	public void setUp() throws Exception {
         super.setUp();
         INDEX_HTML_URL = testCollection.dup().append("index.html");
     }
@@ -29,10 +31,10 @@ public class ProppatchTest extends ActionTestCase {
 		req.setBodyAsString(body);
 		req.setUrl(INDEX_HTML_URL);
 		
-		WebdavAction action = new WebdavProppatchAction(new Protocol());
+		final WebdavAction action = new WebdavProppatchAction(new Protocol());
 		action.perform(req, res);
 		
-		XMLCompare compare = new XMLCompare();
+		final XMLCompare compare = new XMLCompare();
 		
 		
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
@@ -89,27 +91,27 @@ public class ProppatchTest extends ActionTestCase {
 	
 	public void testXML() throws Exception {
 
-		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propertyupdate xmlns:D=\"DAV:\" xmlns:OX=\""+TEST_NS.getURI()+"\"><D:set><D:prop><OX:test><OX:gnatzel>GNA!</OX:gnatzel><bla xmlns=\"http://www.open-xchange.com/namespace/webdav-test2\" /></OX:test></D:prop></D:set></D:propertyupdate>";
-		String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\" xmlns:OX=\""+TEST_NS.getURI()+"\"><D:response><D:href>http://localhost/"+INDEX_HTML_URL+"</D:href><D:propstat><D:prop><OX:test /></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
+		final String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propertyupdate xmlns:D=\"DAV:\" xmlns:OX=\""+TEST_NS.getURI()+"\"><D:set><D:prop><OX:test><OX:gnatzel>GNA!</OX:gnatzel><bla xmlns=\"http://www.open-xchange.com/namespace/webdav-test2\" /></OX:test></D:prop></D:set></D:propertyupdate>";
+		final String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\" xmlns:OX=\""+TEST_NS.getURI()+"\"><D:response><D:href>http://localhost/"+INDEX_HTML_URL+"</D:href><D:propstat><D:prop><OX:test /></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
 		
-		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
-		MockWebdavResponse res = new MockWebdavResponse();
+		final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+		final MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setBodyAsString(body);
 		req.setUrl(INDEX_HTML_URL);
 		
-		WebdavAction action = new WebdavProppatchAction(new Protocol());
+		final WebdavAction action = new WebdavProppatchAction(new Protocol());
 		action.perform(req, res);
 		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
 		
-		XMLCompare compare = new XMLCompare();
+		final XMLCompare compare = new XMLCompare();
 		
 		
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 		
-		WebdavResource resource = factory.resolveResource(INDEX_HTML_URL);
+		final WebdavResource resource = factory.resolveResource(INDEX_HTML_URL);
 		
-		WebdavProperty prop = resource.getProperty(TEST_NS.getURI(),"test");
+		final WebdavProperty prop = resource.getProperty(TEST_NS.getURI(),"test");
 		assertNotNull(prop);
 		assertTrue(prop.isXML());
 		assertEquals("<OX:gnatzel xmlns:OX=\"http://www.open-xchange.com/namespace/webdav-test\">GNA!</OX:gnatzel><bla xmlns=\"http://www.open-xchange.com/namespace/webdav-test2\" />", prop.getValue());
@@ -117,19 +119,19 @@ public class ProppatchTest extends ActionTestCase {
 	
 	public void testForbidden() throws Exception {
 		
-		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propertyupdate xmlns:D=\"DAV:\"><D:set><D:prop><D:displayname>The index page</D:displayname></D:prop><D:prop><D:getlastmodified>Hallo</D:getlastmodified></D:prop></D:set></D:propertyupdate>";
-		String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost/"+INDEX_HTML_URL+"</D:href><D:propstat><D:prop><D:displayname /></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat><D:propstat><D:prop><D:getlastmodified /></D:prop><D:status>HTTP/1.1 403 FORBIDDEN</D:status></D:propstat></D:response></D:multistatus>";
+		final String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propertyupdate xmlns:D=\"DAV:\"><D:set><D:prop><D:displayname>The index page</D:displayname></D:prop><D:prop><D:getlastmodified>Hallo</D:getlastmodified></D:prop></D:set></D:propertyupdate>";
+		final String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost/"+INDEX_HTML_URL+"</D:href><D:propstat><D:prop><D:displayname /></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat><D:propstat><D:prop><D:getlastmodified /></D:prop><D:status>HTTP/1.1 403 FORBIDDEN</D:status></D:propstat></D:response></D:multistatus>";
 		
-		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
-		MockWebdavResponse res = new MockWebdavResponse();
+		final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+		final MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setBodyAsString(body);
 		req.setUrl(INDEX_HTML_URL);
 		
-		WebdavAction action = new WebdavProppatchAction(new Protocol());
+		final WebdavAction action = new WebdavProppatchAction(new Protocol());
 		action.perform(req, res);
 		
-		XMLCompare compare = new XMLCompare();
+		final XMLCompare compare = new XMLCompare();
 		
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 	}

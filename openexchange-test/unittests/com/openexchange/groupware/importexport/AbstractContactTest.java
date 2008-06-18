@@ -70,29 +70,29 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.ldap.Credentials;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.test.AjaxInit;
+import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
-import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
-import com.openexchange.test.AjaxInit;
 
 /**
  * Basis for folder tests: Creates a folder and deletes it after testing.
@@ -108,118 +108,153 @@ public class AbstractContactTest {
 		 * This class is needed to fake permissions for different modules.
 		 * @param sessionid
 		 */
-		public TestSession(String sessionid) {
+		public TestSession(final String sessionid) {
 			super(sessionid);
 		}
 		
 		public SessionObject delegateSessionObject;
 		public UserConfiguration delegateUserConfiguration;
 		
+		@Override
 		public void closingOperations() {
 			delegateSessionObject.closingOperations();
 		}
-		public boolean equals(Object obj) {
+		@Override
+		public boolean equals(final Object obj) {
 			return delegateSessionObject.equals(obj);
 		}
+		@Override
 		public int getContextId() {
 			return delegateSessionObject.getContextId();
 		}
+		@Override
 		public Date getCreationtime() {
 			return delegateSessionObject.getCreationtime();
 		}
+		@Override
 		public Credentials getCredentials() {
 			return delegateSessionObject.getCredentials();
 		}
+		@Override
 		public String getHost() {
 			return delegateSessionObject.getHost();
 		}
+		@Override
 		public String getLanguage() {
 			return delegateSessionObject.getLanguage();
 		}
+		@Override
 		public long getLifetime() {
 			return delegateSessionObject.getLifetime();
 		}
+		@Override
 		public String getLocalIp() {
 			return delegateSessionObject.getLocalIp();
 		}
+		@Override
 		public String getLoginName() {
 			return delegateSessionObject.getLoginName();
 		}
+		@Override
 		public Session getMailSession() {
 			return delegateSessionObject.getMailSession();
 		}
+		@Override
 		public String getPassword() {
 			return delegateSessionObject.getPassword();
 		}
+		@Override
 		public String getRandomToken() {
 			return delegateSessionObject.getRandomToken();
 		}
+		@Override
 		public String getSecret() {
 			return delegateSessionObject.getSecret();
 		}
+		@Override
 		public String getSessionID() {
 			return delegateSessionObject.getSessionID();
 		}
+		@Override
 		public Date getTimestamp() {
 			return delegateSessionObject.getTimestamp();
 		}
 		public UserConfiguration getUserConfiguration() {
 			return delegateUserConfiguration;
 		}
+		@Override
 		public String getUserlogin() {
 			return delegateSessionObject.getUserlogin();
 		}
+		@Override
 		public String getUsername() {
 			return delegateSessionObject.getUsername();
 		}
+		@Override
 		public int hashCode() {
 			return delegateSessionObject.hashCode();
 		}
-		public void setContextId(int id) {
+		@Override
+		public void setContextId(final int id) {
 			delegateSessionObject.setContextId(id);
 		}
-		public void setCreationtime(Date creationtime) {
+		@Override
+		public void setCreationtime(final Date creationtime) {
 			delegateSessionObject.setCreationtime(creationtime);
 		}
-		public void setCredentials(Credentials cred) {
+		@Override
+		public void setCredentials(final Credentials cred) {
 			delegateSessionObject.setCredentials(cred);
 		}
-		public void setHost(String host) {
+		@Override
+		public void setHost(final String host) {
 			delegateSessionObject.setHost(host);
 		}
-		public void setLanguage(String language) {
+		@Override
+		public void setLanguage(final String language) {
 			delegateSessionObject.setLanguage(language);
 		}
-		public void setLifetime(long lifetime) {
+		@Override
+		public void setLifetime(final long lifetime) {
 			delegateSessionObject.setLifetime(lifetime);
 		}
-		public void setLocalIp(String localip) {
+		@Override
+		public void setLocalIp(final String localip) {
 			delegateSessionObject.setLocalIp(localip);
 		}
-		public void setLoginName(String loginName) {
+		@Override
+		public void setLoginName(final String loginName) {
 			delegateSessionObject.setLoginName(loginName);
 		}
-		public void setMailSession(Session mailSession) {
+		@Override
+		public void setMailSession(final Session mailSession) {
 			delegateSessionObject.setMailSession(mailSession);
 		}
-		public void setPassword(String password) {
+		@Override
+		public void setPassword(final String password) {
 			delegateSessionObject.setPassword(password);
 		}
-		public void setRandomToken(String randomToken) {
+		@Override
+		public void setRandomToken(final String randomToken) {
 			delegateSessionObject.setRandomToken(randomToken);
 		}
-		public void setSecret(String secret) {
+		@Override
+		public void setSecret(final String secret) {
 			delegateSessionObject.setSecret(secret);
 		}
-		public void setTimestamp(Date timestamp) {
+		@Override
+		public void setTimestamp(final Date timestamp) {
 			delegateSessionObject.setTimestamp(timestamp);
 		}
-		public void setUserlogin(String userlogin) {
+		@Override
+		public void setUserlogin(final String userlogin) {
 			delegateSessionObject.setUserlogin(userlogin);
 		}
-		public void setUsername(String username) {
+		@Override
+		public void setUsername(final String username) {
 			delegateSessionObject.setUsername(username);
 		}
+		@Override
 		public String toString() {
 			return delegateSessionObject.toString();
 		}
@@ -348,9 +383,9 @@ public class AbstractContactTest {
 	public static Importer imp;
 	public Format defaultFormat;
 
-	public static int createTestFolder(int type, ServerSession sessObj,Context ctx, String folderTitle) throws DBPoolingException, SQLException, LdapException, OXFolderException {
+	public static int createTestFolder(final int type, final ServerSession sessObj,final Context ctx, final String folderTitle) throws DBPoolingException, SQLException, LdapException, OXFolderException {
 		final User user = UserStorage.getInstance().getUser(sessObj.getUserId(), ctx);
-		FolderObject fo = new FolderObject();
+		final FolderObject fo = new FolderObject();
 		fo.setFolderName(folderTitle);
 		fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
 		fo.setModule(type);
@@ -361,33 +396,33 @@ public class AbstractContactTest {
 		ocl.setGroupPermission(false);
 		ocl.setFolderAdmin(true);
 		fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-		OXFolderManager oxfa = new OXFolderManagerImpl(sessObj);
+		final OXFolderManager oxfa = new OXFolderManagerImpl(sessObj);
 		int tempFolderId = -1;
 		//deleting old folder if existing
 		try {
 			if(fo.exists(sessObj.getContext())){
 				deleteTestFolder(fo.getObjectID());
 			}
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			System.out.println("Could not find or delete old folder");
 			e.printStackTrace();
 		}
 		//creating new folder
 		try {
 			tempFolderId = oxfa.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			System.out.println("Could not create test folder");
 			e.printStackTrace();
 		}
 		return tempFolderId; 
 	}
 
-	public static void deleteTestFolder(int fuid) throws OXException {
+	public static void deleteTestFolder(final int fuid) throws OXException {
 		if(fuid < 0){
 			return;
 		}
-		OXFolderManager oxfa = new OXFolderManagerImpl(sessObj);
-		FolderObject fo = new FolderObject(fuid);
+		final OXFolderManager oxfa = new OXFolderManagerImpl(sessObj);
+		final FolderObject fo = new FolderObject(fuid);
 		if(fo.exists(sessObj.getContext())){
 			oxfa.deleteFolder(fo, true, System.currentTimeMillis());
 		}
@@ -398,7 +433,7 @@ public class AbstractContactTest {
 		Init.startServer();
 		ContextStorage.start();
 		final UserStorage uStorage = UserStorage.getInstance();
-        Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
+        final Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
         userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), ctx);
 	    sessObj = ServerSessionFactory.createServerSession(userId, 1, "csv-tests");
 		userId = sessObj.getUserId();
@@ -415,22 +450,22 @@ public class AbstractContactTest {
 		super();
 	}
 
-	protected List<ImportResult> importStuff(String csv) throws ImportExportException, UnsupportedEncodingException{
-		InputStream is = new ByteArrayInputStream( csv.getBytes("UTF-8") );
+	protected List<ImportResult> importStuff(final String csv) throws ImportExportException, UnsupportedEncodingException{
+		final InputStream is = new ByteArrayInputStream( csv.getBytes("UTF-8") );
 		return imp.importData(sessObj, defaultFormat, is, _folders(), null);
 	}
 	
-	protected boolean existsEntry(int entryNumber) throws ContextException {
+	protected boolean existsEntry(final int entryNumber) throws ContextException {
 		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
 		try {
-			ContactObject co = contactSql.getObjectById(entryNumber, folderId);
+			final ContactObject co = contactSql.getObjectById(entryNumber, folderId);
 			return co != null;
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			return false;
 		}
 	}
 	
-	protected ContactObject getEntry(int entryNumber) throws OXException, ContextException {
+	protected ContactObject getEntry(final int entryNumber) throws OXException, ContextException {
 		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
 		return contactSql.getObjectById(entryNumber, folderId);
 	}
@@ -454,7 +489,7 @@ public class AbstractContactTest {
 	 * @throws ImportExportException
 	 * @throws UnsupportedEncodingException
 	 */
-	protected ImportResult performOneEntryCheck(String file, Format format, int folderObjectType, String foldername,Context ctx, boolean errorExpected) throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException, LdapException, OXFolderException {
+	protected ImportResult performOneEntryCheck(final String file, final Format format, final int folderObjectType, final String foldername,final Context ctx, final boolean errorExpected) throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException, LdapException, OXFolderException {
 		return performMultipleEntryImport(file, format, folderObjectType, foldername, ctx, errorExpected).get(0);
 	}
 	
@@ -472,12 +507,12 @@ public class AbstractContactTest {
 	 * @throws ImportExportException
 	 * @throws UnsupportedEncodingException
 	 */
-	protected List<ImportResult> performMultipleEntryImport(String file, Format format, int folderObjectType, String foldername, Context ctx, Boolean... expectedErrors) throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException, LdapException, OXFolderException {
+	protected List<ImportResult> performMultipleEntryImport(final String file, final Format format, final int folderObjectType, final String foldername, final Context ctx, final Boolean... expectedErrors) throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException, LdapException, OXFolderException {
 		folderId = createTestFolder(folderObjectType, sessObj,ctx, foldername);
 
 		assertTrue("Can import?" ,  imp.canImport(sessObj, format, _folders(), null));
 
-		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(file.getBytes("UTF-8")), _folders(), null);
+		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(file.getBytes("UTF-8")), _folders(), null);
 		assertEquals("Correct number of results?", expectedErrors.length, results.size());
 		
 		for(int i = 0; i < expectedErrors.length; i++){

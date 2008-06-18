@@ -31,8 +31,8 @@ import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.impl.SessiondServiceImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
+import com.openexchange.sessiond.impl.SessiondServiceImpl;
 import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
@@ -151,13 +151,14 @@ public final class Init {
 	SessiondInit.getInstance() };
 
 	public static void startServer() throws Exception {
-		if (running)
+		if (running) {
 			return;
+		}
 		running = true;
 		System.setProperty("openexchange.propdir", TestInit.getTestProperty("openexchange.propdir"));
 
 		injectTestServices();
-		for (Initialization init : inits) {
+		for (final Initialization init : inits) {
 			init.start();
 			started.add(init);
 		}
@@ -181,12 +182,12 @@ public final class Init {
 	}
 
 	private static void startAndInjectI18NBundle() throws FileNotFoundException {
-		ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
-		String directory_name = config.getProperty("i18n.language.path");
-		File dir = new File(directory_name);
-		I18nServices i18nServices = I18nServices.getInstance();
+		final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
+		final String directory_name = config.getProperty("i18n.language.path");
+		final File dir = new File(directory_name);
+		final I18nServices i18nServices = I18nServices.getInstance();
 		try {
-			for (ResourceBundle rc : new ResourceBundleDiscoverer(dir).getResourceBundles()) {
+			for (final ResourceBundle rc : new ResourceBundleDiscoverer(dir).getResourceBundles()) {
 				i18nServices.addService(rc.getLocale(), new I18nImpl(rc));
 			}
 		} catch (final NullPointerException e) {
@@ -195,7 +196,7 @@ public final class Init {
 	}
 
 	private static void startAndInjectConfigBundle() {
-		ConfigurationService config = new ConfigurationImpl();
+		final ConfigurationService config = new ConfigurationImpl();
 		services.put(ConfigurationService.class, config);
 		ServerServiceRegistry.getInstance().addService(ConfigurationService.class, config);
 	}
@@ -260,7 +261,7 @@ public final class Init {
 	}
 
 	public static ConfigurationServiceHolder getConfigurationServiceHolder() throws Exception {
-		ConfigurationServiceHolder csh = ConfigurationServiceHolder.newInstance();
+		final ConfigurationServiceHolder csh = ConfigurationServiceHolder.newInstance();
 		csh.setService((ConfigurationService) services.get(ConfigurationService.class));
 		return csh;
 	}

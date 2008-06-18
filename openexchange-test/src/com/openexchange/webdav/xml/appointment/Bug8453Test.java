@@ -15,18 +15,19 @@ public class Bug8453Test extends AppointmentTest {
 	
 	private static final Log LOG = LogFactory.getLog(Bug6535Test.class);
 	
-	public Bug8453Test(String name) {
+	public Bug8453Test(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 	
 	public void testBug8453() throws Exception {
-		TimeZone timeZoneUTC = TimeZone.getTimeZone("UTC");
+		final TimeZone timeZoneUTC = TimeZone.getTimeZone("UTC");
 		
-		Calendar calendar = Calendar.getInstance(timeZoneUTC);
+		final Calendar calendar = Calendar.getInstance(timeZoneUTC);
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
@@ -34,13 +35,13 @@ public class Bug8453Test extends AppointmentTest {
 		
 		calendar.add(Calendar.DAY_OF_MONTH, 2);
 		
-		Date recurrenceDatePosition = calendar.getTime();
+		final Date recurrenceDatePosition = calendar.getTime();
 		
 		calendar.add(Calendar.DAY_OF_MONTH, 3);
 		
-		Date until = calendar.getTime();
+		final Date until = calendar.getTime();
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testBug8453");
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
@@ -51,15 +52,15 @@ public class Bug8453Test extends AppointmentTest {
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
 		
-		UserParticipant[] users = new UserParticipant[1];
+		final UserParticipant[] users = new UserParticipant[1];
 		users[0] = new UserParticipant(userId);
 		users[0].setConfirm(AppointmentObject.ACCEPT);
 		
 		appointmentObj.setUsers(users);
 
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
-		AppointmentObject recurrenceUpdate = new AppointmentObject();
+		final AppointmentObject recurrenceUpdate = new AppointmentObject();
 		recurrenceUpdate.setTitle("testBug8453 - exception");
 		recurrenceUpdate.setStartDate(new Date(startTime.getTime()+600000));
 		recurrenceUpdate.setEndDate(new Date(endTime.getTime()+600000));

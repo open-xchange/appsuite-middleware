@@ -31,23 +31,23 @@ public class NaughtyClientTest extends WebdavClientTest {
 	//	contentLengthTest(20,10);
 	//}
 	
-	public void contentLengthTest(int size, int pretendSize) throws MalformedURLException, IOException, SAXException, InterruptedException {
-		byte[] data = new byte[size];
-		Random r = new Random();
+	public void contentLengthTest(final int size, final int pretendSize) throws MalformedURLException, IOException, SAXException, InterruptedException {
+		final byte[] data = new byte[size];
+		final Random r = new Random();
 		for(int i = 0; i < data.length; i++) { data[i] = (byte) r.nextInt(); }
 		
-		String url = "http://"+hostname+"/servlet/webdav.infostore/Sebastian%20Kauss/testFile.bin";
+		final String url = "http://"+hostname+"/servlet/webdav.infostore/Sebastian%20Kauss/testFile.bin";
 		
-		PutMethod put = new PutMethod(url);
+		final PutMethod put = new PutMethod(url);
 		put.setRequestContentLength(pretendSize);
 		put.setRequestBody(new ByteArrayInputStream(data));
 		setAuth(put);
 		
-		HttpClient client = new HttpClient();
+		final HttpClient client = new HttpClient();
 		
 		try {
 			client.executeMethod(put);
-		} catch (IOException x) {
+		} catch (final IOException x) {
 			// This exception is expected, because we don't provide all the data (or more) than we claim.
 		}
 		clean.add("/Sebastian Kauss/testFile.bin");

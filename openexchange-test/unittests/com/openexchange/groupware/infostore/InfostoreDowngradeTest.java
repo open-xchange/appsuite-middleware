@@ -48,34 +48,34 @@
  */
 package com.openexchange.groupware.infostore;
 
-import junit.framework.TestCase;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.Init;
-import com.openexchange.groupware.downgrade.DowngradeEvent;
-import com.openexchange.groupware.downgrade.DowngradeFailedException;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.events.TestEventAdmin;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionFactory;
-import com.openexchange.api2.OXException;
-import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.event.CommonEvent;
-
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Date;
+
+import junit.framework.TestCase;
+
+import com.openexchange.api2.OXException;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.event.CommonEvent;
+import com.openexchange.groupware.Init;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.downgrade.DowngradeEvent;
+import com.openexchange.groupware.downgrade.DowngradeFailedException;
+import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
+import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.tools.events.TestEventAdmin;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionFactory;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -92,7 +92,8 @@ public class InfostoreDowngradeTest extends TestCase {
 
     private final List<DocumentMetadata> clean = new ArrayList<DocumentMetadata>();
 
-    public void setUp() throws Exception {
+    @Override
+	public void setUp() throws Exception {
         Init.startServer();
         AJAXConfig.init();
         
@@ -101,8 +102,8 @@ public class InfostoreDowngradeTest extends TestCase {
         user = UserStorage.getInstance().getUser(userId, ctx);
         userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
 
-        OXFolderAccess access = new OXFolderAccess(ctx);
-        FolderObject fo = access.getDefaultFolder(userId, FolderObject.INFOSTORE);
+        final OXFolderAccess access = new OXFolderAccess(ctx);
+        final FolderObject fo = access.getDefaultFolder(userId, FolderObject.INFOSTORE);
         folderId = fo.getObjectID();
 
         database = new InfostoreFacadeImpl(new DBPoolProvider());
@@ -114,29 +115,30 @@ public class InfostoreDowngradeTest extends TestCase {
 
     }
 
-    public void tearDown() throws OXException {
+    @Override
+	public void tearDown() throws OXException {
         deleteAll();
         Init.stopServer();
     }
 
     private void runDelete() {
-        UserConfiguration config = new UserConfiguration(0, userId,userConfig.getGroups() , ctx);
+        final UserConfiguration config = new UserConfiguration(0, userId,userConfig.getGroups() , ctx);
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(ctx);
-            DowngradeEvent event = new DowngradeEvent(config, con, ctx);
+            final DowngradeEvent event = new DowngradeEvent(config, con, ctx);
             new InfostoreDowngrade().downgradePerformed(event);
-        } catch (DBPoolingException x) {
+        } catch (final DBPoolingException x) {
             x.printStackTrace();
             fail(x.getMessage());
-        } catch (DowngradeFailedException x) {
+        } catch (final DowngradeFailedException x) {
             x.printStackTrace();
             fail(x.getMessage());
         } finally {
             if(con != null) {
                 try {
                     DBPool.pushWrite(ctx, con);
-                } catch (DBPoolingException e) {
+                } catch (final DBPoolingException e) {
                     //IGNORE
                     e.printStackTrace();
                 }
@@ -145,7 +147,7 @@ public class InfostoreDowngradeTest extends TestCase {
     }
 
     public void testDowngrade() throws OXException {
-        DocumentMetadata dm = createDocumentInStandardFolder();
+        final DocumentMetadata dm = createDocumentInStandardFolder();
 
         runDelete();
 
@@ -154,32 +156,32 @@ public class InfostoreDowngradeTest extends TestCase {
     }
 
     private void deleteAll() throws OXException {
-        for(DocumentMetadata document : clean) {
+        for(final DocumentMetadata document : clean) {
             database.removeDocument(new int[]{document.getId()}, Long.MAX_VALUE, session);
         }
     }
 
 
-    private void assertDeletedEvent(int id) {
-        CommonEvent event = TestEventAdmin.getInstance().getNewest();
+    private void assertDeletedEvent(final int id) {
+        final CommonEvent event = TestEventAdmin.getInstance().getNewest();
 
         assertEquals(CommonEvent.DELETE, event.getAction());
 
-        DocumentMetadata dm = (DocumentMetadata) event.getActionObj();
+        final DocumentMetadata dm = (DocumentMetadata) event.getActionObj();
         assertEquals(id, dm.getId());
     }
 
-    private void assertNotFound(int id) {
+    private void assertNotFound(final int id) {
         try {
             database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx, user, userConfig);
             fail("The document still exists!");
-        } catch (OXException e) {
+        } catch (final OXException e) {
             assertEquals(e.getMessage(), 300, e.getDetailNumber());    
         }
     }
 
     private DocumentMetadata createDocumentInStandardFolder() throws OXException {
-        DocumentMetadata dm = new DocumentMetadataImpl();
+        final DocumentMetadata dm = new DocumentMetadataImpl();
         dm.setTitle("documentInStandardFolder");
         dm.setFolderId(folderId);
         dm.setId(InfostoreFacade.NEW);

@@ -18,16 +18,17 @@ public class FreeBusyTest extends AppointmentTest {
 
 	private static final Log LOG = LogFactory.getLog(FreeBusyTest.class);
 	
-	public FreeBusyTest(String name) {
+	public FreeBusyTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 
 	public void testUserParticipant() throws Exception {
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testUserParticipant");
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
@@ -35,12 +36,12 @@ public class FreeBusyTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		
-		Date start = new Date(System.currentTimeMillis()-(dayInMillis*2));
-		Date end = new Date(System.currentTimeMillis()+(dayInMillis*2));
-		AppointmentObject[] appointmentArray = getFreeBusy(getWebConversation(), userId, Participant.USER, start, end, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final Date start = new Date(System.currentTimeMillis()-(dayInMillis*2));
+		final Date end = new Date(System.currentTimeMillis()+(dayInMillis*2));
+		final AppointmentObject[] appointmentArray = getFreeBusy(getWebConversation(), userId, Participant.USER, start, end, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		boolean found = false;
 		
@@ -60,17 +61,17 @@ public class FreeBusyTest extends AppointmentTest {
 	}
 	
 	public void testFullTimeUserParticipant() throws Exception {
-		Calendar c = Calendar.getInstance();
+		final Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
 		c.set(Calendar.MINUTE, 0);
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
 		
-		long newStartTime = c.getTimeInMillis();
-		long newEndTime = newStartTime + dayInMillis;
+		final long newStartTime = c.getTimeInMillis();
+		final long newEndTime = newStartTime + dayInMillis;
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testFullTimeUserParticipant");
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
@@ -78,12 +79,12 @@ public class FreeBusyTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		
-		Date start = new Date(System.currentTimeMillis()-(dayInMillis*2));
-		Date end = new Date(System.currentTimeMillis()+(dayInMillis*2));
-		AppointmentObject[] appointmentArray = getFreeBusy(getWebConversation(), userId, Participant.USER, start, end, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final Date start = new Date(System.currentTimeMillis()-(dayInMillis*2));
+		final Date end = new Date(System.currentTimeMillis()+(dayInMillis*2));
+		final AppointmentObject[] appointmentArray = getFreeBusy(getWebConversation(), userId, Participant.USER, start, end, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		boolean found = false;
 		
@@ -103,7 +104,7 @@ public class FreeBusyTest extends AppointmentTest {
 	}
 	
 	public void testUserParticipantStatusFree() throws Exception {
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testUserParticipantStatusFree");
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
@@ -111,12 +112,12 @@ public class FreeBusyTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		
-		Date start = new Date(System.currentTimeMillis()-(dayInMillis*2));
-		Date end = new Date(System.currentTimeMillis()+(dayInMillis*2));
-		AppointmentObject[] appointmentArray = getFreeBusy(getWebConversation(), userId, Participant.USER, start, end, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final Date start = new Date(System.currentTimeMillis()-(dayInMillis*2));
+		final Date end = new Date(System.currentTimeMillis()+(dayInMillis*2));
+		final AppointmentObject[] appointmentArray = getFreeBusy(getWebConversation(), userId, Participant.USER, start, end, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		boolean found = false;
 		
@@ -136,7 +137,7 @@ public class FreeBusyTest extends AppointmentTest {
 	}
 	
 	public void testResourceParticipantStatusFree() throws Exception {
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testResourceParticipantStatusFree");
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
@@ -144,9 +145,9 @@ public class FreeBusyTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		
-		int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		final int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		
-		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
+		final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
 		participants[0] = new UserParticipant();
 		participants[0].setIdentifier(userId);
 		participants[1] = new ResourceParticipant();
@@ -154,13 +155,13 @@ public class FreeBusyTest extends AppointmentTest {
 		
 		appointmentObj.setParticipants(participants);
 		
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		
 		appointmentObj.removeParticipants();
 		
-		Date start = new Date(System.currentTimeMillis()-(dayInMillis*2));
-		Date end = new Date(System.currentTimeMillis()+(dayInMillis*2));
+		final Date start = new Date(System.currentTimeMillis()-(dayInMillis*2));
+		final Date end = new Date(System.currentTimeMillis()+(dayInMillis*2));
 		
 		AppointmentObject[] appointmentArray = getFreeBusy(getWebConversation(), userId, Participant.USER, start, end, timeZone, PROTOCOL + getHostName(), getSessionId());
 		

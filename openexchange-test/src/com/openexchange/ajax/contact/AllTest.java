@@ -10,10 +10,11 @@ public class AllTest extends ContactTest {
 
 	private static final Log LOG = LogFactory.getLog(AllTest.class);
 	
-	public AllTest(String name) {
+	public AllTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}	
@@ -21,6 +22,6 @@ public class AllTest extends ContactTest {
 	public void testAll() throws Exception {
 		final int cols[] = new int[]{ ContactObject.OBJECT_ID };
 		
-		ContactObject[] contactArray = listContact(getWebConversation(), contactFolderId, cols, PROTOCOL + getHostName(), getSessionId());
+		final ContactObject[] contactArray = listContact(getWebConversation(), contactFolderId, cols, PROTOCOL + getHostName(), getSessionId());
 	}
 }

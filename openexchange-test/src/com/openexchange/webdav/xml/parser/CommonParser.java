@@ -44,11 +44,13 @@
 
 package com.openexchange.webdav.xml.parser;
 
+import java.util.List;
+
+import org.jdom.Element;
+
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.CommonFields;
-import java.util.List;
-import org.jdom.Element;
 
 /**
  * CommonParser
@@ -58,7 +60,7 @@ import org.jdom.Element;
 
 public abstract class CommonParser extends FolderChildParser {
 		
-	protected void parseElementCommon(CommonObject commonobject, Element eProp) throws Exception {
+	protected void parseElementCommon(final CommonObject commonobject, final Element eProp) throws Exception {
 		if (hasElement(eProp.getChild(CommonFields.CATEGORIES, XmlServlet.NS))) {
 			commonobject.setCategories(getValue(eProp.getChild(CommonFields.CATEGORIES, XmlServlet.NS)));
 		} 
@@ -78,8 +80,8 @@ public abstract class CommonParser extends FolderChildParser {
 		parseElementFolderChildObject(commonobject, eProp);
 	}
 	
-	protected void parseElementAttachments(CommonObject commonobject, Element eAttachments) throws Exception {
-		List elementEntries = eAttachments.getChildren("attachment", XmlServlet.NS);
+	protected void parseElementAttachments(final CommonObject commonobject, final Element eAttachments) throws Exception {
+		final List elementEntries = eAttachments.getChildren("attachment", XmlServlet.NS);
 		
 		if (elementEntries == null) {
 			commonobject.setNumberOfAttachments(0);

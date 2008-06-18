@@ -24,7 +24,7 @@ import com.openexchange.test.TestInit;
 
 public class AttachmentTest extends AbstractAJAXTest {
 	
-	public AttachmentTest(String name) {
+	public AttachmentTest(final String name) {
 		super(name);
 	}
 
@@ -34,45 +34,49 @@ public class AttachmentTest extends AbstractAJAXTest {
 	
 	protected List<AttachmentMetadata> clean = new ArrayList<AttachmentMetadata>();
 	
+	@Override
 	public void setUp() throws Exception {
 		sessionId = getSessionId();
 		testFile = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		testFile2 = new File(TestInit.getTestProperty("webdavPropertiesFile"));
 	}
 	
+	@Override
 	public void tearDown() throws Exception {
-		for(AttachmentMetadata attachment : clean) {
+		for(final AttachmentMetadata attachment : clean) {
 			detach(getWebConversation(), sessionId, attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), new int[]{attachment.getId()});
 		}
 		clean.clear();
 	}
 	
-	public Response attach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, List<File> uploads) throws JSONException, IOException {
+	public Response attach(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final List<File> uploads) throws JSONException, IOException {
 		return attach(webConv, sessionId, folderId, attachedId, moduleId, uploads, new HashMap<File,String>(), new HashMap<File,String>());
 	}
 	
-	public Response attach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, List<File> uploads, Map<File, String> filenames, Map<File, String> mimetypes) throws JSONException, IOException {
-		StringBuffer url = getUrl(sessionId,"attach");
+	public Response attach(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final List<File> uploads, final Map<File, String> filenames, final Map<File, String> mimetypes) throws JSONException, IOException {
+		final StringBuffer url = getUrl(sessionId,"attach");
 		
-		PostMethodWebRequest req = new PostMethodWebRequest(url.toString());
+		final PostMethodWebRequest req = new PostMethodWebRequest(url.toString());
 		req.setMimeEncoded(true);
 		
 		int index = 0;
 		
-		for(File upload : uploads) {
+		for(final File upload : uploads) {
 		
-			JSONObject object = new JSONObject();
+			final JSONObject object = new JSONObject();
 			
-			String filename = filenames.get(upload);
-			String mimeType = mimetypes.get(upload);
+			final String filename = filenames.get(upload);
+			final String mimeType = mimetypes.get(upload);
 			
 			object.put("folder", folderId);
 			object.put("attached", attachedId);
 			object.put("module",moduleId);
-			if(filename != null)
+			if(filename != null) {
 				object.put("filename", filename);
-			if(mimeType != null)
+			}
+			if(mimeType != null) {
 				object.put("file_mimetype",mimeType);
+			}
 			
 			req.setParameter("json_"+index,object.toString());
 			if(upload != null) {
@@ -82,10 +86,10 @@ public class AttachmentTest extends AbstractAJAXTest {
 			index++;
 		}
 		
-		WebResponse resp = webConv.getResource(req);
+		final WebResponse resp = webConv.getResource(req);
 		
-		String html = resp.getText();
-		JSONObject response = extractFromCallback(html);
+		final String html = resp.getText();
+		final JSONObject response = extractFromCallback(html);
 //		if(!"".equals(response.optString("error"))) {
 //			throw new IOException(response.getString("error"));
 //		}
@@ -94,28 +98,30 @@ public class AttachmentTest extends AbstractAJAXTest {
 	}
 	
 	
-	public Response attach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId,File upload) throws JSONException, IOException {
+	public Response attach(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId,final File upload) throws JSONException, IOException {
 		return attach(webConv,sessionId,folderId,attachedId,moduleId,upload,null, null);
 	}
 	
-	public Response attach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, File upload, String filename, String mimeType) throws JSONException, IOException {
-		Map<File, String> filenames = new HashMap<File,String>();
-		if(null != filename)
+	public Response attach(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final File upload, final String filename, final String mimeType) throws JSONException, IOException {
+		final Map<File, String> filenames = new HashMap<File,String>();
+		if(null != filename) {
 			filenames.put(upload,filename);
+		}
 		
-		Map<File, String> mimeTypes = new HashMap<File,String>();
-		if(null != mimeType)
+		final Map<File, String> mimeTypes = new HashMap<File,String>();
+		if(null != mimeType) {
 			filenames.put(upload,mimeType);
+		}
 		
 		return attach(webConv,sessionId,folderId,attachedId,moduleId,Arrays.asList(upload), filenames, mimeTypes);
 	}
 
-	public Response detach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int[] ids) throws MalformedURLException, JSONException, IOException, SAXException {
-		StringBuffer url = getUrl(sessionId,"detach");
+	public Response detach(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final int[] ids) throws MalformedURLException, JSONException, IOException, SAXException {
+		final StringBuffer url = getUrl(sessionId,"detach");
 		addCommon(url, folderId, attachedId, moduleId);
 		
-		StringBuffer data = new StringBuffer("[");
-		for(int id : ids){
+		final StringBuffer data = new StringBuffer("[");
+		for(final int id : ids){
 			data.append(id);
 			data.append(",");
 		}
@@ -125,16 +131,16 @@ public class AttachmentTest extends AbstractAJAXTest {
 		return putT(webConv,url.toString(), data.toString());
 	}
 	
-	public Response updates(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, long timestamp, int[] columns, int sort, String order) throws MalformedURLException, JSONException, IOException, SAXException {
-		StringBuffer url = getUrl(sessionId, "updates");
+	public Response updates(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final long timestamp, final int[] columns, final int sort, final String order) throws MalformedURLException, JSONException, IOException, SAXException {
+		final StringBuffer url = getUrl(sessionId, "updates");
 		addCommon(url, folderId, attachedId, moduleId);
 		addSort(url,columns,sort,order);
 		url.append("&timestamp="+timestamp);
 		return gT(webConv, url.toString());
 	}
 	
-	public Response all(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int[] columns, int sort, String order) throws MalformedURLException, JSONException, IOException, SAXException {
-		StringBuffer url = getUrl(sessionId, "all");
+	public Response all(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final int[] columns, final int sort, final String order) throws MalformedURLException, JSONException, IOException, SAXException {
+		final StringBuffer url = getUrl(sessionId, "all");
 		addCommon(url, folderId, attachedId, moduleId);
 		addSort(url, columns,sort,order);
 		
@@ -142,9 +148,9 @@ public class AttachmentTest extends AbstractAJAXTest {
 		return gT(webConv, url.toString());
 	}
 	
-	private void addSort(StringBuffer url, int[] columns, int sort, String order) {
-		StringBuffer cols = new StringBuffer();
-		for(int id : columns) {
+	private void addSort(final StringBuffer url, final int[] columns, final int sort, final String order) {
+		final StringBuffer cols = new StringBuffer();
+		for(final int id : columns) {
 			cols.append(id);
 			cols.append(",");
 		}
@@ -160,19 +166,19 @@ public class AttachmentTest extends AbstractAJAXTest {
 		url.append(order);
 	}
 
-	public Response list(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int[] ids, int[] columns) throws JSONException, MalformedURLException, IOException, SAXException {
-		StringBuffer url = getUrl(sessionId, "list");
+	public Response list(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final int[] ids, final int[] columns) throws JSONException, MalformedURLException, IOException, SAXException {
+		final StringBuffer url = getUrl(sessionId, "list");
 		addCommon(url,folderId,attachedId,moduleId);
-		StringBuffer data = new StringBuffer("[");
-		for(int id : ids) {
+		final StringBuffer data = new StringBuffer("[");
+		for(final int id : ids) {
 			data.append(id);
 			data.append(",");
 		}
 		data.setLength(data.length()-1);
 		data.append("]");
 		
-		StringBuffer cols = new StringBuffer();
-		for(int col : columns) {
+		final StringBuffer cols = new StringBuffer();
+		for(final int col : columns) {
 			cols.append(col);
 			cols.append(",");
 		}
@@ -185,26 +191,26 @@ public class AttachmentTest extends AbstractAJAXTest {
 		return putT(webConv, url.toString(), data.toString());
 	}
 	
-	public Response get(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int id) throws MalformedURLException, JSONException, IOException, SAXException{
-		StringBuffer url = getUrl(sessionId,"get");
+	public Response get(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final int id) throws MalformedURLException, JSONException, IOException, SAXException{
+		final StringBuffer url = getUrl(sessionId,"get");
 		addCommon(url, folderId, attachedId, moduleId);
 		url.append("&id="+id);
 		return gT(webConv, url.toString());
 	}
 	
-	public InputStream document(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int id) throws IOException {
+	public InputStream document(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final int id) throws IOException {
 		return document(webConv, sessionId, folderId, attachedId, moduleId, id, null);
 	}
 	
-	public InputStream document(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int id, String contentType) throws IOException{
-		GetMethodWebRequest m = documentRequest(sessionId, folderId, attachedId, moduleId, id, contentType);
-		WebResponse resp = getWebConversation().getResource(m);
+	public InputStream document(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType) throws IOException{
+		final GetMethodWebRequest m = documentRequest(sessionId, folderId, attachedId, moduleId, id, contentType);
+		final WebResponse resp = getWebConversation().getResource(m);
 		
 		return resp.getInputStream();
 	}
 	
-	public GetMethodWebRequest documentRequest(String sessionId, int folderId, int attachedId, int moduleId, int id, String contentType) {
-		StringBuffer url = getUrl(sessionId,"document");
+	public GetMethodWebRequest documentRequest(final String sessionId, final int folderId, final int attachedId, final int moduleId, final int id, String contentType) {
+		final StringBuffer url = getUrl(sessionId,"document");
 		addCommon(url, folderId, attachedId, moduleId);
 		url.append("&id="+id);
 		if(null != contentType) {
@@ -216,8 +222,8 @@ public class AttachmentTest extends AbstractAJAXTest {
 		return new GetMethodWebRequest(url.toString());
 	}
 	
-	public Response quota(WebConversation webConv, String sessionId) throws MalformedURLException, JSONException, IOException, SAXException {
-		StringBuffer url = new StringBuffer("http://");
+	public Response quota(final WebConversation webConv, final String sessionId) throws MalformedURLException, JSONException, IOException, SAXException {
+		final StringBuffer url = new StringBuffer("http://");
 		url.append(getHostName());
 		url.append("/ajax/quota?session=");
 		url.append(sessionId);
@@ -225,14 +231,14 @@ public class AttachmentTest extends AbstractAJAXTest {
 		return gT(webConv, url.toString());
 	}
 	
-	private void addCommon(StringBuffer url, int folderId, int attachedId, int moduleId) {
+	private void addCommon(final StringBuffer url, final int folderId, final int attachedId, final int moduleId) {
 		url.append("&folder="+folderId);
 		url.append("&attached="+attachedId);
 		url.append("&module="+moduleId);
 	}
 
-	protected StringBuffer getUrl(String sessionId, String action) {
-		StringBuffer url = new StringBuffer("http://");
+	protected StringBuffer getUrl(final String sessionId, final String action) {
+		final StringBuffer url = new StringBuffer("http://");
 		url.append(getHostName());
 		url.append("/ajax/attachment?session=");
 		url.append(sessionId);

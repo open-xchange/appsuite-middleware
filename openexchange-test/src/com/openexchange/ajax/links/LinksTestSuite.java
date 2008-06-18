@@ -55,7 +55,7 @@ import junit.framework.TestSuite;
 public class LinksTestSuite {
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("AJAX tests for links.");
+        final TestSuite suite = new TestSuite("AJAX tests for links.");
         suite.addTestSuite(FunctionTests.class);
         return suite;
     }

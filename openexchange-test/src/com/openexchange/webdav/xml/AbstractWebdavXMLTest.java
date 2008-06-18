@@ -26,22 +26,22 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 	
 	protected static final int APPEND_MODIFIED = 1000000;
 	
-	public AbstractWebdavXMLTest(String name) {
+	public AbstractWebdavXMLTest(final String name) {
 		super(name);
 	}
 	
-	protected static int parseResponse(Document response, boolean delete) throws Exception {
+	protected static int parseResponse(final Document response, final boolean delete) throws Exception {
 		return parseRootElement(response.getRootElement(), delete);
 	}
 	
-	protected static int parseRootElement(Element e, boolean delete) throws Exception {
+	protected static int parseRootElement(final Element e, final boolean delete) throws Exception {
 		assertNotNull("root element (null)", e);
 		assertEquals("root element", "multistatus", e.getName());
 		
 		return parseResponseElement(e.getChild("response", webdav), delete);
 	}
 	
-	protected static int parseResponseElement(Element e, boolean delete) throws Exception {
+	protected static int parseResponseElement(final Element e, final boolean delete) throws Exception {
 		assertNotNull("response element (null)", e);
 		assertEquals("response element", "response", e.getName());
 		
@@ -49,7 +49,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		return parsePropstatElement(e.getChild("propstat", webdav));
 	}
 	
-	protected static void parseHrefElement(Element e, boolean delete) throws Exception {
+	protected static void parseHrefElement(final Element e, final boolean delete) throws Exception {
 		assertNotNull("response element (null)", e);
 		assertEquals("response element", "href", e.getName());
 		if (!delete) {
@@ -57,7 +57,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		}
 	}
 	
-	protected static int parsePropstatElement(Element e) throws Exception {
+	protected static int parsePropstatElement(final Element e) throws Exception {
 		assertNotNull("propstat element (null)", e);
 		assertEquals("propstat element", "propstat", e.getName());
 		
@@ -67,43 +67,43 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		return parsePropElement(e.getChild("prop", webdav));
 	}
 	
-	protected static int parsePropElement(Element e) throws Exception {
+	protected static int parsePropElement(final Element e) throws Exception {
 		assertNotNull("prop element (null)", e);
 		assertEquals("prop element", "prop", e.getName());
 		
 		return parseObjectIdElement(e.getChild(DataFields.OBJECT_ID, XmlServlet.NS));
 	}
 	
-	protected static void parseStatusElement(Element e) throws Exception {
+	protected static void parseStatusElement(final Element e) throws Exception {
 		assertNotNull("status element (null)", e);
 		assertEquals("status element", "status", e.getName());
 		assertNotNull("status not null", e.getValue());
 		assertEquals("status 200", 200, Integer.parseInt(e.getValue()));
 	}
 	
-	protected static void parseResponsedescriptionElement(Element e) throws Exception {
+	protected static void parseResponsedescriptionElement(final Element e) throws Exception {
 		assertNotNull("status element (null)", e);
 		assertEquals("status element", "responsedescription", e.getName());
 		assertNotNull("response description not null", e.getValue());
 	}
 	
-	protected static int parseObjectIdElement(Element e) throws Exception {
+	protected static int parseObjectIdElement(final Element e) throws Exception {
 		assertNotNull("object_id element (null)", e);
 		assertEquals("object_id element", "object_id", e.getName());
 		assertNotNull("object_id null", e.getValue());
 		
-		int objectId = Integer.parseInt(e.getValue());
+		final int objectId = Integer.parseInt(e.getValue());
 		
 		assertTrue("object id > 0", (objectId > 0));
 		
 		return objectId;
 	}
 	
-	protected static Element addProp2PropertyUpdate(Element eProp) throws Exception {
-		Element rootElement = new Element("propertyupdate", webdav);
+	protected static Element addProp2PropertyUpdate(final Element eProp) throws Exception {
+		final Element rootElement = new Element("propertyupdate", webdav);
 		rootElement.addNamespaceDeclaration(XmlServlet.NS);
 		
-		Element eSet = new Element("set", webdav);
+		final Element eSet = new Element("set", webdav);
 		eSet.addContent(eProp);
 		
 		rootElement.addContent(eSet);
@@ -111,11 +111,11 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		return rootElement;
 	}
 	
-	protected static Document addProp2Document(Element eProp) throws Exception {
-		Element rootElement = new Element("propertyupdate", webdav);
+	protected static Document addProp2Document(final Element eProp) throws Exception {
+		final Element rootElement = new Element("propertyupdate", webdav);
 		rootElement.addNamespaceDeclaration(XmlServlet.NS);
 		
-		Element eSet = new Element("set", webdav);
+		final Element eSet = new Element("set", webdav);
 		eSet.addContent(eProp);
 		
 		rootElement.addContent(eSet);
@@ -123,11 +123,11 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		return new Document(rootElement);
 	}
 	
-	protected int sendPut(byte b[]) throws Exception {
+	protected int sendPut(final byte b[]) throws Exception {
 		return sendPut(b, false);
 	}
 	
-	protected int sendPut(byte b[], boolean delete) throws Exception {
+	protected int sendPut(final byte b[], final boolean delete) throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
 		req = new PutMethodWebRequest(PROTOCOL + hostName + getURL(), bais, "text/javascript");
 		req.setHeaderField("Authorization", "Basic " + authData);
@@ -135,59 +135,59 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		
 		bais = new ByteArrayInputStream(resp.getText().getBytes("UTF-8"));
 		
-		Document doc = new SAXBuilder().build(bais);
+		final Document doc = new SAXBuilder().build(bais);
 		return parseResponse(doc, delete);
 	}
 	
-	protected void sendPropFind(byte requestByte[]) throws Exception {
-		HttpClient httpclient = new HttpClient();
+	protected void sendPropFind(final byte requestByte[]) throws Exception {
+		final HttpClient httpclient = new HttpClient();
 		
 		httpclient.getState().setCredentials(null, new UsernamePasswordCredentials(login, password));
-		PropFindMethod propFindMethod = new PropFindMethod(PROTOCOL + hostName + getURL());
+		final PropFindMethod propFindMethod = new PropFindMethod(PROTOCOL + hostName + getURL());
 		propFindMethod.setDoAuthentication( true );
 		
 		InputStream is = new ByteArrayInputStream(requestByte);
 		propFindMethod.setRequestBody(is);
 		
-		int status = httpclient.executeMethod(propFindMethod);
+		final int status = httpclient.executeMethod(propFindMethod);
 		
 		assertEquals("check propfind response", 207, status);
 		
         is = propFindMethod.getResponseBodyAsStream();
         
-		Document doc = new SAXBuilder().build(is);
+		final Document doc = new SAXBuilder().build(is);
 		
 		parseResponse(doc, false);
 	}
 	
-	protected void deleteObject(FolderChildObject folderChildObj, int inFolder) throws Exception {
-		Element e_prop = new Element("prop", webdav);
+	protected void deleteObject(final FolderChildObject folderChildObj, final int inFolder) throws Exception {
+		final Element e_prop = new Element("prop", webdav);
 		
-		Element e_objectId = new Element("object_id", XmlServlet.NS);
+		final Element e_objectId = new Element("object_id", XmlServlet.NS);
 		e_objectId.addContent(String.valueOf(folderChildObj.getObjectID()));
 		e_prop.addContent(e_objectId);
 		
 		if (inFolder != -1) {
-			Element eFolderId = new Element("folder_id", XmlServlet.NS);
+			final Element eFolderId = new Element("folder_id", XmlServlet.NS);
 			eFolderId.addContent(String.valueOf(inFolder));
 			e_prop.addContent(eFolderId);
 		}
 		
-		Element e_method = new Element("method", XmlServlet.NS);
+		final Element e_method = new Element("method", XmlServlet.NS);
 		e_method.addContent("DELETE");
 		e_prop.addContent(e_method);
 		
-		byte[] b = null; // writeRequest(e_prop);
+		final byte[] b = null; // writeRequest(e_prop);
 		sendPut(b, true);
 	}
 	
-	protected void listObjects(int folderId, Date lastSync, boolean delete) throws Exception {
-		Element e_propfind = new Element("propfind", webdav);
-		Element e_prop = new Element("prop", webdav);
+	protected void listObjects(final int folderId, final Date lastSync, final boolean delete) throws Exception {
+		final Element e_propfind = new Element("propfind", webdav);
+		final Element e_prop = new Element("prop", webdav);
 		
-		Element e_folderId = new Element("folder_id", XmlServlet.NS);
-		Element e_lastSync = new Element("lastsync", XmlServlet.NS);
-		Element e_objectmode = new Element("objectmode", XmlServlet.NS);
+		final Element e_folderId = new Element("folder_id", XmlServlet.NS);
+		final Element e_lastSync = new Element("lastsync", XmlServlet.NS);
+		final Element e_objectmode = new Element("objectmode", XmlServlet.NS);
 		
 		e_folderId.addContent(String.valueOf(folderId));
 		e_lastSync.addContent(String.valueOf(lastSync.getTime()));
@@ -201,11 +201,11 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 			e_prop.addContent(e_objectmode);
 		}
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		Document doc = new Document(e_propfind);
+		final Document doc = new Document(e_propfind);
 		
-		XMLOutputter xo = new XMLOutputter();
+		final XMLOutputter xo = new XMLOutputter();
 		xo.output(doc, baos);
 		
 		baos.flush();
@@ -213,22 +213,22 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		sendPropFind(baos.toByteArray());
 	}
 	
-	protected void loadObject(int objectId) throws Exception {
-		Element e_propfind = new Element("propfind", webdav);
-		Element e_prop = new Element("prop", webdav);
+	protected void loadObject(final int objectId) throws Exception {
+		final Element e_propfind = new Element("propfind", webdav);
+		final Element e_prop = new Element("prop", webdav);
 		
-		Element eObjectId = new Element("object_id", XmlServlet.NS);
+		final Element eObjectId = new Element("object_id", XmlServlet.NS);
 		
 		eObjectId.addContent(String.valueOf(objectId));
 		
 		e_propfind.addContent(e_prop);
 		e_prop.addContent(eObjectId);
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		Document doc = new Document(e_propfind);
+		final Document doc = new Document(e_propfind);
 		
-		XMLOutputter xo = new XMLOutputter();
+		final XMLOutputter xo = new XMLOutputter();
 		xo.output(doc, baos);
 		
 		baos.flush();
@@ -240,14 +240,14 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		return "no/url";
 	}
 	
-	public static void assertEqualsAndNotNull(String message, Date expect, Date value) throws Exception {
+	public static void assertEqualsAndNotNull(final String message, final Date expect, final Date value) throws Exception {
 		if (expect != null) {
 			assertNotNull(message + " is null", value);
 			assertEquals(message, expect.getTime(), value.getTime());
 		}
 	}
 	
-	public static void assertEqualsAndNotNull(String message, Date[] expect, Date[] value) throws Exception {
+	public static void assertEqualsAndNotNull(final String message, final Date[] expect, final Date[] value) throws Exception {
 		if (expect != null) {
 			assertNotNull(message + " is null", value);
 			assertEquals(message + " date array size is not equals", expect.length, value.length);
@@ -257,7 +257,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		}
 	}
 	
-	public static void assertEqualsAndNotNull(String message, byte[] expect, byte[] value) throws Exception {
+	public static void assertEqualsAndNotNull(final String message, final byte[] expect, final byte[] value) throws Exception {
 		if (expect != null) {
 			assertNotNull(message + " is null", value);
 			assertEquals(message + " byte array size is not equals", expect.length, value.length);
@@ -267,27 +267,27 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		}
 	}
 	
-	public static void assertEqualsAndNotNull(String message, Object expect, Object value) throws Exception {
+	public static void assertEqualsAndNotNull(final String message, final Object expect, final Object value) throws Exception {
 		if (expect != null) {
 			assertNotNull(message + " is null", value);
 			assertEquals(message, expect, value);
 		}
 	}
 	
-	public static String appendPrefix(String host) {
+	public static String appendPrefix(final String host) {
 		if (host.startsWith("http://")) {
 			return host;
 		}
 		return "http://" + host;
 	}
 	
-	protected static void assertExceptionMessage(String message, int expectedStatus) throws Exception {
+	protected static void assertExceptionMessage(final String message, final int expectedStatus) throws Exception {
 		assertExceptionMessage(message, String.valueOf(expectedStatus));
 	}
 	
-	protected static void assertExceptionMessage(String message, String expectedStatus) throws Exception {
+	protected static void assertExceptionMessage(final String message, final String expectedStatus) throws Exception {
 		System.out.println("message: "+ message);
-		String statusCode = message.substring(1, message.indexOf("]"));
+		final String statusCode = message.substring(1, message.indexOf("]"));
 		assertEquals("Status code is not correct", expectedStatus, statusCode);
 	}
 }

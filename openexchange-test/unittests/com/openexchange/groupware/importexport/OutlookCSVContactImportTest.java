@@ -70,9 +70,9 @@ import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter;
-import com.openexchange.groupware.contexts.impl.ContextException;
 
 public class OutlookCSVContactImportTest extends AbstractContactTest{
 	public String IMPORT_HEADERS = ContactField.GIVEN_NAME.getEnglishOutlookName()+","+ContactField.EMAIL1.getEnglishOutlookName()+","+ContactField.BIRTHDAY.getEnglishOutlookName()+"\n";
@@ -90,16 +90,16 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		return new JUnit4TestAdapter(OutlookCSVContactImportTest.class);
 	}
 
-	protected void checkFirstResult(int objectID ) throws OXException, ContextException {
+	protected void checkFirstResult(final int objectID ) throws OXException, ContextException {
 		final ContactObject co = new RdbContactSQLInterface(sessObj).getObjectById(objectID, folderId);
 		assertEquals("Checking name" ,  NAME1 , co.getGivenName());
 		assertEquals("Checking e-Mail" ,  EMAIL1 , co.getEmail1());
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+		final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
 		Date compDate = null;
 		try {
 			compDate = sdf.parse(DATE1);
-		} catch (ParseException e) {
+		} catch (final ParseException e) {
 			System.out.println("Setup error: Date format used for comparison sucks.");
 		}
 		assertDateEquals(compDate, co.getBirthday());
@@ -107,9 +107,9 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 	
 	@Test
 	public void importOneContact() throws NumberFormatException, Exception {
-		List<ImportResult> results = importStuff(IMPORT_ONE); 
+		final List<ImportResult> results = importStuff(IMPORT_ONE); 
 		assertEquals("One result?" , results.size(), 1);
-		ImportResult res = results.get(0);
+		final ImportResult res = results.get(0);
 		if(res.hasError()){
 			res.getException().printStackTrace();
 		}
@@ -128,11 +128,11 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 	
 	@Test
 	public void bug7105() throws NumberFormatException, Exception {
-		List<ImportResult> results = importStuff(IMPORT_ONE+"\n"+NAME2); 
+		final List<ImportResult> results = importStuff(IMPORT_ONE+"\n"+NAME2); 
 		assertEquals("Two results?" , 2 , results.size());
 
 		int i = 0;
-		for(ImportResult res : results){
+		for(final ImportResult res : results){
 			assertEquals("Entry " + (i++) + " is correct?" , null, res.getException());
 		}
 		
@@ -140,16 +140,16 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 	
 	@Test
 	public void bug7552() throws NumberFormatException, Exception {
-		List<ImportResult> results = importStuff(IMPORT_HEADERS + NAME1+", "+EMAIL1+", 1.4.1981"); 
+		final List<ImportResult> results = importStuff(IMPORT_HEADERS + NAME1+", "+EMAIL1+", 1.4.1981"); 
 		assertEquals("One result?" , 1, results.size());
-		ImportResult res = results.get(0);
+		final ImportResult res = results.get(0);
 		if(res.hasError()){
 			res.getException().printStackTrace();
 		}
 
 		//check date set correctly though German style
 		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
-		Date birthday = contactSql.getObjectById( Integer.parseInt(res.getObjectId()) , Integer.parseInt(res.getFolder()) ).getBirthday();
+		final Date birthday = contactSql.getObjectById( Integer.parseInt(res.getObjectId()) , Integer.parseInt(res.getFolder()) ).getBirthday();
 		assertDateEquals( new SimpleDateFormat("dd.MM.yyyy").parse("1.4.1981") , birthday);
 
 		//cleaning up
@@ -158,14 +158,14 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 	
 	@Test
 	public void bug6825_tooMuchInformation() throws ImportExportException, UnsupportedEncodingException {
-		List<ImportResult> results = importStuff(
+		final List<ImportResult> results = importStuff(
 				IMPORT_HEADERS + 
 				"my name is definately too long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long"+
 				", "
 				+EMAIL1+
 				", 1.4.1981"); 
 		assertEquals("One result?" , 1, results.size());
-		ImportResult res = results.get(0);
+		final ImportResult res = results.get(0);
 		assertTrue("Has error" , res.hasError());
 		final OXException dirk = res.getException();
 		assertEquals("Is truncation error?" , Category.TRUNCATED , dirk.getCategory());
@@ -191,8 +191,8 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		assertTrue("Is private?", !conObj.getPrivateFlag());
 	}
 	
-	public void assertDateEquals(Date date1 , Date date2){
-		Calendar c1 = new GregorianCalendar(), c2 = new GregorianCalendar();
+	public void assertDateEquals(final Date date1 , final Date date2){
+		final Calendar c1 = new GregorianCalendar(), c2 = new GregorianCalendar();
 		c1.setTime(date1);
 		c2.setTime(date2);
 		assertEquals("Day", c1.get(Calendar.DAY_OF_MONTH),c2.get(Calendar.DAY_OF_MONTH));

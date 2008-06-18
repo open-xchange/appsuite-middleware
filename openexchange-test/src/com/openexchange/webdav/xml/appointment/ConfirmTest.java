@@ -2,17 +2,17 @@ package com.openexchange.webdav.xml.appointment;
 
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.FolderTest;
 
 public class ConfirmTest extends AppointmentTest {
 	
-	public ConfirmTest(String name) {
+	public ConfirmTest(final String name) {
 		super(name);
 	}
 
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 	}
@@ -25,7 +25,7 @@ public class ConfirmTest extends AppointmentTest {
 		final FolderObject sharedFolderObject = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 		final int secondUserId = sharedFolderObject.getCreatedBy();
 		
-        AppointmentObject appointmentObj = createAppointmentObject("testConfirm");
+        final AppointmentObject appointmentObj = createAppointmentObject("testConfirm");
 		appointmentObj.setIgnoreConflicts(true);
 		UserParticipant[] participants = new UserParticipant[2];
 		participants[0] = new UserParticipant();
@@ -35,11 +35,11 @@ public class ConfirmTest extends AppointmentTest {
 		
 		appointmentObj.setParticipants(participants);
 
-        int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+        final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 
         confirmAppointment(getSecondWebConversation(), objectId, AppointmentObject.ACCEPT, null, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 		
-		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
 		boolean found = false;
 		

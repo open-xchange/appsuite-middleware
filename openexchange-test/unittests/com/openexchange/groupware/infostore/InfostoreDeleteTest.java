@@ -1,5 +1,9 @@
 package com.openexchange.groupware.infostore;
 
+import java.sql.Connection;
+
+import junit.framework.TestCase;
+
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -14,9 +18,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
-import junit.framework.TestCase;
-
-import java.sql.Connection;
 
 public class InfostoreDeleteTest extends TestCase {
 	
@@ -26,7 +27,8 @@ public class InfostoreDeleteTest extends TestCase {
 	int myFolder = 0;
     private Context ctx;
 
-    public void setUp() throws Exception {
+    @Override
+	public void setUp() throws Exception {
 		Init.startServer();
 		ctx = ContextStorage.getInstance().getContext(1);
 		session = ServerSessionFactory.createServerSession(UserStorage.getInstance().getUserId("francisco", ctx), ctx, "Blubb");
@@ -37,31 +39,33 @@ public class InfostoreDeleteTest extends TestCase {
 		myFolder = oxfa.getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE).getObjectID();
 	}
 	
+	@Override
 	public void tearDown() throws Exception {
 		Init.stopServer();
 	}
 	
 	public void testDeleteUser() throws Exception {
-		DocumentMetadata metadata = createMetadata();
-		DeleteEvent delEvent = new DeleteEvent(this, session.getUserId(), DeleteEvent.TYPE_USER,ContextStorage.getInstance().getContext(session.getContextId()));
+		final DocumentMetadata metadata = createMetadata();
+		final DeleteEvent delEvent = new DeleteEvent(this, session.getUserId(), DeleteEvent.TYPE_USER,ContextStorage.getInstance().getContext(session.getContextId()));
 		
 		Connection con = null;
 		try {
 			con = provider.getWriteConnection(ContextStorage.getInstance().getContext(session.getContextId()));
 			new InfostoreDelete().deletePerformed(delEvent, con, con);
 		} finally {
-			if(con != null)
+			if(con != null) {
 				provider.releaseWriteConnection(ContextStorage.getInstance().getContext(session.getContextId()), con);
+			}
 		}
-        UserStorage userStorage = UserStorage.getInstance();
-        UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
+        final UserStorage userStorage = UserStorage.getInstance();
+        final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
         
         assertFalse(database.exists(metadata.getId(), InfostoreFacade.CURRENT_VERSION, ContextStorage.getInstance().getContext(session.getContextId()), userStorage.getUser(session.getUserId(), ctx), userConfigStorage.getUserConfiguration(session.getUserId(),ctx)));
 	
 	}
 
 	private DocumentMetadataImpl createMetadata() throws Exception {
-		DocumentMetadataImpl metadata = new DocumentMetadataImpl();
+		final DocumentMetadataImpl metadata = new DocumentMetadataImpl();
 		metadata.setTitle("Nice Infoitem");
 		metadata.setFolderId(myFolder); // FIXME
 		database.startTransaction();
@@ -69,7 +73,7 @@ public class InfostoreDeleteTest extends TestCase {
 			database.saveDocumentMetadata(metadata, Long.MAX_VALUE, session);
 			database.commit();
 			return metadata;
-		} catch (Exception x) {
+		} catch (final Exception x) {
 			database.rollback();
 			throw x;
 		} finally {

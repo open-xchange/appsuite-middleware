@@ -1,18 +1,10 @@
 package com.openexchange.webdav.xml;
 
-import com.meterware.httpunit.WebConversation;
-import com.openexchange.group.Group;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.resource.Resource;
-import com.openexchange.resource.ResourceGroup;
-import com.openexchange.webdav.xml.parser.ResponseParser;
-import com.openexchange.webdav.xml.request.PropFindMethod;
-import com.openexchange.webdav.xml.types.Response;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Date;
 import java.util.Map;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
@@ -23,22 +15,33 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
+import com.meterware.httpunit.WebConversation;
+import com.openexchange.group.Group;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.resource.Resource;
+import com.openexchange.resource.ResourceGroup;
+import com.openexchange.webdav.xml.parser.ResponseParser;
+import com.openexchange.webdav.xml.request.PropFindMethod;
+import com.openexchange.webdav.xml.types.Response;
+
 public class GroupUserTest extends AbstractWebdavXMLTest {
 
     private static final Log LOG = LogFactory.getLog(GroupUserTest.class);
 
 	public static final String GROUPUSER_URL = "/servlet/webdav.groupuser";
 	
-	public GroupUserTest(String name) {
+	public GroupUserTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 	
 	public void testSearchUser() throws Exception {
-		ContactObject[] contactObj = searchUser(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
+		final ContactObject[] contactObj = searchUser(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
 		for (int a = 0; a < contactObj.length; a++) {
 			assertTrue("id > 0 expected", contactObj[a].getInternalUserId() > 0);
 			assertNotNull("last modified is null", contactObj[a].getLastModified());
@@ -46,7 +49,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public void testSearchGroup() throws Exception {
-		Group group[] = searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
+		final Group group[] = searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
 		for (int a = 0; a < group.length; a++) {
 			assertTrue("id > 0 expected", group[a].getIdentifier() > 0);
 			assertNotNull("last modified is null", group[a].getLastModified());
@@ -54,7 +57,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public void testSearchResource() throws Exception {
-		Resource[] resource = searchResource(getWebConversation(), "*", new Date(0), PROTOCOL + hostName, login, password);
+		final Resource[] resource = searchResource(getWebConversation(), "*", new Date(0), PROTOCOL + hostName, login, password);
 		for (int a = 0; a < resource.length; a++) {
 			assertTrue("id > 0 expected", resource[a].getIdentifier() > 0);
 			assertNotNull("last modified is null", resource[a].getLastModified());
@@ -74,9 +77,9 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 			}
 		}
 		
-		int id = group[posInArray].getIdentifier();
-		String displayName = group[posInArray].getDisplayName();
-		Date lastModifed = group[posInArray].getLastModified();
+		final int id = group[posInArray].getIdentifier();
+		final String displayName = group[posInArray].getDisplayName();
+		final Date lastModifed = group[posInArray].getLastModified();
 		
 		
 		group = searchGroup(getWebConversation(), displayName, new Date(lastModifed.getTime()+5000), PROTOCOL + getHostName(), getLogin(), getPassword());
@@ -106,9 +109,9 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 			}
 		}
 		
-		int id = resource[posInArray].getIdentifier();
-		String displayName = resource[posInArray].getDisplayName();
-		Date lastModifed = resource[posInArray].getLastModified();
+		final int id = resource[posInArray].getIdentifier();
+		final String displayName = resource[posInArray].getDisplayName();
+		final Date lastModifed = resource[posInArray].getLastModified();
 		
 		
 		resource = searchResource(getWebConversation(), displayName, new Date(lastModifed.getTime()+5000), PROTOCOL + getHostName(), getLogin(), getPassword());
@@ -139,43 +142,43 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		assertTrue("context id for login user not found", contextId != -1);
 	}
 	
-	public static ContactObject[] searchUser(WebConversation webCon, String searchpattern, Date modified, String host, String login, String password) throws Exception {
+	public static ContactObject[] searchUser(final WebConversation webCon, final String searchpattern, final Date modified, String host, final String login, final String password) throws Exception {
 		host = appendPrefix(host);
 		
-		Element eUsers = new Element("user", XmlServlet.NS);
+		final Element eUsers = new Element("user", XmlServlet.NS);
 		eUsers.addContent(searchpattern);
 		
-		Document doc = addElement2PropFind(eUsers, modified);
+		final Document doc = addElement2PropFind(eUsers, modified);
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		XMLOutputter xo = new XMLOutputter();
+		final XMLOutputter xo = new XMLOutputter();
 		xo.output(doc, baos);
 		
 		baos.flush();
 		
-		HttpClient httpclient = new HttpClient();
+		final HttpClient httpclient = new HttpClient();
 		
 		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
-		PropFindMethod propFindMethod = new PropFindMethod(host + GROUPUSER_URL);
+		final PropFindMethod propFindMethod = new PropFindMethod(host + GROUPUSER_URL);
 		propFindMethod.setDoAuthentication( true );
 		
         LOG.debug("Request Body: " + new String(baos.toByteArray(), "UTF-8"));
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		propFindMethod.setRequestBody(bais);
 		
-		int status = httpclient.executeMethod(propFindMethod);
+		final int status = httpclient.executeMethod(propFindMethod);
 		
-		byte responseByte[] = propFindMethod.getResponseBody();
+		final byte responseByte[] = propFindMethod.getResponseBody();
 		bais = new ByteArrayInputStream(responseByte);
 		
 		if (status != 207) {
 			fail("Invalid response code '" + status + "'. Response code is not 207 as expected. Response data: " + new String(responseByte));
 		}
 
-		Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.GROUPUSER);
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.GROUPUSER);
 		
-		ContactObject[] contactArray = new ContactObject[response.length];
+		final ContactObject[] contactArray = new ContactObject[response.length];
 		for (int a = 0; a < contactArray.length; a++) {
 			if (response[a].hasError()) {
 				fail("xml error: " + response[a].getErrorMessage());
@@ -187,39 +190,39 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		return contactArray;
 	}
 	
-	public static Group[] searchGroup(WebConversation webCon, String searchpattern, Date modified, String host, String login, String password) throws Exception {
+	public static Group[] searchGroup(final WebConversation webCon, final String searchpattern, final Date modified, String host, final String login, final String password) throws Exception {
 		host = appendPrefix(host);
 		
-		Element eGroups = new Element("group", XmlServlet.NS);
+		final Element eGroups = new Element("group", XmlServlet.NS);
 		eGroups.addContent(searchpattern);
 		
-		Document doc = addElement2PropFind(eGroups, modified);
+		final Document doc = addElement2PropFind(eGroups, modified);
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		XMLOutputter xo = new XMLOutputter();
+		final XMLOutputter xo = new XMLOutputter();
 		xo.output(doc, baos);
 		
 		baos.flush();
 		
-		HttpClient httpclient = new HttpClient();
+		final HttpClient httpclient = new HttpClient();
 		
 		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
-		PropFindMethod propFindMethod = new PropFindMethod(host + GROUPUSER_URL);
+		final PropFindMethod propFindMethod = new PropFindMethod(host + GROUPUSER_URL);
 		propFindMethod.setDoAuthentication( true );
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		propFindMethod.setRequestBody(bais);
 		
-		int status = httpclient.executeMethod(propFindMethod);
+		final int status = httpclient.executeMethod(propFindMethod);
 		
 		assertEquals("check propfind response", 207, status);
 		
-		byte responseByte[] = propFindMethod.getResponseBody();
+		final byte responseByte[] = propFindMethod.getResponseBody();
 		bais = new ByteArrayInputStream(responseByte);
-		Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.GROUPUSER);
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.GROUPUSER);
 		
-		Group[] groupArray = new Group[response.length];
+		final Group[] groupArray = new Group[response.length];
 		for (int a = 0; a < groupArray.length; a++) {
 			if (response[a].hasError()) {
 				fail("xml error: " + response[a].getErrorMessage());
@@ -231,39 +234,39 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		return groupArray;
 	}
 	
-	public static Resource[] searchResource(WebConversation webCon, String searchpattern, Date modified, String host, String login, String password) throws Exception {
+	public static Resource[] searchResource(final WebConversation webCon, final String searchpattern, final Date modified, String host, final String login, final String password) throws Exception {
 		host = appendPrefix(host);
 		
-		Element eResources = new Element("resource", XmlServlet.NS);
+		final Element eResources = new Element("resource", XmlServlet.NS);
 		eResources.addContent(searchpattern);
 		
-		Document doc = addElement2PropFind(eResources, modified);
+		final Document doc = addElement2PropFind(eResources, modified);
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		XMLOutputter xo = new XMLOutputter();
+		final XMLOutputter xo = new XMLOutputter();
 		xo.output(doc, baos);
 		
 		baos.flush();
 		
-		HttpClient httpclient = new HttpClient();
+		final HttpClient httpclient = new HttpClient();
 		
 		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
-		PropFindMethod propFindMethod = new PropFindMethod(host + GROUPUSER_URL);
+		final PropFindMethod propFindMethod = new PropFindMethod(host + GROUPUSER_URL);
 		propFindMethod.setDoAuthentication( true );
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		propFindMethod.setRequestBody(bais);
 		
-		int status = httpclient.executeMethod(propFindMethod);
+		final int status = httpclient.executeMethod(propFindMethod);
 		
 		assertEquals("check propfind response", 207, status);
 		
-		byte responseByte[] = propFindMethod.getResponseBody();
+		final byte responseByte[] = propFindMethod.getResponseBody();
 		bais = new ByteArrayInputStream(responseByte);
-		Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.GROUPUSER);
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.GROUPUSER);
 		
-		Resource[] resourceArray = new Resource[response.length];
+		final Resource[] resourceArray = new Resource[response.length];
 		for (int a = 0; a < resourceArray.length; a++) {
 			if (response[a].hasError()) {
 				fail("xml error: " + response[a].getErrorMessage());
@@ -275,39 +278,39 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		return resourceArray;
 	}
 	
-	public static ResourceGroup[] searchResourcegroup(WebConversation webCon, String searchpattern, Date modified, String host, String login, String password) throws Exception {
+	public static ResourceGroup[] searchResourcegroup(final WebConversation webCon, final String searchpattern, final Date modified, String host, final String login, final String password) throws Exception {
 		host = appendPrefix(host);
 		
-		Element eResourceGroups = new Element("resourcegroup", XmlServlet.NS);
+		final Element eResourceGroups = new Element("resourcegroup", XmlServlet.NS);
 		eResourceGroups.addContent(searchpattern);
 		
-		Document doc = addElement2PropFind(eResourceGroups, modified);
+		final Document doc = addElement2PropFind(eResourceGroups, modified);
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		XMLOutputter xo = new XMLOutputter();
+		final XMLOutputter xo = new XMLOutputter();
 		xo.output(doc, baos);
 		
 		baos.flush();
 		
-		HttpClient httpclient = new HttpClient();
+		final HttpClient httpclient = new HttpClient();
 		
 		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
-		PropFindMethod propFindMethod = new PropFindMethod(host + GROUPUSER_URL);
+		final PropFindMethod propFindMethod = new PropFindMethod(host + GROUPUSER_URL);
 		propFindMethod.setDoAuthentication( true );
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		propFindMethod.setRequestBody(bais);
 		
-		int status = httpclient.executeMethod(propFindMethod);
+		final int status = httpclient.executeMethod(propFindMethod);
 		
 		assertEquals("check propfind response", 207, status);
 		
-		byte responseByte[] = propFindMethod.getResponseBody();
+		final byte responseByte[] = propFindMethod.getResponseBody();
 		bais = new ByteArrayInputStream(responseByte);
-		Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.GROUPUSER);
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.GROUPUSER);
 		
-		ResourceGroup[] resourcegroupArray = new ResourceGroup[response.length];
+		final ResourceGroup[] resourcegroupArray = new ResourceGroup[response.length];
 		for (int a = 0; a < resourcegroupArray.length; a++) {
 			if (response[a].hasError()) {
 				fail("xml error: " + response[a].getErrorMessage());
@@ -319,13 +322,13 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		return resourcegroupArray;
 	}
 	
-	public static int getUserId(WebConversation webCon, String host, String login, String password) throws Exception {
+	public static int getUserId(final WebConversation webCon, String host, final String login, final String password) throws Exception {
 		host = appendPrefix(host);
 		
-		ContactObject[] contactArray = searchUser(webCon, "*", new Date(0), host, login, password);
+		final ContactObject[] contactArray = searchUser(webCon, "*", new Date(0), host, login, password);
 		for (int a = 0; a < contactArray.length; a++) {
-			ContactObject contactObj = contactArray[a];
-			Map m = contactObj.getMap();
+			final ContactObject contactObj = contactArray[a];
+			final Map m = contactObj.getMap();
 			if (m != null && m.containsKey("myidentity")) {
 				return contactObj.getInternalUserId();
 			}
@@ -333,13 +336,13 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		return -1;
 	}
 	
-	public static int getContextId(WebConversation webCon, String host, String login, String password) throws Exception {
+	public static int getContextId(final WebConversation webCon, String host, final String login, final String password) throws Exception {
 		host = appendPrefix(host);
 		
-		ContactObject[] contactArray = searchUser(webCon, "*", new Date(0), host, login, password);
+		final ContactObject[] contactArray = searchUser(webCon, "*", new Date(0), host, login, password);
 		for (int a = 0; a < contactArray.length; a++) {
-			ContactObject contactObj = contactArray[a];
-			Map m = contactObj.getMap();
+			final ContactObject contactObj = contactArray[a];
+			final Map m = contactObj.getMap();
 			if (m != null && m.containsKey("context_id")) {
 				return Integer.parseInt(m.get("context_id").toString());
 			}
@@ -347,11 +350,11 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		return -1;
 	}
 	
-	public static Document addElement2PropFind(Element e, Date modified) throws Exception {
-		Element ePropfind = new Element("propfind", webdav);
-		Element eProp = new Element("prop", webdav);
+	public static Document addElement2PropFind(final Element e, final Date modified) throws Exception {
+		final Element ePropfind = new Element("propfind", webdav);
+		final Element eProp = new Element("prop", webdav);
 		
-		Element eLastSync = new Element("lastsync", XmlServlet.NS);
+		final Element eLastSync = new Element("lastsync", XmlServlet.NS);
 		eLastSync.addContent(String.valueOf(modified.getTime()));
 		
 		ePropfind.addContent(eProp);

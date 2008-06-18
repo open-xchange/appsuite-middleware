@@ -49,6 +49,15 @@
 
 package com.openexchange.ajax.importexport;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.json.JSONException;
+import org.xml.sax.SAXException;
+
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.ImportExport;
 import com.openexchange.api2.OXException;
@@ -59,14 +68,6 @@ import com.openexchange.groupware.importexport.Format;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.webdav.xml.FolderTest;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 
 /**
@@ -86,10 +87,11 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 	public String IMPORT_VCARD = "BEGIN:VCARD\nVERSION:3.0\nPRODID:OPEN-XCHANGE\nFN:Prinz\\, Tobias\nN:Prinz;Tobias;;;\nNICKNAME:Tierlieb\nBDAY:19810501\nADR;TYPE=work:;;;Meinerzhagen;NRW;58540;DE\nTEL;TYPE=home,voice:+49 2358 7192\nEMAIL:tobias.prinz@open-xchange.com\nORG:- deactivated -\nREV:20061204T160750.018Z\nURL:www.tobias-prinz.de\nUID:80@ox6.netline.de\nEND:VCARD\n";
 	public String[] IMPORT_VCARD_AWAITED_ELEMENTS = "PRODID:OPEN-XCHANGE\nFN:Prinz\\, Tobias\nN:Prinz;Tobias;;;\nBDAY:19810501\nADR;TYPE=work:;;;Meinerzhagen;NRW;58540;DE\nTEL;TYPE=home,voice:+49 2358 7192\nEMAIL:tobias.prinz@open-xchange.com".split("\n");
 	
-	public AbstractImportExportServletTest(String name){
+	public AbstractImportExportServletTest(final String name){
 		super(name);
 	}
 	
+	@Override
 	public void setUp() throws Exception{
 		super.setUp();
 	//	final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
@@ -97,6 +99,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 	//	sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-roundtrip-test");
 	}
 	
+	@Override
 	public void tearDown() throws Exception{
         super.tearDown();
 	}
@@ -109,8 +112,8 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 		return folderObj.getCreatedBy();
 	}
 
-	public String getUrl(String servlet, int folderId, Format format) throws IOException, SAXException, JSONException{
-		StringBuilder bob = new StringBuilder("http://");
+	public String getUrl(final String servlet, final int folderId, final Format format) throws IOException, SAXException, JSONException{
+		final StringBuilder bob = new StringBuilder("http://");
 		bob.append(getHostName());
 		bob.append("/ajax/");
 		bob.append(servlet);
@@ -121,8 +124,8 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 		return bob.toString();
 	}
 	
-	public String getCSVColumnUrl(String servlet, int folderId, Format format) throws IOException, SAXException, JSONException{
-		StringBuilder bob = new StringBuilder(getUrl(servlet, folderId, format));
+	public String getCSVColumnUrl(final String servlet, final int folderId, final Format format) throws IOException, SAXException, JSONException{
+		final StringBuilder bob = new StringBuilder(getUrl(servlet, folderId, format));
 		
 		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.GIVEN_NAME.getNumber());
 		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.EMAIL1.getNumber());
@@ -130,37 +133,37 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 		return bob.toString();		
 	}
 	
-	protected void addParam(StringBuilder bob, String param, String value){
+	protected void addParam(final StringBuilder bob, final String param, final String value){
 		bob.append("&");
 		bob.append(param);
 		bob.append("=");
 		bob.append(value);
 	}
 	
-	protected void addParam(StringBuilder bob, String param, int value){
+	protected void addParam(final StringBuilder bob, final String param, final int value){
 		addParam(bob, param, Integer.toString(value));
 	}
 	
-	protected int createFolder(String title, int folderObjectModuleID) throws Exception{
-		FolderObject folderObj = new FolderObject();
+	protected int createFolder(final String title, final int folderObjectModuleID) throws Exception{
+		final FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName(title);
 		folderObj.setParentFolderID(FolderObject.PRIVATE);
 		folderObj.setModule(folderObjectModuleID);
 		folderObj.setType(FolderObject.PRIVATE);
 		
-		OCLPermission[] permission = new OCLPermission[] {
+		final OCLPermission[] permission = new OCLPermission[] {
 			FolderTest.createPermission( getUserId_FIXME(), false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
 		};
 		
 		folderObj.setPermissionsAsArray( permission );
 		try{
 			return FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword());
-		} catch(OXFolderException e){
+		} catch(final OXFolderException e){
 			return -1;
 		}
 	}
 	
-	protected void removeFolder( int folderId) throws OXException, Exception{
+	protected void removeFolder( final int folderId) throws OXException, Exception{
 		if(folderId == -1){
 			return;
 		}
@@ -169,12 +172,12 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 	
 
 	
-	public static void assertEquals(String message, List l1, List l2){
+	public static void assertEquals(final String message, final List l1, final List l2){
 		if(l1.size() != l2.size()) {
 			fail(message);
 		}
-		Set s = new HashSet(l1);
-		for(Object o : l2) {
+		final Set s = new HashSet(l1);
+		for(final Object o : l2) {
 			assertTrue(message,s.remove(o));
 		}
 	}

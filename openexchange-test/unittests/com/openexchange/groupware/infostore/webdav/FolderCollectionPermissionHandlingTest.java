@@ -1,5 +1,15 @@
 package com.openexchange.groupware.infostore.webdav;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import junit.framework.TestCase;
+
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -19,9 +29,6 @@ import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
-import junit.framework.TestCase;
-
-import java.util.*;
 
 public class FolderCollectionPermissionHandlingTest extends TestCase {
 	
@@ -42,8 +49,8 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 	
 	
 	private FolderObject privateInfostoreFolder;
-	private List<FolderObject> folders = new ArrayList<FolderObject>();
-	private List<FolderObject> foldersB = new ArrayList<FolderObject>();
+	private final List<FolderObject> folders = new ArrayList<FolderObject>();
+	private final List<FolderObject> foldersB = new ArrayList<FolderObject>();
 	
 	private OXFolderManager manager = null;
 	private OXFolderManager managerB = null;
@@ -51,12 +58,13 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 	private WebdavFactory factory;
 	
 	
+	@Override
 	public void setUp() throws Exception {
 		Init.startServer();
 		ctx = ContextStorage.getInstance().getContext(1); 
 		
-		String userNameA = AjaxInit.getAJAXProperty("login");
-		String userNameB = AjaxInit.getAJAXProperty("seconduser");
+		final String userNameA = AjaxInit.getAJAXProperty("login");
+		final String userNameB = AjaxInit.getAJAXProperty("seconduser");
 		
 		userIdA = UserStorage.getInstance().getUserId(userNameA, ctx);
 		userIdB = UserStorage.getInstance().getUserId(userNameB, ctx);
@@ -85,8 +93,8 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 		
 		try {
 			while(privateInfostoreFolder == null && iter.hasNext()) {
-				FolderObject f = (FolderObject) iter.next();
-				List<OCLPermission> perms = f.getPermissions();
+				final FolderObject f = (FolderObject) iter.next();
+				final List<OCLPermission> perms = f.getPermissions();
 				if(perms.size() == 1) {
 					if(perms.get(0).getFolderPermission() >= OCLPermission.ADMIN_PERMISSION && perms.get(0).getEntity() == userIdA) {
 						privateInfostoreFolder = f;
@@ -105,15 +113,16 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 		assertTrue("Can't find suitable infostore folder",null != privateInfostoreFolder);
 	}
 	
+	@Override
 	public void tearDown() throws Exception {
 		
 		Collections.reverse(folders);
-		for(FolderObject fo : folders) {
+		for(final FolderObject fo : folders) {
 			manager.deleteFolder(fo, true, System.currentTimeMillis());
 		}
 		
 		Collections.reverse(foldersB);
-		for(FolderObject fo : foldersB) {
+		for(final FolderObject fo : foldersB) {
 			managerB.deleteFolder(fo, true, System.currentTimeMillis());
 		}
 		
@@ -123,83 +132,83 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 	}
 	
 	public void testCreate() throws Exception {
-		FolderObject folderWithUserBMayReadAllAndUserAMayReadAllAndAdmin = new FolderObject();
+		final FolderObject folderWithUserBMayReadAllAndUserAMayReadAllAndAdmin = new FolderObject();
 		addDefaults(folderWithUserBMayReadAllAndUserAMayReadAllAndAdmin);
 		folderWithUserBMayReadAllAndUserAMayReadAllAndAdmin.setFolderName("User B May Read All and User A may read all and is Admin");
-		OCLPermission perm1 = buildReadAll(userIdA, true);
-		OCLPermission perm2 = buildReadAll(userIdB, false);
+		final OCLPermission perm1 = buildReadAll(userIdA, true);
+		final OCLPermission perm2 = buildReadAll(userIdB, false);
 		folderWithUserBMayReadAllAndUserAMayReadAllAndAdmin.setPermissionsAsArray(new OCLPermission[]{perm1,perm2});
 		
 		manager.createFolder(folderWithUserBMayReadAllAndUserAMayReadAllAndAdmin, true, System.currentTimeMillis());
 		folders.add(folderWithUserBMayReadAllAndUserAMayReadAllAndAdmin);
 		
-		String url = url(privateInfostoreFolder, folderWithUserBMayReadAllAndUserAMayReadAllAndAdmin) + "/subfolder";
+		final String url = url(privateInfostoreFolder, folderWithUserBMayReadAllAndUserAMayReadAllAndAdmin) + "/subfolder";
 		
 		factory.resolveCollection(url).create();
-		FolderCollection coll = (FolderCollection) factory.resolveCollection(url);
+		final FolderCollection coll = (FolderCollection) factory.resolveCollection(url);
 		
-		FolderObject newFolder = FolderObject.loadFolderObjectFromDB(coll.getId(), ctx);
+		final FolderObject newFolder = FolderObject.loadFolderObjectFromDB(coll.getId(), ctx);
 		folders.add(newFolder);
 		
 		assertPermissions(newFolder.getPermissions(), perm1, perm2);
 	}
 	
 	public void testAddAdminOnCreate() throws Exception {
-		FolderObject folderWithUserBMayReadAllAndAdminAndUserAMayReadAll = new FolderObject();
+		final FolderObject folderWithUserBMayReadAllAndAdminAndUserAMayReadAll = new FolderObject();
 		addDefaults(folderWithUserBMayReadAllAndAdminAndUserAMayReadAll);
 		folderWithUserBMayReadAllAndAdminAndUserAMayReadAll.setFolderName("User B May Read All and is Admin and User A may read all "+System.currentTimeMillis());
-		OCLPermission perm1 = buildReadAll(userIdA, false);
+		final OCLPermission perm1 = buildReadAll(userIdA, false);
 		perm1.setFolderPermission(OCLPermission.CREATE_SUB_FOLDERS);
-		OCLPermission perm2 = buildReadAll(userIdB, true);
+		final OCLPermission perm2 = buildReadAll(userIdB, true);
 		folderWithUserBMayReadAllAndAdminAndUserAMayReadAll.setPermissionsAsArray(new OCLPermission[]{perm1,perm2});
 		
 		manager.createFolder(folderWithUserBMayReadAllAndAdminAndUserAMayReadAll, true, System.currentTimeMillis());
 		foldersB.add(folderWithUserBMayReadAllAndAdminAndUserAMayReadAll);
 		
-		String url = url(privateInfostoreFolder, folderWithUserBMayReadAllAndAdminAndUserAMayReadAll)+"/subfolder";
+		final String url = url(privateInfostoreFolder, folderWithUserBMayReadAllAndAdminAndUserAMayReadAll)+"/subfolder";
 		
 		factory.resolveCollection(url).create();
-		FolderCollection coll = (FolderCollection) factory.resolveCollection(url);
+		final FolderCollection coll = (FolderCollection) factory.resolveCollection(url);
 		
-		FolderObject newFolder = FolderObject.loadFolderObjectFromDB(coll.getId(), ctx);
+		final FolderObject newFolder = FolderObject.loadFolderObjectFromDB(coll.getId(), ctx);
 		folders.add(newFolder);
 		
 		assertPermissions(newFolder.getPermissions(), buildReadAll(userIdA, true), perm2);
 	}
 		
 	public void testCopy() throws Exception {
-		FolderObject copyMe = buildFolderToCopy();
-		OCLPermission[] perms = buildFolderToCopyPermissions();
+		final FolderObject copyMe = buildFolderToCopy();
+		final OCLPermission[] perms = buildFolderToCopyPermissions();
 		
 		manager.createFolder(copyMe, true, System.currentTimeMillis());
 		folders.add(copyMe);
 		
-		WebdavPath url = url(privateInfostoreFolder, copyMe);
-		WebdavPath copyUrl = new WebdavPath(privateInfostoreFolder.getFolderName()).append("copy");
+		final WebdavPath url = url(privateInfostoreFolder, copyMe);
+		final WebdavPath copyUrl = new WebdavPath(privateInfostoreFolder.getFolderName()).append("copy");
 		
 		factory.resolveCollection(url).copy(copyUrl);
 		
-		FolderCollection theCopy = (FolderCollection) factory.resolveCollection(copyUrl);
-		FolderObject theCopiedFolder = FolderObject.loadFolderObjectFromDB(theCopy.getId(), ctx);
+		final FolderCollection theCopy = (FolderCollection) factory.resolveCollection(copyUrl);
+		final FolderObject theCopiedFolder = FolderObject.loadFolderObjectFromDB(theCopy.getId(), ctx);
 		folders.add(theCopiedFolder);
 		
 		assertPermissions(theCopiedFolder.getPermissions(), perms);
 	}
 
 	public void testMove() throws Exception{
-		FolderObject moveMe = buildFolderToCopy();
-		OCLPermission[] perms = buildFolderToCopyPermissions();
+		final FolderObject moveMe = buildFolderToCopy();
+		final OCLPermission[] perms = buildFolderToCopyPermissions();
 		
 		manager.createFolder(moveMe, true, System.currentTimeMillis());
 		folders.add(moveMe);
 		
-		WebdavPath url = url(privateInfostoreFolder, moveMe);
-		WebdavPath moveUrl = new WebdavPath(privateInfostoreFolder.getFolderName()).append("moved");
+		final WebdavPath url = url(privateInfostoreFolder, moveMe);
+		final WebdavPath moveUrl = new WebdavPath(privateInfostoreFolder.getFolderName()).append("moved");
 		
 		factory.resolveCollection(url).move(moveUrl);
 		
-		FolderCollection theDestination = (FolderCollection) factory.resolveCollection(moveUrl);
-		FolderObject theDestinationFolder = FolderObject.loadFolderObjectFromDB(theDestination.getId(), ctx);
+		final FolderCollection theDestination = (FolderCollection) factory.resolveCollection(moveUrl);
+		final FolderObject theDestinationFolder = FolderObject.loadFolderObjectFromDB(theDestination.getId(), ctx);
 		folders.remove(moveMe);
 		folders.add(theDestinationFolder);
 		
@@ -207,107 +216,108 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 	}
 	
 	public void testCopyWithOverwrite() throws Exception {
-		FolderObject copyMe = buildFolderToCopy();
-		OCLPermission[] perms = buildFolderToCopyPermissions();
+		final FolderObject copyMe = buildFolderToCopy();
+		final OCLPermission[] perms = buildFolderToCopyPermissions();
 		
 		manager.createFolder(copyMe, true, System.currentTimeMillis());
 		folders.add(copyMe);
 		
-		FolderObject overwriteMe = buildFolderToOverwrite();
+		final FolderObject overwriteMe = buildFolderToOverwrite();
 		manager.createFolder(overwriteMe, true, System.currentTimeMillis());	
 		folders.add(overwriteMe);
 		
-		WebdavPath url = url(privateInfostoreFolder, copyMe);
-		WebdavPath copyUrl = url(privateInfostoreFolder, overwriteMe);
+		final WebdavPath url = url(privateInfostoreFolder, copyMe);
+		final WebdavPath copyUrl = url(privateInfostoreFolder, overwriteMe);
 		
 		factory.resolveCollection(url).copy(copyUrl,false,true);
 		
-		FolderCollection theCopy = (FolderCollection) factory.resolveCollection(copyUrl);
-		FolderObject theCopiedFolder = FolderObject.loadFolderObjectFromDB(theCopy.getId(), ctx);
+		final FolderCollection theCopy = (FolderCollection) factory.resolveCollection(copyUrl);
+		final FolderObject theCopiedFolder = FolderObject.loadFolderObjectFromDB(theCopy.getId(), ctx);
 		
 		assertPermissions(theCopiedFolder.getPermissions(), perms);
 	}
 	
 	public void testMoveWithOverwrite() throws Exception {
-		FolderObject moveMe = buildFolderToCopy();
-		OCLPermission[] perms = buildFolderToCopyPermissions();
+		final FolderObject moveMe = buildFolderToCopy();
+		final OCLPermission[] perms = buildFolderToCopyPermissions();
 		
 		manager.createFolder(moveMe, true, System.currentTimeMillis());
 		folders.add(moveMe);
 		
-		FolderObject overwriteMe = buildFolderToOverwrite();
+		final FolderObject overwriteMe = buildFolderToOverwrite();
 		manager.createFolder(overwriteMe, true, System.currentTimeMillis());		
 		folders.add(overwriteMe);
 		
-		WebdavPath url = url(privateInfostoreFolder, moveMe);
-		WebdavPath moveUrl = url(privateInfostoreFolder, overwriteMe);
+		final WebdavPath url = url(privateInfostoreFolder, moveMe);
+		final WebdavPath moveUrl = url(privateInfostoreFolder, overwriteMe);
 		
 		factory.resolveCollection(url).move(moveUrl,false,true);
 		
-		FolderCollection theDestination = (FolderCollection) factory.resolveCollection(moveUrl);
+		final FolderCollection theDestination = (FolderCollection) factory.resolveCollection(moveUrl);
 		folders.remove(moveMe);
-		FolderObject theDestinationFolder = FolderObject.loadFolderObjectFromDB(theDestination.getId(), ctx);
+		final FolderObject theDestinationFolder = FolderObject.loadFolderObjectFromDB(theDestination.getId(), ctx);
 		assertPermissions(theDestinationFolder.getPermissions(), perms);
 	}
 	
 	
 	public void testCopyWithoutOverwrite() throws Exception {
-		FolderObject copyMe = buildFolderToCopy();
+		final FolderObject copyMe = buildFolderToCopy();
 		
 		manager.createFolder(copyMe, true, System.currentTimeMillis());
 		folders.add(copyMe);
 		
-		FolderObject overwriteMe = buildFolderToOverwrite();
+		final FolderObject overwriteMe = buildFolderToOverwrite();
 		manager.createFolder(overwriteMe, true, System.currentTimeMillis());	
 		folders.add(overwriteMe);
 		
-		WebdavPath url = url(privateInfostoreFolder, copyMe);
-		WebdavPath copyUrl = url(privateInfostoreFolder, overwriteMe);
+		final WebdavPath url = url(privateInfostoreFolder, copyMe);
+		final WebdavPath copyUrl = url(privateInfostoreFolder, overwriteMe);
 		
 		factory.resolveCollection(url).copy(copyUrl,false,false);
 		
-		FolderCollection theCopy = (FolderCollection) factory.resolveCollection(copyUrl);
-		FolderObject theCopiedFolder = FolderObject.loadFolderObjectFromDB(theCopy.getId(), ctx);
+		final FolderCollection theCopy = (FolderCollection) factory.resolveCollection(copyUrl);
+		final FolderObject theCopiedFolder = FolderObject.loadFolderObjectFromDB(theCopy.getId(), ctx);
 		
 		assertPermissions(theCopiedFolder.getPermissions(), buildFolderToOverwritePermissions());
 		
 	}
 	
 	public void testMoveWithoutOverwrite() throws Exception {
-		FolderObject moveMe = buildFolderToCopy();
+		final FolderObject moveMe = buildFolderToCopy();
 		
 		manager.createFolder(moveMe, true, System.currentTimeMillis());
 		folders.add(moveMe);
 		
-		FolderObject overwriteMe = buildFolderToOverwrite();
+		final FolderObject overwriteMe = buildFolderToOverwrite();
 		manager.createFolder(overwriteMe, true, System.currentTimeMillis());		
 		folders.add(overwriteMe);
 		
-		WebdavPath url = url(privateInfostoreFolder, moveMe);
-		WebdavPath moveUrl = url(privateInfostoreFolder, overwriteMe);
+		final WebdavPath url = url(privateInfostoreFolder, moveMe);
+		final WebdavPath moveUrl = url(privateInfostoreFolder, overwriteMe);
 		
 		factory.resolveCollection(url).move(moveUrl,false,false);
 		
-		FolderCollection theDestination = (FolderCollection) factory.resolveCollection(moveUrl);
+		final FolderCollection theDestination = (FolderCollection) factory.resolveCollection(moveUrl);
 		folders.remove(moveMe);
-		FolderObject theDestinationFolder = FolderObject.loadFolderObjectFromDB(theDestination.getId(), ctx);
+		final FolderObject theDestinationFolder = FolderObject.loadFolderObjectFromDB(theDestination.getId(), ctx);
 		
 		assertPermissions(theDestinationFolder.getPermissions(), buildFolderToOverwritePermissions());
 	}
 	
-	private void addDefaults(FolderObject folder) {
+	private void addDefaults(final FolderObject folder) {
 		folder.setType(FolderObject.PUBLIC);
 		folder.setModule(FolderObject.INFOSTORE);
 		folder.setParentFolderID(this.privateInfostoreFolder.getObjectID());
 	}
 	
-	private OCLPermission buildReadAll(int userId,boolean admin) {
-		OCLPermission perm = new OCLPermission();
+	private OCLPermission buildReadAll(final int userId,final boolean admin) {
+		final OCLPermission perm = new OCLPermission();
 		perm.setFolderAdmin(admin);
-		if(admin)
+		if(admin) {
 			perm.setFolderPermission(OCLPermission.ADMIN_PERMISSION);
-		else
+		} else {
 			perm.setFolderPermission(OCLPermission.CREATE_SUB_FOLDERS);
+		}
 		
 		perm.setReadObjectPermission(OCLPermission.READ_ALL_OBJECTS);
 		perm.setWriteObjectPermission(OCLPermission.WRITE_ALL_OBJECTS);
@@ -317,14 +327,15 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 		return perm;
 	}
 	
-	private OCLPermission buildReadOwn(int userId, boolean admin) {
-		OCLPermission perm = new OCLPermission();
+	private OCLPermission buildReadOwn(final int userId, final boolean admin) {
+		final OCLPermission perm = new OCLPermission();
 		
 		perm.setFolderAdmin(admin);
-		if(admin)
+		if(admin) {
 			perm.setFolderPermission(OCLPermission.ADMIN_PERMISSION);
-		else
+		} else {
 			perm.setFolderPermission(OCLPermission.CREATE_SUB_FOLDERS);
+		}
 		
 		perm.setFolderPermission(OCLPermission.ADMIN_PERMISSION);
 		perm.setReadObjectPermission(OCLPermission.READ_OWN_OBJECTS);
@@ -335,9 +346,9 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 		return perm;
 	}
 
-	private WebdavPath url(FolderObject... folders) {
-		WebdavPath path = new WebdavPath();
-		for(FolderObject fo : folders) {
+	private WebdavPath url(final FolderObject... folders) {
+		final WebdavPath path = new WebdavPath();
+		for(final FolderObject fo : folders) {
 			path.append(fo.getFolderName());
 		}
 
@@ -346,13 +357,13 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 	
 	
 	private OCLPermission[] buildFolderToCopyPermissions() {
-		OCLPermission perm1 = buildReadAll(userIdA, true);
-		OCLPermission perm2 = buildReadOwn(userIdB,false);
+		final OCLPermission perm1 = buildReadAll(userIdA, true);
+		final OCLPermission perm2 = buildReadOwn(userIdB,false);
 		return new OCLPermission[]{perm1, perm2};
 	}
 
 	private FolderObject buildFolderToCopy() {
-		FolderObject folderToCopy = new FolderObject();
+		final FolderObject folderToCopy = new FolderObject();
 		addDefaults(folderToCopy);
 		folderToCopy.setFolderName("CopyMe"+count++);
 		folderToCopy.setPermissionsAsArray(buildFolderToCopyPermissions());
@@ -360,13 +371,13 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 	}
 	
 	private OCLPermission[] buildFolderToOverwritePermissions() {
-		OCLPermission perm1 = buildReadAll(userIdA, true);
-		OCLPermission perm2 = buildReadAll(userIdB,false);
+		final OCLPermission perm1 = buildReadAll(userIdA, true);
+		final OCLPermission perm2 = buildReadAll(userIdB,false);
 		return new OCLPermission[]{perm1, perm2};
 	}
 
 	private FolderObject buildFolderToOverwrite() {
-		FolderObject folderToOverwrite = new FolderObject();
+		final FolderObject folderToOverwrite = new FolderObject();
 		addDefaults(folderToOverwrite);
 		folderToOverwrite.setFolderName("OverwriteMe");
 		folderToOverwrite.setPermissionsAsArray(buildFolderToOverwritePermissions());
@@ -374,12 +385,12 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 	}
 
 	
-	public static void assertPermissions(Collection<OCLPermission> perms, OCLPermission...expected){
-		Set<OCLPermission> expectSet = new HashSet<OCLPermission>(Arrays.asList(expected));
+	public static void assertPermissions(final Collection<OCLPermission> perms, final OCLPermission...expected){
+		final Set<OCLPermission> expectSet = new HashSet<OCLPermission>(Arrays.asList(expected));
 		
-		for(OCLPermission perm : perms) {
+		for(final OCLPermission perm : perms) {
 			OCLPermission matches = null;
-			for(OCLPermission permExpect : expectSet){
+			for(final OCLPermission permExpect : expectSet){
 				if(
 						permExpect.getReadPermission() == perm.getReadPermission() &&
 						permExpect.getWritePermission() == perm.getWritePermission() &&
@@ -396,8 +407,8 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 		assertTrue(expectSet.isEmpty());
 	}
 
-	private static String stringify(OCLPermission perm) {
-		StringBuilder b = new StringBuilder();
+	private static String stringify(final OCLPermission perm) {
+		final StringBuilder b = new StringBuilder();
 		b.append("Read: ").append(perm.getReadPermission()).append(" Write: ")
 		.append(perm.getWritePermission()).append(" Delete: ").append(perm.getDeletePermission())
 		.append(" Folder: ").append(perm.getFolderPermission()).append(" Entity: ").append(perm.getEntity());

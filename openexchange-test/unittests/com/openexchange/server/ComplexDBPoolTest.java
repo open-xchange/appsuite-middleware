@@ -18,39 +18,41 @@ public class ComplexDBPoolTest extends TestCase {
 
     private int userid;
 
-    private int TEST_RUNS = 50;
+    private final int TEST_RUNS = 50;
     
     private static int checksize = 0;
     private static int poolsize = 0;
     private static int totalcount = 0;
     
-    protected void setUp() throws Exception {        
+    @Override
+	protected void setUp() throws Exception {        
         super.setUp();
         Init.startServer();
-        String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
+        final String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
     }
     
-    protected void tearDown() throws Exception {
+    @Override
+	protected void tearDown() throws Exception {
         Init.stopServer();
         super.tearDown();
     }
     
     protected Properties getAJAXProperties() {
-        Properties properties = AjaxInit.getAJAXProperties();
+        final Properties properties = AjaxInit.getAJAXProperties();
         return properties;
     }    
     
-    private int resolveUser(String user) throws Exception {
-        UserStorage uStorage = UserStorage.getInstance();
+    private int resolveUser(final String user) throws Exception {
+        final UserStorage uStorage = UserStorage.getInstance();
         userid = uStorage.getUserId(user, new ContextImpl(contextid));
         return userid;
     }
     
     public void testThreadedPool() throws Throwable {
-        Context context = new ContextImpl(contextid);
+        final Context context = new ContextImpl(contextid);
         // poolsize = DBPool.getSize(context, true);
         checksize = poolsize;
-        PoolRunner pr[] = new PoolRunner[TEST_RUNS];
+        final PoolRunner pr[] = new PoolRunner[TEST_RUNS];
         for (int a = 0; a < TEST_RUNS; a++) {
             pr[a] = new PoolRunner(context, false);
         }
@@ -63,10 +65,10 @@ public class ComplexDBPoolTest extends TestCase {
     }
     
     public void testThreadedPoolWithClosedConnections() throws Throwable {
-        Context context = new ContextImpl(contextid);
+        final Context context = new ContextImpl(contextid);
         // int poolsize = DBPool.getSize(context, true);
         checksize = poolsize;
-        PoolRunner pr[] = new PoolRunner[TEST_RUNS];
+        final PoolRunner pr[] = new PoolRunner[TEST_RUNS];
         for (int a = 0; a < TEST_RUNS; a++) {
             pr[a] = new PoolRunner(context, false);
         }

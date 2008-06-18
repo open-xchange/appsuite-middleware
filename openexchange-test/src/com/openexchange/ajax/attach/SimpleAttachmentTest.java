@@ -3,22 +3,22 @@ package com.openexchange.ajax.attach;
 
 public class SimpleAttachmentTest extends AbstractAttachmentTest {
 
-	public SimpleAttachmentTest(String name) {
+	public SimpleAttachmentTest(final String name) {
 		super(name);
 	}
 
 	@Override
-	public int createExclusiveWritableAttachable(String sessionId, int folderId) throws Exception {
+	public int createExclusiveWritableAttachable(final String sessionId, final int folderId) throws Exception {
 		return 22;
 	}
 
 	@Override
-	public int getExclusiveWritableFolder(String sessionId) throws Exception {
+	public int getExclusiveWritableFolder(final String sessionId) throws Exception {
 		return 22;
 	}
 
 	@Override
-	public void removeAttachable(int folder, int id, String sessionId) throws Exception {
+	public void removeAttachable(final int folder, final int id, final String sessionId) throws Exception {
 		
 	}
 

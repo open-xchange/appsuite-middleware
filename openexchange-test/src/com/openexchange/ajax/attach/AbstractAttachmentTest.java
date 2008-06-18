@@ -26,7 +26,7 @@ import com.openexchange.test.OXTestToolkit;
 
 public abstract class AbstractAttachmentTest extends AttachmentTest {
 
-	public AbstractAttachmentTest(String name) {
+	public AbstractAttachmentTest(final String name) {
 		super(name);
 	}
 
@@ -39,6 +39,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 	
 	protected String sessionId;
 	
+	@Override
 	public void setUp() throws Exception{
 		super.setUp();
 		
@@ -50,6 +51,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		moduleId = getModule();
 	}
 	
+	@Override
 	public void tearDown() throws Exception {
 		removeAttachments();
 		removeAttachable(folderId, attachedId, sessionId);
@@ -70,10 +72,10 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 	
 	protected void doDetach() throws Exception {
 		doGet();
-		int id = clean.get(0).getId();
+		final int id = clean.get(0).getId();
 		removeAttachments();
 		
-		Response res = get(getWebConversation(),sessionId,folderId,attachedId,moduleId, id);
+		final Response res = get(getWebConversation(),sessionId,folderId,attachedId,moduleId, id);
 		assertTrue(res.hasError());
 	}
 	
@@ -81,41 +83,41 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		upload();
 		Response res = get(getWebConversation(), sessionId, folderId, attachedId, moduleId, clean.get(0).getId());
 		assertNoError(res);
-		long timestamp = res.getTimestamp().getTime();
+		final long timestamp = res.getTimestamp().getTime();
 		upload();
 		upload();
 		upload();
 		upload();
 		
-		List<AttachmentMetadata> createdLater = new ArrayList<AttachmentMetadata>(clean.subList(1,clean.size()));
+		final List<AttachmentMetadata> createdLater = new ArrayList<AttachmentMetadata>(clean.subList(1,clean.size()));
 		
 		res = updates(getWebConversation(),sessionId,folderId,attachedId, moduleId, timestamp, new int[]{AttachmentField.ID, AttachmentField.FILENAME}, AttachmentField.CREATION_DATE, "ASC");
 		
 		assertNoError(res);
-		JSONArray arrayOfArrays = (JSONArray) res.getData();
+		final JSONArray arrayOfArrays = (JSONArray) res.getData();
 		
 		assertEquals(createdLater.size(), arrayOfArrays.length());
 		
 		for(int i = 0; i < arrayOfArrays.length(); i++) {
-			JSONArray values = arrayOfArrays.getJSONArray(i);
-			AttachmentMetadata attachment = createdLater.get(i);
+			final JSONArray values = arrayOfArrays.getJSONArray(i);
+			final AttachmentMetadata attachment = createdLater.get(i);
 			
 			assertEquals(values.getInt(0),attachment.getId());
 			assertEquals(testFile.getName(), values.getString(1));
 		}
 		
-		List<AttachmentMetadata> copy = new ArrayList<AttachmentMetadata>(clean);
+		final List<AttachmentMetadata> copy = new ArrayList<AttachmentMetadata>(clean);
 		removeAttachments();
 		
 		res = updates(getWebConversation(),sessionId,folderId,attachedId, moduleId, timestamp, new int[]{AttachmentField.ID, AttachmentField.FILENAME}, AttachmentField.CREATION_DATE, "ASC");
 		
-		JSONArray arrayOfIds = (JSONArray) res.getData();
+		final JSONArray arrayOfIds = (JSONArray) res.getData();
 		
 		assertEquals(copy.size(), arrayOfIds.length());
 		
 		for(int i = 0; i < arrayOfIds.length(); i++) {
-			int id = arrayOfIds.getInt(i);
-			AttachmentMetadata attachment = copy.get(i);
+			final int id = arrayOfIds.getInt(i);
+			final AttachmentMetadata attachment = copy.get(i);
 			
 			assertEquals(id,attachment.getId());
 		}
@@ -128,15 +130,15 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		upload();
 		upload();
 		
-		Response res = all(getWebConversation(),sessionId,folderId,attachedId, moduleId, new int[]{AttachmentField.ID, AttachmentField.FILENAME}, AttachmentField.CREATION_DATE, "ASC");
+		final Response res = all(getWebConversation(),sessionId,folderId,attachedId, moduleId, new int[]{AttachmentField.ID, AttachmentField.FILENAME}, AttachmentField.CREATION_DATE, "ASC");
 		assertNoError(res);
-		JSONArray arrayOfArrays = (JSONArray) res.getData();
+		final JSONArray arrayOfArrays = (JSONArray) res.getData();
 		
 		assertEquals(clean.size(), arrayOfArrays.length());
 		
 		for(int i = 0; i < arrayOfArrays.length(); i++) {
-			JSONArray values = arrayOfArrays.getJSONArray(i);
-			AttachmentMetadata attachment = clean.get(i);
+			final JSONArray values = arrayOfArrays.getJSONArray(i);
+			final AttachmentMetadata attachment = clean.get(i);
 			
 			assertEquals(values.getInt(0),attachment.getId());
 			assertEquals(testFile.getName(), values.getString(1));
@@ -150,20 +152,20 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		upload();
 		upload();
 		
-		int[] ids = new int[]{
+		final int[] ids = new int[]{
 				clean.get(0).getId(),
 				clean.get(2).getId(),
 				clean.get(4).getId()
 		};
 		
-		Response res = list(getWebConversation(),sessionId,folderId,attachedId, moduleId, ids, new int[]{AttachmentField.ID, AttachmentField.FILENAME});
+		final Response res = list(getWebConversation(),sessionId,folderId,attachedId, moduleId, ids, new int[]{AttachmentField.ID, AttachmentField.FILENAME});
 		assertNoError(res);
-		JSONArray arrayOfArrays = (JSONArray) res.getData();
+		final JSONArray arrayOfArrays = (JSONArray) res.getData();
 		
 		assertEquals(ids.length, arrayOfArrays.length());
 		
 		for(int i = 0; i < arrayOfArrays.length(); i++) {
-			JSONArray values = arrayOfArrays.getJSONArray(i);
+			final JSONArray values = arrayOfArrays.getJSONArray(i);
 			
 			assertEquals(ids[i], values.getInt(0));
 			assertEquals(testFile.getName(), values.getString(1));
@@ -172,10 +174,10 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 	
 	protected void doGet() throws Exception {
 		upload();
-		Response res = get(getWebConversation(),sessionId,folderId,attachedId,moduleId, clean.get(0).getId());
+		final Response res = get(getWebConversation(),sessionId,folderId,attachedId,moduleId, clean.get(0).getId());
 		assertNoError(res);
 		
-		JSONObject data = (JSONObject) res.getData();
+		final JSONObject data = (JSONObject) res.getData();
 		
 		assertEquals(folderId, data.getInt("folder"));
 		assertEquals(attachedId, data.getInt("attached"));
@@ -187,8 +189,8 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 	}
 	
 	protected void doMultiple() throws Exception {
-		AttachmentMetadata attachment = new AttachmentImpl();
-		AttachmentMetadata attachment2 = new AttachmentImpl();
+		final AttachmentMetadata attachment = new AttachmentImpl();
+		final AttachmentMetadata attachment2 = new AttachmentImpl();
 		
 		attachment.setFolderId(folderId);
 		attachment.setAttachedId(attachedId);
@@ -199,7 +201,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		attachment2.setModuleId(moduleId);
 		
 		
-		Response res = attach(getWebConversation(),sessionId,folderId,attachedId,moduleId, Arrays.asList(testFile, testFile2));
+		final Response res = attach(getWebConversation(),sessionId,folderId,attachedId,moduleId, Arrays.asList(testFile, testFile2));
 		assertNoError(res);
 		
 		attachment.setId(((JSONArray)res.getData()).getInt(0));
@@ -211,11 +213,11 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		assertFilename(clean.get(1), testFile2.getName());
 	}
 	
-	protected final void assertFilename(AttachmentMetadata att, String filename) throws MalformedURLException, JSONException, IOException, SAXException {
-		Response res = get(getWebConversation(),sessionId,folderId,attachedId,moduleId, att.getId());
+	protected final void assertFilename(final AttachmentMetadata att, final String filename) throws MalformedURLException, JSONException, IOException, SAXException {
+		final Response res = get(getWebConversation(),sessionId,folderId,attachedId,moduleId, att.getId());
 		assertNoError(res);
 		
-		JSONObject data = (JSONObject) res.getData();
+		final JSONObject data = (JSONObject) res.getData();
 		
 		assertEquals(filename,data.getString("filename"));
 	}
@@ -230,10 +232,12 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 			data = document(getWebConversation(),sessionId,folderId,attachedId,moduleId, clean.get(0).getId());
 			OXTestToolkit.assertSameContent(local = new FileInputStream(testFile),data);
 		} finally {
-			if(data != null)
+			if(data != null) {
 				data.close();
-			if(local != null)
+			}
+			if(local != null) {
 				local.close();
+			}
 		}
 		
 		GetMethodWebRequest req = documentRequest(sessionId, folderId, attachedId, moduleId, clean.get(0).getId(), null);
@@ -247,10 +251,10 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 	}
 	
 	protected void doNotExists() throws Exception {
-		int imaginaryFolderFriend = Integer.MAX_VALUE;
-		int imaginaryObjectFriend = Integer.MAX_VALUE;
+		final int imaginaryFolderFriend = Integer.MAX_VALUE;
+		final int imaginaryObjectFriend = Integer.MAX_VALUE;
 		
-		AttachmentMetadata attachment = new AttachmentImpl();
+		final AttachmentMetadata attachment = new AttachmentImpl();
 		attachment.setFolderId(imaginaryFolderFriend);
 		attachment.setAttachedId(attachedId);
 		attachment.setModuleId(moduleId);
@@ -266,12 +270,12 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 	}
 	
 	protected void doForbidden() throws Exception {
-		AttachmentMetadata attachment = new AttachmentImpl();
+		final AttachmentMetadata attachment = new AttachmentImpl();
 		attachment.setFolderId(folderId);
 		attachment.setAttachedId(attachedId);
 		attachment.setModuleId(moduleId);
 		
-		Response res = attach(getSecondWebConversation(),getSecondSessionId(),folderId,attachedId,moduleId, testFile);
+		final Response res = attach(getSecondWebConversation(),getSecondSessionId(),folderId,attachedId,moduleId, testFile);
 		assertTrue(res.hasError());
 		
 	}
@@ -285,14 +289,14 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		Response res = quota(getWebConversation(), sessionId);
 		assertNoError(res);
 		JSONObject quota = (JSONObject)res.getData(); 
-		int use = quota.getInt("use");
+		final int use = quota.getInt("use");
 		
 		upload();
 		
 		res = quota(getWebConversation(), sessionId);
 		assertNoError(res);
 		quota = (JSONObject)res.getData();
-		int useAfter = quota.getInt("use");
+		final int useAfter = quota.getInt("use");
 		
 		res = get(getWebConversation(),sessionId, clean.get(0).getFolderId(), clean.get(0).getAttachedId(), clean.get(0).getAttachedId(), clean.get(0).getId());
 		assertNoError(res);
@@ -301,19 +305,19 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 	}
 	
 	public void upload() throws Exception {
-		AttachmentMetadata attachment = new AttachmentImpl();
+		final AttachmentMetadata attachment = new AttachmentImpl();
 		attachment.setFolderId(folderId);
 		attachment.setAttachedId(attachedId);
 		attachment.setModuleId(moduleId);
 		
-		Response res = attach(getWebConversation(),sessionId,folderId,attachedId,moduleId, testFile);
+		final Response res = attach(getWebConversation(),sessionId,folderId,attachedId,moduleId, testFile);
 		assertNoError(res);
 		
 		attachment.setId(((JSONArray)res.getData()).getInt(0));
 		clean.add(attachment);
 	}
 	
-	public AttachmentMetadata getAttachment(int index) {
+	public AttachmentMetadata getAttachment(final int index) {
 		return clean.get(index);
 	}
 	

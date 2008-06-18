@@ -19,7 +19,7 @@ public class MultipleParser extends AbstractAJAXParser {
     /**
      * @param requests 
      */
-    public MultipleParser(AJAXRequest[] requests) {
+    public MultipleParser(final AJAXRequest[] requests) {
         super(true);
         this.requests = requests.clone();
     }

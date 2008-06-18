@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.List;
 
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
@@ -20,19 +19,21 @@ import com.openexchange.groupware.tx.AbstractActionTest;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.sql.DBUtils;
 
 public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 
 	private User user;
 	private Context ctx;
-	private List<DocumentMetadata> infoitems = new ArrayList<DocumentMetadata>();
-	private List<DocumentMetadata> updatedInfoitems = new ArrayList<DocumentMetadata>();
+	private final List<DocumentMetadata> infoitems = new ArrayList<DocumentMetadata>();
+	private final List<DocumentMetadata> updatedInfoitems = new ArrayList<DocumentMetadata>();
 	
 	private InfostoreQueryCatalog queryCatalog;
 	private DBProvider provider;
 	private InfostoreFacade infostore;
 
+	@Override
 	public void setUp() throws Exception {
 		Init.startServer();
 		ContextStorage.start();
@@ -44,6 +45,7 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 		initDocMeta();
 	}
 
+	@Override
 	public void tearDown() throws Exception {
 		Init.stopServer();
 	}
@@ -80,15 +82,15 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 		return null;
 	}
 	
-	protected void assertNoResult(String sql, Object...args) throws TransactionException, SQLException {
+	protected void assertNoResult(final String sql, final Object...args) throws TransactionException, SQLException {
 		assertFalse(hasResult(sql, args));
 	}
 
-	protected void assertResult(String sql, Object...args) throws TransactionException, SQLException {
+	protected void assertResult(final String sql, final Object...args) throws TransactionException, SQLException {
 		assertTrue(hasResult(sql, args));
 	}
 
-	protected boolean hasResult(String sql, Object[] args) throws TransactionException, SQLException {
+	protected boolean hasResult(final String sql, final Object[] args) throws TransactionException, SQLException {
 		Connection readCon = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -96,7 +98,7 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 			readCon = getProvider().getReadConnection(getContext());
 			stmt = readCon.prepareStatement(sql);
 			int i = 1;
-			for(Object arg : args) {
+			for(final Object arg : args) {
 				stmt.setObject(i++,arg);
 			}
 			rs = stmt.executeQuery();

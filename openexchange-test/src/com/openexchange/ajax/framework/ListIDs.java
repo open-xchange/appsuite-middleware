@@ -58,7 +58,7 @@ import java.util.List;
  */
 public class ListIDs {
 
-    private List<ListID> identifiers = new ArrayList<ListID>();
+    private final List<ListID> identifiers = new ArrayList<ListID>();
 
     /**
      * Default constructor.
@@ -75,7 +75,7 @@ public class ListIDs {
         return identifiers.size();
     }
 
-    public ListID get(int i) {
+    public ListID get(final int i) {
         return identifiers.get(i);
     }
 

@@ -21,16 +21,17 @@ public class MultipleTest extends AppointmentTest {
 	
 	private static final Log LOG = LogFactory.getLog(MultipleTest.class);
 	
-	public MultipleTest(String name) {
+	public MultipleTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 	
 	public void testMultipleInsert() throws Exception {
-		AppointmentObject appointmentObj = createAppointmentObject("testMultipleInsert");
+		final AppointmentObject appointmentObj = createAppointmentObject("testMultipleInsert");
 		appointmentObj.setIgnoreConflicts(true);
 		
 		final AJAXSession ajaxSession = new AJAXSession(getWebConversation(), getSessionId());
@@ -71,7 +72,7 @@ public class MultipleTest extends AppointmentTest {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
         final InsertRequest[] inserts = new InsertRequest[1000];
         for (int i = 0; i < inserts.length; i++) {
-            AppointmentObject appointmentObj = createAppointmentObject("testMultipleInsert");
+            final AppointmentObject appointmentObj = createAppointmentObject("testMultipleInsert");
             appointmentObj.setIgnoreConflicts(true);
             inserts[i] = new InsertRequest(appointmentObj, client.getValues().getTimeZone(), true);
         }

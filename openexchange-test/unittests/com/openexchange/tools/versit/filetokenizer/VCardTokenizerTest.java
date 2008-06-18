@@ -53,13 +53,13 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.VCard;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.old.VCalendar10;
 import com.openexchange.tools.versit.old.VCard21;
-
-import junit.framework.TestCase;
 
 /**
  * 
@@ -125,9 +125,9 @@ public class VCardTokenizerTest extends TestCase {
 	}
 
 	
-	private void prepareTest(String content, int entriesFound, int entriesRecognized, VersitDefinition[] compDefs, String[] expectedContent, String encoding) throws IOException{
-		VCardTokenizer chunky = new VCardTokenizer(new ByteArrayInputStream( content.getBytes(encoding) ));
-		List<VCardFileToken> l = chunky.split();
+	private void prepareTest(final String content, final int entriesFound, final int entriesRecognized, final VersitDefinition[] compDefs, final String[] expectedContent, final String encoding) throws IOException{
+		final VCardTokenizer chunky = new VCardTokenizer(new ByteArrayInputStream( content.getBytes(encoding) ));
+		final List<VCardFileToken> l = chunky.split();
 		assertTrue("Correct number of entries", chunky.getNumberOfEntriesFound() == entriesFound);
 		assertTrue("Correct number of recognized entries", chunky.getNumberOfEntriesRecognized() == entriesRecognized);
 		for(int i = 0; i < l.size(); i++){

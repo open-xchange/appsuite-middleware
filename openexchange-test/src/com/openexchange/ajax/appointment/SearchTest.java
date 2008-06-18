@@ -12,26 +12,27 @@ public class SearchTest extends AppointmentTest {
 
 	private static final Log LOG = LogFactory.getLog(SearchTest.class);
 	
-	public SearchTest(String name) {
+	public SearchTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 	
 	public void testSimpleSearch() throws Exception {
-		AppointmentObject appointmentObj = new AppointmentObject();
-		String date = String.valueOf(System.currentTimeMillis());
+		final AppointmentObject appointmentObj = new AppointmentObject();
+		final String date = String.valueOf(System.currentTimeMillis());
 		appointmentObj.setTitle("testSimpleSearch" + date);
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
-		AppointmentObject[] appointmentArray = searchAppointment(getWebConversation(), "testSimpleSearch" + date, appointmentFolderId, new Date(), new Date(), APPOINTMENT_FIELDS, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final AppointmentObject[] appointmentArray = searchAppointment(getWebConversation(), "testSimpleSearch" + date, appointmentFolderId, new Date(), new Date(), APPOINTMENT_FIELDS, timeZone, PROTOCOL + getHostName(), getSessionId());
 		assertTrue("appointment array size is 0", appointmentArray.length > 0);
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());

@@ -8,7 +8,7 @@ import com.openexchange.webdav.xml.GroupUserTest;
 
 public class PermissionTest extends FolderTest {
 	
-	public PermissionTest(String name) {
+	public PermissionTest(final String name) {
 		super(name);
 	}
 	
@@ -25,7 +25,7 @@ public class PermissionTest extends FolderTest {
 		folderObj.setType(FolderObject.PRIVATE);
 		folderObj.setParentFolderID(1);
 		
-		OCLPermission[] permission = new OCLPermission[] { 
+		final OCLPermission[] permission = new OCLPermission[] { 
 			createPermission( userId, false, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS)
 		};
 		
@@ -35,10 +35,10 @@ public class PermissionTest extends FolderTest {
 		folderObj = createFolderObject(userId, "testInsertPrivateFolderWithoutPermission", FolderObject.TASK, false);
 		folderObj.setParentFolderID(objectId);
 		try {
-			int subFolderId1 = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+			final int subFolderId1 = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 			deleteFolder(getWebConversation(), new int[] { subFolderId1 }, PROTOCOL + getHostName(), getLogin(), getPassword());
 			fail("conflict permission expected!");
-		} catch (TestException exc) {
+		} catch (final TestException exc) {
 			assertExceptionMessage(exc.getMessage(), 1002);
 		}
 
@@ -54,7 +54,7 @@ public class PermissionTest extends FolderTest {
 		folderObj.setType(FolderObject.PUBLIC);
 		folderObj.setParentFolderID(2);
 		
-		OCLPermission[] permission = new OCLPermission[] { 
+		final OCLPermission[] permission = new OCLPermission[] { 
 			createPermission( userId, false, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS)
 		};
 		
@@ -64,10 +64,10 @@ public class PermissionTest extends FolderTest {
 		folderObj = createFolderObject(userId, "testInsertPublicFolderWithoutPermission", FolderObject.TASK, true);
 		folderObj.setParentFolderID(objectId);
 		try {
-			int subFolderId1 = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+			final int subFolderId1 = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 			deleteFolder(getWebConversation(), new int[] { subFolderId1 }, PROTOCOL + getHostName(), getLogin(), getPassword());
 			fail("conflict permission expected!");
-		} catch (TestException exc) {
+		} catch (final TestException exc) {
 			assertExceptionMessage(exc.getMessage(), 1002);
 		}
 

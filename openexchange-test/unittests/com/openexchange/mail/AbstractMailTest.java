@@ -279,7 +279,7 @@ public abstract class AbstractMailTest extends TestCase {
 			IOException, MailException {
 		final File fdir = new File(dir);
 		final File[] messageFiles = fdir.listFiles(new FilenameFilter() {
-			public boolean accept(File dir, String name) {
+			public boolean accept(final File dir, final String name) {
 				return name.toLowerCase().endsWith(".eml");
 			}
 		});

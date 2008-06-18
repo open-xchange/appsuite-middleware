@@ -5,7 +5,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tx.DBProvider;
 
 public class ConfigurableDBProvider implements DBProvider {
 
@@ -14,29 +13,31 @@ public class ConfigurableDBProvider implements DBProvider {
 	private String login;
 	private String password;
 	
-	public Connection getReadConnection(Context ctx) {
+	public Connection getReadConnection(final Context ctx) {
 		try {
 			return DriverManager.getConnection(url,login,password);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 		}
 		return null;
 	}
 
-	public void releaseReadConnection(Context ctx, Connection con) {
-		if(con == null)
+	public void releaseReadConnection(final Context ctx, final Connection con) {
+		if(con == null) {
 			return;
+		}
 		try {
-			if(!con.isClosed())
+			if(!con.isClosed()) {
 				con.close();
-		} catch (SQLException e) {
+			}
+		} catch (final SQLException e) {
 		}
 	}
 
-	public Connection getWriteConnection(Context ctx) {
+	public Connection getWriteConnection(final Context ctx) {
 		return getReadConnection(ctx);
 	}
 
-	public void releaseWriteConnection(Context ctx, Connection con) {
+	public void releaseWriteConnection(final Context ctx, final Connection con) {
 		releaseReadConnection(ctx,con);
 	}
 
@@ -44,7 +45,7 @@ public class ConfigurableDBProvider implements DBProvider {
 		return driver;
 	}
 
-	public void setDriver(String driver) throws ClassNotFoundException {
+	public void setDriver(final String driver) throws ClassNotFoundException {
 		Class.forName(driver);
 		this.driver = driver;
 	}
@@ -53,7 +54,7 @@ public class ConfigurableDBProvider implements DBProvider {
 		return login;
 	}
 
-	public void setLogin(String login) {
+	public void setLogin(final String login) {
 		this.login = login;
 	}
 
@@ -61,7 +62,7 @@ public class ConfigurableDBProvider implements DBProvider {
 		return password;
 	}
 
-	public void setPassword(String password) {
+	public void setPassword(final String password) {
 		this.password = password;
 	}
 
@@ -69,7 +70,7 @@ public class ConfigurableDBProvider implements DBProvider {
 		return url;
 	}
 
-	public void setUrl(String url) {
+	public void setUrl(final String url) {
 		this.url = url;
 	}
 

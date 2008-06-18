@@ -90,7 +90,7 @@ public class MultipleRequest implements AJAXRequest {
 
     public Object getBody() throws JSONException {
         final JSONArray array = new JSONArray();
-        for (AJAXRequest request : requests) {
+        for (final AJAXRequest request : requests) {
             final JSONObject object = new JSONObject();
             final String path = request.getServletPath();
             String module = path.substring(path.lastIndexOf('/') + 1);
@@ -98,7 +98,7 @@ public class MultipleRequest implements AJAXRequest {
                 module = "folder";
             }
             object.put("module", module);
-            for (Parameter parameter : request.getParameters()) {
+            for (final Parameter parameter : request.getParameters()) {
                 object.put(parameter.getName(), parameter.getValue());
             }
             object.put(AJAXServlet.PARAMETER_DATA, request.getBody());

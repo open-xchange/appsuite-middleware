@@ -13,7 +13,7 @@ public class Bug9742Test extends AbstractRecurrenceTest {
 	
 	private static final Log LOG = LogFactory.getLog(Bug9742Test.class);
 	
-	public Bug9742Test(String name) {
+	public Bug9742Test(final String name) {
 		super(name);
 	}
 	
@@ -37,7 +37,7 @@ public class Bug9742Test extends AbstractRecurrenceTest {
 		
 		final Date until = calendar.getTime();
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testBug6960");
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
@@ -48,7 +48,7 @@ public class Bug9742Test extends AbstractRecurrenceTest {
 		appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
 		
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
 		final Calendar calendarException = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		calendarException.setTime(recurrenceDatePosition);
@@ -60,7 +60,7 @@ public class Bug9742Test extends AbstractRecurrenceTest {
 		
 		final Date exceptionEndDate = calendarException.getTime();
 		
-		AppointmentObject exceptionAppointmentObject = new AppointmentObject();
+		final AppointmentObject exceptionAppointmentObject = new AppointmentObject();
 		exceptionAppointmentObject.setTitle("testBug6960 - change exception");
 		exceptionAppointmentObject.setStartDate(exceptionStartDate);
 		exceptionAppointmentObject.setEndDate(exceptionEndDate);
@@ -69,7 +69,7 @@ public class Bug9742Test extends AbstractRecurrenceTest {
 		exceptionAppointmentObject.setParentFolderID(appointmentFolderId);
 		exceptionAppointmentObject.setIgnoreConflicts(true);
 
-		int exceptionObjectId = updateAppointment(getWebConversation(), exceptionAppointmentObject, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
+		final int exceptionObjectId = updateAppointment(getWebConversation(), exceptionAppointmentObject, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
 		
 		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), exceptionObjectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
 		final Date modified = loadAppointment.getLastModified();

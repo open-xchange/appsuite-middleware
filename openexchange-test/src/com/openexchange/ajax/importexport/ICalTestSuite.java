@@ -7,7 +7,7 @@ import junit.framework.TestSuite;
 public class ICalTestSuite extends TestSuite{
 	
 	public static Test suite(){
-		TestSuite tests = new TestSuite();
+		final TestSuite tests = new TestSuite();
 		tests.addTestSuite( ICalImportTest.class );
 		tests.addTestSuite( ICalExportTest.class );
 

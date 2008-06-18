@@ -51,9 +51,6 @@ package com.openexchange.ajax.task;
 
 import java.util.TimeZone;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -125,7 +122,7 @@ public class Bug10400Test extends AbstractTaskTest {
         final AJAXClient anton = getClient();
         final int antonFID = anton.getValues().getPrivateTaskFolder();
         final TimeZone antonTZ = anton.getValues().getTimeZone();
-        Task task = Create.createWithDefaults();
+        final Task task = Create.createWithDefaults();
         task.setTitle("Bug10400Test2");
         task.setParentFolderID(antonFID);
         final InsertResponse insert = TaskTools.insert(anton,
@@ -143,7 +140,7 @@ public class Bug10400Test extends AbstractTaskTest {
             update = TaskTools.update(anton, new UpdateRequest(
                 task, antonTZ));
             task.setLastModified(update.getTimestamp());
-            GetResponse get = TaskTools.get(anton, new GetRequest(antonFID,
+            final GetResponse get = TaskTools.get(anton, new GetRequest(antonFID,
                 task.getObjectID()));
             assertFalse("Task disappeared due to deleted folder mapping.",
                 get.hasError());

@@ -5,7 +5,7 @@ import junit.framework.TestSuite;
 
 public class ActionTestSuite {
 	public static Test suite(){
-		TestSuite tests = new TestSuite();
+		final TestSuite tests = new TestSuite();
 		tests.addTestSuite(GetTest.class);
 		tests.addTestSuite(HeadTest.class);
 		tests.addTestSuite(PutTest.class);

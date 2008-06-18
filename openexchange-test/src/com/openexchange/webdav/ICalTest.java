@@ -1,5 +1,10 @@
 package com.openexchange.webdav;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.Date;
+import java.util.TimeZone;
+
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
@@ -10,10 +15,6 @@ import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.Date;
-import java.util.TimeZone;
 
 public class ICalTest extends AbstractWebdavTest {
 	
@@ -23,32 +24,33 @@ public class ICalTest extends AbstractWebdavTest {
 	
 	private static final String ICAL_URL = "/servlet/webdav.ical";
 	
-	public ICalTest(String name) {
+	public ICalTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 	
 	public void testUpload() throws Exception {
-		WebRequest initRequest = new GetMethodWebRequest(PROTOCOL + hostName + ICAL_URL);
+		final WebRequest initRequest = new GetMethodWebRequest(PROTOCOL + hostName + ICAL_URL);
 		initRequest.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
-		WebResponse initresponse = webCon.getResponse(initRequest);
+		final WebResponse initresponse = webCon.getResponse(initRequest);
 		
 		assertEquals(200, initresponse.getResponseCode());
 		
-		AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testUpload");
 		appointmentObj.setStartDate(new Date());
 		appointmentObj.setEndDate(new Date());
 		
-		Task taskObj = new Task();
+		final Task taskObj = new Task();
 		taskObj.setTitle("testUpload");
 		taskObj.setStartDate(new Date());
 		taskObj.setEndDate(new Date());
 		
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		
 		final VersitDefinition def = Versit.getDefinition("text/calendar");
 		final VersitDefinition.Writer w = def.getWriter(byteArrayOutputStream, "UTF-8");
@@ -57,13 +59,13 @@ public class ICalTest extends AbstractWebdavTest {
 		final VersitDefinition eventDef = def.getChildDef("VEVENT");
 		final VersitDefinition taskDef = def.getChildDef("VTODO");
 		
-		OXContainerConverter oxContainerConverter = new OXContainerConverter(TimeZone.getDefault(), "t@t.de");
+		final OXContainerConverter oxContainerConverter = new OXContainerConverter(TimeZone.getDefault(), "t@t.de");
 		
-		VersitObject versitAppointment = oxContainerConverter.convertAppointment(appointmentObj);
+		final VersitObject versitAppointment = oxContainerConverter.convertAppointment(appointmentObj);
 							
 		eventDef.write(w, versitAppointment);
 		
-		VersitObject versitTask = oxContainerConverter.convertTask(taskObj);
+		final VersitObject versitTask = oxContainerConverter.convertTask(taskObj);
 							
 		eventDef.write(w, versitTask);
 		
@@ -72,18 +74,18 @@ public class ICalTest extends AbstractWebdavTest {
 		w.flush();
 		byteArrayOutputStream.flush();
 		
-		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-		WebRequest req = new PutMethodWebRequest(PROTOCOL + hostName + ICAL_URL, byteArrayInputStream, "text/calendar");
+		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+		final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostName + ICAL_URL, byteArrayInputStream, "text/calendar");
 		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
-		WebResponse resp = webCon.getResponse(req);
+		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 	}
 	
 	public void testDownload() throws Exception {
-		WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName + ICAL_URL);
+		final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName + ICAL_URL);
 		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
-		WebResponse resp = webCon.getResponse(req);
+		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 	}	

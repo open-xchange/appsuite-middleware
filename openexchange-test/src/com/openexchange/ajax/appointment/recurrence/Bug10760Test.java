@@ -8,7 +8,7 @@ import com.openexchange.groupware.container.AppointmentObject;
 
 public class Bug10760Test extends AbstractRecurrenceTest {
 	
-	public Bug10760Test(String name) {
+	public Bug10760Test(final String name) {
 		super(name);
 	}
 	
@@ -27,7 +27,7 @@ public class Bug10760Test extends AbstractRecurrenceTest {
 		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setIgnoreConflicts(true);
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		
 		appointmentObj.setRecurrencePosition(2);

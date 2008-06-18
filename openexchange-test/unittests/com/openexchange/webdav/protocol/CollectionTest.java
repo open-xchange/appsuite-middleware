@@ -25,8 +25,9 @@ public class CollectionTest extends ResourceTest {
 
 	protected List<WebdavPath> clean = new ArrayList<WebdavPath>();
 	
+	@Override
 	public void tearDown() throws Exception {
-		for(WebdavPath path : clean) {
+		for(final WebdavPath path : clean) {
 			FACTORY.resolveResource(path).delete();
 		}
 		super.tearDown();
@@ -34,37 +35,37 @@ public class CollectionTest extends ResourceTest {
 	
 	public void testRoot() throws Exception {
 		
-		List<WebdavResource> children = FACTORY.resolveCollection(new WebdavPath()).getChildren();
-		int size = children.size();
+		final List<WebdavResource> children = FACTORY.resolveCollection(new WebdavPath()).getChildren();
+		final int size = children.size();
 		FACTORY.resolveCollection(new WebdavPath("test")).create();
 		clean.add(new WebdavPath("test"));
-		List<WebdavResource> childrenAfter = FACTORY.resolveCollection(new WebdavPath()).getChildren();
+		final List<WebdavResource> childrenAfter = FACTORY.resolveCollection(new WebdavPath()).getChildren();
 		assertEquals(childrenAfter.toString(), size+1, childrenAfter.size());
 		
-		Set<String> childrenNames = new HashSet<String>();
-		for(WebdavResource res : childrenAfter) { childrenNames.add(res.getDisplayName()); }
-		for(WebdavResource res : children) { childrenNames.remove(res.getDisplayName());   }
+		final Set<String> childrenNames = new HashSet<String>();
+		for(final WebdavResource res : childrenAfter) { childrenNames.add(res.getDisplayName()); }
+		for(final WebdavResource res : children) { childrenNames.remove(res.getDisplayName());   }
 		assertEquals("test" , childrenNames.iterator().next());
 	}
 
 	@Override
 	public void testBody() throws Exception {
-		WebdavCollection coll = createResource().toCollection();
+		final WebdavCollection coll = createResource().toCollection();
 		
-		String content = "Hallo Welt!";
-		byte[] bytes = content.getBytes("UTF-8");
+		final String content = "Hallo Welt!";
+		final byte[] bytes = content.getBytes("UTF-8");
 		
 		try {
 			coll.putBody(new ByteArrayInputStream(bytes));
 			fail("Collections shouldn't accept bodies");
-		} catch (WebdavException x) {
+		} catch (final WebdavException x) {
 			assertEquals(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE,x.getStatus());
 		}
 	}
 	
-	public static void createStructure(WebdavCollection coll, WebdavFactory factory) throws WebdavException, UnsupportedEncodingException {
-		String content = "Hallo Welt!";
-		byte[] bytes = content.getBytes("UTF-8");
+	public static void createStructure(final WebdavCollection coll, final WebdavFactory factory) throws WebdavException, UnsupportedEncodingException {
+		final String content = "Hallo Welt!";
+		final byte[] bytes = content.getBytes("UTF-8");
 		
 		WebdavResource res = coll.resolveResource(new WebdavPath("index.html"));
 		res.putBody(new ByteArrayInputStream(INDEX_HTML.getBytes("UTF-8")));
@@ -105,25 +106,25 @@ public class CollectionTest extends ResourceTest {
 	}
 	
 	public void testChildren() throws Exception {
-		WebdavCollection coll = createResource().toCollection();
+		final WebdavCollection coll = createResource().toCollection();
 		createStructure(coll, resourceManager);
 		
 		List<WebdavResource> children = coll.getChildren();
 		assertResources(children, "index.html", "sitemap.html", "development", "pm", "special characters?");
 		
-		WebdavCollection dev = coll.resolveCollection(new WebdavPath("development"));
+		final WebdavCollection dev = coll.resolveCollection(new WebdavPath("development"));
 		children = dev.getChildren();
 		assertResources(children,"gui");
 		
-		WebdavCollection gui = dev.resolveCollection(new WebdavPath("gui"));
+		final WebdavCollection gui = dev.resolveCollection(new WebdavPath("gui"));
 		children = gui.getChildren();
 		assertResources(children, "index3.html");
 		
-		WebdavCollection pm = coll.resolveCollection(new WebdavPath("pm"));
+		final WebdavCollection pm = coll.resolveCollection(new WebdavPath("pm"));
 		children = pm.getChildren();
 		assertResources(children,"index2.html");
 		
-		WebdavResource res = pm.resolveResource(new WebdavPath("index2.html"));
+		final WebdavResource res = pm.resolveResource(new WebdavPath("index2.html"));
 		res.delete();
 		
 		children = pm.getChildren();
@@ -133,7 +134,7 @@ public class CollectionTest extends ResourceTest {
 	}
 
 	public void testIterate() throws Exception {
-		WebdavCollection coll = createResource().toCollection();
+		final WebdavCollection coll = createResource().toCollection();
 		createStructure(coll, resourceManager);
 		assertResources(coll,"index.html", "sitemap.html", "development", "pm","gui","index2.html", "index3.html", "special characters?"); // Note: Children ONLY
 		assertResources(coll.toIterable(1), "index.html", "sitemap.html", "development", "pm", "special characters?");
@@ -142,15 +143,15 @@ public class CollectionTest extends ResourceTest {
 		try{
 			coll.toIterable(23);
 			fail();
-		} catch (IllegalArgumentException x) {
+		} catch (final IllegalArgumentException x) {
 			assertTrue(true);
 		}
 	}
 	
 	public void testDelete() throws Exception {
-		WebdavCollection coll = createResource().toCollection();
+		final WebdavCollection coll = createResource().toCollection();
 		createStructure(coll, resourceManager);
-		WebdavCollection dev = coll.resolveCollection(new WebdavPath("development"));
+		final WebdavCollection dev = coll.resolveCollection(new WebdavPath("development"));
 		
 		List<WebdavResource> subList = new ArrayList<WebdavResource>();
 		subList.add(dev);
@@ -160,21 +161,22 @@ public class CollectionTest extends ResourceTest {
 		assertResources(coll,"index.html", "sitemap.html", "pm","index2.html","special characters?");
 		
 		assertFalse(dev.exists());
-		for(WebdavResource res : subList) {
+		for(final WebdavResource res : subList) {
 			assertFalse(res.exists());
 		}
 	}
 	
+	@Override
 	public void testMove() throws Exception {
-		WebdavCollection coll = createResource().toCollection();
+		final WebdavCollection coll = createResource().toCollection();
 		createStructure(coll, resourceManager);
 		WebdavCollection dev = coll.resolveCollection(new WebdavPath("development"));
 		
 		Date lastModified = dev.getLastModified();
-		Date creationDate = dev.getCreationDate();
+		final Date creationDate = dev.getCreationDate();
 		
 		
-		WebdavProperty prop = new WebdavProperty();
+		final WebdavProperty prop = new WebdavProperty();
 		prop.setName("myvalue");
 		prop.setNamespace("ox");
 		prop.setValue("gnaaa!");
@@ -186,13 +188,13 @@ public class CollectionTest extends ResourceTest {
 		subList = OXCollections.inject(subList, dev, new DisplayNameCollector());
 		
 		Thread.sleep(1000);
-		WebdavPath url = dev.getUrl();
+		final WebdavPath url = dev.getUrl();
 		
 		dev.move(coll.getUrl().dup().append("dev2"));
 		dev = FACTORY.resolveCollection(url);
 		assertFalse(dev.exists());
 		
-		WebdavCollection dev2 = coll.resolveCollection(new WebdavPath("dev2"));
+		final WebdavCollection dev2 = coll.resolveCollection(new WebdavPath("dev2"));
 		assertResources(dev2, subList.toArray(new String[subList.size()]));
 		
 		assertFalse(lastModified.equals(dev2.getLastModified()));
@@ -208,15 +210,16 @@ public class CollectionTest extends ResourceTest {
 		
 	}
 		
+	@Override
 	public void testCopy() throws Exception {
-		WebdavCollection coll = createResource().toCollection();
+		final WebdavCollection coll = createResource().toCollection();
 		createStructure(coll, resourceManager);
-		WebdavCollection dev = coll.resolveCollection(new WebdavPath("development"));
+		final WebdavCollection dev = coll.resolveCollection(new WebdavPath("development"));
 		
-		Date lastModified = dev.getLastModified();
-		Date creationDate = dev.getCreationDate();
+		final Date lastModified = dev.getLastModified();
+		final Date creationDate = dev.getCreationDate();
 		
-		WebdavProperty prop = new WebdavProperty();
+		final WebdavProperty prop = new WebdavProperty();
 		prop.setName("myvalue");
 		prop.setNamespace("ox");
 		prop.setValue("gnaaa!");
@@ -232,7 +235,7 @@ public class CollectionTest extends ResourceTest {
 		
 		assertTrue(dev.exists());
 		
-		WebdavCollection dev2 = coll.resolveCollection(new WebdavPath("dev2"));
+		final WebdavCollection dev2 = coll.resolveCollection(new WebdavPath("dev2"));
 		assertResources(dev2, subList.toArray(new String[subList.size()]));
 		
 		assertFalse(lastModified.equals(dev2.getLastModified()));
@@ -241,33 +244,34 @@ public class CollectionTest extends ResourceTest {
 		
 	}
 
+	@Override
 	public void testConflict() throws Exception {
-		WebdavResource res = super.createResource();
+		final WebdavResource res = super.createResource();
 		try {
 			resourceManager.resolveCollection(res.getUrl()+"/collection").create();
 			fail();
-		} catch (WebdavException x) {
+		} catch (final WebdavException x) {
 			assertTrue(""+x.getStatus(), HttpServletResponse.SC_CONFLICT == x.getStatus() || HttpServletResponse.SC_PRECONDITION_FAILED == x.getStatus());
 		}
 	}
 	
 	public void testMethodNotAllowed() throws Exception {
-		WebdavCollection col = createResource().toCollection();
+		final WebdavCollection col = createResource().toCollection();
 		try {
 			col.create();
 			fail();
-		} catch (WebdavException x) {
+		} catch (final WebdavException x) {
 			assertEquals(HttpServletResponse.SC_METHOD_NOT_ALLOWED, x.getStatus());
 		}
 	}
 	@Override
 	public void testLock() throws Exception {
 		super.testLock();
-		WebdavCollection coll = createResource().toCollection();
+		final WebdavCollection coll = createResource().toCollection();
 		createStructure(coll, resourceManager);
 		
 		//Test Depth-Infinity lock
-		WebdavLock lock = new WebdavLock();
+		final WebdavLock lock = new WebdavLock();
 		lock.setType(WebdavLock.Type.WRITE_LITERAL);
 		lock.setScope(WebdavLock.Scope.EXCLUSIVE_LITERAL);
 		lock.setDepth(WebdavCollection.INFINITY);
@@ -277,8 +281,8 @@ public class CollectionTest extends ResourceTest {
 		coll.lock(lock);
 		coll.save();
 		
-		Set<WebdavPath> urls = new HashSet<WebdavPath>();
-		for(WebdavResource res : coll) {
+		final Set<WebdavPath> urls = new HashSet<WebdavPath>();
+		for(final WebdavResource res : coll) {
 			urls.add(res.getUrl());
 			assertNotNull(res.getLock(lock.getToken()));
 		}
@@ -286,7 +290,7 @@ public class CollectionTest extends ResourceTest {
 		coll.unlock(lock.getToken());
 		coll.save();
 		
-		for(WebdavResource res : coll) {
+		for(final WebdavResource res : coll) {
 			assertNull(res.getLock(lock.getToken()));
 		}
 		
@@ -296,15 +300,15 @@ public class CollectionTest extends ResourceTest {
 		coll.lock(lock);
 		coll.save();
 		
-		for(WebdavResource res : coll.toIterable(1)){
+		for(final WebdavResource res : coll.toIterable(1)){
 			urls.remove(res.getUrl());
 			assertNotNull(res.getLock(lock.getToken()));
 		}
 		
 		// All level 2+ resources should be left in urls and should not be locked
 		
-		for(WebdavPath url : urls) {
-			WebdavResource res = resourceManager.resolveResource(url);
+		for(final WebdavPath url : urls) {
+			final WebdavResource res = resourceManager.resolveResource(url);
 			assertEquals(res.getUrl()+" is locked!", 0, res.getLocks().size());
 		}
 		
@@ -334,7 +338,7 @@ public class CollectionTest extends ResourceTest {
 
 	@Override
 	public Object resourceType() throws WebdavException {
-		WebdavCollection coll = createResource().toCollection();
+		final WebdavCollection coll = createResource().toCollection();
 		assertEquals(Protocol.COLLECTION, coll.getResourceType());
 		assertEquals(coll.getResourceType(), coll.getProperty("DAV:", "resourcetype").getValue());
 		return null;
@@ -342,25 +346,25 @@ public class CollectionTest extends ResourceTest {
 
 	@Override
 	public Object contentLanguage() throws WebdavException {
-		WebdavResource res = createResource();
-		String defaultLanguage = null;
+		final WebdavResource res = createResource();
+		final String defaultLanguage = null;
 		assertEquals(res.getLanguage(), res.getProperty("DAV:", "getcontentlanguage"));
 		assertEquals(defaultLanguage, res.getLanguage());
 		
 		try {
 			res.setLanguage("de");
 			fail("Could update language");
-		} catch (WebdavException x) {
+		} catch (final WebdavException x) {
 			assertTrue(true);
 		}
 		
-		WebdavProperty prop = Protocol.GETCONTENTLANGUAGE_LITERAL.getWebdavProperty();
+		final WebdavProperty prop = Protocol.GETCONTENTLANGUAGE_LITERAL.getWebdavProperty();
 		prop.setValue("de");
 		
 		try {
 			res.putProperty(prop);
 			fail("Could update language");
-		} catch (WebdavException x) {
+		} catch (final WebdavException x) {
 			assertTrue(true);
 		}
 		
@@ -369,7 +373,7 @@ public class CollectionTest extends ResourceTest {
 
 	@Override
 	public Object contentLength() throws WebdavException {
-		WebdavResource res = createResource();
+		final WebdavResource res = createResource();
 		assertEquals(res.getLength(), res.getProperty("DAV:", "getcontentlength"));
 		assertEquals(null, res.getLength());
 		
@@ -377,17 +381,17 @@ public class CollectionTest extends ResourceTest {
 		try {
 			res.setLength(23l);
 			fail("Could update length");
-		} catch (WebdavException x) {
+		} catch (final WebdavException x) {
 			assertTrue(true);
 		}
 		
-		WebdavProperty prop = Protocol.GETCONTENTLENGTH_LITERAL.getWebdavProperty();
+		final WebdavProperty prop = Protocol.GETCONTENTLENGTH_LITERAL.getWebdavProperty();
 		prop.setValue("2");
 		
 		try {
 			res.putProperty(prop);
 			fail("Could update length");
-		} catch (WebdavException x) {
+		} catch (final WebdavException x) {
 			assertTrue(true);
 		}
 
@@ -396,7 +400,7 @@ public class CollectionTest extends ResourceTest {
 
 	@Override
 	public Object etag() throws WebdavException{
-		WebdavResource res = createResource();
+		final WebdavResource res = createResource();
 		assertEquals(res.getETag(), res.getProperty("DAV:", "getetag"));
 		assertEquals(null, res.getETag());
 		
@@ -405,21 +409,21 @@ public class CollectionTest extends ResourceTest {
 	
 	@Override
 	public Object contentType() throws WebdavException {
-		WebdavResource res = createResource();
+		final WebdavResource res = createResource();
 		try {
 			res.setContentType("text/plain");
 			fail("Could update content type");
-		} catch (WebdavException x) {
+		} catch (final WebdavException x) {
 			assertTrue(true);
 		}
 		
-		WebdavProperty prop = Protocol.GETCONTENTTYPE_LITERAL.getWebdavProperty();
+		final WebdavProperty prop = Protocol.GETCONTENTTYPE_LITERAL.getWebdavProperty();
 		prop.setValue("text/plain");
 		
 		try {
 			res.putProperty(prop);
 			fail("Could update content type");
-		} catch (WebdavException x) {
+		} catch (final WebdavException x) {
 			assertTrue(true);
 		}
 
@@ -429,10 +433,10 @@ public class CollectionTest extends ResourceTest {
 	
 	protected static final class DisplayNameCollector implements Injector<List<String>, WebdavResource> {
 
-		public List<String> inject(List<String> list, WebdavResource element) {
+		public List<String> inject(final List<String> list, final WebdavResource element) {
 			try {
 				list.add(element.getDisplayName());
-			} catch (WebdavException e) {
+			} catch (final WebdavException e) {
 				list.add(e.toString());
 			}
 			return list;

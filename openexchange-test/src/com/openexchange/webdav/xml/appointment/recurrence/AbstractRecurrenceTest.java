@@ -1,10 +1,12 @@
 package com.openexchange.webdav.xml.appointment.recurrence;
 
-import com.openexchange.webdav.xml.AppointmentTest;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.webdav.xml.AppointmentTest;
 
 public class AbstractRecurrenceTest extends AppointmentTest {
 	
@@ -14,7 +16,7 @@ public class AbstractRecurrenceTest extends AppointmentTest {
 
 	private static final Log LOG = LogFactory.getLog(AbstractRecurrenceTest.class);
 	
-	public AbstractRecurrenceTest(String name) {
+	public AbstractRecurrenceTest(final String name) {
 		super(name);
 		simpleDateFormatUTC.setTimeZone(timeZoneUTC);
 	}

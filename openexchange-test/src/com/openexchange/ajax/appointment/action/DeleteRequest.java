@@ -55,9 +55,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
@@ -72,7 +70,7 @@ public class DeleteRequest extends AbstractAppointmentRequest {
     
     private final int recurrencePosition;
     
-    private Date lastModified;
+    private final Date lastModified;
 	
 	private boolean failOnError = true;
 

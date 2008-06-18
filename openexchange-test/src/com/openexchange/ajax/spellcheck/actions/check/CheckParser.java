@@ -68,7 +68,7 @@ public final class CheckParser extends AbstractAJAXParser<CheckResponse> {
 	 * 
 	 * @param failOnError
 	 */
-	public CheckParser(boolean failOnError) {
+	public CheckParser(final boolean failOnError) {
 		super(failOnError);
 	}
 

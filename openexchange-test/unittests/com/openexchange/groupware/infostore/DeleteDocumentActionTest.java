@@ -8,6 +8,7 @@ public class DeleteDocumentActionTest extends AbstractInfostoreActionTest {
 
 	CreateDocumentAction create = new CreateDocumentAction();
 	
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		create.setProvider(getProvider());
@@ -17,6 +18,7 @@ public class DeleteDocumentActionTest extends AbstractInfostoreActionTest {
 		create.perform();
 	}
 	
+	@Override
 	public void tearDown() throws Exception {
 		create.undo();
 		super.tearDown();
@@ -24,7 +26,7 @@ public class DeleteDocumentActionTest extends AbstractInfostoreActionTest {
 	
 	@Override
 	protected UndoableAction getAction() throws Exception {
-		DeleteDocumentAction deleteAction = new DeleteDocumentAction();
+		final DeleteDocumentAction deleteAction = new DeleteDocumentAction();
 		deleteAction.setProvider(getProvider());
 		deleteAction.setContext(getContext());
 		deleteAction.setDocuments(getDocuments());
@@ -34,7 +36,7 @@ public class DeleteDocumentActionTest extends AbstractInfostoreActionTest {
 
 	@Override
 	protected void verifyPerformed() throws Exception {
-		for(DocumentMetadata doc : getDocuments()) {
+		for(final DocumentMetadata doc : getDocuments()) {
 			assertNoResult("SELECT 1 FROM infostore WHERE cid = ? and id = ?", getContext().getContextId(), doc.getId());
 		}
 	}
@@ -42,14 +44,14 @@ public class DeleteDocumentActionTest extends AbstractInfostoreActionTest {
 
 	@Override
 	protected void verifyUndone() throws Exception {
-		for(DocumentMetadata doc : getDocuments()) {
+		for(final DocumentMetadata doc : getDocuments()) {
 			assertResult("SELECT 1 FROM infostore WHERE cid = ? and id = ?", getContext().getContextId(), doc.getId());
 		}
 	}
 	
 	// Bug 9061
 	public void testPossibleToTryMoreThanOnce() throws Exception {
-		UndoableAction action = getAction();
+		final UndoableAction action = getAction();
 		action.perform();
 		action.perform();
 	}

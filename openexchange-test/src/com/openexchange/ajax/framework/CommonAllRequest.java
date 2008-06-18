@@ -178,7 +178,7 @@ public class CommonAllRequest implements AJAXRequest {
 	 *
 	 * @param leftHandLimit the leftHandLimit to set
 	 */
-	public void setLeftHandLimit(int leftHandLimit) {
+	public void setLeftHandLimit(final int leftHandLimit) {
 		this.leftHandLimit = leftHandLimit;
 	}
 
@@ -187,7 +187,7 @@ public class CommonAllRequest implements AJAXRequest {
 	 *
 	 * @param rightHandLimit the rightHandLimit to set
 	 */
-	public void setRightHandLimit(int rightHandLimit) {
+	public void setRightHandLimit(final int rightHandLimit) {
 		this.rightHandLimit = rightHandLimit;
 	}
 

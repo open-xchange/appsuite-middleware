@@ -242,7 +242,7 @@ public final class ResourceUpdateTest extends TestCase {
 			/*
 			 * Load via storage API
 			 */
-			Resource storageVersion = ResourceStorage.getInstance().getResource(id, ctx);
+			final Resource storageVersion = ResourceStorage.getInstance().getResource(id, ctx);
 
 			/*
 			 * Compare values

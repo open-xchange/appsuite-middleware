@@ -45,6 +45,10 @@
 
 package com.openexchange.webdav.xml.parser;
 
+import java.util.List;
+
+import org.jdom.Element;
+
 import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalGroupParticipant;
@@ -56,8 +60,6 @@ import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.CalendarFields;
-import java.util.List;
-import org.jdom.Element;
 
 /**
  * CalendarParser
@@ -67,7 +69,7 @@ import org.jdom.Element;
 
 public abstract class CalendarParser extends CommonParser {
 	
-	protected void parseElementCalendar(CalendarObject calendarobject, Element eProp) throws Exception {		if (hasElement(eProp.getChild(CalendarFields.RECURRENCE_ID, XmlServlet.NS))) {
+	protected void parseElementCalendar(final CalendarObject calendarobject, final Element eProp) throws Exception {		if (hasElement(eProp.getChild(CalendarFields.RECURRENCE_ID, XmlServlet.NS))) {
 		calendarobject.setRecurrenceID(getValueAsInt(eProp.getChild(CalendarFields.RECURRENCE_ID, XmlServlet.NS)));
 	}
 	
@@ -108,7 +110,7 @@ public abstract class CalendarParser extends CommonParser {
 	}
 	
 	if (hasElement(eProp.getChild(CalendarFields.RECURRENCE_TYPE, XmlServlet.NS))) {
-		int recurrenceType = parseRecurrenceType(getValue(eProp.getChild(CalendarFields.RECURRENCE_TYPE, XmlServlet.NS)));
+		final int recurrenceType = parseRecurrenceType(getValue(eProp.getChild(CalendarFields.RECURRENCE_TYPE, XmlServlet.NS)));
 		
 		calendarobject.setRecurrenceType(recurrenceType);
 	}
@@ -130,7 +132,7 @@ public abstract class CalendarParser extends CommonParser {
 	parseElementCommon(calendarobject, eProp);
 	}
 	
-	protected int parseRecurrenceType(String value) throws Exception {
+	protected int parseRecurrenceType(final String value) throws Exception {
 		if (value.equals("none")) {
 			return CalendarObject.NONE;
 		} else if (value.equals("daily")) {
@@ -146,18 +148,18 @@ public abstract class CalendarParser extends CommonParser {
 		}
 	}
 	
-	protected void parseElementParticipants(CalendarObject calendarObj, Element eParticipant) throws Exception {
+	protected void parseElementParticipants(final CalendarObject calendarObj, final Element eParticipant) throws Exception {
 		if (eParticipant == null) {
 			return ;
 		}
 		
-		Participants participants = new Participants();
+		final Participants participants = new Participants();
 		
 		boolean hasParticipants = false;
 		
-		List elementUsers = eParticipant.getChildren("user", XmlServlet.NS);
-		List elementGroups = eParticipant.getChildren("group", XmlServlet.NS);
-		List elementResources = eParticipant.getChildren("resource", XmlServlet.NS);
+		final List elementUsers = eParticipant.getChildren("user", XmlServlet.NS);
+		final List elementGroups = eParticipant.getChildren("group", XmlServlet.NS);
+		final List elementResources = eParticipant.getChildren("resource", XmlServlet.NS);
 		
 		if (elementUsers != null) {
 			for (int a = 0; a < elementUsers.size(); a++) {
@@ -187,18 +189,18 @@ public abstract class CalendarParser extends CommonParser {
 	}
 	
 	
-	private void parseElementUser(Element e, Participants participants) throws Exception {
+	private void parseElementUser(final Element e, final Participants participants) throws Exception {
 		Participant participant = null;
 		
-		String external = e.getAttributeValue("external", XmlServlet.NS);
+		final String external = e.getAttributeValue("external", XmlServlet.NS);
 		if (external != null && "true".equals(external)) {
 			final String mail = e.getAttributeValue("mail", XmlServlet.NS);
 			participant = new ExternalUserParticipant(mail);
 		} else {
 			final int userId = getValueAsInt(e);
-			UserParticipant userparticipant = new UserParticipant(userId);
+			final UserParticipant userparticipant = new UserParticipant(userId);
 			participant = userparticipant;
-			String confirm = e.getAttributeValue("confirm", XmlServlet.NS);
+			final String confirm = e.getAttributeValue("confirm", XmlServlet.NS);
 			
 			if (confirm != null) {
 				if (confirm.equals("accept")) {
@@ -219,10 +221,10 @@ public abstract class CalendarParser extends CommonParser {
 		participants.add(participant);
 	}
 	
-	private void parseElementGroup(Element e, Participants participants) throws Exception {
+	private void parseElementGroup(final Element e, final Participants participants) throws Exception {
 		Participant participant = null;
 		
-		String external = e.getAttributeValue("external", XmlServlet.NS);
+		final String external = e.getAttributeValue("external", XmlServlet.NS);
 		if (external != null && "true".equals(external)) {
 			final String mail = e.getAttributeValue("mail", XmlServlet.NS);
 			participant = new ExternalGroupParticipant(mail);
@@ -234,9 +236,9 @@ public abstract class CalendarParser extends CommonParser {
 		participants.add(participant);
 	}
 	
-	private void parseElementResource(Element e, Participants participants) throws Exception {
+	private void parseElementResource(final Element e, final Participants participants) throws Exception {
 		final int resourceId = getValueAsInt(e);
-		Participant p = new ResourceParticipant(resourceId);
+		final Participant p = new ResourceParticipant(resourceId);
 		participants.add(p);
 	}
 }

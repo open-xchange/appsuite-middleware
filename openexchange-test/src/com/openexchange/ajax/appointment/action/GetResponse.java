@@ -61,7 +61,6 @@ import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * 

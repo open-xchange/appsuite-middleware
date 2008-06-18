@@ -55,7 +55,7 @@ import junit.framework.TestSuite;
 public class Bug8681Suite extends TestSuite {
 
 	public static Test suite(){
-		TestSuite tests = new TestSuite();
+		final TestSuite tests = new TestSuite();
 		//basics
 		tests.addTest( Bug8681forICAL.suite() );
 		tests.addTest( Bug8681forVCard.suite() );

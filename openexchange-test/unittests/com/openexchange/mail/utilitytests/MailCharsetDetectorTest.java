@@ -71,7 +71,7 @@ public final class MailCharsetDetectorTest extends AbstractMailTest {
 	/**
 	 * @param name
 	 */
-	public MailCharsetDetectorTest(String name) {
+	public MailCharsetDetectorTest(final String name) {
 		super(name);
 	}
 

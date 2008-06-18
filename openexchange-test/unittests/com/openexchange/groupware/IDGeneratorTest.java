@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Random;
 
+import junit.framework.TestCase;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -15,8 +17,6 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
-
-import junit.framework.TestCase;
 
 public class IDGeneratorTest extends TestCase {
 
@@ -48,7 +48,7 @@ public class IDGeneratorTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         Init.startServer();
-        ContextStorage cs = ContextStorage.getInstance();
+        final ContextStorage cs = ContextStorage.getInstance();
         context = cs.getContext(cs.getContextId("defaultcontext"));
     }
 
@@ -71,7 +71,7 @@ public class IDGeneratorTest extends TestCase {
             final Statement stmt = con.createStatement();
             try {
                 stmt.execute(TEST_TABLE);
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 LOG.fatal("Error while creating test table.", e);
                 fail("Error while creating test table.");
             }
@@ -81,8 +81,8 @@ public class IDGeneratorTest extends TestCase {
             con = null;
         }
 
-        Inserter[] tester = new Inserter[THREADS];
-        Thread[] threads = new Thread[tester.length];
+        final Inserter[] tester = new Inserter[THREADS];
+        final Thread[] threads = new Thread[tester.length];
         for (int i = 0; i < tester.length; i++) {
             tester[i] = new Inserter();
             threads[i] = new Thread(tester[i]);
@@ -118,7 +118,7 @@ public class IDGeneratorTest extends TestCase {
             final Statement stmt = con.createStatement();
             try {
                 stmt.execute("DROP TABLE id_generator_test");
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 LOG.fatal("Error while dropping table.", e);
             }
             stmt.close();
@@ -136,7 +136,7 @@ public class IDGeneratorTest extends TestCase {
                 Connection con = null;
                 try {
                     con = DBPool.pickupWriteable(context);
-                } catch (DBPoolingException e) {
+                } catch (final DBPoolingException e) {
                     LOG.error("Can't get writable database connection.", e);
                     return;
                 }
@@ -153,10 +153,10 @@ public class IDGeneratorTest extends TestCase {
                     }
                     con.commit();
                     insert.close();
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     try {
                         con.rollback();
-                    } catch (SQLException e1) {
+                    } catch (final SQLException e1) {
                         LOG.fatal("Error while rollback.", e);
                     }
                     LOG.fatal("Error while getting ID and inserting.", e);
@@ -165,7 +165,7 @@ public class IDGeneratorTest extends TestCase {
                 } finally {
                     try {
                         con.setAutoCommit(true);
-                    } catch (SQLException e) {
+                    } catch (final SQLException e) {
                         LOG.fatal("Error while setting autocommit true.", e);
                     }
                     DBPool.closeWriterSilent(context, con);

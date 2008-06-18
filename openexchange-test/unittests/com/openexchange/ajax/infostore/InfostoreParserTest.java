@@ -8,7 +8,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 public class InfostoreParserTest extends TestCase {
 	
 	public void testParseObject() throws Exception{
-		InfostoreParser parser = new InfostoreParser();
+		final InfostoreParser parser = new InfostoreParser();
 		
 		DocumentMetadata dm = parser.getDocumentMetadata("{\"title\" : \"The title\", \"url\" : \"http://www.open-xchange.com\" , \"filename\" : \"test.txt\", \"file_mimetype\" :\"text/plain\", \"file_size\" : 12345, \"version\" : 1, \"description\" : \"Description\", \"file_md5sum\" : \"123n12b4askfa2\", \"folder_id\" : 23, \"categories\" : [\"toll\", \"fein\", \"hervorragend\", \"am tollsten\"]}");
 		

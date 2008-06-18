@@ -53,6 +53,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.TimeZone;
 
+import junit.framework.TestCase;
+
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -60,8 +62,6 @@ import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
-
-import junit.framework.TestCase;
 
 public class VCardTest extends TestCase {
 	
@@ -77,7 +77,7 @@ public class VCardTest extends TestCase {
 		performTest("vCard 2 as " + mime2, vcard2, mime2);
 	}
 	
-	public void performTest(String testName, String vcard, String mime) throws ConverterException, IOException{
+	public void performTest(final String testName, final String vcard, final String mime) throws ConverterException, IOException{
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 		final VersitDefinition def = Versit.getDefinition(mime);
 		final VersitDefinition.Reader versitReader = def.getReader(new ByteArrayInputStream(vcard.getBytes("UTF-8")), "UTF-8");
@@ -88,7 +88,7 @@ public class VCardTest extends TestCase {
 				versitObject = def.parse(versitReader);
 			}
 			assertTrue(testName + " passed", true);
-		} catch (VersitException e){
+		} catch (final VersitException e){
 			fail(testName + " failed");
 		}
 	}

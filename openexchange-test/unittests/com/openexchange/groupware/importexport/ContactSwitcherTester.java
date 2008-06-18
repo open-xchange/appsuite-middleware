@@ -78,8 +78,8 @@ public class ContactSwitcherTester extends TestCase {
 	public void testSetStringValue() throws ContactException{
 		// preparations
 		ContactObject conObj = new ContactObject();
-		ContactField field = ContactField.GIVEN_NAME;
-		String value = "Prinz";
+		final ContactField field = ContactField.GIVEN_NAME;
+		final String value = "Prinz";
 		
 		//setting
 		conObj = (ContactObject) field.doSwitch(new ContactSetter(), conObj, value);
@@ -90,8 +90,8 @@ public class ContactSwitcherTester extends TestCase {
 	public void testSetMailValue() throws ContactException{
 		// preparations
 		ContactObject conObj = new ContactObject();
-		ContactField field = ContactField.EMAIL1;
-		String value = "prinz@example.invalid";
+		final ContactField field = ContactField.EMAIL1;
+		final String value = "prinz@example.invalid";
 		
 		//setting
 		conObj = (ContactObject) field.doSwitch(new ContactSetter(), conObj, value);
@@ -102,8 +102,8 @@ public class ContactSwitcherTester extends TestCase {
 	public void testSetDateValue() throws ContactException{
 		// preparations
 		ContactObject conObj = new ContactObject();
-		ContactField field = ContactField.BIRTHDAY;
-		Date value = new Date(System.currentTimeMillis());
+		final ContactField field = ContactField.BIRTHDAY;
+		final Date value = new Date(System.currentTimeMillis());
 		
 		//preparing setter for a normal date
 		conObj = (ContactObject) field.doSwitch(new ContactSetter(), conObj, value);
@@ -114,17 +114,17 @@ public class ContactSwitcherTester extends TestCase {
 	public void testSetDateValueViaTimestamp() throws ContactException{
 		// preparations
 		ContactObject conObj = new ContactObject();
-		ContactField field = ContactField.BIRTHDAY;
-		long value = System.currentTimeMillis();
+		final ContactField field = ContactField.BIRTHDAY;
+		final long value = System.currentTimeMillis();
 		
 		//setting up setter for Timestamp instead of date
-		ContactSwitcherForTimestamp switcher = new ContactSwitcherForTimestamp();
+		final ContactSwitcherForTimestamp switcher = new ContactSwitcherForTimestamp();
 		switcher.setDelegate(new ContactSetter());
 		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
 		
 		assertEquals("Setting of date via timestamp (as long) does work" , conObj.getBirthday(), new Date(value));
 		
-		String value2 = new Long(value).toString();
+		final String value2 = new Long(value).toString();
 		switcher.setDelegate(new ContactSetter());
 		conObj = (ContactObject) field.doSwitch(switcher, conObj, value2);
 		
@@ -134,8 +134,8 @@ public class ContactSwitcherTester extends TestCase {
 	public void testSetDateValueViaSimpleDate() throws ContactException, ParseException{
 		// preparations
 		ContactObject conObj = new ContactObject();
-		ContactField field = ContactField.BIRTHDAY;
-		String value = "1981/03/05";
+		final ContactField field = ContactField.BIRTHDAY;
+		final String value = "1981/03/05";
 
 		//setting up a proper setter for SimpleDateFormat
 		final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
@@ -152,9 +152,9 @@ public class ContactSwitcherTester extends TestCase {
 	
 	public void testGetDateAndName() throws ContactException{
 		//preparations
-		ContactObject conObj = new ContactObject();
-		Date date = new Date(System.currentTimeMillis());
-		String nickname = "Tierlieb";
+		final ContactObject conObj = new ContactObject();
+		final Date date = new Date(System.currentTimeMillis());
+		final String nickname = "Tierlieb";
 		
 		//preparing getter
 		final ContactSwitcher switcher = new ContactGetter(); 
@@ -162,8 +162,8 @@ public class ContactSwitcherTester extends TestCase {
 		conObj.setNickname(nickname);
 		
 		//reading
-		Date compareDate = (Date) ContactField.BIRTHDAY.doSwitch(switcher, conObj, "");
-		String compareNickname = (String) ContactField.NICKNAME.doSwitch(switcher, conObj, "");
+		final Date compareDate = (Date) ContactField.BIRTHDAY.doSwitch(switcher, conObj, "");
+		final String compareNickname = (String) ContactField.NICKNAME.doSwitch(switcher, conObj, "");
 		
 		assertEquals("Checking date", date, compareDate);
 		assertEquals("Checking nickname", nickname, compareNickname);
@@ -172,7 +172,7 @@ public class ContactSwitcherTester extends TestCase {
 	public void testDateSwitchingForBug7552() throws ParseException, ContactException{
 		//preparations
 		ContactObject conObj = new ContactObject();
-		ContactField field = ContactField.BIRTHDAY;
+		final ContactField field = ContactField.BIRTHDAY;
 
 		//setting up a proper setter for SimpleDateFormat
 		final ContactSwitcherForSimpleDateFormat switcher = new ContactSwitcherForSimpleDateFormat();
@@ -193,7 +193,7 @@ public class ContactSwitcherTester extends TestCase {
 	public void testBooleanSwitchingForBug7710() throws ContactException{
 		//preparations
 		ContactObject conObj = new ContactObject();
-		ContactField field = ContactField.PRIVATE_FLAG;
+		final ContactField field = ContactField.PRIVATE_FLAG;
 
 		//setting up a proper setter for SimpleDateFormat
 		final ContactSwitcherForBooleans switcher = new ContactSwitcherForBooleans();

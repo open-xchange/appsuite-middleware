@@ -85,7 +85,7 @@ public class NewAppointmentSearchRequest extends AbstractAppointmentRequest {
 	 */
 	private final int limit;
 	
-	private TimeZone timeZone;
+	private final TimeZone timeZone;
 	
 	private int[] columns = {
 		DataObject.OBJECT_ID,

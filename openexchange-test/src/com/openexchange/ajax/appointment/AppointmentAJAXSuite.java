@@ -9,7 +9,7 @@ import com.openexchange.ajax.appointment.recurrence.RecurrenceTestSuite;
 public class AppointmentAJAXSuite extends TestSuite{
 	
 	public static Test suite(){
-		TestSuite tests = new TestSuite();
+		final TestSuite tests = new TestSuite();
 		tests.addTestSuite( AllTest.class );
 		tests.addTestSuite( ConfirmTest.class );
 		tests.addTestSuite( CopyTest.class );

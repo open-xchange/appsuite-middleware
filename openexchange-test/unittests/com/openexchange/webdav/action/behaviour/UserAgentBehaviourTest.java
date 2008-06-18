@@ -2,10 +2,10 @@ package com.openexchange.webdav.action.behaviour;
 
 import java.util.HashSet;
 
+import junit.framework.TestCase;
+
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.webdav.action.MockWebdavRequest;
-
-import junit.framework.TestCase;
 
 public class UserAgentBehaviourTest extends TestCase {
 	
@@ -23,7 +23,7 @@ public class UserAgentBehaviourTest extends TestCase {
 		try {
 			new UserAgentBehaviour(".*", new C13(), new C2(), new C123());
 			fail("Could create conflicting behaviour");
-		} catch (ConfigurationException x) {
+		} catch (final ConfigurationException x) {
 			assertTrue(true);
 		}
 	}
@@ -39,7 +39,7 @@ public class UserAgentBehaviourTest extends TestCase {
 	}
 	
 	public void testMatches() throws ConfigurationException {
-		MockWebdavRequest req = new MockWebdavRequest(null, "");
+		final MockWebdavRequest req = new MockWebdavRequest(null, "");
 		req.setHeader("User-Agent", "Bla");
 		
 		
@@ -49,10 +49,10 @@ public class UserAgentBehaviourTest extends TestCase {
 	}
 	
 	public void testGet() throws ConfigurationException {
-		C13 c13 = new C13();
-		C2 c2 = new C2();
+		final C13 c13 = new C13();
+		final C2 c2 = new C2();
 		
-		Behaviour behaviour = new UserAgentBehaviour(".*", c13, c2);
+		final Behaviour behaviour = new UserAgentBehaviour(".*", c13, c2);
 		
 		assertTrue(c13 == behaviour.get(I1.class));
 		assertTrue(c13 == behaviour.get(I3.class));
@@ -60,9 +60,9 @@ public class UserAgentBehaviourTest extends TestCase {
 		
 	}
 	
-	private static void assertProvides(Behaviour behaviour, Class<? extends Object>...classes) {
-		HashSet<Class<? extends Object>> copy = new HashSet<Class<? extends Object>>(behaviour.provides());
-		for(Class clazz : classes) {
+	private static void assertProvides(final Behaviour behaviour, final Class<? extends Object>...classes) {
+		final HashSet<Class<? extends Object>> copy = new HashSet<Class<? extends Object>>(behaviour.provides());
+		for(final Class clazz : classes) {
 			assertTrue("Didn't find "+clazz, copy.remove(clazz));
 		}
 		assertTrue( copy.toString(), copy.isEmpty());

@@ -71,7 +71,7 @@ import com.openexchange.test.OXTestToolkit;
  */
 public class VCardImportExportServletTest extends AbstractImportExportServletTest {
 
-	public VCardImportExportServletTest(String name) {
+	public VCardImportExportServletTest(final String name) {
 		super(name);
 	}
 
@@ -92,16 +92,16 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
 			req.selectFile("file", "contact.vcf", is, format.getMimeType());
 			WebResponse webRes = webconv.getResource(req);
 			
-			JSONObject response = extractFromCallback( webRes.getText() );
+			final JSONObject response = extractFromCallback( webRes.getText() );
 			
 			//test: export
 			webconv =  getWebConversation();
 			req = new GetMethodWebRequest( getUrl(EXPORT_SERVLET, folderId, format) );
 			webRes = webconv.sendRequest(req);
 			is = webRes.getInputStream();
-			String resultingVCard = OXTestToolkit.readStreamAsString(is);
+			final String resultingVCard = OXTestToolkit.readStreamAsString(is);
 			//finally: checking
-			for(String test: IMPORT_VCARD_AWAITED_ELEMENTS){
+			for(final String test: IMPORT_VCARD_AWAITED_ELEMENTS){
 				assertTrue("VCard contains " + test + "?", resultingVCard.contains(test));
 			}
 		} finally {

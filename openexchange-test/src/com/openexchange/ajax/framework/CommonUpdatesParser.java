@@ -89,7 +89,7 @@ public class CommonUpdatesParser extends AbstractAJAXParser {
                     for (int j = 0; j < inner.length(); j++) {
                         values[i][j] = inner.get(j);
                     }
-                } catch (JSONException e) {
+                } catch (final JSONException e) {
                     // delete
                     values[i] = new Integer[] { Integer.valueOf(array.getInt(i)) };
                 }

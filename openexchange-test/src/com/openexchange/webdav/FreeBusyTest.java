@@ -1,12 +1,13 @@
 package com.openexchange.webdav;
 
+import java.util.Date;
+
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.tools.URLParameter;
 import com.openexchange.webdav.xml.GroupUserTest;
-import java.util.Date;
 
 public class FreeBusyTest extends AbstractWebdavTest {
 	
@@ -18,10 +19,11 @@ public class FreeBusyTest extends AbstractWebdavTest {
 	
 	private static final String FREEBUSY_URL = "/servlet/webdav.freebusy";
 	
-	public FreeBusyTest(String name) {
+	public FreeBusyTest(final String name) {
 		super(name);
 	}
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
@@ -43,8 +45,8 @@ public class FreeBusyTest extends AbstractWebdavTest {
 		parameter.setParameter("username", getLogin());
 		parameter.setParameter("server", "open-xchange.tux");
         
-        WebRequest req = new GetMethodWebRequest(PROTOCOL + getHostName() + FREEBUSY_URL + parameter.getURLParameters());
-        WebResponse resp = webCon.getResponse(req);
+        final WebRequest req = new GetMethodWebRequest(PROTOCOL + getHostName() + FREEBUSY_URL + parameter.getURLParameters());
+        final WebResponse resp = webCon.getResponse(req);
         
         assertEquals(200, resp.getResponseCode());
 	}

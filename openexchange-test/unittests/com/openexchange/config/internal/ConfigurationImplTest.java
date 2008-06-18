@@ -48,16 +48,15 @@
  */
 package com.openexchange.config.internal;
 
-import junit.framework.TestCase;
-
-import java.util.Properties;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Properties;
+
+import junit.framework.TestCase;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.internal.ConfigurationImpl;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -65,20 +64,22 @@ import com.openexchange.config.internal.ConfigurationImpl;
 public class ConfigurationImplTest extends TestCase {
     private File configFolder;
 
-    public void setUp() {
+    @Override
+	public void setUp() {
         configFolder = new File("/tmp/configTest");
         configFolder.mkdirs();
     }
 
-    public void tearDown() {
+    @Override
+	public void tearDown() {
         deleteAll(configFolder);
     }
 
-    private void deleteAll(File file) {
+    private void deleteAll(final File file) {
         if(file.isFile()) {
             file.delete();
         } else {
-            for(File subfile : file.listFiles()) {
+            for(final File subfile : file.listFiles()) {
                 deleteAll(subfile);
             }
             file.delete();
@@ -86,30 +87,30 @@ public class ConfigurationImplTest extends TestCase {
     }
 
     public void testGetAllBelowDirectory() throws IOException {
-        Properties props = new Properties();
+        final Properties props = new Properties();
         props.put("prop1", "value1");
         props.put("prop2", "value2");
         dump(props, "subfolder", "expectedProps.properties");
 
-        Properties props2 = new Properties();
+        final Properties props2 = new Properties();
         props2.put("prop3", "value3");
         props2.put("prop4", "value4");
         dump(props2, "subfolder", "otherExpectedProps.properties");
 
-        Properties props3 = new Properties();
+        final Properties props3 = new Properties();
         props3.put("prop5", "value5");
         props3.put("prop6", "value6");
         dump(props3, "subfolder","subsubfolder", "yetMoreExpectedProps.properties");
 
-        Properties props4 = new Properties();
+        final Properties props4 = new Properties();
         props4.put("prop7", "value7");
         props4.put("prop8", "value8");
         dump(props4, "otherFolder","unexpected.properties");
 
 
-        ConfigurationService config = getConfiguration();
+        final ConfigurationService config = getConfiguration();
 
-        Properties aggregated = config.getPropertiesInFolder("subfolder");
+        final Properties aggregated = config.getPropertiesInFolder("subfolder");
 
         assertEquals("value1", aggregated.get("prop1"));
         assertEquals("value2", aggregated.get("prop2"));
@@ -121,13 +122,13 @@ public class ConfigurationImplTest extends TestCase {
         assertNull(aggregated.get("prop8"));
     }
 
-    private void dump(Properties props, String...path) throws IOException {
+    private void dump(final Properties props, final String...path) throws IOException {
         File folder = configFolder;
         for(int i = 0; i < path.length-1; i++) {
             folder = new File(folder, path[i]);
             folder.mkdirs();
         }
-        File propertiesFile = new File(folder, path[path.length-1]);
+        final File propertiesFile = new File(folder, path[path.length-1]);
         if(propertiesFile.exists()) {
             propertiesFile.delete();
         }

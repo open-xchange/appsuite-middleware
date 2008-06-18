@@ -1,12 +1,19 @@
 package com.openexchange.webdav.action;
 
-import com.openexchange.webdav.protocol.*;
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
+
+import junit.framework.TestCase;
+
+import com.openexchange.webdav.protocol.CollectionTest;
+import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
+import com.openexchange.webdav.protocol.WebdavCollection;
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavResource;
 
 public abstract class ActionTestCase extends TestCase {
 	
@@ -16,27 +23,29 @@ public abstract class ActionTestCase extends TestCase {
 	
 	protected WebdavPath testCollection = null;
 	
+	@Override
 	public void setUp() throws Exception {
 		TestWebdavFactoryBuilder.setUp();
 		factory = TestWebdavFactoryBuilder.buildFactory();
 		factory.beginRequest();
 		try {
 			testCollection = new WebdavPath("testCollection"+System.currentTimeMillis());
-			WebdavCollection coll = factory.resolveCollection(testCollection);
+			final WebdavCollection coll = factory.resolveCollection(testCollection);
 			coll.create();
 			clean.add(coll.getUrl());
 		
 			CollectionTest.createStructure(coll, factory);
-		} catch (Exception x) {
+		} catch (final Exception x) {
             x.printStackTrace();
             tearDown();
 			throw x;
 		}
 	}
 	
+	@Override
 	public void tearDown() throws Exception {
 		try {
-			for(WebdavPath url : clean) {
+			for(final WebdavPath url : clean) {
 				factory.resolveResource(url).delete();
 			}
 		} finally {
@@ -45,10 +54,10 @@ public abstract class ActionTestCase extends TestCase {
 		}
 	}
 	
-	public String getContent(WebdavPath url) throws WebdavException, IOException {
-		WebdavResource res = factory.resolveResource(url);
-		byte[] bytes = new byte[(int)(long)res.getLength()];
-		InputStream in = res.getBody();
+	public String getContent(final WebdavPath url) throws WebdavException, IOException {
+		final WebdavResource res = factory.resolveResource(url);
+		final byte[] bytes = new byte[(int)(long)res.getLength()];
+		final InputStream in = res.getBody();
 		in.read(bytes);
 		return new String(bytes, "UTF-8");
 	}

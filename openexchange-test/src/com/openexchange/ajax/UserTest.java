@@ -29,14 +29,14 @@ public class UserTest extends AbstractAJAXTest {
 		ContactObject.EMAIL1,
 	};
 	
-	public UserTest(String name) {
+	public UserTest(final String name) {
 		super(name);
 	}
 
 	private static final String USER_URL = "/ajax/contacts";
 	
 	public void testSearch() throws Exception {
-		com.openexchange.groupware.ldap.User users[] = searchUser(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
+		final com.openexchange.groupware.ldap.User users[] = searchUser(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
 		assertTrue("user array size > 0", users.length > 0);
 	}
 
@@ -44,7 +44,7 @@ public class UserTest extends AbstractAJAXTest {
 		com.openexchange.groupware.ldap.User users[] = searchUser(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
 		assertTrue("user array size > 0", users.length > 0);
 		
-		int[] id = new int[users.length];
+		final int[] id = new int[users.length];
 		for (int a = 0; a < id.length; a++) {
 			id[a] = users[a].getId();
 		}
@@ -54,17 +54,17 @@ public class UserTest extends AbstractAJAXTest {
 	}
 	
 	public void testSearchUsers() throws Exception {
-		com.openexchange.groupware.ldap.User users[] = searchUser(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
+		final com.openexchange.groupware.ldap.User users[] = searchUser(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
 		assertTrue("user array size > 0", users.length > 0);
 	}
 	
 	public void testGet() throws Exception {
-		com.openexchange.groupware.ldap.User users[] = searchUser(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
+		final com.openexchange.groupware.ldap.User users[] = searchUser(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
 		assertTrue("user array size > 0", users.length > 0);
-		com.openexchange.groupware.ldap.User user = loadUser(getWebConversation(), users[0].getId(), PROTOCOL + getHostName(), getSessionId());
+		final com.openexchange.groupware.ldap.User user = loadUser(getWebConversation(), users[0].getId(), PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public static UserImpl4Test[] searchUser(WebConversation webCon, String searchpattern, String host, String session) throws Exception {
+	public static UserImpl4Test[] searchUser(final WebConversation webCon, final String searchpattern, String host, final String session) throws Exception {
 		host = appendPrefix(host);
 		
         final URLParameter parameter = new URLParameter();
@@ -81,12 +81,12 @@ public class UserTest extends AbstractAJAXTest {
 		
 		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, stringBuffer.toString());
 		
-		JSONObject jsonObj = new JSONObject();
+		final JSONObject jsonObj = new JSONObject();
 		jsonObj.put("pattern", searchpattern);
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
-		WebRequest req = new PutMethodWebRequest(host + USER_URL + parameter.getURLParameters(), bais, "text/javascript");
-		WebResponse resp = webCon.getResponse(req);
+		final ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
+		final WebRequest req = new PutMethodWebRequest(host + USER_URL + parameter.getURLParameters(), bais, "text/javascript");
+		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
@@ -110,7 +110,7 @@ public class UserTest extends AbstractAJAXTest {
 		return user;
 	}
 	
-	public static UserImpl4Test[] listUser(WebConversation webCon, int[] id, String host, String session) throws Exception {
+	public static UserImpl4Test[] listUser(final WebConversation webCon, final int[] id, String host, final String session) throws Exception {
 		host = appendPrefix(host);
 		
         final URLParameter parameter = new URLParameter();
@@ -127,17 +127,17 @@ public class UserTest extends AbstractAJAXTest {
 		
 		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, stringBuffer.toString());
 		
-		JSONArray requestArray = new JSONArray();
+		final JSONArray requestArray = new JSONArray();
 		for (int a = 0; a < id.length; a++) {
-			JSONObject jData = new JSONObject();
+			final JSONObject jData = new JSONObject();
 			jData.put(DataFields.ID, id[a]);
 			jData.put(AJAXServlet.PARAMETER_FOLDERID, FolderObject.SYSTEM_LDAP_FOLDER_ID);
 			requestArray.put(jData);
 		}
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(requestArray.toString().getBytes());
-		WebRequest req = new PutMethodWebRequest(host + USER_URL + parameter.getURLParameters(), bais, "text/javascript");
-		WebResponse resp = webCon.getResponse(req);
+		final ByteArrayInputStream bais = new ByteArrayInputStream(requestArray.toString().getBytes());
+		final WebRequest req = new PutMethodWebRequest(host + USER_URL + parameter.getURLParameters(), bais, "text/javascript");
+		final WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
@@ -149,8 +149,8 @@ public class UserTest extends AbstractAJAXTest {
 		
 		assertNotNull("timestamp", response.getTimestamp());
 		
-		JSONArray jsonArray = (JSONArray)response.getData();
-		UserImpl4Test[] user = new UserImpl4Test[jsonArray.length()];
+		final JSONArray jsonArray = (JSONArray)response.getData();
+		final UserImpl4Test[] user = new UserImpl4Test[jsonArray.length()];
 		for (int a = 0; a < user.length; a++) {
 			final JSONArray jsonContactArray = jsonArray.getJSONArray(a);
 			user[a] = new UserImpl4Test();
@@ -161,7 +161,7 @@ public class UserTest extends AbstractAJAXTest {
 		return user;
 	}
 	
-	public static UserImpl4Test loadUser(WebConversation webCon, int userId, String host, String session) throws Exception {
+	public static UserImpl4Test loadUser(final WebConversation webCon, final int userId, String host, final String session) throws Exception {
 		host = appendPrefix(host);
 		
         final URLParameter parameter = new URLParameter();
@@ -170,8 +170,8 @@ public class UserTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(userId));
 		parameter.setParameter(AJAXServlet.PARAMETER_FOLDERID, FolderObject.SYSTEM_LDAP_FOLDER_ID);
 		
-		WebRequest req = new GetMethodWebRequest(host + USER_URL + parameter.getURLParameters());
-		WebResponse resp = webCon.getResponse(req);
+		final WebRequest req = new GetMethodWebRequest(host + USER_URL + parameter.getURLParameters());
+		final WebResponse resp = webCon.getResponse(req);
 
 		assertEquals(200, resp.getResponseCode());
 		
@@ -183,9 +183,9 @@ public class UserTest extends AbstractAJAXTest {
 		
 		assertNotNull("timestamp", response.getTimestamp());
 		
-		JSONObject jsonObj = (JSONObject)response.getData();
+		final JSONObject jsonObj = (JSONObject)response.getData();
 		
-		UserImpl4Test user = new UserImpl4Test();
+		final UserImpl4Test user = new UserImpl4Test();
 		assertTrue("check id", jsonObj.has(ParticipantsFields.ID));
 		user.setId(jsonObj.getInt(DataFields.ID));
 		user.setMail(jsonObj.getString(ContactFields.EMAIL1));

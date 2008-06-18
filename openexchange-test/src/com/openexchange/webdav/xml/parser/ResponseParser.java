@@ -37,6 +37,14 @@
 
 package com.openexchange.webdav.xml.parser;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.Namespace;
+
 import com.openexchange.group.Group;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -49,13 +57,6 @@ import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.DataFields;
 import com.openexchange.webdav.xml.types.Response;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.Namespace;
-import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Parses a Webdav XML response into the Response object.
@@ -66,13 +67,13 @@ public class ResponseParser {
 	
 	public static final Namespace webdav = Namespace.getNamespace("D", "DAV:");
 	
-	public static Response[] parse(final Document doc, int module) throws Exception {
+	public static Response[] parse(final Document doc, final int module) throws Exception {
 		return parse(doc, module, false);
 	}
 	
-	public static Response[] parse(final Document doc, int module, boolean bList) throws Exception {
-		Element rootElement = doc.getRootElement();
-		List responseElements = rootElement.getChildren("response", webdav);
+	public static Response[] parse(final Document doc, final int module, final boolean bList) throws Exception {
+		final Element rootElement = doc.getRootElement();
+		final List responseElements = rootElement.getChildren("response", webdav);
 		
 		Response[] response = null;
 		
@@ -93,11 +94,11 @@ public class ResponseParser {
 		return response;
 	}
 	
-	protected static Response parseResponse(Element eResponse, int module, boolean bList) throws Exception {
-		Response response = new Response();
+	protected static Response parseResponse(final Element eResponse, final int module, final boolean bList) throws Exception {
+		final Response response = new Response();
 		
-		Element ePropstat = eResponse.getChild("propstat", webdav);
-		Element eProp = ePropstat.getChild("prop", webdav);
+		final Element ePropstat = eResponse.getChild("propstat", webdav);
+		final Element eProp = ePropstat.getChild("prop", webdav);
 		
 		if (bList) {
 			response.setDataObject(parseList(eProp));
@@ -120,14 +121,14 @@ public class ResponseParser {
 			}
 		}
 		
-		Element eStatus = ePropstat.getChild("status", webdav);
-		Element eResponsedescription = ePropstat.getChild("responsedescription", webdav);
+		final Element eStatus = ePropstat.getChild("status", webdav);
+		final Element eResponsedescription = ePropstat.getChild("responsedescription", webdav);
 		
 		response.setStatus(Integer.valueOf(eStatus.getValue()));
 		
-		String responseDescription = eResponsedescription.getValue();
+		final String responseDescription = eResponsedescription.getValue();
 		
-		int status = Integer.parseInt(eStatus.getValue());
+		final int status = Integer.parseInt(eStatus.getValue());
 		if (status != 200) {
 			response.setErrorMessage(responseDescription);
 		}
@@ -138,7 +139,7 @@ public class ResponseParser {
 	protected static int[] parseList(final Element eProp) throws Exception {
 		final Element eIdList = eProp.getChild("object_list", XmlServlet.NS);
 		final List idList = eIdList.getChildren(DataFields.ID, XmlServlet.NS);
-		int[] idArray = new int[idList.size()];
+		final int[] idArray = new int[idList.size()];
 		for (int a = 0; a < idList.size(); a++) {
 			final Element eId = (Element)idList.get(a);
 			idArray[a] = DataParser.getValueAsInt(eId);
@@ -146,13 +147,13 @@ public class ResponseParser {
 		return idArray;
 	}
 	
-	protected static Response[] parseGroupUserResponse(Element eResponse) throws Exception {
-		Element ePropstat = eResponse.getChild("propstat", webdav);
-		Element eProp = ePropstat.getChild("prop", webdav);
-		Element eUsers = eProp.getChild("users", XmlServlet.NS);
-		Element eGroups = eProp.getChild("groups", XmlServlet.NS);
-		Element eResources = eProp.getChild("resources", XmlServlet.NS);
-		Element eResourcegroups = eProp.getChild("resourcegroups", XmlServlet.NS);
+	protected static Response[] parseGroupUserResponse(final Element eResponse) throws Exception {
+		final Element ePropstat = eResponse.getChild("propstat", webdav);
+		final Element eProp = ePropstat.getChild("prop", webdav);
+		final Element eUsers = eProp.getChild("users", XmlServlet.NS);
+		final Element eGroups = eProp.getChild("groups", XmlServlet.NS);
+		final Element eResources = eProp.getChild("resources", XmlServlet.NS);
+		final Element eResourcegroups = eProp.getChild("resourcegroups", XmlServlet.NS);
 		
 		List userList = null;
 		
@@ -186,7 +187,7 @@ public class ResponseParser {
 			resourcegroupList = new ArrayList();
 		}
 		
-		Response[] response = new Response[userList.size() + groupList.size() + resourceList.size() + resourcegroupList.size()];
+		final Response[] response = new Response[userList.size() + groupList.size() + resourceList.size() + resourcegroupList.size()];
 		
 		int counter = 0;
 		
@@ -226,40 +227,40 @@ public class ResponseParser {
 		return response;
 	}
 	
-	protected static AppointmentObject parseAppointmentResponse(Element eProp) throws Exception {
-		AppointmentObject appointmentObj = new AppointmentObject();
-		AppointmentParser appointmentParser = new AppointmentParser();
+	protected static AppointmentObject parseAppointmentResponse(final Element eProp) throws Exception {
+		final AppointmentObject appointmentObj = new AppointmentObject();
+		final AppointmentParser appointmentParser = new AppointmentParser();
 		appointmentParser.parse(appointmentObj, eProp);
 		return appointmentObj;
 	}
 	
-	protected static ContactObject parseContactResponse(Element eProp) throws Exception {
-		ContactObject contactObj = new ContactObject();
-		ContactParser contactParser = new ContactParser();
+	protected static ContactObject parseContactResponse(final Element eProp) throws Exception {
+		final ContactObject contactObj = new ContactObject();
+		final ContactParser contactParser = new ContactParser();
 		contactParser.parse(contactObj, eProp);
 		return contactObj;
 	}
 	
-	protected static FolderObject parseFolderResponse(Element eProp) throws Exception {
-		FolderObject folderObj = new FolderObject();
-		FolderParser folderParser = new FolderParser();
+	protected static FolderObject parseFolderResponse(final Element eProp) throws Exception {
+		final FolderObject folderObj = new FolderObject();
+		final FolderParser folderParser = new FolderParser();
 		folderParser.parse(folderObj, eProp);
 		return folderObj;
 	}
 	
-	protected static Task parseTaskResponse(Element eProp) throws Exception {
-		Task taskObj = new Task();
-		TaskParser taskParser = new TaskParser();
+	protected static Task parseTaskResponse(final Element eProp) throws Exception {
+		final Task taskObj = new Task();
+		final TaskParser taskParser = new TaskParser();
 		taskParser.parse(taskObj, eProp);
 		return taskObj;
 	}
 	
-	protected static ContactObject parseUserResponse(Element eProp) throws Exception {
-		ContactObject contactObj = new ContactObject();
-		ContactParser contactParser = new ContactParser();
+	protected static ContactObject parseUserResponse(final Element eProp) throws Exception {
+		final ContactObject contactObj = new ContactObject();
+		final ContactParser contactParser = new ContactParser();
 		contactParser.parse(contactObj, eProp);
 		
-		HashMap hm = new HashMap();
+		final HashMap hm = new HashMap();
 		
 		if (DataParser.hasElement(eProp.getChild("myidentity", XmlServlet.NS))) {
 			hm.put("myidentity", DataParser.getValue(eProp.getChild("myidentity", XmlServlet.NS)));
@@ -274,23 +275,23 @@ public class ResponseParser {
 		return contactObj;
 	}
 	
-	protected static Group parseGroupResponse(Element eProp) throws Exception {
-		Group groupObj = new Group();
-		GroupParser groupParser = new GroupParser();
+	protected static Group parseGroupResponse(final Element eProp) throws Exception {
+		final Group groupObj = new Group();
+		final GroupParser groupParser = new GroupParser();
 		groupParser.parse(groupObj, eProp);
 		return groupObj;
 	}
 	
-	protected static Resource parseResourceResponse(Element eProp) throws Exception {
-		Resource resourceObj = new Resource();
-		ResourceParser resourceParser = new ResourceParser();
+	protected static Resource parseResourceResponse(final Element eProp) throws Exception {
+		final Resource resourceObj = new Resource();
+		final ResourceParser resourceParser = new ResourceParser();
 		resourceParser.parse(resourceObj, eProp);
 		return resourceObj;
 	}
 	
-	protected static ResourceGroup parseResourceGroupResponse(Element eProp) throws Exception {
-		ResourceGroup resourcegroupObj = new ResourceGroup();
-		ResourceGroupParser resourcegroupParser = new ResourceGroupParser();
+	protected static ResourceGroup parseResourceGroupResponse(final Element eProp) throws Exception {
+		final ResourceGroup resourcegroupObj = new ResourceGroup();
+		final ResourceGroupParser resourcegroupParser = new ResourceGroupParser();
 		resourcegroupParser.parse(resourcegroupObj, eProp);
 		return resourcegroupObj;
 	}

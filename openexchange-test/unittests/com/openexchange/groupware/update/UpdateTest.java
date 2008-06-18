@@ -1,5 +1,12 @@
 package com.openexchange.groupware.update;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import junit.framework.TestCase;
+
 import com.openexchange.database.Database;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
@@ -9,12 +16,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.server.impl.DBPoolingException;
-import junit.framework.TestCase;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class UpdateTest extends TestCase {
     protected Schema schema = null;
@@ -24,7 +25,8 @@ public class UpdateTest extends TestCase {
     protected User user;
     private DBProvider provider;
 
-    public void setUp() throws Exception {
+    @Override
+	public void setUp() throws Exception {
         Init.startServer();
         ContextStorage.start();
 
@@ -37,11 +39,12 @@ public class UpdateTest extends TestCase {
         user = UserStorage.getInstance().getUser(user_id, ctx);
     }
 
-    public void tearDown() throws Exception {
+    @Override
+	public void tearDown() throws Exception {
         Init.stopServer();
     }
 
-    protected final void exec(String sql, Object...args) throws DBPoolingException, SQLException {
+    protected final void exec(final String sql, final Object...args) throws DBPoolingException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
 
@@ -49,7 +52,7 @@ public class UpdateTest extends TestCase {
             con = Database.get(existing_ctx_id, true);
             stmt = con.prepareStatement(sql);
             int count = 1;
-            for(Object o : args) {
+            for(final Object o : args) {
                 stmt.setObject(count++,o);
             }
 
@@ -63,7 +66,7 @@ public class UpdateTest extends TestCase {
         }
     }
 
-    protected final void assertNoResults(String sql, Object...args) throws DBPoolingException, SQLException {
+    protected final void assertNoResults(final String sql, final Object...args) throws DBPoolingException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -71,7 +74,7 @@ public class UpdateTest extends TestCase {
             con = Database.get(existing_ctx_id, true);
             stmt = con.prepareStatement(sql);
             int count = 1;
-            for(Object o : args) {
+            for(final Object o : args) {
                 stmt.setObject(count++,o);
             }
 
@@ -89,8 +92,9 @@ public class UpdateTest extends TestCase {
     }
 
     protected DBProvider getProvider(){
-        if(provider != null)
-            return provider;
+        if(provider != null) {
+			return provider;
+		}
         return provider = createProvider();
     }
 
@@ -99,27 +103,27 @@ public class UpdateTest extends TestCase {
     }
 
     private class UpdateTaskDBProvider implements DBProvider {
-        public Connection getReadConnection(Context ctx) throws TransactionException {
+        public Connection getReadConnection(final Context ctx) throws TransactionException {
             try {
                 return Database.get(ctx, false);
-            } catch (DBPoolingException e) {
+            } catch (final DBPoolingException e) {
                 throw new TransactionException(e);
             }
         }
 
-        public void releaseReadConnection(Context ctx, Connection con) {
+        public void releaseReadConnection(final Context ctx, final Connection con) {
             Database.back(ctx, false, con);
         }
 
-        public Connection getWriteConnection(Context ctx) throws TransactionException {
+        public Connection getWriteConnection(final Context ctx) throws TransactionException {
             try {
                 return Database.get(ctx, true);
-            } catch (DBPoolingException e) {
+            } catch (final DBPoolingException e) {
                 throw new TransactionException(e);
             }
         }
 
-        public void releaseWriteConnection(Context ctx, Connection con) {
+        public void releaseWriteConnection(final Context ctx, final Connection con) {
             Database.back(ctx, true, con);
         }
     }

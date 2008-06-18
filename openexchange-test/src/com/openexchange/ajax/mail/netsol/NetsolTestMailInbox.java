@@ -71,7 +71,7 @@ public final class NetsolTestMailInbox extends AbstractNetsolTest {
 	 * 
 	 * @param name
 	 */
-	public NetsolTestMailInbox(String name) {
+	public NetsolTestMailInbox(final String name) {
 		super(name);
 	}
 
@@ -130,7 +130,7 @@ public final class NetsolTestMailInbox extends AbstractNetsolTest {
 			/*
 			 * Fetch INBOX mails
 			 */
-			CommonListResponse resp = (CommonListResponse) Executor.execute(getSession(), new NetsolListRequest(paths));
+			final CommonListResponse resp = (CommonListResponse) Executor.execute(getSession(), new NetsolListRequest(paths));
 			assertTrue("List failed", resp.getArray() != null && resp.getArray().length > 0);
 			assertTrue("Duration corrupt", resp.getRequestDuration() > 0);
 			requestTracker.addDuration(resp.getRequestDuration());

@@ -51,7 +51,6 @@ package com.openexchange.ajax.folder.actions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
 
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.api2.OXException;

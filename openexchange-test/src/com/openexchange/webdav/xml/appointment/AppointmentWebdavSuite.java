@@ -1,14 +1,15 @@
 package com.openexchange.webdav.xml.appointment;
 
 
-import com.openexchange.webdav.xml.appointment.recurrence.RecurrenceTestSuite;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import com.openexchange.webdav.xml.appointment.recurrence.RecurrenceTestSuite;
 
 public class AppointmentWebdavSuite extends TestSuite{
 	
 	public static Test suite(){
-		TestSuite tests = new TestSuite();
+		final TestSuite tests = new TestSuite();
 		tests.addTestSuite( ConfirmTest.class );
 		tests.addTestSuite( DeleteTest.class );
 		tests.addTestSuite( ListTest.class );

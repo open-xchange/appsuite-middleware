@@ -73,7 +73,7 @@ public final class NetsolTestMailInboxSort extends AbstractNetsolTest {
 	 * 
 	 * @param name
 	 */
-	public NetsolTestMailInboxSort(String name) {
+	public NetsolTestMailInboxSort(final String name) {
 		super(name);
 	}
 

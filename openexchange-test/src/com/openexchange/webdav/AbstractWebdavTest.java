@@ -1,17 +1,18 @@
 package com.openexchange.webdav;
 
+import java.util.Properties;
+
+import junit.framework.TestCase;
+
+import org.jdom.Namespace;
+
 import com.meterware.httpunit.Base64;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
-import com.openexchange.webdav.xml.GroupUserTest;
 import com.openexchange.test.WebdavInit;
-
-import java.util.Properties;
-
-import junit.framework.TestCase;
-import org.jdom.Namespace;
+import com.openexchange.webdav.xml.GroupUserTest;
 
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
@@ -53,13 +54,14 @@ public abstract class AbstractWebdavTest extends TestCase {
 	
 	public static final String AUTHORIZATION = "authorization";
 	
-	public AbstractWebdavTest(String name) {
+	public AbstractWebdavTest(final String name) {
 		super(name);
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		webCon = new WebConversation();
@@ -80,7 +82,7 @@ public abstract class AbstractWebdavTest extends TestCase {
 		authData = getAuthData(login, password);		
 	} 
 	
-	protected static String getAuthData(String login, String password) throws Exception {
+	protected static String getAuthData(final String login, String password) throws Exception {
 		if (password == null) {
 			password = "";
 		}

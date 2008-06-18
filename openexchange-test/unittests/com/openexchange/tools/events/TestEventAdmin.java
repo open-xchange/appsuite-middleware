@@ -1,11 +1,11 @@
 package com.openexchange.tools.events;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-
-import java.util.List;
-import java.util.LinkedList;
-import java.util.ArrayList;
 
 import com.openexchange.event.CommonEvent;
 
@@ -13,13 +13,13 @@ public class TestEventAdmin implements EventAdmin {
 
     private static TestEventAdmin INSTANCE = new TestEventAdmin();
 
-    private List<Event> events = new LinkedList<Event>();
+    private final List<Event> events = new LinkedList<Event>();
 
-    public void postEvent(Event event) {
+    public void postEvent(final Event event) {
 	    events.add( event );
 	}
 
-	public void sendEvent(Event event) {
+	public void sendEvent(final Event event) {
         events.add( event );
 	}
 

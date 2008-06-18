@@ -2,10 +2,10 @@ package com.openexchange.groupware.importexport;
 
 
 public class ConversionPath {
-	private String folder;
-	private Format format;
+	private final String folder;
+	private final Format format;
 
-	ConversionPath(String folder, Format format){
+	ConversionPath(final String folder, final Format format){
 		this.folder = folder;
 		this.format = format;
 	}
@@ -20,24 +20,31 @@ public class ConversionPath {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		final ConversionPath other = (ConversionPath) obj;
 		if (folder == null) {
-			if (other.folder != null)
+			if (other.folder != null) {
 				return false;
-		} else if (!folder.equals(other.folder))
+			}
+		} else if (!folder.equals(other.folder)) {
 			return false;
+		}
 		if (format == null) {
-			if (other.format != null)
+			if (other.format != null) {
 				return false;
-		} else if (!format.equals(other.format))
+			}
+		} else if (!format.equals(other.format)) {
 			return false;
+		}
 		return true;
 	}
 }

@@ -10,7 +10,7 @@ public class Occurrence {
     
     private int position = -1;
     
-    public Occurrence(Date startDate, Date endDate, int position) {
+    public Occurrence(final Date startDate, final Date endDate, final int position) {
         this.startDate = startDate;
         this.endDate = endDate;
         this.position = position;

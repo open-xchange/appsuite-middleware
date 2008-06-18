@@ -24,15 +24,17 @@ public static final int SKEW = 1000;
 	protected abstract WebdavResource createResource() throws Exception;
 
 	
+	@Override
 	public void setUp() throws Exception{
 		resourceManager = getWebdavFactory();
 		
-		WebdavResource resource = resourceManager.resolveCollection(testCollection);
+		final WebdavResource resource = resourceManager.resolveCollection(testCollection);
 		assertTrue(resource.isCollection());
 		resource.create();
 	}
 	
 
+	@Override
 	public void tearDown() throws Exception {
 		resourceManager.resolveCollection(testCollection).delete();
 	}
@@ -72,8 +74,8 @@ public static final int SKEW = 1000;
 	}
 	
 	public void testMandatoryProperties() throws Exception {
-		List<Property> mandatory = getPropertiesToTest();
-		for(Property prop : mandatory) {
+		final List<Property> mandatory = getPropertiesToTest();
+		for(final Property prop : mandatory) {
 			prop.doSwitch(this);
 		}
 	}	
@@ -88,38 +90,39 @@ public static final int SKEW = 1000;
 	
 	
 	
-	public static void assertEquals(Date d1, Date d2, int skew){
-		long l1 = d1.getTime();
-		long l2 = d2.getTime();
-		long diff = (l1 < l2) ? l2 - l1 : l1 - l2;
-		if(diff > skew)
+	public static void assertEquals(final Date d1, final Date d2, final int skew){
+		final long l1 = d1.getTime();
+		final long l2 = d2.getTime();
+		final long diff = (l1 < l2) ? l2 - l1 : l1 - l2;
+		if(diff > skew) {
 			assertEquals(l1,l2);
+		}
 		assertTrue(true);
 	}
 	
-	public static void assertResources(Iterable<WebdavResource> resources, String...displayNames) throws WebdavException{
+	public static void assertResources(final Iterable<WebdavResource> resources, final String...displayNames) throws WebdavException{
 		//assertEquals(displayNames.length, resources.size());
 		
-		Set<String> nameSet = new HashSet<String>(Arrays.asList(displayNames));
+		final Set<String> nameSet = new HashSet<String>(Arrays.asList(displayNames));
 		
-		for(WebdavResource res : resources) {
+		for(final WebdavResource res : resources) {
 			assertTrue(res.getDisplayName()+" not expected",nameSet.remove(res.getDisplayName()));
 		}
 		assertTrue(nameSet.toString(),nameSet.isEmpty());
 	}
 	
-	public static void assertOptions(Iterable<Protocol.WEBDAV_METHOD> expect, Protocol.WEBDAV_METHOD...methods) throws WebdavException{
+	public static void assertOptions(final Iterable<Protocol.WEBDAV_METHOD> expect, final Protocol.WEBDAV_METHOD...methods) throws WebdavException{
 		//assertEquals(displayNames.length, resources.size());
 		
-		Set<Protocol.WEBDAV_METHOD> methodSet = new HashSet<Protocol.WEBDAV_METHOD>(Arrays.asList(methods));
+		final Set<Protocol.WEBDAV_METHOD> methodSet = new HashSet<Protocol.WEBDAV_METHOD>(Arrays.asList(methods));
 		
-		for(Protocol.WEBDAV_METHOD method : expect) {
+		for(final Protocol.WEBDAV_METHOD method : expect) {
 			assertTrue(method+" not expected",methodSet.remove(method));
 		}
 		assertTrue(methodSet.toString(),methodSet.isEmpty());
 	}
 	
-	public void throwEx(Exception x) throws WebdavException {
+	public void throwEx(final Exception x) throws WebdavException {
 		throw new WebdavException(x.getMessage(), x, new WebdavPath() ,500 );
 	}
 }

@@ -5,25 +5,25 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import junit.framework.TestCase;
+
 import com.openexchange.webdav.action.ifheader.IfHeader;
 import com.openexchange.webdav.action.ifheader.IfHeaderEntity;
 import com.openexchange.webdav.action.ifheader.IfHeaderList;
 import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.action.ifheader.IfHeaderParser;
 
-import junit.framework.TestCase;
-
 public class IfHeaderParserTest extends TestCase {
 	public void testETag() throws Exception {
-		IfHeader ifHeader = new IfHeaderParser().parse("([etag])");
+		final IfHeader ifHeader = new IfHeaderParser().parse("([etag])");
 		
 		assertEquals(1, ifHeader.getLists().size());
 		
-		List<IfHeaderEntity> list = ifHeader.getList(0);
+		final List<IfHeaderEntity> list = ifHeader.getList(0);
 		
 		assertEquals(1, list.size());
 		
-		IfHeaderEntity entity = list.get(0);
+		final IfHeaderEntity entity = list.get(0);
 		assertTrue(entity.isETag());
 		assertTrue(entity.mustMatch());
 		assertFalse(entity.isLockToken());
@@ -31,30 +31,30 @@ public class IfHeaderParserTest extends TestCase {
 	}
 	
 	public void testLockToken() throws Exception {
-		IfHeader ifHeader = new IfHeaderParser().parse("(<http://www.open-xchange.com/webdav/12345>)");
+		final IfHeader ifHeader = new IfHeaderParser().parse("(<http://www.open-xchange.com/webdav/12345>)");
 		
 		assertEquals(1, ifHeader.getLists().size());
 		
-		List<IfHeaderEntity> list = ifHeader.getList(0);
+		final List<IfHeaderEntity> list = ifHeader.getList(0);
 		
 		assertEquals(1, list.size());
 		
-		IfHeaderEntity entity = list.get(0);
+		final IfHeaderEntity entity = list.get(0);
 		assertTrue(entity.isLockToken());
 		assertTrue(entity.mustMatch());
 		assertEquals("http://www.open-xchange.com/webdav/12345", entity.getPayload());
 	}
 	
 	public void testTrimETag() throws Exception {
-		IfHeader ifHeader = new IfHeaderParser().parse("([   etag ])");
+		final IfHeader ifHeader = new IfHeaderParser().parse("([   etag ])");
 		
 		assertEquals(1, ifHeader.getLists().size());
 		
-		List<IfHeaderEntity> list = ifHeader.getList(0);
+		final List<IfHeaderEntity> list = ifHeader.getList(0);
 		
 		assertEquals(1, list.size());
 		
-		IfHeaderEntity entity = list.get(0);
+		final IfHeaderEntity entity = list.get(0);
 		assertTrue(entity.isETag());
 		assertTrue(entity.mustMatch());
 		assertFalse(entity.isLockToken());
@@ -62,31 +62,31 @@ public class IfHeaderParserTest extends TestCase {
 	}
 	
 	public void testTrimLockToken() throws Exception {
-		IfHeader ifHeader = new IfHeaderParser().parse("(<   http://www.open-xchange.com/webdav/12345 >)");
+		final IfHeader ifHeader = new IfHeaderParser().parse("(<   http://www.open-xchange.com/webdav/12345 >)");
 		
 		assertEquals(1, ifHeader.getLists().size());
 		
-		List<IfHeaderEntity> list = ifHeader.getList(0);
+		final List<IfHeaderEntity> list = ifHeader.getList(0);
 		
 		assertEquals(1, list.size());
 		
-		IfHeaderEntity entity = list.get(0);
+		final IfHeaderEntity entity = list.get(0);
 		assertTrue(entity.mustMatch());
 		assertTrue(entity.isLockToken());
 		assertEquals("http://www.open-xchange.com/webdav/12345", entity.getPayload());
 	}
 	
 	public void testNot() throws Exception {
-		IfHeader ifHeader = new IfHeaderParser().parse("(Not [etag] <lockToken> Not <lockToken2>)");
+		final IfHeader ifHeader = new IfHeaderParser().parse("(Not [etag] <lockToken> Not <lockToken2>)");
 		
 		assertEquals(1, ifHeader.getLists().size());
 		
-		List<IfHeaderEntity> list = ifHeader.getList(0);
+		final List<IfHeaderEntity> list = ifHeader.getList(0);
 		
 		assertEquals(3, list.size());
 		
 		int found = 0;
-		for(IfHeaderEntity entity : list) {
+		for(final IfHeaderEntity entity : list) {
 			if("etag".equals(entity.getPayload())) {
 				assertFalse(entity.mustMatch());
 				found++;
@@ -102,18 +102,18 @@ public class IfHeaderParserTest extends TestCase {
 	}
 	
 	public void testMany() throws Exception {
-		IfHeader ifHeader = new IfHeaderParser().parse("([etag] <lockToken> [etag2] <lockToken2> <lockToken3> [etag3])");
+		final IfHeader ifHeader = new IfHeaderParser().parse("([etag] <lockToken> [etag2] <lockToken2> <lockToken3> [etag3])");
 		
 		assertEquals(1, ifHeader.getLists().size());
 		
-		List<IfHeaderEntity> list = ifHeader.getList(0);
+		final List<IfHeaderEntity> list = ifHeader.getList(0);
 		
 		assertEquals(6, list.size());
 		
-		Set<String> etags = new HashSet<String>(Arrays.asList("etag", "etag2", "etag3"));
-		Set<String> lockToken = new HashSet<String>(Arrays.asList("lockToken", "lockToken2", "lockToken3"));
+		final Set<String> etags = new HashSet<String>(Arrays.asList("etag", "etag2", "etag3"));
+		final Set<String> lockToken = new HashSet<String>(Arrays.asList("lockToken", "lockToken2", "lockToken3"));
 		
-		for(IfHeaderEntity entity : list) {
+		for(final IfHeaderEntity entity : list) {
 			if(entity.isETag()) {
 				assertTrue(entity.getPayload(), etags.remove(entity.getPayload()));
 			} else {
@@ -125,17 +125,17 @@ public class IfHeaderParserTest extends TestCase {
 	}
 	
 	public void testUntaggedLists() throws Exception {
-		IfHeader ifHeader = new IfHeaderParser().parse("([etag]) (<lockToken>) ([etag2])");
+		final IfHeader ifHeader = new IfHeaderParser().parse("([etag]) (<lockToken>) ([etag2])");
 		
 		assertEquals(3, ifHeader.getLists().size());
 		
-		Set<String> etags = new HashSet<String>(Arrays.asList("etag", "etag2"));
-		Set<String> lockToken = new HashSet<String>(Arrays.asList("lockToken"));
+		final Set<String> etags = new HashSet<String>(Arrays.asList("etag", "etag2"));
+		final Set<String> lockToken = new HashSet<String>(Arrays.asList("lockToken"));
 		
-		for(IfHeaderList list : ifHeader.getLists()) {
+		for(final IfHeaderList list : ifHeader.getLists()) {
 			assertEquals(1, list.size());
 			assertFalse(list.isTagged());
-			IfHeaderEntity entity = list.get(0);
+			final IfHeaderEntity entity = list.get(0);
 			if(entity.isETag()) {
 				assertTrue(entity.getPayload(), etags.remove(entity.getPayload()));
 			} else {
@@ -148,19 +148,19 @@ public class IfHeaderParserTest extends TestCase {
 	}
 	
 	public void testTaggedLists() throws Exception {
-		IfHeader ifHeader = new IfHeaderParser().parse("<http://myResource1> ([etag]) <  http://myResource2> (<lockToken>) <http://myResource3> ([etag2])");
+		final IfHeader ifHeader = new IfHeaderParser().parse("<http://myResource1> ([etag]) <  http://myResource2> (<lockToken>) <http://myResource3> ([etag2])");
 		
 		assertEquals(3, ifHeader.getLists().size());
 		
-		Set<String> etags = new HashSet<String>(Arrays.asList("etag", "etag2"));
-		Set<String> lockToken = new HashSet<String>(Arrays.asList("lockToken"));
-		Set<String> resources = new HashSet<String>(Arrays.asList("http://myResource1", "http://myResource2", "http://myResource3"));
+		final Set<String> etags = new HashSet<String>(Arrays.asList("etag", "etag2"));
+		final Set<String> lockToken = new HashSet<String>(Arrays.asList("lockToken"));
+		final Set<String> resources = new HashSet<String>(Arrays.asList("http://myResource1", "http://myResource2", "http://myResource3"));
 		
-		for(IfHeaderList list : ifHeader.getLists()) {
+		for(final IfHeaderList list : ifHeader.getLists()) {
 			assertEquals(1, list.size());
 			assertTrue(list.isTagged());
 			assertTrue(resources.remove(list.getTag()));
-			IfHeaderEntity entity = list.get(0);
+			final IfHeaderEntity entity = list.get(0);
 			if(entity.isETag()) {
 				assertTrue(entity.getPayload(), etags.remove(entity.getPayload()));
 			} else {
@@ -173,17 +173,17 @@ public class IfHeaderParserTest extends TestCase {
 	}
 	
 	public void testGetRelevant() throws Exception {
-		IfHeader ifHeader = new IfHeaderParser().parse("<http://myResource1> ([etag]) <  http://myResource1> (<lockToken>) <http://myResource3> ([etag2])");
+		final IfHeader ifHeader = new IfHeaderParser().parse("<http://myResource1> ([etag]) <  http://myResource1> (<lockToken>) <http://myResource3> ([etag2])");
 		
 		assertEquals(3, ifHeader.getLists().size());
 		
-		Set<String> etags = new HashSet<String>(Arrays.asList("etag"));
-		Set<String> lockToken = new HashSet<String>(Arrays.asList("lockToken"));
+		final Set<String> etags = new HashSet<String>(Arrays.asList("etag"));
+		final Set<String> lockToken = new HashSet<String>(Arrays.asList("lockToken"));
 		
-		for(IfHeaderList list : ifHeader.getRelevant("http://myResource1")) {
+		for(final IfHeaderList list : ifHeader.getRelevant("http://myResource1")) {
 			assertEquals(1, list.size());
 			assertTrue(list.isTagged());
-			IfHeaderEntity entity = list.get(0);
+			final IfHeaderEntity entity = list.get(0);
 			if(entity.isETag()) {
 				assertTrue(entity.getPayload(), etags.remove(entity.getPayload()));
 			} else {
@@ -214,10 +214,10 @@ public class IfHeaderParserTest extends TestCase {
 		assertException("<blabla> (<gnatzel> NurgelWargelWahnsinn)", "Invalid character", 22);
 	}
 
-	private void assertException(String ifHeader, String errorMessage, int column) {
+	private void assertException(final String ifHeader, final String errorMessage, final int column) {
 		try {
 			new IfHeaderParser().parse("([etag])");
-		} catch (IfHeaderParseException x) {
+		} catch (final IfHeaderParseException x) {
 			assertTrue(x.getMessage().contains(errorMessage));
 			assertEquals(column, x.getColumn());
 		}

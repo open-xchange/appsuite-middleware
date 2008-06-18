@@ -44,14 +44,16 @@
 
 package com.openexchange.webdav.xml.parser;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jdom.Element;
+
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.ContactFields;
-import java.util.ArrayList;
-import java.util.List;
-import org.jdom.Element;
 
 /**
  * ContactParser
@@ -65,7 +67,7 @@ public class ContactParser extends CommonParser {
 		
 	}
 	
-	protected void parse(ContactObject contactObj, Element eProp) throws Exception {
+	protected void parse(final ContactObject contactObj, final Element eProp) throws Exception {
 		if (hasElement(eProp.getChild("uid", XmlServlet.NS))) {
 			contactObj.setInternalUserId(getValueAsInt(eProp.getChild("uid", XmlServlet.NS)));
 		}
@@ -461,15 +463,15 @@ public class ContactParser extends CommonParser {
 	}
 	
 	
-	protected void parseElementDistributionlists(ContactObject contactObj, Element eDistributionList) throws Exception {
-		ArrayList distributionlist = new ArrayList();
+	protected void parseElementDistributionlists(final ContactObject contactObj, final Element eDistributionList) throws Exception {
+		final ArrayList distributionlist = new ArrayList();
 		
-		List elementEntries = eDistributionList.getChildren("email", XmlServlet.NS);
+		final List elementEntries = eDistributionList.getChildren("email", XmlServlet.NS);
 		
 		for (int a = 0; a < elementEntries.size(); a++) {
-			Element eEntry = (Element)elementEntries.get(a);
+			final Element eEntry = (Element)elementEntries.get(a);
 			
-			DistributionListEntryObject entry = new DistributionListEntryObject();
+			final DistributionListEntryObject entry = new DistributionListEntryObject();
 			
 			parseElementEntry(eEntry, entry);
 			
@@ -479,11 +481,11 @@ public class ContactParser extends CommonParser {
 		contactObj.setDistributionList((DistributionListEntryObject[])distributionlist.toArray(new DistributionListEntryObject[distributionlist.size()]));
 	}
 	
-	protected void parseElementEntry(Element e, DistributionListEntryObject entry) throws Exception {
+	protected void parseElementEntry(final Element e, final DistributionListEntryObject entry) throws Exception {
 		String s = null;
 		
 		if ((s = e.getAttributeValue(ContactFields.ID, XmlServlet.NS)) != null) {
-			int contactId = Integer.parseInt(s);
+			final int contactId = Integer.parseInt(s);
 			entry.setEntryID(contactId);
 		}
 		
@@ -492,15 +494,15 @@ public class ContactParser extends CommonParser {
 		entry.setEmailaddress(getValue(e));
 	}
 	
-	protected void parseElementLinks(ContactObject contactObj, Element eLinks) throws Exception {
-		ArrayList links = new ArrayList();
+	protected void parseElementLinks(final ContactObject contactObj, final Element eLinks) throws Exception {
+		final ArrayList links = new ArrayList();
 		
-		List elementEntries = eLinks.getChildren("link", XmlServlet.NS);
+		final List elementEntries = eLinks.getChildren("link", XmlServlet.NS);
 		
 		for (int a = 0; a < elementEntries.size(); a++) {
-			Element eLink = (Element)elementEntries.get(a);
+			final Element eLink = (Element)elementEntries.get(a);
 			
-			LinkEntryObject link = new LinkEntryObject();
+			final LinkEntryObject link = new LinkEntryObject();
 			
 			parseElementLink(eLink, link);
 			
@@ -510,7 +512,7 @@ public class ContactParser extends CommonParser {
 		contactObj.setLinks((LinkEntryObject[])links.toArray(new LinkEntryObject[links.size()]));
 	}
 	
-	protected void parseElementLink(Element e, LinkEntryObject link) throws Exception {
+	protected void parseElementLink(final Element e, final LinkEntryObject link) throws Exception {
 		link.setLinkDisplayname(e.getAttributeValue(ContactFields.DISPLAY_NAME, XmlServlet.NS));
 		link.setLinkID(getValueAsInt(e));
 	}

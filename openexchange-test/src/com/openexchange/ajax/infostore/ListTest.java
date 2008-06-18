@@ -1,10 +1,9 @@
 package com.openexchange.ajax.infostore;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.net.MalformedURLException;
-import java.io.IOException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,12 +15,12 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class ListTest extends InfostoreAJAXTest {
 
-	public ListTest(String name) {
+	public ListTest(final String name) {
 		super(name);
 	}
 	
 	public void testBasic() throws Exception {
-		int[][] bothEntries = new int[2][2];
+		final int[][] bothEntries = new int[2][2];
 		bothEntries[0][1] = clean.get(0);
 		bothEntries[1][1] = clean.get(1);
 		
@@ -36,9 +35,9 @@ public class ListTest extends InfostoreAJAXTest {
 
 
     public void testSkipsMissingIds() throws Exception {
-        int fantasyID = getFantasyID();
+        final int fantasyID = getFantasyID();
 
-        int[][] entries = new int[3][2];
+        final int[][] entries = new int[3][2];
         entries[0][1] = clean.get(0);
         entries[1][1] = fantasyID;
         entries[1][1] = clean.get(1);
@@ -66,21 +65,21 @@ public class ListTest extends InfostoreAJAXTest {
     }
 
 
-    public void checkEntries(int[][] infostore_ids) throws Exception{
-        Response res = list(getWebConversation(), getHostName(),sessionId, new int[]{Metadata.ID,Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL}, infostore_ids);
+    public void checkEntries(final int[][] infostore_ids) throws Exception{
+        final Response res = list(getWebConversation(), getHostName(),sessionId, new int[]{Metadata.ID,Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL}, infostore_ids);
 
 		assertNoError(res);
 
-		Set<Integer> ids = new HashSet<Integer>(clean);
-		Set<String> descriptions = new HashSet<String>(Arrays.asList("test knowledge description", "test url description"));
-		Set<String> urls = new HashSet<String>(Arrays.asList("http://www.open-xchange.com"));
-		Set<String> titles = new HashSet<String>(Arrays.asList("test knowledge", "test url"));
+		final Set<Integer> ids = new HashSet<Integer>(clean);
+		final Set<String> descriptions = new HashSet<String>(Arrays.asList("test knowledge description", "test url description"));
+		final Set<String> urls = new HashSet<String>(Arrays.asList("http://www.open-xchange.com"));
+		final Set<String> titles = new HashSet<String>(Arrays.asList("test knowledge", "test url"));
 
 
-		JSONArray entries = (JSONArray) res.getData();
+		final JSONArray entries = (JSONArray) res.getData();
 
 		for(int i = 0; i < entries.length(); i++) {
-			JSONArray entry = entries.getJSONArray(i);
+			final JSONArray entry = entries.getJSONArray(i);
 
 			assertTrue(ids.remove(entry.getInt(0)));
 			assertTrue(titles.remove(entry.getString(1)));

@@ -49,7 +49,13 @@
 
 package com.openexchange.ajax.task;
 
-import static com.openexchange.ajax.task.TaskTools.*;
+import static com.openexchange.ajax.task.TaskTools.confirmTask;
+import static com.openexchange.ajax.task.TaskTools.deleteTask;
+import static com.openexchange.ajax.task.TaskTools.extractInsertId;
+import static com.openexchange.ajax.task.TaskTools.getAllTasksInFolder;
+import static com.openexchange.ajax.task.TaskTools.getTask;
+import static com.openexchange.ajax.task.TaskTools.insertTask;
+import static com.openexchange.ajax.task.TaskTools.updateTask;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -132,7 +138,7 @@ public class TasksTest extends AbstractAJAXTest {
             getWebConversation(), getHostName(), getSessionId(), 2, true,
             ConfigTools.getUserId(getWebConversation(), getHostName(),
                 getSessionId()));
-        ExternalUserParticipant external = new ExternalUserParticipant();
+        final ExternalUserParticipant external = new ExternalUserParticipant();
         external.setEmailAddress("external@external.no");
         external.setDisplayName("External, External");
         participants.add(external);
@@ -146,9 +152,9 @@ public class TasksTest extends AbstractAJAXTest {
         final Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
         final Task reload = (Task) response.getData();
-        for (Participant p1 : reload.getParticipants()) {
+        for (final Participant p1 : reload.getParticipants()) {
             boolean found = false;
-            for (Participant p2 : participants) {
+            for (final Participant p2 : participants) {
                 if (p1.getIdentifier() == p2.getIdentifier()) {
                     found = true;
                 }
@@ -194,9 +200,9 @@ public class TasksTest extends AbstractAJAXTest {
         Task reload = (Task) response.getData();
         assertEquals("Number of participants differ", firstParticipants.size(),
             reload.getParticipants().length);
-        for (Participant p1 : firstParticipants) {
+        for (final Participant p1 : firstParticipants) {
             boolean found = false;
-            for (Participant p2 : reload.getParticipants()) {
+            for (final Participant p2 : reload.getParticipants()) {
                 if (p1.getIdentifier() == p2.getIdentifier()) {
                     found = true;
                 }
@@ -221,9 +227,9 @@ public class TasksTest extends AbstractAJAXTest {
         reload = (Task) response.getData();
         assertEquals("Number of participants differ", secondParticipants.size(),
             reload.getParticipants().length);
-        for (Participant p1 : secondParticipants) {
+        for (final Participant p1 : secondParticipants) {
             boolean found = false;
-            for (Participant p2 : reload.getParticipants()) {
+            for (final Participant p2 : reload.getParticipants()) {
                 if (p1.getIdentifier() == p2.getIdentifier()) {
                     found = true;
                 }
@@ -281,7 +287,7 @@ public class TasksTest extends AbstractAJAXTest {
             getHostName(), getSessionId());
         final Task task = new Task();
         task.setParentFolderID(folderId);
-        int[][] tasks = new int[10][2];
+        final int[][] tasks = new int[10][2];
         for (int i = 0; i < tasks.length; i++) {
             task.setTitle("Task " + (i + 1));
             tasks[i][1] = extractInsertId(insertTask(getWebConversation(),
@@ -296,7 +302,7 @@ public class TasksTest extends AbstractAJAXTest {
         final JSONArray array = (JSONArray) response.getData();
         // TODO parse JSON array
         final Date lastModified = response.getTimestamp();
-        for (int[] folderAndTask : tasks) {
+        for (final int[] folderAndTask : tasks) {
             deleteTask(getWebConversation(), getHostName(), getSessionId(),
                 lastModified, folderAndTask[0], folderAndTask[1]);
         }

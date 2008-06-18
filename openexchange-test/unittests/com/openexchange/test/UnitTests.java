@@ -7,7 +7,7 @@ import junit.framework.TestSuite;
 public class UnitTests {
     public static Test suite() {
 
-		TestSuite tests = new TestSuite();
+		final TestSuite tests = new TestSuite();
 
 		tests.addTestSuite(com.openexchange.groupware.infostore.URLHelperTest.class);
 		tests.addTestSuite(com.openexchange.ajax.infostore.InfostoreParserTest.class);

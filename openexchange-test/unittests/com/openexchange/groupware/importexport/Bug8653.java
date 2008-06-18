@@ -66,8 +66,8 @@ import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.impl.DBPoolingException;
 
@@ -93,8 +93,8 @@ public class Bug8653 extends AbstractICalImportTest {
 			"DTSTAMP:20070731T110038Z\n" +
 			"END:VEVENT\n" +
 			"END:VCALENDAR";
-		Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext")) ;
-		ImportResult res = performOneEntryCheck( ical, Format.ICAL, FolderObject.CALENDAR, "8475", ctx, false);
+		final Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext")) ;
+		final ImportResult res = performOneEntryCheck( ical, Format.ICAL, FolderObject.CALENDAR, "8475", ctx, false);
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
 		final int oid = Integer.valueOf( res.getObjectId() );
 		final AppointmentObject appointmentObj = appointmentSql.getObjectById(oid, folderId);
@@ -116,7 +116,7 @@ public class Bug8653 extends AbstractICalImportTest {
 			"DTSTAMP:20070731T110038Z\n" +
 			"END:VEVENT\n" +
 			"END:VCALENDAR";
-		Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext")) ;
-		List<ImportResult> res = performMultipleEntryImport( ical, Format.ICAL, FolderObject.TASK, "8475", ctx);
+		final Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext")) ;
+		final List<ImportResult> res = performMultipleEntryImport( ical, Format.ICAL, FolderObject.TASK, "8475", ctx);
 	}
 }

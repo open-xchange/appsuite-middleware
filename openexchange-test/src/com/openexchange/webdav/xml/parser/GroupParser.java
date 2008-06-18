@@ -44,11 +44,13 @@
 
 package com.openexchange.webdav.xml.parser;
 
+import java.util.List;
+
+import org.jdom.Element;
+
 import com.openexchange.group.Group;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.DataFields;
-import java.util.List;
-import org.jdom.Element;
 
 /**
  * ResourceParser
@@ -62,7 +64,7 @@ public class GroupParser extends DataParser {
 		
 	}
 	
-	public void parse(Group groupObj, Element eProp) throws Exception {
+	public void parse(final Group groupObj, final Element eProp) throws Exception {
 		groupObj.setIdentifier(getValueAsInt(eProp.getChild("uid", XmlServlet.NS)));
 		groupObj.setLastModified(getValueAsDate(eProp.getChild(DataFields.LAST_MODIFIED, XmlServlet.NS)));
 		groupObj.setDisplayName(getValue(eProp.getChild("displayname", XmlServlet.NS)));
@@ -70,10 +72,10 @@ public class GroupParser extends DataParser {
 		parseMembers(groupObj, eProp.getChild("members", XmlServlet.NS));
 	}
 	
-	public void parseMembers(Group groupObj, Element eMembers) throws Exception {
-		List memberList = eMembers.getChildren("memberuid", XmlServlet.NS);
+	public void parseMembers(final Group groupObj, final Element eMembers) throws Exception {
+		final List memberList = eMembers.getChildren("memberuid", XmlServlet.NS);
 		
-		int[] member = new int[memberList.size()];
+		final int[] member = new int[memberList.size()];
 		
 		for (int a = 0; a < memberList.size(); a++) {
 			member[a] = Integer.parseInt(((Element)memberList.get(a)).getValue());

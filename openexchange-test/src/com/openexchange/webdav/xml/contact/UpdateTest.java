@@ -1,10 +1,11 @@
 package com.openexchange.webdav.xml.contact;
 
+import java.util.Date;
+
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.ContactTest;
 import com.openexchange.webdav.xml.XmlServlet;
-import java.util.Date;
 
 public class UpdateTest extends ContactTest {
 	
@@ -19,26 +20,26 @@ public class UpdateTest extends ContactTest {
 	-4, 0, 0, 0, 10, 73, 68, 65, 84, 120, -38, 99, 96, 0, 0, 0, 2, 0,
 	1, -27, 39, -34, -4, 0, 0, 0, 0, 73, 69, 78, 68, -82, 66, 96, -126 };
 	
-	public UpdateTest(String name) {
+	public UpdateTest(final String name) {
 		super(name);
 	}
 	
 	public void testUpdateContact() throws Exception {
 		ContactObject contactObj = createContactObject("testUpdateContact");
-		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
 		contactObj = createContactObject("testUpdateContact");
 		contactObj.setEmail1(null);
 		
 		updateContact(webCon, contactObj, objectId, contactFolderId, PROTOCOL + hostName, login, password);
-		ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(contactObj, loadContact);
 		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
 	public void testUpdateContactWithImage() throws Exception {
 		ContactObject contactObj = createContactObject("testUpdateContactWithImage");
-		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
 		contactObj = createContactObject("testUpdateContactWithImage");
 		contactObj.setEmail1(null);
@@ -46,7 +47,7 @@ public class UpdateTest extends ContactTest {
 		contactObj.setImage1(image);
 		
 		updateContact(webCon, contactObj, objectId, contactFolderId, PROTOCOL + hostName, login, password);
-		ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		final ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		contactObj.removeImage1();
 		compareObject(contactObj, loadContact);
 		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
@@ -54,35 +55,35 @@ public class UpdateTest extends ContactTest {
 	
 	public void testUpdateConcurentConflict() throws Exception {
 		ContactObject contactObj = createContactObject("testUpdateContactConcurentConflict");
-		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
 		contactObj = createContactObject("testUpdateContactConcurentConflict2");
 		
 		try {
 			updateContact(webCon, contactObj, objectId, contactFolderId, new Date(0), PROTOCOL + hostName, login, password);
 			fail("expected concurent modification exception!");
-		} catch (TestException exc) {
+		} catch (final TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.MODIFICATION_STATUS);
 		}
 		
-		int[][] objectIdAndFolderId = { {objectId, contactFolderId } };
+		final int[][] objectIdAndFolderId = { {objectId, contactFolderId } };
 		deleteContact(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	
 	public void testUpdateNotFound() throws Exception {
 		ContactObject contactObj = createContactObject("testUpdateContactNotFound");
-		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
 		contactObj = createContactObject("testUpdateContactNotFound");
 		
 		try {
 			updateContact(webCon, contactObj, (objectId + 1000), contactFolderId, new Date(0), PROTOCOL + hostName, login, password);
 			fail("expected object not found exception!");
-		} catch (TestException exc) {
+		} catch (final TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
 		}
 		
-		int[][] objectIdAndFolderId = { {objectId, contactFolderId } };
+		final int[][] objectIdAndFolderId = { {objectId, contactFolderId } };
 		deleteContact(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	

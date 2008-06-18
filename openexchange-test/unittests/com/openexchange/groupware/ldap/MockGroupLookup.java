@@ -13,12 +13,13 @@ import com.openexchange.groupware.ldap.LdapException.Code;
  */
 public class MockGroupLookup {
 
-	private Map<Integer,Group> groups = new HashMap<Integer,Group>();
+	private final Map<Integer,Group> groups = new HashMap<Integer,Group>();
 	
-	public Group getGroup(int gid) throws LdapException {
-		if(!groups.containsKey(gid))
+	public Group getGroup(final int gid) throws LdapException {
+		if(!groups.containsKey(gid)) {
 			throw new LdapException(EnumComponent.GROUP, Code.GROUP_NOT_FOUND,
                 gid, -1);
+		}
 		return groups.get(gid);
 	}
 	
@@ -49,7 +50,7 @@ public class MockGroupLookup {
 		
 	}
 
-	private void addGroup(Group group) {
+	private void addGroup(final Group group) {
 		groups.put(group.getIdentifier(),group);
 	}
 

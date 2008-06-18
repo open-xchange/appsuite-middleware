@@ -11,12 +11,12 @@ import com.openexchange.webdav.xml.TaskTest;
 
 public class Bug10991Test extends TaskTest {
 	
-	public Bug10991Test(String name) {
+	public Bug10991Test(final String name) {
 		super(name);
 	}
 	
 	public void testBug10991() throws Exception {
-		Task taskObj = createTask("testBug10991");
+		final Task taskObj = createTask("testBug10991");
 		final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		taskObj.setObjectID(objectId);
 		

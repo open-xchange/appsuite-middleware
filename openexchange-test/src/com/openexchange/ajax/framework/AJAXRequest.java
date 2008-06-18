@@ -95,7 +95,7 @@ public interface AJAXRequest {
         }
         public static String convert(final int[] values) {
             final StringBuilder columnSB = new StringBuilder();
-            for (int i : values) {
+            for (final int i : values) {
                 columnSB.append(i);
                 columnSB.append(',');
             }
@@ -161,7 +161,7 @@ public interface AJAXRequest {
 		 * @param fieldName
 		 * @param fieldContent
 		 */
-		public FieldParameter(String fieldName, String fieldContent) {
+		public FieldParameter(final String fieldName, final String fieldContent) {
 			super(fieldName, (String) null);
 			this.fieldName = fieldName;
 			this.fieldContent = fieldContent;

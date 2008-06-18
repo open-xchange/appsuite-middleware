@@ -11,17 +11,17 @@ import com.openexchange.test.TestInit;
 
 public class GetTest extends InfostoreAJAXTest {
 
-	public GetTest(String name) {
+	public GetTest(final String name) {
 		super(name);
 	}
 	
 	public void testBasic() throws Exception{
 		
-		Response res = this.get(getWebConversation(), getHostName(), sessionId, clean.get(0));
+		final Response res = this.get(getWebConversation(), getHostName(), sessionId, clean.get(0));
 		
 		assertNoError(res);
 		
-		JSONObject obj = (JSONObject) res.getData();
+		final JSONObject obj = (JSONObject) res.getData();
 		
 		assertEquals("test knowledge",obj.getString("title"));
 		assertEquals("test knowledge description",obj.getString("description"));
@@ -29,7 +29,7 @@ public class GetTest extends InfostoreAJAXTest {
 	}
 	
 	public void getVersion() throws Exception {
-		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		Response res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m("description","New description"), upload, "text/plain");
 		assertNoError(res);
 		

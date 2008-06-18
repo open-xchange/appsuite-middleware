@@ -40,6 +40,7 @@ public class SessiondTest extends TestCase {
 	
 	private static boolean isInit = false;
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		
@@ -49,15 +50,15 @@ public class SessiondTest extends TestCase {
 		
 		Init.startServer();
 
-		Properties prop = TestInit.getTestProperties();
+		final Properties prop = TestInit.getTestProperties();
 		
-		String propfile = prop.getProperty(sessiondPropertiesFile);
+		final String propfile = prop.getProperty(sessiondPropertiesFile);
 		
 		if (propfile == null) {
 			throw new Exception("no sessiond propfile given!");
 		}
 		
-		Properties p = new Properties();
+		final Properties p = new Properties();
 		
 		p.load(new FileInputStream(propfile));
 		
