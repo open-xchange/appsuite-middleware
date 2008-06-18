@@ -49,6 +49,8 @@
 
 package com.openexchange.security;
 
+import java.util.Collection;
+
 import com.openexchange.security.permission.BundleAccessPermission;
 import com.openexchange.security.permission.BundleAccessPermissionCollection;
 
@@ -59,6 +61,23 @@ import com.openexchange.security.permission.BundleAccessPermissionCollection;
  * 
  */
 public interface BundleAccessSecurityService {
+
+	/**
+	 * Checks if the specified desired path is covered by given paths.
+	 * <p>
+	 * This method is supposed to create the appropriate instances of
+	 * {@link BundleAccessPermissionCollection} and
+	 * {@link BundleAccessPermission} from specified arguments to delegate to
+	 * {@link #checkPermission(BundleAccessPermissionCollection, BundleAccessPermission)}.
+	 * 
+	 * @param paths
+	 *            The paths of permitted bundles such as "a.b.*", or "*".
+	 * @param desiredPath
+	 *            The desired path such as "a.b.c"
+	 * @exception BundleAccessException
+	 *                If bundle access is not permitted
+	 */
+	public void checkPermission(Collection<String> paths, String desiredPath) throws BundleAccessException;
 
 	/**
 	 * Checks if the specified desired path is covered by given paths.

@@ -49,6 +49,8 @@
 
 package com.openexchange.security.internal;
 
+import java.util.Collection;
+
 import com.openexchange.security.BundleAccessException;
 import com.openexchange.security.BundleAccessSecurityService;
 import com.openexchange.security.permission.BundleAccessPermission;
@@ -68,6 +70,25 @@ public final class BundleAccessSecurityServiceImpl implements BundleAccessSecuri
 	 */
 	public BundleAccessSecurityServiceImpl() {
 		super();
+	}
+
+	public void checkPermission(final Collection<String> paths, final String desiredPath) throws BundleAccessException {
+		if (desiredPath == null || desiredPath.length() == 0) {
+			throw new IllegalArgumentException("desiredPath is null");
+		}
+		if (paths == null) {
+			/*
+			 * Obviously desired path is not covered by paths
+			 */
+			throw new BundleAccessException(BundleAccessException.Code.ACCESS_DENIED, desiredPath);
+		}
+		final BundleAccessPermission p = new BundleAccessPermission(desiredPath);
+		final BundleAccessPermissionCollection collection = (BundleAccessPermissionCollection) p
+				.newPermissionCollection();
+		for (final String path : paths) {
+			collection.add(new BundleAccessPermission(path));
+		}
+		checkPermission(collection, p);
 	}
 
 	public void checkPermission(final String[] paths, final String desiredPath) throws BundleAccessException {
