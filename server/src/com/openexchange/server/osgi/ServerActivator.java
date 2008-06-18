@@ -83,7 +83,6 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
-import com.openexchange.security.BundleAccessSecurityService;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.server.osgiservice.DeferredActivator;
@@ -114,10 +113,10 @@ public final class ServerActivator extends DeferredActivator {
 	private static final String BUNDLE_ID_ADMIN = "open_xchange_admin";
 
 	private static final Class<?>[] NEEDED_SERVICES_ADMIN = { ConfigurationService.class, CacheService.class,
-			EventAdmin.class, BundleAccessSecurityService.class };
+			EventAdmin.class };
 
 	private static final Class<?>[] NEEDED_SERVICES_SERVER = { ConfigurationService.class, CacheService.class,
-			EventAdmin.class, BundleAccessSecurityService.class, SessiondService.class };
+			EventAdmin.class, SessiondService.class };
 
 	private final Starter starter;
 

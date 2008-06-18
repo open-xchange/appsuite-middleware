@@ -49,12 +49,9 @@
 
 package com.openexchange.resource.internal;
 
-import static com.openexchange.resource.internal.ResourceServiceImpl.PATH;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.Set;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -68,12 +65,8 @@ import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.resource.storage.ResourceStorage.StorageType;
-import com.openexchange.security.BundleAccessException;
-import com.openexchange.security.BundleAccessSecurityService;
-import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -109,11 +102,8 @@ public final class ResourceDelete {
 	 * @param clientLastModified
 	 *            The client last-modified timestamp; may be <code>null</code>
 	 *            to omit timestamp comparison
-	 * @throws ResourceException
-	 *             If initialization fails
 	 */
-	ResourceDelete(final User user, final Context ctx, final Resource resource, final Date clientLastModified)
-			throws ResourceException {
+	ResourceDelete(final User user, final Context ctx, final Resource resource, final Date clientLastModified) {
 		super();
 		this.user = user;
 		this.ctx = ctx;
@@ -187,21 +177,21 @@ public final class ResourceDelete {
 	 * @throws ResourceException
 	 *             If permission is not granted
 	 */
-	private void checkBySecurityService() throws ResourceException {
-		final BundleAccessSecurityService securityService = ServerServiceRegistry.getInstance().getService(
-				BundleAccessSecurityService.class);
-		if (securityService == null) {
-			throw new ResourceException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
-					BundleAccessSecurityService.class.getName()));
-		}
-		final Set<String> permissions = user.getAttributes().get("permission");
-		try {
-			securityService.checkPermission(permissions == null ? null : permissions.toArray(new String[permissions
-					.size()]), PATH);
-		} catch (final BundleAccessException e) {
-			throw new ResourceException(e);
-		}
-	}
+//	private void checkBySecurityService() throws ResourceException {
+//		final BundleAccessSecurityService securityService = ServerServiceRegistry.getInstance().getService(
+//				BundleAccessSecurityService.class);
+//		if (securityService == null) {
+//			throw new ResourceException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
+//					BundleAccessSecurityService.class.getName()));
+//		}
+//		final Set<String> permissions = user.getAttributes().get("permission");
+//		try {
+//			securityService.checkPermission(permissions == null ? null : permissions.toArray(new String[permissions
+//					.size()]), PATH);
+//		} catch (final BundleAccessException e) {
+//			throw new ResourceException(e);
+//		}
+//	}
 
 	/**
 	 * This method performs all necessary checks before updating a resource.
@@ -275,11 +265,8 @@ public final class ResourceDelete {
 
 	/**
 	 * Propagates insertion to system: Possible cache invalidation, etc.
-	 * 
-	 * @throws ResourceException
-	 *             If propagating the insertion fails
 	 */
-	private void propagate() throws ResourceException {
+	private void propagate() {
 		// TODO: Check if any caches should be invalidated
 	}
 
