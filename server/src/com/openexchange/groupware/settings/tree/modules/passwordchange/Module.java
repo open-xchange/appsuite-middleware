@@ -79,6 +79,7 @@ public class Module extends AbstractModules {
 		 * Both conditions must be met: User is allowed to change password and
 		 * appropriate service is available
 		 */
+		// TODO: Check to use security service when available later on
 		return userConfig.isEditPassword() && PasswordChange.getService() != null;
 	}
 }
