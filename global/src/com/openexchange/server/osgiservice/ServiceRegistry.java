@@ -134,6 +134,16 @@ public class ServiceRegistry {
 		return clazz.cast(service);
 	}
 
+	/**
+	 * Gets the number of services currently held by this service registration
+	 * 
+	 * @return The number of services currently held by this service
+	 *         registration
+	 */
+	public int size() {
+		return services.size();
+	}
+
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder(256);
