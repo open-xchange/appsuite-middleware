@@ -129,6 +129,9 @@ ln -sf ../etc/init.d/open-xchange-admin %{buildroot}/sbin/rcopen-xchange-admin
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Wed Jun 11 2008 - choeger@open-xchange.com
+ - Bugfix ID#11344 listuser fails with NoClassDefFoundError
+ - Bugfix ID#11405 unable to set the password mechanism on commandline
 * Mon Jun 02 2008 - marcus.klein@open-xchange.com
  - Bugfix #11327: Checking for possible null values in GUI configuration.
 * Mon Jun 02 2008 - manuel.kraft@open-xchange.com
