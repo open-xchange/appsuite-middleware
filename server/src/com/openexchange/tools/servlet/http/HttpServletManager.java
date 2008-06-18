@@ -148,7 +148,7 @@ public class HttpServletManager {
 	 * @return <code>true</code> if given <code>currentPath</code> implies given
 	 *         <code>path</code>; otherwise <code>false</code>
 	 */
-	private static boolean implies(final String currentPath, final String path) {
+	private static final boolean implies(final String currentPath, final String path) {
 		final int len = currentPath.length();
 		if (currentPath.charAt(len - 1) == '*') {
 			/*
