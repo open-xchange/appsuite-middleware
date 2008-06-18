@@ -511,7 +511,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	}
 
 	/**
-	 * Returns the complete body as a string. Be carefull when getting big
+	 * Returns the complete body as a string. Be careful when getting big
 	 * request bodies.
 	 * 
 	 * @param req
