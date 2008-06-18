@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Group manage requests
-Bundle-SymbolicName: com.openexchange.group.management
+Bundle-SymbolicName: com.openexchange.group.managerequest
 Bundle-Version: 6.5.0
 Bundle-Activator: com.openexchange.group.servlet.osgi.GroupManageActivator
 Bundle-Vendor: Open-Xchange Inc.
