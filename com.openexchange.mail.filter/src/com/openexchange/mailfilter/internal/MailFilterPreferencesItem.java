@@ -76,7 +76,7 @@ public class MailFilterPreferencesItem implements PreferencesItemService {
      * {@inheritDoc}
      */
     public String[] getPath() {
-        return new String[] { "modules", "mailfilter" };
+        return new String[] { "modules", "com.openexchange.mail.filter" };
     }
 
     /**
