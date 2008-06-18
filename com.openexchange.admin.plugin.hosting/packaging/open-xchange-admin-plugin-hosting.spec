@@ -100,6 +100,8 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Mon Jun 09 2008 - dennis.sieben@open-xchange.com
+  - Bugfix ID#11358 [L3] Movecontextfilestore doesn't move filestore if context filestore isn't available
 * Tue Apr 29 2008 - choeger@open-xchange.com
   - Bugfix ID#11194 getaccesscombinationnameforuser throws NoClassDefFoundError
 * Wed Mar 05 2008 - choeger@open-xchange.com
