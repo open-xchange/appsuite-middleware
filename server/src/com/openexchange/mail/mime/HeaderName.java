@@ -64,12 +64,15 @@ public final class HeaderName implements Serializable {
 
 	private final String s;
 
+	private final int hashcode;
+
 	/**
 	 * No direct instantiation
 	 */
 	private HeaderName(final String s) {
 		super();
 		this.s = s;
+		this.hashcode = s.toLowerCase(Locale.ENGLISH).hashCode();
 	}
 
 	/**
@@ -117,7 +120,7 @@ public final class HeaderName implements Serializable {
 	 */
 	@Override
 	public int hashCode() {
-		return s.toLowerCase(Locale.ENGLISH).hashCode();
+		return hashcode;
 	}
 
 }
