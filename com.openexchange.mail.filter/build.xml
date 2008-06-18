@@ -29,17 +29,25 @@
     <property name="osgibundle"           value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
     <property name="osgiservicesbundle"   value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
 	<property name="commonsloggingbundle" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
+	<property name="servletbundle"        value="javax.servlet_2.4.0.v200706111738.jar"/>
 	<property name="serverbundle"         value="com.openexchange.server.jar"/>
+	<property name="globalbundle"         value="com.openexchange.global.jar"/>
+	<property name="configbundle"         value="com.openexchange.configread.jar"/>
 
 	<!-- non-osgi jars -->
-	<property name="mail"         value="mail.jar"/>
+	<property name="mail"     value="mail.jar"/>
+	<property name="jsonjar"  value="json.jar" />
 
 	<path id="project.classpath">
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${mail}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${junit}"/>
         <pathelement location="${bundlesdir}/${osgibundle}"/>
+        <pathelement location="${bundlesdir}/${osgiservicesbundle}"/>
 		<pathelement location="${bundlesdir}/${commonsloggingbundle}" />
 		<pathelement location="${bundlesdir}/${serverbundle}"/>
+		<pathelement location="${bundlesdir}/${globalbundle}"/>
+		<pathelement location="${bundlesdir}/${configbundle}"/>
+		<pathelement location="${bundlesdir}/${servletbundle}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${mail}"/>
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
     </path>
 
     <!--                    TARGETS                      -->
