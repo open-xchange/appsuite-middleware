@@ -50,9 +50,11 @@
 package com.openexchange.ajax.resource.actions;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.resource.json.ResourceFields;
 
 /**
  * {@link ResourceNewResponse} - The response corresponding to NEW request
@@ -80,7 +82,7 @@ public final class ResourceNewResponse extends AbstractAJAXResponse {
 	 *             If a JSON error occurs
 	 */
 	public int getID() throws JSONException {
-		final String idStr = getResponse().getData().toString();
-		return Integer.parseInt(idStr);
+		final JSONObject idObj = new JSONObject(getResponse().getData().toString());
+		return idObj.getInt(ResourceFields.ID);
 	}
 }

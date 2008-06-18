@@ -49,13 +49,8 @@
 
 package com.openexchange.ajax.resource.actions;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.resource.Resource;
-import com.openexchange.resource.json.ResourceParser;
 
 /**
  * {@link ResourceUpdateResponse} - The response corresponding to UPDATE request
@@ -75,14 +70,4 @@ public final class ResourceUpdateResponse extends AbstractAJAXResponse {
 		super(response);
 	}
 
-	/**
-	 * Gets the resource received through UPDATE request
-	 * 
-	 * @return The resource received through UPDATE request
-	 * @throws JSONException
-	 *             If a JSON error occurs
-	 */
-	public Resource getResource() throws JSONException {
-		return ResourceParser.parseResource(new JSONObject(getResponse().getData().toString()));
-	}
 }
