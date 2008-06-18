@@ -1822,7 +1822,7 @@ public final class MIMEMessageConverter {
 
 	/**
 	 * Parses given headers' {@link InputStream input stream} into a {@link Map
-	 * map} until EOF or 2 subsequent CRLF occur.
+	 * map} until EOF or 2 subsequent CRLFs occur.
 	 * <p>
 	 * This is a convenience method that delegates to
 	 * {@link #loadHeaders(byte[])}.
@@ -1845,7 +1845,7 @@ public final class MIMEMessageConverter {
 
 	/**
 	 * Parses given headers' <code>byte</code> array into a {@link Map map}
-	 * until EOF or 2 subsequent CRLF occur.
+	 * until EOF or 2 subsequent CRLFs occur.
 	 * <p>
 	 * This is a convenience method that delegates to
 	 * {@link #loadHeaders(String)}.
@@ -1870,7 +1870,7 @@ public final class MIMEMessageConverter {
 
 	/**
 	 * Parses given message source's headers into a {@link Map map} until EOF or
-	 * 2 subsequent CRLF occur.
+	 * 2 subsequent CRLFs occur.
 	 * 
 	 * @param messageSrc
 	 *            The message source
