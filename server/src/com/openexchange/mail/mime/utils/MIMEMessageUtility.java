@@ -241,7 +241,7 @@ public final class MIMEMessageUtility {
 	}
 
 	/*
-	 * Mulipart subtype constants
+	 * Multipart subtype constants
 	 */
 	private static final String MULTI_SUBTYPE_ALTERNATIVE = "ALTERNATIVE";
 
