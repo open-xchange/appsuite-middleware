@@ -89,7 +89,7 @@ public class RuleConverter {
         for (int k = 0; k < argumentslist.size(); k++) {
             final Object object = argumentslist.get(k);
             if (object instanceof List) {
-                List sublist = (List) object;
+                final List sublist = (List) object;
                 final ASTargument arg = new ASTargument(js[0]++);
                 arg.jjtAddChild(createStringList(sublist, js), 0);
                 targuments.jjtAddChild(arg, p[0]++);
@@ -108,7 +108,7 @@ public class RuleConverter {
         targuments2.jjtAddChild(targument, p[0]++);
     }
 
-    private ASTblock createActionBlockForTest(final List<ActionCommand> actioncommands, final int[] js, int linenumber) {
+    private ASTblock createActionBlockForTest(final List<ActionCommand> actioncommands, final int[] js, final int linenumber) {
         final ASTblock tblock = new ASTblock(js[0]++);
         tblock.setFirstToken(getDummyToken("{"));
         tblock.setLastToken(getDummyToken("}"));
@@ -116,7 +116,7 @@ public class RuleConverter {
         return tblock;
     }
 
-    private ASTcommand createActionCommand(final ArrayList<Object> arguments, final String commandname, final int[] js, int line) {
+    private ASTcommand createActionCommand(final ArrayList<Object> arguments, final String commandname, final int[] js, final int line) {
         final ASTcommand tcommand = createCommand(commandname, js, line);
         if (!arguments.isEmpty()) {
             tcommand.jjtAddChild(createArguments(arguments, js), 0);
@@ -124,7 +124,7 @@ public class RuleConverter {
         return tcommand;
     }
 
-    private ASTcommands createActionCommands(final List<ActionCommand> actioncommands, final int[] js, int linenumber) {
+    private ASTcommands createActionCommands(final List<ActionCommand> actioncommands, final int[] js, final int linenumber) {
         final ASTcommands tcommands = new ASTcommands(js[0]++);
         for (int k = 0; k < actioncommands.size(); k++) {
             final ActionCommand actionCommand = actioncommands.get(k);
@@ -136,7 +136,7 @@ public class RuleConverter {
     }
 
     @SuppressWarnings("unchecked")
-    private ASTarguments createArguments(final ArrayList<Object> arguments, int[] iarray) {
+    private ASTarguments createArguments(final ArrayList<Object> arguments, final int[] iarray) {
         final ASTarguments targuments = new ASTarguments(iarray[0]++);
         for (int i = 0; i < arguments.size(); i++) {
             final Object obj = arguments.get(i);
@@ -152,14 +152,14 @@ public class RuleConverter {
                 targuments.jjtAddChild(targument, i);
             } else if (obj instanceof TagArgument) {
                 final ASTargument targument = new ASTargument(iarray[0]++);
-                targument.setValue((TagArgument) obj);
+                targument.setValue(obj);
                 targuments.jjtAddChild(targument, i);
             }
         }
         return targuments;
     }
 
-    private ASTcommand createCommand(final String commandname, int[] iarray, int line) {
+    private ASTcommand createCommand(final String commandname, final int[] iarray, final int line) {
         int i = iarray[0];
         final ASTcommand tcommand = new ASTcommand(i++);
         tcommand.setName(commandname);
@@ -169,7 +169,7 @@ public class RuleConverter {
         return tcommand;
     }
 
-    private ASTtest createCompleteTestPart(TestCommand testcommand, final int[] js) {
+    private ASTtest createCompleteTestPart(final TestCommand testcommand, final int[] js) {
         final ASTtest ttest = new ASTtest(js[0]++);
         final List<TestCommand> testcommands = testcommand.getTestcommands();
         ttest.setName(testcommand.getCommand().getCommandname());
@@ -191,7 +191,7 @@ public class RuleConverter {
         return ttest;
     }
 
-    private ASTstring_list createStringList(final List<String> arrayList, int[] iarray) {
+    private ASTstring_list createStringList(final List<String> arrayList, final int[] iarray) {
         int i = iarray[0];
         final ASTstring_list tstring_list = new ASTstring_list(i++);
         final int size = arrayList.size();

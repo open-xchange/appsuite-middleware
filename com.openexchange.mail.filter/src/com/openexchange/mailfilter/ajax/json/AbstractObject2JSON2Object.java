@@ -86,7 +86,7 @@ public abstract class AbstractObject2JSON2Object<T> {
             if (json.has(attrName)) {
                 try {
                     mapper.setAttribute(obj, json.get(attrName));
-                } catch (ClassCastException e) {
+                } catch (final ClassCastException e) {
                     throw new JSONException(e);
                 }
             }
@@ -94,13 +94,13 @@ public abstract class AbstractObject2JSON2Object<T> {
         return obj;
     }
 
-    public T parse(T obj, final JSONObject json) throws JSONException, SieveException, OXJSONException {
+    public T parse(final T obj, final JSONObject json) throws JSONException, SieveException, OXJSONException {
         for (final Mapper<T> mapper : allMapper()) {
             final String attrName = mapper.getAttrName();
             if (json.has(attrName)) {
                 try {
                     mapper.setAttribute(obj, json.get(attrName));
-                } catch (ClassCastException e) {
+                } catch (final ClassCastException e) {
                     throw new JSONException(e);
                 }
             }

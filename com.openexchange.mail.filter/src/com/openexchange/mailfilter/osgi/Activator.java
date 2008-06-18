@@ -87,7 +87,7 @@ public class Activator extends DeferredActivator {
 
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
+    protected void handleAvailability(final Class<?> clazz) {
         if (LOG.isInfoEnabled()) {
             LOG.info("Re-available service: " + clazz.getName());
         }

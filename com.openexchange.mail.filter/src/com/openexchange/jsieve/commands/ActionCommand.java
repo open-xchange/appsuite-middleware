@@ -175,7 +175,7 @@ public class ActionCommand extends ControlOrActionCommand {
         for (int i = 0; i < size; i++) {
             final Object object = arguments.get(i);
             if (object instanceof TagArgument) {
-                TagArgument tagarg = (TagArgument) object;
+                final TagArgument tagarg = (TagArgument) object;
                 final String tag = tagarg.getTag();
                 // Check if an argument is allowed for this tag
                 final Hashtable<String, Integer> tagargs = this.command.getTagargs();
@@ -183,7 +183,7 @@ public class ActionCommand extends ControlOrActionCommand {
                     // Get next element check if it is a list and insert
                     final Object object2 = arguments.get(++i);
                     if (object2 instanceof List) {
-                        List<String> list = (List<String>) object2;
+                        final List<String> list = (List<String>) object2;
                         this.tagarguments.put(tag, list);
                     } else if (object2 instanceof NumberArgument) {
                         final ArrayList<String> arrayList = new ArrayList<String>();
@@ -230,7 +230,7 @@ public class ActionCommand extends ControlOrActionCommand {
                 throw new SieveException("One of the tagarguments: " + rest + " is not valid for " + this.command.getCommandname());
             }
         }
-        int counttags = counttags();
+        final int counttags = counttags();
         if (null != this.arguments && this.command.getMinNumberOfArguments() >= 0 && (this.arguments.size() - counttags) < this.command.getMinNumberOfArguments()) {
             throw new SieveException("The number of arguments for " + this.command.getCommandname() + " is not valid. ; " + this.toString());
         }

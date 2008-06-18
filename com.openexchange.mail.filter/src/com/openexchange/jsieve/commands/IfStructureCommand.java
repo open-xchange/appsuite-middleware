@@ -75,7 +75,7 @@ public abstract class IfStructureCommand extends ControlCommand {
      * @return
      * @see java.util.List#add(java.lang.Object)
      */
-    public boolean addActioncommands(ActionCommand o) {
+    public boolean addActioncommands(final ActionCommand o) {
         if (null == this.actioncommands) {
             this.actioncommands = new ArrayList<ActionCommand>();
         }

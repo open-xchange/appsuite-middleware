@@ -78,7 +78,7 @@ public abstract class IfOrElseIfCommand extends IfStructureCommand {
         return this.testcommand;
     }
 
-    public final void setTestcommand(TestCommand testcommand) {
+    public final void setTestcommand(final TestCommand testcommand) {
         this.testcommand = testcommand;
     }
 

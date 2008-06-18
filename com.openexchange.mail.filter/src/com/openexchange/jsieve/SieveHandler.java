@@ -298,12 +298,12 @@ public class SieveHandler {
             return;
         } else if (null != actualline && actualline.startsWith("NO ")) {
             final String answer = actualline.substring(3);
-            Pattern p = Pattern.compile("^\\{([^\\}]*)\\}.*$");
+            final Pattern p = Pattern.compile("^\\{([^\\}]*)\\}.*$");
             final Matcher matcher = p.matcher(answer);
             if (matcher.matches()) {
                 final String group = matcher.group(1);
                 final int octetsToRead = Integer.parseInt(group);
-                char[] buf = new char[octetsToRead];
+                final char[] buf = new char[octetsToRead];
                 bis_sieve.read(buf, 0, octetsToRead);
                 sb.append(buf);
                 sb.append(CRLF);
@@ -358,7 +358,7 @@ public class SieveHandler {
             final String temp = bis_sieve.readLine();
             if (temp.endsWith(SIEVE_OK)) {
                 // We have to strip off the last trailing CRLF...
-                String returnstring = sb.substring(0, sb.length() - 2);
+                final String returnstring = sb.substring(0, sb.length() - 2);
                 script = new byte[returnstring.length()];
                 script = returnstring.getBytes("UTF-8");
                 return script;

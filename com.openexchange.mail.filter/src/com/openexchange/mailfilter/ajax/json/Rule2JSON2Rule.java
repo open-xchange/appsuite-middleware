@@ -63,9 +63,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.jsieve.commands.ActionCommand;
-import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
+import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mailfilter.ajax.fields.RuleFields;
@@ -171,21 +171,25 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         super();
     }
     
-    protected Mapper<Rule>[] allMapper() {        
+    @Override
+	protected Mapper<Rule>[] allMapper() {        
         return mappers;
     }
     
-    protected Rule createObject() {       
+    @Override
+	protected Rule createObject() {       
         return new Rule();
     }
     
-    protected String[] getListFields() {        
+    @Override
+	protected String[] getListFields() {        
         return RULE_FIELDS_LIST;
     }
     
     private final static Map<String, Mapper<Rule>> attr2Mapper;
 
-    protected Mapper<Rule> getMapper(final String attrName) {
+    @Override
+	protected Mapper<Rule> getMapper(final String attrName) {
         return attr2Mapper.get(attrName);
     }
     
@@ -211,7 +215,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return RuleFields.ID;
             }
 
-            public Object getAttribute(Rule obj) throws JSONException {
+            public Object getAttribute(final Rule obj) throws JSONException {
                 final RuleComment ruleComment = obj.getRuleComment();
                 if (null != ruleComment) {
                     return ruleComment.getUniqueid();
@@ -220,11 +224,11 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 }
             }
 
-            public boolean isNull(Rule obj) {
+            public boolean isNull(final Rule obj) {
                 return ((null == obj.getRuleComment()) || (-1 == obj.getRuleComment().getUniqueid()));
             }
 
-            public void setAttribute(Rule obj, Object attr) throws JSONException {                
+            public void setAttribute(final Rule obj, final Object attr) throws JSONException {                
                 final RuleComment ruleComment = obj.getRuleComment();
                 if (null != ruleComment) {
                     ruleComment.setUniqueid((Integer)attr);
@@ -240,15 +244,15 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return RuleFields.POSITION;
             }
             
-            public Object getAttribute(Rule obj) throws JSONException {
+            public Object getAttribute(final Rule obj) throws JSONException {
                 return obj.getPosition();
             }
             
-            public boolean isNull(Rule obj) {
+            public boolean isNull(final Rule obj) {
                 return -1 == obj.getPosition();
             }
             
-            public void setAttribute(Rule obj, Object attr) throws JSONException {                
+            public void setAttribute(final Rule obj, final Object attr) throws JSONException {                
                 obj.setPosition((Integer)attr);
             }
         },
@@ -259,7 +263,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return RuleFields.RULENAME;
             }
 
-            public Object getAttribute(Rule obj) throws JSONException {
+            public Object getAttribute(final Rule obj) throws JSONException {
                 final RuleComment ruleComment = obj.getRuleComment();
                 if (null != ruleComment) {
                     return ruleComment.getRulename();
@@ -268,12 +272,12 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 }
             }
 
-            public boolean isNull(Rule obj) {                
+            public boolean isNull(final Rule obj) {                
                 final RuleComment ruleComment = obj.getRuleComment();
                 return ((null == ruleComment) || (null == ruleComment.getRulename()));
             }
 
-            public void setAttribute(Rule obj, Object attr) throws JSONException {                
+            public void setAttribute(final Rule obj, final Object attr) throws JSONException {                
                 final RuleComment ruleComment = obj.getRuleComment();
                 if (null != ruleComment) {
                     ruleComment.setRulename((String)attr);
@@ -289,15 +293,15 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return RuleFields.ACTIVE;
             }
 
-            public Object getAttribute(Rule obj) throws JSONException {
+            public Object getAttribute(final Rule obj) throws JSONException {
                 return !obj.isCommented();
             }
 
-            public boolean isNull(Rule obj) {                
+            public boolean isNull(final Rule obj) {                
                 return false;
             }
 
-            public void setAttribute(Rule obj, Object attr) throws JSONException {
+            public void setAttribute(final Rule obj, final Object attr) throws JSONException {
                 obj.setCommented(!(Boolean) attr);
             }
         },
@@ -308,7 +312,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return RuleFields.FLAGS;
             }
 
-            public Object getAttribute(Rule obj) throws JSONException {
+            public Object getAttribute(final Rule obj) throws JSONException {
                 final JSONArray tmp = new JSONArray();
                 final RuleComment name = obj.getRuleComment();
                 if (null != name && null != name.getFlags()) {
@@ -319,11 +323,11 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return tmp;
             }
 
-            public boolean isNull(Rule obj) {                
+            public boolean isNull(final Rule obj) {                
                 return ((null == obj.getRuleComment()) || (null == obj.getRuleComment().getRulename()));
             }
 
-            public void setAttribute(Rule rule, Object obj) throws JSONException {
+            public void setAttribute(final Rule rule, final Object obj) throws JSONException {
                 final JSONArray array = (JSONArray) obj;
                 final ArrayList<String> list = new ArrayList<String>(array.length());
                 for (int i = 0; i < array.length(); i++) {
@@ -344,7 +348,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return RuleFields.TEST;
             }
 
-            public Object getAttribute(Rule obj) throws JSONException {
+            public Object getAttribute(final Rule obj) throws JSONException {
                 final JSONObject tmp = new JSONObject();
 
                 final TestCommand testCommand = obj.getTestCommand();
@@ -352,11 +356,11 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return tmp;
             }
 
-            public boolean isNull(Rule obj) {                
+            public boolean isNull(final Rule obj) {                
                 return (null == obj.getTestCommand());
             }
 
-            public void setAttribute(Rule rule, Object obj) throws JSONException, SieveException, OXJSONException {
+            public void setAttribute(final Rule rule, final Object obj) throws JSONException, SieveException, OXJSONException {
                 final JSONObject jobj = (JSONObject) obj;
                 final String id = jobj.getString(GeneralFields.ID);
                 final TestCommand testCommand = rule.getTestCommand();
@@ -424,7 +428,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
              * @param testCommand the TestCommand itself
              * @throws JSONException
              */
-            private void createJSONFromTestCommand(JSONObject tmp, final TestCommand testCommand) throws JSONException {
+            private void createJSONFromTestCommand(final JSONObject tmp, final TestCommand testCommand) throws JSONException {
                 if (null != testCommand) {
                     if (TestCommand.Commands.ADDRESS.equals(testCommand.getCommand())) {
                         tmp.put(GeneralFields.ID, TestCommand.Commands.ADDRESS.getCommandname());
@@ -467,7 +471,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 }
             }
 
-            private void createAllofOrAnyofObjects(JSONObject tmp, final TestCommand testCommand, final Commands command) throws JSONException {
+            private void createAllofOrAnyofObjects(final JSONObject tmp, final TestCommand testCommand, final Commands command) throws JSONException {
                 tmp.put(GeneralFields.ID, command.getCommandname());
                 final JSONArray array = new JSONArray();
                 for (final TestCommand testCommand2 : testCommand.getTestcommands()) {
@@ -509,7 +513,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return RuleFields.ACTIONCMDS;
             }
 
-            public Object getAttribute(Rule obj) throws JSONException {
+            public Object getAttribute(final Rule obj) throws JSONException {
                 final JSONArray array = new JSONArray();
                 final IfCommand ifCommand = obj.getIfCommand();
                 if (null != ifCommand) {
@@ -524,11 +528,11 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return null;
             }
 
-            public boolean isNull(Rule obj) {                
+            public boolean isNull(final Rule obj) {                
                 return (null == obj.getIfCommand());
             }
 
-            public void setAttribute(Rule rule, Object obj) throws JSONException, SieveException, OXJSONException {
+            public void setAttribute(final Rule rule, final Object obj) throws JSONException, SieveException, OXJSONException {
                 final JSONArray jarray = (JSONArray) obj;
                 final IfCommand ifCommand = rule.getIfCommand();
                 if (null == ifCommand) {
@@ -543,7 +547,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 }
             }
             
-            private ActionCommand createActionCommandFromJSON(JSONObject object) throws JSONException, SieveException, OXJSONException {
+            private ActionCommand createActionCommandFromJSON(final JSONObject object) throws JSONException, SieveException, OXJSONException {
                 final String id = object.getString(GeneralFields.ID);
                 if (ActionCommand.Commands.KEEP.getJsonname().equals(id)) {
                     return new ActionCommand(ActionCommand.Commands.KEEP, new ArrayList<Object>());
@@ -631,7 +635,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
              * @param actionCommand the TestCommand itself
              * @throws JSONException
              */
-            private void createJSONFromActionCommand(JSONObject tmp, final ActionCommand actionCommand) throws JSONException {
+            private void createJSONFromActionCommand(final JSONObject tmp, final ActionCommand actionCommand) throws JSONException {
                 if (null != actionCommand) {
                     if (ActionCommand.Commands.KEEP.equals(actionCommand.getCommand())) {
                         tmp.put(GeneralFields.ID, ActionCommand.Commands.KEEP.getCommandname());
@@ -671,7 +675,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 }
             }
 
-            private void createOneParameterJSON(JSONObject tmp, final ArrayList<Object> arguments, final com.openexchange.jsieve.commands.ActionCommand.Commands command, final String field) throws JSONException {
+            private void createOneParameterJSON(final JSONObject tmp, final ArrayList<Object> arguments, final com.openexchange.jsieve.commands.ActionCommand.Commands command, final String field) throws JSONException {
                 tmp.put(GeneralFields.ID, command.getJsonname());
                 tmp.put(field, ((List<String>)arguments.get(0)).get(0));
             }
@@ -692,15 +696,15 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return RuleFields.TEXT;
             }
 
-            public Object getAttribute(Rule obj) throws JSONException {
+            public Object getAttribute(final Rule obj) throws JSONException {
                 return obj.getText();
             }
 
-            public boolean isNull(Rule obj) {
+            public boolean isNull(final Rule obj) {
                 return null == obj.getText();
             }
 
-            public void setAttribute(Rule obj, Object attr) throws JSONException {
+            public void setAttribute(final Rule obj, final Object attr) throws JSONException {
                 obj.setText((String)attr);
             }
             
@@ -712,15 +716,15 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return RuleFields.ERRORMSG;
             }
             
-            public Object getAttribute(Rule obj) throws JSONException {
+            public Object getAttribute(final Rule obj) throws JSONException {
                 return obj.getErrormsg();
             }
             
-            public boolean isNull(Rule obj) {
+            public boolean isNull(final Rule obj) {
                 return null == obj.getErrormsg();
             }
             
-            public void setAttribute(Rule obj, Object attr) throws JSONException {
+            public void setAttribute(final Rule obj, final Object attr) throws JSONException {
                 obj.setErrormsg((String)attr);
             }
             
@@ -730,7 +734,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
     
     static {
         final Map<String, Mapper<Rule>> tmp = new HashMap<String, Mapper<Rule>>();
-        for (Mapper<Rule> mapper : mappers) {
+        for (final Mapper<Rule> mapper : mappers) {
             tmp.put(mapper.getAttrName(), mapper);
         }
         attr2Mapper = Collections.unmodifiableMap(tmp);

@@ -85,7 +85,7 @@ public class Rule implements Comparable<Rule> {
         this.linenumber = linenumber;
     }
 
-    public Rule(final ArrayList<Command> commands, final int linenumber, int endlinenumber, final boolean commented) {
+    public Rule(final ArrayList<Command> commands, final int linenumber, final int endlinenumber, final boolean commented) {
         super();
         this.commands = commands;
         this.linenumber = linenumber;
@@ -99,7 +99,7 @@ public class Rule implements Comparable<Rule> {
      * @param text
      * @param errormsg
      */
-    public Rule(boolean commented, int linenumber, int endlinenumber, String errormsg) {
+    public Rule(final boolean commented, final int linenumber, final int endlinenumber, final String errormsg) {
         super();
         this.commented = commented;
         this.linenumber = linenumber;
@@ -131,7 +131,7 @@ public class Rule implements Comparable<Rule> {
      * @return
      * @see java.util.ArrayList#add(java.lang.Object)
      */
-    public boolean addCommand(Command o) {
+    public boolean addCommand(final Command o) {
         return commands.add(o);
     }
 
@@ -140,7 +140,7 @@ public class Rule implements Comparable<Rule> {
      * @return
      * @see java.util.ArrayList#remove(java.lang.Object)
      */
-    public boolean removeCommand(Object o) {
+    public boolean removeCommand(final Object o) {
         return commands.remove(o);
     }
 
@@ -233,7 +233,7 @@ public class Rule implements Comparable<Rule> {
     /**
      * @param position the position to set
      */
-    public final void setPosition(int position) {
+    public final void setPosition(final int position) {
         this.position = position;
     }
 
@@ -255,7 +255,7 @@ public class Rule implements Comparable<Rule> {
     /**
      * @param text the text to set
      */
-    public final void setText(String text) {
+    public final void setText(final String text) {
         this.text = text;
     }
 
@@ -269,7 +269,7 @@ public class Rule implements Comparable<Rule> {
     /**
      * @param errormsg the errormsg to set
      */
-    public final void setErrormsg(String errormsg) {
+    public final void setErrormsg(final String errormsg) {
         this.errormsg = errormsg;
     }
 
@@ -283,7 +283,7 @@ public class Rule implements Comparable<Rule> {
     /**
      * @param endlinenumber the endlinenumber to set
      */
-    public final void setEndlinenumber(int endlinenumber) {
+    public final void setEndlinenumber(final int endlinenumber) {
         this.endlinenumber = endlinenumber;
     }
 

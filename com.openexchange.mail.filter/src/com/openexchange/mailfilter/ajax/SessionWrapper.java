@@ -80,7 +80,7 @@ public class SessionWrapper {
         /**
          * @param username the username to set
          */
-        public final void setUsername(String username) {
+        public final void setUsername(final String username) {
             this.username = username;
         }
 
@@ -94,7 +94,7 @@ public class SessionWrapper {
         /**
          * @param password the password to set
          */
-        public final void setPassword(String password) {
+        public final void setPassword(final String password) {
             this.password = password;
         }
 
@@ -108,7 +108,7 @@ public class SessionWrapper {
         /**
          * @param authname the authname to set
          */
-        public final void setAuthname(String authname) {
+        public final void setAuthname(final String authname) {
             this.authname = authname;
         }
 

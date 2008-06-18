@@ -84,11 +84,11 @@ public class MailFilterPreferencesItem implements PreferencesItemService {
      */
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
                 setting.setSingleValue(Boolean.valueOf(true));
             }
 
-            public boolean isAvailable(UserConfiguration userConfig) {
+            public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
         };

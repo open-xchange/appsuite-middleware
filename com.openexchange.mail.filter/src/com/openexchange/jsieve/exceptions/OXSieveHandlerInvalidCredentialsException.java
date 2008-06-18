@@ -66,7 +66,7 @@ public class OXSieveHandlerInvalidCredentialsException extends Exception {
     /**
      * @param message
      */
-    public OXSieveHandlerInvalidCredentialsException(String message) {
+    public OXSieveHandlerInvalidCredentialsException(final String message) {
         super(message);
 
     }
@@ -74,7 +74,7 @@ public class OXSieveHandlerInvalidCredentialsException extends Exception {
     /**
      * @param cause
      */
-    public OXSieveHandlerInvalidCredentialsException(Throwable cause) {
+    public OXSieveHandlerInvalidCredentialsException(final Throwable cause) {
         super(cause);
 
     }
@@ -83,7 +83,7 @@ public class OXSieveHandlerInvalidCredentialsException extends Exception {
      * @param message
      * @param cause
      */
-    public OXSieveHandlerInvalidCredentialsException(String message, Throwable cause) {
+    public OXSieveHandlerInvalidCredentialsException(final String message, final Throwable cause) {
         super(message, cause);
     }
 

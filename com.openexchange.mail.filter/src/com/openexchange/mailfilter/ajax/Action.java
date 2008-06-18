@@ -106,7 +106,7 @@ public enum Action {
     static {
         final Map<String, Action> tmp = new HashMap<String, Action>(values()
             .length, 1);
-        for (Action action : values()) {
+        for (final Action action : values()) {
             tmp.put(action.getAjaxName(), action);
         }
         name2Action = Collections.unmodifiableMap(tmp);

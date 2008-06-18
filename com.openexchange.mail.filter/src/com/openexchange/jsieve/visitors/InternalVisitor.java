@@ -38,7 +38,7 @@ public class InternalVisitor implements SieveParserVisitor {
 
     private boolean commented;
 
-    protected Object visitChildren(SimpleNode node, Object data) throws SieveException {
+    protected Object visitChildren(final SimpleNode node, final Object data) throws SieveException {
         Object jjtAccept = data;
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
             final Node child = node.jjtGetChild(i);
@@ -94,10 +94,10 @@ public class InternalVisitor implements SieveParserVisitor {
                     final Node child = node.jjtGetChild(i);
                     final Object jjtAccept = child.jjtAccept(this, data);
                     if (jjtAccept instanceof TestCommand) {
-                        TestCommand command = (TestCommand) jjtAccept;
+                        final TestCommand command = (TestCommand) jjtAccept;
                         ifCommand.setTestcommand(command);
                     } else if (jjtAccept instanceof ArrayList) {
-                        ArrayList command = (ArrayList) jjtAccept;
+                        final ArrayList command = (ArrayList) jjtAccept;
                         ifCommand.setActioncommands(command);
                     }
                 }
@@ -167,7 +167,7 @@ public class InternalVisitor implements SieveParserVisitor {
                     final NumberArgument numberarg = (NumberArgument) obj;
                     arguments.add(numberarg);
                 } else if (obj instanceof ArrayList) {
-                    arguments.add((ArrayList<String>) obj);
+                    arguments.add(obj);
                 } else {
                     final ArrayList<String> arrayList = new ArrayList<String>();
                     arrayList.add(obj.toString());
@@ -218,10 +218,10 @@ public class InternalVisitor implements SieveParserVisitor {
         } else {
             final Object value = node.getValue();
             if (value instanceof TagArgument) {
-                ((ArrayList<Object>) data).add((TagArgument) value);
+                ((ArrayList<Object>) data).add(value);
                 return data;
             } else if (value instanceof NumberArgument) {
-                ((ArrayList<Object>) data).add((NumberArgument) value);
+                ((ArrayList<Object>) data).add(value);
                 return data;
             } else {
                 final String string = value.toString();
@@ -257,7 +257,7 @@ public class InternalVisitor implements SieveParserVisitor {
                                 if (object instanceof TestCommand) {
                                     testcommands.addAll((ArrayList<TestCommand>) obj);
                                 } else if (object instanceof String) {
-                                    arguments.add((ArrayList<String>) obj);
+                                    arguments.add(obj);
                                 }
                             }
                         } else if (obj instanceof TestCommand) {

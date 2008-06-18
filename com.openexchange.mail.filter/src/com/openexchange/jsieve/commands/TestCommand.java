@@ -234,7 +234,7 @@ public class TestCommand extends Command {
          */
         private String required;
 
-        Commands(String commandname, int numberofarguments, Hashtable<String, String> address, Hashtable<String, String> comparator, Hashtable<String, String> matchtypes, String required) {
+        Commands(final String commandname, final int numberofarguments, final Hashtable<String, String> address, final Hashtable<String, String> comparator, final Hashtable<String, String> matchtypes, final String required) {
             this.commandname = commandname;
             this.numberofarguments = numberofarguments;
             this.address = address;
@@ -320,7 +320,7 @@ public class TestCommand extends Command {
         this.arguments = arguments;
         for (final Object arg : this.arguments) {
             if (arg instanceof TagArgument) {
-                TagArgument tagarg = (TagArgument) arg;
+                final TagArgument tagarg = (TagArgument) arg;
                 this.tagarguments.add(tagarg.getTag());
             }
         }
@@ -382,7 +382,7 @@ public class TestCommand extends Command {
         for (int i = 0; i < this.arguments.size(); i++) {
             final Object obj = this.arguments.get(i);
             if (obj instanceof TagArgument) {
-                TagArgument tag = (TagArgument) obj;
+                final TagArgument tag = (TagArgument) obj;
                 if (":comparator".equals(tag.getTag())) {
                     return i;
                 }
@@ -398,7 +398,7 @@ public class TestCommand extends Command {
     /**
      * @param command the command to set
      */
-    public final void setCommand(Commands command) {
+    public final void setCommand(final Commands command) {
         this.command = command;
     }
 
@@ -411,7 +411,7 @@ public class TestCommand extends Command {
      * @return
      * @see java.util.List#add(java.lang.Object)
      */
-    public boolean addTagarguments(String o) {
+    public boolean addTagarguments(final String o) {
         return tagarguments.add(o);
     }
 

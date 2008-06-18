@@ -105,7 +105,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
          * @param rule
          * @param position
          */
-        public RuleAndPosition(Rule rule, int position) {
+        public RuleAndPosition(final Rule rule, final int position) {
             super();
             this.rule = rule;
             this.position = position;
@@ -326,7 +326,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             }
         }
     }
-    protected void actionReorder(final MailfilterRequest request) throws AbstractOXException {
+    @Override
+	protected void actionReorder(final MailfilterRequest request) throws AbstractOXException {
         final Credentials credentials = request.getCredentials();
         final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
         final SieveHandler sieveHandler = connectRight(credentials);
@@ -342,7 +343,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final JSONArray json = new JSONArray(body);
             
             for (int i = 0; i < json.length(); i++) {
-                int uniqueid = json.getInt(i);
+                final int uniqueid = json.getInt(i);
                 final RuleAndPosition rightRule = getRightRuleForUniqueId(clientrules, uniqueid, getUserPrefix(credentials));
                 final int position = rightRule.getPosition();
                 clientrules.remove(position);
@@ -397,7 +398,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             
             final String body = request.getBody();
             final JSONObject json = new JSONObject(body);
-            Integer uniqueid = getUniqueId(json);
+            final Integer uniqueid = getUniqueId(json);
             
             if (null != uniqueid) {
                 // First get the right rule which should be modified...
@@ -622,11 +623,11 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
      * @param credentials
      * @return
      */
-    private String getUserPrefix(Credentials credentials) {
+    private String getUserPrefix(final Credentials credentials) {
         return "Error for user " + credentials.getRightUsername() + ": ";
     }
 
-    private void setUidInRule(Rule newrule, final int uid) {
+    private void setUidInRule(final Rule newrule, final int uid) {
         final RuleComment name = newrule.getRuleComment();
         if (null != name) {
             name.setUniqueid(uid);

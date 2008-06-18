@@ -67,10 +67,10 @@ import org.apache.jsieve.parser.generated.ParseException;
 import org.apache.jsieve.parser.generated.SieveParser;
 
 import com.openexchange.jsieve.commands.Command;
-import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.commands.IfStructureCommand;
 import com.openexchange.jsieve.commands.RequireCommand;
 import com.openexchange.jsieve.commands.Rule;
+import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.visitors.InternalVisitor;
 import com.openexchange.jsieve.visitors.Visitor;
 import com.openexchange.jsieve.visitors.Visitor.OwnType;
@@ -97,7 +97,7 @@ public final class SieveTextFilter {
          * @param rulelist
          * @param nextuid
          */
-        public RuleListAndNextUid(ArrayList<Rule> rulelist, int nextuid) {
+        public RuleListAndNextUid(final ArrayList<Rule> rulelist, final int nextuid) {
             super();
             this.rulelist = rulelist;
             this.nextuid = nextuid;
@@ -221,7 +221,7 @@ public final class SieveTextFilter {
      * 
      * @param finalrules
      */
-    private void addLines(ArrayList<Rule> finalrules) {
+    private void addLines(final ArrayList<Rule> finalrules) {
         // We add one to the first line offset here, so that the first real rule isn't written directly below
         // the require rule
         int linenumber = FIRST_LINE_OFFSET + 1;
@@ -237,7 +237,7 @@ public final class SieveTextFilter {
         }
     }
 
-    private void addPlainTextToRule(final String wholetext, final String commentedtext, final RuleComment ruleComment, Rule rightrule) {
+    private void addPlainTextToRule(final String wholetext, final String commentedtext, final RuleComment ruleComment, final Rule rightrule) {
         final int linenumber = rightrule.getLinenumber();
         final int endlinenumber = rightrule.getEndlinenumber();
         if (null != ruleComment) {
@@ -297,7 +297,7 @@ public final class SieveTextFilter {
      * @param wholetext The whole text of the script
      * @param commentedtext The commented text of the script
      */
-    private void addRulenameToFittingCommand(ArrayList<RuleComment> ruleComments, ArrayList<Rule> rules, final String wholetext, final String commentedtext) {
+    private void addRulenameToFittingCommand(final ArrayList<RuleComment> ruleComments, final ArrayList<Rule> rules, final String wholetext, final String commentedtext) {
         for (final RuleComment ruleComment : ruleComments) {
             int mindiff = Integer.MAX_VALUE;
             Rule rightrule = null;
@@ -366,7 +366,7 @@ public final class SieveTextFilter {
         return listToString(removedcomments);
     }
 
-    private ArrayList<RuleComment> extractrulenames(ArrayList<Rule> finalrules) {
+    private ArrayList<RuleComment> extractrulenames(final ArrayList<Rule> finalrules) {
         final ArrayList<RuleComment> retval = new ArrayList<RuleComment>();
         for (final Rule rule : finalrules) {
             final RuleComment ruleComment = rule.getRuleComment();
@@ -383,11 +383,11 @@ public final class SieveTextFilter {
         }
     }
 
-    private int getPosDif(int i) {
+    private int getPosDif(final int i) {
         return (i > 0) ? i : Integer.MAX_VALUE;
     }
 
-    private String getRightPart(final String commentedtext, int linenumber, int endlinenumber) {
+    private String getRightPart(final String commentedtext, final int linenumber, final int endlinenumber) {
         int start = 0;
         int end = 0;
         int number = 1;
@@ -450,7 +450,7 @@ public final class SieveTextFilter {
         return ruleComments;
     }
 
-    private void handleRuleError(final String wholetext, final String commentedtext, final RuleComment rulename, Rule rightrule) {
+    private void handleRuleError(final String wholetext, final String commentedtext, final RuleComment rulename, final Rule rightrule) {
         final String errormsg = rightrule.getErrormsg();
         if (null != errormsg) {
             rightrule.setCommands(null);
@@ -459,7 +459,7 @@ public final class SieveTextFilter {
         }
     }
 
-    private List<String> interweaving(List<OwnType> noncommentedoutput, List<OwnType> commentedoutput, ArrayList<RuleComment> rulenames) {
+    private List<String> interweaving(final List<OwnType> noncommentedoutput, final List<OwnType> commentedoutput, final ArrayList<RuleComment> rulenames) {
         final List<String> retval = new ArrayList<String>();
         retval.add(FIRST_LINE + (new Date()).toString());
         for (final OwnType owntype : noncommentedoutput) {
@@ -508,7 +508,7 @@ public final class SieveTextFilter {
      * @param readFileToString
      * @return
      */
-    private String kickcommentsright(String readFileToString) {
+    private String kickcommentsright(final String readFileToString) {
         final StringBuilder sb = new StringBuilder(readFileToString);
         boolean dontparse = false;
         boolean nextchar = false;
@@ -516,7 +516,7 @@ public final class SieveTextFilter {
         boolean comment = false;
         boolean commentremoved = false;
         for (int i = 0; i < sb.length();) {
-            char c = sb.charAt(i);
+            final char c = sb.charAt(i);
             if (c == '\n') {
                 newline = true;
                 nextchar = false;
@@ -561,7 +561,7 @@ public final class SieveTextFilter {
         return sb.toString();
     }
 
-    private String listToCommaSeparatedString(List<String> flags) {
+    private String listToCommaSeparatedString(final List<String> flags) {
         if (null != flags) {
             final StringBuilder sb = new StringBuilder();
             for (final String flag : flags) {
@@ -602,7 +602,7 @@ public final class SieveTextFilter {
         LOG.error("Error in mailfilter rules of user " + this.username + ": " + mailfilterException.getMessage(), mailfilterException);
     }
 
-    private int removelines(List<String> retval, int linenumber, int lines) {
+    private int removelines(final List<String> retval, final int linenumber, final int lines) {
         // Here we have to delete the lines after the linenumber which are
         // empty, so that no text is removed
         int deleteafter = -1;
@@ -629,7 +629,7 @@ public final class SieveTextFilter {
      * @param retval
      * @param line
      */
-    private void searchEmptyLineAndRemove(List<String> retval, int line) {
+    private void searchEmptyLineAndRemove(final List<String> retval, final int line) {
         for (int i = line; i < retval.size(); i++) {
             if (retval.get(i).equals("")) {
                 retval.remove(i);
@@ -644,7 +644,7 @@ public final class SieveTextFilter {
      * @param commentedtext
      * @return The next uid
      */
-    private int setPosAndMissingErrortextsAndIds(ArrayList<Rule> finalrules, final String wholetext, final String commentedtext) {
+    private int setPosAndMissingErrortextsAndIds(final ArrayList<Rule> finalrules, final String wholetext, final String commentedtext) {
         final List<Integer> uniqueids = new ArrayList<Integer>();
         int max = -1;
         int i = 0;
@@ -691,7 +691,7 @@ public final class SieveTextFilter {
      * @param commented
      *                The list which will contain all commented rules afterwards
      */
-    private void splitRules(final ArrayList<Rule> totalrules, ArrayList<Rule> noncommented, ArrayList<Rule> commented) {
+    private void splitRules(final ArrayList<Rule> totalrules, final ArrayList<Rule> noncommented, final ArrayList<Rule> commented) {
         // First clear the two output lists
         noncommented.clear();
         commented.clear();
@@ -711,7 +711,7 @@ public final class SieveTextFilter {
     private List<String> stringToListComment(final String string) {
         final ArrayList<String> retval = new ArrayList<String>();
         final String[] split = string.split(CRLF);
-        for (String line : split) {
+        for (final String line : split) {
             retval.add(COMMENT_TAG + line);
         }
         return retval;

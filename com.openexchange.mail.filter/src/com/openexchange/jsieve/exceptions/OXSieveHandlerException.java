@@ -66,7 +66,7 @@ public class OXSieveHandlerException extends Exception {
     /**
      * @param message
      */
-    public OXSieveHandlerException(String message) {
+    public OXSieveHandlerException(final String message) {
         super(message);
 
     }
@@ -74,7 +74,7 @@ public class OXSieveHandlerException extends Exception {
     /**
      * @param cause
      */
-    public OXSieveHandlerException(Throwable cause) {
+    public OXSieveHandlerException(final Throwable cause) {
         super(cause);
 
     }
@@ -83,7 +83,7 @@ public class OXSieveHandlerException extends Exception {
      * @param message
      * @param cause
      */
-    public OXSieveHandlerException(String message, Throwable cause) {
+    public OXSieveHandlerException(final String message, final Throwable cause) {
         super(message, cause);
     }
 

@@ -89,7 +89,7 @@ public class Visitor implements SieveParserVisitor {
             this.linenumber = -1;
         }
 
-        public OwnType(StringBuilder output, int linenumber) {
+        public OwnType(final StringBuilder output, final int linenumber) {
             super();
             this.output = output;
             this.linenumber = linenumber;
@@ -99,7 +99,7 @@ public class Visitor implements SieveParserVisitor {
             return output;
         }
 
-        public void setOutput(StringBuilder output) {
+        public void setOutput(final StringBuilder output) {
             this.output = output;
         }
 
@@ -107,7 +107,7 @@ public class Visitor implements SieveParserVisitor {
             return linenumber;
         }
 
-        public void setLinenumber(int linenumber) {
+        public void setLinenumber(final int linenumber) {
             this.linenumber = linenumber;
         }
 
@@ -119,7 +119,7 @@ public class Visitor implements SieveParserVisitor {
 
     private boolean inblock = false;
 
-    protected Object visitChildren(SimpleNode node, Object data) throws SieveException {
+    protected Object visitChildren(final SimpleNode node, final Object data) throws SieveException {
         Object jjtAccept = data;
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
             final Node child = node.jjtGetChild(i);
@@ -128,16 +128,16 @@ public class Visitor implements SieveParserVisitor {
         return jjtAccept;
     }
 
-    public Object visit(SimpleNode node, Object data) throws SieveException {
+    public Object visit(final SimpleNode node, final Object data) throws SieveException {
         return visitChildren(node, data);
     }
 
-    public Object visit(ASTstart node, Object data) throws SieveException {
+    public Object visit(final ASTstart node, final Object data) throws SieveException {
         final Object visitChildren = visitChildren(node, data);
         return visitChildren;
     }
 
-    public Object visit(ASTcommands node, Object data) throws SieveException {
+    public Object visit(final ASTcommands node, final Object data) throws SieveException {
         if (null != data) {
             final Object visitChildren = visitChildren(node, data);
             return visitChildren;
@@ -148,7 +148,7 @@ public class Visitor implements SieveParserVisitor {
     }
 
     @SuppressWarnings("unchecked")
-    public Object visit(ASTcommand node, Object data) throws SieveException {
+    public Object visit(final ASTcommand node, final Object data) throws SieveException {
         ((List<OwnType>) data).add(new OwnType(new StringBuilder((this.inblock ? "    " : "") + node.getName() + " "), node.getCoordinate().getStartLineNumber()));
         final List<OwnType> visitChildren = (List<OwnType>) visitChildren(node, data);
         final StringBuilder output = visitChildren.get(visitChildren.size() - 1).getOutput();
@@ -159,7 +159,7 @@ public class Visitor implements SieveParserVisitor {
     }
 
     @SuppressWarnings("unchecked")
-    public Object visit(ASTblock node, Object data) throws SieveException {
+    public Object visit(final ASTblock node, final Object data) throws SieveException {
         final Token firstToken = node.getFirstToken();
         final Token lastToken = node.getLastToken();
         this.inblock = true;
@@ -177,12 +177,12 @@ public class Visitor implements SieveParserVisitor {
         return visitChildren;
     }
 
-    public Object visit(ASTarguments node, Object data) throws SieveException {
+    public Object visit(final ASTarguments node, final Object data) throws SieveException {
         return visitChildren(node, data);
     }
 
     @SuppressWarnings( { "unchecked" })
-    public Object visit(ASTargument node, Object data) throws SieveException {
+    public Object visit(final ASTargument node, final Object data) throws SieveException {
         final Object value = node.getValue();
         if (null != value) {
             final OwnType ownType = ((List<OwnType>) data).get(((List<OwnType>) data).size() - 1);
@@ -193,14 +193,14 @@ public class Visitor implements SieveParserVisitor {
     }
 
     @SuppressWarnings("unchecked")
-    public Object visit(ASTtest node, Object data) throws SieveException {
+    public Object visit(final ASTtest node, final Object data) throws SieveException {
         final OwnType ownType = ((List<OwnType>) data).get(((List<OwnType>) data).size() - 1);
         ownType.getOutput().append(node.getName() + " ");
         return visitChildren(node, data);
     }
 
     @SuppressWarnings("unchecked")
-    public Object visit(ASTtest_list node, Object data) throws SieveException {
+    public Object visit(final ASTtest_list node, final Object data) throws SieveException {
         final Token firstToken = node.getFirstToken();
         final Token lastToken = node.getLastToken();
         final StringBuilder output = ((List<OwnType>) data).get(((List<OwnType>) data).size() - 1).getOutput();
@@ -223,7 +223,7 @@ public class Visitor implements SieveParserVisitor {
     }
 
     @SuppressWarnings("unchecked")
-    public Object visit(ASTstring node, Object data) throws SieveException {
+    public Object visit(final ASTstring node, final Object data) throws SieveException {
         final OwnType ownType = ((List<OwnType>) data).get(((List<OwnType>) data).size() - 1);
         final Object value = node.getValue();
         final String string = value.toString();
@@ -236,7 +236,7 @@ public class Visitor implements SieveParserVisitor {
     }
 
     @SuppressWarnings("unchecked")
-    public Object visit(ASTstring_list node, Object data) throws SieveException {
+    public Object visit(final ASTstring_list node, final Object data) throws SieveException {
         final Token firstToken = node.getFirstToken();
         final Token lastToken = node.getLastToken();
         if (firstToken != lastToken) {

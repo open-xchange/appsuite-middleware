@@ -72,7 +72,7 @@ public class RuleComment {
      * @param rulename
      * @param line
      */
-    public RuleComment(final List<String> flags, int uniqueid, final String rulename, final int line) {
+    public RuleComment(final List<String> flags, final int uniqueid, final String rulename, final int line) {
         super();
         this.flags = flags;
         this.rulename = rulename;
@@ -90,7 +90,7 @@ public class RuleComment {
         this.line = line;
     }
 
-    public RuleComment(int uniqueid, final String rulename, final int line) {
+    public RuleComment(final int uniqueid, final String rulename, final int line) {
         super();
         this.uniqueid = uniqueid;
         this.rulename = rulename;
@@ -100,7 +100,7 @@ public class RuleComment {
     /**
      * @param uniqueid
      */
-    public RuleComment(int uniqueid) {
+    public RuleComment(final int uniqueid) {
         super();
         this.uniqueid = uniqueid;
     }
@@ -113,7 +113,7 @@ public class RuleComment {
     /**
      * @param flags
      */
-    public RuleComment(List<String> flags) {
+    public RuleComment(final List<String> flags) {
         super();
         this.flags = flags;
     }
@@ -130,7 +130,7 @@ public class RuleComment {
         this.rulename = comment;
     }
 
-    public final void setLine(int line) {
+    public final void setLine(final int line) {
         this.line = line;
     }
 
@@ -144,7 +144,7 @@ public class RuleComment {
     /**
      * @param flags the flags to set
      */
-    public final void setFlags(List<String> flags) {
+    public final void setFlags(final List<String> flags) {
         this.flags = flags;
     }
 
@@ -159,7 +159,7 @@ public class RuleComment {
     /**
      * @param errortext the errortext to set
      */
-    public final void setErrortext(String errortext) {
+    public final void setErrortext(final String errortext) {
         this.errortext = errortext;
     }
 
@@ -173,7 +173,7 @@ public class RuleComment {
     /**
      * @param uniqueid the uniqueid to set
      */
-    public final void setUniqueid(int uniqueid) {
+    public final void setUniqueid(final int uniqueid) {
         this.uniqueid = uniqueid;
     }
 
@@ -194,26 +194,34 @@ public class RuleComment {
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (!(obj instanceof RuleComment))
-            return false;
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+			return true;
+		}
+        if (obj == null) {
+			return false;
+		}
+        if (!(obj instanceof RuleComment)) {
+			return false;
+		}
         final RuleComment other = (RuleComment) obj;
         if (flags == null) {
-            if (other.flags != null)
-                return false;
-        } else if (!flags.equals(other.flags))
-            return false;
-        if (line != other.line)
-            return false;
+            if (other.flags != null) {
+				return false;
+			}
+        } else if (!flags.equals(other.flags)) {
+			return false;
+		}
+        if (line != other.line) {
+			return false;
+		}
         if (rulename == null) {
-            if (other.rulename != null)
-                return false;
-        } else if (!rulename.equals(other.rulename))
-            return false;
+            if (other.rulename != null) {
+				return false;
+			}
+        } else if (!rulename.equals(other.rulename)) {
+			return false;
+		}
         return true;
     }
 

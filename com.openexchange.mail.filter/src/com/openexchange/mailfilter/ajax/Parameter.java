@@ -94,7 +94,7 @@ public enum Parameter {
     static {
         final Map<String, Parameter> tmp = new HashMap<String, Parameter>(
             values().length, 1);
-        for (Parameter action : values()) {
+        for (final Parameter action : values()) {
             tmp.put(action.getName(), action);
         }
         name2Parameter = Collections.unmodifiableMap(tmp);

@@ -79,6 +79,11 @@ import com.openexchange.tools.servlet.http.Tools;
 public abstract class AJAXServlet extends HttpServlet {
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 3006497622205429579L;
+
+	/**
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(AJAXServlet.class);
@@ -124,7 +129,7 @@ public abstract class AJAXServlet extends HttpServlet {
      * @param session
      * @throws AdminServletException
      */
-    public static void checkSessionExpired(HttpSession session) throws OXMailfilterException {
+    public static void checkSessionExpired(final HttpSession session) throws OXMailfilterException {
         if (null == session) {
             throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, null, "Can't find session.");
         }
@@ -162,7 +167,7 @@ public abstract class AJAXServlet extends HttpServlet {
                     session.setParameter(name, value);
                 }
 
-                public void removeAttribute(String name) throws OXMailfilterException, SessiondException {
+                public void removeAttribute(final String name) throws OXMailfilterException, SessiondException {
                     final SessionWrapper session = getSession(req);
                     session.removeParameter(name);
                 }
@@ -225,7 +230,7 @@ public abstract class AJAXServlet extends HttpServlet {
                     session.setParameter(name, value);
                 }
 
-                public void removeAttribute(String name) throws OXMailfilterException, SessiondException {
+                public void removeAttribute(final String name) throws OXMailfilterException, SessiondException {
                     final SessionWrapper session = getSession(req);
                     session.removeParameter(name);
                 }
