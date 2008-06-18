@@ -1834,7 +1834,7 @@ public final class MIMEMessageConverter {
 	 */
 	public static Map<String, String> loadHeaders(final InputStream inputStream) throws IOException {
 		final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
-		final byte[] bbuf = new byte[8192];
+		final byte[] bbuf = new byte[DEFAULT_MESSAGE_SIZE];
 		int read = -1;
 		while ((read = inputStream.read(bbuf, 0, bbuf.length)) != -1) {
 			out.write(bbuf, 0, read);
