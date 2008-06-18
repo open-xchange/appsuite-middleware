@@ -50,7 +50,7 @@
 package com.openexchange.resource.managerequest.request;
 
 import static com.openexchange.json.ReadOnlyJSONArray.EMPTY_JSON_ARRAY;
-import static com.openexchange.json.ReanOnlyJSONObject.EMPTY_JSON_OBJECT;
+import static com.openexchange.json.ReadOnlyJSONObject.EMPTY_JSON_OBJECT;
 import static com.openexchange.resource.managerequest.services.ResourceRequestServiceRegistry.getServiceRegistry;
 
 import java.util.Arrays;

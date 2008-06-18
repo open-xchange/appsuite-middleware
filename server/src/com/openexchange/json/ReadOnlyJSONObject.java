@@ -61,29 +61,29 @@ import org.json.JSONTokener;
 import com.openexchange.tools.iterator.ReadOnlyIterator;
 
 /**
- * {@link ReanOnlyJSONObject} - A read-only {@link JSONObject JSON object}.
+ * {@link ReadOnlyJSONObject} - A read-only {@link JSONObject JSON object}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ReanOnlyJSONObject extends JSONObject {
+public final class ReadOnlyJSONObject extends JSONObject {
 
 	/**
 	 * A read-only constant for an empty JSON object
 	 */
-	public static final JSONObject EMPTY_JSON_OBJECT = new ReanOnlyJSONObject();
+	public static final JSONObject EMPTY_JSON_OBJECT = new ReadOnlyJSONObject();
 
 	/**
-	 * Initializes a new {@link ReanOnlyJSONObject}.
+	 * Initializes a new {@link ReadOnlyJSONObject}.
 	 * <p>
 	 * Constructs an empty JSON object.
 	 */
-	public ReanOnlyJSONObject() {
+	public ReadOnlyJSONObject() {
 		super();
 	}
 
 	/**
-	 * Initializes a new {@link ReanOnlyJSONObject}.
+	 * Initializes a new {@link ReadOnlyJSONObject}.
 	 * <p>
 	 * Constructs a JSON object from a JSON tokener.
 	 * 
@@ -92,12 +92,12 @@ public final class ReanOnlyJSONObject extends JSONObject {
 	 * @throws JSONException
 	 *             If there is a syntax error in the source string.
 	 */
-	public ReanOnlyJSONObject(final JSONTokener x) throws JSONException {
+	public ReadOnlyJSONObject(final JSONTokener x) throws JSONException {
 		super(x);
 	}
 
 	/**
-	 * Initializes a new {@link ReanOnlyJSONObject}.
+	 * Initializes a new {@link ReadOnlyJSONObject}.
 	 * <p>
 	 * Constructs a JSON object from a string. This is the most commonly used
 	 * JSON object constructor.
@@ -106,12 +106,12 @@ public final class ReanOnlyJSONObject extends JSONObject {
 	 *            A map object that can be used to initialize the contents of
 	 *            the JSON object.
 	 */
-	public ReanOnlyJSONObject(final Map<String, ? extends Object> map) {
+	public ReadOnlyJSONObject(final Map<String, ? extends Object> map) {
 		super(map);
 	}
 
 	/**
-	 * Initializes a new {@link ReanOnlyJSONObject}.
+	 * Initializes a new {@link ReadOnlyJSONObject}.
 	 * <p>
 	 * Constructs a JSON object from a string. This is the most commonly used
 	 * JSONObject constructor.
@@ -123,12 +123,12 @@ public final class ReanOnlyJSONObject extends JSONObject {
 	 * @throws JSONException
 	 *             If there is a syntax error in the source string.
 	 */
-	public ReanOnlyJSONObject(final String string) throws JSONException {
+	public ReadOnlyJSONObject(final String string) throws JSONException {
 		super(string);
 	}
 
 	/**
-	 * Initializes a new {@link ReanOnlyJSONObject}.
+	 * Initializes a new {@link ReadOnlyJSONObject}.
 	 * <p>
 	 * Constructs this JSON object from a subset of another JSON object. An
 	 * array of strings is used to identify the keys that should be copied.
@@ -141,12 +141,12 @@ public final class ReanOnlyJSONObject extends JSONObject {
 	 * @throws JSONException
 	 *             If a value is a non-finite number.
 	 */
-	public ReanOnlyJSONObject(final JSONObject jo, final String[] sa) throws JSONException {
+	public ReadOnlyJSONObject(final JSONObject jo, final String[] sa) throws JSONException {
 		super(jo, sa);
 	}
 
 	/**
-	 * Initializes a new {@link ReanOnlyJSONObject}.
+	 * Initializes a new {@link ReadOnlyJSONObject}.
 	 * <p>
 	 * Constructs a JSON object from an object, using reflection to find the
 	 * public members. The resulting JSON object's keys will be the strings from
@@ -161,7 +161,7 @@ public final class ReanOnlyJSONObject extends JSONObject {
 	 *            An array of strings, the names of the fields to be used from
 	 *            the object.
 	 */
-	public ReanOnlyJSONObject(final Object object, final String[] names) {
+	public ReadOnlyJSONObject(final Object object, final String[] names) {
 		super(object, names);
 	}
 
