@@ -1,3 +1,9 @@
+open-xchange-spamhandler-spamassassin (6.5.0-5) unstable; urgency=low
+
+  * first build for Beta2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 18 Jun 2008 17:40:37 +0200
+
 open-xchange-spamhandler-spamassassin (6.5.0-4) unstable; urgency=low
 
   * second build for Beta1

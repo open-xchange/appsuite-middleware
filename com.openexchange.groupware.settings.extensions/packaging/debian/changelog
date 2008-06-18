@@ -1,3 +1,9 @@
+open-xchange-settings-extensions (6.5.0-3) unstable; urgency=low
+
+  * first build for Beta2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 18 Jun 2008 17:41:18 +0200
+
 open-xchange-settings-extensions (6.5.0-2) unstable; urgency=low
 
   * second build for Beta1

@@ -119,6 +119,36 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Jun 18 2008 - sebastian.kauss@open-xchange.com
+ - Bugfix #11250: [L3] List of day and month view is not sorted 
+   correctly if there are serial appointments
+* Tue Jun 17 2008 - ben.pahne@open-xchange.com
+ - Bugfix #11274: Some contacts were not deletable 
+ - Bugfix #11371: Not accessable links and attachments deleted
+* Tue Jun 17 2008 - thorben.betten@open-xchange.com
+ - Bugfix #10551: Extended calendar fields by missing constants used in
+   error messages in importer-exporter module
+* Fri Jun 13 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11417: Added position information to printf-formatted error
+   messages
+* Tue Jun 10 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11367: Sorting virtual owner folders appearing below
+   "Shared Folder"
+* Mon Jun 09 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11352: Properly setting an attached VCard's disposition to
+   'attachment'
+* Fri Jun 06 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11156: Fixed SQL injection vulnerability through contact search
+* Fri Jun 06 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11357: Sending lastModified and creationTime in contacts with correct
+   timezone.
+* Thu Jun 05 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11346: Fixed adding of direct links which got messed by tidy's
+   pretty printer
+* Thu Jun 05 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11348: Extended charset provider may be null.
+* Thu Jun 05 2008 - choeger@open-xchange.com
+ - Bugfix ID#11347: rpm packages for SLES10 and RHEL5 have broken dependencies
 * Mon Jun 02 2008 - ben.pahne@open-xchange.com
  - Bugfix #9842: In global addressbook moved contacts not deleteable
 * Mon Jun 02 2008 - marcus.klein@open-xchange.com
