@@ -66,17 +66,17 @@ public final class UploadException extends AbstractOXException {
 	
 	public static enum UploadCode {
 		/**
-		 * File upload failed: %s
+		 * File upload failed: %1$s
 		 */
-		UPLOAD_FAILED("File upload failed: %s", Category.INTERNAL_ERROR, 1),
+		UPLOAD_FAILED("File upload failed: %1$s", Category.INTERNAL_ERROR, 1),
 		/**
 		 * Missing affiliation id
 		 */
 		MISSING_AFFILIATION_ID("Missing affiliation id", Category.CODE_ERROR, 2),
 		/**
-		 * Unknown action value: %s
+		 * Unknown action value: %1$s
 		 */
-		UNKNOWN_ACTION_VALUE("Unknown action value: %s", Category.CODE_ERROR, 3),
+		UNKNOWN_ACTION_VALUE("Unknown action value: %1$s", Category.CODE_ERROR, 3),
 		/**
 		 * Header "content-type" does not indicate multipart content
 		 */
@@ -84,34 +84,34 @@ public final class UploadException extends AbstractOXException {
 				4),
 		/**
 		 * Request rejected because its size (%d) exceeds the maximum configured
-		 * size of %d
+		 * size of %1$d
 		 */
-		MAX_UPLOAD_SIZE_EXCEEDED("Request rejected because its size (%d) exceeds the maximum configured size of %d",
+		MAX_UPLOAD_SIZE_EXCEEDED("Request rejected because its size (%d) exceeds the maximum configured size of %1$d",
 				Category.USER_INPUT, 5),
 		/**		
-		 * Missing parameter %s
+		 * Missing parameter %1$s
 		 */
-		MISSING_PARAM("Missing parameter %s", Category.CODE_ERROR, 6),
+		MISSING_PARAM("Missing parameter %1$s", Category.CODE_ERROR, 6),
 		/**
-		 * Unknown module: %d
+		 * Unknown module: %1$d
 		 */
-		UNKNOWN_MODULE("Unknown module: %d", Category.CODE_ERROR, 7),
+		UNKNOWN_MODULE("Unknown module: %1$d", Category.CODE_ERROR, 7),
 		/**
-		 * An uploaded file referenced by %s could not be found
+		 * An uploaded file referenced by %1$s could not be found
 		 */
-		UPLOAD_FILE_NOT_FOUND("An uploaded file referenced by %s could not be found", Category.USER_INPUT, 8),
+		UPLOAD_FILE_NOT_FOUND("An uploaded file referenced by %1$s could not be found", Category.USER_INPUT, 8),
 		/**
-		 * Invalid action value: %s
+		 * Invalid action value: %1$s
 		 */
-		INVALID_ACTION_VALUE("Invalid action value: %s", Category.CODE_ERROR, 9),
+		INVALID_ACTION_VALUE("Invalid action value: %1$s", Category.CODE_ERROR, 9),
 		/**
-		 * Uplaod file with id %s could not be found
+		 * Upload file with id %1$s could not be found
 		 */
-		FILE_NOT_FOUND("Upload file with id %s could not be found", Category.CODE_ERROR, 10),
+		FILE_NOT_FOUND("Upload file with id %1$s could not be found", Category.CODE_ERROR, 10),
 		/**
-		 * Upload file's content type "%s" does not fit to given file filter "%s"
+		 * Upload file's content type "%1$s" does not fit to given file filter "%2$s"
 		 */
-		INVALID_FILE_TYPE("Upload file's content type \"%s\" does not fit to given file filter \"%s\"", Category.CODE_ERROR, 11);
+		INVALID_FILE_TYPE("Upload file's content type \"%1$s\" does not fit to given file filter \"%2$s\"", Category.CODE_ERROR, 11);
 
 		private final String message;
 

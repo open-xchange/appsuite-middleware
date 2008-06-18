@@ -65,13 +65,13 @@ public final class SpellCheckServletException extends AbstractOXException {
 	public static enum Code {
 
 		/**
-		 * Spell check property '%s' not specified in configuration.
+		 * Spell check property '%1$s' not specified in configuration.
 		 */
-		MISSING_PROPERTY("Spell check property '%s' not specified in configuration.", Category.SETUP_ERROR, 1),
+		MISSING_PROPERTY("Spell check property '%1$s' not specified in configuration.", Category.SETUP_ERROR, 1),
 		/**
-		 * Spell check directory '%s' not found or is not a directory
+		 * Spell check directory '%1$s' not found or is not a directory
 		 */
-		MISSING_DIR("Spell check directory '%s' not found or is not a directory", Category.SETUP_ERROR, 2),
+		MISSING_DIR("Spell check directory '%1$s' not found or is not a directory", Category.SETUP_ERROR, 2),
 		/**
 		 * Only one phonetic file is allowed per locale
 		 */
@@ -81,45 +81,45 @@ public final class SpellCheckServletException extends AbstractOXException {
 		 */
 		AT_LEAST_ONE_WL_FILE("At least one word list file per locale", Category.SETUP_ERROR, 4),
 		/**
-		 * An I/O error occurred: %s
+		 * An I/O error occurred: %1$s
 		 */
-		IO_ERROR("An I/O error occurred: %s", Category.CODE_ERROR, 5),
+		IO_ERROR("An I/O error occurred: %1$s", Category.CODE_ERROR, 5),
 		/**
 		 * No locale directory found
 		 */
 		NO_LOCALE_FOUND("No locale directory found", Category.SETUP_ERROR, 6),
 		/**
-		 * No dictionary available for locale %s
+		 * No dictionary available for locale %1$s
 		 */
-		MISSING_LOCALE_DIC("No dictionary available for locale %s", Category.SETUP_ERROR, 7),
+		MISSING_LOCALE_DIC("No dictionary available for locale %1$s", Category.SETUP_ERROR, 7),
 		/**
-		 * A SQL error occurred: %s
+		 * A SQL error occurred: %1$s
 		 */
-		SQL_ERROR("A SQL error occurred: %s", Category.CODE_ERROR, 8),
+		SQL_ERROR("A SQL error occurred: %1$s", Category.CODE_ERROR, 8),
 		/**
-		 * Invalid format of user dictionary: %s
+		 * Invalid format of user dictionary: %1$s
 		 */
-		INVALID_FORMAT("Invalid format of user dictionary: %s", Category.CODE_ERROR, 9),
+		INVALID_FORMAT("Invalid format of user dictionary: %1$s", Category.CODE_ERROR, 9),
 		/**
-		 * Spell check servlet cannot be registered: %s
+		 * Spell check servlet cannot be registered: %1$s
 		 */
-		SERVLET_REGISTRATION_FAILED("Spell check servlet cannot be registered: %s", Category.CODE_ERROR, 10),
+		SERVLET_REGISTRATION_FAILED("Spell check servlet cannot be registered: %1$s", Category.CODE_ERROR, 10),
 		/**
-		 * Missing parameter %s
+		 * Missing parameter %1$s
 		 */
-		MISSING_PARAM("Missing parameter %s", Category.CODE_ERROR, 11),
+		MISSING_PARAM("Missing parameter %1$s", Category.CODE_ERROR, 11),
 		/**
-		 * Unsupported value parameter %s: %s
+		 * Unsupported value parameter %1$s: %2$s
 		 */
-		UNSUPPORTED_PARAM("Unsupported value parameter %s: %s", Category.CODE_ERROR, 12),
+		UNSUPPORTED_PARAM("Unsupported value parameter %1$s: %2$s", Category.CODE_ERROR, 12),
 		/**
-		 * A JSON error occurred: %s
+		 * A JSON error occurred: %1$s
 		 */
-		JSON_ERROR("A JSON error occurred: %s", Category.CODE_ERROR, 13),
+		JSON_ERROR("A JSON error occurred: %1$s", Category.CODE_ERROR, 13),
 		/**
-		 * Invalid locale string: %s
+		 * Invalid locale string: %1$s
 		 */
-		INVALID_LOCALE_STR("Invalid locale string: %s", Category.CODE_ERROR, 14);
+		INVALID_LOCALE_STR("Invalid locale string: %1$s", Category.CODE_ERROR, 14);
 
 		private final String message;
 

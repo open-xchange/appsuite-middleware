@@ -68,18 +68,18 @@ public final class User2ACLException extends AbstractOXException {
 		CLASS_NOT_FOUND("Implementing class could not be found", Category.CODE_ERROR, 2),
 		/**
 		 * An I/O error occurred while creating the socket connection to IMAP
-		 * server (%s): %s
+		 * server (%1$s): %2$s
 		 */
-		CREATING_SOCKET_FAILED("An I/O error occurred while creating the socket connection to IMAP server (%s): %s",
+		CREATING_SOCKET_FAILED("An I/O error occurred while creating the socket connection to IMAP server (%1$s): %2$s",
 				Category.SUBSYSTEM_OR_SERVICE_DOWN, 5),
 		/**
 		 * Instantiating the class failed.
 		 */
 		INSTANTIATION_FAILED("Instantiating the class failed.", Category.CODE_ERROR, 1),
 		/**
-		 * An I/O error occurred: %s
+		 * An I/O error occurred: %1$s
 		 */
-		IO_ERROR("An I/O error occurred: %s", Category.SUBSYSTEM_OR_SERVICE_DOWN, 6),
+		IO_ERROR("An I/O error occurred: %1$s", Category.SUBSYSTEM_OR_SERVICE_DOWN, 6),
 		/**
 		 * Missing property %1$s in system.properties.
 		 */
