@@ -1,0 +1,596 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.mail.mime;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.Map.Entry;
+
+import com.openexchange.mail.MailException;
+
+/**
+ * {@link HeaderCollection} - Represents a collection of RFC822 headers.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
+public final class HeaderCollection {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(HeaderCollection.class);
+
+	private final Map<HeaderName, List<String>> map;
+
+	/**
+	 * Initializes a new {@link HeaderCollection}
+	 */
+	public HeaderCollection() {
+		super();
+		map = new HashMap<HeaderName, List<String>>(40);
+	}
+
+	/**
+	 * Initializes a new {@link HeaderCollection} from specified headers' RFC822
+	 * source
+	 * 
+	 * @param headerSrc
+	 *            The headers' RFC822 source
+	 * @throws MailException
+	 *             If parsing the header source fails
+	 */
+	public HeaderCollection(final String headerSrc) throws MailException {
+		this();
+		load(headerSrc);
+	}
+
+	/**
+	 * Read and parse the given headers' RFC822 input stream till the blank line
+	 * separating the header from the body. Thus specified input stream is
+	 * <b>not</b> closed by this method.
+	 * <p>
+	 * Note that the header lines are added, so any existing headers in this
+	 * object will not be affected. Headers are added to the end of the existing
+	 * list of headers, in order.
+	 * 
+	 * @param inputStream
+	 *            The headers' RFC822 input stream
+	 * @throws MailException
+	 *             If reading from headers' RFC822 input stream fails
+	 */
+	public void load(final InputStream inputStream) throws MailException {
+		// TODO: Check if reader is allowed to not be closed properly
+		final BufferedReader reader;
+		try {
+			reader = new BufferedReader(new InputStreamReader(inputStream, "US-ASCII"));
+		} catch (final UnsupportedEncodingException e) {
+			/*
+			 * Cannot occur since us-ascii is supported
+			 */
+			throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+		}
+		load(reader);
+	}
+
+	/**
+	 * Read and parse the given headers' RFC822 source till the blank line
+	 * separating the header from the body.
+	 * <p>
+	 * Note that the header lines are added, so any existing headers in this
+	 * object will not be affected. Headers are added to the end of the existing
+	 * list of headers, in order.
+	 * 
+	 * @param headerSrc
+	 *            The headers' RFC822 source
+	 * @throws MailException
+	 *             If reading from headers' source fails
+	 */
+	public void load(final String headerSrc) throws MailException {
+		load(new BufferedReader(new StringReader(headerSrc)));
+	}
+
+	private void load(final BufferedReader reader) throws MailException {
+		/*
+		 * Read header lines until a blank line.
+		 */
+		String line;
+		String prevline = null;
+		final StringBuilder lineBuffer = new StringBuilder(128);
+		try {
+			do {
+				line = reader.readLine();
+				if (line != null && (line.startsWith(" ") || line.startsWith("\t"))) {
+					/*
+					 * Header continuation
+					 */
+					if (prevline != null) {
+						lineBuffer.append(prevline);
+						prevline = null;
+					}
+					lineBuffer.append("\r\n");
+					lineBuffer.append(line);
+				} else {
+					/*
+					 * A new header
+					 */
+					if (prevline != null) {
+						addHeaderLine(prevline);
+					} else if (lineBuffer.length() > 0) {
+						/*
+						 * Store previous header first
+						 */
+						addHeaderLine(lineBuffer.toString());
+						lineBuffer.setLength(0);
+					}
+					prevline = line;
+				}
+			} while (line != null && line.length() > 0);
+		} catch (final IOException ioex) {
+			throw new MailException(MailException.Code.IO_ERROR, ioex, ioex.getMessage());
+		}
+	}
+
+	private void addHeaderLine(final String headerLine) {
+		final int pos = headerLine.indexOf(": ");
+		if (pos == -1) {
+			throw new IllegalStateException("Invalid header line: " + headerLine);
+		}
+		addHeader(headerLine.substring(0, pos), headerLine.substring(pos + 2));
+	}
+
+	/**
+	 * Adds a header with the specified name and value
+	 * <p>
+	 * The current implementation knows about the preferred order of most
+	 * well-known headers and will insert headers in that order. In addition, it
+	 * knows that <code>Received</code> headers should be inserted in reverse
+	 * order (newest before oldest), and that they should appear at the
+	 * beginning of the headers, preceded only by a possible
+	 * <code>Return-Path</code> header.
+	 * 
+	 * @param name
+	 *            The header name
+	 * @param value
+	 *            The header value
+	 * @throws IllegalArgumentException
+	 *             If name or value is invalid
+	 */
+	public void addHeader(final String name, final String value) {
+		putHeader(name, value, false);
+	}
+
+	/**
+	 * Change the first header that matches name to have value, adding a new
+	 * header if no existing header matches. Remove all matching headers but the
+	 * first.
+	 * 
+	 * @param name
+	 *            The header name
+	 * @param value
+	 *            The header value
+	 * @throws IllegalArgumentException
+	 *             If name or value is invalid
+	 */
+	public void setHeader(final String name, final String value) {
+		putHeader(name, value, true);
+	}
+
+	/**
+	 * Return all the values for the specified header. Returns <code>null</code>
+	 * if no headers with the specified name exist.
+	 * 
+	 * @param name
+	 *            The header name
+	 * @return An array of header values, or <code>null</code> if none exists
+	 * @throws IllegalArgumentException
+	 *             If name is invalid
+	 */
+	public String[] getHeader(final String name) {
+		if (isInvalid(name, true)) {
+			throw new IllegalArgumentException("Header name is invalid");
+		}
+		final HeaderName headerName = HeaderName.valueOf(name);
+		final List<String> values = map.get(headerName);
+		if (values == null) {
+			return null;
+		}
+		return values.toArray(new String[values.size()]);
+	}
+
+	/**
+	 * Get all the headers for this header name, returned as a single String,
+	 * with headers separated by the delimiter. If the delimiter is
+	 * <code>null</code>, only the first header is returned. Returns
+	 * <code>null</code> if no headers with the specified name exist.
+	 * 
+	 * @param name
+	 *            The header name
+	 * @param delimiter
+	 *            The delimiter
+	 * @return The value fields for all headers with this name, or
+	 *         <code>null</code> if none
+	 */
+	public String getHeader(final String name, final String delimiter) {
+		if (isInvalid(name, true)) {
+			throw new IllegalArgumentException("Header name is invalid");
+		}
+		final List<String> values = map.get(HeaderName.valueOf(name));
+		if (values == null) {
+			return null;
+		}
+		final int size;
+		if (delimiter == null || (size = values.size()) == 1) {
+			return values.get(0);
+		}
+		final StringBuilder sb = new StringBuilder(values.get(0));
+		for (int i = 1; i < size; i++) {
+			sb.append(delimiter).append(values.get(i));
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * Remove all header entries that match the given name
+	 * 
+	 * @param name
+	 *            The header name
+	 */
+	public void removeHeader(final String name) {
+		if (isInvalid(name, true)) {
+			throw new IllegalArgumentException("Header name is invalid");
+		}
+		map.remove(HeaderName.valueOf(name));
+	}
+
+	/**
+	 * Gets an instance of {@link Iterator} to iterate all headers.
+	 * 
+	 * @return An instance of {@link Iterator} to iterate all headers
+	 */
+	public Iterator<Map.Entry<String, String>> getAllHeaders() {
+		if (map.isEmpty()) {
+			return EMPTY_ITER;
+		}
+		return new HeaderIterator(map.entrySet().iterator());
+	}
+
+	/**
+	 * Gets the matching headers
+	 * 
+	 * @param matchingHeaders
+	 *            The matching headers
+	 * @return The matching headers
+	 */
+	public Iterator<Map.Entry<String, String>> getMatchingHeaders(final String[] matchingHeaders) {
+		final Set<HeaderName> set = new HashSet<HeaderName>(matchingHeaders.length);
+		for (int i = 0; i < matchingHeaders.length; i++) {
+			set.add(HeaderName.valueOf(matchingHeaders[i]));
+		}
+		return new HeaderIterator(map.entrySet().iterator(), set, true);
+	}
+
+	/**
+	 * Gets the non-matching headers
+	 * 
+	 * @param nonMatchingHeaders
+	 *            The non-matching headers
+	 * @return The non-matching headers
+	 */
+	public Iterator<Map.Entry<String, String>> getNonMatchingHeaders(final String[] nonMatchingHeaders) {
+		final Set<HeaderName> set = new HashSet<HeaderName>(nonMatchingHeaders.length);
+		for (int i = 0; i < nonMatchingHeaders.length; i++) {
+			set.add(HeaderName.valueOf(nonMatchingHeaders[i]));
+		}
+		return new HeaderIterator(map.entrySet().iterator(), set, false);
+	}
+
+	/*
+	 * ############ UTILITY METHODS ##############
+	 */
+
+	private static final Iterator<Map.Entry<String, String>> EMPTY_ITER = new Iterator<Map.Entry<String, String>>() {
+
+		public boolean hasNext() {
+			return false;
+		}
+
+		public Entry<String, String> next() {
+			throw new NoSuchElementException();
+		}
+
+		public void remove() {
+			// Nothing to remove
+		}
+	};
+
+	private static final class HeaderIterator implements Iterator<Map.Entry<String, String>> {
+
+		private final Iterator<Map.Entry<HeaderName, List<String>>> iter;
+
+		private final Set<HeaderName> headers;
+
+		private final boolean matches;
+
+		private int index;
+
+		private Map.Entry<HeaderName, List<String>> entry;
+
+		public HeaderIterator(final Iterator<Map.Entry<HeaderName, List<String>>> iter) {
+			super();
+			this.iter = iter;
+			this.matches = false;
+			headers = null;
+		}
+
+		public HeaderIterator(final Iterator<Map.Entry<HeaderName, List<String>>> iter, final Set<HeaderName> headers,
+				final boolean matches) {
+			super();
+			this.iter = iter;
+			this.matches = matches;
+			this.headers = headers;
+		}
+
+		public boolean hasNext() {
+			if (entry == null || index >= entry.getValue().size()) {
+				while (iter.hasNext()) {
+					entry = iter.next();
+					if (headers == null
+							|| (matches ? headers.contains(entry.getKey()) : !headers.contains(entry.getKey()))) {
+						index = 0;
+						return true;
+					}
+				}
+				entry = null;
+				return false;
+			}
+			return (index < entry.getValue().size());
+		}
+
+		public Entry<String, String> next() {
+			if (entry == null) {
+				throw new NoSuchElementException();
+			} else if (index >= entry.getValue().size()) {
+				while (iter.hasNext()) {
+					entry = iter.next();
+					if (headers == null
+							|| (matches ? headers.contains(entry.getKey()) : !headers.contains(entry.getKey()))) {
+						index = 0;
+						return new HeaderEntry(entry, index++);
+					}
+				}
+				entry = null;
+				throw new NoSuchElementException();
+			}
+			return new HeaderEntry(entry, index++);
+		}
+
+		public void remove() {
+			if (entry == null) {
+				throw new IllegalStateException("next() method has not yet been called, or the remove()"
+						+ " method has already been called after the last call to the next() method.");
+			}
+			entry.getValue().remove(--index);
+			if (entry.getValue().isEmpty()) {
+				iter.remove();
+				entry = null;
+			}
+		}
+
+	}
+
+	private static final class HeaderEntry implements Map.Entry<String, String> {
+
+		private final Map.Entry<HeaderName, List<String>> entry;
+
+		private final int index;
+
+		public HeaderEntry(final Map.Entry<HeaderName, List<String>> entry, final int index) {
+			super();
+			this.entry = entry;
+			this.index = index;
+		}
+
+		public String getKey() {
+			return entry.getKey().toString();
+		}
+
+		public String getValue() {
+			return entry.getValue().get(index);
+		}
+
+		public String setValue(final String value) {
+			return entry.getValue().set(index, value);
+		}
+
+	}
+
+	private void putHeader(final String name, final String value, final boolean clear) {
+		if (isInvalid(name, true)) {
+			throw new IllegalArgumentException("Header name is invalid");
+		} else if (isInvalid(value, false)) {
+			throw new IllegalArgumentException("Header value is invalid");
+		}
+		final HeaderName headerName = HeaderName.valueOf(name);
+		List<String> values = map.get(headerName);
+		if (values == null) {
+			values = new ArrayList<String>(2);
+			map.put(headerName, values);
+		} else if (clear) {
+			values.clear();
+		}
+		if (MessageHeaders.RECEIVED.equals(headerName) || MessageHeaders.RETURN_PATH.equals(headerName)) {
+			// Append
+			values.add(value);
+		} else {
+			// Prepend
+			values.add(0, value);
+		}
+	}
+
+	/**
+	 * Specified string is invalid if it is <code>null</code>, empty, its
+	 * characters are whitespace characters only or contains Non-ASCII 7 bit
+	 * 
+	 * @param str
+	 *            The string to check
+	 * @return <code>true</code> if string is invalid; otherwise
+	 *         <code>false</code>
+	 */
+	private static boolean isInvalid(final String str, final boolean isName) {
+		if (str == null) {
+			return true;
+		}
+		final char[] chars = str.toCharArray();
+		if (isName) {
+			if (str.length() == 0) {
+				return true;
+			}
+			for (int i = 0; i < chars.length; i++) {
+				if (Character.isWhitespace(chars[i])) {
+					return true;
+				}
+			}
+			return !isAscii(str);
+		}
+		if (str.length() == 0) {
+			return false;
+		}
+		for (int i = 0; i < chars.length; i++) {
+			if (!Character.isWhitespace(chars[i])) {
+				return !isAscii(str);
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Checks whether the specified string's characters are ASCII 7 bit
+	 * 
+	 * @param s
+	 *            The string to check
+	 * @return <code>true</code> if string's characters are ASCII 7 bit;
+	 *         otherwise <code>false</code>
+	 */
+	private static boolean isAscii(final String s) {
+		final char[] chars = s.toCharArray();
+		boolean isAscci = true;
+		for (int i = 0; (i < chars.length) && isAscci; i++) {
+			isAscci &= (chars[i] < 128);
+		}
+		return isAscci;
+	}
+
+	/**
+	 * Simple test method
+	 */
+	public static void test() {
+		try {
+			final HeaderCollection hc = new HeaderCollection();
+
+			hc.addHeader("From", "Jane Doe <jane.doe@somewhere.org>");
+			hc.addHeader("To", "Jane Doe2 <jane.doe2@somewhere.org>, Jane Doe3 <jane.doe3@somewhere.org>");
+			hc.addHeader("Received", "thisOneSecond from [212.227.126.201] (helo=mxintern.foobar.de) "
+					+ "by mx.barfoo.de (node=mxeu24) with ESMTP (Nemesis), "
+					+ "id 0MKtd6-1ICv9b3jPS-0001BJ for user2@host.de; Mon, 23 Jul 2007 12:28:42 +0200");
+			hc.addHeader("Received", "thisOneFirst from [172.23.1.244] (helo=titan.foobar.de) "
+					+ "by mxintern.barfoo.de with esmtp (Exim 4.50) "
+					+ "id 1ICv9b-0004A2-Jn for user2@host.de; Mon, 23 Jul 2007 12:28:39 +0200");
+			hc.addHeader("Subject", "The simple subject");
+			hc.addHeader("Aaa", "dummy header here");
+
+			final Iterator<Map.Entry<String, String>> iter = hc.getAllHeaders();
+			while (iter.hasNext()) {
+				final Map.Entry<String, String> e = iter.next();
+				LOG.info(e.getKey() + ": " + e.getValue());
+				if ("Faust".equals(e.getKey())) {
+					iter.remove();
+				}
+			}
+
+			LOG.info("\n\nAfter removal through iterator");
+
+			final Iterator<Map.Entry<String, String>> iter2 = hc.getAllHeaders();
+			while (iter2.hasNext()) {
+				final Map.Entry<String, String> e = iter2.next();
+				LOG.info(e.getKey() + ": " + e.getValue());
+			}
+
+			LOG.info("\n\nNon-Matching");
+
+			final Iterator<Map.Entry<String, String>> iter3 = hc.getNonMatchingHeaders(new String[] { "To", "From" });
+			while (iter3.hasNext()) {
+				final Map.Entry<String, String> e = iter3.next();
+				LOG.info(e.getKey() + ": " + e.getValue());
+			}
+
+			LOG.info("\n\nMatching");
+
+			final Iterator<Map.Entry<String, String>> iter4 = hc.getMatchingHeaders(new String[] { "To", "From" });
+			while (iter4.hasNext()) {
+				final Map.Entry<String, String> e = iter4.next();
+				LOG.info(e.getKey() + ": " + e.getValue());
+			}
+
+		} catch (final Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
+	}
+}
