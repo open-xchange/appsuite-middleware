@@ -130,6 +130,9 @@ public final class HeaderCollection {
 	 * Note that the header lines are added, so any existing headers in this
 	 * object will not be affected. Headers are added to the end of the existing
 	 * list of headers, in order.
+	 * <p>
+	 * Provided input stream is not going to be closed but is read until
+	 * <code>EOF</code> or two subsequent <code>CRLF</code>s occur.
 	 * 
 	 * @param inputStream
 	 *            The headers' RFC822 input stream
