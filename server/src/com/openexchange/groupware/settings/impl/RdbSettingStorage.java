@@ -190,7 +190,7 @@ public class RdbSettingStorage extends SettingStorage {
             } else {
                 final SettingException e = new SettingException(Code.NO_WRITE,
                     setting.getName());
-                LOG.warn(e.getMessage(), e);
+                LOG.debug(e.getMessage(), e);
             }
         } else {
             final boolean update = settingExists(userId, setting);
