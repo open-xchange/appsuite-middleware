@@ -585,7 +585,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     for (final Map.Entry<String, String> matchtype : matchtypes.entrySet()) {
                         final String value = matchtype.getValue();
                         if ("".equals(value) || sieve.contains(value)) {
-                            comparison.put(matchtype.getKey());
+                            comparison.put(matchtype.getKey().substring(1));
                         }
                     }
                 }
