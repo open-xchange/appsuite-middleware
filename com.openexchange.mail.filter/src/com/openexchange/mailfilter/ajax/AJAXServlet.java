@@ -193,7 +193,7 @@ public abstract class AJAXServlet extends HttpServlet {
             final AbstractAction action = createAction();
             response.setData(action.action(request));
         } catch (final AbstractOXException e) {
-            Logging.log(LOG, e);
+            LOG.error(e.getMessage(), e);
             response.setException(e);
         }
         /*
@@ -253,7 +253,7 @@ public abstract class AJAXServlet extends HttpServlet {
             final AbstractAction action = createAction();
             response.setData(action.action(request));
         } catch (final AbstractOXException e) {
-            Logging.log(LOG, e);
+            LOG.error(e.getMessage(), e);
             response.setException(e);
         }
         /*
