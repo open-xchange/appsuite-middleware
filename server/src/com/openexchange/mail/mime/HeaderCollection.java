@@ -50,11 +50,10 @@
 package com.openexchange.mail.mime;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -66,6 +65,7 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import com.openexchange.mail.MailException;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link HeaderCollection} - Represents a collection of RFC822 headers.
@@ -77,6 +77,12 @@ public final class HeaderCollection {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(HeaderCollection.class);
+
+	private static final String CRLF = "\r\n";
+
+	private static final String CHARSET_US_ASCII = "US-ASCII";
+
+	private static final int DEFAULT_CAPACITY = 4096;
 
 	private final Map<HeaderName, List<String>> map;
 
@@ -103,6 +109,20 @@ public final class HeaderCollection {
 	}
 
 	/**
+	 * Initializes a new {@link HeaderCollection} from specified headers' RFC822
+	 * input stream
+	 * 
+	 * @param inputStream
+	 *            The headers' RFC822 input stream
+	 * @throws MailException
+	 *             If parsing the header input stream fails
+	 */
+	public HeaderCollection(final InputStream inputStream) throws MailException {
+		this();
+		load(inputStream);
+	}
+
+	/**
 	 * Read and parse the given headers' RFC822 input stream till the blank line
 	 * separating the header from the body. Thus specified input stream is
 	 * <b>not</b> closed by this method.
@@ -117,17 +137,29 @@ public final class HeaderCollection {
 	 *             If reading from headers' RFC822 input stream fails
 	 */
 	public void load(final InputStream inputStream) throws MailException {
-		// TODO: Check if reader is allowed to not be closed properly
-		final BufferedReader reader;
+		/*
+		 * Gather bytes until empty line or EOF
+		 */
+		final ByteArrayOutputStream buffer = new UnsynchronizedByteArrayOutputStream(DEFAULT_CAPACITY);
 		try {
-			reader = new BufferedReader(new InputStreamReader(inputStream, "US-ASCII"));
-		} catch (final UnsupportedEncodingException e) {
-			/*
-			 * Cannot occur since us-ascii is supported
-			 */
+			int i = -1;
+			NextRead: while ((i = inputStream.read()) != -1) {
+				int count = 0;
+				while ((i == '\r') || (i == '\n')) {
+					if (i != -1) {
+						buffer.write(i);
+					}
+					if ((i == '\n') && (++count >= 2)) {
+						break NextRead;
+					}
+					i = inputStream.read();
+				}
+				buffer.write(i);
+			}
+			load(new String(buffer.toByteArray(), CHARSET_US_ASCII));
+		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
 		}
-		load(reader);
 	}
 
 	/**
@@ -144,16 +176,13 @@ public final class HeaderCollection {
 	 *             If reading from headers' source fails
 	 */
 	public void load(final String headerSrc) throws MailException {
-		load(new BufferedReader(new StringReader(headerSrc)));
-	}
-
-	private void load(final BufferedReader reader) throws MailException {
 		/*
 		 * Read header lines until a blank line.
 		 */
+		final BufferedReader reader = new BufferedReader(new StringReader(headerSrc));
+		final StringBuilder lineBuffer = new StringBuilder(128);
 		String line;
 		String prevline = null;
-		final StringBuilder lineBuffer = new StringBuilder(128);
 		try {
 			do {
 				line = reader.readLine();
@@ -165,7 +194,7 @@ public final class HeaderCollection {
 						lineBuffer.append(prevline);
 						prevline = null;
 					}
-					lineBuffer.append("\r\n");
+					lineBuffer.append(CRLF);
 					lineBuffer.append(line);
 				} else {
 					/*
@@ -340,6 +369,16 @@ public final class HeaderCollection {
 			set.add(HeaderName.valueOf(nonMatchingHeaders[i]));
 		}
 		return new HeaderIterator(map.entrySet().iterator(), set, false);
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder(4096);
+		for (final Iterator<Map.Entry<String, String>> iter = getAllHeaders(); iter.hasNext();) {
+			final Map.Entry<String, String> e = iter.next();
+			sb.append(e.getKey()).append(": ").append(e.getValue()).append(CRLF);
+		}
+		return sb.toString();
 	}
 
 	/*
