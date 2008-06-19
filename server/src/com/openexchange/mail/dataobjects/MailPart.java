@@ -117,11 +117,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 		}
 
 		public Map.Entry<String, String> next() {
-			final Map.Entry<HeaderName, String> e = iter.next();
-			if (null == e) {
-				return null;
-			}
-			return new HeaderEntry(e);
+			return new HeaderEntry(iter.next());
 		}
 
 		public void remove() {
@@ -195,6 +191,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 		 * the iterator (optional operation).
 		 */
 		public void remove() {
+			// Nothing to remove
 		}
 
 	};
