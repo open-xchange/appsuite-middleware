@@ -166,4 +166,8 @@ public final class MessageHeaders {
 
 	public static final HeaderName RECEIVED = HeaderName.valueOf(HDR_RECEIVED);
 
+	public static final String HDR_RETURN_PATH = "Return-Path";
+
+	public static final HeaderName RETURN_PATH = HeaderName.valueOf(HDR_RETURN_PATH);
+
 }
