@@ -92,13 +92,13 @@ public class VCardTokenizer {
 
     private final InputStream vcard;
 
-    private int entriesFound = 0;
+    private int entriesFound;
 
-    private int entriesRecognized = 0;
+    private int entriesRecognized;
 
     private ByteArrayOutputStream streamAsBytes;
 
-    private boolean streamEnded = false;
+    private boolean streamEnded;
 
     /**
      * Creates a new instance that reads the content to be parsed from a reader.
