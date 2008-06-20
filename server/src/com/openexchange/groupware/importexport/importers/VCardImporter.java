@@ -84,6 +84,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
@@ -145,9 +146,10 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 		if(!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasContact() ){
 			throw importExportExceptionFactory.create(7, new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "Contacts") );
 		}
-		final Iterator iterator = folders.iterator();
+		final OXFolderAccess folderAccess = new OXFolderAccess(sessObj.getContext());
+		final Iterator<String> iterator = folders.iterator();
 		while (iterator.hasNext()) {
-			final String folder = iterator.next().toString();
+			final String folder = iterator.next();
 			
 			int folderId = 0;
 			try {
@@ -158,7 +160,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 
 			FolderObject fo;
 			try {
-				fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());
+				fo = folderAccess.getFolderObject(folderId);
 			} catch (final OXException e) {
 				return false;
 			}
@@ -193,17 +195,17 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 	public List<ImportResult> importData(final ServerSession sessObj, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
 		
 		int contactFolderId = -1;
-		
-		final Iterator iterator = folders.iterator();
+		final OXFolderAccess folderAccess = new OXFolderAccess(sessObj.getContext());
+		final Iterator<String> iterator = folders.iterator();
 		while (iterator.hasNext()) {
-			final String folder = iterator.next().toString();
+			final String folder = iterator.next();
 			
 			final int folderId = Integer.parseInt(folder);
 			FolderObject fo;
 			try {
-				fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());
+				fo = folderAccess.getFolderObject(folderId);
 			} catch (final OXException e) {
-				throw importExportExceptionFactory.create(4,folderId);
+				throw importExportExceptionFactory.create(4,Integer.valueOf(folderId));
 			}
 			
 			if (fo.getModule() == FolderObject.CONTACT) {
@@ -268,7 +270,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 			throw importExportExceptionFactory.create(6);
 		} catch (final IOException e) {
 			LOG.error(e);
-			throw importExportExceptionFactory.create(4, contactFolderId);
+			throw importExportExceptionFactory.create(4, Integer.valueOf(contactFolderId));
 		} catch (final ConverterException e) {
             LOG.error(e);
 			throw importExportExceptionFactory.create(1, e);

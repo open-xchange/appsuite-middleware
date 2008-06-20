@@ -217,7 +217,7 @@ public class ICalImporter extends AbstractImporter {
 			try {
 				fo = folderAccess.getFolderObject(folderId);
 			} catch (final OXException e) {
-				throw EXCEPTIONS.create(4,folderId);
+				throw EXCEPTIONS.create(4,Integer.valueOf(folderId));
 			}
 			if (fo.getModule() == FolderObject.CALENDAR) {
 				appointmentFolderId = folderId;
@@ -226,7 +226,7 @@ public class ICalImporter extends AbstractImporter {
 				taskFolderId = folderId;
 				importTask = true;
 			} else {
-				throw EXCEPTIONS.create(0, fo.getModule()); 
+				throw EXCEPTIONS.create(0, Integer.valueOf(fo.getModule())); 
 			}
 		}
 		
