@@ -55,7 +55,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -91,6 +90,14 @@ public class DeleteRequest extends AbstractTaskRequest {
     }
 
     /**
+     * @param insert An insert response contains all necessary information for
+     * deleting the task.
+     */
+    public DeleteRequest(final InsertResponse insert) {
+        this(insert.getFolderId(), insert.getId(), insert.getTimestamp());
+    }
+
+    /**
      * {@inheritDoc}
      */
     public Object getBody() throws JSONException {
@@ -122,7 +129,7 @@ public class DeleteRequest extends AbstractTaskRequest {
     /**
      * {@inheritDoc}
      */
-    public AbstractAJAXParser getParser() {
+    public DeleteParser getParser() {
         return new DeleteParser();
     }
 }
