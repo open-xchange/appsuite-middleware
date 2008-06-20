@@ -49,6 +49,8 @@
 
 package com.openexchange.tools.versit.converter;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
@@ -56,6 +58,8 @@ import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,6 +73,7 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
@@ -76,6 +81,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.RecurringResults;
+import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -94,6 +100,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.session.Session;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.ParameterValue;
 import com.openexchange.tools.versit.Property;
@@ -804,22 +811,67 @@ public class OXContainerConverter {
 		// PHOTO
 		property = object.getProperty("PHOTO");
 		if (property != null) {
-			String value;
-			if (property.getValue() instanceof byte[]) {
+			Parameter uriParam = property.getParameter("URI");
+			if (uriParam == null) {
+				String value;
+				if (property.getValue() instanceof byte[]) {
+					try {
+						value = new BASE64Encoding().encode(new String((byte[]) property.getValue(), "ISO-8859-1"));
+					} catch (final IOException e) {
+						final ConverterException ce = new ConverterException(e.getMessage());
+						ce.initCause(e);
+						throw ce;
+					}
+				} else {
+					value = property.getValue().toString();
+				}
 				try {
-					value = new BASE64Encoding().encode(new String((byte[]) property.getValue(), "ISO-8859-1"));
-				} catch (final IOException e) {
-					final ConverterException ce = new ConverterException(e.getMessage());
-					ce.initCause(e);
-					throw ce;
+					contactContainer.setImage1(value.getBytes("ISO-8859-1"));
+				} catch (final UnsupportedEncodingException e) {
+					LOG.error("Image could not be set", e);
 				}
 			} else {
-				value = property.getValue().toString();
-			}
-			try {
-				contactContainer.setImage1(value.getBytes("ISO-8859-1"));
-			} catch (final UnsupportedEncodingException e) {
-				LOG.error("Image could not be set", e);
+				final String urlStr = uriParam.getValue(0).getText();
+				
+				byte[] bytes = null;
+				try {
+					final URLConnection conn = new URL(urlStr).openConnection();
+					conn.connect();
+					final BufferedInputStream in = new BufferedInputStream(conn.getInputStream());
+					try {
+						final ByteArrayOutputStream byteArrayOut = new UnsynchronizedByteArrayOutputStream();
+						int c;
+						while ((c = in.read()) != -1) {
+						  byteArrayOut.write(c);
+						}
+						// Now the byteArrayOut contains the whole image data.
+						final String value;
+						try {
+							value = new BASE64Encoding().encode(new String(byteArrayOut.toByteArray(), "ISO-8859-1"));
+						} catch (final IOException e) {
+							final ConverterException ce = new ConverterException(e.getMessage());
+							ce.initCause(e);
+							throw ce;
+						}
+						bytes = value.getBytes("ISO-8859-1");
+						if (bytes.length > Integer.parseInt(ContactConfig.getProperty("max_image_size"))) {
+							LOG.warn("Contact image is too large and is therefore ignored");
+							bytes = null;
+						}
+					} finally {
+						try {
+							in.close();
+						} catch (final IOException e) {
+							LOG.error(e.getMessage(), e);
+						}
+					}
+				} catch (final IOException e) {
+					LOG.warn("Image  URI could not be loaded: " + uriParam.getValue(0).getText(), e);
+				}
+				if (bytes != null) {
+					contactContainer.setImage1(bytes);
+					contactContainer.setImageContentType(getMimeType(urlStr));
+				}
 			}
 		}
 		// BDAY
@@ -2074,4 +2126,7 @@ public class OXContainerConverter {
 		return object;
 	}
 
+	private static String getMimeType(final String filename) {
+		return MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(filename);
+	}
 }
