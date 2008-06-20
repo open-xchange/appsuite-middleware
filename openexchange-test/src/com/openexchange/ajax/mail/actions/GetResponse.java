@@ -51,10 +51,8 @@ package com.openexchange.ajax.mail.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 
 import javax.mail.internet.AddressException;
@@ -71,6 +69,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 
@@ -149,13 +148,13 @@ public class GetResponse extends AbstractAJAXResponse {
 			if (jsonObj.has(MailJSONField.HEADERS.getKey()) && !jsonObj.isNull(MailJSONField.HEADERS.getKey())) {
 				final JSONObject obj = jsonObj.getJSONObject(MailJSONField.HEADERS.getKey());
 				final int size = obj.length();
-				final Map<String, String> m = new HashMap<String, String>();
+				final HeaderCollection headers = new HeaderCollection(size);
 				final Iterator<String> iter = obj.keys();
 				for (int i = 0; i < size; i++) {
 					final String key = iter.next();
-					m.put(key, obj.getString(key));
+					headers.addHeader(key, obj.getString(key));
 				}
-				mail.addHeaders(m);
+				mail.addHeaders(headers);
 			}
 			/*
 			 * From Only mandatory if non-draft message

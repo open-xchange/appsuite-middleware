@@ -174,7 +174,7 @@ public final class MailSearchTest extends AbstractMailTest {
 
 				final Map<Long, String> map = new HashMap<Long, String>(fetchedMails.length);
 				for (int i = 0; i < fetchedMails.length && i < 100; i++) {
-					final String messageId = fetchedMails[i].getHeader(MessageHeaders.HDR_MESSAGE_ID);
+					final String messageId = fetchedMails[i].getFirstHeader(MessageHeaders.HDR_MESSAGE_ID);
 					if (null != messageId && messageId.length() > 0 && !"null".equalsIgnoreCase(messageId)) {
 						map.put(Long.valueOf(fetchedMails[i].getMailId()), messageId);
 					}
@@ -192,7 +192,7 @@ public final class MailSearchTest extends AbstractMailTest {
 					assertTrue("Search failed: Non-matching result size", searchedMails.length >= 1);
 					boolean found = false;
 					for (int j = 0; j < searchedMails.length && !found; j++) {
-						final String messageId = searchedMails[j].getHeader(MessageHeaders.HDR_MESSAGE_ID);
+						final String messageId = searchedMails[j].getFirstHeader(MessageHeaders.HDR_MESSAGE_ID);
 						assertTrue("Missing Message-Id", null != messageId);
 						assertTrue("Non-matching Message-Id", messageId.equals(e.getValue()));
 						found = e.getKey().longValue() == searchedMails[j].getMailId();
