@@ -209,13 +209,13 @@ public class ICalImporter extends AbstractImporter {
 		
 		boolean importAppointment = false;
 		boolean importTask = false;
-		
+		final OXFolderAccess folderAccess = new OXFolderAccess(sessObj.getContext());
 		final Iterator<String> iterator = folders.iterator();
 		while (iterator.hasNext()) {
 			final int folderId = Integer.parseInt( iterator.next() );
 			FolderObject fo;
 			try {
-				fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());
+				fo = folderAccess.getFolderObject(folderId);
 			} catch (final OXException e) {
 				throw EXCEPTIONS.create(4,folderId);
 			}
