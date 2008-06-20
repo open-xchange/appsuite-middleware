@@ -221,6 +221,8 @@ public final class DBUtils {
 		}
 	}
 
+	private static final Pattern PAT_TRUNCATED_IDS = Pattern.compile("([^']*')(\\S+)('[^']*)");
+
 	/**
 	 * This method tries to parse the truncated fields out of the DataTruncation
 	 * exception. This method has been implemented because mysql doesn't return
@@ -234,8 +236,7 @@ public final class DBUtils {
 	 * @return a string array containing all truncated field from the exception.
 	 */
 	public static String[] parseTruncatedFields(final DataTruncation trunc) {
-		final Pattern pattern = Pattern.compile("([^']*')(\\S+)('[^']*)");
-		final Matcher matcher = pattern.matcher(trunc.getMessage());
+		final Matcher matcher = PAT_TRUNCATED_IDS.matcher(trunc.getMessage());
 		final List<String> retval = new ArrayList<String>();
 		if (matcher.find()) {
 			for (int i = 2; i < matcher.groupCount(); i++) {
