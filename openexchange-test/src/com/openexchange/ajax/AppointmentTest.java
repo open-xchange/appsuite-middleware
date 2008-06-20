@@ -10,6 +10,7 @@ import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.meterware.httpunit.GetMethodWebRequest;
@@ -1008,29 +1009,44 @@ public class AppointmentTest extends AbstractAJAXTest {
 		for (int i = 0; i < jsonArray.length(); i++) {
 			final JSONObject jparticipant = jsonArray.getJSONObject(i);
 			final int type = jparticipant.getInt("type");
-			final int id = jparticipant.getInt("id");
+			final int id;
+			if (jparticipant.has("id")) {
+			    id = jparticipant.getInt("id");
+			} else {
+			    id = Participant.NO_ID;
+			}
 			final String mail = jparticipant.optString("mail");
 			Participant p = null;
 			switch (type) {
 				case Participant.USER:
-					final UserParticipant user = new UserParticipant();
-					user.setIdentifier(id);
-					
+				    if (Participant.NO_ID == id) {
+				        throw new JSONException("JSONObject[id] not found.");
+				    }
+					final UserParticipant user = new UserParticipant(id);
 					p = user;
 					break;
 				case Participant.GROUP:
-					p = new GroupParticipant();
-					p.setIdentifier(id);
+                    if (Participant.NO_ID == id) {
+                        throw new JSONException("JSONObject[id] not found.");
+                    }
+					p = new GroupParticipant(id);
 					break;
 				case Participant.RESOURCE:
-					p = new ResourceParticipant();
-					p.setIdentifier(id);
+                    if (Participant.NO_ID == id) {
+                        throw new JSONException("JSONObject[id] not found.");
+                    }
+					p = new ResourceParticipant(id);
 					break;
 				case Participant.RESOURCEGROUP:
-					p = new ResourceGroupParticipant();
-					p.setIdentifier(id);
+                    if (Participant.NO_ID == id) {
+                        throw new JSONException("JSONObject[id] not found.");
+                    }
+					p = new ResourceGroupParticipant(id);
 					break;
 				case Participant.EXTERNAL_USER:
+                    if (null == mail) {
+                        throw new JSONException("JSONObject[id] not found.");
+                    }
 					p = new ExternalUserParticipant(mail);
 					break;
 				default:
