@@ -57,6 +57,21 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  */
 public class GenericChecks {
 
+//    ftp://ftp.rfc-editor.org/in-notes/rfc2822.txt
+//
+//        3.2.4. Atom
+//
+//        atext           =       ALPHA / DIGIT / ; Any character except controls,
+//                                "!" / "#" /     ;  SP, and specials.
+//                                "$" / "%" /     ;  Used for atoms
+//                                "&" / "'" /
+//                                "*" / "+" /
+//                                "-" / "/" /
+//                                "=" / "?" /
+//                                "^" / "_" /
+//                                "`" / "{" /
+//                                "|" / "}" /
+//                                "~"
     /**
      * This method checks if an address contains invalid characters
      * 
@@ -64,12 +79,12 @@ public class GenericChecks {
      */
     public final static boolean isValidMailAddress(final String address)  {
         if (null != address) {
-            return address.matches("[$%\\.+a-zA-Z0-9_-]+@[\\.a-zA-Z0-9_-]+");
+            return address.matches("[$%\\.+a-zA-Z0-9_-!#$&'/=?^`{|}~]+@[\\.a-zA-Z0-9_-]+");
         } else {
             return false;
         }
     }
-    
+
     /**
      * This method throws an exception if the address is != null and contains invalid characters
      * 
