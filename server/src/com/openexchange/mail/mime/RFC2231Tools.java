@@ -56,7 +56,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * {@link RFC2231Tools} - A collection of RFC2231 related utility methods
+ * {@link RFC2231Tools} - A collection of <small><b><a
+ * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> related
+ * utility methods
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -76,8 +78,12 @@ public final class RFC2231Tools {
 	private static final Pattern PAT_CL = Pattern.compile("([\\p{ASCII}&&[^']]+)'([\\p{ASCII}&&[^']]*)'(\\p{ASCII}+)");
 
 	/**
-	 * Parses given RFC2231 value into its charset, language and rfc2231-encoded
-	 * value. Therefore RFC2231 value should match pattern:
+	 * Parses given <small><b><a
+	 * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> value
+	 * into its charset, language and rfc2231-encoded value. Therefore
+	 * <small><b><a
+	 * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> value
+	 * should match pattern:
 	 * 
 	 * <pre>
 	 * &lt;charset-name&gt; + &quot;'&quot; + &lt;language-code&gt; + &quot;'&quot; + &lt;encoded-data&gt;
@@ -99,7 +105,8 @@ public final class RFC2231Tools {
 
 	/**
 	 * Decodes specified string according to mail-safe encoding introduced in
-	 * RFC2231
+	 * <small><b><a
+	 * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
 	 * <p>
 	 * This method assumes that encoding informations are contained in given
 	 * string; e.g.
@@ -122,7 +129,8 @@ public final class RFC2231Tools {
 
 	/**
 	 * Decodes specified string according to mail-safe encoding introduced in
-	 * RFC2231
+	 * <small><b><a
+	 * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
 	 * 
 	 * @param encoded
 	 *            The encoded string
@@ -158,7 +166,8 @@ public final class RFC2231Tools {
 	}
 
 	/**
-	 * Encodes given string according to mechanism provided in RFC2231
+	 * Encodes given string according to mechanism provided in <small><b><a
+	 * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
 	 * 
 	 * @param toEncode
 	 *            The string to encode
@@ -177,7 +186,8 @@ public final class RFC2231Tools {
 	}
 
 	/**
-	 * Encodes given string according to mechanism provided in RFC2231
+	 * Encodes given string according to mechanism provided in <small><b><a
+	 * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
 	 * 
 	 * @param toEncode
 	 *            The string to encode
@@ -189,8 +199,8 @@ public final class RFC2231Tools {
 	 *            <code>true</code> to prepend charset and language
 	 *            informations; otherwise <code>false</code>
 	 * @param force
-	 *            <code>true</code> to force encoding even if string top
-	 *            encode only consists of ASCII characters; otherwise
+	 *            <code>true</code> to force encoding even if string top encode
+	 *            only consists of ASCII characters; otherwise
 	 *            <code>false</code>
 	 * @return The encoded string
 	 */
