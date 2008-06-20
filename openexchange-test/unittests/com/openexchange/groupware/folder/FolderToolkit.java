@@ -49,19 +49,10 @@
 
 package com.openexchange.groupware.folder;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
-import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 
 /**
  *

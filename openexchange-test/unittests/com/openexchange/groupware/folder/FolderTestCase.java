@@ -1,5 +1,12 @@
 package com.openexchange.groupware.folder;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import junit.framework.TestCase;
+
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -12,17 +19,11 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.oxfolder.OXFolderLogicException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderPermissionException;
-import com.openexchange.test.AjaxInit;
-import junit.framework.TestCase;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class FolderTestCase extends TestCase {
 	
@@ -35,11 +36,12 @@ public class FolderTestCase extends TestCase {
 	
 	
 	
+	@Override
 	public void setUp() throws Exception {
 		Init.startServer();
 
-        UserStorage userStorage = UserStorage.getInstance();
-        UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
+        final UserStorage userStorage = UserStorage.getInstance();
+        final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
 
         session = SessionObjectWrapper.createSessionObject(userStorage.getUserId(getUsername(), ctx), ctx, getClass().getName());
 		user = userStorage.getUser(session.getUserId(), ctx);
@@ -50,20 +52,21 @@ public class FolderTestCase extends TestCase {
 		return AjaxInit.getAJAXProperty("login");
 	}
 
+	@Override
 	public void tearDown() throws Exception {
-		for(FolderObject folderobject : clean) {
+		for(final FolderObject folderobject : clean) {
 			rm(folderobject.getObjectID());
 		}
 		Init.stopServer();
 	}
 	
-	protected FolderObject mkdir(int parent, String name) throws SQLException, OXFolderPermissionException, Exception {
+	protected FolderObject mkdir(final int parent, final String name) throws SQLException, OXFolderPermissionException, Exception {
 		Connection writecon = null;
         try {
         	writecon = DBPool.pickupWriteable(ctx);
 	        //OXFolderAction ofa = new OXFolderAction(session);
 	        final OXFolderManager oxma = new OXFolderManagerImpl(session, writecon, writecon);
-	        OCLPermission oclp = new OCLPermission();
+	        final OCLPermission oclp = new OCLPermission();
 	        oclp.setEntity(user.getId());
 	        oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
 	        oclp.setFolderAdmin(true);
@@ -77,12 +80,13 @@ public class FolderTestCase extends TestCase {
 	        fo = oxma.createFolder(fo, true, System.currentTimeMillis());
 	        return fo;
         } finally {
-        	if(writecon != null)
-        		DBPool.pushWrite(ctx, writecon);
+        	if(writecon != null) {
+				DBPool.pushWrite(ctx, writecon);
+			}
         }
     }
 	
-	protected void rm(int objectID) throws SQLException, OXFolderPermissionException, OXFolderLogicException, Exception {
+	protected void rm(final int objectID) throws SQLException, OXFolderPermissionException, OXFolderLogicException, Exception {
 		//OXFolderAction ofa = new OXFolderAction(session);
 		final OXFolderManager oxma = new OXFolderManagerImpl(session);
 		//ofa.deleteFolder(objectID, session, true, System.currentTimeMillis());
