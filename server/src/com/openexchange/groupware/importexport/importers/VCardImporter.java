@@ -76,7 +76,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.AbstractImporter;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
-import com.openexchange.groupware.importexport.Importer;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
@@ -94,63 +93,51 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.openexchange.tools.versit.filetokenizer.VCardFileToken;
 import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 
-@OXExceptionSource(
-    classId=ImportExportExceptionClasses.VCARDIMPORTER,
-    component=EnumComponent.IMPORT_EXPORT
-)
-@OXThrowsMultiple(
-    category={
-        Category.PERMISSION,
-    	Category.SUBSYSTEM_OR_SERVICE_DOWN,
-    	Category.USER_INPUT,
-    	Category.CODE_ERROR,
-    	Category.CODE_ERROR,
-    	Category.USER_INPUT,
-    	Category.CODE_ERROR,
-    	Category.PERMISSION,
-        Category.USER_INPUT
-    },
-	desc={"", "", "", "", "", "", "", "", ""},
-	exceptionId={0, 1, 2, 3, 4, 5, 6, 7, 8},
-	msg={
-    	"Could not import into the folder %s.",
-    	"Subsystem down",
-    	"User input error %s",
-    	"Programming error - folder %s",
-    	"Could not load folder %s",
-    	"Could not recognize format of the following data: %s",
-    	"Could not use UTF-8 encoding.",
-    	"Module Contacts is not enabled for this user, cannot store contacts contained in VCard.",
-        "No VCard to import found."
-    }
-)
-	/**
-	 * This importer translates VCards into contacts for the OX.
-	 * 
-	 * @see OXContainerConverter - if you have a problem with the content of the parsed ICAL file
-	 * @see ContactSQLInterface - if you cannot enter the parsed content as contact into the database
-	 * 
-	 * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
-	 * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
-	 */
-	public class VCardImporter extends AbstractImporter implements Importer {
-	
+@OXExceptionSource(classId = ImportExportExceptionClasses.VCARDIMPORTER, component = EnumComponent.IMPORT_EXPORT)
+@OXThrowsMultiple(category = { Category.PERMISSION, Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.USER_INPUT,
+		Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT, Category.CODE_ERROR, Category.PERMISSION,
+		Category.USER_INPUT }, desc = { "", "", "", "", "", "", "", "", "" }, exceptionId = { 0, 1, 2, 3, 4, 5, 6, 7, 8 }, msg = {
+		"Could not import into the folder %s.", "Subsystem down", "User input error %s",
+		"Programming error - folder %s", "Could not load folder %s",
+		"Could not recognize format of the following data: %s", "Could not use UTF-8 encoding.",
+		"Module Contacts is not enabled for this user, cannot store contacts contained in VCard.",
+		"No VCard to import found." })
+/*
+ * This importer translates VCards into contacts for the OX.
+ * 
+ * @see OXContainerConverter - if you have a problem with the content of the
+ * parsed ICAL file
+ * 
+ * @see ContactSQLInterface - if you cannot enter the parsed content as contact
+ * into the database
+ * 
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * 
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb'
+ * Prinz</a> (minor: changes to new interface)
+ */
+public class VCardImporter extends AbstractImporter {
+
 	private static final Log LOG = LogFactory.getLog(VCardImporter.class);
-	
-	private static ImportExportExceptionFactory importExportExceptionFactory = new ImportExportExceptionFactory(VCardImporter.class);
-	
-	public boolean canImport(final ServerSession sessObj, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
+
+	private static ImportExportExceptionFactory importExportExceptionFactory = new ImportExportExceptionFactory(
+			VCardImporter.class);
+
+	public boolean canImport(final ServerSession session, final Format format, final List<String> folders,
+			final Map<String, String[]> optionalParams) throws ImportExportException {
 		if (!format.equals(Format.VCARD)) {
 			return false;
 		}
-		if(!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasContact() ){
-			throw importExportExceptionFactory.create(7, new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "Contacts") );
+		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext())
+				.hasContact()) {
+			throw importExportExceptionFactory.create(7, new OXPermissionException(
+					OXPermissionException.Code.NoPermissionForModul, "Contacts"));
 		}
-		final OXFolderAccess folderAccess = new OXFolderAccess(sessObj.getContext());
+		final OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
 		final Iterator<String> iterator = folders.iterator();
 		while (iterator.hasNext()) {
 			final String folder = iterator.next();
-			
+
 			int folderId = 0;
 			try {
 				folderId = Integer.parseInt(folder);
@@ -164,86 +151,88 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 			} catch (final OXException e) {
 				return false;
 			}
-			
-			//check format of folder
-			if ( fo.getModule() == FolderObject.CONTACT){
-				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasContact()) {
+
+			// check format of folder
+			if (fo.getModule() == FolderObject.CONTACT) {
+				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
+						session.getContext()).hasContact()) {
 					return false;
 				}
 			} else {
 				return false;
 			}
-			//check read access to folder
+			// check read access to folder
 			EffectivePermission perm;
 			try {
-				perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage
-						.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
+				perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance()
+						.getUserConfigurationSafe(session.getUserId(), session.getContext()));
 			} catch (final DBPoolingException e) {
 				throw importExportExceptionFactory.create(1, folder);
 			} catch (final SQLException e) {
 				throw importExportExceptionFactory.create(1, folder);
 			}
-			
+
 			if (perm.canCreateObjects()) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
-	public List<ImportResult> importData(final ServerSession sessObj, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
-		
+
+	public List<ImportResult> importData(final ServerSession session, final Format format, final InputStream is,
+			final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
+
 		int contactFolderId = -1;
-		final OXFolderAccess folderAccess = new OXFolderAccess(sessObj.getContext());
+		final OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
 		final Iterator<String> iterator = folders.iterator();
 		while (iterator.hasNext()) {
 			final String folder = iterator.next();
-			
+
 			final int folderId = Integer.parseInt(folder);
 			FolderObject fo;
 			try {
 				fo = folderAccess.getFolderObject(folderId);
 			} catch (final OXException e) {
-				throw importExportExceptionFactory.create(4,Integer.valueOf(folderId));
+				throw importExportExceptionFactory.create(4, Integer.valueOf(folderId));
 			}
-			
+
 			if (fo.getModule() == FolderObject.CONTACT) {
 				contactFolderId = folderId;
 				break;
 			}
 		}
-		
-		final ContactSQLInterface contactInterface = new RdbContactSQLInterface(sessObj, sessObj.getContext());
+
+		final ContactSQLInterface contactInterface = new RdbContactSQLInterface(session, session.getContext());
 		OXContainerConverter oxContainerConverter = null;
-		
+
 		final List<ImportResult> list = new ArrayList<ImportResult>();
-		
+
 		try {
-            oxContainerConverter = new OXContainerConverter(sessObj);
-            final VCardTokenizer tokenizer = new VCardTokenizer(is);
+			oxContainerConverter = new OXContainerConverter(session);
+			final VCardTokenizer tokenizer = new VCardTokenizer(is);
 			final List<VCardFileToken> chunks = tokenizer.split();
-            if (0 == chunks.size()) {
-                throw importExportExceptionFactory.create(8);
-            }
-			for(final VCardFileToken chunk: chunks){
+			if (0 == chunks.size()) {
+				throw importExportExceptionFactory.create(8);
+			}
+			for (final VCardFileToken chunk : chunks) {
 				final VersitDefinition def = chunk.getVersitDefinition();
 				final ImportResult importResult = new ImportResult();
-				
-				if(def != null){
-					final VersitDefinition.Reader versitReader = def.getReader(
-							new UnsynchronizedByteArrayInputStream(chunk.getContent()), "UTF-8");
+
+				if (def != null) {
+					final VersitDefinition.Reader versitReader = def.getReader(new UnsynchronizedByteArrayInputStream(
+							chunk.getContent()), "UTF-8");
 					try {
 						final VersitObject versitObject = def.parse(versitReader);
-						
+
 						importResult.setFolder(String.valueOf(contactFolderId));
-						
+
 						final ContactObject contactObj = oxContainerConverter.convertContact(versitObject);
 						contactObj.setParentFolderID(contactFolderId);
 						importResult.setDate(new Date());
 						try {
 							contactInterface.insertContactObject(contactObj);
-						} catch (OXException oxEx){
+						} catch (OXException oxEx) {
 							oxEx = handleDataTruncation(oxEx);
 							LOG.debug("cannot import contact object", oxEx);
 							importResult.setException(oxEx);
@@ -256,38 +245,39 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 					} catch (final VersitException exc) {
 						LOG.error("cannot parse contact object", exc);
 						importResult.setException(new OXException("cannot parse vcard object", exc));
-					} 
+					}
 				} else {
-					//could not find appropriate parser for this part of the vcard file
+					// could not find appropriate parser for this part of the
+					// vcard file
 					LOG.error("Could not recognize format of the following VCard data: " + chunk.getContent());
 					importResult.setDate(new Date(System.currentTimeMillis()));
 					importResult.setException(importExportExceptionFactory.create(5, chunk.getContent()));
 				}
 				list.add(importResult);
 			}
-		} catch (final UnsupportedEncodingException e){
+		} catch (final UnsupportedEncodingException e) {
 			LOG.fatal(e);
 			throw importExportExceptionFactory.create(6);
 		} catch (final IOException e) {
 			LOG.error(e);
 			throw importExportExceptionFactory.create(4, Integer.valueOf(contactFolderId));
 		} catch (final ConverterException e) {
-            LOG.error(e);
+			LOG.error(e);
 			throw importExportExceptionFactory.create(1, e);
-        } finally {
-            if(oxContainerConverter != null) {
+		} finally {
+			if (oxContainerConverter != null) {
 				oxContainerConverter.close();
 			}
 		}
-		
+
 		return list;
 	}
 
 	@Override
 	protected String getNameForFieldInTruncationError(final int id, final OXException unused) {
 		final ContactField field = ContactField.getByValue(id);
-		if(field == null){
-			return String.valueOf( id );
+		if (field == null) {
+			return String.valueOf(id);
 		}
 		return field.getReadableName();
 	}
