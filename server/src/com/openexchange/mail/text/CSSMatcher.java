@@ -61,13 +61,7 @@ import com.openexchange.tools.regex.RegexUtility;
 import com.openexchange.tools.regex.RegexUtility.GroupType;
 
 /**
- * {@link CSSMatcher} - Something like:
- * 
- * <pre>
- * matches(final String value, final String pattern) {
- * 	...
- * }
- * </pre>
+ * {@link CSSMatcher} - Provides several utility methods to check CSS content.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -303,7 +297,9 @@ public final class CSSMatcher {
 			"([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}&&[^;]]+);?", Pattern.CASE_INSENSITIVE);
 
 	/**
-	 * Corrects rgb functions; e.g.<br>"<i>rgb(238,&nbsp;239,&nbsp;240)</i>"&nbsp;-&gt;&nbsp;"<i>rgb(238,239,240)</i>"
+	 * Corrects rgb functions; e.g.<br>
+	 * "<i>rgb(238,&nbsp;239,&nbsp;240)</i>"&nbsp;-&gt;&nbsp;
+	 * "<i>rgb(238,239,240)</i>"
 	 * 
 	 * @param cssBuffer
 	 *            A {@link StringBuffer} containing CSS content
@@ -395,8 +391,8 @@ public final class CSSMatcher {
 	 * 
 	 * @param css
 	 *            The CSS string
-	 * @return <code>true</code> if specified string argument contains at
-	 *         least one CSS element; otherwise <code>false</code>
+	 * @return <code>true</code> if specified string argument contains at least
+	 *         one CSS element; otherwise <code>false</code>
 	 */
 	public static boolean containsCSSElement(final String css) {
 		if (null == css || isEmpty(css)) {
