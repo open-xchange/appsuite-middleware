@@ -78,7 +78,7 @@ public class CalendarWriter extends CommonWriter {
 		if (participants != null) {
 			for (int a = 0; a < participants.length; a++) {
 				final Participant p = participants[a];
-				final JSONObject jsonObj = getParticipantAsJSONObject(p.getIdentifier(), p.getDisplayName(), p.getEmailAddress(), p.getType());
+				final JSONObject jsonObj = getParticipantAsJSONObject(p);
 				jsonArray.put(jsonObj);
 			}
 		}
@@ -153,12 +153,15 @@ public class CalendarWriter extends CommonWriter {
 		}
 	}
 	
-	public JSONObject getParticipantAsJSONObject(final int id, final String displayname, final String email, final int type) throws JSONException {
+	private JSONObject getParticipantAsJSONObject(final Participant participant) throws JSONException {
 		final JSONObject jsonObj = new JSONObject();
-		writeParameter(ParticipantsFields.ID, id, jsonObj);
-		writeParameter(ParticipantsFields.DISPLAY_NAME, displayname, jsonObj);
-		writeParameter(ParticipantsFields.MAIL, email, jsonObj);
-		writeParameter("type", type, jsonObj);
+		final int id = participant.getIdentifier();
+		if (Participant.NO_ID != id) {
+		    writeParameter(ParticipantsFields.ID, id, jsonObj);
+		}
+		writeParameter(ParticipantsFields.DISPLAY_NAME, participant.getDisplayName(), jsonObj);
+		writeParameter(ParticipantsFields.MAIL, participant.getEmailAddress(), jsonObj);
+		writeParameter("type", participant.getType(), jsonObj);
 		return jsonObj;
 	}
 	

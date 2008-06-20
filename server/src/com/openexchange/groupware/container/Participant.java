@@ -47,15 +47,12 @@
  *
  */
 
-
-
 package com.openexchange.groupware.container;
 
 /**
  * Participant
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public interface Participant
 {
 
@@ -70,7 +67,9 @@ public interface Participant
 	public static final int EXTERNAL_USER = 5;
 	
 	public static final int EXTERNAL_GROUP = 6;
-	
+
+	public static final int NO_ID = -1;
+
 	/**
      * @deprecated Use explicit constructor.
      * {@link UserParticipant#UserParticipant(int)},

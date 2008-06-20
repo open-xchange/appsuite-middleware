@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.container;
 
 /**
@@ -59,7 +57,7 @@ package com.openexchange.groupware.container;
 public class ExternalUserParticipant implements Participant, Comparable
 {
 
-	private int id;
+	private int id = NO_ID;
 	
 	private String displayName;
 	

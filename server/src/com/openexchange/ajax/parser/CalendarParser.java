@@ -176,39 +176,48 @@ public class CalendarParser extends CommonParser {
 		for (int i = 0; i < jparticipants.length(); i++) {
 			final JSONObject jparticipant = jparticipants.getJSONObject(i);
 			final int type = jparticipant.getInt(ParticipantsFields.TYPE);
-			final int id;
+			int id;
             try {
                 id = jparticipant.getInt(ParticipantsFields.ID);
             } catch (final JSONException e) {
-                throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR,
-                    e, jparticipant.get(ParticipantsFields.ID));
+                id = Participant.NO_ID;
             }
 			Participant p = null;
 			switch (type) {
 				case Participant.USER:
-					p = new UserParticipant();
-					p.setIdentifier(id);
+				    if (Participant.NO_ID == id) {
+		                throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR,
+		                    jparticipant.get(ParticipantsFields.ID));
+				    }
+					p = new UserParticipant(id);
 					break;
 				case Participant.GROUP:
-					p = new GroupParticipant();
-					p.setIdentifier(id);
+                    if (Participant.NO_ID == id) {
+                        throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR,
+                            jparticipant.get(ParticipantsFields.ID));
+                    }
+					p = new GroupParticipant(id);
 					break;
 				case Participant.RESOURCE:
-					p = new ResourceParticipant();
-					p.setIdentifier(id);
+                    if (Participant.NO_ID == id) {
+                        throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR,
+                            jparticipant.get(ParticipantsFields.ID));
+                    }
+					p = new ResourceParticipant(id);
 					break;
 				case Participant.RESOURCEGROUP:
-					p = new ResourceGroupParticipant();
-					p.setIdentifier(id);
+                    if (Participant.NO_ID == id) {
+                        throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR,
+                            jparticipant.get(ParticipantsFields.ID));
+                    }
+					p = new ResourceGroupParticipant(id);
 					break;
 				case Participant.EXTERNAL_USER:
 					final String displayName = DataParser.parseString(jparticipant, ParticipantsFields.DISPLAY_NAME);
 					final String mailAddress = DataParser.parseString(jparticipant, ParticipantsFields.MAIL);
 					
-					p = new ExternalUserParticipant();
-					// p.setIdentifier(id);
+					p = new ExternalUserParticipant(mailAddress);
 					p.setDisplayName(displayName);
-					p.setEmailAddress(mailAddress);
 					
 					break;
 				case Participant.EXTERNAL_GROUP:
@@ -227,9 +236,8 @@ public class CalendarParser extends CommonParser {
 	public static UserParticipant[] parseUsers(final JSONObject jsonObj, final Participants participants) throws JSONException {
 		final JSONArray jusers = jsonObj.getJSONArray(CalendarFields.USERS);
 		for (int i = 0; i < jusers.length(); i++) {
-			final UserParticipant user = new UserParticipant();
 			final JSONObject jUser = jusers.getJSONObject(i);
-			user.setIdentifier(jUser.getInt(ParticipantsFields.ID));
+            final UserParticipant user = new UserParticipant(jUser.getInt(ParticipantsFields.ID));
 			if (jUser.has(CalendarFields.CONFIRMATION)) {
 				user.setConfirm(jUser.getInt(CalendarFields.CONFIRMATION));
 			}

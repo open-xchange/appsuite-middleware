@@ -1,3 +1,7 @@
+* 2008-06-20 - marcus.klein@open-xchange.com
+
+ - Bugfix #11397: Removed identifier from external participants in JSON.
+
 * 2008-06-20 - francisco.laguna@open-xchange.com
 
  - Bugfix #11305: [L3] - Deleting a user not possible
