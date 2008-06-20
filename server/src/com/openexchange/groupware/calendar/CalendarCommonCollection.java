@@ -141,7 +141,7 @@ public class CalendarCommonCollection {
         fieldMap[CalendarDataObject.TIMEZONE] = "timezone";
     }
     
-    private CalendarCommonCollection() { }
+    private CalendarCommonCollection() { super(); }
     
     public static final String getFieldName(final int i) throws IndexOutOfBoundsException {
         return fieldMap[i];
