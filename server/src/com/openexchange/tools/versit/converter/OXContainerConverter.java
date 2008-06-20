@@ -1143,7 +1143,7 @@ public class OXContainerConverter {
 			if (property == null) {
 				throw new ConverterException("Duration without start is not supported.");
 			}
-			final Calendar cal = ((DateTimeValue) property.getValue()).calendar;
+			final Calendar cal = (Calendar) ((DateTimeValue) property.getValue()).calendar.clone();
 			cal.add(Calendar.WEEK_OF_YEAR, dur.Negative ? -dur.Weeks : dur.Weeks);
 			cal.add(Calendar.DATE, dur.Negative ? -dur.Days : dur.Days);
 			cal.add(Calendar.HOUR, dur.Negative ? -dur.Hours : dur.Hours);

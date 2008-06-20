@@ -2,6 +2,8 @@
 
  - Bugfix #11909: Setting proper category TRUNCATED on a SQL data
    truncation error
+ - Bugfix #11257: Fixed computing duration of a recurring appointment
+   without altering Calendar object of "DTSTART" field
 
 * 2008-06-20 - marcus.klein@open-xchange.com
 
