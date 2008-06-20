@@ -681,6 +681,9 @@ public class HeaderCollection implements Serializable {
 	 * 
 	 * @param str
 	 *            The string to check
+	 * @param isName
+	 *            <code>true</code> to check a header name; otherwise
+	 *            <code>false</code> to check a header value
 	 * @return <code>true</code> if string is invalid; otherwise
 	 *         <code>false</code>
 	 */
