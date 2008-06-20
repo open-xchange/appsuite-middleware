@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
@@ -28,7 +29,7 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 	private Context ctx;
 	private final List<DocumentMetadata> infoitems = new ArrayList<DocumentMetadata>();
 	private final List<DocumentMetadata> updatedInfoitems = new ArrayList<DocumentMetadata>();
-	
+
 	private InfostoreQueryCatalog queryCatalog;
 	private DBProvider provider;
 	private InfostoreFacade infostore;
@@ -41,7 +42,7 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 		queryCatalog = new InfostoreQueryCatalog();
 		ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
 		user = UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId("francisco", ctx), ctx);
-		
+
 		initDocMeta();
 	}
 
@@ -49,7 +50,7 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 	public void tearDown() throws Exception {
 		Init.stopServer();
 	}
-	
+
 	protected User getUser() {
 		return user;
 	}
@@ -61,7 +62,7 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 	protected List<DocumentMetadata> getDocuments() {
 		return infoitems;
 	}
-	
+
 	protected List<DocumentMetadata> getUpdatedDocuments() {
 		return updatedInfoitems;
 	}
@@ -73,15 +74,15 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 	protected DBProvider getProvider() {
 		return provider;
 	}
-	
+
 	protected InfostoreFacade getInfostore(){
 		return infostore;
 	}
-	
+
 	protected UserConfiguration getUserConfiguration(){
 		return null;
 	}
-	
+
 	protected void assertNoResult(final String sql, final Object...args) throws TransactionException, SQLException {
 		assertFalse(hasResult(sql, args));
 	}

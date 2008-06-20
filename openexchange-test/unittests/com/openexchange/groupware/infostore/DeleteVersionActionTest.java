@@ -69,4 +69,13 @@ public class DeleteVersionActionTest extends AbstractInfostoreActionTest {
 		action.perform();
 	}
 
+
+    public void testBatching() throws Exception {
+        DeleteVersionAction action = (DeleteVersionAction) getAction();
+        action.setBatchSize(3); // 2 batches one with 3 and one with 1 entry
+        action.perform();
+        verifyPerformed();
+
+    }
+
 }
