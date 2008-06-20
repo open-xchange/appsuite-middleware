@@ -1,3 +1,8 @@
+* 2008-06-20 - francisco.laguna@open-xchange.com
+
+ - Bugfix #11305: [L3] - Deleting a user not possible
+   The infostore batches deletes of more than 1000 documents to keep the statement size manageable.
+
 * 2008-06-18 - sebastian.kauss@open-xchange.com
 
  - Bugfix #11250: [L3] List of day and month view is not sorted 

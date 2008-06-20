@@ -50,6 +50,7 @@
 package com.openexchange.groupware.infostore.database.impl;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -116,8 +117,13 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
 		if(getDocuments().size()==0) {
 			return;
 		}
-		final UpdateBlock[] updates = new UpdateBlock[getDocuments().size()+2];
-		updates[0] = new Update(getQueryCatalog().getVersionDelete(InfostoreQueryCatalog.Table.DEL_INFOSTORE_DOCUMENT,getDocuments())) {
+
+        List<DocumentMetadata>[] slices = getSlices();
+
+        final UpdateBlock[] updates = new UpdateBlock[getDocuments().size()+slices.length+1];
+
+
+        updates[0] = new Update(getQueryCatalog().getVersionDelete(InfostoreQueryCatalog.Table.DEL_INFOSTORE_DOCUMENT,getDocuments())) {
 			@Override
 			public void fillStatement() throws SQLException {
 				stmt.setInt(1, getContext().getContextId());
@@ -135,15 +141,17 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
 				
 			};
 		}
-		updates[i] = new Update(getQueryCatalog().getVersionDelete(InfostoreQueryCatalog.Table.INFOSTORE_DOCUMENT, getDocuments())){
+        for(int j = 0; j < slices.length; j++) {
+            updates[i++] = new Update(getQueryCatalog().getVersionDelete(InfostoreQueryCatalog.Table.INFOSTORE_DOCUMENT, slices[j])){
 
-			@Override
-			public void fillStatement() throws SQLException {
-				stmt.setInt(1, getContext().getContextId());
-			}
-			
-		};
-		
+                @Override
+                public void fillStatement() throws SQLException {
+                    stmt.setInt(1, getContext().getContextId());
+                }
+
+            };
+	    }
+
 		try {
 			doUpdates(updates);
 		} catch (final UpdateException e) {
@@ -152,7 +160,39 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
 		
 	}
 
-	@Override
+    private int batchSize = 1000;
+
+    public int getBatchSize() {
+        return batchSize;
+    }
+
+    public void setBatchSize(int batchSize) {
+        this.batchSize = batchSize;
+    }
+
+    private List<DocumentMetadata>[] getSlices() {
+        List<DocumentMetadata> documents = getDocuments();
+        boolean addOne = (0 != (documents.size() % batchSize));
+        int numberOfSlices = documents.size() / batchSize;
+        if(addOne) { numberOfSlices += 1; }
+        
+        List<DocumentMetadata>[] slices = new List[numberOfSlices];
+
+        int max = documents.size();
+        for(int i = 0; i < numberOfSlices; i++) {
+            int start = i * batchSize;
+            int end = i+1 * batchSize;
+            if(end > max) { end = max; };
+            List<DocumentMetadata> slice = documents.subList(start, end);
+            slices[i] = slice;
+
+        }
+
+        return slices;
+    }
+
+
+    @Override
 	protected Object[] getAdditionals(final DocumentMetadata doc) {
 		return null;
 	}
