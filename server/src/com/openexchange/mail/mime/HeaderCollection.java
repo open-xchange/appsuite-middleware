@@ -53,6 +53,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,14 +69,17 @@ import com.openexchange.mail.MailException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
- * {@link HeaderCollection} - Represents a collection of RFC822 headers.
+ * {@link HeaderCollection} - Represents a collection of <small><b><a
+ * href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> headers.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class HeaderCollection {
+public final class HeaderCollection implements Serializable {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	private static final long serialVersionUID = 6939560514144351286L;
+
+	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(HeaderCollection.class);
 
 	private static final String CRLF = "\r\n";
@@ -84,22 +88,48 @@ public final class HeaderCollection {
 
 	private static final int DEFAULT_CAPACITY = 4096;
 
-	private final Map<HeaderName, List<String>> map;
+	private final HashMap<HeaderName, List<String>> map;
+
+	private int count;
 
 	/**
 	 * Initializes a new {@link HeaderCollection}
 	 */
 	public HeaderCollection() {
-		super();
-		map = new HashMap<HeaderName, List<String>>(40);
+		this(40);
 	}
 
 	/**
-	 * Initializes a new {@link HeaderCollection} from specified headers' RFC822
-	 * source
+	 * Initializes a new {@link HeaderCollection}
+	 * 
+	 * @param initialCapacity
+	 *            The initial capacity of this header colelction
+	 */
+	public HeaderCollection(final int initialCapacity) {
+		super();
+		map = new HashMap<HeaderName, List<String>>(initialCapacity);
+	}
+
+	/**
+	 * Copy constructor for {@link HeaderCollection}
+	 * 
+	 * @param headers
+	 *            The source headers
+	 */
+	public HeaderCollection(final HeaderCollection headers) {
+		this(headers.map.size());
+		addHeaders(headers);
+	}
+
+	/**
+	 * Initializes a new {@link HeaderCollection} from specified headers'
+	 * <small><b><a
+	 * href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> source
 	 * 
 	 * @param headerSrc
-	 *            The headers' RFC822 source
+	 *            The headers' <small><b><a
+	 *            href="http://www.ietf.org/rfc/rfc822.txt"
+	 *            >RFC822</a></b></small> source
 	 * @throws MailException
 	 *             If parsing the header source fails
 	 */
@@ -109,11 +139,15 @@ public final class HeaderCollection {
 	}
 
 	/**
-	 * Initializes a new {@link HeaderCollection} from specified headers' RFC822
-	 * input stream
+	 * Initializes a new {@link HeaderCollection} from specified headers'
+	 * <small><b><a
+	 * href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> input
+	 * stream
 	 * 
 	 * @param inputStream
-	 *            The headers' RFC822 input stream
+	 *            The headers' <small><b><a
+	 *            href="http://www.ietf.org/rfc/rfc822.txt"
+	 *            >RFC822</a></b></small> input stream
 	 * @throws MailException
 	 *             If parsing the header input stream fails
 	 */
@@ -123,9 +157,10 @@ public final class HeaderCollection {
 	}
 
 	/**
-	 * Read and parse the given headers' RFC822 input stream till the blank line
-	 * separating the header from the body. Thus specified input stream is
-	 * <b>not</b> closed by this method.
+	 * Read and parse the given headers' <small><b><a
+	 * href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> input
+	 * stream till the blank line separating the header from the body. Thus
+	 * specified input stream is <b>not</b> closed by this method.
 	 * <p>
 	 * Note that the header lines are added, so any existing headers in this
 	 * object will not be affected. Headers are added to the end of the existing
@@ -135,9 +170,13 @@ public final class HeaderCollection {
 	 * <code>EOF</code> or two subsequent <code>CRLF</code>s occur.
 	 * 
 	 * @param inputStream
-	 *            The headers' RFC822 input stream
+	 *            The headers' <small><b><a
+	 *            href="http://www.ietf.org/rfc/rfc822.txt"
+	 *            >RFC822</a></b></small> input stream
 	 * @throws MailException
-	 *             If reading from headers' RFC822 input stream fails
+	 *             If reading from headers' <small><b><a
+	 *             href="http://www.ietf.org/rfc/rfc822.txt"
+	 *             >RFC822</a></b></small> input stream fails
 	 */
 	public void load(final InputStream inputStream) throws MailException {
 		/*
@@ -166,15 +205,18 @@ public final class HeaderCollection {
 	}
 
 	/**
-	 * Read and parse the given headers' RFC822 source till the blank line
-	 * separating the header from the body.
+	 * Read and parse the given headers' <small><b><a
+	 * href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> source
+	 * till the blank line separating the header from the body.
 	 * <p>
 	 * Note that the header lines are added, so any existing headers in this
 	 * object will not be affected. Headers are added to the end of the existing
 	 * list of headers, in order.
 	 * 
 	 * @param headerSrc
-	 *            The headers' RFC822 source
+	 *            The headers' <small><b><a
+	 *            href="http://www.ietf.org/rfc/rfc822.txt"
+	 *            >RFC822</a></b></small> source
 	 * @throws MailException
 	 *             If reading from headers' source fails
 	 */
@@ -229,6 +271,51 @@ public final class HeaderCollection {
 	}
 
 	/**
+	 * Returns <code>true</code> if no headers are contained in this collection
+	 * 
+	 * @return <code>true</code> if no headers are contained in this collection
+	 */
+	public boolean isEmpty() {
+		return map.isEmpty();
+	}
+
+	/**
+	 * Gets the number of headers contained in this collection.
+	 * <p>
+	 * This method is a constant-time operation.
+	 * 
+	 * @return The number of headers contained in this collection
+	 */
+	public int size() {
+		return count;
+	}
+
+	/**
+	 * Adds the specified header collection to this header collection.
+	 * <p>
+	 * Note that the header lines are added, so any existing headers in this
+	 * object will not be affected. Headers are added to the end of the existing
+	 * list of headers, in order.
+	 * 
+	 * @param headers
+	 *            The header collection to add
+	 */
+	public void addHeaders(final HeaderCollection headers) {
+		final int size = headers.map.size();
+		final Iterator<Map.Entry<HeaderName, List<String>>> iter = headers.map.entrySet().iterator();
+		for (int i = 0; i < size; i++) {
+			final Map.Entry<HeaderName, List<String>> entry = iter.next();
+			List<String> values = this.map.get(entry.getKey());
+			if (values == null) {
+				values = new ArrayList<String>(entry.getValue().size());
+				this.map.put(entry.getKey(), values);
+			}
+			values.addAll(entry.getValue());
+			count += entry.getValue().size();
+		}
+	}
+
+	/**
 	 * Adds a header with the specified name and value
 	 * <p>
 	 * The current implementation knows about the preferred order of most
@@ -237,6 +324,10 @@ public final class HeaderCollection {
 	 * order (newest before oldest), and that they should appear at the
 	 * beginning of the headers, preceded only by a possible
 	 * <code>Return-Path</code> header.
+	 * <p>
+	 * Note that <small><b><a
+	 * href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> headers
+	 * can only contain <small><b>US-ASCII</b></small> characters.
 	 * 
 	 * @param name
 	 *            The header name
@@ -253,6 +344,10 @@ public final class HeaderCollection {
 	 * Change the first header that matches name to have value, adding a new
 	 * header if no existing header matches. Remove all matching headers but the
 	 * first.
+	 * <p>
+	 * Note that <small><b><a
+	 * href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> headers
+	 * can only contain <small><b>US-ASCII</b></small> characters.
 	 * 
 	 * @param name
 	 *            The header name
@@ -263,6 +358,30 @@ public final class HeaderCollection {
 	 */
 	public void setHeader(final String name, final String value) {
 		putHeader(name, value, true);
+	}
+
+	private void putHeader(final String name, final String value, final boolean clear) {
+		if (isInvalid(name, true)) {
+			throw new IllegalArgumentException("Header name is invalid");
+		} else if (isInvalid(value, false)) {
+			throw new IllegalArgumentException("Header value is invalid");
+		}
+		final HeaderName headerName = HeaderName.valueOf(name);
+		List<String> values = map.get(headerName);
+		if (values == null) {
+			values = new ArrayList<String>(2);
+			map.put(headerName, values);
+		} else if (clear) {
+			values.clear();
+		}
+		if (MessageHeaders.RECEIVED.equals(headerName) || MessageHeaders.RETURN_PATH.equals(headerName)) {
+			// Prepend
+			values.add(0, value);
+		} else {
+			// Append
+			values.add(value);
+		}
+		count++;
 	}
 
 	/**
@@ -329,7 +448,10 @@ public final class HeaderCollection {
 		if (isInvalid(name, true)) {
 			throw new IllegalArgumentException("Header name is invalid");
 		}
-		map.remove(HeaderName.valueOf(name));
+		final List<String> removed = map.remove(HeaderName.valueOf(name));
+		if (removed != null) {
+			count -= removed.size();
+		}
 	}
 
 	/**
@@ -388,7 +510,7 @@ public final class HeaderCollection {
 	 * ############ UTILITY METHODS ##############
 	 */
 
-	private static final Iterator<Map.Entry<String, String>> EMPTY_ITER = new Iterator<Map.Entry<String, String>>() {
+	private static final transient Iterator<Map.Entry<String, String>> EMPTY_ITER = new Iterator<Map.Entry<String, String>>() {
 
 		public boolean hasNext() {
 			return false;
@@ -431,37 +553,35 @@ public final class HeaderCollection {
 		}
 
 		public boolean hasNext() {
-			if (entry == null || index >= entry.getValue().size()) {
+			if (entry == null || index < 0) {
 				while (iter.hasNext()) {
 					entry = iter.next();
 					if (headers == null
 							|| (matches ? headers.contains(entry.getKey()) : !headers.contains(entry.getKey()))) {
-						index = 0;
+						index = entry.getValue().size() - 1;
 						return true;
 					}
 				}
 				entry = null;
 				return false;
 			}
-			return (index < entry.getValue().size());
+			return (index >= 0);
 		}
 
 		public Entry<String, String> next() {
-			if (entry == null) {
-				throw new NoSuchElementException();
-			} else if (index >= entry.getValue().size()) {
+			if (entry == null || index < 0) {
 				while (iter.hasNext()) {
 					entry = iter.next();
 					if (headers == null
 							|| (matches ? headers.contains(entry.getKey()) : !headers.contains(entry.getKey()))) {
-						index = 0;
-						return new HeaderEntry(entry, index++);
+						index = entry.getValue().size() - 1;
+						return new HeaderEntry(entry, index--);
 					}
 				}
 				entry = null;
 				throw new NoSuchElementException();
 			}
-			return new HeaderEntry(entry, index++);
+			return new HeaderEntry(entry, index--);
 		}
 
 		public void remove() {
@@ -502,29 +622,6 @@ public final class HeaderCollection {
 			return entry.getValue().set(index, value);
 		}
 
-	}
-
-	private void putHeader(final String name, final String value, final boolean clear) {
-		if (isInvalid(name, true)) {
-			throw new IllegalArgumentException("Header name is invalid");
-		} else if (isInvalid(value, false)) {
-			throw new IllegalArgumentException("Header value is invalid");
-		}
-		final HeaderName headerName = HeaderName.valueOf(name);
-		List<String> values = map.get(headerName);
-		if (values == null) {
-			values = new ArrayList<String>(2);
-			map.put(headerName, values);
-		} else if (clear) {
-			values.clear();
-		}
-		if (MessageHeaders.RECEIVED.equals(headerName) || MessageHeaders.RETURN_PATH.equals(headerName)) {
-			// Append
-			values.add(value);
-		} else {
-			// Prepend
-			values.add(0, value);
-		}
 	}
 
 	/**
@@ -589,10 +686,10 @@ public final class HeaderCollection {
 
 			hc.addHeader("From", "Jane Doe <jane.doe@somewhere.org>");
 			hc.addHeader("To", "Jane Doe2 <jane.doe2@somewhere.org>, Jane Doe3 <jane.doe3@somewhere.org>");
-			hc.addHeader("Received", "thisOneSecond from [212.227.126.201] (helo=mxintern.foobar.de) "
+			hc.addHeader("Received", "first from [212.227.126.201] (helo=mxintern.foobar.de) "
 					+ "by mx.barfoo.de (node=mxeu24) with ESMTP (Nemesis), "
 					+ "id 0MKtd6-1ICv9b3jPS-0001BJ for user2@host.de; Mon, 23 Jul 2007 12:28:42 +0200");
-			hc.addHeader("Received", "thisOneFirst from [172.23.1.244] (helo=titan.foobar.de) "
+			hc.addHeader("Received", "second from [172.23.1.244] (helo=titan.foobar.de) "
 					+ "by mxintern.barfoo.de with esmtp (Exim 4.50) "
 					+ "id 1ICv9b-0004A2-Jn for user2@host.de; Mon, 23 Jul 2007 12:28:39 +0200");
 			hc.addHeader("Subject", "The simple subject");
