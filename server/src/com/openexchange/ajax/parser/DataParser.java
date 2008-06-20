@@ -57,7 +57,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
@@ -228,20 +227,18 @@ public abstract class DataParser {
 		return new Date(Long.parseLong(tmp));
 	}
 	
-	public static String checkString(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, AjaxException {
+	public static String checkString(final JSONObject jsonObj, final String name) throws JSONException, AjaxException {
 		final String tmp = parseString(jsonObj, name);
-		
 		if (tmp == null) {
 			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
 		}
-
-		if (tmp != null && tmp.length() == 0) {
+		if (tmp.length() == 0) {
 			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
 		}
 		return tmp;
 	}
 	
-	public static int checkInt(final JSONObject jsonObj, final String name) throws OXMandatoryFieldException, OXJSONException, JSONException, AjaxException {
+	public static int checkInt(final JSONObject jsonObj, final String name) throws OXJSONException, JSONException, AjaxException {
 		final String tmp = checkString(jsonObj, name);
 		if (tmp != null && tmp.length() == 0) {
 			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
@@ -254,7 +251,7 @@ public abstract class DataParser {
         }
 	}
 	
-	public static boolean checkBoolean(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, AjaxException {
+	public static boolean checkBoolean(final JSONObject jsonObj, final String name) throws JSONException, AjaxException {
 		final String tmp = jsonObj.getString(name);
 		if (tmp != null && tmp.length() == 0) {
 			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
@@ -262,7 +259,7 @@ public abstract class DataParser {
 		return Boolean.parseBoolean(tmp);
 	}
 	
-	public static float checkFloat(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, OXJSONException, AjaxException {
+	public static float checkFloat(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException, AjaxException {
 		final String tmp = jsonObj.getString(name);
 		if (tmp != null && tmp.length() == 0) {
 			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
@@ -275,7 +272,7 @@ public abstract class DataParser {
 		}
 	}
 	
-	public static Date checkDate(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, OXJSONException, AjaxException {
+	public static Date checkDate(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException, AjaxException {
 		final String tmp = parseString(jsonObj, name);
 		if (tmp == null) {
 			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
@@ -288,7 +285,7 @@ public abstract class DataParser {
 		}
 	}
 	
-	public static Date checkTime(final JSONObject jsonObj, final String name, final TimeZone timeZone) throws JSONException, OXMandatoryFieldException, OXJSONException, AjaxException {
+	public static Date checkTime(final JSONObject jsonObj, final String name, final TimeZone timeZone) throws JSONException, OXJSONException, AjaxException {
 		final String tmp = parseString(jsonObj, name);
 		if (tmp == null) {
 			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
@@ -303,16 +300,16 @@ public abstract class DataParser {
 		}
 	}
 	
-	public static JSONObject checkJSONObject(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, AjaxException {
-		final JSONObject tmp = jsonObj.getJSONObject(name);
+	public static JSONObject checkJSONObject(final JSONObject jsonObj, final String name) throws AjaxException {
+		final JSONObject tmp = jsonObj.optJSONObject(name);
 		if (tmp == null) {
 			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
 		}
 		return tmp;
 	}
 	
-	public static JSONArray checkJSONArray(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, AjaxException {
-		final JSONArray tmp = jsonObj.getJSONArray(name);
+	public static JSONArray checkJSONArray(final JSONObject jsonObj, final String name) throws AjaxException {
+		final JSONArray tmp = jsonObj.optJSONArray(name);
 		if (tmp == null) {
 			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
 		}
@@ -381,7 +378,7 @@ public abstract class DataParser {
 		}
 	}
 	
-	public static int[] checkJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, OXJSONException, AjaxException {
+	public static int[] checkJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException, AjaxException {
 		final int[] i = parseJSONIntArray(jsonObj, name);
 		if (i == null) {
 			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);

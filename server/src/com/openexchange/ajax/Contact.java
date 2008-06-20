@@ -85,7 +85,6 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.json.OXJSONWriter;
 import com.openexchange.session.Session;
 import com.openexchange.tools.Logging;
 import com.openexchange.tools.servlet.AjaxException;
@@ -171,7 +170,6 @@ public class Contact extends DataServlet {
 			
 			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
 			
-			final OXJSONWriter sw = new OXJSONWriter();
 			final ContactRequest contactRequest = new ContactRequest(sessionObj, ctx);
 			final Object responseObj = contactRequest.action(action, jsonObj);
 			response.setTimestamp(contactRequest.getTimestamp());

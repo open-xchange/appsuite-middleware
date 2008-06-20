@@ -1,6 +1,7 @@
 * 2008-06-20 - marcus.klein@open-xchange.com
 
  - Bugfix #11397: Removed identifier from external participants in JSON.
+ - Bugfix #11463: Improved exception message if the body for a search is missing.
 
 * 2008-06-20 - francisco.laguna@open-xchange.com
 
