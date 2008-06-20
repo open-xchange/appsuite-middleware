@@ -248,7 +248,7 @@ public final class DBUtils {
 
     /**
      * Extends a SQL statement with enough ? characters in the last IN argument.
-     * @param sql SQL statment ending with "IN (";
+     * @param sql SQL statement ending with "IN (";
      * @param length number of entries.
      * @return the ready to use SQL statement.
      */
