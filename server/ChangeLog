@@ -9,6 +9,7 @@
 
  - Bugfix #11397: Removed identifier from external participants in JSON.
  - Bugfix #11463: Improved exception message if the body for a search is missing.
+ - Bugfix #11443: Invalidating cached contexts after database update.
 
 * 2008-06-20 - francisco.laguna@open-xchange.com
 
