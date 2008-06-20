@@ -143,6 +143,9 @@ public class UpdateProcess implements Runnable {
 					if (unlock) {
 						unlockSchema(schema);
 					}
+					// Remove contexts from cache if they are cached during
+					// update process.
+                    removeContexts(schema);
 				}
 			} catch (final SchemaException e) {
 				LOG.error(e.getMessage(), e);
