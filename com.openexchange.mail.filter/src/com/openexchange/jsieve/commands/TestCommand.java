@@ -174,23 +174,20 @@ public class TestCommand extends Command {
         }
 
         private static Hashtable<String, String> standard_address_match_types() {
-            final Hashtable<String, String> standard_match_types = new Hashtable<String, String>(6);
-            standard_match_types.put(":is", "");
-            standard_match_types.put(":contains", "");
-            standard_match_types.put(":matches", "");
-            // Add further extensions here... and don't forget to raise the
-            // initial number
-            standard_match_types.put(":regex", "regex");
+            final Hashtable<String, String> standard_match_types = standard_match_types();
             standard_match_types.put(":user", "subaddress");
             standard_match_types.put(":detail", "subaddress");
             return standard_match_types;
         }
 
         private static Hashtable<String, String> standard_match_types() {
-            final Hashtable<String, String> standard_match_types = new Hashtable<String, String>(3);
+            final Hashtable<String, String> standard_match_types = new Hashtable<String, String>(4);
             standard_match_types.put(":is", "");
             standard_match_types.put(":contains", "");
             standard_match_types.put(":matches", "");
+            // Add further extensions here... and don't forget to raise the
+            // initial number
+            standard_match_types.put(":regex", "regex");
             return standard_match_types;
         }
 
