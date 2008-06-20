@@ -370,8 +370,10 @@ public class Contacts implements DeleteListener {
 			validateEmailAddress(co);
 
 			final int fid = co.getParentFolderID();
+			
+			final OXFolderAccess oxfs = new OXFolderAccess(readcon, ct);
 
-			final FolderObject contactFolder = new OXFolderAccess(readcon, ct).getFolderObject(fid);
+			final FolderObject contactFolder = oxfs.getFolderObject(fid);
 			if (contactFolder.getModule() != FolderObject.CONTACT) {
 				throw EXCEPTIONS.createOXConflictException(3, Integer.valueOf(fid), Integer.valueOf(so.getContextId()),
 						Integer.valueOf(user));
@@ -380,7 +382,6 @@ public class Contacts implements DeleteListener {
 				// fid="+fid+" uid="+user);
 			}
 
-			final OXFolderAccess oxfs = new OXFolderAccess(readcon, ct);
 			final EffectivePermission oclPerm = oxfs.getFolderPermission(fid, user, UserConfigurationStorage
 					.getInstance().getUserConfigurationSafe(so.getUserId(), ct));
 
