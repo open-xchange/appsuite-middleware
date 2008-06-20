@@ -61,7 +61,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class HeaderName implements Serializable {
+public final class HeaderName implements Serializable, Cloneable {
 
 	private static final long serialVersionUID = -4841569785169326836L;
 
@@ -116,6 +116,18 @@ public final class HeaderName implements Serializable {
 		super();
 		this.s = s;
 		this.hashcode = s.toLowerCase(Locale.ENGLISH).hashCode();
+	}
+
+	@Override
+	public Object clone() {
+		try {
+			return super.clone();
+		} catch (final CloneNotSupportedException e) {
+			/*
+			 * Cannot not occur since Cloneable is implemented
+			 */
+			throw new InternalError("CloneNotSupportedException although Cloneable is implemented");
+		}
 	}
 
 	/**

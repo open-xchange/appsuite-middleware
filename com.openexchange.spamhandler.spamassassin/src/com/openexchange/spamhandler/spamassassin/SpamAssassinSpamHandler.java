@@ -131,8 +131,8 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
 			SmartLongArray plainIDs = new SmartLongArray(mailIDs.length);
 			SmartLongArray extractIDs = new SmartLongArray(mailIDs.length);
 			for (int i = 0; i < mails.length; i++) {
-				final String spamHdr = mails[i].getHeader(MessageHeaders.HDR_X_SPAM_FLAG);
-				final String spamChecker = mails[i].getHeader("X-Spam-Checker-Version");
+				final String spamHdr = mails[i].getFirstHeader(MessageHeaders.HDR_X_SPAM_FLAG);
+				final String spamChecker = mails[i].getFirstHeader("X-Spam-Checker-Version");
 				final ContentType contentType = mails[i].getContentType();
 				if (spamHdr != null
 						&& "yes".regionMatches(true, 0, spamHdr, 0, 3)

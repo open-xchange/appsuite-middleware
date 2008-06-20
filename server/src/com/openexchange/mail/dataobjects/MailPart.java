@@ -55,11 +55,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
 
 import javax.activation.DataHandler;
@@ -68,7 +65,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.HeaderName;
+import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -94,82 +91,6 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * does not hold any enclosed parts.
 	 */
 	public static final int NO_ENCLOSED_PARTS = -1;
-
-	/**
-	 * {@link HeaderIterator} - Converts an instance of
-	 * <code>java.util.Iterator&lt;HeaderName, String&gt;</code> to
-	 * <code>java.util.Iterator&lt;String, String&gt;</code>
-	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben
-	 *         Betten</a>
-	 * 
-	 */
-	private static final class HeaderIterator implements Iterator<Map.Entry<String, String>> {
-
-		private final Iterator<Map.Entry<HeaderName, String>> iter;
-
-		public HeaderIterator(final Iterator<Map.Entry<HeaderName, String>> iter) {
-			this.iter = iter;
-		}
-
-		public boolean hasNext() {
-			return iter.hasNext();
-		}
-
-		public Map.Entry<String, String> next() {
-			return new HeaderEntry(iter.next());
-		}
-
-		public void remove() {
-			iter.remove();
-		}
-	}
-
-	/**
-	 * {@link HeaderEntry} - Converts an instance of
-	 * <code>java.util.Map.Entry&lt;HeaderName, String&gt;</code> to
-	 * <code>java.util.Map.Entry&lt;String, String&gt;</code>
-	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben
-	 *         Betten</a>
-	 * 
-	 */
-	private static final class HeaderEntry implements Map.Entry<String, String> {
-
-		private final Map.Entry<HeaderName, String> headerEntry;
-
-		public HeaderEntry(final Map.Entry<HeaderName, String> headerEntry) {
-			this.headerEntry = headerEntry;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.util.Map$Entry#getKey()
-		 */
-		public String getKey() {
-			return headerEntry.getKey().toString();
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.util.Map$Entry#getValue()
-		 */
-		public String getValue() {
-			return headerEntry.getValue();
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.util.Map$Entry#setValue(java.lang.Object)
-		 */
-		public String setValue(final String value) {
-			return headerEntry.setValue(value);
-		}
-
-	}
 
 	private static final transient Iterator<Map.Entry<String, String>> EMPTY_ITER = new Iterator<Map.Entry<String, String>>() {
 		/**
@@ -223,7 +144,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	/**
 	 * The headers (if not explicitly set in other fields)
 	 */
-	private HashMap<HeaderName, String> headers;
+	private HeaderCollection headers;
 
 	private boolean b_headers;
 
@@ -279,7 +200,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 */
 	public ContentType getContentType() {
 		if (!b_contentType) {
-			final String ct = getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+			final String ct = getFirstHeader(MessageHeaders.HDR_CONTENT_TYPE);
 			if (ct != null) {
 				try {
 					setContentType(new ContentType(ct));
@@ -345,7 +266,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 */
 	public ContentDisposition getContentDisposition() {
 		if (!b_disposition) {
-			final String disp = getHeader(MessageHeaders.HDR_DISPOSITION);
+			final String disp = getFirstHeader(MessageHeaders.HDR_DISPOSITION);
 			if (disp != null) {
 				try {
 					setContentDisposition(new ContentDisposition(disp));
@@ -453,66 +374,30 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 *            The header value
 	 */
 	public void addHeader(final String name, final String value) {
-		if (null == name) {
-			throw new IllegalArgumentException("Header name must not be null");
-		} else if (value == null) {
-			/*
-			 * Don't need to put a null value
-			 */
-			return;
-		} else if (null == headers) {
-			headers = new HashMap<HeaderName, String>();
+		if (null == headers) {
+			headers = new HeaderCollection();
 			b_headers = true;
 		}
-		headers.put(HeaderName.valueOf(name), value);
+		headers.addHeader(name, value);
 	}
 
 	/**
-	 * Adds a header map
+	 * Adds a header collection
 	 * 
 	 * @param headers
-	 *            The header map
+	 *            The header collection
 	 */
-	public void addHeaders(final Map<String, String> headers) {
+	public void addHeaders(final HeaderCollection headers) {
 		if (null == headers) {
 			throw new IllegalArgumentException("Headers must not be null");
 		}
-		final int size = headers.size();
-		if (size == 0) {
+		if (headers.isEmpty()) {
 			return;
 		} else if (null == this.headers) {
-			this.headers = new HashMap<HeaderName, String>();
+			this.headers = new HeaderCollection();
 			b_headers = true;
 		}
-		final Iterator<Map.Entry<String, String>> iter = headers.entrySet().iterator();
-		for (int i = 0; i < size; i++) {
-			final Map.Entry<String, String> e = iter.next();
-			this.headers.put(HeaderName.valueOf(e.getKey()), e.getValue());
-		}
-	}
-
-	/**
-	 * Adds a header map
-	 * 
-	 * @param headers
-	 *            The header map
-	 */
-	public void addHeadersMap(final Map<HeaderName, String> headers) {
-		if (null == headers) {
-			throw new IllegalArgumentException("Headers must not be null");
-		}
-		final int size = headers.size();
-		if (size == 0) {
-			return;
-		} else if (null == this.headers) {
-			this.headers = new HashMap<HeaderName, String>();
-			b_headers = true;
-		}
-		final Iterator<Map.Entry<HeaderName, String>> iter = headers.entrySet().iterator();
-		for (int i = 0; i < size; i++) {
-			final Map.Entry<HeaderName, String> e = iter.next();
-			this.headers.put(e.getKey(), e.getValue());
-		}
+		this.headers.addHeaders(headers);
 	}
 
 	/**
@@ -552,85 +437,95 @@ public abstract class MailPart implements Serializable, Cloneable {
 		if (null == headers) {
 			return EMPTY_ITER;
 		}
-		return new HeaderIterator(headers.entrySet().iterator());
+		return headers.getAllHeaders();
 	}
 
 	/**
-	 * Gets the header's value or <code>null</code>
+	 * Gets all the values for the specified header. Returns null if no headers
+	 * with the specified name exist.
 	 * 
 	 * @param name
 	 *            The header name
-	 * @return The header's value or <code>null</code>
+	 * @return The header values or <code>null</code>
 	 */
-	public String getHeader(final String name) {
+	public String[] getHeader(final String name) {
 		if (containsHeaders() && (null != headers)) {
-			return headers.get(HeaderName.valueOf(name));
+			return headers.getHeader(name);
 		}
 		return null;
 	}
 
 	/**
-	 * Gets the headers as a map
+	 * Gets the first header for specified header name.
+	 * <p>
+	 * This is a convenience method that invokes
+	 * {@link #getHeader(String, String)} with the latter parameter set to
+	 * <code>null</code>.
 	 * 
-	 * @return The header's value or <code>null</code>
+	 * @param name
+	 *            The header name
+	 * @return The header's first value or <code>null</code>
 	 */
-	public Map<HeaderName, String> getHeaders() {
+	public String getFirstHeader(final String name) {
+		return getHeader(name, null);
+	}
+
+	/**
+	 * Gets all the headers for this header name, returned as a single String,
+	 * with headers separated by the delimiter. If the delimiter is null, only
+	 * the first header is returned. Returns null if no headers with the
+	 * specified name exist.
+	 * 
+	 * @param name
+	 *            The header name
+	 * @return The header values as a single String or <code>null</code>
+	 */
+	public String getHeader(final String name, final String delimiter) {
 		if (containsHeaders() && (null != headers)) {
-			return headers;
+			return headers.getHeader(name, delimiter);
 		}
 		return null;
 	}
 
 	/**
-	 * Gets the non-matching headers as a map
+	 * Gets a read-only version of this part's headers
+	 * 
+	 * @return A read-only version of this part's headers or <code>null</code>
+	 *         if not exists
+	 */
+	public HeaderCollection getHeaders() {
+		if (containsHeaders() && (null != headers)) {
+			return headers.getReadOnlyCollection();
+		}
+		return null;
+	}
+
+	/**
+	 * Gets an iterator for non-matching headers
 	 * 
 	 * @param nonMatchingHeaders
 	 *            The non-matching headers
-	 * @return The non-matching headers as a map
+	 * @return An iterator for non-matching headers or <code>null</code> if not
+	 *         exists
 	 */
-	public Map<HeaderName, String> getNonMatchingHeaders(final String[] nonMatchingHeaders) {
+	public Iterator<Map.Entry<String, String>> getNonMatchingHeaders(final String[] nonMatchingHeaders) {
 		if (containsHeaders() && (null != headers)) {
-			final Set<HeaderName> set = new HashSet<HeaderName>(nonMatchingHeaders.length);
-			for (int i = 0; i < nonMatchingHeaders.length; i++) {
-				set.add(HeaderName.valueOf(nonMatchingHeaders[i]));
-			}
-			final Map<HeaderName, String> retval = new HashMap<HeaderName, String>();
-			final int size = headers.size();
-			final Iterator<Map.Entry<HeaderName, String>> iter = headers.entrySet().iterator();
-			for (int i = 0; i < size; i++) {
-				final Map.Entry<HeaderName, String> e = iter.next();
-				if (!set.contains(e.getKey())) {
-					retval.put(HeaderName.valueOf(e.getKey().toString()), e.getValue());
-				}
-			}
-			return retval;
+			return headers.getNonMatchingHeaders(nonMatchingHeaders);
 		}
 		return null;
 	}
 
 	/**
-	 * Gets the matching headers as a map
+	 * Gets an iterator for matching headers
 	 * 
 	 * @param matchingHeaders
 	 *            The matching headers
-	 * @return The matching headers as a map
+	 * @return An iterator for matching headers or <code>null</code> if not
+	 *         exists
 	 */
-	public Map<HeaderName, String> getMatchingHeaders(final String[] matchingHeaders) {
+	public Iterator<Map.Entry<String, String>> getMatchingHeaders(final String[] matchingHeaders) {
 		if (containsHeaders() && (null != headers)) {
-			final Set<HeaderName> set = new HashSet<HeaderName>(matchingHeaders.length);
-			for (int i = 0; i < matchingHeaders.length; i++) {
-				set.add(HeaderName.valueOf(matchingHeaders[i]));
-			}
-			final Map<HeaderName, String> retval = new HashMap<HeaderName, String>();
-			final int size = headers.size();
-			final Iterator<Map.Entry<HeaderName, String>> iter = headers.entrySet().iterator();
-			for (int i = 0; i < size; i++) {
-				final Map.Entry<HeaderName, String> e = iter.next();
-				if (set.contains(e.getKey())) {
-					retval.put(HeaderName.valueOf(e.getKey().toString()), e.getValue());
-				}
-			}
-			return retval;
+			return headers.getMatchingHeaders(matchingHeaders);
 		}
 		return null;
 	}
@@ -640,13 +535,11 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * 
 	 * @param name
 	 *            The header name
-	 * @return The header's former value or <code>null</code> if not found
 	 */
-	public String removeHeader(final String name) {
+	public void removeHeader(final String name) {
 		if (containsHeaders() && (null != headers)) {
-			return headers.remove(HeaderName.valueOf(name));
+			headers.removeHeader(name);
 		}
-		return null;
 	}
 
 	/**
@@ -691,7 +584,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 */
 	public String getContentId() {
 		if (!b_contentId) {
-			final String cid = getHeader(MessageHeaders.HDR_CONTENT_ID);
+			final String cid = getFirstHeader(MessageHeaders.HDR_CONTENT_ID);
 			if (cid != null) {
 				setContentId(cid);
 			}
@@ -771,8 +664,9 @@ public abstract class MailPart implements Serializable, Cloneable {
 		if (b_msgref) {
 			return msgref;
 		}
-		final String xMsgref = removeHeader(MessageHeaders.HDR_X_OXMSGREF);
+		final String xMsgref = getFirstHeader(MessageHeaders.HDR_X_OXMSGREF);
 		if (null != xMsgref) {
+			removeHeader(MessageHeaders.HDR_X_OXMSGREF);
 			b_msgref = true;
 			try {
 				msgref = new MailPath(xMsgref);
@@ -823,7 +717,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 				clone.contentType = new ContentType(contentType.toString());
 			}
 			if (null != headers) {
-				clone.headers = new HashMap<HeaderName, String>(headers);
+				clone.headers = new HeaderCollection(headers);
 			}
 			return clone;
 		} catch (final CloneNotSupportedException e) {

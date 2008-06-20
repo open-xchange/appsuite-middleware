@@ -113,7 +113,7 @@ public final class ImageMessageHandler implements MailMessageHandler {
 				/*
 				 * Try to read from headers
 				 */
-				cid = part.getHeader(MessageHeaders.HDR_CONTENT_ID);
+				cid = part.getFirstHeader(MessageHeaders.HDR_CONTENT_ID);
 				if (cid == null || cid.length() == 0) {
 					/*
 					 * Compare with filename

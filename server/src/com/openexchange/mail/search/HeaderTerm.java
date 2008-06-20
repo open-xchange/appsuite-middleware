@@ -98,7 +98,7 @@ public final class HeaderTerm extends SearchTerm<String[]> {
 
 	@Override
 	public boolean matches(final MailMessage mailMessage) {
-		final String val = mailMessage.getHeader(hdr[0]);
+		final String val = mailMessage.getHeader(hdr[0], ", ");
 		if (val == null) {
 			if (hdr[1] == null) {
 				return true;

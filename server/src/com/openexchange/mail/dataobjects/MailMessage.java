@@ -55,7 +55,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -274,28 +273,28 @@ public abstract class MailMessage extends MailPart {
 	/**
 	 * From addresses
 	 */
-	private Set<InternetAddress> from;
+	private HashSet<InternetAddress> from;
 
 	private boolean b_from;
 
 	/**
 	 * To addresses
 	 */
-	private Set<InternetAddress> to;
+	private HashSet<InternetAddress> to;
 
 	private boolean b_to;
 
 	/**
 	 * Cc addresses
 	 */
-	private Set<InternetAddress> cc;
+	private HashSet<InternetAddress> cc;
 
 	private boolean b_cc;
 
 	/**
 	 * Bcc addresses
 	 */
-	private Set<InternetAddress> bcc;
+	private HashSet<InternetAddress> bcc;
 
 	private boolean b_bcc;
 
@@ -330,7 +329,7 @@ public abstract class MailMessage extends MailPart {
 	/**
 	 * User flags
 	 */
-	private Set<HeaderName> userFlags;
+	private HashSet<HeaderName> userFlags;
 
 	private boolean b_userFlags;
 
@@ -438,7 +437,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public InternetAddress[] getFrom() {
 		if (!b_from) {
-			final String fromStr = getHeader(MessageHeaders.HDR_FROM);
+			final String fromStr = getFirstHeader(MessageHeaders.HDR_FROM);
 			if (fromStr == null) {
 				return EMPTY_ADDRS;
 			}
@@ -507,7 +506,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public InternetAddress[] getTo() {
 		if (!b_to) {
-			final String toStr = getHeader(MessageHeaders.HDR_TO);
+			final String toStr = getFirstHeader(MessageHeaders.HDR_TO);
 			if (toStr == null) {
 				return EMPTY_ADDRS;
 			}
@@ -576,7 +575,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public InternetAddress[] getCc() {
 		if (!b_cc) {
-			final String ccStr = getHeader(MessageHeaders.HDR_CC);
+			final String ccStr = getFirstHeader(MessageHeaders.HDR_CC);
 			if (ccStr == null) {
 				return EMPTY_ADDRS;
 			}
@@ -645,7 +644,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public InternetAddress[] getBcc() {
 		if (!b_bcc) {
-			final String bccStr = getHeader(MessageHeaders.HDR_TO);
+			final String bccStr = getFirstHeader(MessageHeaders.HDR_TO);
 			if (bccStr == null) {
 				return EMPTY_ADDRS;
 			}
@@ -878,7 +877,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public String getSubject() {
 		if (!b_subject) {
-			final String subjectStr = getHeader(MessageHeaders.HDR_SUBJECT);
+			final String subjectStr = getFirstHeader(MessageHeaders.HDR_SUBJECT);
 			if (subjectStr != null) {
 				setSubject(MIMEMessageUtility.decodeMultiEncodedHeader(subjectStr));
 			}
@@ -920,7 +919,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public Date getSentDate() {
 		if (!b_sentDate) {
-			final String sentDateStr = getHeader(MessageHeaders.HDR_DATE);
+			final String sentDateStr = getFirstHeader(MessageHeaders.HDR_DATE);
 			if (sentDateStr != null) {
 				setSentDate(DateUtils.getDateRFC822(sentDateStr));
 			}
@@ -1105,7 +1104,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public int getPriority() {
 		if (!b_priority) {
-			final String prioStr = getHeader(MessageHeaders.HDR_X_PRIORITY);
+			final String prioStr = getFirstHeader(MessageHeaders.HDR_X_PRIORITY);
 			if (prioStr != null) {
 				setPriority(MIMEMessageConverter.parsePriority(prioStr));
 			}
@@ -1147,7 +1146,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public InternetAddress getDispositionNotification() {
 		if (!b_dispositionNotification) {
-			final String dispNotTo = getHeader(MessageHeaders.HDR_DISP_NOT_TO);
+			final String dispNotTo = getFirstHeader(MessageHeaders.HDR_DISP_NOT_TO);
 			if (dispNotTo != null) {
 				try {
 					setDispositionNotification(new InternetAddress(dispNotTo, true));

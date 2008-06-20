@@ -207,7 +207,7 @@ public final class MIMEMessageUtility {
 		if (part.getFileName() != null) {
 			return part.getFileName();
 		}
-		final String hdr = part.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION);
+		final String hdr = part.getFirstHeader(MessageHeaders.HDR_CONTENT_DISPOSITION);
 		if (hdr == null) {
 			return getContentTypeFilename(part);
 		}
@@ -228,7 +228,7 @@ public final class MIMEMessageUtility {
 		if (part.containsContentType()) {
 			return part.getContentType().getParameter(PARAM_NAME);
 		}
-		final String hdr = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+		final String hdr = part.getFirstHeader(MessageHeaders.HDR_CONTENT_TYPE);
 		if (hdr == null || hdr.length() == 0) {
 			return null;
 		}

@@ -133,7 +133,7 @@ public final class InlineContentHandler implements MailMessageHandler {
 		if (part.getContentType().isMimeType(MIMETypes.MIME_IMAGE_ALL)) {
 			String partCid = part.getContentId();
 			if (partCid == null || partCid.length() == 0) {
-				partCid = part.getHeader(MessageHeaders.HDR_CONTENT_ID);
+				partCid = part.getFirstHeader(MessageHeaders.HDR_CONTENT_ID);
 			}
 			partCid = partCid == null ? "" : partCid;
 			String realFilename = MIMEMessageUtility.getRealFilename(part);

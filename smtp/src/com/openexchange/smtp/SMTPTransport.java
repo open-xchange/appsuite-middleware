@@ -333,7 +333,7 @@ public final class SMTPTransport extends MailTransport {
 			ct.setContentType(CT_READ_ACK);
 			{
 				final MimeBodyPart ack = new MimeBodyPart();
-				final String msgId = srcMail.getHeader(MessageHeaders.HDR_MESSAGE_ID);
+				final String msgId = srcMail.getFirstHeader(MessageHeaders.HDR_MESSAGE_ID);
 				ack.setText(strHelper.getString(ACK_TEXT).replaceFirst("#FROM#", quoteReplacement(from)).replaceFirst(
 						"#MSG ID#", quoteReplacement(msgId)), defaultMimeCS);
 				ack.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");

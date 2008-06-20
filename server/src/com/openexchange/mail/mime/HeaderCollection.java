@@ -75,12 +75,17 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class HeaderCollection implements Serializable {
+public class HeaderCollection implements Serializable {
 
 	private static final long serialVersionUID = 6939560514144351286L;
 
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(HeaderCollection.class);
+
+	/**
+	 * Read-only constant for an empty header collection
+	 */
+	public static final HeaderCollection EMPTY_COLLECTION = new HeaderCollection(0).getReadOnlyCollection();
 
 	private static final String CRLF = "\r\n";
 
@@ -93,7 +98,8 @@ public final class HeaderCollection implements Serializable {
 	private int count;
 
 	/**
-	 * Initializes a new {@link HeaderCollection}
+	 * Initializes a new {@link HeaderCollection} with a default initial
+	 * capacity of <code>40</code>.
 	 */
 	public HeaderCollection() {
 		this(40);
@@ -103,7 +109,7 @@ public final class HeaderCollection implements Serializable {
 	 * Initializes a new {@link HeaderCollection}
 	 * 
 	 * @param initialCapacity
-	 *            The initial capacity of this header colelction
+	 *            The collection's initial capacity
 	 */
 	public HeaderCollection(final int initialCapacity) {
 		super();
@@ -154,6 +160,16 @@ public final class HeaderCollection implements Serializable {
 	public HeaderCollection(final InputStream inputStream) throws MailException {
 		this();
 		load(inputStream);
+	}
+
+	/**
+	 * Gets a read-only {@link HeaderCollection collection} constructed from
+	 * this collection's current content
+	 * 
+	 * @return A read-only {@link HeaderCollection collection}
+	 */
+	public HeaderCollection getReadOnlyCollection() {
+		return new ReadOnlyHeaderCollection(this);
 	}
 
 	/**
@@ -262,7 +278,7 @@ public final class HeaderCollection implements Serializable {
 		}
 	}
 
-	private void addHeaderLine(final String headerLine) {
+	private final void addHeaderLine(final String headerLine) {
 		final int pos = headerLine.indexOf(": ");
 		if (pos == -1) {
 			throw new IllegalStateException("Invalid header line: " + headerLine);
@@ -360,7 +376,7 @@ public final class HeaderCollection implements Serializable {
 		putHeader(name, value, true);
 	}
 
-	private void putHeader(final String name, final String value, final boolean clear) {
+	private final void putHeader(final String name, final String value, final boolean clear) {
 		if (isInvalid(name, true)) {
 			throw new IllegalArgumentException("Header name is invalid");
 		} else if (isInvalid(value, false)) {
@@ -624,6 +640,41 @@ public final class HeaderCollection implements Serializable {
 
 	}
 
+	private static final class ReadOnlyHeaderCollection extends HeaderCollection {
+
+		private static final long serialVersionUID = 3272885948579962027L;
+
+		public ReadOnlyHeaderCollection(final HeaderCollection headers) {
+			super(headers);
+		}
+
+		@Override
+		public void addHeader(final String name, final String value) {
+			throw new UnsupportedOperationException("ReadOnlyHeaderCollection.addHeader() is not supported");
+		}
+
+		@Override
+		public void setHeader(final String name, final String value) {
+			throw new UnsupportedOperationException("ReadOnlyHeaderCollection.setHeader() is not supported");
+		}
+
+		@Override
+		public void load(final String headersSrc) {
+			throw new UnsupportedOperationException("ReadOnlyHeaderCollection.load() is not supported");
+		}
+
+		@Override
+		public void load(final InputStream inputStream) {
+			throw new UnsupportedOperationException("ReadOnlyHeaderCollection.load() is not supported");
+		}
+
+		@Override
+		public void removeHeader(final String name) {
+			throw new UnsupportedOperationException("ReadOnlyHeaderCollection.removeHeader() is not supported");
+		}
+
+	}
+
 	/**
 	 * Specified string is invalid if it is <code>null</code>, empty, its
 	 * characters are whitespace characters only or contains Non-ASCII 7 bit
@@ -633,7 +684,7 @@ public final class HeaderCollection implements Serializable {
 	 * @return <code>true</code> if string is invalid; otherwise
 	 *         <code>false</code>
 	 */
-	private static boolean isInvalid(final String str, final boolean isName) {
+	private static final boolean isInvalid(final String str, final boolean isName) {
 		if (str == null) {
 			return true;
 		}
@@ -668,7 +719,7 @@ public final class HeaderCollection implements Serializable {
 	 * @return <code>true</code> if string's characters are ASCII 7 bit;
 	 *         otherwise <code>false</code>
 	 */
-	private static boolean isAscii(final String s) {
+	private static final boolean isAscii(final String s) {
 		final char[] chars = s.toCharArray();
 		boolean isAscci = true;
 		for (int i = 0; (i < chars.length) && isAscci; i++) {
@@ -680,7 +731,7 @@ public final class HeaderCollection implements Serializable {
 	/**
 	 * Simple test method
 	 */
-	public static void test() {
+	public static final void test() {
 		try {
 			final HeaderCollection hc = new HeaderCollection();
 

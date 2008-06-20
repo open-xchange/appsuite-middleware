@@ -457,15 +457,15 @@ public class MIMEMessageFiller {
 	 */
 	public void setReplyHeaders(final MailMessage referencedMail, final MimeMessage mimeMessage)
 			throws MessagingException {
-		final String pMsgId = referencedMail.getHeader(MessageHeaders.HDR_MESSAGE_ID);
+		final String pMsgId = referencedMail.getFirstHeader(MessageHeaders.HDR_MESSAGE_ID);
 		if (pMsgId != null) {
 			mimeMessage.setHeader(MessageHeaders.HDR_IN_REPLY_TO, pMsgId);
 		}
 		/*
 		 * Set References header field
 		 */
-		final String pReferences = referencedMail.getHeader(MessageHeaders.HDR_REFERENCES);
-		final String pInReplyTo = referencedMail.getHeader(MessageHeaders.HDR_IN_REPLY_TO);
+		final String pReferences = referencedMail.getFirstHeader(MessageHeaders.HDR_REFERENCES);
+		final String pInReplyTo = referencedMail.getFirstHeader(MessageHeaders.HDR_IN_REPLY_TO);
 		final StringBuilder refBuilder = new StringBuilder();
 		if (pReferences != null) {
 			/*

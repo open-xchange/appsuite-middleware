@@ -59,7 +59,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -97,6 +96,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.FullnameFolder;
+import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
@@ -1441,7 +1441,7 @@ public final class MIMEMessageConverter {
 				}
 			}
 			mail.setFileName(filename);
-			parsePriority(mail.getHeader(MessageHeaders.HDR_X_PRIORITY), mail);
+			parsePriority(mail.getFirstHeader(MessageHeaders.HDR_X_PRIORITY), mail);
 			if (msg.getReceivedDate() != null) {
 				mail.setReceivedDate(msg.getReceivedDate());
 			} else {
@@ -1788,17 +1788,16 @@ public final class MIMEMessageConverter {
 
 	private static final int DEFAULT_MESSAGE_SIZE = 8192;
 
-	@SuppressWarnings("unchecked")
 	private static void setHeaders(final Part part, final MailPart mailPart) {
 		/*
 		 * HEADERS
 		 */
-		Map<String, String> headerMap = null;
+		HeaderCollection headers = null;
 		try {
-			headerMap = new HashMap<String, String>();
-			for (final Enumeration<Header> e = part.getAllHeaders(); e.hasMoreElements();) {
-				final Header h = e.nextElement();
-				headerMap.put(h.getName(), h.getValue());
+			headers = new HeaderCollection();
+			for (final Enumeration<?> e = part.getAllHeaders(); e.hasMoreElements();) {
+				final Header h = (Header) e.nextElement();
+				headers.addHeader(h.getName(), h.getValue());
 			}
 		} catch (final MessagingException e) {
 			if (LOG.isWarnEnabled()) {
@@ -1807,33 +1806,34 @@ public final class MIMEMessageConverter {
 			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
 			try {
 				part.writeTo(out);
-				headerMap = loadHeaders(new String(out.toByteArray(), "US-ASCII"));
+				headers = loadHeaders(new String(out.toByteArray(), "US-ASCII"));
 			} catch (final IOException e2) {
 				LOG.error("Unable to parse headers", e2);
-				headerMap = new HashMap<String, String>(0);
+				headers = new HeaderCollection(0);
 			} catch (final MessagingException e2) {
 				LOG.error("Unable to parse headers", e2);
-				headerMap = new HashMap<String, String>(0);
+				headers = new HeaderCollection(0);
 			}
 
 		}
-		mailPart.addHeaders(headerMap);
+		mailPart.addHeaders(headers);
 	}
 
 	/**
-	 * Parses given headers' {@link InputStream input stream} into a {@link Map
-	 * map} until EOF or 2 subsequent CRLFs occur.
+	 * Parses given headers' {@link InputStream input stream} into a
+	 * {@link HeaderCollection collection} until EOF or 2 subsequent CRLFs
+	 * occur.
 	 * <p>
 	 * This is a convenience method that delegates to
 	 * {@link #loadHeaders(byte[])}.
 	 * 
 	 * @param inputStream
 	 *            The headers' {@link InputStream input stream}
-	 * @return The parsed headers as a {@link Map map}.
+	 * @return The parsed headers as a {@link HeaderCollection collection}.
 	 * @throws IOException
 	 *             If an I/O error occurs.
 	 */
-	public static Map<String, String> loadHeaders(final InputStream inputStream) throws IOException {
+	public static HeaderCollection loadHeaders(final InputStream inputStream) throws IOException {
 		final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
 		final byte[] bbuf = new byte[DEFAULT_MESSAGE_SIZE];
 		int read = -1;
@@ -1844,17 +1844,18 @@ public final class MIMEMessageConverter {
 	}
 
 	/**
-	 * Parses given headers' <code>byte</code> array into a {@link Map map}
-	 * until EOF or 2 subsequent CRLFs occur.
+	 * Parses given headers' <code>byte</code> array into a
+	 * {@link HeaderCollection collection} until EOF or 2 subsequent CRLFs
+	 * occur.
 	 * <p>
 	 * This is a convenience method that delegates to
 	 * {@link #loadHeaders(String)}.
 	 * 
 	 * @param bytes
 	 *            The headers' <code>byte</code> array
-	 * @return The parsed headers as a {@link Map map}.
+	 * @return The parsed headers as a {@link HeaderCollection collection}.
 	 */
-	public static Map<String, String> loadHeaders(final byte[] bytes) {
+	public static HeaderCollection loadHeaders(final byte[] bytes) {
 		try {
 			return loadHeaders(new String(bytes, "US-ASCII"));
 		} catch (final UnsupportedEncodingException e) {
@@ -1862,21 +1863,21 @@ public final class MIMEMessageConverter {
 			 * Cannot occur
 			 */
 			LOG.error(e.getMessage(), e);
-			return new HashMap<String, String>(0);
+			return new HeaderCollection(0);
 		}
 	}
 
 	private static final Pattern PATTERN_PARSE_HEADER = Pattern.compile("(\\S+):\\p{Blank}(.*)(?:(?:\r?\n)|(?:$))");
 
 	/**
-	 * Parses given message source's headers into a {@link Map map} until EOF or
-	 * 2 subsequent CRLFs occur.
+	 * Parses given message source's headers into a {@link HeaderCollection
+	 * collection} until EOF or 2 subsequent CRLFs occur.
 	 * 
 	 * @param messageSrc
 	 *            The message source
-	 * @return The parsed headers as a {@link Map map}.
+	 * @return The parsed headers as a {@link HeaderCollection collection}.
 	 */
-	public static Map<String, String> loadHeaders(final String messageSrc) {
+	public static HeaderCollection loadHeaders(final String messageSrc) {
 		/*
 		 * Determine position of double line break
 		 */
@@ -1902,11 +1903,11 @@ public final class MIMEMessageConverter {
 		 * Parse single headers
 		 */
 		final Matcher m = PATTERN_PARSE_HEADER.matcher(unfold(messageSrc.substring(0, i)));
-		final Map<String, String> retval = new HashMap<String, String>();
+		final HeaderCollection headers = new HeaderCollection();
 		while (m.find()) {
-			retval.put(m.group(1), m.group(2));
+			headers.addHeader(m.group(1), m.group(2));
 		}
-		return retval;
+		return headers;
 	}
 
 	private static InternetAddress[] getAddressesOnParseError(final String[] addrs) {
