@@ -66,6 +66,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.ParameterValue;
+import com.openexchange.tools.versit.ParameterValueDefinition;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
@@ -125,6 +126,15 @@ public class OldPropertyDefinition {
 				final Parameter parameter = new Parameter(param);
 				paramdef.parse(s, parameter);
 				property.addParameter(parameter);
+				while (s.peek == ',') {
+					// New parameter value definition in old VCard
+					s.read();
+					final ParameterValue parameterValue = ParameterValueDefinition.Default.parse(s);
+					if (parameterValue != null) {
+						parameter.addValue(parameterValue);
+					}
+				}
+				
 			} else {
 				final String paramname = ParamValues.get(param);
 				if (paramname != null) {

@@ -4,6 +4,8 @@
    truncation error
  - Bugfix #11257: Fixed computing duration of a recurring appointment
    without altering Calendar object of "DTSTART" field
+ - Bugfix #10951: Supporting multiple comma-separated parameter values in
+   older VCard object
 
 * 2008-06-20 - marcus.klein@open-xchange.com
 

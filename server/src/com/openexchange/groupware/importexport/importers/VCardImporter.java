@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.importexport.importers;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -86,6 +85,7 @@ import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
@@ -232,7 +232,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 				
 				if(def != null){
 					final VersitDefinition.Reader versitReader = def.getReader(
-							new ByteArrayInputStream(chunk.getContent()), "UTF-8");
+							new UnsynchronizedByteArrayInputStream(chunk.getContent()), "UTF-8");
 					try {
 						final VersitObject versitObject = def.parse(versitReader);
 						

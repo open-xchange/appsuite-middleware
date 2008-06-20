@@ -58,6 +58,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -1042,7 +1043,16 @@ public class OXContainerConverter {
 			}
 			// CATEGORIES
 			else if (property.name.equals("CATEGORIES")) {
-				cats.addAll((ArrayList) property.getValue());
+				final Object value =  property.getValue();
+				if (value != null) {
+					if (value instanceof ArrayList) {
+						cats.addAll((ArrayList) value);
+					} else if (value instanceof String) {
+						cats.addAll(Arrays.asList(value.toString().split(" *, *")));
+					} else {
+						LOG.error("Unexpected class: " + value.getClass().getName());
+					}
+				}
 			}
 		}
 		ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.CATEGORIES)), cats, ",");
