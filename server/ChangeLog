@@ -1,3 +1,8 @@
+* 2008-06-20 - thorben.betten@open-xchange.com
+
+ - Bugfix #11909: Setting proper category TRUNCATED on a SQL data
+   truncation error
+
 * 2008-06-20 - marcus.klein@open-xchange.com
 
  - Bugfix #11397: Removed identifier from external participants in JSON.
