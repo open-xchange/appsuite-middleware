@@ -111,6 +111,7 @@ public class OldPropertyDefinition {
 
 	public void parse(final OldScanner s, final Property property) throws IOException {
 		s.skipWS();
+		boolean uri = false;
 		while (s.peek == ';') {
 			s.read();
 			s.skipWS();
@@ -124,7 +125,7 @@ public class OldPropertyDefinition {
 					paramdef = OldParamDefinition.Default;
 				}
 				final Parameter parameter = new Parameter(param);
-				paramdef.parse(s, parameter);
+				paramdef.parse(s, parameter, (uri = "URI".equals(param)));
 				property.addParameter(parameter);
 				while (s.peek == ',') {
 					// New parameter value definition in old VCard
@@ -150,6 +151,10 @@ public class OldPropertyDefinition {
 			s.skipWS();
 		}
 		if (s.peek != ':') {
+			if (uri) {
+				property.setValue("");
+				return;
+			}
 			throw new VersitException(s, "':' expected");
 		}
 		s.read();

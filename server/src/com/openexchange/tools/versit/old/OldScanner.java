@@ -134,4 +134,12 @@ public class OldScanner extends Scanner {
 		return sb.toString();
 	}
 
+	public String parseURI() throws IOException {
+		final StringBuilder sb = new StringBuilder();
+		while (peek > ' ' && peek < 127) {
+			sb.append((char) read());
+		}
+		return sb.toString();
+	}
+
 }

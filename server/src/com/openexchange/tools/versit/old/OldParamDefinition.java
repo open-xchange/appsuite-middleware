@@ -85,4 +85,8 @@ public class OldParamDefinition {
 	public void parse(final OldScanner s, final Parameter parameter) throws IOException {
 		parameter.addValue(new ParameterValue(s.parseWord()));
 	}
+
+	public void parse(final OldScanner s, final Parameter parameter, final boolean isURI) throws IOException {
+		parameter.addValue(isURI ? new ParameterValue(s.parseURI()) : new ParameterValue(s.parseWord()));
+	}
 }

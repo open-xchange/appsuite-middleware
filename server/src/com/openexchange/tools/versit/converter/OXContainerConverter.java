@@ -855,7 +855,7 @@ public class OXContainerConverter {
 						}
 						bytes = value.getBytes("ISO-8859-1");
 						if (bytes.length > Integer.parseInt(ContactConfig.getProperty("max_image_size"))) {
-							LOG.warn("Contact image is too large and is therefore ignored");
+							LOG.warn("Contact image is too large and is therefore ignored", new Throwable());
 							bytes = null;
 						}
 					} finally {
