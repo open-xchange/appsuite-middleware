@@ -434,16 +434,19 @@ public final class MIMEMessageUtility {
 	private static final Pattern PATTERN_REPLACE = Pattern.compile("([^\"]\\S+?)(\\s*)([;])(\\s*)");
 
 	private static String replaceWithComma(final String addressList) {
-		final StringBuilder sb = new StringBuilder(addressList.length());
 		final Matcher m = PATTERN_REPLACE.matcher(addressList);
-		int lastMatch = 0;
-		while (m.find()) {
-			sb.append(addressList.substring(lastMatch, m.start()));
-			sb.append(m.group(1)).append(m.group(2)).append(',').append(m.group(4));
-			lastMatch = m.end();
+		if (m.find()) {
+			final StringBuilder sb = new StringBuilder(addressList.length());
+			int lastMatch = 0;
+			do {
+				sb.append(addressList.substring(lastMatch, m.start()));
+				sb.append(m.group(1)).append(m.group(2)).append(',').append(m.group(4));
+				lastMatch = m.end();
+			} while (m.find());
+			sb.append(addressList.substring(lastMatch));
+			return sb.toString();
 		}
-		sb.append(addressList.substring(lastMatch));
-		return sb.toString();
+		return addressList;
 	}
 
 	private static final Pattern PAT_QUOTED = Pattern.compile("(^\")([^\"]+?)(\"$)");
