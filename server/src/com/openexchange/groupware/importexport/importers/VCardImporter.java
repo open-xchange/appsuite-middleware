@@ -256,13 +256,13 @@ public class VCardImporter extends AbstractImporter {
 				list.add(importResult);
 			}
 		} catch (final UnsupportedEncodingException e) {
-			LOG.fatal(e);
+			LOG.fatal(e.getMessage(), e);
 			throw importExportExceptionFactory.create(6);
 		} catch (final IOException e) {
-			LOG.error(e);
+			LOG.error(e.getMessage(), e);
 			throw importExportExceptionFactory.create(4, Integer.valueOf(contactFolderId));
 		} catch (final ConverterException e) {
-			LOG.error(e);
+			LOG.error(e.getMessage(), e);
 			throw importExportExceptionFactory.create(1, e);
 		} finally {
 			if (oxContainerConverter != null) {
