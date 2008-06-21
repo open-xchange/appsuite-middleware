@@ -1131,9 +1131,11 @@ public class OXContainerConverter {
 				}
 			}
 		} catch (final java.net.SocketTimeoutException e) {
-			LOG.warn("Either connecting to or reading from an image's URI timed out: " + urlStr, e);
+			LOG.warn(new StringBuilder(64 + urlStr.length()).append(
+					"Either connecting to or reading from an image's URI timed out: ").append(urlStr).toString(), e);
 		} catch (final IOException e) {
-			LOG.warn("Image  URI could not be loaded: " + urlStr, e);
+			LOG.warn(new StringBuilder(32 + urlStr.length()).append("Image  URI could not be loaded: ").append(urlStr)
+					.toString(), e);
 		}
 		if (bytes != null) {
 			contactContainer.setImage1(bytes);

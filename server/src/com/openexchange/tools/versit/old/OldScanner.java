@@ -70,7 +70,7 @@ public class OldScanner extends Scanner {
 	public String DefaultCharset = "US-ASCII";
 
 	public OldScanner(final InputStream is) throws IOException {
-		r = new PushbackInputStream(is);
+		r = new PushbackInputStream(is, 2);
 		peek = readImpl();
 	}
 
@@ -135,11 +135,38 @@ public class OldScanner extends Scanner {
 	}
 
 	public String parseURI() throws IOException {
-		final StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder(32);
 		while (peek > ' ' && peek < 127) {
+			if (peek == ':') {
+				final int n1 = r.read();
+				final int n2 = r.read();
+				r.unread(n2);
+				r.unread(n1);
+				if (n1 != '/' || n2 != '/' || !isValidProtocol(sb.toString())) {
+					// Invalid protocol
+					break;
+				}
+			}
 			sb.append((char) read());
 		}
 		return sb.toString();
 	}
 
+	private static boolean isValidProtocol(final String protocol) {
+		final int len = protocol.length();
+		if (len < 1) {
+			return false;
+		}
+		char c = protocol.charAt(0);
+		if (!Character.isLetter(c)) {
+			return false;
+		}
+		for (int i = 1; i < len; i++) {
+			c = protocol.charAt(i);
+			if (!Character.isLetterOrDigit(c) && (c != '.') && (c != '+') && (c != '-')) {
+				return false;
+			}
+		}
+		return true;
+	}
 }
