@@ -143,6 +143,8 @@ public class OXContainerConverter {
 
 	private static final Map<Integer, Method> SET_FLOAT_METHODS = new HashMap<Integer, Method>();
 
+	private static final String CHARSET_ISO_8859_1 = "ISO-8859-1";
+
 	private static Method getSetIntegerMethod(final Class<?> containerObjClass, final String methodName) {
 		return getSetMethod(containerObjClass, methodName, int.class);
 	}
@@ -511,14 +513,14 @@ public class OXContainerConverter {
 		this.timezone = TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
 	}
 
-    public OXContainerConverter(final Session session, final Context ctx, final TimeZone tz) {
-        super();
-        this.session = session;
-        this.ctx = ctx;
-        this.timezone = tz;
-    }
+	public OXContainerConverter(final Session session, final Context ctx, final TimeZone tz) {
+		super();
+		this.session = session;
+		this.ctx = ctx;
+		this.timezone = tz;
+	}
 
-    public void close() {
+	public void close() {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("OXContainerConverter.close()");
 		}
@@ -816,7 +818,8 @@ public class OXContainerConverter {
 				String value;
 				if (property.getValue() instanceof byte[]) {
 					try {
-						value = new BASE64Encoding().encode(new String((byte[]) property.getValue(), "ISO-8859-1"));
+						value = new BASE64Encoding()
+								.encode(new String((byte[]) property.getValue(), CHARSET_ISO_8859_1));
 					} catch (final IOException e) {
 						final ConverterException ce = new ConverterException(e.getMessage());
 						ce.initCause(e);
@@ -826,51 +829,14 @@ public class OXContainerConverter {
 					value = property.getValue().toString();
 				}
 				try {
-					contactContainer.setImage1(value.getBytes("ISO-8859-1"));
+					contactContainer.setImage1(value.getBytes(CHARSET_ISO_8859_1));
 				} catch (final UnsupportedEncodingException e) {
 					LOG.error("Image could not be set", e);
 				}
 			} else {
-				final String urlStr = uriParam.getValue(0).getText();
-				
-				byte[] bytes = null;
-				try {
-					final URLConnection conn = new URL(urlStr).openConnection();
-					conn.connect();
-					final BufferedInputStream in = new BufferedInputStream(conn.getInputStream());
-					try {
-						final ByteArrayOutputStream byteArrayOut = new UnsynchronizedByteArrayOutputStream();
-						int c;
-						while ((c = in.read()) != -1) {
-						  byteArrayOut.write(c);
-						}
-						// Now the byteArrayOut contains the whole image data.
-						final String value;
-						try {
-							value = new BASE64Encoding().encode(new String(byteArrayOut.toByteArray(), "ISO-8859-1"));
-						} catch (final IOException e) {
-							final ConverterException ce = new ConverterException(e.getMessage());
-							ce.initCause(e);
-							throw ce;
-						}
-						bytes = value.getBytes("ISO-8859-1");
-						if (bytes.length > Integer.parseInt(ContactConfig.getProperty("max_image_size"))) {
-							LOG.warn("Contact image is too large and is therefore ignored", new Throwable());
-							bytes = null;
-						}
-					} finally {
-						try {
-							in.close();
-						} catch (final IOException e) {
-							LOG.error(e.getMessage(), e);
-						}
-					}
-				} catch (final IOException e) {
-					LOG.warn("Image  URI could not be loaded: " + uriParam.getValue(0).getText(), e);
-				}
-				if (bytes != null) {
-					contactContainer.setImage1(bytes);
-					contactContainer.setImageContentType(getMimeType(urlStr));
+				if (uriParam.getValueCount() == 1) {
+					// We expect that the URI/URL is parametes's only value
+					loadImageFromURL(contactContainer, uriParam);
 				}
 			}
 		}
@@ -1095,7 +1061,7 @@ public class OXContainerConverter {
 			}
 			// CATEGORIES
 			else if (property.name.equals("CATEGORIES")) {
-				final Object value =  property.getValue();
+				final Object value = property.getValue();
 				if (value != null) {
 					if (value instanceof ArrayList) {
 						cats.addAll((ArrayList) value);
@@ -1112,7 +1078,70 @@ public class OXContainerConverter {
 		return contactContainer;
 	}
 
-	private boolean IntegerProperty(final Object containerObj, final VersitObject object, final String VersitName,
+	/**
+	 * Open a new {@link URLConnection URL connection} to specified parameter's
+	 * value which indicates to be an URI/URL. The image's data and its MIME
+	 * type is then read from opened connection and put into given
+	 * {@link ContactObject contact container}.
+	 * 
+	 * @param contactContainer
+	 *            The contact container to fill
+	 * @param uriParam
+	 *            The parameter keeping the URI in its value
+	 * @throws ConverterException
+	 *             If converting image's data fails
+	 */
+	private static void loadImageFromURL(final ContactObject contactContainer, final Parameter uriParam)
+			throws ConverterException {
+		final String urlStr = uriParam.getValue(0).getText();
+		String mimeType = null;
+		byte[] bytes = null;
+		try {
+			final URLConnection urlCon = new URL(urlStr).openConnection();
+			urlCon.setConnectTimeout(2500);
+			urlCon.setReadTimeout(2500);
+			urlCon.connect();
+			mimeType = urlCon.getContentType();
+			final BufferedInputStream in = new BufferedInputStream(urlCon.getInputStream());
+			try {
+				final ByteArrayOutputStream buffer = new UnsynchronizedByteArrayOutputStream();
+				final byte[] bbuf = new byte[8192];
+				int read = -1;
+				while ((read = in.read(bbuf, 0, bbuf.length)) != -1) {
+					buffer.write(bbuf, 0, read);
+				}
+				final String value;
+				try {
+					value = new BASE64Encoding().encode(new String(buffer.toByteArray(), CHARSET_ISO_8859_1));
+				} catch (final IOException e) {
+					final ConverterException ce = new ConverterException(e.getMessage());
+					ce.initCause(e);
+					throw ce;
+				}
+				bytes = value.getBytes(CHARSET_ISO_8859_1);
+				if (bytes.length > Integer.parseInt(ContactConfig.getProperty("max_image_size"))) {
+					LOG.warn("Contact image is too large and is therefore ignored", new Throwable());
+					bytes = null;
+				}
+			} finally {
+				try {
+					in.close();
+				} catch (final IOException e) {
+					LOG.error(e.getMessage(), e);
+				}
+			}
+		} catch (final java.net.SocketTimeoutException e) {
+			LOG.warn("Either connecting to or reading from an image's URI timed out: " + urlStr, e);
+		} catch (final IOException e) {
+			LOG.warn("Image  URI could not be loaded: " + urlStr, e);
+		}
+		if (bytes != null) {
+			contactContainer.setImage1(bytes);
+			contactContainer.setImageContentType(mimeType == null ? getMimeType(urlStr) : mimeType);
+		}
+	}
+
+	private static boolean IntegerProperty(final Object containerObj, final VersitObject object, final String VersitName,
 			final Method setStringMethod) throws ConverterException {
 		try {
 			final Property property = object.getProperty(VersitName);
@@ -1131,7 +1160,7 @@ public class OXContainerConverter {
 		}
 	}
 
-	private boolean StringProperty(final Object containerObj, final VersitObject object, final String VersitName,
+	private static boolean StringProperty(final Object containerObj, final VersitObject object, final String VersitName,
 			final Method setStringMethod) throws ConverterException {
 		try {
 			final Property property = object.getProperty(VersitName);
@@ -1146,7 +1175,7 @@ public class OXContainerConverter {
 		}
 	}
 
-	private boolean PrivacyProperty(final Object containerObj, final VersitObject object, final String VersitName,
+	private static boolean PrivacyProperty(final Object containerObj, final VersitObject object, final String VersitName,
 			final Method setPrivacyMethod) throws ConverterException {
 		try {
 			final Property property = object.getProperty(VersitName);
@@ -1242,8 +1271,8 @@ public class OXContainerConverter {
 	 * Finds out whether a user is internal, since internal users get treated
 	 * differently when entering appointments or tasks.
 	 * 
-	 * @param mail -
-	 *            Mail address as string
+	 * @param mail
+	 *            - Mail address as string
 	 * @return true if is internal user, false otherwise
 	 */
 	public boolean isInternalUser(final String mail) {
@@ -1259,8 +1288,8 @@ public class OXContainerConverter {
 	 * Finds an internal user by its e-mail address. Note that an e-mail address
 	 * is unique, but the identifier for an internal user is its id.
 	 * 
-	 * Should only be called after using <code>isInternalUser</code> or you
-	 * have to live with the LdapException.
+	 * Should only be called after using <code>isInternalUser</code> or you have
+	 * to live with the LdapException.
 	 */
 	public User getInternalUser(final String mail) throws LdapException {
 		return UserStorage.getInstance().searchUser(mail, ctx);
@@ -1361,7 +1390,8 @@ public class OXContainerConverter {
 			Property property = alarm.getProperty("ACTION");
 			// if (property != null &&
 			// property.getValue().toString().equalsIgnoreCase("EMAIL")) {
-			if (property != null && property.getValue().toString().equalsIgnoreCase("DISPLAY")) { // bugfix:
+			if (property != null && property.getValue().toString().equalsIgnoreCase("DISPLAY")) { // bugfix
+				// :
 				// 7473
 				property = alarm.getProperty("TRIGGER");
 				if (property != null) {
@@ -1693,7 +1723,7 @@ public class OXContainerConverter {
 		String s = null;
 		if (contact.getImage1() != null) {
 			try {
-				s = new String(contact.getImage1(), "ISO-8859-1");
+				s = new String(contact.getImage1(), CHARSET_ISO_8859_1);
 			} catch (final UnsupportedEncodingException e2) {
 				LOG.error(e2);
 				throw new ConverterException(e2);
@@ -1707,7 +1737,7 @@ public class OXContainerConverter {
 					final Parameter type = new Parameter("TYPE");
 					type.addValue(new ParameterValue("JPEG"));
 					addProperty(object, "PHOTO", "ENCODING", new String[] { "B" },
-							(new BASE64Encoding()).decode(s).getBytes("ISO-8859-1")).addParameter(type);
+							(new BASE64Encoding()).decode(s).getBytes(CHARSET_ISO_8859_1)).addParameter(type);
 				} catch (final IOException e1) {
 					final ConverterException ce = new ConverterException(e.getMessage());
 					ce.initCause(e1);
