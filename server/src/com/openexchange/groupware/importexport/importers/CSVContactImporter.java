@@ -78,7 +78,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.AbstractImporter;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
-import com.openexchange.groupware.importexport.Importer;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
@@ -121,7 +120,7 @@ import com.openexchange.tools.session.ServerSession;
 		"Module Contacts not enabled for user, cannot import contacts"
 		})
 		
-public class CSVContactImporter extends AbstractImporter implements Importer {
+public class CSVContactImporter extends AbstractImporter {
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(CSVContactImporter.class);

@@ -68,10 +68,8 @@ import com.openexchange.groupware.contact.mappers.EnglishOutlookMapper;
 import com.openexchange.groupware.contact.mappers.FrenchOutlookMapper;
 import com.openexchange.groupware.contact.mappers.GermanOutlookMapper;
 import com.openexchange.groupware.importexport.Format;
-import com.openexchange.groupware.importexport.Importer;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
-import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 
 @OXExceptionSource(
 	classId=ImportExportExceptionClasses.OUTLOOKCSVCONTACTIMPORTER, 
@@ -90,9 +88,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
-public class OutlookCSVContactImporter extends CSVContactImporter implements Importer {
-	
-	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(OutlookCSVContactImporter.class);
+public class OutlookCSVContactImporter extends CSVContactImporter {
 	
 	protected ContactFieldMapper fieldMapper;
 	
@@ -124,12 +120,12 @@ public class OutlookCSVContactImporter extends CSVContactImporter implements Imp
 		return "cp1252";
 	}
 
-	@Override
 	/**
 	 * Opposed to the basic CSV importer, this method probes different
 	 * language mappers and sets the correct ContactFieldMapper for this
 	 * class.
 	 */
+	@Override
 	protected boolean checkFields(final List<String> fields) {
 		int de = 0, fr = 0, en = 0;
 		final ContactFieldMapper 	deMap = new GermanOutlookMapper(), 

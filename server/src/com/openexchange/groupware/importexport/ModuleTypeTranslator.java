@@ -94,7 +94,7 @@ public class ModuleTypeTranslator {
 			case FolderObject.MAIL: 		return Types.EMAIL;
 			case FolderObject.TASK: 		return Types.TASK;
 			case FolderObject.CALENDAR: 	return Types.APPOINTMENT;
-			default: throw EXCEPTIONS.create(0,folderObjectConstant);
+			default: throw EXCEPTIONS.create(0,Integer.valueOf(folderObjectConstant));
 		}
 	}
 	
@@ -108,7 +108,7 @@ public class ModuleTypeTranslator {
 			case Types.EMAIL: 		return FolderObject.MAIL;
 			case Types.TASK: 		return FolderObject.TASK;
 			case Types.APPOINTMENT: return FolderObject.CALENDAR;
-			default: throw EXCEPTIONS.create(1,typeConstant);
+			default: throw EXCEPTIONS.create(1,Integer.valueOf(typeConstant));
 		}
 	}
 }
