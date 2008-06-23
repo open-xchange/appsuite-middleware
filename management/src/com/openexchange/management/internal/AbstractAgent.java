@@ -261,7 +261,7 @@ public abstract class AbstractAgent {
 			return;
 		}
 		registries.put(Integer.valueOf(port), registry);
-		printTrace(new StringBuilder(200).append("RMI registry created on port ").append(port).append(
+		printTrace(new StringBuilder(128).append("RMI registry created on port ").append(port).append(
 				" and bind address ").append(bindAddr).toString());
 	}
 
