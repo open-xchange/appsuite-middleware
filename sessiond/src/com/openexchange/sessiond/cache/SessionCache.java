@@ -51,7 +51,6 @@ package com.openexchange.sessiond.cache;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -79,9 +78,7 @@ public final class SessionCache {
 
 	private static final ReadWriteLock READ_WRITE_LOCK = new ReentrantReadWriteLock();
 
-	private static final AtomicBoolean initialized = new AtomicBoolean();
-
-	private static SessionCache singleton;
+	private static volatile SessionCache singleton;
 
 	/**
 	 * Initializes a new {@link SessionCache}
@@ -118,11 +115,10 @@ public final class SessionCache {
 	 *             If instance initialization fails
 	 */
 	public static SessionCache getInstance() throws CacheException {
-		if (!initialized.get()) {
-			synchronized (initialized) {
+		if (null == singleton) {
+			synchronized (SessionCache.class) {
 				if (null == singleton) {
 					singleton = new SessionCache();
-					initialized.set(true);
 				}
 			}
 		}
@@ -133,11 +129,10 @@ public final class SessionCache {
 	 * Releases the singleton instance
 	 */
 	public static void releaseInstance() {
-		if (initialized.get()) {
-			synchronized (initialized) {
+		if (null != singleton) {
+			synchronized (SessionCache.class) {
 				if (null != singleton) {
 					singleton = null;
-					initialized.set(false);
 				}
 			}
 		}
