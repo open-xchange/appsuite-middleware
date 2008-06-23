@@ -130,7 +130,7 @@ public class ManagementAgentImpl extends AbstractAgent implements ManagementServ
 					ip == null ? "localhost" : ip).append(':').append(jmxPort).append("/server").toString();
 			jmxURL = addConnector(jmxURLStr);
 			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(100).append(
+				LOG.info(new StringBuilder(128).append(
 						"\n\n\tUse the JConsole or the MC4J to connect the MBeanServer with this url: ").append(jmxURL)
 						.append("\n").toString());
 			}
