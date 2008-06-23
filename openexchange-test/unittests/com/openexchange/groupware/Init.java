@@ -41,6 +41,7 @@ import com.openexchange.test.TestInit;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 import com.openexchange.tools.servlet.http.HttpManagersInit;
+import com.openexchange.group.internal.GroupInit;
 
 /**
  * This class contains methods for initialising tests.
@@ -148,7 +149,9 @@ public final class Init {
 
 	new com.openexchange.event.impl.EventInit(),
 
-	SessiondInit.getInstance() };
+	SessiondInit.getInstance(),
+
+    new GroupInit()};
 
 	public static void startServer() throws Exception {
 		if (running) {
