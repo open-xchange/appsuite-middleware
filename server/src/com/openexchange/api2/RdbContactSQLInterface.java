@@ -148,7 +148,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 	)
 	public void insertContactObject(final ContactObject co) throws OXException {
 		try{
-			Contacts.performContactStorageInsert(co,userId,memberInGroups,session);
+			Contacts.performContactStorageInsert(co,userId,session);
 			final EventClient ec = new EventClient(session);
 			ec.create(co);
 			/*

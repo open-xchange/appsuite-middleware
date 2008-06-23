@@ -54,7 +54,6 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Connection;
@@ -97,9 +96,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.data.Check;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
-import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
@@ -121,9 +117,18 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
  * 
  */
-
 @OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACTS_CONTACTS, component = EnumComponent.CONTACT)
-public class Contacts implements DeleteListener {
+public final class Contacts {
+
+	private static final String PROP_SCALE_IMAGE_HEIGHT = "scale_image_height";
+
+	private static final String PROP_SCALE_IMAGE_WIDTH = "scale_image_width";
+
+	private static final String PROP_VALIDATE_CONTACT_EMAIL = "validate_contact_email";
+
+	private static final String PROP_SCALE_IMAGES = "scale_images";
+
+	private static final String PROP_MAX_IMAGE_SIZE = "max_image_size";
 
 	private static final String ERR_UNABLE_TO_CLOSE_CON = "Unable to close Connection";
 
@@ -139,13 +144,20 @@ public class Contacts implements DeleteListener {
 
 	public static mapper[] mapping;
 
+	/**
+	 * Prevent instantiation
+	 */
+	private Contacts() {
+		super();
+	}
+
 	@OXThrows(category = Category.USER_INPUT, desc = "0", exceptionId = 0, msg = "The application was unable to validate a given email address from this contact: %s")
-	public static void validateEmailAddress(final ContactObject co) throws OXException {
+	private static void validateEmailAddress(final ContactObject co) throws OXException {
 
 		String email = "";
 		try {
-			if ((ContactConfig.getProperty("validate_contact_email") != null)
-					&& ContactConfig.getProperty("validate_contact_email").equals("true")) {
+			if ((ContactConfig.getProperty(PROP_VALIDATE_CONTACT_EMAIL) != null)
+					&& ContactConfig.getProperty(PROP_VALIDATE_CONTACT_EMAIL).equalsIgnoreCase("true")) {
 				if (co.containsEmail1() && (co.getEmail1() != null)) {
 					email = co.getEmail1();
 					final InternetAddress ia = new InternetAddress(email);
@@ -170,7 +182,7 @@ public class Contacts implements DeleteListener {
 			"70" }, exceptionId = { 1, 2, 70 }, msg = {
 			"Unable to scale this contact image.  Either the file type is not supported or the image is too large. Your mime type is %1$s and your image size is %2$d. The max. allowed image size is %3$d.",
 			"This gif image is too large. It can not be scaled and will not be accepted", "Mime type is null" })
-	public static byte[] scaleContactImage(final byte[] img, String mime) throws OXConflictException, OXException,
+	private static byte[] scaleContactImage(final byte[] img, String mime) throws OXConflictException, OXException,
 			IOException {
 		if (null == mime) {
 			throw EXCEPTIONS.create(70, new Object[0]);
@@ -181,9 +193,9 @@ public class Contacts implements DeleteListener {
 		 * 
 		 * int scaledWidth = 76; int scaledHeight = 76; int max_size = 33750;
 		 */
-		final int scaledWidth = Integer.parseInt(ContactConfig.getProperty("scale_image_width"));
-		final int scaledHeight = Integer.parseInt(ContactConfig.getProperty("scale_image_height"));
-		final int max_size = Integer.parseInt(ContactConfig.getProperty("max_image_size"));
+		final int scaledWidth = Integer.parseInt(ContactConfig.getProperty(PROP_SCALE_IMAGE_WIDTH));
+		final int scaledHeight = Integer.parseInt(ContactConfig.getProperty(PROP_SCALE_IMAGE_HEIGHT));
+		final int max_size = Integer.parseInt(ContactConfig.getProperty(PROP_MAX_IMAGE_SIZE));
 
 		/*
 		 * for (int i=0;i<allowed_mime.length;i++){ System.out.println(new
@@ -344,6 +356,14 @@ public class Contacts implements DeleteListener {
 		return img;
 	}
 
+	@OXThrowsMultiple(category = { Category.USER_INPUT }, desc = { "72" }, exceptionId = { 72 }, msg = {
+			"Image size too large. Image size: %1$d. Max. size: %2$d." })
+	private static void checkImageSize(final int imageSize, final int maxSize) throws ContactException {
+		if (maxSize > 0 && imageSize > maxSize) {
+			throw EXCEPTIONS.create(72, Integer.valueOf(imageSize), Integer.valueOf(maxSize));
+		}
+	}
+
 	@OXThrowsMultiple(category = { Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR,
 			Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR,
 			Category.TRY_AGAIN, Category.TRY_AGAIN, Category.USER_INPUT }, desc = { "3", "4", "5", "6", "7", "8", "9", "51", "53", "58",
@@ -354,8 +374,7 @@ public class Contacts implements DeleteListener {
 			ContactException.INIT_CONNECTION_FROM_DBPOOL, ContactException.INIT_CONNECTION_FROM_DBPOOL,
 			"The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
 			"Mandatory field last name is not set.",ContactException.PFLAG_IN_PUBLIC_FOLDER })
-	public static void performContactStorageInsert(final ContactObject co, final int user, final int[] group,
-			final Session so) throws OXConflictException, OXException {
+	public static void performContactStorageInsert(final ContactObject co, final int user, final Session so) throws OXConflictException, OXException {
 
 		final StringBuilder insert_fields = new StringBuilder();
 		final StringBuilder insert_values = new StringBuilder();
@@ -534,7 +553,7 @@ public class Contacts implements DeleteListener {
 				writeContactLinkArrayInsert(co.getLinks(), co.getObjectID(), so.getContextId(), writecon);
 			}
 			if (co.containsImage1()) {
-				if (ContactConfig.getProperty("scale_images").equals("true")) {
+				if (ContactConfig.getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
 					try {
 						co.setImage1(scaleContactImage(co.getImage1(), co.getImageContentType()));
 					} catch (final OXConflictException ex) {
@@ -546,7 +565,10 @@ public class Contacts implements DeleteListener {
 					} catch (final Exception ex) {
 						throw EXCEPTIONS.create(58, ex);
 					}
+				} else {				
+					checkImageSize(co.getImage1().length, Integer.parseInt(ContactConfig.getProperty(PROP_MAX_IMAGE_SIZE)));
 				}
+				
 				writeContactImage(co.getObjectID(), co.getImage1(), so.getContextId(), co.getImageContentType(),
 						writecon);
 			}
@@ -976,7 +998,7 @@ public class Contacts implements DeleteListener {
 
 			if (co.containsImage1()) {
 				if (co.getImage1() != null) {
-					if (ContactConfig.getProperty("scale_images").equals("true")) {
+					if (ContactConfig.getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
 						try {
 							co.setImage1(scaleContactImage(co.getImage1(), co.getImageContentType()));
 						} catch (final OXConflictException ex) {
@@ -990,6 +1012,8 @@ public class Contacts implements DeleteListener {
 						} catch (final Exception ex) {
 							throw EXCEPTIONS.create(59, ex);
 						}
+					} else {
+						checkImageSize(co.getImage1().length, Integer.parseInt(ContactConfig.getProperty(PROP_MAX_IMAGE_SIZE)));
 					}
 
 					if (original.containsImage1()) {
@@ -1019,13 +1043,6 @@ public class Contacts implements DeleteListener {
 			}
 			throw ox;
 		} catch (final DBPoolingException oe) {
-			if (null != writecon) {
-				try {
-					writecon.rollback();
-				} catch (final SQLException see) {
-					LOG.error(ERR_UABLE_TO_ROLLBACK, see);
-				}
-			}
 			throw EXCEPTIONS.create(55, oe);
 		} catch (final DataTruncation se) {
 			if (null != writecon) {
@@ -1219,7 +1236,7 @@ public class Contacts implements DeleteListener {
 
 	@OXThrows(category = Category.CODE_ERROR, desc = "28", exceptionId = 28, msg = "Unable to load dristributionlist: Context %1$d Contact %2$d")
 	public static DistributionListEntryObject[] fillDistributionListArray(final int id, final int user,
-			final int[] group, final Context ctx, final UserConfiguration uc, final Connection readcon)
+			final Context ctx, final Connection readcon)
 			throws OXException {
 
 		Statement smt = null;
@@ -2632,18 +2649,6 @@ public class Contacts implements DeleteListener {
 			} catch (final SQLException see) {
 				LOG.error("Unable to close Statement");
 			}
-		}
-	}
-
-	public void deletePerformed(final DeleteEvent sqlDelEvent, final Connection readCon, final Connection writeCon)
-			throws DeleteFailedException {
-
-		try {
-			if (sqlDelEvent.getType() == DeleteEvent.TYPE_USER) {
-				trashAllUserContacts(sqlDelEvent.getId(), sqlDelEvent.getSession(), readCon, writeCon);
-			}
-		} catch (final OXException ox) {
-			throw new DeleteFailedException(ox);
 		}
 	}
 
@@ -8398,8 +8403,7 @@ public class Contacts implements DeleteListener {
 				try {
 					final int t = rs.getInt(pos);
 					if (!rs.wasNull() && (t > 0)) {
-						co.setDistributionList(fillDistributionListArray(co.getObjectID(), user, group, ctx, uc,
-								readcon));
+						co.setDistributionList(fillDistributionListArray(co.getObjectID(), user, ctx, readcon));
 					}
 				} catch (final Exception e) {
 					LOG.error("Unable to load Distributionlist", e);
@@ -8437,6 +8441,7 @@ public class Contacts implements DeleteListener {
 			}
 
 			public void setValueAsString(final String s, final ContactObject co) {
+				// Nothing to do
 			}
 		};
 		/** ************** * intfield03 Part 2 * * ************ */
@@ -8489,6 +8494,7 @@ public class Contacts implements DeleteListener {
 			}
 
 			public void setValueAsString(final String s, final ContactObject co) {
+				// Nothing to do
 			}
 		};
 		/** ************** * fid * * ************ */

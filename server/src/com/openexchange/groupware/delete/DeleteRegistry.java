@@ -63,7 +63,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.groupware.attach.impl.AttachmentContextDelete;
 import com.openexchange.groupware.attach.impl.AttachmentDelDelete;
 import com.openexchange.groupware.calendar.CalendarAdministration;
-import com.openexchange.groupware.contact.Contacts;
+import com.openexchange.groupware.contact.ContactDeleteListener;
 import com.openexchange.groupware.filestore.FileStorageRemover;
 import com.openexchange.groupware.infostore.InfostoreDelete;
 import com.openexchange.groupware.ldap.LdapException;
@@ -113,7 +113,7 @@ public final class DeleteRegistry {
 		 */
 		registerDeleteListener(new TasksDelete());
 		registerDeleteListener(new InfostoreDelete());
-		registerDeleteListener(new Contacts());
+		registerDeleteListener(new ContactDeleteListener());
 		registerDeleteListener(new CalendarAdministration());
 		/*
 		 * Delete user configuration & settings
