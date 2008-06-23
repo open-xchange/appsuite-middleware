@@ -47,58 +47,53 @@
  *
  */
 
-
-
 package com.openexchange.sessiond.impl;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Random;
 
 import com.openexchange.sessiond.exception.SessiondException;
 
-
 /**
- * DefaultSessionIdGenerator
- *
- *
+ * {@link DefaultSessionIdGenerator} - The default session ID generator.
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-
 public class DefaultSessionIdGenerator extends SessionIdGenerator {
-	
+
 	@Override
 	public String createSessionId(final String userId, final String data) throws SessiondException {
 		return getUniqueId(userId, data);
 	}
-	
+
 	@Override
 	public String createSecretId(final String userId, final String data) throws SessiondException {
 		return getUniqueId(userId, data);
 	}
-	
+
 	@Override
 	public String createRandomId() throws SessiondException {
 		return String.valueOf(System.currentTimeMillis());
 	}
 
 	private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-	
+
 	private String getUniqueId(final String userId, final String data) throws SessiondException {
 		try {
-			final String decode = System.currentTimeMillis() +""+ (SECURE_RANDOM.nextLong() + userId+ "."+data);
+			final String decode = System.currentTimeMillis() + "" + (SECURE_RANDOM.nextLong() + userId + "." + data);
 			final byte buf[] = decode.getBytes();
 			final StringBuffer md5 = new StringBuffer();
 			final MessageDigest algorithm = MessageDigest.getInstance("MD5");
 			algorithm.reset();
 			algorithm.update(buf);
 			final byte[] digest = algorithm.digest();
-			for(int i=0; i< digest.length; i++){
-				String x = Integer.toHexString(digest[i]&0xff);
-				if (x.length()<2) {
-					x = "0"+x;
-				} 
+			for (int i = 0; i < digest.length; i++) {
+				String x = Integer.toHexString(digest[i] & 0xff);
+				if (x.length() < 2) {
+					x = "0" + x;
+				}
 				md5.append(x);
 			}
 			return md5.toString();
@@ -107,12 +102,3 @@ public class DefaultSessionIdGenerator extends SessionIdGenerator {
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
