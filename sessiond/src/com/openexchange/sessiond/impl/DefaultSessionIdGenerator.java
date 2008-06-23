@@ -53,6 +53,7 @@ package com.openexchange.sessiond.impl;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Random;
 
 import com.openexchange.sessiond.exception.SessiondException;
@@ -81,10 +82,12 @@ public class DefaultSessionIdGenerator extends SessionIdGenerator {
 	public String createRandomId() throws SessiondException {
 		return String.valueOf(System.currentTimeMillis());
 	}
+
+	private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 	
 	private String getUniqueId(final String userId, final String data) throws SessiondException {
 		try {
-			final String decode = System.currentTimeMillis() +""+ (new Random().nextLong() + userId+ "."+data);
+			final String decode = System.currentTimeMillis() +""+ (SECURE_RANDOM.nextLong() + userId+ "."+data);
 			final byte buf[] = decode.getBytes();
 			final StringBuffer md5 = new StringBuffer();
 			final MessageDigest algorithm = MessageDigest.getInstance("MD5");
