@@ -65,6 +65,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
@@ -109,6 +112,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -181,8 +185,6 @@ public class Contacts implements DeleteListener {
 		final int scaledHeight = Integer.parseInt(ContactConfig.getProperty("scale_image_height"));
 		final int max_size = Integer.parseInt(ContactConfig.getProperty("max_image_size"));
 
-		final String fileType = "";
-		final String[] allowed_mime = ImageIO.getReaderFormatNames();
 		/*
 		 * for (int i=0;i<allowed_mime.length;i++){ System.out.println(new
 		 * StringBuiler("--> "+allowed_mime[i]+" vs "+mime)); }
@@ -191,16 +193,17 @@ public class Contacts implements DeleteListener {
 
 		if ((mime.toLowerCase().indexOf("jpg") != -1) || (mime.toLowerCase().indexOf("jpeg") != -1)) {
 			mime = "image/jpg";
-		} else if ((mime.toLowerCase().indexOf("bmp") != -1) || (mime.toLowerCase().indexOf("bmp") != -1)) {
+		} else if ((mime.toLowerCase().indexOf("bmp") != -1)) {
 			mime = "image/bmp";
 		} else if (mime.toLowerCase().indexOf("png") != -1) {
 			mime = "image/png";
 		}
-		for (int h = 0; h < allowed_mime.length; h++) {
-			if (mime.equals("image/" + allowed_mime[h])) {
-				check = true;
-				// fileType = mime.substring(6,mime.length());
-			}
+		
+		final String fileType = mime.substring(mime.indexOf('/') + 1);
+		
+		{
+			final Set<String> allowedMime = new HashSet<String>(Arrays.asList(ImageIO.getReaderFormatNames()));
+			check = allowedMime.contains(fileType);
 		}
 
 		if (mime.toLowerCase().contains("gif")) {
@@ -219,9 +222,10 @@ public class Contacts implements DeleteListener {
 			// Image or it is to large! MimeType ="+mime+" / Image Size =
 			// "+img.length+" / max. allowed Image size = "+max_size);
 		}
+		
+		
 
-		final ByteArrayInputStream bais = new ByteArrayInputStream(img);
-		final BufferedImage bi = ImageIO.read(bais);
+		final BufferedImage bi = ImageIO.read(new UnsynchronizedByteArrayInputStream(img));
 
 		final int origHeigh = bi.getHeight();
 		final int origWidth = bi.getWidth();
