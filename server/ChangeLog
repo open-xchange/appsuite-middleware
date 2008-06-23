@@ -2,6 +2,8 @@
 
  - Bugfix #11104: Fixed mapping of exported contacts in German Outlook CSV
    file
+ - Bugfix #10963: Always checking image size against property
+   "max_image_size" (not only if "scale_images" is set to true)
 
 * 2008-06-20 - thorben.betten@open-xchange.com
 
