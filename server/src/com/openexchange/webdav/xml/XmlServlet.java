@@ -99,7 +99,7 @@ public abstract class XmlServlet extends PermissionServlet {
 	 */
 	private static final long serialVersionUID = -2484534357141516623L;
 
-	public static AttachmentBase attachmentBase = Attachments.getInstance();
+	public static final AttachmentBase attachmentBase = Attachments.getInstance();
 	
 	public static final int MODIFICATION_STATUS = 1000;
 	
