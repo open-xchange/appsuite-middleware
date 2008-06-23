@@ -8,6 +8,7 @@
    file
  - Bugfix #10963: Always checking image size against property
    "max_image_size" (not only if "scale_images" is set to true)
+ - Bugfix #11328: Also copying attachments and links on contact copy
 
 * 2008-06-20 - thorben.betten@open-xchange.com
 

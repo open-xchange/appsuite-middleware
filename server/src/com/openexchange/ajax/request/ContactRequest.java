@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.request;
 
+import java.sql.Connection;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -71,18 +72,30 @@ import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.database.Database;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentMetadata;
+import com.openexchange.groupware.attach.Attachments;
+import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactServices;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.links.Links;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -789,18 +802,139 @@ public class ContactRequest {
 		contactInterface.setSession(sessionObj);
 
 		final ContactObject contactObj = contactInterface.getObjectById(id, inFolder);
+		final int origObjectId = contactObj.getObjectID();
 		contactObj.removeObjectID();
+		final int origFolderId = contactObj.getParentFolderID();
 		contactObj.setParentFolderID(folderId);
 
 		if (inFolder == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
 			contactObj.removeInternalUserId();
 		}
-
+		
 		contactInterface.insertContactObject(contactObj);
+		
+		final User user = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfiguration(
+				sessionObj.getUserId(), ctx);
+		/*
+		 * Check attachments
+		 */
+		copyAttachments(folderId, ctx, contactObj, origObjectId, origFolderId, user, uc);
+		/*
+		 * Check links
+		 */
+		copyLinks(folderId, sessionObj, ctx, contactObj, origObjectId, origFolderId, user);
 
 		final JSONObject jsonResponseObject = new JSONObject();
 		jsonResponseObject.put(DataFields.ID, contactObj.getObjectID());
 
 		return jsonResponseObject;
+	}
+
+	private static void copyLinks(final int folderId, final Session session, final Context ctx,
+			final ContactObject contactObj, final int origObjectId, final int origFolderId, final User user)
+			throws OXException {
+		/*
+		 * Get all
+		 */
+		Connection readCon;
+		try {
+			readCon = Database.get(ctx, false);
+		} catch (final DBPoolingException e) {
+			throw new OXException(e);
+		}
+		final LinkObject[] links;
+		try {
+			links = Links.getAllLinksFromObject(origObjectId, Types.CONTACT, origFolderId, user.getId(), user
+					.getGroups(), session, readCon);
+		} catch (final ContextException e) {
+			throw new OXException(e);
+		} finally {
+			Database.back(ctx, false, readCon);
+			readCon = null;
+		}
+		if (links == null || links.length == 0) {
+			return;
+		}
+		/*
+		 * Copy
+		 */
+		final Connection writeCon;
+		try {
+			writeCon = Database.get(ctx, true);
+		} catch (final DBPoolingException e) {
+			throw new OXException(e);
+		}
+		try {
+			for (final LinkObject link : links) {
+				final LinkObject copy;
+				if (link.getFirstId() == origObjectId) {
+					copy = new LinkObject(contactObj.getObjectID(), Types.CONTACT, folderId, link.getSecondId(), link
+							.getSecondType(), link.getSecondFolder(), ctx.getContextId());
+				} else if (link.getSecondId() == origObjectId) {
+					copy = new LinkObject(link.getFirstId(), link.getFirstType(), link.getFirstFolder(), contactObj
+							.getObjectID(), Types.CONTACT, folderId, ctx.getContextId());
+				} else {
+					LOG.error("Invalid link retrieved from Links.getAllLinksFromObject()."
+							+ " Neither first nor second ID matches!");
+					continue;
+				}
+				Links.performLinkStorage(copy, user.getId(), user.getGroups(), session, writeCon);
+			}
+		} catch (final ContextException e) {
+			throw new OXException(e);
+		} finally {
+			Database.back(ctx, true, writeCon);
+		}
+	}
+
+	private static void copyAttachments(final int folderId, final Context ctx, final ContactObject contactObj,
+			final int origObjectId, final int origFolderId, final User user, final UserConfiguration uc)
+			throws OXException {
+		/*
+		 * Copy attachments
+		 */
+		final AttachmentBase attachmentBase = Attachments.getInstance();
+		final SearchIterator<?> iterator = attachmentBase.getAttachments(origFolderId, origObjectId, Types.CONTACT,
+				ctx, user, uc).results();
+		if (iterator.hasNext()) {
+			try {
+				attachmentBase.startTransaction();
+				do {
+					final AttachmentMetadata orig = (AttachmentMetadata) iterator.next();
+					final AttachmentMetadata copy = new AttachmentImpl(orig);
+					copy.setFolderId(folderId);
+					copy.setAttachedId(contactObj.getObjectID());
+					attachmentBase.attachToObject(copy, attachmentBase.getAttachedFile(origFolderId, origObjectId,
+							Types.CONTACT, orig.getId(), ctx, user, uc), ctx, user, uc);
+				} while (iterator.hasNext());
+				attachmentBase.commit();
+			} catch (final SearchIteratorException e) {
+				try {
+					attachmentBase.rollback();
+				} catch (final TransactionException e1) {
+					LOG.error("Attachment transaction rollback failed", e);
+				}
+				throw new OXException(e);
+			} catch (final OXException e) {
+				try {
+					attachmentBase.rollback();
+				} catch (final TransactionException e1) {
+					LOG.error("Attachment transaction rollback failed", e);
+				}
+				throw e;
+			} finally {
+				try {
+					iterator.close();
+				} catch (final SearchIteratorException e) {
+					LOG.error("SearchIterator could not be closed", e);
+				}
+				try {
+					attachmentBase.finish();
+				} catch (final TransactionException e) {
+					LOG.error("Attachment transaction finish failed", e);
+				}
+			}
+		}
 	}
 }
