@@ -147,7 +147,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                         }
                     } catch (final SQLException sql) {
                         log.error(sql.getMessage(), sql);
-                        throw new StorageException(sql);
+                        throw new StorageException(sql.toString());
                     } catch (final PoolException ex) {
                         log.error(ex.getMessage(), ex);
                         throw new StorageException(ex);
@@ -248,7 +248,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                 }
             } catch (final SQLException sql) {
                 log.error(sql.getMessage(), sql);
-                throw new StorageException(sql);
+                throw new StorageException(sql.toString());
             } catch (final PoolException ex) {
                 log.error(ex.getMessage(), ex);
                 throw new StorageException(ex);

@@ -128,7 +128,7 @@ public class OXUtilMySQLStorageCommon {
             } catch (final Throwable expd) {
                 log.error("Error processing rollback of simple connection!", expd);
             }
-            throw new StorageException(cp);
+            throw new StorageException(cp.toString());
         } finally {
             try {
                 if (st != null) {
@@ -206,7 +206,7 @@ public class OXUtilMySQLStorageCommon {
             } catch (final SQLException ecp) {
                 log.error("Error processing rollback of simple connection!", ecp);
             }
-            throw new StorageException(cp);
+            throw new StorageException(cp.toString());
         } finally {
             try {
                 if (st != null) {
