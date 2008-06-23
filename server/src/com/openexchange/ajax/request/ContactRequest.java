@@ -346,11 +346,7 @@ public class ContactRequest {
 			contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
 		}
 		contactInterface.setSession(sessionObj);
-		try {
-			contactInterface.deleteContactObject(objectId, inFolder, timestamp);
-		} catch (final Exception e) {
-			throw new OXException(e);
-		}
+		contactInterface.deleteContactObject(objectId, inFolder, timestamp);
 
 		return new JSONArray();
 	}
@@ -456,8 +452,10 @@ public class ContactRequest {
 						}
 					}
 				}
-			} catch (final Exception e) {
-				throw new OXException(e);
+			} catch (final OXException e) {
+				throw e;
+			} catch (final JSONException e) {
+				throw new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
 			}
 
 			return jsonResponseArray;
@@ -514,8 +512,8 @@ public class ContactRequest {
 						timestamp = lastModified;
 					}
 				}
-			} catch (final Exception e) {
-				throw new OXException(e);
+			} catch (final JSONException e) {
+				throw new OXException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]));
 			}
 
 			return jsonResponseArray;

@@ -188,7 +188,7 @@ public interface ContactInterface {
 	 * @return A SearchIterator contains ContactObjects
 	 * @throws OXException
 	 */	
-	public SearchIterator<ContactObject> getObjectsById(int[][] objectIdAndInFolder, int cols[]) throws OXException, Exception;
+	public SearchIterator<ContactObject> getObjectsById(int[][] objectIdAndInFolder, int cols[]) throws OXException;
 	
 	public int getFolderId();
 	
