@@ -80,7 +80,7 @@ public class ActionCommand extends ControlOrActionCommand {
         REJECT("reject", 1, new Hashtable<String, Integer>(), "reject", "reject"), 
         STOP("stop", 0, new Hashtable<String, Integer>(), null , "stop"), 
         VACATION("vacation", 1, vacationtags(), "vacation", "vacation"),
-        ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "imapflags", "addflag");
+        ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "imapflags", "addflags");
 
         private static Hashtable<String, Integer> vacationtags() {
             final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
