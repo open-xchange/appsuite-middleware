@@ -210,10 +210,8 @@ public class GermanOutlookMapper implements ContactFieldMapper {
         german2field.put("Telex" , ContactField.TELEPHONE_TELEX);
         field2german.put(ContactField.TELEPHONE_TELEX , "Telex");
 
-        // TODO: Location that causes bug entry:
-        // http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=11104
-        german2field.put("Abrechnungsinformation" , ContactField.EMAIL1);
-        field2german.put(ContactField.EMAIL1 , "Abrechnungsinformation");
+        german2field.put("E-Mail-Adresse" , ContactField.EMAIL1);
+        field2german.put(ContactField.EMAIL1 , "E-Mail-Adresse");
 
         //french2field.put("E-Mail-Typ" , ContactField.);
         //field2french.put(ContactField. , "E-Mail-Typ");

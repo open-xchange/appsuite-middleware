@@ -1,3 +1,8 @@
+* 2008-06-23 - thorben.betten@open-xchange.com
+
+ - Bugfix #11104: Fixed mapping of exported contacts in German Outlook CSV
+   file
+
 * 2008-06-20 - thorben.betten@open-xchange.com
 
  - Bugfix #11909: Setting proper category TRUNCATED on a SQL data
