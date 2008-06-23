@@ -1,3 +1,7 @@
+* 2008-06-23 - dennis.sieben@open-xchange.com
+
+  - Bugfix #11448: Wrong folder names in sieve scripts
+  
 * 2008-06-23 - thorben.betten@open-xchange.com
 
  - Bugfix #11104: Fixed mapping of exported contacts in German Outlook CSV

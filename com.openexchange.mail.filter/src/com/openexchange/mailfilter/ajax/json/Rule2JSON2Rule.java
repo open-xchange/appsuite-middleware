@@ -68,6 +68,7 @@ import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailfilter.ajax.fields.RuleFields;
 import com.openexchange.tools.servlet.OXJSONException;
 
@@ -556,7 +557,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 } else if (ActionCommand.Commands.REDIRECT.getJsonname().equals(id)) {
                     return createOneParameterActionCommand(object, RedirectActionFields.TO, ActionCommand.Commands.REDIRECT);
                 } else if (ActionCommand.Commands.FILEINTO.getJsonname().equals(id)) {
-                    return createOneParameterActionCommand(object, MoveActionFields.INTO, ActionCommand.Commands.FILEINTO);
+                    return createFileintoActionCommand(object, MoveActionFields.INTO, ActionCommand.Commands.FILEINTO);
                 } else if (ActionCommand.Commands.REJECT.getJsonname().equals(id)) {
                     return createOneParameterActionCommand(object, RejectActionFields.TEXT, ActionCommand.Commands.REJECT);
                 } else if (ActionCommand.Commands.STOP.getJsonname().equals(id)) {
@@ -606,6 +607,16 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 }
             }
 
+            private ActionCommand createFileintoActionCommand(final JSONObject object, final String parameter, final ActionCommand.Commands command) throws JSONException, SieveException, OXJSONException {
+                final String stringparam = getString(object, parameter, command.getCommandname());
+                if (null != stringparam) {
+                    return new ActionCommand(command, createArrayArray(MailFolderUtility.prepareMailFolderParam(stringparam)));
+                } else {
+                    throw new JSONException("The parameter " + parameter + " is missing for action command " + 
+                            command.getCommandname() + ".");
+                }
+            }
+            
             private NumberArgument createNumberArg(final String string) {
                 final Token token = new Token();
                 token.image = string;
@@ -646,7 +657,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                         if (ActionCommand.Commands.REDIRECT.equals(actionCommand.getCommand())) {
                             createOneParameterJSON(tmp, arguments, ActionCommand.Commands.REDIRECT, RedirectActionFields.TO);
                         } else if (ActionCommand.Commands.FILEINTO.equals(actionCommand.getCommand())) {
-                            createOneParameterJSON(tmp, arguments, ActionCommand.Commands.FILEINTO, MoveActionFields.INTO);
+                            createFileintoJSON(tmp, arguments, ActionCommand.Commands.FILEINTO, MoveActionFields.INTO);
                         } else if (ActionCommand.Commands.REJECT.equals(actionCommand.getCommand())) {
                             createOneParameterJSON(tmp, arguments, ActionCommand.Commands.REJECT, RejectActionFields.TEXT);
                         } else if (ActionCommand.Commands.STOP.equals(actionCommand.getCommand())) {
@@ -680,6 +691,11 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 tmp.put(field, ((List<String>)arguments.get(0)).get(0));
             }
 
+            private void createFileintoJSON(final JSONObject tmp, final ArrayList<Object> arguments, final com.openexchange.jsieve.commands.ActionCommand.Commands command, final String field) throws JSONException {
+                tmp.put(GeneralFields.ID, command.getJsonname());
+                tmp.put(field, MailFolderUtility.prepareFullname(((List<String>)arguments.get(0)).get(0)));
+            }
+            
             private String getString(final JSONObject jobj, final String value, final String component) throws OXJSONException {
                 try {
                     return jobj.getString(value);
