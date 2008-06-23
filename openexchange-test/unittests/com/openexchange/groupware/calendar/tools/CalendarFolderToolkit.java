@@ -52,6 +52,17 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
+import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.session.Session;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.sql.Connection;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -68,5 +79,59 @@ public class CalendarFolderToolkit {
             return -1;
         }
         return fo.getObjectID();
+    }
+
+    public FolderObject createPublicFolderFor(Session session,Context ctx, String name, int parent, int...users) {
+        Connection writecon = null;
+        try {
+        	writecon = DBPool.pickupWriteable(ctx);
+	        final OXFolderManager oxma = new OXFolderManagerImpl(session, writecon, writecon);
+
+            ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(users.length);
+            for(int user : users) {
+                final OCLPermission oclp = new OCLPermission();
+                oclp.setEntity(user);
+                oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                oclp.setFolderAdmin(true);
+                permissions.add(oclp);
+            }
+
+
+            FolderObject fo = new FolderObject();
+	        fo.setFolderName(name);
+	        fo.setParentFolderID(parent);
+	        fo.setModule(FolderObject.CALENDAR);
+	        fo.setType(FolderObject.PUBLIC);
+	        fo.setPermissions(permissions);
+            fo = oxma.createFolder(fo, true, System.currentTimeMillis());
+	        return fo;
+        } catch (OXException e) {
+            e.printStackTrace();
+            return null;
+        } catch (DBPoolingException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+        	if(writecon != null) {
+                try {
+                    DBPool.pushWrite(ctx, writecon);
+                } catch (DBPoolingException e) {
+                    //IGNORE
+                }
+            }
+        }
+    }
+
+    public void removeAll(Session session, List<FolderObject> cleanFolders) {
+        final OXFolderManager oxma;
+        try {
+            oxma = new OXFolderManagerImpl(session);
+            for(FolderObject folder : cleanFolders) {
+                oxma.deleteFolder(folder, true, System.currentTimeMillis());
+            }
+        } catch (OXException e) {
+            e.printStackTrace();
+
+        }
     }
 }

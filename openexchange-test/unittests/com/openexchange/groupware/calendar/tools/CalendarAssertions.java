@@ -105,6 +105,16 @@ public class CalendarAssertions {
         if( mustFail ) { fail( problems.toString() ); }
     }
 
+
+    public static void assertInPrivateFolder(CommonAppointments appointments , CalendarDataObject appointment) {
+        for(CalendarDataObject currentAppointment : appointments.getPrivateAppointments()) {
+            if(appointment.getObjectID() == currentAppointment.getObjectID()) {
+                return;
+            }
+        }
+        fail("Couldn't find "+appointment.getObjectID()+" in private appointments");
+    }
+
     private static String stringify(final Set<? extends Participant> unexpected) {
         final StringBuilder bob = new StringBuilder();
         for(final Participant p : unexpected) {

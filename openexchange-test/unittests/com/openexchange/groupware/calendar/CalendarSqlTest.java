@@ -50,10 +50,13 @@ package com.openexchange.groupware.calendar;
 
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertResourceParticipants;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertUserParticipants;
+import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertInPrivateFolder;
+
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 import junit.framework.TestCase;
 
@@ -62,8 +65,12 @@ import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
+import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.session.Session;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -71,7 +78,7 @@ import com.openexchange.groupware.contexts.Context;
 public class CalendarSqlTest extends TestCase {
 
     private final List<CalendarDataObject> clean = new ArrayList<CalendarDataObject>();
-        
+    private final List<FolderObject> cleanFolders = new ArrayList<FolderObject>();    
 
     private String participant1, participant2, participant3;
     private String resource1, resource2, resource3;
@@ -80,8 +87,14 @@ public class CalendarSqlTest extends TestCase {
 
     private String user;
     private String secondUser;
+
+    private int userId, secondUserId;
+
     private Context ctx;
     private CommonAppointments appointments;
+    private CalendarFolderToolkit folders;
+
+    private Session session;
 
     @Override
 	public void setUp() throws Exception {
@@ -105,18 +118,26 @@ public class CalendarSqlTest extends TestCase {
         resource2 = config.getResource2();
         resource3 = config.getResource3();
 
+        folders = new CalendarFolderToolkit();
+
         group = config.getGroup();
         final int groupid = tools.resolveGroup(group, ctx);
         final int memberid = tools.loadGroup(groupid, ctx).getMember()[0];
         member = tools.loadUser(memberid, ctx).getLoginInfo();
 
+        userId = tools.resolveUser(user, ctx);
+        secondUserId = tools.resolveUser(secondUser, ctx);
+
         appointments.deleteAll(ctx);
+
+        session = tools.getSessionForUser(user, ctx);
     }
 
     @Override
 	public void tearDown() throws OXException, SQLException {
-        Init.stopServer();
         appointments.removeAll(user, clean);
+        folders.removeAll(session, cleanFolders);
+        Init.stopServer();
     }
 
     // Bug #11148
@@ -202,6 +223,7 @@ public class CalendarSqlTest extends TestCase {
             fail(x.toString());
         }
     }
+
 
     // Node 1077
     public void testShouldSupplyConflictingUserParticipants() throws SQLException, OXException {
@@ -296,6 +318,65 @@ public class CalendarSqlTest extends TestCase {
         final CalendarDataObject conflict = conflicts[0];
         assertEquals(appointment.getTitle(), conflict.getTitle());
         assertUserParticipants(conflict, user ); 
+
+    }
+
+    // Bug 11316 Updating an appointment should leave it in private folder
+
+    public void testUpdatePublicAppointmentTimeShouldUpdateParticipantStatus() throws OXException, SQLException {
+        FolderObject folder = folders.createPublicFolderFor(session, ctx,"A nice public folder",  FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId, secondUserId);
+        cleanFolders.add( folder );
+
+        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);
+        appointment.setParentFolderID(folder.getObjectID());
+        appointments.save( appointment ); clean.add( appointment );
+
+        appointments.switchUser(secondUser);
+        appointment = appointments.reload(appointment);
+
+        boolean found = false;
+        for(UserParticipant participant : appointment.getUsers()) {
+            if(participant.getIdentifier() == secondUserId) {
+                found = true;
+                participant.setConfirm(CalendarDataObject.ACCEPT);
+            }
+        }
+        assertTrue(found);
+        appointments.save( appointment );
+        appointments.switchUser( user );
+
+        appointment = appointments.reload(appointment);
+        found = false;
+        for(UserParticipant participant : appointment.getUsers()) {
+            if(participant.getIdentifier() == secondUserId) {
+                found = true;
+                assertEquals(participant.getConfirm(), CalendarDataObject.ACCEPT);
+            }
+        }
+
+        assertTrue("SecondUser disappeared from users!", found);
+
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setStartDate(appointment.getStartDate());
+        cdao.setEndDate(new Date(appointment.getEndDate().getTime() + 36000000));
+        cdao.setObjectID(appointment.getObjectID());
+        cdao.setParentFolderID(appointment.getParentFolderID());
+        cdao.setContext(appointment.getContext());
+
+        appointments.save( cdao );
+
+        appointment = appointments.reload(appointment);
+
+        found = false;
+        for(UserParticipant participant : appointment.getUsers()) {
+            if(participant.getIdentifier() == secondUserId) {
+                found = true;
+                assertEquals(participant.getConfirm(), CalendarDataObject.NONE);
+            }
+        }
+
+        assertTrue("SecondUser disappeared from users!", found);
+        assertEquals(appointment.getParticipants().length, appointment.getUsers().length);
 
     }
 }

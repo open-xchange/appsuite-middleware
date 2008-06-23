@@ -54,6 +54,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Collections;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -65,6 +66,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -104,7 +107,11 @@ public class CommonAppointments {
     public void removeAll(final String user, final List<CalendarDataObject> clean) throws SQLException, OXException {
         switchUser( user );
         for(final CalendarDataObject cdao : clean) {
-            calendar.deleteAppointmentObject(cdao,privateFolder,new Date(Long.MAX_VALUE));
+            try {
+                calendar.deleteAppointmentObject(cdao,cdao.getParentFolderID(),new Date(Long.MAX_VALUE));
+            } catch (Throwable t) {
+                t.printStackTrace(); // Drastic but apparently neccessary...
+            }
         }
     }
 
@@ -196,6 +203,27 @@ public class CommonAppointments {
             if(writeCon != null) {
                 DBPool.closeWriterSilent(ctx, writeCon);                    
             }
+        }
+
+    }
+
+    public List<CalendarDataObject> getPrivateAppointments() {
+        List<CalendarDataObject> cdao = new ArrayList<CalendarDataObject>();
+        try {
+            SearchIterator<CalendarDataObject> iterator = calendar.getAppointmentsBetweenInFolder(privateFolder, new int[]{CalendarDataObject.OBJECT_ID}, new Date(0), new Date(Long.MAX_VALUE), CalendarDataObject.OBJECT_ID, "ASC");
+            while(iterator.hasNext()) {
+                cdao.add(iterator.next());
+            }
+            return cdao;
+        } catch (OXException e) {
+            e.printStackTrace();
+            return Collections.EMPTY_LIST;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Collections.EMPTY_LIST;
+        } catch (SearchIteratorException e) {
+            e.printStackTrace();
+            return Collections.EMPTY_LIST;
         }
 
     }
