@@ -66,7 +66,7 @@ import com.openexchange.server.ServiceException;
  * {@link SessionCache} - A cache for instances of {@link CachedSession}.
  * <p>
  * <b>Note</b>: The appropriate instance of {@link CacheService} is obtained on
- * every request thus there's no need to to release/reinit any references.
+ * every request thus there's no need to to release/re-init any references.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -222,8 +222,7 @@ public final class SessionCache {
 			final CacheKey key = createKey(cachedSession.getSecret(), cache);
 			if (cache.get(key) != null) {
 				/*
-				 * Key is already in use and therefore an IMAP connection is
-				 * already in cache for current user
+				 * Key is already in use
 				 */
 				return false;
 			}
