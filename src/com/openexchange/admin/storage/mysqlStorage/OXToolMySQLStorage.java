@@ -96,7 +96,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             return (res!=null || grp!=null || usr!=null);             
         } catch (SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
@@ -123,7 +123,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             return getDomainUsedbyResource(ctx, domain, con);
         } catch (SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
@@ -144,7 +144,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             return getDomainUsedbyUser(ctx, domain, con);
         } catch (SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
@@ -212,7 +212,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 return retval;              
             } catch (final SQLException e) {
                 log.error("SQL Error",e);
-                throw new StorageException(e);
+                throw new StorageException(e.toString());
             } finally {
             	closeRecordSet(rs);
                 closePreparedStatement(prep_check);
@@ -246,7 +246,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             return rs.next();
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (final PoolException e) {
             log.error("SQL Error",e);
             throw new StorageException(e);
@@ -285,7 +285,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -340,7 +340,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -390,7 +390,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep);
@@ -453,7 +453,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);            
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -492,7 +492,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -527,7 +527,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -599,7 +599,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -658,7 +658,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closePreparedStatement(prep);
 
@@ -716,7 +716,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             try {
                 if (prep != null) {
@@ -770,7 +770,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             if (rs != null) {
                 try {
@@ -835,7 +835,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             try {
                 rs.close();
@@ -876,7 +876,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
@@ -924,7 +924,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             rs.close();
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             try {
                 if(rs!=null){
@@ -966,7 +966,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -1001,7 +1001,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
 
@@ -1037,7 +1037,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -1072,7 +1072,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -1112,7 +1112,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -1147,7 +1147,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -1316,7 +1316,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closePreparedStatement(stmt);
             closeRecordSet(rs);
@@ -1354,7 +1354,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -1397,7 +1397,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(stmt);
@@ -1435,7 +1435,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -1472,7 +1472,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(ps);
@@ -1559,7 +1559,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(stmt);
@@ -1598,7 +1598,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(stmt);
@@ -1641,7 +1641,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (final PoolException e) {
             log.error(e.getMessage(), e);
             throw new StorageException(e);
@@ -1790,7 +1790,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -1844,7 +1844,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -1882,7 +1882,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -1922,7 +1922,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -1962,7 +1962,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -2003,7 +2003,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -2042,7 +2042,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -2084,7 +2084,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);

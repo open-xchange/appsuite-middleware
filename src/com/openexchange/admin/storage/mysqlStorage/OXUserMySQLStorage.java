@@ -1163,7 +1163,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
             log.error("SQL Error", e);            
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (final OXException e) {
             log.error("OX Error", e);           
             throw new StorageException(e.toString());
@@ -1243,7 +1243,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             } catch (final SQLException ecp) {
                 log.error("Error rollback ox db write connection", ecp);
             }
-            throw new StorageException(sql);
+            throw new StorageException(sql.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             // rollback operations on ox db connection
@@ -1309,7 +1309,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             return retval;
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
@@ -1361,7 +1361,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             return retval.toArray(new User[retval.size()]);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
@@ -1555,7 +1555,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (final IllegalArgumentException e) {
             log.error("Error", e);
             throw new StorageException(e);
@@ -1701,7 +1701,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(cte.toString());
         } catch (final SQLException sqle) {
             log.error("SQL Error", sqle);
-            throw new StorageException(sqle);
+            throw new StorageException(sqle.toString());
         } catch (OXException e) {
             log.error("Delete contact via groupware API error", e);
             throw new StorageException(e.toString());
@@ -1733,7 +1733,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             rs.close();
         } catch (SQLException e) {
             log.error("SQL Error", e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         }finally{
             try {
                 if (stmt != null) {
@@ -1781,7 +1781,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             } catch (final SQLException ex) {
                 log.error("Error rollback ox db write connection", ex);
             }
-            throw new StorageException(sql);
+            throw new StorageException(sql.toString());
         } catch (final RuntimeException e) {
             log.error(e.getMessage(), e);
             try {
@@ -1834,7 +1834,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             } catch (final SQLException ex) {
                 log.error("Error rollback ox db write connection", ex);
             }
-            throw new StorageException(sqle);
+            throw new StorageException(sqle.toString());
         } catch (final PoolException pole) {
             log.error("Pool Error", pole);
             try {
@@ -1916,7 +1916,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(polex);
         } catch (final SQLException sqle) {
             log.error("SQL Error ", sqle);
-            throw new StorageException(sqle);
+            throw new StorageException(sqle.toString());
         } finally {
             try {
                 if (read_ox_con != null) {
@@ -1942,7 +1942,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             
         } catch (final SQLException sqle) {
             log.error("SQL Error ", sqle);
-            throw new StorageException(sqle);
+            throw new StorageException(sqle.toString());
         } finally {
             try {
                 if (prep_edit_user != null) {
@@ -2097,7 +2097,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException sqle) {
             log.error("SQL Error ", sqle);
-            throw new StorageException(sqle);
+            throw new StorageException(sqle.toString());
         } finally {
             try {
                 if (del_st != null) {
@@ -2119,7 +2119,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             del_st.executeUpdate();
         } catch (final SQLException sqle) {
             log.error("SQL Error ", sqle);
-            throw new StorageException(sqle);
+            throw new StorageException(sqle.toString());
         } finally {
             try {
                 if (del_st != null) {
@@ -2143,7 +2143,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             del_st.executeUpdate();
         } catch (final SQLException sqle) {
             log.error("SQL Error ", sqle);
-            throw new StorageException(sqle);
+            throw new StorageException(sqle.toString());
         } finally {
             try {
                 if (del_st != null) {
@@ -2240,7 +2240,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(pole.toString());
         } catch (final SQLException sqle) {
             log.error("SQL Error", sqle);
-            throw new StorageException(sqle);
+            throw new StorageException(sqle.toString());
         }
     }
 
