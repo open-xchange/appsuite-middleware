@@ -600,7 +600,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         final JSONArray actionarray = new JSONArray();
         for (final ActionCommand.Commands command : ActionCommand.Commands.values()) {
             if (null == command.getRequired() || sieve.contains(command.getRequired())) {
-                actionarray.put(command.getCommandname());
+                actionarray.put(command.getJsonname());
             }
         }
         return actionarray;
