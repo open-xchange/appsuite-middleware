@@ -179,7 +179,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             }
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);            
-            throw new StorageException(sql);       
+            throw new StorageException(sql.toString());       
         } finally {
             closeResultSet(rs);
             closePreparedStatement(prep_list);
@@ -202,7 +202,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             return ids.toArray(new Integer[ids.size()]);        
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);            
-            throw new StorageException(sql);
+            throw new StorageException(sql.toString());
         } finally {
             closePreparedStatement(prep_list);
         }
@@ -253,7 +253,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
             doRollback(con);
-            throw new StorageException(sql);
+            throw new StorageException(sql.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             doRollback(con);
@@ -329,7 +329,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         } catch (final SQLException e) {
            log.error("SQL Error", e);
             doRollback(con);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             doRollback(con);
@@ -400,7 +400,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
             doRollback(con);
-            throw new StorageException(sql);
+            throw new StorageException(sql.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             doRollback(con);
@@ -452,7 +452,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
             doRollback(con);
-            throw new StorageException(sql);
+            throw new StorageException(sql.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             doRollback(con);
@@ -484,7 +484,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
             doRollback(con);
-            throw new StorageException(sql);
+            throw new StorageException(sql.toString());
         } finally {
             closePreparedStatement(del_st);
         }
@@ -503,7 +503,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
             doRollback(con);
-            throw new StorageException(sql);
+            throw new StorageException(sql.toString());
         } finally {
             closePreparedStatement(del_st);
         }
@@ -543,7 +543,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             return grplist.toArray(new Group[grplist.size()]);
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
-            throw new StorageException(sql);
+            throw new StorageException(sql.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
@@ -612,7 +612,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             return (Group[])list.toArray(new Group[list.size()]);
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);            
-            throw new StorageException(sql);
+            throw new StorageException(sql.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);            
             throw new StorageException(e);
@@ -659,7 +659,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
             doRollback(con);
-            throw new StorageException(sql);
+            throw new StorageException(sql.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             doRollback(con);

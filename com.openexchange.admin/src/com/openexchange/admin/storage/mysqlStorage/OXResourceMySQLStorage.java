@@ -182,7 +182,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             dorollback(con);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             dorollback(con);
@@ -272,7 +272,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             dorollback(con);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             dorollback(con);
@@ -318,7 +318,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             dorollback(con);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             dorollback(con);
@@ -373,7 +373,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             dorollback(con);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             dorollback(con);
@@ -456,7 +456,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             dorollback(con);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             dorollback(con);
@@ -538,7 +538,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             return retval;
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);         
             throw new StorageException(e);
@@ -580,7 +580,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             dorollback(write_ox_con);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             try {
                 prep_edit_user.close();
@@ -634,7 +634,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             dorollback(con);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             try {
                 if (del_st != null) {
@@ -660,7 +660,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             dorollback(con);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             try {
                 if (del_st != null) {
@@ -686,7 +686,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             dorollback(con);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             try {
                 if (del_st != null) {
