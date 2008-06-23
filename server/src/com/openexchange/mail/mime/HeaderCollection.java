@@ -77,6 +77,8 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class HeaderCollection implements Serializable {
 
+	private static final String ERR_HEADER_NAME_IS_INVALID = "Header name is invalid";
+
 	private static final long serialVersionUID = 6939560514144351286L;
 
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
@@ -247,7 +249,7 @@ public class HeaderCollection implements Serializable {
 		try {
 			do {
 				line = reader.readLine();
-				if (line != null && (line.startsWith(" ") || line.startsWith("\t"))) {
+				if (line != null && (line.charAt(0) == ' ' || line.charAt(0) == '\t')) {
 					/*
 					 * Header continuation
 					 */
@@ -378,7 +380,7 @@ public class HeaderCollection implements Serializable {
 
 	private final void putHeader(final String name, final String value, final boolean clear) {
 		if (isInvalid(name, true)) {
-			throw new IllegalArgumentException("Header name is invalid");
+			throw new IllegalArgumentException(ERR_HEADER_NAME_IS_INVALID);
 		} else if (isInvalid(value, false)) {
 			throw new IllegalArgumentException("Header value is invalid");
 		}
@@ -412,7 +414,7 @@ public class HeaderCollection implements Serializable {
 	 */
 	public String[] getHeader(final String name) {
 		if (isInvalid(name, true)) {
-			throw new IllegalArgumentException("Header name is invalid");
+			throw new IllegalArgumentException(ERR_HEADER_NAME_IS_INVALID);
 		}
 		final HeaderName headerName = HeaderName.valueOf(name);
 		final List<String> values = map.get(headerName);
@@ -437,7 +439,7 @@ public class HeaderCollection implements Serializable {
 	 */
 	public String getHeader(final String name, final String delimiter) {
 		if (isInvalid(name, true)) {
-			throw new IllegalArgumentException("Header name is invalid");
+			throw new IllegalArgumentException(ERR_HEADER_NAME_IS_INVALID);
 		}
 		final List<String> values = map.get(HeaderName.valueOf(name));
 		if (values == null) {
@@ -462,7 +464,7 @@ public class HeaderCollection implements Serializable {
 	 */
 	public void removeHeader(final String name) {
 		if (isInvalid(name, true)) {
-			throw new IllegalArgumentException("Header name is invalid");
+			throw new IllegalArgumentException(ERR_HEADER_NAME_IS_INVALID);
 		}
 		final List<String> removed = map.remove(HeaderName.valueOf(name));
 		if (removed != null) {
