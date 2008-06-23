@@ -128,7 +128,7 @@ public class Contact extends DataServlet {
 				try {
 					ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
 				} catch (final ContextException ct) {
-					new ContactException(ct);
+					throw new ContactException(ct);
 				}
 				
 				ContactInterface contactInterface = ContactServices.getInstance().getService(inFolder, ctx.getContextId());
