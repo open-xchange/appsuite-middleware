@@ -1,3 +1,7 @@
+* 2008-06-23 - francisco.laguna@open-xchange.com
+
+  - Bugfix #11316 : Don't remove other participants.
+
 * 2008-06-23 - dennis.sieben@open-xchange.com
 
   - Bugfix #11448: Wrong folder names in sieve scripts
