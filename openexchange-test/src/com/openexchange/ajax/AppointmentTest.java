@@ -1045,7 +1045,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 					break;
 				case Participant.EXTERNAL_USER:
                     if (null == mail) {
-                        throw new JSONException("JSONObject[id] not found.");
+                        throw new JSONException("JSONObject[mail] not found.");
                     }
 					p = new ExternalUserParticipant(mail);
 					break;
