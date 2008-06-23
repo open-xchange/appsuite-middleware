@@ -89,6 +89,12 @@ public final class PlainTextAddress extends InternetAddress {
 
 	private final int hashCode;
 
+	/**
+	 * Constructs a new {@link PlainTextAddress}
+	 * 
+	 * @param address
+	 *            The plain text address
+	 */
 	public PlainTextAddress(final String address) {
 		this.address = MIMEMessageUtility.decodeMultiEncodedHeader(address);
 		hashCode = address.toLowerCase().hashCode();
