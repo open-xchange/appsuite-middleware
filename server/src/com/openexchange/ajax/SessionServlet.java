@@ -131,20 +131,18 @@ public abstract class SessionServlet extends AJAXServlet {
 			IOException {
 		Tools.disableCaching(resp);
 		try {
-			Session session = null;
+			final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
+					SessiondService.class);
+			if (sessiondService == null) {
+				throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
+						SessiondService.class.getName()));
+			}
+			final Session session;
 			final String sessionId;
 			{
-				final String cookieId = getCookieId(req);
 				final String[] sessionIdHolder = new String[1];
-				session = getSessionId(req, resp, cookieId, sessionIdHolder);
+				session = getSession(req, resp, getCookieId(req), sessionIdHolder, sessiondService);
 				sessionId = sessionIdHolder[0];
-				if (null == session) {
-					/*
-					 * Not obtained from session cache: get from local session
-					 * containers
-					 */
-					session = getSession(sessionId);
-				}
 			}
 			checkIP(session.getLocalIp(), req.getRemoteAddr());
 			rememberSession(req, session);
@@ -250,38 +248,54 @@ public abstract class SessionServlet extends AJAXServlet {
 	 * @param sessionIdHolder
 	 *            An array of {@link String} with length <code>1</code> for
 	 *            storing the session identifier
-	 * @return The session if fetched from cache; otherwise <code>null</code>.
+	 * @param sessiondService
+	 *            The SessionD service
+	 * @return The appropriate session.
 	 * @throws SessionException
-	 *             if the session identifier can not be found in a cookie.
+	 *             if either the session identifier can not be found in a cookie
+	 *             or the session is missing at all.
 	 */
 	@OXThrows(category = Category.CODE_ERROR, desc = "Your browser does not send the cookie for identifying your "
 			+ "session.", exceptionId = 2, msg = "The cookie with the session identifier is missing.")
-	private static Session getSessionId(final HttpServletRequest req, final HttpServletResponse resp,
-			final String cookieId, final String[] sessionIdHolder) throws SessiondException {
+	private static Session getSession(final HttpServletRequest req, final HttpServletResponse resp,
+			final String cookieId, final String[] sessionIdHolder, final SessiondService sessiondService)
+			throws SessiondException {
+		/*
+		 * Look for a local session
+		 */
 		final Cookie[] cookies = req.getCookies();
-		if (cookies != null) {
-			final String cookieName = new StringBuilder(Login.cookiePrefix).append(cookieId).toString();
-			for (int a = 0; a < cookies.length; a++) {
-				if (cookieName.equals(cookies[a].getName())) {
-					sessionIdHolder[0] = cookies[a].getValue();
-					return null;
+		try {
+			if (cookies != null) {
+				final String cookieName = new StringBuilder(Login.cookiePrefix).append(cookieId).toString();
+				for (final Cookie cookie : cookies) {
+					if (cookieName.equals(cookie.getName())) {
+						sessionIdHolder[0] = cookie.getValue();
+						return getLocalSession(sessionIdHolder[0], sessiondService);
+					}
 				}
 			}
+		} catch (final SessiondException e) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("No appropriate local session found");
+			}
+			/*
+			 * Look for a cached session on second try
+			 */
+			final Session session = getCachedSession(req, resp, cookieId, sessionIdHolder, sessiondService);
+			if (null != session) {
+				return session;
+			}
+			/*
+			 * Re-throw original exception to indicate session absence
+			 */
+			throw e;
 		}
 		/*
 		 * No appropriate cookie found: check session cache
 		 */
-		final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-		if (null != sessiondService) {
-			final Session session = sessiondService.getCachedSession(cookieId, req.getRemoteAddr());
-			if (null != session) {
-				sessionIdHolder[0] = session.getSessionID();
-				/*
-				 * Adapt cookie and local IP
-				 */
-				Login.writeCookie(resp, session);
-				return session;
-			}
+		final Session session = getCachedSession(req, resp, cookieId, sessionIdHolder, sessiondService);
+		if (null != session) {
+			return session;
 		}
 		/*
 		 * A cache miss: throw error
@@ -302,21 +316,49 @@ public abstract class SessionServlet extends AJAXServlet {
 	}
 
 	/**
-	 * Finds the session.
+	 * Finds appropriate cached session.
+	 * 
+	 * @param req
+	 *            HTTP servlet request
+	 * @param resp
+	 *            HTTP servlet response
+	 * @param cookieId
+	 *            Identifier of the cookie
+	 * @param sessionIdHolder
+	 *            An array of {@link String} with length <code>1</code> for
+	 *            storing the session identifier
+	 * @param sessiondService
+	 *            The SessionD service
+	 * @return The session if fetched from cache; otherwise <code>null</code>.
+	 */
+	private static Session getCachedSession(final HttpServletRequest req, final HttpServletResponse resp,
+			final String cookieId, final String[] sessionIdHolder, final SessiondService sessiondService) {
+		final Session session = sessiondService.getCachedSession(cookieId, req.getRemoteAddr());
+		if (null != session) {
+			sessionIdHolder[0] = session.getSessionID();
+			/*
+			 * Adapt cookie and local IP
+			 */
+			Login.writeCookie(resp, session);
+			return session;
+		}
+		return null;
+	}
+
+	/**
+	 * Finds appropriate local session.
 	 * 
 	 * @param sessionId
 	 *            identifier of the session.
+	 * @param sessiondService
+	 *            The SessionD service
 	 * @return the session.
 	 * @throws SessionException
 	 *             if the session can not be found.
 	 */
 	@OXThrows(category = Category.TRY_AGAIN, desc = "A session with the given identifier can not be found.", exceptionId = 3, msg = "Your session %s expired. Please start a new browser session.")
-	private static Session getSession(final String sessionId) throws SessiondException {
-		final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-		if (sessiondService == null) {
-			throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
-					SessiondService.class.getName()));
-		}
+	private static Session getLocalSession(final String sessionId, final SessiondService sessiondService)
+			throws SessiondException {
 		final Session retval = sessiondService.getSession(sessionId);
 		if (null == retval) {
 			throw EXCEPTION.create(3, sessionId);
