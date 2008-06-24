@@ -260,6 +260,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PRIVATE) {
                     final CalendarOperation co = new CalendarOperation();
                     final EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), userConfig);
+                    mayRead(oclp);
                     prep = cimp.getPrivateFolderModifiedSinceSQL(ctx, session.getUserId(), user.getGroups(), fid, since, StringCollection.getSelect(cols, DATES_TABLE_NAME), oclp.canReadAllObjects(), readcon, start, end);
                     rs = cimp.getResultSet(prep);
                     co.setRequestedFolder(fid);
@@ -269,6 +270,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 } else if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PUBLIC) {
                     final CalendarOperation co = new CalendarOperation();
                     final EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), userConfig);
+                    mayRead(oclp);
                     prep = cimp.getPublicFolderModifiedSinceSQL(ctx, session.getUserId(), user.getGroups(), fid, since, StringCollection.getSelect(cols, DATES_TABLE_NAME), oclp.canReadAllObjects(), readcon, start, end);
                     rs = cimp.getResultSet(prep);
                     co.setRequestedFolder(fid);
@@ -278,6 +280,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 } else {
                     final CalendarOperation co = new CalendarOperation();
                     final EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), userConfig);
+                    mayRead(oclp);
                     final int shared_folder_owner = ofa.getFolderOwner(fid);
                     prep = cimp.getSharedFolderModifiedSinceSQL(ctx, session.getUserId(), shared_folder_owner, user.getGroups(), fid, since, StringCollection.getSelect(cols, DATES_TABLE_NAME), oclp.canReadAllObjects(), readcon, start, end);
                     rs = cimp.getResultSet(prep);
@@ -314,7 +317,13 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
 		throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
     }
-    
+
+    private void mayRead(EffectivePermission oclp) throws OXCalendarException {
+        if(!oclp.canReadAllObjects() && !oclp.canReadOwnObjects()) {
+            throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSION);   
+        }
+    }
+
     public SearchIterator getModifiedAppointmentsInFolder(final int fid, final int cols[], final Date since) throws OXException, SQLException {
         return getModifiedAppointmentsInFolder(fid, null, null, cols, since);
     }
@@ -326,10 +335,13 @@ public class CalendarSql implements AppointmentSQLInterface {
             ResultSet rs = null;
             boolean close_connection = true;
             final Context ctx = Tools.getContext(session);
+            final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
             try {
                 readcon = DBPool.pickup(ctx);
                 cols = CalendarCommonCollection.checkAndAlterCols(cols);
                 final OXFolderAccess ofa = new OXFolderAccess(readcon, ctx);
+                EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), userConfig);
+                mayRead(oclp);
                 if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PRIVATE) {
                     final CalendarOperation co = new CalendarOperation();
                     prep = cimp.getPrivateFolderDeletedSinceSQL(ctx, session.getUserId(), fid, since, StringCollection.getSelect(cols, "del_dates"), readcon);
