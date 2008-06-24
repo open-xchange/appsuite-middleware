@@ -94,9 +94,9 @@ public abstract class SettingStorage {
 
     /**
      * This method reads the setting and its subsettings from the database.
-     * @param con
-     * @param setting
-     * @throws SettingException
+     * @param con database connection.
+     * @param setting setting to read.
+     * @throws SettingException if an error occurs while reading the setting.
      */
     public abstract void readValues(Connection con, Setting setting)
         throws SettingException;

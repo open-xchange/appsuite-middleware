@@ -220,7 +220,7 @@ public class RdbSettingStorage extends SettingStorage {
      */
     @Override
     public void readValues(final Setting setting) throws SettingException {
-        Connection con;
+        final Connection con;
         try {
             con = DBPool.pickup(ctx);
         } catch (final DBPoolingException e) {
@@ -237,7 +237,8 @@ public class RdbSettingStorage extends SettingStorage {
      * {@inheritDoc}
      */
     @Override
-    public void readValues(final Connection con, final Setting setting) throws SettingException {
+    public void readValues(final Connection con, final Setting setting)
+        throws SettingException {
         if (!setting.isLeaf()) {
             readSubValues(setting);
             return;
@@ -248,8 +249,7 @@ public class RdbSettingStorage extends SettingStorage {
             PreparedStatement stmt = null;
             ResultSet result = null;
             try {
-                stmt = con.prepareStatement(
-                    SELECT_VALUE);
+                stmt = con.prepareStatement(SELECT_VALUE);
                 int pos = 1;
                 stmt.setInt(pos++, ctxId);
                 stmt.setInt(pos++, userId);
