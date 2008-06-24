@@ -373,8 +373,14 @@ public final class HTMLProcessing {
 		return processDownlevelRevealedConditionalComments(htmlContent);
 	}
 
-	private static final Pattern PATTERN_PP_IF = Pattern.compile("(<!\\[if)([^\\]]+\\]>)(.*?)(<!\\[endif\\]>)",
+	private static final Pattern PATTERN_CC = Pattern.compile("(<!\\[if)([^\\]]+\\]>)(.*?)(<!\\[endif\\]>)",
 			Pattern.DOTALL);
+
+	private static final String CC_START_IF = "<!--[if";
+
+	private static final String CC_END_IF = "-->";
+
+	private static final String CC_ENDIF = "<!--<![endif]-->";
 
 	/**
 	 * Processes detected downlevel-revealed <a
@@ -404,15 +410,15 @@ public final class HTMLProcessing {
 	 *         valid HTML for non-IE browsers
 	 */
 	private static String processDownlevelRevealedConditionalComments(final String htmlContent) {
-		final Matcher m = PATTERN_PP_IF.matcher(htmlContent);
+		final Matcher m = PATTERN_CC.matcher(htmlContent);
 		if (m.find()) {
 			int lastMatch = 0;
 			final StringBuilder sb = new StringBuilder(htmlContent.length() + 128);
 			do {
 				sb.append(htmlContent.substring(lastMatch, m.start()));
-				sb.append("<!--[if").append(m.group(2)).append("-->");
+				sb.append(CC_START_IF).append(m.group(2)).append(CC_END_IF);
 				sb.append(m.group(3));
-				sb.append("<!--<![endif]-->");
+				sb.append(CC_ENDIF);
 				lastMatch = m.end();
 			} while (m.find());
 			sb.append(htmlContent.substring(lastMatch));
