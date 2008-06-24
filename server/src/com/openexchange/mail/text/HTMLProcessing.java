@@ -376,6 +376,10 @@ public final class HTMLProcessing {
 	private static final Pattern PATTERN_PP_IF = Pattern.compile("(<!\\[if *)([^\\]]+\\]>.*?)(<!\\[endif\\]>)",
 			Pattern.DOTALL);
 
+	private static final String PP_START = "<!--[if ";
+
+	private static final String PP_END = "<![endif]-->";
+
 	/**
 	 * Puts detected pre-processor statements into a comment:
 	 * 
@@ -400,8 +404,8 @@ public final class HTMLProcessing {
 			final StringBuilder sb = new StringBuilder(htmlContent.length() + 128);
 			do {
 				sb.append(htmlContent.substring(lastMatch, m.start()));
-				sb.append("<!--[if ").append(m.group(2));
-				sb.append("<![endif]-->");
+				sb.append(PP_START).append(m.group(2));
+				sb.append(PP_END);
 				lastMatch = m.end();
 			} while (m.find());
 			sb.append(htmlContent.substring(lastMatch));
