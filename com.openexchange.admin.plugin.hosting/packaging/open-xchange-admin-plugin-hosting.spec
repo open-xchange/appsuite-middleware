@@ -100,6 +100,8 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Tue Jun 24 2008 - manuel.karft@open-xchange.com
+  - Bugfix ID#11490 unable to create context using --access-combination-name on commandline
 * Mon Jun 09 2008 - dennis.sieben@open-xchange.com
   - Bugfix ID#11358 [L3] Movecontextfilestore doesn't move filestore if context filestore isn't available
 * Tue Apr 29 2008 - choeger@open-xchange.com
