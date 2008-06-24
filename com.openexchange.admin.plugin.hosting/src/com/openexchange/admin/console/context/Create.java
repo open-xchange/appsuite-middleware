@@ -112,7 +112,7 @@ public class Create extends CreateCore {
         parsed_access.disableAll();
         
         // parse access options
-        setModuleAccessOptionsinUserCreate(parser, parsed_access);
+        setModuleAccessOptionsinUserChange(parser, parsed_access);
         
         String accessCombinationName = ctxabs.parseAndSetAccessCombinationName(parser);
         
