@@ -64,6 +64,7 @@ import org.json.JSONTokener;
  */
 public final class ReadOnlyJSONArray extends JSONArray {
 
+	private static final String TRACE_PUT = "ReadOnlyJSONArray.put()";
 	/**
 	 * A read-only constant for an empty JSON object
 	 */
@@ -143,7 +144,7 @@ public final class ReadOnlyJSONArray extends JSONArray {
 	 */
 	@Override
 	public JSONArray put(final boolean value) {
-		throw new UnsupportedOperationException("ReadOnlyJSONArray.put()");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	/**
@@ -159,7 +160,7 @@ public final class ReadOnlyJSONArray extends JSONArray {
 	 */
 	@Override
 	public JSONArray put(final Collection<? extends Object> value) {
-		throw new UnsupportedOperationException("ReadOnlyJSONArray.put()");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	/**
@@ -176,7 +177,7 @@ public final class ReadOnlyJSONArray extends JSONArray {
 	 */
 	@Override
 	public JSONArray put(final double value) throws JSONException {
-		throw new UnsupportedOperationException("ReadOnlyJSONArray.put()");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	/**
@@ -191,7 +192,7 @@ public final class ReadOnlyJSONArray extends JSONArray {
 	 */
 	@Override
 	public JSONArray put(final int value) {
-		throw new UnsupportedOperationException("ReadOnlyJSONArray.put()");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	/**
@@ -206,7 +207,7 @@ public final class ReadOnlyJSONArray extends JSONArray {
 	 */
 	@Override
 	public JSONArray put(final long value) {
-		throw new UnsupportedOperationException("ReadOnlyJSONArray.put()");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	/**
@@ -222,7 +223,7 @@ public final class ReadOnlyJSONArray extends JSONArray {
 	 */
 	@Override
 	public JSONArray put(final Map<String, ? extends Object> value) {
-		throw new UnsupportedOperationException("ReadOnlyJSONArray.put()");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	/**
@@ -239,7 +240,7 @@ public final class ReadOnlyJSONArray extends JSONArray {
 	 */
 	@Override
 	public JSONArray put(final Object value) {
-		throw new UnsupportedOperationException("ReadOnlyJSONArray.put()");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	/**
@@ -260,7 +261,7 @@ public final class ReadOnlyJSONArray extends JSONArray {
 	 */
 	@Override
 	public JSONArray put(final int index, final boolean value) throws JSONException {
-		throw new UnsupportedOperationException("ReadOnlyJSONArray.put()");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	/**
@@ -280,7 +281,7 @@ public final class ReadOnlyJSONArray extends JSONArray {
 	 */
 	@Override
 	public JSONArray put(final int index, final Collection<? extends Object> value) throws JSONException {
-		throw new UnsupportedOperationException("ReadOnlyJSONArray.put()");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	/**
@@ -301,7 +302,7 @@ public final class ReadOnlyJSONArray extends JSONArray {
 	 */
 	@Override
 	public JSONArray put(final int index, final double value) throws JSONException {
-		throw new UnsupportedOperationException("ReadOnlyJSONArray.put()");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	/**
@@ -322,7 +323,7 @@ public final class ReadOnlyJSONArray extends JSONArray {
 	 */
 	@Override
 	public JSONArray put(final int index, final int value) throws JSONException {
-		throw new UnsupportedOperationException("ReadOnlyJSONArray.put()");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	/**
@@ -343,7 +344,7 @@ public final class ReadOnlyJSONArray extends JSONArray {
 	 */
 	@Override
 	public JSONArray put(final int index, final long value) throws JSONException {
-		throw new UnsupportedOperationException("ReadOnlyJSONArray.put()");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	/**
@@ -364,7 +365,7 @@ public final class ReadOnlyJSONArray extends JSONArray {
 	 */
 	@Override
 	public JSONArray put(final int index, final Map<String, ? extends Object> value) throws JSONException {
-		throw new UnsupportedOperationException("ReadOnlyJSONArray.put()");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	/**
@@ -388,7 +389,7 @@ public final class ReadOnlyJSONArray extends JSONArray {
 	 */
 	@Override
 	public JSONArray put(final int index, final Object value) throws JSONException {
-		throw new UnsupportedOperationException("ReadOnlyJSONArray.put()");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 }

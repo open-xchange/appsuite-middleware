@@ -68,6 +68,8 @@ import com.openexchange.tools.iterator.ReadOnlyIterator;
  */
 public final class ReadOnlyJSONObject extends JSONObject {
 
+	private static final String TRACE_PUT = "ReadOnlyJSONObject.put() not supported";
+
 	/**
 	 * A read-only constant for an empty JSON object
 	 */
@@ -262,7 +264,7 @@ public final class ReadOnlyJSONObject extends JSONObject {
 	 */
 	@Override
 	public JSONObject put(final String key, final boolean value) throws JSONException {
-		throw new UnsupportedOperationException("ReadOnlyJSONObject.put() not supported");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	/**
@@ -281,7 +283,7 @@ public final class ReadOnlyJSONObject extends JSONObject {
 	 */
 	@Override
 	public JSONObject put(final String key, final double value) throws JSONException {
-		throw new UnsupportedOperationException("ReadOnlyJSONObject.put() not supported");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	/**
@@ -300,7 +302,7 @@ public final class ReadOnlyJSONObject extends JSONObject {
 	 */
 	@Override
 	public JSONObject put(final String key, final int value) throws JSONException {
-		throw new UnsupportedOperationException("ReadOnlyJSONObject.put() not supported");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	/**
@@ -319,7 +321,7 @@ public final class ReadOnlyJSONObject extends JSONObject {
 	 */
 	@Override
 	public JSONObject put(final String key, final long value) throws JSONException {
-		throw new UnsupportedOperationException("ReadOnlyJSONObject.put() not supported");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	/**
@@ -338,7 +340,7 @@ public final class ReadOnlyJSONObject extends JSONObject {
 	 */
 	@Override
 	public JSONObject put(final String key, final Map<String, ? extends Object> value) throws JSONException {
-		throw new UnsupportedOperationException("ReadOnlyJSONObject.put() not supported");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	private static final String DECLARING_CLASS = "org.json.JSONObject";
@@ -377,7 +379,7 @@ public final class ReadOnlyJSONObject extends JSONObject {
 				return super.put(key, value);
 			}
 		}
-		throw new UnsupportedOperationException("ReadOnlyJSONObject.put() not supported");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	/**
@@ -399,7 +401,7 @@ public final class ReadOnlyJSONObject extends JSONObject {
 	 */
 	@Override
 	public JSONObject putOpt(final String key, final Object value) throws JSONException {
-		throw new UnsupportedOperationException("ReadOnlyJSONObject.put() not supported");
+		throw new UnsupportedOperationException(TRACE_PUT);
 	}
 
 	/**
