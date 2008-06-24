@@ -727,14 +727,18 @@ public class InfostoreRequest extends CommonRequest {
 		}
 
 		try {
-			w.array();
+			w.object();
+            w.key("data");
+
+            w.array();
 			for (int i = 0; i < notDeleted.length; i++) {
 				final int nd = notDeleted[i];
 				w.value(nd);
 			}
 			w.endArray();
+            w.endObject();
 
-		} catch (final JSONException e) {
+        } catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		}
 	}
@@ -778,13 +782,16 @@ public class InfostoreRequest extends CommonRequest {
 		}
 
 		try {
-			w.array();
+            w.object();
+            w.key("data");
+            w.array();
 			for (int i = 0; i < notDetached.length; i++) {
 				final int nd = notDetached[i];
 				w.value(nd);
 			}
 			w.endArray();
-		} catch (final JSONException e) {
+            w.endObject();
+        } catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		}
 	}
