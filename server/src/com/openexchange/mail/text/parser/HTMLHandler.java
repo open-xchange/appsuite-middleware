@@ -93,7 +93,8 @@ public interface HTMLHandler {
 	public void handleDocDeclaration(String docDecl);
 
 	/**
-	 * Handle specified CDATA segment's text; e.g. '<i>fo&lt;o</i>' from '<i>&lt;![CDATA[fo&lt;o]]&gt;</i>'.
+	 * Handle specified CDATA segment's text; e.g. '<i>fo&lt;o</i>' from
+	 * '<i>&lt;![CDATA[fo&lt;o]]&gt;</i>'.
 	 * 
 	 * @param text
 	 *            The CDATA segment's text
@@ -171,6 +172,8 @@ public interface HTMLHandler {
 	 * 
 	 * @param errorMsg
 	 *            The error message
+	 * @throws IllegalStateException
+	 *             If handler decides that occurred error is worth being thrown
 	 */
 	public void handleError(String errorMsg);
 }
