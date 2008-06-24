@@ -276,7 +276,7 @@ public final class SessionCache {
 
 	private static final int DUMMY = 1;
 
-	private CacheKey createKey(final String sessionId, final Cache cache) throws ServiceException, CacheException {
+	private CacheKey createKey(final String sessionId, final Cache cache) {
 		return cache.newCacheKey(DUMMY, sessionId);
 	}
 
