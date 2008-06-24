@@ -51,6 +51,7 @@ package com.openexchange.mail.text.parser;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -102,7 +103,7 @@ public final class HTMLParser {
 		try {
 			parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
 			parser.setFeature(FEATURE_PRESERVE_TEXT, true);
-			//parser.setFeature(FEATURE_RELAXED, true);
+			// parser.setFeature(FEATURE_RELAXED, true);
 			parser.setInput(new StringReader(html));
 			int event = XmlPullParser.END_DOCUMENT;
 			int[] holderForStartAndLength = null;
@@ -235,13 +236,33 @@ public final class HTMLParser {
 				}
 			}
 		} catch (final XmlPullParserException e) {
-			LOG.error(e.getLocalizedMessage(), e);
+			LOG.error(composeErrorMessage(e, html), e);
 			handler.handleError(e.getLocalizedMessage());
 		} catch (final IOException e) {
-			LOG.error(e.getLocalizedMessage(), e);
+			LOG.error(composeErrorMessage(e, html), e);
 			handler.handleError(e.getLocalizedMessage());
 		}
 
+	}
+
+	private static final String ERR01 = "Parsing of HTML content failed: ";
+
+	private static String composeErrorMessage(final Exception e, final String html) {
+		final StringBuilder sb = new StringBuilder(html.length() + 256);
+		sb.append(ERR01);
+		sb.append(e.getMessage());
+		sb.append(". Affected HTML content:\n");
+		dumpHtml(html, sb);
+		return sb.toString();
+	}
+
+	private static void dumpHtml(final String html, final StringBuilder sb) {
+		final String[] lines = html.split("\r?\n");
+		final DecimalFormat df = new DecimalFormat("0000");
+		int count = 1;
+		for (final String line : lines) {
+			sb.append(df.format(count++)).append(' ').append(line).append("\r\n");
+		}
 	}
 
 }
