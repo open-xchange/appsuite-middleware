@@ -207,17 +207,21 @@ public class CommonAppointments {
 
     }
 
-    public List<CalendarDataObject> getPrivateAppointments() {
+    public List<CalendarDataObject> getPrivateAppointments() throws OXException {
+       return getAppointmentsInFolder(privateFolder);
+
+    }
+
+    public List<CalendarDataObject> getAppointmentsInFolder(int folderId) throws OXException {
         List<CalendarDataObject> cdao = new ArrayList<CalendarDataObject>();
         try {
-            SearchIterator<CalendarDataObject> iterator = calendar.getAppointmentsBetweenInFolder(privateFolder, new int[]{CalendarDataObject.OBJECT_ID}, new Date(0), new Date(Long.MAX_VALUE), CalendarDataObject.OBJECT_ID, "ASC");
+            SearchIterator<CalendarDataObject> iterator = calendar.getAppointmentsBetweenInFolder(folderId, new int[]{CalendarDataObject.OBJECT_ID}, new Date(0), new Date(Long.MAX_VALUE), CalendarDataObject.OBJECT_ID, "ASC");
             while(iterator.hasNext()) {
                 cdao.add(iterator.next());
             }
             return cdao;
         } catch (OXException e) {
-            e.printStackTrace();
-            return Collections.EMPTY_LIST;
+            throw e;
         } catch (SQLException e) {
             e.printStackTrace();
             return Collections.EMPTY_LIST;
@@ -225,6 +229,45 @@ public class CommonAppointments {
             e.printStackTrace();
             return Collections.EMPTY_LIST;
         }
+    }
 
+    public List<CalendarDataObject> getModifiedInFolder(int folderId, long since) throws OXException {
+        List<CalendarDataObject> cdao = new ArrayList<CalendarDataObject>();
+        try {
+
+            SearchIterator<CalendarDataObject> iterator = calendar.getModifiedAppointmentsInFolder(folderId, new Date(0), new Date(Long.MAX_VALUE),new int[]{CalendarDataObject.OBJECT_ID}, new Date(since));
+            while(iterator.hasNext()) {
+                cdao.add(iterator.next());
+            }
+            return cdao;
+        } catch (OXException e) {
+            throw e;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Collections.EMPTY_LIST;
+        } catch (SearchIteratorException e) {
+            e.printStackTrace();
+            return Collections.EMPTY_LIST;
+        }
+    }
+
+    public List<CalendarDataObject> getDeletedInFolder(int folderId, long since) throws OXException {
+        List<CalendarDataObject> cdao = new ArrayList<CalendarDataObject>();
+        try {
+
+            SearchIterator<CalendarDataObject> iterator = calendar.getDeletedAppointmentsInFolder(folderId, new int[]{CalendarDataObject.OBJECT_ID}, new Date(since));
+            while(iterator.hasNext()) {
+                cdao.add(iterator.next());
+            }
+            return cdao;
+        } catch (OXException e) {
+            throw e;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Collections.EMPTY_LIST;
+        } catch (SearchIteratorException e) {
+            e.printStackTrace();
+            return Collections.EMPTY_LIST;
+        }
     }
 }

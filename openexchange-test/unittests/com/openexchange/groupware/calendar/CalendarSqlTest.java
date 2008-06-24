@@ -73,6 +73,8 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.tools.Arrays;
+import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.api.OXPermissionException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -485,5 +487,74 @@ public class CalendarSqlTest extends TestCase {
             // Unshare
             folders.unsharePrivateFolder(session, ctx);
         }    
+    }
+
+    // Bug 11059
+    public void testShouldRespectReadPermissions() throws OXException {
+        FolderObject folder = folders.createPublicFolderFor(session, ctx,"A nice public folder",  FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId);
+        cleanFolders.add( folder );
+
+        boolean found = false;
+        ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(folder.getPermissions());
+        for(OCLPermission permission : permissions) {
+            if(OCLPermission.ALL_GROUPS_AND_USERS == permission.getEntity()) {
+                found = true;
+                permission.setReadObjectPermission(OCLPermission.NO_PERMISSIONS);
+                permission.setWriteObjectPermission(OCLPermission.NO_PERMISSIONS);
+                permission.setDeleteObjectPermission(OCLPermission.NO_PERMISSIONS);
+                permission.setFolderPermission(OCLPermission.CREATE_SUB_FOLDERS);
+                permission.setGroupPermission(true);
+            }
+        }
+
+        if(!found) {
+            OCLPermission permission = new OCLPermission();
+            permission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
+            permission.setReadObjectPermission(OCLPermission.NO_PERMISSIONS);
+            permission.setWriteObjectPermission(OCLPermission.NO_PERMISSIONS);
+            permission.setDeleteObjectPermission(OCLPermission.NO_PERMISSIONS);
+            permission.setFolderPermission(OCLPermission.CREATE_SUB_FOLDERS);
+            permission.setGroupPermission(true);
+            permissions.add(permission);            
+        }
+        FolderObject update = new FolderObject();
+        update.setObjectID(folder.getObjectID());
+        update.setPermissions(permissions);
+
+        folders.save( update , ctx, session ) ;
+
+        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);
+        appointment.setParentFolderID(folder.getObjectID());
+        appointments.save( appointment ); clean.add( appointment );
+
+        appointments.switchUser(secondUser);
+
+        // Read
+
+        try {
+            appointments.getAppointmentsInFolder(folder.getObjectID());
+            fail("I could read the content!");            
+        } catch (OXException x) {
+            assertTrue(x.getMessage().contains("APP-0013"));
+        }
+
+        // Modified
+
+        try {
+            appointments.getModifiedInFolder(folder.getObjectID(), 0);
+            fail("I could read the content!");
+        } catch (OXException x) {
+            assertTrue(x.getMessage().contains("APP-0013"));
+        }
+
+        // Deleted
+
+        try {
+            appointments.getDeletedInFolder(folder.getObjectID(), 0);
+            fail("I could read the content!");
+        } catch (OXException x) {
+            assertTrue(x.getMessage().contains("APP-0013"));
+        }
+        
     }
 }

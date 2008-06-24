@@ -60,6 +60,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.api2.OXException;
 
 
 /**
@@ -106,7 +107,7 @@ public class CalendarAssertions {
     }
 
 
-    public static void assertInPrivateFolder(CommonAppointments appointments , CalendarDataObject appointment) {
+    public static void assertInPrivateFolder(CommonAppointments appointments , CalendarDataObject appointment) throws OXException {
         for(CalendarDataObject currentAppointment : appointments.getPrivateAppointments()) {
             if(appointment.getObjectID() == currentAppointment.getObjectID()) {
                 return;

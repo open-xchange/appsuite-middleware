@@ -112,7 +112,7 @@ public class CalendarFolderToolkit {
 	        fo.setType(FolderObject.PUBLIC);
 	        fo.setPermissions(permissions);
             fo = oxma.createFolder(fo, true, System.currentTimeMillis());
-	        return fo;
+            return fo;
         } catch (OXException e) {
             e.printStackTrace();
             return null;
@@ -166,7 +166,7 @@ public class CalendarFolderToolkit {
         save(fo, ctx, session);
     }
 
-    private void save(FolderObject fo, Context ctx, Session session) {
+    public void save(FolderObject fo, Context ctx, Session session) {
         Connection writecon = null;
         try {
             writecon = DBPool.pickupWriteable(ctx);
