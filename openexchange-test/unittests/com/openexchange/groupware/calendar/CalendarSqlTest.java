@@ -69,8 +69,10 @@ import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
+import com.openexchange.tools.Arrays;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -430,5 +432,58 @@ public class CalendarSqlTest extends TestCase {
             // Unshare
             folders.unsharePrivateFolder(session, ctx);
         }
+    }
+
+    // Bug 10154
+
+    public void testShouldKeepParticipantsInSharedFolder() throws OXException, SQLException {
+        folders.sharePrivateFolder(session, ctx, secondUserId);
+        try {
+            appointments.switchUser( secondUser );
+            CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user);
+            appointment.setParentFolderID(folders.getStandardFolder(userId, ctx));
+                                        
+            appointments.save( appointment );
+
+            appointment = appointments.reload(appointment);
+
+            appointments.switchUser(user);
+
+            ArrayList<Participant> participants = new ArrayList<Participant>(java.util.Arrays.asList(appointment.getParticipants()));
+
+            CalendarContextToolkit tk = new CalendarContextToolkit();
+
+            UserParticipant participant = new UserParticipant(tk.resolveUser(participant1));
+            participants.add(participant);
+
+
+            CalendarDataObject cdao = new CalendarDataObject();
+            cdao.setObjectID(appointment.getObjectID());
+            cdao.setParentFolderID(appointment.getParentFolderID());
+            cdao.setContext(appointment.getContext());
+            cdao.setParticipants(participants);
+
+            appointments.save( cdao );
+
+            appointments.switchUser(secondUser);
+
+            cdao = new CalendarDataObject();
+            cdao.setStartDate(appointment.getStartDate());
+            cdao.setEndDate(new Date(appointment.getEndDate().getTime() + 36000000));
+            cdao.setObjectID(appointment.getObjectID());
+            cdao.setParentFolderID(appointment.getParentFolderID());
+            cdao.setContext(appointment.getContext());
+
+            appointments.save( cdao );
+
+            appointments.switchUser(user);
+            appointment = appointments.reload(appointment);
+
+            assertUserParticipants(appointment, user, participant1);
+
+        } finally {
+            // Unshare
+            folders.unsharePrivateFolder(session, ctx);
+        }    
     }
 }
