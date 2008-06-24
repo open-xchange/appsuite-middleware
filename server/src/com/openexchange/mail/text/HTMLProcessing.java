@@ -406,8 +406,8 @@ public final class HTMLProcessing {
 	 * @param htmlContent
 	 *            The HTML content possibly containing downlevel-revealed
 	 *            conditional comments
-	 * @return The HTML whose downlevel-revealed conditional comments contain
-	 *         valid HTML for non-IE browsers
+	 * @return The HTML content whose downlevel-revealed conditional comments
+	 *         contain valid HTML for non-IE browsers
 	 */
 	private static String processDownlevelRevealedConditionalComments(final String htmlContent) {
 		final Matcher m = PATTERN_CC.matcher(htmlContent);
