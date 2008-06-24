@@ -129,6 +129,10 @@ ln -sf ../etc/init.d/open-xchange-admin %{buildroot}/sbin/rcopen-xchange-admin
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Mon Jun 23 2008 - choeger@open-xchange.com
+ - Bugfix ID#11437 ClassNotFoundException instead of real error code on SLES10
+   nothing SLES specific; commandline clients do not know anything about mysql
+   internal classes; fix: Do not wrap SQLExceptions.
 * Wed Jun 11 2008 - choeger@open-xchange.com
  - Bugfix ID#11344 listuser fails with NoClassDefFoundError
  - Bugfix ID#11405 unable to set the password mechanism on commandline
