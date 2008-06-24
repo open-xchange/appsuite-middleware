@@ -83,9 +83,9 @@ public class SessiondServiceImpl implements SessiondService {
 	}
 
 	public Session getSession(final String sessionId) {
-		final SessionControl sessionControlObject = SessionHandler.getSession(sessionId, true);
-		if (sessionControlObject != null) {
-			return sessionControlObject.getSession();
+		final SessionControl sessionControl = SessionHandler.getSession(sessionId, true);
+		if (sessionControl != null) {
+			return sessionControl.getSession();
 		}
 		return null;
 	}
