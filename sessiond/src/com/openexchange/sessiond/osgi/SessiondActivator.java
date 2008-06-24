@@ -191,10 +191,10 @@ public final class SessiondActivator extends DeferredActivator {
 			 */
 			final List<SessionControl> sessions = SessionHandler.getSessions();
 			try {
-				for (final SessionControl sessionControlObject : sessions) {
-					if (null != sessionControlObject) {
+				for (final SessionControl sessionControl : sessions) {
+					if (null != sessionControl) {
 						SessionCache.getInstance().putCachedSession(
-								((SessionImpl) (sessionControlObject.getSession())).createCachedSession());
+								((SessionImpl) (sessionControl.getSession())).createCachedSession());
 					}
 				}
 				if (LOG.isInfoEnabled()) {
