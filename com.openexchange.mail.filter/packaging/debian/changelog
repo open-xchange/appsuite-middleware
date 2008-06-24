@@ -1,3 +1,9 @@
+open-xchange-mailfilter (6.5.0-3) unstable; urgency=low
+
+  * first build for Beta3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 24 Jun 2008 17:10:45 +0200
+
 open-xchange-mailfilter (6.5.0-2) unstable; urgency=low
 
   * first build for Beta2

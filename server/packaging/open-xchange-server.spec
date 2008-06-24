@@ -119,6 +119,36 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Jun 24 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #11399: Change delete and detach calls in inforstore to match the HTTP-API.
+ - Bugfix #11424: Autoaccept for shared folder owner when an appointment is modified.
+ - Bugfix #10154: Copy old participants when an appointment is modified in a shared folder.
+* Tue Jun 24 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11403: Improved hashCode() and equals() method of participants.
+* Mon Jun 23 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11104: Fixed mapping of exported contacts in German Outlook CSV
+   file
+ - Bugfix #10963: Always checking image size against property
+   "max_image_size" (not only if "scale_images" is set to true)
+ - Bugfix #11328: Also copying attachments and links on contact copy
+* Mon Jun 23 2008 - dennis.sieben@open-xchange.com
+ - Bugfix #11448: Wrong folder names in sieve scripts
+* Mon Jun 23 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #11316: Don't remove other participants.
+* Fri Jun 20 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #11305: [L3] - Deleting a user not possible
+   The infostore batches deletes of more than 1000 documents to keep the statement size manageable.
+* Fri Jun 20 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11397: Removed identifier from external participants in JSON.
+ - Bugfix #11463: Improved exception message if the body for a search is missing.
+ - Bugfix #11443: Invalidating cached contexts after database update.
+* Fri Jun 20 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11909: Setting proper category TRUNCATED on a SQL data
+   truncation error
+ - Bugfix #11257: Fixed computing duration of a recurring appointment
+   without altering Calendar object of "DTSTART" field
+ - Bugfix #10951: Supporting multiple comma-separated parameter values in
+   older VCard object
 * Wed Jun 18 2008 - sebastian.kauss@open-xchange.com
  - Bugfix #11250: [L3] List of day and month view is not sorted 
    correctly if there are serial appointments

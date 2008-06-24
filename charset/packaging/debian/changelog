@@ -1,3 +1,9 @@
+open-xchange-charset (6.5.0-10) unstable; urgency=low
+
+  * first build for Beta3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 24 Jun 2008 17:09:35 +0200
+
 open-xchange-charset (6.5.0-9) unstable; urgency=low
 
   * first build for Beta2
