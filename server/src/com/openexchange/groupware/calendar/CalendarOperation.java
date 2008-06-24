@@ -452,9 +452,7 @@ public class CalendarOperation implements SearchIterator {
                         cdao.setUsers(edao.getUsers());
                     }
                     final UserParticipant up = new UserParticipant(cdao.getSharedFolderOwner());
-                    if (action) {
-                        up.setConfirm(CalendarDataObject.ACCEPT);
-                    }
+                    up.setConfirm(CalendarDataObject.ACCEPT);
                     CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
                     
                 } else if (cdao.getFolderType() == FolderObject.PUBLIC) {
@@ -469,12 +467,13 @@ public class CalendarOperation implements SearchIterator {
                     }
                   }
                 
-                Participant p = null;
+                UserParticipant p = null;
                 if (cdao.getFolderType() == FolderObject.SHARED) {
                     p = new UserParticipant(cdao.getSharedFolderOwner());
                 } else {
                     p = new UserParticipant(uid);
                 }
+                p.setConfirm(CalendarDataObject.ACCEPT);
                 if ((action || cdao.containsUserParticipants()) && cdao.getFolderType() != FolderObject.PUBLIC) {
                     CalendarCommonCollection.checkAndFillIfUserIsUser(cdao, p);
                 }
@@ -971,7 +970,7 @@ public class CalendarOperation implements SearchIterator {
         return p.getList();
     }
     
-    static final Participants[] getModifiedUserParticipants(final UserParticipant np[], final UserParticipant op[], final int owner, final int uid, final boolean time_change, final CalendarDataObject cdao) throws OXPermissionException {
+    static final Participants[] getModifiedUserParticipants(final UserParticipant np[], final UserParticipant op[], final int owner, final int uid, final int sharedFolderOwner, final boolean time_change, final CalendarDataObject cdao) throws OXPermissionException {
         final Participants p[] = new Participants[2];
         for (int a = 0; a < np.length; a++ ) {
             final int bs = Arrays.binarySearch(op, np[a]);
@@ -982,10 +981,10 @@ public class CalendarOperation implements SearchIterator {
                 p[0].add(np[a]);
             } else {
                 if (cdao.getFolderMoveAction() == NO_MOVE_ACTION || cdao.getFolderMoveAction() == PRIVATE_CURRENT_PARTICIPANT_ONLY) {
-                    if (uid == np[a].getIdentifier()) { // only the owner or the current user can change this object(s)
+                    if (uid == np[a].getIdentifier() || sharedFolderOwner == np[a].getIdentifier()) { // only the owner or the current user can change this object(s)
                         if (np[a].getIdentifier() == op[bs].getIdentifier() ||
                                 (cdao.getFolderMoveAction() == PRIVATE_CURRENT_PARTICIPANT_ONLY &&
-                                uid == np[a].getIdentifier())) {
+                                (uid == np[a].getIdentifier() || sharedFolderOwner == np[a].getIdentifier()))) {
                             if (np[a].containsAlarm() || np[a].containsConfirm() || np[a].containsConfirmMessage() || cdao.containsAlarm()) {
                                 if (p[1] == null) {
                                     p[1] = new Participants(); // modified
@@ -1000,7 +999,7 @@ public class CalendarOperation implements SearchIterator {
                                 }
                                 if (!np[a].containsConfirm() || time_change) {
                                     np[a].setIsModified(true);
-                                    if (!time_change || np[a].getIdentifier() == uid) {
+                                    if (!time_change || np[a].getIdentifier() == uid || np[a].getIdentifier() == sharedFolderOwner) {
                                         np[a].setConfirm(op[bs].getConfirm());
                                     } else {
                                         np[a].setConfirm(CalendarDataObject.NONE);

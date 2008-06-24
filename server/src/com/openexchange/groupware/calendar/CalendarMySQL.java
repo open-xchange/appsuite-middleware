@@ -1922,7 +1922,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		if (users != null) {
 			Arrays.sort(users);
 			Arrays.sort(old_users);
-			final Participants p[] = CalendarOperation.getModifiedUserParticipants(users, old_users, edao.getCreatedBy(), uid, time_change, cdao);
+			final Participants p[] = CalendarOperation.getModifiedUserParticipants(users, old_users, edao.getCreatedBy(), uid, cdao.getSharedFolderOwner(), time_change, cdao);
 			if (p[0] != null) {
 				new_userparticipants = p[0].getUsers();
 				if (new_userparticipants != null) {
@@ -1981,7 +1981,7 @@ class CalendarMySQL implements CalendarSqlImp {
 						}
 						dr.addBatch();
 					}
-				}
+                }
 				dr.executeBatch();
 			} finally {
 				CalendarCommonCollection.closePreparedStatement(dr);
