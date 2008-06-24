@@ -264,6 +264,7 @@ public final class MailProperties {
 			}
 		}
 
+		final String fallbackPrefix = "\". Setting to fallback: ";
 		{
 			final String mailFetchLimitStr = configuration.getProperty("com.openexchange.mail.mailFetchLimit", "1000")
 					.trim();
@@ -273,7 +274,7 @@ public final class MailProperties {
 			} catch (final NumberFormatException e) {
 				mailFetchLimit = 1000;
 				logBuilder.append("\tMail Fetch Limit: Non parseable value \"").append(mailFetchLimitStr).append(
-						"\". Setting to fallback: ").append(mailFetchLimit).append('\n');
+						fallbackPrefix).append(mailFetchLimit).append('\n');
 			}
 		}
 
@@ -286,7 +287,7 @@ public final class MailProperties {
 			} catch (final NumberFormatException e) {
 				attachDisplaySize = 8192;
 				logBuilder.append("\tAttachment Display Size Limit: Non parseable value \"").append(
-						attachDisplaySizeStr).append("\". Setting to fallback: ").append(attachDisplaySize)
+						attachDisplaySizeStr).append(fallbackPrefix).append(attachDisplaySize)
 						.append('\n');
 			}
 		}
@@ -318,7 +319,7 @@ public final class MailProperties {
 			} catch (final Throwable t) {
 				defaultMimeCharset = "UTF-8";
 				logBuilder.append("\tDefault MIME Charset: Unsupported charset \"").append(defaultMimeCharsetStr)
-						.append("\". Setting to fallback: ").append(defaultMimeCharset).append('\n');
+						.append(fallbackPrefix).append(defaultMimeCharset).append('\n');
 			}
 			/*
 			 * Add to system properties, too
@@ -361,7 +362,7 @@ public final class MailProperties {
 			} catch (final NumberFormatException e) {
 				maxNumOfConnections = 0;
 				logBuilder.append("\tMax Number of Connections: Invalid value \"").append(maxNum).append(
-						"\". Setting to fallback: ").append(maxNumOfConnections).append('\n');
+						fallbackPrefix).append(maxNumOfConnections).append('\n');
 			}
 		}
 
@@ -382,7 +383,7 @@ public final class MailProperties {
 					LOG.error(e.getLocalizedMessage(), e);
 				}
 				logBuilder.append("\tPartModifier Implementation: Unknown class \"").append(partModifierStr).append(
-						"\". Setting to fallback: ").append(DummyPartModifier.class.getName()).append('\n');
+						fallbackPrefix).append(DummyPartModifier.class.getName()).append('\n');
 			}
 		}
 
@@ -415,7 +416,7 @@ public final class MailProperties {
 			} catch (final NumberFormatException e) {
 				watcherTime = 60000;
 				logBuilder.append("\tWatcher Time: Invalid value \"").append(watcherTimeStr).append(
-						"\". Setting to fallback: ").append(watcherTime).append('\n');
+						fallbackPrefix).append(watcherTime).append('\n');
 			}
 		}
 
@@ -428,7 +429,7 @@ public final class MailProperties {
 			} catch (final NumberFormatException e) {
 				watcherFrequency = 10000;
 				logBuilder.append("\tWatcher Frequency: Invalid value \"").append(watcherFeqStr).append(
-						"\". Setting to fallback: ").append(watcherFrequency).append('\n');
+						fallbackPrefix).append(watcherFrequency).append('\n');
 			}
 		}
 
