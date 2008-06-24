@@ -4,7 +4,8 @@
 
 * 2008-06-24 - francisco.laguna@open-xchange.com
 
- - Bugfix #11399: Change delete and detach calls in Inforstore to match the HTTP-API.
+ - Bugfix #11399: Change delete and detach calls in inforstore to match the HTTP-API.
+ - Bugfix #11424: Autoaccept for shared folder owner when an appointment is modified.
 
 * 2008-06-23 - francisco.laguna@open-xchange.com
 
