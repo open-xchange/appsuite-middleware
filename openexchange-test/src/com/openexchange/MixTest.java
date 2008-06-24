@@ -122,13 +122,17 @@ public final class MixTest {
                     resp = LoginTools.login(session, request);
                     final String sessionId = resp.getSessionId();
                     LoginTools.logout(session, new LogoutRequest(sessionId));
-                    session.getConversation().clearContents();
-                    Thread.sleep(rand.nextInt(10));
                 } catch (final AssertionFailedError e) {
-                    System.out.println("AJAX kaputt!");
-                    e.printStackTrace();
+                    System.out.println("Login failed! " + e.getMessage());
                 } catch (final Throwable t) {
                     t.printStackTrace();
+                } finally {
+                    session.getConversation().clearContents();
+                    try {
+                        Thread.sleep(rand.nextInt(10));
+                    } catch (final InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -151,7 +155,12 @@ public final class MixTest {
                         final WebResponse resp = conv.getResponse(req);
                         if (resp.getResponseCode() != 200
                             || !"httpd/unix-directory".equals(resp.getContentType())) {
-                            System.out.println("WebDAV kaputt!");
+                            System.out.println("discovered mod_jk problem!");
+                        }
+                        if (resp.getResponseCode() == 200
+                            && resp.getContentType().startsWith("text/javascript")) {
+                            System.out.println("Invalid body found! \""
+                                + resp.getText() + "\"");
                         }
                     } catch (final AuthorizationRequiredException e) {
                         System.out.println("Login failed.");

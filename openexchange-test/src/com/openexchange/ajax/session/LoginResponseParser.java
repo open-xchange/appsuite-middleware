@@ -5,6 +5,8 @@ package com.openexchange.ajax.session;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -18,6 +20,11 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(LoginResponseParser.class);
 
     private String jvmRoute;
     
@@ -38,6 +45,11 @@ public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
         try {
             super.getResponse(resp.getText());
         } catch (final JSONException e) {
+            try {
+                LOG.error("Invalid login body: \"" + resp.getText() + "\"");
+            } catch (IOException e1) {
+                fail(e.getMessage());
+            }
             fail(e.getMessage());
         } catch (final IOException e) {
             fail(e.getMessage());
