@@ -220,6 +220,24 @@ public class RdbSettingStorage extends SettingStorage {
      */
     @Override
     public void readValues(final Setting setting) throws SettingException {
+        Connection con;
+        try {
+            con = DBPool.pickup(ctx);
+        } catch (final DBPoolingException e) {
+            throw new SettingException(Code.NO_CONNECTION, e);
+        }
+        try {
+            readValues(con, setting);
+        } finally {
+            DBPool.closeReaderSilent(ctx, con);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void readValues(final Connection con, final Setting setting) throws SettingException {
         if (!setting.isLeaf()) {
             readSubValues(setting);
             return;
@@ -227,12 +245,6 @@ public class RdbSettingStorage extends SettingStorage {
         if (setting.isShared()) {
             readSharedValue(setting);
         } else {
-            Connection con;
-            try {
-                con = DBPool.pickup(ctx);
-            } catch (final DBPoolingException e) {
-                throw new SettingException(Code.NO_CONNECTION, e);
-            }
             PreparedStatement stmt = null;
             ResultSet result = null;
             try {
@@ -252,7 +264,6 @@ public class RdbSettingStorage extends SettingStorage {
                 throw new SettingException(Code.SQL_ERROR, e);
             } finally {
                 closeSQLStuff(result, stmt);
-                DBPool.closeReaderSilent(ctx, con);
             }
         }
     }

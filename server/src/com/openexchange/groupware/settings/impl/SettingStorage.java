@@ -93,6 +93,15 @@ public abstract class SettingStorage {
         throws SettingException;
 
     /**
+     * This method reads the setting and its subsettings from the database.
+     * @param con
+     * @param setting
+     * @throws SettingException
+     */
+    public abstract void readValues(Connection con, Setting setting)
+        throws SettingException;
+
+    /**
      * @param session Session.
      * @return an instance implementing this storage interface.
      */
