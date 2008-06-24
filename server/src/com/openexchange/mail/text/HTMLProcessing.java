@@ -370,6 +370,43 @@ public final class HTMLProcessing {
 				return sb.toString();
 			}
 		}
+		return commentPreProcStmts(htmlContent);
+	}
+
+	private static final Pattern PATTERN_PP_IF = Pattern.compile("(<!\\[if *)([^\\]]+\\]>.*?)(<!\\[endif\\]>)",
+			Pattern.DOTALL);
+
+	/**
+	 * Puts detected pre-processor statements into a comment:
+	 * 
+	 * <pre>
+	 *  &lt;![if condition]&gt; ... &lt;![endif]&gt;
+	 * </pre>
+	 * 
+	 * is converted to:
+	 * 
+	 * <pre>
+	 *  &lt;!--[if condition]&gt; ... &lt;![endif]--&gt;
+	 * </pre>
+	 * 
+	 * @param htmlContent
+	 *            The HTML content
+	 * @return The HTML content with pre-processor statements put into comments.
+	 */
+	private static String commentPreProcStmts(final String htmlContent) {
+		final Matcher m = PATTERN_PP_IF.matcher(htmlContent);
+		if (m.find()) {
+			int lastMatch = 0;
+			final StringBuilder sb = new StringBuilder(htmlContent.length() + 128);
+			do {
+				sb.append(htmlContent.substring(lastMatch, m.start()));
+				sb.append("<!--[if ").append(m.group(2));
+				sb.append("<![endif]-->");
+				lastMatch = m.end();
+			} while (m.find());
+			sb.append(htmlContent.substring(lastMatch));
+			return sb.toString();
+		}
 		return htmlContent;
 	}
 

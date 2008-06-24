@@ -301,7 +301,11 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 				final String checkedCSS = cssBuffer.toString();
 				cssBuffer.setLength(0);
 				if (containsCSSElement(checkedCSS)) {
-					attrBuilder.append(' ').append(STYLE).append(VAL_START).append(checkedCSS).append('"');
+					if (checkedCSS.indexOf('"') == -1) {
+						attrBuilder.append(' ').append(STYLE).append(VAL_START).append(checkedCSS).append('"');
+					} else {
+						attrBuilder.append(' ').append(STYLE).append("='").append(checkedCSS).append('\'');
+					}
 				}
 			} else {
 				attrBuilder.append(' ').append(e.getKey()).append(VAL_START).append(htmlFormat(e.getValue(), false))
