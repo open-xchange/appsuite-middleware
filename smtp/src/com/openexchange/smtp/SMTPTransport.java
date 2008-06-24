@@ -275,12 +275,13 @@ public final class SMTPTransport extends MailTransport {
 			 * Set from
 			 */
 			final String from;
-			if (fromAddr != null) {
-				from = fromAddr;
-			} else if ((usm.getSendAddr() == null) && (userMail == null)) {
-				throw new SMTPException(SMTPException.Code.NO_SEND_ADDRESS_FOUND);
-			} else {
+			if (fromAddr == null) {
+				if ((usm.getSendAddr() == null) && (userMail == null)) {
+					throw new SMTPException(SMTPException.Code.NO_SEND_ADDRESS_FOUND);
+				}
 				from = usm.getSendAddr() == null ? userMail : usm.getSendAddr();
+			} else {
+				from = fromAddr;
 			}
 			smtpMessage.addFrom(parseAddressList(from, false));
 			/*

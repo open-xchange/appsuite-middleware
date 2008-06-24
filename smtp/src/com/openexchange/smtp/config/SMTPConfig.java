@@ -174,11 +174,11 @@ public final class SMTPConfig extends TransportConfig {
 		smtpPort = 25;
 		{
 			final String[] parsed = parseProtocol(smtpServer);
-			if (parsed != null) {
+			if (parsed == null) {
+				secure = false;
+			} else {
 				secure = PROTOCOL_SMTP_SECURE.equals(parsed[0]);
 				smtpServer = parsed[1];
-			} else {
-				secure = false;
 			}
 			final int pos = smtpServer.indexOf(':');
 			if (pos > -1) {
