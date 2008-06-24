@@ -370,42 +370,49 @@ public final class HTMLProcessing {
 				return sb.toString();
 			}
 		}
-		return commentPreProcStmts(htmlContent);
+		return processDownlevelRevealedConditionalComments(htmlContent);
 	}
 
-	private static final Pattern PATTERN_PP_IF = Pattern.compile("(<!\\[if *)([^\\]]+\\]>.*?)(<!\\[endif\\]>)",
+	private static final Pattern PATTERN_PP_IF = Pattern.compile("(<!\\[if)([^\\]]+\\]>)(.*?)(<!\\[endif\\]>)",
 			Pattern.DOTALL);
 
-	private static final String PP_START = "<!--[if ";
-
-	private static final String PP_END = "<![endif]-->";
-
 	/**
-	 * Puts detected pre-processor statements into a comment:
+	 * Processes detected downlevel-revealed <a
+	 * href="http://en.wikipedia.org/wiki/Conditional_comment">conditional
+	 * comments</a> through adding dashes before and after each if statement tag
+	 * completes them as a valid HTML comment and leaves center code open to
+	 * rendering on non-IE browsers:
 	 * 
 	 * <pre>
-	 *  &lt;![if condition]&gt; ... &lt;![endif]&gt;
+	 * &lt;![if !IE]&gt;
+	 * &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;non-ie.css&quot;&gt;
+	 * &lt;![endif]&gt;
 	 * </pre>
 	 * 
-	 * is converted to:
+	 * is turned to
 	 * 
 	 * <pre>
-	 *  &lt;!--[if condition]&gt; ... &lt;![endif]--&gt;
+	 * &lt;!--[if !IE]&gt;--&gt;
+	 * &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;non-ie.css&quot;&gt;
+	 * &lt;!--&lt;![endif]--&gt;
 	 * </pre>
 	 * 
 	 * @param htmlContent
-	 *            The HTML content
-	 * @return The HTML content with pre-processor statements put into comments.
+	 *            The HTML content possibly containing downlevel-revealed
+	 *            conditional comments
+	 * @return The HTML whose downlevel-revealed conditional comments contain
+	 *         valid HTML for non-IE browsers
 	 */
-	private static String commentPreProcStmts(final String htmlContent) {
+	private static String processDownlevelRevealedConditionalComments(final String htmlContent) {
 		final Matcher m = PATTERN_PP_IF.matcher(htmlContent);
 		if (m.find()) {
 			int lastMatch = 0;
 			final StringBuilder sb = new StringBuilder(htmlContent.length() + 128);
 			do {
 				sb.append(htmlContent.substring(lastMatch, m.start()));
-				sb.append(PP_START).append(m.group(2));
-				sb.append(PP_END);
+				sb.append("<!--[if").append(m.group(2)).append("-->");
+				sb.append(m.group(3));
+				sb.append("<!--<![endif]-->");
 				lastMatch = m.end();
 			} while (m.find());
 			sb.append(htmlContent.substring(lastMatch));
