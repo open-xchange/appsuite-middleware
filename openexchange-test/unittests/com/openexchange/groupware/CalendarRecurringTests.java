@@ -1011,7 +1011,7 @@ public class CalendarRecurringTests extends TestCase {
         
         final CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
         final RecurringResults rss_test = CalendarRecurringCollection.calculateRecurring(testobject, 0, 0, 3, 999, true);
-        final RecurringResult rs_test = rss.getRecurringResult(0);
+        final RecurringResult rs_test = rss_test.getRecurringResult(0);
         
         
         assertTrue("Got RecurringResult", rs_test != null);

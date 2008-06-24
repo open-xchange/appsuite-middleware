@@ -1481,14 +1481,13 @@ public class CalendarTest extends TestCase {
         up.setAlarmMinutes(5);
         cdao.setUsers(new UserParticipant[] { up });
         
-        final String mail_address = "test@example.org";
+        final String mail_address = "firsttest@example.org";
         final String display_name = "Externer test user";
         
         
-        final String mail_address2 = "test2@example.org";
+        final String mail_address2 = "othertest@example.org";
         final String display_name2 = "Externer test user2";
-        
-        
+
         Participants participants = new Participants();
         final ExternalUserParticipant p1 = new ExternalUserParticipant(mail_address);
         p1.setEmailAddress(mail_address);
@@ -1557,7 +1556,7 @@ public class CalendarTest extends TestCase {
         final String update_new_display_1 = "External Update 1";
         final String update_new_mail_1 = "abc@de";
         final String update_new_display_2 = "External Update 2";
-        final String update_new_mail_2 = "abc2@de";        
+        final String update_new_mail_2 = "def2@de";
         
         final Participants participants_update = new Participants();
         final ExternalUserParticipant p3 = new ExternalUserParticipant(update_new_mail_1);

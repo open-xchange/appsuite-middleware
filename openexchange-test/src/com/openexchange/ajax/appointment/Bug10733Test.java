@@ -59,6 +59,6 @@ public class Bug10733Test extends AppointmentTest {
 		
 		final String errorCode = jsonObj.getString("code");
 		
-		assertEquals("unexpected error message", "APP-0005", errorCode);
+		assertEquals("unexpected error message", "APP-0072", errorCode);
 	}
 }

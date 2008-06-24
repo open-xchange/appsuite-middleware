@@ -379,4 +379,56 @@ public class CalendarSqlTest extends TestCase {
         assertEquals(appointment.getParticipants().length, appointment.getUsers().length);
 
     }
+
+    // Bug 11424
+
+    public void testUpdateInSharedFolderShouldAutoAcceptTimeChange() throws OXException, SQLException {
+
+        folders.sharePrivateFolder(session, ctx, secondUserId);
+        try {
+            appointments.switchUser( secondUser );
+            CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user);
+            appointment.setParentFolderID(folders.getStandardFolder(userId, ctx));
+
+            appointments.save( appointment );
+
+            appointment = appointments.reload(appointment);
+
+            boolean found = false;
+            for(UserParticipant participant : appointment.getUsers()) {
+                if(participant.getIdentifier() == userId) {
+                    found = true;
+                    assertEquals(CalendarDataObject.ACCEPT, participant.getConfirm());
+                }
+            }
+
+            assertTrue(found);
+
+            
+            CalendarDataObject cdao = new CalendarDataObject();
+            cdao.setStartDate(appointment.getStartDate());
+            cdao.setEndDate(new Date(appointment.getEndDate().getTime() + 36000000));
+            cdao.setObjectID(appointment.getObjectID());
+            cdao.setParentFolderID(appointment.getParentFolderID());
+            cdao.setContext(appointment.getContext());
+
+            appointments.save( cdao );
+
+            appointment = appointments.reload(appointment);
+
+            found = false;
+            for(UserParticipant participant : appointment.getUsers()) {
+                if(participant.getIdentifier() == userId) {
+                    found = true;
+                    assertEquals(CalendarDataObject.ACCEPT, participant.getConfirm());
+                }
+            }
+
+            assertTrue(found);
+
+        } finally {
+            // Unshare
+            folders.unsharePrivateFolder(session, ctx);
+        }
+    }
 }

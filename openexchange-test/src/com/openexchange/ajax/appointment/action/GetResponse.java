@@ -92,6 +92,10 @@ public class GetResponse extends AbstractAJAXResponse {
                 appointmentObj.setCreationDate(DataParser.parseTime(json,
                     AppointmentFields.CREATION_DATE, timeZone));
             }
+            if (json.has(AppointmentFields.LAST_MODIFIED)) {
+                appointmentObj.setLastModified(DataParser.parseTime(json,
+                    AppointmentFields.LAST_MODIFIED, timeZone));
+            }
         }
         return appointmentObj;
     }
