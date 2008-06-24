@@ -385,9 +385,9 @@ public final class HTMLProcessing {
 	/**
 	 * Processes detected downlevel-revealed <a
 	 * href="http://en.wikipedia.org/wiki/Conditional_comment">conditional
-	 * comments</a> through adding dashes before and after each if statement tag
-	 * completes them as a valid HTML comment and leaves center code open to
-	 * rendering on non-IE browsers:
+	 * comments</a> through adding dashes before and after each <code>if</code>
+	 * statement tag to complete them as a valid HTML comment and leaves center
+	 * code open to rendering on non-IE browsers:
 	 * 
 	 * <pre>
 	 * &lt;![if !IE]&gt;
