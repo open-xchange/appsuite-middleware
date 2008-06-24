@@ -79,7 +79,7 @@ public class GenericChecks {
      */
     public final static boolean isValidMailAddress(final String address)  {
         if (null != address) {
-            return address.matches("[$%\\.+a-zA-Z0-9_-!#$&'/=?^`{|}~]+@[\\.a-zA-Z0-9_-]+");
+            return address.matches("[$%\\.+a-zA-Z0-9_#$&'/=!?^`{|}~-]+@[\\.a-zA-Z0-9_-]+");
         } else {
             return false;
         }
