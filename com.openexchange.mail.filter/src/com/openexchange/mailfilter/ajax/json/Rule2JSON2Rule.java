@@ -194,6 +194,13 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         return attr2Mapper.get(attrName);
     }
     
+    private static TagArgument createTagArg(VacationActionFields fields) {
+        final Token token = new Token();
+        token.image = fields.getTagname();
+        final TagArgument tagArgument = new TagArgument(token);
+        return tagArgument;
+    }
+
     private static TagArgument createTagArg(final String string) {
         final Token token = new Token();
         token.image = ":" + string;
@@ -566,12 +573,12 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                     final ArrayList<Object> arrayList = new ArrayList<Object>();
                     final String days = object.getString(VacationActionFields.DAYS.getFieldname());
                     if (null != days) {
-                        arrayList.add(createTagArg(VacationActionFields.DAYS.getTagname()));
+                        arrayList.add(createTagArg(VacationActionFields.DAYS));
                         arrayList.add(createNumberArg(days));
                     }
                     final JSONArray addresses = object.getJSONArray(VacationActionFields.ADDRESSES.getFieldname());
                     if (null != addresses) {
-                        arrayList.add(createTagArg(VacationActionFields.ADDRESSES.getTagname()));
+                        arrayList.add(createTagArg(VacationActionFields.ADDRESSES));
                         arrayList.add(JSONArrayToStringList(addresses));
                     }
                     final String subject = object.getString(VacationActionFields.SUBJECT.getFieldname());

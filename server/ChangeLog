@@ -1,3 +1,7 @@
+* 2008-06-24 - dennis.sieben@open-xchange.com
+
+ - Bugfix #11494: Can't create a vacation notice
+
 * 2008-06-24 - thorben.betten@open-xchange.com
 
  - Bugfix #11481: Properly encapsulating pre-processor statements in
