@@ -47,31 +47,21 @@
  *
  */
 
-
-
 package com.openexchange.groupware.container;
 
 /**
- * Participant
+ * A group of resources as participant.
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
+public class ResourceGroupParticipant implements Participant, Comparable<Participant> {
 
-public class ResourceGroupParticipant implements Participant, Comparable
-{
+    private int id = 0;
 
-	private int id = 0;
-	
-	private String displayName = null;
-	
-	private String emailaddress = null;
-	
-	private boolean b_id = false;
-	
-	private boolean b_displayName = false;
-	
-	private boolean b_emailaddress = false;
+    private String displayName = null;
 
-	/**
+    private String emailaddress = null;
+
+    /**
      * Default constructor.
      * @param id unique identifier of the resource group.
      */
@@ -84,91 +74,93 @@ public class ResourceGroupParticipant implements Participant, Comparable
      * @deprecated Use {@link #ResourceGroupParticipant(int)}.
      */
     @Deprecated
-	public ResourceGroupParticipant() {
+    public ResourceGroupParticipant() {
         super();
     }
 
-    public void setIdentifier( final int id ) {
-		this.id = id;
-	}
-	
-	public int getIdentifier( ) {
-		return id;
-	}
-	
-	public void setDisplayName( final String displayName) {
-		this.displayName = displayName;
-		b_displayName = true;
-	}
-	
-	public String getDisplayName() {
-		return displayName;
-	}
-	
-	public String getEmailAddress() {
-		return emailaddress;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public void setIdentifier(final int id ) {
+        this.id = id;
+    }
 
-	public void setEmailAddress( final String emailaddress) {
-		this.emailaddress = emailaddress;
-		b_emailaddress = true;
-	}
-	
-	public boolean containsIdentifier() {
-		return b_id;
-	}
-	
-	public boolean containsDisplayname() {
-		return b_displayName;
-	}
-	
-	public boolean containsEmailAddress() {
-		return b_emailaddress;
-	}
-	
-	public void removeIdentifier() {
-		id = 0;
-		b_id = false;
-	}
-	
-	public void removeDisplayName() {
-		displayName = null;
-		b_displayName = false;
-	}
-	
-	public void removeEmailAddress() {
-		emailaddress = null;
-		b_emailaddress = false;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public int getIdentifier() {
+        return id;
+    }
 
-	public int getType() {
-		return RESOURCEGROUP;
-	}
-	
-	@Override
-	public int hashCode() {
-		return getHashString(getIdentifier(), getType()).hashCode();
-	}
-	
-	@Override
-	public boolean equals(final Object o) {
-		return (hashCode() == o.hashCode());
-	}
-	
-	public int compareTo(final Object o) {
-		final String s1 = getHashString(getIdentifier(), getType());
-		final String s2 = getHashString(((Participant)o).getIdentifier(), ((Participant)o).getType());
-		
-		return s1.compareTo(s2);
-	}
-	
-	private String getHashString(final int id, final int type) {
-		final StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append('I');
-		stringBuilder.append(id);
-		stringBuilder.append('T');
-		stringBuilder.append(type);
-		
-		return stringBuilder.toString();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public void setDisplayName(final String displayName) {
+        this.displayName = displayName;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getEmailAddress() {
+        return emailaddress;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setEmailAddress(final String emailaddress) {
+        this.emailaddress = emailaddress;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getType() {
+        return RESOURCEGROUP;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + RESOURCEGROUP;
+        result = prime * result + id;
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (!(obj instanceof ResourceGroupParticipant)) {
+            return false;
+        }
+        final ResourceGroupParticipant other = (ResourceGroupParticipant) obj;
+        return id == other.id;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int compareTo(final Participant part) {
+        final int retval;
+        if (RESOURCEGROUP == part.getType()) {
+            retval = Integer.valueOf(id).compareTo(Integer.valueOf(part.getIdentifier()));
+        } else {
+            retval = Integer.valueOf(RESOURCEGROUP).compareTo(Integer.valueOf(part.getType()));
+        }
+        return retval;
+    }
 }

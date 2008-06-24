@@ -47,59 +47,49 @@
  *
  */
 
-
-
 package com.openexchange.groupware.container;
 
 import java.util.Date;
 
 /**
- * UserParticipant
+ * Internal user participant.
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
+public class UserParticipant implements Participant, Comparable<Participant> {
 
-public class UserParticipant implements Participant, Comparable {
-	
-	public static final int NO_PFID = -1;
-	
-	private int id = 0;
-	
-	private int pfid = NO_PFID;
-	
-	private int alarmMinutes = -1;
-	
-	private Date alarmDate = null;
-	
-	private int confirm = CalendarObject.NONE;
-	
-	private String confirmMessage = null;
-	
-	private String displayName = null;
-	
-	private String emailaddress = null;
-	
-	private boolean isModified = false;
-	
-	private boolean b_id = false;
-	
-	private boolean bAlarmMinutes = false;
+    public static final int NO_PFID = -1;
 
-	private boolean bAlarmDate = false;
-	
-	private boolean b_confirm = false;
-	
-	private boolean b_confirmMessage = false;
-	
-	private boolean b_displayName = false;
-	
-	private boolean b_emailaddress = false;
-	
-	/**
+    private int id = NO_ID;
+
+    private int pfid = NO_PFID;
+
+    private int alarmMinutes = -1;
+
+    private Date alarmDate = null;
+
+    private int confirm = CalendarObject.NONE;
+
+    private String confirmMessage = null;
+
+    private String displayName = null;
+
+    private String emailaddress = null;
+
+    private boolean isModified = false;
+
+    private boolean bAlarmMinutes = false;
+
+    private boolean b_confirm = false;
+
+    private boolean b_confirmMessage = false;
+
+    /**
      * @deprecated User {@link #UserParticipant(int)}.
-	 */
+     */
     @Deprecated
-	public UserParticipant() {
-	}
+    public UserParticipant() {
+        super();
+    }
 
     /**
      * Default constructor.
@@ -108,203 +98,155 @@ public class UserParticipant implements Participant, Comparable {
     public UserParticipant(final int id) {
         super();
         this.id = id;
-        b_id = true;
     }
 
-	public void setPersonalFolderId(final int pfid) {
-		this.pfid = pfid;
-	}
-	
-	/**
+    public void setPersonalFolderId(final int pfid) {
+        this.pfid = pfid;
+    }
+
+    /**
      * @deprecated Use {@link #UserParticipant(int)}.
-	 */
+     */
     @Deprecated
-	public void setIdentifier(final int id) {
-		this.id = id;
-		b_id = true;
-	}
-	
-	public int getIdentifier() {
-		return id;
-	}
-	
-	public boolean isModified() {
-		return isModified;
-	}
-	
-	public void setIsModified( final boolean isModified) {
-		this.isModified = isModified;
-	}
-	
-	public void setAlarmMinutes( final int alarmMinutes) {
-		this.alarmMinutes = alarmMinutes;
-		bAlarmMinutes = true;
-	}
-	
-	public void setAlarmDate( final Date alarmDate) {
-		this.alarmDate = alarmDate;
-		bAlarmDate = true;
-	}
-	
-	public int getPersonalFolderId() {
-		return pfid;
-	}
-	
-	public int getAlarmMinutes() {
-		return alarmMinutes;
-	}
-	
-	public Date getAlarmDate() {
-		return alarmDate;
-	}
-	
-	public void setConfirm( final int confirm) {
-		this.confirm = confirm;
-		b_confirm = true;
-	}
-	
-	public int getConfirm() {
-		return confirm;
-	}
-	
-	public void setConfirmMessage( final String confirmMessage) {
-		this.confirmMessage = confirmMessage;
-		b_confirmMessage = true;
-	}
-	
-	public String getConfirmMessage() {
-		return confirmMessage;
-	}
-	
-	public void setDisplayName( final String displayName) {
-		this.displayName = displayName;
-		b_displayName = true;
-	}
-	
-	public String getDisplayName() {
-		return displayName;
-	}
-	
-	public String getEmailAddress() {
-		return emailaddress;
-	}
-	
-	public void setEmailAddress( final String emailaddress) {
-		this.emailaddress = emailaddress;
-		b_emailaddress = true;
-	}
-	
-	public boolean containsIdentifier() {
-		return b_id;
-	}
-	
-	public boolean containsAlarm() {
-		return bAlarmMinutes;
-	}
-	
-	public boolean containsAlarmDate() {
-		return bAlarmDate;
-	}
-	
-	public boolean containsConfirm() {
-		return b_confirm;
-	}
-	
-	public boolean containsConfirmMessage() {
-		return b_confirmMessage;
-	}
-	
-	public boolean containsDisplayName() {
-		return b_displayName;
-	}
-	
-	public boolean containsEmailAddress() {
-		return b_emailaddress;
-	}
-	
-	public void removeIdentifier() {
-		id = 0;
-		b_id = false;
-	}
-	
-	public void removeAlarmMinutes() {
-		alarmMinutes = 0;
-		bAlarmMinutes = false;
-	}
-	
-	public void removeAlarmDate() {
-		alarmDate = null;
-		bAlarmDate = false;
-	}
-	
-	public void removeConfirm() {
-		confirm = 0;
-		b_confirm = false;
-	}
-	
-	public void removeDisplayName() {
-		displayName = null;
-		b_displayName = false;
-	}
-	
-	public void removeConfirmMessage() {
-		confirmMessage = null;
-		b_confirmMessage = false;
-	}
-	
-	public void removeEmailAddress() {
-		emailaddress = null;
-		b_emailaddress = false;
-	}
-	
-	public void reset() {
-		id = 0;
-		alarmMinutes = 0;
-		confirm = 0;
-		confirmMessage = null;
-		displayName = null;
-		emailaddress = null;
-		
-		b_id = false;
-		bAlarmMinutes = false;
-		b_confirm = false;
-		b_confirmMessage = false;
-		b_displayName = false;
-		b_emailaddress = false;
-	}
-	
-	public int getType() {
-		return USER;
-	}
-	
-	@Override
-	public int hashCode() {
-		return getHashString(getIdentifier(), getType(), getDisplayName(), getEmailAddress()).hashCode();
-	}
-	
-	@Override
-	public boolean equals(final Object o) {
-		return (hashCode() == o.hashCode());
-	}
-	
-	public int compareTo(final Object o) {
-		final String s1 = getHashString(getIdentifier(), getType(), getDisplayName(), getEmailAddress());
-		final String s2 = getHashString(((Participant)o).getIdentifier(), ((Participant)o).getType(), ((Participant)o).getDisplayName(), ((Participant)o).getEmailAddress());
-		
-		return s1.compareTo(s2);
-	}
-	
-	private String getHashString(final int id, final int type, final String displayName, final String emailaddress) {
-		final StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append('I');
-		stringBuilder.append(id);
-		stringBuilder.append('T');
-		stringBuilder.append(type);
-		stringBuilder.append('D');
-		stringBuilder.append(displayName);
-		stringBuilder.append('E');
-		stringBuilder.append(emailaddress);
-		
-		return stringBuilder.toString();
-	}
+    public void setIdentifier(final int id) {
+        this.id = id;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getIdentifier() {
+        return id;
+    }
+
+    public boolean isModified() {
+        return isModified;
+    }
+
+    public void setIsModified(final boolean isModified) {
+        this.isModified = isModified;
+    }
+
+    public void setAlarmMinutes(final int alarmMinutes) {
+        this.alarmMinutes = alarmMinutes;
+        bAlarmMinutes = true;
+    }
+
+    public void setAlarmDate(final Date alarmDate) {
+        this.alarmDate = alarmDate;
+    }
+
+    public int getPersonalFolderId() {
+        return pfid;
+    }
+
+    public int getAlarmMinutes() {
+        return alarmMinutes;
+    }
+
+    public Date getAlarmDate() {
+        return alarmDate;
+    }
+
+    public void setConfirm(final int confirm) {
+        this.confirm = confirm;
+        b_confirm = true;
+    }
+
+    public int getConfirm() {
+        return confirm;
+    }
+
+    public void setConfirmMessage(final String confirmMessage) {
+        this.confirmMessage = confirmMessage;
+        b_confirmMessage = true;
+    }
+
+    public String getConfirmMessage() {
+        return confirmMessage;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setDisplayName(final String displayName) {
+        this.displayName = displayName;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getEmailAddress() {
+        return emailaddress;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setEmailAddress(final String emailaddress) {
+        this.emailaddress = emailaddress;
+    }
+
+    public boolean containsAlarm() {
+        return bAlarmMinutes;
+    }
+
+    public boolean containsConfirm() {
+        return b_confirm;
+    }
+
+    public boolean containsConfirmMessage() {
+        return b_confirmMessage;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getType() {
+        return USER;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + USER;
+        result = prime * result + id;
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (!(obj instanceof UserParticipant)) {
+            return false;
+        }
+        final UserParticipant other = (UserParticipant) obj;
+        return id == other.id;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int compareTo(final Participant part) {
+        final int retval;
+        if (USER == part.getType()) {
+            retval = Integer.valueOf(id).compareTo(Integer.valueOf(part.getIdentifier()));
+        } else {
+            retval = Integer.valueOf(USER).compareTo(Integer.valueOf(part.getType()));
+        }
+        return retval;
+    }
 }

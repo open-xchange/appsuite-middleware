@@ -51,23 +51,15 @@ package com.openexchange.groupware.container;
 
 /**
  * ExternalUserParticipant
- * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-public class ExternalUserParticipant implements Participant, Comparable
-{
+public class ExternalUserParticipant implements Participant, Comparable<Participant> {
 
-	private int id = NO_ID;
-	
-	private String displayName;
-	
-	private String emailaddress;
-	
-	private boolean b_id;
-	
-	private boolean b_displayName;
-	
-	private boolean b_emailaddress;
+    private int id = NO_ID;
+
+    private String displayName;
+
+    private String emailaddress;
 
     /**
      * Default constructur.
@@ -82,98 +74,101 @@ public class ExternalUserParticipant implements Participant, Comparable
      * @deprecated Use {@link #ExternalUserParticipant(String)}.
      */
     @Deprecated
-	public ExternalUserParticipant() {
-        this(null);
+    public ExternalUserParticipant() {
+        super();
     }
 
-	public void setIdentifier( final int id ) {
-		this.id = id;
-	}
-	
-	public int getIdentifier( ) {
-		return id;
-	}
-	
-	public void setDisplayName( final String displayName) {
-		this.displayName = displayName;
-		b_displayName = true;
-	}
-	
-	public String getDisplayName() {
-		return displayName;
-	}
-	
-	public String getEmailAddress() {
-		return emailaddress;
-	}
-
-	/**
+    /**
      * {@inheritDoc}
-	 */
-    public void setEmailAddress( final String emailaddress) {
-		this.emailaddress = emailaddress;
-		b_emailaddress = true;
-	}
-	
-	public boolean containsIdentifier() {
-		return b_id;
-	}
-	
-	public boolean containsDisplayname() {
-		return b_displayName;
-	}
-	
-	public boolean containsEmailAddress() {
-		return b_emailaddress;
-	}
-	
-	public void removeIdentifier() {
-		id = 0;
-		b_id = false;
-	}
-	
-	public void removeDisplayName() {
-		displayName = null;
-		b_displayName = false;
-	}
-	
-	public void removeEmailAddress() {
-		emailaddress = null;
-		b_emailaddress = false;
-	}
-	
-	public int getType() {
-		return EXTERNAL_USER;
-	}
-	
-	@Override
-	public int hashCode() {
-		return getHashString(getIdentifier(), getType(), getDisplayName(), getEmailAddress()).hashCode();
-	}
-	
-	@Override
-	public boolean equals(final Object o) {
-		return (hashCode() == o.hashCode());
-	}
-	
-	public int compareTo(final Object o) {
-		final String s1 = getHashString(getIdentifier(), getType(), getDisplayName(), getEmailAddress());
-		final String s2 = getHashString(((Participant)o).getIdentifier(), ((Participant)o).getType(), ((Participant)o).getDisplayName(), ((Participant)o).getEmailAddress());
-		
-		return s1.compareTo(s2);
-	}
-	
-	private String getHashString(final int id, final int type, final String displayName, final String emailaddress) {
-		final StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append('I');
-		stringBuilder.append(id);
-		stringBuilder.append('T');
-		stringBuilder.append(type);
-		stringBuilder.append('D');
-		stringBuilder.append(displayName);
-		stringBuilder.append('E');
-		stringBuilder.append(emailaddress);
-		
-		return stringBuilder.toString();
-	}
+     */
+    public void setIdentifier(final int id ) {
+        this.id = id;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getIdentifier( ) {
+        return id;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setDisplayName(final String displayName) {
+        this.displayName = displayName;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getEmailAddress() {
+        return emailaddress;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setEmailAddress(final String emailaddress) {
+        this.emailaddress = emailaddress;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getType() {
+        return EXTERNAL_USER;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + EXTERNAL_USER;
+        result = prime * result
+            + ((emailaddress == null) ? 0 : emailaddress.hashCode());
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (!(obj instanceof ExternalUserParticipant)) {
+            return false;
+        }
+        final ExternalUserParticipant other = (ExternalUserParticipant) obj;
+        if (null == emailaddress && null != other.emailaddress) {
+            return false;
+        }
+        return emailaddress.equals(other.emailaddress);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int compareTo(final Participant part) {
+        final int retval;
+        if (EXTERNAL_USER == part.getType()) {
+            if (null == emailaddress && null == part.getEmailAddress()) {
+                retval = 0;
+            } else {
+                retval = emailaddress.compareTo(part.getEmailAddress());
+            }
+        } else {
+            retval = Integer.valueOf(EXTERNAL_USER).compareTo(Integer.valueOf(part.getType()));
+        }
+        return retval;
+    }
 }

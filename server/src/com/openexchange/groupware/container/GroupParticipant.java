@@ -47,28 +47,19 @@
  *
  */
 
-
-
 package com.openexchange.groupware.container;
 
 /**
- * Participant
+ * Internal group participant.
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
+public class GroupParticipant implements Participant, Comparable<Participant> {
 
-public class GroupParticipant implements Participant, Comparable {
-	
-	private int id = 0;
-	
-	private String displayName = null;
-	
-	private String emailaddress = null;
-	
-	private boolean b_id = false;
-	
-	private boolean b_displayName = false;
-	
-	private boolean b_emailaddress = false;
+    private int id = 0;
+
+    private String displayName = null;
+
+    private String emailaddress = null;
 
     /**
      * Default constructor.
@@ -83,95 +74,93 @@ public class GroupParticipant implements Participant, Comparable {
      * @deprecated Use {@link #GroupParticipant(int)}.
      */
     @Deprecated
-	public GroupParticipant() {
+    public GroupParticipant() {
         this(0);
     }
 
-	public void setIdentifier( final int id ) {
-		this.id = id;
-	}
-	
-	public int getIdentifier( ) {
-		return id;
-	}
-	
-	public void setDisplayName( final String displayName) {
-		this.displayName = displayName;
-		b_displayName = true;
-	}
-	
-	public String getDisplayName() {
-		return displayName;
-	}
-	
-	public String getEmailAddress() {
-		return emailaddress;
-	}
-	
-	public void setEmailAddress( final String emailaddress) {
-		this.emailaddress = emailaddress;
-		b_emailaddress = true;
-	}
-	
-	public boolean containsIdentifier() {
-		return b_id;
-	}
-	
-	public boolean containsDisplayname() {
-		return b_displayName;
-	}
-	
-	public boolean containsEmailAddress() {
-		return b_emailaddress;
-	}
-	
-	public void removeIdentifier() {
-		id = 0;
-		b_id = false;
-	}
-	
-	public void removeDisplayName() {
-		displayName = null;
-		b_displayName = false;
-	}
-	
-	public void removeEmailAddress() {
-		emailaddress = null;
-		b_emailaddress = false;
-	}
-	
-	public int getType() {
-		return GROUP;
-	}
-	
-	@Override
-	public int hashCode() {
-		return getHashString(getIdentifier(), getType(), getDisplayName(), getEmailAddress()).hashCode();
-	}
-	
-	@Override
-	public boolean equals(final Object o) {
-		return (hashCode() == o.hashCode());
-	}
-	
-	public int compareTo(final Object o) {
-		final String s1 = getHashString(getIdentifier(), getType(), getDisplayName(), getEmailAddress());
-		final String s2 = getHashString(((Participant)o).getIdentifier(), ((Participant)o).getType(), ((Participant)o).getDisplayName(), ((Participant)o).getEmailAddress());
-		
-		return s1.compareTo(s2);
-	}
-	
-	private String getHashString(final int id, final int type, final String displayName, final String emailaddress) {
-		final StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append('I');
-		stringBuilder.append(id);
-		stringBuilder.append('T');
-		stringBuilder.append(type);
-		stringBuilder.append('D');
-		stringBuilder.append(displayName);
-		stringBuilder.append('E');
-		stringBuilder.append(emailaddress);
-		
-		return stringBuilder.toString();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public void setIdentifier(final int id ) {
+        this.id = id;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getIdentifier( ) {
+        return id;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setDisplayName(final String displayName) {
+        this.displayName = displayName;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getEmailAddress() {
+        return emailaddress;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setEmailAddress(final String emailaddress) {
+        this.emailaddress = emailaddress;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getType() {
+        return GROUP;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + GROUP;
+        result = prime * result + id;
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (!(obj instanceof GroupParticipant)) {
+            return false;
+        }
+        final GroupParticipant other = (GroupParticipant) obj;
+        return id == other.id;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int compareTo(final Participant part) {
+        final int retval;
+        if (GROUP == part.getType()) {
+            retval = Integer.valueOf(id).compareTo(Integer.valueOf(part.getIdentifier()));
+        } else {
+            retval = Integer.valueOf(GROUP).compareTo(Integer.valueOf(part.getType()));
+        }
+        return retval;
+    }
 }

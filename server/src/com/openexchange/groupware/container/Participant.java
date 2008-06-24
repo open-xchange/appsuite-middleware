@@ -53,49 +53,48 @@ package com.openexchange.groupware.container;
  * Participant
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-public interface Participant
-{
+public interface Participant {
 
-	public static final int USER = 1;
+    static final int USER = 1;
 
-	public static final int GROUP = 2;
+    static final int GROUP = 2;
 
-	public static final int RESOURCE = 3;
+    static final int RESOURCE = 3;
 
-	public static final int RESOURCEGROUP = 4;
-	
-	public static final int EXTERNAL_USER = 5;
-	
-	public static final int EXTERNAL_GROUP = 6;
+    static final int RESOURCEGROUP = 4;
 
-	public static final int NO_ID = -1;
+    static final int EXTERNAL_USER = 5;
 
-	/**
+    static final int EXTERNAL_GROUP = 6;
+
+    static final int NO_ID = -1;
+
+    /**
      * @deprecated Use explicit constructor.
      * {@link UserParticipant#UserParticipant(int)},
      * {@link GroupParticipant#GroupParticipant(int)},
      * {@link ResourceParticipant#ResourceParticipant(int)},
      * {@link ResourceGroupParticipant#ResourceGroupParticipant(int)}
-	 */
+     */
     @Deprecated
-	public void setIdentifier( int name ) ;
-	
-	public int getIdentifier( );
-	
-	public void setDisplayName(String displayName);
-	
-	public String getDisplayName();
+    void setIdentifier(final int name) ;
 
-	/**
+    int getIdentifier();
+
+    void setDisplayName(final String displayName);
+
+    String getDisplayName();
+
+    /**
      * @deprecated Use explicit constructor.
      * {@link ExternalUserParticipant#ExternalUserParticipant(String)},
      * {@link ExternalGroupParticipant#ExternalGroupParticipant(String)}
-	 */
+     */
     @Deprecated
-	public void setEmailAddress(String emailaddress);
-	
-	public String getEmailAddress();
-	
-	public int getType();
+    void setEmailAddress(String emailaddress);
+
+    String getEmailAddress();
+
+    int getType();
 
 }

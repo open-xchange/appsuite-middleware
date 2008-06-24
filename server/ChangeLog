@@ -1,14 +1,18 @@
+* 2008-06-24 - marcus.klein@open-xchange.com
+
+ - Bugfix #11403: Improved hashCode() and equals() method of participants.
+
 * 2008-06-24 - francisco.laguna@open-xchange.com
 
-  - Bugfix #11399 : Change delete and detach calls in Inforstore to match the HTTP-API.
+ - Bugfix #11399: Change delete and detach calls in Inforstore to match the HTTP-API.
 
 * 2008-06-23 - francisco.laguna@open-xchange.com
 
-  - Bugfix #11316 : Don't remove other participants.
+ - Bugfix #11316: Don't remove other participants.
 
 * 2008-06-23 - dennis.sieben@open-xchange.com
 
-  - Bugfix #11448: Wrong folder names in sieve scripts
+ - Bugfix #11448: Wrong folder names in sieve scripts
   
 * 2008-06-23 - thorben.betten@open-xchange.com
 
