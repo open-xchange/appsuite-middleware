@@ -20,8 +20,8 @@ jcs.region.SessionCache.elementattributes.IsLateral=true
 # The lateral cache broadcasts PUTS and REMOVALS (and possibly GETS) to other local caches.
 jcs.auxiliary.SessionLTCP=org.apache.jcs.auxiliary.lateral.socket.tcp.LateralTCPCacheFactory
 jcs.auxiliary.SessionLTCP.attributes=org.apache.jcs.auxiliary.lateral.socket.tcp.TCPLateralCacheAttributes
-jcs.auxiliary.SessionLTCP.attributes.TcpServers=127.0.0.1:57461
-jcs.auxiliary.SessionLTCP.attributes.TcpListenerPort=57462
+jcs.auxiliary.SessionLTCP.attributes.TcpServers=127.0.0.1:12346
+jcs.auxiliary.SessionLTCP.attributes.TcpListenerPort=12345
 # Define UDP discovery here, but ensure you do not specify static TCP server via 'jcs.auxiliary.SessionLTCP.attributes.TcpServers'
 # jcs.auxiliary.SessionLTCP.attributes.UdpDiscoveryAddr=224.0.0.1
 # jcs.auxiliary.SessionLTCP.attributes.UdpDiscoveryPort=6780
