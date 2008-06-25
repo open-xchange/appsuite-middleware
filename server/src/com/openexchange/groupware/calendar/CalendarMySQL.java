@@ -916,12 +916,13 @@ class CalendarMySQL implements CalendarSqlImp {
 					if (!private_query) {
 						sb.append(PD_CREATED_FROM_IS);
 					} else {
-						sb.append("OR pd.created_from = ");
+						sb.append(" OR pd.created_from = ");
 					}
 					sb.append(uid);
 					sb.append(" AND (pdm.pfid IN ");
 					sb.append(StringCollection.getSqlInString(private_read_own));
-					private_query = true;
+                    sb.append(") ");
+                    private_query = true;
 				}
 
 				if (public_read_all.length > 0) {
@@ -987,8 +988,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		}
 
 		final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-
-		int x = 1;
+        int x = 1;
 
 		if (range != null && range[0] != null && range[1] != null) {
 			pst.setTimestamp(x++, new Timestamp(range[1].getTime()));

@@ -1,6 +1,7 @@
 * 2008-06-25 - francisco.laguna@open-xchange.com
 
  - Bugfix #11307: Skip recurrence calculation when changing a series into a single appointment.
+ - Bugfix #11333: Having a private calendar folder where the user could only see his own objects led to a SQL Error.
 
 * 2008-06-24 - dennis.sieben@open-xchange.com
 
