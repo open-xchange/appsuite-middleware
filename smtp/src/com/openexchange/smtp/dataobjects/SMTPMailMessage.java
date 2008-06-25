@@ -144,6 +144,7 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 
 	@Override
 	public void loadContent() {
+		// Nothing to do
 	}
 
 	@Override
