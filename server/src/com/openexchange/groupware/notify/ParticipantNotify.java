@@ -160,7 +160,6 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 			mail.send();
 		} catch (final MailException e) {
 			LL.log(e);
-            e.printStackTrace();
         }
 	}
 
