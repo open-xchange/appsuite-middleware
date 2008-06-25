@@ -126,12 +126,22 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Jun 25 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #11307: Skip recurrence calculation when changing a series into a single appointment.
+ - Bugfix #11333: Having a private calendar folder where the user could only see his own objects led to a SQL Error.
 * Tue Jun 24 2008 - francisco.laguna@open-xchange.com
  - Bugfix #11399: Change delete and detach calls in inforstore to match the HTTP-API.
  - Bugfix #11424: Autoaccept for shared folder owner when an appointment is modified.
  - Bugfix #10154: Copy old participants when an appointment is modified in a shared folder.
+ - Bigfix #11059: Check for read permissions when loading modified/deleted appointments.
 * Tue Jun 24 2008 - marcus.klein@open-xchange.com
  - Bugfix #11403: Improved hashCode() and equals() method of participants.
+* Tue Jun 24 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11481: Properly encapsulating pre-processor statements in
+   comment and using single quote for quoting attribute value if attribute
+   value contains quote character(s).
+* Tue Jun 24 2008 - dennis.sieben@open-xchange.com
+ - Bugfix #11494: Can't create a vacation notice
 * Mon Jun 23 2008 - thorben.betten@open-xchange.com
  - Bugfix #11104: Fixed mapping of exported contacts in German Outlook CSV
    file
