@@ -56,8 +56,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
+import java.util.Map.Entry;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
@@ -183,6 +186,27 @@ public abstract class ListCore extends UserAbstraction {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    protected final String maptostring(final Map<?,?> map) {
+        if (null != map && map.size() > 0) {
+            HashMap<String, String> hashMap = (HashMap<String,String>)map;
+            Iterator<Entry<String, String>> i = hashMap.entrySet().iterator(); 
+            final StringBuilder sb = new StringBuilder();
+            while( i.hasNext() ) {
+                final Entry<String, String> e = i.next();
+                sb.append(e.getKey());
+                sb.append("=");
+                sb.append(e.getValue());
+                sb.append(", ");
+            }
+            sb.deleteCharAt(sb.length()-1);
+            sb.deleteCharAt(sb.length()-1);
+            return sb.toString();
+        } else {
+            return null;
+        }
+    }
+
     protected final String passwordtostring(final PASSWORDMECH passwordmech2) {
         if (passwordmech2 == PASSWORDMECH.CRYPT) {
             return "crypt";
@@ -294,6 +318,8 @@ public abstract class ListCore extends UserAbstraction {
                     datarow.add(datetostring((Date)methodandnames.getMethod().invoke(user, (Object[]) null)));
                 } else if (returntype.equals(JAVA_UTIL_HASH_SET)) {
                     datarow.add(hashtostring((HashSet<?>)methodandnames.getMethod().invoke(user, (Object[]) null)));
+                } else if (returntype.equals(JAVA_UTIL_MAP)) {
+                    datarow.add(maptostring((HashMap<?,?>)methodandnames.getMethod().invoke(user, (Object[]) null)));
                 } else if (returntype.equals(PASSWORDMECH_CLASS)) {
                     datarow.add(passwordtostring((PASSWORDMECH)methodandnames.getMethod().invoke(user, (Object[]) null)));
                 } else if (returntype.equals(JAVA_UTIL_TIME_ZONE)) {
