@@ -52,7 +52,6 @@ package com.openexchange.ajax.task;
 import java.util.Date;
 import java.util.TimeZone;
 
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -103,13 +102,14 @@ public class Bug7377Test extends AbstractTaskTest {
      * @throws Throwable if this test fails.
      */
     public void testLostFolderInfo() throws Throwable {
+        final TimeZone tz1 = client1.getValues().getTimeZone();
         // Create a task.
         final Task task = new Task();
-        task.setTitle("Test bug #8504");
+        task.setTitle("Test bug #7377");
         final int folderId = getPrivateFolder();
         task.setParentFolderID(folderId);
         final InsertResponse iResponse = TaskTools.insert(client1,
-            new InsertRequest(task, client1.getValues().getTimeZone()));
+            new InsertRequest(task, tz1));
         task.setObjectID(iResponse.getId());
         try {
             // Update timestamp
@@ -120,18 +120,16 @@ public class Bug7377Test extends AbstractTaskTest {
             task.setNote("Updated with reminder");
             final Date remindDate = new Date();
             task.setAlarm(remindDate);
-            task.removeParentFolderID();
             final UpdateResponse uResponse = TaskTools.update(client1,
-                new SpecialUpdateRequest(folderId, task, client1.getValues()
-                .getTimeZone()));
+                new UpdateRequest(task, tz1));
             task.setLastModified(uResponse.getTimestamp());
             // Check reminder
             final com.openexchange.ajax.reminder.actions.GetResponse rResponse =
                 ReminderTools.get(client1, new com.openexchange.ajax.reminder
                 .actions.GetRequest(remindDate));
-            final ReminderObject reminder = rResponse.getReminderByTarget(
-                client1.getValues().getTimeZone(), task.getObjectID());
-    
+            final ReminderObject reminder = rResponse.getReminderByTarget(tz1,
+                task.getObjectID());
+
             assertNotNull("Can't find reminder for task.", reminder);
             assertNotSame("Found folder 0 for task reminder.",
                 Integer.valueOf(0), Integer.valueOf(reminder.getFolder()));
@@ -144,11 +142,13 @@ public class Bug7377Test extends AbstractTaskTest {
     }
 
     public void testPublicFolderMove() throws Throwable {
+        final TimeZone tz1 = client1.getValues().getTimeZone();
+        final TimeZone tz2 = client2.getValues().getTimeZone();
         // Create task with 2 participants and reminder
         final int folder1 = client1.getValues().getPrivateTaskFolder();
         final Task task = new Task();
         task.setParentFolderID(folder1);
-        task.setTitle("Test bug #8504");
+        task.setTitle("Test bug #7377");
         final Date remindDate = new Date();
         task.setAlarm(remindDate);
         final Participant[] parts = new Participant[] {
@@ -156,83 +156,80 @@ public class Bug7377Test extends AbstractTaskTest {
             new UserParticipant(client2.getValues().getUserId())
         };
         task.setParticipants(parts);
-        final InsertResponse iResponse = TaskTools.insert(client1,
-            new InsertRequest(task, client1.getValues().getTimeZone()));
-        task.setObjectID(iResponse.getId());
-        // Update timestamp
+        FolderObject folder = null;
+        try {
+        {
+            final InsertResponse response = TaskTools.insert(client1,
+                new InsertRequest(task, tz1));
+            response.fillTask(task);
+        }
+        // Check if user 2 sees the task.
         final int folder2 = client2.getValues().getPrivateTaskFolder();
-        final GetResponse gResponse = TaskTools.get(client2,
-            new GetRequest(folder2, task.getObjectID()));
-        task.setLastModified(gResponse.getTimestamp());
+        final Task task2;
+        {
+            final GetResponse response = TaskTools.get(client2,
+                new GetRequest(folder2, task.getObjectID()));
+            task2 = response.getTask(tz2);
+        }
         // Update task and insert reminder and don't send folder in task.
-        task.setNote("Updated with reminder");
-        task.setAlarm(remindDate);
-        task.removeParentFolderID();
-        final UpdateResponse uResponse = TaskTools.update(client2,
-            new SpecialUpdateRequest(folder2, task, client2.getValues()
-            .getTimeZone()));
-        task.setLastModified(uResponse.getTimestamp());
+        task2.setNote("Updated with reminder");
+        task2.setAlarm(remindDate);
+        {
+            final UpdateResponse response = TaskTools.update(client2,
+                new UpdateRequest(task2, tz2));
+            task.setLastModified(response.getTimestamp());
+        }
         // Create public folder
-        final FolderObject folder = Create.createPublicFolder(
-            "Bug7377TaskFolder1", FolderObject.TASK, client1.getValues()
-            .getUserId());
+        folder = Create.createPublicFolder("Bug7377TaskFolder1",
+            FolderObject.TASK, client1.getValues().getUserId());
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-        final CommonInsertResponse fInsertR = FolderTools.insert(client1,
-            new com.openexchange.ajax.folder.actions.InsertRequest(folder));
+        {
+            final CommonInsertResponse response = FolderTools.insert(client1,
+                new com.openexchange.ajax.folder.actions.InsertRequest(folder));
+            folder.setObjectID(response.getId());
+            folder.setLastModified(response.getTimestamp());
+        }
         // Now client1 moves to public folder.
         task.setNote("Moved to public");
         task.removeAlarm();
-        task.setParentFolderID(fInsertR.getId());
-        final UpdateResponse uResponse2 = TaskTools.update(client1,
-            new SpecialUpdateRequest(folder1, task, client1.getValues()
-            .getTimeZone()));
-        task.setLastModified(uResponse2.getTimestamp());
-        // Check reminder
-        final com.openexchange.ajax.reminder.actions.GetResponse rResponse1 =
-            ReminderTools.get(client1, new com.openexchange.ajax.reminder
-            .actions.GetRequest(remindDate));
-        final ReminderObject reminder1 = rResponse1.getReminderByTarget(
-            client1.getValues().getTimeZone(), task.getObjectID());
-        assertNotNull("Can't find reminder for task.", reminder1);
-        assertNotSame("Found folder 0 for task reminder.", Integer.valueOf(0),
-            Integer.valueOf(reminder1.getFolder()));
-        final com.openexchange.ajax.reminder.actions.GetResponse rResponse2 =
-            ReminderTools.get(client2, new com.openexchange.ajax.reminder
-            .actions.GetRequest(remindDate));
-        final ReminderObject reminder2 = rResponse2.getReminderByTarget(
-            client2.getValues().getTimeZone(), task.getObjectID());
-        assertNotNull("Can't find reminder for task.", reminder2);
-        assertNotSame("Found folder 0 for task reminder.", Integer.valueOf(0),
-            Integer.valueOf(reminder2.getFolder()));
-        FolderTools.delete(client1, new com.openexchange.ajax.folder.actions
-            .DeleteRequest(fInsertR.getId(), new Date()));
-    }
-    
-    private static class SpecialUpdateRequest extends UpdateRequest {
-
-        private final int folderId;
-        
-        public SpecialUpdateRequest(final int folderId, final Task task,
-            final TimeZone timeZone) {
-            super(task, timeZone);
-            this.folderId = folderId;
+        task.setParentFolderID(folder.getObjectID());
+        {
+            final UpdateResponse response = TaskTools.update(client1,
+                new UpdateRequest(folder1, task, tz1));
+            task.setLastModified(response.getTimestamp());
         }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Parameter[] getParameters() {
-            return new Parameter[] {
-                new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                    .ACTION_UPDATE),
-                new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(
-                    folderId)),
-                new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(getTask()
-                    .getObjectID())),
-                new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(
-                    getTask().getLastModified().getTime()))
-            };
+        // Check if task is there with user 2.
+        TaskTools.get(client2, new GetRequest(folder.getObjectID(),
+            task.getObjectID()));
+        // Check reminder
+        {
+            final com.openexchange.ajax.reminder.actions.GetResponse response =
+                ReminderTools.get(client1, new com.openexchange.ajax.reminder
+                .actions.GetRequest(remindDate));
+            final ReminderObject reminder = response.getReminderByTarget(tz1,
+                task.getObjectID());
+            assertNotNull("Can't find reminder for task.", reminder);
+            assertNotSame("Found folder 0 for task reminder.", Integer.valueOf(0),
+                Integer.valueOf(reminder.getFolder()));
+        }
+        {
+            final com.openexchange.ajax.reminder.actions.GetResponse response =
+                ReminderTools.get(client2, new com.openexchange.ajax.reminder
+                .actions.GetRequest(remindDate));
+            final ReminderObject reminder = response.getReminderByTarget(tz2,
+                task.getObjectID());
+            assertNotNull("Can't find reminder for task.", reminder);
+            assertNotSame("Found folder 0 for task reminder.", Integer.valueOf(0),
+                Integer.valueOf(reminder.getFolder()));
+        }
+        } finally {
+            if (null != task.getLastModified()) {
+                TaskTools.delete(client1, new DeleteRequest(task));
+            }
+            if (null != folder) {
+                FolderTools.delete(client1, new com.openexchange.ajax.folder.actions
+                    .DeleteRequest(folder.getObjectID(), folder.getLastModified()));
+            }
         }
     }
 }

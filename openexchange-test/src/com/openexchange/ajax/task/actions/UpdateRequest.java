@@ -75,7 +75,7 @@ public class UpdateRequest extends AbstractTaskRequest {
     private final TimeZone timeZone;
 
     /**
-     * Default constructor.
+     * Constructor if the task should not be moved.
      * @param task Task object with updated attributes. This task must contain
      * the attributes parent folder identifier, object identifier and last
      * modification timestamp.

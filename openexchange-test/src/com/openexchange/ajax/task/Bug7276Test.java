@@ -70,8 +70,6 @@ import com.openexchange.groupware.tasks.TaskException;
  */
 public class Bug7276Test extends AbstractTaskTest {
 
-    private AJAXClient client1;
-
     private AJAXClient client2;
 
     /**
@@ -87,8 +85,16 @@ public class Bug7276Test extends AbstractTaskTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        client1 = getClient();
         client2 = new AJAXClient(AJAXClient.User.User2);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        client2.logout();
+        super.tearDown();
     }
 
     /**
@@ -96,37 +102,46 @@ public class Bug7276Test extends AbstractTaskTest {
      * @throws Throwable if this test fails.
      */
     public void testBug() throws Throwable {
+        final AJAXClient client1 = getClient();
+        final int folder2 = client2.getValues().getPrivateTaskFolder();
         // User 1 inserts task.
         Task task = Create.createWithDefaults();
         task.setTitle("Test bug #7276");
         task.setParentFolderID(client1.getValues().getPrivateTaskFolder());
         task.setParticipants(ParticipantTools.createParticipants(client1
             .getValues().getUserId(), client2.getValues().getUserId()));
-        final InsertResponse iResponse = TaskTools.insert(client1,
-            new InsertRequest(task, client1.getValues().getTimeZone()));
-        final int taskId = iResponse.getId();
+        {
+            final InsertResponse response = TaskTools.insert(client1,
+                new InsertRequest(task, client1.getValues().getTimeZone()));
+            response.fillTask(task);
+        }
         // User 2 checks if he can see it.
-        TaskTools.get(client2, new GetRequest(client2.getValues()
-            .getPrivateTaskFolder(), taskId));
+        TaskTools.get(client2, new GetRequest(folder2, task.getObjectID()));
         // User 1 modifies the task and removes participant User 2
-        final GetResponse gResponse1 = TaskTools.get(client1, new GetRequest(
-            iResponse));
-        task = gResponse1.getTask(client1.getValues().getTimeZone());
+        {
+            final GetResponse response = TaskTools.get(client1, new GetRequest(
+                task.getParentFolderID(), task.getObjectID()));
+            task = response.getTask(client1.getValues().getTimeZone());
+        }
         task.setParticipants(ParticipantTools.createParticipants(client1
             .getValues().getUserId()));
-        final UpdateResponse uResponse1 = TaskTools.update(client1,
-            new UpdateRequest(task, client1.getValues().getTimeZone()));
-        task.setLastModified(uResponse1.getTimestamp());
+        {
+            final UpdateResponse response = TaskTools.update(client1,
+                new UpdateRequest(task, client1.getValues().getTimeZone()));
+            task.setLastModified(response.getTimestamp());
+        }
         // Now User 2 tries to load the task again.
-        final GetResponse gResponse2 = TaskTools.get(client2, new GetRequest(
-            client2.getValues().getPrivateTaskFolder(), taskId, false));
-        assertTrue("Server does not give exception although it has to.",
-            gResponse2.hasError());
-        final TaskException.Code code = TaskException.Code.NO_PERMISSION;
-        final AbstractOXException exc = gResponse2.getException();
-        assertEquals("Wrong exception message.", EnumComponent.TASK, exc.getComponent());
-        assertEquals("Wrong exception message.", code.getCategory(), exc.getCategory());
-        assertEquals("Wrong exception message.", code.getNumber(), exc.getDetailNumber());
+        {
+            final GetResponse response = TaskTools.get(client2, new GetRequest(
+                folder2, task.getObjectID(), false));
+            assertTrue("Server does not give exception although it has to.",
+                response.hasError());
+            final TaskException.Code code = TaskException.Code.NO_PERMISSION;
+            final AbstractOXException exc = response.getException();
+            assertEquals("Wrong exception message.", EnumComponent.TASK, exc.getComponent());
+            assertEquals("Wrong exception message.", code.getCategory(), exc.getCategory());
+            assertEquals("Wrong exception message.", code.getNumber(), exc.getDetailNumber());
+        }
         // Clean up
         TaskTools.delete(client1, new DeleteRequest(task));
     }
