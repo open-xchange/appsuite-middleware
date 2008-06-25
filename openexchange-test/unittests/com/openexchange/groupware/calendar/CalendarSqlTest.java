@@ -74,6 +74,8 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.tools.Arrays;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.api.OXPermissionException;
 
@@ -583,5 +585,38 @@ public class CalendarSqlTest extends TestCase {
         assertEquals(end.getTime(), reloaded.getEndDate().getTime());
         assertEquals(CalendarDataObject.NO_RECURRENCE, reloaded.getRecurrenceType());
 
+    }
+
+    // Bug 4778
+
+    public void testFreebusyResultShouldContainTitleIfItIsReadableViaASharedFolder() throws OXException, SearchIteratorException {
+        CalendarDataObject appointment = appointments.buildBasicAppointment(D("24/02/1981 10:00"), D("24/02/1981 12:00"));
+        appointments.save( appointment );
+
+        folders.sharePrivateFolder(session,ctx, secondUserId);
+        try {
+            appointments.switchUser(secondUser);
+
+            SearchIterator<CalendarDataObject> freebusy = appointments.getCurrentAppointmentSQLInterface()
+                    .getFreeBusyInformation(userId,Participant.USER,D("23/02/1981 00:00"), D("25/02/1981 00:00"));
+
+            List<CalendarDataObject> appointments = read(freebusy);
+
+
+            assertEquals(1, appointments.size());
+            CalendarDataObject result = appointments.get(0);
+            // Assert the title is visible
+
+            assertEquals(appointment.getTitle(), result.getTitle());
+        } finally {
+            folders.unsharePrivateFolder(session, ctx);
+        }
+
+    }
+
+    private List<CalendarDataObject> read(SearchIterator<CalendarDataObject> si) throws OXException, SearchIteratorException {
+        List<CalendarDataObject> appointments = new ArrayList<CalendarDataObject>();
+        while(si.hasNext()) { appointments.add( si.next() ); }
+        return appointments;
     }
 }

@@ -56,6 +56,7 @@ import java.text.SimpleDateFormat;
 import java.text.ParseException;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.CalendarObject;
@@ -67,6 +68,7 @@ import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.webdav.freebusy;
 import junit.framework.Assert;
 
 /**
@@ -307,5 +309,9 @@ public class CommonAppointments {
         copy.setContext(appointment.getContext());
         copy.setParentFolderID(appointment.getParentFolderID());
         return copy;
+    }
+
+    public AppointmentSQLInterface getCurrentAppointmentSQLInterface() {
+        return calendar;
     }
 }
