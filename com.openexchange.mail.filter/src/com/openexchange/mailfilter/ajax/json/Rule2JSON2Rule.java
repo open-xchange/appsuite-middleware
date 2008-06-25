@@ -583,10 +583,15 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                     }
                     final String subject = object.getString(VacationActionFields.SUBJECT.getFieldname());
                     if (null != subject) {
+                        arrayList.add(createTagArg(VacationActionFields.SUBJECT));
                         arrayList.add(stringToList(subject));
+                    }
+                    final String text = object.getString(VacationActionFields.TEXT.getFieldname());
+                    if (null != text) {
+                        arrayList.add(stringToList(text));
                         return new ActionCommand(ActionCommand.Commands.VACATION, arrayList);
                     } else {
-                        throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, "Parameter " + VacationActionFields.SUBJECT.getFieldname() + " is missing for " + 
+                        throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, "Parameter " + VacationActionFields.TEXT.getFieldname() + " is missing for " + 
                                 ActionCommand.Commands.VACATION.getJsonname() + " is missing in JSON-Object. This is a required field");
                     }
                 } else if (ActionCommand.Commands.ADDFLAG.getJsonname().equals(id)) {
