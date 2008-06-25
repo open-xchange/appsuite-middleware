@@ -52,7 +52,6 @@ package com.openexchange.mail.text;
 import static com.openexchange.mail.text.HTMLProcessing.PATTERN_HREF;
 
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.openexchange.tools.Collections.SmartIntArray;
 
@@ -67,41 +66,37 @@ public final class TextProcessing {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(TextProcessing.class);
 
-	private static final String SPLIT_LINES = "(\r)?\n";
+	private static final String SPLIT_LINES = "\r?\n";
 
 	private static final char CHAR_BREAK = '\n';
 
 	/**
 	 * Performs the line folding after specified number of characters through
-	 * <code>linewrap</code>. Occurring HTML links are excluded.
+	 * parameter <code>linewrap</code>. Occurring HTML links are excluded.
 	 * <p>
-	 * If parameter <code>isHtml</code> is set to <code>true</code> the
-	 * content is returned unchanged.
+	 * If parameter <code>isHtml</code> is set to <code>true</code> the content
+	 * is returned unchanged.
 	 * 
 	 * @param content
-	 *            The content
-	 * @param isHtml
-	 *            <code>true</code> if content is HTML content; otherwise
-	 *            <code>false</code>
+	 *            The plain text content to fold
 	 * @param linewrap
 	 *            The number of characters which may fit into a line
 	 * @return The line-folded content
 	 */
-	public static String performLineFolding(final String content, final boolean isHtml, final int linewrap) {
+	public static String performLineFolding(final String content, final int linewrap) {
 		if (linewrap <= 0) {
 			return content;
-		} else if (isHtml) {
-			return content;
 		}
-		final StringBuilder sb = new StringBuilder(content.length() + 128);
 		final String[] lines = content.split(SPLIT_LINES);
 		if (lines.length > 0) {
+			final StringBuilder sb = new StringBuilder(content.length() + 128);
 			sb.append(foldTextLine(lines[0], linewrap));
 			for (int i = 1; i < lines.length; i++) {
 				sb.append(CHAR_BREAK).append(foldTextLine(lines[i], linewrap));
 			}
+			return sb.toString();
 		}
-		return sb.toString();
+		return content;
 	}
 
 	private static String foldTextLine(final String line, final int linewrap) {
@@ -177,11 +172,41 @@ public final class TextProcessing {
 						.append(line.substring(sep[1])).toString(), linewrap, quote)).toString();
 	}
 
-	private static final Pattern PATTERN_QP = Pattern.compile("((?:\\s?>)+)(\\s?)(.*)");
+	//private static final Pattern PATTERN_QP = Pattern.compile("((?:\\s?>)+)(\\s?)(.*)");
 
 	private static String getQuotePrefix(final String line) {
-		final Matcher m = PATTERN_QP.matcher(line);
-		return m.matches() ? new StringBuilder(m.group(1)).append(m.group(2)).toString() : null;
+		if (line.length() == 0) {
+			return null;
+		}
+		final char[] chars = line.toCharArray();
+		final StringBuilder sb = new StringBuilder(8);
+		int lastGT = -1;
+		for (int i = 0; i < chars.length; i++) {
+			final char c = chars[i];
+			if (c == '>') {
+				sb.append(c);
+				lastGT = i;
+			} else if (Character.isWhitespace(c)) {
+				sb.append(c);
+			} else {
+				break;
+			}
+		}
+		if (lastGT == -1) {
+			/*
+			 * No '>' character found
+			 */
+			return null;
+		}
+		/*
+		 * Allow only 1 whitespace character after last '>' character
+		 */
+		if (lastGT + 2 < sb.length()) {
+			sb.delete(lastGT + 2, sb.length());
+		}
+		return sb.toString();
+		//final Matcher m = PATTERN_QP.matcher(line);
+		//return m.matches() ? new StringBuilder(m.group(1)).append(m.group(2)).toString() : null;
 	}
 
 	private static int[] getHrefIndices(final String line) {

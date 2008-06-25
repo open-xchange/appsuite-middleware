@@ -64,7 +64,9 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.text.Html2TextConverter;
+import com.openexchange.mail.text.HTMLProcessing;
+import com.openexchange.mail.text.parser.HTMLParser;
+import com.openexchange.mail.text.parser.handler.HTML2TextHandler;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 
@@ -212,7 +214,9 @@ public final class BodyTerm extends SearchTerm<String> {
 				charset = CharsetDetector.detectCharset(part.getInputStream());
 			}
 			if (ct.isMimeType("text/htm*")) {
-				return new Html2TextConverter().convert(MessageUtility.readMimePart(part, charset));
+				final HTML2TextHandler h = new HTML2TextHandler(part.getSize(), false);
+				HTMLParser.parse(HTMLProcessing.getConformHTML(MessageUtility.readMimePart(part, charset), charset), h);
+				return h.getText();
 			}
 			return MessageUtility.readMimePart(part, charset);
 		} catch (final IOException e) {
@@ -244,7 +248,10 @@ public final class BodyTerm extends SearchTerm<String> {
 		}
 		try {
 			if (mailPart.getContentType().isMimeType("text/htm*")) {
-				return new Html2TextConverter().convert(MessageUtility.readMailPart(mailPart, charset));
+				final HTML2TextHandler h = new HTML2TextHandler((int) mailPart.getSize(), false);
+				HTMLParser.parse(
+						HTMLProcessing.getConformHTML(MessageUtility.readMailPart(mailPart, charset), charset), h);
+				return h.getText();
 			}
 			return MessageUtility.readMailPart(mailPart, charset);
 		} catch (final IOException e) {

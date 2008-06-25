@@ -110,7 +110,8 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
-import com.openexchange.mail.text.Html2TextConverter;
+import com.openexchange.mail.text.parser.HTMLParser;
+import com.openexchange.mail.text.parser.handler.HTML2TextHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.impl.DBPool;
@@ -174,7 +175,9 @@ public class MIMEMessageFiller {
 
 	private Set<String> uploadFileIDs;
 
-	private Html2TextConverter converter;
+	//private Html2TextConverter converter;
+
+	private HTML2TextHandler html2textHandler;
 
 	/**
 	 * Initializes a new {@link MIMEMessageFiller}
@@ -206,11 +209,18 @@ public class MIMEMessageFiller {
 				: usm;
 	}
 
-	protected final Html2TextConverter getConverter() {
+	/*protected final Html2TextConverter getConverter() {
 		if (converter == null) {
 			converter = new Html2TextConverter();
 		}
 		return converter;
+	}*/
+
+	protected final HTML2TextHandler getHTML2TextHandler() {
+		if (html2textHandler == null) {
+			html2textHandler = new HTML2TextHandler(4096, true);
+		}
+		return html2textHandler;
 	}
 
 	/**
@@ -645,22 +655,24 @@ public class MIMEMessageFiller {
 			 * Get number of enclosed parts
 			 */
 			final int size = mail.getEnclosedCount();
-			if (isAttachmentForward) {
-				/*
-				 * Add referenced mail(s)
-				 */
-				final StringBuilder sb = new StringBuilder(32);
-				final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(BUF_SIZE);
-				final byte[] bbuf = new byte[BUF_SIZE];
-				for (int i = 0; i < size; i++) {
-					addNestedMessage(mail.getEnclosedMailPart(i), primaryMultipart, sb, out, bbuf);
-				}
-			} else {
-				/*
-				 * Add referenced parts from ONE referenced mail
-				 */
-				for (int i = 0; i < size; i++) {
-					addMessageBodyPart(primaryMultipart, mail.getEnclosedMailPart(i), false);
+			if (size > 0) {
+				if (isAttachmentForward) {
+					/*
+					 * Add referenced mail(s)
+					 */
+					final StringBuilder sb = new StringBuilder(32);
+					final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(BUF_SIZE);
+					final byte[] bbuf = new byte[BUF_SIZE];
+					for (int i = 0; i < size; i++) {
+						addNestedMessage(mail.getEnclosedMailPart(i), primaryMultipart, sb, out, bbuf);
+					}
+				} else {
+					/*
+					 * Add referenced parts from ONE referenced mail
+					 */
+					for (int i = 0; i < size; i++) {
+						addMessageBodyPart(primaryMultipart, mail.getEnclosedMailPart(i), false);
+					}
 				}
 			}
 			/*
@@ -750,8 +762,13 @@ public class MIMEMessageFiller {
 					/*
 					 * Convert html content to regular text
 					 */
-					mailText = performLineFolding(getConverter().convertWithQuotes((String) mail.getContent()), false,
-							usm.getAutoLinebreak());
+					HTMLParser.parse(getConformHTML((String) mail.getContent(), MailConfig.getDefaultMimeCharset()),
+							getHTML2TextHandler().reset());
+					mailText = performLineFolding(getHTML2TextHandler().getText(), usm.getAutoLinebreak());
+					// mailText =
+					// performLineFolding(getConverter().convertWithQuotes
+					// ((String) mail.getContent()), false,
+					// usm.getAutoLinebreak());
 				} else {
 					mailText = getConformHTML((String) mail.getContent(), mail.getContentType());
 				}
@@ -1070,8 +1087,13 @@ public class MIMEMessageFiller {
 		/*
 		 * Define text content
 		 */
-		text.setText(performLineFolding(getConverter().convertWithQuotes(htmlContent), false, usm.getAutoLinebreak()),
-				MailConfig.getDefaultMimeCharset());
+		HTMLParser
+				.parse(getConformHTML(htmlContent, MailConfig.getDefaultMimeCharset()), getHTML2TextHandler().reset());
+		text.setText(performLineFolding(getHTML2TextHandler().getText(), usm.getAutoLinebreak()), MailConfig
+				.getDefaultMimeCharset());
+		// text.setText(performLineFolding(getConverter().convertWithQuotes(
+		// htmlContent), false, usm.getAutoLinebreak()),
+		// MailConfig.getDefaultMimeCharset());
 		text.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
 		text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, MailConfig
 				.getDefaultMimeCharset()));

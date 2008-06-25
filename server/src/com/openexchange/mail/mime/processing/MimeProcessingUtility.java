@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.processing;
 
+import static com.openexchange.mail.text.HTMLProcessing.getConformHTML;
 import static com.openexchange.mail.text.HTMLProcessing.htmlFormat;
 
 import java.io.IOException;
@@ -60,7 +61,8 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMETypes;
-import com.openexchange.mail.text.Html2TextConverter;
+import com.openexchange.mail.text.parser.HTMLParser;
+import com.openexchange.mail.text.parser.handler.HTML2TextHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
@@ -117,7 +119,10 @@ public final class MimeProcessingUtility {
 				return MessageUtility.readMimePart(textPart, contentType);
 			}
 			contentType.setBaseType("text/plain");
-			return new Html2TextConverter().convertWithQuotes(MessageUtility.readMimePart(textPart, contentType));
+			final HTML2TextHandler handler = new HTML2TextHandler(textPart.getSize(), false);
+			HTMLParser.parse(getConformHTML(MessageUtility.readMimePart(textPart, contentType), contentType), handler);
+			return handler.getText();
+			//return new Html2TextConverter().convertWithQuotes(MessageUtility.readMimePart(textPart, contentType));
 		} else if (contentType.isMimeType(MIMETypes.MIME_TEXT_PLAIN)) {
 			final String content = MessageUtility.readMimePart(textPart, contentType);
 			final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
@@ -170,7 +175,10 @@ public final class MimeProcessingUtility {
 		} else if (rootType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
 			textBuilder.append(htmlFormat(text));
 		} else {
-			textBuilder.append(new Html2TextConverter().convertWithQuotes(text));
+			final HTML2TextHandler handler = new HTML2TextHandler(text.length(), false);
+			HTMLParser.parse(getConformHTML(text, contentType), handler);
+			textBuilder.append(handler.getText());
+			//textBuilder.append(new Html2TextConverter().convertWithQuotes(text));
 		}
 	}
 

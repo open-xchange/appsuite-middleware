@@ -75,9 +75,13 @@ public final class HTML2TextHandler implements HTMLHandler {
 
 	private static final String ATTR_ALT = "alt";
 
+	private static final String ATTR_ALT2 = "ALT";
+
 	private static final String ATTR_HREF = "href";
 
 	private static final String ATTR_SRC = "src";
+
+	private static final String ATTR_SRC2 = "SRC";
 
 	private static final String CRLF = "\r\n";
 
@@ -188,51 +192,39 @@ public final class HTML2TextHandler implements HTMLHandler {
 	public void handleEndTag(final String tag) {
 		if (TAG_BODY.equalsIgnoreCase(tag)) {
 			insideBody = false;
-		} else if (tag.equalsIgnoreCase(TAG_BLOCKQUOTE)) {
-			if (insideBody) {
-				textBuilder.append(CRLF);
-				quote--;
-			}
-		} else if (tag.equalsIgnoreCase(TAG_P)) {
-			if (insideBody) {
-				textBuilder.append(CRLF);
-				quote--;
-			}
-		} else if (tag.equalsIgnoreCase(TAG_TR)) {
-			// Ending table row
-			if (insideBody) {
-				textBuilder.append(CRLF);
-				quote--;
-			}
-		} else if (tag.equalsIgnoreCase(TAG_LI)) {
-			// Ending list entry
-			if (insideBody) {
-				textBuilder.append(CRLF);
-				quote--;
-			}
-		} else if (tag.equalsIgnoreCase(TAG_TD)) {
-			// Ending table column
-			if (insideBody) {
-				textBuilder.append('\t');
-			}
 		} else if (appendHref && tag.equalsIgnoreCase(TAG_A)) {
 			anchorTag = false;
-		} else if (tag.equalsIgnoreCase(TAG_PRE)) {
-			if (insideBody) {
+		} else if (TAG_STYLE.equalsIgnoreCase(tag)) {
+			ignore = false;
+		} else if (TAG_SCRIPT.equalsIgnoreCase(tag)) {
+			ignore = false;
+		} else if (insideBody) {
+			if (tag.equalsIgnoreCase(TAG_BLOCKQUOTE)) {
+				textBuilder.append(CRLF);
+				quote--;
+			} else if (tag.equalsIgnoreCase(TAG_P)) {
+				textBuilder.append(CRLF);
+				quoteText();
+			} else if (tag.equalsIgnoreCase(TAG_TR)) {
+				// Ending table row
+				textBuilder.append(CRLF);
+				quoteText();
+			} else if (tag.equalsIgnoreCase(TAG_LI)) {
+				// Ending list entry
+				textBuilder.append(CRLF);
+				quoteText();
+			} else if (tag.equalsIgnoreCase(TAG_TD)) {
+				// Ending table column
+				textBuilder.append('\t');
+			} else if (tag.equalsIgnoreCase(TAG_PRE)) {
 				textBuilder.append(CRLF);
 				quoteText();
 				textBuilder.append(CRLF);
 				quoteText();
 				preTag = false;
-			}
-		} else if (TAG_STYLE.equalsIgnoreCase(tag)) {
-			ignore = false;
-		} else if (TAG_SCRIPT.equalsIgnoreCase(tag)) {
-			ignore = false;
-		} else if (tag.equalsIgnoreCase(TAG_H1) || tag.equalsIgnoreCase(TAG_H2) || tag.equalsIgnoreCase(TAG_H3)
-				|| tag.equalsIgnoreCase(TAG_H4) || tag.equalsIgnoreCase(TAG_H5) || tag.equalsIgnoreCase(TAG_H6)
-				|| tag.equalsIgnoreCase(TAG_ADDRESS)) {
-			if (insideBody) {
+			} else if (tag.equalsIgnoreCase(TAG_H1) || tag.equalsIgnoreCase(TAG_H2) || tag.equalsIgnoreCase(TAG_H3)
+					|| tag.equalsIgnoreCase(TAG_H4) || tag.equalsIgnoreCase(TAG_H5) || tag.equalsIgnoreCase(TAG_H6)
+					|| tag.equalsIgnoreCase(TAG_ADDRESS)) {
 				textBuilder.append(CRLF);
 				quoteText();
 				textBuilder.append(CRLF);
@@ -257,23 +249,21 @@ public final class HTML2TextHandler implements HTMLHandler {
 	 *      java.util.Map)
 	 */
 	public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
-		if (tag.equalsIgnoreCase(TAG_BR)) {
-			if (insideBody) {
+		if (insideBody) {
+			if (tag.equalsIgnoreCase(TAG_BR)) {
 				textBuilder.append(CRLF);
 				quoteText();
-			}
-		} else if (tag.equalsIgnoreCase(TAG_IMG)) {
-			if (insideBody) {
-				final int size = attributes.size();
-				if (size > 0) {
-					final Iterator<Entry<String, String>> iter = attributes.entrySet().iterator();
-					for (int i = 0; i < size; i++) {
-						final Entry<String, String> e = iter.next();
-						if (ATTR_ALT.equalsIgnoreCase(e.getKey())) {
-							textBuilder.append(' ').append(e.getValue()).append(' ');
-						} else if (appendHref && ATTR_SRC.equalsIgnoreCase(e.getKey())) {
-							textBuilder.append(" [").append(e.getValue()).append("] ");
-						}
+			} else if (tag.equalsIgnoreCase(TAG_IMG)) {
+				if (attributes.containsKey(ATTR_ALT)) {
+					textBuilder.append(' ').append(attributes.get(ATTR_ALT)).append(' ');
+				} else if (attributes.containsKey(ATTR_ALT2)) {
+					textBuilder.append(' ').append(attributes.get(ATTR_ALT2)).append(' ');
+				}
+				if (appendHref) {
+					final String src = attributes.containsKey(ATTR_SRC) ? attributes.get(ATTR_SRC) : (attributes
+							.containsKey(ATTR_SRC2) ? attributes.get(ATTR_SRC2) : null);
+					if (src != null && src.indexOf("cid:") == -1) {
+						textBuilder.append(" [").append(src).append("] ");
 					}
 				}
 			}
@@ -289,29 +279,25 @@ public final class HTML2TextHandler implements HTMLHandler {
 	public void handleStartTag(final String tag, final Map<String, String> attributes) {
 		if (TAG_BODY.equalsIgnoreCase(tag)) {
 			insideBody = true;
-		} else if (tag.equalsIgnoreCase(TAG_BLOCKQUOTE)) {
-			if (insideBody) {
+		} else if (TAG_STYLE.equalsIgnoreCase(tag)) {
+			ignore = true;
+		} else if (TAG_SCRIPT.equalsIgnoreCase(tag)) {
+			ignore = true;
+		} else if (insideBody) {
+			if (tag.equalsIgnoreCase(TAG_BLOCKQUOTE)) {
 				textBuilder.append(CRLF);
 				quote++;
 				quoteText();
-			}
-		} else if (tag.equalsIgnoreCase(TAG_DIV)) {
-			if (insideBody) {
+			} else if (tag.equalsIgnoreCase(TAG_DIV)) {
 				textBuilder.append(CRLF);
 				quoteText();
-			}
-		} else if (tag.equalsIgnoreCase(TAG_OL) || tag.equalsIgnoreCase(TAG_UL)) {
-			// Starting list
-			if (insideBody) {
+			} else if (tag.equalsIgnoreCase(TAG_OL) || tag.equalsIgnoreCase(TAG_UL)) {
+				// Starting list
 				textBuilder.append(CRLF);
 				quoteText();
-			}
-		} else if (tag.equalsIgnoreCase(TAG_PRE)) {
-			if (insideBody) {
+			} else if (tag.equalsIgnoreCase(TAG_PRE)) {
 				preTag = true;
-			}
-		} else if (appendHref && tag.equalsIgnoreCase(TAG_A)) {
-			if (insideBody) {
+			} else if (appendHref && tag.equalsIgnoreCase(TAG_A)) {
 				anchorTag = true;
 				final int size = attributes.size();
 				if (size > 0) {
@@ -324,10 +310,6 @@ public final class HTML2TextHandler implements HTMLHandler {
 					}
 				}
 			}
-		} else if (TAG_STYLE.equalsIgnoreCase(tag)) {
-			ignore = true;
-		} else if (TAG_SCRIPT.equalsIgnoreCase(tag)) {
-			ignore = true;
 		}
 	}
 

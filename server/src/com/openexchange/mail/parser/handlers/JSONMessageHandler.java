@@ -95,7 +95,8 @@ import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.text.Enriched2HtmlConverter;
 import com.openexchange.mail.text.HTMLProcessing;
-import com.openexchange.mail.text.Html2TextConverter;
+import com.openexchange.mail.text.parser.HTMLParser;
+import com.openexchange.mail.text.parser.handler.HTML2TextHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.DisplayMode;
@@ -128,7 +129,9 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
 	private final JSONObject jsonObject;
 
-	private Html2TextConverter converter;
+	//private Html2TextConverter converter;
+
+	private HTML2TextHandler html2textHandler;
 
 	private JSONArray attachmentsArr;
 
@@ -259,11 +262,18 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		return nestedMsgsArr;
 	}
 
-	private Html2TextConverter getConverter() {
+	/*private Html2TextConverter getConverter() {
 		if (converter == null) {
 			converter = new Html2TextConverter();
 		}
 		return converter;
+	}*/
+
+	private HTML2TextHandler getHandler() {
+		if (html2textHandler == null) {
+			html2textHandler = new HTML2TextHandler(4096, true);
+		}
+		return html2textHandler;
 	}
 
 	private TimeZone getTimeZone() {
@@ -1073,15 +1083,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			/*
 			 * Try to convert the given html to regular text
 			 */
-			final String content;
-			if (usm.isUseColorQuote()) {
-				content = HTMLProcessing.formatHrefLinks(HTMLProcessing
-						.replaceHTMLSimpleQuotesForDisplay(HTMLProcessing.convertAndKeepQuotes(htmlContent,
-								getConverter())));
-			} else {
-				final String convertedHtml = getConverter().convertWithQuotes(htmlContent);
-				content = HTMLProcessing.formatTextForDisplay(convertedHtml, usm, displayMode);
-			}
+			HTMLParser.parse(HTMLProcessing.getConformHTML(htmlContent, (String) null), getHandler().reset());
+			final String content = HTMLProcessing.formatTextForDisplay(getHandler().getText(), usm, displayMode);
 			jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
 			jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
 			jsonObject.put(MailJSONField.CONTENT.getKey(), content);
@@ -1107,8 +1110,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			getAttachmentsArr().put(originalVersion);
 		} catch (final JSONException e) {
 			throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-		} catch (final IOException e) {
-			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}
 	}
 
