@@ -214,6 +214,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String JAVA_UTIL_TIME_ZONE = "java.util.TimeZone";
     protected static final String PASSWORDMECH_CLASS = "com.openexchange.admin.rmi.dataobjects.User$PASSWORDMECH";
     protected static final String JAVA_UTIL_HASH_SET = "java.util.HashSet";
+    protected static final String JAVA_UTIL_MAP = "java.util.Map";
     protected static final String JAVA_UTIL_DATE = "java.util.Date";
     protected static final String JAVA_LANG_BOOLEAN = "java.lang.Boolean";
     protected static final String JAVA_LANG_INTEGER = "java.lang.Integer";
@@ -265,6 +266,13 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected Option accessWebdavOption = null;
     protected Option accessWebdavXmlOption = null;
     protected Option accessWebmailOption = null;
+    
+    // non-generic extended option
+    protected Option addGUISettingOption = null;
+    protected Option removeGUISettingOption = null;
+
+    protected static final String OPT_ADD_GUI_SETTING_LONG = "addguipreferences";
+    protected static final String OPT_REMOVE_GUI_SETTING_LONG = "removeguipreferences";
     
     // For right error output
     protected String username = null;
@@ -347,6 +355,14 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.dbOnlyOption =  setLongOpt(admp,OPT_DBONLY_LONG,"Do this operation only in Database system (parameters which apply to extensions will be ignored)", false, false); 
     }
     
+    protected final void setAddGuiSettingOption(final AdminParser admp){
+        this.addGUISettingOption = setLongOpt(admp,OPT_ADD_GUI_SETTING_LONG,"Add a GUI setting (key=value)", true, false);
+    }
+
+    protected final void setRemoveGuiSettingOption(final AdminParser admp){
+        this.removeGUISettingOption = setLongOpt(admp,OPT_REMOVE_GUI_SETTING_LONG,"Remove a GUI setting", true, false);
+    }
+
     /**
      * @param theMethods
      * @param notallowed Here we define the methods we don't want. The name is the name of method without the prefix
@@ -361,6 +377,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         returntypes.add(JAVA_LANG_BOOLEAN);
         returntypes.add(JAVA_UTIL_DATE);
         returntypes.add(JAVA_UTIL_HASH_SET);
+        returntypes.add(JAVA_UTIL_MAP);
         returntypes.add(JAVA_UTIL_TIME_ZONE);
         returntypes.add(JAVA_UTIL_LOCALE);
         returntypes.add(PASSWORDMECH_CLASS);
@@ -696,6 +713,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected void setExtendedOptions(final AdminParser parser) {
+        setAddGuiSettingOption(parser);
+        if( this.getClass().getName().endsWith("Change") ) {
+            setRemoveGuiSettingOption(parser);
+        }
+        
         final Method[] methods = User.class.getMethods();
         final ArrayList<MethodAndNames> methArrayList = getSetters(methods);
     
@@ -736,6 +758,35 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
      * @throws InvalidDataException 
      */
     protected final void applyExtendedOptionsToUser(final AdminParser parser, final User usr) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, InvalidDataException {
+        
+        String addguival    = (String)parser.getOptionValue(this.addGUISettingOption);
+        if( addguival != null ) {
+            addguival = addguival.trim();
+            if( addguival.length() == 0 ) {
+                throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (empty value)");
+            }
+            if( ! addguival.contains("=") ) {
+                throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (not key = value)");
+            }
+            int idx = addguival.indexOf("=");
+            final String key = addguival.substring(0, idx).trim();
+            final String val = addguival.substring(idx+1, addguival.length()).trim();
+            if(key.length() == 0 || val.length() == 0) {
+                throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (key or val empty)");
+            }
+            usr.addGuiPreferences(key, val);
+        }
+        if( this.getClass().getName().endsWith("Change") ) {
+            String removeguival = (String)parser.getOptionValue(this.removeGUISettingOption);
+            if( removeguival != null ) {
+                removeguival = removeguival.trim();
+                if( removeguival.length() == 0 ) {
+                    throw new InvalidDataException("Argument for " + OPT_REMOVE_GUI_SETTING_LONG + "is wrong (empty value)");
+                }
+                usr.removeGuiPreferences(removeguival);
+            }
+        }
+
         for (final OptionAndMethod optionAndMethod : optionsandmethods) {
             if (optionAndMethod.getReturntype().equals(JAVA_LANG_STRING)) {
                 final String value = (String)parser.getOptionValue(optionAndMethod.getOption());
@@ -780,7 +831,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                     } else if (value.equalsIgnoreCase("crypt")) {
                         pwmech = User.PASSWORDMECH.CRYPT;
                     } else {
-                        throw new IllegalArgumentException("Argument for passwordmech is wrong.");
+                        throw new IllegalArgumentException("Argument for " + OPT_PASSWORD_LONG + " is wrong.");
                     }
                     optionAndMethod.getMethod().invoke(usr, pwmech);
                 }

@@ -535,8 +535,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
 
     private boolean defaultSenderAddressset = false;
 
-    private Map<String, String> guiPreferences = new HashMap<String, String>();
+    private Map<String, String> guiPreferences;
 
+    private boolean guiPreferencesset = false;
+    
     /**
      * Instantiates a new empty user object
      */
@@ -4153,6 +4155,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield19 = null;
         this.userfield20 = null;
         this.defaultSenderAddress = null;
+        this.guiPreferences = null;
     }
 
     /**
@@ -4390,17 +4393,51 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
+     * @return true if set; false if not
+     */
+    public final boolean isGuiPreferencesset() {
+        return guiPreferencesset;
+    }
+    
+    /**
      * @return the guiPreferences
      */
     public final Map<String, String> getGuiPreferences() {
-        return Collections.unmodifiableMap(guiPreferences);
+        return guiPreferences;
+    }
+
+    /**
+     * add a path/value pair to gui settings
+     * 
+     * @param path
+     * @param guiValue
+     */
+    public final void addGuiPreferences(final String path, final String guiValue) {
+        if( guiPreferences == null ) {
+            guiPreferences = new HashMap<String, String>();
+        }
+        guiPreferences.put(path, guiValue);
+    }
+
+    /**
+     * remove a path/value pair from gui settings
+     * 
+     * @param path
+     */
+    public final void removeGuiPreferences(final String path) {
+        if( guiPreferences != null ) {
+            guiPreferences.remove(path);
+        }
     }
 
     /**
      * @param guiPreferences the guiPreferences to set
      */
-    public final void addGuiPreferences(final String path, final String guiValue) {
-        guiPreferences.put(path, guiValue);
+   public final void setGuiPreferences(final Map<String, String> guiPreferences) {
+        if( guiPreferences != null ) {
+            this.guiPreferencesset = true;
+        }
+        this.guiPreferences = guiPreferences;
     }
 
     /**
