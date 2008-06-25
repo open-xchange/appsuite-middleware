@@ -94,12 +94,10 @@ import com.openexchange.tools.servlet.OXJSONException;
  */
 public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 
-    private final Pattern p = Pattern.compile("^(?:([^:]*)://)?([^:]*)(.*)$");
-    
     private class RuleAndPosition {
-        private final Rule rule;
-        
         private final int position;
+        
+        private final Rule rule;
 
         /**
          * @param rule
@@ -112,22 +110,26 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         }
 
         /**
-         * @return the rule
-         */
-        public final Rule getRule() {
-            return rule;
-        }
-
-        /**
          * @return the position
          */
         public final int getPosition() {
             return position;
         }
+
+        /**
+         * @return the rule
+         */
+        public final Rule getRule() {
+            return rule;
+        }
         
     }
     
     private static final AbstractObject2JSON2Object<Rule> CONVERTER = new Rule2JSON2Rule();
+    
+    private static final String SCRIPTNAME = "Open-Xchange";
+    
+    private final Pattern p = Pattern.compile("^(?:([^:]*)://)?([^:]*)(.*)$");
     
     /**
      * Default constructor.
@@ -194,7 +196,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final RuleAndPosition deletedrule = getRightRuleForUniqueId(rules, getUniqueId(json), getUserPrefix(credentials));
             rules.remove(deletedrule.getPosition());
             final String writeback = sieveTextFilter.writeback(rules);
-            sieveHandler.setScript(activeScript, writeback.getBytes("UTF-8"));
+            writeScript(sieveHandler, activeScript, writeback);
         } catch (final UnsupportedEncodingException e) {
             throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
         } catch (final IOException e) {
@@ -297,7 +299,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 position = clientrules.size() - 1;
             }
             final String writeback = sieveTextFilter.writeback(clientrules);
-            sieveHandler.setScript(activeScript, writeback.getBytes("UTF-8"));
+            writeScript(sieveHandler, activeScript, writeback);
 
             return nextuid;
         } catch (final UnsupportedEncodingException e) {
@@ -326,6 +328,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             }
         }
     }
+
     @Override
 	protected void actionReorder(final MailfilterRequest request) throws AbstractOXException {
         final Credentials credentials = request.getCredentials();
@@ -351,7 +354,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             }
             
             final String writeback = sieveTextFilter.writeback(clientrules);
-            sieveHandler.setScript(activeScript, writeback.getBytes("UTF-8"));
+            writeScript(sieveHandler, activeScript, writeback);
 
         } catch (final UnsupportedEncodingException e) {
             throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
@@ -379,7 +382,6 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             }
         }
     }
-    
     /**
      * {@inheritDoc}
      */
@@ -409,7 +411,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             }
             
             final String writeback = sieveTextFilter.writeback(clientrules);
-            sieveHandler.setScript(activeScript, writeback.getBytes("UTF-8"));
+            writeScript(sieveHandler, activeScript, writeback);
 
         } catch (final UnsupportedEncodingException e) {
             throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
@@ -437,7 +439,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             }
         }
     }
-
+    
     /**
      * {@inheritDoc}
      */
@@ -511,6 +513,16 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             throw new OXMailfilterException(Code.NO_VALID_CREDSRC);
         }
         return sieveHandler;
+    }
+
+    private JSONArray getActionArray(final ArrayList<String> sieve) {
+        final JSONArray actionarray = new JSONArray();
+        for (final ActionCommand.Commands command : ActionCommand.Commands.values()) {
+            if (null == command.getRequired() || sieve.contains(command.getRequired())) {
+                actionarray.put(command.getJsonname());
+            }
+        }
+        return actionarray;
     }
 
     /**
@@ -596,16 +608,6 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         return testarray;
     }
 
-    private JSONArray getActionArray(final ArrayList<String> sieve) {
-        final JSONArray actionarray = new JSONArray();
-        for (final ActionCommand.Commands command : ActionCommand.Commands.values()) {
-            if (null == command.getRequired() || sieve.contains(command.getRequired())) {
-                actionarray.put(command.getJsonname());
-            }
-        }
-        return actionarray;
-    }
-
     private Integer getUniqueId(final JSONObject json) throws OXMailfilterException {
         Integer uniqueid = null;
         if (json.has("id")) {
@@ -633,6 +635,24 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             name.setUniqueid(uid);
         } else {
             newrule.setRuleComments(new RuleComment(uid));
+        }
+    }
+
+    /**
+     * Used to perform checks to set the right script name when writing
+     * 
+     * @param sieveHandler
+     * @param activeScript
+     * @param writeback
+     * @throws OXSieveHandlerException
+     * @throws IOException
+     * @throws UnsupportedEncodingException
+     */
+    private void writeScript(final SieveHandler sieveHandler, final String activeScript, final String writeback) throws OXSieveHandlerException, IOException, UnsupportedEncodingException {
+        if (null != activeScript && activeScript.equals(SCRIPTNAME)) {
+            sieveHandler.setScript(activeScript, writeback.getBytes("UTF-8"));
+        } else {
+            sieveHandler.setScript(SCRIPTNAME, writeback.getBytes("UTF-8"));
         }
     }
 
