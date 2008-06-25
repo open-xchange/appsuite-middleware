@@ -193,7 +193,7 @@ public class RdbSettingStorage extends SettingStorage {
                 LOG.debug(e.getMessage(), e);
             }
         } else {
-            final boolean update = settingExists(userId, setting);
+            final boolean update = settingExists(con, userId, setting);
             PreparedStatement stmt = null;
             try {
                 if (update) {
@@ -289,20 +289,16 @@ public class RdbSettingStorage extends SettingStorage {
 
     /**
      * Checks if a setting is already stored in the database.
+     * @param con readonly database connection.
      * @param userId unique identifier of the user.
      * @param setting Setting.
      * @return <code>true</code> if a value for the setting exists in the
      * database.
      * @throws SettingException if an error occurs.
      */
-    private boolean settingExists(final int userId, final Setting setting)
+    private boolean settingExists(final Connection con, final int userId,
+        final Setting setting)
         throws SettingException {
-        Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw new SettingException(Code.NO_CONNECTION, e);
-        }
         boolean exists = false;
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -320,7 +316,6 @@ public class RdbSettingStorage extends SettingStorage {
             throw new SettingException(Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(result, stmt);
-            DBPool.closeReaderSilent(ctx, con);
         }
         return exists;
     }
