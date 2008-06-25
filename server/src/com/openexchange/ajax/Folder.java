@@ -99,6 +99,7 @@ import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.json.OXJSONWriter;
@@ -167,6 +168,8 @@ public class Folder extends SessionServlet {
 	public static final int MAX_PERMISSION = 64;
 
 	private static final String STRING_1 = "1";
+
+	private static final String STRING_DELETED = "deleted";
 
 	/*
 	 * (non-Javadoc)
@@ -1164,6 +1167,8 @@ public class Folder extends SessionServlet {
 			final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx);
 			final Date timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
 			final boolean includeMailFolders = STRING_1.equals(paramContainer.getStringParam(PARAMETER_MAIL));
+			final boolean ignoreDeleted = STRING_DELETED.equalsIgnoreCase(paramContainer
+					.getStringParam(PARAMETER_IGNORE));
 			lastModified = Math.max(timestamp.getTime(), lastModified);
 			final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
 			final FolderFieldWriter[] writers = folderWriter.getFolderFieldWriter(columns);
@@ -1174,24 +1179,21 @@ public class Folder extends SessionServlet {
 					.asQueue();
 			final OXFolderAccess access = new OXFolderAccess(ctx);
 			final Queue<FolderObject> updatedQueue = new LinkedList<FolderObject>();
-			final Queue<FolderObject> deletedQueue = new LinkedList<FolderObject>();
+			final Queue<FolderObject> deletedQueue = ignoreDeleted ? null : new LinkedList<FolderObject>();
+			final UserConfiguration userConf = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+					session.getUserId(), ctx);
 			boolean addSystemSharedFolder = false;
 			boolean checkVirtualListFolders = false;
 			int size = q.size();
 			Iterator<FolderObject> iter = q.iterator();
 			for (int i = 0; i < size; i++) {
 				final FolderObject fo = iter.next();
-				final User u = UserStorage.getStorageUser(session.getUserId(), ctx);
-				if (fo.isVisible(u.getId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-						session.getUserId(), ctx))) {
-					if (fo.isShared(u.getId())) {
+				if (fo.isVisible(session.getUserId(), userConf)) {
+					if (fo.isShared(session.getUserId())) {
 						addSystemSharedFolder = true;
 					} else if (FolderObject.PUBLIC == fo.getType()) {
-						if (access.getFolderPermission(
-								fo.getParentFolderID(),
-								u.getId(),
-								UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-										ctx)).isFolderVisible()) {
+						if (access.getFolderPermission(fo.getParentFolderID(), session.getUserId(), userConf)
+								.isFolderVisible()) {
 							/*
 							 * Parent is already visible: Add real parent
 							 */
@@ -1209,37 +1211,32 @@ public class Folder extends SessionServlet {
 					}
 					updatedQueue.add(fo);
 				} else {
-					checkVirtualListFolders = (FolderObject.PUBLIC == fo.getType());
-					deletedQueue.add(fo);
+					checkVirtualListFolders |= (FolderObject.PUBLIC == fo.getType());
+					if (deletedQueue != null) {
+						deletedQueue.add(fo);
+					}
 				}
 			}
 			/*
 			 * Check virtual list folders
 			 */
-			if (checkVirtualListFolders) {
-				if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx).hasTask()
-						&& !foldersqlinterface.getNonTreeVisiblePublicTaskFolders().hasNext()) {
+			if (checkVirtualListFolders && deletedQueue != null) {
+				if (userConf.hasTask() && !foldersqlinterface.getNonTreeVisiblePublicTaskFolders().hasNext()) {
 					final FolderObject virtualTasks = new FolderObject(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
 					virtualTasks.setLastModified(DATE_0);
 					deletedQueue.add(virtualTasks);
 				}
-				if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)
-						.hasCalendar()
-						&& !foldersqlinterface.getNonTreeVisiblePublicCalendarFolders().hasNext()) {
+				if (userConf.hasCalendar() && !foldersqlinterface.getNonTreeVisiblePublicCalendarFolders().hasNext()) {
 					final FolderObject virtualCalendar = new FolderObject(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID);
 					virtualCalendar.setLastModified(DATE_0);
 					deletedQueue.add(virtualCalendar);
 				}
-				if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)
-						.hasContact()
-						&& !foldersqlinterface.getNonTreeVisiblePublicContactFolders().hasNext()) {
+				if (userConf.hasContact() && !foldersqlinterface.getNonTreeVisiblePublicContactFolders().hasNext()) {
 					final FolderObject virtualContact = new FolderObject(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID);
 					virtualContact.setLastModified(DATE_0);
 					deletedQueue.add(virtualContact);
 				}
-				if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)
-						.hasInfostore()
-						&& !foldersqlinterface.getNonTreeVisiblePublicInfostoreFolders().hasNext()) {
+				if (userConf.hasInfostore() && !foldersqlinterface.getNonTreeVisiblePublicInfostoreFolders().hasNext()) {
 					final FolderObject virtualInfostore = new FolderObject(
 							FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
 					virtualInfostore.setLastModified(DATE_0);
@@ -1272,25 +1269,28 @@ public class Folder extends SessionServlet {
 					jsonWriter.endArray();
 				}
 			}
-			/*
-			 * Get deleted OX folders
-			 */
-			q = ((FolderObjectIterator) foldersqlinterface.getDeletedFolders(timestamp)).asQueue();
-			/*
-			 * Add deleted OX folders from above
-			 */
-			q.addAll(deletedQueue);
-			final FolderFieldWriter idWriter = folderWriter.getFolderFieldWriter(new int[] { FolderObject.OBJECT_ID })[0];
-			size = q.size();
-			iter = q.iterator();
-			for (int i = 0; i < size; i++) {
-				final FolderObject fo = iter.next();
-				lastModified = Math.max(fo.getLastModified().getTime(), lastModified);
-				jsonWriter.array();
-				try {
-					idWriter.writeField(jsonWriter, fo, false);
-				} finally {
-					jsonWriter.endArray();
+			if (!ignoreDeleted) {
+				/*
+				 * Get deleted OX folders
+				 */
+				q = ((FolderObjectIterator) foldersqlinterface.getDeletedFolders(timestamp)).asQueue();
+				/*
+				 * Add deleted OX folders from above
+				 */
+				q.addAll(deletedQueue);
+				final FolderFieldWriter idWriter = folderWriter
+						.getFolderFieldWriter(new int[] { FolderObject.OBJECT_ID })[0];
+				size = q.size();
+				iter = q.iterator();
+				for (int i = 0; i < size; i++) {
+					final FolderObject fo = iter.next();
+					lastModified = Math.max(fo.getLastModified().getTime(), lastModified);
+					jsonWriter.array();
+					try {
+						idWriter.writeField(jsonWriter, fo, false);
+					} finally {
+						jsonWriter.endArray();
+					}
 				}
 			}
 			if (includeMailFolders) {
