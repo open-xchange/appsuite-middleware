@@ -52,8 +52,10 @@ package com.openexchange.ajax.task.actions;
 import java.util.TimeZone;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -63,6 +65,10 @@ import com.openexchange.groupware.tasks.Task;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class UpdateRequest extends AbstractTaskRequest {
+
+    private final int folderId;
+
+    private final boolean removeFolderId;
 
     private final Task task;
 
@@ -75,7 +81,27 @@ public class UpdateRequest extends AbstractTaskRequest {
      * modification timestamp.
      */
     public UpdateRequest(final Task task, final TimeZone timeZone) {
+        this(task.getParentFolderID(), true, task, timeZone);
+    }
+
+    /**
+     * Constructor if the task should be moved into another folder.
+     * @param folderId source folder of the task.
+     * @param task Task object with updated attributes. This task must contain
+     * the attributes destination folder identifier, object identifier and last
+     * modification timestamp.
+     * @param timeZone timeZone for converting time stamps.
+     */
+    public UpdateRequest(final int folderId, final Task task,
+        final TimeZone timeZone) {
+        this(folderId, false, task, timeZone);
+    }
+
+    private UpdateRequest(final int folderId, final boolean removeFolderId,
+        final Task task, final TimeZone timeZone) {
         super();
+        this.folderId = folderId;
+        this.removeFolderId = removeFolderId;
         this.task = task;
         this.timeZone = timeZone;
     }
@@ -84,7 +110,11 @@ public class UpdateRequest extends AbstractTaskRequest {
      * {@inheritDoc}
      */
     public Object getBody() throws JSONException {
-        return convert(task, timeZone);
+        final JSONObject json = convert(task, timeZone);
+        if (removeFolderId) {
+            json.remove(TaskFields.FOLDER_ID);
+        }
+        return json;
     }
 
     /**
@@ -101,12 +131,10 @@ public class UpdateRequest extends AbstractTaskRequest {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
                 .ACTION_UPDATE),
-            new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(task
-                .getParentFolderID())),
-            new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(task
-                .getObjectID())),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(task
-                .getLastModified().getTime()))
+            new Parameter(AJAXServlet.PARAMETER_INFOLDER, folderId),
+            new Parameter(AJAXServlet.PARAMETER_ID, task.getObjectID()),
+            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP,
+                task.getLastModified().getTime())
         };
     }
 

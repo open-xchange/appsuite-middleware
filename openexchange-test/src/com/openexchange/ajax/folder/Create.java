@@ -66,7 +66,7 @@ public final class Create {
     }
 
     /**
-     * This method creates a public folder. Everyone gets full object
+     * This method creates a public folder object. Everyone gets full object
      * permissions on this folder.
      * @param name name of the folder.
      * @param type PIM type of the folder.
@@ -98,6 +98,33 @@ public final class Create {
             OCLPermission.WRITE_ALL_OBJECTS,
             OCLPermission.DELETE_ALL_OBJECTS);
         folder.setPermissionsAsArray(new OCLPermission[] { perm1, perm2 });
+        return folder;
+    }
+
+    /**
+     * This method creates a private folder object. Admin user gets full access
+     * permissions.
+     * @param name name of the folder.
+     * @param type PIM type of the folder.
+     * @param admin user identifier of the admin.
+     * @return a ready to insert folder.
+     */
+    public static FolderObject createPrivateFolder(final String name,
+        final int type, final int admin) {
+        final FolderObject folder = new FolderObject();
+        folder.setFolderName(name);
+        folder.setModule(type);
+        folder.setType(FolderObject.PRIVATE);
+        final OCLPermission perm = new OCLPermission();
+        perm.setEntity(admin);
+        perm.setGroupPermission(false);
+        perm.setFolderAdmin(true);
+        perm.setAllPermission(
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION);
+        folder.setPermissionsAsArray(new OCLPermission[] { perm });
         return folder;
     }
 }

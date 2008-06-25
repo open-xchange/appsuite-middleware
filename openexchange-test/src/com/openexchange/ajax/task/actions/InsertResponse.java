@@ -51,9 +51,11 @@ package com.openexchange.ajax.task.actions;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonInsertResponse;
+import com.openexchange.groupware.tasks.Task;
 
 /**
- * 
+ * Stores the reponse values of a task insert request and provides methods for
+ * working with them.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class InsertResponse extends CommonInsertResponse {
@@ -73,5 +75,14 @@ public class InsertResponse extends CommonInsertResponse {
      */
     public int getFolderId() {
         return folderId;
+    }
+
+    /**
+     * Puts the data of this insert response into a task object. This are
+     * especially the task identifier and the modified time stamp. 
+     */
+    public void fillTask(final Task task) {
+        task.setObjectID(getId());
+        task.setLastModified(getTimestamp());
     }
 }

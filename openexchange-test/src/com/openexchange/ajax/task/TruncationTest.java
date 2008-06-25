@@ -64,8 +64,6 @@ import com.openexchange.tools.RandomString;
  */
 public class TruncationTest extends AbstractTaskTest {
 
-    private AJAXClient client;
-
     /**
      * Logger.
      */
@@ -92,7 +90,7 @@ public class TruncationTest extends AbstractTaskTest {
         task.setTripMeter(RandomString.generateFixLetter(300));
         task.setParentFolderID(getPrivateFolder());
         final InsertResponse response = TaskTools.insert(getClient(),
-            new InsertRequest(task, client.getValues().getTimeZone(), false));
+            new InsertRequest(task, getClient().getValues().getTimeZone(), false));
         assertTrue("Server did not detect truncated data.", response
             .hasError());
         assertTrue("Array of truncated attribute identifier is empty.", response
