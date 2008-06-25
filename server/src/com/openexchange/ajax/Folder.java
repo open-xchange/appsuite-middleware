@@ -142,11 +142,6 @@ public class Folder extends SessionServlet {
 
 	private static transient final Log LOG = LogFactory.getLog(Folder.class);
 
-	/**
-	 * Error message if writing the response fails.
-	 */
-	private static final String RESPONSE_ERROR = "Error while writing response object.";
-
 	private static final AbstractOXException getWrappingOXException(final Throwable cause) {
 		return new AbstractOXException(EnumComponent.FOLDER, Category.INTERNAL_ERROR, 9999, cause.getMessage(), cause);
 	}
