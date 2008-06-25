@@ -51,10 +51,9 @@ package com.openexchange.groupware.calendar.tools;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Collections;
+import java.util.*;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -68,6 +67,7 @@ import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import junit.framework.Assert;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -80,6 +80,11 @@ public class CommonAppointments {
     private final long FUTURE = System.currentTimeMillis()+24*3600000;
     private Session session;
 
+    private static final SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+
+    static {
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     public CommonAppointments(final Context ctx, final String user) {
         this.ctx = ctx;
@@ -101,6 +106,19 @@ public class CommonAppointments {
         cdao.setDays(CalendarObject.TUESDAY);
         
         cdao.setContext(ctx);
+        return cdao;
+    }
+
+    public CalendarDataObject buildBasicAppointment(Date start, Date end) {
+        final CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTitle("basic");
+        cdao.setParentFolderID(privateFolder);
+        cdao.setIgnoreConflicts(true);
+        //CalendarTest.fillDatesInDao(cdao);
+        cdao.setStartDate(start);
+        cdao.setEndDate(end);
+        cdao.setContext(ctx);
+        cdao.setTimezone("utc");
         return cdao;
     }
 
@@ -269,5 +287,25 @@ public class CommonAppointments {
             e.printStackTrace();
             return Collections.EMPTY_LIST;
         }
+    }
+
+    public static Date D(String date) {
+        try {
+
+            Date d = format.parse(date);
+            return d;
+        } catch (ParseException e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+            return null;
+        }
+    }
+
+    public CalendarDataObject createIdentifyingCopy(CalendarDataObject appointment) {
+        CalendarDataObject copy = new CalendarDataObject();
+        copy.setObjectID(appointment.getObjectID());
+        copy.setContext(appointment.getContext());
+        copy.setParentFolderID(appointment.getParentFolderID());
+        return copy;
     }
 }

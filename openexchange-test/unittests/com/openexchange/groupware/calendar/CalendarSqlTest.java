@@ -51,6 +51,7 @@ package com.openexchange.groupware.calendar;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertResourceParticipants;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertUserParticipants;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertInPrivateFolder;
+import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 
 
 import java.sql.SQLException;
@@ -556,5 +557,31 @@ public class CalendarSqlTest extends TestCase {
             assertTrue(x.getMessage().contains("APP-0013"));
         }
         
+    }
+
+    // Bug 11307
+
+    public void testRecurringAppointmentShouldBeConvertibleToSingleAppointment() throws OXException, SQLException {
+        Date start = D("24/02/1981 10:00");
+        Date end = D("24/02/1981 12:00");
+
+        CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
+        appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+        appointment.setDays(CalendarDataObject.MONDAY);
+        appointment.setInterval(1);
+        appointment.setRecurrenceCount(3);
+        appointments.save( appointment );
+
+        CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
+        update.setRecurrenceType(CalendarDataObject.NO_RECURRENCE);
+        update.setStartDate(start);
+        update.setEndDate(end);
+        appointments.save(update);
+
+        CalendarDataObject reloaded = appointments.reload(appointment);
+        assertEquals(start.getTime(), reloaded.getStartDate().getTime());
+        assertEquals(end.getTime(), reloaded.getEndDate().getTime());
+        assertEquals(CalendarDataObject.NO_RECURRENCE, reloaded.getRecurrenceType());
+
     }
 }
