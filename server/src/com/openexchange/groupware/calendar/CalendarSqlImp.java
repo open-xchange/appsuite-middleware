@@ -80,6 +80,8 @@ public interface CalendarSqlImp {
 
     public PreparedStatement getAllPrivateAppointmentAndFolderIdsForUser(Context c, int id, Connection readcon) throws SQLException;
 
+    public PreparedStatement getSharedAppointmentFolderQuery(Context c, CalendarFolderObject cfo, Connection con) throws SQLException;
+
     public PreparedStatement getResourceConflicts(Context c, java.util.Date d1, java.util.Date d2, java.util.Date d3, java.util.Date d4, Connection readcon, String resource_sql_in) throws SQLException;
     
     public PreparedStatement getResourceConflictsPrivateFolderInformation(Context c, java.util.Date d1, java.util.Date d2, java.util.Date d3, java.util.Date d4, Connection readcon, String resource_sql_in) throws SQLException;
@@ -149,5 +151,6 @@ public interface CalendarSqlImp {
     public PreparedStatement getSearchQuery(String select,  int uid, int groups[], UserConfiguration uc, int orderBy, String orderDir, AppointmentSearchObject searchobject, Context c, Connection readcon, CalendarFolderObject cfo) throws SQLException, OXException;
     
     public PreparedStatement getActiveAppointments(Context c, int uid, java.util.Date d1, java.util.Date d2, String select, Connection readcon) throws SQLException;
-    
+
+
 }

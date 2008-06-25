@@ -253,6 +253,18 @@ class CalendarMySQL implements CalendarSqlImp {
         return stmt;
     }
 
+    public PreparedStatement getSharedAppointmentFolderQuery(Context c, CalendarFolderObject cfo, Connection readcon) throws SQLException {
+        StringBuilder sb = new StringBuilder("SELECT object_id, pfid, member_uid FROM prg_dates_members WHERE cid = ? AND pfid IN (");
+        for(Object o : cfo.getSharedFolderList()) {
+            sb.append(o).append(",");
+        }
+        sb.setCharAt(sb.length()-1, ')');
+        final PreparedStatement stmt = readcon.prepareStatement(sb.toString());
+        stmt.setInt(1, c.getContextId());
+        return stmt;
+
+    }
+
     public final PreparedStatement getResourceConflictsPrivateFolderInformation(final Context c, final java.util.Date d1, final java.util.Date d2, final java.util.Date d3, final java.util.Date d4, final Connection readcon, final String resource_sql_in) throws SQLException {
 		final StringBuilder sb = new StringBuilder(184);
 		sb.append("SELECT pdm.object_id, pdm.pfid, pdm.member_uid FROM prg_dates ");

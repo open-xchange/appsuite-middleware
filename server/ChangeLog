@@ -7,7 +7,9 @@
 
  - Bugfix #11307: Skip recurrence calculation when changing a series into a single appointment.
  - Bugfix #11333: Having a private calendar folder where the user could only see his own objects led to a SQL Error.
-
+ - Bugfix #11349: If a conflicting appointment is in a shared folder, which is readable, provide the title in the
+                   conflict.
+ 
 * 2008-06-24 - dennis.sieben@open-xchange.com
 
  - Bugfix #11494: Can't create a vacation notice

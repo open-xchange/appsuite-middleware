@@ -115,6 +115,8 @@ public class FreeBusyResults implements SearchIterator {
     
     private ArrayList<PrivateFolderInformationObject> private_folder_array;
     private PreparedStatement private_folder_information;
+
+    private CalendarSqlImp calendarsqlimp;
     
     private static final Log LOG = LogFactory.getLog(FreeBusyResults.class);
     
@@ -130,7 +132,7 @@ public class FreeBusyResults implements SearchIterator {
         preFill();
     }
     
-    public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final int uid, final int groups[], final UserConfiguration uc, final Connection con, final boolean show_details, final Participant conflict_objects[], final PreparedStatement private_folder_information) throws OXException {
+    public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final int uid, final int groups[], final UserConfiguration uc, final Connection con, final boolean show_details, final Participant conflict_objects[], final PreparedStatement private_folder_information, CalendarSqlImp calendarsqlimp) throws OXException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);
     	this.rs = rs;
         this.prep = prep;
@@ -139,6 +141,7 @@ public class FreeBusyResults implements SearchIterator {
         this.uid = uid;
         this.show_details = show_details;
         this.conflict_objects = conflict_objects;
+        this.calendarsqlimp = calendarsqlimp;
         this.private_folder_information = private_folder_information;
         if (show_details) {
             preFillPermissionArray(groups, uc);
@@ -457,8 +460,11 @@ public class FreeBusyResults implements SearchIterator {
         int object_id = 0;
         int pfid = 0;
         int uid = 0;
+        PreparedStatement shared_folder_info = null;
         try {
-            final ResultSet rs = private_folder_information.executeQuery();
+            
+
+            ResultSet rs = private_folder_information.executeQuery();
             while (rs.next()) {
                 object_id = rs.getInt(1);
                 pfid = rs.getInt(2);
@@ -468,8 +474,31 @@ public class FreeBusyResults implements SearchIterator {
                     private_folder_array.add(pfio);
                 }
             }
+            rs.close();
+            // Add shared folders
+            shared_folder_info = calendarsqlimp.getSharedAppointmentFolderQuery(c, cfo, con);
+
+            rs = shared_folder_info.executeQuery();
+            while (rs.next()) {
+                object_id = rs.getInt(1);
+                pfid = rs.getInt(2);
+                uid = rs.getInt(3);
+                if (!rs.wasNull()) {
+                    final PrivateFolderInformationObject pfio = new PrivateFolderInformationObject(object_id, pfid, uid);
+                    private_folder_array.add(pfio);
+                }
+            }
+            rs.close();
         } catch(final SQLException sqle) {
             LOG.error(sqle.getMessage(), sqle);
+        } finally {
+            if(shared_folder_info != null) {
+                try {
+                    shared_folder_info.close();
+                } catch (SQLException e) {
+                    //IGNORE
+                }
+            }
         }
     }
     
