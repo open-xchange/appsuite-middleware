@@ -380,7 +380,12 @@ public class TaskException extends AbstractOXException {
          * Task contains invalid data: "%1$s"
          */
         INVALID_DATA("Task contains invalid data: \"%1$s\"", Category
-            .USER_INPUT, Detail.OTHER, 47);
+            .USER_INPUT, Detail.OTHER, 47),
+        /**
+         * The task %1$d is not stored in folder %2$s (%3$d).
+         */
+        NOT_IN_FOLDER("The task %1$d is not stored in folder %2$s (%3$d).",
+            Category.PERMISSION, Detail.PERMISSION, 48);
 
         /**
          * Message of the exception.

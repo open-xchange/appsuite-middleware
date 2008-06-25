@@ -141,6 +141,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
 
     /**
      * {@inheritDoc}
+     * TODO eliminate duplicate columns
      */
     public SearchIterator<Task> getTaskList(final int folderId, final int from,
         final int until, final int orderBy, final String orderDir,

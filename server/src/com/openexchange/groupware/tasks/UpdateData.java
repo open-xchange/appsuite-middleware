@@ -398,7 +398,8 @@ class UpdateData {
         while (iter.hasNext()) {
             final Folder addedFolder = iter.next();
             for (final Folder origFolder : origFolders) {
-                if (addedFolder.getUser() == origFolder.getUser()) {
+                if (addedFolder.getUser() == origFolder.getUser()
+                    && !removedFolder.contains(origFolder)) {
                     iter.remove();
                 }
             }
@@ -447,7 +448,7 @@ class UpdateData {
             // Check if task appears in folder.
             if (null == FolderStorage.getFolder(getOrigFolder(),
                 getFolderId())) {
-                throw new TaskException(Code.NO_PERMISSION, Integer.valueOf(
+                throw new TaskException(Code.NOT_IN_FOLDER, Integer.valueOf(
                     getTaskId()), folder.getFolderName(), Integer.valueOf(
                     getFolderId()));
             }
