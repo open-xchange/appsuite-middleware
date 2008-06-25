@@ -1272,7 +1272,7 @@ public class CalendarOperation implements SearchIterator {
             if (!cdao.containsStartDate() && !cdao.containsEndDate()) {
                 cdao.setStartDate(edao.getStartDate());
                 cdao.setEndDate(edao.getEndDate());
-            } else {
+            } else if(CalendarDataObject.NO_RECURRENCE != cdao.getRecurrenceType()) {
                 cdao.setRecurrenceCalculator(((int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/CalendarRecurringCollection.MILLI_DAY)));
                 calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
             }

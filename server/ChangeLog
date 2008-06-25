@@ -1,3 +1,7 @@
+* 2008-06-25 - francisco.laguna@open-xchange.com
+
+ - Bugfix #11307: Skip recurrence calculation when changing a series into a single appointment.
+
 * 2008-06-24 - dennis.sieben@open-xchange.com
 
  - Bugfix #11494: Can't create a vacation notice
