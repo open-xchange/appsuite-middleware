@@ -94,7 +94,7 @@ import com.openexchange.tools.servlet.OXJSONException;
  */
 public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 
-    private final Pattern p = Pattern.compile("^([^:]*)://([^:]*)(.*)$");
+    private final Pattern p = Pattern.compile("^(?:([^:]*)://)?([^:]*)(.*)$");
     
     private class RuleAndPosition {
         private final Rule rule;
