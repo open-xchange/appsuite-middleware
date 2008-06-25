@@ -5,10 +5,14 @@ Name:           open-xchange-admin
 BuildArch:	noarch
 BuildRequires:  ant open-xchange-common open-xchange-server
 %if 0%{?suse_version}
-%if 0%{?suse_version} <= 1010
+%if %{?suse_version} <= 1010
 # SLES10
 BuildRequires:  java-1_5_0-ibm java-1_5_0-ibm-devel java-1_5_0-ibm-alsa update-alternatives
-%else
+%endif
+%if %{?suse_version} >= 1100
+BuildRequires:  java-sdk-openjdk
+%endif
+%if %{?suse_version} > 1010 && %{?suse_version} < 1100
 BuildRequires:  java-sdk-1.5.0-sun
 %endif
 %endif
@@ -30,11 +34,14 @@ Summary:        The Open-Xchange Admin Daemon
 Requires:       open-xchange-common open-xchange-server
 %if 0%{?suse_version}
 Requires:  mysql-client >= 5.0.0
-%if 0%{?suse_version} <= 1010
+%if %{?suse_version} <= 1010
 # SLES10
 Requires:  java-1_5_0-ibm java-1_5_0-ibm-alsa update-alternatives
 %endif
-%if 0%{?suse_version} >= 1020
+%if %{?suse_version} >= 1100
+BuildRequires:  java-openjdk
+%endif
+%if %{?suse_version} > 1010 && %{?suse_version} < 1100
 Requires:  java-1_5_0-sun
 %endif
 %endif
