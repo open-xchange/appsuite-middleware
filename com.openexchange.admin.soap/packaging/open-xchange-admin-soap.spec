@@ -5,10 +5,14 @@ Name:           open-xchange-admin-soap
 BuildArch:	noarch
 BuildRequires:  ant open-xchange-admin-client open-xchange-admin-plugin-hosting
 %if 0%{?suse_version}
-%if 0%{?suse_version} <= 1010
+%if %{?suse_version} <= 1010
 # SLES10
 BuildRequires:  java-1_5_0-ibm java-1_5_0-ibm-devel java-1_5_0-ibm-alsa update-alternatives
-%else
+%endif
+%if %{?suse_version} >= 1100
+BuildRequires:  java-sdk-openjdk
+%endif
+%if %{?suse_version} > 1010 && %{?suse_version} < 1100
 BuildRequires:  java-sdk-1.5.0-sun
 %endif
 %endif
@@ -31,11 +35,14 @@ Requires:       open-xchange-admin-client >= 6.5.0
 Requires:	open-xchange-admin-plugin-hosting >= 6.5.0
 Requires:	open-xchange-axis2
 %if 0%{?suse_version}
-%if 0%{?suse_version} <= 1010
+%if %{?suse_version} <= 1010
 # SLES10
 Requires:  java-1_5_0-ibm java-1_5_0-ibm-alsa update-alternatives
 %endif
-%if 0%{?suse_version} >= 1020
+%if %{?suse_version} >= 1100
+BuildRequires:  java-openjdk
+%endif
+%if %{?suse_version} > 1010 && %{?suse_version} < 1100
 Requires:  java-1_5_0-sun
 %endif
 %endif
