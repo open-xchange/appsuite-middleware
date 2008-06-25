@@ -6,10 +6,14 @@ Name:           open-xchange-server
 BuildArch:	noarch
 BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-configread open-xchange-monitoring open-xchange-cache
 %if 0%{?suse_version}
-%if 0%{?suse_version} <= 1010
+%if %{?suse_version} <= 1010
 # SLES10
 BuildRequires:  java-1_5_0-ibm java-1_5_0-ibm-devel java-1_5_0-ibm-alsa update-alternatives
-%else
+%endif
+%if %{?suse_version} >= 1100
+BuildRequires:  java-sdk-openjdk
+%endif
+%if %{?suse_version} > 1010 && %{?suse_version} < 1100
 BuildRequires:  java-sdk-1.5.0-sun
 %endif
 %endif
@@ -30,11 +34,14 @@ Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Server Bundle
 Requires:       open-xchange-global open-xchange-configread open-xchange-global open-xchange-monitoring open-xchange-management open-xchange-cache
 %if 0%{?suse_version}
-%if 0%{?suse_version} <= 1010
+%if %{?suse_version} <= 1010
 # SLES10
 Requires:  java-1_5_0-ibm java-1_5_0-ibm-alsa update-alternatives
 %endif
-%if 0%{?suse_version} >= 1020
+%if %{?suse_version} >= 1100
+BuildRequires:  java-openjdk
+%endif
+%if %{?suse_version} > 1010 && %{?suse_version} < 1100
 Requires:  java-1_5_0-sun
 %endif
 %endif
