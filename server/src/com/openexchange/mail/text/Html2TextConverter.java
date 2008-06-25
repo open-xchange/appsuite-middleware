@@ -155,12 +155,18 @@ public final class Html2TextConverter {
 		}
 		if (found) {
 			reset();
-			final String head = convert(htmlContent.substring(0, start));
-			sb.append(head);
-			final String body = convertWithQuotes(addSimpleQuote(htmlContent.substring(bodyStart, bodyEnd)));
-			sb.append(body);
-			final String tail = convertWithQuotes(htmlContent.substring(end));
-			sb.append(tail);
+			/*
+			 * Head
+			 */
+			sb.append(convert(htmlContent.substring(0, start)));
+			/*
+			 * Body
+			 */
+			sb.append(convertWithQuotes(addSimpleQuote(htmlContent.substring(bodyStart, bodyEnd))));
+			/*
+			 * Tail
+			 */
+			sb.append(convertWithQuotes(htmlContent.substring(end)));
 		} else {
 			reset();
 			sb.append(convert(htmlContent));
@@ -177,10 +183,24 @@ public final class Html2TextConverter {
 	private static String addSimpleQuote(final String htmlContent, final int quoteLevel) {
 		final String[] lines = htmlContent.split(SPLIT_BREAK);
 		final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
-		for (int i = 0; i < lines.length; i++) {
+		/*
+		 * Compose quote prefix
+		 */
+		final String quotePrefix;
+		if (quoteLevel == 1) {
+			quotePrefix = HTML_GT;
+		} else {
 			for (int j = 0; j < quoteLevel; j++) {
 				sb.append(HTML_GT);
 			}
+			quotePrefix = sb.toString();
+			sb.setLength(0);
+		}
+		/*
+		 * Prepend prefix to each line
+		 */
+		for (int i = 0; i < lines.length; i++) {
+			sb.append(quotePrefix);
 			sb.append(lines[i]).append(HTML_BREAK);
 		}
 		return sb.toString();
@@ -387,7 +407,7 @@ public final class Html2TextConverter {
 		 * 		result = &quot;\&quot;&quot;;
 		 * } else if (isTag(t, &quot;/i&quot;)) {
 		 * 		result = &quot;\&quot;&quot;;
-		 * } 	
+		 * }
 		 * </pre>
 		 */
 		else if (isTag(t, "img")) {
