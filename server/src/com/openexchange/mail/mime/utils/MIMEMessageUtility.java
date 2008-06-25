@@ -94,11 +94,11 @@ public final class MIMEMessageUtility {
 		super();
 	}
 
-	private static final Pattern PATTERN_EMBD_IMG = Pattern.compile("(<img.*src=\"?cid:)([^\"]+)(\"?[^/>]*/?>)",
+	private static final Pattern PATTERN_EMBD_IMG = Pattern.compile("(<img[^>]+src=\"?cid:)([^\"]+)(\"?[^>]*/?>)",
 			Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
 	private static final Pattern PATTERN_EMBD_IMG_ALT = Pattern.compile(
-			"(<img.*src=\"?)([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)(\"?[^/>]*/?>)", Pattern.CASE_INSENSITIVE
+			"(<img[^>]+src=\"?)([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)(\"?[^>]*/?>)", Pattern.CASE_INSENSITIVE
 					| Pattern.DOTALL);
 
 	/**
@@ -164,7 +164,7 @@ public final class MIMEMessageUtility {
 	}
 
 	public static final Pattern PATTERN_REF_IMG = Pattern.compile(
-			"(<img[^/>]*?)(src=\")([^\"]+)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^/>]*/?>)", Pattern.CASE_INSENSITIVE
+			"(<img[^>]*?)(src=\")([^\"]+)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)", Pattern.CASE_INSENSITIVE
 					| Pattern.DOTALL);
 
 	/**

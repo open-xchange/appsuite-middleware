@@ -49,9 +49,7 @@
 
 package com.openexchange.mail.mime.filler;
 
-import static com.openexchange.mail.text.HTMLProcessing.formatHrefLinks;
 import static com.openexchange.mail.text.HTMLProcessing.getConformHTML;
-import static com.openexchange.mail.text.HTMLProcessing.replaceHTMLSimpleQuotesForDisplay;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 
 import java.io.ByteArrayOutputStream;
@@ -564,13 +562,17 @@ public class MIMEMessageFiller {
 		// TODO: final boolean hasNestedMessages =
 		// (msgObj.getNestedMsgs().size() > 0);
 		final boolean hasNestedMessages = false;
-		final int size = mail.getEnclosedCount();
-		final boolean hasAttachments = size > 0;
-		/*
-		 * A non-inline forward message
-		 */
-		final boolean isAttachmentForward = ((ComposeType.FORWARD.equals(type)) && (usm.isForwardAsAttachment() || (size > 1 && hasOnlyReferencedMailAttachments(
-				mail, size))));
+		final boolean hasAttachments;
+		final boolean isAttachmentForward;
+		{
+			final int size = mail.getEnclosedCount();
+			hasAttachments = size > 0;
+			/*
+			 * A non-inline forward message
+			 */
+			isAttachmentForward = ((ComposeType.FORWARD.equals(type)) && (usm.isForwardAsAttachment() || (size > 1 && hasOnlyReferencedMailAttachments(
+					mail, size))));
+		}
 		/*
 		 * Initialize primary multipart
 		 */
@@ -639,6 +641,10 @@ public class MIMEMessageFiller {
 					primaryMultipart.addBodyPart(createHtmlBodyPart((String) mail.getContent()));
 				}
 			}
+			/*
+			 * Get number of enclosed parts
+			 */
+			final int size = mail.getEnclosedCount();
 			if (isAttachmentForward) {
 				/*
 				 * Add referenced mail(s)
@@ -747,8 +753,7 @@ public class MIMEMessageFiller {
 					mailText = performLineFolding(getConverter().convertWithQuotes((String) mail.getContent()), false,
 							usm.getAutoLinebreak());
 				} else {
-					mailText = getConformHTML(replaceHTMLSimpleQuotesForDisplay(formatHrefLinks((String) mail
-							.getContent())), mail.getContentType());
+					mailText = getConformHTML((String) mail.getContent(), mail.getContentType());
 				}
 				mimeMessage.setContent(mailText, mail.getContentType().toString());
 				mimeMessage.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
@@ -1091,8 +1096,7 @@ public class MIMEMessageFiller {
 		final ContentType htmlCT = new ContentType(PAT_HTML_CT.replaceFirst(REPLACE_CS, MailConfig
 				.getDefaultMimeCharset()));
 		final MimeBodyPart html = new MimeBodyPart();
-		html.setContent(getConformHTML(replaceHTMLSimpleQuotesForDisplay(formatHrefLinks(htmlContent)), htmlCT), htmlCT
-				.toString());
+		html.setContent(getConformHTML(htmlContent, htmlCT), htmlCT.toString());
 		html.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
 		html.setHeader(MessageHeaders.HDR_CONTENT_TYPE, htmlCT.toString());
 		return html;
