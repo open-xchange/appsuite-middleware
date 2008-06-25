@@ -72,7 +72,6 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
@@ -154,7 +153,7 @@ public final class TaskTools extends Assert {
      * @throws JSONException if parsing of serialized json fails.
      * @throws SAXException if a SAX error occurs.
      * @throws IOException if the communication with the server fails.
-     * @deprecated use {@link #insert(AJAXSession, TaskInsertRequest)}
+     * @deprecated use {@link #insert(AJAXClient, TaskInsertRequest)}
      */
     @Deprecated
     public static Response insertTask(final WebConversation conversation,
@@ -181,7 +180,7 @@ public final class TaskTools extends Assert {
     public static InsertResponse insert(final AJAXClient client,
         final InsertRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return insert(client.getSession(), request);
+        return (InsertResponse) Executor.execute(client, request);
     }
 
     /**
@@ -364,41 +363,11 @@ public final class TaskTools extends Assert {
         return all(client.getSession(), request);
     }
 
-    public static Response getUpdatedTasks(final WebConversation conversation,
-        final String hostName, final String sessionId, final int folderId,
-        final int[] columns, final int sort, final String order,
-        final Date lastModified) throws IOException, SAXException,
-        JSONException, AjaxException {
-        LOG.trace("Getting updated tasks in a folder.");
-        final AJAXClient client = new AJAXClient(new AJAXSession(conversation,
-            sessionId));
-        final CommonUpdatesResponse response = updates(client,
-            new UpdatesRequest(folderId, columns, sort,
-            OrderFields.parse(order), lastModified));
-        return response.getResponse();
-    }
-
     public static CommonUpdatesResponse updates(final AJAXClient client,
         final UpdatesRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
         return (CommonUpdatesResponse) Executor.execute(client.getSession(),
             request);
-    }
-
-    /**
-     * @deprecated Use {@link #list(AJAXClient, ListRequest)}.
-     */
-    @Deprecated
-    public static Response getTaskList(final WebConversation conversation,
-        final String hostName, final String sessionId,
-        final int[][] folderAndTaskIds, final int[] columns)
-        throws IOException, SAXException, JSONException, AjaxException {
-        LOG.trace("Get a list of tasks.");
-        final AJAXClient client = new AJAXClient(new AJAXSession(conversation,
-            sessionId));
-        final CommonListResponse listR = list(client, new ListRequest(
-            folderAndTaskIds, columns));
-        return listR.getResponse();
     }
 
     public static CommonListResponse list(final AJAXClient client,

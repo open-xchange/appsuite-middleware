@@ -54,7 +54,6 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
@@ -102,7 +101,7 @@ public final class AllTest extends AbstractTaskTest {
         final GetRequest[] gets = new GetRequest[NUMBER];
         for (int i = 0; i < gets.length; i++) {
             final InsertResponse ins = (InsertResponse) mInsert.getResponse(i);
-            LOG.info(ins.getId());
+            LOG.info(Integer.valueOf(ins.getId()));
             gets[i] = new GetRequest(ins);
         }
         final MultipleResponse mGet = (MultipleResponse) Executor.execute(
@@ -110,14 +109,13 @@ public final class AllTest extends AbstractTaskTest {
         // TODO Read Task.ALARM
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
             Task.LAST_MODIFIED, Task.FOLDER_ID, Task.PARTICIPANTS };
-        final CommonAllResponse allR = TaskTools.all(getSession(), new AllRequest(
-            getPrivateFolder(), columns, 0, null));
+        TaskTools.all(getSession(),
+            new AllRequest(getPrivateFolder(), columns, 0, null));
         final DeleteRequest[] deletes = new DeleteRequest[inserts.length];
         for (int i = 0; i < inserts.length; i++) {
             final GetResponse get = (GetResponse) mGet.getResponse(i);
             deletes[i] = new DeleteRequest(get.getTask(getTimeZone()));
         }
-        final MultipleResponse mDelete = (MultipleResponse) Executor.execute(
-            getSession(), new MultipleRequest(deletes)); 
+        Executor.execute(getSession(), new MultipleRequest(deletes)); 
     }
 }

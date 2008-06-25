@@ -110,7 +110,7 @@ public class SmokeTest extends AbstractTaskTest {
             AllRequest.GUI_ORDER));
         boolean foundObject = false;
         for (final Object[] rowValues : allR) {
-            if (rowValues[0].equals(insertR.getId())) {
+            if (rowValues[0].equals(Integer.valueOf(insertR.getId()))) {
                 foundObject = true;
             }
         }

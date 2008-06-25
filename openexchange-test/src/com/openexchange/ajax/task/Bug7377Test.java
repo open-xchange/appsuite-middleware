@@ -56,7 +56,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.reminder.ReminderTools;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -109,7 +108,6 @@ public class Bug7377Test extends AbstractTaskTest {
         task.setTitle("Test bug #8504");
         final int folderId = getPrivateFolder();
         task.setParentFolderID(folderId);
-        final AJAXSession session = client1.getSession();
         final InsertResponse iResponse = TaskTools.insert(client1,
             new InsertRequest(task, client1.getValues().getTimeZone()));
         task.setObjectID(iResponse.getId());

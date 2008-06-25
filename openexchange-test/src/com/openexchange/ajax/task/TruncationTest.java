@@ -80,15 +80,6 @@ public class TruncationTest extends AbstractTaskTest {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = new AJAXClient(getSession());
-    }
-
-    /**
      * Creates a task with a to long title and checks if the data truncation
      * is detected.
      * @throws Throwable if an error occurs.
@@ -100,7 +91,7 @@ public class TruncationTest extends AbstractTaskTest {
         // Trip meter length in database is 255.
         task.setTripMeter(RandomString.generateFixLetter(300));
         task.setParentFolderID(getPrivateFolder());
-        final InsertResponse response = TaskTools.insert(getSession(),
+        final InsertResponse response = TaskTools.insert(getClient(),
             new InsertRequest(task, client.getValues().getTimeZone(), false));
         assertTrue("Server did not detect truncated data.", response
             .hasError());

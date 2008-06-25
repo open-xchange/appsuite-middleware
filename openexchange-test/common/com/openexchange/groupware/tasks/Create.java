@@ -64,6 +64,9 @@ public class Create {
         super();
     }
 
+    /**
+     * Creates a task and fills all fields.
+     */
     public static Task createTask() {
         final Task task = new Task();
         task.setTitle("Private task");
@@ -88,12 +91,20 @@ public class Create {
         return task;
     }
 
+    /**
+     * Creates an empty task.
+     */
     public static Task createWithDefaults() {
         final Task task = new Task();
         task.setPrivateFlag(false);
         return task;
     }
 
+    /**
+     * Creates a task for a given folder and with a given title.
+     * @param folder prefill parent folder field.
+     * @param title title of the task.
+     */
     public static final Task createWithDefaults(final int folder, final String title) {
         final Task task = createWithDefaults();
         task.setParentFolderID(folder);

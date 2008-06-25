@@ -88,10 +88,10 @@ public class FloatTest extends AbstractTaskTest {
             reload.getActualDuration());
         assertEquals("Target duration differs.", task.getTargetDuration(),
             reload.getTargetDuration());
-        assertEquals("Actual costs differs.", task.getActualCosts(),
-            reload.getActualCosts());
-        assertEquals("Target costs differs.", task.getTargetCosts(),
-            reload.getTargetCosts());
+        assertEquals("Actual costs differs.", Float.valueOf(task.getActualCosts()),
+            Float.valueOf(reload.getActualCosts()));
+        assertEquals("Target costs differs.", Float.valueOf(task.getTargetCosts()),
+            Float.valueOf(reload.getTargetCosts()));
 
         TaskTools.delete(getClient(), new DeleteRequest(reload));
     }
