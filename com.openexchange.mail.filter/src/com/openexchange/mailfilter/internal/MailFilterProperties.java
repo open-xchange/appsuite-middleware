@@ -17,7 +17,8 @@ public class MailFilterProperties {
         SIEVE_CREDSRC("SIEVE_CREDSRC", CredSrc.SESSION.name),
         SIEVE_LOGIN_TYPE("SIEVE_LOGIN_TYPE", LoginTypes.GLOBAL.name),
         SIEVE_SERVER("SIEVE_SERVER", "localhost"),
-        SIEVE_PORT("SIEVE_PORT", "2000");
+        SIEVE_PORT("SIEVE_PORT", "2000"),
+        SCRIPT_NAME("SCRIPT_NAME", "Open-Xchange");
         
         public final String property;
         

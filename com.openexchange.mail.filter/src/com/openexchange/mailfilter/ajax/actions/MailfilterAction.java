@@ -127,15 +127,17 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     
     private static final AbstractObject2JSON2Object<Rule> CONVERTER = new Rule2JSON2Rule();
     
-    private static final String SCRIPTNAME = "Open-Xchange";
-    
     private final Pattern p = Pattern.compile("^(?:([^:]*)://)?([^:]*)(.*)$");
+    
+    private final String scriptname;
     
     /**
      * Default constructor.
      */
     public MailfilterAction() {
         super();
+        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        scriptname = config.getProperty(MailFilterProperties.Values.SCRIPT_NAME.property);
     }
 
     /**
@@ -649,12 +651,12 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
      * @throws UnsupportedEncodingException
      */
     private void writeScript(final SieveHandler sieveHandler, final String activeScript, final String writeback) throws OXSieveHandlerException, IOException, UnsupportedEncodingException {
-        if (null != activeScript && activeScript.equals(SCRIPTNAME)) {
+        if (null != activeScript && activeScript.equals(this.scriptname)) {
             sieveHandler.setScript(activeScript, writeback.getBytes("UTF-8"));
             sieveHandler.setScriptStatus(activeScript, true);
         } else {
-            sieveHandler.setScript(SCRIPTNAME, writeback.getBytes("UTF-8"));
-            sieveHandler.setScriptStatus(SCRIPTNAME, true);
+            sieveHandler.setScript(this.scriptname, writeback.getBytes("UTF-8"));
+            sieveHandler.setScriptStatus(this.scriptname, true);
         }
     }
 
