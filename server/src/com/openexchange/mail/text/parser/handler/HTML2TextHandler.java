@@ -168,6 +168,7 @@ public final class HTML2TextHandler implements HTMLHandler {
 	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleComment(java.lang.String)
 	 */
 	public void handleComment(final String comment) {
+		// Nothing to do
 	}
 
 	/*
@@ -176,6 +177,7 @@ public final class HTML2TextHandler implements HTMLHandler {
 	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleDocDeclaration(java.lang.String)
 	 */
 	public void handleDocDeclaration(final String docDecl) {
+		// Nothing to do
 	}
 
 	/*
@@ -245,6 +247,7 @@ public final class HTML2TextHandler implements HTMLHandler {
 	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleError(java.lang.String)
 	 */
 	public void handleError(final String errorMsg) {
+		// Nothing to do
 	}
 
 	/*
@@ -376,13 +379,17 @@ public final class HTML2TextHandler implements HTMLHandler {
 
 	/**
 	 * Resets this handler for re-usage
+	 * 
+	 * @return This html2text handler
 	 */
-	public void reset() {
+	public HTML2TextHandler reset() {
 		quote = 0;
 		textBuilder.setLength(0);
+		return this;
 	}
 
 	public void handleXMLDeclaration(final String version, final Boolean standalone, final String encoding) {
+		// Nothing to do
 	}
 
 }
