@@ -72,8 +72,10 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
@@ -1048,12 +1050,15 @@ public class CalendarSql implements AppointmentSQLInterface {
     
     public SearchIterator getFreeBusyInformation(final int uid, final int type, final Date start, final Date end) throws OXException {
         if (session != null) {
+            final Context ctx = Tools.getContext(session);
+            final User user = Tools.getUser(session, ctx);
             Connection readcon = null;
             PreparedStatement prep = null;
             ResultSet rs = null;
             boolean close_connection = true;
-            final Context ctx = Tools.getContext(session);
             final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
+            CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
+            PreparedStatement private_folder_information = null;
             try {
                 if (!userConfig.hasFreeBusy()) {
                     return new CalendarOperation();
@@ -1061,16 +1066,24 @@ public class CalendarSql implements AppointmentSQLInterface {
                 readcon = DBPool.pickup(ctx);
                 switch(type) {
                     case Participant.USER:
+                        private_folder_information = calendarsqlimp.getAllPrivateAppointmentAndFolderIdsForUser(ctx, user.getId(), readcon);
                         prep = cimp.getFreeBusy(uid, ctx, start, end, readcon);
                         break;
                     case Participant.RESOURCE:
+                        final long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, user.getTimeZone());
+                        long whole_day_end = CalendarCommonCollection.getUserTimeUTCDate(end, user.getTimeZone());
+                        if (whole_day_end <= whole_day_start) {
+                            whole_day_end = whole_day_start+CalendarRecurringCollection.MILLI_DAY;
+                        }
+                        private_folder_information = calendarsqlimp.getResourceConflictsPrivateFolderInformation(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, "("+uid+")");
                         prep = cimp.getResourceFreeBusy(uid, ctx, start, end, readcon);
                         break;
                     default:
                         throw new OXCalendarException(OXCalendarException.Code.FREE_BUSY_UNSUPPOTED_TYPE, Integer.valueOf(type));
                 }
                 rs = cimp.getResultSet(prep);
-                final SearchIterator si = new FreeBusyResults(rs, prep, ctx, readcon, start.getTime(), end.getTime());
+                //final SearchIterator si = new FreeBusyResults(rs, prep, ctx, readcon, start.getTime(), end.getTime());
+                final SearchIterator si = new FreeBusyResults(rs, prep, ctx, session.getUserId(), user.getGroups(), userConfig, readcon, true, new Participant[0], private_folder_information, calendarsqlimp);
                 close_connection = false;
                 return si;
             } catch(final SQLException sqle) {

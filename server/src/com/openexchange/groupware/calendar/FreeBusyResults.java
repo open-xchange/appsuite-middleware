@@ -120,7 +120,7 @@ public class FreeBusyResults implements SearchIterator {
     
     private static final Log LOG = LogFactory.getLog(FreeBusyResults.class);
     
-    public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final Connection con, final long range_start, final long range_end) throws OXException {
+    /*public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final Connection con, final long range_start, final long range_end) throws OXException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);
     	this.rs = rs;
         this.prep = prep;
@@ -130,7 +130,7 @@ public class FreeBusyResults implements SearchIterator {
         this.range_end = range_end;
         rsNext();
         preFill();
-    }
+    }*/
     
     public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final int uid, final int groups[], final UserConfiguration uc, final Connection con, final boolean show_details, final Participant conflict_objects[], final PreparedStatement private_folder_information, CalendarSqlImp calendarsqlimp) throws OXException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);
