@@ -256,10 +256,15 @@ public final class MIMEMailPart extends MailPart {
 							e.getMessage() == null ? "<no error message given>" : e.getMessage()).append(
 							". Trying to read from part's raw input stream instead").toString(), e);
 				}
-				if (part instanceof MimeBodyPart) {
-					return ((MimeBodyPart) part).getRawInputStream();
-				} else if (part instanceof MimeMessage) {
-					return ((MimeMessage) part).getRawInputStream();
+				try {
+					if (part instanceof MimeBodyPart) {
+						return ((MimeBodyPart) part).getRawInputStream();
+					} else if (part instanceof MimeMessage) {
+						return ((MimeMessage) part).getRawInputStream();
+					}
+				} catch (final MessagingException me) {
+					me.setNextException(e);
+					throw me;
 				}
 				throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 			} catch (final MessagingException e) {
@@ -268,10 +273,15 @@ public final class MIMEMailPart extends MailPart {
 							e.getMessage() == null ? "<no error message given>" : e.getMessage()).append(
 							". Trying to read from part's raw input stream instead").toString(), e);
 				}
-				if (part instanceof MimeBodyPart) {
-					return ((MimeBodyPart) part).getRawInputStream();
-				} else if (part instanceof MimeMessage) {
-					return ((MimeMessage) part).getRawInputStream();
+				try {
+					if (part instanceof MimeBodyPart) {
+						return ((MimeBodyPart) part).getRawInputStream();
+					} else if (part instanceof MimeMessage) {
+						return ((MimeMessage) part).getRawInputStream();
+					}
+				} catch (final MessagingException me) {
+					me.setNextException(e);
+					throw me;
 				}
 				throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
 			}
