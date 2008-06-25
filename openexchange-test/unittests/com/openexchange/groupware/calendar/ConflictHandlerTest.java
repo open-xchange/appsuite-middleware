@@ -62,7 +62,9 @@ import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
+import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.session.Session;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -78,6 +80,7 @@ public class ConflictHandlerTest extends TestCase {
     private String secondUser;
     private Context ctx;
     private CommonAppointments appointments;
+    private CalendarFolderToolkit folders;
 
     List<CalendarDataObject> clean = new ArrayList<CalendarDataObject>();
 
@@ -109,6 +112,8 @@ public class ConflictHandlerTest extends TestCase {
         member = tools.loadUser(memberid, ctx).getLoginInfo();
 
         appointments.deleteAll(ctx);
+
+        folders = new CalendarFolderToolkit();
     }
 
     @Override
@@ -213,6 +218,32 @@ public class ConflictHandlerTest extends TestCase {
         final CalendarDataObject conflict = conflicts[0];
         assertEquals(appointment.getTitle(), conflict.getTitle());
         assertUserParticipants(conflict, user );
+
+    }
+
+    // Bug #11349
+
+    public void testShouldShowTitleIfReadPermissionsInPrivateFolderAllowIt() throws OXException {
+        Session session = appointments.getSession();
+        int secondUserId = new CalendarContextToolkit().resolveUser(secondUser);
+        folders.sharePrivateFolder(session, ctx, secondUserId);
+        try {
+            final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant2);
+            appointments.save( appointment ); clean.add( appointment );
+
+            appointments.switchUser( secondUser );
+
+            final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant3);
+            conflictingAppointment.setIgnoreConflicts(false);
+            final CalendarDataObject[] conflicts = getConflicts( conflictingAppointment );
+
+            assertNotNull(conflicts);
+            assertEquals(1, conflicts.length);
+            final CalendarDataObject conflict = conflicts[0];
+            assertNotNull(conflict.getTitle());
+        } finally {
+            folders.unsharePrivateFolder(session, ctx);
+        }
 
     }
 
