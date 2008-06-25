@@ -21,6 +21,7 @@
 /opt/open-xchange/etc/groupware/participant.properties
 /opt/open-xchange/etc/groupware/push.properties
 /opt/open-xchange/etc/groupware/server.properties
+/opt/open-xchange/etc/groupware/sessioncache.ccf
 /opt/open-xchange/etc/groupware/sessiond.properties
 /opt/open-xchange/etc/groupware/smtp.properties
 /opt/open-xchange/etc/groupware/system.properties
