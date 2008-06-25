@@ -322,7 +322,7 @@ public abstract class BasicCommandlineOptions {
                 for (final String data_column : data_list) {
                     if(data_column!=null){
                         sb.append("\"");
-                        sb.append(data_column);
+                        sb.append(data_column.replaceAll("\"", "\"\""));
                         sb.append("\"");
                     }
                     sb.append(",");
