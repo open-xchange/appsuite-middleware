@@ -651,8 +651,10 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     private void writeScript(final SieveHandler sieveHandler, final String activeScript, final String writeback) throws OXSieveHandlerException, IOException, UnsupportedEncodingException {
         if (null != activeScript && activeScript.equals(SCRIPTNAME)) {
             sieveHandler.setScript(activeScript, writeback.getBytes("UTF-8"));
+            sieveHandler.setScriptStatus(activeScript, true);
         } else {
             sieveHandler.setScript(SCRIPTNAME, writeback.getBytes("UTF-8"));
+            sieveHandler.setScriptStatus(SCRIPTNAME, true);
         }
     }
 
