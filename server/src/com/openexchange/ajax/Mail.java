@@ -156,7 +156,8 @@ import com.openexchange.tools.versit.utility.VersitUtility;
  */
 public class Mail extends PermissionServlet implements UploadListener {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Mail.class);
+	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(Mail.class);
 
 	private static final String MIME_MULTIPART = "multipart/";
 
@@ -1226,8 +1227,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 				response.setException(e instanceof AbstractOXException ? (AbstractOXException) e
 						: getWrappingOXException(e));
 				final String callback = saveToDisk ? JS_FRAGMENT : JS_FRAGMENT_POPUP;
-				writer.write(callback.replaceFirst(JS_FRAGMENT_JSON, response.getJSON().toString()).replaceFirst(
-						JS_FRAGMENT_ACTION, "error"));
+				writer.write(callback.replaceFirst(JS_FRAGMENT_JSON,
+						Matcher.quoteReplacement(response.getJSON().toString())).replaceFirst(JS_FRAGMENT_ACTION,
+						"error"));
 				writer.flush();
 			} catch (final UnsupportedEncodingException uee) {
 				LOG.error(uee.getLocalizedMessage(), uee);
