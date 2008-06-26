@@ -183,8 +183,9 @@ text/css	css
 text/english
 text/html	html htm
 text/mathml	mml
-text/plain	asc txt c cc h hh cpp hpp
+text/plain	txt asc c cc h hh cpp hpp
 text/richtext	rtx
+text/richtext   rtf
 text/tab-separated-values	tsv
 text/vnd.rn-realtext	rt
 text/x-c++hdr	h++ hpp hxx hh
