@@ -213,8 +213,8 @@ public class InfostoreRequest extends CommonRequest {
 				if (!checkRequired(req, AJAXServlet.PARAMETER_TIMESTAMP)) {
 					return true;
 				}
-				final JSONArray array = (JSONArray) req.getBody();
-				final int[] ids = parseIDList(array);
+				final Object toDelete = req.getBody();
+				final int[] ids = parseIDList(toDelete);
 				final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
 				delete(ids, timestamp);
 				return true;
@@ -333,19 +333,26 @@ public class InfostoreRequest extends CommonRequest {
 		}
 	}
 
-	protected int[] parseIDList(final JSONArray array) throws JSONException {
-		final int[] ids = new int[array.length()];
+	protected int[] parseIDList(Object toDelete) throws JSONException {
+        if(JSONArray.class.isAssignableFrom(toDelete.getClass())) {
+            JSONArray array = (JSONArray) toDelete;
+            final int[] ids = new int[array.length()];
 
-		for (int i = 0; i < array.length(); i++) {
-			final JSONObject tuple = array.getJSONObject(i);
-			try {
-				ids[i] = tuple.getInt(AJAXServlet.PARAMETER_ID);
-			} catch (final JSONException x) {
-				ids[i] = Integer.parseInt(tuple.getString(AJAXServlet.PARAMETER_ID));
-			}
-		}
-		return ids;
-	}
+            for (int i = 0; i < array.length(); i++) {
+                final JSONObject tuple = array.getJSONObject(i);
+                try {
+                    ids[i] = tuple.getInt(AJAXServlet.PARAMETER_ID);
+                } catch (final JSONException x) {
+                    ids[i] = Integer.parseInt(tuple.getString(AJAXServlet.PARAMETER_ID));
+                }
+            }
+            return ids;
+        } else {
+            final int[] ids = new int[1];
+            ids[0] = ((JSONObject)toDelete).getInt(AJAXServlet.PARAMETER_ID);
+            return ids;
+        }
+    }
 
 	protected void doSortedSearch(final SimpleRequest req) throws JSONException, SearchIteratorException {
 		Metadata[] cols = null;

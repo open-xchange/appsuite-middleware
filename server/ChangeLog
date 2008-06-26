@@ -10,6 +10,7 @@
  - Bugfix #11298: Ask OXFolderAccess only if a folder is public / private. Ignore share state.
  - Bugfix #11237: Corrected control flow if management service is unavailable.
  - Bugfix #11465: Fallback to external participants eMail adress when the display name is not set.
+ - Bugfix #11187 and #11467: Accept both an array of objects that must be deleted and a single object.
 
 * 2008-06-26 - marcus.klein@open-xchange.com
 
