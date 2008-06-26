@@ -2,8 +2,11 @@ package com.openexchange.ajax.infostore;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.io.IOException;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
@@ -63,9 +66,11 @@ public class DeleteTest extends InfostoreAJAXTest {
 		
 	}
 	
-	public void testDeleteVersion() throws Exception {
-		//TODO
-		assertTrue(true);
-	}
+
+    public void testDeleteSingle() throws JSONException, IOException, SAXException {
+        int[] notDeleted = deleteSingle(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), folderId, clean.get(clean.size()-1));
+        assertEquals(0, notDeleted.length);
+        
+    }
 
 }

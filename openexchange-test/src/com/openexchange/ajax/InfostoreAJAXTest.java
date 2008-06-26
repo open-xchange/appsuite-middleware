@@ -375,8 +375,33 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		
 		return notDeleted;
 	}
-	
-	public int[] detach(final WebConversation webConv, final String hostname, final String sessionId, final long timestamp, final int objectId, final int[] versions) throws MalformedURLException, JSONException, IOException, SAXException {
+
+    public int[] deleteSingle(final WebConversation webConv, final String hostname, final String sessionId, final long timestamp, final int folder, final int id) throws JSONException, IOException, SAXException {
+        final StringBuffer url = getUrl(sessionId,"delete", hostname);
+		url.append("&timestamp=");
+		url.append(timestamp);
+
+
+        final StringBuffer data = new StringBuffer();
+
+        data.append("{folder : ");
+        data.append(folder);
+        data.append(", id : ");
+        data.append(id);
+        data.append("}");
+
+
+		final JSONArray arr = put(webConv, url.toString(), data.toString()).getJSONArray("data");
+		final int[] notDeleted = new int[arr.length()];
+
+		for(int i = 0; i < arr.length(); i++) {
+			notDeleted[i] = arr.getInt(i);
+		}
+
+		return notDeleted;
+    }
+
+    public int[] detach(final WebConversation webConv, final String hostname, final String sessionId, final long timestamp, final int objectId, final int[] versions) throws MalformedURLException, JSONException, IOException, SAXException {
 		final StringBuffer url = getUrl(sessionId,"detach", hostname);
 		url.append("&timestamp=");
 		url.append(timestamp);
