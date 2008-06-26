@@ -358,7 +358,8 @@ public final class RTF2HTMLConverter {
 
 	private static void readString(final String s, final Document document, final RTFEditorKit rtfeditorkit) {
 		try {
-			final ByteArrayInputStream bytearrayinputstream = new UnsynchronizedByteArrayInputStream(s.getBytes());
+			final ByteArrayInputStream bytearrayinputstream = new UnsynchronizedByteArrayInputStream(s
+					.getBytes("US-ASCII"));
 			rtfeditorkit.read(bytearrayinputstream, document, 0);
 		} catch (final IOException e) {
 			LOG.error(e.getMessage(), e);
