@@ -93,10 +93,10 @@ import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.ajax.task.actions.UpdatesRequest;
 import com.openexchange.ajax.writer.TaskWriter;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.tools.URLParameter;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * Utility class that contains all methods for making task requests to the
@@ -256,7 +256,7 @@ public final class TaskTools extends Assert {
     public static Response getTask(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,
         final int taskId) throws IOException, SAXException, JSONException,
-        OXException, AjaxException {
+        AjaxException, OXJSONException {
         LOG.trace("Getting task.");
         final AJAXClient client = new AJAXClient(new AJAXSession(conversation,
             sessionId));
