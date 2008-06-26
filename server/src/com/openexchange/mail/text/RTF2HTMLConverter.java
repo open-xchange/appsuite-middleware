@@ -412,7 +412,7 @@ public final class RTF2HTMLConverter {
 
 	private static String scanDocument(final Document document, final HTMLStateMachine hsm) {
 		try {
-			final StringBuilder sb = new StringBuilder();
+			final StringBuilder sb = new StringBuilder(document.getLength());
 			final Element element = document.getDefaultRootElement();
 			recurseElements(element, document, sb, hsm);
 			hsm.closeTags(sb);
