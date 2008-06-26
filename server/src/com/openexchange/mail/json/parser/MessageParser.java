@@ -483,6 +483,10 @@ public final class MessageParser {
 						 */
 						handler.setSequenceId(seqId);
 						parser.reset().parseMailMessage(referencedMail, handler);
+						if (handler.getMailPart() == null) {
+							throw new MailException(MailException.Code.ATTACHMENT_NOT_FOUND, seqId, Long.valueOf(msgref
+									.getUid()), msgref.getFolder());
+						}
 						referencedMailPart = provider.getNewReferencedPart(handler.getMailPart(), session);
 					}
 					referencedMailPart.setMsgref(msgref);
