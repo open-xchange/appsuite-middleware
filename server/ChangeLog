@@ -19,6 +19,7 @@
    overwriting an edited file.
  - Bugfix #11311: Writing long values as strings in JSON. This fixes problem with
    big long values.
+ - Bugfix #11300: Added missing activator for generic ConfigJump.
 
 * 2008-06-25 - marcus.klein@open-xchange.com
 
