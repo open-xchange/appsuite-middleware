@@ -278,11 +278,11 @@ public final class MailMessageParser {
 				return;
 			}
 			final String mpPrefix;
-			if (!multipartDetected) {
+			if (multipartDetected) {
+				mpPrefix = mpId;
+			} else {
 				mpPrefix = prefix;
 				multipartDetected = true;
-			} else {
-				mpPrefix = mpId;
 			}
 			for (int i = 0; i < count; i++) {
 				final MailPart enclosedContent = mailPart.getEnclosedMailPart(i);
