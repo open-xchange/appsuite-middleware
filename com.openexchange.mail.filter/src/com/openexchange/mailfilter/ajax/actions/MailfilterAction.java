@@ -57,6 +57,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.parser.generated.ParseException;
 import org.json.JSONArray;
@@ -124,6 +126,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         }
         
     }
+    
+    private final Log log = LogFactory.getLog(this.getClass());
     
     private static final AbstractObject2JSON2Object<Rule> CONVERTER = new Rule2JSON2Rule();
     
@@ -301,6 +305,9 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 position = clientrules.size() - 1;
             }
             final String writeback = sieveTextFilter.writeback(clientrules);
+            if (log.isDebugEnabled()) {
+                log.debug("The following sieve script will be written:\n" + writeback);
+            }
             writeScript(sieveHandler, activeScript, writeback);
 
             return nextuid;
