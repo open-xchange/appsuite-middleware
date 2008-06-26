@@ -63,28 +63,28 @@ import com.openexchange.groupware.container.SystemObject;
 
 public class ReminderObject extends SystemObject {
 	
-	private Date lastModified = null;
+	private Date lastModified;
 	
-	private int userId = 0;
+	private int userId;
 	
-	private Date date = null;
+	private Date date;
 	
-	private int objectId = 0;
+	private int objectId;
     
-	private String targetId = null;
+	private String targetId;
 	
-	private int module = 0;
+	private int module;
 	
-	private String description = null;
+	private String description;
 	
-	private String folder = null;
+	private String folder;
 	
-	private boolean isRecurrenceAppointment = false;
+	private boolean isRecurrenceAppointment;
     
-    private int recurrencePosition = 0;
+    private int recurrencePosition;
 	
 	public ReminderObject() {
-		
+		super();
 	}
 	
 	public void setUser( final int userId )
