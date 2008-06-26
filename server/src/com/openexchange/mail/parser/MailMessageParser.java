@@ -408,15 +408,16 @@ public final class MailMessageParser {
 						final TNEFBodyPart bodyPart = new TNEFBodyPart();
 						final String contentTypeStr = new StringBuilder(MIMETypes.MIME_TEXT_RTF).append("; charset=")
 								.append(MailConfig.getDefaultMimeCharset()).toString();
-						// final String content = new
-						// String(TNEFUtils.decompressRTF(rtfBody), defCharset);
 						final byte[] decompressedBytes = TNEFUtils.decompressRTF(rtfBody);
+						/*
+						 * Set content through a data handler to avoid further
+						 * exceptions raised by unavailable DCH (data content
+						 * handler) for MIME type "text/rtf" when set by
+						 * setContent() method
+						 */
 						bodyPart.setDataHandler(new DataHandler(new MessageDataSource(
 								new UnsynchronizedByteArrayInputStream(decompressedBytes), contentTypeStr)));
-						// bodyPart.setText(content,
-						// MailConfig.getDefaultMimeCharset(), "rtf");
 						bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
-						// bodyPart.setSize(content.length());
 						bodyPart.setSize(decompressedBytes.length);
 						parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
 					}
