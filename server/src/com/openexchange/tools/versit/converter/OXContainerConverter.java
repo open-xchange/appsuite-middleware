@@ -1286,7 +1286,7 @@ public class OXContainerConverter {
 			return false;
 		}
 	}
-
+                                                                                                                                                
 	/**
 	 * Finds an internal user by its e-mail address. Note that an e-mail address
 	 * is unique, but the identifier for an internal user is its id.

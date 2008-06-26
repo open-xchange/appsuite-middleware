@@ -680,13 +680,13 @@ public class CalendarSql implements AppointmentSQLInterface {
                 readcon = DBPool.pickup(ctx);
                 try {
                     final OXFolderAccess ofa = new OXFolderAccess(readcon, ctx);
-                    if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PRIVATE) {
+                    if (ofa.getFolderType(fid) == FolderObject.PRIVATE) {
                         prep = cimp.getPrivateFolderObjects(fid, ctx, readcon);
                         rs = cimp.getResultSet(prep);
                         writecon = DBPool.pickupWriteable(ctx);
                         writecon.setAutoCommit(false);
                         cimp.deleteAppointmentsInFolder(session, ctx, rs, readcon, writecon, FolderObject.PRIVATE, fid);
-                    } else if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PUBLIC) {
+                    } else if (ofa.getFolderType(fid) == FolderObject.PUBLIC) {
                         prep = cimp.getPublicFolderObjects(fid, ctx, readcon);
                         rs = cimp.getResultSet(prep);
                         writecon = DBPool.pickupWriteable(ctx);
