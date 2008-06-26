@@ -619,4 +619,5 @@ public class CalendarSqlTest extends TestCase {
         while(si.hasNext()) { appointments.add( si.next() ); }
         return appointments;
     }
+
 }

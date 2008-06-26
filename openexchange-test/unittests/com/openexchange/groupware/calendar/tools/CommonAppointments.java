@@ -303,6 +303,25 @@ public class CommonAppointments {
         }
     }
 
+    public static Date recalculate(Date date, TimeZone from, TimeZone to) {
+        Calendar fromCal = new GregorianCalendar();
+        fromCal.setTimeZone(from);
+        fromCal.setTime(date);
+
+        Calendar toCal = new GregorianCalendar();
+        toCal.setTimeZone(to);
+        toCal.set(fromCal.get(Calendar.YEAR), fromCal.get(Calendar.MONTH), fromCal.get(Calendar.DATE), fromCal.get(Calendar.HOUR_OF_DAY), fromCal.get(Calendar.MINUTE), fromCal.get(Calendar.SECOND));
+        toCal.set(Calendar.MILLISECOND, 0);
+
+        return toCal.getTime();
+    }
+
+    public static String dateString(long time, TimeZone tz) {
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        format.setTimeZone(tz);
+        return format.format(new Date(time));
+    }
+
     public CalendarDataObject createIdentifyingCopy(CalendarDataObject appointment) {
         CalendarDataObject copy = new CalendarDataObject();
         copy.setObjectID(appointment.getObjectID());
