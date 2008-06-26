@@ -116,6 +116,7 @@ public class ConsistencyInit implements Initialization {
         final ManagementService management = discoverManagementService();
         if(management == null) {
             LOG.info("It seems like the management service has gone away. Skipping unregistration of the consistency mbean.");
+            return;
         }
         LOG.info("Unregistering consistency MBean with name "+name);
         management.unregisterMBean(name);
