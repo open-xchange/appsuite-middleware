@@ -95,6 +95,7 @@ import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.text.Enriched2HtmlConverter;
 import com.openexchange.mail.text.HTMLProcessing;
+import com.openexchange.mail.text.RTF2HTMLConverter;
 import com.openexchange.mail.text.parser.HTMLParser;
 import com.openexchange.mail.text.parser.handler.HTML2TextHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -679,11 +680,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			return HTMLProcessing.formatHTMLForDisplay(ENRCONV.convert(src), contentType.getCharsetParameter(), session
 					.getSecret(), mailPath, usm, modified, displayMode);
 		} else if (contentType.isMimeType(MIMETypes.MIME_TEXT_RTF)) {
-			// TODO: return
-			// MessageUtils.formatContentForDisplay(RTFCONV.convert2HTML(src),
-			// true, session, mailPath,
-			// displayVersion);
-			return HTMLProcessing.formatTextForDisplay(src, usm, displayMode);
+			return HTMLProcessing.formatHTMLForDisplay(RTF2HTMLConverter.convertRTFToHTML(src), contentType.getCharsetParameter(), session
+					.getSecret(), mailPath, usm, modified, displayMode);
 		}
 		return HTMLProcessing.formatTextForDisplay(src, usm, displayMode);
 	}
