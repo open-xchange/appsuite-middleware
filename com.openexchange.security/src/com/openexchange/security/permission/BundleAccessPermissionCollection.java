@@ -196,7 +196,7 @@ public final class BundleAccessPermissionCollection extends PermissionCollection
 		 */
 		int last, offset;
 		offset = path.length() - 1;
-		while ((last = path.lastIndexOf('.', offset)) != -1) {
+		while ((last = path.lastIndexOf(".", offset)) != -1) {
 			path = path.substring(0, last + 1) + '*';
 			x = perms.get(path);
 			if (x != null) {
