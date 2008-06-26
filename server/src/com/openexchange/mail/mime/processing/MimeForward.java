@@ -441,8 +441,8 @@ public final class MimeForward {
 			}
 
 		}
-		forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", MIMEMessageUtility.decodeMultiEncodedHeader(msg
-				.getSubject()));
+		forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", Matcher.quoteReplacement(MIMEMessageUtility
+				.decodeMultiEncodedHeader(msg.getSubject())));
 		if (html) {
 			forwardPrefix = HTMLProcessing.htmlFormat(forwardPrefix);
 		}
