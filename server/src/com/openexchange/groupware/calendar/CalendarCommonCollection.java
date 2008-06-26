@@ -1376,8 +1376,21 @@ public class CalendarCommonCollection {
 					throw new OXCalendarException(OXCalendarException.Code.INVALID_CHARACTER, "Confirm Message", error);
 				}				
 			}
-		}		
-	}
+		}
+
+        if(cdao.containsParticipants()) {
+            for(Participant p : cdao.getParticipants()) {
+                error = Check.containsInvalidChars(p.getDisplayName());
+				if (error != null) {
+					throw new OXCalendarException(OXCalendarException.Code.INVALID_CHARACTER, "Display Name", error);
+				}
+				error = Check.containsInvalidChars(p.getEmailAddress());
+				if (error != null) {
+					throw new OXCalendarException(OXCalendarException.Code.INVALID_CHARACTER, "Email Address", error);
+				}
+            }
+        }
+    }
     
 	
 	
