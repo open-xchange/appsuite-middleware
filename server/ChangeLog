@@ -15,6 +15,8 @@
    break recurrence calculation.
  - Bugfix #10222: Marked configjump.properties as configuration file to prevent
    overwriting an edited file.
+ - Bugfix #11311: Writing long values as strings in JSON. This fixes problem with
+   big long values.
 
 * 2008-06-25 - marcus.klein@open-xchange.com
 

@@ -51,12 +51,14 @@ package com.openexchange.ajax.parser;
 
 import java.util.TimeZone;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.TaskFields;
-import com.openexchange.api2.OXException;
+import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * TaskParser
@@ -74,89 +76,89 @@ public class TaskParser extends CalendarParser {
     }
 
     public void parse(final Task taskobject, final JSONObject jsonobject)
-        throws OXException {
+        throws OXJSONException {
         try {
             parseElementTask(taskobject, jsonobject);
         } catch (final Exception exc) {
-            throw new OXException(exc);
+            throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, exc);
         }
     }
 
-    protected void parseElementTask(final Task taskobject,
-        final JSONObject jsonobject) throws Exception {
-        if (jsonobject.has(CalendarFields.START_DATE)) {
-            taskobject.setStartDate(parseDate(jsonobject,
+    protected void parseElementTask(final Task taskobject, final JSONObject json)
+        throws JSONException, OXJSONException, OXConflictException {
+        if (json.has(CalendarFields.START_DATE)) {
+            taskobject.setStartDate(parseDate(json,
                 CalendarFields.START_DATE));
         }
 
-        if (jsonobject.has(CalendarFields.END_DATE)) {
+        if (json.has(CalendarFields.END_DATE)) {
             taskobject
-                .setEndDate(parseDate(jsonobject, CalendarFields.END_DATE));
+                .setEndDate(parseDate(json, CalendarFields.END_DATE));
         }
 
-        if (jsonobject.has(TaskFields.STATUS)) {
-            taskobject.setStatus(parseInt(jsonobject, TaskFields.STATUS));
+        if (json.has(TaskFields.STATUS)) {
+            taskobject.setStatus(parseInt(json, TaskFields.STATUS));
         }
 
-        if (jsonobject.has(TaskFields.ACTUAL_COSTS)) {
-            taskobject.setActualCosts(parseFloat(jsonobject,
+        if (json.has(TaskFields.ACTUAL_COSTS)) {
+            taskobject.setActualCosts(parseFloat(json,
                 TaskFields.ACTUAL_COSTS));
         }
 
-        if (jsonobject.has(TaskFields.ACTUAL_DURATION)) {
-            taskobject.setActualDuration(parseLong(jsonobject,
+        if (json.has(TaskFields.ACTUAL_DURATION)) {
+            taskobject.setActualDuration(parseLong(json,
                 TaskFields.ACTUAL_DURATION));
         }
 
-        if (jsonobject.has(TaskFields.PERCENT_COMPLETED)) {
-            taskobject.setPercentComplete(parseInt(jsonobject,
+        if (json.has(TaskFields.PERCENT_COMPLETED)) {
+            taskobject.setPercentComplete(parseInt(json,
                 TaskFields.PERCENT_COMPLETED));
         }
 
-        if (jsonobject.has(TaskFields.DATE_COMPLETED)) {
-            taskobject.setDateCompleted(parseDate(jsonobject,
+        if (json.has(TaskFields.DATE_COMPLETED)) {
+            taskobject.setDateCompleted(parseDate(json,
                 TaskFields.DATE_COMPLETED));
         }
 
-        if (jsonobject.has(TaskFields.BILLING_INFORMATION)) {
-            taskobject.setBillingInformation(parseString(jsonobject,
+        if (json.has(TaskFields.BILLING_INFORMATION)) {
+            taskobject.setBillingInformation(parseString(json,
                 TaskFields.BILLING_INFORMATION));
         }
 
-        if (jsonobject.has(TaskFields.TARGET_COSTS)) {
-            taskobject.setTargetCosts(parseFloat(jsonobject,
+        if (json.has(TaskFields.TARGET_COSTS)) {
+            taskobject.setTargetCosts(parseFloat(json,
                 TaskFields.TARGET_COSTS));
         }
 
-        if (jsonobject.has(TaskFields.TARGET_DURATION)) {
-            taskobject.setTargetDuration(parseLong(jsonobject,
+        if (json.has(TaskFields.TARGET_DURATION)) {
+            taskobject.setTargetDuration(parseLong(json,
                 TaskFields.TARGET_DURATION));
         }
 
-        if (jsonobject.has(TaskFields.PRIORITY)) {
-            taskobject.setPriority(parseInt(jsonobject, TaskFields.PRIORITY));
+        if (json.has(TaskFields.PRIORITY)) {
+            taskobject.setPriority(parseInt(json, TaskFields.PRIORITY));
         }
 
-        if (jsonobject.has(TaskFields.CURRENCY)) {
+        if (json.has(TaskFields.CURRENCY)) {
             taskobject
-                .setCurrency(parseString(jsonobject, TaskFields.CURRENCY));
+                .setCurrency(parseString(json, TaskFields.CURRENCY));
         }
 
-        if (jsonobject.has(TaskFields.TRIP_METER)) {
-            taskobject.setTripMeter(parseString(jsonobject,
+        if (json.has(TaskFields.TRIP_METER)) {
+            taskobject.setTripMeter(parseString(json,
                 TaskFields.TRIP_METER));
         }
 
-        if (jsonobject.has(TaskFields.COMPANIES)) {
-            taskobject.setCompanies(parseString(jsonobject,
+        if (json.has(TaskFields.COMPANIES)) {
+            taskobject.setCompanies(parseString(json,
                 TaskFields.COMPANIES));
         }
 
-        if (jsonobject.has(CalendarFields.ALARM)) {
-            taskobject.setAlarm(parseTime(jsonobject, CalendarFields.ALARM,
+        if (json.has(CalendarFields.ALARM)) {
+            taskobject.setAlarm(parseTime(json, CalendarFields.ALARM,
                 timeZone));
         }
 
-        parseElementCalendar(taskobject, jsonobject);
+        parseElementCalendar(taskobject, json);
     }
 }

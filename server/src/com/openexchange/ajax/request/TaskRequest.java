@@ -190,7 +190,7 @@ public class TaskRequest {
 		}
 	}
 	
-	public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, AjaxException {
+	public JSONObject actionNew(final JSONObject jsonObj) throws JSONException, OXJSONException, AjaxException, OXException {
 		final Task task = new Task();
 		
 		final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, DATA);
@@ -243,14 +243,14 @@ public class TaskRequest {
 		
 		boolean bIgnoreDelete = false;
 		
-		if (ignore != null && ignore.indexOf("deleted") != -1) {
+		if (ignore.indexOf("deleted") != -1) {
 			bIgnoreDelete = true;
 		}
 		
 		Date lastModified = null;
 		
 		final JSONArray jsonResponseArray = new JSONArray();
-		SearchIterator it = null;
+		SearchIterator<Task> it = null;
 		try {
 			final int[] internalColumns = new int[columns.length+1];
 			System.arraycopy(columns, 0, internalColumns, 0, columns.length);
@@ -261,7 +261,7 @@ public class TaskRequest {
 			
 			it = taskssql.getModifiedTasksInFolder(folderId, internalColumns, requestedTimestamp);
 			while (it.hasNext()) {
-				final Task taskObj = (Task)it.next();
+				final Task taskObj = it.next();
 				
 				taskWriter.writeArray(taskObj, columns, jsonResponseArray);
 				
@@ -276,7 +276,7 @@ public class TaskRequest {
 				it.close();
 				it = taskssql.getDeletedTasksInFolder(folderId, internalColumns, requestedTimestamp);
 				while (it.hasNext()) {
-					final Task taskObj = (Task)it.next();
+					final Task taskObj = it.next();
 					
 					jsonResponseArray.put(taskObj.getObjectID());
 					
@@ -374,7 +374,7 @@ public class TaskRequest {
 		Date lastModified = null;
 		
 		final JSONArray jsonResponseArray = new JSONArray();
-		SearchIterator it = null;
+		SearchIterator<Task> it = null;
 		try {
 			
 			final TaskWriter taskwriter = new TaskWriter(timeZone);
@@ -387,7 +387,7 @@ public class TaskRequest {
 			}
 			
 			while (it.hasNext()) {
-				final Task taskobject = (Task)it.next();
+				final Task taskobject = it.next();
 				taskwriter.writeArray(taskobject, columns, jsonResponseArray);
 				
 				lastModified = taskobject.getLastModified();
@@ -423,7 +423,7 @@ public class TaskRequest {
 		return jsonResponseObject;
 	}
 
-	public JSONObject actionConfirm(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, AjaxException {
+	public JSONObject actionConfirm(final JSONObject jsonObj) throws OXMandatoryFieldException, OXException, AjaxException, OXJSONException {
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, DATA);
 		final Task taskObj = new Task();
 		
@@ -496,7 +496,7 @@ public class TaskRequest {
 
 		final JSONArray jsonResponseArray = new JSONArray();
 		
-		SearchIterator it = null;
+		SearchIterator<Task> it = null;
 		
 		try {
 			final TaskWriter taskWriter = new TaskWriter(timeZone);
@@ -505,7 +505,7 @@ public class TaskRequest {
 			it = taskssql.getTasksByExtendedSearch(searchObj, orderBy, orderDir, internalColumns);
 			
 			while (it.hasNext()) {
-				final Task taskObj = (Task)it.next();
+				final Task taskObj = it.next();
 				taskWriter.writeArray(taskObj, columns, jsonResponseArray);
 				
 				lastModified = taskObj.getLastModified();
