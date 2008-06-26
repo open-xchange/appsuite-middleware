@@ -148,10 +148,12 @@ public final class MailPartHandler implements MailMessageHandler {
 
 		@Override
 		public void loadContent() {
+			// Nothing to do
 		}
 
 		@Override
 		public void prepareForCaching() {
+			// Nothing to do
 		}
 
 	}
@@ -366,6 +368,7 @@ public final class MailPartHandler implements MailMessageHandler {
 	 * openexchange.mail.dataobjects.MailMessage)
 	 */
 	public void handleMessageEnd(final MailMessage msg) throws MailException {
+		// Nothing to do
 	}
 
 	/*
