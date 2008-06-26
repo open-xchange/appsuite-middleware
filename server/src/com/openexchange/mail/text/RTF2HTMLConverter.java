@@ -1,12 +1,8 @@
 package com.openexchange.mail.text;
 
 import java.awt.Color;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.regex.Matcher;
 
 import javax.swing.text.AttributeSet;
@@ -330,55 +326,18 @@ public final class RTF2HTMLConverter {
 	public static String convertRTFToHTML(final String rtfContent) {
 		final HTMLStateMachine hsm = new HTMLStateMachine();
 		final String htmlBody = convertRTFStringToHTML(rtfContent, hsm);
-		final StringBuilder s3 = new StringBuilder(1024).append("<html><body>");
-		s3.append(HTMLProcessing.formatHrefLinks(htmlBody));
-		return s3.append("</body></html>").toString();
+		final StringBuilder docBuilder = new StringBuilder(htmlBody.length() + 26).append("<html><body>");
+		docBuilder.append(HTMLProcessing.formatHrefLinks(htmlBody));
+		return docBuilder.append("</body></html>").toString();
 	}
 
 	/**
-	 * Triggers the rtf2html conversion
-	 * 
-	 * @param reader
-	 *            The RTF data reader
-	 * @return The converted HTML content
-	 * @throws IOException
-	 *             If reading RTF data fails
-	 */
-	public static String convertRTFToHTML(final Reader reader) throws IOException {
-		final BufferedReader strm = new BufferedReader(reader);
-		final StringBuilder sb = new StringBuilder();
-		int s;
-		while ((s = strm.read()) != -1) {
-			sb.append((char) s);
-		}
-		return convertRTFToHTML(sb.toString());
-	}
-
-	/**
-	 * Triggers the rtf2html conversion
-	 * 
-	 * @param input
-	 *            The RTF data input stream
-	 * @return The converted HTML content
-	 * @throws IOException
-	 *             If reading RTF data fails
-	 */
-	public static String convertRTFToHTML(final InputStream input) throws IOException {
-		final BufferedReader strm = new BufferedReader(new InputStreamReader(input));
-		final StringBuilder sb = new StringBuilder();
-		int s;
-		while ((s = strm.read()) != -1) {
-			sb.append((char) s);
-		}
-		return convertRTFToHTML(sb.toString());
-	}
-
-	/**
-	 * Triggers the RTF to HTML conversion
+	 * Converts a single RTF string to HTML without wrapping returned converted
+	 * HTML body inside a HTML document.
 	 * 
 	 * @param rtfString
 	 *            The RTF string
-	 * @return The converted TML string
+	 * @return The converted HTML body
 	 */
 	public static String convertRTFStringToHTML(final String rtfString) {
 		final HTMLStateMachine hsm = new HTMLStateMachine();
