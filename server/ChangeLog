@@ -1,3 +1,9 @@
+* 2008-06-26 - thorben.betten@open-xchange.com
+
+ - Bugfix #11221: Checking array size prior to composing a SQL "IN (xxx)"
+   string with StringCollection utility class which returns null if array
+   parameter is empty.
+
 * 2008-06-26 - francisco.laguna@open-xchange.com
 
  - Bugfix #11298: Ask OXFolderAccess only if a folder is public / private. Ignore share state.
