@@ -53,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -590,13 +591,13 @@ public final class MailMessageParser {
 	public static String getFileName(final String rawFileName, final String sequenceId, final String baseMimeType) {
 		String filename = rawFileName;
 		if ((filename == null) || isEmptyString(filename)) {
-			final List<String> exts = MIMEType2ExtMap.getFileExtensions(baseMimeType.toLowerCase());
+			final List<String> exts = MIMEType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
 			final StringBuilder sb = new StringBuilder(PREFIX.length() + sequenceId.length() + 5).append(PREFIX)
 					.append(sequenceId).append('.');
-			if (exts != null) {
-				sb.append(exts.get(0));
-			} else {
+			if (exts == null) {
 				sb.append("dat");
+			} else {
+				sb.append(exts.get(0));
 			}
 			filename = sb.toString();
 		} else {
