@@ -1,3 +1,7 @@
+* 2008-06-25 - francisco.laguna@open-xchange.com
+
+ - Bugfix #11298: Ask OXFolderAccess only if a folder is public / private. Ignore share state.
+
 * 2008-06-26 - marcus.klein@open-xchange.com
 
  - Bugfix #9774: Removed setting task series until date to MAX_VALUE. This may
