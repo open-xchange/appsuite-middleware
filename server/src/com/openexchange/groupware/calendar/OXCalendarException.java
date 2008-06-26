@@ -79,6 +79,9 @@ public class OXCalendarException extends OXException {
         NOT_YET_SUPPORTED("Not yet supported!", 2, AbstractOXException.Category.CODE_ERROR),
         NO_SHARED_FOLDER_OWNER("Shared folder owner not given !", 3, AbstractOXException.Category.CODE_ERROR),
         FOLDER_TYPE_UNRESOLVEABLE("Folder type unresolvable !", 4, AbstractOXException.Category.CODE_ERROR),
+        /**
+         * Unexpected SQL Error!
+         */
         CALENDAR_SQL_ERROR("Unexpected SQL Error!", 5, AbstractOXException.Category.SUBSYSTEM_OR_SERVICE_DOWN),
         LAST_MODIFIED_IS_NULL("clientLastModified IS NULL. Abort action!", 6, AbstractOXException.Category.CODE_ERROR),
         UNEXPECTED_EXCEPTION("Unexpected exception %d!", 7, AbstractOXException.Category.INTERNAL_ERROR),
