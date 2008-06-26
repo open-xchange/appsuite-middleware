@@ -73,7 +73,6 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeFailedException;
 import com.openexchange.groupware.downgrade.DowngradeListener;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -89,11 +88,15 @@ public class CalendarAdministration implements DeleteListener {
 
     private static final int[] CALENDAR_MODULE = {FolderObject.CALENDAR};
 
-    private StringBuilder u1 = null;
+    private StringBuilder u1;
+
     private static final Log LOG = LogFactory.getLog(CalendarAdministration.class);
     
+    /**
+     * Initializes a new {@link CalendarAdministration}
+     */
     public CalendarAdministration() {
-        
+        super();
     }
     
     public void deletePerformed(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws DeleteFailedException {
@@ -111,8 +114,6 @@ public class CalendarAdministration implements DeleteListener {
 	        }
         } catch (final SQLException e) {
         	throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
-        } catch (final LdapException e) {
-        	throw new DeleteFailedException(e);
         }
     }
 
@@ -128,8 +129,7 @@ public class CalendarAdministration implements DeleteListener {
             removeAppointmentsWithOnlyTheUserAsParticipant(downgradeEvent.getSession(),downgradeEvent.getContext(),downgradeEvent.getNewUserConfiguration().getUserId(), downgradeEvent.getWriteCon());
         } catch (final SQLException e) {
             LOG.error(e);
-            throw new DowngradeFailedException(DowngradeFailedException.Code.SQL_ERROR, e.getLocalizedMessage());
-
+            throw new DowngradeFailedException(DowngradeFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
         } catch (final OXException e) {
             throw new DowngradeFailedException(e);
         }
@@ -179,7 +179,7 @@ public class CalendarAdministration implements DeleteListener {
 
         } catch (final SQLException e) {
             LOG.error(e);
-            throw new DowngradeFailedException(DowngradeFailedException.Code.SQL_ERROR, e.getLocalizedMessage());
+            throw new DowngradeFailedException(DowngradeFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
         } catch (final OXException e) {
             throw new DowngradeFailedException(e);
         } finally {
@@ -248,9 +248,9 @@ public class CalendarAdministration implements DeleteListener {
             throw new DowngradeFailedException(e);
         } catch (final SearchIteratorException e) {
             throw new DowngradeFailedException(e);
-        } catch (final SQLException e) { e.printStackTrace();
+        } catch (final SQLException e) {
             LOG.error(e);
-            throw new DowngradeFailedException(DowngradeFailedException.Code.SQL_ERROR, e.getLocalizedMessage());
+            throw new DowngradeFailedException(DowngradeFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
         } finally {
             for(final PreparedStatement stmt : statements) {
                 CalendarCommonCollection.closePreparedStatement(stmt);
@@ -272,19 +272,19 @@ public class CalendarAdministration implements DeleteListener {
     }
     
     
-    private final void deleteGroup(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws DeleteFailedException, LdapException, SQLException {
+    private final void deleteGroup(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws DeleteFailedException, SQLException {
         deleteObjects(deleteEvent, readcon, writecon, CalendarSql.VIEW_TABLE_NAME, Participant.GROUP);
     }
     
-    private final void deleteResource(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws DeleteFailedException, LdapException, SQLException {
+    private final void deleteResource(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws DeleteFailedException, SQLException {
         deleteObjects(deleteEvent, readcon, writecon, CalendarSql.VIEW_TABLE_NAME, Participant.RESOURCE);
     }
     
-    private final void deleteResourceGroup(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws DeleteFailedException, LdapException, SQLException {
+    private final void deleteResourceGroup(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws DeleteFailedException, SQLException {
         deleteObjects(deleteEvent, readcon, writecon, CalendarSql.VIEW_TABLE_NAME, Participant.RESOURCEGROUP);
     }
     
-    private final void deleteObjects(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon, final String table, final int type) throws DeleteFailedException, LdapException, SQLException {
+    private final void deleteObjects(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon, final String table, final int type) throws DeleteFailedException, SQLException {
         PreparedStatement pst = null;
         ResultSet rs = null;
         try {
@@ -557,8 +557,7 @@ public class CalendarAdministration implements DeleteListener {
     
     private final void eventHandling(final int object_id, final int in_folder, final Context context, final Session so, final int type, final Connection readcon) throws SQLException, OXException {
         final CalendarOperation co = new CalendarOperation();
-        final CalendarSql csql = new CalendarSql(so);
-        final CalendarSqlImp cimp = csql.getCalendarSqlImplementation();
+        final CalendarSqlImp cimp = CalendarSql.getCalendarSqlImplementation();
         PreparedStatement prep = null;
         ResultSet rs = null;
         try {
