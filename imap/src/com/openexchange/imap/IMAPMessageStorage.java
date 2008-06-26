@@ -240,7 +240,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			 * Shall a search be performed?
 			 */
 			final int[] filter;
-			if (null != searchTerm) {
+			if (null == searchTerm) {
+				filter = null;
+			} else {
 				/*
 				 * Preselect message list according to given search pattern
 				 */
@@ -248,8 +250,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				if ((filter == null) || (filter.length == 0)) {
 					return EMPTY_RETVAL;
 				}
-			} else {
-				filter = null;
 			}
 			final Set<MailField> usedFields = new HashSet<MailField>();
 			Message[] msgs = IMAPSort.sortMessages(imapFolder, filter, fields, sortField, order, UserStorage
@@ -297,7 +297,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			 * Shall a search be performed?
 			 */
 			final int[] filter;
-			if (null != searchTerm) {
+			if (null == searchTerm) {
+				filter = null;
+			} else {
 				/*
 				 * Preselect message list according to given search pattern
 				 */
@@ -305,8 +307,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				if ((filter == null) || (filter.length == 0)) {
 					return EMPTY_RETVAL;
 				}
-			} else {
-				filter = null;
 			}
 			Message[] msgs = null;
 			final List<TreeNode> threadList;
@@ -315,7 +315,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				 * Sort messages by thread reference
 				 */
 				final StringBuilder sortRange;
-				if (null != filter) {
+				if (null == filter) {
+					/*
+					 * Select all messages
+					 */
+					sortRange = new StringBuilder(3).append("ALL");
+				} else {
 					/*
 					 * Define sequence of valid message numbers: e.g.:
 					 * 2,34,35,43,51
@@ -325,11 +330,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 					for (int i = 1; i < filter.length; i++) {
 						sortRange.append(filter[i]).append(',');
 					}
-				} else {
-					/*
-					 * Select all messages
-					 */
-					sortRange = new StringBuilder(3).append("ALL");
 				}
 				final long start = System.currentTimeMillis();
 				final String threadResp = ThreadSortUtil.getThreadResponse(imapFolder, sortRange);
@@ -425,7 +425,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 					throw new IMAPException(IMAPException.Code.NO_DELETE_ACCESS, imapFolder.getFullName());
 				}
 			} catch (final MessagingException e) {
-				throw new IMAPException(IMAPException.Code.NO_ACCESS, imapFolder.getFullName());
+				throw new IMAPException(IMAPException.Code.NO_ACCESS, e, imapFolder.getFullName());
 			}
 			final String trashFullname = imapAccess.getFolderStorage().getTrashFolder();
 			if (null == trashFullname) {
@@ -496,7 +496,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 						throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA);
 					}
 				}
-				throw new IMAPException(IMAPException.Code.MOVE_ON_DELETE_FAILED);
+				throw new IMAPException(IMAPException.Code.MOVE_ON_DELETE_FAILED, e, new Object[0]);
 			}
 		}
 		/*
@@ -566,7 +566,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 					throw new IMAPException(IMAPException.Code.NO_DELETE_ACCESS, imapFolder.getFullName());
 				}
 			} catch (final MessagingException e) {
-				throw new IMAPException(IMAPException.Code.NO_ACCESS, imapFolder.getFullName());
+				throw new IMAPException(IMAPException.Code.NO_ACCESS, e, imapFolder.getFullName());
 			}
 			{
 				/*
@@ -582,7 +582,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 						throw new IMAPException(IMAPException.Code.NO_INSERT_ACCESS, destFolder.getFullName());
 					}
 				} catch (final MessagingException e) {
-					throw new IMAPException(IMAPException.Code.NO_ACCESS, destFolder.getFullName());
+					throw new IMAPException(IMAPException.Code.NO_ACCESS, e, destFolder.getFullName());
 				} finally {
 					destFolder.close(false);
 				}
@@ -732,7 +732,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 					throw new IMAPException(IMAPException.Code.NO_INSERT_ACCESS, imapFolder.getFullName());
 				}
 			} catch (final MessagingException e) {
-				throw new IMAPException(IMAPException.Code.NO_ACCESS, imapFolder.getFullName());
+				throw new IMAPException(IMAPException.Code.NO_ACCESS, e, imapFolder.getFullName());
 			}
 			/*
 			 * Convert messages to JavaMail message objects
@@ -761,12 +761,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			}
 			final long[] retval = new long[msgs.length];
 			long uid = IMAPCommandsCollection.findMarker(hash, imapFolder);
-			if (uid != -1) {
+			if (uid == -1) {
+				Arrays.fill(retval, -1L);
+			} else {
 				for (int i = 0; i < retval.length; i++) {
 					retval[i] = uid++;
 				}
-			} else {
-				Arrays.fill(retval, -1L);
 			}
 			return retval;
 		} catch (final MessagingException e) {
@@ -900,7 +900,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 					throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
 				}
 			} catch (final MessagingException e) {
-				throw new IMAPException(IMAPException.Code.NO_ACCESS, imapFolder.getFullName());
+				throw new IMAPException(IMAPException.Code.NO_ACCESS, e, imapFolder.getFullName());
 			}
 			if (!UserFlagsCache.supportsUserFlags(imapFolder, true, session)) {
 				LOG.error(new StringBuilder().append("Folder \"").append(imapFolder.getFullName()).append(

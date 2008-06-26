@@ -419,10 +419,10 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
 	public void setPermissionsAsArray(final OCLPermission[] permissions) {
 		final List<OCLPermission> tmpList = Arrays.asList(permissions);
-		if (this.permissions != null) {
-			this.permissions.clear();
-		} else {
+		if (this.permissions == null) {
 			this.permissions = new ArrayList<OCLPermission>();
+		} else {
+			this.permissions.clear();
 		}
 		this.permissions.addAll(tmpList);
 		b_permissions = true;
@@ -508,7 +508,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	 */
 	public final boolean hasVisibleSubfolders(final int userId, final int[] groups, final UserConfiguration userConfig,
 			final Context ctx) throws DBPoolingException, OXException, SQLException, SearchIteratorException {
-		SearchIterator iter = null;
+		SearchIterator<FolderObject> iter = null;
 		try {
 			if (objectId == SYSTEM_ROOT_FOLDER_ID) {
 				return true;
@@ -586,7 +586,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 			return new ArrayList<FolderObject>(0);
 		}
 		final List<FolderObject> retval;
-		SearchIterator iter = null;
+		SearchIterator<FolderObject> iter = null;
 		try {
 			if (objectId == VIRTUAL_LIST_TASK_FOLDER_ID) {
 				iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(userId, groups, FolderObject.TASK,
@@ -608,12 +608,12 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 				final int size = iter.size();
 				retval = new ArrayList<FolderObject>(size);
 				for (int i = 0; i < size; i++) {
-					retval.add((FolderObject) iter.next());
+					retval.add(iter.next());
 				}
 			} else {
 				retval = new ArrayList<FolderObject>();
 				while (iter.hasNext()) {
-					retval.add((FolderObject) iter.next());
+					retval.add(iter.next());
 				}
 			}
 			return retval;
@@ -777,7 +777,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 			setPermissionFlag(other.getPermissionFlag());
 		}
 		if (other.containsPermissions() && (overwrite || !containsPermissions())) {
-			setPermissions((ArrayList) other.getPermissions());
+			setPermissions((ArrayList<OCLPermission>) other.getPermissions());
 		}
 		if (other.containsSubfolderFlag() && (overwrite || !containsSubfolderFlag())) {
 			setSubfolderFlag(other.hasSubfolders());
@@ -1240,21 +1240,17 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	}
 
 	public static final int mapVirtualID2SystemID(final int virtualID) {
-		switch (virtualID) {
-		case VIRTUAL_USER_INFOSTORE_FOLDER_ID:
+		if (virtualID == VIRTUAL_USER_INFOSTORE_FOLDER_ID) {
 			return SYSTEM_INFOSTORE_FOLDER_ID;
-		default:
-			return virtualID;
 		}
+		return virtualID;
 	}
 
 	public static final int mapSystemID2VirtualID(final int systemID) {
-		switch (systemID) {
-		case SYSTEM_INFOSTORE_FOLDER_ID:
+		if (systemID == SYSTEM_INFOSTORE_FOLDER_ID) {
 			return VIRTUAL_USER_INFOSTORE_FOLDER_ID;
-		default:
-			return systemID;
 		}
+		return systemID;
 	}
 
 	public static final FolderObject createVirtualFolderObject(final int objectID, final String name, final int module,
