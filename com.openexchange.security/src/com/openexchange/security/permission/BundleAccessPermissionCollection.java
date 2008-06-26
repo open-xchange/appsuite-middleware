@@ -137,7 +137,7 @@ public final class BundleAccessPermissionCollection extends PermissionCollection
 			throw new SecurityException("Attempt to add a permission to a read-only permission collection");
 		}
 		final BundleAccessPermission bp = (BundleAccessPermission) permission;
-		if (perms.size() == 0) {
+		if (perms.isEmpty()) {
 			permClass = bp.getClass();
 		} else {
 			if (bp.getClass() != permClass) {
@@ -196,7 +196,7 @@ public final class BundleAccessPermissionCollection extends PermissionCollection
 		 */
 		int last, offset;
 		offset = path.length() - 1;
-		while ((last = path.lastIndexOf(".", offset)) != -1) {
+		while ((last = path.lastIndexOf('.', offset)) != -1) {
 			path = path.substring(0, last + 1) + '*';
 			x = perms.get(path);
 			if (x != null) {

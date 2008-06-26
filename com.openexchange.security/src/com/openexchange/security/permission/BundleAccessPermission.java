@@ -122,12 +122,13 @@ public final class BundleAccessPermission extends BasicPermission {
 	private static String wildcardToRegex(final String wildcard) {
 		final StringBuilder s = new StringBuilder(wildcard.length());
 		s.append('^');
-		for (int i = 0, len = wildcard.length(); i < len; i++) {
+		final int len = wildcard.length();
+		for (int i = 0; i < len; i++) {
 			final char c = wildcard.charAt(i);
 			if (c == '*') {
 				s.append(".*");
 			} else if (c == '?') {
-				s.append(".");
+				s.append('.');
 			} else if (c == '(' || c == ')' || c == '[' || c == ']' || c == '$' || c == '^' || c == '.' || c == '{'
 					|| c == '}' || c == '|' || c == '\\') {
 				/*

@@ -65,7 +65,7 @@ public final class BundleAccessException extends AbstractOXException {
 	 */
 	private static final long serialVersionUID = 4015829995924115590L;
 
-	private static final Component COMPONENT = new Component() {
+	private static final transient Component COMPONENT = new Component() {
 
 		private static final String STR_COMPONENT = "SECURITY";
 
@@ -106,7 +106,7 @@ public final class BundleAccessException extends AbstractOXException {
 		}
 	}
 
-	private static final Object[] EMPTY_ARGS = new Object[0];
+	private static final transient Object[] EMPTY_ARGS = new Object[0];
 
 	/**
 	 * Initializes a new {@link BundleAccessException}
