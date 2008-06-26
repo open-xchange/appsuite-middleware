@@ -3,6 +3,7 @@
  - Bugfix #11221: Checking array size prior to composing a SQL "IN (xxx)"
    string with StringCollection utility class which returns null if array
    parameter is empty.
+ - Bugfix #11180: Deleting appointment reminders on user deletion
 
 * 2008-06-26 - francisco.laguna@open-xchange.com
 

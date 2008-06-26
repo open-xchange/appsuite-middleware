@@ -62,6 +62,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -74,7 +75,6 @@ import com.openexchange.groupware.downgrade.DowngradeFailedException;
 import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -259,15 +259,13 @@ public class CalendarAdministration implements DeleteListener {
         }
     }
     
-    private final void deleteUser(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws DeleteFailedException, LdapException, SQLException {
+    private final void deleteUser(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws DeleteFailedException, SQLException {
         try {
             //  Delete all appointments where the user is the only participant (and where the app is private) !! NO MOVE TO del_* !!
             //  Delete the user from the participant list and update the appointment
             //  Update all created_by and changed_from and changing_dates WHERE the user is the creator
             //  Update all changed_from and changing_dates WHERE the user is the editor
             deleteUserFromAppointments(deleteEvent, readcon, writecon);
-        } catch (final DBPoolingException ex) {
-            throw new DeleteFailedException(ex);
         } catch (final OXException ex) {
             throw new DeleteFailedException(ex);
         }
@@ -398,8 +396,10 @@ public class CalendarAdministration implements DeleteListener {
             }
         }
     }
+   
+    private static final String SQL_DEL_REMINDER = "DELETE FROM reminder WHERE cid = ? AND module = ? AND userid = ?";
 
-    private void deleteUserFromAppointments(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws DeleteFailedException, LdapException, SQLException, DBPoolingException, OXException {
+    private void deleteUserFromAppointments(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws SQLException, OXException {
         PreparedStatement pst2 = null;
         ResultSet rs2 = null;
         PreparedStatement pst3 = null;
@@ -407,6 +407,18 @@ public class CalendarAdministration implements DeleteListener {
         PreparedStatement pst5 = null;
         PreparedStatement pst6 = null;
         try {
+        	/*
+        	 * Remove user's appointment reminder
+        	 */
+        	pst2 = writecon.prepareStatement(SQL_DEL_REMINDER);
+        	int pos = 1;
+        	pst2.setInt(pos++, deleteEvent.getContext().getContextId());
+        	pst2.setInt(pos++, Types.APPOINTMENT);
+        	pst2.setInt(pos++, deleteEvent.getId());
+        	pst2.executeUpdate();
+        	pst2.close();
+        	pst2 = null;
+        	
             removeAppointmentsWithOnlyTheUserAsParticipant(deleteEvent.getSession(), deleteEvent.getContext(), deleteEvent.getId(), writecon);
 
             final StringBuilder sb2 = new StringBuilder(128);
