@@ -308,13 +308,13 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 			checkJSessionIDCookie(servletRequest, servletResponse, ajpRequestHandler);
 		} else {
 			final int dot = jsessionID.lastIndexOf('.');
-			if ((dot != -1) && (!AJPv13Config.getJvmRoute().equals(jsessionID.substring(dot + 1)))) {
+			if ((dot == -1) || (AJPv13Config.getJvmRoute().equals(jsessionID.substring(dot + 1)))) {
+				addJSessionIDCookie(jsessionID, servletResponse, ajpRequestHandler);
+			} else {
 				/*
 				 * JVM route does not match
 				 */
 				createJSessionIDCookie(servletResponse, ajpRequestHandler);
-			} else {
-				addJSessionIDCookie(jsessionID, servletResponse, ajpRequestHandler);
 			}
 		}
 		/*
@@ -547,10 +547,10 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 			paramsStart = Math.min(paramMatcher.start(), paramsStart);
 			prevCookie.setDomain(paramMatcher.group(1));
 		}
-		if (paramsStart != -1) {
-			prevValue = complVal.substring(0, paramsStart);
-		} else {
+		if (paramsStart == -1) {
 			prevValue = complVal;
+		} else {
+			prevValue = complVal.substring(0, paramsStart);
 		}
 		prevCookie.setValue(prevValue);
 	}
@@ -704,7 +704,10 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 			/*
 			 * Check known JSESSIONIDs and corresponding HTTP session
 			 */
-			if (!jsessionids.containsKey(id) || !HttpSessionManagement.isHttpSessionValid(id)) {
+			if (jsessionids.containsKey(id) && HttpSessionManagement.isHttpSessionValid(id)) {
+				jsessionIdVal = id;
+				join = false;
+			} else {
 				/*
 				 * Invalid cookie. Create a new unique id
 				 */
@@ -715,9 +718,6 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 				}
 				jsessionIdVal = jsessionIDVal.toString();
 				join = true;
-			} else {
-				jsessionIdVal = id;
-				join = false;
 			}
 		}
 		final Cookie jsessionIDCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, jsessionIdVal);

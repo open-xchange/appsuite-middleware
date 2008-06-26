@@ -1041,14 +1041,14 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			jsonObject.put(MailJSONField.SIZE.getKey(), len);
 			jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.ATTACHMENT);
 			jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
-			if (fileName != null) {
+			if (fileName == null) {
+				jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), JSONObject.NULL);
+			} else {
 				try {
 					jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), MimeUtility.decodeText(fileName));
 				} catch (final UnsupportedEncodingException e) {
 					jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), fileName);
 				}
-			} else {
-				jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), JSONObject.NULL);
 			}
 			getAttachmentsArr().put(jsonObject);
 
@@ -1098,14 +1098,14 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			originalVersion.put(MailJSONField.DISPOSITION.getKey(), Part.ATTACHMENT);
 			originalVersion.put(MailJSONField.SIZE.getKey(), htmlContent.length());
 			originalVersion.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
-			if (fileName != null) {
+			if (fileName == null) {
+				originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), JSONObject.NULL);
+			} else {
 				try {
 					originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), MimeUtility.decodeText(fileName));
 				} catch (final UnsupportedEncodingException e) {
 					originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), fileName);
 				}
-			} else {
-				originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), JSONObject.NULL);
 			}
 			getAttachmentsArr().put(originalVersion);
 		} catch (final JSONException e) {
