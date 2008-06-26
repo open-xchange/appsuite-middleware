@@ -84,10 +84,13 @@ import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.TNEFBodyPart;
+import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -395,7 +398,7 @@ public final class MailMessageParser {
 					final TNEFBodyPart bodyPart = new TNEFBodyPart();
 					bodyPart.setText((String) attrBody.getValue());
 					bodyPart.setSize(((String) attrBody.getValue()).length());
-					parseMailContent(new MIMEMailPart(bodyPart), handler, prefix, partCount++);
+					parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
 				}
 				if (message.getMAPIProps() != null) {
 					final RawInputStream ris = (RawInputStream) message.getMAPIProps().getPropValue(
@@ -403,13 +406,19 @@ public final class MailMessageParser {
 					if (ris != null) {
 						final byte[] rtfBody = ris.toByteArray();
 						final TNEFBodyPart bodyPart = new TNEFBodyPart();
-						final String defCharset = MailConfig.getDefaultMimeCharset();
-						final String content = new String(TNEFUtils.decompressRTF(rtfBody), defCharset);
-						bodyPart.setText(content, defCharset, "rtf");
-						bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new StringBuilder(MIMETypes.MIME_TEXT_RTF)
-								.append("; charset=").append(defCharset).toString());
-						bodyPart.setSize(content.length());
-						parseMailContent(new MIMEMailPart(bodyPart), handler, prefix, partCount++);
+						final String contentTypeStr = new StringBuilder(MIMETypes.MIME_TEXT_RTF).append("; charset=")
+								.append(MailConfig.getDefaultMimeCharset()).toString();
+						// final String content = new
+						// String(TNEFUtils.decompressRTF(rtfBody), defCharset);
+						final byte[] decompressedBytes = TNEFUtils.decompressRTF(rtfBody);
+						bodyPart.setDataHandler(new DataHandler(new MessageDataSource(
+								new UnsynchronizedByteArrayInputStream(decompressedBytes), contentTypeStr)));
+						// bodyPart.setText(content,
+						// MailConfig.getDefaultMimeCharset(), "rtf");
+						bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
+						// bodyPart.setSize(content.length());
+						bodyPart.setSize(decompressedBytes.length);
+						parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
 					}
 				}
 				/*
@@ -446,7 +455,7 @@ public final class MailMessageParser {
 						os.reset();
 						attachment.writeTo(os);
 						bodyPart.setSize(os.size());
-						parseMailContent(new MIMEMailPart(bodyPart), handler, prefix, partCount++);
+						parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
 					} else {
 						/*
 						 * Nested message
@@ -455,7 +464,7 @@ public final class MailMessageParser {
 								attachment.getNestedMessage());
 						bodyPart.setDataHandler(new DataHandler(nestedMessage, MIMETypes.MIME_MESSAGE_RFC822));
 						bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_MESSAGE_RFC822);
-						parseMailContent(new MIMEMailPart(bodyPart), handler, prefix, partCount++);
+						parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
 					}
 				}
 			} catch (final IOException tnefExc) {
