@@ -6,6 +6,8 @@
 
  - Bugfix #9774: Removed setting task series until date to MAX_VALUE. This may
    break recurrence calculation.
+ - Bugfix #10222: Marked configjump.properties as configuration file to prevent
+   overwriting an edited file.
 
 * 2008-06-25 - marcus.klein@open-xchange.com
 
