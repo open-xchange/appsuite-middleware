@@ -279,12 +279,9 @@ public class InfostoreWriter extends TimedWriter {
 			writeString(String.valueOf(id));
 		}
 	
-		private void writeString(String string) {
-			if(null == string) {
-				string = "";
-			}
+		private void writeString(final String string) {
 			try {
-				writer.value(string);
+				writer.value(string == null ? "" : string);
 			} catch (final JSONException e) {
 				LOG.debug("",e);
 			}

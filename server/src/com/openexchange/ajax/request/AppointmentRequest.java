@@ -1156,12 +1156,11 @@ public class AppointmentRequest {
 	}
 	
 	private Date getDateByFieldId(final int field, final AppointmentObject appointmentObj, final TimeZone timeZone) {
-		Date date = null; 
-		switch (field) {
-			case CalendarObject.START_DATE:
-				return appointmentObj.getStartDate();
-			case CalendarObject.END_DATE:
-				return appointmentObj.getEndDate();
+		final Date date = null; 
+		if (field == CalendarObject.START_DATE) {
+			return appointmentObj.getStartDate();
+		} else if (field == CalendarObject.END_DATE) {
+			return appointmentObj.getEndDate();
 		}
 		
 		if (date == null) {
@@ -1170,9 +1169,8 @@ public class AppointmentRequest {
 		
 		if (appointmentObj.getFullTime()) {
 			return date;
-		} else {
-			final int offset = timeZone.getOffset(date.getTime());
-			return new Date(date.getTime()+offset);
 		}
+		final int offset = timeZone.getOffset(date.getTime());
+		return new Date(date.getTime()+offset);
 	}
 }
