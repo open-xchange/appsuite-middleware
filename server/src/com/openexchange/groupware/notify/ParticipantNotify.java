@@ -626,7 +626,9 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 		if(resource) {
 			return;
 		}
-		participantSet.add(participant.displayName);
+        String name = participant.displayName;
+        if(name == null) { name = participant.email; }
+        participantSet.add(name);
 	}
 	
 	public static final class EmailableParticipant {
