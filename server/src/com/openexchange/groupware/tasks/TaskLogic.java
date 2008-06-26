@@ -550,16 +550,12 @@ public final class TaskLogic {
         final Date origStart = task.getStartDate();
         task.setRecurrenceCalculator((int) ((task.getEndDate().getTime()
             - origStart.getTime()) / (CalendarRecurringCollection.MILLI_DAY)));
-        boolean removeUntil = false;
-        if (task.containsOccurrence() || !task.containsUntil()) {
-            removeUntil = true;
-            task.setUntil(new Date(Long.MAX_VALUE));
-        }
+        // Setting until date to Long.MAX_VALUE is not a good idea.
+        // Recurring calculation sets until date itself and may add some time
+        // in some conditions cause an overflow if MAX_VALUE is set and no
+        // new recurrence is calculated.
         final RecurringResults rr = CalendarRecurringCollection
             .calculateRecurring(task, 0, 0, 2);
-        if (removeUntil) {
-            task.removeUntil();
-        }
         final RecurringResult result = rr.getRecurringResult(0);
         final Date[] retval;
         if (null == result) {

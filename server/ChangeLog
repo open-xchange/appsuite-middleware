@@ -1,3 +1,8 @@
+* 2008-06-26 - marcus.klein@open-xchange.com
+
+ - Bugfix #9774: Removed setting task series until date to MAX_VALUE. This may
+   break recurrence calculation.
+
 * 2008-06-25 - marcus.klein@open-xchange.com
 
  - Bugfix #11195: Detecting duplicate task folder for user now correct when
