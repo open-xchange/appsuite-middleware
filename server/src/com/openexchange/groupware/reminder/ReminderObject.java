@@ -167,7 +167,7 @@ public class ReminderObject extends SystemObject {
 	}
 	
 	public void setLastModified(final Date lastModified) {
-		this.lastModified = lastModified;
+		this.lastModified = new Date(lastModified.getTime());
 	}
 	
 	public Date getLastModified() {
