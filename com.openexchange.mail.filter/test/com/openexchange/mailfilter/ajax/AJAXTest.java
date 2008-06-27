@@ -52,10 +52,41 @@ public abstract class AJAXTest {
         System.out.println("Rule created with newid: " + newid);
     }
     
+    /**
+     * This test case is used for testing the bug that the subject was written as text
+     * 
+     * @throws MalformedURLException
+     * @throws IOException
+     * @throws SAXException
+     * @throws JSONException
+     */
     @Test
     public void MailfilternewVacation2Test() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebConversation login = login();
         final String test = "{\"rulename\":\"Vacation Notice\",\"active\":true,\"flags\":[\"vacation\"],\"test\":{\"id\":\"true\"},\"actioncmds\":[{\"id\":\"vacation\",\"days\":13,\"addresses\":[\"root@localhost\",\"billg@microsoft.com\"],\"subject\":\"Betreff\",\"text\":\"Text\\u000aText\"}],\"id\":5}";
+        final String newid = mailfilternew(login, getHostname(), getUsername(), test, null);
+        System.out.println("Rule created with newid: " + newid);
+    }
+    
+    @Test
+    public void MailfilternewVacation3Test() throws MalformedURLException, IOException, SAXException, JSONException {
+        final WebConversation login = login();
+        final String test ="{\"rulename\":\"New x\",\"test\":{\"id\":\"header\",\"comparison\":\"contains\",\"values\":[\"\"],\"headers\":[\"X-Been-There\",\"X-Mailinglist\"]},\"actioncmds\":[{\"id\":\"redirect\",\"to\":\"xyz@bla.de\"}],\"flags\":[],\"active\":true}";
+        final String newid = mailfilternew(login, getHostname(), getUsername(), test, null);
+        System.out.println("Rule created with newid: " + newid);
+    }
+
+    /**
+     * This test is used to check the correct operation of the size test, this was dealt in bug 11519
+     * @throws MalformedURLException
+     * @throws IOException
+     * @throws SAXException
+     * @throws JSONException
+     */
+    @Test
+    public void MailfilternewSizeTest() throws MalformedURLException, IOException, SAXException, JSONException {
+        final WebConversation login = login();
+        final String test = "{\"rulename\":\"sizerule\",\"test\":{\"id\":\"size\",\"comparison\":\"over\",\"size\":88},\"actioncmds\":[{\"id\":\"keep\"}],\"flags\":[],\"active\":true}";
         final String newid = mailfilternew(login, getHostname(), getUsername(), test, null);
         System.out.println("Rule created with newid: " + newid);
     }
