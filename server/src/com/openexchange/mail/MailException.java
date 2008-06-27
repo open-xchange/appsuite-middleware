@@ -102,7 +102,8 @@ public class MailException extends AbstractOXException {
 		 */
 		INVALID_MULTIPART_CONTENT("Invalid multipart content. Number of enclosed contents is 0", Category.CODE_ERROR, 6),
 		/**
-		 * A part's content could not be read from message %1$s in mail folder %2$s
+		 * A part's content could not be read from message %1$s in mail folder
+		 * %2$s
 		 */
 		UNREADBALE_PART_CONTENT("A part's content could not be read from message %1$s in mail folder %2$s",
 				Category.INTERNAL_ERROR, 7),
@@ -189,11 +190,13 @@ public class MailException extends AbstractOXException {
 		/**
 		 * Could not create a PartModifier instance from name %1$s
 		 */
-		PART_MODIFIER_CREATION_FAILED("Could not create a PartModifier instance from name %1$s", Category.CODE_ERROR, 27),
+		PART_MODIFIER_CREATION_FAILED("Could not create a PartModifier instance from name %1$s", Category.CODE_ERROR,
+				27),
 		/**
 		 * Upload quota (%1$s) exceeded for file %2$s (size=%3$s)
 		 */
-		UPLOAD_QUOTA_EXCEEDED_FOR_FILE("Upload quota (%1$s) exceeded for file %2$s (size=%3$s)", Category.USER_INPUT, 28),
+		UPLOAD_QUOTA_EXCEEDED_FOR_FILE("Upload quota (%1$s) exceeded for file %2$s (size=%3$s)", Category.USER_INPUT,
+				28),
 		/**
 		 * Upload quota (%1$s) exceeded
 		 */
@@ -236,8 +239,8 @@ public class MailException extends AbstractOXException {
 		DELETE_FAILED_OVER_QUOTA("Mail could not be moved to trash folder. Quota exceeded",
 				Category.EXTERNAL_RESOURCE_FULL, 39),
 		/**
-		 * The message part with sequence ID %1$s could not be found in message %2$s
-		 * in folder %3$s
+		 * The message part with sequence ID %1$s could not be found in message
+		 * %2$s in folder %3$s
 		 */
 		PART_NOT_FOUND("The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s",
 				Category.CODE_ERROR, 40),
@@ -309,7 +312,14 @@ public class MailException extends AbstractOXException {
 		/**
 		 * Missing mail folder fullname
 		 */
-		MISSING_FULLNAME("Missing mail folder fullname", Category.CODE_ERROR, 54);
+		MISSING_FULLNAME("Missing mail folder fullname", Category.CODE_ERROR, 54),
+		/**
+		 * Image attachment with Content-Id "%1$s" not found inside mail %2$s of
+		 * mail folder %3$s
+		 */
+		IMAGE_ATTACHMENT_NOT_FOUND(
+				"Image attachment with Content-Id \"%1$s\" not found inside mail %2$s of mail folder %3$s",
+				Category.CODE_ERROR, 49);
 
 		private final String message;
 
