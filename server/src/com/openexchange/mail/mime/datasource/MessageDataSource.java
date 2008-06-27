@@ -147,12 +147,12 @@ public final class MessageDataSource implements DataSource {
 	 */
 	public MessageDataSource(final String data, final ContentType contentType) throws UnsupportedEncodingException {
 		final ContentType ct;
-		if (!contentType.containsCharsetParameter()) {
+		if (contentType.containsCharsetParameter()) {
+			ct = contentType;
+		} else {
 			ct = new ContentType();
 			ct.setContentType(contentType);
 			ct.setCharsetParameter(MailConfig.getDefaultMimeCharset());
-		} else {
-			ct = contentType;
 		}
 		this.data = data.getBytes(ct.getCharsetParameter());
 		this.contentType = ct.toString();
@@ -189,7 +189,7 @@ public final class MessageDataSource implements DataSource {
 		return name;
 	}
 
-	protected static int copyStream(final InputStream inputStreamArg, final ByteArrayOutputStream outputStream)
+	protected static void copyStream(final InputStream inputStreamArg, final ByteArrayOutputStream outputStream)
 			throws IOException {
 		final InputStream inputStream;
 		if (inputStreamArg instanceof ByteArrayInputStream) {
@@ -203,13 +203,9 @@ public final class MessageDataSource implements DataSource {
 		try {
 			final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
 			int len;
-			int totalBytes = 0;
 			while ((len = inputStream.read(bbuf)) != -1) {
 				outputStream.write(bbuf, 0, len);
-				totalBytes += len;
 			}
-			outputStream.flush();
-			return totalBytes;
 		} finally {
 			try {
 				inputStream.close();
