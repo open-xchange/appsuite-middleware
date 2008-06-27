@@ -265,21 +265,21 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             }
         }
         if (cdao.containsShownAs()) {
-            if (CalendarCommonCollection.check(cdao.getShownAs(), edao.getShownAs())) {
+            if (CalendarCommonCollection.check(Integer.valueOf(cdao.getShownAs()), Integer.valueOf(edao.getShownAs()))) {
                 if (CalendarCommonCollection.getFieldName(AppointmentObject.SHOWN_AS) != null) {
                     ucols[uc++] = AppointmentObject.SHOWN_AS;
                 }
             }
         }
         if (cdao.containsStartDate()) {
-            if (CalendarCommonCollection.check(cdao.getStartDate().getTime(), edao.getStartDate().getTime())) {
+            if (CalendarCommonCollection.check(Long.valueOf(cdao.getStartDate().getTime()), Long.valueOf(edao.getStartDate().getTime()))) {
                 if (CalendarCommonCollection.getFieldName(AppointmentObject.START_DATE) != null) {
                     ucols[uc++] = AppointmentObject.START_DATE;
                 }
             }
         }
         if (cdao.containsEndDate()) {
-            if (CalendarCommonCollection.check(cdao.getEndDate().getTime(), edao.getEndDate().getTime())) {
+            if (CalendarCommonCollection.check(Long.valueOf(cdao.getEndDate().getTime()), Long.valueOf(edao.getEndDate().getTime()))) {
                 if (CalendarCommonCollection.getFieldName(AppointmentObject.END_DATE) != null) {
                     ucols[uc++] = AppointmentObject.END_DATE;
                 }
@@ -300,7 +300,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             }
         }
         if (cdao.containsFullTime()) {
-            if (CalendarCommonCollection.check(cdao.getFullTime(), edao.getFullTime())) {
+            if (CalendarCommonCollection.check(Boolean.valueOf(cdao.getFullTime()), Boolean.valueOf(edao.getFullTime()))) {
                 if (CalendarCommonCollection.getFieldName(AppointmentObject.FULL_TIME) != null) {
                     ucols[uc++] = AppointmentObject.FULL_TIME;
                 }
@@ -314,21 +314,21 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             }
         }
         if (cdao.containsLabel()) {
-            if (CalendarCommonCollection.check(cdao.getLabel(), edao.getLabel())) {
+            if (CalendarCommonCollection.check(Integer.valueOf(cdao.getLabel()), Integer.valueOf(edao.getLabel()))) {
                 if (CalendarCommonCollection.getFieldName(AppointmentObject.COLOR_LABEL) != null) {
                     ucols[uc++] = AppointmentObject.COLOR_LABEL;
                 }
             }
         }
         if (cdao.containsPrivateFlag()) {
-            if (CalendarCommonCollection.check(cdao.getPrivateFlag(), edao.getPrivateFlag())) {
+            if (CalendarCommonCollection.check(Boolean.valueOf(cdao.getPrivateFlag()), Boolean.valueOf(edao.getPrivateFlag()))) {
                 if (CalendarCommonCollection.getFieldName(AppointmentObject.PRIVATE_FLAG) != null) {
                     ucols[uc++] = AppointmentObject.PRIVATE_FLAG;
                 }
             }
         }
         if (cdao.containsParentFolderID()) {
-            if (CalendarCommonCollection.check(cdao.getGlobalFolderID(), edao.getGlobalFolderID())) {
+            if (CalendarCommonCollection.check(Integer.valueOf(cdao.getGlobalFolderID()), Integer.valueOf(edao.getGlobalFolderID()))) {
                 if (CalendarCommonCollection.getFieldName(AppointmentObject.FOLDER_ID) != null) {
                     ucols[uc++] = AppointmentObject.FOLDER_ID;
                 }
@@ -342,7 +342,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             }
         }
         if (cdao.containsRecurrenceID()) {
-            if (CalendarCommonCollection.check(cdao.getRecurrenceID(), edao.getRecurrenceID())) {
+            if (CalendarCommonCollection.check(Integer.valueOf(cdao.getRecurrenceID()), Integer.valueOf(edao.getRecurrenceID()))) {
                 if (CalendarCommonCollection.getFieldName(AppointmentObject.RECURRENCE_ID) != null) {
                     ucols[uc++] = AppointmentObject.RECURRENCE_ID;
                 }
@@ -365,21 +365,21 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             }
         }
         if (cdao.containsRecurrencePosition()) {
-            if (CalendarCommonCollection.check(cdao.getRecurrencePosition(), edao.getRecurrencePosition())) {
+            if (CalendarCommonCollection.check(Integer.valueOf(cdao.getRecurrencePosition()), Integer.valueOf(edao.getRecurrencePosition()))) {
                 if (CalendarCommonCollection.getFieldName(AppointmentObject.RECURRENCE_POSITION) != null) {
                     ucols[uc++] = AppointmentObject.RECURRENCE_POSITION;
                 }
             }
         }
         if (cdao.containsNumberOfAttachments()) {
-            if (CalendarCommonCollection.check(cdao.getNumberOfAttachments(), edao.getNumberOfAttachments())) {
+            if (CalendarCommonCollection.check(Integer.valueOf(cdao.getNumberOfAttachments()), Integer.valueOf(edao.getNumberOfAttachments()))) {
                 if (CalendarCommonCollection.getFieldName(AppointmentObject.NUMBER_OF_ATTACHMENTS) != null) {
                     ucols[uc++] = AppointmentObject.NUMBER_OF_ATTACHMENTS;
                 }
             }
         }
         
-        if (CalendarCommonCollection.check(cdao.getRecurrenceCalculator(), edao.getRecurrenceCalculator())) {
+        if (CalendarCommonCollection.check(Integer.valueOf(cdao.getRecurrenceCalculator()), Integer.valueOf(edao.getRecurrenceCalculator()))) {
             if (CalendarCommonCollection.getFieldName(AppointmentObject.RECURRENCE_CALCULATOR) != null) {
                 ucols[uc++] = AppointmentObject.RECURRENCE_CALCULATOR;
             }
