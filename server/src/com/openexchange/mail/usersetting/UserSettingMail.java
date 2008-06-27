@@ -760,6 +760,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 		}
 		this.displayMsgHeaders = new String[displayMsgHeaders.length];
 		System.arraycopy(displayMsgHeaders, 0, this.displayMsgHeaders, 0, displayMsgHeaders.length);
+		modifiedDuringSession = true;
 	}
 
 	public void setForwardAsAttachment(final boolean forwardAsAttachment) {
