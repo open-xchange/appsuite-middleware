@@ -51,8 +51,11 @@ package com.openexchange.resource.internal;
 
 import java.util.regex.Pattern;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+
 /**
- * {@link ResourceTools}
+ * {@link ResourceTools} - Utility methods for resource module
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -62,8 +65,7 @@ public final class ResourceTools {
 	/**
 	 * Initializes a new {@link ResourceTools}
 	 */
-	public ResourceTools() {
-		// TODO Auto-generated constructor stub
+	private ResourceTools() {
 		super();
 	}
 
@@ -91,10 +93,11 @@ public final class ResourceTools {
 		return PATTERN_ALLOWED_CHARS.matcher(identifier).matches();
 	}
 
-	private static final Pattern PATTERN_VALID_EMAIL = Pattern.compile("[$%\\.+a-zA-Z0-9_-]+@[\\.a-zA-Z0-9_-]+");
+	// private static final Pattern PATTERN_VALID_EMAIL =
+	// Pattern.compile("[$%\\.+a-zA-Z0-9_-]+@[\\.a-zA-Z0-9_-]+");
 
 	/**
-	 * Checks id specified resource email address' notation is valid
+	 * Checks if specified resource email address' notation is valid
 	 * 
 	 * @param emailAddress
 	 *            The resource email address to check
@@ -102,6 +105,14 @@ public final class ResourceTools {
 	 *         otherwise <code>false</code>
 	 */
 	public static boolean validateResourceEmail(final String emailAddress) {
-		return PATTERN_VALID_EMAIL.matcher(emailAddress).matches();
+		/*
+		 * Validate e-mail with InternetAddress class from JavaMail API
+		 */
+		try {
+			new InternetAddress(emailAddress, true);
+			return true;
+		} catch (final AddressException e) {
+			return false;
+		}
 	}
 }
