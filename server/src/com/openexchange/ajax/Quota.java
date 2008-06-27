@@ -61,7 +61,6 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.QuotaRequest;
-import com.openexchange.ajax.request.ServletRequestAdapter;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.json.OXJSONWriter;
@@ -105,7 +104,7 @@ public class Quota extends SessionServlet {
 
         final OXJSONWriter writer = new OXJSONWriter();
 		final QuotaRequest fsReq = new QuotaRequest(session, writer);
-		if (!fsReq.action(action, new ServletRequestAdapter(req, res))) {
+		if (!fsReq.action(action)) {
 			unknownAction("GET", action, res, false);
 			return;
 		}
