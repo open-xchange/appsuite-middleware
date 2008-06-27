@@ -69,8 +69,6 @@ public final class Quota {
 	 */
 	private static final int UNLIMITED_QUOTA = -1;
 
-	private long[] arr;
-
 	/**
 	 * The quota's limit
 	 */
@@ -114,17 +112,14 @@ public final class Quota {
 	}
 
 	/**
-	 * Creates an array of <code>long</code> from this quota's limit and usage
-	 * values. Quota's limit is at index <code>0</code> and its usage is located
-	 * at index <code>1</code>.
+	 * Returns a newly created array of <code>long</code> from this quota's
+	 * limit and usage values. Quota's limit is at index <code>0</code> and its
+	 * usage is located at index <code>1</code>.
 	 * 
 	 * @return An array of <code>long</code> from this quota's limit and usage.
 	 */
 	public long[] toLongArray() {
-		if (null == arr) {
-			arr = new long[] { limit, usage };
-		}
-		return arr;
+		return new long[] { limit, usage };
 	}
 
 	@Override
