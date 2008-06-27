@@ -629,7 +629,7 @@ public final class CalendarRecurringCollection {
         rc.setExceptions(change_exceptions, delete_exceptions);
         rc.setStartAndEndTime(cdao.getStartDate().getTime(), cdao.getEndDate().getTime());        
         if (cdao instanceof CalendarDataObject) {
-           rc.setRecurringStart(((CalendarDataObject)cdao).getRecurringStart());
+           rc.setRecurringStart(((CalendarDataObject)cdao).getRecurringStart());                                                  
         } else {
             rc.setRecurringStart(((cdao.getStartDate().getTime()/MILLI_DAY)*MILLI_DAY));
         }
@@ -673,12 +673,12 @@ public final class CalendarRecurringCollection {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_TYPE, re.getValue());
             } else if (re.getCode() == RecurringException.UNEXPECTED_ERROR) {
             	throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, re, re.getValue());
+            } else if (re.getCode() == RecurringException.UNKOWN_DAYS_VALUE) {
+                throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_DAY, re.getValue());
+            } else {
+                throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, re, re.getValue());
             }
-            
         }
-        
-        return null;
-
     }
     
     private static int getDay(final int cd) {

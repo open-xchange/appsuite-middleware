@@ -1,3 +1,7 @@
+* 2008-06-26 - francisco.laguna@open-xchange.com
+
+ - Bugfix #11051: Ask OXFolderAccess only if a folder is public / private. Ignore share state.
+
 * 2008-06-27 - marcus.klein@open-xchange.com
 
  - Bugfix #7475: This bug has been fixed with the fix for bug #4778.
