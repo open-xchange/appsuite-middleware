@@ -328,18 +328,58 @@ public abstract class MailFolderStorage {
 		return list.toArray(new MailFolder[list.size()]);
 	}
 
+	private static final Quota.Type[] STORAGE = { Quota.Type.STORAGE };
+
 	/**
-	 * Detects both quota limit and quota usage on given mailbox folder's
-	 * quotaroot.
+	 * Detects both quota limit and quota usage of STORAGE resource on given
+	 * mailbox folder's quota-root.
 	 * 
 	 * @param folder
 	 *            The folder fullname (if <code>null</code> <i>"INBOX"</i> is
 	 *            used)
-	 * @return The quota
+	 * @return The quota of STORAGE resource
 	 * @throws MailException
 	 *             If quota limit and/or quote usage cannot be determined
 	 */
-	public abstract Quota getQuota(String folder) throws MailException;
+	public Quota getStorageQuota(final String folder) throws MailException {
+		return getQuotas(folder, STORAGE)[0];
+	}
+
+	private static final Quota.Type[] MESSAGE = { Quota.Type.MESSAGE };
+
+	/**
+	 * Detects both quota limit and quota usage of MESSAGE resource on given
+	 * mailbox folder's quota-root.
+	 * 
+	 * @param folder
+	 *            The folder fullname (if <code>null</code> <i>"INBOX"</i> is
+	 *            used)
+	 * @return The quota of MESSAGE resource
+	 * @throws MailException
+	 *             If quota limit and/or quote usage cannot be determined
+	 */
+	public Quota getMessageQuota(final String folder) throws MailException {
+		return getQuotas(folder, MESSAGE)[0];
+	}
+
+	/**
+	 * Detects both quotas' limit and usage on given mailbox folder's quota-root
+	 * for specified resource types.
+	 * <p>
+	 * If no quota restriction exists for a certain resource type, both quota
+	 * usage and limit value carry constant {@link Quota#UNLIMITED} to indicate
+	 * no limitations on that resource type.
+	 * 
+	 * @param folder
+	 *            The folder fullname (if <code>null</code> <i>"INBOX"</i> is
+	 *            used)
+	 * @param types
+	 *            The desired quota resource types
+	 * @return The quotas for specified resource types
+	 * @throws MailException
+	 *             If quota limit and/or quote usage cannot be determined
+	 */
+	public abstract Quota[] getQuotas(String folder, Quota.Type[] types) throws MailException;
 
 	/**
 	 * Gets the fullname of default confirmed ham folder

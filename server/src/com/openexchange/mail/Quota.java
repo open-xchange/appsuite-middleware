@@ -58,16 +58,64 @@ package com.openexchange.mail;
 public final class Quota {
 
 	/**
-	 * The unlimited quota if no quota restrictions exist
+	 * {@link Type} - The quota resource type
+	 * 
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben
+	 *         Betten</a>
+	 * 
 	 */
-	public static final Quota UNLIMITED = new Quota(Quota.UNLIMITED_QUOTA, Quota.UNLIMITED_QUOTA);
+	public static enum Type {
+		/**
+		 * STORAGE resource: rfc822.size of contained messages
+		 */
+		STORAGE("STORAGE"),
+		/**
+		 * MESSAGE resource: number of messages
+		 */
+		MESSAGE("MESSAGE");
+
+		private final String typeStr;
+
+		private Type(final String typeStr) {
+			this.typeStr = typeStr;
+		}
+
+		@Override
+		public String toString() {
+			return typeStr;
+		}
+	}
+
+	/**
+	 * The unlimited quota on storage space if no quota restrictions exist
+	 */
+	private static final Quota UNLIMITED_STORAGE = new Quota(Quota.UNLIMITED, Quota.UNLIMITED, Type.STORAGE);
+
+	/**
+	 * The unlimited quota on number of messages if no quota restrictions exist
+	 */
+	private static final Quota UNLIMITED_MESSAGE = new Quota(Quota.UNLIMITED, Quota.UNLIMITED, Type.MESSAGE);
+
+	/**
+	 * Gets constant for unlimited quota for specified resource type
+	 * 
+	 * @param type
+	 *            The resource type
+	 * @return The constant for unlimited quota for specified resource type
+	 */
+	public static Quota getUnlimitedQuota(final Type type) {
+		if (Type.STORAGE.equals(type)) {
+			return UNLIMITED_STORAGE;
+		}
+		return UNLIMITED_MESSAGE;
+	}
 
 	/**
 	 * Constant which indicates unlimited quota
 	 * 
 	 * @value <code>-1</code>
 	 */
-	private static final int UNLIMITED_QUOTA = -1;
+	public static final int UNLIMITED = -1;
 
 	/**
 	 * The quota's limit
@@ -80,17 +128,26 @@ public final class Quota {
 	private final long usage;
 
 	/**
+	 * The quota's resource type
+	 */
+	private final Type type;
+
+	/**
 	 * Initializes a new {@link Quota}
 	 * 
 	 * @param limit
 	 *            The quota's limit
 	 * @param usage
 	 *            The quota's usage
+	 * @param type
+	 *            The quota's resource type to which this quota limitation
+	 *            applies
 	 */
-	public Quota(final long limit, final long usage) {
+	public Quota(final long limit, final long usage, final Type type) {
 		super();
 		this.limit = limit;
 		this.usage = usage;
+		this.type = type;
 	}
 
 	/**
@@ -109,6 +166,15 @@ public final class Quota {
 	 */
 	public long getUsage() {
 		return usage;
+	}
+
+	/**
+	 * Gets the quota's resource type to which this quota limitation applies
+	 * 
+	 * @return The quota's resource type to which this quota limitation applies
+	 */
+	public Type getType() {
+		return type;
 	}
 
 	/**

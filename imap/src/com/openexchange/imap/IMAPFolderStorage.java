@@ -266,7 +266,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 							throw new IMAPException(IMAPException.Code.NO_LOOKUP_ACCESS, parentFullname);
 						}
 					} catch (final MessagingException e) {
-						throw new IMAPException(IMAPException.Code.NO_ACCESS, parentFullname);
+						throw new IMAPException(IMAPException.Code.NO_ACCESS, e, parentFullname);
 					}
 				}
 				return getSubfolderArray(all, parent);
@@ -511,7 +511,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 						throw new IMAPException(IMAPException.Code.NO_CREATE_ACCESS, parentFullname);
 					}
 				} catch (final MessagingException e) {
-					throw new IMAPException(IMAPException.Code.NO_ACCESS, parentFullname);
+					throw new IMAPException(IMAPException.Code.NO_ACCESS, e, parentFullname);
 				}
 			}
 			if (!checkFolderNameValidity(toCreate.getName(), parent.getSeparator())) {
@@ -733,7 +733,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 						}
 					} catch (final MessagingException e) {
 						LOG.error(e.getMessage(), e);
-						throw new IMAPException(IMAPException.Code.NO_ACCESS, newParent);
+						throw new IMAPException(IMAPException.Code.NO_ACCESS, e, newParent);
 					}
 				}
 				if (!checkFolderNameValidity(newName, separator)) {
@@ -768,7 +768,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 							throw new IMAPException(IMAPException.Code.NO_CREATE_ACCESS, moveMe.getFullName());
 						}
 					} catch (final MessagingException e) {
-						throw new IMAPException(IMAPException.Code.NO_ACCESS, moveMe.getFullName());
+						throw new IMAPException(IMAPException.Code.NO_ACCESS, e, moveMe.getFullName());
 					}
 				}
 				if (!checkFolderNameValidity(newName, separator)) {
@@ -1049,7 +1049,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 					}
 				}
 			} catch (final MessagingException e) {
-				throw new IMAPException(IMAPException.Code.NO_ACCESS, f.getFullName());
+				throw new IMAPException(IMAPException.Code.NO_ACCESS, e, f.getFullName());
 			}
 			f.open(Folder.READ_WRITE);
 			try {
@@ -1095,10 +1095,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 									/*
 									 * We face an Over-Quota-Exception
 									 */
-									throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA);
+									throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, exc, new Object[0]);
 								}
 							}
-							throw new IMAPException(IMAPException.Code.MOVE_ON_DELETE_FAILED);
+							throw new IMAPException(IMAPException.Code.MOVE_ON_DELETE_FAILED, e, new Object[0]);
 						}
 					}
 					/*
@@ -1163,10 +1163,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 								/*
 								 * We face an Over-Quota-Exception
 								 */
-								throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA);
+								throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, e, new Object[0]);
 							}
 						}
-						throw new IMAPException(IMAPException.Code.MOVE_ON_DELETE_FAILED);
+						throw new IMAPException(IMAPException.Code.MOVE_ON_DELETE_FAILED, e, new Object[0]);
 					}
 				}
 				/*
@@ -1213,7 +1213,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 						throw new IMAPException(IMAPException.Code.NO_LOOKUP_ACCESS, fullname);
 					}
 				} catch (final MessagingException e) {
-					throw new IMAPException(IMAPException.Code.NO_ACCESS, fullname);
+					throw new IMAPException(IMAPException.Code.NO_ACCESS, e, fullname);
 				}
 			}
 			final List<MailFolder> list = new ArrayList<MailFolder>();
@@ -1260,12 +1260,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 
 	@Override
 	public void releaseResources() throws IMAPException {
+		// Nothing to release
 	}
 
-	private static final String QUOTA_RES_STORAGE = "STORAGE";
-
 	@Override
-	public com.openexchange.mail.Quota getQuota(final String folder) throws MailException {
+	public com.openexchange.mail.Quota[] getQuotas(final String folder, final com.openexchange.mail.Quota.Type[] types)
+			throws MailException {
 		try {
 			final IMAPFolder f;
 			{
@@ -1286,12 +1286,16 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 						}
 					}
 				} catch (final MessagingException e) {
-					throw new IMAPException(IMAPException.Code.NO_ACCESS, fullname);
+					throw new IMAPException(IMAPException.Code.NO_ACCESS, e, fullname);
 				}
 			}
 			f.open(Folder.READ_ONLY);
 			if (!imapConfig.getImapCapabilities().hasQuota()) {
-				return com.openexchange.mail.Quota.UNLIMITED;
+				final com.openexchange.mail.Quota[] quotas = new com.openexchange.mail.Quota[types.length];
+				for (int i = 0; i < quotas.length; i++) {
+					quotas[i] = com.openexchange.mail.Quota.getUnlimitedQuota(types[i]);
+				}
+				return quotas;
 			}
 			final Quota[] folderQuota;
 			try {
@@ -1300,36 +1304,55 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			} catch (final MessagingException mexc) {
 				if (mexc.getNextException() instanceof ParsingException) {
-					return com.openexchange.mail.Quota.UNLIMITED;
+					if (LOG.isWarnEnabled()) {
+						LOG.warn(mexc.getMessage(), mexc);
+					}
+					final com.openexchange.mail.Quota[] quotas = new com.openexchange.mail.Quota[types.length];
+					for (int i = 0; i < quotas.length; i++) {
+						quotas[i] = com.openexchange.mail.Quota.getUnlimitedQuota(types[i]);
+					}
+					return quotas;
 				}
 				throw mexc;
 			}
 			if (folderQuota.length == 0) {
-				return com.openexchange.mail.Quota.UNLIMITED;
+				final com.openexchange.mail.Quota[] quotas = new com.openexchange.mail.Quota[types.length];
+				for (int i = 0; i < quotas.length; i++) {
+					quotas[i] = com.openexchange.mail.Quota.getUnlimitedQuota(types[i]);
+				}
+				return quotas;
 			}
 			final Quota.Resource[] resources = folderQuota[0].resources;
 			if (resources.length == 0) {
-				return com.openexchange.mail.Quota.UNLIMITED;
-			}
-			Resource storageResource = null;
-			for (int i = 0; i < resources.length; i++) {
-				if (QUOTA_RES_STORAGE.equalsIgnoreCase(resources[i].name)) {
-					storageResource = resources[i];
+				final com.openexchange.mail.Quota[] quotas = new com.openexchange.mail.Quota[types.length];
+				for (int i = 0; i < quotas.length; i++) {
+					quotas[i] = com.openexchange.mail.Quota.getUnlimitedQuota(types[i]);
 				}
+				return quotas;
 			}
-			if (null == storageResource) {
+			final com.openexchange.mail.Quota[] quotas = new com.openexchange.mail.Quota[types.length];
+			for (int i = 0; i < types.length; i++) {
+				final String typeStr = types[i].toString();
 				/*
-				 * No storage limitations
+				 * Find corresponding resource to current type
 				 */
-				if (LOG.isWarnEnabled()) {
-					logUnsupportedQuotaResources(resources, 0);
+				Resource resource = null;
+				for (int k = 0; k < resources.length && resource == null; k++) {
+					if (typeStr.equalsIgnoreCase(resources[k].name)) {
+						resource = resources[k];
+					}
 				}
-				return com.openexchange.mail.Quota.UNLIMITED;
+				if (resource == null) {
+					/*
+					 * No quota limitation found that applies to current
+					 * resource type
+					 */
+					quotas[i] = com.openexchange.mail.Quota.getUnlimitedQuota(types[i]);
+				} else {
+					quotas[i] = new com.openexchange.mail.Quota(resource.limit, resource.usage, types[i]);
+				}
 			}
-			if ((resources.length > 1) && LOG.isWarnEnabled()) {
-				logUnsupportedQuotaResources(resources, 1);
-			}
-			return new com.openexchange.mail.Quota(storageResource.limit, storageResource.usage);
+			return quotas;
 		} catch (final MessagingException e) {
 			throw MIMEMailException.handleMessagingException(e, imapConfig);
 		}
@@ -1338,25 +1361,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 	/*
 	 * ++++++++++++++++++ Helper methods ++++++++++++++++++
 	 */
-
-	/**
-	 * Logs unsupported QUOTA resources
-	 * 
-	 * @param resources
-	 *            The QUOTA resources
-	 */
-	private static void logUnsupportedQuotaResources(final Quota.Resource[] resources, final int start) {
-		final StringBuilder sb = new StringBuilder(128)
-				.append("Unsupported QUOTA resource(s) [<name> (<usage>/<limit>]:\n");
-		sb.append(resources[start].name).append(" (").append(resources[start].usage).append('/').append(
-				resources[start].limit).append(')');
-		for (int i = start + 1; i < resources.length; i++) {
-			sb.append(", ").append(resources[i].name).append(" (").append(resources[i].usage).append('/').append(
-					resources[i].limit).append(')');
-
-		}
-		LOG.warn(sb.toString());
-	}
 
 	/**
 	 * Get the QUOTA resource with the highest usage-per-limitation value
@@ -1416,7 +1420,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				throw new IMAPException(IMAPException.Code.NO_CREATE_ACCESS, deleteMe.getFullName());
 			}
 		} catch (final MessagingException e) {
-			throw new IMAPException(IMAPException.Code.NO_ACCESS, deleteMe.getFullName());
+			throw new IMAPException(IMAPException.Code.NO_ACCESS, e, deleteMe.getFullName());
 		}
 		if (deleteMe.isOpen()) {
 			deleteMe.close(false);
@@ -1528,7 +1532,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 					throw new IMAPException(IMAPException.Code.NO_CREATE_ACCESS, toMove.getFullName());
 				}
 			} catch (final MessagingException e) {
-				throw new IMAPException(IMAPException.Code.NO_ACCESS, toMove.getFullName());
+				throw new IMAPException(IMAPException.Code.NO_ACCESS, e, toMove.getFullName());
 			}
 		}
 		/*
@@ -1569,7 +1573,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 					newFolder.close(false);
 				}
 			} catch (final ReadOnlyFolderException e) {
-				throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, newFolder.getFullName());
+				throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, e, newFolder.getFullName());
 			}
 		}
 		if ((toMoveType & Folder.HOLDS_MESSAGES) > 0) {

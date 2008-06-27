@@ -73,6 +73,16 @@ import com.openexchange.tools.iterator.SearchIterator;
 public abstract class MailServletInterface {
 
 	/**
+	 * The constant for quota storage resource
+	 */
+	public static final int QUOTA_RESOURCE_STORAGE = 1;
+
+	/**
+	 * The constant for quota message resource
+	 */
+	public static final int QUOTA_RESOURCE_MESSAGE = 2;
+
+	/**
 	 * Gets a proper implementation of {@link MailServletInterface}
 	 * <p>
 	 * <b>NOTE:</b> Don't forget to invoke {@link #close(boolean)} after usage
@@ -126,21 +136,28 @@ public abstract class MailServletInterface {
 	public abstract int getDeletedMessageCount(String folder) throws MailException;
 
 	/**
+	 * Gets both quota limit and quota usage in an array with length set to
+	 * <code>2</code> for each resource type
 	 * 
-	 * @return both quota limit and quota usage in an array with length set to 2
+	 * @param types
+	 *            The resource types; {@link #QUOTA_RESOURCE_STORAGE} or
+	 *            {@link #QUOTA_RESOURCE_MESSAGE}
+	 * @return Both quota limit and quota usage in an array with length set to
+	 *         <code>2</code> for each resource type
 	 * @throws MailException
+	 *             If quotas cannot be retrieved
 	 */
-	public abstract long[] getQuota() throws MailException;
+	public abstract long[][] getQuotas(int[] types) throws MailException;
 
 	/**
 	 * Returns the quota limit
 	 */
-	public abstract long getQuotaLimit() throws MailException;
+	public abstract long getQuotaLimit(int type) throws MailException;
 
 	/**
 	 * Returns the current quota usage
 	 */
-	public abstract long getQuotaUsage() throws MailException;
+	public abstract long getQuotaUsage(int type) throws MailException;
 
 	/**
 	 * Returns an instance of <code>SearchIterator</code> containing max.

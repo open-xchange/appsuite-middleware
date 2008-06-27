@@ -561,21 +561,49 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	}
 
 	@Override
-	public long[] getQuota() throws MailException {
+	public long[][] getQuotas(final int[] types) throws MailException {
 		initConnection();
-		return mailAccess.getFolderStorage().getQuota(INBOX_ID).toLongArray();
+		final com.openexchange.mail.Quota.Type[] qtypes = new com.openexchange.mail.Quota.Type[types.length];
+		for (int i = 0; i < qtypes.length; i++) {
+			qtypes[i] = getType(types[i]);
+		}
+		final com.openexchange.mail.Quota[] quotas = mailAccess.getFolderStorage().getQuotas(INBOX_ID, qtypes);
+		final long[][] retval = new long[quotas.length][];
+		for (int i = 0; i < retval.length; i++) {
+			retval[i] = quotas[i].toLongArray();
+		}
+		return retval;
 	}
 
 	@Override
-	public long getQuotaLimit() throws MailException {
+	public long getQuotaLimit(final int type) throws MailException {
 		initConnection();
-		return mailAccess.getFolderStorage().getQuota(INBOX_ID).getLimit();
+		if (QUOTA_RESOURCE_STORAGE == type) {
+			return mailAccess.getFolderStorage().getStorageQuota(INBOX_ID).getLimit();
+		} else if (QUOTA_RESOURCE_MESSAGE == type) {
+			return mailAccess.getFolderStorage().getMessageQuota(INBOX_ID).getLimit();
+		}
+		throw new IllegalArgumentException("Unknown quota resource type: " + type);
 	}
 
 	@Override
-	public long getQuotaUsage() throws MailException {
+	public long getQuotaUsage(final int type) throws MailException {
 		initConnection();
-		return mailAccess.getFolderStorage().getQuota(INBOX_ID).getUsage();
+		if (QUOTA_RESOURCE_STORAGE == type) {
+			return mailAccess.getFolderStorage().getStorageQuota(INBOX_ID).getUsage();
+		} else if (QUOTA_RESOURCE_MESSAGE == type) {
+			return mailAccess.getFolderStorage().getMessageQuota(INBOX_ID).getUsage();
+		}
+		throw new IllegalArgumentException("Unknown quota resource type: " + type);
+	}
+
+	private static com.openexchange.mail.Quota.Type getType(final int type) {
+		if (QUOTA_RESOURCE_STORAGE == type) {
+			return com.openexchange.mail.Quota.Type.STORAGE;
+		} else if (QUOTA_RESOURCE_MESSAGE == type) {
+			return com.openexchange.mail.Quota.Type.MESSAGE;
+		}
+		throw new IllegalArgumentException("Unknown quota resource type: " + type);
 	}
 
 	@Override
