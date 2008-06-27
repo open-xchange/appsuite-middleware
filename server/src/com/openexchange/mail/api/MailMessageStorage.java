@@ -238,7 +238,8 @@ public abstract class MailMessageStorage {
 		final ImageMessageHandler handler = new ImageMessageHandler(contentId);
 		new MailMessageParser().parseMailMessage(getMessage(folder, mailId, false), handler);
 		if (handler.getImagePart() == null) {
-			throw new MailException(MailException.Code.ATTACHMENT_NOT_FOUND, contentId, Long.valueOf(mailId), folder);
+			throw new MailException(MailException.Code.IMAGE_ATTACHMENT_NOT_FOUND, contentId, Long.valueOf(mailId),
+					folder);
 		}
 		return handler.getImagePart();
 	}
