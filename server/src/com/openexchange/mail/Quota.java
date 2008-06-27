@@ -49,6 +49,8 @@
 
 package com.openexchange.mail;
 
+import static com.openexchange.mail.utils.StorageUtility.UNLIMITED_QUOTA;
+
 /**
  * {@link Quota}
  * 
@@ -115,7 +117,7 @@ public final class Quota {
 	 * 
 	 * @value <code>-1</code>
 	 */
-	public static final int UNLIMITED = -1;
+	public static final int UNLIMITED = UNLIMITED_QUOTA;
 
 	/**
 	 * The quota's limit
