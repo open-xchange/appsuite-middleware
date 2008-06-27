@@ -572,7 +572,7 @@ public class CalendarSqlTest extends TestCase {
         appointment.setDays(CalendarDataObject.MONDAY);
         appointment.setInterval(1);
         appointment.setRecurrenceCount(3);
-        appointments.save( appointment );
+        appointments.save( appointment ); clean.add(appointment);
 
         CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
         update.setRecurrenceType(CalendarDataObject.NO_RECURRENCE);
@@ -591,7 +591,7 @@ public class CalendarSqlTest extends TestCase {
 
     public void testFreebusyResultShouldContainTitleIfItIsReadableViaASharedFolder() throws OXException, SearchIteratorException {
         CalendarDataObject appointment = appointments.buildBasicAppointment(D("24/02/1981 10:00"), D("24/02/1981 12:00"));
-        appointments.save( appointment );
+        appointments.save( appointment ); clean.add(appointment);
 
         folders.sharePrivateFolder(session,ctx, secondUserId);
         try {
@@ -612,6 +612,33 @@ public class CalendarSqlTest extends TestCase {
             folders.unsharePrivateFolder(session, ctx);
         }
 
+    }
+
+    // Bug 11051
+
+    public void testShouldSurviveInvalidDaysValueInWeeklyRecurrenceWithOccurrence() throws OXException {
+        Date start = D("24/02/1981 10:00");
+        Date end = D("24/02/1981 12:00");
+        CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
+        appointments.save(appointment); clean.add(appointment);
+
+        CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
+        update.setStartDate(start);
+        update.setEndDate(end);
+        update.setRecurrenceType(CalendarDataObject.MONTHLY);
+        update.setMonth(3);
+        update.setDays(666);
+        update.setInterval(2);
+        update.setOccurrence(2);
+
+        try {
+            appointments.save( update );
+        } catch (OXCalendarException x) {
+            assertEquals(47, x.getDetailNumber());
+        } catch (Throwable t) {
+            t.printStackTrace();
+            fail(t.getMessage());
+        }
     }
 
     private List<CalendarDataObject> read(SearchIterator<CalendarDataObject> si) throws OXException, SearchIteratorException {
