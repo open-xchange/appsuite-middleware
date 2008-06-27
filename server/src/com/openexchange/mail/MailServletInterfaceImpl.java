@@ -132,7 +132,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		}
 		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx).hasWebMail()) {
 			throw new MailException(MailException.Code.NO_MAIL_ACCESS);
-		} else if (/* IMAPProperties.noAdminMailbox() && */session.getUserId() == ctx.getMailadmin()) {
+		}
+		if (/* IMAPProperties.noAdminMailbox() && */session.getUserId() == ctx.getMailadmin()) {
 			throw new MailException(MailException.Code.ACCOUNT_DOES_NOT_EXIST, Integer.valueOf(ctx.getContextId()));
 		}
 		this.session = session;
@@ -745,7 +746,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		}
 		final MailPath msgref = draftMail.getMsgref();
 		final MailMessage origMail;
-		if (null != msgref) {
+		if (null == msgref) {
+			origMail = null;
+		} else {
 			origMail = mailAccess.getMessageStorage().getMessage(msgref.getFolder(), msgref.getUid(), false);
 			/*
 			 * Check for attachments and add them
@@ -762,8 +765,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 					draftMail.addEnclosedPart(tp.getNewReferencedPart(mailPart, session));
 				}
 			}
-		} else {
-			origMail = null;
 		}
 		final long uid;
 		try {
