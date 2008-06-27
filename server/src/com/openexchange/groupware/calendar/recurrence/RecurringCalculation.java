@@ -394,7 +394,11 @@ public class RecurringCalculation {
         System.arraycopy(days, 0, r, 0, c);
         Arrays.sort(r);
         if (contains_occurrence) {
-            // find highes value and compare if sst.getDayOfWeek >= highest value. If not, we need to change e !!!
+            // bishoph: find highest value and compare if sst.getDayOfWeek >= highest value. If not, we need to change e !!!
+            // marcus: the calculated until date must be shifted in some cases.
+            // look at a weekly recurrence. start day may be a tuesday but you
+            // want this recurrence to be on thursday. the until has been calculated
+            // to a tuesday and is now shifted to the thursday.
             final int hi = r[c-1];
             calc.setTimeInMillis(sst);
             final int sd = calc.get(Calendar.DAY_OF_WEEK);
