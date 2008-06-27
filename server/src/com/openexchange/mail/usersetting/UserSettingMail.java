@@ -157,7 +157,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
 	/**
 	 * If this bit is set, the user is notified if a message contains a read
-	 * acknowledgement
+	 * acknowledgment
 	 */
 	public static final int INT_NOTIFY_ON_READ_ACK = 1 << 6;
 
