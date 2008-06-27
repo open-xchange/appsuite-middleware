@@ -70,7 +70,7 @@ public class OXCalendarException extends OXException {
     }
     
     public OXCalendarException(final Code code, final Throwable throwable, final Object... messageArgs) {
-        super(EnumComponent.APPOINTMENT, code.category, code.detailNumber, code.message, throwable);
+        super(EnumComponent.APPOINTMENT, code.getCategory(), code.getDetailNumber(), code.getMessage(), throwable);
         super.setMessageArgs(messageArgs);
     }
     
