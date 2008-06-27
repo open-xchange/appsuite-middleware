@@ -317,7 +317,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 		throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
     }
 
-    private void mayRead(EffectivePermission oclp) throws OXCalendarException {
+    private void mayRead(final EffectivePermission oclp) throws OXCalendarException {
         if(!oclp.canReadAllObjects() && !oclp.canReadOwnObjects()) {
             throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSION);   
         }
@@ -339,7 +339,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 readcon = DBPool.pickup(ctx);
                 cols = CalendarCommonCollection.checkAndAlterCols(cols);
                 final OXFolderAccess ofa = new OXFolderAccess(readcon, ctx);
-                EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), userConfig);
+                final EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), userConfig);
                 mayRead(oclp);
                 if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PRIVATE) {
                     final CalendarOperation co = new CalendarOperation();
@@ -1054,7 +1054,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             ResultSet rs = null;
             boolean close_connection = true;
             final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
-            CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
+            final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
             PreparedStatement private_folder_information = null;
             try {
                 if (!userConfig.hasFreeBusy()) {

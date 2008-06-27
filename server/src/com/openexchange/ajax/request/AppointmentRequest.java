@@ -674,7 +674,7 @@ public class AppointmentRequest {
 							
 							// add to order list
 							if (listOrder) {
-								final DateOrderObject dateOrderObject = new DateOrderObject(getDateByFieldId(orderBy, appointmentobject, timeZone), (AppointmentObject)appointmentobject.clone());
+								final DateOrderObject dateOrderObject = new DateOrderObject(getDateByFieldId(orderBy, appointmentobject, timeZone), appointmentobject.clone());
 								objectList.add(dateOrderObject);
 							} else {
 								appointmentwriter.writeArray(appointmentobject, columns, startUTC, endUTC, jsonResponseArray);
@@ -684,7 +684,7 @@ public class AppointmentRequest {
 				} else {
 					// add to order list
 					if (listOrder) {
-						final DateOrderObject dateOrderObject = new DateOrderObject(getDateByFieldId(orderBy, appointmentobject, timeZone), (AppointmentObject)appointmentobject.clone());
+						final DateOrderObject dateOrderObject = new DateOrderObject(getDateByFieldId(orderBy, appointmentobject, timeZone), appointmentobject.clone());
 						objectList.add(dateOrderObject);
 					} else {
 						appointmentwriter.writeArray(appointmentobject, columns, startUTC, endUTC, jsonResponseArray);

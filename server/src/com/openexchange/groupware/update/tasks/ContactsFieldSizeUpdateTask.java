@@ -276,7 +276,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
                 			name.equals("field99") ){
                 			toDelete.put(name, 1);
                 		} else {
-                			final int si = (Integer)columnRefer.get(name).intValue();
+                			final int si = columnRefer.get(name).intValue();
                 			if (si != size){
                 				LOG.warn("CHANGE FIELD "+sqltable+"."+name+" WITH SIZE "+size+" TO NEW SIZE "+si);
                 				toChange.put(name, si);
@@ -297,7 +297,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
                 	StringBuilder sb2 = new StringBuilder("ALTER TABLE "+sqltable+" ");
                 	it = toDelete.keySet().iterator();
                 	while (it.hasNext()){
-                		final String key = (String)it.next();
+                		final String key = it.next();
                 		//int value = (Integer)toDelete.get(key).intValue();
                 		sb2.append("DROP COLUMN "+key+", ");
                 		done = true;
@@ -318,8 +318,8 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
                 	StringBuilder sb = new StringBuilder("ALTER TABLE "+sqltable+" ");
                 	it = toChange.keySet().iterator();
                 	while (it.hasNext()){
-                		final String key = (String)it.next();
-                		final int value = (Integer)toChange.get(key).intValue();
+                		final String key = it.next();
+                		final int value = toChange.get(key).intValue();
                 		sb.append("MODIFY "+key+" varchar("+value+"), ");
                 		done = true;
                 	}

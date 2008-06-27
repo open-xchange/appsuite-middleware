@@ -333,9 +333,9 @@ public class InfostoreRequest extends CommonRequest {
 		}
 	}
 
-	protected int[] parseIDList(Object toDelete) throws JSONException {
+	protected int[] parseIDList(final Object toDelete) throws JSONException {
         if(JSONArray.class.isAssignableFrom(toDelete.getClass())) {
-            JSONArray array = (JSONArray) toDelete;
+            final JSONArray array = (JSONArray) toDelete;
             final int[] ids = new int[array.length()];
 
             for (int i = 0; i < array.length(); i++) {

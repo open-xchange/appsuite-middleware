@@ -813,7 +813,7 @@ public class OXContainerConverter {
 		// PHOTO
 		property = object.getProperty("PHOTO");
 		if (property != null) {
-			Parameter uriParam = property.getParameter("URI");
+			final Parameter uriParam = property.getParameter("URI");
 			if (uriParam == null) {
 				String value;
 				if (property.getValue() instanceof byte[]) {

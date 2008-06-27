@@ -86,6 +86,11 @@ import com.openexchange.session.Session;
  */
 public abstract class InfostoreDocumentMailPart extends MailPart implements ComposedMailPart {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3158021272821196715L;
+
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(InfostoreDocumentMailPart.class);
 

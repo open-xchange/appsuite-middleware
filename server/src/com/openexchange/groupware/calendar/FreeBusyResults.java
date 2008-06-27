@@ -87,7 +87,7 @@ public class FreeBusyResults implements SearchIterator {
     private final ResultSet rs;
     private final Connection con;
     private final Context c;
-    private int uid;
+    private final int uid;
     private int seq = -1;
     private int sa;
     private int ft;
@@ -98,10 +98,10 @@ public class FreeBusyResults implements SearchIterator {
     private String title;
     private RecurringResults rrs;
     private boolean has_next;
-    private boolean show_details;
+    private final boolean show_details;
     private final PreparedStatement prep;
     private CalendarFolderObject cfo;
-    private Participant conflict_objects[];
+    private final Participant conflict_objects[];
     private long range_start;
     private long range_end;
     
@@ -114,9 +114,9 @@ public class FreeBusyResults implements SearchIterator {
     private int counter;
     
     private ArrayList<PrivateFolderInformationObject> private_folder_array;
-    private PreparedStatement private_folder_information;
+    private final PreparedStatement private_folder_information;
 
-    private CalendarSqlImp calendarsqlimp;
+    private final CalendarSqlImp calendarsqlimp;
     
     private static final Log LOG = LogFactory.getLog(FreeBusyResults.class);
     
@@ -132,7 +132,7 @@ public class FreeBusyResults implements SearchIterator {
         preFill();
     }*/
     
-    public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final int uid, final int groups[], final UserConfiguration uc, final Connection con, final boolean show_details, final Participant conflict_objects[], final PreparedStatement private_folder_information, CalendarSqlImp calendarsqlimp) throws OXException {
+    public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final int uid, final int groups[], final UserConfiguration uc, final Connection con, final boolean show_details, final Participant conflict_objects[], final PreparedStatement private_folder_information, final CalendarSqlImp calendarsqlimp) throws OXException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);
     	this.rs = rs;
         this.prep = prep;
@@ -495,7 +495,7 @@ public class FreeBusyResults implements SearchIterator {
             if(shared_folder_info != null) {
                 try {
                     shared_folder_info.close();
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     //IGNORE
                 }
             }

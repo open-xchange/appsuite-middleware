@@ -118,7 +118,7 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
 			return;
 		}
 
-        List<DocumentMetadata>[] slices = getSlices();
+        final List<DocumentMetadata>[] slices = getSlices();
 
         final UpdateBlock[] updates = new UpdateBlock[getDocuments().size()+slices.length+1];
 
@@ -166,24 +166,24 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
         return batchSize;
     }
 
-    public void setBatchSize(int batchSize) {
+    public void setBatchSize(final int batchSize) {
         this.batchSize = batchSize;
     }
 
     private List<DocumentMetadata>[] getSlices() {
-        List<DocumentMetadata> documents = getDocuments();
-        boolean addOne = (0 != (documents.size() % batchSize));
+        final List<DocumentMetadata> documents = getDocuments();
+        final boolean addOne = (0 != (documents.size() % batchSize));
         int numberOfSlices = documents.size() / batchSize;
         if(addOne) { numberOfSlices += 1; }
         
-        List<DocumentMetadata>[] slices = new List[numberOfSlices];
+        final List<DocumentMetadata>[] slices = new List[numberOfSlices];
 
-        int max = documents.size();
+        final int max = documents.size();
         for(int i = 0; i < numberOfSlices; i++) {
-            int start = i * batchSize;
+            final int start = i * batchSize;
             int end = i+1 * batchSize;
             if(end > max) { end = max; };
-            List<DocumentMetadata> slice = documents.subList(start, end);
+            final List<DocumentMetadata> slice = documents.subList(start, end);
             slices[i] = slice;
 
         }

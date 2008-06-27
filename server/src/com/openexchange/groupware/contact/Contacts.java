@@ -2764,7 +2764,7 @@ public final class Contacts {
 						co.setParentFolderID(fid);
 						co.setObjectID(oid);
 						ec.delete(co);
-					} catch (Exception e){
+					} catch (final Exception e){
 						LOG.error("Unable to trigger delete event for contact delete: id="+co.getObjectID()+" cid="+co.getContextId(), e);
 						//e.printStackTrace();
 					}

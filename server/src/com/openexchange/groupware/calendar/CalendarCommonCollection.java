@@ -1379,7 +1379,7 @@ public class CalendarCommonCollection {
 		}
 
         if(cdao.containsParticipants()) {
-            for(Participant p : cdao.getParticipants()) {
+            for(final Participant p : cdao.getParticipants()) {
                 error = Check.containsInvalidChars(p.getDisplayName());
 				if (error != null) {
 					throw new OXCalendarException(OXCalendarException.Code.INVALID_CHARACTER, "Display Name", error);

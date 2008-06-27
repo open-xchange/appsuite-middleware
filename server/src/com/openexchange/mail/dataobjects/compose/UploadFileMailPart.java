@@ -105,7 +105,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
 		setContentType(uploadFile.getContentType());
 		setFileName(uploadFile.getPreparedFileName());
 		setSize(uploadFile.getSize());
-		ContentDisposition cd = new ContentDisposition();
+		final ContentDisposition cd = new ContentDisposition();
 		cd.setDisposition(Part.ATTACHMENT);
 		cd.setFilenameParameter(getFileName());
 		setContentDisposition(cd);

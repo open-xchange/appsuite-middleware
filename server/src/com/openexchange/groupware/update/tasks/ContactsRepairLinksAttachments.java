@@ -142,7 +142,7 @@ public final class ContactsRepairLinksAttachments implements UpdateTask {
     	correctAttachments(contextId);    
     }
     
-    private void correctContacts(int contextId) throws AbstractOXException {
+    private void correctContacts(final int contextId) throws AbstractOXException {
         Connection writeCon = null;
         Statement st = null;
         ResultSet resultSet = null;
@@ -213,7 +213,7 @@ public final class ContactsRepairLinksAttachments implements UpdateTask {
             				}
             			}
             		}
-            	} catch (ContextException ce){
+            	} catch (final ContextException ce){
             		delete = true;
             		LOG.info("MARKED CONTACT "+id+" IN CONTEXT "+cid+" TO GET DELETED BECAUSE THE CONTEXT IS GONE");
             	}
@@ -237,7 +237,7 @@ public final class ContactsRepairLinksAttachments implements UpdateTask {
         }
 	}
 
-	public boolean checkContactExistence(Connection writeCon, int id, int cid){
+	public boolean checkContactExistence(final Connection writeCon, final int id, final int cid){
     	boolean killit = false;
     	ResultSet rs = null;
     	Statement st = null;
@@ -246,12 +246,12 @@ public final class ContactsRepairLinksAttachments implements UpdateTask {
     		rs = st.executeQuery("SELECT intfield01 FROM prg_contacts WHERE intfield01 = "+id+" AND cid = "+cid);
    		
     		while (rs.next()){
-    				int chk = rs.getInt(1);
+    				final int chk = rs.getInt(1);
     				if (chk == id){
     					killit = true;
     				}
     		}
-    	} catch (SQLException sqle){
+    	} catch (final SQLException sqle){
     		LOG.error("UNABLE TO FETCH THIS CONTACT: ID "+id+" CID "+cid);
     		sqle.printStackTrace();
     	} finally {
@@ -377,29 +377,29 @@ public final class ContactsRepairLinksAttachments implements UpdateTask {
 	private final void deleteAttachments(final int parentFolderID, final int objectID, final int type, final int[] attachIds, final int contextId) {
 
 		try {
-			Context ctx = ContextStorage.getInstance().loadContext(contextId);
+			final Context ctx = ContextStorage.getInstance().loadContext(contextId);
             ATTACHMENT_BASE.startTransaction();			
 			ATTACHMENT_BASE.detachFromObject(parentFolderID, objectID, type, attachIds, ctx, null, null);
 			ATTACHMENT_BASE.commit();
-		} catch (TransactionException e) {
+		} catch (final TransactionException e) {
 			rollback(e);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			rollback(e);
-		} catch (ContextException e) {
+		} catch (final ContextException e) {
             LOG.error(e);
         } finally {
 			try {
 				ATTACHMENT_BASE.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.error(e);
 			}
 		}
 	}
 	
-	private void rollback(AbstractOXException x) {
+	private void rollback(final AbstractOXException x) {
 		try {
 			ATTACHMENT_BASE.rollback();
-		} catch (TransactionException e) {
+		} catch (final TransactionException e) {
 			LOG.error(e);
 		}
 		LOG.error(x);

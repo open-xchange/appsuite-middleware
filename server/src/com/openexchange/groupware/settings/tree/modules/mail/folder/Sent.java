@@ -104,13 +104,13 @@ public class Sent implements PreferencesItemService {
                 try {
                     mail = MailServletInterface.getInstance(session);
                     setting.setSingleValue(mail.getSentFolder());
-                } catch (MailException e) {
+                } catch (final MailException e) {
                     throw new SettingException(e);
                 } finally {
                     if (mail != null) {
                         try {
                             mail.close(true);
-                        } catch (MailException e) {
+                        } catch (final MailException e) {
                             LOG.error(e.getMessage(), e);
                         }
                     }
