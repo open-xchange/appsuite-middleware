@@ -105,6 +105,8 @@ public final class MailMessageParser {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailMessageParser.class);
 
+	private static final int BUF_SIZE = 8192;
+
 	/*
 	 * +++++++++++++++++++ TNEF CONSTANTS +++++++++++++++++++
 	 */
@@ -428,14 +430,18 @@ public final class MailMessageParser {
 				 */
 				final int s = message.getAttachments().size();
 				final Iterator<?> iter = message.getAttachments().iterator();
-				final ByteArrayOutputStream os = new UnsynchronizedByteArrayOutputStream(1024);
+				final ByteArrayOutputStream os = new UnsynchronizedByteArrayOutputStream(BUF_SIZE);
 				for (int i = 0; i < s; i++) {
 					final Attachment attachment = (Attachment) iter.next();
 					final TNEFBodyPart bodyPart = new TNEFBodyPart();
 					if (attachment.getNestedMessage() == null) {
-						// add TNEF attributes
+						/*
+						 * Add TNEF attributes
+						 */
 						bodyPart.setTNEFAttributes(attachment.getAttributes());
-						// translate TNEF attributes to Mime
+						/*
+						 * Translate TNEF attributes to MIME
+						 */
 						final String attachFilename = attachment.getFilename();
 						if (attachFilename != null) {
 							bodyPart.setFileName(attachFilename);
@@ -464,7 +470,10 @@ public final class MailMessageParser {
 						 */
 						final MimeMessage nestedMessage = TNEFMime.convert(MIMEDefaultSession.getDefaultSession(),
 								attachment.getNestedMessage());
-						bodyPart.setDataHandler(new DataHandler(nestedMessage, MIMETypes.MIME_MESSAGE_RFC822));
+						os.reset();
+						nestedMessage.writeTo(os);
+						bodyPart.setDataHandler(new DataHandler(new MessageDataSource(os.toByteArray(),
+								MIMETypes.MIME_MESSAGE_RFC822)));
 						bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_MESSAGE_RFC822);
 						parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
 					}
