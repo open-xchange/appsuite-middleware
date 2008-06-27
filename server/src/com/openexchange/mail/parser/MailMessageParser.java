@@ -89,7 +89,6 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -418,8 +417,8 @@ public final class MailMessageParser {
 						 * handler) for MIME type "text/rtf" when set by
 						 * setContent() method
 						 */
-						bodyPart.setDataHandler(new DataHandler(new MessageDataSource(
-								new UnsynchronizedByteArrayInputStream(decompressedBytes), contentTypeStr)));
+						bodyPart.setDataHandler(new DataHandler(
+								new MessageDataSource(decompressedBytes, contentTypeStr)));
 						bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
 						bodyPart.setSize(decompressedBytes.length);
 						parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
