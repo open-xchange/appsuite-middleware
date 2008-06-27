@@ -152,6 +152,44 @@ public final class Quota {
 		this.type = type;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (limit ^ (limit >>> 32));
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + (int) (usage ^ (usage >>> 32));
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final Quota other = (Quota) obj;
+		if (limit != other.limit) {
+			return false;
+		}
+		if (type == null) {
+			if (other.type != null) {
+				return false;
+			}
+		} else if (!type.equals(other.type)) {
+			return false;
+		}
+		if (usage != other.usage) {
+			return false;
+		}
+		return true;
+	}
+
 	/**
 	 * Gets the limit
 	 * 
