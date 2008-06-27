@@ -97,7 +97,7 @@ public class Quota extends SessionServlet {
         try {
             session = new ServerSessionAdapter(getSessionObject(req));
         } catch (final ContextException e) {
-            handle(res, e, action, JS_FRAGMENT_POPUP);
+            handle(res, e);
             return;
         }
 
@@ -116,7 +116,7 @@ public class Quota extends SessionServlet {
 	}
 
 
-    private void handle(final HttpServletResponse res, final AbstractOXException t, final String action, final String fragmentOverride) {
+    private void handle(final HttpServletResponse res, final AbstractOXException t) {
 		LL.log(t);
 
 		final Response resp = new Response();

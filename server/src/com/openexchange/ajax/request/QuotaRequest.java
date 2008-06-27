@@ -79,45 +79,45 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public class QuotaRequest extends CommonRequest {
 
 	private static final Log LOG = LogFactory.getLog(QuotaRequest.class);
-	
+
 	private QuotaFileStorage qfs;
-	
+
 	private AbstractOXException fsException;
 
 	private final ServerSession session;
 
-    public QuotaRequest(final Session session, final Context ctx, final JSONWriter w) {
-        this(new ServerSessionAdapter(session,ctx),w);
-    }
+	public QuotaRequest(final Session session, final Context ctx, final JSONWriter w) {
+		this(new ServerSessionAdapter(session, ctx), w);
+	}
 
-    public QuotaRequest(final ServerSession sessionObj, final JSONWriter w) {
+	public QuotaRequest(final ServerSession sessionObj, final JSONWriter w) {
 		super(w);
 		try {
 			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-			this.qfs = (QuotaFileStorage) FileStorage.getInstance(FilestoreStorage.createURI(ctx),ctx,new DBPoolProvider());
+			this.qfs = (QuotaFileStorage) FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx,
+					new DBPoolProvider());
 		} catch (final AbstractOXException e) {
 			this.fsException = e;
 		}
-		
+
 		this.session = sessionObj;
 	}
-	
-	public boolean action(final String action, final SimpleRequest req){
-		if (action.equals(AJAXServlet.ACTION_GET)) {
+
+	public boolean action(final String action) {
+		if (AJAXServlet.ACTION_GET.equals(action)) {
 			filestore();
 			return true;
-		} else if (action.equals("filestore")) {
+		} else if ("filestore".equals(action)) {
 			filestore();
 			return true;
-		} else if (action.equals("mail")) {
+		} else if ("mail".equals(action)) {
 			mail();
 			return true;
 		}
 		return false;
-	
 	}
-	
-	private void exception(final AbstractOXException exception){
+
+	private void exception(final AbstractOXException exception) {
 		final Response resp = new Response();
 		resp.setException(exception);
 		try {
@@ -129,7 +129,7 @@ public class QuotaRequest extends CommonRequest {
 	}
 
 	private void filestore() {
-		if(fsException != null) {
+		if (fsException != null) {
 			exception(fsException);
 			return;
 		}
@@ -137,10 +137,11 @@ public class QuotaRequest extends CommonRequest {
 			final long use = qfs.getUsage();
 			final long quota = qfs.getQuota();
 			final JSONObject data = new JSONObject();
-			data.put("quota",quota);
-			data.put("use",use);
+			data.put("quota", quota);
+			data.put("use", use);
 			/*
-			 * Write JSON object into writer as data content of a response object
+			 * Write JSON object into writer as data content of a response
+			 * object
 			 */
 			w.object();
 			w.key(DATA).value(data);
@@ -149,14 +150,14 @@ public class QuotaRequest extends CommonRequest {
 			handle(e);
 		}
 	}
-	
+
 	private void mail() {
 		MailServletInterface mi = null;
 		try {
 			long[] quotaInfo = null;
 			try {
 				mi = MailServletInterface.getInstance(this.session);
-				quotaInfo = mi.getQuotas(new int[] {MailServletInterface.QUOTA_RESOURCE_STORAGE})[0];
+				quotaInfo = mi.getQuotas(new int[] { MailServletInterface.QUOTA_RESOURCE_STORAGE })[0];
 			} catch (final MailException e) {
 				LOG.error(e.getMessage(), e);
 				quotaInfo = new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
@@ -167,7 +168,8 @@ public class QuotaRequest extends CommonRequest {
 			data.put("quota", quota * 1024);
 			data.put("use", use * 1024);
 			/*
-			 * Write JSON object into writer as data content of a response object
+			 * Write JSON object into writer as data content of a response
+			 * object
 			 */
 			w.object();
 			w.key(DATA).value(data);
