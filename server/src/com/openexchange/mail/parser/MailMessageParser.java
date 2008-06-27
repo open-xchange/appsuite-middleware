@@ -85,7 +85,6 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
-import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
@@ -357,7 +356,8 @@ public final class MailMessageParser {
 						 * instance of IMAPMailContent regardless of the mail
 						 * implementation
 						 */
-						parseMailContent(new MIMEMailPart(mp.getBodyPart(i)), handler, prefix, partCount++);
+						parseMailContent(MIMEMessageConverter.convertPart(mp.getBodyPart(i)), handler, prefix,
+								partCount++);
 					}
 					/*
 					 * Stop to further process tnef attachment
@@ -383,7 +383,8 @@ public final class MailMessageParser {
 						 * instance of IMAPMailContent regardless of the mail
 						 * implementation
 						 */
-						parseMailContent(new MIMEMailPart(mp.getBodyPart(i)), handler, prefix, partCount++);
+						parseMailContent(MIMEMessageConverter.convertPart(mp.getBodyPart(i)), handler, prefix,
+								partCount++);
 					}
 					/*
 					 * Stop to further process tnef attachment
