@@ -94,9 +94,9 @@ public class MailException extends AbstractOXException {
 		 */
 		MISSING_CONNECT_PARAM("Missing parameter in user's mail config: %1$s", Category.CODE_ERROR, 4),
 		/**
-		 * Property error: %1$s
+		 * Configuration error: %1$s
 		 */
-		PROPERTY_ERROR("Property error: %1$s", Category.SETUP_ERROR, 5),
+		CONFIG_ERROR("Configuration error: %1$s", Category.SETUP_ERROR, 5),
 		/**
 		 * Invalid multipart content. Number of enclosed contents is 0
 		 */

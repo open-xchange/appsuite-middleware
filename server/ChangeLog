@@ -1,3 +1,8 @@
+* 2008-06-27 - thorben.betten@open-xchange.com
+
+ - Bugfix #11515: Properly detecting null value as user's mail login and
+   throwing an appropriate exception
+
 * 2008-06-27 - dennis.sieben@open-xchange.com
 
  - Bugfix #11519: sieve filter could not be saved

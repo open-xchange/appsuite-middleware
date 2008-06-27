@@ -80,8 +80,8 @@ public final class MailConfigException extends MailException {
 	 * 
 	 */
 	public MailConfigException(final String message, final Throwable cause) {
-		super(EnumComponent.MAIL, MailException.Code.PROPERTY_ERROR.getCategory(), MailException.Code.PROPERTY_ERROR
-				.getNumber(), MailException.Code.PROPERTY_ERROR.getMessage(), cause);
+		super(EnumComponent.MAIL, MailException.Code.CONFIG_ERROR.getCategory(), MailException.Code.CONFIG_ERROR
+				.getNumber(), MailException.Code.CONFIG_ERROR.getMessage(), cause);
 		super.setMessageArgs(message);
 	}
 
@@ -90,8 +90,8 @@ public final class MailConfigException extends MailException {
 	 * 
 	 */
 	public MailConfigException(final String message) {
-		super(EnumComponent.MAIL, MailException.Code.PROPERTY_ERROR.getCategory(), MailException.Code.PROPERTY_ERROR
-				.getNumber(), MailException.Code.PROPERTY_ERROR.getMessage(), null);
+		super(EnumComponent.MAIL, MailException.Code.CONFIG_ERROR.getCategory(), MailException.Code.CONFIG_ERROR
+				.getNumber(), MailException.Code.CONFIG_ERROR.getMessage(), null);
 		super.setMessageArgs(message);
 	}
 
@@ -100,8 +100,8 @@ public final class MailConfigException extends MailException {
 	 * instance.
 	 */
 	public MailConfigException(final Exception e) {
-		super(EnumComponent.MAIL, MailException.Code.PROPERTY_ERROR.getCategory(), MailException.Code.PROPERTY_ERROR
-				.getNumber(), MailException.Code.PROPERTY_ERROR.getMessage(), e);
+		super(EnumComponent.MAIL, MailException.Code.CONFIG_ERROR.getCategory(), MailException.Code.CONFIG_ERROR
+				.getNumber(), MailException.Code.CONFIG_ERROR.getMessage(), e);
 		super.setMessageArgs(e.getMessage());
 	}
 

@@ -309,14 +309,20 @@ public abstract class MailConfig {
 	 *            - determines whether to look up {@link User#getImapLogin()} or
 	 *            not
 	 * @return The session-associated user's login
+	 * @throws MailConfigException
+	 *             If login cannot be determined
 	 */
-	private static final String getLocalMailLogin(final Session session, final User user, final boolean lookUp) {
-		String login = lookUp ? user.getImapLogin() : null;
-		if ((login == null) || (login.length() == 0)) {
-			login = (session.getUserlogin() != null) && (session.getUserlogin().length() > 0) ? session.getUserlogin()
-					: String.valueOf(session.getUserId());
+	private static final String getLocalMailLogin(final Session session, final User user, final boolean lookUp)
+			throws MailConfigException {
+		if (lookUp) {
+			final String login = user.getImapLogin();
+			if (login == null || login.length() == 0) {
+				throw new MailConfigException("Missing user mail login");
+			}
+			return login;
 		}
-		return login;
+		return (session.getUserlogin() != null) && (session.getUserlogin().length() > 0) ? session.getUserlogin()
+				: String.valueOf(session.getUserId());
 	}
 
 	/**
@@ -436,7 +442,7 @@ public abstract class MailConfig {
 		return MailProperties.getInstance().getMailFetchLimit();
 	}
 
-	private static Boolean usePartModifier;
+	private static volatile Boolean usePartModifier;
 
 	/**
 	 * Checks if a part modifier shall be used that is
@@ -448,10 +454,13 @@ public abstract class MailConfig {
 	 *         <code>false</code>
 	 */
 	public static final boolean usePartModifier() {
-		// TODO: Improve unsafe lazy initialization
-		if (null == usePartModifier) {
-			final PartModifier pm = PartModifier.getInstance();
-			usePartModifier = Boolean.valueOf(pm != null && !DummyPartModifier.class.isInstance(pm));
+		if (usePartModifier == null) {
+			synchronized (MailConfig.class) {
+				if (usePartModifier == null) {
+					final PartModifier pm = PartModifier.getInstance();
+					usePartModifier = Boolean.valueOf(pm != null && !DummyPartModifier.class.isInstance(pm));
+				}
+			}
 		}
 		return usePartModifier.booleanValue();
 	}
