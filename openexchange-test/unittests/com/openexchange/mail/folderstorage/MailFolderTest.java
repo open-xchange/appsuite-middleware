@@ -82,6 +82,8 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
  */
 public final class MailFolderTest extends AbstractMailTest {
 
+	private static final String SESSION_NAME = "mail-test-session";
+
 	private static final String TEMPORARY_FOLDER = "TemporaryFolder";
 
 	private static final String INBOX = "INBOX";
@@ -103,7 +105,7 @@ public final class MailFolderTest extends AbstractMailTest {
 	public void testStandardFolders() {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
+					new ContextImpl(getCid()), SESSION_NAME);
 			session.setPassword(getPassword());
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -145,7 +147,7 @@ public final class MailFolderTest extends AbstractMailTest {
 	public void testExistStandardFolders() {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
+					new ContextImpl(getCid()), SESSION_NAME);
 			session.setPassword(getPassword());
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -187,7 +189,7 @@ public final class MailFolderTest extends AbstractMailTest {
 	public void testFolderGet() {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
+					new ContextImpl(getCid()), SESSION_NAME);
 			session.setPassword(getPassword());
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -233,7 +235,7 @@ public final class MailFolderTest extends AbstractMailTest {
 	public void testFolderCreateAndSubfolders() {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
+					new ContextImpl(getCid()), SESSION_NAME);
 			session.setPassword(getPassword());
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -359,7 +361,7 @@ public final class MailFolderTest extends AbstractMailTest {
 	public void testFolderRoot() {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
+					new ContextImpl(getCid()), SESSION_NAME);
 			session.setPassword(getPassword());
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -408,7 +410,7 @@ public final class MailFolderTest extends AbstractMailTest {
 	public void testFolderUpdate() {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
+					new ContextImpl(getCid()), SESSION_NAME);
 			session.setPassword(getPassword());
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -518,7 +520,7 @@ public final class MailFolderTest extends AbstractMailTest {
 	public void testFolderMove() {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
+					new ContextImpl(getCid()), SESSION_NAME);
 			session.setPassword(getPassword());
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -645,7 +647,7 @@ public final class MailFolderTest extends AbstractMailTest {
 	public void testFolderRename() {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
+					new ContextImpl(getCid()), SESSION_NAME);
 			session.setPassword(getPassword());
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -724,7 +726,7 @@ public final class MailFolderTest extends AbstractMailTest {
 	public void testFolderDelete() {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
+					new ContextImpl(getCid()), SESSION_NAME);
 			session.setPassword(getPassword());
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -851,7 +853,7 @@ public final class MailFolderTest extends AbstractMailTest {
 	public void testFolderClear() {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
+					new ContextImpl(getCid()), SESSION_NAME);
 			session.setPassword(getPassword());
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -973,7 +975,7 @@ public final class MailFolderTest extends AbstractMailTest {
 	public void testFolderQuota() {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
+					new ContextImpl(getCid()), SESSION_NAME);
 			session.setPassword(getPassword());
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -1051,7 +1053,7 @@ public final class MailFolderTest extends AbstractMailTest {
 	public void testPath2DefaultFolder() {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
+					new ContextImpl(getCid()), SESSION_NAME);
 			session.setPassword(getPassword());
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
