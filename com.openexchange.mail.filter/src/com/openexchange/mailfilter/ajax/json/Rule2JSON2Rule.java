@@ -216,6 +216,13 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         return retval;
     }
     
+    private static NumberArgument createNumberArg(final String string) {
+        final Token token = new Token();
+        token.image = string;
+        final NumberArgument numberArgument = new NumberArgument(token);
+        return numberArgument;
+    }
+
     private static final Mapper<Rule>[] mappers = new Mapper[] { 
         new Mapper<Rule>() {
 
@@ -397,7 +404,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 } else if (TestCommand.Commands.SIZE.getCommandname().equals(id)) {
                     final List<Object> argList = new ArrayList<Object>();
                     argList.add(createTagArg(getString(jobj, SizeTestFields.COMPARISON, id)));
-                    argList.add(JSONArrayToStringList(getJSONArray(jobj, SizeTestFields.SIZE, id)));
+                    argList.add(createNumberArg(getString(jobj, SizeTestFields.SIZE, id)));
                     return new TestCommand(TestCommand.Commands.SIZE, argList, new ArrayList<TestCommand>());
                 } else if (TestCommand.Commands.HEADER.getCommandname().equals(id)) {
                     return createAddressEnvelopeOrHeaderTest(jobj, TestCommand.Commands.HEADER);
@@ -458,7 +465,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                     } else if (TestCommand.Commands.SIZE.equals(testCommand.getCommand())) {
                         tmp.put(GeneralFields.ID, TestCommand.Commands.SIZE.getCommandname());
                         tmp.put(SizeTestFields.COMPARISON, testCommand.getMatchtype().substring(1));
-                        tmp.put(SizeTestFields.SIZE, testCommand.getArguments().get(0));
+                        tmp.put(SizeTestFields.SIZE, Long.parseLong(testCommand.getArguments().get(1).toString()));
                     } else if (TestCommand.Commands.HEADER.equals(testCommand.getCommand())) {
                         tmp.put(GeneralFields.ID, TestCommand.Commands.HEADER.getCommandname());
                         tmp.put(AddressEnvelopeAndHeaderTestFields.COMPARISON, testCommand.getMatchtype().substring(1));
@@ -629,13 +636,6 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 }
             }
             
-            private NumberArgument createNumberArg(final String string) {
-                final Token token = new Token();
-                token.image = string;
-                final NumberArgument numberArgument = new NumberArgument(token);
-                return numberArgument;
-            }
-
             private ArrayList<Object> createArrayArray(final String string) {
                 final ArrayList<Object> retval = new ArrayList<Object>();
                 final ArrayList<String> strings = new ArrayList<String>();

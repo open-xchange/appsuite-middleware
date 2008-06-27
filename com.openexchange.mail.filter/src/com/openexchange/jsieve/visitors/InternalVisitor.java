@@ -263,6 +263,9 @@ public class InternalVisitor implements SieveParserVisitor {
                         } else if (obj instanceof TestCommand) {
                             final TestCommand testcommand = (TestCommand) obj;
                             testcommands.add(testcommand);
+                        } else if (obj instanceof NumberArgument) {
+                            final NumberArgument numberarg = (NumberArgument) obj;
+                            arguments.add(numberarg);
                         } else {
                             final ArrayList<String> array = new ArrayList<String>(1);
                             array.add(obj.toString());

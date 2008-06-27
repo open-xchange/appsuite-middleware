@@ -93,6 +93,11 @@ public class RuleConverter {
                 final ASTargument arg = new ASTargument(js[0]++);
                 arg.jjtAddChild(createStringList(sublist, js), 0);
                 targuments.jjtAddChild(arg, p[0]++);
+            } else if (object instanceof NumberArgument) {
+                final NumberArgument arg = (NumberArgument) object;
+                final ASTargument targument = new ASTargument(js[0]++);
+                targument.setValue(arg);
+                targuments.jjtAddChild(targument, p[0]++);
             } else if (object instanceof TagArgument) {
                 final TagArgument tag = (TagArgument) object;
                 addTagArgument(targuments, tag.getTag(), js, p);
