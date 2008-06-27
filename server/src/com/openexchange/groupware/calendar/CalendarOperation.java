@@ -89,7 +89,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 
-public class CalendarOperation implements SearchIterator {
+public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     
     public static final int READ = 0;
     public static final int INSERT = 1;
@@ -614,7 +614,7 @@ public class CalendarOperation implements SearchIterator {
         }
     }
     
-    public final Object next() throws SearchIteratorException, OXException, OXObjectNotFoundException, OXPermissionException {
+    public final CalendarDataObject next() throws SearchIteratorException, OXException, OXObjectNotFoundException, OXPermissionException {
         if (hasNext()) {
             final CalendarDataObject cdao = new CalendarDataObject();
             cdao.setContext(c);
@@ -862,11 +862,11 @@ public class CalendarOperation implements SearchIterator {
                 }
                 
                 if (!CalendarCommonCollection.checkPermissions(cdao, so, c, readcon, CalendarOperation.READ, check_folder_id)) {
-                    final StringBuffer colss = new StringBuffer();
+                    final StringBuilder colss = new StringBuilder();
                     for (int a = 0; a < cols.length; a++) {
                         String fn = CalendarCommonCollection.getFieldName(cols[a]);
                         if (fn == null) {
-                            fn = ""+cols[a];
+                            fn = String.valueOf(cols[a]);
                         }
                         if (a > 0)  {
                             colss.append(',');
