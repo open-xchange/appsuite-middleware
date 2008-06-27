@@ -519,6 +519,7 @@ public abstract class MailMessageStorage {
 	 */
 	public void updateMessageColorLabel(final String folder, final long[] mailIds, final int colorLabel)
 			throws MailException {
+		// Empty body here
 	}
 
 	/**
