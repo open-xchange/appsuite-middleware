@@ -50,34 +50,30 @@ package com.openexchange.groupware.calendar;
 
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertResourceParticipants;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertUserParticipants;
-import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertInPrivateFolder;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
-
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 
 import junit.framework.TestCase;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
-import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
-import com.openexchange.tools.Arrays;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.api.OXPermissionException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -331,7 +327,7 @@ public class CalendarSqlTest extends TestCase {
     // Bug 11316 Updating an appointment should leave it in private folder
 
     public void testUpdatePublicAppointmentTimeShouldUpdateParticipantStatus() throws OXException, SQLException {
-        FolderObject folder = folders.createPublicFolderFor(session, ctx,"A nice public folder",  FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId, secondUserId);
+        final FolderObject folder = folders.createPublicFolderFor(session, ctx,"A nice public folder",  FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId, secondUserId);
         cleanFolders.add( folder );
 
         CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);
@@ -342,7 +338,7 @@ public class CalendarSqlTest extends TestCase {
         appointment = appointments.reload(appointment);
 
         boolean found = false;
-        for(UserParticipant participant : appointment.getUsers()) {
+        for(final UserParticipant participant : appointment.getUsers()) {
             if(participant.getIdentifier() == secondUserId) {
                 found = true;
                 participant.setConfirm(CalendarDataObject.ACCEPT);
@@ -354,7 +350,7 @@ public class CalendarSqlTest extends TestCase {
 
         appointment = appointments.reload(appointment);
         found = false;
-        for(UserParticipant participant : appointment.getUsers()) {
+        for(final UserParticipant participant : appointment.getUsers()) {
             if(participant.getIdentifier() == secondUserId) {
                 found = true;
                 assertEquals(participant.getConfirm(), CalendarDataObject.ACCEPT);
@@ -363,7 +359,7 @@ public class CalendarSqlTest extends TestCase {
 
         assertTrue("SecondUser disappeared from users!", found);
 
-        CalendarDataObject cdao = new CalendarDataObject();
+        final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setStartDate(appointment.getStartDate());
         cdao.setEndDate(new Date(appointment.getEndDate().getTime() + 36000000));
         cdao.setObjectID(appointment.getObjectID());
@@ -375,7 +371,7 @@ public class CalendarSqlTest extends TestCase {
         appointment = appointments.reload(appointment);
 
         found = false;
-        for(UserParticipant participant : appointment.getUsers()) {
+        for(final UserParticipant participant : appointment.getUsers()) {
             if(participant.getIdentifier() == secondUserId) {
                 found = true;
                 assertEquals(participant.getConfirm(), CalendarDataObject.NONE);
@@ -402,7 +398,7 @@ public class CalendarSqlTest extends TestCase {
             appointment = appointments.reload(appointment);
 
             boolean found = false;
-            for(UserParticipant participant : appointment.getUsers()) {
+            for(final UserParticipant participant : appointment.getUsers()) {
                 if(participant.getIdentifier() == userId) {
                     found = true;
                     assertEquals(CalendarDataObject.ACCEPT, participant.getConfirm());
@@ -412,7 +408,7 @@ public class CalendarSqlTest extends TestCase {
             assertTrue(found);
 
             
-            CalendarDataObject cdao = new CalendarDataObject();
+            final CalendarDataObject cdao = new CalendarDataObject();
             cdao.setStartDate(appointment.getStartDate());
             cdao.setEndDate(new Date(appointment.getEndDate().getTime() + 36000000));
             cdao.setObjectID(appointment.getObjectID());
@@ -424,7 +420,7 @@ public class CalendarSqlTest extends TestCase {
             appointment = appointments.reload(appointment);
 
             found = false;
-            for(UserParticipant participant : appointment.getUsers()) {
+            for(final UserParticipant participant : appointment.getUsers()) {
                 if(participant.getIdentifier() == userId) {
                     found = true;
                     assertEquals(CalendarDataObject.ACCEPT, participant.getConfirm());
@@ -454,11 +450,11 @@ public class CalendarSqlTest extends TestCase {
 
             appointments.switchUser(user);
 
-            ArrayList<Participant> participants = new ArrayList<Participant>(java.util.Arrays.asList(appointment.getParticipants()));
+            final ArrayList<Participant> participants = new ArrayList<Participant>(java.util.Arrays.asList(appointment.getParticipants()));
 
-            CalendarContextToolkit tk = new CalendarContextToolkit();
+            final CalendarContextToolkit tk = new CalendarContextToolkit();
 
-            UserParticipant participant = new UserParticipant(tk.resolveUser(participant1));
+            final UserParticipant participant = new UserParticipant(tk.resolveUser(participant1));
             participants.add(participant);
 
 
@@ -494,12 +490,12 @@ public class CalendarSqlTest extends TestCase {
 
     // Bug 11059
     public void testShouldRespectReadPermissions() throws OXException {
-        FolderObject folder = folders.createPublicFolderFor(session, ctx,"A nice public folder",  FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId);
+        final FolderObject folder = folders.createPublicFolderFor(session, ctx,"A nice public folder",  FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId);
         cleanFolders.add( folder );
 
         boolean found = false;
-        ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(folder.getPermissions());
-        for(OCLPermission permission : permissions) {
+        final ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(folder.getPermissions());
+        for(final OCLPermission permission : permissions) {
             if(OCLPermission.ALL_GROUPS_AND_USERS == permission.getEntity()) {
                 found = true;
                 permission.setReadObjectPermission(OCLPermission.NO_PERMISSIONS);
@@ -511,7 +507,7 @@ public class CalendarSqlTest extends TestCase {
         }
 
         if(!found) {
-            OCLPermission permission = new OCLPermission();
+            final OCLPermission permission = new OCLPermission();
             permission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
             permission.setReadObjectPermission(OCLPermission.NO_PERMISSIONS);
             permission.setWriteObjectPermission(OCLPermission.NO_PERMISSIONS);
@@ -520,13 +516,13 @@ public class CalendarSqlTest extends TestCase {
             permission.setGroupPermission(true);
             permissions.add(permission);            
         }
-        FolderObject update = new FolderObject();
+        final FolderObject update = new FolderObject();
         update.setObjectID(folder.getObjectID());
         update.setPermissions(permissions);
 
         folders.save( update , ctx, session ) ;
 
-        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);
+        final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);
         appointment.setParentFolderID(folder.getObjectID());
         appointments.save( appointment ); clean.add( appointment );
 
@@ -537,7 +533,7 @@ public class CalendarSqlTest extends TestCase {
         try {
             appointments.getAppointmentsInFolder(folder.getObjectID());
             fail("I could read the content!");            
-        } catch (OXException x) {
+        } catch (final OXException x) {
             assertTrue(x.getMessage().contains("APP-0013"));
         }
 
@@ -546,7 +542,7 @@ public class CalendarSqlTest extends TestCase {
         try {
             appointments.getModifiedInFolder(folder.getObjectID(), 0);
             fail("I could read the content!");
-        } catch (OXException x) {
+        } catch (final OXException x) {
             assertTrue(x.getMessage().contains("APP-0013"));
         }
 
@@ -555,7 +551,7 @@ public class CalendarSqlTest extends TestCase {
         try {
             appointments.getDeletedInFolder(folder.getObjectID(), 0);
             fail("I could read the content!");
-        } catch (OXException x) {
+        } catch (final OXException x) {
             assertTrue(x.getMessage().contains("APP-0013"));
         }
         
@@ -564,23 +560,23 @@ public class CalendarSqlTest extends TestCase {
     // Bug 11307
 
     public void testRecurringAppointmentShouldBeConvertibleToSingleAppointment() throws OXException, SQLException {
-        Date start = D("24/02/1981 10:00");
-        Date end = D("24/02/1981 12:00");
+        final Date start = D("24/02/1981 10:00");
+        final Date end = D("24/02/1981 12:00");
 
-        CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
+        final CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
         appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
         appointment.setDays(CalendarDataObject.MONDAY);
         appointment.setInterval(1);
         appointment.setRecurrenceCount(3);
         appointments.save( appointment ); clean.add(appointment);
 
-        CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
+        final CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
         update.setRecurrenceType(CalendarDataObject.NO_RECURRENCE);
         update.setStartDate(start);
         update.setEndDate(end);
         appointments.save(update);
 
-        CalendarDataObject reloaded = appointments.reload(appointment);
+        final CalendarDataObject reloaded = appointments.reload(appointment);
         assertEquals(start.getTime(), reloaded.getStartDate().getTime());
         assertEquals(end.getTime(), reloaded.getEndDate().getTime());
         assertEquals(CalendarDataObject.NO_RECURRENCE, reloaded.getRecurrenceType());
@@ -590,21 +586,21 @@ public class CalendarSqlTest extends TestCase {
     // Bug 4778
 
     public void testFreebusyResultShouldContainTitleIfItIsReadableViaASharedFolder() throws OXException, SearchIteratorException {
-        CalendarDataObject appointment = appointments.buildBasicAppointment(D("24/02/1981 10:00"), D("24/02/1981 12:00"));
+        final CalendarDataObject appointment = appointments.buildBasicAppointment(D("24/02/1981 10:00"), D("24/02/1981 12:00"));
         appointments.save( appointment ); clean.add(appointment);
 
         folders.sharePrivateFolder(session,ctx, secondUserId);
         try {
             appointments.switchUser(secondUser);
 
-            SearchIterator<CalendarDataObject> freebusy = appointments.getCurrentAppointmentSQLInterface()
+            final SearchIterator<CalendarDataObject> freebusy = appointments.getCurrentAppointmentSQLInterface()
                     .getFreeBusyInformation(userId,Participant.USER,D("23/02/1981 00:00"), D("25/02/1981 00:00"));
 
-            List<CalendarDataObject> appointments = read(freebusy);
+            final List<CalendarDataObject> appointments = read(freebusy);
 
 
             assertEquals(1, appointments.size());
-            CalendarDataObject result = appointments.get(0);
+            final CalendarDataObject result = appointments.get(0);
             // Assert the title is visible
 
             assertEquals(appointment.getTitle(), result.getTitle());
@@ -617,12 +613,12 @@ public class CalendarSqlTest extends TestCase {
     // Bug 11051
 
     public void testShouldSurviveInvalidDaysValueInWeeklyRecurrenceWithOccurrence() throws OXException {
-        Date start = D("24/02/1981 10:00");
-        Date end = D("24/02/1981 12:00");
-        CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
+        final Date start = D("24/02/1981 10:00");
+        final Date end = D("24/02/1981 12:00");
+        final CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
         appointments.save(appointment); clean.add(appointment);
 
-        CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
+        final CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
         update.setStartDate(start);
         update.setEndDate(end);
         update.setRecurrenceType(CalendarDataObject.MONTHLY);
@@ -633,16 +629,16 @@ public class CalendarSqlTest extends TestCase {
 
         try {
             appointments.save( update );
-        } catch (OXCalendarException x) {
+        } catch (final OXCalendarException x) {
             assertEquals(47, x.getDetailNumber());
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             t.printStackTrace();
             fail(t.getMessage());
         }
     }
 
-    private List<CalendarDataObject> read(SearchIterator<CalendarDataObject> si) throws OXException, SearchIteratorException {
-        List<CalendarDataObject> appointments = new ArrayList<CalendarDataObject>();
+    private List<CalendarDataObject> read(final SearchIterator<CalendarDataObject> si) throws OXException, SearchIteratorException {
+        final List<CalendarDataObject> appointments = new ArrayList<CalendarDataObject>();
         while(si.hasNext()) { appointments.add( si.next() ); }
         return appointments;
     }

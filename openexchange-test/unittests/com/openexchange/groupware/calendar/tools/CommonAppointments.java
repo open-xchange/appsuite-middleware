@@ -51,12 +51,20 @@ package com.openexchange.groupware.calendar.tools;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
-import java.text.SimpleDateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
 
-import com.openexchange.api2.OXException;
+import junit.framework.Assert;
+
 import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.CalendarObject;
@@ -68,8 +76,6 @@ import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.webdav.freebusy;
-import junit.framework.Assert;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -111,7 +117,7 @@ public class CommonAppointments {
         return cdao;
     }
 
-    public CalendarDataObject buildBasicAppointment(Date start, Date end) {
+    public CalendarDataObject buildBasicAppointment(final Date start, final Date end) {
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTitle("basic");
         cdao.setParentFolderID(privateFolder);
@@ -129,7 +135,7 @@ public class CommonAppointments {
         for(final CalendarDataObject cdao : clean) {
             try {
                 calendar.deleteAppointmentObject(cdao,cdao.getParentFolderID(),new Date(Long.MAX_VALUE));
-            } catch (Throwable t) {
+            } catch (final Throwable t) {
                 t.printStackTrace(); // Drastic but apparently neccessary...
             }
         }
@@ -232,83 +238,83 @@ public class CommonAppointments {
 
     }
 
-    public List<CalendarDataObject> getAppointmentsInFolder(int folderId) throws OXException {
-        List<CalendarDataObject> cdao = new ArrayList<CalendarDataObject>();
+    public List<CalendarDataObject> getAppointmentsInFolder(final int folderId) throws OXException {
+        final List<CalendarDataObject> cdao = new ArrayList<CalendarDataObject>();
         try {
-            SearchIterator<CalendarDataObject> iterator = calendar.getAppointmentsBetweenInFolder(folderId, new int[]{CalendarDataObject.OBJECT_ID}, new Date(0), new Date(Long.MAX_VALUE), CalendarDataObject.OBJECT_ID, "ASC");
+            final SearchIterator<CalendarDataObject> iterator = calendar.getAppointmentsBetweenInFolder(folderId, new int[]{CalendarDataObject.OBJECT_ID}, new Date(0), new Date(Long.MAX_VALUE), CalendarDataObject.OBJECT_ID, "ASC");
             while(iterator.hasNext()) {
                 cdao.add(iterator.next());
             }
             return cdao;
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw e;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             e.printStackTrace();
             return Collections.EMPTY_LIST;
-        } catch (SearchIteratorException e) {
+        } catch (final SearchIteratorException e) {
             e.printStackTrace();
             return Collections.EMPTY_LIST;
         }
     }
 
-    public List<CalendarDataObject> getModifiedInFolder(int folderId, long since) throws OXException {
-        List<CalendarDataObject> cdao = new ArrayList<CalendarDataObject>();
+    public List<CalendarDataObject> getModifiedInFolder(final int folderId, final long since) throws OXException {
+        final List<CalendarDataObject> cdao = new ArrayList<CalendarDataObject>();
         try {
 
-            SearchIterator<CalendarDataObject> iterator = calendar.getModifiedAppointmentsInFolder(folderId, new Date(0), new Date(Long.MAX_VALUE),new int[]{CalendarDataObject.OBJECT_ID}, new Date(since));
+            final SearchIterator<CalendarDataObject> iterator = calendar.getModifiedAppointmentsInFolder(folderId, new Date(0), new Date(Long.MAX_VALUE),new int[]{CalendarDataObject.OBJECT_ID}, new Date(since));
             while(iterator.hasNext()) {
                 cdao.add(iterator.next());
             }
             return cdao;
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw e;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             e.printStackTrace();
             return Collections.EMPTY_LIST;
-        } catch (SearchIteratorException e) {
+        } catch (final SearchIteratorException e) {
             e.printStackTrace();
             return Collections.EMPTY_LIST;
         }
     }
 
-    public List<CalendarDataObject> getDeletedInFolder(int folderId, long since) throws OXException {
-        List<CalendarDataObject> cdao = new ArrayList<CalendarDataObject>();
+    public List<CalendarDataObject> getDeletedInFolder(final int folderId, final long since) throws OXException {
+        final List<CalendarDataObject> cdao = new ArrayList<CalendarDataObject>();
         try {
 
-            SearchIterator<CalendarDataObject> iterator = calendar.getDeletedAppointmentsInFolder(folderId, new int[]{CalendarDataObject.OBJECT_ID}, new Date(since));
+            final SearchIterator<CalendarDataObject> iterator = calendar.getDeletedAppointmentsInFolder(folderId, new int[]{CalendarDataObject.OBJECT_ID}, new Date(since));
             while(iterator.hasNext()) {
                 cdao.add(iterator.next());
             }
             return cdao;
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw e;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             e.printStackTrace();
             return Collections.EMPTY_LIST;
-        } catch (SearchIteratorException e) {
+        } catch (final SearchIteratorException e) {
             e.printStackTrace();
             return Collections.EMPTY_LIST;
         }
     }
 
-    public static Date D(String date) {
+    public static Date D(final String date) {
         try {
 
-            Date d = format.parse(date);
+            final Date d = format.parse(date);
             return d;
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
             return null;
         }
     }
 
-    public static Date recalculate(Date date, TimeZone from, TimeZone to) {
-        Calendar fromCal = new GregorianCalendar();
+    public static Date recalculate(final Date date, final TimeZone from, final TimeZone to) {
+        final Calendar fromCal = new GregorianCalendar();
         fromCal.setTimeZone(from);
         fromCal.setTime(date);
 
-        Calendar toCal = new GregorianCalendar();
+        final Calendar toCal = new GregorianCalendar();
         toCal.setTimeZone(to);
         toCal.set(fromCal.get(Calendar.YEAR), fromCal.get(Calendar.MONTH), fromCal.get(Calendar.DATE), fromCal.get(Calendar.HOUR_OF_DAY), fromCal.get(Calendar.MINUTE), fromCal.get(Calendar.SECOND));
         toCal.set(Calendar.MILLISECOND, 0);
@@ -316,14 +322,14 @@ public class CommonAppointments {
         return toCal.getTime();
     }
 
-    public static String dateString(long time, TimeZone tz) {
-        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+    public static String dateString(final long time, final TimeZone tz) {
+        final SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         format.setTimeZone(tz);
         return format.format(new Date(time));
     }
 
-    public CalendarDataObject createIdentifyingCopy(CalendarDataObject appointment) {
-        CalendarDataObject copy = new CalendarDataObject();
+    public CalendarDataObject createIdentifyingCopy(final CalendarDataObject appointment) {
+        final CalendarDataObject copy = new CalendarDataObject();
         copy.setObjectID(appointment.getObjectID());
         copy.setContext(appointment.getContext());
         copy.setParentFolderID(appointment.getParentFolderID());

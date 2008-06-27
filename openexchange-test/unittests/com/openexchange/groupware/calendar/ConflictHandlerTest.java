@@ -60,9 +60,9 @@ import junit.framework.TestCase;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
-import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 
@@ -224,8 +224,8 @@ public class ConflictHandlerTest extends TestCase {
     // Bug #11349
 
     public void testShouldShowTitleIfReadPermissionsInPrivateFolderAllowIt() throws OXException {
-        Session session = appointments.getSession();
-        int secondUserId = new CalendarContextToolkit().resolveUser(secondUser);
+        final Session session = appointments.getSession();
+        final int secondUserId = new CalendarContextToolkit().resolveUser(secondUser);
         folders.sharePrivateFolder(session, ctx, secondUserId);
         try {
             final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant2);

@@ -56,11 +56,11 @@ import static junit.framework.Assert.fail;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.api2.OXException;
 
 
 /**
@@ -107,8 +107,8 @@ public class CalendarAssertions {
     }
 
 
-    public static void assertInPrivateFolder(CommonAppointments appointments , CalendarDataObject appointment) throws OXException {
-        for(CalendarDataObject currentAppointment : appointments.getPrivateAppointments()) {
+    public static void assertInPrivateFolder(final CommonAppointments appointments , final CalendarDataObject appointment) throws OXException {
+        for(final CalendarDataObject currentAppointment : appointments.getPrivateAppointments()) {
             if(appointment.getObjectID() == currentAppointment.getObjectID()) {
                 return;
             }

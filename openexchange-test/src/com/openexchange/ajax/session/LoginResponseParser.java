@@ -47,7 +47,7 @@ public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
         } catch (final JSONException e) {
             try {
                 LOG.error("Invalid login body: \"" + resp.getText() + "\"");
-            } catch (IOException e1) {
+            } catch (final IOException e1) {
                 fail(e.getMessage());
             }
             fail(e.getMessage());

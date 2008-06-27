@@ -18,6 +18,7 @@ import com.openexchange.caching.internal.JCSCacheServiceInit;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.internal.ConfigurationImpl;
+import com.openexchange.group.internal.GroupInit;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
 import com.openexchange.i18n.tools.I18nServices;
@@ -41,7 +42,6 @@ import com.openexchange.test.TestInit;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 import com.openexchange.tools.servlet.http.HttpManagersInit;
-import com.openexchange.group.internal.GroupInit;
 
 /**
  * This class contains methods for initialising tests.

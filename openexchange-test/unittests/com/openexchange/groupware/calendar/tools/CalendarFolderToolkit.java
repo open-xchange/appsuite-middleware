@@ -48,21 +48,20 @@
  */
 package com.openexchange.groupware.calendar.tools;
 
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
-import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.session.Session;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.sql.Connection;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -70,14 +69,14 @@ import java.sql.Connection;
 public class CalendarFolderToolkit {
 
     public int getStandardFolder(final int user, final Context ctx) {
-        FolderObject fo = getStandardFolderObject(user, ctx);
+        final FolderObject fo = getStandardFolderObject(user, ctx);
         if(fo == null) {
             return -1;
         }
         return fo.getObjectID();
     }
 
-    private FolderObject getStandardFolderObject(int user, Context ctx) {
+    private FolderObject getStandardFolderObject(final int user, final Context ctx) {
         final OXFolderAccess access = new OXFolderAccess(ctx);
         FolderObject fo = null;
         try {
@@ -89,14 +88,14 @@ public class CalendarFolderToolkit {
         return fo;
     }
 
-    public FolderObject createPublicFolderFor(Session session,Context ctx, String name, int parent, int...users) {
+    public FolderObject createPublicFolderFor(final Session session,final Context ctx, final String name, final int parent, final int...users) {
         Connection writecon = null;
         try {
         	writecon = DBPool.pickupWriteable(ctx);
 	        final OXFolderManager oxma = new OXFolderManagerImpl(session, writecon, writecon);
 
-            ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(users.length);
-            for(int user : users) {
+            final ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(users.length);
+            for(final int user : users) {
                 final OCLPermission oclp = new OCLPermission();
                 oclp.setEntity(user);
                 oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -113,42 +112,42 @@ public class CalendarFolderToolkit {
 	        fo.setPermissions(permissions);
             fo = oxma.createFolder(fo, true, System.currentTimeMillis());
             return fo;
-        } catch (OXException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
             return null;
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             e.printStackTrace();
             return null;
         } finally {
         	if(writecon != null) {
                 try {
                     DBPool.pushWrite(ctx, writecon);
-                } catch (DBPoolingException e) {
+                } catch (final DBPoolingException e) {
                     //IGNORE
                 }
             }
         }
     }
 
-    public void removeAll(Session session, List<FolderObject> cleanFolders) {
+    public void removeAll(final Session session, final List<FolderObject> cleanFolders) {
         final OXFolderManager oxma;
         try {
             oxma = new OXFolderManagerImpl(session);
-            for(FolderObject folder : cleanFolders) {
+            for(final FolderObject folder : cleanFolders) {
                 oxma.deleteFolder(folder, true, System.currentTimeMillis());
             }
-        } catch (OXException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
 
         }
     }
 
-    public void sharePrivateFolder(Session session, Context ctx, int otherUserId) {
-        FolderObject fo = getStandardFolderObject(session.getUserId(), ctx);
+    public void sharePrivateFolder(final Session session, final Context ctx, final int otherUserId) {
+        final FolderObject fo = getStandardFolderObject(session.getUserId(), ctx);
         boolean mustAdd = true;
-        ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(fo.getPermissions());
+        final ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(fo.getPermissions());
         for(int i = 0, size = permissions.size(); i < size && mustAdd; i++) {
-            OCLPermission permission = permissions.get(i);
+            final OCLPermission permission = permissions.get(i);
             if(permission.getEntity() == otherUserId) {
                 mustAdd = false;
                 permission.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -166,34 +165,34 @@ public class CalendarFolderToolkit {
         save(fo, ctx, session);
     }
 
-    public void save(FolderObject fo, Context ctx, Session session) {
+    public void save(final FolderObject fo, final Context ctx, final Session session) {
         Connection writecon = null;
         try {
             writecon = DBPool.pickupWriteable(ctx);
             final OXFolderManager oxma = new OXFolderManagerImpl(session, writecon, writecon);
             oxma.updateFolder(fo, false, System.currentTimeMillis());
-        } catch (OXException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             e.printStackTrace();
         } finally {
             if(writecon != null) {
                 try {
                     DBPool.pushWrite(ctx, writecon);
-                } catch (DBPoolingException e) {
+                } catch (final DBPoolingException e) {
                     //IGNORE
                 }
             }
         }
     }
 
-    public void unsharePrivateFolder(Session session, Context ctx) {
-        FolderObject fo = getStandardFolderObject(session.getUserId(), ctx);
-        ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(fo.getPermissions());
-        ArrayList<OCLPermission> newPermissions = new ArrayList<OCLPermission>();
-        int userId = session.getUserId();
+    public void unsharePrivateFolder(final Session session, final Context ctx) {
+        final FolderObject fo = getStandardFolderObject(session.getUserId(), ctx);
+        final ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(fo.getPermissions());
+        final ArrayList<OCLPermission> newPermissions = new ArrayList<OCLPermission>();
+        final int userId = session.getUserId();
         for(int i = 0, size = permissions.size(); i < size; i++) {
-            OCLPermission permission = permissions.get(i);
+            final OCLPermission permission = permissions.get(i);
             if(permission.getEntity() == userId) {
                 newPermissions.add(permission);
             }

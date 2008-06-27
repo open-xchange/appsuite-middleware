@@ -22,7 +22,6 @@ import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.CalendarSqlImp;
 import com.openexchange.groupware.calendar.ConflictHandler;
-import com.openexchange.groupware.calendar.FreeBusyResults;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
