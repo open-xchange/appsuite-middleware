@@ -158,6 +158,7 @@ public class QuotaRequest extends CommonRequest {
 				mi = MailServletInterface.getInstance(this.session);
 				quotaInfo = mi.getQuotas(new int[] {MailServletInterface.QUOTA_RESOURCE_STORAGE})[0];
 			} catch (final MailException e) {
+				LOG.error(e.getMessage(), e);
 				quotaInfo = new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
 			}
 			final long quota = quotaInfo[0];
