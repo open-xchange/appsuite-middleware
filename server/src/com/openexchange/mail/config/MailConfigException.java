@@ -66,6 +66,11 @@ public final class MailConfigException extends MailException {
 	 */
 	private static final long serialVersionUID = -5676002376855401186L;
 
+	/**
+	 * Initializes a new {@link MailConfigException}
+	 * 
+	 * @param cause The initial error
+	 */
 	public MailConfigException(final AbstractOXException cause) {
 		super(cause);
 	}
