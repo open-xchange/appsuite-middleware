@@ -251,22 +251,4 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 		}
 	}
 
-	public void testQuota() {
-		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
-			session.setPassword(getPassword());
-			final MailAccess<?, ?> mailConnection = MailAccess.getInstance(session);
-			mailConnection.connect(/* mailConfig */);
-			try {
-				final Quota quota = mailConnection.getFolderStorage().getQuota(null);
-				System.out.println(quota.toString());
-			} finally {
-				mailConnection.close(true);
-			}
-		} catch (final MailException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
 }
