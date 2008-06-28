@@ -894,7 +894,7 @@ public final class HTMLProcessing {
 		return sb.toString();
 	}
 
-	private static final String HTML_BR = "<br>";
+	private static final String HTML_BR = "<br />";
 
 	private static final String REPL_LINEBREAK = "\r?\n";
 
