@@ -900,7 +900,7 @@ public final class HTMLProcessing {
 
 	/**
 	 * Formats plain text to HTML by escaping HTML special characters e.g.
-	 * <code>&lt;</code> => <code>&amp;lt;</code>
+	 * <code>&quot;&lt;&quot;</code> to <code>&quot;&amp;lt;&quot;</code>
 	 * 
 	 * @param plainText
 	 *            The plain text
