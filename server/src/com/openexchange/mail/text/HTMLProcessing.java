@@ -882,13 +882,14 @@ public final class HTMLProcessing {
 		/*
 		 * Escape
 		 */
-		for (int i = 0; i < len; i++) {
-			final Character c = Character.valueOf(s.charAt(i));
-			if (withQuote ? getHTMLCharMap().containsKey(c) : (c.charValue() == '"' ? false : getHTMLCharMap()
-					.containsKey(c))) {
-				sb.append('&').append(getHTMLCharMap().get(c)).append(';');
-			} else {
+		final char[] chars = s.toCharArray();
+		for (final char c : chars) {
+			final String entity = withQuote ? getHTMLCharMap().get(Character.valueOf(c)) : (c == '"' ? null
+					: getHTMLCharMap().get(Character.valueOf(c)));
+			if (entity == null) {
 				sb.append(c);
+			} else {
+				sb.append('&').append(entity).append(';');
 			}
 		}
 		return sb.toString();
