@@ -333,7 +333,9 @@ public final class IMAPFolderConverter {
 				}
 				mailFolder.setOwnPermission(ownPermission);
 			}
-			if (!mailFolder.isRootFolder()) {
+			if (mailFolder.isRootFolder()) {
+				mailFolder.setDefaultFolder(false);
+			} else {
 				/*
 				 * Default folder
 				 */
@@ -351,8 +353,6 @@ public final class IMAPFolderConverter {
 						mailFolder.setDefaultFolder(false);
 					}
 				}
-			} else {
-				mailFolder.setDefaultFolder(false);
 			}
 			if (mailFolder.isHoldsMessages() && ownRights.contains(Rights.Right.READ)) {
 				mailFolder.setMessageCount(imapFolder.getMessageCount());
@@ -413,7 +413,9 @@ public final class IMAPFolderConverter {
 					return protocol.list(STR_EMPTY, pattern);
 				} catch (final MessagingException e) {
 					LOG.error(e.getLocalizedMessage(), e);
-					throw new ProtocolException(e.getLocalizedMessage());
+					final ProtocolException pe = new ProtocolException(e.getLocalizedMessage());
+					pe.initCause(e);
+					throw pe;
 				}
 			}
 		});
