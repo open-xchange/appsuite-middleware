@@ -81,6 +81,9 @@ public abstract class AbstractIMAPCommand<T> {
 
 	/**
 	 * Constructor
+	 * 
+	 * @param imapFolder
+	 *            The IMAP folder
 	 */
 	protected AbstractIMAPCommand(final IMAPFolder imapFolder) {
 		super();
