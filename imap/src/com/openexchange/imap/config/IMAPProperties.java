@@ -212,11 +212,10 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 
 		{
 			user2AclImpl = configuration.getProperty("com.openexchange.imap.User2ACLImpl");
-			if (null != user2AclImpl) {
-				user2AclImpl = user2AclImpl.trim();
-			} else {
+			if (null == user2AclImpl) {
 				throw new MailConfigException("Missing IMAP property \"com.openexchange.imap.User2ACLImpl\"");
 			}
+			user2AclImpl = user2AclImpl.trim();
 		}
 
 		{

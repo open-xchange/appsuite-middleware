@@ -356,11 +356,11 @@ public final class IMAPConfig extends MailConfig {
 		imapPort = 143;
 		{
 			final String[] parsed = parseProtocol(imapServer);
-			if (parsed != null) {
+			if (parsed == null) {
+				secure = false;
+			} else {
 				secure = PROTOCOL_IMAP_SECURE.equals(parsed[0]);
 				imapServer = parsed[1];
-			} else {
-				secure = false;
 			}
 			final int pos = imapServer.indexOf(':');
 			if (pos > -1) {
