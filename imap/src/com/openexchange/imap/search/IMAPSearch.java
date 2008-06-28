@@ -126,15 +126,9 @@ public final class IMAPSearch {
 				}
 				if ((msgs.length < 50) && !searchTerm.isAscii()) {
 					/*
-					 * Search with respect to umlauts
+					 * Search with respect to umlauts in pre-selected messages
 					 */
-					final SmartIntArray sia = new SmartIntArray(msgs.length);
-					for (int i = 0; i < msgs.length; i++) {
-						if (searchTerm.matches(msgs[i])) {
-							sia.append(msgs[i].getMessageNumber());
-						}
-					}
-					return sia.toArray();
+					return searchWithUmlautSupport(searchTerm, msgs);
 				}
 				final int[] matchSeqNums = new int[msgs.length];
 				for (int i = 0; i < msgs.length; i++) {
@@ -177,6 +171,28 @@ public final class IMAPSearch {
 		for (int i = 0; i < allMsgs.length; i++) {
 			if (searchTerm.matches(allMsgs[i])) {
 				sia.append(allMsgs[i].getMessageNumber());
+			}
+		}
+		return sia.toArray();
+	}
+
+	/**
+	 * Searches with respect to umlauts
+	 * 
+	 * @param searchTerm
+	 *            The search term
+	 * @param msgs
+	 *            The messages
+	 * @return Matching messages
+	 * @throws MailException
+	 *             If searching fails
+	 */
+	private static int[] searchWithUmlautSupport(final com.openexchange.mail.search.SearchTerm<?> searchTerm,
+			final Message[] msgs) throws MailException {
+		final SmartIntArray sia = new SmartIntArray(msgs.length);
+		for (int i = 0; i < msgs.length; i++) {
+			if (searchTerm.matches(msgs[i])) {
+				sia.append(msgs[i].getMessageNumber());
 			}
 		}
 		return sia.toArray();
