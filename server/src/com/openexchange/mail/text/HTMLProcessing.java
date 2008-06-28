@@ -246,7 +246,7 @@ public final class HTMLProcessing {
 			final StringBuilder tmp = new StringBuilder(256);
 			while (m.find()) {
 				final String nonHtmlLink = m.group(1);
-				if ((nonHtmlLink == null) || (isImgSrc(content, m.start(1)))) {
+				if ((nonHtmlLink == null) || (isSrcAttr(content, m.start(1)))) {
 					m.appendReplacement(sb, Matcher.quoteReplacement(checkTarget(m.group())));
 				} else {
 					tmp.setLength(0);
@@ -286,15 +286,17 @@ public final class HTMLProcessing {
 		if (pos == -1) {
 			return anchorTag;
 		}
-		final StringBuilder sb = new StringBuilder(128);
+		final StringBuilder sb = new StringBuilder(anchorTag.length() + 16);
 		return sb.append(anchorTag.substring(0, pos)).append(" target=\"").append(STR_BLANK).append('"').append(
 				anchorTag.substring(pos)).toString();
 	}
 
-	private static final String STR_IMG_SRC = "src=\"";
+	private static final String STR_IMG_SRC = "src=";
 
-	private static boolean isImgSrc(final String line, final int start) {
-		return (start >= 5) && STR_IMG_SRC.equalsIgnoreCase(line.substring(start - 5, start));
+	private static boolean isSrcAttr(final String line, final int urlStart) {
+		return (urlStart >= 5)
+				&& ((STR_IMG_SRC.equalsIgnoreCase(line.substring(urlStart - 5, urlStart - 1))) || (STR_IMG_SRC
+						.equalsIgnoreCase(line.substring(urlStart - 4, urlStart))));
 	}
 
 	private static final String RPL_CT = "#CT#";
@@ -319,36 +321,36 @@ public final class HTMLProcessing {
 	/**
 	 * Creates valid HTML from specified HTML content conform to W3C standards.
 	 * 
-	 * @param htmlContentArg
+	 * @param htmlContent
 	 *            The HTML content
 	 * @param contentType
 	 *            The corresponding content type (including charset parameter)
 	 * @return The HTML content conform to W3C standards
 	 */
-	public static String getConformHTML(final String htmlContentArg, final ContentType contentType) {
-		return getConformHTML(htmlContentArg, contentType.getCharsetParameter());
+	public static String getConformHTML(final String htmlContent, final ContentType contentType) {
+		return getConformHTML(htmlContent, contentType.getCharsetParameter());
 	}
 
 	/**
 	 * Creates valid HTML from specified HTML content conform to W3C standards.
 	 * 
-	 * @param htmlContentArg
+	 * @param htmlContent
 	 *            The HTML content
 	 * @param charset
 	 *            The charset parameter
 	 * @return The HTML content conform to W3C standards
 	 */
-	public static String getConformHTML(final String htmlContentArg, final String charset) {
-		if ((htmlContentArg == null) || (htmlContentArg.length() == 0)) {
+	public static String getConformHTML(final String htmlContent, final String charset) {
+		if ((htmlContent == null) || (htmlContent.length() == 0)) {
 			/*
 			 * Nothing to do...
 			 */
-			return htmlContentArg;
+			return htmlContent;
 		}
 		/*
 		 * Validate with JTidy library
 		 */
-		final String htmlContent;
+		final String html;
 		String cs = charset;
 		if (null == cs) {
 			if (LOG.isWarnEnabled()) {
@@ -356,21 +358,21 @@ public final class HTMLProcessing {
 			}
 			cs = CHARSET_US_ASCII;
 		}
-		htmlContent = validate(htmlContentArg);
+		html = validate(htmlContent);
 		/*
 		 * Check for meta tag in validated html content which indicates
 		 * documents content type. Add if missing.
 		 */
-		final int start = htmlContent.indexOf(TAG_S_HEAD) + 6;
+		final int start = html.indexOf(TAG_S_HEAD) + 6;
 		if (start >= 6) {
-			final Matcher m = PAT_META_CT.matcher(htmlContent.substring(start, htmlContent.indexOf(TAG_E_HEAD)));
+			final Matcher m = PAT_META_CT.matcher(html.substring(start, html.indexOf(TAG_E_HEAD)));
 			if (!m.find()) {
-				final StringBuilder sb = new StringBuilder(htmlContent);
+				final StringBuilder sb = new StringBuilder(html);
 				sb.insert(start, HTML_META_TEMPLATE.replaceFirst(RPL_CT, CT_TEXT_HTML.replaceFirst(RPL_CS, cs)));
 				return sb.toString();
 			}
 		}
-		return processDownlevelRevealedConditionalComments(htmlContent);
+		return processDownlevelRevealedConditionalComments(html);
 	}
 
 	private static final Pattern PATTERN_CC = Pattern.compile("(<!\\[if)([^\\]]+\\]>)(.*?)(<!\\[endif\\]>)",
