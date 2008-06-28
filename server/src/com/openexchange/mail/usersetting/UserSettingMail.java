@@ -95,7 +95,9 @@ public final class UserSettingMail implements Cloneable, Serializable {
 				 * Cannot occur since we are cloneable
 				 */
 				LOG.error(e.getMessage(), e);
-				throw new InternalError(e.getMessage());
+				final InternalError error = new InternalError(e.getMessage());
+				error.initCause(e);
+				throw error;
 			}
 		}
 
@@ -331,7 +333,9 @@ public final class UserSettingMail implements Cloneable, Serializable {
 			return clone;
 		} catch (final CloneNotSupportedException e) {
 			LOG.error(e.getMessage(), e);
-			throw new InternalError(e.getMessage());
+			final InternalError error = new InternalError(e.getMessage());
+			error.initCause(e);
+			throw error;
 		}
 	}
 
