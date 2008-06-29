@@ -84,7 +84,7 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OXFolderSQL {
+public final class OXFolderSQL {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(OXFolderSQL.class);
@@ -102,18 +102,18 @@ public class OXFolderSQL {
 	 * @param ctx
 	 *            The context
 	 * @param readConArg
-	 *            A readable connection or <code>null</code> to fetch a new
-	 *            one from connection pool
+	 *            A readable connection or <code>null</code> to fetch a new one
+	 *            from connection pool
 	 * @return The ID of context admin or <code>-1</code> if none found
 	 * @throws DBPoolingException
-	 *             If parameter <code>readConArg</code> is <code>null</code>
-	 *             and no readable connection could be fetched from or put back
-	 *             into connection pool
+	 *             If parameter <code>readConArg</code> is <code>null</code> and
+	 *             no readable connection could be fetched from or put back into
+	 *             connection pool
 	 * @throws SQLException
 	 *             If a SQL error occurs
 	 */
-	public static final int getContextAdminID(final Context ctx, final Connection readConArg)
-			throws DBPoolingException, SQLException {
+	public static int getContextAdminID(final Context ctx, final Connection readConArg) throws DBPoolingException,
+			SQLException {
 		Connection readCon = readConArg;
 		boolean closeReadCon = false;
 		PreparedStatement stmt = null;
@@ -137,7 +137,7 @@ public class OXFolderSQL {
 
 	private static final String SQL_DEFAULTFLD = "SELECT ot.fuid FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.created_from = ? AND ot.module = ? AND ot.default_flag = 1";
 
-	public static final int getUserDefaultFolder(final int userId, final int module, final Connection readConArg,
+	public static int getUserDefaultFolder(final int userId, final int module, final Connection readConArg,
 			final Context ctx) throws DBPoolingException, SQLException {
 		Connection readCon = readConArg;
 		boolean closeReadCon = false;
@@ -165,8 +165,6 @@ public class OXFolderSQL {
 	private static final String SQL_SELECT_ALL_SHARED_FLDS = "SELECT ot.fuid FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.type = ? AND ot.created_from = ? AND "
 			+ "(SELECT COUNT(op.permission_id) FROM oxfolder_permissions AS op WHERE op.cid = ot.cid AND op.fuid = ot.fuid) > 1 GROUP BY ot.fuid";
 
-	private static final int[] EMPTY_INTARR = new int[0];
-
 	/**
 	 * Gets all private folders of specified owner which are shared to other
 	 * users.
@@ -174,20 +172,20 @@ public class OXFolderSQL {
 	 * @param owner
 	 *            The owner's ID
 	 * @param readConArg
-	 *            A readable connection or <code>null</code> to fetch a new
-	 *            one from connection pool
+	 *            A readable connection or <code>null</code> to fetch a new one
+	 *            from connection pool
 	 * @param ctx
 	 *            The context
 	 * @return All private folders of specified owner which are shared to other
 	 *         users.
 	 * @throws DBPoolingException
-	 *             If parameter <code>readConArg</code> is <code>null</code>
-	 *             and no readable connection could be fetched from or put back
-	 *             into connection pool
+	 *             If parameter <code>readConArg</code> is <code>null</code> and
+	 *             no readable connection could be fetched from or put back into
+	 *             connection pool
 	 * @throws SQLException
 	 *             If a SQL error occurs
 	 */
-	public static final int[] getSharedFoldersOf(final int owner, final Connection readConArg, final Context ctx)
+	public static int[] getSharedFoldersOf(final int owner, final Connection readConArg, final Context ctx)
 			throws DBPoolingException, SQLException {
 		Connection readCon = readConArg;
 		boolean closeReadCon = false;
@@ -204,7 +202,7 @@ public class OXFolderSQL {
 			stmt.setInt(3, owner);
 			rs = stmt.executeQuery();
 			if (!rs.next()) {
-				return EMPTY_INTARR;
+				return new int[0];
 			}
 			final SmartIntArray sia = new SmartIntArray(16);
 			do {
@@ -229,8 +227,8 @@ public class OXFolderSQL {
 	 * @param modifiedBy
 	 *            The user who shall be inserted as modified-by
 	 * @param writeConArg
-	 *            A writeable connection or <code>null</code> to fetch a new
-	 *            one from pool
+	 *            A writeable connection or <code>null</code> to fetch a new one
+	 *            from pool
 	 * @param ctx
 	 *            The context
 	 * @throws DBPoolingException
@@ -239,7 +237,7 @@ public class OXFolderSQL {
 	 * @throws SQLException
 	 *             If a SQL error occurs
 	 */
-	public static final void updateLastModified(final int folderId, final long lastModified, final int modifiedBy,
+	public static void updateLastModified(final int folderId, final long lastModified, final int modifiedBy,
 			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
 		Connection writeCon = writeConArg;
 		boolean closeWriteCon = false;
@@ -275,8 +273,8 @@ public class OXFolderSQL {
 	 * @param modifiedBy
 	 *            The user who shall be inserted as modified-by
 	 * @param writeConArg
-	 *            A writeable connection or <code>null</code> to fetch a new
-	 *            one from pool
+	 *            A writeable connection or <code>null</code> to fetch a new one
+	 *            from pool
 	 * @param ctx
 	 *            The context
 	 * @throws DBPoolingException
@@ -285,9 +283,8 @@ public class OXFolderSQL {
 	 * @throws SQLException
 	 *             If a SQL error occurs
 	 */
-	public static final void updateName(final int folderId, final String newName, final long lastModified,
-			final int modifiedBy, final Connection writeConArg, final Context ctx) throws DBPoolingException,
-			SQLException {
+	static void updateName(final int folderId, final String newName, final long lastModified, final int modifiedBy,
+			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
 		Connection writeCon = writeConArg;
 		boolean closeWriteCon = false;
 		PreparedStatement stmt = null;
@@ -316,7 +313,7 @@ public class OXFolderSQL {
 	 * 
 	 * @return folder id or <tt>-1</tt> if none found
 	 */
-	public static final int lookUpFolder(final int parent, final String folderName, final int module,
+	public static int lookUpFolder(final int parent, final String folderName, final int module,
 			final Connection readConArg, final Context ctx) throws DBPoolingException, SQLException {
 		return lookUpFolderOnUpdate(-1, parent, folderName, module, readConArg, ctx);
 	}
@@ -342,7 +339,7 @@ public class OXFolderSQL {
 	 * @throws DBPoolingException
 	 * @throws SQLException
 	 */
-	public static final int lookUpFolderOnUpdate(final int folderId, final int parent, final String folderName,
+	public static int lookUpFolderOnUpdate(final int folderId, final int parent, final String folderName,
 			final int module, final Connection readConArg, final Context ctx) throws DBPoolingException, SQLException {
 		Connection readCon = readConArg;
 		boolean closeReadCon = false;
@@ -373,7 +370,7 @@ public class OXFolderSQL {
 	 * 
 	 * @return <tt>true</tt> if folder exists, otherwise <tt>false</tt>
 	 */
-	public static final boolean exists(final int folderId, final Connection readConArg, final Context ctx)
+	public static boolean exists(final int folderId, final Connection readConArg, final Context ctx)
 			throws DBPoolingException, SQLException {
 		Connection readCon = readConArg;
 		boolean closeReadCon = false;
@@ -403,7 +400,7 @@ public class OXFolderSQL {
 	 * @return a <tt>java.util.List</tt> instance containing all subfolder IDs
 	 *         of given folder
 	 */
-	public static final List<Integer> getSubfolderIDs(final int folderId, final Connection readConArg, final Context ctx)
+	public static List<Integer> getSubfolderIDs(final int folderId, final Connection readConArg, final Context ctx)
 			throws DBPoolingException, SQLException {
 		final List<Integer> retval = new ArrayList<Integer>();
 		Connection readCon = readConArg;
@@ -434,9 +431,8 @@ public class OXFolderSQL {
 	 * Updates the field 'subfolder_flag' of matching folder in underlying
 	 * storage
 	 */
-	public static final void updateSubfolderFlag(final int folderId, final boolean hasSubfolders,
-			final long lastModified, final Connection writeConArg, final Context ctx) throws DBPoolingException,
-			SQLException {
+	static void updateSubfolderFlag(final int folderId, final boolean hasSubfolders, final long lastModified,
+			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
 		Connection writeCon = writeConArg;
 		boolean closeCon = false;
 		PreparedStatement stmt = null;
@@ -464,7 +460,7 @@ public class OXFolderSQL {
 	 * @return the number of subfolders of given folder which can be moved
 	 *         according to user's permissions
 	 */
-	public static final int getNumOfMoveableSubfolders(final int folderId, final int userId, final int[] groups,
+	public static int getNumOfMoveableSubfolders(final int folderId, final int userId, final int[] groups,
 			final Connection readConArg, final Context ctx) throws DBPoolingException, SQLException {
 		Connection readCon = readConArg;
 		boolean closeReadCon = false;
@@ -496,19 +492,19 @@ public class OXFolderSQL {
 
 	private static final String SQL_UPDATE_PARENT_SUBFOLDER_FLAG = "UPDATE oxfolder_tree SET subfolder_flag = 1, changing_date = ? WHERE cid = ? AND fuid = ?";
 
-	public static final void insertFolderSQL(final int newFolderID, final int userId, final FolderObject folderObj,
+	static void insertFolderSQL(final int newFolderID, final int userId, final FolderObject folderObj,
 			final long creatingTime, final Context ctx, final Connection writeConArg) throws SQLException,
 			DBPoolingException {
 		insertFolderSQL(newFolderID, userId, folderObj, creatingTime, false, ctx, writeConArg);
 	}
 
-	public static final void insertDefaultFolderSQL(final int newFolderID, final int userId,
-			final FolderObject folderObj, final long creatingTime, final Context ctx, final Connection writeConArg)
-			throws SQLException, DBPoolingException {
+	static void insertDefaultFolderSQL(final int newFolderID, final int userId, final FolderObject folderObj,
+			final long creatingTime, final Context ctx, final Connection writeConArg) throws SQLException,
+			DBPoolingException {
 		insertFolderSQL(newFolderID, userId, folderObj, creatingTime, true, ctx, writeConArg);
 	}
 
-	private static final void insertFolderSQL(final int newFolderID, final int userId, final FolderObject folderObj,
+	private static void insertFolderSQL(final int newFolderID, final int userId, final FolderObject folderObj,
 			final long creatingTime, final boolean acceptDefaultFlag, final Context ctx, final Connection writeConArg)
 			throws SQLException, DBPoolingException {
 		Connection writeCon = writeConArg;
@@ -636,13 +632,15 @@ public class OXFolderSQL {
 		}
 	}
 
-	private static final String SQL_UPDATE_WITH_FOLDERNAME = "UPDATE oxfolder_tree SET fname = ?, changing_date = ?, changed_from = ?, permission_flag = ? WHERE cid = ? AND fuid = ?";
+	private static final String SQL_UPDATE_WITH_FOLDERNAME = "UPDATE oxfolder_tree SET fname = ?, changing_date = ?, changed_from = ?, "
+			+ "permission_flag = ?, module = ? WHERE cid = ? AND fuid = ?";
 
-	private static final String SQL_UPDATE_WITHOUT_FOLDERNAME = "UPDATE oxfolder_tree SET changing_date = ?, changed_from = ?, permission_flag = ? WHERE cid = ? AND fuid = ?";
+	private static final String SQL_UPDATE_WITHOUT_FOLDERNAME = "UPDATE oxfolder_tree SET changing_date = ?, changed_from = ?, "
+			+ "permission_flag = ?, module = ? WHERE cid = ? AND fuid = ?";
 
 	private static final String SQL_DELETE_EXISTING_PERMISSIONS = "DELETE FROM oxfolder_permissions WHERE cid = ? AND fuid = ?";
 
-	public final static void updateFolderSQL(final int userId, final FolderObject folderObj, final long lastModified,
+	static void updateFolderSQL(final int userId, final FolderObject folderObj, final long lastModified,
 			final Context ctx, final Connection writeConArg) throws SQLException, DBPoolingException {
 		Connection writeCon = writeConArg;
 		/*
@@ -677,24 +675,27 @@ public class OXFolderSQL {
 			}
 			PreparedStatement stmt = null;
 			try {
+				int pos = 1;
 				if (folderObj.containsFolderName()) {
 					stmt = writeCon.prepareStatement(SQL_UPDATE_WITH_FOLDERNAME);
-					stmt.setString(1, folderObj.getFolderName());
-					stmt.setLong(2, lastModified);
-					stmt.setInt(3, userId);
-					stmt.setInt(4, permissionFlag);
-					stmt.setInt(5, ctx.getContextId());
-					stmt.setInt(6, folderObj.getObjectID());
+					stmt.setString(pos++, folderObj.getFolderName());
+					stmt.setLong(pos++, lastModified);
+					stmt.setInt(pos++, userId);
+					stmt.setInt(pos++, permissionFlag);
+					stmt.setInt(pos++, folderObj.getModule());
+					stmt.setInt(pos++, ctx.getContextId());
+					stmt.setInt(pos++, folderObj.getObjectID());
 					stmt.executeUpdate();
 					stmt.close();
 					stmt = null;
 				} else {
 					stmt = writeCon.prepareStatement(SQL_UPDATE_WITHOUT_FOLDERNAME);
-					stmt.setLong(1, lastModified);
-					stmt.setInt(2, userId);
-					stmt.setInt(3, permissionFlag);
-					stmt.setInt(4, ctx.getContextId());
-					stmt.setInt(5, folderObj.getObjectID());
+					stmt.setLong(pos++, lastModified);
+					stmt.setInt(pos++, userId);
+					stmt.setInt(pos++, permissionFlag);
+					stmt.setInt(pos++, folderObj.getModule());
+					stmt.setInt(pos++, ctx.getContextId());
+					stmt.setInt(pos++, folderObj.getObjectID());
 					stmt.executeUpdate();
 					stmt.close();
 					stmt = null;
@@ -703,8 +704,9 @@ public class OXFolderSQL {
 				 * Delete old permissions
 				 */
 				stmt = writeCon.prepareStatement(SQL_DELETE_EXISTING_PERMISSIONS);
-				stmt.setInt(1, ctx.getContextId());
-				stmt.setInt(2, folderObj.getObjectID());
+				pos = 1;
+				stmt.setInt(pos++, ctx.getContextId());
+				stmt.setInt(pos++, folderObj.getObjectID());
 				stmt.executeUpdate();
 				stmt.close();
 				stmt = null;
@@ -716,15 +718,16 @@ public class OXFolderSQL {
 				final Iterator<OCLPermission> iter = folderObj.getPermissions().iterator();
 				for (int i = 0; i < permissionsSize; i++) {
 					final OCLPermission oclPerm = iter.next();
-					stmt.setInt(1, ctx.getContextId());
-					stmt.setInt(2, folderObj.getObjectID());
-					stmt.setInt(3, oclPerm.getEntity());
-					stmt.setInt(4, oclPerm.getFolderPermission());
-					stmt.setInt(5, oclPerm.getReadPermission());
-					stmt.setInt(6, oclPerm.getWritePermission());
-					stmt.setInt(7, oclPerm.getDeletePermission());
-					stmt.setInt(8, oclPerm.isFolderAdmin() ? 1 : 0);
-					stmt.setInt(9, oclPerm.isGroupPermission() ? 1 : 0);
+					pos = 1;
+					stmt.setInt(pos++, ctx.getContextId());
+					stmt.setInt(pos++, folderObj.getObjectID());
+					stmt.setInt(pos++, oclPerm.getEntity());
+					stmt.setInt(pos++, oclPerm.getFolderPermission());
+					stmt.setInt(pos++, oclPerm.getReadPermission());
+					stmt.setInt(pos++, oclPerm.getWritePermission());
+					stmt.setInt(pos++, oclPerm.getDeletePermission());
+					stmt.setInt(pos++, oclPerm.isFolderAdmin() ? 1 : 0);
+					stmt.setInt(pos++, oclPerm.isGroupPermission() ? 1 : 0);
 					stmt.addBatch();
 				}
 				stmt.executeBatch();
@@ -759,7 +762,7 @@ public class OXFolderSQL {
 
 	private static final String SQL_MOVE_UPDATE2 = "UPDATE oxfolder_tree SET subfolder_flag = ?, changing_date = ?, changed_from = ? WHERE cid = ? AND fuid = ?";
 
-	public static final void moveFolderSQL(final int userId, final FolderObject src, final FolderObject dest,
+	static void moveFolderSQL(final int userId, final FolderObject src, final FolderObject dest,
 			final long lastModified, final Context ctx, final Connection readConArg, final Connection writeConArg)
 			throws SQLException, DBPoolingException {
 		Connection writeCon = writeConArg;
@@ -840,7 +843,7 @@ public class OXFolderSQL {
 
 	private static final String SQL_RENAME_UPDATE = "UPDATE oxfolder_tree SET fname = ?, changing_date = ?, changed_from = ? where cid = ? AND fuid = ?";
 
-	public static final void renameFolderSQL(final int userId, final FolderObject folderObj, final long lastModified,
+	static void renameFolderSQL(final int userId, final FolderObject folderObj, final long lastModified,
 			final Context ctx, final Connection writeConArg) throws SQLException, DBPoolingException {
 		Connection writeCon = writeConArg;
 		boolean closeWriteCon = false;
@@ -895,8 +898,8 @@ public class OXFolderSQL {
 
 	private static final String STR_DELOXFOLDERPERMS = "del_oxfolder_permissions";
 
-	public static final void delWorkingOXFolder(final int folderId, final int userId, final long lastModified,
-			final Context ctx, final Connection writeConArg) throws SQLException, DBPoolingException {
+	static void delWorkingOXFolder(final int folderId, final int userId, final long lastModified, final Context ctx,
+			final Connection writeConArg) throws SQLException, DBPoolingException {
 		delOXFolder(folderId, userId, lastModified, true, true, ctx, writeConArg);
 	}
 
@@ -911,14 +914,14 @@ public class OXFolderSQL {
 	private static final String SQL_DELETE_UPDATE = "UPDATE del_oxfolder_tree SET changing_date = ?, changed_from = ? WHERE cid = ? AND fuid = ?";
 
 	/**
-	 * Deletes a folder entry - and its corresponding permission entries as well -
-	 * from underlying storage. <code>deleteWorking</code> determines whether
+	 * Deletes a folder entry - and its corresponding permission entries as well
+	 * - from underlying storage. <code>deleteWorking</code> determines whether
 	 * working or backup tables are affected by delete operation.
 	 * <code>createBackup</code> specifies if backup entries are going to be
 	 * created and is only allowed if <code>deleteWorking</code> is set to
 	 * <code>true</code>.
 	 */
-	private static final void delOXFolder(final int folderId, final int userId, final long lastModified,
+	private static void delOXFolder(final int folderId, final int userId, final long lastModified,
 			final boolean deleteWorking, final boolean createBackup, final Context ctx, final Connection writeConArg)
 			throws SQLException, DBPoolingException {
 		Connection writeCon = writeConArg;
@@ -1085,14 +1088,14 @@ public class OXFolderSQL {
 					callWriteCon.rollback(); // ROLLBACK
 					callWriteCon.setAutoCommit(true);
 				}
-				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, Integer.valueOf(ctx.getContextId()));
+				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
 			}
 		} finally {
 			NEXTSERIAL_LOCK.unlock();
 		}
 	}
 
-	public static void hardDeleteOXFolder(final int folderId, final Context ctx, final Connection writeConArg)
+	static void hardDeleteOXFolder(final int folderId, final Context ctx, final Connection writeConArg)
 			throws SQLException, DBPoolingException {
 		Connection writeCon = writeConArg;
 		boolean closeWrite = false;
@@ -1146,8 +1149,8 @@ public class OXFolderSQL {
 
 	private static final String SQL_GET_CONTEXT_MAILADMIN = "SELECT user FROM user_setting_admin WHERE cid = ?";
 
-	public static final int getContextMailAdmin(final Connection readConArg, final Context ctx)
-			throws DBPoolingException, SQLException {
+	public static int getContextMailAdmin(final Connection readConArg, final Context ctx) throws DBPoolingException,
+			SQLException {
 		Connection readCon = readConArg;
 		boolean createReadCon = false;
 		PreparedStatement stmt = null;
@@ -1181,9 +1184,9 @@ public class OXFolderSQL {
 	 * Deletes all permissions assigned to context's mail admin from given
 	 * permission table.
 	 */
-	public static final void handleMailAdminPermissions(final int mailAdmin, final String folderTable,
-			final String permTable, final Connection readConArg, final Connection writeConArg, final Context ctx)
-			throws DBPoolingException, SQLException {
+	static void handleMailAdminPermissions(final int mailAdmin, final String folderTable, final String permTable,
+			final Connection readConArg, final Connection writeConArg, final Context ctx) throws DBPoolingException,
+			SQLException {
 		handleEntityPermissions(mailAdmin, null, -1L, folderTable, permTable, readConArg, writeConArg, ctx);
 	}
 
@@ -1192,15 +1195,15 @@ public class OXFolderSQL {
 	 * permission is associated with a private folder, it is going to be
 	 * deleted. Otherwise the permission is reassigned to mailadmin.
 	 */
-	public static final void handleEntityPermissions(final int entity, final int mailAdmin, final long lastModified,
+	static void handleEntityPermissions(final int entity, final int mailAdmin, final long lastModified,
 			final String folderTable, final String permTable, final Connection readConArg,
 			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
 		handleEntityPermissions(entity, Integer.valueOf(mailAdmin), lastModified, folderTable, permTable, readConArg,
 				writeConArg, ctx);
 	}
 
-	private static final void handleEntityPermissions(final int entity, final Integer mailAdmin,
-			final long lastModified, final String folderTable, final String permTable, final Connection readConArg,
+	private static void handleEntityPermissions(final int entity, final Integer mailAdmin, final long lastModified,
+			final String folderTable, final String permTable, final Connection readConArg,
 			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
 		Connection readCon = readConArg;
 		boolean closeReadCon = false;
@@ -1277,9 +1280,8 @@ public class OXFolderSQL {
 
 	private static final String SQL_DELETE_PERMS = "DELETE FROM #PERM# WHERE cid = ? AND fuid = ? AND permission_id = ?";
 
-	private static final void deletePermissions(final Set<Integer> deletePerms, final int entity,
-			final String permTable, final Connection writeConArg, final Context ctx) throws DBPoolingException,
-			SQLException {
+	private static void deletePermissions(final Set<Integer> deletePerms, final int entity, final String permTable,
+			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
 		final int size = deletePerms.size();
 		if (size == 0) {
 			return;
@@ -1310,10 +1312,9 @@ public class OXFolderSQL {
 
 	private static final String SQL_REASSIGN_UPDATE_TIMESTAMP = "UPDATE #FOLDER# SET changed_from = ?, changing_date = ? WHERE cid = ? AND fuid = ?";
 
-	private static final void reassignPermissions(final Set<Integer> reassignPerms, final int entity,
-			final int mailAdmin, final long lastModified, final String folderTable, final String permTable,
-			final Connection readConArg, final Connection writeConArg, final Context ctx) throws DBPoolingException,
-			SQLException {
+	private static void reassignPermissions(final Set<Integer> reassignPerms, final int entity, final int mailAdmin,
+			final long lastModified, final String folderTable, final String permTable, final Connection readConArg,
+			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
 		final int size = reassignPerms.size();
 		if (size == 0) {
 			return;
@@ -1334,7 +1335,8 @@ public class OXFolderSQL {
 				closeRead = true;
 			}
 			// stmt =
-			// wc.prepareStatement(SQL_REASSIGN_PERMS.replaceFirst(TMPL_PERM_TABLE,
+			//wc.prepareStatement(SQL_REASSIGN_PERMS.replaceFirst(TMPL_PERM_TABLE
+			// ,
 			// permTable));
 			Iterator<Integer> iter = reassignPerms.iterator();
 			Next: for (int i = 0; i < size; i++) {
@@ -1381,13 +1383,9 @@ public class OXFolderSQL {
 						continue Next;
 					} finally {
 						stmt.close();
-						stmt = null;
 					}
 				}
 			}
-			// stmt.executeBatch();
-			// stmt.close();
-			// stmt = null;
 			stmt = wc.prepareStatement(SQL_REASSIGN_UPDATE_TIMESTAMP.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
 			iter = reassignPerms.iterator();
 			for (int i = 0; i < size; i++) {
@@ -1408,7 +1406,7 @@ public class OXFolderSQL {
 
 	private static final String SQL_REASSIGN_DEL_PERM = "DELETE FROM #PERM# WHERE cid = ? AND permission_id = ? AND fuid = ?";
 
-	private static final void deleteSingleEntityPermission(final int entity, final int fuid, final String permTable,
+	private static void deleteSingleEntityPermission(final int entity, final int fuid, final String permTable,
 			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
 		Connection wc = writeConArg;
 		boolean close = false;
@@ -1430,7 +1428,7 @@ public class OXFolderSQL {
 
 	private static final String SQL_REASSIGN_UPDATE_PERM = "UPDATE #PERM# SET fp = ?, orp = ?, owp = ?, odp = ?, admin_flag = ?, group_flag = ? WHERE cid = ? AND permission_id = ? AND fuid = ?";
 
-	private static final void updateSingleEntityPermission(final OCLPermission mergedPerm, final int mailAdmin,
+	private static void updateSingleEntityPermission(final OCLPermission mergedPerm, final int mailAdmin,
 			final int fuid, final String permTable, final Connection writeConArg, final Context ctx)
 			throws DBPoolingException, SQLException {
 		Connection wc = writeConArg;
@@ -1459,7 +1457,7 @@ public class OXFolderSQL {
 
 	private static final String SQL_REASSIGN_SEL_PERM = "SELECT fp, orp, owp, odp, admin_flag FROM #PERM# WHERE cid = ? AND permission_id = ? AND fuid = ?";
 
-	private static final OCLPermission getMergedPermission(final int entity, final int mailAdmin, final int fuid,
+	private static OCLPermission getMergedPermission(final int entity, final int mailAdmin, final int fuid,
 			final String permTable, final Connection readConArg, final Context ctx) throws SQLException,
 			DBPoolingException {
 		Connection readCon = readConArg;
@@ -1537,13 +1535,13 @@ public class OXFolderSQL {
 
 	// ------------------- DELETE FOLDERS --------------------------
 
-	public static final void handleMailAdminFolders(final int mailAdmin, final String folderTable,
-			final String permTable, final Connection readConArg, final Connection writeConArg, final Context ctx)
-			throws DBPoolingException, SQLException {
+	static void handleMailAdminFolders(final int mailAdmin, final String folderTable, final String permTable,
+			final Connection readConArg, final Connection writeConArg, final Context ctx) throws DBPoolingException,
+			SQLException {
 		handleEntityFolders(mailAdmin, null, -1L, folderTable, permTable, readConArg, writeConArg, ctx);
 	}
 
-	public static final void handleEntityFolders(final int entity, final int mailAdmin, final long lastModified,
+	static void handleEntityFolders(final int entity, final int mailAdmin, final long lastModified,
 			final String folderTable, final String permTable, final Connection readConArg,
 			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
 		handleEntityFolders(entity, Integer.valueOf(mailAdmin), lastModified, folderTable, permTable, readConArg,
@@ -1554,7 +1552,7 @@ public class OXFolderSQL {
 
 	private static final String SQL_SEL_FOLDERS2 = "SELECT ot.fuid FROM #FOLDER# AS ot WHERE ot.cid = ? AND ot.changed_from = ?";
 
-	private static final void handleEntityFolders(final int entity, final Integer mailAdmin, final long lastModified,
+	private static void handleEntityFolders(final int entity, final Integer mailAdmin, final long lastModified,
 			final String folderTable, final String permTable, final Connection readConArg,
 			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
 		Connection readCon = readConArg;
@@ -1672,7 +1670,7 @@ public class OXFolderSQL {
 
 	private static final String SQL_DELETE_FOLDER = "DELETE FROM #FOLDER# WHERE cid = ? AND fuid = ?";
 
-	private static final void deleteFolders(final Set<Integer> deleteFolders, final String folderTable,
+	private static void deleteFolders(final Set<Integer> deleteFolders, final String folderTable,
 			final String permTable, final Connection writeConArg, final Context ctx) throws DBPoolingException,
 			SQLException {
 		final int size = deleteFolders.size();
@@ -1719,7 +1717,7 @@ public class OXFolderSQL {
 
 	private static final String SQL_DELETE_SPECIAL_REFS = "DELETE FROM oxfolder_specialfolders WHERE cid = ? AND fuid = ?";
 
-	private static final void deleteSpecialfoldersRefs(final int fuid, final Connection writeConArg, final Context ctx)
+	private static void deleteSpecialfoldersRefs(final int fuid, final Connection writeConArg, final Context ctx)
 			throws DBPoolingException, SQLException {
 		Connection wc = writeConArg;
 		boolean closeWrite = false;
@@ -1740,8 +1738,8 @@ public class OXFolderSQL {
 
 	private static final String SQL_DELETE_FOLDER_PERMS = "DELETE FROM #PERM# WHERE cid = ? AND fuid = ?";
 
-	private static final void checkFolderPermissions(final int fuid, final String permTable,
-			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
+	private static void checkFolderPermissions(final int fuid, final String permTable, final Connection writeConArg,
+			final Context ctx) throws DBPoolingException, SQLException {
 		Connection wc = writeConArg;
 		boolean closeWrite = false;
 		PreparedStatement stmt = null;
@@ -1763,9 +1761,9 @@ public class OXFolderSQL {
 
 	private static final String SQL_REASSIGN_FOLDERS_WITH_NAME = "UPDATE #FOLDER# SET created_from = ?, changed_from = ?, changing_date = ?, default_flag = 0, fname = ? WHERE cid = ? AND fuid = ?";
 
-	private static final void reassignFolders(final Set<Integer> reassignFolders, final int entity,
-			final int mailAdmin, final long lastModified, final String folderTable, final Connection writeConArg,
-			final Context ctx) throws DBPoolingException, SQLException {
+	private static void reassignFolders(final Set<Integer> reassignFolders, final int entity, final int mailAdmin,
+			final long lastModified, final String folderTable, final Connection writeConArg, final Context ctx)
+			throws DBPoolingException, SQLException {
 		Connection wc = writeConArg;
 		boolean closeWrite = false;
 		PreparedStatement stmt = null;
@@ -1827,8 +1825,8 @@ public class OXFolderSQL {
 	private static final String SQL_DEF_INF = "SELECT fname FROM #FOLDER# WHERE cid = ? AND fuid = ? AND module = ? AND created_from = ? AND default_flag = 1";
 
 	/**
-	 * @return The entity's default infostore folder's name if <code>true</code>;
-	 *         otherwise <code>null</code>
+	 * @return The entity's default infostore folder's name if <code>true</code>
+	 *         ; otherwise <code>null</code>
 	 */
 	private static String isDefaultInfostoreFolder(final int fuid, final int entity, final String folderTable,
 			final Connection con, final Context ctx) throws SQLException {
@@ -1851,7 +1849,7 @@ public class OXFolderSQL {
 	 * @return <code>true</code> if folder type is set to private,
 	 *         <code>false</code> otherwise
 	 */
-	private static final boolean markForDeletion(final int type) {
+	private static boolean markForDeletion(final int type) {
 		return (type == FolderObject.PRIVATE); // || (type ==
 		// FolderObject.PUBLIC && module
 		// == FolderObject.INFOSTORE &&

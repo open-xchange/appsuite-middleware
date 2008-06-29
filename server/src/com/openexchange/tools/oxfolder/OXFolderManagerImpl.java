@@ -450,7 +450,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			}
 		}
 		final boolean performMove = fo.containsParentFolderID();
-		if (fo.containsPermissions()) {
+		if (fo.containsPermissions() || fo.containsModule()) {
 			if (performMove) {
 				move(fo.getObjectID(), fo.getParentFolderID(), lastModified);
 			}

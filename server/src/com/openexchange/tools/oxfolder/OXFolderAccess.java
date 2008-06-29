@@ -133,8 +133,8 @@ public class OXFolderAccess {
 	 * <code>com.openexchange.groupware.container.FolderObject</code> instance
 	 * either from cache (if enabled) or from underlying storage.
 	 * 
-	 * @param folderId -
-	 *            the folder ID
+	 * @param folderId
+	 *            - the folder ID
 	 * @return matching
 	 *         <code>com.openexchange.groupware.container.FolderObject</code>
 	 *         instance
@@ -154,8 +154,8 @@ public class OXFolderAccess {
 	 * Creates a <code>java.util.List</code> of <code>FolderObject</code>
 	 * instances fills which match given folder IDs
 	 * 
-	 * @param folderIDs -
-	 *            the folder IDs as an <code>int</code> array
+	 * @param folderIDs
+	 *            - the folder IDs as an <code>int</code> array
 	 * @return a <code>java.util.List</code> of <code>FolderObject</code>
 	 *         instances
 	 * @throws OXException
@@ -176,8 +176,8 @@ public class OXFolderAccess {
 	 * Creates a <code>java.util.List</code> of <code>FolderObject</code>
 	 * instances fills which match given folder IDs
 	 * 
-	 * @param folderIDs -
-	 *            the folder IDs backed by a <code>java.util.Collection</code>
+	 * @param folderIDs
+	 *            - the folder IDs backed by a <code>java.util.Collection</code>
 	 * @return a <code>java.util.List</code> of <code>FolderObject</code>
 	 *         instances
 	 * @throws OXException
@@ -198,14 +198,14 @@ public class OXFolderAccess {
 
 	/**
 	 * Determines folder type. The returned value is either
-	 * <code>FolderObject.PRIVATE</code>, <code>FolderObject.PUBLIC</code>
-	 * or <code>FolderObject.SHARED</code>. <b>NOTE:</b> This method assumes
-	 * that given user has read access!
+	 * <code>FolderObject.PRIVATE</code>, <code>FolderObject.PUBLIC</code> or
+	 * <code>FolderObject.SHARED</code>. <b>NOTE:</b> This method assumes that
+	 * given user has read access!
 	 * 
-	 * @param folderId -
-	 *            the folder ID
-	 * @param userId -
-	 *            the user ID
+	 * @param folderId
+	 *            - the folder ID
+	 * @param userId
+	 *            - the user ID
 	 * @return the folder type
 	 * @throws OXException
 	 */
@@ -216,12 +216,12 @@ public class OXFolderAccess {
 	/**
 	 * Determines the <b>plain</b> folder type meaning the returned value is
 	 * either <code>FolderObject.PRIVATE</code> or
-	 * <code>FolderObject.PUBLIC</code>. <b>NOTE:</b> Do not use this method
-	 * to check if folder is shared (<code>FolderObject.SHARED</code>), use
+	 * <code>FolderObject.PUBLIC</code>. <b>NOTE:</b> Do not use this method to
+	 * check if folder is shared (<code>FolderObject.SHARED</code>), use
 	 * {@link #getFolderType(int, int)} instead.
 	 * 
-	 * @param folderId -
-	 *            the folder ID
+	 * @param folderId
+	 *            - the folder ID
 	 * @return the folder type
 	 * @throws OXException
 	 * @see <code>getFolderType(int, int)</code>
@@ -233,8 +233,8 @@ public class OXFolderAccess {
 	/**
 	 * Determines folder module
 	 * 
-	 * @param folderId -
-	 *            the folder ID
+	 * @param folderId
+	 *            - the folder ID
 	 * @return folder module
 	 * @throws OXException
 	 */
@@ -245,8 +245,8 @@ public class OXFolderAccess {
 	/**
 	 * Determines folder owner
 	 * 
-	 * @param folderId -
-	 *            the folder ID
+	 * @param folderId
+	 *            - the folder ID
 	 * @return folder owner
 	 * @throws OXException
 	 */
@@ -258,10 +258,10 @@ public class OXFolderAccess {
 	 * Determines if folder is shared. <b>NOTE:</b> This method assumes that
 	 * given user has read access!
 	 * 
-	 * @param folderId -
-	 *            the folder ID
-	 * @param userId -
-	 *            the user ID
+	 * @param folderId
+	 *            - the folder ID
+	 * @param userId
+	 *            - the user ID
 	 * @return <code>true</code> if folder is shared, otherwise
 	 *         <code>false</code>
 	 * @throws OXException
@@ -273,8 +273,8 @@ public class OXFolderAccess {
 	/**
 	 * Determines if folder is an user's default folder
 	 * 
-	 * @param folderId -
-	 *            the folder ID
+	 * @param folderId
+	 *            - the folder ID
 	 * @return <code>true</code> if folder is marked as a default folder,
 	 *         otherwise <code>false</code>
 	 * @throws OXException
@@ -286,8 +286,8 @@ public class OXFolderAccess {
 	/**
 	 * Determines given folder's name
 	 * 
-	 * @param folderId -
-	 *            the folder ID
+	 * @param folderId
+	 *            - the folder ID
 	 * @return folder name
 	 * @throws OXException
 	 */
@@ -298,8 +298,8 @@ public class OXFolderAccess {
 	/**
 	 * Determines given folder's parent ID
 	 * 
-	 * @param folderId -
-	 *            the folder ID
+	 * @param folderId
+	 *            - the folder ID
 	 * @return folder parent ID
 	 * @throws OXException
 	 */
@@ -322,12 +322,12 @@ public class OXFolderAccess {
 	 * Determines user's effective permission on the folder matching given
 	 * folder ID.
 	 * 
-	 * @param folderId -
-	 *            the folder ID
-	 * @param userId -
-	 *            the user ID
-	 * @param userConfig -
-	 *            the user configuration
+	 * @param folderId
+	 *            - the folder ID
+	 * @param userId
+	 *            - the user ID
+	 * @param userConfig
+	 *            - the user configuration
 	 * @return user's effective permission
 	 * @throws OXException
 	 */
@@ -346,10 +346,10 @@ public class OXFolderAccess {
 	/**
 	 * Determines user's default folder of given module
 	 * 
-	 * @param userId -
-	 *            the user ID
-	 * @param module -
-	 *            the module
+	 * @param userId
+	 *            - the user ID
+	 * @param module
+	 *            - the module
 	 * @return user's default folder of given module
 	 * @throws OXException
 	 */
@@ -372,16 +372,17 @@ public class OXFolderAccess {
 	 * Determines if session's user is allowed to delete all objects located in
 	 * given folder.
 	 * <p>
-	 * <b>Note</b>: This method checks only by contained items and does <small><b>NOT</b></small>
-	 * check by the user's effective folder permission itself. Thus the user is
-	 * supposed to hold sufficient folder permissions on specified folder.
+	 * <b>Note</b>: This method checks only by contained items and does
+	 * <small><b>NOT</b></small> check by the user's effective folder permission
+	 * itself. Thus the user is supposed to hold sufficient folder permissions
+	 * on specified folder.
 	 * 
-	 * @param fo -
-	 *            the folder object
-	 * @param session -
-	 *            current user session
-	 * @param ctx -
-	 *            the context
+	 * @param fo
+	 *            - the folder object
+	 * @param session
+	 *            - current user session
+	 * @param ctx
+	 *            - the context
 	 * @return
 	 * @throws OXException
 	 */
@@ -400,12 +401,14 @@ public class OXFolderAccess {
 				 * Folder is not visible to user
 				 */
 				return false;
-			} else if (oclPerm.canDeleteAllObjects()) {
+			}
+			if (oclPerm.canDeleteAllObjects()) {
 				/*
 				 * Can delete all objects
 				 */
 				return true;
-			} else if (oclPerm.canDeleteOwnObjects()) {
+			}
+			if (oclPerm.canDeleteOwnObjects()) {
 				/*
 				 * User may only delete own objects. Check if folder contains
 				 * foreign objects which must not be deleted.

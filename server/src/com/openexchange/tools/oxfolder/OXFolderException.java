@@ -54,7 +54,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
 /**
- * OXFolderException
+ * {@link OXFolderException} - OX-Folder related exceptions
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -524,8 +524,8 @@ public class OXFolderException extends OXException {
 		 * %3$s. Only owner of parental shared folder %4$s may be folder admin
 		 */
 		INVALID_SHARED_FOLDER_SUBFOLDER_PERMISSION(
-				"User %1$s grants invalid permissions on shared folder %2$s in context %3$s. Only owner of parental shared folder %4$s may be folder admin",
-				Category.PERMISSION, 70),
+				"User %1$s grants invalid permissions on shared folder %2$s in context %3$s."
+						+ " Only owner of parental shared folder %4$s may be folder admin", Category.PERMISSION, 70),
 		/**
 		 * Owner %1$s of default folder %2$s must keep the folder admin
 		 * permission
@@ -551,15 +551,16 @@ public class OXFolderException extends OXException {
 		 * delete its parent folder.
 		 */
 		HIDDEN_FOLDER_ON_DELETION(
-				"Folder %1$s in context %2$s contains a hidden subfolder. User %3$s has no delete rights for this subfolder and consequently cannot delete its parent folder.",
+				"Folder %1$s in context %2$s contains a hidden subfolder."
+						+ " User %3$s has no delete rights for this subfolder and consequently cannot delete its parent folder.",
 				Category.PERMISSION, 74),
 		/**
 		 * An infostore folder named %1$s already exists below folder %2$s
 		 * (%3$s) in context %4$s. Please choose another display name.
 		 */
 		NO_DEFAULT_INFOSTORE_CREATE(
-				"An infostore folder named %1$s already exists below folder %2$s (%3$s) in context %4$s. Please choose another display name.",
-				Category.PERMISSION, 75),
+				"An infostore folder named %1$s already exists below folder %2$s (%3$s) in context %4$s."
+						+ " Please choose another display name.", Category.PERMISSION, 75),
 		/**
 		 * Folder contains invalid data: "%1$s"
 		 */
@@ -571,8 +572,13 @@ public class OXFolderException extends OXException {
 		 * share the folder.
 		 */
 		SIMILAR_NAMED_SHARED_FOLDER(
-				"A private folder with the same name %1$s has already been shared to identical user(s) (Either direct or affected user(s) are members of a group to whom the folder is shared).\nPlease enter another name to share the folder.",
-				Category.USER_INPUT, 77);
+				"A private folder with the same name %1$s has already been shared to identical user(s) "
+						+ "(Either direct or affected user(s) are members of a group to whom the folder is shared)."
+						+ "\nPlease enter another name to share the folder.", Category.USER_INPUT, 77),
+		/**
+		 * Folder module cannot be updated since folder is not empty
+		 */
+		NO_FOLDER_MODULE_UPDATE("Folder module cannot be updated since folder is not empty", Category.USER_INPUT, 78);
 
 		/**
 		 * Message of the exception.
@@ -589,16 +595,6 @@ public class OXFolderException extends OXException {
 		 */
 		private final int detailNumber;
 
-		/**
-		 * Default constructor.
-		 * 
-		 * @param message
-		 *            message.
-		 * @param category
-		 *            category.
-		 * @param detailNumber
-		 *            detail number.
-		 */
 		private FolderCode(final String message, final Category category, final int detailNumber) {
 			this.message = message;
 			this.category = category;
@@ -620,23 +616,65 @@ public class OXFolderException extends OXException {
 
 	private static final transient Object[] EMPTY_ARGS = new Object[0];
 
+	/**
+	 * Constructs a new {@link OXFolderException} from specified
+	 * {@link AbstractOXException init cause}.
+	 * 
+	 * @param e
+	 *            The init cause
+	 */
 	public OXFolderException(final AbstractOXException e) {
 		super(e);
 	}
 
+	/**
+	 * Constructs a new {@link OXFolderException} from specified
+	 * {@link FolderCode folder error code} only.
+	 * 
+	 * @param folderCode
+	 *            The folder error code
+	 */
 	public OXFolderException(final FolderCode folderCode) {
-		this(folderCode, (Throwable) null, EMPTY_ARGS);
+		super(EnumComponent.FOLDER, folderCode.category, folderCode.detailNumber, folderCode.message, null, EMPTY_ARGS);
 	}
 
+	/**
+	 * Constructs a new {@link OXFolderException}
+	 * 
+	 * @param folderCode
+	 *            The folder error code
+	 * @param messageArgs
+	 *            The error code's message arguments
+	 */
 	public OXFolderException(final FolderCode folderCode, final Object... messageArgs) {
-		this(folderCode, (Throwable) null, messageArgs);
+		super(EnumComponent.FOLDER, folderCode.category, folderCode.detailNumber, folderCode.message, null, messageArgs);
 	}
 
+	/**
+	 * Constructs a new {@link OXFolderException}
+	 * 
+	 * @param folderCode
+	 *            The folder error code
+	 * @param cause
+	 *            The init cause
+	 * @param messageArgs
+	 *            The error code's message arguments
+	 */
 	public OXFolderException(final FolderCode folderCode, final Throwable cause, final Object... messageArgs) {
 		super(EnumComponent.FOLDER, folderCode.category, folderCode.detailNumber, folderCode.message, cause,
 				messageArgs);
 	}
 
+	/**
+	 * Constructs a new {@link OXFolderException}
+	 * 
+	 * @param folderCode
+	 *            The folder error code
+	 * @param category
+	 *            The error's category
+	 * @param messageArgs
+	 *            The error code's message arguments
+	 */
 	public OXFolderException(final FolderCode folderCode, final Category category, final Object... messageArgs) {
 		super(EnumComponent.FOLDER, category, folderCode.detailNumber, folderCode.message, null, messageArgs);
 	}
