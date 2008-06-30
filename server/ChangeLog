@@ -1,3 +1,8 @@
+* 2008-06-30 - marcus.klein@open-xchange.com
+
+ - Bugfix #10743: This is a special case of problem described in bug 11250 and
+   it is fixed with fix for bug 11250.
+
 * 2008-06-30 - thorben.betten@open-xchange.com
 
  - Bugfix #9987: Remembering a timed-out IMAP server as being temporary
@@ -6,8 +11,8 @@
 
 * 2008-06-30 - choeger@open-xchange.com
 
- - Bugfix ID#11527: packages providing the same functionality should conflict
-                    added conflicts for authentication and spamhandler bundles
+ - Bugfix #11527: packages providing the same functionality should conflict
+   added conflicts for authentication and spamhandler bundles
 
 * 2008-06-27 - thorben.betten@open-xchange.com
 
