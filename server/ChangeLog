@@ -1,3 +1,8 @@
+* 2008-06-30 - choeger@open-xchange.com
+
+ - Bugfix ID#11527: packages providing the same functionality should conflict
+                    added conflicts for authentication and spamhandler bundles
+
 * 2008-06-27 - thorben.betten@open-xchange.com
 
  - Bugfix #11515: Properly detecting null value as user's mail login and
