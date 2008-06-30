@@ -8,6 +8,8 @@
    it is fixed with fix for bug 11250.
  - Bugfix #11524: Polling java.util.concurrent.DelayQueue without timeout to
    workaround a bug in this class not fixed in currently IBM Java 5.0.7.
+ - Bugfix #11423: Verified that all cache puts for contexts are located inside
+   a lock.
 
 * 2008-06-30 - thorben.betten@open-xchange.com
 
