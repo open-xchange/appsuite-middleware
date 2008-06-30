@@ -475,20 +475,11 @@ public final class SieveTextFilter {
             final int linenumber = owntype.getLinenumber();
             final String string = owntype.getOutput().toString();
             final int size = retval.size();
-            if (linenumber > size) {
-                fillup(retval, linenumber - (size));
+            if (linenumber > size + 1) {
+                fillup(retval, linenumber - (size + 1));
             }
             final List<String> stringToListComment = stringToListComment(string);
-            if (linenumber == retval.size()) {
-                retval.addAll(stringToListComment);
-            } else {
-                final int removelines = removelines(retval, linenumber, stringToListComment.size());
-                if (-1 != removelines) {
-                    retval.addAll(removelines, stringToListComment);
-                } else {
-                    retval.addAll(stringToListComment);
-                }
-            }
+            retval.addAll(stringToListComment);
         }
         for (final RuleComment rulename : rulenames) {
             final int line = rulename.getLine();
@@ -600,26 +591,6 @@ public final class SieveTextFilter {
 
     private void printErrorForUser(final OXMailfilterException mailfilterException) {
         LOG.error("Error in mailfilter rules of user " + this.username + ": " + mailfilterException.getMessage(), mailfilterException);
-    }
-
-    private int removelines(final List<String> retval, final int linenumber, final int lines) {
-        // Here we have to delete the lines after the linenumber which are
-        // empty, so that no text is removed
-        int deleteafter = -1;
-        for (int i = linenumber - 1; i < retval.size(); i++) {
-            if (retval.get(i).length() == 0) {
-                deleteafter = i;
-                break;
-            }
-        }
-        // We only delete lines if we have found empty lines
-        if (-1 != deleteafter) {
-            for (int i = 0; i < lines; i++) {
-                retval.remove(deleteafter);
-            }
-            return deleteafter;
-        }
-        return -1;
     }
 
     /**

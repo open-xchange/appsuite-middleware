@@ -1,3 +1,7 @@
+* 2008-06-30 - dennis.sieben@open-xchange.com
+
+ - Bugfix #11534: mailfilter: ox set vacation rule generates sieve error
+
 * 2008-06-30 - marcus.klein@open-xchange.com
 
  - Bugfix #10743: This is a special case of problem described in bug 11250 and
