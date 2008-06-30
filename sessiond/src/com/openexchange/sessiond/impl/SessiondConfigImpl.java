@@ -184,6 +184,7 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements
 							+ maxSession);
 		}
 		
+		maxSessionPerUser = 0;
 		maxSessionPerUser = parseProperty(conf,
 				"com.openexchange.sessiond.maxSessionPerUser", maxSessionPerUser);
 		if (LOG.isDebugEnabled()) {
