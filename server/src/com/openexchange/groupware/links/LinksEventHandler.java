@@ -50,9 +50,9 @@
 package com.openexchange.groupware.links;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,31 +71,32 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
-
+import com.openexchange.tools.sql.DBUtils;
 
 /**
- Links
- @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
- 
+ * Links
+ * 
+ * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
  */
-public class LinksEventHandler  implements AppointmentEventInterface, TaskEventInterface, ContactEventInterface, InfostoreEventInterface{
-	
+public class LinksEventHandler implements AppointmentEventInterface, TaskEventInterface, ContactEventInterface,
+		InfostoreEventInterface {
+
 	private static final Log LOG = LogFactory.getLog(LinksEventHandler.class);
-	
-	public LinksEventHandler () {
+
+	public LinksEventHandler() {
 		super();
 	}
 
 	public void appointmentCreated(final AppointmentObject appointmentObj, final Session sessionObj) {
-		//  nix
+		// nix
 	}
 
 	public void appointmentModified(final AppointmentObject appointmentObj, final Session sessionObj) {
-		updateLink(appointmentObj.getObjectID(),Types.APPOINTMENT,appointmentObj.getParentFolderID(),sessionObj);
+		updateLink(appointmentObj.getObjectID(), Types.APPOINTMENT, appointmentObj.getParentFolderID(), sessionObj);
 	}
 
 	public void appointmentDeleted(final AppointmentObject appointmentObj, final Session sessionObj) {
-		deleteLink(appointmentObj.getObjectID(),Types.APPOINTMENT,appointmentObj.getParentFolderID(),sessionObj);
+		deleteLink(appointmentObj.getObjectID(), Types.APPOINTMENT, appointmentObj.getParentFolderID(), sessionObj);
 	}
 
 	public void taskCreated(final Task taskObj, final Session sessionObj) {
@@ -103,11 +104,11 @@ public class LinksEventHandler  implements AppointmentEventInterface, TaskEventI
 	}
 
 	public void taskModified(final Task taskObj, final Session sessionObj) {
-		updateLink(taskObj.getObjectID(),Types.TASK,taskObj.getParentFolderID(),sessionObj);
+		updateLink(taskObj.getObjectID(), Types.TASK, taskObj.getParentFolderID(), sessionObj);
 	}
 
 	public void taskDeleted(final Task taskObj, final Session sessionObj) {
-		deleteLink(taskObj.getObjectID(),Types.TASK,taskObj.getParentFolderID(),sessionObj);
+		deleteLink(taskObj.getObjectID(), Types.TASK, taskObj.getParentFolderID(), sessionObj);
 	}
 
 	public void contactCreated(final ContactObject contactObj, final Session sessionObj) {
@@ -115,11 +116,11 @@ public class LinksEventHandler  implements AppointmentEventInterface, TaskEventI
 	}
 
 	public void contactModified(final ContactObject contactObj, final Session sessionObj) {
-		updateLink(contactObj.getObjectID(),Types.CONTACT,contactObj.getParentFolderID(),sessionObj);
+		updateLink(contactObj.getObjectID(), Types.CONTACT, contactObj.getParentFolderID(), sessionObj);
 	}
 
 	public void contactDeleted(final ContactObject contactObj, final Session sessionObj) {
-		deleteLink(contactObj.getObjectID(),Types.CONTACT,contactObj.getParentFolderID(),sessionObj);
+		deleteLink(contactObj.getObjectID(), Types.CONTACT, contactObj.getParentFolderID(), sessionObj);
 	}
 
 	public void infoitemCreated(final DocumentMetadata metadata, final Session sessionObject) {
@@ -129,142 +130,168 @@ public class LinksEventHandler  implements AppointmentEventInterface, TaskEventI
 	public void infoitemModified(final DocumentMetadata metadata, final Session sessionObject) {
 		// BOESE TODO
 		final int x = (int) metadata.getFolderId();
-		updateLink(metadata.getId(),Types.INFOSTORE,x,sessionObject);
+		updateLink(metadata.getId(), Types.INFOSTORE, x, sessionObject);
 	}
 
 	public void infoitemDeleted(final DocumentMetadata metadata, final Session sessionObject) {
 		// BOESE TODO
 		final int x = (int) metadata.getFolderId();
-		deleteLink(metadata.getId(),Types.INFOSTORE,x,sessionObject);
+		deleteLink(metadata.getId(), Types.INFOSTORE, x, sessionObject);
 	}
-	
-	public void deleteLink(final int id, final int type, final int fid, final Session so){
+
+	private static final String SQL_DEL = "DELETE from prg_links WHERE (firstid = ? AND firstmodule = ? AND firstfolder = ?)"
+			+ " OR (secondid = ? AND secondmodule = ? AND secondfolder = ?) AND cid = ?";
+
+	public void deleteLink(final int id, final int type, final int fid, final Session so) {
 		Connection writecon = null;
-		Statement del = null;
-		
+		PreparedStatement del = null;
+
 		Context ct = null;
 		try {
 			ct = ContextStorage.getStorageContext(so.getContextId());
 		} catch (final ContextException e) {
-			LOG.error(e.getMessage(), e);
+			LOG.error("ERROR: Unable to Delete Links from Object! cid=" + so.getContextId() + " oid=" + id + " fid="
+					+ fid, e);
+			return;
 		}
-		
-		try{
+
+		try {
 			writecon = DBPool.pickupWriteable(ct);
-			writecon.setAutoCommit(false);	
-			
-			del = writecon.createStatement();
-			del.execute("DELETE from prg_links WHERE (firstid = "+id+" AND firstmodule = "+type+" AND firstfolder = "+fid+") OR (secondid = "+id+" AND secondmodule = "+type+" AND secondfolder = "+fid+") AND cid = "+so.getContextId());
-			
+			writecon.setAutoCommit(false);
+
+			del = writecon.prepareStatement(SQL_DEL);
+			int pos = 1;
+			del.setInt(pos++, id);
+			del.setInt(pos++, type);
+			del.setInt(pos++, fid);
+			del.setInt(pos++, id);
+			del.setInt(pos++, type);
+			del.setInt(pos++, fid);
+			del.setInt(pos++, so.getContextId());
+			del.executeUpdate();
+
 			writecon.commit();
 		} catch (final Exception se) {
 			try {
 				writecon.rollback();
-			} catch (final SQLException see){
+			} catch (final SQLException see) {
 				LOG.error("Uable to rollback Link Delete", see);
 			}
-			LOG.error("ERROR: Unable to Delete Links from Object! cid="+so.getContextId()+" oid="+id+" fid="+fid,se);
+			LOG.error("ERROR: Unable to Delete Links from Object! cid=" + so.getContextId() + " oid=" + id + " fid="
+					+ fid, se);
 		} finally {
-			try{
+			try {
 				del.close();
-			}catch (final SQLException sq){
-				LOG.error("UNABLE TO CLOSE STATEMENT ",sq);
+			} catch (final SQLException sq) {
+				LOG.error("UNABLE TO CLOSE STATEMENT ", sq);
 			}
 			try {
 				writecon.setAutoCommit(true);
-			} catch (final SQLException see){
+			} catch (final SQLException see) {
 				LOG.error("Uable to close Writeconnection", see);
 			}
 			if (writecon != null) {
 				DBPool.closeWriterSilent(ct, writecon);
 			}
-		}		
-			
+		}
+
 	}
-	
-	public void updateLink(final int id, final int type, final int fid, final Session so){
-		Connection readcon = null;
-		Statement smt = null;
+
+	private static final String SQL_LOAD = "SELECT firstid, firstfolder, secondid, secondfolder FROM prg_links"
+			+ " WHERE ((firstid = ? AND firstmodule = ?) OR (secondid = ? AND secondmodule = ?)) AND cid = ? LIMIT 1";
+
+	private static final String SQL_UP1 = "UPDATE prg_links SET firstfolder = ? WHERE firstid = ? AND firstmodule = ? AND cid = ?";
+
+	private static final String SQL_UP2 = "UPDATE prg_links SET secondfolder = ? WHERE secondid = ? AND secondmodule = ? AND cid = ?";
+
+	public void updateLink(final int id, final int type, final int fid, final Session so) {
+		Connection writecon = null;
+		PreparedStatement smt = null;
 		ResultSet rs = null;
 		boolean updater = false;
-		
+
 		Context ct = null;
 		try {
 			ct = ContextStorage.getStorageContext(so.getContextId());
 		} catch (final ContextException e) {
-			//
+			LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid=" + so.getContextId() + " uid=" + id + " type="
+					+ type + " fid=" + fid + ')', e);
+			return;
 		}
-		
-		try{
-			readcon = DBPool.pickup(ct);
-			smt = readcon.createStatement();
-			rs = smt.executeQuery("SELECT firstid, firstfolder, secondid, secondfolder FROM prg_links WHERE ((firstid = "+id+" AND firstmodule = "+type+") OR (secondid = "+id+" AND secondmodule = "+type+")) AND cid = "+so.getContextId()+" LIMIT 1");
 
-			if (rs.next()){
+		try {
+			writecon = DBPool.pickupWriteable(ct);
+
+			smt = writecon.prepareStatement(SQL_LOAD);
+			int pos = 1;
+			smt.setInt(pos++, id);
+			smt.setInt(pos++, type);
+			smt.setInt(pos++, id);
+			smt.setInt(pos++, type);
+			smt.setInt(pos++, so.getContextId());
+			rs = smt.executeQuery();
+
+			if (rs.next()) {
 				int tp = rs.getInt(1);
 				int fp = rs.getInt(2);
-				if (tp != id){
+				if (tp != id) {
 					tp = rs.getInt(3);
 					fp = rs.getInt(4);
 				}
-				if (fid !=  fp) {
+				if (fid != fp) {
 					updater = true;
 				}
-			}		
-		} catch (final Exception e){
-			LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid="+so.getContextId()+" uid="+id+" type="+type+" fid="+fid+')', e);
-		}  finally {
-			try{
-				if (rs != null) {
-					rs.close();
-				}
-				if (smt != null) {
-					smt.close();
-				}
-			} catch (final SQLException see){
-				LOG.warn("Unable to close Statement", see);
 			}
-			if (readcon != null) {
-				DBPool.closeReaderSilent(ct, readcon);
-			}
+		} catch (final Exception e) {
+			LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid=" + so.getContextId() + " uid=" + id + " type="
+					+ type + " fid=" + fid + ')', e);
+		} finally {
+			DBUtils.closeResources(rs, smt, writecon, false, ct);
+			rs = null;
+			smt = null;
 		}
-		
-		Connection writecon = null;
-		Statement upd = null;
-		
-		if (updater){
-			try{
+
+		PreparedStatement upd = null;
+		if (updater) {
+			try {
 				writecon = DBPool.pickupWriteable(ct);
-				writecon.setAutoCommit(false);	
-				
-				upd = writecon.createStatement();
-				upd.execute("UPDATE prg_links SET firstfolder = "+fid+" WHERE firstid = "+id+" AND firstmodule = "+type+" AND cid = "+so.getContextId());
-				upd.execute("UPDATE prg_links SET secondfolder = "+fid+" WHERE secondid = "+id+" AND secondmodule = "+type+" AND cid = "+so.getContextId());
-				
+				writecon.setAutoCommit(false);
+
+				upd = writecon.prepareStatement(SQL_UP1);
+				int pos = 1;
+				upd.setInt(pos++, fid);
+				upd.setInt(pos++, id);
+				upd.setInt(pos++, type);
+				upd.setInt(pos++, so.getContextId());
+				upd.executeUpdate();
+				upd.close();
+
+				upd = writecon.prepareStatement(SQL_UP2);
+				pos = 1;
+				upd.setInt(pos++, fid);
+				upd.setInt(pos++, id);
+				upd.setInt(pos++, type);
+				upd.setInt(pos++, so.getContextId());
+				upd.executeUpdate();
+
 				writecon.commit();
 			} catch (final Exception se) {
 				try {
 					writecon.rollback();
-				} catch (final SQLException see){
+				} catch (final SQLException see) {
 					LOG.error("Uable to rollback Link Update", see);
 				}
-				LOG.error("ERROR: Unable to Update Links for Object! cid="+so.getContextId()+" oid="+id+" fid="+fid,se);
+				LOG.error("ERROR: Unable to Update Links for Object! cid=" + so.getContextId() + " oid=" + id + " fid="
+						+ fid, se);
 			} finally {
-				try{
-					upd.close();
-				}catch (final SQLException sq){
-					LOG.error("UNABLE TO CLOSE STATEMENT ",sq);
-				}
 				try {
 					writecon.setAutoCommit(true);
-				} catch (final SQLException see){
-					LOG.error("Uable to close Writeconnection", see);
+				} catch (final SQLException see) {
+					LOG.error("Unable to switch auto-commit", see);
 				}
-				if (writecon != null) {
-					DBPool.closeWriterSilent(ct, writecon);
-				}
+				DBUtils.closeResources(null, upd, writecon, false, ct);
 			}
 		}
 	}
-	
+
 }
