@@ -56,7 +56,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.DelayQueue;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -66,292 +65,298 @@ import com.openexchange.tools.StringCollection;
 
 /**
  * PushOutputQueue
- * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public class PushOutputQueue implements Runnable {
 
-	private static PushConfigInterface pushConfigInterface;
+    private static PushConfigInterface pushConfigInterface;
 
-	private static boolean isInit;
+    private static boolean isInit;
 
-	private static DelayQueue<PushDelayedObject> queue = new DelayQueue<PushDelayedObject>();
+    private static DelayQueue<PushDelayedObject> queue = new DelayQueue<PushDelayedObject>();
 
-	private static long delay = 60000;
+    private static long delay = 60000;
 
-	private static int remoteHostTimeOut = 3600000;
+    private static int remoteHostTimeOut = 3600000;
 
-	private static Set<RemoteHostObject> remoteHost;
+    private static Set<RemoteHostObject> remoteHost;
 
-	private static boolean isEnabled;
-	
-	private boolean isRunning = false;
+    private static boolean isEnabled;
 
-	private static final Log LOG = LogFactory.getLog(PushOutputQueue.class);
-	
-	private static HashMap<PushObject, PushDelayedObject> existingPushObjects = new HashMap<PushObject, PushDelayedObject>();
+    private boolean isRunning = false;
 
-	public PushOutputQueue(final PushConfigInterface pushConfigInterface) {
-		PushOutputQueue.pushConfigInterface = pushConfigInterface;
+    private static final Log LOG = LogFactory.getLog(PushOutputQueue.class);
 
-		remoteHost = pushConfigInterface.getRemoteHost();
+    private static HashMap<PushObject, PushDelayedObject> existingPushObjects = new HashMap<PushObject, PushDelayedObject>();
 
-		if (pushConfigInterface.isPushEnabled()) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Starting PushOutputQueue");
-			}
+    public PushOutputQueue(final PushConfigInterface pushConfigInterface) {
+        PushOutputQueue.pushConfigInterface = pushConfigInterface;
 
-			remoteHost = pushConfigInterface.getRemoteHost();
+        remoteHost = pushConfigInterface.getRemoteHost();
 
-			delay = pushConfigInterface.getOutputQueueDelay();
+        if (pushConfigInterface.isPushEnabled()) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Starting PushOutputQueue");
+            }
 
-			remoteHostTimeOut = pushConfigInterface.getRemoteHostTimeOut();
+            remoteHost = pushConfigInterface.getRemoteHost();
 
-			isEnabled = true;
-			
-			isRunning = true;
+            delay = pushConfigInterface.getOutputQueueDelay();
 
-			final Thread th = new Thread(this);
-			th.setName(this.getClass().getName());
-			th.start();
-		} else {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("PushOutputQueue is disabled");
-			}
-		}
+            remoteHostTimeOut = pushConfigInterface.getRemoteHostTimeOut();
 
-		isInit = true;
-	}
+            isEnabled = true;
 
-	public static void addRemoteHostObject(final RemoteHostObject remoteHostObject) {
-	    if (remoteHost.contains(remoteHostObject)) {
-	        remoteHost.remove(remoteHostObject);
-	    }
-		remoteHost.add(remoteHostObject);
-	}
+            isRunning = true;
 
-	public static void add(final PushObject pushObject) throws EventException {
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("add PushObject: " + pushObject);
-		}
+            final Thread th = new Thread(this);
+            th.setName(this.getClass().getName());
+            th.start();
+        } else {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("PushOutputQueue is disabled");
+            }
+        }
 
-		if (!isEnabled) {
-			return;
-		}
+        isInit = true;
+    }
 
-		if (!isInit) {
-			throw new EventException("PushOutputQueue not initialisiert!");
-		}
-		
-		final PushDelayedObject pushDelayedObject;
-		if (existingPushObjects.containsKey(pushObject)) {
-			pushDelayedObject = existingPushObjects.get(pushObject);
-			pushDelayedObject.updateTime();
-		} else {
-			pushDelayedObject = new PushDelayedObject(delay, pushObject);
-		}
-		
-		existingPushObjects.put(pushObject, pushDelayedObject);
-		queue.add(pushDelayedObject);
-	}
+    public static void addRemoteHostObject(final RemoteHostObject remoteHostObject) {
+        if (remoteHost.contains(remoteHostObject)) {
+            remoteHost.remove(remoteHostObject);
+        }
+        remoteHost.add(remoteHostObject);
+    }
 
-	public static void add(final RegisterObject registerObject) throws EventException {
-		add(registerObject, false);
-	}
+    public static void add(final PushObject pushObject) throws EventException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("add PushObject: " + pushObject);
+        }
 
-	public static void add(final RegisterObject registerObject, final boolean noDelay)
-			throws EventException {
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("add RegisterObject: " + registerObject);
-		}
+        if (!isEnabled) {
+            return;
+        }
 
-		if (!isEnabled) {
-			return;
-		}
+        if (!isInit) {
+            throw new EventException("PushOutputQueue not initialisiert!");
+        }
 
-		if (!isInit) {
-			throw new EventException("PushOutputQueue not initialisiert!");
-		}
+        final PushDelayedObject pushDelayedObject;
+        if (existingPushObjects.containsKey(pushObject)) {
+            pushDelayedObject = existingPushObjects.get(pushObject);
+            pushDelayedObject.updateTime();
+        } else {
+            pushDelayedObject = new PushDelayedObject(delay, pushObject);
+        }
 
-		if (noDelay) {
-			final PushDelayedObject pushDelayObject = new PushDelayedObject(0, registerObject);
-			queue.add(pushDelayObject);
-		} else {
-			final PushDelayedObject pushDelayObject = new PushDelayedObject(delay, registerObject);
-			queue.add(pushDelayObject);
-		}
-	}
+        existingPushObjects.put(pushObject, pushDelayedObject);
+        queue.add(pushDelayedObject);
+    }
 
-	public void run() {
-		while (isRunning) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("get push objects from queue: " + queue.size());
-			}
+    public static void add(final RegisterObject registerObject) throws EventException {
+        add(registerObject, false);
+    }
 
-			try {
-				final PushDelayedObject pushDelayedObject = queue.poll(10000, TimeUnit.MILLISECONDS);
-				if (pushDelayedObject != null) {
-					action(pushDelayedObject);
-				}
-			} catch (final Exception exc) {
-				LOG.error(exc.getMessage(), exc);
-			}
-		}
-	}
+    public static void add(final RegisterObject registerObject, final boolean noDelay)
+            throws EventException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("add RegisterObject: " + registerObject);
+        }
 
-	protected static void action(final PushDelayedObject pushDelayedObject) {
-		final AbstractPushObject abstractPushObject = pushDelayedObject.getPushObject();
+        if (!isEnabled) {
+            return;
+        }
 
-		if (abstractPushObject instanceof PushObject) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("Send Push Object");
-			}
-			
-			final PushObject pushObject =(PushObject) abstractPushObject; 
-			existingPushObjects.remove(pushObject);
-			
-			createPushPackage(pushObject);
-		} else if (abstractPushObject instanceof RegisterObject) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("Send Register Object");
-			}
+        if (!isInit) {
+            throw new EventException("PushOutputQueue not initialisiert!");
+        }
 
-			createRegisterPackage((RegisterObject) abstractPushObject);
-		}
-	}
+        if (noDelay) {
+            final PushDelayedObject pushDelayObject = new PushDelayedObject(0, registerObject);
+            queue.add(pushDelayObject);
+        } else {
+            final PushDelayedObject pushDelayObject = new PushDelayedObject(delay, registerObject);
+            queue.add(pushDelayObject);
+        }
+    }
 
-	protected static void createPushPackage(final PushObject pushObject) {
-		final int users[] = pushObject.getUsers();
-		for (int a = 0; a < users.length; a++) {
-			final int contextId = pushObject.getContextId();
+    public void run() {
+        while (isRunning) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("get push objects from queue: " + queue.size());
+            }
 
-			if (RegisterHandler.isRegistered(users[a], contextId)) {
-				final RegisterObject registerObj = RegisterHandler.getRegisterObject(users[a],
-						contextId);
-				final StringBuilder sb = new StringBuilder();
-				sb.append(pushObject.getFolderId());
-				sb.append('\1');
-				try {
-					makePackage(sb.toString().getBytes(), registerObj.getHostAddress(), registerObj
-							.getPort());
-				} catch (final Exception exc) {
-					LOG.error("createPushPackage", exc);
-				}
-			}
-		}
+            try {
+                // Breaks IBM Java
+//                final PushDelayedObject pushDelayedObject = queue.poll(10, TimeUnit.SECONDS);
+//                if (pushDelayedObject != null) {
+//                    action(pushDelayedObject);
+//                }
+                // Workaround for IBM Java (always sleeps 10 seconds even if push is added)
+                final PushDelayedObject pushDelayedObject = queue.poll();
+                if (pushDelayedObject != null) {
+                    action(pushDelayedObject);
+                } else {
+                    Thread.sleep(10000);
+                }
+            } catch (final Exception exc) {
+                LOG.error(exc.getMessage(), exc);
+            }
+        }
+    }
 
-		if (pushConfigInterface.isEventDistributionEnabled() && !pushObject.isSync()) {
-			// if (!pushObject.isSync()) {
-		    final Iterator<RemoteHostObject> iter = remoteHost.iterator();
-			while (iter.hasNext()) {
-			    final RemoteHostObject remoteHostObject = iter.next();
-				try {
-					final StringBuilder sb = new StringBuilder();
-					sb.append(PushRequest.MAGIC);
-					sb.append('\1');
+    protected static void action(final PushDelayedObject pushDelayedObject) {
+        final AbstractPushObject abstractPushObject = pushDelayedObject.getPushObject();
 
-					final StringBuilder data = new StringBuilder();
-					data.append(PushRequest.PUSH_SYNC);
-					data.append('\1');
-					data.append(pushObject.getFolderId());
-					data.append('\1');
-					data.append(pushObject.getModule());
-					data.append('\1');
-					data.append(pushObject.getContextId());
-					data.append('\1');
-					data.append(StringCollection.convertArray2String(pushObject.getUsers()));
+        if (abstractPushObject instanceof PushObject) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Send Push Object");
+            }
 
-					sb.append(data.length());
-					sb.append('\1');
-					sb.append(data);
+            final PushObject pushObject =(PushObject) abstractPushObject;
+            existingPushObjects.remove(pushObject);
 
-					final byte b[] = sb.toString().getBytes();
+            createPushPackage(pushObject);
+        } else if (abstractPushObject instanceof RegisterObject) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Send Register Object");
+            }
 
-					if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime() + remoteHostTimeOut)) {
-						makePackage(b, remoteHostObject.getHost(), remoteHostObject.getPort());
-					} else {
-						if (LOG.isTraceEnabled()) {
-							LOG.trace("remote host object is timed out");
-						}
-						iter.remove();
-					}
-				} catch (final Exception exc) {
-					LOG.error("createPushPackage", exc);
-				}
-			}
-			// }
-		}
-	}
+            createRegisterPackage((RegisterObject) abstractPushObject);
+        }
+    }
 
-	protected static void createRegisterPackage(final RegisterObject registerObject) {
-		if (!registerObject.isSync()) {
-			final StringBuilder sb = new StringBuilder();
-			sb.append("OK\1");
-			try {
-				makePackage(sb.toString().getBytes(), registerObject.getHostAddress(),
-						registerObject.getPort());
-			} catch (final Exception exc) {
-				LOG.error("createRegisterPackage", exc);
-			}
-		}
+    protected static void createPushPackage(final PushObject pushObject) {
+        final int users[] = pushObject.getUsers();
+        for (int a = 0; a < users.length; a++) {
+            final int contextId = pushObject.getContextId();
 
-		if (pushConfigInterface.isRegisterDistributionEnabled()) {
-		    final Iterator<RemoteHostObject> iter = remoteHost.iterator();
-			while (iter.hasNext()) {
-			    final RemoteHostObject remoteHostObject = iter.next();
-				try {
-					final StringBuilder sb = new StringBuilder();
-					sb.append(PushRequest.MAGIC);
-					sb.append('\1');
+            if (RegisterHandler.isRegistered(users[a], contextId)) {
+                final RegisterObject registerObj = RegisterHandler.getRegisterObject(users[a],
+                        contextId);
+                final StringBuilder sb = new StringBuilder();
+                sb.append(pushObject.getFolderId());
+                sb.append('\1');
+                try {
+                    makePackage(sb.toString().getBytes(), registerObj.getHostAddress(), registerObj
+                            .getPort());
+                } catch (final Exception exc) {
+                    LOG.error("createPushPackage", exc);
+                }
+            }
+        }
 
-					final StringBuilder data = new StringBuilder();
-					data.append(PushRequest.REGISTER_SYNC);
-					data.append('\1');
-					data.append(registerObject.getUserId());
-					data.append('\1');
-					data.append(registerObject.getContextId());
-					data.append('\1');
-					data.append(registerObject.getHostAddress());
-					data.append('\1');
-					data.append(registerObject.getPort());
-					data.append('\1');
-					data.append(registerObject.isSync());
-					data.append('\1');
+        if (pushConfigInterface.isEventDistributionEnabled() && !pushObject.isSync()) {
+            // if (!pushObject.isSync()) {
+            final Iterator<RemoteHostObject> iter = remoteHost.iterator();
+            while (iter.hasNext()) {
+                final RemoteHostObject remoteHostObject = iter.next();
+                try {
+                    final StringBuilder sb = new StringBuilder();
+                    sb.append(PushRequest.MAGIC);
+                    sb.append('\1');
 
-					sb.append(data.length());
-					sb.append('\1');
-					sb.append(data);
+                    final StringBuilder data = new StringBuilder();
+                    data.append(PushRequest.PUSH_SYNC);
+                    data.append('\1');
+                    data.append(pushObject.getFolderId());
+                    data.append('\1');
+                    data.append(pushObject.getModule());
+                    data.append('\1');
+                    data.append(pushObject.getContextId());
+                    data.append('\1');
+                    data.append(StringCollection.convertArray2String(pushObject.getUsers()));
 
-					final byte b[] = sb.toString().getBytes();
-					if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime() + remoteHostTimeOut)) {
-						makePackage(b, remoteHostObject.getHost(), remoteHostObject.getPort());
-					} else {
-						if (LOG.isTraceEnabled()) {
-							LOG.trace("remote host object is timed out");
-						}
-						iter.remove();
-					}
-				} catch (final Exception exc) {
-					LOG.error("createRegisterPackage", exc);
-				}
-			}
-		}
-	}
+                    sb.append(data.length());
+                    sb.append('\1');
+                    sb.append(data);
 
-	protected static void makePackage(final byte[] b, final String host, final int port)
-			throws Exception {
-		makePackage(b, InetAddress.getByName(host), port);
-	}
+                    final byte b[] = sb.toString().getBytes();
 
-	protected static void makePackage(final byte[] b, final InetAddress host, final int port)
-			throws Exception {
-		final DatagramSocket datagramSocket = PushSocket.getPushDatagramSocket();
-		final DatagramPacket datagramPackage = new DatagramPacket(b, b.length, host, port);
-		datagramSocket.send(datagramPackage);
-	}
-	
-	public void close() {
-		isRunning = false;
-	}
+                    if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime() + remoteHostTimeOut)) {
+                        makePackage(b, remoteHostObject.getHost(), remoteHostObject.getPort());
+                    } else {
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace("remote host object is timed out");
+                        }
+                        iter.remove();
+                    }
+                } catch (final Exception exc) {
+                    LOG.error("createPushPackage", exc);
+                }
+            }
+            // }
+        }
+    }
+
+    protected static void createRegisterPackage(final RegisterObject registerObject) {
+        if (!registerObject.isSync()) {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("OK\1");
+            try {
+                makePackage(sb.toString().getBytes(), registerObject.getHostAddress(),
+                        registerObject.getPort());
+            } catch (final Exception exc) {
+                LOG.error("createRegisterPackage", exc);
+            }
+        }
+
+        if (pushConfigInterface.isRegisterDistributionEnabled()) {
+            final Iterator<RemoteHostObject> iter = remoteHost.iterator();
+            while (iter.hasNext()) {
+                final RemoteHostObject remoteHostObject = iter.next();
+                try {
+                    final StringBuilder sb = new StringBuilder();
+                    sb.append(PushRequest.MAGIC);
+                    sb.append('\1');
+
+                    final StringBuilder data = new StringBuilder();
+                    data.append(PushRequest.REGISTER_SYNC);
+                    data.append('\1');
+                    data.append(registerObject.getUserId());
+                    data.append('\1');
+                    data.append(registerObject.getContextId());
+                    data.append('\1');
+                    data.append(registerObject.getHostAddress());
+                    data.append('\1');
+                    data.append(registerObject.getPort());
+                    data.append('\1');
+                    data.append(registerObject.isSync());
+                    data.append('\1');
+
+                    sb.append(data.length());
+                    sb.append('\1');
+                    sb.append(data);
+
+                    final byte b[] = sb.toString().getBytes();
+                    if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime() + remoteHostTimeOut)) {
+                        makePackage(b, remoteHostObject.getHost(), remoteHostObject.getPort());
+                    } else {
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace("remote host object is timed out");
+                        }
+                        iter.remove();
+                    }
+                } catch (final Exception exc) {
+                    LOG.error("createRegisterPackage", exc);
+                }
+            }
+        }
+    }
+
+    protected static void makePackage(final byte[] b, final String host, final int port)
+            throws Exception {
+        makePackage(b, InetAddress.getByName(host), port);
+    }
+
+    protected static void makePackage(final byte[] b, final InetAddress host, final int port)
+            throws Exception {
+        final DatagramSocket datagramSocket = PushSocket.getPushDatagramSocket();
+        final DatagramPacket datagramPackage = new DatagramPacket(b, b.length, host, port);
+        datagramSocket.send(datagramPackage);
+    }
+
+    public void close() {
+        isRunning = false;
+    }
 }

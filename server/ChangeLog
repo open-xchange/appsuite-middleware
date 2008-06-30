@@ -2,6 +2,8 @@
 
  - Bugfix #10743: This is a special case of problem described in bug 11250 and
    it is fixed with fix for bug 11250.
+ - Bugfix #11524: Polling java.util.concurrent.DelayQueue without timeout to
+   workaround a bug in this class not fixed in currently IBM Java 5.0.7.
 
 * 2008-06-30 - thorben.betten@open-xchange.com
 
