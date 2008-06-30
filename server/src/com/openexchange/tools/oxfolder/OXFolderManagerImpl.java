@@ -724,30 +724,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		/*
 		 * Get storage version (and thus implicitly check existence)
 		 */
-		final FolderObject storageObj;
-		try {
-			/*
-			 * Fetch from master database, cause a move operation could be done
-			 * before
-			 */
-			Connection wc = writeCon;
-			final boolean create = (wc == null);
-			try {
-				if (create) {
-					wc = DBPool.pickupWriteable(ctx);
-				}
-				storageObj = FolderObject.loadFolderObjectFromDB(folderObj.getObjectID(), ctx, wc);
-			} finally {
-				if (create && wc != null) {
-					DBPool.closeWriterSilent(ctx, wc);
-					wc = null;
-				}
-			}
-		} catch (final OXFolderNotFoundException e) {
-			throw e;
-		} catch (final DBPoolingException e) {
-			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
-		}
+		final FolderObject storageObj = getFolderFromMaster(folderObj.getObjectID());
 		/*
 		 * Check if rename can be avoided (cause new name equals old one) and
 		 * prevent default folder rename
