@@ -518,13 +518,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			/*
 			 * Not possible to retry since connection is broken
 			 */
-			throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapAccess.getMailConfig().getServer(),
+			throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapAccess.getMailConfig().getServer(),
 					imapAccess.getMailConfig().getLogin());
 		} catch (final StoreClosedException e) {
 			/*
 			 * Not possible to retry since connection is broken
 			 */
-			throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapAccess.getMailConfig().getServer(),
+			throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapAccess.getMailConfig().getServer(),
 					imapAccess.getMailConfig().getLogin());
 		} catch (final MessagingException e) {
 			throw new IMAPException(IMAPException.Code.UID_EXPUNGE_FAILED, e, Arrays.toString(tmp), imapFolder
@@ -701,13 +701,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				/*
 				 * Not possible to retry since connection is broken
 				 */
-				throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapAccess.getMailConfig().getServer(),
+				throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapAccess.getMailConfig().getServer(),
 						imapAccess.getMailConfig().getLogin());
 			} catch (final StoreClosedException e) {
 				/*
 				 * Not possible to retry since connection is broken
 				 */
-				throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapAccess.getMailConfig().getServer(),
+				throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapAccess.getMailConfig().getServer(),
 						imapAccess.getMailConfig().getLogin());
 			} catch (final MessagingException e) {
 				throw new IMAPException(IMAPException.Code.UID_EXPUNGE_FAILED, e, Arrays.toString(tmp), imapFolder

@@ -100,6 +100,8 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 
 	private int imapConnectionIdleTime;
 
+	private int imapTemporaryDown;
+
 	private String imapAuthEnc;
 
 	private String user2AclImpl;
@@ -185,6 +187,19 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 		}
 
 		{
+			final String imapTempDownStr = configuration.getProperty("com.openexchange.imap.imapTemporaryDown", "0")
+					.trim();
+			try {
+				imapTemporaryDown = Integer.parseInt(imapTempDownStr);
+				logBuilder.append("\tIMAP Temporary Down: ").append(imapTemporaryDown).append('\n');
+			} catch (final NumberFormatException e) {
+				imapTemporaryDown = 0;
+				logBuilder.append("\tIMAP Temporary Down: Invalid value \"").append(imapTempDownStr).append(
+						"\". Setting to fallback: ").append(imapTemporaryDown).append('\n');
+			}
+		}
+
+		{
 			final String maxConIdleTime = configuration.getProperty("com.openexchange.imap.maxIMAPConnectionIdleTime",
 					"60000").trim();
 			try {
@@ -262,6 +277,7 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 		imapTimeout = 0;
 		imapConnectionTimeout = 0;
 		imapConnectionIdleTime = 0;
+		imapTemporaryDown = 0;
 		imapAuthEnc = null;
 		user2AclImpl = null;
 		mboxEnabled = false;
@@ -303,6 +319,15 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 	 */
 	int getImapConnectionTimeout() {
 		return imapConnectionTimeout;
+	}
+
+	/**
+	 * Gets the imapTemporaryDown
+	 * 
+	 * @return the imapTemporaryDown
+	 */
+	int getImapTemporaryDown() {
+		return imapTemporaryDown;
 	}
 
 	/**

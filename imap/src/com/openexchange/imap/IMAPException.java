@@ -309,7 +309,7 @@ public final class IMAPException extends MIMEMailException {
 		 * Connection was refused or timed out while attempting to connect to
 		 * remote server %1$s for user %1$s
 		 */
-		CONNECTION_ERROR(MIMEMailException.Code.CONNECT_ERROR),
+		CONNECT_ERROR(MIMEMailException.Code.CONNECT_ERROR),
 		/**
 		 * Mailbox' root folder must not be source or the destination fullname
 		 * of a move operation.

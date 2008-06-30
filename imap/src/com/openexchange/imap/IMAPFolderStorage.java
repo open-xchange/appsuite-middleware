@@ -1126,7 +1126,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 							LOG.debug(debug.append("EXPUNGE command timed out in ").append(
 									(System.currentTimeMillis() - startExpunge)).append("msec").toString());
 						}
-						throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapConfig.getServer(),
+						throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapConfig.getServer(),
 								imapConfig.getLogin());
 					} catch (final StoreClosedException e) {
 						/*
@@ -1137,7 +1137,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 							LOG.debug(debug.append("EXPUNGE command timed out in ").append(
 									(System.currentTimeMillis() - startExpunge)).append("msec").toString());
 						}
-						throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapConfig.getServer(),
+						throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapConfig.getServer(),
 								imapConfig.getLogin());
 					}
 					/*

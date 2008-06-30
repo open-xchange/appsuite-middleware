@@ -116,6 +116,15 @@ public final class IMAPConfig extends MailConfig {
 	}
 
 	/**
+	 * Gets the imapTemporaryDown
+	 * 
+	 * @return the imapTemporaryDown
+	 */
+	public static int getImapTemporaryDown() {
+		return IMAPProperties.getInstance().getImapTemporaryDown();
+	}
+
+	/**
 	 * Gets the imapTimeout
 	 * 
 	 * @return the imapTimeout

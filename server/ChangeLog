@@ -1,3 +1,9 @@
+* 2008-06-30 - thorben.betten@open-xchange.com
+
+ - Bugfix #9987: Remembering a timed-out IMAP server as being temporary
+   down on a failed connect attempt for a configurable amount of time and
+   denying every request to affected IMAP for that time range.
+
 * 2008-06-30 - choeger@open-xchange.com
 
  - Bugfix ID#11527: packages providing the same functionality should conflict

@@ -50,8 +50,12 @@
 package com.openexchange.imap;
 
 import java.io.UnsupportedEncodingException;
+import java.net.SocketTimeoutException;
 import java.security.Security;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.mail.MessagingException;
 
@@ -89,6 +93,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 			.getLog(IMAPAccess.class);
 
 	private static final String CHARENC_ISO8859 = "ISO-8859-1";
+
+	private static final Map<HostAndPort, Long> timedOutServers = new ConcurrentHashMap<HostAndPort, Long>();
 
 	private IMAPFolderStorage folderStorage;
 
@@ -206,6 +212,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
 	private static final String CLASSNAME_SECURITY_FACTORY = "com.openexchange.tools.ssl.TrustAllSSLSocketFactory";
 
+	private static final String ERR_CONNECT_TIMEOUT = "connect timed out";
+
 	@Override
 	protected void connectInternal() throws MailException {
 		if ((imapStore != null) && imapStore.isConnected()) {
@@ -213,6 +221,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 			return;
 		}
 		try {
+			final boolean tmpDownEnabled = (IMAPConfig.getImapTemporaryDown() > 0);
+			if (tmpDownEnabled) {
+				/*
+				 * Check if IMAP server is marked as being (temporary) down
+				 * since connecting to it failed before
+				 */
+				checkTemporaryDown();
+			}
 			final Properties imapProps = IMAPSessionProperties.getDefaultSessionProperties();
 			if ((null != getMailProperties()) && !getMailProperties().isEmpty()) {
 				imapProps.putAll(getMailProperties());
@@ -254,8 +270,22 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 					LOG.error(e.getMessage(), e);
 				}
 			}
-			imapStore.connect(getMailConfig().getServer(), getMailConfig().getPort(), getMailConfig().getLogin(),
-					tmpPass);
+			try {
+				imapStore.connect(getMailConfig().getServer(), getMailConfig().getPort(), getMailConfig().getLogin(),
+						tmpPass);
+			} catch (final MessagingException e) {
+				if (tmpDownEnabled
+						&& SocketTimeoutException.class.isInstance(e.getNextException())
+						&& ((SocketTimeoutException) e.getNextException()).getMessage().toLowerCase(Locale.ENGLISH)
+								.indexOf(ERR_CONNECT_TIMEOUT) != -1) {
+					/*
+					 * Remember a timed-out IMAP server on connect attempt
+					 */
+					timedOutServers.put(new HostAndPort(getMailConfig().getServer(), getMailConfig().getPort()), Long
+							.valueOf(System.currentTimeMillis()));
+				}
+				throw e;
+			}
 			connected = true;
 			/*
 			 * Add server's capabilities
@@ -273,6 +303,21 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 			decrement = true;
 		} catch (final MessagingException e) {
 			throw MIMEMailException.handleMessagingException(e, getMailConfig());
+		}
+	}
+
+	private void checkTemporaryDown() throws MailException, IMAPException {
+		final HostAndPort key = new HostAndPort(getMailConfig().getServer(), getMailConfig().getPort());
+		final Long range = timedOutServers.get(key);
+		if (range != null) {
+			if (System.currentTimeMillis() - range.longValue() <= IMAPConfig.getImapTemporaryDown()) {
+				/*
+				 * Still treated as being temporary broken
+				 */
+				throw new IMAPException(IMAPException.Code.CONNECT_ERROR, getMailConfig().getServer(), getMailConfig()
+						.getLogin());
+			}
+			timedOutServers.remove(key);
 		}
 	}
 
@@ -364,6 +409,58 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 	@Override
 	protected boolean checkMailServerPort() {
 		return true;
+	}
+
+	private static final class HostAndPort {
+
+		private final String host;
+
+		private final int port;
+
+		private final int hashCode;
+
+		public HostAndPort(final String host, final int port) {
+			super();
+			if (port < 0 || port > 0xFFFF) {
+				throw new IllegalArgumentException("port out of range:" + port);
+			}
+			if (host == null) {
+				throw new IllegalArgumentException("hostname can't be null");
+			}
+			this.host = host;
+			this.port = port;
+			hashCode = (host.toLowerCase(Locale.ENGLISH).hashCode()) ^ port;
+		}
+
+		@Override
+		public int hashCode() {
+			return hashCode;
+		}
+
+		@Override
+		public boolean equals(final Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			final HostAndPort other = (HostAndPort) obj;
+			if (host == null) {
+				if (other.host != null) {
+					return false;
+				}
+			} else if (!host.equals(other.host)) {
+				return false;
+			}
+			if (port != other.port) {
+				return false;
+			}
+			return true;
+		}
 	}
 
 }
