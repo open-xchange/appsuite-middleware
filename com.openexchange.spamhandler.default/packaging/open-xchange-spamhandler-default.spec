@@ -3,6 +3,7 @@
 
 Name:           open-xchange-spamhandler-default
 Provides:	open-xchange-spamhandler
+Conflicts:	open-xchange-spamhandler-spamassassin
 BuildArch:	noarch
 BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-server
 %if 0%{?suse_version}
