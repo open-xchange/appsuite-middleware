@@ -87,6 +87,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -96,6 +97,8 @@ import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
@@ -550,18 +553,20 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // is overwritten
             final SettingStorage settStor = SettingStorage.getInstance(ctx.getId().intValue(), usrdata.getId().intValue());
             final Map<String, String> guiPreferences = usrdata.getGuiPreferences();
-            final Iterator<Entry<String, String>> iter = guiPreferences.entrySet().iterator();
-            while (iter.hasNext()) {
-                final Entry<String, String> entry = iter.next();
-                final String key = entry.getKey();
-                final String value = entry.getValue();
-                if (null != key && null != value) {
-                    try {
-                        final Setting setting = ConfigTree.getSettingByPath(key);
-                        setting.setSingleValue(value);
-                        settStor.save(write_ox_con, setting);
-                    } catch (final SettingException e) {
-                        log.error("Problem while storing GUI preferences.", e);
+            if( guiPreferences != null ) {
+                final Iterator<Entry<String, String>> iter = guiPreferences.entrySet().iterator();
+                while (iter.hasNext()) {
+                    final Entry<String, String> entry = iter.next();
+                    final String key = entry.getKey();
+                    final String value = entry.getValue();
+                    if (null != key && null != value) {
+                        try {
+                            final Setting setting = ConfigTree.getSettingByPath(key);
+                            setting.setSingleValue(value);
+                            settStor.save(write_ox_con, setting);
+                        } catch (final SettingException e) {
+                            log.error("Problem while storing GUI preferences.", e);
+                        }
                     }
                 }
             }
@@ -2214,12 +2219,21 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setDelegateTasks(access.getDelegateTask());
 
             RdbUserConfigurationStorage.saveUserConfiguration(user, insert_or_update, write_ox_con);
+            com.openexchange.groupware.contexts.Context tmp = ContextStorage.getInstance().getContext(ctx.getId());
+            final UserConfigurationStorage uConfStor = UserConfigurationStorage.getInstance();
+            uConfStor.removeUserConfiguration(user.getUserId(), tmp);
         } catch (final DBPoolingException pole) {
             log.error("DBPooling Error", pole);
             throw new StorageException(pole.toString());
         } catch (final SQLException sqle) {
             log.error("SQL Error", sqle);
             throw new StorageException(sqle.toString());
+        } catch (ContextException e) {
+            log.error("Context Error", e);
+            throw new StorageException(e.toString());
+        } catch (UserConfigurationException e) {
+            log.error("UserConfiguration Error", e);
+            throw new StorageException(e.toString());
         }
     }
 
