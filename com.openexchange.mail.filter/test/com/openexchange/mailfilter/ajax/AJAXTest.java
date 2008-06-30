@@ -142,6 +142,18 @@ public abstract class AJAXTest {
         mailfilterupdate(login, getHostname(), getUsername(), test);
     }
     
+    @Test
+    public void MailfiltergetScriptTest() throws MalformedURLException, IOException, SAXException, JSONException {
+        final WebConversation login = login();
+        mailfiltergetScript(login, getHostname(), getUsername());
+    }
+    
+    @Test
+    public void MailfilterdeleteScriptTest() throws MalformedURLException, IOException, SAXException, JSONException {
+        final WebConversation login = login();
+        mailfilterdeleteScript(login, getHostname(), getUsername());
+    }
+    
     protected abstract String getHostname();
     
     protected abstract String getUsername();
@@ -295,5 +307,46 @@ public abstract class AJAXTest {
         assertFalse(json.optString("error"), json.has("error"));
         System.out.println(json);
     }
-    
+
+    private void mailfiltergetScript(final WebConversation conversation, final String hostname, final String username) throws MalformedURLException, IOException, SAXException, JSONException {
+        String body;
+        final WebRequest reqmailfilter = new GetMethodWebRequest(PROTOCOL + hostname + MAILFILTER_ADMIN);
+        reqmailfilter.setParameter("action", "getscript");
+        if (null != username) {
+            reqmailfilter.setParameter("username", username);
+        }
+//        reqmailfilter.setParameter("flag", "AdminFlag");
+        final WebResponse mailfilterresp = conversation.getResponse(reqmailfilter);
+        body = mailfilterresp.getText();
+        final JSONObject json;
+        try {
+            json = new JSONObject(body);
+        } catch (JSONException e) {
+            System.out.println("Can't parse this body to JSON: \"" + body + '\"');
+            throw e;
+        }
+        assertFalse(json.optString("error"), json.has("error"));
+        System.out.println(json);
+    }
+
+    private void mailfilterdeleteScript(final WebConversation conversation, final String hostname, final String username) throws MalformedURLException, IOException, SAXException, JSONException {
+        String body;
+        final WebRequest reqmailfilter = new GetMethodWebRequest(PROTOCOL + hostname + MAILFILTER_ADMIN);
+        reqmailfilter.setParameter("action", "deletescript");
+        if (null != username) {
+            reqmailfilter.setParameter("username", username);
+        }
+//        reqmailfilter.setParameter("flag", "AdminFlag");
+        final WebResponse mailfilterresp = conversation.getResponse(reqmailfilter);
+        body = mailfilterresp.getText();
+        final JSONObject json;
+        try {
+            json = new JSONObject(body);
+        } catch (JSONException e) {
+            System.out.println("Can't parse this body to JSON: \"" + body + '\"');
+            throw e;
+        }
+        assertFalse(json.optString("error"), json.has("error"));
+        System.out.println(json);
+    }
 }
