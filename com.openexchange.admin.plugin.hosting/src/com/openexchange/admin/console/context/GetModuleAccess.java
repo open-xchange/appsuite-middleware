@@ -102,26 +102,29 @@ public class GetModuleAccess extends ContextAbstraction {
 	private void doCsvOutput(UserModuleAccess access) throws InvalidDataException {
 		final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
 		
-        final ArrayList<String> datarow = new ArrayList<String>();
-        
-        datarow.add(String.valueOf(access.getCalendar()));
-        datarow.add(String.valueOf(access.getContacts()));
-        datarow.add(String.valueOf(access.getDelegateTask()));
-        datarow.add(String.valueOf(access.getEditPublicFolders()));
-        datarow.add(String.valueOf(access.getForum()));
-        datarow.add(String.valueOf(access.getIcal()));
-        datarow.add(String.valueOf(access.getInfostore()));
-        datarow.add(String.valueOf(access.getPinboardWrite()));
-        datarow.add(String.valueOf(access.getProjects()));
-        datarow.add(String.valueOf(access.getReadCreateSharedFolders()));
-        datarow.add(String.valueOf(access.getRssBookmarks()));
-        datarow.add(String.valueOf(access.getRssPortal()));
-        datarow.add(String.valueOf(access.getSyncml()));
-        datarow.add(String.valueOf(access.getTasks()));
-        datarow.add(String.valueOf(access.getVcard()));
-        datarow.add(String.valueOf(access.getWebdav()));
-        datarow.add(String.valueOf(access.getWebdavXml()));
-        datarow.add(String.valueOf(access.getWebmail()));
+		final ArrayList<String> datarow = new ArrayList<String>();
+
+		datarow.add(String.valueOf(access.getCalendar()));
+		datarow.add(String.valueOf(access.getContacts()));
+		datarow.add(String.valueOf(access.getDelegateTask()));
+		datarow.add(String.valueOf(access.getEditPublicFolders()));
+		datarow.add(String.valueOf(access.getForum()));
+		datarow.add(String.valueOf(access.getIcal()));
+		datarow.add(String.valueOf(access.getInfostore()));
+		datarow.add(String.valueOf(access.getPinboardWrite()));
+		datarow.add(String.valueOf(access.getProjects()));
+		datarow.add(String.valueOf(access.getReadCreateSharedFolders()));
+		datarow.add(String.valueOf(access.getRssBookmarks()));
+		datarow.add(String.valueOf(access.getRssPortal()));
+		datarow.add(String.valueOf(access.getSyncml()));
+		datarow.add(String.valueOf(access.getTasks()));
+		datarow.add(String.valueOf(access.getVcard()));
+		datarow.add(String.valueOf(access.getWebdav()));
+		datarow.add(String.valueOf(access.getWebdavXml()));
+		datarow.add(String.valueOf(access.getWebmail()));
+                datarow.add(String.valueOf(access.getEditGroup()));
+                datarow.add(String.valueOf(access.getEditResource()));
+                datarow.add(String.valueOf(access.getEditPassword()));
                 		
 		data.add(datarow);
 		
@@ -131,24 +134,27 @@ public class GetModuleAccess extends ContextAbstraction {
 	private static ArrayList<String> getAccessColums(){
 		final ArrayList<String> columnnames = new ArrayList<String>();
 		columnnames.add(UserAbstraction.OPT_ACCESS_CALENDAR);
-        columnnames.add(UserAbstraction.OPT_ACCESS_CONTACTS);
-        columnnames.add(UserAbstraction.OPT_ACCESS_DELEGATE_TASKS);
-        columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_PUBLIC_FOLDERS);
-        columnnames.add(UserAbstraction.OPT_ACCESS_FORUM);
-        columnnames.add(UserAbstraction.OPT_ACCESS_ICAL);
-        columnnames.add(UserAbstraction.OPT_ACCESS_INFOSTORE);
-        columnnames.add(UserAbstraction.OPT_ACCESS_PINBOARD_WRITE);
-        columnnames.add(UserAbstraction.OPT_ACCESS_PROJECTS);
-        columnnames.add(UserAbstraction.OPT_ACCESS_READCREATE_SHARED_FOLDERS);
-        columnnames.add(UserAbstraction.OPT_ACCESS_RSS_BOOKMARKS);
-        columnnames.add(UserAbstraction.OPT_ACCESS_RSS_PORTAL);
-        columnnames.add(UserAbstraction.OPT_ACCESS_SYNCML);
-        columnnames.add(UserAbstraction.OPT_ACCESS_TASKS);
-        columnnames.add(UserAbstraction.OPT_ACCESS_VCARD);
-        columnnames.add(UserAbstraction.OPT_ACCESS_WEBDAV);
-        columnnames.add(UserAbstraction.OPT_ACCESS_WEBDAV_XML);
-        columnnames.add(UserAbstraction.OPT_ACCESS_WEBMAIL);
-        return columnnames;
+		columnnames.add(UserAbstraction.OPT_ACCESS_CONTACTS);
+		columnnames.add(UserAbstraction.OPT_ACCESS_DELEGATE_TASKS);
+		columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_PUBLIC_FOLDERS);
+		columnnames.add(UserAbstraction.OPT_ACCESS_FORUM);
+		columnnames.add(UserAbstraction.OPT_ACCESS_ICAL);
+		columnnames.add(UserAbstraction.OPT_ACCESS_INFOSTORE);
+		columnnames.add(UserAbstraction.OPT_ACCESS_PINBOARD_WRITE);
+		columnnames.add(UserAbstraction.OPT_ACCESS_PROJECTS);
+		columnnames.add(UserAbstraction.OPT_ACCESS_READCREATE_SHARED_FOLDERS);
+		columnnames.add(UserAbstraction.OPT_ACCESS_RSS_BOOKMARKS);
+		columnnames.add(UserAbstraction.OPT_ACCESS_RSS_PORTAL);
+		columnnames.add(UserAbstraction.OPT_ACCESS_SYNCML);
+		columnnames.add(UserAbstraction.OPT_ACCESS_TASKS);
+		columnnames.add(UserAbstraction.OPT_ACCESS_VCARD);
+		columnnames.add(UserAbstraction.OPT_ACCESS_WEBDAV);
+		columnnames.add(UserAbstraction.OPT_ACCESS_WEBDAV_XML);
+		columnnames.add(UserAbstraction.OPT_ACCESS_WEBMAIL);
+                columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_GROUP);
+                columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_RESOURCE);
+                columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_PASSWORD);
+		return columnnames;
 	}
 
 	public static void main(final String args[]) {
