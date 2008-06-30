@@ -76,6 +76,14 @@ public abstract class AJAXTest {
         System.out.println("Rule created with newid: " + newid);
     }
 
+    @Test
+    public void MailfilternewVacationDeactiveTest() throws MalformedURLException, IOException, SAXException, JSONException {
+        final WebConversation login = login();
+        final String test = "{\"rulename\":\"Vacation Notice\",\"active\":false,\"flags\":[\"vacation\"],\"test\":{\"id\":\"true\"},\"actioncmds\":[{\"id\":\"vacation\",\"days\":1,\"addresses\":[\"dsfa\"],\"subject\":\"123\",\"text\":\"123\"}]}";
+        final String newid = mailfilternew(login, getHostname(), getUsername(), test, null);
+        System.out.println("Rule created with newid: " + newid);
+    }
+    
     /**
      * This test is used to check the correct operation of the size test, this was dealt in bug 11519
      * @throws MalformedURLException
