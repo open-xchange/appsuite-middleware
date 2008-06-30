@@ -153,10 +153,13 @@ public abstract class BasicCommandlineOptions {
     protected static final String OPT_NAME_CSVOUTPUT_DESCRIPTION = "Format output to csv";
 
     private static final String []ENV_OPTIONS = 
-        new String[]{ "RMI_HOSTNAME", "COMMANDLINE_TIMEZONE", "COMMANDLINE_DATEFORMAT" };
-    protected static String RMI_HOSTNAME ="rmi://localhost:1099/";
-    protected static String COMMANDLINE_TIMEZONE ="GMT";
-    protected static String COMMANDLINE_DATEFORMAT ="yyyy-MM-dd";
+        new String[]{ "RMI_HOSTNAME", "COMMANDLINE_TIMEZONE", "COMMANDLINE_DATEFORMAT",
+    "ADMIN_PASSWORD", "NEW_USER_PASSWORD"};
+    protected static String RMI_HOSTNAME           = "rmi://localhost:1099/";
+    protected static String COMMANDLINE_TIMEZONE   = "GMT";
+    protected static String COMMANDLINE_DATEFORMAT = "yyyy-MM-dd";
+    protected static String ADMIN_PASSWORD         = null;
+    protected static String NEW_USER_PASSWORD      = null;
     
     protected Option contextOption = null;
     protected Option contextNameOption = null;
@@ -182,8 +185,13 @@ public abstract class BasicCommandlineOptions {
         Hashtable<String, String> opts = new Hashtable<String, String>();
         for( final String opt : ENV_OPTIONS ) {
             try {
-                Field f = BasicCommandlineOptions.class.getDeclaredField(opt);
-                opts.put(opt, (String)f.get(null));
+                final Field f = BasicCommandlineOptions.class.getDeclaredField(opt);
+                String val = (String)f.get(null); 
+                // to be able to print also opts set to null, override with empty string
+                if( val == null ) {
+                    val = "<NOT SET>";
+                }
+                opts.put(opt, val);
             } catch (SecurityException e) {
                 System.err.println("unable to get commandline option \""+opt+"\"");
                 e.printStackTrace();
@@ -501,7 +509,14 @@ public abstract class BasicCommandlineOptions {
     }
 
     protected final Credentials credentialsparsing(final AdminParser parser) {
-        final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+        Credentials auth = null;
+
+        if( ADMIN_PASSWORD != null ) {
+            // use admin password as set in environment
+            auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), ADMIN_PASSWORD);
+        } else {
+            auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+        }
         return auth;
     }
 

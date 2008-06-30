@@ -501,7 +501,12 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             usr.setSur_name(optionValue4);
         }        
 
-        final String optionValue5 = (String) parser.getOptionValue(this.passwordOption);
+        String optionValue5 = null;
+        if( NEW_USER_PASSWORD != null ) {
+            optionValue5 = NEW_USER_PASSWORD;
+        } else {
+            optionValue5 = (String) parser.getOptionValue(this.passwordOption);
+        }
         if (null != optionValue5) {
             usr.setPassword(optionValue5);
         }   
@@ -700,7 +705,12 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         setDisplayNameOption(parser, needed);
         setGivenNameOption(parser, needed);
         setSurNameOption(parser, needed);
-        setPasswordOption(parser, needed);
+        // if password of new user is supplied in environment, do not insist on password option
+        if( NEW_USER_PASSWORD != null ) {
+            setPasswordOption(parser, NeededQuadState.notneeded);
+        } else {
+            setPasswordOption(parser, needed);
+        }
         setPrimaryMailOption(parser, needed);
     }
 
