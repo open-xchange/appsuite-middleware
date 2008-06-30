@@ -279,7 +279,12 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		/*
 		 * Check folder module
 		 */
-		if (!checkFolderModuleAgainstParentModule(parentFolder, folderObj.getModule(), ctx)) {
+		if (!isKnownModule(folderObj.getModule())) {
+			throw new OXFolderException(FolderCode.UNKNOWN_MODULE, folderModule2String(folderObj.getModule()), Integer
+					.valueOf(ctx.getContextId()));
+		}
+		if (!checkFolderModuleAgainstParentModule(parentFolder.getObjectID(), parentFolder.getModule(), folderObj
+				.getModule(), ctx.getContextId())) {
 			throw new OXFolderLogicException(FolderCode.INVALID_MODULE, getFolderName(parentFolder),
 					folderModule2String(folderObj.getModule()), Integer.valueOf(ctx.getContextId()));
 		}
@@ -519,30 +524,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		/*
 		 * Get storage version (and thus implicitly check existence)
 		 */
-		final FolderObject storageObj;
-		try {
-			/*
-			 * Fetch from master database, cause a move operation could be done
-			 * before
-			 */
-			Connection wc = writeCon;
-			final boolean create = (wc == null);
-			try {
-				if (create) {
-					wc = DBPool.pickupWriteable(ctx);
-				}
-				storageObj = FolderObject.loadFolderObjectFromDB(folderObj.getObjectID(), ctx, wc);
-			} finally {
-				if (create && wc != null) {
-					DBPool.closeWriterSilent(ctx, wc);
-					wc = null;
-				}
-			}
-		} catch (final OXFolderNotFoundException e) {
-			throw e;
-		} catch (final DBPoolingException e) {
-			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
-		}
+		final FolderObject storageObj = getFolderFromMaster(folderObj.getObjectID());
 		/*
 		 * Check if a move is done here
 		 */
@@ -574,6 +556,12 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			}
 			if (!isFolderEmpty(storageObj.getObjectID(), storageObj.getModule())) {
 				throw new OXFolderException(FolderCode.NO_FOLDER_MODULE_UPDATE);
+			}
+			final FolderObject parent = getFolderFromMaster(storageObj.getParentFolderID());
+			if (!checkFolderModuleAgainstParentModule(parent.getObjectID(), parent.getModule(), folderObj.getModule(),
+					ctx.getContextId())) {
+				throw new OXFolderLogicException(FolderCode.INVALID_MODULE, getFolderName(parent),
+						folderModule2String(folderObj.getModule()), Integer.valueOf(ctx.getContextId()));
 			}
 		} else {
 			folderObj.setModule(storageObj.getModule());
@@ -665,6 +653,31 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			throw new OXFolderException(FolderCode.TRUNCATED, e, folderObj.getFolderName());
 		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+		}
+	}
+
+	private FolderObject getFolderFromMaster(final int folderId) throws OXException {
+		try {
+			/*
+			 * Use writable connection to ensure to fetch from master database
+			 */
+			Connection wc = writeCon;
+			final boolean create = (wc == null);
+			try {
+				if (create) {
+					wc = DBPool.pickupWriteable(ctx);
+				}
+				return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc);
+			} finally {
+				if (create && wc != null) {
+					DBPool.closeWriterSilent(ctx, wc);
+					wc = null;
+				}
+			}
+		} catch (final OXFolderNotFoundException e) {
+			throw e;
+		} catch (final DBPoolingException e) {
+			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		}
 	}
 
@@ -1491,30 +1504,26 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		return (newFolderType == enforcedType);
 	}
 
-	private static boolean checkFolderModuleAgainstParentModule(final FolderObject parentFolder,
-			final int newFolderModule, final Context ctx) throws OXException {
-		final int[] sortedStandardModules = new int[] { FolderObject.TASK, FolderObject.CALENDAR, FolderObject.CONTACT,
-				FolderObject.UNBOUND };
-		switch (parentFolder.getModule()) {
-		case FolderObject.TASK:
-		case FolderObject.CALENDAR:
-		case FolderObject.CONTACT:
-			return (Arrays.binarySearch(sortedStandardModules, newFolderModule) >= 0);
-		case FolderObject.SYSTEM_MODULE:
-			if (parentFolder.getObjectID() == FolderObject.SYSTEM_PRIVATE_FOLDER_ID
-					|| parentFolder.getObjectID() == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
-				return (Arrays.binarySearch(sortedStandardModules, newFolderModule) >= 0);
-			} else if (parentFolder.getObjectID() == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
+	private static final int[] SORTED_STD_MODULES = { FolderObject.TASK, FolderObject.CALENDAR, FolderObject.CONTACT,
+			FolderObject.UNBOUND };
+
+	private static boolean checkFolderModuleAgainstParentModule(final int parentId, final int parentModule,
+			final int newFolderModule, final int cid) throws OXException {
+		if (parentModule == FolderObject.TASK || parentModule == FolderObject.CALENDAR
+				|| parentModule == FolderObject.CONTACT) {
+			return (Arrays.binarySearch(SORTED_STD_MODULES, newFolderModule) >= 0);
+		} else if (parentModule == FolderObject.SYSTEM_MODULE) {
+			if (parentId == FolderObject.SYSTEM_PRIVATE_FOLDER_ID || parentId == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
+				return (Arrays.binarySearch(SORTED_STD_MODULES, newFolderModule) >= 0);
+			} else if (parentId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
 				return (newFolderModule == FolderObject.INFOSTORE);
 			}
-			break;
-		case FolderObject.PROJECT:
+		} else if (parentModule == FolderObject.PROJECT) {
 			return (newFolderModule == FolderObject.PROJECT);
-		case FolderObject.INFOSTORE:
+		} else if (parentModule == FolderObject.INFOSTORE) {
 			return (newFolderModule == FolderObject.INFOSTORE);
-		default:
-			throw new OXFolderException(FolderCode.UNKNOWN_MODULE, Integer.valueOf(parentFolder.getModule()), Integer
-					.valueOf(ctx.getContextId()));
+		} else {
+			throw new OXFolderException(FolderCode.UNKNOWN_MODULE, Integer.valueOf(parentModule), Integer.valueOf(cid));
 		}
 		return true;
 	}
