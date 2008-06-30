@@ -202,7 +202,7 @@ public abstract class PasswordChangeService {
 	 *            shall be changed, the context, the new password, and the old
 	 *            password (needed for verification)
 	 * @throws UserException
-	 *             If propagating the password fails
+	 *             If propagating the password change fails
 	 */
 	private final void propagate(final PasswordChangeEvent event) throws UserException {
 		/*
