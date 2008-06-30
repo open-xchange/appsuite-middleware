@@ -127,7 +127,7 @@ public abstract class PasswordChangeService {
 		 */
 		try {
 			if (!UserConfigurationStorage.getInstance().getUserConfiguration(event.getSession().getUserId(),
-					event.getContext()).isEditResource()) {
+					event.getContext()).isEditPassword()) {
 				throw new UserException(UserException.Code.PERMISSION, Integer.valueOf(event.getContext()
 						.getContextId()));
 			}
