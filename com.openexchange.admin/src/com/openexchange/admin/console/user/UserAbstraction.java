@@ -208,6 +208,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_WEBDAV = "access-webdav";
     protected static final String OPT_ACCESS_WEBDAV_XML = "access-webdav-xml";
     protected static final String OPT_ACCESS_WEBMAIL = "access-webmail";
+    protected static final String OPT_ACCESS_EDIT_GROUP = "access-edit-group";
+    protected static final String OPT_ACCESS_EDIT_RESOURCE = "access-edit-resource";
+    protected static final String OPT_ACCESS_EDIT_PASSWORD = "access-edit-password";
     
     
     
@@ -266,6 +269,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected Option accessWebdavOption = null;
     protected Option accessWebdavXmlOption = null;
     protected Option accessWebmailOption = null;
+    protected Option accessEditGroupOption = null;
+    protected Option accessEditResourceOption = null;
+    protected Option accessEditPasswordOption = null;
     
     // non-generic extended option
     protected Option addGUISettingOption = null;
@@ -543,6 +549,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         access.setWebdav(accessOption2BooleanCreate(parser,this.accessWebdavOption));
         access.setWebdavXml(accessOption2BooleanCreate(parser,this.accessWebdavXmlOption));
         access.setWebmail(accessOption2BooleanCreate(parser,this.accessWebmailOption));
+        access.setEditGroup(accessOption2BooleanCreate(parser,this.accessEditGroupOption));
+        access.setEditResource(accessOption2BooleanCreate(parser,this.accessEditResourceOption));
+        access.setEditPassword(accessOption2BooleanCreate(parser,this.accessEditPasswordOption));
         
     }
     
@@ -616,6 +625,15 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         }
         if ((String) parser.getOptionValue(this.accessWebmailOption) != null) {
             access.setWebmail(accessOption2BooleanCreate(parser, this.accessWebmailOption));
+        }
+        if ((String) parser.getOptionValue(this.accessEditGroupOption) != null) {
+            access.setEditGroup(accessOption2BooleanCreate(parser, this.accessEditGroupOption));
+        }
+        if ((String) parser.getOptionValue(this.accessEditResourceOption) != null) {
+            access.setEditResource(accessOption2BooleanCreate(parser, this.accessEditResourceOption));
+        }
+        if ((String) parser.getOptionValue(this.accessEditPasswordOption) != null) {
+            access.setEditPassword(accessOption2BooleanCreate(parser, this.accessEditPasswordOption));
         }
     }
     
@@ -694,6 +712,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.accessWebdavOption = setLongOpt(admp, OPT_ACCESS_WEBDAV,"on/off","Webdav access (Default is off)", true, false,true);
         this.accessWebdavXmlOption = setLongOpt(admp, OPT_ACCESS_WEBDAV_XML,"on/off","Webdav-Xml access (Default is off)", true, false,true);
         this.accessWebmailOption = setLongOpt(admp, OPT_ACCESS_WEBMAIL,"on/off","Webmail access (Default is on)", true, false,true);
+        this.accessEditGroupOption = setLongOpt(admp, OPT_ACCESS_EDIT_GROUP,"on/off","Edit Group access (Default is on)", true, false,true);
+        this.accessEditResourceOption = setLongOpt(admp, OPT_ACCESS_EDIT_RESOURCE,"on/off","Edit Resource access (Default is on)", true, false,true);
+        this.accessEditPasswordOption = setLongOpt(admp, OPT_ACCESS_EDIT_PASSWORD,"on/off","Edit Password access (Default is on)", true, false,true);
     }
 
     protected final void setMandatoryOptions(final AdminParser parser) {
