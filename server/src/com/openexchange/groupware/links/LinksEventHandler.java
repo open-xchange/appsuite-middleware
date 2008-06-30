@@ -47,8 +47,6 @@
  *
  */
 
-
-	
 package com.openexchange.groupware.links;
 
 import java.sql.Connection;
@@ -80,13 +78,13 @@ import com.openexchange.session.Session;
  @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
  
  */
-	
-	
 public class LinksEventHandler  implements AppointmentEventInterface, TaskEventInterface, ContactEventInterface, InfostoreEventInterface{
 	
 	private static final Log LOG = LogFactory.getLog(LinksEventHandler.class);
 	
-	public LinksEventHandler (){	}
+	public LinksEventHandler () {
+		super();
+	}
 
 	public void appointmentCreated(final AppointmentObject appointmentObj, final Session sessionObj) {
 		//  nix
@@ -130,13 +128,13 @@ public class LinksEventHandler  implements AppointmentEventInterface, TaskEventI
 
 	public void infoitemModified(final DocumentMetadata metadata, final Session sessionObject) {
 		// BOESE TODO
-		final int x = Integer.parseInt(metadata.getFolderId()+"");
+		final int x = (int) metadata.getFolderId();
 		updateLink(metadata.getId(),Types.INFOSTORE,x,sessionObject);
 	}
 
 	public void infoitemDeleted(final DocumentMetadata metadata, final Session sessionObject) {
 		// BOESE TODO
-		final int x = Integer.parseInt(metadata.getFolderId()+"");
+		final int x = (int) metadata.getFolderId();
 		deleteLink(metadata.getId(),Types.INFOSTORE,x,sessionObject);
 	}
 	
@@ -148,7 +146,7 @@ public class LinksEventHandler  implements AppointmentEventInterface, TaskEventI
 		try {
 			ct = ContextStorage.getStorageContext(so.getContextId());
 		} catch (final ContextException e) {
-			//
+			LOG.error(e.getMessage(), e);
 		}
 		
 		try{
