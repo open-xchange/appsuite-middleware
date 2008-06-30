@@ -154,19 +154,22 @@ public class QuotaRequest extends CommonRequest {
 	private void mail() {
 		MailServletInterface mi = null;
 		try {
-			long[] quotaInfo = null;
+			long[][] quotaInfo = null;
 			try {
 				mi = MailServletInterface.getInstance(this.session);
-				quotaInfo = mi.getQuotas(new int[] { MailServletInterface.QUOTA_RESOURCE_STORAGE })[0];
+				quotaInfo = mi.getQuotas(new int[] { MailServletInterface.QUOTA_RESOURCE_STORAGE,
+						MailServletInterface.QUOTA_RESOURCE_MESSAGE });
 			} catch (final MailException e) {
 				LOG.error(e.getMessage(), e);
-				quotaInfo = new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
+				quotaInfo = new long[][] { { UNLIMITED_QUOTA, UNLIMITED_QUOTA }, { UNLIMITED_QUOTA, UNLIMITED_QUOTA } };
 			}
-			final long quota = quotaInfo[0];
-			final long use = quotaInfo[1];
 			final JSONObject data = new JSONObject();
-			data.put("quota", quota * 1024);
-			data.put("use", use * 1024);
+			// STORAGE
+			data.put("quota", quotaInfo[0][0] * 1024);
+			data.put("use", quotaInfo[0][1] * 1024);
+			// MESSAGE
+			data.put("countquota", quotaInfo[1][0] * 1024);
+			data.put("countuse", quotaInfo[1][1] * 1024);
 			/*
 			 * Write JSON object into writer as data content of a response
 			 * object
