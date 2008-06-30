@@ -16,6 +16,8 @@
    denying every request to affected IMAP for that time range.
  - Bugfix #9964: Applied support for different mail quota resources to JSON
    interface
+ - Bugfix #10649: Added new property to limit number of concurrent sessions
+   per user.
 
 * 2008-06-30 - choeger@open-xchange.com
 

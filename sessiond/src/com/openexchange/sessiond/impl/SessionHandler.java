@@ -52,13 +52,13 @@ package com.openexchange.sessiond.impl;
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
@@ -78,7 +78,7 @@ import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.sessiond.exception.SessiondException.Code;
 
 /**
- * {@link SessionHandler}
+ * {@link SessionHandler} - Provides access to sessions
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -87,7 +87,7 @@ public final class SessionHandler {
 
 	private static int numberOfSessionContainers = 4;
 
-	private static LinkedList<Map<String, SessionControl>> sessionList = new LinkedList<Map<String, SessionControl>>();
+	private static LinkedList<SessionContainer> sessionList = new LinkedList<SessionContainer>();
 
 	private static LinkedList<Map<String, String>> userList = new LinkedList<Map<String, String>>();
 
@@ -97,9 +97,9 @@ public final class SessionHandler {
 
 	private static SessiondConfigInterface config;
 
-	private static boolean noLimit = false;
+	private static boolean noLimit;
 
-	private static boolean isInit = false;
+	private static boolean isInit;
 
 	private static final Log LOG = LogFactory.getLog(SessionHandler.class);
 
@@ -143,20 +143,41 @@ public final class SessionHandler {
 	}
 
 	private static void prependContainer() {
-		sessionList.add(0, new Hashtable<String, SessionControl>(config.getMaxSessions()));
-		userList.add(0, new Hashtable<String, String>(config.getMaxSessions()));
-		randomList.add(0, new Hashtable<String, String>(config.getMaxSessions()));
+		sessionList.add(0, new SessionContainer(config.getMaxSessions()));
+		userList.add(0, new ConcurrentHashMap<String, String>(config.getMaxSessions()));
+		randomList.add(0, new ConcurrentHashMap<String, String>(config.getMaxSessions()));
 	}
 
 	private static void removeContainer() {
-		final Map<String, SessionControl> sessions = sessionList.removeLast();
+		final SessionContainer sessions = sessionList.removeLast();
 		userList.removeLast();
 		randomList.removeLast();
 		postContainerRemoval(sessions);
 	}
 
+	protected static boolean isUserActive(final int userId, final Context context) {
+		final int size = sessionList.size();
+		boolean active = false;
+		for (int i = 0; i < size && !active; i++) {
+			active |= sessionList.get(i).containsUser(userId, context.getContextId());
+		}
+		return active;
+	}
+
 	protected static String addSession(final int userId, final String loginName, final String password,
 			final Context context, final String clientHost) throws SessiondException {
+		if (config.getMaxSessionsPerUser() > 0) {
+			final int size = sessionList.size();
+			int count = 0;
+			for (int i = 0; i < size && count <= config.getMaxSessionsPerUser(); i++) {
+				count += sessionList.get(i).numOfUserSessions(userId, context.getContextId());
+			}
+			if (count > config.getMaxSessionsPerUser()) {
+				throw new SessiondException(Code.MAX_SESSION_PER_USER_EXCEPTION, null, Integer.valueOf(userId), Integer
+						.valueOf(context.getContextId()));
+			}
+		}
+
 		final String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
 		final String secret = sessionIdGenerator.createSecretId(loginName, String.valueOf(System.currentTimeMillis()));
 		final String randomToken = sessionIdGenerator.createRandomId();
@@ -175,26 +196,22 @@ public final class SessionHandler {
 
 	private static SessionControl addSessionInternal(final Session session) throws SessiondException {
 		final String sessionId = session.getSessionID();
-		Map<String, SessionControl> sessions = null;
+		SessionContainer sessionContainer = null;
 		Map<String, String> userMap = null;
 		Map<String, String> randomMap = null;
 
 		for (int a = 0; a < numberOfSessionContainers; a++) {
-			sessions = sessionList.get(a);
+			sessionContainer = sessionList.get(a);
 			userMap = userList.get(a);
 			randomMap = randomList.get(a);
 
-			if (!noLimit && sessions.size() > config.getMaxSessions()) {
+			if (!noLimit && sessionContainer.size() > config.getMaxSessions()) {
 				throw new SessiondException(Code.MAX_SESSION_EXCEPTION);
 			}
 		}
 
-		final SessionControl sessionControlObject = new SessionControl(session, config.getLifeTime());
-		if (sessions.containsKey(sessionId) && LOG.isDebugEnabled()) {
-			LOG.debug("session REBORN sessionid=" + sessionId);
-		}
+		final SessionControl sessionControlObject = sessionContainer.put(session, config.getLifeTime());
 
-		sessions.put(sessionId, sessionControlObject);
 		randomMap.put(session.getRandomToken(), sessionId);
 		userMap.put(session.getLoginName(), sessionId);
 		numberOfActiveSessions.incrementAndGet();
@@ -206,23 +223,20 @@ public final class SessionHandler {
 			LOG.debug("refreshSession <" + sessionid + '>');
 		}
 
-		Map<String, SessionControl> sessions = null;
-
-		// final Date timestamp = new Date();
-
 		for (int a = 0; a < numberOfSessionContainers; a++) {
-			sessions = sessionList.get(a);
+			final SessionContainer sessionContainer = sessionList.get(a);
 
-			if (sessions.containsKey(sessionid)) {
-				final SessionControl sessionIdInterface = sessions.get(sessionid);
-				if (isValid(sessionIdInterface)) {
-					sessionIdInterface.updateTimestamp();
+			if (sessionContainer.containsSessionId(sessionid)) {
+				final SessionControl sessionControl = sessionContainer.getSessionById(sessionid);
+				if (isValid(sessionControl)) {
+					sessionControl.updateTimestamp();
 
-					sessionList.get(0).put(sessionid, sessionIdInterface);
 					if (a > 0) {
-						sessions.remove(sessionid);
-						// the session is only moved to the first container so a
-						// decrement is not necessary
+						/*
+						 * Put into first container and remove from latter one
+						 */
+						sessionList.get(0).putSessionControl(sessionControl);
+						sessionContainer.removeSessionById(sessionid);
 					}
 
 					return true;
@@ -230,7 +244,7 @@ public final class SessionHandler {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("session TIMEOUT sessionid=" + sessionid);
 				}
-				sessions.remove(sessionid);
+				sessionContainer.removeSessionById(sessionid);
 				numberOfActiveSessions.decrementAndGet();
 
 				return false;
@@ -244,15 +258,13 @@ public final class SessionHandler {
 			LOG.debug("clearSession <" + sessionid + '>');
 		}
 
-		Map<String, SessionControl> sessions = null;
-
 		for (int a = 0; a < numberOfSessionContainers; a++) {
-			sessions = sessionList.get(a);
+			final SessionContainer sessionContainer = sessionList.get(a);
 
-			if (sessions.containsKey(sessionid)) {
-				final SessionControl session = sessions.remove(sessionid);
+			if (sessionContainer.containsSessionId(sessionid)) {
+				final SessionControl sessionControl = sessionContainer.removeSessionById(sessionid);
 				numberOfActiveSessions.decrementAndGet();
-				postSessionRemoval(session.getSession());
+				postSessionRemoval(sessionControl.getSession());
 				return true;
 			}
 		}
@@ -273,10 +285,10 @@ public final class SessionHandler {
 		// TODO: Check permission via security service
 
 		for (int a = 0; a < numberOfSessionContainers; a++) {
-			final Map<String, SessionControl> sessionContainer = sessionList.get(a);
+			final SessionContainer sessionContainer = sessionList.get(a);
 
-			if (sessionContainer.containsKey(sessionid)) {
-				final SessionControl sessionControl = sessionContainer.get(sessionid);
+			if (sessionContainer.containsSessionId(sessionid)) {
+				final SessionControl sessionControl = sessionContainer.getSessionById(sessionid);
 				if (isValid(sessionControl)) {
 					sessionControl.updateTimestamp();
 					/*
@@ -287,21 +299,19 @@ public final class SessionHandler {
 					}
 					((SessionImpl) sessionControl.getSession()).setPassword(newPassword);
 
-					/*
-					 * Move to first container
-					 */
-					sessionList.get(0).put(sessionid, sessionControl);
 					if (a > 0) {
-						sessionContainer.remove(sessionid);
-						// the session is only moved to the first container so a
-						// decrement is not necessary
+						/*
+						 * Put into first container and remove from latter one
+						 */
+						sessionList.get(0).putSessionControl(sessionControl);
+						sessionContainer.removeSessionById(sessionid);
 					}
 					return;
 				}
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("session TIMEOUT sessionid=" + sessionid);
 				}
-				sessionContainer.remove(sessionid);
+				sessionContainer.removeSessionById(sessionid);
 				numberOfActiveSessions.decrementAndGet();
 
 				throw new SessiondException(SessiondException.Code.SESSIOND_EXCEPTION);
@@ -339,28 +349,24 @@ public final class SessionHandler {
 			LOG.debug("getSession <" + sessionid + '>');
 		}
 
-		// Map<String, SessionControlObject> sessions = null;
-
-		// final Date timestamp = new Date();
-
 		for (int a = 0; a < numberOfSessionContainers; a++) {
-			final Map<String, SessionControl> sessions = sessionList.get(a);
+			final SessionContainer sessionContainer = sessionList.get(a);
 
-			if (sessions.containsKey(sessionid)) {
-				final SessionControl sessionControlObject = sessions.get(sessionid);
+			if (sessionContainer.containsSessionId(sessionid)) {
+				final SessionControl sessionControl = sessionContainer.getSessionById(sessionid);
 
-				if (sessionControlObject != null && isValid(sessionControlObject)) {
-					sessionControlObject.updateTimestamp();
+				if (sessionControl != null && isValid(sessionControl)) {
+					sessionControl.updateTimestamp();
 
 					if (a > 0) {
 						/*
 						 * Put into first container and remove from latter one
 						 */
-						sessionList.get(0).put(sessionid, sessionControlObject);
-						sessions.remove(sessionid);
+						sessionList.get(0).putSessionControl(sessionControl);
+						sessionContainer.removeSessionById(sessionid);
 					}
 
-					return sessionControlObject;
+					return sessionControl;
 				}
 				return null;
 			}
@@ -414,7 +420,7 @@ public final class SessionHandler {
 		}
 		final List<SessionControl> retval = new ArrayList<SessionControl>(numberOfActiveSessions.get());
 		for (int a = 0; a < numberOfSessionContainers; a++) {
-			retval.addAll(sessionList.get(a).values());
+			retval.addAll(sessionList.get(a).getSessionControls());
 		}
 		return retval;
 	}
@@ -425,9 +431,8 @@ public final class SessionHandler {
 		}
 
 		if (LOG.isDebugEnabled()) {
-			final Map<String, SessionControl> hashMap = sessionList.getLast();
-			final Iterator<String> iterator = hashMap.keySet().iterator();
-			while (iterator.hasNext()) {
+			final SessionContainer sessionContainer = sessionList.getLast();
+			for (final Iterator<String> iterator = sessionContainer.getSessionIds(); iterator.hasNext();) {
 				LOG.debug("session timeout for id: " + iterator.next());
 			}
 		}
@@ -451,7 +456,7 @@ public final class SessionHandler {
 	public static void close() {
 		numberOfSessionContainers = 4;
 		postContainersRemoval();
-		sessionList = new LinkedList<Map<String, SessionControl>>();
+		sessionList = new LinkedList<SessionContainer>();
 		userList = new LinkedList<Map<String, String>>();
 		randomList = new LinkedList<Map<String, String>>();
 		sessionIdGenerator = null;
@@ -483,11 +488,11 @@ public final class SessionHandler {
 		}
 	}
 
-	private static void postContainerRemoval(final Map<String, SessionControl> sessions) {
+	private static void postContainerRemoval(final SessionContainer sessionContainer) {
 		final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
 		if (eventAdmin != null) {
 			final Hashtable<Object, Object> dic = new Hashtable<Object, Object>();
-			dic.put(SessiondEventConstants.PROP_CONTAINER, convert(sessions));
+			dic.put(SessiondEventConstants.PROP_CONTAINER, sessionContainer.convert());
 			final Event event = new Event(SessiondEventConstants.TOPIC_REMOVE_CONTAINER, dic);
 			eventAdmin.postEvent(event);
 			if (LOG.isDebugEnabled()) {
@@ -499,9 +504,9 @@ public final class SessionHandler {
 	private static void postContainersRemoval() {
 		final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
 		if (eventAdmin != null) {
-			for (final Map<String, SessionControl> sessions : sessionList) {
+			for (final SessionContainer sessionContainer : sessionList) {
 				final Hashtable<Object, Object> dic = new Hashtable<Object, Object>();
-				dic.put(SessiondEventConstants.PROP_CONTAINER, convert(sessions));
+				dic.put(SessiondEventConstants.PROP_CONTAINER, sessionContainer.convert());
 				final Event event = new Event(SessiondEventConstants.TOPIC_REMOVE_CONTAINER, dic);
 				eventAdmin.postEvent(event);
 			}
@@ -511,14 +516,4 @@ public final class SessionHandler {
 		}
 	}
 
-	private static Map<String, Session> convert(final Map<String, SessionControl> sessions) {
-		final int size = sessions.size();
-		final Map<String, Session> retval = new HashMap<String, Session>(size);
-		final Iterator<Map.Entry<String, SessionControl>> iter = sessions.entrySet().iterator();
-		for (int i = 0; i < size; i++) {
-			final Map.Entry<String, SessionControl> entry = iter.next();
-			retval.put(entry.getKey(), entry.getValue().getSession());
-		}
-		return retval;
-	}
 }

@@ -79,6 +79,8 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements
 
 	private int maxSession = 5000;
 
+	private int maxSessionPerUser;
+
 	private String serverBindAddress = "localhost";
 
 	private boolean isDoubleLoginPermitted = true;
@@ -180,6 +182,14 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements
 			LOG
 					.debug("Sessiond property: com.openexchange.sessiond.maxSession="
 							+ maxSession);
+		}
+		
+		maxSessionPerUser = parseProperty(conf,
+				"com.openexchange.sessiond.maxSessionPerUser", maxSessionPerUser);
+		if (LOG.isDebugEnabled()) {
+			LOG
+					.debug("Sessiond property: com.openexchange.sessiond.maxSessionPerUser="
+							+ maxSessionPerUser);
 		}
 
 		serverBindAddress = parseProperty(conf,
@@ -291,6 +301,10 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements
 
 	public int getMaxSessions() {
 		return maxSession;
+	}
+
+	public int getMaxSessionsPerUser() {
+		return maxSessionPerUser;
 	}
 
 	public String getServerBindAddress() {

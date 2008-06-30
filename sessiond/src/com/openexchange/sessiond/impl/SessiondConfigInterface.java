@@ -75,6 +75,8 @@ public interface SessiondConfigInterface {
 	public int getNumberOfSessionContainers();
 	
 	public int getMaxSessions();
+
+	public int getMaxSessionsPerUser();
 	
 	public String getServerBindAddress();
 	

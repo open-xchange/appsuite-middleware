@@ -28,6 +28,9 @@ com.openexchange.sessiond.numberOfSessionContainers:8
 # maximum number of concurrent sessions, 0 stands for unlimited
 com.openexchange.sessiond.maxSession:5000
 
+# maximum number of concurrent sessions per user, a value less than or equal to zero means unlimited
+com.openexchange.sessiond.maxSessionPerUser:0
+
 # accept only sockets from this address
 com.openexchange.sessiond.serverBindAddress:localhost
 
