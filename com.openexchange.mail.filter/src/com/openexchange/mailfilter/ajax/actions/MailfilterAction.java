@@ -242,6 +242,9 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         try {
             sieveHandler.initializeConnection();
             final byte[] script = sieveHandler.getScript(sieveHandler.getActiveScript());
+            if (log.isDebugEnabled()) {
+                log.debug("The following sieve script will be parsed:\n" + new String(script, "UTF-8"));
+            }
             final RuleListAndNextUid readScriptFromString = sieveTextFilter.readScriptFromString(new String(script, "UTF-8"));
             final ArrayList<Rule> clientrules = getClientRules(readScriptFromString.getRulelist(), parameters.getParameter(Parameter.FLAG));
             return CONVERTER.write(clientrules.toArray(new Rule[clientrules.size()]));
@@ -420,6 +423,9 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             }
             
             final String writeback = sieveTextFilter.writeback(clientrules);
+            if (log.isDebugEnabled()) {
+                log.debug("The following sieve script will be written:\n" + writeback);
+            }
             writeScript(sieveHandler, activeScript, writeback);
 
         } catch (final UnsupportedEncodingException e) {
