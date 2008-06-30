@@ -1512,7 +1512,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	 * @param parentOwner
 	 *            - the user ID of parent folder owner
 	 * @param folderObj
-	 *            - the sharde subfolder
+	 *            - the shared subfolder
 	 * @throws OXException
 	 *             - if permission check fails
 	 */
