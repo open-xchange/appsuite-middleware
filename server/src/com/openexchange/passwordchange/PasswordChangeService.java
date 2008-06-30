@@ -58,6 +58,7 @@ import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.caching.CacheException;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
@@ -212,6 +213,14 @@ public abstract class PasswordChangeService {
 		} catch (final CacheException e) {
 			LOG.error("Removing cached mail access failed", e);
 			throw new UserException(e);
+		}
+		/*
+		 * Invalidate user cache
+		 */
+		try {
+			UserStorage.getInstance().invalidateUser(event.getContext(), event.getSession().getUserId());
+		} catch (final LdapException e) {
+			LOG.error("Invalidating user cache failed", e);
 		}
 		/*
 		 * Update password in session
