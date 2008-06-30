@@ -9,4 +9,5 @@ Package: open-xchange-spamhandler-spamassassin
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common (>= 6.5.0), open-xchange-global (>=6.5.0), open-xchange-server (>=6.5.0)
 Provides: open-xchange-spamhandler
+Conflicts: open-xchange-spamhandler-default
 Description: The Open-Xchange SpamAssassin Handler
