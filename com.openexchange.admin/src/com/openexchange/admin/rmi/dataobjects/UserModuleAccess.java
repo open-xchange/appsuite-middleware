@@ -107,6 +107,12 @@ public class UserModuleAccess implements Serializable {
 
     private boolean Webmail = true;
 
+    private boolean EditGroup = true;
+    
+    private boolean EditResource = true;
+    
+    private boolean EditPassword = true;
+    
     /**
      * Creates a new instance of UserModuleAccess
      */
@@ -133,6 +139,7 @@ public class UserModuleAccess implements Serializable {
      * @param webdav
      * @param webdavXml
      * @param webmail
+     * @deprecated
      */
     public UserModuleAccess(boolean calendar, boolean contacts, boolean delegateTask, boolean editPublicFolders, boolean forum, boolean ical, boolean infostore, boolean pinboardWrite, boolean projects, boolean readCreateSharedFolders, boolean rssBookmarks, boolean rssPortal, boolean syncml, boolean tasks, boolean vcard, boolean webdav, boolean webdavXml, boolean webmail) {
         super();
@@ -178,6 +185,9 @@ public class UserModuleAccess implements Serializable {
     	this.Webdav = true;
     	this.WebdavXml = true;
     	this.Webmail = true;
+    	this.EditGroup = true;
+    	this.EditResource = true;
+    	this.EditPassword = true;
     }
     
     /**
@@ -202,8 +212,35 @@ public class UserModuleAccess implements Serializable {
     	this.Webdav = false;
     	this.WebdavXml = false;
     	this.Webmail = false;
+    	this.EditGroup = false;
+    	this.EditResource = false;
+    	this.EditPassword = false;
     }
     
+    public boolean getEditGroup() {
+        return EditGroup;
+    }
+
+    public void setEditGroup(boolean editGroup) {
+        EditGroup = editGroup;
+    }
+
+    public boolean getEditResource() {
+        return EditResource;
+    }
+
+    public void setEditResource(boolean editResource) {
+        EditResource = editResource;
+    }
+
+    public boolean getEditPassword() {
+        return EditPassword;
+    }
+
+    public void setEditPassword(boolean editPassword) {
+        EditPassword = editPassword;
+    }
+
     /**
      * Shows if a user has access to the calendar module of ox.
      * 

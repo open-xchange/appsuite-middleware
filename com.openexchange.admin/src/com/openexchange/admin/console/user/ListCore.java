@@ -300,6 +300,9 @@ public abstract class ListCore extends UserAbstraction {
             columnnames.add(UserAbstraction.OPT_ACCESS_WEBDAV);
             columnnames.add(UserAbstraction.OPT_ACCESS_WEBDAV_XML);
             columnnames.add(UserAbstraction.OPT_ACCESS_WEBMAIL);
+            columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_GROUP);
+            columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_RESOURCE);
+            columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_PASSWORD);
             
             
         }        
@@ -352,6 +355,9 @@ public abstract class ListCore extends UserAbstraction {
             datarow.add(String.valueOf(access.getWebdav()));
             datarow.add(String.valueOf(access.getWebdavXml()));
             datarow.add(String.valueOf(access.getWebmail()));
+            datarow.add(String.valueOf(access.getEditGroup()));
+            datarow.add(String.valueOf(access.getEditResource()));
+            datarow.add(String.valueOf(access.getEditPassword()));
             
             data.add(datarow);
             printExtensionsError(user);

@@ -1086,18 +1086,20 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // Write GUI configuration to database.
             final SettingStorage settStor = SettingStorage.getInstance(ctx.getId().intValue(), internal_user_id);
             final Map<String, String> guiPreferences = usrdata.getGuiPreferences();
-            final Iterator<Entry<String, String>> iter = guiPreferences.entrySet().iterator();
-            while (iter.hasNext()) {
-                final Entry<String, String> entry = iter.next();
-                final String key = entry.getKey();
-                final String value = entry.getValue();
-                if (null != key && null != value) {
-                    try {
-                        final Setting setting = ConfigTree.getSettingByPath(key);
-                        setting.setSingleValue(value);
-                        settStor.save(write_ox_con, setting);
-                    } catch (final SettingException e) {
-                        log.error("Problem while storing GUI preferences.", e);
+            if( guiPreferences != null ) {
+                final Iterator<Entry<String, String>> iter = guiPreferences.entrySet().iterator();
+                while (iter.hasNext()) {
+                    final Entry<String, String> entry = iter.next();
+                    final String key = entry.getKey();
+                    final String value = entry.getValue();
+                    if (null != key && null != value) {
+                        try {
+                            final Setting setting = ConfigTree.getSettingByPath(key);
+                            setting.setSingleValue(value);
+                            settStor.save(write_ox_con, setting);
+                        } catch (final SettingException e) {
+                            log.error("Problem while storing GUI preferences.", e);
+                        }
                     }
                 }
             }
@@ -1911,7 +1913,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             acc.setWebdavXml(user.hasWebDAVXML());
             acc.setWebmail(user.hasWebMail());
             acc.setDelegateTask(user.canDelegateTasks());
-
+            acc.setEditGroup(user.isEditGroup());
+            acc.setEditResource(user.isEditResource());
+            acc.setEditPassword(user.isEditPassword());
+            
             return acc;
         } catch (final DBPoolingException dbpol) {
             log.error("DBPooling error", dbpol);
@@ -2217,6 +2222,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setWebDAVXML(access.getWebdavXml());
             user.setWebMail(access.getWebmail());
             user.setDelegateTasks(access.getDelegateTask());
+            user.setEditGroup(access.getEditGroup());
+            user.setEditResource(access.getEditResource());
+            user.setEditPassword(access.getEditPassword());
 
             RdbUserConfigurationStorage.saveUserConfiguration(user, insert_or_update, write_ox_con);
             com.openexchange.groupware.contexts.Context tmp = ContextStorage.getInstance().getContext(ctx.getId());
