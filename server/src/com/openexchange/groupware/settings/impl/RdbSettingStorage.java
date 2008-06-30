@@ -49,11 +49,12 @@
 
 package com.openexchange.groupware.settings.impl;
 
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -221,15 +222,23 @@ public class RdbSettingStorage extends SettingStorage {
     @Override
     public void readValues(final Setting setting) throws SettingException {
         final Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final DBPoolingException e) {
-            throw new SettingException(Code.NO_CONNECTION, e);
+        if (!setting.isLeaf()) {
+            readSubValues(setting);
+            return;
         }
-        try {
-            readValues(con, setting);
-        } finally {
-            DBPool.closeReaderSilent(ctx, con);
+        if (setting.isShared()) {
+            readSharedValue(setting);
+        } else {
+            try {
+                con = DBPool.pickup(ctx);
+            } catch (final DBPoolingException e) {
+                throw new SettingException(Code.NO_CONNECTION, e);
+            }
+            try {
+                readValues(con, setting);
+            } finally {
+                DBPool.closeReaderSilent(ctx, con);
+            }
         }
     }
 
@@ -333,28 +342,6 @@ public class RdbSettingStorage extends SettingStorage {
         // During reading values all childs may be removed.
         if (setting.isLeaf()) {
             setting.getParent().removeElement(setting);
-        }
-    }
-
-    /**
-     * Closes an open ResultSet and an open Statement.
-     * @param result ResultSet.
-     * @param stmt Statement.
-     */
-    private void closeSQLStuff(final ResultSet result, final Statement stmt) {
-        if (null != result) {
-            try {
-                result.close();
-            } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
-        if (null != stmt) {
-            try {
-                stmt.close();
-            } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
-            }
         }
     }
 }
