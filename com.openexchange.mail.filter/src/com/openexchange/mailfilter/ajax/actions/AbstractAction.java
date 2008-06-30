@@ -96,6 +96,13 @@ public abstract class AbstractAction<T, U extends AbstractRequest> {
             case LIST:
                 retval = actionList(request);
                 break;
+            case DELETESCRIPT:
+                actionDeleteScript(request);
+                retval = JSONObject.NULL;
+                break;
+            case GETSCRIPT:
+                retval = actionGetScript(request);
+                break;
             default:
                 throw new OXMailfilterException(Code.PROBLEM, "Unimplemented action.");
         }
@@ -137,5 +144,14 @@ public abstract class AbstractAction<T, U extends AbstractRequest> {
     protected JSONArray actionList(final U request) throws AbstractOXException {
         throw new AjaxException(AjaxException.Code.UnknownAction, Action.LIST.getAjaxName());
     }
+
+    protected void actionDeleteScript(final U request) throws AbstractOXException {
+        throw new AjaxException(AjaxException.Code.UnknownAction, Action.NEW.getAjaxName());
+    }
+
+    protected String actionGetScript(final U request) throws AbstractOXException {
+        throw new AjaxException(AjaxException.Code.UnknownAction, Action.NEW.getAjaxName());
+    }
+
 
 }

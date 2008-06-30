@@ -455,6 +455,72 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         }
     }
     
+    @Override
+    protected void actionDeleteScript(final MailfilterRequest request) throws AbstractOXException {
+        final Credentials credentials = request.getCredentials();
+        final SieveHandler sieveHandler = connectRight(credentials);
+        try {
+            sieveHandler.initializeConnection();
+            final String activeScript = sieveHandler.getActiveScript();
+            
+            writeScript(sieveHandler, activeScript, "");
+
+        } catch (final UnsupportedEncodingException e) {
+            throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
+        } catch (final IOException e) {
+            throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
+        } catch (final OXSieveHandlerException e) {
+            throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
+        } catch (final OXSieveHandlerInvalidCredentialsException e) {
+            throw new OXMailfilterException(Code.INVALID_CREDENTIALS, getUserPrefix(credentials) + e.getMessage());
+        } finally {
+            if (null != sieveHandler) {
+                try {
+                    sieveHandler.close();
+                } catch (final UnsupportedEncodingException e) {
+                    throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
+                } catch (final IOException e) {
+                    throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
+                }
+            }
+        }
+    }
+    
+    @Override
+    protected String actionGetScript(final MailfilterRequest request) throws AbstractOXException {
+        final Credentials credentials = request.getCredentials();
+        final SieveHandler sieveHandler = connectRight(credentials);
+        try {
+            sieveHandler.initializeConnection();
+            final String activeScript = sieveHandler.getActiveScript();
+            final byte[] script = sieveHandler.getScript(activeScript);
+            
+            if (null != script) {
+                return new String(script, "UTF-8");
+            } else {
+                return "";
+            }
+        } catch (final UnsupportedEncodingException e) {
+            throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
+        } catch (final IOException e) {
+            throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
+        } catch (final OXSieveHandlerException e) {
+            throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
+        } catch (final OXSieveHandlerInvalidCredentialsException e) {
+            throw new OXMailfilterException(Code.INVALID_CREDENTIALS, getUserPrefix(credentials) + e.getMessage());
+        } finally {
+            if (null != sieveHandler) {
+                try {
+                    sieveHandler.close();
+                } catch (final UnsupportedEncodingException e) {
+                    throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
+                } catch (final IOException e) {
+                    throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
+                }
+            }
+        }
+    }
+    
     /**
      * {@inheritDoc}
      */

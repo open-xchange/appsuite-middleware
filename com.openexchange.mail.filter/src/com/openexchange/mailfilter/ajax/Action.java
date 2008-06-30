@@ -82,7 +82,17 @@ public enum Action {
      * Returns a list of a list of requested attributes. Request must contain
      * a list of identifier of objects that attributes should be returned.
      */
-    LIST("list");
+    LIST("list"),
+    /**
+     * Deletes the whole script
+     */
+    DELETESCRIPT("deletescript"),
+    /**
+     * Gets the whole script as text
+     */
+    GETSCRIPT("getscript");
+
+
     
     private String ajaxName;
 
