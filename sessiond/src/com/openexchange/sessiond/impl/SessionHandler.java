@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
@@ -99,7 +100,7 @@ public final class SessionHandler {
 
 	private static boolean noLimit;
 
-	private static boolean isInit;
+	private static final AtomicBoolean initialized = new AtomicBoolean();
 
 	private static final Log LOG = LogFactory.getLog(SessionHandler.class);
 
@@ -121,7 +122,7 @@ public final class SessionHandler {
 	public static void init(final SessiondConfigInterface config) {
 		SessionHandler.config = config;
 
-		if (!isInit) {
+		if (initialized.compareAndSet(false, true)) {
 			try {
 				sessionIdGenerator = SessionIdGenerator.getInstance();
 			} catch (final SessiondException exc) {
@@ -133,13 +134,14 @@ public final class SessionHandler {
 			for (int a = 0; a < numberOfSessionContainers; a++) {
 				prependContainer();
 			}
+
+			noLimit = (config.getMaxSessions() == 0);
+
+			final SessiondTimer sessiondTimer = new SessiondTimer();
+			final Timer t = ServerTimer.getTimer();
+			t.schedule(sessiondTimer, config.getSessionContainerTimeout(), config.getSessionContainerTimeout());
 		}
 
-		noLimit = (config.getMaxSessions() == 0);
-
-		final SessiondTimer sessiondTimer = new SessiondTimer();
-		final Timer t = ServerTimer.getTimer();
-		t.schedule(sessiondTimer, config.getSessionContainerTimeout(), config.getSessionContainerTimeout());
 	}
 
 	private static void prependContainer() {
@@ -454,15 +456,16 @@ public final class SessionHandler {
 	}
 
 	public static void close() {
-		numberOfSessionContainers = 4;
-		postContainersRemoval();
-		sessionList = new LinkedList<SessionContainer>();
-		userList = new LinkedList<Map<String, String>>();
-		randomList = new LinkedList<Map<String, String>>();
-		sessionIdGenerator = null;
-		config = null;
-		noLimit = false;
-		isInit = false;
+		if (initialized.compareAndSet(true, false)) {
+			numberOfSessionContainers = 4;
+			postContainersRemoval();
+			sessionList = new LinkedList<SessionContainer>();
+			userList = new LinkedList<Map<String, String>>();
+			randomList = new LinkedList<Map<String, String>>();
+			sessionIdGenerator = null;
+			config = null;
+			noLimit = false;
+		}
 	}
 
 	public static int getNumberOfActiveSessions() {
