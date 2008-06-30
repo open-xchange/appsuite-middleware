@@ -258,17 +258,17 @@ public abstract class PasswordChangeService {
 				return UnixCrypt.crypt(newPassword);
 			} catch (final UnsupportedEncodingException e) {
 				LOG.error("Error encrypting password according to CRYPT mechanism", e);
-				throw new UserException(UserException.Code.UNSUPPORTED_ENCODING, e.getMessage());
+				throw new UserException(UserException.Code.UNSUPPORTED_ENCODING, e, e.getMessage());
 			}
 		} else if (MECH_SHA.equals(mech)) {
 			try {
 				return SHACrypt.makeSHAPasswd(newPassword);
 			} catch (final NoSuchAlgorithmException e) {
 				LOG.error("Error encrypting password according to SHA mechanism", e);
-				throw new UserException(UserException.Code.UNSUPPORTED_ENCODING, e.getMessage());
+				throw new UserException(UserException.Code.UNSUPPORTED_ENCODING, e, e.getMessage());
 			} catch (final UnsupportedEncodingException e) {
 				LOG.error("Error encrypting password according to SHA mechanism", e);
-				throw new UserException(UserException.Code.UNSUPPORTED_ENCODING, e.getMessage());
+				throw new UserException(UserException.Code.UNSUPPORTED_ENCODING, e, e.getMessage());
 			}
 		} else {
 			throw new UserException(UserException.Code.MISSING_PASSWORD_MECH, mech == null ? "" : mech);
