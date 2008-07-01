@@ -58,17 +58,15 @@ import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanRegistrationException;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jdom.JDOMException;
 
 import com.openexchange.configuration.ConfigDB;
 import com.openexchange.configuration.ConfigDB.Property;
+import com.openexchange.management.ManagementException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.ServerTimer;
 import com.openexchange.server.impl.DBPoolingException;
@@ -252,11 +250,7 @@ public final class Pools implements Runnable {
             LOG.error(e.getMessage(), e);
         } catch (final NullPointerException e) {
             LOG.error(e.getMessage(), e);
-        } catch (final InstanceNotFoundException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final MBeanRegistrationException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final Exception e) {
+        } catch (final ManagementException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -279,9 +273,7 @@ public final class Pools implements Runnable {
             LOG.error(e.getMessage(), e);
         } catch (final NullPointerException e) {
             LOG.error(e.getMessage(), e);
-        } catch (final JDOMException e) {
-            LOG.error(e);
-        } catch (final Exception e) {
+        } catch (final ManagementException e) {
             LOG.error(e.getMessage(), e);
         }
     }

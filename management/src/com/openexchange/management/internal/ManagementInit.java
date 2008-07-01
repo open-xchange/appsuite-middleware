@@ -59,6 +59,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.ServiceException;
 
 /**
  * 
@@ -99,17 +100,29 @@ public final class ManagementInit implements Initialization {
 		}
 		final ManagementAgentImpl agent = ManagementAgentImpl.getInstance();
 		final ConfigurationService c = getServiceRegistry().getService(ConfigurationService.class);
+		if (c == null) {
+			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ConfigurationService.class.getName());
+		}
 		/*
-		 * Configure bind address and port
+		 * Configure
 		 */
 		{
-			String bindAddress = c.getProperty("MonitorJMXBindAddress", "localhost");
+			String bindAddress = c.getProperty("JMXBindAddress", "localhost");
 			if (bindAddress == null) {
 				bindAddress = "localhost";
 			}
-			final int jmxPort = c.getIntProperty("MonitorJMXPort", 9999);
+			final int jmxPort = c.getIntProperty("JMXPort", 9999);
 			agent.setJmxPort(jmxPort);
 			agent.setJmxBindAddr(bindAddress);
+			String jmxLogin = c.getProperty("JMXLogin");
+			if (jmxLogin != null && (jmxLogin = jmxLogin.trim()).length() > 0) {
+				String jmxPassword = c.getProperty("JMXPassword");
+				if (jmxPassword == null || (jmxPassword = jmxPassword.trim()).length() == 0) {
+					throw new IllegalArgumentException("JMX password not set");
+				}
+				agent.setJmxLogin(jmxLogin);
+				agent.setJmxPassword(jmxPassword);
+			}
 		}
 		/*
 		 * Run

@@ -326,13 +326,13 @@ public final class ServerConfig extends AbstractConfig {
 		 */
 		MAX_UPLOAD_SIZE("MAX_UPLOAD_SIZE"),
 		/**
-		 * MonitorJMXPort
+		 * JMXPort
 		 */
-		JMX_PORT("MonitorJMXPort"),
+		JMX_PORT("JMXPort"),
 		/**
-		 * MonitorJMXBindAddress
+		 * JMXBindAddress
 		 */
-		JMX_BIND_ADDRESS("MonitorJMXBindAddress"),
+		JMX_BIND_ADDRESS("JMXBindAddress"),
 		/**
 		 * Max idle time for uploaded files in milliseconds
 		 */

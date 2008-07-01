@@ -66,28 +66,28 @@ public interface ManagementService {
 	 *            The bean's object name
 	 * @param mbean
 	 *            The bean to register
-	 * @throws Exception
+	 * @throws ManagementException
 	 *             If registration fails
 	 */
-	public void registerMBean(ObjectName objectName, Object mbean) throws Exception;
+	public void registerMBean(ObjectName objectName, Object mbean) throws ManagementException;
 
 	/**
 	 * Unregisters the MBean corresponding to given name
 	 * 
 	 * @param name
 	 *            The bean name
-	 * @throws Exception
+	 * @throws ManagementException
 	 *             If bean cannot be unregistered
 	 */
-	public void unregisterMBean(String name) throws Exception;
+	public void unregisterMBean(String name) throws ManagementException;
 
 	/**
 	 * Unregisters the MBean corresponding to given object name
 	 * 
 	 * @param objectName
 	 *            The bean's object name
-	 * @throws Exception
+	 * @throws ManagementException
 	 *             If bean cannot be unregistered
 	 */
-	public void unregisterMBean(ObjectName objectName) throws Exception;
+	public void unregisterMBean(ObjectName objectName) throws ManagementException;
 }
