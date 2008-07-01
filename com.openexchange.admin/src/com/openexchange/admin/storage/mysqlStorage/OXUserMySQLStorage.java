@@ -2227,9 +2227,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setEditPassword(access.getEditPassword());
 
             RdbUserConfigurationStorage.saveUserConfiguration(user, insert_or_update, write_ox_con);
-            com.openexchange.groupware.contexts.Context tmp = ContextStorage.getInstance().getContext(ctx.getId());
-            final UserConfigurationStorage uConfStor = UserConfigurationStorage.getInstance();
-            uConfStor.removeUserConfiguration(user.getUserId(), tmp);
+            
+            if( ! insert_or_update ) {
+                com.openexchange.groupware.contexts.Context tmp = ContextStorage.getInstance().getContext(ctx.getId());
+                final UserConfigurationStorage uConfStor = UserConfigurationStorage.getInstance();
+                uConfStor.removeUserConfiguration(user.getUserId(), tmp);
+            }
         } catch (final DBPoolingException pole) {
             log.error("DBPooling Error", pole);
             throw new StorageException(pole.toString());
