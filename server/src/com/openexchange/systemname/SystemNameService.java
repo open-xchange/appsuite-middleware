@@ -47,29 +47,22 @@
  *
  */
 
-package com.openexchange.systemname.internal;
-
-import com.openexchange.ajp13.AJPv13Config;
-import com.openexchange.systemname.SystemName;
+package com.openexchange.systemname;
 
 /**
- * {@link JVMRouteSystemName} - The {@link SystemName system name}
- * implementation that uses the JVM route.
+ * {@link SystemNameService} - Provides access to system name
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class JVMRouteSystemName implements SystemName {
+public interface SystemNameService {
 
 	/**
-	 * Initializes a new {@link JVMRouteSystemName}
+	 * Gets the unique system name that may be used for logging or other
+	 * purposes.
+	 * 
+	 * @return The unique system name or <code>null</code> if none available
 	 */
-	public JVMRouteSystemName() {
-		super();
-	}
-
-	public String getSystemName() {
-		return AJPv13Config.getJvmRoute();
-	}
+	public String getSystemName();
 
 }
