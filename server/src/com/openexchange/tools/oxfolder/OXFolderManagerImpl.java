@@ -1920,12 +1920,12 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	}
 
 	private static Object getFolderValue(final int folderField, final FolderObject folder) {
-		if (FolderObject.OBJECT_ID == folderField) {
+		if (FolderObject.FOLDER_NAME == folderField) {
+			return folder.getFolderName();
+		} else if (FolderObject.OBJECT_ID == folderField) {
 			return Integer.valueOf(folder.getObjectID());
 		} else if (FolderObject.FOLDER_ID == folderField) {
 			return Integer.valueOf(folder.getParentFolderID());
-		} else if (FolderObject.FOLDER_NAME == folderField) {
-			return folder.getFolderName();
 		} else if (FolderObject.MODULE == folderField) {
 			return Integer.valueOf(folder.getModule());
 		} else if (FolderObject.TYPE == folderField) {
@@ -1959,11 +1959,27 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 				valueLength = 0;
 			}
 			int tmp2 = -1;
+			boolean closeReadCon = false;
+			Connection readCon = this.readCon;
+			if (readCon == null) {
+				try {
+					readCon = DBPool.pickup(ctx);
+				} catch (final DBPoolingException e) {
+					LOG.error("A readable connection could not be fetched from pool", e);
+					return new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, exc, Integer.valueOf(ctx
+							.getContextId()));
+				}
+				closeReadCon = true;
+			}
 			try {
 				tmp2 = DBUtils.getColumnSize(readCon, tableName, fields[i]);
 			} catch (final SQLException e) {
 				LOG.error(e.getMessage(), e);
 				tmp2 = -1;
+			} finally {
+				if (closeReadCon) {
+					DBPool.closeReaderSilent(ctx, readCon);
+				}
 			}
 			final int length = -1 == tmp2 ? 0 : tmp2;
 			truncateds[i] = new OXFolderException.Truncated() {
@@ -1980,7 +1996,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 				}
 			};
 		}
-		sFields.setLength(sFields.length() - 1);
+		sFields.setLength(sFields.length() - 2);
 		final OXFolderException fe;
 		if (truncateds.length > 0) {
 			final OXFolderException.Truncated truncated = truncateds[0];
