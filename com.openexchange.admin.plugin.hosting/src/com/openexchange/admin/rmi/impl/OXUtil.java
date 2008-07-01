@@ -186,7 +186,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     
     public void unregisterFilestore(final Filestore store, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         try {
-            doNullCheck(store,store.getId());
+            doNullCheck(store);
+            doNullCheck(store.getId());
         } catch (final InvalidDataException e1) {            
             log.error("Invalid data sent by client!", e1);
             throw e1;
@@ -368,7 +369,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
    
     public Server registerServer(final Server srv, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         try{
-            doNullCheck(srv,srv.getName());
+            doNullCheck(srv);
+            doNullCheck(srv.getName());
         } catch (final InvalidDataException e1) {            
             log.error("Invalid data sent by client!", e1);
             throw e1;

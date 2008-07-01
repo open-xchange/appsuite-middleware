@@ -262,7 +262,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     private void disable(final Context ctx, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchReasonException, OXContextException {
         try {
-            doNullCheck(ctx, reason,reason.getId());        
+            doNullCheck(ctx, reason);        
+            doNullCheck(reason.getId());        
         } catch (final InvalidDataException e1) {            
             log.error("Invalid data sent by client!", e1);
             throw e1;
@@ -306,7 +307,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     private void disableAll(final MaintenanceReason reason, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchReasonException {
         try{
-            doNullCheck(reason,reason.getId());
+            doNullCheck(reason);
+            doNullCheck(reason.getId());
         } catch (final InvalidDataException e1) {            
             log.error("Invalid data sent by client!", e1);
             throw e1;
@@ -454,7 +456,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     public Context[] listByFilestore(final Filestore filestore, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchFilestoreException {
         try {
-            doNullCheck(filestore, filestore.getId());
+            doNullCheck(filestore);
+            doNullCheck(filestore.getId());
         } catch (final InvalidDataException e) {
             final InvalidDataException invalidDataException = new InvalidDataException("Filestore is null");
             log.error(invalidDataException.getMessage(), invalidDataException);
@@ -485,7 +488,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     private int moveContextDatabase(final Context ctx, final Database db, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
         try{
-            doNullCheck(ctx,db,reason, reason.getId());
+            doNullCheck(ctx,db,reason);
+            doNullCheck(reason.getId());
         } catch (final InvalidDataException e1) {            
             log.error("Invalid data sent by client!", e1);
             throw e1;
@@ -539,7 +543,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     private int moveContextFilestore(final Context ctx, final Filestore dst_filestore, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
         try {
-            doNullCheck(ctx, dst_filestore,dst_filestore.getId(), reason,reason.getId());
+            doNullCheck(ctx, dst_filestore,reason);
+            doNullCheck(dst_filestore.getId(), reason.getId());
         } catch (final InvalidDataException e1) {            
             log.error("Invalid data sent by client!", e1);
             throw e1;
