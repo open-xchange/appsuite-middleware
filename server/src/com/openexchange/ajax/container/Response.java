@@ -66,6 +66,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.AbstractOXException.Truncated;
 
 /**
  * Response data object.
@@ -117,6 +118,18 @@ public final class Response {
 	 * identifier.
 	 */
 	public static final String TRUNCATED = "truncated";
+
+	/**
+	 * Name of the JSON attribute containing the array of maximum sizes for the
+	 * truncated attributes.
+	 */
+	public static final String MAX_SIZES = "max_sizes";
+
+	/**
+	 * Name of the JSON attribute containing the array of actual length of the
+	 * truncated attributes.
+	 */
+	public static final String LENGTHS = "lengths";
 
 	/**
 	 * The original JSON response.
@@ -189,16 +202,28 @@ public final class Response {
 			json.put(ERROR_CATEGORY, isWarning ? Category.WARNING.getCode() : exception.getCategory().getCode());
 			json.put(ERROR_CODE, exception.getErrorCode());
 			json.put(ERROR_ID, exception.getExceptionID());
-			if (exception.getTruncatedIds().length > 0) {
-				final JSONArray array = new JSONArray();
-				json.put(TRUNCATED, array);
-				for (final int i : exception.getTruncatedIds()) {
-					array.put(i);
-				}
-			}
+			truncated2JSON(json, exception);
 		}
 		return json;
 	}
+
+    private static void truncated2JSON(final JSONObject json,
+        final AbstractOXException exception) throws JSONException {
+        final Truncated truncateds[] = exception.getTruncated();
+        if (truncateds.length > 0) {
+            final JSONArray array = new JSONArray();
+            json.put(TRUNCATED, array);
+            final JSONArray maxSize = new JSONArray();
+            json.put(MAX_SIZES, maxSize);
+            final JSONArray lengths = new JSONArray();
+            json.put(LENGTHS, lengths);
+            for (final Truncated truncated : truncateds) {
+                array.put(truncated.getId());
+                maxSize.put(truncated.getMaxSize());
+                lengths.put(truncated.getLength());
+            }
+        }
+    }
 
 	/**
 	 * Resets the response object for re-use
@@ -344,7 +369,10 @@ public final class Response {
 				retval.exception.overrideExceptionID(response.getString(ERROR_ID));
 			}
 			parseErrorMessageArgs(response.optJSONArray(ERROR_PARAMS), retval.exception);
-			parseTruncatedIds(response.optJSONArray(TRUNCATED), retval.exception);
+			parseTruncateds(response.optJSONArray(TRUNCATED),
+			    response.optJSONArray(MAX_SIZES),
+			    response.optJSONArray(LENGTHS),
+			    retval.exception);
 		}
 		return retval;
 	}
@@ -430,11 +458,25 @@ public final class Response {
 	 *             if reading the truncated attribute identifier from the JSON
 	 *             array fails.
 	 */
-	private static void parseTruncatedIds(final JSONArray jTrunc, final AbstractOXException exception)
-			throws JSONException {
-		if (null != jTrunc) {
-			for (int i = 0; i < jTrunc.length(); i++) {
-				exception.addTruncatedId(jTrunc.getInt(i));
+	private static void parseTruncateds(final JSONArray trunc,
+	    final JSONArray maxSizes, final JSONArray lengths,
+	    final AbstractOXException exception) throws JSONException {
+		if (null != trunc) {
+			for (int i = 0; i < trunc.length(); i++) {
+			    final int id = trunc.getInt(i);
+			    final int maxSize = (null != maxSizes) ? maxSizes.getInt(i) : 0;
+			    final int length = (null != lengths) ? lengths.getInt(i) : 0;
+			    exception.addTruncated(new Truncated() {
+                    public int getId() {
+                        return id;
+                    }
+                    public int getLength() {
+                        return length;
+                    }
+                    public int getMaxSize() {
+                        return maxSize;
+                    }
+			    });
 			}
 		}
 	}
@@ -501,14 +543,26 @@ public final class Response {
 		writer.key(ERROR_CATEGORY).value(exception.getCategory().getCode());
 		writer.key(ERROR_CODE).value(exception.getErrorCode());
 		writer.key(ERROR_ID).value(exception.getExceptionID());
-		if (exception.getTruncatedIds().length > 0) {
-			final JSONArray array = new JSONArray();
-			for (final int i : exception.getTruncatedIds()) {
-				array.put(i);
-			}
-			writer.key(TRUNCATED).value(array);
-		}
+		writeTruncated(exception, writer);
 	}
+
+    private static void writeTruncated(final AbstractOXException exception,
+        final JSONWriter writer) throws JSONException {
+        final Truncated truncateds[] = exception.getTruncated();
+        if (truncateds.length > 0) {
+            final JSONArray array = new JSONArray();
+            final JSONArray maxSize = new JSONArray();
+            final JSONArray lengths = new JSONArray();
+            for (final Truncated truncated : truncateds) {
+                array.put(truncated.getId());
+                maxSize.put(truncated.getMaxSize());
+                lengths.put(truncated.getLength());
+            }
+            writer.key(TRUNCATED).value(array);
+            writer.key(MAX_SIZES).value(maxSize);
+            writer.key(LENGTHS).value(lengths);
+        }
+    }
 
 	/**
 	 * Writes given instance of <code>AbstractOXException</code> as a warning
@@ -534,13 +588,7 @@ public final class Response {
 		writer.key(ERROR_CATEGORY).value(Category.WARNING.getCode());
 		writer.key(ERROR_CODE).value(warning.getErrorCode());
 		writer.key(ERROR_ID).value(warning.getExceptionID());
-		if (warning.getTruncatedIds().length > 0) {
-			final JSONArray array = new JSONArray();
-			for (final int i : warning.getTruncatedIds()) {
-				array.put(i);
-			}
-			writer.key(TRUNCATED).value(array);
-		}
+		writeTruncated(warning, writer);
 	}
 
 	/**
