@@ -78,9 +78,14 @@ public final class ConfigurationImpl implements ConfigurationService {
 	private static final Log LOG = LogFactory.getLog(ConfigurationImpl.class);
 
 	private static final String EXT = ".properties";
-    private final File dir;
 
-    private static final class PropertyFileFilter implements FileFilter {
+	private final File dir;
+
+	private static final class PropertyFileFilter implements FileFilter {
+
+		public PropertyFileFilter() {
+			super();
+		}
 
 		public boolean accept(final File pathname) {
 			return pathname.isDirectory() || pathname.getName().toLowerCase().endsWith(EXT);
@@ -126,11 +131,11 @@ public final class ConfigurationImpl implements ConfigurationService {
 	private static void processDirectory(final File dir, final FileFilter fileFilter,
 			final Map<String, String> properties, final Map<String, String> propertiesFiles) {
 		final File[] files = dir.listFiles(fileFilter);
-        if(files == null) {
-            LOG.info("Can't read "+dir+". Skipping.");
-            return;
-        }
-        for (int i = 0; i < files.length; i++) {
+		if (files == null) {
+			LOG.info("Can't read " + dir + ". Skipping.");
+			return;
+		}
+		for (int i = 0; i < files.length; i++) {
 			if (files[i].isDirectory()) {
 				processDirectory(files[i], fileFilter, properties, propertiesFiles);
 			} else {
@@ -182,7 +187,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.config.Configuration#getProperty(java.lang.String,
-	 *      java.lang.Object)
+	 * java.lang.Object)
 	 */
 	public String getProperty(final String name, final String defaultValue) {
 		return properties.containsKey(name) ? properties.get(name) : defaultValue;
@@ -192,7 +197,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.config.Configuration#getProperty(java.lang.String,
-	 *      com.openexchange.config.PropertyListener)
+	 * com.openexchange.config.PropertyListener)
 	 */
 	public String getProperty(final String name, final PropertyListener listener) {
 		if (properties.containsKey(name)) {
@@ -210,7 +215,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.config.Configuration#getProperty(java.lang.String,
-	 *      java.lang.Object, com.openexchange.config.PropertyListener)
+	 * java.lang.Object, com.openexchange.config.PropertyListener)
 	 */
 	public String getProperty(final String name, final String defaultValue, final PropertyListener listener) {
 		if (properties.containsKey(name)) {
@@ -225,61 +230,62 @@ public final class ConfigurationImpl implements ConfigurationService {
 	}
 
 	/**
-     * {@inheritDoc}
-     */
-    public Properties getFile(final String filename) {
-        return getFile(filename, null);
-    }
+	 * {@inheritDoc}
+	 */
+	public Properties getFile(final String filename) {
+		return getFile(filename, null);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public Properties getFile(final String filename,
-        final PropertyListener listener) {
-        final Properties retval = new Properties();
-        final Iterator<Entry<String,String>> iter = propertiesFiles.entrySet().iterator();
-        while (iter.hasNext()) {
-            final Entry<String,String> entry = iter.next();
-            if (entry.getValue().endsWith(filename)) {
-                final String value;
-                if (null == listener) {
-                    value = getProperty(entry.getKey());
-                } else {
-                    value = getProperty(entry.getKey(), listener);
-                }
-                retval.put(entry.getKey(), value);
-            }
-        }
-        return retval;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	public Properties getFile(final String filename, final PropertyListener listener) {
+		final Properties retval = new Properties();
+		final Iterator<Entry<String, String>> iter = propertiesFiles.entrySet().iterator();
+		while (iter.hasNext()) {
+			final Entry<String, String> entry = iter.next();
+			if (entry.getValue().endsWith(filename)) {
+				final String value;
+				if (null == listener) {
+					value = getProperty(entry.getKey());
+				} else {
+					value = getProperty(entry.getKey(), listener);
+				}
+				retval.put(entry.getKey(), value);
+			}
+		}
+		return retval;
+	}
 
-    public Properties getPropertiesInFolder(final String folderName) {
-        return getPropertiesInFolder(folderName, null);
-    }
+	public Properties getPropertiesInFolder(final String folderName) {
+		return getPropertiesInFolder(folderName, null);
+	}
 
-    public Properties getPropertiesInFolder(String folderName, final PropertyListener listener) {
-        final Properties retval = new Properties();
-        final Iterator<Entry<String,String>> iter = propertiesFiles.entrySet().iterator();
-        folderName = dir.getAbsolutePath()+"/"+folderName+"/"; 
-        while (iter.hasNext()) {
-            final Entry<String,String> entry = iter.next();
-                if (entry.getValue().startsWith(folderName)) {
-                final String value;
-                if (null == listener) {
-                    value = getProperty(entry.getKey());
-                } else {
-                    value = getProperty(entry.getKey(), listener);
-                }  // FIXME: this could have been overriden by some property external to the requested folder.
-                retval.put(entry.getKey(), value);
-            }
-        }
-        return retval;
-    }
-    /*
+	public Properties getPropertiesInFolder(String folderName, final PropertyListener listener) {
+		final Properties retval = new Properties();
+		final Iterator<Entry<String, String>> iter = propertiesFiles.entrySet().iterator();
+		folderName = dir.getAbsolutePath() + "/" + folderName + "/";
+		while (iter.hasNext()) {
+			final Entry<String, String> entry = iter.next();
+			if (entry.getValue().startsWith(folderName)) {
+				final String value;
+				if (null == listener) {
+					value = getProperty(entry.getKey());
+				} else {
+					value = getProperty(entry.getKey(), listener);
+				} // FIXME: this could have been overriden by some property
+					// external to the requested folder.
+				retval.put(entry.getKey(), value);
+			}
+		}
+		return retval;
+	}
+
+	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.config.Configuration#getProperty(java.lang.String,
-	 *      boolean)
+	 * boolean)
 	 */
 	public boolean getBoolProperty(final String name, final boolean defaultValue) {
 		if (properties.containsKey(name)) {
@@ -292,7 +298,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.config.Configuration#getProperty(java.lang.String,
-	 *      int)
+	 * int)
 	 */
 	public int getIntProperty(final String name, final int defaultValue) {
 		final String prop;
