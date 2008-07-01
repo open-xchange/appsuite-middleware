@@ -182,18 +182,11 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
 					+ fid, se);
 		} finally {
 			try {
-				del.close();
-			} catch (final SQLException sq) {
-				LOG.error("UNABLE TO CLOSE STATEMENT ", sq);
-			}
-			try {
 				writecon.setAutoCommit(true);
 			} catch (final SQLException see) {
-				LOG.error("Uable to close Writeconnection", see);
+				LOG.error("Unable to restore auto-commit", see);
 			}
-			if (writecon != null) {
-				DBPool.closeWriterSilent(ct, writecon);
-			}
+			DBUtils.closeResources(null, del, writecon, false, ct);
 		}
 
 	}
@@ -288,7 +281,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
 				try {
 					writecon.setAutoCommit(true);
 				} catch (final SQLException see) {
-					LOG.error("Unable to switch auto-commit", see);
+					LOG.error("Unable to restore auto-commit", see);
 				}
 				DBUtils.closeResources(null, upd, writecon, false, ct);
 			}
