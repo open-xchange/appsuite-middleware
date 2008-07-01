@@ -60,6 +60,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.ContactEventInterface;
 import com.openexchange.event.impl.InfostoreEventInterface;
+import com.openexchange.event.impl.NoDelayEventInterface;
 import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -78,7 +79,7 @@ import com.openexchange.tools.sql.DBUtils;
  * 
  * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
  */
-public class LinksEventHandler implements AppointmentEventInterface, TaskEventInterface, ContactEventInterface,
+public class LinksEventHandler implements NoDelayEventInterface, AppointmentEventInterface, TaskEventInterface, ContactEventInterface,
 		InfostoreEventInterface {
 
 	private static final Log LOG = LogFactory.getLog(LinksEventHandler.class);

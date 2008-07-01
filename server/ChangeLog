@@ -1,3 +1,8 @@
+* 2008-07-01 - thorben.betten@open-xchange.com
+
+ - Bugfix #10803: Immediate update of links on object modification (move,
+   deletion, etc.)
+
 * 2008-06-30 - dennis.sieben@open-xchange.com
 
  - Bugfix #11534: mailfilter: ox set vacation rule generates sieve error

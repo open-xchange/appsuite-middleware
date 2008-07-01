@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -69,15 +70,15 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.ServerTimer;
 
 /**
- * EventQueue
- * 
+ * {@link EventQueue} - The event queue
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-
 public class EventQueue extends TimerTask {
 
-	private static boolean isFirst = true;
+	private static final AtomicBoolean isFirst = new AtomicBoolean(true);
 
 	private static boolean isInit;
 
@@ -93,15 +94,48 @@ public class EventQueue extends TimerTask {
 
 	private static final Log LOG = LogFactory.getLog(EventQueue.class);
 
-	private static List<AppointmentEventInterface> appointmentEventList = new ArrayList<AppointmentEventInterface>();
+	/*
+	 * +++++++++++++++ Appointment Event Lists +++++++++++++++
+	 */
 
-	private static List<TaskEventInterface> taskEventList = new ArrayList<TaskEventInterface>();
+	private static final List<AppointmentEventInterface> appointmentEventList = new ArrayList<AppointmentEventInterface>(
+			4);
 
-	private static List<ContactEventInterface> contactEventList = new ArrayList<ContactEventInterface>();
+	private static final List<AppointmentEventInterface> noDelayAppointmentEventList = new ArrayList<AppointmentEventInterface>(
+			4);
 
-	private static List<FolderEventInterface> folderEventList = new ArrayList<FolderEventInterface>();
+	/*
+	 * +++++++++++++++ Task Event Lists +++++++++++++++
+	 */
 
-	private static List<InfostoreEventInterface> infostoreEventList = new ArrayList<InfostoreEventInterface>();
+	private static final List<TaskEventInterface> taskEventList = new ArrayList<TaskEventInterface>(4);
+
+	private static final List<TaskEventInterface> noDelayTaskEventList = new ArrayList<TaskEventInterface>(4);
+
+	/*
+	 * +++++++++++++++ Contact Event Lists +++++++++++++++
+	 */
+
+	private static final List<ContactEventInterface> contactEventList = new ArrayList<ContactEventInterface>(4);
+
+	private static final List<ContactEventInterface> noDelayContactEventList = new ArrayList<ContactEventInterface>(4);
+
+	/*
+	 * +++++++++++++++ Folder Event Lists +++++++++++++++
+	 */
+
+	private static final List<FolderEventInterface> folderEventList = new ArrayList<FolderEventInterface>(4);
+
+	private static final List<FolderEventInterface> noDelayFolderEventList = new ArrayList<FolderEventInterface>(4);
+
+	/*
+	 * +++++++++++++++ Infostore Event Lists +++++++++++++++
+	 */
+
+	private static final List<InfostoreEventInterface> infostoreEventList = new ArrayList<InfostoreEventInterface>(4);
+
+	private static final List<InfostoreEventInterface> noDelayInfostoreEventList = new ArrayList<InfostoreEventInterface>(
+			4);
 
 	private static boolean shuttingDown;
 
@@ -111,6 +145,13 @@ public class EventQueue extends TimerTask {
 
 	private static boolean shutdownComplete;
 
+	/**
+	 * Initializes a new {@link EventQueue}.
+	 * 
+	 * @param config
+	 *            The configuration with which this event queue is going to be
+	 *            configured
+	 */
 	public EventQueue(final EventConfig config) {
 		delay = config.getEventQueueDelay();
 
@@ -156,11 +197,23 @@ public class EventQueue extends TimerTask {
 		if (!isInit) {
 			throw new EventException("EventQueue not initialized!");
 		}
-
+		/*
+		 * Immediate invocation of non-delayed handlers...
+		 */
+		event(eventObj, true);
+		/*
+		 * ... and proceed with delayed handlers
+		 */
 		if (noDelay) {
+			/*
+			 * Invoke delayed handlers immediately due to configuration
+			 */
 			event(eventObj);
 		} else {
-			if (isFirst) {
+			/*
+			 * Enqueue for delayed execution
+			 */
+			if (isFirst.get()) {
 				queue1.add(eventObj);
 			} else {
 				queue2.add(eventObj);
@@ -168,19 +221,13 @@ public class EventQueue extends TimerTask {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.util.TimerTask#run()
-	 */
 	@Override
 	public void run() {
 		try {
-			if (isFirst) {
-				isFirst = false;
+			if (isFirst.compareAndSet(true, false)) {
 				callEvent(queue1);
 			} else {
-				isFirst = true;
+				isFirst.set(true);
 				callEvent(queue2);
 			}
 		} catch (final Exception exc) {
@@ -207,29 +254,37 @@ public class EventQueue extends TimerTask {
 	}
 
 	protected static void event(final EventObject eventObj) {
+		event(eventObj, false);
+	}
+
+	protected static void event(final EventObject eventObj, final boolean noDelay) {
 		final int module = eventObj.getModule();
 		switch (module) {
 		case Types.APPOINTMENT:
-			appointment(eventObj);
+			appointment(eventObj, noDelay ? noDelayAppointmentEventList : appointmentEventList);
 			break;
 		case Types.CONTACT:
-			contact(eventObj);
+			contact(eventObj, noDelay ? noDelayContactEventList : contactEventList);
 			break;
 		case Types.TASK:
-			task(eventObj);
+			task(eventObj, noDelay ? noDelayTaskEventList : taskEventList);
 			break;
 		case Types.FOLDER:
-			folder(eventObj);
+			folder(eventObj, noDelay ? noDelayFolderEventList : folderEventList);
 			break;
 		case Types.INFOSTORE:
-			infostore(eventObj);
+			infostore(eventObj, noDelay ? noDelayInfostoreEventList : infostoreEventList);
 			break;
 		default:
 			LOG.error("invalid module: " + module);
 		}
 	}
 
-	protected static void appointment(final EventObject eventObj) {
+	protected static void appointment(final EventObject eventObj,
+			final List<AppointmentEventInterface> appointmentEventList) {
+		if (appointmentEventList.isEmpty()) {
+			return;
+		}
 		final int action = eventObj.getAction();
 		switch (action) {
 		case EventClient.CREATED:
@@ -267,7 +322,10 @@ public class EventQueue extends TimerTask {
 		}
 	}
 
-	protected static void contact(final EventObject eventObj) {
+	protected static void contact(final EventObject eventObj, final List<ContactEventInterface> contactEventList) {
+		if (contactEventList.isEmpty()) {
+			return;
+		}
 		final int action = eventObj.getAction();
 		switch (action) {
 		case EventClient.CREATED:
@@ -305,7 +363,10 @@ public class EventQueue extends TimerTask {
 		}
 	}
 
-	protected static void task(final EventObject eventObj) {
+	protected static void task(final EventObject eventObj, final List<TaskEventInterface> taskEventList) {
+		if (taskEventList.isEmpty()) {
+			return;
+		}
 		final int action = eventObj.getAction();
 		switch (action) {
 		case EventClient.CREATED:
@@ -340,7 +401,10 @@ public class EventQueue extends TimerTask {
 		}
 	}
 
-	protected static void folder(final EventObject eventObj) {
+	protected static void folder(final EventObject eventObj, final List<FolderEventInterface> folderEventList) {
+		if (folderEventList.isEmpty()) {
+			return;
+		}
 		final int action = eventObj.getAction();
 		switch (action) {
 		case EventClient.CREATED:
@@ -378,7 +442,10 @@ public class EventQueue extends TimerTask {
 		}
 	}
 
-	protected static void infostore(final EventObject eventObj) {
+	protected static void infostore(final EventObject eventObj, final List<InfostoreEventInterface> infostoreEventList) {
+		if (infostoreEventList.isEmpty()) {
+			return;
+		}
 		final int action = eventObj.getAction();
 		switch (action) {
 		case EventClient.CREATED:
@@ -417,48 +484,88 @@ public class EventQueue extends TimerTask {
 	}
 
 	public static void addAppointmentEvent(final AppointmentEventInterface event) {
-		appointmentEventList.add(event);
+		if (NoDelayEventInterface.class.isInstance(event)) {
+			noDelayAppointmentEventList.add(event);
+		} else {
+			appointmentEventList.add(event);
+		}
 	}
 
 	public static void addTaskEvent(final TaskEventInterface event) {
-		taskEventList.add(event);
+		if (NoDelayEventInterface.class.isInstance(event)) {
+			noDelayTaskEventList.add(event);
+		} else {
+			taskEventList.add(event);
+		}
 	}
 
 	public static void addContactEvent(final ContactEventInterface event) {
-		contactEventList.add(event);
+		if (NoDelayEventInterface.class.isInstance(event)) {
+			noDelayContactEventList.add(event);
+		} else {
+			contactEventList.add(event);
+		}
 	}
 
 	public static void addFolderEvent(final FolderEventInterface event) {
-		folderEventList.add(event);
+		if (NoDelayEventInterface.class.isInstance(event)) {
+			noDelayFolderEventList.add(event);
+		} else {
+			folderEventList.add(event);
+		}
 	}
 
 	public static void addInfostoreEvent(final InfostoreEventInterface event) {
-		infostoreEventList.add(event);
+		if (NoDelayEventInterface.class.isInstance(event)) {
+			noDelayInfostoreEventList.add(event);
+		} else {
+			infostoreEventList.add(event);
+		}
 	}
 
 	public static void removeAppointmentEvent(final AppointmentEventInterface event) {
-		appointmentEventList.remove(event);
+		if (NoDelayEventInterface.class.isInstance(event)) {
+			noDelayAppointmentEventList.remove(event);
+		} else {
+			appointmentEventList.remove(event);
+		}
 	}
 
 	public static void removeTaskEvent(final TaskEventInterface event) {
-		taskEventList.remove(event);
+		if (NoDelayEventInterface.class.isInstance(event)) {
+			noDelayTaskEventList.remove(event);
+		} else {
+			taskEventList.remove(event);
+		}
 	}
 
 	public static void removeContactEvent(final ContactEventInterface event) {
-		contactEventList.remove(event);
+		if (NoDelayEventInterface.class.isInstance(event)) {
+			noDelayContactEventList.remove(event);
+		} else {
+			contactEventList.remove(event);
+		}
 	}
 
 	public static void removeFolderEvent(final FolderEventInterface event) {
-		folderEventList.remove(event);
+		if (NoDelayEventInterface.class.isInstance(event)) {
+			noDelayFolderEventList.remove(event);
+		} else {
+			folderEventList.remove(event);
+		}
 	}
 
 	public static void removeInfostoreEvent(final InfostoreEventInterface event) {
-		infostoreEventList.remove(event);
+		if (NoDelayEventInterface.class.isInstance(event)) {
+			noDelayInfostoreEventList.remove(event);
+		} else {
+			infostoreEventList.remove(event);
+		}
 	}
 
 	/**
 	 * Stops execution of events after the next run, still delivers all
-	 * remaining evnets. Method blocks until all remaining tasks have been
+	 * remaining events. Method blocks until all remaining tasks have been
 	 * completed
 	 */
 	// TODO: Do we want a timeout here?
