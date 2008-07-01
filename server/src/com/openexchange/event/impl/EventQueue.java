@@ -157,14 +157,14 @@ public class EventQueue extends TimerTask {
 			throw new EventException("EventQueue not initialisiert!");
 		}
 
-		if (!noDelay) {
+		if (noDelay) {
+			event(eventObj);
+		} else {
 			if (isFirst) {
 				queue1.add(eventObj);
 			} else {
 				queue2.add(eventObj);
 			}
-		} else {
-			event(eventObj);
 		}
 	}
 
