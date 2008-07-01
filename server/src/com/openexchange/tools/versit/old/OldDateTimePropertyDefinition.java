@@ -100,13 +100,9 @@ public class OldDateTimePropertyDefinition extends OldShortPropertyDefinition {
 	protected void parseTime(final StringScanner s, final DateTimeValue date)
 			throws IOException {
 		date.calendar.set(Calendar.HOUR_OF_DAY, s.parseNumber(2));
-		if (s.peek == ':') {
-			s.read();
-		}
+		skipColon(s);
 		date.calendar.set(Calendar.MINUTE, s.parseNumber(2));
-		if (s.peek == ':') {
-			s.read();
-		}
+		skipColon(s);
 		date.calendar.set(Calendar.SECOND, s.parseNumber(2));
 		int ms = 0;
 		if (s.peek == '.') {
@@ -132,6 +128,15 @@ public class OldDateTimePropertyDefinition extends OldShortPropertyDefinition {
 			}
 		}
 		date.calendar.setTimeZone(TimeZone.getTimeZone(tz.toString()));
+	}
+
+	private void skipColon(final StringScanner s) throws IOException {
+		if (s.peek == '\\') {
+			s.read();
+		}
+		if (s.peek == ':') {
+			s.read();
+		}
 	}
 
 	@Override

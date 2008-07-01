@@ -51,26 +51,21 @@
 
 package com.openexchange.tools.versit.old;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
+
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 public class OldXBitEncoding implements OldEncoding {
 
 	public static final OldXBitEncoding Default = new OldXBitEncoding();
 	
 	public byte[] decode(final OldScanner s) throws IOException {
-		final ArrayList<Byte> bytes = new ArrayList<Byte>();
+		final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
 		while (s.peek != -1 && s.peek != -2) {
-			bytes.add(Byte.valueOf((byte)s.read()));
+			out.write(s.read());
 		}
-		final byte[] retval = new byte[bytes.size()];
-		final int size = bytes.size();
-		final Iterator iter = bytes.iterator();
-		for (int j = 0; j < size; j++) {
-			retval[j] = ((Byte)iter.next()).byteValue();
-		}
-		return retval;
+		return out.toByteArray();
 	}
 
 	public void encode(final OldFoldingWriter fw, final byte[] b) throws IOException {

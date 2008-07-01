@@ -2,6 +2,10 @@
 
  - Bugfix #10803: Immediate update of links on object modification (move,
    deletion, etc.)
+ - Bugfix #11538: Added possibility to define login/password for
+   authenticating connect to JMX agent
+ - Bugfix #9746: More tolerant parsing of date/time values by allowing
+   escaped colons
 
 * 2008-06-30 - dennis.sieben@open-xchange.com
 
