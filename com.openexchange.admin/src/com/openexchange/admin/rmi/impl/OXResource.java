@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.57 2008/04/28 09:21:00 choeger Exp $
+ * $Id: OXResource.java,v 1.58 2008/07/01 13:01:58 choeger Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -217,7 +217,8 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
     
     public Resource create(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
        try {
-           doNullCheck(res,res.getName());
+           doNullCheck(res);
+           doNullCheck(res.getName());
        } catch (final InvalidDataException e3) {
            log.error("One of the given arguments for create is null", e3);
            throw e3;
