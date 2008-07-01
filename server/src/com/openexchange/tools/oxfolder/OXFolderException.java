@@ -492,9 +492,11 @@ public class OXFolderException extends OXException {
 		 */
 		NO_SHARED_FOLDER_UPDATE("Shared folder %1$s MUST NOT be updated in context %2$s", Category.PERMISSION, 63),
 		/**
-		 * Specified folder name is too long
+		 * The attribute %1$s contains too much characters. Current length %3$s
+         * is more than allowed length of %2$s characters.
 		 */
-		TRUNCATED("Specified folder name is too long", Category.TRUNCATED, 64),
+		TRUNCATED("The attribute %1$s contains too much characters. Current "
+	            + "length %3$d is more than allowed length of %2$d characters.", Category.TRUNCATED, 64),
 		/**
 		 * Unable to map OCL permission value %1$s to a JSON permission value
 		 */

@@ -56,6 +56,7 @@ import java.sql.DataTruncation;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -95,8 +96,10 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link OXFolderManagerImpl} implements interface
@@ -105,6 +108,11 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXFolderManagerImpl implements OXFolderManager {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(OXFolderManagerImpl.class);
+
+	private static final String TABLE_OXFOLDER_TREE = "oxfolder_tree";
 
 	private final Connection readCon;
 
@@ -119,9 +127,6 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	private final Session session;
 
 	private OXFolderAccess oxfolderAccess;
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(OXFolderManagerImpl.class);
 
 	/**
 	 * Constructor which only uses <code>Session</code>. Optional connections
@@ -330,7 +335,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 				} catch (final DBPoolingException e) {
 					throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
 				} catch (final DataTruncation e) {
-					throw new OXFolderException(FolderCode.TRUNCATED, e, folderObj.getFolderName());
+					throw parseTruncated(e, folderObj, TABLE_OXFOLDER_TREE);
 				} catch (final SQLException e) {
 					throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
 				}
@@ -358,7 +363,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		} catch (final DataTruncation e) {
-			throw new OXFolderException(FolderCode.TRUNCATED, e, folderObj.getFolderName());
+			throw parseTruncated(e, folderObj, TABLE_OXFOLDER_TREE);
 		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		}
@@ -634,7 +639,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 				} catch (final DBPoolingException e) {
 					throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
 				} catch (final DataTruncation e) {
-					throw new OXFolderException(FolderCode.TRUNCATED, e, folderObj.getFolderName());
+					throw parseTruncated(e, folderObj, TABLE_OXFOLDER_TREE);
 				} catch (final SQLException e) {
 					throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
 				}
@@ -650,7 +655,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		} catch (final DataTruncation e) {
-			throw new OXFolderException(FolderCode.TRUNCATED, e, folderObj.getFolderName());
+			throw parseTruncated(e, folderObj, TABLE_OXFOLDER_TREE);
 		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		}
@@ -777,7 +782,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 				} catch (final DBPoolingException e) {
 					throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
 				} catch (final DataTruncation e) {
-					throw new OXFolderException(FolderCode.TRUNCATED, e, folderObj.getFolderName());
+					throw parseTruncated(e, folderObj, TABLE_OXFOLDER_TREE);
 				} catch (final SQLException e) {
 					throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
 				}
@@ -792,7 +797,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		} catch (final DataTruncation e) {
-			throw new OXFolderException(FolderCode.TRUNCATED, e, folderObj.getFolderName());
+			throw parseTruncated(e, folderObj, TABLE_OXFOLDER_TREE);
 		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		}
@@ -919,7 +924,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		try {
 			OXFolderSQL.moveFolderSQL(user.getId(), storageSrc, storageDest, lastModified, ctx, readCon, writeCon);
 		} catch (final DataTruncation e) {
-			throw new OXFolderException(FolderCode.TRUNCATED, e, storageSrc.getFolderName());
+			throw parseTruncated(e, storageSrc, TABLE_OXFOLDER_TREE);
 		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		} catch (final DBPoolingException e) {
@@ -1896,6 +1901,99 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		if (!affectedUsers.isEmpty()) {
 			throw new OXFolderException(OXFolderException.FolderCode.SIMILAR_NAMED_SHARED_FOLDER, folderName);
 		}
+	}
+
+	private static Map<String, Integer> fieldMapping;
+
+	static {
+		final Map<String, Integer> fieldMapping = new HashMap<String, Integer>(9);
+		fieldMapping.put("fuid", Integer.valueOf(FolderObject.OBJECT_ID));
+		fieldMapping.put("parent", Integer.valueOf(FolderObject.FOLDER_ID));
+		fieldMapping.put("fname", Integer.valueOf(FolderObject.FOLDER_NAME));
+		fieldMapping.put("module", Integer.valueOf(FolderObject.MODULE));
+		fieldMapping.put("type", Integer.valueOf(FolderObject.TYPE));
+		fieldMapping.put("creating_date", Integer.valueOf(FolderObject.CREATION_DATE));
+		fieldMapping.put("created_from", Integer.valueOf(FolderObject.CREATED_BY));
+		fieldMapping.put("changing_date", Integer.valueOf(FolderObject.LAST_MODIFIED));
+		fieldMapping.put("changed_from", Integer.valueOf(FolderObject.MODIFIED_BY));
+		OXFolderManagerImpl.fieldMapping = Collections.unmodifiableMap(fieldMapping);
+	}
+
+	private static Object getFolderValue(final int folderField, final FolderObject folder) {
+		if (FolderObject.OBJECT_ID == folderField) {
+			return Integer.valueOf(folder.getObjectID());
+		} else if (FolderObject.FOLDER_ID == folderField) {
+			return Integer.valueOf(folder.getParentFolderID());
+		} else if (FolderObject.FOLDER_NAME == folderField) {
+			return folder.getFolderName();
+		} else if (FolderObject.MODULE == folderField) {
+			return Integer.valueOf(folder.getModule());
+		} else if (FolderObject.TYPE == folderField) {
+			return Integer.valueOf(folder.getType());
+		} else if (FolderObject.CREATION_DATE == folderField) {
+			return folder.getCreationDate();
+		} else if (FolderObject.CREATED_BY == folderField) {
+			return Integer.valueOf(folder.getCreatedBy());
+		} else if (FolderObject.LAST_MODIFIED == folderField) {
+			return folder.getLastModified();
+		} else if (FolderObject.MODIFIED_BY == folderField) {
+			return Integer.valueOf(folder.getModifiedBy());
+		} else {
+			throw new IllegalStateException("Unknown folder field ID: " + folder);
+		}
+	}
+
+	private OXFolderException parseTruncated(final DataTruncation exc, final FolderObject folder, final String tableName) {
+		final String[] fields = DBUtils.parseTruncatedFields(exc);
+		final OXFolderException.Truncated[] truncateds = new OXFolderException.Truncated[fields.length];
+		final StringBuilder sFields = new StringBuilder(fields.length * 8);
+		for (int i = 0; i < fields.length; i++) {
+			sFields.append(fields[i]);
+			sFields.append(", ");
+			final int valueLength;
+			final int fieldId = fieldMapping.get(fields[i]).intValue();
+			final Object tmp = getFolderValue(fieldId, folder);
+			if (tmp instanceof String) {
+				valueLength = Charsets.getBytes((String) tmp, Charsets.UTF_8).length;
+			} else {
+				valueLength = 0;
+			}
+			int tmp2 = -1;
+			try {
+				tmp2 = DBUtils.getColumnSize(readCon, tableName, fields[i]);
+			} catch (final SQLException e) {
+				LOG.error(e.getMessage(), e);
+				tmp2 = -1;
+			}
+			final int length = -1 == tmp2 ? 0 : tmp2;
+			truncateds[i] = new OXFolderException.Truncated() {
+				public int getId() {
+					return fieldId;
+				}
+
+				public int getLength() {
+					return valueLength;
+				}
+
+				public int getMaxSize() {
+					return length;
+				}
+			};
+		}
+		sFields.setLength(sFields.length() - 1);
+		final OXFolderException fe;
+		if (truncateds.length > 0) {
+			final OXFolderException.Truncated truncated = truncateds[0];
+			fe = new OXFolderException(OXFolderException.FolderCode.TRUNCATED, exc, sFields.toString(), Integer
+					.valueOf(truncated.getMaxSize()), Integer.valueOf(truncated.getLength()));
+		} else {
+			fe = new OXFolderException(OXFolderException.FolderCode.TRUNCATED, exc, sFields.toString(), Integer
+					.valueOf(0), Integer.valueOf(0));
+		}
+		for (final OXFolderException.Truncated truncated : truncateds) {
+			fe.addTruncated(truncated);
+		}
+		return fe;
 	}
 
 }
