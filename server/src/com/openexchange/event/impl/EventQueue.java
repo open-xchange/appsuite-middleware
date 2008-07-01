@@ -154,7 +154,7 @@ public class EventQueue extends TimerTask {
 		}
 
 		if (!isInit) {
-			throw new EventException("EventQueue not initialisiert!");
+			throw new EventException("EventQueue not initialized!");
 		}
 
 		if (noDelay) {
