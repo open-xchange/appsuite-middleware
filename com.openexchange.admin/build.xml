@@ -234,7 +234,7 @@
 		</manifest>
 	</target>
 
-	<target name="compile" depends="replacer">
+	<target name="compile">
         <mkdir dir="classes"/>
         <javac failonerror="true" srcdir="src" debug="true" destdir="classes">
             <exclude name="**/*ResourceGroup*"/>
@@ -247,7 +247,7 @@
     </target>
 
 
-    <target name="compile_libs" depends="replacer">
+    <target name="compile_libs">
         <mkdir dir="classes"/>
         <javac failonerror="true" srcdir="src/com/openexchange/admin/rmi" debug="true" destdir="classes">
             <exclude name="*ResourceGroup*"/>
@@ -261,7 +261,7 @@
 
     <target name="jar" depends="compile,manifest">
         <mkdir dir="jar"/>
-        <jar jarfile="jar/${bundle.name}"
+        <jar update="true" jarfile="jar/${bundle.name}"
         excludes="com/openexchange/admin/test**"
         basedir="classes"
         manifest="META-INF/MANIFEST.MF.package"/>
@@ -271,7 +271,7 @@
 
     <target name="client" depends="compile_libs">
         <mkdir dir="jar"/>
-        <jar jarfile="jar/${client.jar}"
+        <jar update="true" jarfile="jar/${client.jar}"
          includes="com/openexchange/admin/rmi/,com/openexchange/admin/console/"
          excludes="com/openexchange/admin/rmi/impl/"
          basedir="classes"/>
