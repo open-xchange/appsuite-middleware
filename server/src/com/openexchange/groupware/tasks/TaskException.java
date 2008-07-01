@@ -350,7 +350,7 @@ public class TaskException extends AbstractOXException {
          * is more than allowed length of %2$s characters.
          */
         TRUNCATED("The attribute %1$s contains too much characters. Current "
-            + "length %3$s is more than allowed length of %2$s characters.",
+            + "length %3$d is more than allowed length of %2$d characters.",
             Category.TRUNCATED, Detail.TRUNCATED, 41),
         /**
          * Task with private flag cannot be moved to public folder %1$s (%2$d).

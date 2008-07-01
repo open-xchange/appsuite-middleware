@@ -106,6 +106,7 @@ import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -598,7 +599,7 @@ public final class Contacts {
 					LOG.error(ERR_UABLE_TO_ROLLBACK, see);
 				}
 			}
-			throw Contacts.getTruncation(se);
+			throw Contacts.getTruncation(writecon, se, "prg_contacts", co);
 		} catch (final SQLException se) {
 			if (null != writecon) {
 				try {
@@ -1052,9 +1053,7 @@ public final class Contacts {
 					LOG.error("Uable to rollback SQL Update", see);
 				}
 			}
-			throw Contacts.getTruncation(se);
-			// throw EXCEPTIONS.create(56, se,se.getIndex(),se.getDataSize(),
-			// se.getTransferSize());
+			throw Contacts.getTruncation(writecon, se, "prg_contacts", co);
 		} catch (final SQLException se) {
 			if (null != writecon) {
 				try {
@@ -2815,8 +2814,8 @@ public final class Contacts {
 		}
 	}
 
-	@OXThrows(category = Category.TRUNCATED, desc = "54", exceptionId = DATA_TRUNCATION, msg = "Import failed. Some data entered exceed the database field limit. Please shorten following entries: %1$s Character Limit: %2$d Sent %3$d")
-	public static OXException getTruncation(final DataTruncation se) {
+	@OXThrows(category = Category.TRUNCATED, desc = "54", exceptionId = DATA_TRUNCATION, msg = "Import failed. Some data entered exceed the database field limit. Please shorten following entries: %1$s Character Limit: %2$s Sent %3$s")
+	public static OXException getTruncation(final Connection con, final DataTruncation se, final String table, final ContactObject co) {
 
 		final String[] fields = DBUtils.parseTruncatedFields(se);
 		final StringBuilder sFields = new StringBuilder();
@@ -2826,20 +2825,42 @@ public final class Contacts {
 			sFields.append(", ");
 		}
 		sFields.setLength(sFields.length() - 2);
-
-		final OXException oxx = EXCEPTIONS.create(DATA_TRUNCATION, se, sFields.toString(), Integer.valueOf(se
-				.getDataSize()), Integer.valueOf(se.getTransferSize()));
-
-		if (fields.length > 0) {
-			for (final String field : fields) {
-				for (int i = 0; i < 650; i++) {
-					if ((mapping[i] != null) && mapping[i].getDBFieldName().equals(field)) {
-						oxx.addTruncatedId(i);
-					}
-				}
-			}
-		}
-
+		final OXException.Truncated[] truncateds = new OXException.Truncated[fields.length];
+        for (int i = 0; i < fields.length; i++) {
+            for (int j = 0; j < 650; j++) {
+                if ((mapping[j] != null) && mapping[j].getDBFieldName().equals(fields[i])) {
+                    int tmp = 0;
+                    try {
+                        tmp = DBUtils.getColumnSize(con, table, fields[i]);
+                    } catch (final SQLException e) {
+                        LOG.error(e.getMessage(), e);
+                        tmp = 0;
+                    }
+                    final int maxSize = tmp;
+                    final int attributeId = j;
+                    truncateds[i] = new OXException.Truncated() {
+                        public int getId() {
+                            return attributeId;
+                        }
+                        public int getLength() {
+                            return Charsets.getBytes(mapping[attributeId].getValueAsString(co), Charsets.UTF_8).length;
+                        }
+                        public int getMaxSize() {
+                            return maxSize;
+                        }
+                    };
+                }
+            }
+        }
+        final OXException oxx;
+        if (truncateds.length > 0) {
+            oxx = EXCEPTIONS.create(DATA_TRUNCATION, se, sFields.toString(), Integer.valueOf(truncateds[0].getMaxSize()), Integer.valueOf(truncateds[0].getLength()));
+        } else {
+            oxx = EXCEPTIONS.create(DATA_TRUNCATION, se, sFields.toString(), Integer.valueOf(-1), Integer.valueOf(-1));
+        }
+        for (final OXException.Truncated truncated : truncateds) {
+            oxx.addTruncated(truncated);
+        }
 		return oxx;
 	}
 

@@ -489,38 +489,54 @@ public class RdbTaskStorage extends TaskStorage {
         final DataTruncation exc, final Task task, final StorageType type) {
         final String[] fields = DBUtils.parseTruncatedFields(exc);
         final StringBuilder sFields = new StringBuilder();
-        for (final String field : fields) {
-            sFields.append(field);
+        final TaskException.Truncated[] truncateds = new TaskException.Truncated[fields.length];
+        final Mapper<?>[] mappers = SQL.findTruncated(fields);
+        for (int i = 0; i < fields.length; i++) {
+            sFields.append(fields[i]);
             sFields.append(", ");
+            final Mapper<?> mapper = mappers[i];
+            final int valueLength;
+            final Object tmp = mapper.get(task);
+            if (tmp instanceof String) {
+                valueLength = Charsets.getBytes((String) tmp, Charsets.UTF_8).length;
+            } else {
+                valueLength = 0;
+            }
+            int tmp2 = -1;
+            try {
+                tmp2 = DBUtils.getColumnSize(con, SQL.TASK_TABLES.get(type),
+                    mapper.getDBColumnName());
+            } catch (final SQLException e) {
+                LOG.error(e.getMessage(), e);
+                tmp2 = -1;
+            }
+            final int length = -1 == tmp2 ? 0 : tmp2;
+            truncateds[i] = new TaskException.Truncated() {
+                public int getId() {
+                    return mapper.getId();
+                }
+                public int getLength() {
+                    return valueLength;
+                }
+                public int getMaxSize() {
+                    return length;
+                }
+            };
         }
         sFields.setLength(sFields.length() - 1);
-        final Mapper<?>[] mappers = SQL.findTruncated(fields);
-
-        final Mapper<?> mapper = mappers[0];
-        String valueLength = null;
-        try {
-            final String value = (String) mapper.get(task);
-            valueLength = String.valueOf(Charsets.getBytes(value, Charsets.UTF_8).length);
-        } catch (final ClassCastException e) {
-            valueLength = "unknown";
+        final TaskException tske;
+        if (truncateds.length > 0) {
+            final TaskException.Truncated truncated = truncateds[0];
+            tske = new TaskException(Code.TRUNCATED, exc, sFields.toString(),
+                Integer.valueOf(truncated.getMaxSize()),
+                Integer.valueOf(truncated.getLength()));
+        } else {
+            tske = new TaskException(Code.TRUNCATED, exc, sFields.toString(),
+                Integer.valueOf(0),
+                Integer.valueOf(0));
         }
-
-        String allowedLength = "unknown";
-        try {
-            final int length = DBUtils.getColumnSize(con,
-                SQL.TASK_TABLES.get(type), mapper.getDBColumnName());;
-            if (-1 == length) {
-                allowedLength = "unknown";
-            } else {
-                allowedLength = String.valueOf(length);
-            }
-        } catch (final SQLException e) {
-            allowedLength = "unknown";
-        }
-        final TaskException tske = new TaskException(Code.TRUNCATED, exc,
-            sFields.toString(), allowedLength, valueLength);
-        for (final Mapper<?> i : mappers) {
-            tske.addTruncatedId(i.getId());
+        for (final TaskException.Truncated truncated : truncateds) {
+            tske.addTruncated(truncated);
         }
         return tske;
     }
