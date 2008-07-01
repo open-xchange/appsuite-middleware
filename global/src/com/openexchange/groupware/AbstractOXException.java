@@ -211,9 +211,9 @@ public class AbstractOXException extends Exception {
     private Object[] messageArgs;
 
     /**
-     * List of truncated identifier.
+     * List of truncated attributes.
      */
-    private final List<Integer> truncatedIds;
+    private final List<Truncated> truncateds;
 
     /**
      * The user session which provide appropiate <code>Locale</code> object
@@ -228,18 +228,10 @@ public class AbstractOXException extends Exception {
      */
     @Deprecated
 	public AbstractOXException() {
-        this(EnumComponent.NONE);
-    }
-
-    /**
-     * @deprecated use constructor category.
-     */
-    @Deprecated
-	public AbstractOXException(final Component component) {
         super();
-        this.component = component;
+        this.component = EnumComponent.NONE;
         category = Category.SUBSYSTEM_OR_SERVICE_DOWN;
-        truncatedIds = new ArrayList<Integer>();
+        truncateds = new ArrayList<Truncated>();
     }
 
     /**
@@ -258,7 +250,7 @@ public class AbstractOXException extends Exception {
         super(message);
         this.component = component;
         category = Category.SUBSYSTEM_OR_SERVICE_DOWN;
-        truncatedIds = new ArrayList<Integer>();
+        truncateds = new ArrayList<Truncated>();
     }
 
     /**
@@ -271,7 +263,7 @@ public class AbstractOXException extends Exception {
         category = cause.category;
         detailNumber = cause.detailNumber;
         messageArgs = cause.messageArgs;
-        truncatedIds = cause.truncatedIds;
+        truncateds = new ArrayList<Truncated>(cause.truncateds);
     }
 
     /**
@@ -290,7 +282,7 @@ public class AbstractOXException extends Exception {
         super(cause);
         this.component = component;
         category = Category.SUBSYSTEM_OR_SERVICE_DOWN;
-        truncatedIds = new ArrayList<Integer>();
+        truncateds = new ArrayList<Truncated>();
     }
 
     /**
@@ -310,7 +302,7 @@ public class AbstractOXException extends Exception {
         super(message, cause);
         this.component = component;
         category = Category.SUBSYSTEM_OR_SERVICE_DOWN;
-        truncatedIds = new ArrayList<Integer>();
+        truncateds = new ArrayList<Truncated>();
     }
 
     public AbstractOXException(final Component component, final String message,
@@ -319,7 +311,7 @@ public class AbstractOXException extends Exception {
         this.component = component;
         category = cause.category;
         detailNumber = cause.detailNumber;
-        truncatedIds = new ArrayList<Integer>();
+        truncateds = new ArrayList<Truncated>();
     }
 
     /**
@@ -337,7 +329,7 @@ public class AbstractOXException extends Exception {
         this.component = component;
         this.category = category;
         this.detailNumber = detailNumber;
-        truncatedIds = new ArrayList<Integer>();
+        truncateds = new ArrayList<Truncated>();
     }
 
     public Component getComponent() {
@@ -390,20 +382,49 @@ public class AbstractOXException extends Exception {
     /**
      * Adds an attribute identifier that has been truncated.
      * @param truncatedId identifier of the truncated attribute.
+     * @deprecated use {@link #addTruncated(com.openexchange.groupware.AbstractOXException.Truncated)}
      */
+    @Deprecated
     public void addTruncatedId(final int truncatedId) {
-        truncatedIds.add(Integer.valueOf(truncatedId));
+        truncateds.add(new Truncated() {
+            public int getId() {
+                return truncatedId;
+            }
+            public int getLength() {
+                return -1;
+            }
+            public int getMaxSize() {
+                return -1;
+            }
+        });
+    }
+
+    /**
+     * Adds a truncated attribute.
+     * @param truncated data for the truncated attribute.
+     */
+    public void addTruncated(final Truncated truncated) {
+        truncateds.add(truncated);
     }
 
     /**
      * @return the array of truncated identifier.
+     * @deprecated use {@link #getTruncated()}
      */
+    @Deprecated
     public int[] getTruncatedIds() {
-        final int[] retval = new int[truncatedIds.size()];
-        for (int i = 0; i < truncatedIds.size(); i++) {
-            retval[i] = truncatedIds.get(i).intValue();
+        final int[] retval = new int[truncateds.size()];
+        for (int i = 0; i < truncateds.size(); i++) {
+            retval[i] = truncateds.get(i).getId();
         }
         return retval;
+    }
+
+    /**
+     * @return
+     */
+    public Truncated[] getTruncated() {
+        return truncateds.toArray(new Truncated[truncateds.size()]);
     }
 
     /**
@@ -472,5 +493,23 @@ public class AbstractOXException extends Exception {
         sb.append(" exceptionID=");
         sb.append(getExceptionID());
         return sb.toString();
+    }
+
+    public interface Truncated {
+
+        /**
+         * @return the column identifier of the truncated attribute.
+         */
+        int getId();
+
+        /**
+         * @return the maximum allowed size in bytes for the truncated attribute.
+         */
+        int getMaxSize();
+
+        /**
+         * @return the actual length of the value of the truncated attribute.
+         */
+        int getLength();
     }
 }
