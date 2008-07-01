@@ -73,6 +73,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.tools.Collections;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * Implementation of the participant storage interface.
@@ -387,11 +388,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             }
             stmt.executeBatch();
         } catch (final DataTruncation e) {
-            final int truncated = -1; // No ID defined here
-            final TaskException tske = new TaskException(Code.TRUNCATED, e,
-                "mail");
-            tske.addTruncatedId(truncated);
-            throw tske;
+            throw parseTruncatedE(con, e, type, participants);
         } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
@@ -399,6 +396,35 @@ public class RdbParticipantStorage extends ParticipantStorage {
         }
     }
 
+    private static TaskException parseTruncatedE(final Connection con,
+        final DataTruncation dt, final StorageType type,
+        final Set<ExternalParticipant> participants) {
+        final String field = DBUtils.parseTruncatedFields(dt)[0];
+        int maxLength = 0;
+        for (final ExternalParticipant participant : participants) {
+            maxLength = Math.max(maxLength, participant.getMail().length());
+            if (null != participant.getDisplayName()) {
+                maxLength = Math.max(maxLength, participant.getDisplayName().length());
+            }
+        }
+        String allowedLength = "unknown";
+        try {
+            final int length = DBUtils.getColumnSize(con,
+                SQL.EPARTS_TABLES.get(type), field);
+            if (-1 == length) {
+                allowedLength = "unknown";
+            } else {
+                allowedLength = String.valueOf(length);
+            }
+        } catch (final SQLException e) {
+            allowedLength = "unknown";
+        }
+        final TaskException tske = new TaskException(Code.TRUNCATED, dt,
+            field, allowedLength, String.valueOf(maxLength));
+        tske.addTruncatedId(-1);
+        return tske;
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -441,15 +467,37 @@ public class RdbParticipantStorage extends ParticipantStorage {
             }
             stmt.executeBatch();
         } catch (final DataTruncation e) {
-            final int truncated = -1; // No ID defined here
-            final TaskException tske = new TaskException(Code.TRUNCATED, e,
-                "description");
-            tske.addTruncatedId(truncated);
-            throw tske;
+            throw parseTruncated(con, e, type, participants);
         } catch (final SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }
+    }
+
+    private static TaskException parseTruncated(final Connection con,
+        final DataTruncation dt, final StorageType type,
+        final Set<InternalParticipant> participants) {
+        final String field = "description";
+        int maxLength = 0;
+        for (final InternalParticipant participant : participants) {
+            maxLength = Math.max(maxLength, participant.getConfirmMessage().length());
+        }
+        String allowedLength = "unknown";
+        try {
+            final int length = DBUtils.getColumnSize(con,
+                SQL.EPARTS_TABLES.get(type), field);
+            if (-1 == length) {
+                allowedLength = "unknown";
+            } else {
+                allowedLength = String.valueOf(length);
+            }
+        } catch (final SQLException e) {
+            allowedLength = "unknown";
+        }
+        final TaskException tske = new TaskException(Code.TRUNCATED, dt,
+            field, allowedLength, String.valueOf(maxLength));
+        tske.addTruncatedId(-1);
+        return tske;
     }
 }

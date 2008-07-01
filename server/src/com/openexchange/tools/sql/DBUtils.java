@@ -51,6 +51,7 @@ package com.openexchange.tools.sql;
 
 import java.sql.Connection;
 import java.sql.DataTruncation;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -259,5 +260,26 @@ public final class DBUtils {
         }
         retval.setCharAt(retval.length() - 1, ')');
         return retval.toString();
+    }
+
+    /**
+     * This method determines the size of a database column. For strings it
+     * gives the maximum allowed characters and for number it returns the
+     * precision.
+     * @param con read only database connection.
+     * @param table name of the table.
+     * @param column name of the column.
+     * @return the size or <code>-1</code> if the column is not found.
+     * @throws SQLException if some exception occurs reading from database.
+     */
+    public static int getColumnSize(final Connection con, final String table,
+        final String column) throws SQLException {
+        final DatabaseMetaData metas = con.getMetaData();
+        final ResultSet result = metas.getColumns(null, null, table, column);
+        int retval = -1;
+        if (result.next()) {
+            retval = result.getInt("COLUMN_SIZE");
+        }
+        return retval;
     }
 }

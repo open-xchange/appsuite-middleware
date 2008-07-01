@@ -380,21 +380,17 @@ public final class SQL {
      * @param fields string array with all truncated field names.
      * @return the identifier of the truncated attribute.
      */
-    public static int[] findTruncated(final String[] fields) {
-        final List<Integer> truncated = new ArrayList<Integer>();
+    public static Mapper<?>[] findTruncated(final String[] fields) {
+        final List<Mapper<?>> tmp = new ArrayList<Mapper<?>>();
         for (final String field : fields) {
             for (final Mapper<?> mapper : Mapping.MAPPERS) {
                 if (mapper.getDBColumnName().equals(field)) {
-                    truncated.add(Integer.valueOf(mapper.getId()));
+                    tmp.add(mapper);
                     break;
                 }
             }
         }
-        final int[] retval = new int[truncated.size()];
-        for (int i = 0; i < truncated.size(); i++) {
-            retval[i] = truncated.get(i).intValue();
-        }
-        return retval;
+        return tmp.toArray(new Mapper[tmp.size()]);
     }
 
     static {

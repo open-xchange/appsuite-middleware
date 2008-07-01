@@ -346,9 +346,11 @@ public class TaskException extends AbstractOXException {
         START_NOT_BEFORE_END("Start date %1$s must be before end date %2$s.",
             Category.USER_INPUT, Detail.CONFLICT, 40),
         /**
-         * The attribute %1$s has been truncated.
+         * The attribute %1$s contains too much characters. Current length %3$s
+         * is more than allowed length of %2$s characters.
          */
-        TRUNCATED("The attribute %1$s has been truncated.",
+        TRUNCATED("The attribute %1$s contains too much characters. Current "
+            + "length %3$s is more than allowed length of %2$s characters.",
             Category.TRUNCATED, Detail.TRUNCATED, 41),
         /**
          * Task with private flag cannot be moved to public folder %1$s (%2$d).
