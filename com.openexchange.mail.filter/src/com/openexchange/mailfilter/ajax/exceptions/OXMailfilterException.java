@@ -110,7 +110,19 @@ public class OXMailfilterException extends AbstractOXException {
         /**
          * The credsrc given in the config file is not a valid one
          */
-        NO_VALID_CREDSRC("The credsrc given in the config file is not a valid one", Category.CODE_ERROR, 12)
+        NO_VALID_CREDSRC("The credsrc given in the config file is not a valid one", Category.CODE_ERROR, 12),
+        /**
+         * The encoding given is not supported by Java
+         */
+        UNSUPPORTED_ENCODING("The encoding given is not supported by Java", Category.CODE_ERROR, 13),
+        /**
+         * Error in low level connection to sieve server
+         */
+        IO_CONNECTION_ERROR("Error in low level connection to sieve server", Category.CODE_ERROR, 14),
+        /**
+         * Error while communicating with the sieve server
+         */
+        SIEVE_COMMUNICATION_ERROR("Error while communicating with the sieve server", Category.CODE_ERROR, 15)
         ;
 
         private final String message;
