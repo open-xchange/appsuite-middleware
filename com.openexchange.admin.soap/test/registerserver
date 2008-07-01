@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-package Createresource;
+package Registerserver;
 use strict;
 use Data::Dumper;
 use base qw(BasicCommandlineOptions);
@@ -9,7 +9,7 @@ use base qw(BasicCommandlineOptions);
 #use SOAP::Lite +trace => 'debug';
 use SOAP::Lite;
 
-my $test = new Createresource();
+my $test = new Registerserver();
 $test->doRequest();
 
 sub new {
@@ -22,23 +22,17 @@ sub new {
 
 sub doRequest {
    	my $inSelf = shift;
-    my $soap = SOAP::Lite->ns( $inSelf->{'serviceNs'} )->proxy( $inSelf->{'basisUrl'}."OXResourceService" );
+    my $soap = SOAP::Lite->ns( $inSelf->{'serviceNs'} )->proxy( $inSelf->{'basisUrl'}."OXUtilService" );
     
-    my $name = "test4";
-    my $displayname = "test4";
-    my $email = "xyz4\@bla.de";
+    my $name = "local2";
+    my $creds = SOAP::Data->type("Credentials")->value(\SOAP::Data->value(SOAP::Data->name("login" => "oxadminmaster"),SOAP::Data->name("password" => "secret")));
     
     my $som_entry = 
-      $soap->create($inSelf->{'Context'},
-    	      SOAP::Data->value("Resource")->value(\SOAP::Data->value(
-    	           # First the mandatory fields
-    	           SOAP::Data->name("name" => $name),
-    	           SOAP::Data->name("displayname" => $displayname),
-    	           SOAP::Data->name("email" => $email),
-    	           # And here the optional fields
-    	           SOAP::Data->name("available" => "true")
+      $soap->registerServer(
+    	      SOAP::Data->value("Server")->value(\SOAP::Data->value(
+    	           SOAP::Data->name("name" => $name)
     	           )),
-    	      $inSelf->{'creds'}
+    	      $creds
     	     );
     
     if ( $som_entry->fault() ) {
