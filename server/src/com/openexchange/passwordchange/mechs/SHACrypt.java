@@ -46,28 +46,34 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.passwordchange.mechs;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class SHACrypt {
-    public static String makeSHAPasswd(final String raw) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        MessageDigest md;
+public final class SHACrypt {
 
-        md = MessageDigest.getInstance("SHA-1");
+	private SHACrypt() {
+		super();
+	}
 
-        final byte[] salt = {};
+	public static String makeSHAPasswd(final String raw) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+		MessageDigest md;
 
-        md.reset();
-        md.update(raw.getBytes("UTF-8"));
-        md.update(salt);
+		md = MessageDigest.getInstance("SHA-1");
 
-        final byte[] pwhash = md.digest();
-        final String ret = com.openexchange.tools.encoding.Base64.encode(pwhash);
+		final byte[] salt = {};
 
-        return ret;
-    }
+		md.reset();
+		md.update(raw.getBytes("UTF-8"));
+		md.update(salt);
+
+		final byte[] pwhash = md.digest();
+		final String ret = com.openexchange.tools.encoding.Base64.encode(pwhash);
+
+		return ret;
+	}
 
 }
