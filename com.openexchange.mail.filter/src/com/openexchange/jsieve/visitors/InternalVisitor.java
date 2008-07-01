@@ -232,10 +232,17 @@ public class InternalVisitor implements SieveParserVisitor {
                     if (node.jjtGetParent().jjtGetParent() instanceof ASTblock) {
                         ((ArrayList<ActionCommand>) data).add(actionCommand);
                     } else if (node.jjtGetParent().jjtGetParent() instanceof ASTstart) {
-                        throw new SieveException("Action commands are not allowed on base level, line " + node.getCoordinate().getStartLineNumber());
-//                        final ArrayList<Command> commands = new ArrayList<Command>();
-//                        commands.add(actionCommand);
+                        // As a workaround we surround the commands with an if (true)
+                        final ArrayList<ActionCommand> actionCommands = new ArrayList<ActionCommand>();
+                        actionCommands.add(actionCommand);
+                        final IfOrElseIfCommand ifCommand = new IfCommand();
+                        ifCommand.setTestcommand(new TestCommand(TestCommand.Commands.TRUE, new ArrayList<Object>(), new ArrayList<TestCommand>()));
+                        ifCommand.setActioncommands(actionCommands);
+                        final ArrayList<Command> commands = new ArrayList<Command>();
+                        commands.add(ifCommand);
+                        ((ArrayList<Rule>) data).add(new Rule(commands, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), commented));
 //                        ((ArrayList<Rule>) data).add(new Rule(commands, node.getCoordinate().getStartLineNumber(), commented));
+//                        throw new SieveException("Action commands are not allowed on base level, line " + node.getCoordinate().getStartLineNumber());
                     } else {
                         // What the hell....
                     }
