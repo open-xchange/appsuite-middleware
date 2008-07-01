@@ -50,9 +50,7 @@ package com.openexchange.jsieve.commands;
 
 import java.util.List;
 
-/**
- * 
- */
+
 
 public class RuleComment {
     
