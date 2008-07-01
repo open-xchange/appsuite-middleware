@@ -6,6 +6,8 @@
    authenticating connect to JMX agent
  - Bugfix #9746: More tolerant parsing of date/time values by allowing
    escaped colons
+ - Bugfix #9768: Properly setting private flag if VCard's "CLASS" property
+   is set to "CONFIDENTIAL" or "PRIVATE"
 
 * 2008-06-30 - dennis.sieben@open-xchange.com
 

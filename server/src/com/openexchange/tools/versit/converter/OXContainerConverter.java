@@ -1072,6 +1072,13 @@ public class OXContainerConverter {
 					}
 				}
 			}
+			// CLASS
+			else if (property.name.equals("CLASS")) {
+				if ("CONFIDENTIAL".equalsIgnoreCase(property.getValue().toString())
+						|| "PRIVATE".equalsIgnoreCase(property.getValue().toString())) {
+					contactContainer.setPrivateFlag(true);
+				}
+			}
 		}
 		ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.CATEGORIES)), cats, ",");
 
