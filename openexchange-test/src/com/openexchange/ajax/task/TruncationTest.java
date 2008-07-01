@@ -84,9 +84,9 @@ public class TruncationTest extends AbstractTaskTest {
     public void testTruncation() throws Throwable {
         final Task task = new Task();
         // Title length in database is 128.
-        task.setTitle(RandomString.generateFixLetter(200));
+        task.setTitle(RandomString.generateChars(129));
         // Trip meter length in database is 255.
-        task.setTripMeter(RandomString.generateFixLetter(300));
+        task.setTripMeter(RandomString.generateChars(256));
         task.setParentFolderID(getPrivateFolder());
         final InsertResponse response = TaskTools.insert(getClient(),
             new InsertRequest(task, getClient().getValues().getTimeZone(), false));

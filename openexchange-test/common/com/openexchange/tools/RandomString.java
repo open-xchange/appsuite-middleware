@@ -40,7 +40,8 @@ package com.openexchange.tools;
 import java.util.Random;
 
 /**
- * @author marcus
+ * Contains methods for generating random string with defined length.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class RandomString {
 
@@ -56,6 +57,14 @@ public class RandomString {
     }
 
     public static String generateFixLetter(final int length) {
+        final char[] value = new char[length];
+        for (int i = 0; i < value.length; i++) {
+            value[i] = (char) rand.nextInt(Character.MAX_VALUE + 1);
+        }
+        return new String(value);
+    }
+
+    public static String generateChars(final int length) {
         final char[] value = new char[length];
         for (int i = 0; i < value.length; i++) {
             value[i] = letter[rand.nextInt(letter.length)];
