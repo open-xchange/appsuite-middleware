@@ -295,9 +295,10 @@ public final class ConfigurationImpl implements ConfigurationService {
 	 *      int)
 	 */
 	public int getIntProperty(final String name, final int defaultValue) {
-		if (properties.containsKey(name)) {
+		final String prop;
+		if (properties.containsKey(name) && (prop = properties.get(name)) != null) {
 			try {
-				return Integer.parseInt(properties.get(name));
+				return Integer.parseInt(prop.trim());
 			} catch (final NumberFormatException e) {
 				if (LOG.isTraceEnabled()) {
 					LOG.trace(e.getLocalizedMessage(), e);
