@@ -217,7 +217,8 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
     
     public Resource create(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
        try {
-           doNullCheck(res,res.getName());
+           doNullCheck(res);
+           doNullCheck(res.getName());
        } catch (final InvalidDataException e3) {
            log.error("One of the given arguments for create is null", e3);
            throw e3;
