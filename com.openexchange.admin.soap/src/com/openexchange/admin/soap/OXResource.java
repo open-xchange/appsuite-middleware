@@ -62,7 +62,17 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class OXResource extends OXSOAPRMIMapper implements OXResourceInterface {
+/**
+ * SOAP Service implementing RMI Interface OXResourceInterface
+ * 
+ * @author choeger
+ *
+ */
+/*
+ * Note: cannot implement interface OXResourceInterface because method
+ * overloading is not supported
+ */
+public class OXResource extends OXSOAPRMIMapper {
 
     public OXResource() throws RemoteException {
         super(OXResourceInterface.class);
@@ -108,7 +118,7 @@ public class OXResource extends OXSOAPRMIMapper implements OXResourceInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
-    public Resource[] getData(final Context ctx, final Resource[] resources, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
+    public Resource[] getMultipleData(final Context ctx, final Resource[] resources, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
         reconnect();
         try {
             return ((OXResourceInterface)rmistub).getData(ctx, resources, auth);

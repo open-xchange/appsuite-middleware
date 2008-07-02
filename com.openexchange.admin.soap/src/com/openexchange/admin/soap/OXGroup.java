@@ -64,7 +64,17 @@ import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class OXGroup extends OXSOAPRMIMapper implements OXGroupInterface {
+/**
+ * SOAP Service implementing RMI Interface OXGroupInterface 
+ *
+ * @author choeger
+ *
+ */
+/*
+ * Note: cannot implement interface OXGroupInterface because method
+ * overloading is not supported
+ */
+public class OXGroup extends OXSOAPRMIMapper {
 
     public OXGroup() throws RemoteException {
         super(OXGroupInterface.class);
@@ -110,7 +120,7 @@ public class OXGroup extends OXSOAPRMIMapper implements OXGroupInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
-    public void delete(Context ctx, Group[] grps, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
+    public void deleteMultiple(Context ctx, Group[] grps, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
         reconnect();
         try {
             ((OXGroupInterface)rmistub).delete(ctx, grps, auth);
@@ -130,7 +140,7 @@ public class OXGroup extends OXSOAPRMIMapper implements OXGroupInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
-    public Group[] getData(Context ctx, Group[] grps, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchGroupException, DatabaseUpdateException {
+    public Group[] getMultipleData(Context ctx, Group[] grps, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchGroupException, DatabaseUpdateException {
         reconnect();
         try {
             return ((OXGroupInterface)rmistub).getData(ctx, grps, auth);

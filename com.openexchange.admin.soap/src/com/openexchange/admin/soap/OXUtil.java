@@ -61,6 +61,12 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
+/**
+ * SOAP Service implementing RMI Interface OXUtilInterface
+ * 
+ * @author choeger
+ *
+ */
 public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
 
     public OXUtil() throws RemoteException {

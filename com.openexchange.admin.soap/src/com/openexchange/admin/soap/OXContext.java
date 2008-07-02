@@ -69,7 +69,18 @@ import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
+
+/**
+ * SOAP Service implementing RMI Interface OXContextInterface
+ * 
+ * @author choeger
+ *
+ */
+/*
+ * Note: cannot implement interface OXContextInterface because method
+ * overloading is not supported
+ */
+public class OXContext extends OXSOAPRMIMapper {
 
     public OXContext() throws RemoteException {
         super(OXContextInterface.class);
@@ -95,7 +106,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
-    public void changeModuleAccess(Context ctx, String access_combination_name, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    public void changeModuleAccessByName(Context ctx, String access_combination_name, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         reconnect();
         try {
             ((OXContextInterface)rmistub).changeModuleAccess(ctx, access_combination_name, auth);
@@ -115,7 +126,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
-    public Context create(Context ctx, User admin_user, String access_combination_name, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+    public Context createModuleAccessByName(Context ctx, User admin_user, String access_combination_name, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
         reconnect();
         try {
             return ((OXContextInterface)rmistub).create(ctx, admin_user, access_combination_name, auth);
@@ -125,7 +136,7 @@ public class OXContext extends OXSOAPRMIMapper implements OXContextInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
-    public Context create(Context ctx, User admin_user, UserModuleAccess access, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+    public Context createModuleAccess(Context ctx, User admin_user, UserModuleAccess access, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
         reconnect();
         try {
             return ((OXContextInterface)rmistub).create(ctx, admin_user, access, auth);

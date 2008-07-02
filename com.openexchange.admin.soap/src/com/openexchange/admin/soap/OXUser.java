@@ -63,7 +63,17 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class OXUser extends OXSOAPRMIMapper implements OXUserInterface {
+/**
+ * SOAP Service implementing RMI Interface OXResourceInterface
+ * 
+ * @author choeger
+ *
+ */
+/*
+ * Note: cannot implement interface OXResourceInterface because method
+ * overloading is not supported
+ */
+public class OXUser extends OXSOAPRMIMapper {
 
     public OXUser() throws RemoteException {
         super(OXUserInterface.class);
@@ -89,7 +99,7 @@ public class OXUser extends OXSOAPRMIMapper implements OXUserInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
-    public void changeModuleAccess(Context ctx, User user, String access_combination_name, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    public void changeModuleAccessByName(Context ctx, User user, String access_combination_name, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         reconnect();
         try {
             ((OXUserInterface)rmistub).changeModuleAccess(ctx, user, access_combination_name, auth);
@@ -99,7 +109,7 @@ public class OXUser extends OXSOAPRMIMapper implements OXUserInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
-    public User create(Context ctx, User usrdata, UserModuleAccess access, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+    public User createModuleAccess(Context ctx, User usrdata, UserModuleAccess access, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
             return ((OXUserInterface)rmistub).create(ctx, usrdata, access, auth);
@@ -109,7 +119,7 @@ public class OXUser extends OXSOAPRMIMapper implements OXUserInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
-    public User create(Context ctx, User usrdata, String access_combination_name, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+    public User createModuleAccessByName(Context ctx, User usrdata, String access_combination_name, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
             return ((OXUserInterface)rmistub).create(ctx, usrdata, access_combination_name, auth);
@@ -129,7 +139,7 @@ public class OXUser extends OXSOAPRMIMapper implements OXUserInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
-    public void delete(Context ctx, User[] users, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    public void deleteMultiple(Context ctx, User[] users, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         reconnect();
         try {
             ((OXUserInterface)rmistub).delete(ctx, users, auth);
@@ -159,7 +169,7 @@ public class OXUser extends OXSOAPRMIMapper implements OXUserInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
-    public User[] getData(Context ctx, User[] users, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
+    public User[] getMultipleData(Context ctx, User[] users, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
         reconnect();
         try {
             return ((OXUserInterface)rmistub).getData(ctx, users, auth);
