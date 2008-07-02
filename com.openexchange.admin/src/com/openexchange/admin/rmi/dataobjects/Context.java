@@ -583,4 +583,8 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
             return false;
         return true;
     }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
 }
