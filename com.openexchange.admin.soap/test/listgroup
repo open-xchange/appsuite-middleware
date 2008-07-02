@@ -51,8 +51,8 @@ sub reformmembers {
     my $data = shift;
     
     for my $row (@$data) {
-        my $value = @$row[-1];
-        @$row[-1] = join(", ", @$value);
+      my $value = @$row[-1];
+      @$row[-1] = join(", ", @$value) if defined $value;
     }
 }
 
