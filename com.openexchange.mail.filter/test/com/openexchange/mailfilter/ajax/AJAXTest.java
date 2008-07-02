@@ -45,9 +45,17 @@ public abstract class AJAXTest {
     }
     
     @Test
-    public void MailfilternewVacationPlainTest() throws MalformedURLException, IOException, SAXException, JSONException {
+    public void MailfilternewVacationPlainAtTheEndTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebConversation login = login();
         final String test = "{\"active\":true,\"text\":\"if true \\r\\n{\\r\\n    vacation :days 13 :addresses [ \\\"root@localhost\\\" , \\\"billg@microsoft.com\\\" ] :mime :subject \\\"Betreff\\\" \\\"Text\\r\\nText\\\" ;\\r\\n}\\r\\n\",\"errormsg\":\"\",\"flags\":[\"vacation\"],\"id\":3,\"rulename\":\"Vacation Notice\"}";
+        final String newid = mailfilternew(login, getHostname(), getUsername(), test, null);
+        System.out.println("Rule created with newid: " + newid);
+    }
+    
+    @Test
+    public void MailfilternewVacationPlainInBetweenTest() throws MalformedURLException, IOException, SAXException, JSONException {
+        final WebConversation login = login();
+        final String test = "{\"active\":true,\"position\":0,\"text\":\"if true \\r\\n{\\r\\n    vacation :days 13 :addresses [ \\\"root@localhost\\\" , \\\"billg@microsoft.com\\\" ] :mime :subject \\\"Betreff\\\" \\\"Text\\r\\nText\\\" ;\\r\\n}\\r\\n\",\"errormsg\":\"\",\"flags\":[\"vacation\"],\"id\":3,\"rulename\":\"Vacation Notice\"}";
         final String newid = mailfilternew(login, getHostname(), getUsername(), test, null);
         System.out.println("Rule created with newid: " + newid);
     }
@@ -85,9 +93,17 @@ public abstract class AJAXTest {
     }
 
     @Test
-    public void MailfilternewVacationDeactiveTest() throws MalformedURLException, IOException, SAXException, JSONException {
+    public void MailfilternewVacationDeactiveAtTheEndTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebConversation login = login();
         final String test = "{\"rulename\":\"Vacation Notice\",\"active\":false,\"flags\":[\"vacation\"],\"test\":{\"id\":\"true\"},\"actioncmds\":[{\"id\":\"vacation\",\"days\":1,\"addresses\":[\"dsfa\"],\"subject\":\"123\",\"text\":\"123\"}]}";
+        final String newid = mailfilternew(login, getHostname(), getUsername(), test, null);
+        System.out.println("Rule created with newid: " + newid);
+    }
+    
+    @Test
+    public void MailfilternewVacationDeactiveInBetweenTest() throws MalformedURLException, IOException, SAXException, JSONException {
+        final WebConversation login = login();
+        final String test = "{\"rulename\":\"Vacation Notice\",\"position\":0,\"active\":false,\"flags\":[\"vacation\"],\"test\":{\"id\":\"true\"},\"actioncmds\":[{\"id\":\"vacation\",\"days\":1,\"addresses\":[\"dsfa\"],\"subject\":\"123\",\"text\":\"123\"}]}";
         final String newid = mailfilternew(login, getHostname(), getUsername(), test, null);
         System.out.println("Rule created with newid: " + newid);
     }
