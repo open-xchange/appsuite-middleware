@@ -52,7 +52,11 @@ sub reformmembers {
     
     for my $row (@$data) {
       my $value = @$row[-1];
-      @$row[-1] = join(", ", @$value) if defined $value;
+      if( ref($value) eq "ARRAY" ) {
+	@$row[-1] = join(", ", @$value) if defined $value;
+      } else {
+	@$row[-1] = $value;
+      }
     }
 }
 
