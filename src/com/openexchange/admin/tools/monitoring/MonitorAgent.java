@@ -103,7 +103,7 @@ public class MonitorAgent {
                 LocateRegistry.createRegistry(getPort());
             }
         } catch (Exception e) {
-            log.error("Error creating Registry on port "+getPort());
+            log.error("Error creating Registry on port "+getPort(),e);
         }
     }
     
