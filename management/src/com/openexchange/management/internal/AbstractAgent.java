@@ -72,8 +72,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
@@ -94,7 +92,7 @@ import javax.security.auth.Subject;
 import com.openexchange.management.ManagementException;
 
 /**
- * {@link AbstractAgent} - An abstract agent for JMX
+ * {@link AbstractAgent} - An abstract JMX agent
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -131,6 +129,19 @@ public abstract class AbstractAgent {
 	}
 
 	private static final class AbstractAgentJMXAuthenticator implements JMXAuthenticator {
+
+		private static volatile Charset US_ASCII;
+
+		private static Charset getUSASCII() {
+			if (US_ASCII == null) {
+				synchronized (AbstractAgentJMXAuthenticator.class) {
+					if (US_ASCII == null) {
+						US_ASCII = Charset.forName("US-ASCII");
+					}
+				}
+			}
+			return US_ASCII;
+		}
 
 		private final String[] credentials;
 
@@ -187,23 +198,19 @@ public abstract class AbstractAgent {
 			}
 			md.update(salt);
 
-			final byte[] pwhash = md.digest();
-			final String ret = encode(pwhash);
+			final String ret = getUSASCII().decode(
+					ByteBuffer.wrap(org.apache.commons.codec.binary.Base64.encodeBase64(md.digest()))).toString();
 
 			return ret;
-		}
-
-		private static String encode(final byte[] bytes) {
-			return toString(org.apache.commons.codec.binary.Base64.encodeBase64(bytes), Charset.forName("US-ASCII"));
-		}
-
-		private static String toString(final byte[] bytes, final Charset charset) {
-			return charset.decode(ByteBuffer.wrap(bytes)).toString();
 		}
 
 	}
 
 	private final AtomicBoolean initialized;
+
+	private final Map<Integer, Registry> registries;
+
+	private final Map<JMXServiceURL, JMXConnectorServer> connectors;
 
 	protected final AtomicReference<GaugeMonitor> gaugeMonitorRef;
 
@@ -211,68 +218,44 @@ public abstract class AbstractAgent {
 
 	protected MBeanServer mbs;
 
-	protected Map<String, Object> environment;
-
-	public AbstractAgent() {
+	/**
+	 * Initializes a new {@link AbstractAgent}
+	 */
+	protected AbstractAgent() {
 		super();
 		gaugeMonitorRef = new AtomicReference<GaugeMonitor>();
 		initialized = new AtomicBoolean();
+		registries = new HashMap<Integer, Registry>();
+		connectors = new HashMap<JMXServiceURL, JMXConnectorServer>();
 		mbs = ManagementFactory.getPlatformMBeanServer();
 	}
 
 	/**
-	 * Uniquely identify the MBeans and register them with the MBeanServer
-	 */
-	public void registerMBean(final Object object, final ObjectName objectName) throws ManagementException {
-		if (mbs.isRegistered(objectName)) {
-			printTrace(objectName.getCanonicalName() + " already registered");
-			return;
-		}
-		try {
-			mbs.registerMBean(object, objectName);
-		} catch (final InstanceAlreadyExistsException e) {
-			throw new ManagementException(ManagementException.Code.ALREADY_EXISTS, e, object.getClass().getName());
-		} catch (final MBeanRegistrationException e) {
-			throw new ManagementException(ManagementException.Code.MBEAN_REGISTRATION, e, object.getClass().getName());
-		} catch (final NotCompliantMBeanException e) {
-			throw new ManagementException(ManagementException.Code.NOT_COMPLIANT_MBEAN, e, object.getClass().getName());
-		}
-		printTrace(object + " registered");
-	}
-
-	/**
-	 * Uniquely identify the MBeans and register them with the MBeanServer
+	 * Uniquely identifies the MBean and registers it to MBeanServer
+	 * 
+	 * @param name
+	 *            The MBeans's object name as a string
+	 * @param mbean
+	 *            The MBean object
+	 * @throws ManagementException
+	 *             If registering the MBean to MBeanServer fails
 	 */
 	public void registerMBean(final String name, final Object mbean) throws ManagementException {
-		final ObjectName objectName;
 		try {
-			objectName = new ObjectName(name);
+			registerMBean(new ObjectName(name), mbean);
 		} catch (final MalformedObjectNameException e) {
 			throw new ManagementException(ManagementException.Code.MALFORMED_OBJECT_NAME, e, name);
 		}
-		if (mbs.isRegistered(objectName)) {
-			printTrace(objectName.getCanonicalName() + " already registered");
-			return;
-		}
-		try {
-			mbs.registerMBean(mbean, objectName);
-		} catch (final InstanceAlreadyExistsException e) {
-			throw new ManagementException(ManagementException.Code.ALREADY_EXISTS, e, mbean.getClass().getName());
-		} catch (final MBeanRegistrationException e) {
-			throw new ManagementException(ManagementException.Code.MBEAN_REGISTRATION, e, mbean.getClass().getName());
-		} catch (final NotCompliantMBeanException e) {
-			throw new ManagementException(ManagementException.Code.NOT_COMPLIANT_MBEAN, e, mbean.getClass().getName());
-		}
-		printTrace(name + " registered");
 	}
 
 	/**
-	 * Unregister an mbean.
+	 * Unregister the MBean identified through specified object name as a
+	 * string.
 	 * 
 	 * @param name
-	 *            name of the mbean.
-	 * @throws Exception
-	 *             if an error occurs.
+	 *            The MBean's object name as a string
+	 * @throws ManagementException
+	 *             If unregistering the MBean fails
 	 */
 	public void unregisterMBean(final String name) throws ManagementException {
 		try {
@@ -283,11 +266,20 @@ public abstract class AbstractAgent {
 	}
 
 	/**
-	 * Uniquely identify the MBeans and register them with the MBeanServer
+	 * Uniquely identifies the MBean and registers it to MBeanServer
+	 * 
+	 * @param objectName
+	 *            The MBean's object name
+	 * @param mbean
+	 *            The MBean object
+	 * @throws ManagementException
+	 *             If registering the MBean to MBeanServer fails
 	 */
 	public void registerMBean(final ObjectName objectName, final Object mbean) throws ManagementException {
 		if (mbs.isRegistered(objectName)) {
-			printTrace(objectName.getCanonicalName() + " already registered");
+			if (LOG.isInfoEnabled()) {
+				LOG.info(new StringBuilder(objectName.getCanonicalName()).append(" already registered"));
+			}
 			return;
 		}
 		try {
@@ -299,11 +291,18 @@ public abstract class AbstractAgent {
 		} catch (final NotCompliantMBeanException e) {
 			throw new ManagementException(ManagementException.Code.NOT_COMPLIANT_MBEAN, e, mbean.getClass().getName());
 		}
-		printTrace(objectName.getCanonicalName() + " registered");
+		if (LOG.isInfoEnabled()) {
+			LOG.info(new StringBuilder(objectName.getCanonicalName()).append(" registered"));
+		}
 	}
 
 	/**
-	 * Unregister a MBean on the MBeanServer
+	 * Unregister the MBean identified through specified object name.
+	 * 
+	 * @param objectName
+	 *            The MBean's object name
+	 * @throws ManagementException
+	 *             If unregistering the MBean fails
 	 */
 	public void unregisterMBean(final ObjectName objectName) throws ManagementException {
 		if (mbs.isRegistered(objectName)) {
@@ -314,21 +313,27 @@ public abstract class AbstractAgent {
 			} catch (final MBeanRegistrationException e) {
 				throw new ManagementException(ManagementException.Code.MBEAN_REGISTRATION, e, objectName);
 			}
-			printTrace(objectName.getCanonicalName() + " unregistered");
+			if (LOG.isInfoEnabled()) {
+				LOG.info(new StringBuilder(objectName.getCanonicalName()).append(" unregistered"));
+			}
 		}
 	}
 
 	/**
-	 * add a MBean to observe by the GaugeMonitor
+	 * Adds the MBean identified by given object name to {@link GaugeMonitor}
+	 * for being observed
 	 * 
 	 * @param objectName
+	 *            The MBean's object name
 	 * @param attributeName
+	 *            The observed attribute
 	 * @throws ManagementException
+	 *             If adding the MBean to {@link GaugeMonitor} fails
 	 */
 	public final void addObservedMBean(final ObjectName objectName, final String attributeName)
 			throws ManagementException {
 		GaugeMonitor gm = gaugeMonitorRef.get();
-		if (gm == null) {
+		while (gm == null) {
 			final GaugeMonitor newgm = new GaugeMonitor();
 			newgm.setGranularityPeriod(5000);
 			newgm.setDifferenceMode(false);
@@ -356,6 +361,8 @@ public abstract class AbstractAgent {
 							"Services:type=GaugeMonitor");
 				}
 				gm.start();
+			} else {
+				gm = gaugeMonitorRef.get();
 			}
 		}
 		gm.addObservedObject(objectName);
@@ -363,10 +370,13 @@ public abstract class AbstractAgent {
 	}
 
 	/**
-	 * remove an observed MBean from the GaugeMonitor
+	 * Removes the observed MBean identified by specified object name from the
+	 * {@link GaugeMonitor}
 	 * 
 	 * @param objectName
+	 *            The MBean's object name
 	 * @throws ManagementException
+	 *             If removing the MBean from {@link GaugeMonitor} fails
 	 */
 	public final void removeObservedMBean(final ObjectName objectName) throws ManagementException {
 		final GaugeMonitor gm = gaugeMonitorRef.get();
@@ -375,40 +385,44 @@ public abstract class AbstractAgent {
 		}
 	}
 
-	private final Map<Integer, Registry> registries = new HashMap<Integer, Registry>();
-
 	/**
-	 * add a RMI registry
+	 * Adds a RMI registry
 	 * 
 	 * @param port
-	 *            The port
+	 *            The port on which the RMI registry should listen on
 	 * @param bindAddr
-	 *            The bind address or <code>"*"</code> to accept connections on
-	 *            any/all local addresses
-	 * @param jmxLogin
-	 *            The JMX login or <code>null</code> to use no authentication
-	 * @param jmxPassword
-	 *            The JMX password (only needed if previous parameter is not
-	 *            <code>null</code>)
+	 *            The bind address for created sockets by RMI registry
 	 * @throws ManagementException
-	 *             If registry cannot be added
+	 *             If RMI registry cannot be created
 	 */
-	protected final void addRMIRegistry(final int port, final String bindAddr, final String jmxLogin,
-			final String jmxPassword) throws ManagementException {
+	protected final void addRMIRegistry(final int port, final String bindAddr) throws ManagementException {
 		Registry registry = null;
 		try {
-			initializeRMIServerSocketFactory(bindAddr, jmxLogin == null || jmxPassword == null ? null : new String[] {
-					jmxLogin, jmxPassword });
+			if (initialized.compareAndSet(false, true)) {
+				rmiSocketFactory = new AbstractAgentSocketFactory(0, bindAddr);
+			}
 			try {
+				/*
+				 * If following calls succeed, a RMI registry has already been
+				 * created that listens on this port
+				 */
 				registry = LocateRegistry.getRegistry(port);
 				registry.list();
 			} catch (final RemoteException e) {
-				LOG.debug(e.getMessage(), e);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("No responsive RMI registry found that listens on port " + port
+							+ ". A new one is going to be created", e);
+				}
+				/*
+				 * Create a new one
+				 */
 				registry = LocateRegistry.createRegistry(port, rmiSocketFactory, rmiSocketFactory);
 			}
 			registries.put(Integer.valueOf(port), registry);
-			printTrace(new StringBuilder(128).append("RMI registry created on port ").append(port).append(
-					" and bind address ").append(bindAddr).toString());
+			if (LOG.isInfoEnabled()) {
+				LOG.info(new StringBuilder(128).append("RMI registry created on port ").append(port).append(
+						" and bind address ").append(bindAddr).toString());
+			}
 		} catch (final UnknownHostException e) {
 			throw new ManagementException(ManagementException.Code.UNKNOWN_HOST_ERROR, e, e.getMessage());
 		} catch (final RemoteException e) {
@@ -416,25 +430,10 @@ public abstract class AbstractAgent {
 		}
 	}
 
-	private final void initializeRMIServerSocketFactory(final String bindAddr, final String[] credentials)
-			throws UnknownHostException {
-		if (initialized.compareAndSet(false, true)) {
-			rmiSocketFactory = new AbstractAgentSocketFactory(0, bindAddr);
-			environment = new HashMap<String, Object>(2);
-			// environment.put(RMIConnectorServer.
-			// RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE, rmiSocketFactory);
-			// environment.put(RMIConnectorServer.
-			// RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE, rmiSocketFactory);
-			if (credentials != null) {
-				environment.put(RMIConnectorServer.AUTHENTICATOR, new AbstractAgentJMXAuthenticator(credentials));
-			}
-		}
-	}
-
 	/**
-	 * list the RMI registries ports
+	 * Lists the RMI registries ports
 	 * 
-	 * @param port
+	 * @return An array of <code>int</code> representing RMI ports
 	 */
 	public final int[] getRMIRegistryPorts() {
 		final int size = registries.size();
@@ -446,25 +445,51 @@ public abstract class AbstractAgent {
 		return portnumbers;
 	}
 
-	private final Map<JMXServiceURL, JMXConnectorServer> connectors = new HashMap<JMXServiceURL, JMXConnectorServer>();
-
 	/**
-	 * Create a JMX connector and starts it
+	 * Creates a JMX connector and starts it
 	 * 
-	 * @return The assigned JMX URL
+	 * @param urlstr
+	 *            The JMX URL as a string
+	 * @param jmxLogin
+	 *            The JMX login or <code>null</code> to use no authentication
+	 *            for connecting to specified JMX URL
+	 * @param jmxPassword
+	 *            The JMX password (only needed if previous parameter is not
+	 *            <code>null</code>)
+	 * @return The {@link JMXServiceURL} to which the connector is bound
+	 * @throws ManagementException
+	 *             If connector cannot be added
 	 */
-	protected final JMXServiceURL addConnector(final String urlstr) throws ManagementException {
+	protected final JMXServiceURL addConnector(final String urlstr, final String jmxLogin, final String jmxPassword)
+			throws ManagementException {
 		final JMXServiceURL url;
 		try {
 			url = new JMXServiceURL(urlstr);
 		} catch (final MalformedURLException e) {
 			throw new ManagementException(ManagementException.Code.MALFORMED_URL, e, urlstr);
 		}
+		if (connectors.containsKey(url)) {
+			throw new ManagementException(ManagementException.Code.JMX_URL_ALREADY_BOUND, urlstr);
+		}
 		try {
+			final Map<String, Object> environment;
+			// environment.put(RMIConnectorServer.
+			// RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE, rmiSocketFactory);
+			// environment.put(RMIConnectorServer.
+			// RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE, rmiSocketFactory);
+			if (jmxLogin == null || jmxPassword == null) {
+				environment = null;
+			} else {
+				environment = new HashMap<String, Object>(1);
+				environment.put(RMIConnectorServer.AUTHENTICATOR, new AbstractAgentJMXAuthenticator(new String[] {
+						jmxLogin, jmxPassword }));
+			}
 			final JMXConnectorServer cs = JMXConnectorServerFactory.newJMXConnectorServer(url, environment, mbs);
 			cs.start();
 			connectors.put(url, cs);
-			printTrace("Connector on " + urlstr + " is started");
+			if (LOG.isInfoEnabled()) {
+				LOG.info(new StringBuilder("JMX connector on ").append(urlstr).append(" started"));
+			}
 			return url;
 		} catch (final IOException e) {
 			throw new ManagementException(ManagementException.Code.IO_ERROR, e, e.getMessage());
@@ -472,7 +497,10 @@ public abstract class AbstractAgent {
 	}
 
 	/**
-	 * Remove a JMX connector and stops it
+	 * Remove the JMX connector bound to specified JMX URL
+	 * 
+	 * @param url
+	 *            The JMX URL
 	 */
 	protected final void removeConnector(final JMXServiceURL url) {
 		final JMXConnectorServer connector = connectors.remove(url);
@@ -481,45 +509,24 @@ public abstract class AbstractAgent {
 		}
 		try {
 			connector.stop();
-			printTrace("Connector on " + url + " is stopped");
+			if (LOG.isInfoEnabled()) {
+				LOG.info(new StringBuilder("JMX connector on ").append(url).append(" stopped"));
+			}
 		} catch (final IOException e) {
-			LOG.error(e);
+			LOG.error(new StringBuilder("JMX connector on ").append(url).append(" could not be stopped").toString(), e);
 			return;
 		}
 	}
 
 	/**
-	 * Remove a Snmp adaptor and start it
+	 * Starts the agent
 	 */
-	public final void removeSnmpAdaptor(final int port) {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace(new StringBuilder("removeSnmpAdaptor() with ").append(port).toString());
-		}
-	}
-
 	public abstract void run();
 
-	// Utility method: so that the application continues to run
-	public static final void waitForEnterPressed() {
-		try {
-			printTrace("Press return to exit ...");
-			System.in.read();
-		} catch (final Exception e) {
-			LOG.error(e);
-		}
-	}
-
+	/**
+	 * Shuts the agent down
+	 */
 	public abstract void stop();
-
-	private static final boolean TRACE = true;
-
-	protected static final void printTrace(final String msg) {
-		if (TRACE && LOG.isInfoEnabled()) {
-			LOG.info(msg);
-		}
-	}
-
-	private static final Lock LOCK_FREE_PORT = new ReentrantLock();
 
 	/**
 	 * Gets a free port at the time of call to this method. The logic leverages
@@ -547,8 +554,7 @@ public abstract class AbstractAgent {
 		int freePort = 0;
 		boolean portFound = false;
 		ServerSocket serverSocket = null;
-		LOCK_FREE_PORT.lock();
-		try {
+		synchronized (AbstractAgent.class) {
 			try {
 				/*
 				 * following call normally returns the free port, to which the
@@ -581,10 +587,7 @@ public abstract class AbstractAgent {
 				}
 			}
 			return freePort;
-		} finally {
-			LOCK_FREE_PORT.unlock();
 		}
-
 	}
 
 }

@@ -103,7 +103,11 @@ public final class ManagementException extends AbstractOXException {
 		/**
 		 * Remote error: %1$s
 		 */
-		REMOTE_ERROR("Remote error: %1$s", Category.CODE_ERROR, 9);
+		REMOTE_ERROR("Remote error: %1$s", Category.CODE_ERROR, 9),
+		/**
+		 * A JMX connector is already bound to URL %1$s.
+		 */
+		JMX_URL_ALREADY_BOUND("A JMX connector is already bound to URL %1$s.", Category.CODE_ERROR, 10);
 
 		private final String message;
 

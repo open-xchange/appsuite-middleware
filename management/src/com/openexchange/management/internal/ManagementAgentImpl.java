@@ -70,6 +70,15 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
 	private static final ManagementAgentImpl instance = new ManagementAgentImpl();
 
+	/**
+	 * Gets the singleton instance
+	 * 
+	 * @return The singleton instance
+	 */
+	public static ManagementAgentImpl getInstance() {
+		return instance;
+	}
+
 	/*
 	 * Member fields
 	 */
@@ -87,24 +96,8 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
 	private final AtomicBoolean running = new AtomicBoolean();
 
-	/**
-	 * Gets the singleton instance
-	 * 
-	 * @return The singleton instance
-	 */
-	public static ManagementAgentImpl getInstance() {
-		return instance;
-	}
-
 	private ManagementAgentImpl() {
 		super();
-	}
-
-	public static void main(final String argv[]) {
-		final ManagementAgentImpl agent = new ManagementAgentImpl();
-		agent.run();
-		waitForEnterPressed();
-		agent.stop();
 	}
 
 	@Override
@@ -121,21 +114,21 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 		}
 		try {
 			/*
-			 * Creates and exports a registry instance on the local host that
+			 * Create and export a registry instance on the local host that
 			 * accepts requests on the specified port.
 			 */
-			addRMIRegistry(jmxPort, jmxBindAddr, jmxLogin, jmxPassword);
+			addRMIRegistry(jmxPort, jmxBindAddr);
 			/*
 			 * Create a JMX connector and start it
 			 */
 			final String ip = getIPAddress(jmxBindAddr.charAt(0) == '*' ? "localhost" : jmxBindAddr);
 			final String jmxURLStr = new StringBuilder(128).append("service:jmx:rmi:///jndi/rmi://").append(
 					ip == null ? "localhost" : ip).append(':').append(jmxPort).append("/server").toString();
-			jmxURL = addConnector(jmxURLStr);
+			jmxURL = addConnector(jmxURLStr, jmxLogin, jmxPassword);
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder(128).append(
-						"\n\n\tUse JConsole or the MC4J to connect to MBeanServer with this url: ").append(jmxURL)
-						.append("\n").toString());
+						"\n\n\tUse JConsole or MC4J to connect to MBeanServer with this url: ").append(jmxURL).append(
+						"\n").toString());
 			}
 			running.set(true);
 		} catch (final ManagementException e) {
@@ -156,6 +149,13 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 			LOG.error(e.getMessage(), e);
 		}
 		removeConnector(jmxURL);
+		/*
+		 * By now there's no API call to close/unexport a RMI registry.
+		 * Therefore the RMI registry created in start() method still remains in
+		 * VM. See http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4457683 or
+		 * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4508962 for
+		 * details.
+		 */
 		running.set(false);
 	}
 
@@ -169,15 +169,6 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 			LOG.error(e.getMessage(), e);
 			return null;
 		}
-	}
-
-	@Override
-	public void registerMBean(final Object object, final ObjectName objectName) throws ManagementException {
-		if (!running.get()) {
-			throw new ManagementException(ManagementException.Code.NOT_RUNNING);
-		}
-		super.registerMBean(object, objectName);
-		objectNames.push(objectName);
 	}
 
 	@Override
@@ -229,36 +220,40 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 	}
 
 	/**
+	 * Sets the JMX port
+	 * 
 	 * @param jmxPort
-	 *            the jmxPort to set
+	 *            The JMX port
 	 */
 	public void setJmxPort(final int jmxPort) {
 		this.jmxPort = jmxPort;
 	}
 
 	/**
+	 * Sets the JMX bind address
+	 * 
 	 * @param jmxBindAddr
-	 *            the jmxBindAddr to set
+	 *            The JMX bind address or <code>"*"</code>
 	 */
 	public void setJmxBindAddr(final String jmxBindAddr) {
 		this.jmxBindAddr = jmxBindAddr;
 	}
 
 	/**
-	 * Sets the jmxLogin
+	 * Sets the JMX login
 	 * 
 	 * @param jmxLogin
-	 *            the jmxLogin to set
+	 *            The JMX login to set
 	 */
 	public void setJmxLogin(final String jmxLogin) {
 		this.jmxLogin = jmxLogin;
 	}
 
 	/**
-	 * Sets the jmxPassword
+	 * Sets the JMX password
 	 * 
 	 * @param jmxPassword
-	 *            the jmxPassword to set
+	 *            the JMX password
 	 */
 	public void setJmxPassword(final String jmxPassword) {
 		this.jmxPassword = jmxPassword;
