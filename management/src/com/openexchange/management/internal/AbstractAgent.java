@@ -488,7 +488,7 @@ public abstract class AbstractAgent {
 			cs.start();
 			connectors.put(url, cs);
 			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder("JMX connector on ").append(urlstr).append(" started"));
+				LOG.info(new StringBuilder("JMX connector server on ").append(urlstr).append(" started"));
 			}
 			return url;
 		} catch (final IOException e) {
@@ -510,10 +510,11 @@ public abstract class AbstractAgent {
 		try {
 			connector.stop();
 			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder("JMX connector on ").append(url).append(" stopped"));
+				LOG.info(new StringBuilder("JMX connector server on ").append(url).append(" stopped"));
 			}
 		} catch (final IOException e) {
-			LOG.error(new StringBuilder("JMX connector on ").append(url).append(" could not be stopped").toString(), e);
+			LOG.error(new StringBuilder("JMX connector server on ").append(url).append(" could not be stopped")
+					.toString(), e);
 			return;
 		}
 	}
