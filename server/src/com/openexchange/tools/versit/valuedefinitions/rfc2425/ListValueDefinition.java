@@ -53,6 +53,7 @@ package com.openexchange.tools.versit.valuedefinitions.rfc2425;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
@@ -91,7 +92,7 @@ public class ListValueDefinition extends ValueDefinition {
 
 	@Override
 	public String writeValue(final Object value) {
-		final ArrayList list = (ArrayList) value;
+		final List<?> list = (ArrayList<?>) value;
 		final int count = list.size();
 		if (count == 0) {
 			return "";
