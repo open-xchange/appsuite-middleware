@@ -78,7 +78,8 @@ public class ImportResult {
 	 * Basic constructor
 	 *
 	 */
-	public ImportResult(){
+	public ImportResult() {
+		super();
 	}
 	
 	/**
