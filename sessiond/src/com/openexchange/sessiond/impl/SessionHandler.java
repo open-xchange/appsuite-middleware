@@ -197,7 +197,6 @@ public final class SessionHandler {
 	}
 
 	private static SessionControl addSessionInternal(final Session session) throws SessiondException {
-		final String sessionId = session.getSessionID();
 		SessionContainer sessionContainer = null;
 		Map<String, String> userMap = null;
 		Map<String, String> randomMap = null;
@@ -214,8 +213,8 @@ public final class SessionHandler {
 
 		final SessionControl sessionControlObject = sessionContainer.put(session, config.getLifeTime());
 
-		randomMap.put(session.getRandomToken(), sessionId);
-		userMap.put(session.getLoginName(), sessionId);
+		randomMap.put(session.getRandomToken(), session.getSessionID());
+		userMap.put(session.getLoginName(), session.getSessionID());
 		numberOfActiveSessions.incrementAndGet();
 		return sessionControlObject;
 	}
