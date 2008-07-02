@@ -47,39 +47,37 @@
 #    Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 #
-
 OXFUNCTIONS=@oxfunctions@
-OXCONFIG=@oxscriptconf@
-OXPREFIX=@oxprefix@
-CONSOLELOG=@consolelogfile@
+OXADMINCONFIG=@oxscriptconf@
+OXCONFIG=@oxgwscriptconf@
+# we need gw classes
+OXPREFIX=@prefix@
+OXBUNDLES=$OXPREFIX/bundles
 
 test -f $OXFUNCTIONS || {
         echo "missing common shell functions file"
-                exit 1
+        exit 1
 }
 
 . $OXFUNCTIONS
 
+test -f $OXADMINCONFIG && . $OXADMINCONFIG
 test -f $OXCONFIG && . $OXCONFIG
 
 ox_set_JAVA_BIN
 
+test -z "$SERVERNAME"       && SERVERNAME=$HOSTNAME
+test -z "$LIBPATH"          && LIBPATH=${PREFIX}jar
 
-test -z "$JAVA_XTRAOPTS"    && JAVA_XTRAOPTS="-ms50m -mx50m"
-test -z "$NRFILES"          && NRFILES=2048
-
-ALLCLASSES=$(for jar in @libdirpath@/*.jar; do
+ADMINCP=$(for jar in $BUNDLELIBPATH/*.jar; do
     echo -n "${jar}:"
     done)
 
-if [ -d @oxgroupwaresysconfdir@/log4j ]; then
-    ALLCLASSES="${ALLCLASSES}@oxgroupwaresysconfdir@/log4j:"
-fi
 
-CLASSPATH="-classpath $ALLCLASSES"
-
-
-exec $JAVA_BIN -Dopenexchange.propdir=$PROPERTIESDIR $CLASSPATH  com.openexchange.admin.console.ReportingTool "$@"
+GROUPWARECP=$(for jar in $OXBUNDLES/*.jar; do
+    echo -n "${jar}:"
+    done)
 
 
 
+$JAVA_BIN $JAVA_OXCMD_OPTS -classpath ${LIBPATH}/ox_admin_rmiclient.jar:$LIBPATH/ox_admin_hosting_rmiclient.jar:${GROUPWARECP}${ADMINCP} -Dopenexchange.propdir=$PROPERTIESDIR  com.openexchange.admin.console.ReportingTool "$@"
