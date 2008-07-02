@@ -90,6 +90,7 @@ public class OXContext extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXContextInterface)rmistub).change(ctx, auth);
+            return;
         } catch( ConnectException e) {
             reconnect(true);
         }
@@ -100,6 +101,7 @@ public class OXContext extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXContextInterface)rmistub).changeModuleAccess(ctx, access, auth);
+            return;
         } catch( ConnectException e) {
             reconnect(true);
         }
@@ -110,6 +112,7 @@ public class OXContext extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXContextInterface)rmistub).changeModuleAccess(ctx, access_combination_name, auth);
+            return;
         } catch( ConnectException e) {
             reconnect(true);
         }
@@ -150,6 +153,7 @@ public class OXContext extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXContextInterface)rmistub).delete(ctx, auth);
+            return;
         } catch( ConnectException e) {
             reconnect(true);
         }
@@ -160,6 +164,7 @@ public class OXContext extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXContextInterface)rmistub).disable(ctx, auth);
+            return;
         } catch( ConnectException e) {
             reconnect(true);
         }
@@ -170,6 +175,7 @@ public class OXContext extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXContextInterface)rmistub).disableAll(auth);
+            return;
         } catch( ConnectException e) {
             reconnect(true);
         }
@@ -180,6 +186,7 @@ public class OXContext extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXContextInterface)rmistub).downgrade(ctx, auth);
+            return;
         } catch( ConnectException e) {
             reconnect(true);
         }
@@ -190,6 +197,7 @@ public class OXContext extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXContextInterface)rmistub).enable(ctx, auth);
+            return;
         } catch( ConnectException e) {
             reconnect(true);
         }
@@ -200,6 +208,7 @@ public class OXContext extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXContextInterface)rmistub).enableAll(auth);
+            return;
         } catch( ConnectException e) {
             reconnect(true);
         }

@@ -83,6 +83,7 @@ public class OXUser extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXUserInterface)rmistub).change(ctx, usrdata, auth);
+            return;
         } catch (ConnectException e) {
             reconnect(true);
         }
@@ -93,6 +94,7 @@ public class OXUser extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXUserInterface)rmistub).changeModuleAccess(ctx, user, moduleAccess, auth);
+            return;
         } catch (ConnectException e) {
             reconnect(true);
         }
@@ -103,6 +105,7 @@ public class OXUser extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXUserInterface)rmistub).changeModuleAccess(ctx, user, access_combination_name, auth);
+            return;
         } catch (ConnectException e) {
             reconnect(true);
         }
@@ -143,6 +146,7 @@ public class OXUser extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXUserInterface)rmistub).delete(ctx, users, auth);
+            return;
         } catch (ConnectException e) {
             reconnect(true);
         }
@@ -153,6 +157,7 @@ public class OXUser extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXUserInterface)rmistub).delete(ctx, user, auth);
+            return;
         } catch (ConnectException e) {
             reconnect(true);
         }

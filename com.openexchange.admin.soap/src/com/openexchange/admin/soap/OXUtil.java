@@ -77,6 +77,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         reconnect();
         try {
             ((OXUtilInterface)rmistub).changeDatabase(db, auth);
+            return;
         } catch (ConnectException e) {
             reconnect(true);
         }
@@ -87,6 +88,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         reconnect();
         try {
             ((OXUtilInterface)rmistub).changeFilestore(fstore, auth);
+            return;
         } catch (ConnectException e) {
             reconnect(true);
         }
@@ -107,6 +109,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         reconnect();
         try {
             ((OXUtilInterface)rmistub).deleteMaintenanceReason(reasons, auth);
+            return;
         } catch (ConnectException e) {
             reconnect(true);
         }
@@ -227,6 +230,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         reconnect();
         try {
             ((OXUtilInterface)rmistub).unregisterDatabase(dbhandle, auth);
+            return;
         } catch (ConnectException e) {
             reconnect(true);
         }
@@ -237,6 +241,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         reconnect();
         try {
             ((OXUtilInterface)rmistub).unregisterFilestore(store, auth);
+            return;
         } catch (ConnectException e) {
             reconnect(true);
         }
@@ -247,6 +252,7 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         reconnect();
         try {
             ((OXUtilInterface)rmistub).unregisterServer(serv, auth);
+            return;
         } catch (ConnectException e) {
             reconnect(true);
         }

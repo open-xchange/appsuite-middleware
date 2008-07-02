@@ -82,6 +82,7 @@ public class OXResource extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXResourceInterface)rmistub).change(ctx, res, auth);
+            return;
         } catch( ConnectException e) {
             reconnect(true);
         }
@@ -102,6 +103,7 @@ public class OXResource extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXResourceInterface)rmistub).delete(ctx, res, auth);
+            return;
         } catch( ConnectException e) {
             reconnect(true);
         }

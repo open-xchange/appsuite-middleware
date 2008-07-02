@@ -84,6 +84,7 @@ public class OXGroup extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXGroupInterface)rmistub).addMember(ctx, grp, members, auth);
+            return;
         } catch (ConnectException e) {
             reconnect(true);
         }
@@ -94,6 +95,7 @@ public class OXGroup extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXGroupInterface)rmistub).change(ctx, grp, auth);
+            return;
         } catch (ConnectException e) {
             reconnect(true);
         }
@@ -114,6 +116,7 @@ public class OXGroup extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXGroupInterface)rmistub).delete(ctx, grp, auth);
+            return;
         } catch (ConnectException e) {
             reconnect(true);
         }
@@ -124,6 +127,7 @@ public class OXGroup extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXGroupInterface)rmistub).delete(ctx, grps, auth);
+            return;
         } catch (ConnectException e) {
             reconnect(true);
         }
@@ -204,6 +208,7 @@ public class OXGroup extends OXSOAPRMIMapper {
         reconnect();
         try {
             ((OXGroupInterface)rmistub).removeMember(ctx, grp, members, auth);
+            return;
         } catch (ConnectException e) {
             reconnect(true);
         }
