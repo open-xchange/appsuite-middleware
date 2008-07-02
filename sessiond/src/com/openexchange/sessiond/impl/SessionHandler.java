@@ -168,13 +168,14 @@ public final class SessionHandler {
 
 	protected static String addSession(final int userId, final String loginName, final String password,
 			final Context context, final String clientHost) throws SessiondException {
-		if (config.getMaxSessionsPerUser() > 0) {
+		final int maxSessPerUser = config.getMaxSessionsPerUser();
+		if (maxSessPerUser > 0) {
 			final int size = sessionList.size();
 			int count = 0;
-			for (int i = 0; i < size && count <= config.getMaxSessionsPerUser(); i++) {
+			for (int i = 0; i < size && count <= maxSessPerUser; i++) {
 				count += sessionList.get(i).numOfUserSessions(userId, context.getContextId());
 			}
-			if (count > config.getMaxSessionsPerUser()) {
+			if (count > maxSessPerUser) {
 				throw new SessiondException(Code.MAX_SESSION_PER_USER_EXCEPTION, null, Integer.valueOf(userId), Integer
 						.valueOf(context.getContextId()));
 			}
