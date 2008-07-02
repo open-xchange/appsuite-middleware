@@ -57,7 +57,7 @@
 			<fileset dir="META-INF"/>
 		</copy>
     	<mkdir dir="jar"/>
-        <jar jarfile="jar/${service.name}.aar" manifest="META-INF/MANIFEST.MF" basedir="classes"/>
+        <jar update="true" jarfile="jar/${service.name}.aar" manifest="META-INF/MANIFEST.MF" basedir="classes"/>
     </target>
 
     <target name="clean">
