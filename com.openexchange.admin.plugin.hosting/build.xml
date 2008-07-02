@@ -51,7 +51,8 @@
         <pathelement location="${admin.classpath}"/>
     </path>
 
-	<filterset id="pathsubst">
+	<filterset id="pathsubst">		
+		<filter token="oxgwscriptconf"    value="${prefix}/${etcdir}/groupware/ox-scriptconf.sh"/>
         <filter token="oxfunctions"       value="${prefix}/${etcdir}/oxfunctions.sh"/>
         <filter token="oxscriptconf"      value="${prefix}/${oxconfdir}/ox-admin-scriptconf.sh"/>
         <filter token="absoxconfdir"      value="${prefix}/${oxconfdir}"/>
