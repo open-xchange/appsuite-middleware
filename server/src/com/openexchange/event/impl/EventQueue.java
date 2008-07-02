@@ -51,7 +51,6 @@ package com.openexchange.event.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
@@ -76,7 +75,62 @@ import com.openexchange.server.ServerTimer;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class EventQueue extends TimerTask {
+public final class EventQueue {
+
+	private static final class EventQueueTimerTask extends TimerTask {
+
+		private final AtomicBoolean useFirst;
+
+		private final List<EventObject> q1;
+
+		private final List<EventObject> q2;
+
+		private final AtomicBoolean closing;
+
+		private final AtomicBoolean shutdown;
+
+		private final ReentrantLock shutdownLock;
+
+		private final Condition allEventsProcessed;
+
+		public EventQueueTimerTask(final Condition allEventsProcessed, final ReentrantLock shutdownLock,
+				final AtomicBoolean isFirst, final List<EventObject> queue1, final List<EventObject> queue2,
+				final AtomicBoolean shutdownComplete, final AtomicBoolean shuttingDown) {
+			super();
+			this.allEventsProcessed = allEventsProcessed;
+			this.shutdownLock = shutdownLock;
+			this.useFirst = isFirst;
+			this.q1 = queue1;
+			this.q2 = queue2;
+			this.shutdown = shutdownComplete;
+			this.closing = shuttingDown;
+		}
+
+		@Override
+		public void run() {
+			try {
+				if (useFirst.compareAndSet(true, false)) {
+					callEvent(q1);
+				} else {
+					useFirst.set(true);
+					callEvent(q2);
+				}
+			} catch (final Exception exc) {
+				LOG.error(exc.getMessage(), exc);
+			}
+			if (closing.get() && q1.isEmpty() && q2.isEmpty()) {
+				cancel(); // Stops this TimerTask
+				ServerTimer.getTimer().purge(); // Remove canceled tasks
+				shutdownLock.lock();
+				try {
+					shutdown.set(true);
+					allEventsProcessed.signalAll();
+				} finally {
+					shutdownLock.unlock();
+				}
+			}
+		}
+	}
 
 	private static final AtomicBoolean isFirst = new AtomicBoolean(true);
 
@@ -92,7 +146,7 @@ public class EventQueue extends TimerTask {
 
 	private static boolean isEnabled;
 
-	private static final Log LOG = LogFactory.getLog(EventQueue.class);
+	static final Log LOG = LogFactory.getLog(EventQueue.class);
 
 	/*
 	 * +++++++++++++++ Appointment Event Lists +++++++++++++++
@@ -137,22 +191,28 @@ public class EventQueue extends TimerTask {
 	private static final List<InfostoreEventInterface> noDelayInfostoreEventList = new ArrayList<InfostoreEventInterface>(
 			4);
 
-	private static boolean shuttingDown;
+	private static final AtomicBoolean shuttingDown = new AtomicBoolean();
 
 	private static final ReentrantLock SHUTDOWN_LOCK = new ReentrantLock();
 
 	private static final Condition ALL_EVENTS_PROCESSED = SHUTDOWN_LOCK.newCondition();
 
-	private static boolean shutdownComplete;
+	private static final AtomicBoolean shutdownComplete = new AtomicBoolean();
+
+	private static TimerTask timerTask;
+
+	private EventQueue() {
+		super();
+	}
 
 	/**
-	 * Initializes a new {@link EventQueue}.
+	 * Initializes the {@link EventQueue}.
 	 * 
 	 * @param config
-	 *            The configuration with which this event queue is going to be
+	 *            The configuration with which event queue is going to be
 	 *            configured
 	 */
-	public EventQueue(final EventConfig config) {
+	static void init(final EventConfig config) {
 		delay = config.getEventQueueDelay();
 
 		if (config.isEventQueueEnabled()) {
@@ -166,8 +226,10 @@ public class EventQueue extends TimerTask {
 			noDelay = (delay == 0);
 
 			if (!noDelay) {
-				final Timer t = ServerTimer.getTimer();
-				t.schedule(this, delay, delay);
+				timerTask = new EventQueueTimerTask(ALL_EVENTS_PROCESSED, SHUTDOWN_LOCK, isFirst, queue1, queue2,
+						shutdownComplete, shuttingDown);
+
+				ServerTimer.getTimer().schedule(timerTask, delay, delay);
 			}
 
 			isEnabled = true;
@@ -178,11 +240,11 @@ public class EventQueue extends TimerTask {
 		}
 
 		isInit = true;
-		shuttingDown = false;
+		shuttingDown.set(false);
 	}
 
 	public static void add(final EventObject eventObj) throws EventException {
-		if (shuttingDown) {
+		if (shuttingDown.get()) {
 			LOG.info("Shutting down event system, so no events are accepted. Throwing Invalid State Exception");
 			throw new EventException("Event system is being shut down and therefore does not accept new events.");
 		}
@@ -217,30 +279,6 @@ public class EventQueue extends TimerTask {
 				queue1.add(eventObj);
 			} else {
 				queue2.add(eventObj);
-			}
-		}
-	}
-
-	@Override
-	public void run() {
-		try {
-			if (isFirst.compareAndSet(true, false)) {
-				callEvent(queue1);
-			} else {
-				isFirst.set(true);
-				callEvent(queue2);
-			}
-		} catch (final Exception exc) {
-			LOG.error(exc.getMessage(), exc);
-		}
-		if (shuttingDown && queue1.isEmpty() && queue2.isEmpty()) {
-			cancel(); // Stops this TimerTask
-			SHUTDOWN_LOCK.lock();
-			try {
-				shutdownComplete = true;
-				ALL_EVENTS_PROCESSED.signalAll();
-			} finally {
-				SHUTDOWN_LOCK.unlock();
 			}
 		}
 	}
@@ -572,10 +610,10 @@ public class EventQueue extends TimerTask {
 	public static void stop() {
 		SHUTDOWN_LOCK.lock();
 		try {
-			if (shutdownComplete) {
+			if (shutdownComplete.get()) {
 				return;
 			}
-			shuttingDown = true;
+			shuttingDown.set(true);
 
 			if (queue1.isEmpty() && queue2.isEmpty()) {
 				// next run.

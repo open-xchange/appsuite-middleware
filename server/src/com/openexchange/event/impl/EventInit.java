@@ -91,7 +91,8 @@ public class EventInit implements Initialization {
 			LOG.info("Parse Event properties");
 		}
 		final EventConfig eventConfig = new EventConfigImpl(SystemConfig.getProperty("EVENTPROPERTIES"));
-		final EventQueue eventQueue = new EventQueue(eventConfig);
+		//final EventQueue eventQueue = new EventQueue(eventConfig);
+		EventQueue.init(eventConfig);
 
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Adding Notification Listener");
