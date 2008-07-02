@@ -673,8 +673,7 @@ public final class Contacts {
 		 * throw EXCEPTIONS.createOXConflictException(63,ctx.getContextId()); }
 		 */
 
-		if (FolderObject.SYSTEM_LDAP_FOLDER_ID == fid && co.containsEmail1() && (co.getEmail1() != null)
-				&& ctx.getMailadmin() != user) {
+		if (FolderObject.SYSTEM_LDAP_FOLDER_ID == fid && co.containsEmail1() && ctx.getMailadmin() != user) {
 			final Connection readCon;
 			try {
 				readCon = DBPool.pickup(ctx);
