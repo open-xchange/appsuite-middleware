@@ -144,7 +144,7 @@ public class ICalImporter extends AbstractImporter {
 			try {
 				folderId = Integer.parseInt(folder);
 			} catch (final NumberFormatException exc) {
-				throw EXCEPTIONS.create(0, folder);
+				throw EXCEPTIONS.create(0, exc, folder);
 			}
 
 			FolderObject fo;
@@ -176,9 +176,9 @@ public class ICalImporter extends AbstractImporter {
 				perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance()
 						.getUserConfigurationSafe(session.getUserId(), session.getContext()));
 			} catch (final DBPoolingException e) {
-				throw EXCEPTIONS.create(0, folder);
+				throw EXCEPTIONS.create(0, e, folder);
 			} catch (final SQLException e) {
-				throw EXCEPTIONS.create(0, folder);
+				throw EXCEPTIONS.create(0, e, folder);
 			}
 
 			if (perm.canCreateObjects()) {
@@ -204,7 +204,7 @@ public class ICalImporter extends AbstractImporter {
 			try {
 				fo = folderAccess.getFolderObject(folderId);
 			} catch (final OXException e) {
-				throw EXCEPTIONS.create(4, Integer.valueOf(folderId));
+				throw EXCEPTIONS.create(4, e, Integer.valueOf(folderId));
 			}
 			if (fo.getModule() == FolderObject.CALENDAR) {
 				appointmentFolderId = folderId;
@@ -286,15 +286,15 @@ public class ICalImporter extends AbstractImporter {
 						} catch (final ConverterException x) {
 							importResult.setException(EXCEPTIONS.create(10, x.getMessage()));
 						}
-						if (appointmentObj != null) {
+						if (appointmentObj == null) {
+							importResult.setDate(new Date());
+						} else {
 							appointmentObj.setContext(session.getContext());
 							appointmentObj.setParentFolderID(appointmentFolderId);
 							appointmentObj.setIgnoreConflicts(true);
 							appointmentInterface.insertAppointmentObject(appointmentObj);
 							importResult.setObjectId(String.valueOf(appointmentObj.getObjectID()));
 							importResult.setDate(appointmentObj.getLastModified());
-						} else {
-							importResult.setDate(new Date());
 						}
 						list.add(importResult);
 					} else if ("VTODO".equals(versitObject.name) && importTask) {
@@ -308,13 +308,13 @@ public class ICalImporter extends AbstractImporter {
 						} catch (final ConverterException x) {
 							importResult.setException(EXCEPTIONS.create(10, x.getMessage()));
 						}
-						if (taskObj != null) {
+						if (taskObj == null) {
+							importResult.setDate(new Date());
+						} else {
 							taskObj.setParentFolderID(taskFolderId);
 							taskInterface.insertTaskObject(taskObj);
 							importResult.setObjectId(String.valueOf(taskObj.getObjectID()));
 							importResult.setDate(taskObj.getLastModified());
-						} else {
-							importResult.setDate(new Date());
 						}
 						list.add(importResult);
 					} else {

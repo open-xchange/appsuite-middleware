@@ -54,7 +54,7 @@ package com.openexchange.tools.versit;
 import com.openexchange.tools.versit.old.VCalendar10;
 import com.openexchange.tools.versit.old.VCard21;
 
-public class Versit {
+public final class Versit {
 
 	private static String[] Types = { "text/calendar", "text/vcard",
 			"text/x-vcalendar", "text/x-vcard" };

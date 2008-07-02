@@ -57,6 +57,7 @@ import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * @author Viktor Pracht
@@ -64,9 +65,9 @@ import java.util.Locale;
  */
 public class ObjectDefinition implements VersitDefinition {
 	
-	private final HashMap<String, PropertyDefinition> Properties = new HashMap<String, PropertyDefinition>();
+	private final Map<String, PropertyDefinition> Properties = new HashMap<String, PropertyDefinition>();
 	
-	private final HashMap<String, ObjectDefinition> Children = new HashMap<String, ObjectDefinition>();
+	private final Map<String, ObjectDefinition> Children = new HashMap<String, ObjectDefinition>();
 	
 	public static final ObjectDefinition Default = new ObjectDefinition();
 	
@@ -84,8 +85,8 @@ public class ObjectDefinition implements VersitDefinition {
 		}
 	}
 	
-	private ObjectDefinition(final HashMap<String, PropertyDefinition> properties,
-			final HashMap<String, ObjectDefinition> children) {
+	private ObjectDefinition(final Map<String, PropertyDefinition> properties,
+			final Map<String, ObjectDefinition> children) {
 		Properties.putAll(properties);
 		Children.putAll(children);
 	}
@@ -232,7 +233,7 @@ public class ObjectDefinition implements VersitDefinition {
 		return child;
 	}
 	
-	public Iterator iterator() {
+	public Iterator<PropertyDefinition> iterator() {
 		return Properties.values().iterator();
 	}
 	

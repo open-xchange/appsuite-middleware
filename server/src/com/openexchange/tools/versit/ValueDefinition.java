@@ -54,15 +54,16 @@ package com.openexchange.tools.versit;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * @author Viktor Pracht
  */
 public class ValueDefinition {
 
-	private final HashMap<String, Encoding> Encodings;
+	private final Map<String, Encoding> Encodings;
 
-	private static final HashMap<String, Encoding> NoEncodings = new HashMap<String, Encoding>();
+	private static final Map<String, Encoding> NoEncodings = new HashMap<String, Encoding>();
 
 	// public static final ValueDefinition Default = new ValueDefinition();
 

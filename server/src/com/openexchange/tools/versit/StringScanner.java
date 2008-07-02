@@ -106,7 +106,7 @@ public class StringScanner extends Scanner {
 			return text.length() == 0;
 		}
 		if (UpcaseText == null) {
-			UpcaseText = Text.toUpperCase();
+			UpcaseText = Text.toUpperCase(Locale.ENGLISH);
 		}
 		final boolean retval = UpcaseText.startsWith(text.toUpperCase(Locale.ENGLISH), pos - 1);
 		if (retval) {

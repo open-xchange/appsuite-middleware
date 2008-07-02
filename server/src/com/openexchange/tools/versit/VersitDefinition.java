@@ -59,6 +59,7 @@ import java.util.Iterator;
 public interface VersitDefinition {
 
 	public interface Reader {
+		// Empty
 	}
 
 	public Reader getReader(InputStream stream, String charset)
@@ -93,5 +94,5 @@ public interface VersitDefinition {
 
 	public VersitDefinition copy();
 
-	public Iterator iterator();
+	public Iterator<PropertyDefinition> iterator();
 }

@@ -61,8 +61,7 @@ import java.util.Map;
 /**
  * @author Viktor Pracht
  */
-public class VersionedObjectDefinition extends ObjectDefinition implements
-		VersitDefinition {
+public class VersionedObjectDefinition extends ObjectDefinition {
 
 	private final Map<String, ObjectDefinition> Definitions = new HashMap<String, ObjectDefinition>();
 
@@ -81,7 +80,7 @@ public class VersionedObjectDefinition extends ObjectDefinition implements
 			final ObjectDefinition od = entry.getValue();
 			final ObjectDefinition copy = (ObjectDefinition) od.copy();
 			addDefinition(entry.getKey(), copy);
-			if (od == definition) {
+			if (od.equals(definition)) {
 				Definition = copy;
 			}
 		}
@@ -96,7 +95,7 @@ public class VersionedObjectDefinition extends ObjectDefinition implements
 	}
 
 	public final void addDefinition(final String version, final ObjectDefinition definition) {
-		if (Definitions.size() == 0) {
+		if (Definitions.isEmpty()) {
 			Definition = definition;
 		}
 		Definitions.put(version, definition);
@@ -178,7 +177,7 @@ public class VersionedObjectDefinition extends ObjectDefinition implements
 	}
 
 	@Override
-	public Iterator iterator() {
+	public Iterator<PropertyDefinition> iterator() {
 		return Definition.iterator();
 	}
 
