@@ -446,7 +446,7 @@ public abstract class AbstractAgent {
 	}
 
 	/**
-	 * Creates a JMX connector and starts it
+	 * Creates a JMX connector server bound to specified JMX URL.
 	 * 
 	 * @param urlstr
 	 *            The JMX URL as a string
@@ -460,8 +460,8 @@ public abstract class AbstractAgent {
 	 * @throws ManagementException
 	 *             If connector cannot be added
 	 */
-	protected final JMXServiceURL addConnector(final String urlstr, final String jmxLogin, final String jmxPassword)
-			throws ManagementException {
+	protected final JMXServiceURL addConnectorServer(final String urlstr, final String jmxLogin,
+			final String jmxPassword) throws ManagementException {
 		final JMXServiceURL url;
 		try {
 			url = new JMXServiceURL(urlstr);
@@ -497,12 +497,12 @@ public abstract class AbstractAgent {
 	}
 
 	/**
-	 * Remove the JMX connector bound to specified JMX URL
+	 * Removes the JMX connector server bound to specified JMX URL
 	 * 
 	 * @param url
 	 *            The JMX URL
 	 */
-	protected final void removeConnector(final JMXServiceURL url) {
+	protected final void removeConnectorServer(final JMXServiceURL url) {
 		final JMXConnectorServer connector = connectors.remove(url);
 		if (connector == null) {
 			return;

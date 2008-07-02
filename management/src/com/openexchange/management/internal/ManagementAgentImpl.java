@@ -124,7 +124,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 			final String ip = getIPAddress(jmxBindAddr.charAt(0) == '*' ? "localhost" : jmxBindAddr);
 			final String jmxURLStr = new StringBuilder(128).append("service:jmx:rmi:///jndi/rmi://").append(
 					ip == null ? "localhost" : ip).append(':').append(jmxPort).append("/server").toString();
-			jmxURL = addConnector(jmxURLStr, jmxLogin, jmxPassword);
+			jmxURL = addConnectorServer(jmxURLStr, jmxLogin, jmxPassword);
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder(128).append(
 						"\n\n\tUse JConsole or MC4J to connect to MBeanServer with this url: ").append(jmxURL).append(
@@ -148,7 +148,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 		} catch (final ManagementException e) {
 			LOG.error(e.getMessage(), e);
 		}
-		removeConnector(jmxURL);
+		removeConnectorServer(jmxURL);
 		/*
 		 * By now there's no API call to close/unexport a RMI registry.
 		 * Therefore the RMI registry created in start() method still remains in
