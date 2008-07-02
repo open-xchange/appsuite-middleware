@@ -51,6 +51,7 @@ package com.openexchange.groupware.importexport.importers;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import com.openexchange.api2.OXException;
@@ -164,13 +165,13 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
 	}
 	
 	public static final SimpleDateFormat getGermanDateNotation(){
-		final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+		final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
 		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 		return sdf; 
 	}
 	
 	public static final SimpleDateFormat getAmericanDateNotation(){
-		final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+		final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
 		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 		return sdf; 
 	}

@@ -98,8 +98,10 @@ public class SizedInputStream extends InputStream{
 	}
 
 	@Override
-	public synchronized void mark(final int readlimit) {
-		in.mark(readlimit);
+	public void mark(final int readlimit) {
+		synchronized (this) {
+			in.mark(readlimit);
+		}
 	}
 
 	@Override
@@ -118,8 +120,10 @@ public class SizedInputStream extends InputStream{
 	}
 
 	@Override
-	public synchronized void reset() throws IOException {
-		in.reset();
+	public void reset() throws IOException {
+		synchronized (this) {	
+			in.reset();
+		}
 	}
 
 	@Override

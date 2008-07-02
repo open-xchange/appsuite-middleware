@@ -93,19 +93,19 @@ public enum Format {
 				return f;
 			}
 		}
-		if(mimeType.equals("text/comma-separated-values")) {
+		if("text/comma-separated-values".equals(mimeType)) {
 			return CSV;
 		}
-		if(mimeType.equals("text/vcard")) {
+		if("text/vcard".equals(mimeType)) {
 			return VCARD;
 		}
-		if(mimeType.equals("text/directory")) {
+		if("text/directory".equals(mimeType)) {
 			return VCARD;
 		}
-		if(mimeType.equals("text/calendar")) {
+		if("text/calendar".equals(mimeType)) {
 			return VCARD;
 		}
-		if(mimeType.equals("text/x-vcalendar")) {
+		if("text/x-vcalendar".equals(mimeType)) {
 			return VCARD;
 		}
 		return null;

@@ -81,7 +81,12 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 			"Cannot translate id=%d to a constant from Types.",
 			"Cannot translate id=%d to a constant from FolderObject."})
 			
-public class ModuleTypeTranslator {
+public final class ModuleTypeTranslator {
+
+	private ModuleTypeTranslator() {
+		super();
+	}
+
 	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(ModuleTypeTranslator.class); 
 	
 	/**

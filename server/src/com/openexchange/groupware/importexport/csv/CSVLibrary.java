@@ -95,12 +95,17 @@ import com.openexchange.tools.session.ServerSession;
 		"Could not create folder id from string %s",
 		"Could not read InputStream as string",
 		"Missing ability to encode or decode UTF-8 on server, cannot read file."})
-public class CSVLibrary {
+public final class CSVLibrary {
+
+	private CSVLibrary() {
+		super();
+	}
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(CSVLibrary.class);
 	
-	protected static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVLibrary.class);
+	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVLibrary.class);
+
 	public static final char CELL_DELIMITER = ',';
 	public static final char ROW_DELIMITER = '\n';
 
@@ -118,7 +123,7 @@ public class CSVLibrary {
 		try {
 			fo = new OXFolderAccess(sessObj.getContext()).getFolderObject(folderId);
 		} catch (final OXException e) {
-			throw EXCEPTIONS.create(0, folder);
+			throw EXCEPTIONS.create(0, e, folder);
 		}
 		return fo;
 	}
@@ -134,7 +139,7 @@ public class CSVLibrary {
 		try{
 			return Integer.parseInt(folderString);
 		} catch (final NumberFormatException e) {
-			throw EXCEPTIONS.create(1, folderString);
+			throw EXCEPTIONS.create(1, e, folderString);
 		}
 	}
 
@@ -180,7 +185,7 @@ public class CSVLibrary {
 			br = new BufferedReader(new InputStreamReader(is, encoding));
 		} catch (final UnsupportedEncodingException e1) {
 			LOG.fatal(e1);
-			throw EXCEPTIONS.create(3);
+			throw EXCEPTIONS.create(3, e1, new Object[0]);
 		}
 		final StringBuilder bob = new StringBuilder();
 		String buffer;
@@ -190,7 +195,7 @@ public class CSVLibrary {
 				bob.append('\n');
 			}
 		} catch (final IOException e) {
-			throw EXCEPTIONS.create(2);
+			throw EXCEPTIONS.create(2, e, new Object[0]);
 		} finally {
 			try {
 				br.close();

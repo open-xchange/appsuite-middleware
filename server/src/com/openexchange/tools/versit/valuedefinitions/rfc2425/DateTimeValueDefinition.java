@@ -121,11 +121,11 @@ public class DateTimeValueDefinition extends ValueDefinition {
 			s.read();
 		} else {
 			final String offs = s.regex(TZPattern);
-			if (offs != null) {
+			if (offs == null) {
+				date.isFloating = true;
+			} else {
 				tz.append(offs);
 				date.isUTC = false;
-			} else {
-				date.isFloating = true;
 			}
 		}
 		date.calendar.setTimeZone(TimeZone.getTimeZone(tz.toString()));

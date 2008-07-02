@@ -142,7 +142,7 @@ public class VCardImporter extends AbstractImporter {
 			try {
 				folderId = Integer.parseInt(folder);
 			} catch (final NumberFormatException exc) {
-				throw importExportExceptionFactory.create(0, folder);
+				throw importExportExceptionFactory.create(0, exc, folder);
 			}
 
 			FolderObject fo;
@@ -167,9 +167,9 @@ public class VCardImporter extends AbstractImporter {
 				perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance()
 						.getUserConfigurationSafe(session.getUserId(), session.getContext()));
 			} catch (final DBPoolingException e) {
-				throw importExportExceptionFactory.create(1, folder);
+				throw importExportExceptionFactory.create(1, e, folder);
 			} catch (final SQLException e) {
-				throw importExportExceptionFactory.create(1, folder);
+				throw importExportExceptionFactory.create(1, e, folder);
 			}
 
 			if (perm.canCreateObjects()) {
@@ -212,14 +212,20 @@ public class VCardImporter extends AbstractImporter {
 			oxContainerConverter = new OXContainerConverter(session);
 			final VCardTokenizer tokenizer = new VCardTokenizer(is);
 			final List<VCardFileToken> chunks = tokenizer.split();
-			if (0 == chunks.size()) {
+			if (chunks.isEmpty()) {
 				throw importExportExceptionFactory.create(8);
 			}
 			for (final VCardFileToken chunk : chunks) {
 				final VersitDefinition def = chunk.getVersitDefinition();
 				final ImportResult importResult = new ImportResult();
 
-				if (def != null) {
+				if (def == null) {
+					// could not find appropriate parser for this part of the
+					// vcard file
+					LOG.error("Could not recognize format of the following VCard data: " + chunk.getContent());
+					importResult.setDate(new Date(System.currentTimeMillis()));
+					importResult.setException(importExportExceptionFactory.create(5, chunk.getContent()));
+				} else {
 					final VersitDefinition.Reader versitReader = def.getReader(new UnsynchronizedByteArrayInputStream(
 							chunk.getContent()), "UTF-8");
 					try {
@@ -246,24 +252,18 @@ public class VCardImporter extends AbstractImporter {
 						LOG.error("cannot parse contact object", exc);
 						importResult.setException(new OXException("cannot parse vcard object", exc));
 					}
-				} else {
-					// could not find appropriate parser for this part of the
-					// vcard file
-					LOG.error("Could not recognize format of the following VCard data: " + chunk.getContent());
-					importResult.setDate(new Date(System.currentTimeMillis()));
-					importResult.setException(importExportExceptionFactory.create(5, chunk.getContent()));
 				}
 				list.add(importResult);
 			}
 		} catch (final UnsupportedEncodingException e) {
 			LOG.fatal(e.getMessage(), e);
-			throw importExportExceptionFactory.create(6);
+			throw importExportExceptionFactory.create(6, e, new Object[0]);
 		} catch (final IOException e) {
 			LOG.error(e.getMessage(), e);
-			throw importExportExceptionFactory.create(4, Integer.valueOf(contactFolderId));
+			throw importExportExceptionFactory.create(4, e, Integer.valueOf(contactFolderId));
 		} catch (final ConverterException e) {
 			LOG.error(e.getMessage(), e);
-			throw importExportExceptionFactory.create(1, e);
+			throw importExportExceptionFactory.create(1, e, e);
 		} finally {
 			if (oxContainerConverter != null) {
 				oxContainerConverter.close();

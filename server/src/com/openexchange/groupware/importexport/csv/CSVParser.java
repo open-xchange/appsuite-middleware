@@ -171,7 +171,7 @@ public class CSVParser {
 			}
 		}
 		
-		if( ! (currentCell.length() == 0 && currentLine.size() == 0) ){
+		if( ! (currentCell.length() == 0 && currentLine.isEmpty()) ){
 			throw EXCEPTIONS.create(1);
 		}
 		
@@ -227,14 +227,14 @@ public class CSVParser {
 			if(numberOfCells == STARTING_LENGTH ){
 				numberOfCells = currentLine.size();
 				structure.add(currentLine);
-			} else if(numberOfCells != currentLine.size() && !isTolerant() ){
-				throw EXCEPTIONS.create(0, Integer.valueOf(numberOfCells), Integer.valueOf(currentLineNumber), Integer.valueOf(currentLine.size()));
-				//unparsableLines.add(currentLineNumber-1);
-			} else {
+			} else if(numberOfCells == currentLine.size() || isTolerant() ) {
 				for(int j = currentLine.size(); j < numberOfCells; j++){
 					currentLine.add("");
 				}
 				structure.add(currentLine);
+			} else {
+				throw EXCEPTIONS.create(0, Integer.valueOf(numberOfCells), Integer.valueOf(currentLineNumber), Integer.valueOf(currentLine.size()));
+				//unparsableLines.add(currentLineNumber-1);
 			}
 			currentLine = new LinkedList<String>();
 		}

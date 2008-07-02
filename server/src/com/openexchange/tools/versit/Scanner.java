@@ -51,6 +51,7 @@ package com.openexchange.tools.versit;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Viktor Pracht
@@ -62,9 +63,9 @@ public abstract class Scanner implements VersitDefinition.Reader {
 	 */
 	public int peek;
 
-	protected int Column = 0;
+	protected int Column;
 
-	protected int Line = 0;
+	protected int Line;
 
 	public int getColumn() {
 		return Column;
@@ -140,7 +141,7 @@ public abstract class Scanner implements VersitDefinition.Reader {
 	}
 
 	public int[] parseNumList() throws IOException {
-		final ArrayList list = new ArrayList();
+		final List<Integer> list = new ArrayList<Integer>();
 		while (true) {
 			int sign = 1;
 			if (peek == '+') {
@@ -158,7 +159,7 @@ public abstract class Scanner implements VersitDefinition.Reader {
 		}
 		final int[] retval = new int[list.size()];
 		for (int i = 0; i < retval.length; i++) {
-			retval[i] = ((Integer) list.get(i)).intValue();
+			retval[i] = (list.get(i)).intValue();
 		}
 		return retval;
 	}
