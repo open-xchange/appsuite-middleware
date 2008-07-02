@@ -337,17 +337,23 @@ public final class SieveTextFilter {
             final Rule rule = finalrules.get(i);
             final RuleComment ruleComment = rule.getRuleComment();
             if (null != ruleComment) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Added line number " + linenumber + " to comment " + ruleComment);
+                }
                 ruleComment.setLine(linenumber++);
+            }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Added line number " + linenumber + " to rule " + rule);
             }
             rule.setLinenumber(linenumber);
             // Here we add one because a space between two rules looks better
             final ArrayList<Command> commands = rule.getCommands();
-            if (null != commands) {
+            if (null != commands && !commands.isEmpty()) {
                 linenumber += countcommandlines(commands) + 1;
             } else {
                 final String text = rule.getText();
                 if (null != text) {
-                    linenumber += countlines(text);
+                    linenumber += countlines(text) + 1;
                 }
             }
         }
@@ -601,14 +607,18 @@ public final class SieveTextFilter {
             retval.addAll(stringToList(string));
         }
         for (final OwnType owntype : commentedoutput) {
-            final int linenumber = owntype.getLinenumber();
+            int linenumber = owntype.getLinenumber() - 1;
             final String string = owntype.getOutput().toString();
             final int size = retval.size();
-            if (linenumber > size + 1) {
-                fillup(retval, linenumber - (size + 1));
+            if (linenumber >= size) {
+                fillup(retval, linenumber - (size - 1));
             }
             final List<String> stringToListComment = stringToListComment(string);
-            retval.addAll(stringToListComment);
+            while (null != retval.get(linenumber) && !("".equals(retval.get(linenumber)))) {
+                linenumber++;
+            }
+            removeEmptyLines(retval, linenumber, stringToListComment.size());
+            retval.addAll(linenumber, stringToListComment);
         }
         
         for (final Rule rule : rules) {
@@ -617,10 +627,12 @@ public final class SieveTextFilter {
             if (null != text) {
                 final int line = ruleComment.getLine();
                 final int size = retval.size();
-                if (line > size + 1) {
-                    fillup(retval, line - (size + 1));
+                if (line > size) {
+                    fillup(retval, line - size);
                 }
-                retval.addAll(stringToList(text));
+                final ArrayList<String> stringToList = stringToList(text);
+                removeEmptyLines(retval, line, stringToList.size());
+                retval.addAll(line, stringToList);
             }
             if (null != ruleComment) {
                 final int line = ruleComment.getLine();
@@ -633,6 +645,17 @@ public final class SieveTextFilter {
         }
 
         return retval;
+    }
+
+    private void removeEmptyLines(final List<String> retval, final int line, final int linescount) {
+        for (int i = 0; i < linescount; i++) {
+            if (retval.size() > line + 1) {
+                final String string = retval.get(line);
+                if (null != string && "".equals(string)) {
+                    retval.remove(line);
+                }
+            }
+        }
     }
 
     /**
