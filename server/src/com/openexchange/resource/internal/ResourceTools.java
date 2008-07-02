@@ -109,7 +109,7 @@ public final class ResourceTools {
 		 * Validate e-mail with InternetAddress class from JavaMail API
 		 */
 		try {
-			new InternetAddress(emailAddress, true);
+			new InternetAddress(emailAddress, true).validate();
 			return true;
 		} catch (final AddressException e) {
 			return false;
