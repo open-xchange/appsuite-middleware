@@ -211,9 +211,9 @@ public final class Contacts {
 		} else if (mime.toLowerCase().indexOf("png") != -1) {
 			mime = "image/png";
 		}
-		
+
 		final String fileType = mime.substring(mime.indexOf('/') + 1);
-		
+
 		{
 			final Set<String> allowedMime = new HashSet<String>(Arrays.asList(ImageIO.getReaderFormatNames()));
 			check = allowedMime.contains(fileType);
@@ -235,8 +235,6 @@ public final class Contacts {
 			// Image or it is to large! MimeType ="+mime+" / Image Size =
 			// "+img.length+" / max. allowed Image size = "+max_size);
 		}
-		
-		
 
 		final BufferedImage bi = ImageIO.read(new UnsynchronizedByteArrayInputStream(img));
 
@@ -357,8 +355,7 @@ public final class Contacts {
 		return img;
 	}
 
-	@OXThrowsMultiple(category = { Category.USER_INPUT }, desc = { "72" }, exceptionId = { 72 }, msg = {
-			"Image size too large. Image size: %1$d. Max. size: %2$d." })
+	@OXThrowsMultiple(category = { Category.USER_INPUT }, desc = { "72" }, exceptionId = { 72 }, msg = { "Image size too large. Image size: %1$d. Max. size: %2$d." })
 	private static void checkImageSize(final int imageSize, final int maxSize) throws ContactException {
 		if (maxSize > 0 && imageSize > maxSize) {
 			throw EXCEPTIONS.create(72, Integer.valueOf(imageSize), Integer.valueOf(maxSize));
@@ -367,15 +364,16 @@ public final class Contacts {
 
 	@OXThrowsMultiple(category = { Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR,
 			Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR,
-			Category.TRY_AGAIN, Category.TRY_AGAIN, Category.USER_INPUT }, desc = { "3", "4", "5", "6", "7", "8", "9", "51", "53", "58",
-			"62","71" }, exceptionId = { 3, 4, 5, 6, 7, 8, 9, 51, 53, 58, 62, 71 }, msg = {
+			Category.TRY_AGAIN, Category.TRY_AGAIN, Category.USER_INPUT }, desc = { "3", "4", "5", "6", "7", "8", "9",
+			"51", "53", "58", "62", "71" }, exceptionId = { 3, 4, 5, 6, 7, 8, 9, 51, 53, 58, 62, 71 }, msg = {
 			ContactException.NON_CONTACT_FOLDER_MSG, ContactException.NO_PERMISSION_MSG,
 			ContactException.NO_PERMISSION_MSG, "Unable to insert contacts! Context: %d",
 			"Got a -1 ID from IDGenerator", "Unable to scale image down.", "Unable to insert Contact. Context: %d",
 			ContactException.INIT_CONNECTION_FROM_DBPOOL, ContactException.INIT_CONNECTION_FROM_DBPOOL,
 			"The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
-			"Mandatory field last name is not set.",ContactException.PFLAG_IN_PUBLIC_FOLDER })
-	public static void performContactStorageInsert(final ContactObject co, final int user, final Session so) throws OXConflictException, OXException {
+			"Mandatory field last name is not set.", ContactException.PFLAG_IN_PUBLIC_FOLDER })
+	public static void performContactStorageInsert(final ContactObject co, final int user, final Session so)
+			throws OXConflictException, OXException {
 
 		final StringBuilder insert_fields = new StringBuilder();
 		final StringBuilder insert_values = new StringBuilder();
@@ -394,7 +392,7 @@ public final class Contacts {
 			validateEmailAddress(co);
 
 			final int fid = co.getParentFolderID();
-			
+
 			final OXFolderAccess oxfs = new OXFolderAccess(readcon, ct);
 
 			final FolderObject contactFolder = oxfs.getFolderObject(fid);
@@ -427,18 +425,16 @@ public final class Contacts {
 			}
 
 			if ((contactFolder.getType() != FolderObject.PRIVATE) && co.getPrivateFlag()) {
-				throw EXCEPTIONS.createOXConflictException(71, 
-						                                   Integer.valueOf(fid), 
-						                                   Integer.valueOf(so.getContextId()),
-						                                   Integer.valueOf(user));
-				//co.setPrivateFlag(false);
+				throw EXCEPTIONS.createOXConflictException(71, Integer.valueOf(fid),
+						Integer.valueOf(so.getContextId()), Integer.valueOf(user));
+				// co.setPrivateFlag(false);
 			}
 			/*
 			 * if (!co.containsDisplayName() || co.getDisplayName() == null ||
 			 * co.getDisplayName().length() < 1){ if (co.getSurName() != null &&
 			 * co.getSurName().length() > 0){ if (co.getGivenName() != null &&
-			 * co.getGivenName().length() > 0){ if (co.getMiddleName() != null &&
-			 * co.getMiddleName().length() > 0){
+			 * co.getGivenName().length() > 0){ if (co.getMiddleName() != null
+			 * && co.getMiddleName().length() > 0){
 			 * co.setDisplayName(co.getSurName()+", "+co.getGivenName()+'
 			 * '+co.getMiddleName()); }else{
 			 * co.setDisplayName(co.getSurName()+", "+co.getGivenName()); }
@@ -566,10 +562,11 @@ public final class Contacts {
 					} catch (final Exception ex) {
 						throw EXCEPTIONS.create(58, ex);
 					}
-				} else {				
-					checkImageSize(co.getImage1().length, Integer.parseInt(ContactConfig.getProperty(PROP_MAX_IMAGE_SIZE)));
+				} else {
+					checkImageSize(co.getImage1().length, Integer.parseInt(ContactConfig
+							.getProperty(PROP_MAX_IMAGE_SIZE)));
 				}
-				
+
 				writeContactImage(co.getObjectID(), co.getImage1(), so.getContextId(), co.getImageContentType(),
 						writecon);
 			}
@@ -636,17 +633,17 @@ public final class Contacts {
 			Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR, Category.PERMISSION, Category.PERMISSION,
 			Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT,
 			Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT, Category.TRY_AGAIN,
-			Category.TRY_AGAIN, Category.TRY_AGAIN, Category.TRY_AGAIN, Category.PERMISSION }, desc = { "10", "11",
+			Category.TRY_AGAIN, Category.TRY_AGAIN, Category.TRY_AGAIN, Category.PERMISSION, Category.PERMISSION }, desc = { "10", "11",
 			"12", "13", "14", "15", "16", "17", "65", "18", "19", "20", "21", "22", "23", "24", "55", "56", "59", "63",
-			"66", "67", "69" }, exceptionId = { 10, 11, 12, 13, 14, 15, 16, 17, 65, 18, 19, 20, 21, 22, 23, 24, 55, 56,
-			59, 63, 66, 67, 69 }, msg = {
+			"66", "67", "69", "73" }, exceptionId = { 10, 11, 12, 13, 14, 15, 16, 17, 65, 18, 19, 20, 21, 22, 23, 24, 55, 56,
+			59, 63, 66, 67, 69, 73 }, msg = {
 			ContactException.NON_CONTACT_FOLDER_MSG,
 			ContactException.NO_PERMISSION_MSG,
 			ContactException.NO_PERMISSION_MSG,
 			ContactException.NON_CONTACT_FOLDER_MSG,
 			ContactException.NO_PERMISSION_MSG,
 			ContactException.NO_PERMISSION_MSG,
-			"Unable to syncronize the old contact with the new changes: Context %1$d Object %2$d",
+			"Unable to synchronize the old contact with the new changes: Context %1$d Object %2$d",
 			ContactException.NO_PERMISSION_MSG,
 			"Unable to move this contact because it is marked as private: Context %1$d Object %2$d",
 			"You are not allowed to mark this contact as private contact: Context %1$d Object %2$d",
@@ -660,9 +657,9 @@ public final class Contacts {
 			"One or more fields contain too much information. Field: %1$d Character Limit: %2$d Sent %3$d",
 			"The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
 			"Mandatory field last name is not set.",
-			"Unable to compare contacts for update. Make sure you have entered a valid display name. Contect %1$d Object %2$d",
+			"Unable to compare contacts for update. Make sure you have entered a valid display name. Context %1$d Object %2$d",
 			"The name you entered is not available. Choose another display name. Context %1$d Object %2$d",
-			ContactException.NO_DELETE_PERMISSION_MSG })
+			ContactException.NO_DELETE_PERMISSION_MSG, "Primary email address in system contact must not be edited: Context %1$d Object %2$d User %3$d" })
 	public static void performContactStorageUpdate(final ContactObject co, final int fid,
 			final java.util.Date client_date, final int user, final int[] group, final Context ctx,
 			final UserConfiguration uc) throws ContactException, OXConflictException, OXObjectNotFoundException,
@@ -675,6 +672,31 @@ public final class Contacts {
 		 * co.getDisplayName() == null || co.getDisplayName().length() < 1)){
 		 * throw EXCEPTIONS.createOXConflictException(63,ctx.getContextId()); }
 		 */
+
+		if (FolderObject.SYSTEM_LDAP_FOLDER_ID == fid && co.containsEmail1() && (co.getEmail1() != null)) {
+			final Connection readCon;
+			try {
+				readCon = DBPool.pickup(ctx);
+			} catch (final DBPoolingException e) {
+				throw new ContactException(e);
+			}
+			try {
+				if (Contacts.getContactById(co.getObjectID(), user, group, ctx, uc, readCon).getInternalUserId() == user) {
+					/*
+					 * User tries to edit his primary email address which is
+					 * allowed by administrator only since this email address is
+					 * used in various places throughout the system. Therefore
+					 * it is denied.
+					 */
+					throw EXCEPTIONS.createOXPermissionException(73, Integer.valueOf(ctx.getContextId()), Integer
+							.valueOf(co.getObjectID()), Integer.valueOf(user));
+
+				}
+			} finally {
+				DBPool.closeReaderSilent(ctx, readCon);
+			}
+		}
+
 		validateEmailAddress(co);
 
 		boolean can_edit_only_own = false;
@@ -783,7 +805,6 @@ public final class Contacts {
 			/*
 			 * ALL RIGHTS CHECK SO FAR NOW LOAD THE OLD OBJECT AND CHECK FOR
 			 * READ ONLY OWN
-			 * 
 			 */
 
 			try {
@@ -994,7 +1015,6 @@ public final class Contacts {
 			 * containsImage = true && image = stuff -> create image
 			 * containsImage = true && image = null -> delete image
 			 * containsImage = false -> nothing to do
-			 * 
 			 */
 
 			if (co.containsImage1()) {
@@ -1014,7 +1034,8 @@ public final class Contacts {
 							throw EXCEPTIONS.create(59, ex);
 						}
 					} else {
-						checkImageSize(co.getImage1().length, Integer.parseInt(ContactConfig.getProperty(PROP_MAX_IMAGE_SIZE)));
+						checkImageSize(co.getImage1().length, Integer.parseInt(ContactConfig
+								.getProperty(PROP_MAX_IMAGE_SIZE)));
 					}
 
 					if (original.containsImage1()) {
@@ -1111,19 +1132,21 @@ public final class Contacts {
 		return co;
 	}
 
-	public static ContactObject getContactById(final int objectId, final Session session) throws OXException, ContextException, DBPoolingException{
+	public static ContactObject getContactById(final int objectId, final Session session) throws OXException,
+			ContextException, DBPoolingException {
 		final Context ctx = ContextStorage.getStorageContext(session);
 		final int[] groups = UserStorage.getStorageUser(session.getUserId(), ctx).getGroups();
 		final Connection readCon = DBPool.pickup(ctx);
-		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),ctx);
+		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+				session.getUserId(), ctx);
 		final ContactObject co = getContactById(objectId, session.getUserId(), groups, ctx, uc, readCon);
-		
+
 		try {
 			DBPool.closeReaderSilent(ctx, readCon);
 		} catch (final Exception ex) {
 			LOG.error("Unable to close READ Connection", ex);
 		}
-		
+
 		return co;
 	}
 
@@ -1235,8 +1258,7 @@ public final class Contacts {
 
 	@OXThrows(category = Category.CODE_ERROR, desc = "28", exceptionId = 28, msg = "Unable to load dristributionlist: Context %1$d Contact %2$d")
 	public static DistributionListEntryObject[] fillDistributionListArray(final int id, final int user,
-			final Context ctx, final Connection readcon)
-			throws OXException {
+			final Context ctx, final Connection readcon) throws OXException {
 
 		Statement smt = null;
 		ResultSet rs = null;
@@ -1347,7 +1369,8 @@ public final class Contacts {
 						ps.setInt(3, dleo.getEmailfield());
 						/*
 						 * if (dleo.getFolderID() == 0){ throw
-						 * EXCEPTIONS.createOXConflictException(60,dleo.getEntryID(),cid); }
+						 * EXCEPTIONS.createOXConflictException
+						 * (60,dleo.getEntryID(),cid); }
 						 */
 						ps.setInt(9, dleo.getFolderID());
 					} else {
@@ -1593,7 +1616,8 @@ public final class Contacts {
 							ps.setInt(11, dleo.getEmailfield());
 							/*
 							 * if (dleo.getFolderID() == 0){ throw
-							 * EXCEPTIONS.createOXConflictException(61,dleo.getEntryID(),cid); }
+							 * EXCEPTIONS.createOXConflictException
+							 * (61,dleo.getEntryID(),cid); }
 							 */
 							ps.setInt(4, dleo.getFolderID());
 						} else {
@@ -2467,7 +2491,7 @@ public final class Contacts {
 		ResultSet rs = null;
 
 		try {
-			//read = readcon.createStatement();
+			// read = readcon.createStatement();
 			del = writecon.createStatement();
 
 			try {
@@ -2494,7 +2518,7 @@ public final class Contacts {
 			final ContactSql cs = new ContactMySql(so);
 			cs.setFolder(fid);
 			cs.setSelect(cs.iFgetRightsSelectString());
-			
+
 			read = cs.getSqlStatement(readcon);
 			rs = ((PreparedStatement) read).executeQuery();
 
@@ -2710,7 +2734,7 @@ public final class Contacts {
 					}
 					if (contactFolder.getType() == FolderObject.PRIVATE) {
 						delete = true;
-					}				
+					}
 
 				} catch (final Exception oe) {
 					if (LOG.isWarnEnabled()) {
@@ -2758,14 +2782,15 @@ public final class Contacts {
 				if (!folder_error) {
 					cs.iFtrashAllUserContacts(delete, del, so.getContextId(), oid, uid, rs, so);
 					final ContactObject co = new ContactObject();
-					try{
+					try {
 						co.setCreatedBy(created_from);
 						co.setParentFolderID(fid);
 						co.setObjectID(oid);
 						ec.delete(co);
-					} catch (final Exception e){
-						LOG.error("Unable to trigger delete event for contact delete: id="+co.getObjectID()+" cid="+co.getContextId(), e);
-						//e.printStackTrace();
+					} catch (final Exception e) {
+						LOG.error("Unable to trigger delete event for contact delete: id=" + co.getObjectID() + " cid="
+								+ co.getContextId(), e);
+						// e.printStackTrace();
 					}
 				}
 			}
@@ -2778,9 +2803,9 @@ public final class Contacts {
 		} catch (final ContextException d) {
 			throw new ContactException(d);
 			/*
-		} catch (final EventException ox) {
-			throw EXCEPTIONS.create(57, Integer.valueOf(so.getContextId()), Integer.valueOf(uid));
-			
+			 * } catch (final EventException ox) { throw EXCEPTIONS.create(57,
+			 * Integer.valueOf(so.getContextId()), Integer.valueOf(uid));
+			 * 
 			 * } catch (final OXException ox) { throw ox;
 			 */
 		} catch (final SQLException se) {
@@ -2815,7 +2840,8 @@ public final class Contacts {
 	}
 
 	@OXThrows(category = Category.TRUNCATED, desc = "54", exceptionId = DATA_TRUNCATION, msg = "Import failed. Some data entered exceed the database field limit. Please shorten following entries: %1$s Character Limit: %2$s Sent %3$s")
-	public static OXException getTruncation(final Connection con, final DataTruncation se, final String table, final ContactObject co) {
+	public static OXException getTruncation(final Connection con, final DataTruncation se, final String table,
+			final ContactObject co) {
 
 		final String[] fields = DBUtils.parseTruncatedFields(se);
 		final StringBuilder sFields = new StringBuilder();
@@ -2826,41 +2852,44 @@ public final class Contacts {
 		}
 		sFields.setLength(sFields.length() - 2);
 		final OXException.Truncated[] truncateds = new OXException.Truncated[fields.length];
-        for (int i = 0; i < fields.length; i++) {
-            for (int j = 0; j < 650; j++) {
-                if ((mapping[j] != null) && mapping[j].getDBFieldName().equals(fields[i])) {
-                    int tmp = 0;
-                    try {
-                        tmp = DBUtils.getColumnSize(con, table, fields[i]);
-                    } catch (final SQLException e) {
-                        LOG.error(e.getMessage(), e);
-                        tmp = 0;
-                    }
-                    final int maxSize = tmp;
-                    final int attributeId = j;
-                    truncateds[i] = new OXException.Truncated() {
-                        public int getId() {
-                            return attributeId;
-                        }
-                        public int getLength() {
-                            return Charsets.getBytes(mapping[attributeId].getValueAsString(co), Charsets.UTF_8).length;
-                        }
-                        public int getMaxSize() {
-                            return maxSize;
-                        }
-                    };
-                }
-            }
-        }
-        final OXException oxx;
-        if (truncateds.length > 0) {
-            oxx = EXCEPTIONS.create(DATA_TRUNCATION, se, sFields.toString(), Integer.valueOf(truncateds[0].getMaxSize()), Integer.valueOf(truncateds[0].getLength()));
-        } else {
-            oxx = EXCEPTIONS.create(DATA_TRUNCATION, se, sFields.toString(), Integer.valueOf(-1), Integer.valueOf(-1));
-        }
-        for (final OXException.Truncated truncated : truncateds) {
-            oxx.addTruncated(truncated);
-        }
+		for (int i = 0; i < fields.length; i++) {
+			for (int j = 0; j < 650; j++) {
+				if ((mapping[j] != null) && mapping[j].getDBFieldName().equals(fields[i])) {
+					int tmp = 0;
+					try {
+						tmp = DBUtils.getColumnSize(con, table, fields[i]);
+					} catch (final SQLException e) {
+						LOG.error(e.getMessage(), e);
+						tmp = 0;
+					}
+					final int maxSize = tmp;
+					final int attributeId = j;
+					truncateds[i] = new OXException.Truncated() {
+						public int getId() {
+							return attributeId;
+						}
+
+						public int getLength() {
+							return Charsets.getBytes(mapping[attributeId].getValueAsString(co), Charsets.UTF_8).length;
+						}
+
+						public int getMaxSize() {
+							return maxSize;
+						}
+					};
+				}
+			}
+		}
+		final OXException oxx;
+		if (truncateds.length > 0) {
+			oxx = EXCEPTIONS.create(DATA_TRUNCATION, se, sFields.toString(), Integer
+					.valueOf(truncateds[0].getMaxSize()), Integer.valueOf(truncateds[0].getLength()));
+		} else {
+			oxx = EXCEPTIONS.create(DATA_TRUNCATION, se, sFields.toString(), Integer.valueOf(-1), Integer.valueOf(-1));
+		}
+		for (final OXException.Truncated truncated : truncateds) {
+			oxx.addTruncated(truncated);
+		}
 		return oxx;
 	}
 

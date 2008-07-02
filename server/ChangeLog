@@ -1,3 +1,7 @@
+* 2008-07-02 - thorben.betten@open-xchange.com
+
+ - Bugfix #11528: Denying editing of system contact's primary email address
+
 * 2008-07-02 - marcus.klein@open-xchange.com
 
  - Bugfix #11016: Renamed xml attribute for deleted groups and resources.
