@@ -344,7 +344,7 @@ public class ParticipantNotifyTest extends TestCase{
     public AppointmentObject convertFromICal(final InputStream icalFile) throws Exception{
         OXContainerConverter oxContainerConverter = null;
 
-	    oxContainerConverter = new OXContainerConverter(session, session.getContext(), TimeZone.getDefault());
+	    oxContainerConverter = new OXContainerConverter(session.getContext(), TimeZone.getDefault());
         final VersitDefinition def = ICalendar.definition;
 		final VersitDefinition.Reader versitReader = def.getReader(icalFile, "UTF-8");
 		final VersitObject rootVersitObject = def.parseBegin(versitReader);
