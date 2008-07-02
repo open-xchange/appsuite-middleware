@@ -52,7 +52,6 @@ package com.openexchange.cache.impl;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -60,7 +59,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.OXCachingException;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
@@ -84,7 +82,7 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class FolderCacheManager {
+public final class FolderCacheManager {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(FolderCacheManager.class);
@@ -93,9 +91,7 @@ public class FolderCacheManager {
 
 	private static final Lock LOCK_MOD = new ReentrantLock();
 
-	private static FolderCacheManager instance;
-
-	private static final AtomicBoolean initialized = new AtomicBoolean();
+	private static volatile FolderCacheManager instance;
 
 	private Cache folderCache;
 
@@ -109,7 +105,7 @@ public class FolderCacheManager {
 	}
 
 	public static boolean isInitialized() {
-		return initialized.get();
+		return (instance != null);
 	}
 
 	public static boolean isEnabled() {
@@ -124,11 +120,10 @@ public class FolderCacheManager {
 	 *             If initialization fails
 	 */
 	public static void initInstance() throws OXException {
-		if (!initialized.get()) {
-			synchronized (initialized) {
+		if (instance == null) {
+			synchronized (FolderCacheManager.class) {
 				if (instance == null) {
 					instance = new FolderCacheManager();
-					initialized.set(true);
 				}
 			}
 		}
@@ -150,11 +145,10 @@ public class FolderCacheManager {
 		if (!OXFolderProperties.isEnableFolderCache()) {
 			throw new FolderCacheNotEnabledException();
 		}
-		if (!initialized.get()) {
-			synchronized (initialized) {
+		if (instance == null) {
+			synchronized (FolderCacheManager.class) {
 				if (instance == null) {
 					instance = new FolderCacheManager();
-					initialized.set(true);
 				}
 			}
 		}
@@ -169,8 +163,8 @@ public class FolderCacheManager {
 		if (!OXFolderProperties.isEnableFolderCache()) {
 			return;
 		}
-		if (initialized.get()) {
-			synchronized (initialized) {
+		if (instance != null) {
+			synchronized (FolderCacheManager.class) {
 				if (instance != null) {
 					instance = null;
 					try {
@@ -179,7 +173,6 @@ public class FolderCacheManager {
 					} catch (final CacheException e) {
 						LOG.error(e.getMessage(), e);
 					}
-					initialized.set(false);
 				}
 			}
 		}
@@ -223,11 +216,11 @@ public class FolderCacheManager {
 		folderCache = null;
 	}
 
-	private static final ReadWriteLock getContextLock(final Context ctx) {
+	private static ReadWriteLock getContextLock(final Context ctx) {
 		return getContextLock(ctx.getContextId());
 	}
 
-	private static final ReadWriteLock getContextLock(final int cid) {
+	private static ReadWriteLock getContextLock(final int cid) {
 		final Integer key = Integer.valueOf(cid);
 		ReadWriteLock l = contextLocks.get(key);
 		if (l == null) {
@@ -244,7 +237,7 @@ public class FolderCacheManager {
 		return l;
 	}
 
-	private final CacheKey getCacheKey(final int cid, final int objectId) {
+	private CacheKey getCacheKey(final int cid, final int objectId) {
 		return folderCache.newCacheKey(cid, objectId);
 	}
 
@@ -472,7 +465,27 @@ public class FolderCacheManager {
 		}
 		try {
 			final CacheKey ck = getCacheKey(ctx.getContextId(), folderObj.getObjectID());
-			if (!overwrite) {
+			if (overwrite) {
+				/*
+				 * Put clone of new object into cache. If there is currently an
+				 * object associated with this key in the region it is replaced.
+				 */
+				final Lock ctxWriteLock = getContextLock(ctx).writeLock();
+				ctxWriteLock.lock();
+				try {
+					final ElementAttributes attribs = getAppliedAttributes(ck, elemAttribs);
+					if (attribs == null) {
+						/*
+						 * Put with default attributes
+						 */
+						folderCache.put(ck, (FolderObject) folderObj.clone());
+					} else {
+						folderCache.put(ck, (FolderObject) folderObj.clone(), attribs);
+					}
+				} finally {
+					ctxWriteLock.unlock();
+				}
+			} else {
 				if (folderCache.get(ck) != null) {
 					return;
 				}
@@ -501,26 +514,6 @@ public class FolderCacheManager {
 						attribs.setIsLateral(false);
 					}
 					folderCache.put(ck, (FolderObject) folderObj.clone(), attribs);
-				} finally {
-					ctxWriteLock.unlock();
-				}
-			} else {
-				/*
-				 * Put clone of new object into cache. If there is currently an
-				 * object associated with this key in the region it is replaced.
-				 */
-				final Lock ctxWriteLock = getContextLock(ctx).writeLock();
-				ctxWriteLock.lock();
-				try {
-					final ElementAttributes attribs = getAppliedAttributes(ck, elemAttribs);
-					if (attribs == null) {
-						/*
-						 * Put with default attributes
-						 */
-						folderCache.put(ck, (FolderObject) folderObj.clone());
-					} else {
-						folderCache.put(ck, (FolderObject) folderObj.clone(), attribs);
-					}
 				} finally {
 					ctxWriteLock.unlock();
 				}
@@ -595,7 +588,7 @@ public class FolderCacheManager {
 		}
 	}
 
-	private final ElementAttributes getAppliedAttributes(final CacheKey key, final ElementAttributes givenAttribs)
+	private ElementAttributes getAppliedAttributes(final CacheKey key, final ElementAttributes givenAttribs)
 			throws CacheException {
 		if (folderCache.get(key) != null) {
 			/*
@@ -610,7 +603,7 @@ public class FolderCacheManager {
 		return givenAttribs;
 	}
 
-	private final ElementAttributes getInitialAttributes() throws CacheException {
+	private ElementAttributes getInitialAttributes() throws CacheException {
 		if (initialAttribs != null) {
 			return initialAttribs;
 		}
@@ -623,7 +616,7 @@ public class FolderCacheManager {
 	 * Returns default element attributes for this cache
 	 * 
 	 * @return default element attributes for this cache or <code>null</code>
-	 * @throws OXCachingException
+	 * @throws CacheException
 	 *             If a caching error occurs
 	 */
 	public ElementAttributes getDefaultFolderObjectAttributes() throws CacheException {
