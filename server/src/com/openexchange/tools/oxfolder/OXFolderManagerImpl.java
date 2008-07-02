@@ -234,13 +234,13 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 				final EffectivePermission p = parentFolder
 						.getEffectiveUserPermission(user.getId(), userConfig, readCon);
 				if (!p.canCreateSubfolders()) {
-					if (p.getUnderlyingPermission().canCreateSubfolders()) {
-						throw new OXFolderPermissionException(FolderCode.NO_CREATE_SUBFOLDER_PERMISSION, getUserName(
-								user.getId(), ctx), getFolderName(parentFolder), Integer.valueOf(ctx.getContextId()));
-					}
-					throw new OXFolderException(FolderCode.NO_CREATE_SUBFOLDER_PERMISSION, Category.USER_CONFIGURATION,
+					final OXFolderException fe = new OXFolderException(FolderCode.NO_CREATE_SUBFOLDER_PERMISSION,
 							getUserName(user.getId(), ctx), getFolderName(parentFolder), Integer.valueOf(ctx
 									.getContextId()));
+					if (p.getUnderlyingPermission().canCreateSubfolders()) {
+						fe.setCategory(Category.USER_CONFIGURATION);
+					}
+					throw fe;
 				}
 				if (!userConfig.hasModuleAccess(folderObj.getModule())) {
 					throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, Category.USER_CONFIGURATION, getUserName(
