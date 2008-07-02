@@ -257,7 +257,7 @@ public abstract class ListCore extends UserAbstraction {
     }
 
     protected final String timezonetostring(final TimeZone zone) {
-        return zone.getDisplayName();
+        return zone.getID();
     }
 
     /**
