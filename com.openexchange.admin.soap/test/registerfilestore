@@ -25,7 +25,11 @@ sub doRequest {
     my $soap = SOAP::Lite->ns( $inSelf->{'serviceNs'} )->proxy( $inSelf->{'basisUrl'}."OXUtilService" );
     my $creds = SOAP::Data->type("Credentials")->value(\SOAP::Data->value(SOAP::Data->name("login" => "oxadminmaster"),SOAP::Data->name("password" => "secret")));
     
-    my $url    = "file:///tmp/filestore";
+    my $sdir   = "/tmp/filestore";
+    if( ! -d $sdir ) { 
+      mkdir($sdir) || die "unable to mkdir $sdir";
+    }
+    my $url    = "file://$sdir";
     my $size   = 123456;
     my $maxctx = 420;
     
@@ -40,9 +44,10 @@ sub doRequest {
     	      );
     
     if ( $som_entry->fault() ) {
-        $inSelf->fault_output($som_entry);
+      $inSelf->fault_output($som_entry);
     } else {
-        print "Fine\n";
+      my @result = $som_entry->paramsall;
+      print "filestore $result[0]{id} registered\n";
     }
 
 }
