@@ -799,7 +799,7 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
                 final VersitDefinition.Writer versitWriter = versitDefinition.getWriter(byteArrayOutputStream, "UTF-8");
                 final VersitObject versitObjectContainer = OXContainerConverter.newCalendar("2.0");
                 versitDefinition.writeProperties(versitWriter, versitObjectContainer);
-                final OXContainerConverter oxContainerConverter = new OXContainerConverter(sessObj, sessObj.getContext(), TimeZone.getDefault());
+                final OXContainerConverter oxContainerConverter = new OXContainerConverter(sessObj.getContext(), TimeZone.getDefault());
                 final VersitDefinition eventDef = versitDefinition.getChildDef("VEVENT");
 
                 final VersitObject versitObject = oxContainerConverter.convertAppointment(obj);

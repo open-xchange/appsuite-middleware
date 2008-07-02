@@ -68,6 +68,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
@@ -124,6 +125,38 @@ import com.openexchange.tools.versit.values.RecurrenceValue;
  * 
  */
 public class OXContainerConverter {
+
+	private static final String P_ORGANIZER = "ORGANIZER";
+
+	private static final String P_TLX = "TLX";
+
+	private static final String P_EMAIL = "EMAIL";
+
+	private static final String PARAM_VOICE = "voice";
+
+	private static final String P_TEL = "TEL";
+
+	private static final String PARAM_WORK = "work";
+
+	private static final String PARAM_HOME = "home";
+
+	private static final String P_TYPE = "TYPE";
+
+	private static final String P_DESCRIPTION = "DESCRIPTION";
+
+	private static final String P_RRULE = "RRULE";
+
+	private static final String P_CATEGORIES = "CATEGORIES";
+
+	private static final String P_ATTENDEE = "ATTENDEE";
+
+	private static final String P_DTSTART = "DTSTART";
+
+	private static final String P_SUMMARY = "SUMMARY";
+
+	private static final String P_COMPLETED = "COMPLETED";
+
+	private static final String P_CLASS = "CLASS";
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(OXContainerConverter.class);
@@ -475,8 +508,6 @@ public class OXContainerConverter {
 	// ------------------------ END Prepare converter class
 	// -------------------------------------
 
-	private final Session session;
-
 	private final Context ctx;
 
 	private final TimeZone timezone;
@@ -491,13 +522,11 @@ public class OXContainerConverter {
 		super();
 		this.timezone = timezone;
 		this.organizerMailAddress = organizerMailAddress;
-		session = null;
 		ctx = null;
 	}
 
 	public OXContainerConverter(final Session session) throws ConverterException {
 		super();
-		this.session = session;
 		try {
 			this.ctx = ContextStorage.getStorageContext(session.getContextId());
 		} catch (final ContextException e) {
@@ -508,14 +537,12 @@ public class OXContainerConverter {
 
 	public OXContainerConverter(final Session session, final Context ctx) {
 		super();
-		this.session = session;
 		this.ctx = ctx;
 		this.timezone = TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
 	}
 
-	public OXContainerConverter(final Session session, final Context ctx, final TimeZone tz) {
+	public OXContainerConverter(final Context ctx, final TimeZone tz) {
 		super();
-		this.session = session;
 		this.ctx = ctx;
 		this.timezone = tz;
 	}
@@ -546,9 +573,9 @@ public class OXContainerConverter {
 		try {
 			final Task taskContainer = new Task();
 			// CLASS
-			PrivacyProperty(taskContainer, object, "CLASS", SET_BOOLEAN_METHODS.get(Integer.valueOf(Task.PRIVATE_FLAG)));
+			PrivacyProperty(taskContainer, object, P_CLASS, SET_BOOLEAN_METHODS.get(Integer.valueOf(Task.PRIVATE_FLAG)));
 			// COMPLETED
-			DateTimeProperty(taskContainer, object, "COMPLETED", SET_DATE_METHODS.get(Integer
+			DateTimeProperty(taskContainer, object, P_COMPLETED, SET_DATE_METHODS.get(Integer
 					.valueOf(Task.DATE_COMPLETED)));
 			// GEO is ignored
 			// LAST-MODIFIED is ignored
@@ -575,20 +602,20 @@ public class OXContainerConverter {
 			property = object.getProperty("STATUS");
 			if (property != null) {
 				final String status = ((String) property.getValue()).toUpperCase();
-				if (status.equals("NEEDS-ACTION")) {
+				if ("NEEDS-ACTION".equals(status)) {
 					taskContainer.setStatus(Task.NOT_STARTED);
-				} else if (status.equals("IN-PROCESS")) {
+				} else if ("IN-PROCESS".equals(status)) {
 					taskContainer.setStatus(Task.IN_PROGRESS);
-				} else if (status.equals("COMPLETED")) {
+				} else if (P_COMPLETED.equals(status)) {
 					taskContainer.setStatus(Task.DONE);
-				} else if (status.equals("CANCELLED")) {
+				} else if ("CANCELLED".equals(status)) {
 					taskContainer.setStatus(Task.DEFERRED);
 				} else {
 					throw new ConverterException("Unknown status: \"" + status + "\"");
 				}
 			}
 			// SUMMARY
-			StringProperty(taskContainer, object, "SUMMARY", SET_STRING_METHODS.get(Integer.valueOf(Task.TITLE)));
+			StringProperty(taskContainer, object, P_SUMMARY, SET_STRING_METHODS.get(Integer.valueOf(Task.TITLE)));
 			// TODO UID
 			// property = object.getProperty("UID");
 			// if (property != null) {
@@ -600,7 +627,7 @@ public class OXContainerConverter {
 			// URL is ignored
 			// DUE and DURATION
 			if (!DateTimeProperty(taskContainer, object, "DUE", SET_DATE_METHODS.get(Integer.valueOf(Task.END_DATE)))) {
-				DurationProperty(taskContainer, object, "DURATION", "DTSTART", SET_DATE_METHODS.get(Integer
+				DurationProperty(taskContainer, object, "DURATION", P_DTSTART, SET_DATE_METHODS.get(Integer
 						.valueOf(Task.END_DATE)));
 			}
 			// Multiple properties
@@ -610,11 +637,11 @@ public class OXContainerConverter {
 				property = object.getProperty(i);
 				// ATTACH is ignored
 				// ATTENDEE
-				if (property.name.equals("ATTENDEE")) {
+				if (P_ATTENDEE.equals(property.name)) {
 					AttendeeProperty(taskContainer, property);
 				}
 				// CATEGORIES
-				else if (property.name.equals("CATEGORIES")) {
+				else if (P_CATEGORIES.equals(property.name)) {
 					final ArrayList<?> al = ((ArrayList<?>) property.getValue());
 					final int size = al.size();
 					final Iterator<?> j = al.iterator();
@@ -632,8 +659,8 @@ public class OXContainerConverter {
 				// RESOURCES is ignored
 				// RDATE is ignored
 				// RRULE
-				else if (property.name.equals("RRULE")) {
-					RecurrenceProperty(taskContainer, property, object.getProperty("DTSTART"));
+				else if (P_RRULE.equals(property.name)) {
+					RecurrenceProperty(taskContainer, property, object.getProperty(P_DTSTART));
 				}
 			}
 			if (cats.length() != 0) {
@@ -641,7 +668,7 @@ public class OXContainerConverter {
 				taskContainer.setCategories(cats.toString());
 			}
 			// DESCRIPTION (fix: 7718)
-			StringProperty(taskContainer, object, "DESCRIPTION", SET_STRING_METHODS.get(Integer.valueOf(Task.NOTE)));
+			StringProperty(taskContainer, object, P_DESCRIPTION, SET_STRING_METHODS.get(Integer.valueOf(Task.NOTE)));
 			// VALARM
 			AddAlarms(taskContainer, object);
 			return taskContainer;
@@ -654,13 +681,13 @@ public class OXContainerConverter {
 	public CalendarDataObject convertAppointment(final VersitObject object) throws ConverterException {
 		final CalendarDataObject appContainer = new CalendarDataObject();
 		// CLASS
-		PrivacyProperty(appContainer, object, "CLASS", SET_BOOLEAN_METHODS.get(Integer.valueOf(Task.PRIVATE_FLAG)));
+		PrivacyProperty(appContainer, object, P_CLASS, SET_BOOLEAN_METHODS.get(Integer.valueOf(Task.PRIVATE_FLAG)));
 		// CREATED is ignored
 		// DESCRIPTION
-		StringProperty(appContainer, object, "DESCRIPTION", SET_STRING_METHODS.get(Integer
+		StringProperty(appContainer, object, P_DESCRIPTION, SET_STRING_METHODS.get(Integer
 				.valueOf(AppointmentObject.NOTE)));
 		// DTSTART
-		Property property = object.getProperty("DTSTART");
+		Property property = object.getProperty(P_DTSTART);
 		if (property != null) {
 			final DateTimeValue date = (DateTimeValue) property.getValue();
 			if (date.isFloating) {
@@ -682,15 +709,15 @@ public class OXContainerConverter {
 		// TODO SEQUENCE
 		// STATUS is ignored
 		// SUMMARY
-		StringProperty(appContainer, object, "SUMMARY", SET_STRING_METHODS
+		StringProperty(appContainer, object, P_SUMMARY, SET_STRING_METHODS
 				.get(Integer.valueOf(AppointmentObject.TITLE)));
 		// TRANSP
 		property = object.getProperty("TRANSP");
 		if (property != null) {
 			final String transp = ((String) property.getValue()).toUpperCase();
-			if (transp.equals("OPAQUE")) {
+			if ("OPAQUE".equals(transp)) {
 				appContainer.setShownAs(AppointmentObject.RESERVED);
-			} else if (transp.equals("TRANSPARENT")) {
+			} else if ("TRANSPARENT".equals(transp)) {
 				appContainer.setShownAs(AppointmentObject.FREE);
 			} else {
 				throw new ConverterException("Invalid transparency");
@@ -709,7 +736,7 @@ public class OXContainerConverter {
 		// DTEND and DURATION
 		if (!DateTimeProperty(appContainer, object, "DTEND", SET_DATE_METHODS.get(Integer
 				.valueOf(AppointmentObject.END_DATE)))
-				&& !DurationProperty(appContainer, object, "DURATION", "DTSTART", SET_DATE_METHODS.get(Integer
+				&& !DurationProperty(appContainer, object, "DURATION", P_DTSTART, SET_DATE_METHODS.get(Integer
 						.valueOf(AppointmentObject.END_DATE)))) {
 			DateTimeProperty(appContainer, object, "DSTART", SET_DATE_METHODS.get(Integer
 					.valueOf(AppointmentObject.END_DATE)));
@@ -722,11 +749,11 @@ public class OXContainerConverter {
 			property = object.getProperty(i);
 			// ATTACH is ignored
 			// ATTENDEE
-			if (property.name.equals("ATTENDEE")) {
+			if (P_ATTENDEE.equals(property.name)) {
 				AttendeeProperty(appContainer, property);
 			}
 			// CATEGORIES
-			else if (property.name.equals("CATEGORIES")) {
+			else if (P_CATEGORIES.equals(property.name)) {
 				final ArrayList<?> al = ((ArrayList<?>) property.getValue());
 				final int size = al.size();
 				final Iterator<?> j = al.iterator();
@@ -738,14 +765,14 @@ public class OXContainerConverter {
 			// COMMENT is ignored
 			// CONTACT is ignored
 			// EXDATE
-			else if (property.name.equals("EXDATE")) {
+			else if ("EXDATE".equals(property.name)) {
 				exdates.addAll((ArrayList) property.getValue());
 			}
 			// EXRULE is ignored
 			// REQUEST-STATUS is ignored
 			// TODO RELATED-TO
 			// RESOURCES
-			else if (property.name.equals("RESOURCES")) {
+			else if ("RESOURCES".equals(property.name)) {
 				final ArrayList<?> al = ((ArrayList<?>) property.getValue());
 				final int size = al.size();
 				final Iterator<?> j = al.iterator();
@@ -757,15 +784,15 @@ public class OXContainerConverter {
 			}
 			// RDATE is ignored
 			// RRULE
-			else if (property.name.equals("RRULE")) {
-				RecurrenceProperty(appContainer, property, object.getProperty("DTSTART"));
+			else if (P_RRULE.equals(property.name)) {
+				RecurrenceProperty(appContainer, property, object.getProperty(P_DTSTART));
 			}
 		}
 		if (cats.length() != 0) {
 			cats.deleteCharAt(cats.length() - 1);
 			appContainer.setCategories(cats.toString());
 		}
-		if (exdates.size() != 0) {
+		if (!exdates.isEmpty()) {
 			final Date[] dates = new Date[exdates.size()];
 			for (int i = 0; i < dates.length; i++) {
 				dates[i] = ((DateTimeValue) exdates.get(i)).calendar.getTime();
@@ -942,15 +969,15 @@ public class OXContainerConverter {
 		for (int i = 0; i < count; i++) {
 			property = object.getProperty(i);
 			// ADR
-			if (property.name.equals("ADR")) {
+			if ("ADR".equals(property.name)) {
 				boolean isHome = false, isWork = true;
-				final Parameter type = property.getParameter("TYPE");
+				final Parameter type = property.getParameter(P_TYPE);
 				if (type != null) {
 					isWork = false;
 					for (int j = 0; j < type.getValueCount(); j++) {
 						final String value = type.getValue(j).getText();
-						isHome |= value.equalsIgnoreCase("home");
-						isWork |= value.equalsIgnoreCase("work");
+						isHome |= PARAM_HOME.equalsIgnoreCase(value);
+						isWork |= PARAM_WORK.equalsIgnoreCase(value);
 					}
 				}
 				final ArrayList<?> A = (ArrayList<?>) property.getValue();
@@ -991,18 +1018,18 @@ public class OXContainerConverter {
 			}
 			// LABEL is ignored
 			// TEL
-			else if (property.name.equals("TEL")) {
+			else if (P_TEL.equals(property.name)) {
 				int idx = WORK;
 				boolean isVoice = false;
 				boolean isFax = false;
-				final Parameter type = property.getParameter("TYPE");
+				final Parameter type = property.getParameter(P_TYPE);
 				if (type != null) {
 					for (int j = 0; j < type.getValueCount(); j++) {
 						final String value = type.getValue(j).getText();
 						if (idx == WORK) {
-							if (value.equalsIgnoreCase("work")) {
+							if (value.equalsIgnoreCase(PARAM_WORK)) {
 								idx = WORK;
-							} else if (value.equalsIgnoreCase("home")) {
+							} else if (value.equalsIgnoreCase(PARAM_HOME)) {
 								idx = HOME;
 							} else if (value.equalsIgnoreCase("car")) {
 								idx = CAR;
@@ -1014,7 +1041,7 @@ public class OXContainerConverter {
 								idx = PAGER;
 							}
 						}
-						if (value.equalsIgnoreCase("voice")) {
+						if (value.equalsIgnoreCase(PARAM_VOICE)) {
 							isVoice = true;
 						} else if (value.equalsIgnoreCase("fax")) {
 							isFax = true;
@@ -1033,7 +1060,7 @@ public class OXContainerConverter {
 				}
 			}
 			// EMAIL
-			else if (property.name.equals("EMAIL")) {
+			else if (P_EMAIL.equals(property.name)) {
 				final String value = property.getValue().toString();
 				// fix for: 7249
 				boolean isProperEmailAddress = value != null && value.length() > 0;
@@ -1050,17 +1077,15 @@ public class OXContainerConverter {
 					ComplexProperty(contactContainer, emails, emailIndex, value);
 				} else {
 					// fix for: 7719
-					final Parameter type = property.getParameter("TYPE");
-					if (type != null && type.getValue(0) != null && type.getValue(0).getText() != null) {
-						if ("TLX".equals(type.getValue(0).getText())) {
-							contactContainer.setTelephoneTelex(property.getValue().toString());
-						}
+					final Parameter type = property.getParameter(P_TYPE);
+					if (type != null && type.getValue(0) != null && type.getValue(0).getText() != null
+							&& P_TLX.equals(type.getValue(0).getText())) {
+						contactContainer.setTelephoneTelex(property.getValue().toString());
 					}
-					// fix:end
 				}
 			}
 			// CATEGORIES
-			else if (property.name.equals("CATEGORIES")) {
+			else if (P_CATEGORIES.equals(property.name)) {
 				final Object value = property.getValue();
 				if (value != null) {
 					if (value instanceof ArrayList) {
@@ -1073,7 +1098,7 @@ public class OXContainerConverter {
 				}
 			}
 			// CLASS
-			else if (property.name.equals("CLASS")) {
+			else if (P_CLASS.equals(property.name)) {
 				if ("CONFIDENTIAL".equalsIgnoreCase(property.getValue().toString())
 						|| "PRIVATE".equalsIgnoreCase(property.getValue().toString())) {
 					contactContainer.setPrivateFlag(true);
@@ -1427,7 +1452,7 @@ public class OXContainerConverter {
 						// fix:end
 					} else {
 						final DateTimeValue trigger = (DateTimeValue) property.getValue();
-						property = object.getProperty("DTSTART");
+						property = object.getProperty(P_DTSTART);
 						if (property == null) {
 							throw new ConverterException("VALARM without DTSTART not supported");
 						}
@@ -1451,8 +1476,8 @@ public class OXContainerConverter {
 	private static void ListValue(final Object containerObj, final Method setMethod, final Object list,
 			final String separator) throws ConverterException {
 		try {
-			final ArrayList<?> al = (ArrayList<?>) list;
-			if (al == null || al.size() == 0) {
+			final List<?> al = (ArrayList<?>) list;
+			if (al == null || al.isEmpty()) {
 				return;
 			}
 			final StringBuilder sb = new StringBuilder();
@@ -1491,29 +1516,29 @@ public class OXContainerConverter {
 	public VersitObject convertTask(final Task task) throws ConverterException {
 		final VersitObject object = new VersitObject("VTODO");
 		// TODO CLASS
-		addProperty(object, "CLASS", "PUBLIC");
+		addProperty(object, P_CLASS, "PUBLIC");
 		// COMPLETED
-		addDateTime(object, "COMPLETED", task.getDateCompleted());
+		addDateTime(object, P_COMPLETED, task.getDateCompleted());
 		// CREATED
 		addDateTime(object, "CREATED", task.getCreationDate());
 		// DESCRIPTION
-		addProperty(object, "DESCRIPTION", task.getNote());
+		addProperty(object, P_DESCRIPTION, task.getNote());
 		// DTSTAMP
 		addDateTime(object, "DTSTAMP", new Date());
 		// DTSTART
-		addWeirdTaskDate(object, "DTSTART", task.getStartDate());
+		addWeirdTaskDate(object, P_DTSTART, task.getStartDate());
 		// GEO is ignored
 		// LAST-MODIFIED
 		addDateTime(object, "LAST-MODIFIED", task.getLastModified());
 		// LOCATION is ignored
 		// ORGANIZER
 		if (organizerMailAddress != null) {
-			addAddress(object, "ORGANIZER", organizerMailAddress);
+			addAddress(object, P_ORGANIZER, organizerMailAddress);
 		} else {
-			addAddress(object, "ORGANIZER", task.getCreatedBy());
+			addAddress(object, P_ORGANIZER, task.getCreatedBy());
 		}
 		// PERCENT-COMPLETE
-		addProperty(object, "PERCENT-COMPLETE", task.getPercentComplete());
+		addProperty(object, "PERCENT-COMPLETE", Integer.valueOf(task.getPercentComplete()));
 		// PRIORITY
 		final int[] priorities = { 9, 5, 1 };
 		final int priority = task.getPriority();
@@ -1527,7 +1552,7 @@ public class OXContainerConverter {
 		// TODO RECURRENCE-ID
 		// TODO SEQUENCE
 		// STATUS
-		final String[] statuses = { "NEEDS-ACTION", "IN-PROCESS", "COMPLETED", "NEEDS-ACTION", "CANCELLED" };
+		final String[] statuses = { "NEEDS-ACTION", "IN-PROCESS", P_COMPLETED, "NEEDS-ACTION", "CANCELLED" };
 		final int status = task.getStatus();
 		/*
 		 * TODO REMOVED DUE REMOVAL OF com.openexchange.groupware.tasks
@@ -1538,7 +1563,7 @@ public class OXContainerConverter {
 		 * else throw new ConverterException("Invlaid status");
 		 */
 		// SUMMARY
-		addProperty(object, "SUMMARY", task.getTitle());
+		addProperty(object, P_SUMMARY, task.getTitle());
 		// UID
 		addProperty(object, "UID", task.getObjectID() + atdomain);
 		// URL is ignored
@@ -1553,7 +1578,7 @@ public class OXContainerConverter {
 			for (int k = 0; k < length; k++) {
 				final Participant p = (Participant) i.next();
 				if (p.getType() == Participant.USER) {
-					addAddress(object, "ATTENDEE", p.getEmailAddress());
+					addAddress(object, P_ATTENDEE, p.getEmailAddress());
 				}
 			}
 		}
@@ -1565,7 +1590,7 @@ public class OXContainerConverter {
 				categories.add(tokenizer.nextToken());
 			}
 		}
-		addProperty(object, "CATEGORIES", categories);
+		addProperty(object, P_CATEGORIES, categories);
 		// COMMENT is ignored
 		// CONTACT is ignored
 		// EXDATE is ignored
@@ -1575,7 +1600,7 @@ public class OXContainerConverter {
 		// RESOURCES is ignored
 		// RDATE is ignored
 		// RRULE
-		addRecurrence(object, "RRULE", task);
+		addRecurrence(object, P_RRULE, task);
 		// TODO VALARM
 		return object;
 	}
@@ -1584,16 +1609,16 @@ public class OXContainerConverter {
 		modifyRecurring(app);
 		final VersitObject object = new VersitObject("VEVENT");
 		// TODO CLASS
-		addProperty(object, "CLASS", "PUBLIC");
+		addProperty(object, P_CLASS, "PUBLIC");
 		// CREATED
 		addDateTime(object, "CREATED", app.getCreationDate());
 		// DESCRIPTION
-		addProperty(object, "DESCRIPTION", app.getNote());
+		addProperty(object, P_DESCRIPTION, app.getNote());
 		// DTSTART
 		if (app.getFullTime()) {
-			addWeirdTaskDate(object, "DTSTART", app.getStartDate());
+			addWeirdTaskDate(object, P_DTSTART, app.getStartDate());
 		} else {
-			addDateTime(object, "DTSTART", app.getStartDate());
+			addDateTime(object, P_DTSTART, app.getStartDate());
 		}
 		// GEO is ignored
 		// LAST-MODIFIED
@@ -1601,10 +1626,10 @@ public class OXContainerConverter {
 		// LOCATION
 		addProperty(object, "LOCATION", app.getLocation());
 		// ORGANIZER
-		if (organizerMailAddress != null) {
-			addAddress(object, "ORGANIZER", organizerMailAddress);
+		if (organizerMailAddress == null) {
+			addAddress(object, P_ORGANIZER, app.getCreatedBy());
 		} else {
-			addAddress(object, "ORGANIZER", app.getCreatedBy());
+			addAddress(object, P_ORGANIZER, organizerMailAddress);
 		}
 		// PRIORITY is ignored
 		// DTSTAMP
@@ -1612,7 +1637,7 @@ public class OXContainerConverter {
 		// TODO SEQUENCE
 		// STATUS is ignored
 		// SUMMARY
-		addProperty(object, "SUMMARY", app.getTitle());
+		addProperty(object, P_SUMMARY, app.getTitle());
 		// TRANSP
 		addProperty(object, "TRANSP", app.getShownAs() == AppointmentObject.FREE ? "TRANSPARENT" : "OPAQUE");
 		// UID
@@ -1635,14 +1660,14 @@ public class OXContainerConverter {
 		// ATTACH
 		// TODO addAttachments(object, app, OXAttachment.APPOINTMENT);
 		// ATTENDEE
-		Iterator i = null;
+		Iterator<?> i = null;
 		if (app.containsParticipants()) {
 			final int length = app.getParticipants().length;
 			i = new ArrayIterator(app.getParticipants());
 			for (int k = 0; k < length; k++) {
 				final Participant p = (Participant) i.next();
 				if (p.getType() == Participant.USER) {
-					addAddress(object, "ATTENDEE", p.getEmailAddress());
+					addAddress(object, P_ATTENDEE, p.getEmailAddress());
 				}
 			}
 		}
@@ -1654,7 +1679,7 @@ public class OXContainerConverter {
 			while (tokenizer.hasMoreTokens()) {
 				categories.add(tokenizer.nextToken());
 			}
-			addProperty(object, "CATEGORIES", categories);
+			addProperty(object, P_CATEGORIES, categories);
 		}
 		// COMMENT is ignored
 		// CONTACT is ignored
@@ -1679,13 +1704,13 @@ public class OXContainerConverter {
 					resources.add(String.valueOf(p.getIdentifier()));
 				}
 			}
-			if (resources.size() > 0) {
+			if (!resources.isEmpty()) {
 				addProperty(object, "RESOURCES", resources);
 			}
 		}
 		// RDATE is ignored
 		// RRULE
-		addRecurrence(object, "RRULE", app);
+		addRecurrence(object, P_RRULE, app);
 		// TODO VALARM
 		return object;
 	}
@@ -1744,7 +1769,7 @@ public class OXContainerConverter {
 				addProperty(object, "PHOTO", "VALUE", new String[] { "URI" }, new URI(s));
 			} catch (final URISyntaxException e) {
 				try {
-					final Parameter type = new Parameter("TYPE");
+					final Parameter type = new Parameter(P_TYPE);
 					type.addValue(new ParameterValue("JPEG"));
 					addProperty(object, "PHOTO", "ENCODING", new String[] { "B" },
 							(new BASE64Encoding()).decode(s).getBytes(CHARSET_ISO_8859_1)).addParameter(type);
@@ -1758,29 +1783,29 @@ public class OXContainerConverter {
 		// BDAY
 		addDate(object, "BDAY", contact.getBirthday(), false);
 		// ADR
-		addADR(object, contact, new String[] { "work" }, ContactObject.STREET_BUSINESS, ContactObject.CITY_BUSINESS,
+		addADR(object, contact, new String[] { PARAM_WORK }, ContactObject.STREET_BUSINESS, ContactObject.CITY_BUSINESS,
 				ContactObject.STATE_BUSINESS, ContactObject.POSTAL_CODE_BUSINESS, ContactObject.COUNTRY_BUSINESS);
 		// LABEL is ignored
 		// TEL
-		addProperty(object, "TEL", "TYPE", new String[] { "work", "voice" }, contact.getTelephoneBusiness1());
-		addProperty(object, "TEL", "TYPE", new String[] { "work", "voice" }, contact.getTelephoneBusiness2());
-		addProperty(object, "TEL", "TYPE", new String[] { "work", "fax" }, contact.getFaxBusiness());
-		addProperty(object, "TEL", "TYPE", new String[] { "car", "voice" }, contact.getTelephoneCar());
-		addProperty(object, "TEL", "TYPE", new String[] { "home", "voice" }, contact.getTelephoneHome1());
-		addProperty(object, "TEL", "TYPE", new String[] { "home", "voice" }, contact.getTelephoneHome2());
-		addProperty(object, "TEL", "TYPE", new String[] { "home", "fax" }, contact.getFaxHome());
-		addProperty(object, "TEL", "TYPE", new String[] { "cell", "voice" }, contact.getCellularTelephone1());
-		addProperty(object, "TEL", "TYPE", new String[] { "cell", "voice" }, contact.getCellularTelephone2());
+		addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_WORK, PARAM_VOICE }, contact.getTelephoneBusiness1());
+		addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_WORK, PARAM_VOICE }, contact.getTelephoneBusiness2());
+		addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_WORK, "fax" }, contact.getFaxBusiness());
+		addProperty(object, P_TEL, P_TYPE, new String[] { "car", PARAM_VOICE }, contact.getTelephoneCar());
+		addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_HOME, PARAM_VOICE }, contact.getTelephoneHome1());
+		addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_HOME, PARAM_VOICE }, contact.getTelephoneHome2());
+		addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_HOME, "fax" }, contact.getFaxHome());
+		addProperty(object, P_TEL, P_TYPE, new String[] { "cell", PARAM_VOICE }, contact.getCellularTelephone1());
+		addProperty(object, P_TEL, P_TYPE, new String[] { "cell", PARAM_VOICE }, contact.getCellularTelephone2());
 		// addProperty(object, "TEL", "TYPE", null, contact
 		// .get(OXContact.PHONE_OTHER));
 		// addProperty(object, "TEL", "TYPE", new String[] { "fax" }, contact
 		// .get(OXContact.FAX_OTHER));
-		addProperty(object, "TEL", "TYPE", new String[] { "isdn" }, contact.getTelephoneISDN());
-		addProperty(object, "TEL", "TYPE", new String[] { "pager" }, contact.getTelephonePager());
+		addProperty(object, P_TEL, P_TYPE, new String[] { "isdn" }, contact.getTelephoneISDN());
+		addProperty(object, P_TEL, P_TYPE, new String[] { "pager" }, contact.getTelephonePager());
 		// EMAIL
-		addProperty(object, "EMAIL", contact.getEmail1());
-		addProperty(object, "EMAIL", contact.getEmail2());
-		addProperty(object, "EMAIL", contact.getEmail3());
+		addProperty(object, P_EMAIL, contact.getEmail1());
+		addProperty(object, P_EMAIL, contact.getEmail2());
+		addProperty(object, P_EMAIL, contact.getEmail3());
 		// MAILER is ignored
 		// TZ is ignored
 		// GEO is ignored
@@ -1813,7 +1838,7 @@ public class OXContainerConverter {
 		// CATEGORIES
 		s = contact.getCategories();
 		if (s != null) {
-			addProperty(object, "CATEGORIES", getList(s, ','));
+			addProperty(object, P_CATEGORIES, getList(s, ','));
 		}
 		// NOTE
 		addProperty(object, "NOTE", contact.getNote());
@@ -1842,7 +1867,7 @@ public class OXContainerConverter {
 			adr.add(makeList(getState(state, contactContainer)));
 			adr.add(makeList(getPostalCode(postalCode, contactContainer)));
 			adr.add(makeList(getCountry(country, contactContainer)));
-			addProperty(object, "ADR", "TYPE", type, adr);
+			addProperty(object, "ADR", P_TYPE, type, adr);
 		} catch (final Exception e) {
 			throw new ConverterException(e);
 		}
