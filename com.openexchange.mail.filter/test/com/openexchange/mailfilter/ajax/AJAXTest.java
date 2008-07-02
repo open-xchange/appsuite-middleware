@@ -45,6 +45,14 @@ public abstract class AJAXTest {
     }
     
     @Test
+    public void MailfilternewVacationPlainTest() throws MalformedURLException, IOException, SAXException, JSONException {
+        final WebConversation login = login();
+        final String test = "{\"active\":true,\"text\":\"if true \\r\\n{\\r\\n    vacation :days 13 :addresses [ \\\"root@localhost\\\" , \\\"billg@microsoft.com\\\" ] :mime :subject \\\"Betreff\\\" \\\"Text\\r\\nText\\\" ;\\r\\n}\\r\\n\",\"errormsg\":\"\",\"flags\":[\"vacation\"],\"id\":3,\"rulename\":\"Vacation Notice\"}";
+        final String newid = mailfilternew(login, getHostname(), getUsername(), test, null);
+        System.out.println("Rule created with newid: " + newid);
+    }
+    
+    @Test
     public void MailfilternewVacationTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebConversation login = login();
         final String test = "{\"rulename\":\"Vacation Notice\",\"active\":true,\"flags\":[\"vacation\"],\"test\":{\"id\":\"true\"},\"actioncmds\":[{\"id\":\"vacation\",\"days\":13,\"addresses\":[\"root@localhost\",\"billg@microsoft.com\"],\"subject\":\"Betreff\",\"text\":\"Text\\u000aText\"}]}";

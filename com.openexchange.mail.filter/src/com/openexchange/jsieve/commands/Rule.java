@@ -157,10 +157,12 @@ public class Rule implements Comparable<Rule> {
         if (null == this.commands) {
             return null;
         }
-        final Command command = this.commands.get(0);
-        if (command instanceof RequireCommand) {
-            final RequireCommand requirecmd = (RequireCommand) command;
-            return requirecmd;
+        if (!this.commands.isEmpty()) {
+            final Command command = this.commands.get(0);
+            if (command instanceof RequireCommand) {
+                final RequireCommand requirecmd = (RequireCommand) command;
+                return requirecmd;
+            }
         }
         return null;
     }

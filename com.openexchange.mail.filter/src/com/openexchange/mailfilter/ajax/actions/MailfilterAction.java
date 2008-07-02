@@ -72,6 +72,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.jsieve.SieveHandler;
 import com.openexchange.jsieve.SieveTextFilter;
 import com.openexchange.jsieve.SieveHandler.Capabilities;
+import com.openexchange.jsieve.SieveTextFilter.ClientRulesAndRequire;
 import com.openexchange.jsieve.SieveTextFilter.RuleListAndNextUid;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.Rule;
@@ -195,13 +196,14 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final String activeScript = sieveHandler.getActiveScript();
             final byte[] script = sieveHandler.getScript(activeScript);
             final RuleListAndNextUid rulesandid = sieveTextFilter.readScriptFromString(new String(script, "UTF-8"));
+            final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rulesandid.getRulelist(), null, rulesandid.isError());
             final String body = request.getBody();
             final JSONObject json = new JSONObject(body);
             
-            final ArrayList<Rule> rules = rulesandid.getRulelist();
+            final ArrayList<Rule> rules = clientrulesandrequire.getRules();
             final RuleAndPosition deletedrule = getRightRuleForUniqueId(rules, getUniqueId(json), getUserPrefix(credentials));
             rules.remove(deletedrule.getPosition());
-            final String writeback = sieveTextFilter.writeback(rules);
+            final String writeback = sieveTextFilter.writeback(clientrulesandrequire);
             writeScript(sieveHandler, activeScript, writeback);
         } catch (final UnsupportedEncodingException e) {
             throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, getUserPrefix(credentials) + e.getMessage());
@@ -246,7 +248,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 log.debug("The following sieve script will be parsed:\n" + new String(script, "UTF-8"));
             }
             final RuleListAndNextUid readScriptFromString = sieveTextFilter.readScriptFromString(new String(script, "UTF-8"));
-            final ArrayList<Rule> clientrules = getClientRules(readScriptFromString.getRulelist(), parameters.getParameter(Parameter.FLAG));
+            final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(readScriptFromString.getRulelist(), parameters.getParameter(Parameter.FLAG), readScriptFromString.isError());
+            final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
             return CONVERTER.write(clientrules.toArray(new Rule[clientrules.size()]));
         } catch (final UnsupportedEncodingException e) {
             throw new OXMailfilterException(Code.UNSUPPORTED_ENCODING, e, getUserPrefix(credentials) + e.getMessage());
@@ -289,13 +292,14 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final byte[] script = sieveHandler.getScript(activeScript);
             final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(new String(script, "UTF-8"));
             
-            final ArrayList<Rule> clientrules = getClientRules(rules.getRulelist(), null);
+            final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
             
             final String body = request.getBody();
             final JSONObject json = new JSONObject(body);
             final Rule newrule = CONVERTER.parse(json);
             // Now find the right position inside the array
             int position = newrule.getPosition();
+            final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
             if (position >= clientrules.size()) {
                 throw new OXMailfilterException(Code.POSITION_TOO_BIG);
             }
@@ -307,7 +311,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 clientrules.add(newrule);
                 position = clientrules.size() - 1;
             }
-            final String writeback = sieveTextFilter.writeback(clientrules);
+            final String writeback = sieveTextFilter.writeback(clientrulesandrequire);
             if (log.isDebugEnabled()) {
                 log.debug("The following sieve script will be written:\n" + writeback);
             }
@@ -342,7 +346,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     }
 
     @Override
-	protected void actionReorder(final MailfilterRequest request) throws AbstractOXException {
+    protected void actionReorder(final MailfilterRequest request) throws AbstractOXException {
         final Credentials credentials = request.getCredentials();
         final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
         final SieveHandler sieveHandler = connectRight(credentials);
@@ -352,11 +356,12 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final byte[] script = sieveHandler.getScript(activeScript);
             final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(new String(script, "UTF-8"));
             
-            final ArrayList<Rule> clientrules = getClientRules(rules.getRulelist(), null);
+            final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
             
             final String body = request.getBody();
             final JSONArray json = new JSONArray(body);
             
+            final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
             for (int i = 0; i < json.length(); i++) {
                 final int uniqueid = json.getInt(i);
                 final RuleAndPosition rightRule = getRightRuleForUniqueId(clientrules, uniqueid, getUserPrefix(credentials));
@@ -365,7 +370,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 clientrules.add(i, rightRule.getRule());
             }
             
-            final String writeback = sieveTextFilter.writeback(clientrules);
+            final String writeback = sieveTextFilter.writeback(clientrulesandrequire);
             writeScript(sieveHandler, activeScript, writeback);
 
         } catch (final UnsupportedEncodingException e) {
@@ -408,12 +413,13 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final byte[] script = sieveHandler.getScript(activeScript);
             final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(new String(script, "UTF-8"));
             
-            final ArrayList<Rule> clientrules = getClientRules(rules.getRulelist(), null);
+            final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
             
             final String body = request.getBody();
             final JSONObject json = new JSONObject(body);
             final Integer uniqueid = getUniqueId(json);
             
+            final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
             if (null != uniqueid) {
                 // First get the right rule which should be modified...
                 final RuleAndPosition rightRule = getRightRuleForUniqueId(clientrules, uniqueid, getUserPrefix(credentials));
@@ -422,7 +428,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 throw new OXMailfilterException(Code.ID_MISSING);
             }
             
-            final String writeback = sieveTextFilter.writeback(clientrules);
+            final String writeback = sieveTextFilter.writeback(clientrulesandrequire);
             if (log.isDebugEnabled()) {
                 log.debug("The following sieve script will be written:\n" + writeback);
             }
@@ -604,32 +610,6 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             }
         }
         return actionarray;
-    }
-
-    /**
-     * Here we have to strip off the require line because this line should not be edited by the client
-     * 
-     * @param rules
-     * @return
-     */
-    private ArrayList<Rule> getClientRules(final ArrayList<Rule> rules, final String flag) {
-        final ArrayList<Rule> retval = new ArrayList<Rule>();
-        // The flag is checked here because if no flag is given we can omit some checks which increases performance
-        if (null != flag) {
-            for (final Rule rule : rules) {
-                final RuleComment ruleComment = rule.getRuleComment();
-                if (null == rule.getRequireCommand() && null != ruleComment && null != ruleComment.getFlags() && ruleComment.getFlags().contains(flag)) {
-                    retval.add(rule);
-                }
-            }
-        } else {
-            for (final Rule rule : rules) {
-                if (null == rule.getRequireCommand()) {
-                    retval.add(rule);
-                }
-            }
-        }
-        return retval;
     }
 
     private RuleAndPosition getRightRuleForUniqueId(final ArrayList<Rule> clientrules, final Integer uniqueid, final String prefix) throws OXMailfilterException {

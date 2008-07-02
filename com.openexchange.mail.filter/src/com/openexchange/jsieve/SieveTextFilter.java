@@ -88,19 +88,53 @@ import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException.Code;
  */
 public final class SieveTextFilter {
 
+    /**
+     * This class hold the rules without the require command and the list of the old required extensions
+     * 
+     * @author d7
+     *
+     */
+    public class ClientRulesAndRequire {
+        private final ArrayList<Rule> rules;
+        
+        private final HashSet<String> require;
+
+        /**
+         * @param rules
+         * @param require
+         */
+        public ClientRulesAndRequire(ArrayList<Rule> rules, HashSet<String> require) {
+            this.rules = rules;
+            this.require = require;
+        }
+
+        public final ArrayList<Rule> getRules() {
+            return rules;
+        }
+
+        public final HashSet<String> getRequire() {
+            return require;
+        }
+        
+        
+    }
+    
     public class RuleListAndNextUid {
         private final ArrayList<Rule> rulelist;
         
         private final int nextuid;
+        
+        private final boolean error;
 
         /**
          * @param rulelist
          * @param nextuid
          */
-        public RuleListAndNextUid(final ArrayList<Rule> rulelist, final int nextuid) {
+        public RuleListAndNextUid(final ArrayList<Rule> rulelist, final int nextuid, final boolean error) {
             super();
             this.rulelist = rulelist;
             this.nextuid = nextuid;
+            this.error = error;
         }
 
         /**
@@ -116,10 +150,37 @@ public final class SieveTextFilter {
         public final int getNextuid() {
             return nextuid;
         }
-        
+
+        public final boolean isError() {
+            return error;
+        }
         
     }
 
+    public class NextUidAndError {
+        private final int nextuid;
+        
+        private final boolean error;
+
+        /**
+         * @param nextuid
+         * @param error
+         */
+        public NextUidAndError(int nextuid, boolean error) {
+            this.nextuid = nextuid;
+            this.error = error;
+        }
+
+        public final int getNextuid() {
+            return nextuid;
+        }
+
+        public final boolean isError() {
+            return error;
+        }
+        
+    }
+    
     private static final String COMMENT_TAG = "#<!-->";
     
     private static final String CRLF = "\r\n";
@@ -159,6 +220,7 @@ public final class SieveTextFilter {
     
     @SuppressWarnings("unchecked")
     public RuleListAndNextUid readScriptFromString(final String readFileToString) throws ParseException, UnsupportedEncodingException, SieveException, OXMailfilterException {
+        boolean errorsinscript = false;
         // The following line strips off the first line of the script
         // final String first = readFileToString.replaceAll("^.*(\r)?\n", "");
         final String commentedlines = diffremovenotcommentedlines(kickcommentsright(readFileToString), readFileToString);
@@ -175,24 +237,29 @@ public final class SieveTextFilter {
         final ArrayList<RuleComment> rulenames = getRulenames(readFileToString);
         final ArrayList<Rule> rules = (ArrayList<Rule>) uncommented.jjtAccept(new InternalVisitor(), Boolean.FALSE);
         final ArrayList<Rule> rules2 = (ArrayList<Rule>) commented.jjtAccept(new InternalVisitor(), Boolean.TRUE);
-        // Attention after merging the manipulation of finalrules also
+        // Attention: After merging the manipulation of finalrules also
         // manipulates rules and rules2
         final ArrayList<Rule> finalrules = mergerules(rules, rules2);
-        addRulenameToFittingCommand(rulenames, finalrules, readFileToString, commentedlines);
-        final int uid = setPosAndMissingErrortextsAndIds(finalrules, readFileToString, commentedlines);
-        return new RuleListAndNextUid(finalrules, uid);
+        if (addRulenameToFittingCommandAndSetErrors(rulenames, finalrules, readFileToString, commentedlines)) {
+            errorsinscript = true;
+        }
+        final NextUidAndError nextuidanderror = setPosAndMissingErrortextsAndIds(finalrules, readFileToString, commentedlines);
+        if (nextuidanderror.isError()) {
+            errorsinscript = true;
+        }
+        return new RuleListAndNextUid(finalrules, nextuidanderror.getNextuid(), errorsinscript);
     }
 
     /**
      * This method is used to get back the resulting sieve script
      * 
-     * @param finalrules
+     * @param clientrulesandrequire
      * @return
      * @throws SieveException
      */
     @SuppressWarnings("unchecked")
-    public String writeback(final ArrayList<Rule> finalrules) throws SieveException {
-        final ArrayList<Rule> finalruleswithrightrequires = addRightRequires(finalrules);
+    public String writeback(final ClientRulesAndRequire clientrulesandrequire) throws SieveException {
+        final ArrayList<Rule> finalruleswithrightrequires = addRightRequires(clientrulesandrequire);
         addLines(finalruleswithrightrequires);
         final ArrayList<Rule> noncommented = new ArrayList<Rule>();
         final ArrayList<Rule> commented = new ArrayList<Rule>();
@@ -213,8 +280,49 @@ public final class SieveTextFilter {
         }
         final List<OwnType> commentedoutput = (List<OwnType>) commentednode.jjtAccept(new Visitor(), null);
 
-        return listToString(interweaving(noncommentedoutput, commentedoutput, extractrulenames(finalrules)));
+        return listToString(interweaving(noncommentedoutput, commentedoutput, clientrulesandrequire.getRules()));
     }
+
+    /**
+     * Here we have to strip off the require line because this line should not be edited by the client
+     * 
+     * @param rules
+     * @param flag The flag which should be filtered out
+     * @param error If an error in any rules has occurred while reading the sieve script. This is important because if so
+     *        we must keep the old requires line
+     * @return
+     */
+    public ClientRulesAndRequire splitClientRulesAndRequire(final ArrayList<Rule> rules, final String flag, boolean error) {
+        final ArrayList<Rule> retval = new ArrayList<Rule>();
+        final HashSet<String> requires = new HashSet<String>();
+        // The flag is checked here because if no flag is given we can omit some checks which increases performance
+        if (null != flag) {
+            for (final Rule rule : rules) {
+                final RuleComment ruleComment = rule.getRuleComment();
+                final RequireCommand requireCommand = rule.getRequireCommand();
+                if (null != requireCommand) {
+                    requires.addAll(requireCommand.getList().get(0));
+                } else if (null != ruleComment && null != ruleComment.getFlags() && ruleComment.getFlags().contains(flag)) {
+                    retval.add(rule);
+                }
+            }
+        } else {
+            for (final Rule rule : rules) {
+                final RequireCommand requireCommand = rule.getRequireCommand();
+                if (null == requireCommand) {
+                    retval.add(rule);
+                } else {
+                    requires.addAll(requireCommand.getList().get(0));
+                }
+            }
+        }
+        if (error) {
+            return new ClientRulesAndRequire(retval, requires);
+        } else {
+            return new ClientRulesAndRequire(retval, new HashSet<String>());
+        }
+    }
+
 
     /**
      * This method goes through all Rules and adds a fitting line number
@@ -233,27 +341,40 @@ public final class SieveTextFilter {
             }
             rule.setLinenumber(linenumber);
             // Here we add one because a space between two rules looks better
-            linenumber += countcommandlines(rule.getCommands()) + 1;
+            final ArrayList<Command> commands = rule.getCommands();
+            if (null != commands) {
+                linenumber += countcommandlines(commands) + 1;
+            } else {
+                final String text = rule.getText();
+                if (null != text) {
+                    linenumber += countlines(text);
+                }
+            }
         }
+    }
+
+    private int countlines(final String text) {
+        int start = 0;
+        int number = 0;
+        while (true) {
+            final int indexOf = text.indexOf(CRLF, start);
+            if (-1 == indexOf) {
+                break;
+            }
+            start = indexOf + CRLF.length();
+            number++;
+        }
+        return number;
     }
 
     private void addPlainTextToRule(final String wholetext, final String commentedtext, final RuleComment ruleComment, final Rule rightrule) {
         final int linenumber = rightrule.getLinenumber();
         final int endlinenumber = rightrule.getEndlinenumber();
-        if (null != ruleComment) {
-            final int line = ruleComment.getLine();
-            final String comment = getRightPart(wholetext, line, line);
-            if (rightrule.isCommented()) {
-                rightrule.setText(comment + CRLF + getRightPart(commentedtext, linenumber, endlinenumber));
-            } else {
-                rightrule.setText(comment + CRLF + getRightPart(wholetext, linenumber, endlinenumber));
-            }
+        // Known comments aren't written to the plain text part, otherwise they will be doubled when writing back
+        if (rightrule.isCommented()) {
+            rightrule.setText(getRightPart(commentedtext, linenumber, endlinenumber));
         } else {
-            if (rightrule.isCommented()) {
-                rightrule.setText(getRightPart(commentedtext, linenumber, endlinenumber));
-            } else {
-                rightrule.setText(getRightPart(wholetext, linenumber, endlinenumber));
-            }
+            rightrule.setText(getRightPart(wholetext, linenumber, endlinenumber));
         }
     }
 
@@ -262,22 +383,24 @@ public final class SieveTextFilter {
      * and adds the proper require commands according to the actions used in the
      * command within
      * 
-     * @param rules
+     * @param clientrulesandrequire
      * @return
      */
-    private ArrayList<Rule> addRightRequires(final ArrayList<Rule> rules) {
+    private ArrayList<Rule> addRightRequires(final ClientRulesAndRequire clientrulesandrequire) {
         final ArrayList<Rule> newruleslist = new ArrayList<Rule>();
         final HashSet<String> requiredlist = new HashSet<String>();
-        for (final Rule rule : rules) {
+        for (final Rule rule : clientrulesandrequire.getRules()) {
             if (null == rule.getRequireCommand()) {
                 newruleslist.add(rule);
-                if (!rule.isCommented()) {
-                    for (final Command command : rule.getCommands()) {
+                final ArrayList<Command> commands = rule.getCommands();
+                if (!rule.isCommented() && null != commands) {
+                    for (final Command command : commands) {
                         requiredlist.addAll(command.getRequired());
                     }
                 }
             }
         }
+        requiredlist.addAll(clientrulesandrequire.getRequire());
         if (!requiredlist.isEmpty()) {
             final ArrayList<ArrayList<String>> arrayList = new ArrayList<ArrayList<String>>();
             arrayList.add(new ArrayList<String>(requiredlist));
@@ -289,15 +412,17 @@ public final class SieveTextFilter {
     }
 
     /**
-     * This method adds the rulename to the fitting command. It will also take care that only the errortext and the ruletext are left if an
+     * This method adds the rulename to the fitting command. It will also take care that only the errortext and the ruletext are left, if an
      * error has occured.
      * 
      * @param ruleComments All the comments which are found and must be applied to a rule
      * @param rules The rules
      * @param wholetext The whole text of the script
      * @param commentedtext The commented text of the script
+     * @return true if an errortext and plaintext has been added anywhere false if not
      */
-    private void addRulenameToFittingCommand(final ArrayList<RuleComment> ruleComments, final ArrayList<Rule> rules, final String wholetext, final String commentedtext) {
+    private boolean addRulenameToFittingCommandAndSetErrors(final ArrayList<RuleComment> ruleComments, final ArrayList<Rule> rules, final String wholetext, final String commentedtext) {
+        boolean erroradded = false;
         for (final RuleComment ruleComment : ruleComments) {
             int mindiff = Integer.MAX_VALUE;
             Rule rightrule = null;
@@ -313,13 +438,18 @@ public final class SieveTextFilter {
                 if (null != errortext) {
                     final String errormsg = rightrule.getErrormsg();
                     rightrule.setErrormsg(null != errormsg ? errormsg + CRLF + errortext: errortext);
-                    handleRuleError(wholetext, commentedtext, ruleComment, rightrule);
+                    if (handleRuleError(wholetext, commentedtext, ruleComment, rightrule)) {
+                        erroradded = true;;
+                    }
                 } else {
                     rightrule.setRuleComments(ruleComment);
-                    handleRuleError(wholetext, commentedtext, ruleComment, rightrule);
+                    if (handleRuleError(wholetext, commentedtext, ruleComment, rightrule)) {
+                        erroradded = true;
+                    }
                 }
             }
         }
+        return erroradded;
     }
 
     /**
@@ -364,17 +494,6 @@ public final class SieveTextFilter {
             }
         }
         return listToString(removedcomments);
-    }
-
-    private ArrayList<RuleComment> extractrulenames(final ArrayList<Rule> finalrules) {
-        final ArrayList<RuleComment> retval = new ArrayList<RuleComment>();
-        for (final Rule rule : finalrules) {
-            final RuleComment ruleComment = rule.getRuleComment();
-            if (null != ruleComment) {
-                retval.add(ruleComment);
-            }
-        }
-        return retval;
     }
 
     private void fillup(final List<String> retval, final int i) {
@@ -450,16 +569,26 @@ public final class SieveTextFilter {
         return ruleComments;
     }
 
-    private void handleRuleError(final String wholetext, final String commentedtext, final RuleComment rulename, final Rule rightrule) {
+    /**
+     * @param wholetext
+     * @param commentedtext
+     * @param rulename
+     * @param rightrule
+     * @return true if an errortext and plaintext has been added false otherwise
+     */
+    private boolean handleRuleError(final String wholetext, final String commentedtext, final RuleComment rulename, final Rule rightrule) {
         final String errormsg = rightrule.getErrormsg();
         if (null != errormsg) {
             rightrule.setCommands(null);
             addPlainTextToRule(wholetext, commentedtext, rulename, rightrule);
             printErrorForUser(new OXMailfilterException(Code.SIEVE_ERROR, errormsg));
+            return true;
+        } else {
+            return false;
         }
     }
 
-    private List<String> interweaving(final List<OwnType> noncommentedoutput, final List<OwnType> commentedoutput, final ArrayList<RuleComment> rulenames) {
+    private List<String> interweaving(final List<OwnType> noncommentedoutput, final List<OwnType> commentedoutput, final ArrayList<Rule> rules) {
         final List<String> retval = new ArrayList<String>();
         retval.add(FIRST_LINE + (new Date()).toString());
         for (final OwnType owntype : noncommentedoutput) {
@@ -481,14 +610,28 @@ public final class SieveTextFilter {
             final List<String> stringToListComment = stringToListComment(string);
             retval.addAll(stringToListComment);
         }
-        for (final RuleComment rulename : rulenames) {
-            final int line = rulename.getLine();
-            final String rulename2 = rulename.getRulename();
-            // The nth line is the n-1th position inside the array
-            retval.add(line - 1, FLAG_TAG + listToCommaSeparatedString(rulename.getFlags()) + SEPARATOR + UNIQUE_ID + rulename.getUniqueid() + SEPARATOR
-                    + RULENAME_TAG + ((null != rulename2) ? rulename2 : ""));
-            searchEmptyLineAndRemove(retval, line - 1);
+        
+        for (final Rule rule : rules) {
+            final RuleComment ruleComment = rule.getRuleComment();
+            final String text = rule.getText();
+            if (null != text) {
+                final int line = ruleComment.getLine();
+                final int size = retval.size();
+                if (line > size + 1) {
+                    fillup(retval, line - (size + 1));
+                }
+                retval.addAll(stringToList(text));
+            }
+            if (null != ruleComment) {
+                final int line = ruleComment.getLine();
+                final String rulename2 = ruleComment.getRulename();
+                // The nth line is the n-1th position inside the array
+                retval.add(line - 1, FLAG_TAG + listToCommaSeparatedString(ruleComment.getFlags()) + SEPARATOR + UNIQUE_ID + ruleComment.getUniqueid() + SEPARATOR
+                        + RULENAME_TAG + ((null != rulename2) ? rulename2 : ""));
+                searchEmptyLineAndRemove(retval, line - 1);
+            }
         }
+
         return retval;
     }
 
@@ -615,10 +758,11 @@ public final class SieveTextFilter {
      * @param commentedtext
      * @return The next uid
      */
-    private int setPosAndMissingErrortextsAndIds(final ArrayList<Rule> finalrules, final String wholetext, final String commentedtext) {
+    private NextUidAndError setPosAndMissingErrortextsAndIds(final ArrayList<Rule> finalrules, final String wholetext, final String commentedtext) {
         final List<Integer> uniqueids = new ArrayList<Integer>();
         int max = -1;
         int i = 0;
+        boolean errortext = false;
         for (int o = 0; o < finalrules.size(); o++) {
             final Rule rule = finalrules.get(o);
             if (null == rule.getRequireCommand()) {
@@ -633,7 +777,9 @@ public final class SieveTextFilter {
                 }
                 rule.setPosition(i++);
                 if (null != rule.getErrormsg() && null == rule.getText()) {
-                    handleRuleError(wholetext, commentedtext, null, rule);
+                    if (handleRuleError(wholetext, commentedtext, null, rule)) {
+                        errortext = true;
+                    }
                 }
             }
         }
@@ -647,7 +793,7 @@ public final class SieveTextFilter {
                 rule.setRuleComments(new RuleComment(++max));
             }
         }
-        return ++max;
+        return new NextUidAndError(++max, errortext);
     }
 
     /**

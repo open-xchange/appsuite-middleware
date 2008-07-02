@@ -21,9 +21,11 @@ import com.openexchange.ajax.Login;
 
 public class GroupwareTests extends AJAXTest {
 
+//    private static final String AUTHPASSWORD = "oxtest41";
     private static final String AUTHPASSWORD = "secret";
 
-    private static final String AUTHNAME = "test3.test3";
+//    private static final String AUTHNAME = "user2@oxtest41.de";
+    private static final String AUTHNAME = "test1@1";
 
     private final static String HOSTNAME = "localhost";
     

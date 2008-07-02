@@ -252,60 +252,62 @@ public class RuleConverter {
         int o = 0;
         for (final Rule rule : rules) {
             final ArrayList<Command> commands = rule.getCommands();
-            for (final Command command : commands) {
-                final int[] js = new int[] { i };
-                if (command instanceof RequireCommand) {
-                    final RequireCommand requirecommand = (RequireCommand) command;
-                    final ASTcommand tcommand = createCommand("require", js, rule.getLinenumber());
+            if (null != commands) {
+                for (final Command command : commands) {
+                    final int[] js = new int[] { i };
+                    if (command instanceof RequireCommand) {
+                        final RequireCommand requirecommand = (RequireCommand) command;
+                        final ASTcommand tcommand = createCommand("require", js, rule.getLinenumber());
 
-                    final ArrayList<String> list = requirecommand.getList().get(0);
-                    final ASTarguments targuments = new ASTarguments(js[0]++);
-                    final ASTargument targument = new ASTargument(js[0]++);
-                    tcommand.jjtAddChild(targuments, 0);
-                    targuments.jjtAddChild(targument, 0);
-                    targument.jjtAddChild(createStringList(list, js), 0);
-                    tcommands.jjtAddChild(tcommand, o);
-                } else if (command instanceof IfOrElseIfCommand) {
-                    final IfOrElseIfCommand ifcommand = (IfOrElseIfCommand) command;
-                    // We need an array here, because we have to make
-                    // call-by-reference through the call-by-value of java
-                    ASTcommand tcommand;
-                    if (command instanceof IfCommand) {
-                        tcommand = createCommand("if", js, rule.getLinenumber());
-                    } else {
-                        tcommand = createCommand("elsif", js, rule.getLinenumber());
+                        final ArrayList<String> list = requirecommand.getList().get(0);
+                        final ASTarguments targuments = new ASTarguments(js[0]++);
+                        final ASTargument targument = new ASTargument(js[0]++);
+                        tcommand.jjtAddChild(targuments, 0);
+                        targuments.jjtAddChild(targument, 0);
+                        targument.jjtAddChild(createStringList(list, js), 0);
+                        tcommands.jjtAddChild(tcommand, o);
+                    } else if (command instanceof IfOrElseIfCommand) {
+                        final IfOrElseIfCommand ifcommand = (IfOrElseIfCommand) command;
+                        // We need an array here, because we have to make
+                        // call-by-reference through the call-by-value of java
+                        ASTcommand tcommand;
+                        if (command instanceof IfCommand) {
+                            tcommand = createCommand("if", js, rule.getLinenumber());
+                        } else {
+                            tcommand = createCommand("elsif", js, rule.getLinenumber());
+                        }
+                        final ASTarguments arguments = new ASTarguments(js[0]++);
+                        final TestCommand testcommand = ifcommand.getTestcommand();
+                        final ASTtest ttest = createCompleteTestPart(testcommand, js);
+                        arguments.jjtAddChild(ttest, 0);
+                        tcommand.jjtAddChild(arguments, 0);
+
+                        // ... and finally the actioncommand block
+                        final ASTblock tblock = createActionBlockForTest(ifcommand.getActioncommands(), js, rule.getLinenumber());
+                        tcommand.jjtAddChild(tblock, 1);
+                        tcommands.jjtAddChild(tcommand, o);
+                    } else if (command instanceof ElseCommand) {
+                        final ElseCommand elsecommand = (ElseCommand) command;
+                        // We need an array here, because we have to make
+                        // call-by-reference through the call-by-value of java
+                        final ASTcommand tcommand = createCommand("else", js, rule.getLinenumber());
+
+                        final ASTarguments arguments = new ASTarguments(js[0]++);
+                        tcommand.jjtAddChild(arguments, 0);
+
+                        // ... and finally the actioncommand block
+                        final ASTblock tblock = createActionBlockForTest(elsecommand.getActioncommands(), js, rule.getLinenumber());
+                        tcommand.jjtAddChild(tblock, 1);
+                        tcommands.jjtAddChild(tcommand, o);
+                    } else if (command instanceof ActionCommand) {
+                        final ActionCommand actionCommand = (ActionCommand) command;
+                        // We need an array here, because we have to make
+                        // call-by-reference through the call-by-value of java
+                        final ASTcommand tcommand = createActionCommand(actionCommand.getArguments(), actionCommand.getCommand().getCommandname(), js, rule.getLinenumber());
+                        tcommands.jjtAddChild(tcommand, o);
                     }
-                    final ASTarguments arguments = new ASTarguments(js[0]++);
-                    final TestCommand testcommand = ifcommand.getTestcommand();
-                    final ASTtest ttest = createCompleteTestPart(testcommand, js);
-                    arguments.jjtAddChild(ttest, 0);
-                    tcommand.jjtAddChild(arguments, 0);
-
-                    // ... and finally the actioncommand block
-                    final ASTblock tblock = createActionBlockForTest(ifcommand.getActioncommands(), js, rule.getLinenumber());
-                    tcommand.jjtAddChild(tblock, 1);
-                    tcommands.jjtAddChild(tcommand, o);
-                } else if (command instanceof ElseCommand) {
-                    final ElseCommand elsecommand = (ElseCommand) command;
-                    // We need an array here, because we have to make
-                    // call-by-reference through the call-by-value of java
-                    final ASTcommand tcommand = createCommand("else", js, rule.getLinenumber());
-
-                    final ASTarguments arguments = new ASTarguments(js[0]++);
-                    tcommand.jjtAddChild(arguments, 0);
-
-                    // ... and finally the actioncommand block
-                    final ASTblock tblock = createActionBlockForTest(elsecommand.getActioncommands(), js, rule.getLinenumber());
-                    tcommand.jjtAddChild(tblock, 1);
-                    tcommands.jjtAddChild(tcommand, o);
-                } else if (command instanceof ActionCommand) {
-                    final ActionCommand actionCommand = (ActionCommand) command;
-                    // We need an array here, because we have to make
-                    // call-by-reference through the call-by-value of java
-                    final ASTcommand tcommand = createActionCommand(actionCommand.getArguments(), actionCommand.getCommand().getCommandname(), js, rule.getLinenumber());
-                    tcommands.jjtAddChild(tcommand, o);
+                    o++;
                 }
-                o++;
             }
         }
         return startnode;

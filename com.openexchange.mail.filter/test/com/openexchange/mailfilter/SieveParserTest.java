@@ -15,6 +15,7 @@ import org.apache.jsieve.parser.generated.Token;
 import org.junit.Test;
 
 import com.openexchange.jsieve.SieveTextFilter;
+import com.openexchange.jsieve.SieveTextFilter.ClientRulesAndRequire;
 import com.openexchange.jsieve.SieveTextFilter.RuleListAndNextUid;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.Command;
@@ -36,9 +37,10 @@ public class SieveParserTest {
         final String readFileToString = FileUtils.readFileToString(file, "UTF-8");
 
         final RuleListAndNextUid finalrules = sieveTextFilter.readScriptFromString(readFileToString);
-        final ArrayList<Rule> rulelist = finalrules.getRulelist();
+        final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(finalrules.getRulelist(), null, finalrules.isError());
+        final ArrayList<Rule> rulelist = clientrulesandrequire.getRules();
         searchVacationRule(rulelist);
-        sieveTextFilter.writeback(rulelist);
+        sieveTextFilter.writeback(clientrulesandrequire);
 
         // writeback(createownrules());
     }
