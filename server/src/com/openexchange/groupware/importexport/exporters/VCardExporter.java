@@ -77,7 +77,9 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
@@ -222,7 +224,7 @@ category={
 		final int folderId = Integer.parseInt(folder);
 		FolderObject fo;
 		try {
-			fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());
+			fo = new OXFolderAccess(sessObj.getContext()).getFolderObject(folderId);
 		} catch (final OXException e) {
 			return false;
 		}
@@ -239,9 +241,9 @@ category={
 		try {
 			perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
 		} catch (final DBPoolingException e) {
-			throw importExportExceptionFactory.create(2, folder);
+			throw importExportExceptionFactory.create(2, e, folder);
 		} catch (final SQLException e) {
-			throw importExportExceptionFactory.create(2, folder);
+			throw importExportExceptionFactory.create(2, e, folder);
 		}
 		
 		if (perm.canReadAllObjects()) {
@@ -252,7 +254,7 @@ category={
 	}
 	
 	public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
-		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
 		try {
 			if (fieldsToBeExported == null) {
 				fieldsToBeExported = _contactFields;
@@ -266,10 +268,10 @@ category={
 			//final String mail = sessObj.getUserObject().getMail();
 			
 			final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
-			final SearchIterator searchIterator = contactSql.getModifiedContactsInFolder(Integer.parseInt(folder), fieldsToBeExported, new Date(0));
+			final SearchIterator<ContactObject> searchIterator = contactSql.getModifiedContactsInFolder(Integer.parseInt(folder), fieldsToBeExported, new Date(0));
 			
 			while (searchIterator.hasNext()) {
-				exportContact(oxContainerConverter, contactDef, versitWriter, (ContactObject)searchIterator.next());
+				exportContact(oxContainerConverter, contactDef, versitWriter, searchIterator.next());
 			}
 			
 			versitWriter.flush();
@@ -284,7 +286,7 @@ category={
 	}
 	
 	public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
-		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
 		try {
 			final VersitDefinition contactDef = Versit.getDefinition("text/vcard");
 			final VersitDefinition.Writer versitWriter = contactDef.getWriter(byteArrayOutputStream, "UTF-8");
@@ -295,7 +297,7 @@ category={
 			
 			exportContact(oxContainerConverter, contactDef, versitWriter, contactObj);
 		} catch (final Exception exc) {
-			throw importExportExceptionFactory.create(3, folder);
+			throw importExportExceptionFactory.create(3, exc, folder);
 		}
 		
 		return new SizedInputStream(
