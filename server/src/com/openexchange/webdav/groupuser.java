@@ -47,10 +47,7 @@
  *
  */
 
-
-
 package com.openexchange.webdav;
-
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -93,13 +90,11 @@ import com.openexchange.webdav.xml.fields.DataFields;
  * groupuser
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
-
 public final class groupuser extends PermissionServlet {
 	
 	private static final long serialVersionUID = -2041907156379627530L;
 	
-	private static final String STR_OBJECTSTATUS = "objectstatus";
+	private static final String STR_OBJECTSTATUS = "object_status";
 	
 	private static String DELETED_GROUP_SQL = "SELECT id, lastmodified FROM del_groups WHERE cid=? AND lastmodified > ?";
 	
@@ -278,8 +273,14 @@ public final class groupuser extends PermissionServlet {
 		
 		if (delete) {
 			DataWriter.addElement(STR_OBJECTSTATUS, "DELETE", e_group);
+			// Following line is for compatibility with older OXtenders
+            // element name changed 2008-07-02
+			DataWriter.addElement("objectstatus", "DELETE", e_group);
 		} else {
 			DataWriter.addElement(STR_OBJECTSTATUS, "CREATE", e_group);
+			// Following line is for compatibility with older OXtenders
+			// element name changed 2008-07-02
+            DataWriter.addElement("objectstatus", "CREATE", e_group);
 		}
 		
 		DataWriter.addElement("uid", group.getIdentifier(), e_group);
@@ -363,8 +364,14 @@ public final class groupuser extends PermissionServlet {
 		
 		if (delete) {
 			DataWriter.addElement(STR_OBJECTSTATUS, "DELETE", eResource);
+            // Following line is for compatibility with older OXtenders
+            // element name changed 2008-07-02
+			DataWriter.addElement("objectstatus", "DELETE", eResource);
 		} else {
 			DataWriter.addElement(STR_OBJECTSTATUS, "CREATE", eResource);
+            // Following line is for compatibility with older OXtenders
+            // element name changed 2008-07-02
+			DataWriter.addElement("objectstatus", "CREATE", eResource);
 		}
 		
 		DataWriter.addElement("uid", resource.getIdentifier(), eResource);

@@ -1,3 +1,9 @@
+* 2008-07-02 - marcus.klein@open-xchange.com
+
+ - Bugfix #11016: Renamed xml attribute for deleted groups and resources.
+   Additionally sending old values for compatibility. This will be removed after
+   some time.
+
 * 2008-07-01 - thorben.betten@open-xchange.com
 
  - Bugfix #10803: Immediate update of links on object modification (move,
