@@ -296,9 +296,6 @@ public final class SessionHandler {
 					/*
 					 * Set new password
 					 */
-					if (!SessionImpl.class.isInstance(sessionControl.getSession())) {
-						throw new SessiondException(SessiondException.Code.PASSWORD_UPDATE_FAILED);
-					}
 					((SessionImpl) sessionControl.getSession()).setPassword(newPassword);
 
 					if (a > 0) {
@@ -315,12 +312,10 @@ public final class SessionHandler {
 				}
 				sessionContainer.removeSessionById(sessionid);
 				numberOfActiveSessions.decrementAndGet();
-
-				throw new SessiondException(SessiondException.Code.SESSIOND_EXCEPTION);
+				throw new SessiondException(SessiondException.Code.PASSWORD_UPDATE_FAILED);
 			}
 		}
-		throw new SessiondException(SessiondException.Code.SESSIOND_EXCEPTION);
-
+		throw new SessiondException(SessiondException.Code.PASSWORD_UPDATE_FAILED);
 	}
 
 	protected static Session getSessionByRandomToken(final String randomToken) {
