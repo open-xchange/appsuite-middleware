@@ -24,13 +24,12 @@ sub doRequest {
    	my $inSelf = shift;
     my $soap = SOAP::Lite->ns( $inSelf->{'serviceNs'} )->proxy( $inSelf->{'basisUrl'}."OXResourceService" );
     
-    my $id = 12;
+    my $name = "test4";
     
     my $som_entry = 
       $soap->delete($inSelf->{'Context'},
     	      SOAP::Data->value("Resource")->value(\SOAP::Data->value(
-                   # First the mandatory fields
-    	           SOAP::Data->name("id" => $id)
+    	           SOAP::Data->name("name" => $name)
     	           )),
     	      $inSelf->{'creds'}
     	     );
