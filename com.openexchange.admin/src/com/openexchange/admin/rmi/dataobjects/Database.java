@@ -295,7 +295,7 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
         return this.master;
     }
 
-    public void setMaster(final boolean master) {
+    public void setMaster(final Boolean master) {
         this.master = master;
         this.masterset = true;
     }
@@ -701,5 +701,9 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
         if (urlset != other.urlset)
             return false;
         return true;
+    }
+
+    public Boolean getMaster() {
+        return master;
     }
 }
