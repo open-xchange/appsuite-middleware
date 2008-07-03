@@ -1182,13 +1182,17 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
     }
     
-    final int checkUpdateRecurring(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {        
+    final int checkUpdateRecurring(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
+        if(cdao.containsRecurrenceCount()) {
+            return CalendarRecurringCollection.RECURRING_NO_ACTION;
+        }
         if (!edao.containsRecurrenceType() && !cdao.containsRecurrenceType()) {
             return CalendarRecurringCollection.RECURRING_NO_ACTION;
         } else if (edao.containsRecurrenceType() && edao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE && (!cdao.containsRecurrenceType() || cdao.getRecurrenceType() == edao.getRecurrenceType())) {
             final int ret = CalendarRecurringCollection.getRecurringAppoiontmentUpdateAction(cdao, edao);
             if (ret == CalendarRecurringCollection.RECURRING_NO_ACTION) {
                 // We have to check if something has been changed in the meantime!
+                boolean ignoreDateMove = false;
                 if (!cdao.containsStartDate() && !cdao.containsEndDate()) {
                     final CalendarDataObject temp = (CalendarDataObject) edao.clone();
                     final RecurringResults rss = CalendarRecurringCollection.calculateFirstRecurring(temp);
@@ -1197,6 +1201,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                         if (rss != null) {
                             cdao.setStartDate(new Date(rs.getStart()));
                             cdao.setEndDate(new Date(rs.getEnd()));
+                            ignoreDateMove = true;
                         }
                     }
                 }
@@ -1243,8 +1248,23 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                             pattern_change = true;
                         }
                     }
+                    if(!ignoreDateMove && (!cdao.getStartDate().equals(edao.getStartDate()) || !cdao.getEndDate().equals(edao.getEndDate()))) {
+                        if(!pattern_change) {
+                            // Copy old pattern
+                            cdao.setRecurrenceType(edao.getRecurrenceType());
+                            cdao.setInterval(edao.getInterval());
+                            if(edao.containsDays()) { cdao.setDays(edao.getDays()); }
+                            if(edao.containsDayInMonth()) { cdao.setDayInMonth(edao.getDayInMonth()); }
+                            if(edao.containsMonth()) { cdao.setMonth(edao.getMonth()); }
+                            if(edao.containsOccurrence()) { cdao.setOccurrence(edao.getOccurrence()); }
+                            if(edao.containsUntil()) { cdao.setUntil(edao.getUntil()); }
+                        }
+                        cdao.setEndDate(calculateRealRecurringEndDate(cdao));
+                        pattern_change = true;
+                    }
                     
-                    if (pattern_change) {
+                    if(pattern_change) {
+
                         cdao.setRecurrence(null);
 
                         CalendarRecurringCollection.checkRecurring(cdao);
@@ -1252,6 +1272,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                         cdao.setExceptions(null);
                         cdao.setDelExceptions(null);
                         return CalendarRecurringCollection.CHANGE_RECURRING_TYPE;
+
                     }
                     calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
                     checkAndRemoveRecurrenceFields(cdao);
