@@ -54,6 +54,8 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
+import com.openexchange.groupware.AbstractOXException.Truncated;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 
@@ -82,10 +84,13 @@ public abstract class AbstractImporter implements Importer {
 		if(oxEx.getCategory() == Category.TRUNCATED){
 			final String separator = ", ";
 			final StringBuilder bob = new StringBuilder();
-			final int[] ids = oxEx.getTruncatedIds();			
-			for(final int id : ids){
-				bob.append( getNameForFieldInTruncationError(id, oxEx) );
-				bob.append( separator );
+			final ProblematicAttribute[] problematics = oxEx.getProblematics();
+			for (final ProblematicAttribute problematic : problematics) {
+			    if (problematic instanceof Truncated) {
+			        final int id = ((Truncated) problematic).getId();
+    				bob.append( getNameForFieldInTruncationError(id, oxEx) );
+    				bob.append( separator );
+			    }
 			}
 			bob.setLength(bob.length() - separator.length());
 			oxEx = EXCEPTIONS.create(0, bob.toString());

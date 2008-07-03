@@ -536,7 +536,7 @@ public class RdbTaskStorage extends TaskStorage {
                 Integer.valueOf(0));
         }
         for (final TaskException.Truncated truncated : truncateds) {
-            tske.addTruncated(truncated);
+            tske.addProblematic(truncated);
         }
         return tske;
     }

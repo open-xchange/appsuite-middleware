@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.request;
 
-import static com.openexchange.ajax.container.Response.DATA;
-
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -63,6 +61,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.parser.CalendarParser;
@@ -193,7 +192,7 @@ public class TaskRequest {
 	public JSONObject actionNew(final JSONObject jsonObj) throws JSONException, OXJSONException, AjaxException, OXException {
 		final Task task = new Task();
 		
-		final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, DATA);
+		final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, ResponseFields.DATA);
 		
 		final TaskParser taskParser = new TaskParser(timeZone);
 		taskParser.parse(task, jsonobject);
@@ -215,7 +214,7 @@ public class TaskRequest {
 		
 		final Task task = new Task();
 		
-		final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, DATA);
+		final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, ResponseFields.DATA);
 		
 		final TaskParser taskParser = new TaskParser(timeZone);
 		taskParser.parse(task, jsonobject);
@@ -297,7 +296,7 @@ public class TaskRequest {
 	}
 
 	public JSONArray actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXPermissionException, OXConflictException, OXObjectNotFoundException, OXFolderNotFoundException, OXException, OXJSONException, AjaxException {
-		final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, DATA);
+		final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, ResponseFields.DATA);
 		final int id = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_ID);
 		final int inFolder = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_INFOLDER);
 		timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -315,7 +314,7 @@ public class TaskRequest {
 		
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-		final JSONArray jData = DataParser.checkJSONArray(jsonObj, DATA);
+		final JSONArray jData = DataParser.checkJSONArray(jsonObj, ResponseFields.DATA);
 		final int[][] objectIdAndFolderId = new int[jData.length()][2];
 		for (int a = 0; a < objectIdAndFolderId.length; a++) {
 			final JSONObject jObject = jData.getJSONObject(a);
@@ -424,7 +423,7 @@ public class TaskRequest {
 	}
 
 	public JSONObject actionConfirm(final JSONObject jsonObj) throws OXMandatoryFieldException, OXException, AjaxException, OXJSONException {
-		final JSONObject jData = DataParser.checkJSONObject(jsonObj, DATA);
+		final JSONObject jData = DataParser.checkJSONObject(jsonObj, ResponseFields.DATA);
 		final Task taskObj = new Task();
 		
 		final TaskParser taskParser = new TaskParser(timeZone);
@@ -444,7 +443,7 @@ public class TaskRequest {
 		
 		Date lastModified = null;
 
-		final JSONObject jData = DataParser.checkJSONObject(jsonObj, DATA);
+		final JSONObject jData = DataParser.checkJSONObject(jsonObj, ResponseFields.DATA);
 		final TaskSearchObject searchObj = new TaskSearchObject();
 		if (jData.has(AJAXServlet.PARAMETER_INFOLDER)) {
 			searchObj.setFolder(DataParser.parseInt(jData, AJAXServlet.PARAMETER_INFOLDER));

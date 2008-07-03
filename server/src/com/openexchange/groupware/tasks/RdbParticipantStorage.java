@@ -452,7 +452,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 Integer.valueOf(0));
         }
         for (final TaskException.Truncated truncated : truncateds) {
-            tske.addTruncated(truncated);
+            tske.addProblematic(truncated);
         }
         return tske;
     }
@@ -528,7 +528,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
         final int maxSize = tmp;
         final TaskException tske = new TaskException(Code.TRUNCATED, dt,
             field, Integer.valueOf(maxSize), Integer.valueOf(maxLength));
-        tske.addTruncated(new TaskException.Truncated() {
+        tske.addProblematic(new TaskException.Truncated() {
             public int getId() {
                 return -1; // No ID defined here
             }

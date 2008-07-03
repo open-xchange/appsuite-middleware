@@ -2007,7 +2007,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 					.valueOf(0), Integer.valueOf(0));
 		}
 		for (final OXFolderException.Truncated truncated : truncateds) {
-			fe.addTruncated(truncated);
+			fe.addProblematic(truncated);
 		}
 		return fe;
 	}

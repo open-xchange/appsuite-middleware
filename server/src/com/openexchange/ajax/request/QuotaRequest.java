@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.request;
 
-import static com.openexchange.ajax.container.Response.DATA;
 import static com.openexchange.mail.utils.StorageUtility.UNLIMITED_QUOTA;
 
 import org.apache.commons.logging.Log;
@@ -60,6 +59,8 @@ import org.json.JSONWriter;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -122,7 +123,7 @@ public class QuotaRequest extends CommonRequest {
 		resp.setException(exception);
 		try {
 			LOG.error(exception.getMessage(), exception);
-			Response.write(resp, w);
+			ResponseWriter.write(resp, w);
 		} catch (final JSONException e) {
 			LOG.error(e);
 		}
@@ -144,7 +145,7 @@ public class QuotaRequest extends CommonRequest {
 			 * object
 			 */
 			w.object();
-			w.key(DATA).value(data);
+			w.key(ResponseFields.DATA).value(data);
 			w.endObject();
 		} catch (final Exception e) {
 			handle(e);
@@ -175,7 +176,7 @@ public class QuotaRequest extends CommonRequest {
 			 * object
 			 */
 			w.object();
-			w.key(DATA).value(data);
+			w.key(ResponseFields.DATA).value(data);
 			w.endObject();
 		} catch (final Exception e) {
 			handle(e);

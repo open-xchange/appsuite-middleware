@@ -49,10 +49,10 @@
 
 package com.openexchange.ajax.request;
 
-import static com.openexchange.ajax.container.Response.DATA;
-
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.openexchange.ajax.fields.ResponseFields;
 
 public class JSONSimpleRequest implements SimpleRequest {
 
@@ -76,7 +76,7 @@ public class JSONSimpleRequest implements SimpleRequest {
 
 	public Object getBody() {
 		try {
-			return jsonObject.get(DATA);
+			return jsonObject.get(ResponseFields.DATA);
 		} catch (final JSONException e) {
 			return null;
 		}

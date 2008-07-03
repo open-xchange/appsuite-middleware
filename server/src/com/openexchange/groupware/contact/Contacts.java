@@ -2888,7 +2888,7 @@ public final class Contacts {
 			oxx = EXCEPTIONS.create(DATA_TRUNCATION, se, sFields.toString(), Integer.valueOf(-1), Integer.valueOf(-1));
 		}
 		for (final OXException.Truncated truncated : truncateds) {
-			oxx.addTruncated(truncated);
+			oxx.addProblematic(truncated);
 		}
 		return oxx;
 	}

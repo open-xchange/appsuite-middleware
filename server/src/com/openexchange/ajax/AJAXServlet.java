@@ -83,6 +83,8 @@ import org.json.JSONObject;
 import org.json.JSONWriter;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
@@ -259,7 +261,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 */
 	public static final String PARAMETER_SESSION = "session";
 
-	public static final String PARAMETER_DATA = "data";
+	public static final String PARAMETER_DATA = ResponseFields.DATA;
 
 	/**
 	 * The parameter 'folder' indicates the current active folder of user
@@ -976,7 +978,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			throws IOException {
 		httpServletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
 		try {
-			Response.write(response, httpServletResponse.getWriter());
+			ResponseWriter.write(response, httpServletResponse.getWriter());
 		} catch (final JSONException e) {
 			log(RESPONSE_ERROR, e);
 			sendError(httpServletResponse);

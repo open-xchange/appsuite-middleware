@@ -63,7 +63,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-
 /**
  * This should be the super class of all exceptions that are sent as error codes
  * to the client.
@@ -211,9 +210,9 @@ public class AbstractOXException extends Exception {
     private Object[] messageArgs;
 
     /**
-     * List of truncated attributes.
+     * List of problematic attributes.
      */
-    private final List<Truncated> truncateds;
+    private final List<ProblematicAttribute> problematics;
 
     /**
      * The user session which provide appropiate <code>Locale</code> object
@@ -231,7 +230,7 @@ public class AbstractOXException extends Exception {
         super();
         this.component = EnumComponent.NONE;
         category = Category.SUBSYSTEM_OR_SERVICE_DOWN;
-        truncateds = new ArrayList<Truncated>();
+        problematics = new ArrayList<ProblematicAttribute>();
     }
 
     /**
@@ -250,7 +249,7 @@ public class AbstractOXException extends Exception {
         super(message);
         this.component = component;
         category = Category.SUBSYSTEM_OR_SERVICE_DOWN;
-        truncateds = new ArrayList<Truncated>();
+        problematics = new ArrayList<ProblematicAttribute>();
     }
 
     /**
@@ -263,7 +262,7 @@ public class AbstractOXException extends Exception {
         category = cause.category;
         detailNumber = cause.detailNumber;
         messageArgs = cause.messageArgs;
-        truncateds = new ArrayList<Truncated>(cause.truncateds);
+        problematics = new ArrayList<ProblematicAttribute>(cause.problematics);
     }
 
     /**
@@ -282,7 +281,7 @@ public class AbstractOXException extends Exception {
         super(cause);
         this.component = component;
         category = Category.SUBSYSTEM_OR_SERVICE_DOWN;
-        truncateds = new ArrayList<Truncated>();
+        problematics = new ArrayList<ProblematicAttribute>();
     }
 
     /**
@@ -302,7 +301,7 @@ public class AbstractOXException extends Exception {
         super(message, cause);
         this.component = component;
         category = Category.SUBSYSTEM_OR_SERVICE_DOWN;
-        truncateds = new ArrayList<Truncated>();
+        problematics = new ArrayList<ProblematicAttribute>();
     }
 
     public AbstractOXException(final Component component, final String message,
@@ -311,7 +310,7 @@ public class AbstractOXException extends Exception {
         this.component = component;
         category = cause.category;
         detailNumber = cause.detailNumber;
-        truncateds = new ArrayList<Truncated>();
+        problematics = new ArrayList<ProblematicAttribute>();
     }
 
     /**
@@ -329,7 +328,7 @@ public class AbstractOXException extends Exception {
         this.component = component;
         this.category = category;
         this.detailNumber = detailNumber;
-        truncateds = new ArrayList<Truncated>();
+        problematics = new ArrayList<ProblematicAttribute>();
     }
 
     public Component getComponent() {
@@ -382,11 +381,11 @@ public class AbstractOXException extends Exception {
     /**
      * Adds an attribute identifier that has been truncated.
      * @param truncatedId identifier of the truncated attribute.
-     * @deprecated use {@link #addTruncated(com.openexchange.groupware.AbstractOXException.Truncated)}
+     * @deprecated use {@link #addProblematic(com.openexchange.groupware.AbstractOXException.Truncated)}
      */
     @Deprecated
     public void addTruncatedId(final int truncatedId) {
-        truncateds.add(new Truncated() {
+        problematics.add(new Truncated() {
             public int getId() {
                 return truncatedId;
             }
@@ -400,31 +399,17 @@ public class AbstractOXException extends Exception {
     }
 
     /**
-     * Adds a truncated attribute.
-     * @param truncated data for the truncated attribute.
+     * Adds a problematic attribute.
      */
-    public void addTruncated(final Truncated truncated) {
-        truncateds.add(truncated);
+    public void addProblematic(final ProblematicAttribute problematic) {
+        problematics.add(problematic);
     }
 
     /**
-     * @return the array of truncated identifier.
-     * @deprecated use {@link #getTruncated()}
+     * @return the problematics
      */
-    @Deprecated
-    public int[] getTruncatedIds() {
-        final int[] retval = new int[truncateds.size()];
-        for (int i = 0; i < truncateds.size(); i++) {
-            retval[i] = truncateds.get(i).getId();
-        }
-        return retval;
-    }
-
-    /**
-     * @return
-     */
-    public Truncated[] getTruncated() {
-        return truncateds.toArray(new Truncated[truncateds.size()]);
+    public final ProblematicAttribute[] getProblematics() {
+        return problematics.toArray(new ProblematicAttribute[problematics.size()]);
     }
 
     /**
@@ -495,7 +480,11 @@ public class AbstractOXException extends Exception {
         return sb.toString();
     }
 
-    public interface Truncated {
+    public interface ProblematicAttribute {
+
+    }
+
+    public interface Truncated extends ProblematicAttribute {
 
         /**
          * @return the column identifier of the truncated attribute.
@@ -511,5 +500,13 @@ public class AbstractOXException extends Exception {
          * @return the actual length of the value of the truncated attribute.
          */
         int getLength();
+    }
+
+    public interface Parsing extends ProblematicAttribute {
+
+        /**
+         * @return the JSON attribute name that can not be parsed.
+         */
+        String getAttribute();
     }
 }

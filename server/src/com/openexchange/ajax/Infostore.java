@@ -69,10 +69,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.parser.InfostoreParser;
 import com.openexchange.ajax.parser.InfostoreParser.UnknownMetadataException;
 import com.openexchange.ajax.request.InfostoreRequest;
 import com.openexchange.ajax.request.ServletRequestAdapter;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
@@ -182,7 +184,7 @@ public class Infostore extends PermissionServlet {
 				resp.setException(new AbstractOXException("You must provide a value for " + PARAMETER_ID));
 				final StringWriter w = new StringWriter();
 				try {
-					Response.write(resp, w);
+					ResponseWriter.write(resp, w);
 				} catch (final JSONException e) {
 					// shouldn't happen
 					throw new ServletException(e);
@@ -214,7 +216,7 @@ public class Infostore extends PermissionServlet {
 				unknownAction("GET", action, res, false);
 				return;
 			}
-			Response.write(new Response((JSONObject) writer.getObject()), res.getWriter());
+			ResponseWriter.write(new Response((JSONObject) writer.getObject()), res.getWriter());
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		} catch (final OXPermissionException e) {
@@ -246,7 +248,7 @@ public class Infostore extends PermissionServlet {
 				return;
 			}
 			if (writer.isJSONObject()) {
-				Response.write(new Response((JSONObject) writer.getObject()), res.getWriter());
+				ResponseWriter.write(new Response((JSONObject) writer.getObject()), res.getWriter());
 			} else if (writer.isJSONArray()) {
 				res.getWriter().print(writer.getObject().toString());
 			}
@@ -339,7 +341,7 @@ public class Infostore extends PermissionServlet {
 			try {
 				res.setContentType("text/html; charset=UTF-8");
 
-				throw new UploadServletException(res, substitute(JS_FRAGMENT, STR_JSON, resp.getJSON().toString(),
+				throw new UploadServletException(res, substitute(JS_FRAGMENT, STR_JSON, ResponseWriter.getJSON(resp).toString(),
 						STR_ACTION, action), x.getMessage(), x);
 			} catch (final JSONException e) {
 				LOG.error("Giving up", e);
@@ -422,7 +424,7 @@ public class Infostore extends PermissionServlet {
 		try {
 			w = res.getWriter();
 			final JSONObject obj = new JSONObject();
-			obj.put(Response.DATA, newDocument.getId());
+			obj.put(ResponseFields.DATA, newDocument.getId());
 			w.print(substitute(JS_FRAGMENT, STR_JSON, obj.toString(), STR_ACTION, ACTION_NEW));
 
 			w.flush();
@@ -559,7 +561,7 @@ public class Infostore extends PermissionServlet {
 		try {
 			w = res.getWriter();
 			final JSONObject obj = new JSONObject();
-			obj.put(Response.DATA, metadata.getId());
+			obj.put(ResponseFields.DATA, metadata.getId());
 			w.print(substitute(JS_FRAGMENT, STR_JSON, obj.toString(), STR_ACTION, ACTION_NEW));
 			w.flush();
 		} catch (final IOException e) {
@@ -649,7 +651,7 @@ public class Infostore extends PermissionServlet {
 				} else {
 					writer = res.getWriter();
 				}
-				Response.write(resp, writer);
+				ResponseWriter.write(resp, writer);
 				if (post) {
 					res.getWriter().write(
 							substitute(fragmentOverride != null ? fragmentOverride : JS_FRAGMENT, STR_JSON, writer
@@ -678,11 +680,11 @@ public class Infostore extends PermissionServlet {
 		}
 		commaSeperatedErrorParams.setLength(commaSeperatedErrorParams.length() - 1);
 		w.print("{ \"");
-		w.print(Response.ERROR);
+		w.print(ResponseFields.ERROR);
 		w.print("\" : \"");
 		w.print(error);
 		w.print("\", \"");
-		w.print(Response.ERROR_PARAMS);
+		w.print(ResponseFields.ERROR_PARAMS);
 		w.print("\" : [");
 		w.print(commaSeperatedErrorParams.toString());
 		w.print("}");

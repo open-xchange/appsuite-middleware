@@ -80,9 +80,11 @@ import org.json.JSONWriter;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.FolderFields;
+import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.ajax.writer.FolderWriter;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.ajax.writer.FolderWriter.FolderFieldWriter;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.OXException;
@@ -269,12 +271,12 @@ public class Folder extends SessionServlet {
 	 */
 	public void actionGetRoot(final Session session, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		Response.write(actionGetRoot(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
+		ResponseWriter.write(actionGetRoot(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
 	}
 
 	private final void actionGetRoot(final HttpServletRequest req, final HttpServletResponse resp)
 			throws JSONException, IOException {
-		Response.write(
+		ResponseWriter.write(
 				actionGetRoot(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.FOLDER, resp)), resp
 						.getWriter());
 	}
@@ -381,13 +383,13 @@ public class Folder extends SessionServlet {
 	 */
 	public void actionGetSubfolders(final Session session, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		Response.write(actionGetSubfolders(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
+		ResponseWriter.write(actionGetSubfolders(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
 	}
 
 	private final void actionGetSubfolders(final HttpServletRequest req, final HttpServletResponse resp)
 			throws IOException, ServletException {
 		try {
-			Response.write(actionGetSubfolders(getSessionObject(req), ParamContainer.getInstance(req,
+			ResponseWriter.write(actionGetSubfolders(getSessionObject(req), ParamContainer.getInstance(req,
 					EnumComponent.FOLDER, resp)), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
@@ -942,13 +944,13 @@ public class Folder extends SessionServlet {
 	 */
 	public void actionGetPath(final Session session, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		Response.write(actionGetPath(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
+		ResponseWriter.write(actionGetPath(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
 	}
 
 	private final void actionGetPath(final HttpServletRequest req, final HttpServletResponse resp) throws IOException,
 			ServletException {
 		try {
-			Response.write(actionGetPath(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.FOLDER,
+			ResponseWriter.write(actionGetPath(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.FOLDER,
 					resp)), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
@@ -1124,14 +1126,14 @@ public class Folder extends SessionServlet {
 	 */
 	public void actionGetUpdatedFolders(final Session session, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		Response.write(actionGetUpdatedFolders(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)),
+		ResponseWriter.write(actionGetUpdatedFolders(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)),
 				w);
 	}
 
 	private final void actionGetUpdatedFolders(final HttpServletRequest req, final HttpServletResponse resp)
 			throws IOException, ServletException {
 		try {
-			Response.write(actionGetUpdatedFolders(getSessionObject(req), ParamContainer.getInstance(req,
+			ResponseWriter.write(actionGetUpdatedFolders(getSessionObject(req), ParamContainer.getInstance(req,
 					EnumComponent.FOLDER, resp)), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
@@ -1355,13 +1357,13 @@ public class Folder extends SessionServlet {
 
 	public void actionGetFolder(final Session session, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		Response.write(actionGetFolder(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
+		ResponseWriter.write(actionGetFolder(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
 	}
 
 	private final void actionGetFolder(final HttpServletRequest req, final HttpServletResponse resp)
 			throws IOException, ServletException {
 		try {
-			Response.write(actionGetFolder(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.FOLDER,
+			ResponseWriter.write(actionGetFolder(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.FOLDER,
 					resp)), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
@@ -1434,14 +1436,14 @@ public class Folder extends SessionServlet {
 
 	public void actionPutUpdateFolder(final Session session, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		Response.write(actionPutUpdateFolder(session, requestObj.getString(Response.DATA), ParamContainer.getInstance(
+		ResponseWriter.write(actionPutUpdateFolder(session, requestObj.getString(ResponseFields.DATA), ParamContainer.getInstance(
 				requestObj, EnumComponent.FOLDER)), w);
 	}
 
 	private final void actionPutUpdateFolder(final HttpServletRequest req, final HttpServletResponse resp)
 			throws IOException, ServletException {
 		try {
-			Response.write(actionPutUpdateFolder(getSessionObject(req), getBody(req), ParamContainer.getInstance(req,
+			ResponseWriter.write(actionPutUpdateFolder(getSessionObject(req), getBody(req), ParamContainer.getInstance(req,
 					EnumComponent.FOLDER, resp)), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
@@ -1515,14 +1517,14 @@ public class Folder extends SessionServlet {
 
 	public void actionPutInsertFolder(final Session session, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		Response.write(actionPutInsertFolder(session, requestObj.getString(Response.DATA), ParamContainer.getInstance(
+		ResponseWriter.write(actionPutInsertFolder(session, requestObj.getString(ResponseFields.DATA), ParamContainer.getInstance(
 				requestObj, EnumComponent.FOLDER)), w);
 	}
 
 	private final void actionPutInsertFolder(final HttpServletRequest req, final HttpServletResponse resp)
 			throws IOException, ServletException {
 		try {
-			Response.write(actionPutInsertFolder(getSessionObject(req), getBody(req), ParamContainer.getInstance(req,
+			ResponseWriter.write(actionPutInsertFolder(getSessionObject(req), getBody(req), ParamContainer.getInstance(req,
 					EnumComponent.FOLDER, resp)), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
@@ -1591,14 +1593,14 @@ public class Folder extends SessionServlet {
 
 	public void actionPutDeleteFolder(final Session session, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		Response.write(actionPutDeleteFolder(session, requestObj.getString(Response.DATA), ParamContainer.getInstance(
+		ResponseWriter.write(actionPutDeleteFolder(session, requestObj.getString(ResponseFields.DATA), ParamContainer.getInstance(
 				requestObj, EnumComponent.FOLDER)), w);
 	}
 
 	private final void actionPutDeleteFolder(final HttpServletRequest req, final HttpServletResponse resp)
 			throws IOException, ServletException {
 		try {
-			Response.write(actionPutDeleteFolder(getSessionObject(req), getBody(req), ParamContainer.getInstance(req,
+			ResponseWriter.write(actionPutDeleteFolder(getSessionObject(req), getBody(req), ParamContainer.getInstance(req,
 					EnumComponent.FOLDER, resp)), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);

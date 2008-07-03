@@ -49,9 +49,6 @@
 
 package com.openexchange.ajax.request;
 
-import static com.openexchange.ajax.container.Response.ERROR;
-import static com.openexchange.ajax.container.Response.ERROR_PARAMS;
-
 import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
@@ -61,6 +58,8 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.exceptions.LoggingLogic;
 
@@ -79,8 +78,8 @@ public abstract class CommonRequest {
 		//final JSONObject response = new JSONObject();
 		try {
 			w.object();
-			w.key(ERROR).value(error);
-			w.key(ERROR_PARAMS).value(new JSONArray(Arrays.asList(errorParams)));
+			w.key(ResponseFields.ERROR).value(error);
+			w.key(ResponseFields.ERROR_PARAMS).value(new JSONArray(Arrays.asList(errorParams)));
 			w.endArray();
 			/*response.put(ERROR,error);
 			final JSONArray arr = new JSONArray(Arrays.asList(errorParams));
@@ -101,7 +100,7 @@ public abstract class CommonRequest {
             res.setException(new AbstractOXException(t));
 		}
 		try {
-			Response.write(res, w);
+			ResponseWriter.write(res, w);
 		} catch (final JSONException e) {
 			LOG.error("",t);
 		}

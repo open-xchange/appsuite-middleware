@@ -49,7 +49,6 @@
 
 package com.openexchange.group.servlet.request;
 
-import static com.openexchange.ajax.container.Response.DATA;
 import static com.openexchange.group.servlet.services.GroupRequestServiceRegistry.getServiceRegistry;
 
 import java.util.Collections;
@@ -62,8 +61,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.GroupFields;
+import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.parser.GroupParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
@@ -136,7 +135,7 @@ public final class GroupManageRequest implements AJAXRequestHandler {
     private AJAXRequestResult actionNew(final Context ctx, final User user,
         final JSONObject json) throws AbstractOXException, JSONException {
         final Group group = new Group();
-        final JSONObject jsonobject = DataParser.checkJSONObject(json, Response.DATA);
+        final JSONObject jsonobject = DataParser.checkJSONObject(json, ResponseFields.DATA);
         final GroupParser groupParser = new GroupParser();
         groupParser.parse(group, jsonobject);
         final GroupService groupService = getServiceRegistry().getService(GroupService.class);
@@ -148,7 +147,7 @@ public final class GroupManageRequest implements AJAXRequestHandler {
 
     private AJAXRequestResult actionDelete(final Context ctx, final User user,
         final JSONObject json) throws AbstractOXException, JSONException {
-        final JSONObject jsonobject = DataParser.checkJSONObject(json, DATA);
+        final JSONObject jsonobject = DataParser.checkJSONObject(json, ResponseFields.DATA);
         final int groupId = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_ID);
         final Date timestamp = DataParser.checkDate(json, AJAXServlet.PARAMETER_TIMESTAMP);
         final GroupService groupService = getServiceRegistry().getService(GroupService.class);
@@ -160,7 +159,7 @@ public final class GroupManageRequest implements AJAXRequestHandler {
         final JSONObject json) throws AbstractOXException, JSONException {
         final int identifier = DataParser.checkInt(json, AJAXServlet.PARAMETER_ID);
         final Date timestamp = DataParser.checkDate(json, AJAXServlet.PARAMETER_TIMESTAMP);
-        final JSONObject data = DataParser.checkJSONObject(json, DATA);
+        final JSONObject data = DataParser.checkJSONObject(json, ResponseFields.DATA);
         final Group group = new Group();
         final GroupParser groupParser = new GroupParser();
         groupParser.parse(group, data);

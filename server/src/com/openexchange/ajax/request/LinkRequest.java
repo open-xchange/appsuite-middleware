@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.request;
 
-import static com.openexchange.ajax.container.Response.DATA;
-
 import java.io.Writer;
 
 import org.json.JSONArray;
@@ -59,6 +57,7 @@ import org.json.JSONObject;
 import org.json.JSONWriter;
 
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.LinkSQLInterface;
@@ -174,7 +173,7 @@ public class LinkRequest {
 		linksql.saveLink(lo,user,group,sessionObj);
 		
 		jsonWriter.object();
-		jsonWriter.key(DATA).value("");
+		jsonWriter.key(ResponseFields.DATA).value("");
 		jsonWriter.endObject();
 
 	}
@@ -187,7 +186,7 @@ public class LinkRequest {
 		final int[] group =	this.user.getGroups();
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		
-		final JSONArray jo = jData.getJSONArray(DATA);
+		final JSONArray jo = jData.getJSONArray(ResponseFields.DATA);
 		
 		final int[][] del = new int[jo.length()][3];
 		

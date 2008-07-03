@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.ajax;
 
 import java.io.ByteArrayOutputStream;
@@ -67,6 +65,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
@@ -133,7 +132,7 @@ public class ConfigMenu extends SessionServlet {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
-            Response.write(response, resp.getWriter());
+            ResponseWriter.write(response, resp.getWriter());
         } catch (final JSONException e) {
             log(RESPONSE_ERROR, e);
             sendError(resp);
@@ -233,7 +232,7 @@ public class ConfigMenu extends SessionServlet {
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
             if (response.hasError()) {
-                Response.write(response, resp.getWriter());
+                ResponseWriter.write(response, resp.getWriter());
             }
         } catch (final JSONException e) {
             log(RESPONSE_ERROR, e);
