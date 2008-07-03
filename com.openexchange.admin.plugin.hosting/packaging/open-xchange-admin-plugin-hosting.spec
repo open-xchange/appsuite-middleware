@@ -107,7 +107,11 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
-* Tue Jun 24 2008 - manuel.karft@open-xchange.com
+* Wed Jul 02 2008 - manuel.kraft@open-xchange.com
+  - Bugfix ID#11539 oxreport does not run any more: "java.lang.NoClassDefFoundError: com/openexchange/admin/console/ReportingTool"
+* Fri Jun 27 2008 - holgi@open-xchange.com
+  - Bugfix ID#11533 added separate cache ports for admin and groupware
+* Tue Jun 24 2008 - manuel.kraft@open-xchange.com
   - Bugfix ID#11490 unable to create context using --access-combination-name on commandline
 * Mon Jun 09 2008 - dennis.sieben@open-xchange.com
   - Bugfix ID#11358 [L3] Movecontextfilestore doesn't move filestore if context filestore isn't available
