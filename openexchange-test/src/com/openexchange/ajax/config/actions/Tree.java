@@ -103,6 +103,18 @@ public enum Tree {
     /** [inside GUI] string array */
     PrivateCategories("/gui/private_categories"),
     
+    /** [inside GUI] "1" (means "Yes") or "0" (means "No") */
+	TimePredefined("/gui/global/region/time/predefined"),
+    		
+    /** [inside GUI] format string for displaying times */
+	TimeFormat("/gui/global/region/time/format"),
+    		
+    /** [inside GUI] "1" (means "Yes") or "0" (means "No") */
+	DatePredefined("/gui/global/region/date/predefined"),
+    		
+    /** [inside GUI] format string for displaying dates */
+	DateFormat("/gui/global/region/date/format"),
+    		
     /** [inside GUI] "true" or "false" */
     EnableConfirmationPopup("/gui/global/confirmpopup"),
     
