@@ -102,8 +102,8 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
 			managementService.registerMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true),
 					mailInterfaceMonitor);
 			Pools.getInstance().registerMBeans();
-            new ConsistencyInit().start();
-        } catch (final MalformedObjectNameException e) {
+			new ConsistencyInit().start();
+		} catch (final MalformedObjectNameException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		} catch (final NullPointerException e) {
 			LOG.error(e.getLocalizedMessage(), e);
@@ -116,7 +116,7 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
 	protected void removedServiceInternal(final ManagementService managementService) {
 		try {
 			/*
-			 * Add all mbeans since management service is now available
+			 * Remove all mbeans since management service now disappears
 			 */
 			managementService.unregisterMBean(getObjectName(AJPv13Server.ajpv13ServerThreadsMonitor.getClass()
 					.getName(), true));
@@ -124,8 +124,8 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
 					true));
 			managementService.unregisterMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true));
 			Pools.getInstance().unregisterMBeans();
-            new ConsistencyInit().stop();
-        } catch (final MalformedObjectNameException e) {
+			new ConsistencyInit().stop();
+		} catch (final MalformedObjectNameException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		} catch (final NullPointerException e) {
 			LOG.error(e.getLocalizedMessage(), e);
