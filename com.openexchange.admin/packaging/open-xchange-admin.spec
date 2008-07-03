@@ -136,6 +136,8 @@ ln -sf ../etc/init.d/open-xchange-admin %{buildroot}/sbin/rcopen-xchange-admin
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Mon Jun 30 2008 - choeger@open-xchange.com
+ - Bugfix ID#11401 module access changes only take affect after restarting the groupware
 * Mon Jun 23 2008 - choeger@open-xchange.com
  - Bugfix ID#11437 ClassNotFoundException instead of real error code on SLES10
    nothing SLES specific; commandline clients do not know anything about mysql
