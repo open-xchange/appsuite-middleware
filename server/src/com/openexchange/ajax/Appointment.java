@@ -81,7 +81,7 @@ public class Appointment extends DataServlet {
 	
 	private static final long serialVersionUID = 8550664916596120436L;
 	
-	private static final Log LOG = LogFactory.getLog(Appointment.class);
+	private static final transient Log LOG = LogFactory.getLog(Appointment.class);
 	
 	@Override
 	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
