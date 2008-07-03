@@ -523,7 +523,7 @@ public class RdbTaskStorage extends TaskStorage {
                 }
             };
         }
-        sFields.setLength(sFields.length() - 1);
+        sFields.setLength(sFields.length() - 2);
         final TaskException tske;
         if (truncateds.length > 0) {
             final TaskException.Truncated truncated = truncateds[0];
