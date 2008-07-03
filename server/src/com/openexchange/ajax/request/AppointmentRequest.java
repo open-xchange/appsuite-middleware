@@ -160,7 +160,7 @@ public class AppointmentRequest {
 	
 	private static final Log LOG = LogFactory.getLog(AppointmentRequest.class);
 	
-	public AppointmentRequest(final Session sessionObj, final Context ctx) {
+	public AppointmentRequest(final Session sessionObj, final Context ctx) throws OXException {
 		this.sessionObj = sessionObj;
 		this.ctx = ctx;
 		try {
@@ -170,7 +170,7 @@ public class AppointmentRequest {
 			 * Cannot occur
 			 */
 			LOG.error(e.getLocalizedMessage(), e);
-			user = null;
+			throw new OXException(e);
 		}
 		final String sTimeZone = user.getTimeZone();
 		
@@ -810,8 +810,6 @@ public class AppointmentRequest {
 		
 		Date lastModified = null;
 		
-		SearchIterator it = null;
-		
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		final AppointmentSearchObject searchObj = new AppointmentSearchObject();
 		if (jData.has(AJAXServlet.PARAMETER_INFOLDER)) {
@@ -859,7 +857,8 @@ public class AppointmentRequest {
 		final boolean bRecurrenceMaster = DataParser.parseBoolean(jsonObj, RECURRENCE_MASTER);
 		
 		final JSONArray jsonResponseArray = new JSONArray();
-		
+
+		SearchIterator<?> it = null;
 		try {
 			final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
 			

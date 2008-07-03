@@ -49,6 +49,7 @@
 
 package com.openexchange.ajp13;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketException;
@@ -66,6 +67,7 @@ import com.openexchange.tools.servlet.http.HttpErrorServlet;
 import com.openexchange.tools.servlet.http.HttpServletManager;
 import com.openexchange.tools.servlet.http.HttpServletRequestWrapper;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link AJPv13RequestHandler} - The AJP request handler processes incoming AJP
@@ -532,22 +534,13 @@ public final class AJPv13RequestHandler {
 			/*
 			 * Read all available bytes
 			 */
-			int bytesRead = 0;
-			int bytesAvailable = in.available();
-			final byte[] fillMe = new byte[bytesAvailable];
-			while (bytesRead != -1 && bytesAvailable > 0) {
-				bytesRead = in.read(fillMe, 0, fillMe.length);
-				bytesAvailable = in.available();
-				if (bytes == null) {
-					bytes = new byte[bytesRead];
-					System.arraycopy(fillMe, 0, bytes, 0, bytesRead);
-				} else {
-					final byte[] tmp = bytes;
-					bytes = new byte[tmp.length + bytesRead];
-					System.arraycopy(tmp, 0, bytes, 0, tmp.length);
-					System.arraycopy(fillMe, 0, bytes, tmp.length, bytesRead);
-				}
+			int bytesRead = -1;
+			final ByteArrayOutputStream buf = new UnsynchronizedByteArrayOutputStream(8192);
+			final byte[] fillMe = new byte[8192];
+			while ((bytesRead = in.read(fillMe, 0, fillMe.length)) != -1) {
+				buf.write(fillMe, 0, bytesRead);
 			}
+			bytes = buf.toByteArray();
 		}
 		return bytes;
 	}

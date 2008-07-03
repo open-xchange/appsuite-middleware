@@ -214,7 +214,12 @@ public class Multiple extends SessionServlet {
 		try {
 			if (module.equals(MODULE_CALENDAR)) {
 				writeMailRequest(req);
-				final AppointmentRequest appointmentRequest = new AppointmentRequest(session, ctx);
+				final AppointmentRequest appointmentRequest;
+				try {
+					appointmentRequest = new AppointmentRequest(session, ctx);
+				} catch (final OXException e) {
+					throw new AjaxException(e);
+				}
 				jsonWriter.object();
 				try {
 					final Object tmp = appointmentRequest.action(action, jsonObj);
