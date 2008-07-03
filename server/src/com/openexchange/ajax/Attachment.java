@@ -219,7 +219,7 @@ public class Attachment extends PermissionServlet {
 				unknownAction("GET",action,res,false);
 			}
 			try {
-				ResponseWriter.write(new Response((JSONObject) writer.getObject()), res.getWriter());
+	            ((JSONObject) writer.getObject()).write(res.getWriter());
 			} catch (final JSONException e) {
 				LOG.error(e.getLocalizedMessage(), e);
 			}
@@ -266,7 +266,7 @@ public class Attachment extends PermissionServlet {
 			unknownAction("PUT",action,res,false);
 		}
 		try {
-			ResponseWriter.write(new Response((JSONObject) writer.getObject()), res.getWriter());
+            ((JSONObject) writer.getObject()).write(res.getWriter());
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		}

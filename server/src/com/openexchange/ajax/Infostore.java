@@ -216,7 +216,7 @@ public class Infostore extends PermissionServlet {
 				unknownAction("GET", action, res, false);
 				return;
 			}
-			ResponseWriter.write(new Response((JSONObject) writer.getObject()), res.getWriter());
+			((JSONObject) writer.getObject()).write(res.getWriter());
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		} catch (final OXPermissionException e) {
@@ -248,7 +248,7 @@ public class Infostore extends PermissionServlet {
 				return;
 			}
 			if (writer.isJSONObject()) {
-				ResponseWriter.write(new Response((JSONObject) writer.getObject()), res.getWriter());
+	            ((JSONObject) writer.getObject()).write(res.getWriter());
 			} else if (writer.isJSONArray()) {
 				res.getWriter().print(writer.getObject().toString());
 			}

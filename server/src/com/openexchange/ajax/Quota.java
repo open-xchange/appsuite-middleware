@@ -109,7 +109,7 @@ public class Quota extends SessionServlet {
 			return;
 		}
 		try {
-			Response.write(new Response((JSONObject) writer.getObject()), res.getWriter());
+		    ((JSONObject) writer.getObject()).write(res.getWriter());
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		}
