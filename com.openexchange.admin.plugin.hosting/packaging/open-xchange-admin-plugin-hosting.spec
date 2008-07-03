@@ -107,6 +107,8 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Thu Jul 03 2008 - manuel.kraft@open-xchange.com
+  - Bugfix ID#11539 oxreport does not run any more: "java.lang.NoClassDefFoundError: com/openexchange/admin/console/ReportingTool"
 * Wed Jul 02 2008 - manuel.kraft@open-xchange.com
   - Bugfix ID#11539 oxreport does not run any more: "java.lang.NoClassDefFoundError: com/openexchange/admin/console/ReportingTool"
 * Fri Jun 27 2008 - holgi@open-xchange.com
