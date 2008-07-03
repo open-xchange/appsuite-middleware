@@ -237,6 +237,17 @@ public interface Cache {
 	public void setDefaultElementAttributes(ElementAttributes attr) throws CacheException;
 
 	/**
+	 * This returns the cache statistics with information on this region and its
+	 * auxiliaries.
+	 * <p>
+	 * This data can be formatted as needed.
+	 * 
+	 * @return The cache statistics with information on this region and its
+	 *         auxiliaries.
+	 */
+	public CacheStatistics getStatistics();
+
+	/**
 	 * Creates a new instance of {@link CacheKey} consisting of specified
 	 * context ID and object ID.
 	 * <p>

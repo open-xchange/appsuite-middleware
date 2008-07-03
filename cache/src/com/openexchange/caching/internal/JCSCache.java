@@ -57,7 +57,9 @@ import org.apache.jcs.access.exception.ObjectExistsException;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheStatistics;
 import com.openexchange.caching.ElementAttributes;
+import com.openexchange.caching.internal.cache2jcs.CacheStatistics2JCS;
 import com.openexchange.caching.internal.cache2jcs.ElementAttributes2JCS;
 import com.openexchange.caching.internal.jcs2cache.JCSElementAttributesDelegator;
 
@@ -80,11 +82,6 @@ public final class JCSCache implements Cache {
 		this.cache = cache;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.CacheService#clear()
-	 */
 	public void clear() throws CacheException {
 		try {
 			cache.clear();
@@ -93,29 +90,14 @@ public final class JCSCache implements Cache {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.CacheService#dispose()
-	 */
 	public void dispose() {
 		cache.dispose();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.CacheService#get(java.io.Serializable)
-	 */
 	public Object get(final Serializable key) {
 		return cache.get(key);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.CacheService#getDefaultElementAttributes()
-	 */
 	public ElementAttributes getDefaultElementAttributes() throws CacheException {
 		try {
 			return new ElementAttributes2JCS(cache.getDefaultElementAttributes());
@@ -124,31 +106,14 @@ public final class JCSCache implements Cache {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.CacheService#getFromGroup(java.io.Serializable,
-	 *      java.lang.String)
-	 */
 	public Object getFromGroup(final Serializable key, final String group) {
 		return cache.getFromGroup(key, group);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.CacheService#invalidateGroup(java.lang.String)
-	 */
 	public void invalidateGroup(final String group) {
 		cache.invalidateGroup(group);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.CacheService#put(java.io.Serializable,
-	 *      java.io.Serializable)
-	 */
 	public void put(final Serializable key, final Serializable obj) throws CacheException {
 		try {
 			cache.put(key, obj);
@@ -157,12 +122,6 @@ public final class JCSCache implements Cache {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.CacheService#put(java.io.Serializable,
-	 *      java.io.Serializable, com.openexchange.cache.ElementAttributes)
-	 */
 	public void put(final Serializable key, final Serializable val, final ElementAttributes attr) throws CacheException {
 		try {
 			cache.put(key, val, new JCSElementAttributesDelegator(attr));
@@ -171,12 +130,6 @@ public final class JCSCache implements Cache {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.CacheService#putInGroup(java.io.Serializable,
-	 *      java.lang.String, java.io.Serializable)
-	 */
 	public void putInGroup(final Serializable key, final String groupName, final Serializable value)
 			throws CacheException {
 		try {
@@ -186,13 +139,6 @@ public final class JCSCache implements Cache {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.CacheService#putInGroup(java.io.Serializable,
-	 *      java.lang.String, java.lang.Object,
-	 *      com.openexchange.cache.ElementAttributes)
-	 */
 	public void putInGroup(final Serializable key, final String groupName, final Object value,
 			final ElementAttributes attr) throws CacheException {
 		try {
@@ -202,12 +148,6 @@ public final class JCSCache implements Cache {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.CacheService#putSafe(java.io.Serializable,
-	 *      java.io.Serializable)
-	 */
 	public void putSafe(final Serializable key, final Serializable value) throws CacheException {
 		try {
 			cache.putSafe(key, value);
@@ -218,11 +158,6 @@ public final class JCSCache implements Cache {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.CacheService#remove(java.io.Serializable)
-	 */
 	public void remove(final Serializable key) throws CacheException {
 		try {
 			cache.remove(key);
@@ -231,21 +166,10 @@ public final class JCSCache implements Cache {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.CacheService#removeFromGroup(java.io.Serializable,
-	 *      java.lang.String)
-	 */
 	public void removeFromGroup(final Serializable key, final String group) {
 		cache.remove(key, group);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.cache.CacheService#setDefaultElementAttributes(com.openexchange.cache.ElementAttributes)
-	 */
 	public void setDefaultElementAttributes(final ElementAttributes attr) throws CacheException {
 		try {
 			cache.setDefaultElementAttributes(new JCSElementAttributesDelegator(attr));
@@ -260,5 +184,9 @@ public final class JCSCache implements Cache {
 
 	public CacheKey newCacheKey(final int contextId, final Serializable obj) {
 		return new CacheKeyImpl(contextId, obj);
+	}
+
+	public CacheStatistics getStatistics() {
+		return new CacheStatistics2JCS(cache.getStatistics());
 	}
 }
