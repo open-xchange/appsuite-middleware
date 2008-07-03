@@ -1,3 +1,7 @@
+* 2008-07-03 - marcus.klein@open-xchange.com
+
+ - Bugfix #11558: Fixed problem arised through Response object refactoring.
+
 * 2008-07-03 - francisco.laguna@open-xchange.com
 
  - Bugfix #6927: Allow changing start_date of appointment series.
