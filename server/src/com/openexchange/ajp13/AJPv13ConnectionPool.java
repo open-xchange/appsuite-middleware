@@ -59,7 +59,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class AJPv13ConnectionPool {
+public final class AJPv13ConnectionPool {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13ConnectionPool.class);

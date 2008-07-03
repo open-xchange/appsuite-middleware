@@ -67,7 +67,7 @@ import com.openexchange.tools.servlet.ServletConfigLoader;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AJPv13Server implements Runnable {
+public final class AJPv13Server implements Runnable {
 
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13Server.class);
@@ -199,7 +199,7 @@ public class AJPv13Server implements Runnable {
 		}
 	}
 
-	private final void initializePools() {
+	private void initializePools() {
 		resetPools();
 		AJPv13ListenerPool.initPool();
 		if (AJPv13Config.useAJPConnectionPool()) {
@@ -213,7 +213,7 @@ public class AJPv13Server implements Runnable {
 		}
 	}
 
-	private final void initializeThreadArray() {
+	private void initializeThreadArray() {
 		threadArr = new Thread[AJPv13Config.getAJPServerThreadSize()];
 		final StringBuilder sb = new StringBuilder(32);
 		for (int i = 0; i < threadArr.length; i++) {
@@ -223,7 +223,7 @@ public class AJPv13Server implements Runnable {
 		}
 	}
 
-	private final void resetPools() {
+	private void resetPools() {
 		if (running.get()) {
 			AJPv13ListenerPool.resetPool();
 			if (AJPv13Config.useAJPConnectionPool()) {
@@ -235,7 +235,7 @@ public class AJPv13Server implements Runnable {
 		}
 	}
 
-	public final boolean isRunning() {
+	public boolean isRunning() {
 		return running.get();
 	}
 
