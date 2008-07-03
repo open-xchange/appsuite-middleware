@@ -661,9 +661,9 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
             private void createJSONFromActionCommand(final JSONObject tmp, final ActionCommand actionCommand) throws JSONException {
                 if (null != actionCommand) {
                     if (ActionCommand.Commands.KEEP.equals(actionCommand.getCommand())) {
-                        tmp.put(GeneralFields.ID, ActionCommand.Commands.KEEP.getCommandname());
+                        tmp.put(GeneralFields.ID, ActionCommand.Commands.KEEP.getJsonname());
                     } else if (ActionCommand.Commands.DISCARD.equals(actionCommand.getCommand())) {
-                        tmp.put(GeneralFields.ID, ActionCommand.Commands.DISCARD.getCommandname());
+                        tmp.put(GeneralFields.ID, ActionCommand.Commands.DISCARD.getJsonname());
                     } else {
                         final ArrayList<Object> arguments = actionCommand.getArguments();
                         if (ActionCommand.Commands.REDIRECT.equals(actionCommand.getCommand())) {
@@ -673,9 +673,9 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                         } else if (ActionCommand.Commands.REJECT.equals(actionCommand.getCommand())) {
                             createOneParameterJSON(tmp, arguments, ActionCommand.Commands.REJECT, RejectActionFields.TEXT);
                         } else if (ActionCommand.Commands.STOP.equals(actionCommand.getCommand())) {
-                            tmp.put(GeneralFields.ID, ActionCommand.Commands.STOP.getCommandname());
+                            tmp.put(GeneralFields.ID, ActionCommand.Commands.STOP.getJsonname());
                         } else if (ActionCommand.Commands.VACATION.equals(actionCommand.getCommand())) {
-                            tmp.put(GeneralFields.ID, ActionCommand.Commands.VACATION.getCommandname());
+                            tmp.put(GeneralFields.ID, ActionCommand.Commands.VACATION.getJsonname());
                             final Hashtable<String, List<String>> tagarguments = actionCommand.getTagarguments();
                             final List<String> days = tagarguments.get(VacationActionFields.DAYS.getTagname());
                             if (null != days) {
@@ -691,7 +691,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                             }
                             tmp.put(VacationActionFields.TEXT.getFieldname(), ((List<String>)arguments.get(arguments.size() - 1)).get(0));
                         } else if (ActionCommand.Commands.ADDFLAG.equals(actionCommand.getCommand())) {
-                            tmp.put(GeneralFields.ID, ActionCommand.Commands.ADDFLAG.getCommandname());
+                            tmp.put(GeneralFields.ID, ActionCommand.Commands.ADDFLAG.getJsonname());
                             tmp.put(AddFlagsActionFields.FLAGS, (List<String>)arguments.get(0));
                         }
                     }
