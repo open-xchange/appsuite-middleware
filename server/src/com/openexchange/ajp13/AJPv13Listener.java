@@ -311,7 +311,7 @@ public final class AJPv13Listener implements Runnable {
 					if (null != client) {
 						client.getOutputStream().flush();
 					}
-				}
+				} // End of loop processing an AJP socket's data
 			} catch (final AJPv13SocketClosedException e) {
 				/*
 				 * Just as debug info
