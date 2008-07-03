@@ -65,6 +65,16 @@ public class AjaxException extends AbstractOXException {
 	private static final long serialVersionUID = -171563644613142249L;
 
 	/**
+	 * Initializes a new {@link AjaxException}
+	 * 
+	 * @param cause
+	 *            The init cause
+	 */
+	public AjaxException(final AbstractOXException cause) {
+		super(cause);
+	}
+
+	/**
 	 * Initializes a new exception using the information provided by the code.
 	 * 
 	 * @param code
