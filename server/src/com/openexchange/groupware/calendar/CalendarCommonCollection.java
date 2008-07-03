@@ -95,7 +95,7 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 
-public class CalendarCommonCollection {
+public final class CalendarCommonCollection {
     
     public static final int PRIVATE = 1;
     public static final int PUBLIC = 2;
@@ -107,7 +107,7 @@ public class CalendarCommonCollection {
     private static final String fieldMap[] = new String[409];
     private static final Log LOG = LogFactory.getLog(CalendarCommonCollection.class);
     
-    public static CalendarCache cache;
+    private static CalendarCache cache;
     
     static {
         fieldMap[AppointmentObject.TITLE] = "field01";
@@ -143,11 +143,11 @@ public class CalendarCommonCollection {
     
     private CalendarCommonCollection() { super(); }
     
-    public static final String getFieldName(final int i) throws IndexOutOfBoundsException {
+    public static String getFieldName(final int i) throws IndexOutOfBoundsException {
         return fieldMap[i];
     }
     
-    public static final int getFieldId(final String field) {
+    public static int getFieldId(final String field) {
         int id = -1;
         for (int a = 0; a < fieldMap.length; a++) {
             if (fieldMap[a] != null && fieldMap[a].equalsIgnoreCase(field)) {
@@ -159,7 +159,7 @@ public class CalendarCommonCollection {
     }
     
     
-    public static final boolean checkPermissions(final CalendarDataObject cdao, final Session so, final Context ctx, final Connection readcon, final int action, final int inFolder) throws OXException {
+    public static boolean checkPermissions(final CalendarDataObject cdao, final Session so, final Context ctx, final Connection readcon, final int action, final int inFolder) throws OXException {
         try {
             final OXFolderAccess access = new OXFolderAccess(readcon, cdao.getContext());
             cdao.setFolderType(access.getFolderType(inFolder, so.getUserId()));
@@ -269,7 +269,7 @@ public class CalendarCommonCollection {
         return false;
     }
     
-    public static final boolean getReadPermission(final int oid, final int fid, final Session so, final Context ctx) throws OXException {
+    public static boolean getReadPermission(final int oid, final int fid, final Session so, final Context ctx) throws OXException {
         try {
             final OXFolderAccess access = new OXFolderAccess(ctx);
             final int type = access.getFolderType(fid, so.getUserId());
@@ -291,7 +291,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    public static final boolean getWritePermission(final int oid, final int fid, final Session so, final Context ctx) throws OXException {
+    public static boolean getWritePermission(final int oid, final int fid, final Session so, final Context ctx) throws OXException {
         try {
             final OXFolderAccess access = new OXFolderAccess(ctx);
             final int type = access.getFolderType(fid, so.getUserId());
@@ -313,7 +313,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    private static final boolean loadObjectAndCheckPermisions(final int oid, final int fid, final Session so, final Context ctx, final int type) throws Exception {
+    private static boolean loadObjectAndCheckPermisions(final int oid, final int fid, final Session so, final Context ctx, final int type) throws Exception {
         Connection readcon = null;
         try {
             readcon = DBPool.pickup(ctx);
@@ -333,7 +333,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    static final void checkAndFillIfUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up) {
+    static void checkAndFillIfUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up) {
         final UserParticipant check[] = cdao.getUsers();
         if (check != null && check.length > 0) {
             Arrays.sort(check);
@@ -353,7 +353,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    static final void checkAndConfirmIfUserUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up) {
+    static void checkAndConfirmIfUserUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up) {
         final UserParticipant check[] = cdao.getUsers();
         if (check != null && check.length > 0) {
             Arrays.sort(check);
@@ -369,7 +369,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    static final UserParticipant[] checkAndModifyAlarm(final CalendarDataObject cdao, UserParticipant check[], final int uid,  final UserParticipant orig[]) {
+    static UserParticipant[] checkAndModifyAlarm(final CalendarDataObject cdao, UserParticipant check[], final int uid,  final UserParticipant orig[]) {
         if (cdao.containsAlarm()) {
             final UserParticipant up = new UserParticipant(uid);
             if (check == null) {
@@ -400,7 +400,7 @@ public class CalendarCommonCollection {
         return check;
     }
     
-    static final void simpleParticipantCheck(final CalendarDataObject cdao) throws OXException {
+    static void simpleParticipantCheck(final CalendarDataObject cdao) throws OXException {
         // TODO: Maybe we have to enhance this simple check
         final Participant check[] = cdao.getParticipants();
         if (check != null && check.length > 0) {
@@ -417,7 +417,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    static final void checkAndFillIfUserIsUser(final CalendarDataObject cdao, final Participant p) {
+    static void checkAndFillIfUserIsUser(final CalendarDataObject cdao, final Participant p) {
         final Participant check[] = cdao.getParticipants();
         if (check != null && check.length > 0) {
             Arrays.sort(check);
@@ -434,7 +434,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    static final void removeParticipant(final CalendarDataObject cdao, final int uid) throws OXException {
+    static void removeParticipant(final CalendarDataObject cdao, final int uid) throws OXException {
         final UserParticipant check[] = cdao.getUsers();
         if (check != null && check.length > 0) {
             final UserParticipant ret[] = new UserParticipant[check.length-1];
@@ -454,7 +454,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    static final void removeUserParticipant(final CalendarDataObject cdao, final int uid) throws OXException {
+    static void removeUserParticipant(final CalendarDataObject cdao, final int uid) throws OXException {
     	        final Participant check[] = cdao.getParticipants();
     	        if (check != null && check.length > 0) {
     	            final Participant ret[] = new Participant[check.length-1];
@@ -474,11 +474,11 @@ public class CalendarCommonCollection {
     	        }
     }        
     
-    public static final Date getNextReminderDate(final int oid, final int fid, final Session so) throws OXException, SQLException {
+    public static Date getNextReminderDate(final int oid, final int fid, final Session so) throws OXException, SQLException {
         return getNextReminderDate(oid, fid, so, 0L);
     }
     
-    public static final Date getNextReminderDate(final int oid, final int fid, final Session so, final long last) throws OXException, SQLException {
+    public static Date getNextReminderDate(final int oid, final int fid, final Session so, final long last) throws OXException, SQLException {
         final CalendarSql csql = new CalendarSql(so);
         final CalendarDataObject cdao = csql.getObjectById(oid, fid);
         final int alarm = cdao.getAlarm();
@@ -499,7 +499,7 @@ public class CalendarCommonCollection {
         return null;
     }    
     
-    public static final boolean existsReminder(final Context c, final int oid, final int uid) {
+    public static boolean existsReminder(final Context c, final int oid, final int uid) {
         final ReminderSQLInterface rsql = new ReminderHandler(c);
         try {
             return rsql.existsReminder(oid, uid, Types.APPOINTMENT);
@@ -509,7 +509,7 @@ public class CalendarCommonCollection {
         return false;
     }
     
-    public static final void debugActiveDates(final long start, final long end, final boolean activeDates[]) {
+    public static void debugActiveDates(final long start, final long end, final boolean activeDates[]) {
         System.out.println("\n\nRange : "+new Date(start)+"  -  "+ new Date(end));
         int a = 1;
         long s = start;
@@ -528,7 +528,7 @@ public class CalendarCommonCollection {
         System.out.println("\n\n\n");
     }
     
-    public static final void debugRecurringResult(final RecurringResult rr) {
+    public static void debugRecurringResult(final RecurringResult rr) {
         if (LOG.isDebugEnabled()) {
             LOG.debug(Integer.valueOf(rr.getPosition()));
             LOG.debug(" : ");
@@ -539,7 +539,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    public static final String getUniqueCalendarSessionName() {
+    public static String getUniqueCalendarSessionName() {
         if (unique_session_int == Integer.MAX_VALUE) {
             unique_session_int = 0;
         }
@@ -547,7 +547,7 @@ public class CalendarCommonCollection {
         return calendar_session_name + unique_session_int;
     }
     
-    public static final int[] checkAndAlterCols(int cols[]) {
+    public static int[] checkAndAlterCols(int cols[]) {
         boolean RECURRENCE_TYPE = false;
         boolean CHANGE_EXCEPTIONS = false;
         boolean DELETE_EXCEPTIONS = false;
@@ -581,7 +581,7 @@ public class CalendarCommonCollection {
         return cols;
     }
     
-    public static final int[] enhanceCols(final int cols[], final int ara[], final int i) {
+    public static int[] enhanceCols(final int cols[], final int ara[], final int i) {
         final int ncols[] = new int[cols.length+i];
         System.arraycopy(cols, 0, ncols, 0, cols.length);
         for (int a = 0; a < i; a++)  {
@@ -590,36 +590,36 @@ public class CalendarCommonCollection {
         return ncols;
     }
     
-    public static final void triggerEvent(final Session session, final int action, final AppointmentObject appointmentobject) throws OXException {
+    public static void triggerEvent(final Session session, final int action, final AppointmentObject appointmentobject) throws OXException {
         final EventClient eventclient = new EventClient(session);
         switch (action) {
             case CalendarOperation.INSERT:
                 try {
                     eventclient.create(appointmentobject); // TODO
                 } catch (final Exception e) {
-                    throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, 16);
+                    throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(16));
                 }
                 break;
             case CalendarOperation.UPDATE:
                 try {
                     eventclient.modify(appointmentobject); // TODO
                 } catch (final Exception e) {
-                    throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, 17);
+                    throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(17));
                 }
                 break;
             case CalendarOperation.DELETE:
                 try {
                     eventclient.delete(appointmentobject); // TODO
                 } catch (final Exception e) {
-                    throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, 18);
+                    throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(18));
                 }
                 break;
             default:
-                throw new OXCalendarException(OXCalendarException.Code.UNSUPPORTED_ACTION_TYPE, action);
+                throw new OXCalendarException(OXCalendarException.Code.UNSUPPORTED_ACTION_TYPE, Integer.valueOf(action));
         }
     }
     
-    public static final String getSQLInStringForParticipants(final UserParticipant[] userParticipant) {
+    public static String getSQLInStringForParticipants(final UserParticipant[] userParticipant) {
         final StringBuilder sb = new StringBuilder(32);
         if (userParticipant != null && userParticipant.length > 0) {
             sb.append('(');
@@ -638,7 +638,7 @@ public class CalendarCommonCollection {
         return sb.toString();
     }
     
-    public static final String getSQLInStringForParticipants(final Participant[] participant) {
+    public static String getSQLInStringForParticipants(final Participant[] participant) {
         final StringBuilder sb = new StringBuilder(32);
         if (participant != null && participant.length > 0) {
             sb.append('(');
@@ -657,7 +657,7 @@ public class CalendarCommonCollection {
         return sb.toString();
     }
     
-    public static final String getSQLInStringForResources(final Participant[] participant) {
+    public static String getSQLInStringForResources(final Participant[] participant) {
         final  StringBuilder sb = new StringBuilder(32);
         boolean containsResources = false;
         if (participant != null && participant.length > 0) {
@@ -689,23 +689,23 @@ public class CalendarCommonCollection {
         return sb.toString();
     }
     
-    public static final boolean inBetween(final long check_start, final long check_end, final long range_start, final long range_end) {
+    public static boolean inBetween(final long check_start, final long check_end, final long range_start, final long range_end) {
         if (check_start <= range_start  && check_start >= range_start) { return true; } else if (check_start >= range_start && check_end <= range_end) { return true; } else if (check_start > range_start && check_end > range_end && check_start < range_end) { return true; } else if (check_start < range_start && check_end > range_start && check_start < range_end) { return true; }
         return false;
     }
     
-    public static final Date[] convertString2Dates(final String s) {
+    public static Date[] convertString2Dates(final String s) {
         Date d[] = null;
         final StringTokenizer stok = new StringTokenizer(s, ", ");
         d = new Date[stok.countTokens()];
         int c = 0;
         while (stok.hasMoreTokens()) {
-            d[c++] = new Date(Long.valueOf(stok.nextToken()));
+            d[c++] = new Date(Long.valueOf(stok.nextToken()).longValue());
         }
         return d;
     }
     
-    public static final String convertDates2String(final Date[] d) {
+    public static String convertDates2String(final Date[] d) {
         if (d != null && d.length > 0) {
             final StringBuilder sb = new StringBuilder(32);
             Arrays.sort(d);
@@ -731,7 +731,7 @@ public class CalendarCommonCollection {
         return null;
     }
     
-    public static final boolean check(final Object a, final Object b) {
+    public static boolean check(final Object a, final Object b) {
         if (a == b) {
             return false;
         }
@@ -741,78 +741,58 @@ public class CalendarCommonCollection {
         return true;
     }
     
-    public static final CalendarFolderObject getVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException, DBPoolingException, SearchIteratorException, OXException {
-        
-        CalendarFolderObject cfo = null;
-        final CalendarFolderObject check = new CalendarFolderObject(uid, c.getContextId(), false);
-        Object o = null;
-        if (cache == null) {
-            cache = CalendarCache.getInstance();
-        }
-        
-        o = cache.get(check.getObjectKey(), check.getGroupKey());
-        
-        if (o != null) {
-            cfo = (CalendarFolderObject)o;
-        } else {
-            final SearchIterator si = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(uid, groups, uc.getAccessibleModules(), FolderObject.CALENDAR, c);
-            EffectivePermission oclp = null;
-            FolderObject fo = null;
-            try {
-                cfo = new CalendarFolderObject(uid, c.getContextId(), false);
-                while (si.hasNext()) {
-                    fo  = (FolderObject)si.next();
-                    oclp = fo.getEffectiveUserPermission(uid, uc);
-                    cfo.addFolder(oclp.canReadAllObjects(), oclp.canReadOwnObjects(), fo.isShared(uid), fo.getObjectID(), fo.getType());
-                }
-                try {
-                    cache.add(cfo.getObjectKey(), cfo.getGroupKey(), cfo);
-                } catch (final CacheException ex) {
-                    LOG.error(ex.getMessage(), ex);
-                }
-            } finally {
-                si.close();
-            }
-        }
-        return cfo;
-    }
+    public static CalendarFolderObject getVisibleAndReadableFolderObject(final int uid, final int groups[],
+			final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException,
+			DBPoolingException, SearchIteratorException, OXException {
+    	return _getVisibleAndReadableFolderObject(uid, groups, c, uc, readcon, false);
+	}
+
+	public static CalendarFolderObject getAllVisibleAndReadableFolderObject(final int uid, final int groups[],
+			final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException,
+			DBPoolingException, SearchIteratorException, OXException {
+		return _getVisibleAndReadableFolderObject(uid, groups, c, uc, readcon, true);
+	}
+
+	private static CalendarFolderObject _getVisibleAndReadableFolderObject(final int uid, final int groups[],
+			final Context c, final UserConfiguration uc, final Connection readcon, final boolean fillShared) throws SQLException,
+			DBPoolingException, SearchIteratorException, OXException {
+		CalendarFolderObject cfo = null;
+		final CalendarFolderObject check = new CalendarFolderObject(uid, c.getContextId(), fillShared);
+		Object o = null;
+		if (cache == null) {
+			cache = CalendarCache.getInstance();
+		}
+
+		o = cache.get(check.getObjectKey(), check.getGroupKey());
+
+		if (o == null) {
+			final SearchIterator<FolderObject> si = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(uid,
+					groups, uc.getAccessibleModules(), FolderObject.CALENDAR, c, readcon);
+			EffectivePermission oclp = null;
+			FolderObject fo = null;
+			try {
+				cfo = new CalendarFolderObject(uid, c.getContextId(), fillShared);
+				while (si.hasNext()) {
+					fo = si.next();
+					oclp = fo.getEffectiveUserPermission(uid, uc);
+					cfo.addFolder(oclp.canReadAllObjects(), oclp.canReadOwnObjects(), fo.isShared(uid), fo
+							.getObjectID(), fo.getType());
+				}
+				try {
+					cache.add(cfo.getObjectKey(), cfo.getGroupKey(), cfo);
+				} catch (final CacheException ex) {
+					LOG.error(ex.getMessage(), ex);
+				}
+			} finally {
+				si.close();
+			}
+		} else {
+			cfo = (CalendarFolderObject) o;
+		}
+		return cfo;
+	}
     
-    public static final CalendarFolderObject getAllVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException, DBPoolingException, SearchIteratorException, OXException {
-        CalendarFolderObject cfo = null;
-        final CalendarFolderObject check = new CalendarFolderObject(uid, c.getContextId(), true);
-        Object o = null;
-        if (cache == null) {
-            cache = CalendarCache.getInstance();
-        }
-        
-        o = cache.get(check.getObjectKey(), check.getGroupKey());
-        
-        if (o != null) {
-            cfo = (CalendarFolderObject)o;
-        } else {
-            final SearchIterator si = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(uid, groups, uc.getAccessibleModules(), FolderObject.CALENDAR, c);
-            EffectivePermission oclp = null;
-            FolderObject fo = null;
-            try {
-                cfo = new CalendarFolderObject(uid, c.getContextId(), true);
-                while (si.hasNext()) {
-                    fo  = (FolderObject)si.next();
-                    oclp = fo.getEffectiveUserPermission(uid, uc);
-                    cfo.addFolder(oclp.canReadAllObjects(), oclp.canReadOwnObjects(), fo.isShared(uid), fo.getObjectID(), fo.getType());
-                }
-                try {
-                    cache.add(cfo.getObjectKey(), cfo.getGroupKey(), cfo);
-                } catch (final CacheException ex) {
-                    LOG.error(ex.getMessage(), ex);
-                }
-            } finally {
-                si.close();
-            }
-        }
-        return cfo;
-    }
-    
-    public static final void getVisibleFolderSQLInString(final StringBuilder sb, final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException, OXException, OXCalendarException {
+    public static void getVisibleFolderSQLInString(final StringBuilder sb, final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException, OXException, OXCalendarException {
         CalendarFolderObject cfo = null;
         try {
             cfo = CalendarCommonCollection.getVisibleAndReadableFolderObject(uid, groups, c, uc, readcon);
@@ -886,7 +866,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    static final Date[] removeException(final Date[] date, final Date d) {
+    static Date[] removeException(final Date[] date, final Date d) {
         if (date != null && date.length > 0) {
             final Date ret[] = new Date[date.length-1];
             int x = 0;
@@ -904,7 +884,7 @@ public class CalendarCommonCollection {
         return null;
     }
     
-    static final CalendarDataObject fillObject(final CalendarDataObject source, final CalendarDataObject destination) {
+    static CalendarDataObject fillObject(final CalendarDataObject source, final CalendarDataObject destination) {
         if (source.containsTitle()) {
             destination.setTitle(source.getTitle());
         }
@@ -947,7 +927,7 @@ public class CalendarCommonCollection {
         return destination;
     }
     
-    static final void removeFieldsFromObject(final CalendarDataObject cdao) {
+    static void removeFieldsFromObject(final CalendarDataObject cdao) {
         cdao.removeTitle();
         cdao.removeLocation();
         cdao.removeShownAs();
@@ -967,21 +947,21 @@ public class CalendarCommonCollection {
         cdao.removeRecurrenceCount();
     }
     
-    static final void purgeExceptionFieldsFromObject(final CalendarDataObject cdao) {
+    static void purgeExceptionFieldsFromObject(final CalendarDataObject cdao) {
         cdao.setRecurrenceID(0);
         cdao.setRecurrencePosition(0);
         cdao.setRecurrence(null);
     }
     
-    public static final boolean isInThePast(final java.sql.Date check) {
+    public static boolean isInThePast(final java.sql.Date check) {
         return checkMillisInThePast(check.getTime());
     }
     
-    public static final boolean isInThePast(final java.util.Date check) {
+    public static boolean isInThePast(final java.util.Date check) {
         return checkMillisInThePast(check.getTime());
     }
     
-    static final boolean checkMillisInThePast(final long check) {
+    static boolean checkMillisInThePast(final long check) {
         final long today = CalendarRecurringCollection.normalizeLong(System.currentTimeMillis());
         return check < today;
     }
@@ -996,7 +976,7 @@ public class CalendarCommonCollection {
         return dest;
     }
     
-    static final void executeStatement(final String statement, final Object[] fields , final int[] types, Connection writecon, final Context context) throws SQLException, OXException {
+    static void executeStatement(final String statement, final Object[] fields , final int[] types, Connection writecon, final Context context) throws SQLException, OXException {
         boolean close_write = false;
         try {
             if (writecon == null) {
@@ -1030,14 +1010,14 @@ public class CalendarCommonCollection {
         }
     }
     
-    static final void removeRecurringType(final CalendarDataObject cdao) {
+    static void removeRecurringType(final CalendarDataObject cdao) {
         cdao.setRecurrenceType(CalendarDataObject.NONE);
         cdao.removeInterval();
         cdao.removeUntil();
         cdao.removeOccurrence();
     }
     
-    public static final void closeResultSet(final ResultSet rs) {
+    public static void closeResultSet(final ResultSet rs) {
         if (rs != null) {
             try {
                 rs.close();
@@ -1047,7 +1027,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    public static final void  closePreparedStatement(final PreparedStatement prep) {
+    public static void  closePreparedStatement(final PreparedStatement prep) {
         if (prep != null) {
             try {
                 prep.close();
@@ -1057,7 +1037,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    public static final void closeStatement(final Statement stmt) {
+    public static void closeStatement(final Statement stmt) {
         if (stmt != null) {
             try {
                 stmt.close();
@@ -1136,7 +1116,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    static final void checkUserParticipantObject(final UserParticipant up, final int folder_type) throws OXException {
+    static void checkUserParticipantObject(final UserParticipant up, final int folder_type) throws OXException {
         if (up.getIdentifier() < 1) {
             throw new OXCalendarException(OXCalendarException.Code.INTERNAL_USER_PARTICIPANT_CHECK_1, up.getIdentifier(), folder_type);
         } else if ((folder_type == FolderObject.PRIVATE || folder_type == FolderObject.SHARED) && up.getPersonalFolderId() < 1) {
@@ -1146,7 +1126,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    static final boolean detectTimeChange(final CalendarDataObject cdao, final CalendarDataObject edao) {
+    static boolean detectTimeChange(final CalendarDataObject cdao, final CalendarDataObject edao) {
         if (cdao.containsStartDate() && cdao.containsEndDate()) {
             if (cdao.getStartDate().getTime() != edao.getStartDate().getTime() || cdao.getEndDate().getTime() != edao.getEndDate().getTime()) {
                 return true;
@@ -1155,7 +1135,7 @@ public class CalendarCommonCollection {
         return false;
     }
     
-    static final int resolveFolderIDForUser(final int oid, final int uid, final Context c) throws OXException {
+    static int resolveFolderIDForUser(final int oid, final int uid, final Context c) throws OXException {
         int ret = -1;
         final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
         Connection readcon = null;
@@ -1200,7 +1180,7 @@ public class CalendarCommonCollection {
         return ret;
     }
     
-    static final void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final UserParticipant[] new_userparticipants, final UserParticipant[] deleted_userparticipants, Participant p_event[], final Participant new_participants[], final Participant deleted_participants[]) {
+    static void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final UserParticipant[] new_userparticipants, final UserParticipant[] deleted_userparticipants, Participant p_event[], final Participant new_participants[], final Participant deleted_participants[]) {
         final Participants pu = new Participants();
         final Participants p = new Participants();
         final UserParticipant oup[] = edao.getUsers();
@@ -1282,7 +1262,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    public static final CalendarDataObject getDAOFromList(final ArrayList al, final int oid) {
+    public static CalendarDataObject getDAOFromList(final ArrayList al, final int oid) {
         CalendarDataObject cdao = null;
         for (int a = 0; a < al.size(); a++) {
             cdao = (CalendarDataObject) al.get(a);

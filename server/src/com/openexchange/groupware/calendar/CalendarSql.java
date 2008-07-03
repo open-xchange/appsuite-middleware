@@ -71,8 +71,10 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
@@ -989,14 +991,27 @@ public class CalendarSql implements AppointmentSQLInterface {
                 cols = CalendarCommonCollection.checkAndAlterCols(cols);
                 CalendarFolderObject cfo = null;
                 try {
-                    cfo = CalendarCommonCollection.getVisibleAndReadableFolderObject(session.getUserId(), user.getGroups(), ctx, userConfig, readcon);
+                    cfo = CalendarCommonCollection.getAllVisibleAndReadableFolderObject(session.getUserId(), user.getGroups(), ctx, userConfig, readcon);
                 } catch (final DBPoolingException dbpe) {
                     throw new OXException(dbpe);
                 } catch (final SearchIteratorException sie) {
                     throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sie, Integer.valueOf(1));
                 }
                 readcon = DBPool.pickup(ctx);
-                prep = cimp.getSearchQuery(StringCollection.getSelect(cols, DATES_TABLE_NAME), session.getUserId(), user.getGroups(), userConfig, orderBy, orderDir, searchobject, ctx, readcon, cfo);
+                final int userId;
+                final int[] groups;
+                final UserConfiguration uc;
+                final OXFolderAccess folderAccess = new OXFolderAccess(readcon, ctx);
+                if (searchobject.getFolder() > 0 && folderAccess.isFolderShared(searchobject.getFolder(), session.getUserId())) {
+                	userId = folderAccess.getFolderOwner(searchobject.getFolder());
+                	groups = UserStorage.getStorageUser(userId, ctx).getGroups();
+                	uc = UserConfigurationStorage.getInstance().getUserConfiguration(userId, groups, ctx);
+                } else {
+                	userId = session.getUserId();
+                	groups = user.getGroups();
+                	uc = userConfig;
+                }
+                prep = cimp.getSearchQuery(StringCollection.getSelect(cols, DATES_TABLE_NAME), userId, groups, uc, orderBy, orderDir, searchobject, ctx, readcon, cfo);
                 rs = cimp.getResultSet(prep);
                 co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
                 close_connection = false;

@@ -1,3 +1,7 @@
+* 2008-07-03 - thorben.betten@open-xchange.com
+
+ - Bugfix #11499: Fixed search for appointments in a shared folder
+
 * 2008-07-03 - marcus.klein@open-xchange.com
 
  - Bugfix #11558: Fixed problem arised through Response object refactoring.
