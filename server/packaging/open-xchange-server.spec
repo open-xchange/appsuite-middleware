@@ -126,9 +126,77 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Jul 02 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11016: Renamed xml attribute for deleted groups and resources.
+   Additionally sending old values for compatibility. This will be removed after
+   some time.
+* Wed Jul 02 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11528: Denying editing of system contact's primary email address
+* Tue Jul 01 2008 - thorben.betten@open-xchange.com
+ - Bugfix #10803: Immediate update of links on object modification (move,
+   deletion, etc.)
+ - Bugfix #11538: Added possibility to define login/password for
+   authenticating connect to JMX agent
+ - Bugfix #9746: More tolerant parsing of date/time values by allowing
+   escaped colons
+ - Bugfix #9768: Properly setting private flag if VCard's "CLASS" property
+   is set to "CONFIDENTIAL" or "PRIVATE"
+* Mon Jun 30 2008 - choeger@open-xchange.com
+ - Bugfix #11527: packages providing the same functionality should conflict
+   added conflicts for authentication and spamhandler bundles
+* Mon Jun 30 2008 - thorben.betten@open-xchange.com
+ - Bugfix #9987: Remembering a timed-out IMAP server as being temporary
+   down on a failed connect attempt for a configurable amount of time and
+   denying every request to affected IMAP for that time range.
+ - Bugfix #9964: Applied support for different mail quota resources to JSON
+   interface
+ - Bugfix #10649: Added new property to limit number of concurrent sessions
+   per user.
+* Mon Jun 30 2008 - marcus.klein@open-xchange.com
+ - Bugfix #10743: This is a special case of problem described in bug 11250 and
+   it is fixed with fix for bug 11250.
+ - Bugfix #11524: Polling java.util.concurrent.DelayQueue without timeout to
+   workaround a bug in this class not fixed in currently IBM Java 5.0.7.
+ - Bugfix #11423: Verified that all cache puts for contexts are located inside
+   a lock.
+* Mon Jun 30 2008 - dennis.sieben@open-xchange.com
+ - Bugfix #11534: mailfilter: ox set vacation rule generates sieve error
+* Fri Jun 27 2008 - marcus.klein@open-xchange.com
+ - Bugfix #7475: This bug has been fixed with the fix for bug #4778.
+* Fri Jun 27 2008 - dennis.sieben@open-xchange.com
+ - Bugfix #11519: sieve filter could not be saved
+* Fri Jun 27 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11515: Properly detecting null value as user's mail login and
+   throwing an appropriate exception
+* Thu Jun 26 2008 - marcus.klein@open-xchange.com
+ - Bugfix #9774: Removed setting task series until date to MAX_VALUE. This may
+   break recurrence calculation.
+ - Bugfix #10222: Marked configjump.properties as configuration file to prevent
+   overwriting an edited file.
+ - Bugfix #11311: Writing long values as strings in JSON. This fixes problem with
+   big long values.
+ - Bugfix #11300: Added missing activator for generic ConfigJump.
+* Thu Jun 26 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #11298: Ask OXFolderAccess only if a folder is public / private. Ignore share state.
+ - Bugfix #11237: Corrected control flow if management service is unavailable.
+ - Bugfix #11465: Fallback to external participants eMail adress when the display name is not set.
+ - Bugfix #11187 and #11467: Accept both an array of objects that must be deleted and a single object.
+* Thu Jun 26 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11221: Checking array size prior to composing a SQL "IN (xxx)"
+   string with StringCollection utility class which returns null if array
+   parameter is empty.
+ - Bugfix #11180: Deleting appointment reminders on user deletion
+* Thu Jun 26 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #11051: Ask OXFolderAccess only if a folder is public / private. Ignore share state.
 * Wed Jun 25 2008 - francisco.laguna@open-xchange.com
  - Bugfix #11307: Skip recurrence calculation when changing a series into a single appointment.
  - Bugfix #11333: Having a private calendar folder where the user could only see his own objects led to a SQL Error.
+ - Bugfix #11349: If a conflicting appointment is in a shared folder, which is readable, provide the title in the
+                   conflict.
+ - Bugfix #4778 (sic!): Supply title in GUIs freebusy query.
+* Wed Jun 25 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11195: Detecting duplicate task folder for user now correct when
+   moving task.
 * Tue Jun 24 2008 - francisco.laguna@open-xchange.com
  - Bugfix #11399: Change delete and detach calls in inforstore to match the HTTP-API.
  - Bugfix #11424: Autoaccept for shared folder owner when an appointment is modified.
