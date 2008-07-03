@@ -54,6 +54,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
+import com.openexchange.groupware.AbstractOXException.Truncated;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.tools.RandomString;
 
@@ -93,12 +95,14 @@ public class TruncationTest extends AbstractTaskTest {
         assertTrue("Server did not detect truncated data.", response
             .hasError());
         assertTrue("Array of truncated attribute identifier is empty.", response
-            .getTruncatedIds().length > 0);
+            .getProblematics().length > 0);
         final StringBuilder sb = new StringBuilder();
         sb.append("Truncated attribute identifier: [");
-        for (final int i : response.getTruncatedIds()) {
-            sb.append(i);
-            sb.append(',');
+        for (final ProblematicAttribute problematic : response.getProblematics()) {
+            if (problematic instanceof Truncated) {
+                sb.append(((Truncated) problematic).getId());
+                sb.append(',');
+            }
         }
         sb.setCharAt(sb.length() - 1, ']');
         LOG.info(sb.toString());

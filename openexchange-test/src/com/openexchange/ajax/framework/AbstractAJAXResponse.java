@@ -55,6 +55,7 @@ import junit.framework.Assert;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
 
 /**
  * This class implements inheritable methods for AJAX responses.
@@ -147,7 +148,7 @@ public abstract class AbstractAJAXResponse extends Assert {
 		return response.getException();
 	}
 
-	public int[] getTruncatedIds() {
-		return response.getException().getTruncatedIds();
+	public ProblematicAttribute[] getProblematics() {
+	    return response.getException().getProblematics();
 	}
 }

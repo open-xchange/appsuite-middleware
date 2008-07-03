@@ -292,7 +292,7 @@ public abstract class AbstractAJAXTest extends TestCase {
 	}
 	
 	public static void assertNoError(final Response res) {
-		assertFalse(res.getErrorMessage()+" : "+res.getErrorParams(),res.hasError());
+		assertFalse(res.getErrorMessage(), res.hasError());
 	}
 
     public static JSONObject extractFromCallback(final String html) throws JSONException {

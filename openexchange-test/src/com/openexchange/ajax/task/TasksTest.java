@@ -339,7 +339,7 @@ public class TasksTest extends AbstractAJAXTest {
         final Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
         final Date lastModified = response.getTimestamp();
-        final JSONObject reload = response.getResponseData();
+        final JSONObject reload = (JSONObject) response.getData();
         final JSONArray users = reload.getJSONArray("users");
         boolean confirmed = false;
         for (int i = 0; i < users.length(); i++) {
