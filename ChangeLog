@@ -1,3 +1,7 @@
+* 2008-07-03 - manuel.kraft@open-xchange.com
+
+  - Bugfix ID#11539 oxreport does not run any more: "java.lang.NoClassDefFoundError: com/openexchange/admin/console/ReportingTool"
+
 * 2008-07-02 - manuel.kraft@open-xchange.com
 
   - Bugfix ID#11539 oxreport does not run any more: "java.lang.NoClassDefFoundError: com/openexchange/admin/console/ReportingTool"
