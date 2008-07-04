@@ -75,7 +75,7 @@ public final class MessageDataSource implements DataSource {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MessageDataSource.class);
 
-	private static final int DEFAULT_BUF_SIZE = 0x2000;
+	private static final int DEFAULT_BUF_SIZE = 0x1000;
 
 	private final byte[] data;
 
@@ -103,9 +103,7 @@ public final class MessageDataSource implements DataSource {
 	public MessageDataSource(final InputStream inputStream, final String contentType, final String name)
 			throws IOException {
 		this.contentType = contentType;
-		final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
-		copyStream(inputStream, baos);
-		data = baos.toByteArray();
+		data = copyStream(inputStream);
 		this.name = name;
 	}
 
@@ -186,22 +184,18 @@ public final class MessageDataSource implements DataSource {
 		return name;
 	}
 
-	protected static void copyStream(final InputStream inputStream, final ByteArrayOutputStream outputStream)
-			throws IOException {
+	protected static byte[] copyStream(final InputStream inputStream) throws IOException {
 		try {
+			final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
 			final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
 			int len;
 			while ((len = inputStream.read(bbuf, 0, bbuf.length)) != -1) {
-				outputStream.write(bbuf, 0, len);
+				baos.write(bbuf, 0, len);
 			}
+			return baos.toByteArray();
 		} finally {
 			try {
 				inputStream.close();
-			} catch (final IOException e) {
-				LOG.error(e.getLocalizedMessage(), e);
-			}
-			try {
-				outputStream.close();
 			} catch (final IOException e) {
 				LOG.error(e.getLocalizedMessage(), e);
 			}
