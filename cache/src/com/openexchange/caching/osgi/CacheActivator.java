@@ -56,7 +56,10 @@ import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.openexchange.caching.CacheInformationMBean;
 import com.openexchange.caching.CacheService;
@@ -86,6 +89,8 @@ public final class CacheActivator extends DeferredActivator {
 
 	private ObjectName objectName;
 
+	private ServiceTracker tracker;
+
 	/**
 	 * Initializes a new {@link CacheActivator}
 	 */
@@ -95,7 +100,7 @@ public final class CacheActivator extends DeferredActivator {
 		dictionary.put("name", "oxcache");
 	}
 
-	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, ManagementService.class };
+	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
 
 	@Override
 	protected Class<?>[] getNeededServices() {
@@ -104,13 +109,6 @@ public final class CacheActivator extends DeferredActivator {
 
 	@Override
 	protected void handleUnavailability(final Class<?> clazz) {
-		if (ManagementService.class.equals(clazz)) {
-			try {
-				unregisterCacheMBean();
-			} catch (final ManagementException e) {
-				LOG.error(e.getMessage(), e);
-			}
-		}
 	}
 
 	@Override
@@ -118,61 +116,75 @@ public final class CacheActivator extends DeferredActivator {
 		/*
 		 * TODO: Reconfigure with newly available configuration service?
 		 */
-		if (ManagementService.class.equals(clazz)) {
-			try {
-				registerCacheMBean();
-			} catch (final MalformedObjectNameException e) {
-				LOG.error(e.getMessage(), e);
-			} catch (final ManagementException e) {
-				LOG.error(e.getMessage(), e);
-			} catch (final NotCompliantMBeanException e) {
-				LOG.error(e.getMessage(), e);
-			}
-		}
 	}
 
 	@Override
 	protected void startBundle() throws Exception {
 		JCSCacheServiceInit.getInstance().start(getService(ConfigurationService.class));
 		/*
-		 * Register MBean
-		 */
-		registerCacheMBean();
-		/*
 		 * Register service
 		 */
 		serviceRegistration = context.registerService(CacheService.class.getName(), JCSCacheService.getInstance(),
 				dictionary);
+		tracker = new ServiceTracker(context, ManagementService.class.getName(),
+		    new ServiceTrackerCustomizer() {
+            public Object addingService(final ServiceReference reference) {
+                final ManagementService management = (ManagementService) context.getService(reference);
+                registerCacheMBean(management);
+                return management;
+            }
+            public void modifiedService(final ServiceReference reference,
+                final Object service) {
+                // Nothing to do.
+            }
+            public void removedService(final ServiceReference reference,
+                final Object service) {
+                final ManagementService management = (ManagementService) service;
+                unregisterCacheMBean(management);
+                context.ungetService(reference);
+            }
+		});
+		tracker.open();
 	}
 
 	@Override
-	protected void stopBundle() throws Exception {
-		try {
-			/*
-			 * Unregister MBean
-			 */
-			unregisterCacheMBean();
-			/*
-			 * Stop cache
-			 */
-			JCSCacheServiceInit.getInstance().stop();
-		} finally {
-			serviceRegistration.unregister();
-		}
+	protected void stopBundle() {
+	    if (null != serviceRegistration) {
+	        serviceRegistration.unregister();
+	        serviceRegistration = null;
+	    }
+	    if (null != tracker) {
+	        tracker.close();
+	        tracker = null;
+	    }
+		/*
+		 * Stop cache
+		 */
+		JCSCacheServiceInit.getInstance().stop();
 	}
 
-	private void registerCacheMBean() throws MalformedObjectNameException, ManagementException, NotCompliantMBeanException {
+	private void registerCacheMBean(final ManagementService management) {
 		if (objectName == null) {
-			objectName = getObjectName(JCSCacheInformation.class.getName(), CacheInformationMBean.CACHE_DOMAIN);
-			getService(ManagementService.class).registerMBean(objectName, new JCSCacheInformation());
+            try {
+    			objectName = getObjectName(JCSCacheInformation.class.getName(), CacheInformationMBean.CACHE_DOMAIN);
+    			management.registerMBean(objectName, new JCSCacheInformation());
+            } catch (final MalformedObjectNameException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final NotCompliantMBeanException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final ManagementException e) {
+                LOG.error(e.getMessage(), e);
+            }
 		}
 	}
 
-	private void unregisterCacheMBean() throws ManagementException {
+	private void unregisterCacheMBean(final ManagementService management) {
 		if (objectName != null) {
 			try {
-				getService(ManagementService.class).unregisterMBean(objectName);
-			} finally {
+				management.unregisterMBean(objectName);
+			} catch (final ManagementException e) {
+                LOG.error(e.getMessage(), e);
+            } finally {
 				objectName = null;
 			}
 		}
@@ -193,7 +205,7 @@ public final class CacheActivator extends DeferredActivator {
 	private static ObjectName getObjectName(final String className, final String domain)
 			throws MalformedObjectNameException {
 		final int pos = className.lastIndexOf('.');
-		return new ObjectName(CacheInformationMBean.CACHE_DOMAIN, "name", pos == -1 ? className : className.substring(pos + 1));
+		return new ObjectName(domain, "name", pos == -1 ? className : className.substring(pos + 1));
 	}
 
 }
