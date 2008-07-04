@@ -116,7 +116,6 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
@@ -168,13 +167,6 @@ public class Folder extends SessionServlet {
 
 	private static final String STRING_DELETED = "deleted";
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest
-	 * , javax.servlet.http.HttpServletResponse)
-	 */
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -187,13 +179,6 @@ public class Folder extends SessionServlet {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest
-	 * , javax.servlet.http.HttpServletResponse)
-	 */
 	@Override
 	protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -276,9 +261,8 @@ public class Folder extends SessionServlet {
 
 	private final void actionGetRoot(final HttpServletRequest req, final HttpServletResponse resp)
 			throws JSONException, IOException {
-		ResponseWriter.write(
-				actionGetRoot(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.FOLDER, resp)), resp
-						.getWriter());
+		ResponseWriter.write(actionGetRoot(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.FOLDER,
+				resp)), resp.getWriter());
 	}
 
 	/**
@@ -360,8 +344,9 @@ public class Folder extends SessionServlet {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final Exception e) {
-			LOG.error("actionGetRoot", e);
-			response.setException(getWrappingOXException(e));
+			final AbstractOXException wrapper = getWrappingOXException(e);
+			LOG.error(wrapper.getMessage(), wrapper);
+			response.setException(wrapper);
 		}
 		/*
 		 * Close response and flush print writer
@@ -379,11 +364,11 @@ public class Folder extends SessionServlet {
 	 * @param w
 	 * @param requestObj
 	 * @throws JSONException
-	 * @throws SearchIteratorException
 	 */
 	public void actionGetSubfolders(final Session session, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		ResponseWriter.write(actionGetSubfolders(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
+		ResponseWriter.write(
+				actionGetSubfolders(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
 	}
 
 	private final void actionGetSubfolders(final HttpServletRequest req, final HttpServletResponse resp)
@@ -843,7 +828,6 @@ public class Folder extends SessionServlet {
 				try {
 					sharedOwner = Integer.parseInt(parentIdentifier.substring(2));
 				} catch (final NumberFormatException exc) {
-					LOG.error(exc.getMessage(), exc);
 					throw getWrappingOXException(exc);
 				}
 				final FolderFieldWriter[] writers = folderWriter.getFolderFieldWriter(columns);
@@ -923,8 +907,9 @@ public class Folder extends SessionServlet {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final Exception e) {
-			LOG.error("actionGetSubfolders", e);
-			response.setException(getWrappingOXException(e));
+			final AbstractOXException wrapper = getWrappingOXException(e);
+			LOG.error(wrapper.getMessage(), wrapper);
+			response.setException(wrapper);
 		}
 		/*
 		 * Close response and flush print writer
@@ -940,7 +925,6 @@ public class Folder extends SessionServlet {
 	 * root folder
 	 * 
 	 * @throws JSONException
-	 * @throws SearchIteratorException
 	 */
 	public void actionGetPath(final Session session, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
@@ -950,8 +934,8 @@ public class Folder extends SessionServlet {
 	private final void actionGetPath(final HttpServletRequest req, final HttpServletResponse resp) throws IOException,
 			ServletException {
 		try {
-			ResponseWriter.write(actionGetPath(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.FOLDER,
-					resp)), resp.getWriter());
+			ResponseWriter.write(actionGetPath(getSessionObject(req), ParamContainer.getInstance(req,
+					EnumComponent.FOLDER, resp)), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
 		}
@@ -1102,8 +1086,9 @@ public class Folder extends SessionServlet {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final Exception e) {
-			LOG.error("actionGetPath", e);
-			response.setException(getWrappingOXException(e));
+			final AbstractOXException wrapper = getWrappingOXException(e);
+			LOG.error(wrapper.getMessage(), wrapper);
+			response.setException(wrapper);
 		}
 		/*
 		 * Close response and flush print writer
@@ -1122,12 +1107,11 @@ public class Folder extends SessionServlet {
 	 * @param w
 	 * @param requestObj
 	 * @throws JSONException
-	 * @throws SearchIteratorException
 	 */
 	public void actionGetUpdatedFolders(final Session session, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		ResponseWriter.write(actionGetUpdatedFolders(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)),
-				w);
+		ResponseWriter.write(actionGetUpdatedFolders(session, ParamContainer.getInstance(requestObj,
+				EnumComponent.FOLDER)), w);
 	}
 
 	private final void actionGetUpdatedFolders(final HttpServletRequest req, final HttpServletResponse resp)
@@ -1343,8 +1327,9 @@ public class Folder extends SessionServlet {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final Exception e) {
-			LOG.error("actionGetUpdatedFolders", e);
-			response.setException(getWrappingOXException(e));
+			final AbstractOXException wrapper = getWrappingOXException(e);
+			LOG.error(wrapper.getMessage(), wrapper);
+			response.setException(wrapper);
 		}
 		/*
 		 * Close response and flush print writer
@@ -1363,8 +1348,8 @@ public class Folder extends SessionServlet {
 	private final void actionGetFolder(final HttpServletRequest req, final HttpServletResponse resp)
 			throws IOException, ServletException {
 		try {
-			ResponseWriter.write(actionGetFolder(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.FOLDER,
-					resp)), resp.getWriter());
+			ResponseWriter.write(actionGetFolder(getSessionObject(req), ParamContainer.getInstance(req,
+					EnumComponent.FOLDER, resp)), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
 		}
@@ -1423,28 +1408,29 @@ public class Folder extends SessionServlet {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final Exception e) {
-			LOG.error("actionGetFolder", e);
-			response.setException(getWrappingOXException(e));
+			final AbstractOXException wrapper = getWrappingOXException(e);
+			LOG.error(wrapper.getMessage(), wrapper);
+			response.setException(wrapper);
 		}
 		/*
 		 * Close response and flush print writer
 		 */
-		response.setData(jsonWriter != null ? jsonWriter.getObject() : JSONObject.NULL);
+		response.setData(jsonWriter == null ? JSONObject.NULL : jsonWriter.getObject());
 		response.setTimestamp(lastModifiedDate);
 		return response;
 	}
 
 	public void actionPutUpdateFolder(final Session session, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		ResponseWriter.write(actionPutUpdateFolder(session, requestObj.getString(ResponseFields.DATA), ParamContainer.getInstance(
-				requestObj, EnumComponent.FOLDER)), w);
+		ResponseWriter.write(actionPutUpdateFolder(session, requestObj.getString(ResponseFields.DATA), ParamContainer
+				.getInstance(requestObj, EnumComponent.FOLDER)), w);
 	}
 
 	private final void actionPutUpdateFolder(final HttpServletRequest req, final HttpServletResponse resp)
 			throws IOException, ServletException {
 		try {
-			ResponseWriter.write(actionPutUpdateFolder(getSessionObject(req), getBody(req), ParamContainer.getInstance(req,
-					EnumComponent.FOLDER, resp)), resp.getWriter());
+			ResponseWriter.write(actionPutUpdateFolder(getSessionObject(req), getBody(req), ParamContainer.getInstance(
+					req, EnumComponent.FOLDER, resp)), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
 		}
@@ -1467,17 +1453,7 @@ public class Folder extends SessionServlet {
 			Date timestamp = null;
 			final JSONObject jsonObj = new JSONObject(body);
 			int updateFolderId = -1;
-			if ((updateFolderId = getUnsignedInteger(folderIdentifier)) != -1) {
-				updateFolderId = FolderObject.mapVirtualID2SystemID(updateFolderId);
-				timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
-				final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
-				FolderObject fo = new FolderObject(updateFolderId);
-				new FolderParser(UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						ctx)).parse(fo, jsonObj);
-				fo = foldersqlinterface.saveFolderObject(fo, timestamp);
-				retval = String.valueOf(fo.getObjectID());
-				lastModifiedDate = fo.getLastModified();
-			} else {
+			if ((updateFolderId = getUnsignedInteger(folderIdentifier)) == -1) {
 				final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
 				try {
 					final MailFolder updateFolder = mailInterface.getFolder(folderIdentifier, true);
@@ -1496,6 +1472,16 @@ public class Folder extends SessionServlet {
 						LOG.error(e.getMessage(), e);
 					}
 				}
+			} else {
+				updateFolderId = FolderObject.mapVirtualID2SystemID(updateFolderId);
+				timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
+				final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
+				FolderObject fo = new FolderObject(updateFolderId);
+				new FolderParser(UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
+						ctx)).parse(fo, jsonObj);
+				fo = foldersqlinterface.saveFolderObject(fo, timestamp);
+				retval = String.valueOf(fo.getObjectID());
+				lastModifiedDate = fo.getLastModified();
 			}
 		} catch (final OXFolderException e) {
 			LOG.error(e.getMessage(), e);
@@ -1504,8 +1490,9 @@ public class Folder extends SessionServlet {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final Exception e) {
-			LOG.error("actionPutUpdateFolder", e);
-			response.setException(getWrappingOXException(e));
+			final AbstractOXException wrapper = getWrappingOXException(e);
+			LOG.error(wrapper.getMessage(), wrapper);
+			response.setException(wrapper);
 		}
 		/*
 		 * Close response and flush print writer
@@ -1517,15 +1504,15 @@ public class Folder extends SessionServlet {
 
 	public void actionPutInsertFolder(final Session session, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		ResponseWriter.write(actionPutInsertFolder(session, requestObj.getString(ResponseFields.DATA), ParamContainer.getInstance(
-				requestObj, EnumComponent.FOLDER)), w);
+		ResponseWriter.write(actionPutInsertFolder(session, requestObj.getString(ResponseFields.DATA), ParamContainer
+				.getInstance(requestObj, EnumComponent.FOLDER)), w);
 	}
 
 	private final void actionPutInsertFolder(final HttpServletRequest req, final HttpServletResponse resp)
 			throws IOException, ServletException {
 		try {
-			ResponseWriter.write(actionPutInsertFolder(getSessionObject(req), getBody(req), ParamContainer.getInstance(req,
-					EnumComponent.FOLDER, resp)), resp.getWriter());
+			ResponseWriter.write(actionPutInsertFolder(getSessionObject(req), getBody(req), ParamContainer.getInstance(
+					req, EnumComponent.FOLDER, resp)), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
 		}
@@ -1547,17 +1534,7 @@ public class Folder extends SessionServlet {
 			final String parentFolder = paramContainer.checkStringParam(FolderFields.FOLDER_ID);
 			final JSONObject jsonObj = new JSONObject(body);
 			int parentFolderId = -1;
-			if ((parentFolderId = getUnsignedInteger(parentFolder)) != -1) {
-				parentFolderId = FolderObject.mapVirtualID2SystemID(parentFolderId);
-				final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
-				FolderObject fo = new FolderObject();
-				fo.setParentFolderID(parentFolderId);
-				new FolderParser(UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						ctx)).parse(fo, jsonObj);
-				fo = foldersqlinterface.saveFolderObject(fo, null);
-				retval = String.valueOf(fo.getObjectID());
-				lastModifiedDate = fo.getLastModified();
-			} else {
+			if ((parentFolderId = getUnsignedInteger(parentFolder)) == -1) {
 				final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
 				try {
 					final MailFolderDescription mf = new MailFolderDescription();
@@ -1572,6 +1549,16 @@ public class Folder extends SessionServlet {
 						LOG.error(e.getMessage(), e);
 					}
 				}
+			} else {
+				parentFolderId = FolderObject.mapVirtualID2SystemID(parentFolderId);
+				final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
+				FolderObject fo = new FolderObject();
+				fo.setParentFolderID(parentFolderId);
+				new FolderParser(UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
+						ctx)).parse(fo, jsonObj);
+				fo = foldersqlinterface.saveFolderObject(fo, null);
+				retval = String.valueOf(fo.getObjectID());
+				lastModifiedDate = fo.getLastModified();
 			}
 		} catch (final OXFolderException e) {
 			LOG.error(e.getMessage(), e);
@@ -1580,8 +1567,9 @@ public class Folder extends SessionServlet {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final Exception e) {
-			LOG.error("actionPutInsertFolder", e);
-			response.setException(getWrappingOXException(e));
+			final AbstractOXException wrapper = getWrappingOXException(e);
+			LOG.error(wrapper.getMessage(), wrapper);
+			response.setException(wrapper);
 		}
 		/*
 		 * Close response and flush print writer
@@ -1593,15 +1581,15 @@ public class Folder extends SessionServlet {
 
 	public void actionPutDeleteFolder(final Session session, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		ResponseWriter.write(actionPutDeleteFolder(session, requestObj.getString(ResponseFields.DATA), ParamContainer.getInstance(
-				requestObj, EnumComponent.FOLDER)), w);
+		ResponseWriter.write(actionPutDeleteFolder(session, requestObj.getString(ResponseFields.DATA), ParamContainer
+				.getInstance(requestObj, EnumComponent.FOLDER)), w);
 	}
 
 	private final void actionPutDeleteFolder(final HttpServletRequest req, final HttpServletResponse resp)
 			throws IOException, ServletException {
 		try {
-			ResponseWriter.write(actionPutDeleteFolder(getSessionObject(req), getBody(req), ParamContainer.getInstance(req,
-					EnumComponent.FOLDER, resp)), resp.getWriter());
+			ResponseWriter.write(actionPutDeleteFolder(getSessionObject(req), getBody(req), ParamContainer.getInstance(
+					req, EnumComponent.FOLDER, resp)), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
 		}
@@ -1632,7 +1620,17 @@ public class Folder extends SessionServlet {
 				NextId: for (int i = 0; i < arrayLength; i++) {
 					final String deleteIdentifier = jsonArr.getString(i);
 					int delFolderId = -1;
-					if ((delFolderId = getUnsignedInteger(deleteIdentifier)) != -1) {
+					if ((delFolderId = getUnsignedInteger(deleteIdentifier)) == -1) {
+						if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)
+								.hasWebMail()) {
+							if (mailInterface == null) {
+								mailInterface = MailServletInterface.getInstance(session);
+							}
+							mailInterface.deleteFolder(deleteIdentifier);
+						} else {
+							jsonWriter.value(deleteIdentifier);
+						}
+					} else {
 						delFolderId = FolderObject.mapVirtualID2SystemID(delFolderId);
 						if (timestamp == null) {
 							timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
@@ -1656,16 +1654,6 @@ public class Folder extends SessionServlet {
 						}
 						foldersqlinterface.deleteFolderObject(delFolderObj, timestamp);
 						lastModified = Math.max(lastModified, delFolderObj.getLastModified().getTime());
-					} else {
-						if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)
-								.hasWebMail()) {
-							if (mailInterface == null) {
-								mailInterface = MailServletInterface.getInstance(session);
-							}
-							mailInterface.deleteFolder(deleteIdentifier);
-						} else {
-							jsonWriter.value(deleteIdentifier);
-						}
 					}
 				}
 				if (lastModified != 0) {
@@ -1684,8 +1672,9 @@ public class Folder extends SessionServlet {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final Exception e) {
-			LOG.error("actionPutInsertFolder", e);
-			response.setException(getWrappingOXException(e));
+			final AbstractOXException wrapper = getWrappingOXException(e);
+			LOG.error(wrapper.getMessage(), wrapper);
+			response.setException(wrapper);
 		}
 		/*
 		 * Close response and flush print writer
@@ -1749,7 +1738,7 @@ public class Folder extends SessionServlet {
 			try {
 				intArray[a] = Integer.parseInt(sa[a]);
 			} catch (final NumberFormatException e) {
-				throw new OXFolderException(FolderCode.BAD_PARAM_VALUE, sa[a], paramName);
+				throw new OXFolderException(FolderCode.BAD_PARAM_VALUE, e, sa[a], paramName);
 			}
 		}
 		return intArray;

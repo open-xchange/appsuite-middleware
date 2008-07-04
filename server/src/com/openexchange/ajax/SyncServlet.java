@@ -69,6 +69,7 @@ import org.json.JSONWriter;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.ParamContainer;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.sync.FolderSyncInterface;
 import com.openexchange.api2.sync.RdbFolderSyncInterface;
@@ -112,7 +113,9 @@ public class SyncServlet extends PermissionServlet {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.ajax.PermissionServlet#hasModulePermission(com.openexchange.sessiond.Session)
+	 * @see
+	 * com.openexchange.ajax.PermissionServlet#hasModulePermission(com.openexchange
+	 * .sessiond.Session)
 	 */
 	@Override
 	protected boolean hasModulePermission(final Session session, final Context ctx) {
@@ -122,8 +125,9 @@ public class SyncServlet extends PermissionServlet {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest,
-	 *      javax.servlet.http.HttpServletResponse)
+	 * @see
+	 * javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest
+	 * , javax.servlet.http.HttpServletResponse)
 	 */
 	@Override
 	protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
@@ -143,12 +147,13 @@ public class SyncServlet extends PermissionServlet {
 			final Response response = new Response();
 			response.setException(e);
 			try {
-				Response.write(response, writer);
+				ResponseWriter.write(response, writer);
 			} catch (final JSONException e1) {
 				LOG.error(e1.getMessage(), e1);
 			}
 		} catch (final Exception e) {
-			LOG.error("SyncServlet.doPut()", e);
+			final AbstractOXException wrapper = getWrappingOXException(e);
+			LOG.error(wrapper.getMessage(), wrapper);
 			final Writer writer;
 			if (((HttpServletResponseWrapper) resp).getOutputSelection() == HttpServletResponseWrapper.USE_OUTPUT_STREAM) {
 				writer = resp.getWriter();
@@ -157,9 +162,9 @@ public class SyncServlet extends PermissionServlet {
 						.getCharacterEncoding())), true);
 			}
 			final Response response = new Response();
-			response.setException(getWrappingOXException(e));
+			response.setException(wrapper);
 			try {
-				Response.write(response, writer);
+				ResponseWriter.write(response, writer);
 			} catch (final JSONException e1) {
 				LOG.error(e1.getMessage(), e1);
 			}
@@ -216,7 +221,17 @@ public class SyncServlet extends PermissionServlet {
 				NextId: for (int i = 0; i < length; i++) {
 					final String deleteIdentifier = jsonArr.getString(i);
 					int delFolderId = -1;
-					if ((delFolderId = getUnsignedInteger(deleteIdentifier)) != -1) {
+					if ((delFolderId = getUnsignedInteger(deleteIdentifier)) == -1) {
+						if (UserConfigurationStorage.getInstance()
+								.getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasWebMail()) {
+							if (mailInterface == null) {
+								mailInterface = MailServletInterface.getInstance(sessionObj);
+							}
+							mailInterface.clearFolder(deleteIdentifier);
+						} else {
+							jsonWriter.value(deleteIdentifier);
+						}
+					} else {
 						delFolderId = mapVirtualID2SystemID(delFolderId);
 						if (timestamp == null) {
 							timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
@@ -243,16 +258,6 @@ public class SyncServlet extends PermissionServlet {
 						}
 						folderSyncInterface.clearFolder(delFolderObj, timestamp);
 						lastModified = Math.max(lastModified, delFolderObj.getLastModified().getTime());
-					} else {
-						if (UserConfigurationStorage.getInstance()
-								.getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasWebMail()) {
-							if (mailInterface == null) {
-								mailInterface = MailServletInterface.getInstance(sessionObj);
-							}
-							mailInterface.clearFolder(deleteIdentifier);
-						} else {
-							jsonWriter.value(deleteIdentifier);
-						}
 					}
 				}
 				if (lastModified != 0) {
@@ -273,8 +278,9 @@ public class SyncServlet extends PermissionServlet {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final Exception e) {
-			LOG.error("SyncServlet.actionPutDeleteFolderContent()", e);
-			response.setException(getWrappingOXException(e));
+			final AbstractOXException wrapper = getWrappingOXException(e);
+			LOG.error(wrapper.getMessage(), wrapper);
+			response.setException(wrapper);
 		}
 		/*
 		 * Close response and flush print writer
@@ -282,7 +288,7 @@ public class SyncServlet extends PermissionServlet {
 		jsonWriter.endArray();
 		response.setData(new JSONArray(strWriter.toString()));
 		response.setTimestamp(lastModifiedDate);
-		Response.write(response, writer);
+		ResponseWriter.write(response, writer);
 	}
 
 	/*
@@ -291,22 +297,24 @@ public class SyncServlet extends PermissionServlet {
 
 	private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final Throwable e)
 			throws IOException {
-		writeErrorResponse(resp, getWrappingOXException(e));
+		final AbstractOXException wrapper = getWrappingOXException(e);
+		LOG.error(wrapper.getMessage(), wrapper);
+		writeErrorResponse(resp, wrapper);
 	}
 
 	private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final AbstractOXException e)
 			throws IOException {
 		final Writer writer;
-		if (resp.getOutputSelection() != HttpServletResponseWrapper.USE_OUTPUT_STREAM) {
+		if (resp.getOutputSelection() == HttpServletResponseWrapper.USE_OUTPUT_STREAM) {
+			writer = resp.getWriter();
+		} else {
 			writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(resp.getOutputStream(), resp
 					.getCharacterEncoding())), true);
-		} else {
-			writer = resp.getWriter();
 		}
 		final Response response = new Response();
 		response.setException(e);
 		try {
-			Response.write(response, writer);
+			ResponseWriter.write(response, writer);
 		} catch (final JSONException e1) {
 			LOG.error(e1.getMessage(), e1);
 		}

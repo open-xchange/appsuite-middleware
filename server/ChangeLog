@@ -1,3 +1,7 @@
+* 2008-07-04 - thorben.betten@open-xchange.com
+
+ - Preparations for Bugfix #11554: Proper logging of unexpected exceptions
+
 * 2008-07-03 - thorben.betten@open-xchange.com
 
  - Bugfix #11499: Fixed search for appointments in a shared folder
