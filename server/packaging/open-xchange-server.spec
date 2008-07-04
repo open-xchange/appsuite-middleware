@@ -126,8 +126,16 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Jul 04 2008 - thorben.betten@open-xchange.com
+ - Preparations for Bugfix #11554: Proper logging of unexpected exceptions
+ - Bugfix #11554:  Changed conversion of MailMessage objects to JavaMail
+   Message objects
 * Thu Jul 03 2008 - francisco.laguna@open-xchange.com
  - Bugfix #6927: Allow changing start_date of appointment series.
+* Thu Jul 03 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11558: Fixed problem arised through Response object refactoring.
+* Thu Jul 03 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11499: Fixed search for appointments in a shared folder
 * Wed Jul 02 2008 - marcus.klein@open-xchange.com
  - Bugfix #11016: Renamed xml attribute for deleted groups and resources.
    Additionally sending old values for compatibility. This will be removed after
