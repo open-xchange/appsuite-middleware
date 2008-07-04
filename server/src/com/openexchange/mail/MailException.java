@@ -397,7 +397,7 @@ public class MailException extends AbstractOXException {
 	 * @param cause
 	 *            The cause
 	 */
-	public MailException(final Component component, final Category category, final int detailNumber,
+	protected MailException(final Component component, final Category category, final int detailNumber,
 			final String message, final Throwable cause) {
 		super(component, category, detailNumber, message, cause);
 	}
