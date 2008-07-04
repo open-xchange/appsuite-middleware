@@ -135,6 +135,7 @@ public class ExternalUserParticipant implements Participant, Comparable<Particip
         final int prime = 31;
         int result = 1;
         result = prime * result + EXTERNAL_USER;
+        result = prime * result + id;
         result = prime * result
             + ((emailaddress == null) ? 0 : emailaddress.hashCode());
         return result;
@@ -145,10 +146,19 @@ public class ExternalUserParticipant implements Participant, Comparable<Particip
      */
     @Override
     public boolean equals(final Object obj) {
-        if (!(obj instanceof ExternalUserParticipant)) {
+        if (this == obj) {
+        	return true;
+        }
+        if (obj == null) {
+			return false;
+        }
+    	if (!(obj instanceof ExternalUserParticipant)) {
             return false;
         }
         final ExternalUserParticipant other = (ExternalUserParticipant) obj;
+        if (id != other.id) {
+			return false;
+		}
         if (null == emailaddress && null != other.emailaddress) {
             return false;
         }
