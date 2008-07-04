@@ -234,14 +234,25 @@ public final class MIMEMessageConverter {
 			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size <= 0 ? DEFAULT_MESSAGE_SIZE
 					: size);
 			mail.writeTo(out);
+			final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession(),
+					new UnsynchronizedByteArrayInputStream(out.toByteArray()));
 			if (mail.containsFlags()) {
-				final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession(),
-						new UnsynchronizedByteArrayInputStream(out.toByteArray()));
 				parseMimeFlags(mail.getFlags(), mimeMessage);
-				return mimeMessage;
 			}
-			return new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out
-					.toByteArray()));
+			if (mail.containsColorLabel()) {
+				final Flags flags = new Flags();
+				flags.add(new StringBuilder(MailMessage.COLOR_LABEL_PREFIX).append(mail.getColorLabel()).toString());
+				mimeMessage.setFlags(flags, true);
+			}
+			if (mail.containsUserFlags()) {
+				final Flags flags = new Flags();
+				final String[] userFlags = mail.getUserFlags();
+				for (final String userFlag : userFlags) {
+					flags.add(userFlag);
+				}
+				mimeMessage.setFlags(flags, true);
+			}
+			return mimeMessage;
 		} catch (final MessagingException e) {
 			throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
 		}
