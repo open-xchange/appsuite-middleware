@@ -322,8 +322,7 @@ public final class SMTPTransport extends MailTransport {
 						"#DATE#",
 						sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG, locale)
 								.format(sentDate))).replaceFirst("#RECIPIENT#", quoteReplacement(from)).replaceFirst(
-						"#SUBJECT#", quoteReplacement(srcMail.getSubject())), usm.getAutoLinebreak()),
-						defaultMimeCS);
+						"#SUBJECT#", quoteReplacement(srcMail.getSubject())), usm.getAutoLinebreak()), defaultMimeCS);
 				text.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
 				text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
 				mixedMultipart.addBodyPart(text);
