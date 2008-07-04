@@ -60,7 +60,10 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
 /**
- * {@link Starter}
+ * {@link Starter} - Starter for <a href="www.open-xchange.com">Open-Xchange</a>
+ * server.
+ * <p>
+ * All necessary initializations for a proper system sart-up take place.
  * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -77,9 +80,9 @@ public class Starter implements Initialization {
 	 */
 	com.openexchange.configuration.SystemConfig.getInstance(),
 	/**
-     * Cache availability registry start-up
-     */
-    com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance(),
+	 * Cache availability registry start-up
+	 */
+	com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance(),
 	/**
 	 * Reads configdb.properties.
 	 */
@@ -167,8 +170,7 @@ public class Starter implements Initialization {
 	/**
 	 * Downgrade registry start-up
 	 */
-	com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance()
-	};
+	com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance() };
 
 	/**
 	 * This contains the components that must be started if the admin uses APIs
@@ -180,9 +182,9 @@ public class Starter implements Initialization {
 	 */
 	com.openexchange.configuration.SystemConfig.getInstance(),
 	/**
-     * Cache availability registry start-up
-     */
-    com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance(),
+	 * Cache availability registry start-up
+	 */
+	com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance(),
 	/**
 	 * Reads configdb.properties.
 	 */
@@ -199,11 +201,11 @@ public class Starter implements Initialization {
 	 * Setup of ContextStorage and LoginInfo.
 	 */
 	com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),
-    /**
-     * Folder initialization
-     */
-    com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
-    /**
+	/**
+	 * Folder initialization
+	 */
+	com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
+	/**
 	 * User storage init
 	 */
 	com.openexchange.groupware.ldap.UserStorageInit.getInstance(),
@@ -223,15 +225,14 @@ public class Starter implements Initialization {
 	 * Notification Configuration
 	 */
 	com.openexchange.groupware.notify.NotificationConfig.getInstance(),
-    /**
-     * Sets up the configuration tree.
-     */
-    com.openexchange.groupware.settings.impl.ConfigTreeInit.getInstance(),
-    /**
-     * Downgrade registry start-up
-     */
-    com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance()
-    };
+	/**
+	 * Sets up the configuration tree.
+	 */
+	com.openexchange.groupware.settings.impl.ConfigTreeInit.getInstance(),
+	/**
+	 * Downgrade registry start-up
+	 */
+	com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance() };
 
 	private static final Log LOG = LogFactory.getLog(Starter.class);
 
@@ -262,7 +263,8 @@ public class Starter implements Initialization {
 
 		/*
 		 * TODO: Check property ENABLE_INTERNAL_USER_EDIT
-		 * OXFolderSQL.updateCtxAddrBookPermission(FolderCacheProperties.isEnableInternalUsersEdit())
+		 * OXFolderSQL.updateCtxAddrBookPermission
+		 * (FolderCacheProperties.isEnableInternalUsersEdit())
 		 */
 
 		if (LOG.isInfoEnabled()) {
