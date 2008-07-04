@@ -175,7 +175,7 @@ public class MIMEMessageFiller {
 
 	private Set<String> uploadFileIDs;
 
-	//private Html2TextConverter converter;
+	// private Html2TextConverter converter;
 
 	private HTML2TextHandler html2textHandler;
 
@@ -209,12 +209,10 @@ public class MIMEMessageFiller {
 				: usm;
 	}
 
-	/*protected final Html2TextConverter getConverter() {
-		if (converter == null) {
-			converter = new Html2TextConverter();
-		}
-		return converter;
-	}*/
+	/*
+	 * protected final Html2TextConverter getConverter() { if (converter ==
+	 * null) { converter = new Html2TextConverter(); } return converter; }
+	 */
 
 	protected final HTML2TextHandler getHTML2TextHandler() {
 		if (html2textHandler == null) {
@@ -936,7 +934,6 @@ public class MIMEMessageFiller {
 
 	protected final void addMessageBodyPart(final Multipart mp, final MailPart part, final boolean inline)
 			throws MessagingException, MailException, IOException {
-		final MimeBodyPart messageBodyPart = new MimeBodyPart();
 		if (part.getContentType().isMimeType(MIMETypes.MIME_APPL_OCTET) && part.getFileName() != null) {
 			/*
 			 * Try to determine MIME type
@@ -953,6 +950,7 @@ public class MIMEMessageFiller {
 			addNestedMessage(part, mp, sb, out, bbuf);
 			return;
 		}
+		final MimeBodyPart messageBodyPart = new MimeBodyPart();
 		messageBodyPart.setDataHandler(part.getDataHandler());
 		messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, part.getContentType().toString());
 		/*
