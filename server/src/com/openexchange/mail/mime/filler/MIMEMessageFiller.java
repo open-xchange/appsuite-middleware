@@ -1089,10 +1089,15 @@ public class MIMEMessageFiller {
 		/*
 		 * Define text content
 		 */
-		HTMLParser
-				.parse(getConformHTML(htmlContent, MailConfig.getDefaultMimeCharset()), getHTML2TextHandler().reset());
-		text.setText(performLineFolding(getHTML2TextHandler().getText(), usm.getAutoLinebreak()), MailConfig
-				.getDefaultMimeCharset());
+		final String textContent;
+		if (htmlContent == null || htmlContent.length() == 0) {
+			textContent = "";
+		} else {
+			HTMLParser.parse(getConformHTML(htmlContent, MailConfig.getDefaultMimeCharset()), getHTML2TextHandler()
+					.reset());
+			textContent = performLineFolding(getHTML2TextHandler().getText(), usm.getAutoLinebreak());
+		}
+		text.setText(textContent, MailConfig.getDefaultMimeCharset());
 		// text.setText(performLineFolding(getConverter().convertWithQuotes(
 		// htmlContent), false, usm.getAutoLinebreak()),
 		// MailConfig.getDefaultMimeCharset());
@@ -1101,6 +1106,8 @@ public class MIMEMessageFiller {
 				.getDefaultMimeCharset()));
 		return text;
 	}
+
+	private static final String HTML_SPACE = "&#160;";
 
 	/**
 	 * Creates a body part of type <code>text/html</code> from given HTML
@@ -1120,7 +1127,11 @@ public class MIMEMessageFiller {
 		final ContentType htmlCT = new ContentType(PAT_HTML_CT.replaceFirst(REPLACE_CS, MailConfig
 				.getDefaultMimeCharset()));
 		final MimeBodyPart html = new MimeBodyPart();
-		html.setContent(getConformHTML(htmlContent, htmlCT), htmlCT.toString());
+		if (htmlContent == null || htmlContent.length() == 0) {
+			html.setContent(getConformHTML(HTML_SPACE, htmlCT).replaceFirst(HTML_SPACE, ""), htmlCT.toString());
+		} else {
+			html.setContent(getConformHTML(htmlContent, htmlCT), htmlCT.toString());
+		}
 		html.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
 		html.setHeader(MessageHeaders.HDR_CONTENT_TYPE, htmlCT.toString());
 		return html;
