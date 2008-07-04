@@ -53,7 +53,6 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static java.util.regex.Matcher.quoteReplacement;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -110,27 +109,22 @@ import com.sun.mail.imap.Rights;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class IMAPFolderStorage extends MailFolderStorage implements Serializable {
+public final class IMAPFolderStorage extends MailFolderStorage {
 
-	/**
-	 * Serial Version UID
-	 */
-	private static final long serialVersionUID = -7945316079728160239L;
-
-	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(IMAPFolderStorage.class);
 
 	private static final String STR_INBOX = "INBOX";
 
-	private final transient IMAPStore imapStore;
+	private final IMAPStore imapStore;
 
-	private final transient IMAPAccess imapAccess;
+	private final IMAPAccess imapAccess;
 
-	private final transient Session session;
+	private final Session session;
 
-	private final transient Context ctx;
+	private final Context ctx;
 
-	private final transient IMAPConfig imapConfig;
+	private final IMAPConfig imapConfig;
 
 	private Character separator;
 
@@ -1095,7 +1089,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 									/*
 									 * We face an Over-Quota-Exception
 									 */
-									throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, exc, new Object[0]);
+									throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, exc,
+											new Object[0]);
 								}
 							}
 							throw new IMAPException(IMAPException.Code.MOVE_ON_DELETE_FAILED, e, new Object[0]);
@@ -1126,8 +1121,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 							LOG.debug(debug.append("EXPUNGE command timed out in ").append(
 									(System.currentTimeMillis() - startExpunge)).append("msec").toString());
 						}
-						throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapConfig.getServer(),
-								imapConfig.getLogin());
+						throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapConfig.getServer(), imapConfig
+								.getLogin());
 					} catch (final StoreClosedException e) {
 						/*
 						 * Not possible to retry since connection is broken
@@ -1137,8 +1132,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 							LOG.debug(debug.append("EXPUNGE command timed out in ").append(
 									(System.currentTimeMillis() - startExpunge)).append("msec").toString());
 						}
-						throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapConfig.getServer(),
-								imapConfig.getLogin());
+						throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapConfig.getServer(), imapConfig
+								.getLogin());
 					}
 					/*
 					 * Decrement

@@ -115,7 +115,7 @@ import com.sun.mail.imap.Rights;
  */
 public final class IMAPMessageStorage extends IMAPFolderWorker {
 
-	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(IMAPMessageStorage.class);
 
 	/**
