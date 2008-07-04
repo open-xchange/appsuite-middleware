@@ -1,6 +1,8 @@
 * 2008-07-04 - thorben.betten@open-xchange.com
 
  - Preparations for Bugfix #11554: Proper logging of unexpected exceptions
+ - Bugfix #11554:  Changed conversion of MailMessage objects to JavaMail
+   Message objects
 
 * 2008-07-03 - thorben.betten@open-xchange.com
 
