@@ -188,11 +188,6 @@ public final class MIMEMailPart extends MailPart {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailContent#getContent()
-	 */
 	@Override
 	public Object getContent() throws MailException {
 		if (null == part) {
@@ -216,11 +211,6 @@ public final class MIMEMailPart extends MailPart {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailContent#getDataHandler()
-	 */
 	@Override
 	public DataHandler getDataHandler() throws MailException {
 		if (null == part) {
@@ -235,11 +225,6 @@ public final class MIMEMailPart extends MailPart {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailContent#getInputStream()
-	 */
 	@Override
 	public InputStream getInputStream() throws MailException {
 		if (null == part) {
@@ -290,11 +275,6 @@ public final class MIMEMailPart extends MailPart {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailContent#getEnclosedMailContent(int)
-	 */
 	@Override
 	public MailPart getEnclosedMailPart(final int index) throws MailException {
 		if (null == part) {
@@ -314,11 +294,6 @@ public final class MIMEMailPart extends MailPart {
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailContent#getEnclosedCount()
-	 */
 	@Override
 	public int getEnclosedCount() throws MailException {
 		if (null == part) {
@@ -338,11 +313,6 @@ public final class MIMEMailPart extends MailPart {
 		return NO_ENCLOSED_PARTS;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#writeTo(java.io.OutputStream)
-	 */
 	@Override
 	public void writeTo(final OutputStream out) throws MailException {
 		if (null == part) {
@@ -357,11 +327,6 @@ public final class MIMEMailPart extends MailPart {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailContent#prepareForCaching()
-	 */
 	@Override
 	public void prepareForCaching() {
 		/*
