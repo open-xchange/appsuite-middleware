@@ -90,18 +90,18 @@ public final class MessageUtility {
 	/**
 	 * Reads the string out of MIME part's input stream. On first try the input
 	 * stream retrieved by <code>javax.mail.Part.getInputStream()</code> is
-	 * used. If an I/O error occurs (<code>java.io.IOException</code>) then
-	 * the next try is with part's raw input stream. If everything fails an
-	 * empty string is returned.
+	 * used. If an I/O error occurs (<code>java.io.IOException</code>) then the
+	 * next try is with part's raw input stream. If everything fails an empty
+	 * string is returned.
 	 * 
-	 * @param p -
-	 *            the <code>javax.mail.Part</code> object
-	 * @param ct -
-	 *            the part's content type
+	 * @param p
+	 *            - the <code>javax.mail.Part</code> object
+	 * @param ct
+	 *            - the part's content type
 	 * @return the string read from part's input stream or the empty string ""
 	 *         if everything failed
-	 * @throws MessagingException -
-	 *             if an error occurs in part's getter methods
+	 * @throws MessagingException
+	 *             - if an error occurs in part's getter methods
 	 */
 	public static String readMimePart(final Part p, final ContentType ct) throws MessagingException {
 		/*
@@ -117,18 +117,18 @@ public final class MessageUtility {
 	/**
 	 * Reads the string out of MIME part's input stream. On first try the input
 	 * stream retrieved by <code>javax.mail.Part.getInputStream()</code> is
-	 * used. If an I/O error occurs (<code>java.io.IOException</code>) then
-	 * the next try is with part's raw input stream. If everything fails an
-	 * empty string is returned.
+	 * used. If an I/O error occurs (<code>java.io.IOException</code>) then the
+	 * next try is with part's raw input stream. If everything fails an empty
+	 * string is returned.
 	 * 
-	 * @param p -
-	 *            the <code>javax.mail.Part</code> object
-	 * @param charset -
-	 *            the charset
+	 * @param p
+	 *            - the <code>javax.mail.Part</code> object
+	 * @param charset
+	 *            - the charset
 	 * @return the string read from part's input stream or the empty string ""
 	 *         if everything failed
-	 * @throws MessagingException -
-	 *             if an error occurs in part's getter methods
+	 * @throws MessagingException
+	 *             - if an error occurs in part's getter methods
 	 */
 	public static String readMimePart(final Part p, final String charset) throws MessagingException {
 		try {
@@ -180,25 +180,25 @@ public final class MessageUtility {
 	/**
 	 * Reads a string from given input stream using direct buffering
 	 * 
-	 * @param inStream -
-	 *            the input stream
-	 * @param charset -
-	 *            the charset
+	 * @param inStream
+	 *            - the input stream
+	 * @param charset
+	 *            - the charset
 	 * @return the <code>String</code> read from input stream
-	 * @throws IOException -
-	 *             if an I/O error occurs
+	 * @throws IOException
+	 *             - if an I/O error occurs
 	 */
 	public static String readStream(final InputStream inStream, final String charset) throws IOException {
 		InputStreamReader isr = null;
 		try {
 			int count = 0;
-			final char[] c = new char[BUFSIZE];
+			final char[] cbuf = new char[BUFSIZE];
 			isr = new InputStreamReader(inStream, charset);
-			if ((count = isr.read(c)) > 0) {
+			if ((count = isr.read(cbuf, 0, cbuf.length)) > 0) {
 				final StringBuilder sb = new StringBuilder(STRBLD_SIZE);
 				do {
-					sb.append(c, 0, count);
-				} while ((count = isr.read(c)) > 0);
+					sb.append(cbuf, 0, count);
+				} while ((count = isr.read(cbuf)) > 0);
 				return sb.toString();
 			}
 			return STR_EMPTY;

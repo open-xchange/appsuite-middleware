@@ -49,8 +49,6 @@
 
 package com.openexchange.mail.mime.datasource;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,7 +56,6 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 import javax.activation.DataSource;
-import javax.mail.internet.SharedInputStream;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
@@ -189,21 +186,12 @@ public final class MessageDataSource implements DataSource {
 		return name;
 	}
 
-	protected static void copyStream(final InputStream inputStreamArg, final ByteArrayOutputStream outputStream)
+	protected static void copyStream(final InputStream inputStream, final ByteArrayOutputStream outputStream)
 			throws IOException {
-		final InputStream inputStream;
-		if (inputStreamArg instanceof ByteArrayInputStream) {
-			inputStream = inputStreamArg;
-		} else if (inputStreamArg instanceof SharedInputStream) {
-			inputStream = inputStreamArg;
-		} else {
-			inputStream = inputStreamArg instanceof BufferedInputStream ? (BufferedInputStream) inputStreamArg
-					: new BufferedInputStream(inputStreamArg);
-		}
 		try {
 			final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
 			int len;
-			while ((len = inputStream.read(bbuf)) != -1) {
+			while ((len = inputStream.read(bbuf, 0, bbuf.length)) != -1) {
 				outputStream.write(bbuf, 0, len);
 			}
 		} finally {
