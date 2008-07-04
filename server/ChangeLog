@@ -3,6 +3,8 @@
  - Preparations for Bugfix #11554: Proper logging of unexpected exceptions
  - Bugfix #11554:  Changed conversion of MailMessage objects to JavaMail
    Message objects
+ - Bugfix #10949: Allowing multiple external participants whose email
+   address' hash code is equal through re-computing their identifier
 
 * 2008-07-03 - thorben.betten@open-xchange.com
 

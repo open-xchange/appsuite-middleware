@@ -59,6 +59,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1132,16 +1134,32 @@ class CalendarMySQL implements CalendarSqlImp {
 			PreparedStatement pi = null;
 			try {
 				pi = writecon.prepareStatement("insert into prg_date_rights (object_id, cid, id, type, dn, ma) values (?, ?, ?, ?, ?, ?)");
+				final Set<Integer> knownExternalIds = createExternalIdentifierSet(p);
 				int lastid = -1;
 				int lasttype = -1;
 				for (int a = 0; a < p.length; a++) {
 					if (p[a].getIdentifier() == 0 && p[a].getType() == Participant.EXTERNAL_USER && p[a].getEmailAddress() != null) {
 						final ExternalUserParticipant eup = new ExternalUserParticipant(p[a].getEmailAddress());
-						eup.setIdentifier(p[a].getEmailAddress().hashCode());
+						/*
+						 * Determine an unique identifier
+						 */
+						Integer identifier = Integer.valueOf(eup.getEmailAddress().hashCode());
+						while (knownExternalIds.contains(identifier)) {
+							identifier = Integer.valueOf(identifier.intValue() + 1);
+
+						}
+						/*
+						 * Add to known identifiers
+						 */
+						knownExternalIds.add(identifier);
+						eup.setIdentifier(identifier.intValue());
 						eup.setDisplayName(p[a].getDisplayName());
 						p[a] = eup;
 					}
-					if (!(lastid == p[a].getIdentifier() && lasttype == p[a].getType())) {
+					/*
+					 * Don't insert a participant twice...
+					 */
+					if (lastid != p[a].getIdentifier() || lasttype != p[a].getType()) {
 						lastid = p[a].getIdentifier();
 						lasttype = p[a].getType();
 						pi.setInt(1, cdao.getObjectID());
@@ -1399,6 +1417,7 @@ class CalendarMySQL implements CalendarSqlImp {
 					final String temp2 = rs.getString(4);
 					if (!rs.wasNull()) {
 						participant = new ExternalUserParticipant(temp2);
+						((ExternalUserParticipant) participant).setIdentifier(id);
 						if (temp != null) {
 							participant.setDisplayName(temp);
 						}
@@ -1963,6 +1982,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		}
 
 		if (new_participants != null && new_participants.length > 0) {
+			final Set<Integer> knownExternalIds = createExternalIdentifierSet(old_participants);
 			cup.setMBoolen(true);
 			PreparedStatement dr = null;
 			try {
@@ -1972,8 +1992,21 @@ class CalendarMySQL implements CalendarSqlImp {
 				int lasttype = -1;
 				for (int a = 0; a < new_participants.length; a++) {
 					if (new_participants[a].getIdentifier() == 0 && new_participants[a].getType() == Participant.EXTERNAL_USER && new_participants[a].getEmailAddress() != null) {
-						final ExternalUserParticipant eup = new ExternalUserParticipant(new_participants[a].getEmailAddress());
-						eup.setIdentifier(new_participants[a].getEmailAddress().hashCode());
+						final ExternalUserParticipant eup = new ExternalUserParticipant(new_participants[a]
+								.getEmailAddress());
+						/*
+						 * Determine an unique identifier
+						 */
+						Integer identifier = Integer.valueOf(new_participants[a].getEmailAddress().hashCode());
+						while (knownExternalIds.contains(identifier)) {
+							identifier = Integer.valueOf(identifier.intValue() + 1);
+
+						}
+						/*
+						 * Add to known identifiers
+						 */
+						knownExternalIds.add(identifier);
+						eup.setIdentifier(identifier.intValue());
 						eup.setDisplayName(new_participants[a].getDisplayName());
 						new_participants[a] = eup;
 					}
@@ -2472,6 +2505,25 @@ class CalendarMySQL implements CalendarSqlImp {
 
 		CalendarCommonCollection.fillEventInformation(cdao, edao, edao.getUsers(), new_userparticipants, deleted_userparticipants, edao.getParticipants(), new_participants, deleted_participants);
 
+	}
+
+	/**
+	 * Gathers all identifiers of external participants contained in specified
+	 * array of {@link Participant} objects whose identifier is different from
+	 * zero.
+	 * 
+	 * @param participants
+	 *            The array of {@link Participant} objects.
+	 * @return All identifiers of external participants as a {@link Set}.
+	 */
+	private static Set<Integer> createExternalIdentifierSet(final Participant[] participants) {
+		final Set<Integer> retval = new HashSet<Integer>(participants.length / 2);
+		for (int i = 0; i < participants.length; i++) {
+			if (participants[i].getType() == Participant.EXTERNAL_USER && participants[i].getIdentifier() != 0) {
+				retval.add(Integer.valueOf(participants[i].getIdentifier()));
+			}
+		}
+		return retval;
 	}
 
 	public final void setUserConfirmation(final int oid, final int uid, final int confirm, final String confirm_message, final Session so, final Context ctx) throws OXException {
