@@ -3,7 +3,7 @@
 
 Name:           open-xchange-cache
 BuildArch:	noarch
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-configread
+BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-configread open-xchange-management
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
@@ -31,7 +31,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Server Caching Bundle
-Requires:       open-xchange-common open-xchange-global open-xchange-configread
+Requires:       open-xchange-common open-xchange-global open-xchange-configread open-xchange-management
 #
 
 %description
