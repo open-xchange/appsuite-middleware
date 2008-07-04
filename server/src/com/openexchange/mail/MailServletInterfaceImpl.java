@@ -117,13 +117,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	private final UserSettingMail usm;
 
 	/**
-	 * No direct instantiation
+	 * Initializes a new {@link MailServletInterfaceImpl}
 	 * 
 	 * @throws MailException
 	 *             If user has no mail access or properties cannot be
 	 *             successfully loaded
 	 */
-	protected MailServletInterfaceImpl(final Session session) throws MailException {
+	MailServletInterfaceImpl(final Session session) throws MailException {
 		super();
 		try {
 			this.ctx = ContextStorage.getStorageContext(session.getContextId());
