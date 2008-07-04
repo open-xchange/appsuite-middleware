@@ -934,6 +934,17 @@ public class MIMEMessageFiller {
 
 	protected final void addMessageBodyPart(final Multipart mp, final MailPart part, final boolean inline)
 			throws MessagingException, MailException, IOException {
+		if (part.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
+			// TODO: Works correctly?
+			final StringBuilder sb = new StringBuilder(32);
+			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(BUF_SIZE);
+			final byte[] bbuf = new byte[BUF_SIZE];
+			addNestedMessage(part, mp, sb, out, bbuf);
+			return;
+		}
+		/*
+		 * A non-message attachment
+		 */
 		if (part.getContentType().isMimeType(MIMETypes.MIME_APPL_OCTET) && part.getFileName() != null) {
 			/*
 			 * Try to determine MIME type
@@ -942,13 +953,6 @@ public class MIMEMessageFiller {
 			final int pos = ct.indexOf('/');
 			part.getContentType().setPrimaryType(ct.substring(0, pos));
 			part.getContentType().setSubType(ct.substring(pos + 1));
-		} else if (part.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
-			// TODO: Works correctly?
-			final StringBuilder sb = new StringBuilder(32);
-			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(BUF_SIZE);
-			final byte[] bbuf = new byte[BUF_SIZE];
-			addNestedMessage(part, mp, sb, out, bbuf);
-			return;
 		}
 		final MimeBodyPart messageBodyPart = new MimeBodyPart();
 		messageBodyPart.setDataHandler(part.getDataHandler());
