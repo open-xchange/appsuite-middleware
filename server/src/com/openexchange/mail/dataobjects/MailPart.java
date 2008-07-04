@@ -827,9 +827,8 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 *             If writing to output stream fails
 	 */
 	public void writeTo(final OutputStream out) throws MailException {
-		InputStream in = null;
+		final InputStream in = getInputStream();
 		try {
-			in = getInputStream();
 			if (null == in) {
 				throw new MailException(MailException.Code.NO_CONTENT);
 			}
@@ -841,12 +840,10 @@ public abstract class MailPart implements Serializable, Cloneable {
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		} finally {
-			if (in != null) {
-				try {
-					in.close();
-				} catch (final IOException e) {
-					LOG.error(e.getLocalizedMessage(), e);
-				}
+			try {
+				in.close();
+			} catch (final IOException e) {
+				LOG.error(e.getLocalizedMessage(), e);
 			}
 		}
 	}
