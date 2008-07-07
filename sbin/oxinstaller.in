@@ -497,11 +497,10 @@ v_cache_hosting ${ADMINCONF}/cache.ccf
 v_setprop jcs.auxiliary.LTCP.attributes.TcpListenerPort $AMCACHEPORT ${ADMINCONF}/cache.ccf
 
 if [ -z "$DISABLE_RMI_AUTH" ]; then
-    echo
-    echo "*** RMI authentication is enabled"
     v_setprop MASTER_AUTHENTICATION_DISABLED false ${ADMINCONF}/AdminDaemon.properties
     v_setprop CONTEXT_AUTHENTICATION_DISABLED false ${ADMINCONF}/AdminDaemon.properties
     echo
+    echo "*** RMI authentication is enabled"
     if [ -z "$MASTER_PASS" ]; then
     	die "ERROR: master password cannot be null if authentication is enabled"
     else
