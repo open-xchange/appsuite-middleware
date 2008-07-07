@@ -366,7 +366,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		
 		data.append("]");
 		
-		final JSONArray arr = put(webConv, url.toString(), data.toString()).getJSONArray("data");
+		final JSONArray arr = putA(webConv, url.toString(), data.toString());
 		final int[] notDeleted = new int[arr.length()];
 		
 		for(int i = 0; i < arr.length(); i++) {
