@@ -2043,6 +2043,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         } catch (final SQLException e) {
             log.error("SQL Error",e);
             throw new StorageException(e.toString());
+        } catch (final RuntimeException e) {
+            log.error("Runtime Error",e);
+            throw new StorageException(e.toString());
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
