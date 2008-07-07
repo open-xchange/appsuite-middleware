@@ -148,8 +148,6 @@ public class AdminDaemon {
         final BundleListener bl = new BundleListener() {
             public void bundleChanged(final BundleEvent event) {
             	
-            	final String sn = event.getBundle().getSymbolicName();
-            	
                 if (event.getType() == BundleEvent.STARTED) {
                     bundlelist.add(event.getBundle());
                 } else if (event.getType() == BundleEvent.STOPPED) {
@@ -176,7 +174,7 @@ public class AdminDaemon {
     	this.cache.initAccessCombinations();
     }
 
-    public void initRMI(final ClassLoader loader, final BundleContext context) {
+    public void initRMI(final BundleContext context) {
 
         try {
             if (null == System.getSecurityManager()) {
@@ -190,7 +188,6 @@ public class AdminDaemon {
                     }
                 });
             }
-            Thread.currentThread().setContextClassLoader(loader);
             
             final int rmi_port = prop.getRmiProp(AdminProperties.RMI.RMI_PORT, 1099);
             try {
