@@ -91,7 +91,7 @@ public class Activator implements BundleActivator {
         this.daemon.registerBundleListener(context);
         this.daemon.initCache(context);
         this.daemon.initAccessCombinationsInCache(); // EXTRA INIT BECAUSE WE NEED TO GET THE EXCEPTIONS TO FAIL ON STARTUP
-        this.daemon.initRMI(this.getClass().getClassLoader(), context);
+        this.daemon.initRMI(context);
         if (log.isInfoEnabled()) {
             final Dictionary<Object, Object> headers = context.getBundle().getHeaders();
             log.info("Version: " + headers.get("Bundle-Version"));
