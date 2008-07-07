@@ -170,18 +170,28 @@ v_setprop() {
     local prop="$1"
     local val="$2"
     local propfile="$3"
-#    echo setting $prop in $propfile
-    echo -n .
-    ox_set_property "$prop" "$val" "$propfile"
+    if [ -f $3 ]; then 
+	    # echo setting $prop in $propfile
+    	echo -n .
+    	ox_set_property "$prop" "$val" "$propfile"
+    else
+	echo
+		echo skipping configuration of $1 in $3
+    fi
 }
 
 v_comment() {
     local prop="$1"
     local action="$2"
     local propfile="$3"
-#    echo $action hash for $prop in $propfile
-    echo -n .
-    ox_comment "$prop" "$action" "$propfile"
+    if [ -f $3 ]; then
+		#    echo $action hash for $prop in $propfile
+		echo -n .
+		ox_comment "$prop" "$action" "$propfile"
+    else
+	echo
+		echo skipping configuration of $i in $3
+    fi
 }
 
 v_cache_hosting(){
@@ -394,6 +404,8 @@ SQLDB=$CONFIGDB_DBNAME
 SQLOPTS=$SQLOPTS
 
 # groupware
+setup_groupware() 
+{
 echo setting up groupware configuration ${SERVERCONF}
 
 # this formular and parameters are from Holger
@@ -437,14 +449,6 @@ v_setprop SERVER_NAME $SERVER_NAME ${SERVERCONF}/system.properties
 v_setprop com.openexchange.mail.mailServer $IMAP_SERVER ${SERVERCONF}/mail.properties
 v_setprop com.openexchange.mail.loginType  $IMAP_LOGIN_TYPE ${SERVERCONF}/mail.properties
 
-#case $LOGIN_IMPL_TYPE in
-#    database)
-#	v_setprop LoginInfo com.openexchange.groupware.contexts.RdbLoginInfo ${SERVERCONF}/system.properties
-#	v_setprop checkPassword true ${SERVERCONF}/ldap.properties
-#	;;
-#    
-#esac
-
 v_setprop UPLOAD_DIRECTORY "$TMPDIR_PATH" ${SERVERCONF}/server.properties
 
 v_setprop com.openexchange.sessiond.sessionContainerTimeout "$SESSIONCONTAINERTIMEOUT" ${SERVERCONF}/sessiond.properties
@@ -464,12 +468,14 @@ v_setprop com.openexchange.push.udp.pushEnabled true ${SERVERCONF}/push.properti
 v_setprop com.openexchange.push.udp.registerPort $OLPORT ${SERVERCONF}/push.properties
 v_setprop com.openexchange.push.udp.registerDistributionEnabled false  ${SERVERCONF}/push.properties
 v_setprop com.openexchange.push.udp.eventDistributionEnabled true ${SERVERCONF}/push.properties
-
+}
 
 #
 # admin daemon
 #
-echo
+
+setup_admin()
+{
 echo setting up admin daemon configuration ${ADMINCONF}
 
 v_setprop SERVER_NAME $SERVER_NAME ${ADMINCONF}/system.properties
@@ -514,5 +520,19 @@ else
     echo
     echo "*** RMI authentication is disabled"
 fi
-echo "groupware and admin configuration done"
-echo "admin daemon must now be restarted if already running"
+}
+
+if [ -d ${SERVERCONF} ]; then
+	setup_groupware
+	echo
+	echo "groupware daemon must now be restarted if already running"
+else
+	echo ${SERVERCONF} not available skipping groupware configuration
+fi
+
+if [ -d  ${ADMINCONF} ]; then
+	setup_admin
+        echo "admin daemon must now be restarted if already running"
+else
+	echo ${ADMINCONF} not available skipping admin daemon configuration
+fi
