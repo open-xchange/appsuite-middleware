@@ -61,12 +61,8 @@ public class Activator implements BundleActivator {
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
     public void start(BundleContext context) throws Exception {
-        final ClassLoader oldloader = Thread.currentThread().getContextClassLoader();
-        final ClassLoader newloader = this.getClass().getClassLoader();
-        Thread.currentThread().setContextClassLoader(newloader);
-        this.starter = new PluginStarter(newloader);
+        this.starter = new PluginStarter();
         this.starter.start(context);
-        Thread.currentThread().setContextClassLoader(oldloader);
     }
 
     /*

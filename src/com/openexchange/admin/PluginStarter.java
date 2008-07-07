@@ -74,7 +74,6 @@ import com.openexchange.admin.tools.PropertyHandlerExtended;
 import com.openexchange.admin.tools.monitoring.MonitorAgent;
 
 public class PluginStarter {
-    private ClassLoader loader = null;
     private static Registry registry = null;
     private static Log log = LogFactory.getLog(PluginStarter.class);
 
@@ -84,13 +83,11 @@ public class PluginStarter {
     private static PropertyHandlerExtended prop = null;
     private static MonitorAgent moni = null;
 
-    public PluginStarter(final ClassLoader loader) {
-        this.loader = loader;
+    public PluginStarter() {
     }
 
     public void start(final BundleContext context) throws RemoteException, AlreadyBoundException, StorageException {
         try {
-            Thread.currentThread().setContextClassLoader(loader);
 
             if (null == System.getSecurityManager()) {
                 System.setSecurityManager(new SecurityManager() {

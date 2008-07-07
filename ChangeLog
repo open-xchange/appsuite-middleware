@@ -1,3 +1,8 @@
+* 2008-07-07 - choeger@open-xchange.com
+
+  - Bugfix ID#11500 JMX error when starting admindaemon
+    do not set contextclassloader
+
 * 2008-07-03 - manuel.kraft@open-xchange.com
 
   - Bugfix ID#11539 oxreport does not run any more: "java.lang.NoClassDefFoundError: com/openexchange/admin/console/ReportingTool"
