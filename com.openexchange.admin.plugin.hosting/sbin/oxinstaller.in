@@ -170,7 +170,8 @@ v_setprop() {
     local prop="$1"
     local val="$2"
     local propfile="$3"
-    echo setting $prop in $propfile
+#    echo setting $prop in $propfile
+    echo -n .
     ox_set_property "$prop" "$val" "$propfile"
 }
 
@@ -178,7 +179,8 @@ v_comment() {
     local prop="$1"
     local action="$2"
     local propfile="$3"
-    echo $action hash for $prop in $propfile
+#    echo $action hash for $prop in $propfile
+    echo -n .
     ox_comment "$prop" "$action" "$propfile"
 }
 
@@ -392,6 +394,7 @@ SQLDB=$CONFIGDB_DBNAME
 SQLOPTS=$SQLOPTS
 
 # groupware
+echo setting up groupware configuration ${SERVERCONF}
 
 # this formular and parameters are from Holger
 NSIZE=$(( ${SERVER_MEMORY} / 2 ))
@@ -466,6 +469,8 @@ v_setprop com.openexchange.push.udp.eventDistributionEnabled true ${SERVERCONF}/
 #
 # admin daemon
 #
+echo
+echo setting up admin daemon configuration ${ADMINCONF}
 
 v_setprop SERVER_NAME $SERVER_NAME ${ADMINCONF}/system.properties
 v_setprop SERVER_NAME $SERVER_NAME ${ADMINCONF}/AdminDaemon.properties
@@ -505,11 +510,10 @@ if [ -z "$DISABLE_RMI_AUTH" ]; then
 		-f /opt/open-xchange/etc/admindaemon/mpasswd -P "$MASTER_PASS" >/dev/null
     fi
 else
-    echo
-    echo "*** RMI authentication is disabled"
     v_setprop MASTER_AUTHENTICATION_DISABLED true ${ADMINCONF}/AdminDaemon.properties
     v_setprop CONTEXT_AUTHENTICATION_DISABLED true ${ADMINCONF}/AdminDaemon.properties
     echo
+    echo "*** RMI authentication is disabled"
 fi
-
+echo "groupware and admin configuration done"
 echo "admin daemon must now be restarted if already running"
