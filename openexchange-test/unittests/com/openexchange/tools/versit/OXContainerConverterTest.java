@@ -93,7 +93,6 @@ public class OXContainerConverterTest extends TestCase {
 
     public static SessionObject getSession() throws Exception {
 
-		ContextStorage.start();
 		final UserStorage uStorage = UserStorage.getInstance();
 		final int userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), new ContextImpl(1));
 		final SessionObject sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-tests");
@@ -209,7 +208,6 @@ public class OXContainerConverterTest extends TestCase {
 	
 	public static User getUserParticipant() throws AbstractOXException{
 
-		ContextStorage.start();
 		final UserStorage uStorage = UserStorage.getInstance();
 		final Context ctx = new ContextImpl(1);
 		final int uid = uStorage.getUserId(AjaxInit.getAJAXProperty("user_participant1"), ctx);

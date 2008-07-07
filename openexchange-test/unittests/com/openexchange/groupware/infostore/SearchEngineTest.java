@@ -102,7 +102,6 @@ public class SearchEngineTest extends TestCase {
 
         TestInit.loadTestProperties();
         Init.startServer();
-        ContextStorage.start();
 
         final ContextStorage ctxstor = ContextStorage.getInstance();
         final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();

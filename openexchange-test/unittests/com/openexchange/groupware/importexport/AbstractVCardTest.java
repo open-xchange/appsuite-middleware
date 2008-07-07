@@ -79,7 +79,6 @@ public class AbstractVCardTest extends AbstractContactTest {
 	@BeforeClass
 	public static void initialize() throws Exception {
 		Init.startServer();
-		ContextStorage.start();
 		final UserStorage uStorage = UserStorage.getInstance();
         ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
         userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), ctx);

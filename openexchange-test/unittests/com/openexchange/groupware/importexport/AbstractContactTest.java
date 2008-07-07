@@ -102,7 +102,7 @@ import com.openexchange.tools.session.ServerSessionFactory;
  */
 public class AbstractContactTest {
 	
-	public static class TestSession extends SessionObject{
+	public static class TestSession extends SessionObject {
 		
 		/**
 		 * This class is needed to fake permissions for different modules.
@@ -431,7 +431,6 @@ public class AbstractContactTest {
     @BeforeClass
 	public static void initialize() throws Exception {
 		Init.startServer();
-		ContextStorage.start();
 		final UserStorage uStorage = UserStorage.getInstance();
         final Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
         userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), ctx);
@@ -529,7 +528,6 @@ public class AbstractContactTest {
 	 */
 	public static User getUserParticipant() throws Exception{
 		Init.startServer();
-		ContextStorage.start();
 		final UserStorage uStorage = UserStorage.getInstance();
 		final Context ctx = new ContextImpl(1);
 		final int uid = uStorage.getUserId(AjaxInit.getAJAXProperty("user_participant1"), ctx);
