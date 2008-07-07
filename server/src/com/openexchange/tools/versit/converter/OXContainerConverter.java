@@ -1785,6 +1785,9 @@ public class OXContainerConverter {
 		// ADR
 		addADR(object, contact, new String[] { PARAM_WORK }, ContactObject.STREET_BUSINESS, ContactObject.CITY_BUSINESS,
 				ContactObject.STATE_BUSINESS, ContactObject.POSTAL_CODE_BUSINESS, ContactObject.COUNTRY_BUSINESS);
+		// ADR HOME
+		addADR(object, contact, new String[] { PARAM_HOME }, ContactObject.STREET_HOME, ContactObject.CITY_HOME,
+				ContactObject.STATE_HOME, ContactObject.POSTAL_CODE_HOME, ContactObject.COUNTRY_HOME);
 		// LABEL is ignored
 		// TEL
 		addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_WORK, PARAM_VOICE }, contact.getTelephoneBusiness1());
@@ -2021,9 +2024,10 @@ public class OXContainerConverter {
 		if (value == null) {
 			return;
 		}
-		final DateTimeValue dt = new DateTimeValue();
-		dt.calendar.setTimeZone(DateTimeValue.GMT);
-		dt.calendar.setTime(value);
+		// Fill date property
+		DateTimeValue dt = new DateTimeValue();
+		//dt.calendar.setTimeZone(DateTimeValue.GMT);
+		dt.calendar.setTimeInMillis(value.getTime());
 		dt.hasTime = false;
 		final Property property = new Property(name);
 		if (setValue) {
