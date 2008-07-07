@@ -50,8 +50,6 @@
 package com.openexchange.axis2.internal;
 
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.servlet.ServletException;
