@@ -186,17 +186,6 @@ public abstract class ContextStorage {
 
     /**
      * Initialization.
-     * FIXME remove this method.
-     * @throws ContextException if initialization of contexts fails.
-     * @deprecated use normal server startup with {@link Starter}.
-     */
-    @Deprecated
-	public static void init() throws ContextException {
-        start();
-    }
-
-    /**
-     * Initialization.
      * @throws ContextException if initialization of contexts fails.
      */
     public static void start() throws ContextException {
