@@ -867,7 +867,7 @@ public class OXContainerConverter {
 			} else {
 				if (uriParam.getValueCount() == 1) {
 					// We expect that the URI/URL is parametes's only value
-					loadImageFromURL(contactContainer, uriParam);
+					loadImageFromURL(contactContainer, uriParam.getValue(0).getText());
 				}
 			}
 		}
@@ -1122,18 +1122,17 @@ public class OXContainerConverter {
 	 * 
 	 * @param contactContainer
 	 *            The contact container to fill
-	 * @param uriParam
-	 *            The parameter keeping the URI in its value
+	 * @param uri
+	 *            The URI parameter's value
 	 * @throws ConverterException
 	 *             If converting image's data fails
 	 */
-	private static void loadImageFromURL(final ContactObject contactContainer, final Parameter uriParam)
+	private static void loadImageFromURL(final ContactObject contactContainer, final String uri)
 			throws ConverterException {
-		final String urlStr = uriParam.getValue(0).getText();
 		String mimeType = null;
 		byte[] bytes = null;
 		try {
-			final URLConnection urlCon = new URL(urlStr).openConnection();
+			final URLConnection urlCon = new URL(uri).openConnection();
 			urlCon.setConnectTimeout(2500);
 			urlCon.setReadTimeout(2500);
 			urlCon.connect();
@@ -1168,15 +1167,15 @@ public class OXContainerConverter {
 				}
 			}
 		} catch (final java.net.SocketTimeoutException e) {
-			LOG.warn(new StringBuilder(64 + urlStr.length()).append(
-					"Either connecting to or reading from an image's URI timed out: ").append(urlStr).toString(), e);
+			LOG.warn(new StringBuilder(64 + uri.length()).append(
+					"Either connecting to or reading from an image's URI timed out: ").append(uri).toString(), e);
 		} catch (final IOException e) {
-			LOG.warn(new StringBuilder(32 + urlStr.length()).append("Image  URI could not be loaded: ").append(urlStr)
+			LOG.warn(new StringBuilder(32 + uri.length()).append("Image  URI could not be loaded: ").append(uri)
 					.toString(), e);
 		}
 		if (bytes != null) {
 			contactContainer.setImage1(bytes);
-			contactContainer.setImageContentType(mimeType == null ? getMimeType(urlStr) : mimeType);
+			contactContainer.setImageContentType(mimeType == null ? getMimeType(uri) : mimeType);
 		}
 	}
 
