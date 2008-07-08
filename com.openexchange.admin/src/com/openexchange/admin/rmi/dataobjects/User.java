@@ -52,7 +52,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -435,7 +434,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
 
     private boolean telephone_telexset = false;
 
-    private String timezone;
+    private TimeZone timezone;
 
     private boolean timezoneset = false;
 
@@ -3288,7 +3287,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         if( this.timezone == null ) {
             return null;
         } else {
-            return TimeZone.getTimeZone(timezone);
+            return timezone;
         }
     }
 
@@ -3301,7 +3300,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         if (null == timezone) {
             this.timezoneset = true;
         }
-        this.timezone = timezone.getID();
+        this.timezone = timezone;
     }
 
     /**
