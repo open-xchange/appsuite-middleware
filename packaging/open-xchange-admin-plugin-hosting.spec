@@ -107,6 +107,11 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Mon Jul 07 2008 - choeger@open-xchange.com
+  - Bugfix ID#11500 JMX error when starting admindaemon
+    do not set contextclassloader
+* Mon Jul 07 2008 - holger.achtziger@open-xchange.com
+  - Bugfix ID#11575 OX installer fails if configjump.properties does not exist
 * Thu Jul 03 2008 - manuel.kraft@open-xchange.com
   - Bugfix ID#11539 oxreport does not run any more: "java.lang.NoClassDefFoundError: com/openexchange/admin/console/ReportingTool"
 * Wed Jul 02 2008 - manuel.kraft@open-xchange.com
