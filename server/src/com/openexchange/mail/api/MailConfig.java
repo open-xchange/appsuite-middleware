@@ -738,7 +738,7 @@ public abstract class MailConfig {
 		final int len = server.length();
 		char c = '\0';
 		for (int i = 0; (i < len) && ((c = server.charAt(i)) != '/'); i++) {
-			if (c == ':') {
+			if (c == ':' && ((c = server.charAt(i + 1)) == '/') && ((c = server.charAt(i + 2)) == '/')) {
 				final String s = server.substring(0, i).toLowerCase();
 				if (isValidProtocol(s)) {
 					int start = i + 1;
