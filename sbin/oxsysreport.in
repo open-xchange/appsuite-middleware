@@ -200,29 +200,24 @@ done
 ox_system_type
 DIST=$?
 
-case "$DIST" in 
-     $DEBIAN)
+if [ $(( $DIST & $DEBIAN )) -eq $DEBIAN ]; then
      echo Debian system detected
      FILES_DIRS="$FILES_DIRS /etc/debian_version"
      PROCS=${PROCS}';dpkg -l'
      test -f /etc/mysql/my.cnf && FILES_DIRS="$FILES_DIRS /etc/mysql/my.cnf"
-     ;;
-     $SUSE)
+elif [ $(( $DIST & $SUSE )) -eq $SUSE ]; then
      echo SuSE system detected
      FILES_DIRS="$FILES_DIRS /etc/SuSE-release"
      PROCS=${PROCS}';rpm -qa --last'
      test -f /etc/my.cnf && FILES_DIRS="$FILES_DIRS /etc/my.cnf"
-     ;;
-     $REDHAT)
+elif [ $(( $DIST & $REDHAT )) -eq $REDHAT ]; then
      echo Redhat system detected
      FILES_DIRS="$FILES_DIRS /etc/redhat-release"
      PROCS=${PROCS}';rpm -qa --last'
      test -f /etc/my.cnf && FILES_DIRS="$FILES_DIRS /etc/my.cnf"
-     ;;
-     *)
+else
      echo Distribution not detected
-     ;;
-esac
+fi
 
 collect_files() {
    $TAR cvfj /$TMP/$LOGDIR/ox_files_and_logs.tar.Z $FILES_DIRS > /dev/null 2>&1
