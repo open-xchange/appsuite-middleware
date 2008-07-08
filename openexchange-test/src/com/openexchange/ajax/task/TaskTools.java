@@ -314,12 +314,18 @@ public final class TaskTools extends Assert {
     public static GetResponse get(final AJAXClient client,
         final GetRequest request, final Date lastModified) throws AjaxException,
         IOException, SAXException, JSONException {
+        final boolean origFail = request.isFailOnError();
+        request.setFailOnError(false);
         GetResponse response = null;
         final long start = System.currentTimeMillis();
         do {
             response = (GetResponse) Executor.execute(client, request);
         } while (!timeout(start) &&
             (response.hasError() || lastModified.after(response.getTimestamp())));
+        request.setFailOnError(origFail);
+        if (origFail) {
+            assertFalse(response.getException().getMessage(), response.hasError());
+        }
         return response;
     }
 
