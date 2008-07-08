@@ -265,11 +265,12 @@ public class TasksTest extends AbstractAJAXTest {
 
         task.setObjectID(taskId);
         task.setTitle(updatedTitle);
-        failOnError(updateTask(getWebConversation(), getHostName(),
-            getSessionId(), folderId, task, lastModified));
+        response = updateTask(getWebConversation(), getHostName(),
+            getSessionId(), folderId, task, lastModified);
+        failOnError(response);
 
         response = getTask(getWebConversation(), getHostName(), getSessionId(),
-            folderId, taskId);
+            folderId, taskId, response.getTimestamp());
         assertEquals("Title of task is not updated.", updatedTitle,
             ((Task) response.getData()).getTitle());
         lastModified = response.getTimestamp();

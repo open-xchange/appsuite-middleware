@@ -119,6 +119,16 @@ public final class TaskTools extends Assert {
      * URL of the tasks AJAX interface.
      */
     private static final String TASKS_URL = "/ajax/tasks";
+
+    /**
+     * zero unix timestamp.
+     */
+    private static final Date ZERO = new Date(0);
+    
+    /**
+     * Timeout for master slave synchronisation.
+     */
+    public static final long TIMEOUT = 10000;
     
     /**
      * Prevent instantiation
@@ -127,6 +137,10 @@ public final class TaskTools extends Assert {
         super();
     }
 
+    public static boolean timeout(final long start) {
+        return System.currentTimeMillis() < (start + TIMEOUT);
+    }
+    
     /**
      * @return the identifier of the private task folder of the primary user.
      * @throws IOException if the communication with the server fails.
@@ -250,7 +264,7 @@ public final class TaskTools extends Assert {
     }
 
     /**
-     * @deprecated use {@link #get(AJAXSession, GetRequest)}
+     * @deprecated use {@link #get(AJAXSession, GetRequest, long)}
      */
     @Deprecated
     public static Response getTask(final WebConversation conversation,
@@ -267,8 +281,22 @@ public final class TaskTools extends Assert {
         return response;
     }
 
+    public static Response getTask(final WebConversation conversation,
+        final String hostName, final String sessionId, final int folderId,
+        final int taskId, final Date lastModified) throws IOException,
+        SAXException, JSONException, AjaxException, OXJSONException {
+        LOG.trace("Getting task.");
+        final AJAXClient client = new AJAXClient(new AJAXSession(conversation,
+            sessionId));
+        final GetResponse getR = get(client, new GetRequest(folderId,
+            taskId), lastModified);
+        final Response response = getR.getResponse();
+        response.setData(getR.getTask(client.getValues().getTimeZone()));
+        return response;
+    }
+
     /**
-     * @deprecated use {@link #get(AJAXClient, GetRequest)}.
+     * @deprecated use {@link #get(AJAXClient, GetRequest, long)}.
      */
     @Deprecated
     public static GetResponse get(final AJAXSession session,
@@ -280,8 +308,21 @@ public final class TaskTools extends Assert {
     public static GetResponse get(final AJAXClient client,
         final GetRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return get(client.getSession(), request);
+        return get(client, request, ZERO);
     }
+
+    public static GetResponse get(final AJAXClient client,
+        final GetRequest request, final Date lastModified) throws AjaxException,
+        IOException, SAXException, JSONException {
+        GetResponse response = null;
+        final long start = System.currentTimeMillis();
+        do {
+            response = (GetResponse) Executor.execute(client, request);
+        } while (!timeout(start) &&
+            (response.hasError() || lastModified.after(response.getTimestamp())));
+        return response;
+    }
+
     /**
      * @param folderAndTaskId Contains the folder identifier with the index
      * <code>0</code> and the task identifier with the index <code>1</code>.
