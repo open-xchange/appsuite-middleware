@@ -321,8 +321,7 @@ public class TasksTest extends AbstractAJAXTest {
 
         final List<UserParticipant> participants =
             new ArrayList<UserParticipant>();
-        final UserParticipant participant = new UserParticipant();
-        participant.setIdentifier(userId2);
+        final UserParticipant participant = new UserParticipant(userId2);
         participants.add(participant);
         task.setParticipants(participants);
         task.setParentFolderID(folderId);
@@ -339,13 +338,12 @@ public class TasksTest extends AbstractAJAXTest {
         final Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
         final Date lastModified = response.getTimestamp();
-        final JSONObject reload = (JSONObject) response.getData();
-        final JSONArray users = reload.getJSONArray("users");
+        final Task reload = (Task) response.getData();
+        final UserParticipant[] users = reload.getUsers();
         boolean confirmed = false;
-        for (int i = 0; i < users.length(); i++) {
-            final JSONObject user = users.getJSONObject(i);
-            final int confirm = user.getInt("confirmation");
-            final int userId = user.getInt("id");
+        for (final UserParticipant user : users) {
+            final int confirm = user.getConfirm();
+            final int userId = user.getIdentifier();
             if (userId2 == userId && Task.ACCEPT == confirm) {
                 confirmed = true;
             }
