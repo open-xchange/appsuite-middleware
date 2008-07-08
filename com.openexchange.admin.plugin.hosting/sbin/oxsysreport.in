@@ -201,22 +201,19 @@ ox_system_type
 DIST=$?
 
 case "$DIST" in 
-     1)
-     #Debian
+     $DEBIAN)
      echo Debian system detected
      FILES_DIRS="$FILES_DIRS /etc/debian_version"
      PROCS=${PROCS}';dpkg -l'
      test -f /etc/mysql/my.cnf && FILES_DIRS="$FILES_DIRS /etc/mysql/my.cnf"
      ;;
-     2)
-     #SuSE
+     $SUSE)
      echo SuSE system detected
      FILES_DIRS="$FILES_DIRS /etc/SuSE-release"
      PROCS=${PROCS}';rpm -qa --last'
      test -f /etc/my.cnf && FILES_DIRS="$FILES_DIRS /etc/my.cnf"
      ;;
-     3)
-     #Redhat
+     $REDHAT)
      echo Redhat system detected
      FILES_DIRS="$FILES_DIRS /etc/redhat-release"
      PROCS=${PROCS}';rpm -qa --last'
@@ -252,7 +249,7 @@ echo creating logdir $TMP/$LOGDIR
 mkdir -p $TMP/$LOGDIR/commands/
 echo collecting files into $TMP/$LOGDIR/ox_files_and_logs.tar.gz 
 collect_files
-echo colelcting system data into $TMP/$LOGDIR
+echo collecting system data into $TMP/$LOGDIR
 collect_output
 echo creating archive $LOGARC
 $TAR cvfz $LOGARC $TMP/$LOGDIR > /dev/null 2>&1
