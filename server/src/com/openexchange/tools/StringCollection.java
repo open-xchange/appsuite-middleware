@@ -113,7 +113,7 @@ public final class StringCollection {
 		return sb.toString();
 	}
 
-	public static final String disarmSQLString(final String s) {
+	public static String disarmSQLString(final String s) {
 		return new String(replaceGivenBytes(replaceGivenBytes(s.getBytes(), DSO, DSOR), DAP, DAPR));
 	}
 
@@ -128,7 +128,7 @@ public final class StringCollection {
 	 * @param byte replacement[]
 	 * @return byte[]
 	 */
-	public static final byte[] replaceGivenBytes(final byte b[], final byte replace[], final byte replacement[]) {
+	public static byte[] replaceGivenBytes(final byte b[], final byte replace[], final byte replacement[]) {
 		byte r[] = new byte[(b.length + (replacement.length * 2))];
 		int c = 0;
 		final int l = replace.length;
@@ -175,7 +175,7 @@ public final class StringCollection {
 	 * @param int arr[]
 	 * @return SQLInString or null
 	 */
-	public static final String getSqlInString(final int arr[]) {
+	public static String getSqlInString(final int arr[]) {
 		final StringBuffer sb = new StringBuffer();
 		if (arr.length > 0) {
 			sb.append('(');
@@ -203,7 +203,7 @@ public final class StringCollection {
 	 *            arr[]
 	 * @return SQLInString or null
 	 */
-	public static final String getSqlInString(final Object arr[]) {
+	public static String getSqlInString(final Object arr[]) {
 		final StringBuffer sb = new StringBuffer();
 		if (arr.length > 0) {
 			sb.append('(');
@@ -230,7 +230,7 @@ public final class StringCollection {
 	 * @param int arr[][]
 	 * @return SQLInString or null
 	 */
-	public static final String getSqlInString(final int arr[][]) {
+	public static String getSqlInString(final int arr[][]) {
 		final StringBuffer sb = new StringBuffer();
 		if (arr.length > 0) {
 			sb.append('(');
@@ -258,7 +258,7 @@ public final class StringCollection {
 	 * @param int arr[]
 	 * @return SQLInString or null
 	 */
-	public static final String getSqlInString(final int i, final int arr[]) {
+	public static String getSqlInString(final int i, final int arr[]) {
 		final StringBuffer sb = new StringBuffer();
 		sb.append('(');
 		sb.append(i);
@@ -280,7 +280,7 @@ public final class StringCollection {
 	 * @param Map
 	 * @return SQLInString or null
 	 */
-	public static final String getSqlInStringFromMap(final Map m) {
+	public static String getSqlInStringFromMap(final Map m) {
 		final StringBuffer sb = new StringBuffer();
 		sb.append('(');
 		if (m != null) {
@@ -313,7 +313,7 @@ public final class StringCollection {
 	 * @param int c
 	 * @return byte[]
 	 */
-	public static final byte[] blurTrim(final byte b[], final int c) {
+	public static byte[] blurTrim(final byte b[], final int c) {
 		final byte r[] = new byte[c];
 		System.arraycopy(b, 0, r, 0, c);
 		return r;
@@ -329,23 +329,23 @@ public final class StringCollection {
 	 * @param int l (last position in b + replacement.length)
 	 * @return byte[]
 	 */
-	public static final byte[] expandArray(final byte b[], final int c, final int l) {
+	public static byte[] expandArray(final byte b[], final int c, final int l) {
 		final byte r[] = new byte[((b.length + l) * 2)];
 		System.arraycopy(b, 0, r, 0, c);
 		return r;
 	}
 
-	public static final String date2SQLString(final Date d) {
+	public static String date2SQLString(final Date d) {
 		final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		return (sdf.format(d));
 	}
 
-	public static final String date2String(final Date d) {
+	public static String date2String(final Date d) {
 		final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm");
 		return (sdf.format(d));
 	}
 
-	public static final String getSelect(final int[] cols, final String table) throws IndexOutOfBoundsException {
+	public static String getSelect(final int[] cols, final String table) throws IndexOutOfBoundsException {
 		final StringBuffer sb = new StringBuffer(256);
 		sb.append("SELECT ");
 		int x = 0;
@@ -412,7 +412,7 @@ public final class StringCollection {
 		return true;
 	}
 
-	public static final String convertArraytoString(final Object[] o) {
+	public static String convertArraytoString(final Object[] o) {
 		final StringBuilder sb = new StringBuilder();
 		for (int a = 0; a < o.length; a++) {
 			sb.append(o[a]);
@@ -420,7 +420,7 @@ public final class StringCollection {
 		return sb.toString();
 	}
 
-	public static final String getStackAsString() {
+	public static String getStackAsString() {
 		final Throwable t = new Throwable();
 		t.fillInStackTrace();
 		final StringWriter sw = new StringWriter();
