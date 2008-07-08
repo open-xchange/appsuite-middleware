@@ -67,14 +67,12 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
-import com.openexchange.tools.date.FormatDate;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
@@ -373,17 +371,22 @@ public class ContactMySql implements ContactSql {
 
 			/*********************** * search ranges * ***********************/
 
-			final String language = UserStorage.getStorageUser(user, ctx).getLocale().getLanguage();
+			//final String language = UserStorage.getStorageUser(user, ctx).getLocale().getLanguage();
 
 			if (cso.getAnniversaryRange() != null && cso.getAnniversaryRange().length > 0) {
 				final Date[] d = cso.getAnniversaryRange();
 				try {
-					final String a = new FormatDate(language.toLowerCase(), language.toUpperCase())
+					final String field = Contacts.mapping[ContactObject.ANNIVERSARY].getDBFieldName();
+					sb.append("co.").append(field).append(" >= ? ").append(search_habit).append(' ');
+					sb.append("co.").append(field).append(" <= ? ").append(search_habit).append(' ');
+					injectors.add(new TimestampSQLInjector(d[0]));
+					injectors.add(new TimestampSQLInjector(d[1]));
+					/*final String a = new FormatDate(language.toLowerCase(), language.toUpperCase())
 							.formatDateForPostgres(d[0], false);
 					final String b = new FormatDate(language.toLowerCase(), language.toUpperCase())
 							.formatDateForPostgres(d[0], false);
 					sb.append(getRangeSearch(Contacts.mapping[ContactObject.ANNIVERSARY].getDBFieldName(), a, b,
-							search_habit));
+							search_habit));*/
 				} catch (final Exception e) {
 					LOG.error("Could not Format Anniversary Date for Range Search! ", e);
 				}
@@ -391,12 +394,17 @@ public class ContactMySql implements ContactSql {
 			if (cso.getBirthdayRange() != null && cso.getBirthdayRange().length > 0) {
 				final Date[] d = cso.getBirthdayRange();
 				try {
-					final String a = new FormatDate(language.toLowerCase(), language.toUpperCase())
+					final String field = Contacts.mapping[ContactObject.BIRTHDAY].getDBFieldName();
+					sb.append("co.").append(field).append(" >= ? ").append(search_habit).append(' ');
+					sb.append("co.").append(field).append(" <= ? ").append(search_habit).append(' ');
+					injectors.add(new TimestampSQLInjector(d[0]));
+					injectors.add(new TimestampSQLInjector(d[1]));
+					/*final String a = new FormatDate(language.toLowerCase(), language.toUpperCase())
 							.formatDateForPostgres(d[0], false);
 					final String b = new FormatDate(language.toLowerCase(), language.toUpperCase())
 							.formatDateForPostgres(d[0], false);
 					sb.append(getRangeSearch(Contacts.mapping[ContactObject.BIRTHDAY].getDBFieldName(), a, b,
-							search_habit));
+							search_habit));*/
 				} catch (final Exception e) {
 					LOG.error("Could not Format Birthday Date for Range Search! ", e);
 				}
@@ -409,12 +417,17 @@ public class ContactMySql implements ContactSql {
 			if (cso.getCreationDateRange() != null && cso.getCreationDateRange().length > 0) {
 				final Date[] d = cso.getCreationDateRange();
 				try {
-					final String a = new FormatDate(language.toLowerCase(), language.toUpperCase())
+					final String field = Contacts.mapping[ContactObject.CREATION_DATE].getDBFieldName();
+					sb.append("co.").append(field).append(" >= ? ").append(search_habit).append(' ');
+					sb.append("co.").append(field).append(" <= ? ").append(search_habit).append(' ');
+					injectors.add(new TimestampSQLInjector(d[0]));
+					injectors.add(new TimestampSQLInjector(d[1]));
+					/*final String a = new FormatDate(language.toLowerCase(), language.toUpperCase())
 							.formatDateForPostgres(d[0], false);
 					final String b = new FormatDate(language.toLowerCase(), language.toUpperCase())
 							.formatDateForPostgres(d[0], false);
 					sb.append(getRangeSearch(Contacts.mapping[ContactObject.CREATION_DATE].getDBFieldName(), a, b,
-							search_habit));
+							search_habit));*/
 				} catch (final Exception e) {
 					LOG.error("Could not Format Creating_Date Date for Range Search! ", e);
 				}
@@ -422,12 +435,17 @@ public class ContactMySql implements ContactSql {
 			if (cso.getLastModifiedRange() != null && cso.getLastModifiedRange().length > 0) {
 				final Date[] d = cso.getLastModifiedRange();
 				try {
-					final String a = new FormatDate(language.toLowerCase(), language.toUpperCase())
+					final String field = Contacts.mapping[ContactObject.LAST_MODIFIED].getDBFieldName();
+					sb.append("co.").append(field).append(" >= ? ").append(search_habit).append(' ');
+					sb.append("co.").append(field).append(" <= ? ").append(search_habit).append(' ');
+					injectors.add(new TimestampSQLInjector(d[0]));
+					injectors.add(new TimestampSQLInjector(d[1]));
+					/*final String a = new FormatDate(language.toLowerCase(), language.toUpperCase())
 							.formatDateForPostgres(d[0], false);
 					final String b = new FormatDate(language.toLowerCase(), language.toUpperCase())
 							.formatDateForPostgres(d[0], false);
 					sb.append(getRangeSearch(Contacts.mapping[ContactObject.LAST_MODIFIED].getDBFieldName(), a, b,
-							search_habit));
+							search_habit));*/
 				} catch (final Exception e) {
 					LOG.error("Could not Format LastModified Date for Range Search! ", e);
 				}
@@ -1251,6 +1269,21 @@ public class ContactMySql implements ContactSql {
 
 		public void inject(final PreparedStatement ps, final int parameterIndex) throws SQLException {
 			ps.setString(parameterIndex, value);
+		}
+
+	}
+
+	private static final class TimestampSQLInjector implements SQLInjector {
+
+		private final java.sql.Timestamp value;
+
+		public TimestampSQLInjector(final Date value) {
+			super();
+			this.value = new java.sql.Timestamp(value.getTime());
+		}
+
+		public void inject(final PreparedStatement ps, final int parameterIndex) throws SQLException {
+			ps.setTimestamp(parameterIndex, value);
 		}
 
 	}
