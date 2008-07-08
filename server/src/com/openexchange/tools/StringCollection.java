@@ -79,8 +79,8 @@ public final class StringCollection {
 	}
 
 	/**
-	 * Prepares specified string for being used in a SQL WHERE clause as a
-	 * search pattern.
+	 * Prepares specified string for being used in a prepared statement's WHERE
+	 * clause as a search pattern.
 	 * <ul>
 	 * <li>
 	 * Any contained <code>'%'</code> characters are quoted/escaped.</li>
@@ -104,8 +104,8 @@ public final class StringCollection {
 	}
 
 	/**
-	 * Prepares specified string for being used in a SQL WHERE clause as a
-	 * search pattern.
+	 * Prepares specified string for being used in a prepared statement's WHERE
+	 * clause as a search pattern.
 	 * <ul>
 	 * <li> Any contained <code>'%'</code> characters are quoted/escaped.</li>
 	 * <li> Wildcard characters <code>'*'</code> and <code>'?'</code> are
