@@ -60,7 +60,7 @@ import java.util.Map;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
 
 /**
- * {@link StringCollection} - rovides useful string utility methods mainly for
+ * {@link StringCollection} - Provides useful string utility methods mainly for
  * SQL.
  * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
