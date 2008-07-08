@@ -126,10 +126,21 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Jul 08 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11561: Added check if shared folder may be empty.
+* Tue Jul 08 2008 - thorben.betten@open-xchange.com
+ - Bugfix #9749: Setting image's content type according to "TYPE" parameter
+   in VCard object
+ - Partial fix for bug #11569: Fixed search with "%" in calendar module
+ - Partial fix for bug #11569: Fixed search with "%" in contact module
+* Mon Jul 07 2008 - thorben.betten@open-xchange.com
+ - Partially fixed bug #11474: Proper birthday when syncing contacts
 * Fri Jul 04 2008 - thorben.betten@open-xchange.com
  - Preparations for Bugfix #11554: Proper logging of unexpected exceptions
  - Bugfix #11554:  Changed conversion of MailMessage objects to JavaMail
    Message objects
+ - Bugfix #10949: Allowing multiple external participants whose email
+   address' hash code is equal through re-computing their identifier
 * Thu Jul 03 2008 - francisco.laguna@open-xchange.com
  - Bugfix #6927: Allow changing start_date of appointment series.
 * Thu Jul 03 2008 - marcus.klein@open-xchange.com
