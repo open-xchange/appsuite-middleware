@@ -73,6 +73,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
+import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.date.FormatDate;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -194,7 +195,7 @@ public class ContactMySql implements ContactSql {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(new StringBuilder("ContactSQL Query: ").append(sb.toString()));
 		}
-		//System.out.println("-> "+sb.toString());
+		// System.out.println("-> "+sb.toString());
 		final PreparedStatement ps = con.prepareStatement(sb.toString());
 		final int size = injectors.size();
 		for (int i = 0; i < size; i++) {
@@ -338,8 +339,7 @@ public class ContactMySql implements ContactSql {
 						String value = values[i];
 
 						if (!value.equals("*")) {
-							value = value.replace('*', '%');
-							value = value.replace('?', '_');
+							value = StringCollection.prepareForSearch(value, false);
 
 							if (value.indexOf(',') != -1) {
 								final String[] tokens = value.trim().split("\\s*,\\s*");
@@ -360,16 +360,10 @@ public class ContactMySql implements ContactSql {
 						String value = values[i];
 
 						if (!value.equals("*")) {
-							value = value.replace('*', '%');
-							value = value.replace('?', '_');
+							value = StringCollection.prepareForSearch(value);
 
-							if (value.indexOf('%') != -1) {
-								sb.append("( co.").append(field).append(" LIKE ? ) ").append(search_habit).append(' ');
-								injectors.add(new StringSQLInjector(value));
-							} else {
-								sb.append("( co.").append(field).append(" LIKE ? ) ").append(search_habit).append(' ');
-								injectors.add(new StringSQLInjector("%", value, "%"));
-							}
+							sb.append("( co.").append(field).append(" LIKE ? ) ").append(search_habit).append(' ');
+							injectors.add(new StringSQLInjector(value));
 						}
 					}
 				}
@@ -462,106 +456,73 @@ public class ContactMySql implements ContactSql {
 			if (cso.getGivenName() != null && cso.getGivenName().length() > 0) {
 				final String field = Contacts.mapping[ContactObject.GIVEN_NAME].getDBFieldName();
 
-				String value = cso.getGivenName();
-				value = value.replace('*', '%');
-				value = value.replace('?', '_');
+				final String value = StringCollection.prepareForSearch(cso.getGivenName());
 
 				if (value.equals("%")) {
 					sb.append(' ');
-				} else if (value.indexOf('%') != -1) {
-					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector(value));
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector(new StringBuilder(value.length() + 2).append('%').append(value)
-							.append('%').toString()));
+					injectors.add(new StringSQLInjector(value));
 				}
 			}
 			if (cso.getSurname() != null && cso.getSurname().length() > 0) {
 				final String field = Contacts.mapping[ContactObject.SUR_NAME].getDBFieldName();
 
-				String value = cso.getSurname();
-				value = value.replace('*', '%');
-				value = value.replace('?', '_');
+				final String value = StringCollection.prepareForSearch(cso.getSurname());
 
 				if (value.equals("%")) {
 					sb.append(' ');
-				} else if (value.indexOf('%') != -1) {
-					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector(value));
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector(new StringBuilder(value.length() + 2).append('%').append(value)
-							.append('%').toString()));
+					injectors.add(new StringSQLInjector(value));
 				}
 			}
 			if (cso.getDisplayName() != null && cso.getDisplayName().length() > 0) {
 				final String field = Contacts.mapping[ContactObject.DISPLAY_NAME].getDBFieldName();
 
-				String value = cso.getDisplayName();
-				value = value.replace('*', '%');
-				value = value.replace('?', '_');
+				final String value = StringCollection.prepareForSearch(cso.getDisplayName());
 
 				if (value.equals("%")) {
 					sb.append(' ');
-				} else if (value.indexOf('%') != -1) {
-					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector(value));
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector(new StringBuilder(value.length() + 2).append('%').append(value)
-							.append('%').toString()));
+					injectors.add(new StringSQLInjector(value));
 				}
 			}
 			if (cso.getEmail1() != null && cso.getEmail1().length() > 0) {
 				final String field = Contacts.mapping[ContactObject.EMAIL1].getDBFieldName();
 
-				String value = cso.getEmail1();
-				value = value.replace('*', '%');
-				value = value.replace('?', '_');
+				final String value = StringCollection.prepareForSearch(cso.getEmail1());
 
 				if (value.equals("%")) {
 					sb.append(' ');
-				} else if (value.indexOf('%') != -1) {
-					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector(value));
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector("%", value, "%"));
+					injectors.add(new StringSQLInjector(value));
 				}
 			}
 			if (cso.getEmail2() != null && cso.getEmail2().length() > 0) {
 				final String field = Contacts.mapping[ContactObject.EMAIL2].getDBFieldName();
 
-				String value = cso.getEmail2();
-				value = value.replace('*', '%');
-				value = value.replace('?', '_');
+				final String value = StringCollection.prepareForSearch(cso.getEmail2());
 
 				if (value.equals("%")) {
 					sb.append(' ');
-				} else if (value.indexOf('%') != -1) {
-					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector(value));
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector("%", value, "%"));
+					injectors.add(new StringSQLInjector(value));
 				}
 			}
 			if (cso.getEmail3() != null && cso.getEmail3().length() > 0) {
 				final String field = Contacts.mapping[ContactObject.EMAIL3].getDBFieldName();
 
-				String value = cso.getEmail3();
-				value = value.replace('*', '%');
-				value = value.replace('?', '_');
+				final String value = StringCollection.prepareForSearch(cso.getEmail3());
 
 				if (value.equals("%")) {
 					sb.append(' ');
-				} else if (value.indexOf('%') != -1) {
-					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector(value));
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector("%", value, "%"));
+					injectors.add(new StringSQLInjector(value));
 				}
 			}
 			if (cso.getCatgories() != null && cso.getCatgories().length() > 0) {
@@ -569,8 +530,7 @@ public class ContactMySql implements ContactSql {
 				String value = cso.getCatgories();
 
 				if (!value.equals("*")) {
-					value = value.replace('*', '%');
-					value = value.replace('?', '_');
+					value = StringCollection.prepareForSearch(value, false);
 
 					if (value.indexOf(',') != -1) {
 						final String[] tokens = value.trim().split("\\s*,\\s*");
@@ -590,18 +550,13 @@ public class ContactMySql implements ContactSql {
 			if (cso.getCompany() != null && cso.getCompany().length() > 0) {
 				final String field = Contacts.mapping[ContactObject.COMPANY].getDBFieldName();
 
-				String value = cso.getCompany();
-				value = value.replace('*', '%');
-				value = value.replace('?', '_');
+				final String value = StringCollection.prepareForSearch(cso.getCompany());
 
 				if (value.equals("%")) {
 					sb.append(' ');
-				} else if (value.indexOf('%') != -1) {
-					sb.append("( co.").append(field).append(" LIKE ? ) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector(value));
 				} else {
 					sb.append("( co.").append(field).append(" LIKE ? ) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector("%", value, "%"));
+					injectors.add(new StringSQLInjector(value));
 				}
 			}
 			if (cso.getIgnoreOwn() > 0) {
@@ -1078,8 +1033,9 @@ public class ContactMySql implements ContactSql {
 		}
 		smt.execute(tmp.toString());
 	}
-	
-	public void iFgiveUserContacToAdmin(final Statement smt, final int oid, final int admin_fid, final Context ct) throws SQLException {
+
+	public void iFgiveUserContacToAdmin(final Statement smt, final int oid, final int admin_fid, final Context ct)
+			throws SQLException {
 		final StringBuilder tmp = new StringBuilder("UPDATE prg_contacts SET changed_from = ")
 				.append(ct.getMailadmin()).append(", created_from = ").append(ct.getMailadmin()).append(
 						", changing_date = ").append(System.currentTimeMillis()).append(", fid = ").append(admin_fid)

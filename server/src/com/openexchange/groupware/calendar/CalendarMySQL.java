@@ -61,7 +61,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -977,16 +976,7 @@ class CalendarMySQL implements CalendarSqlImp {
 			sb.append(PDM_AND);
 			sb.append(CalendarCommonCollection.getFieldName(AppointmentObject.TITLE));
 			sb.append(" LIKE ?");
-			pattern = pattern.trim().replaceAll("%", StringCollection.quoteReplacement("\\%")).replaceAll("\\*",
-					StringCollection.quoteReplacement("%"));
-			if (pattern.charAt(0) != '*') {
-				// Prepend '%' character
-				pattern = CalendarOperation.PERCENT + pattern;
-			}
-			if (pattern.charAt(pattern.length() - 1) != '*') {
-				// Append '%' character
-				pattern = pattern + CalendarOperation.PERCENT;
-			}
+			pattern = StringCollection.prepareForSearch(pattern);
 		}
 
 		sb.append(PDM_ORDER_BY);

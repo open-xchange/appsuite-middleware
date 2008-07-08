@@ -79,6 +79,68 @@ public final class StringCollection {
 	}
 
 	/**
+	 * Prepares specified string for being used in a SQL WHERE clause as a
+	 * search pattern.
+	 * <ul>
+	 * <li>
+	 * Any contained <code>'%'</code> characters are quoted/escaped.</li>
+	 * <li>
+	 * Wildcard characters <code>'*'</code> and <code>'?'</code> are replaced
+	 * with corresponding SQL wildcard characters <code>'%'</code> and
+	 * <code>'_'</code>.</li>
+	 * <li>
+	 * If pattern does not start with/end with SQL wildcard character,
+	 * <code>'%'</code> character is prepended/appended to pattern.</li>
+	 * </ul>
+	 * <p>
+	 * E.g.: <code>"Foo%Bar*xxx?Hoo"</code> =&gt; <code>"Foo\%Bar%xxx_Hoo"</code>
+	 * 
+	 * @param s
+	 *            The string to be prepared for SQL search
+	 * @return A prepared search string
+	 */
+	public static String prepareForSearch(final String s) {
+		return prepareForSearch(s, true);
+	}
+
+	/**
+	 * Prepares specified string for being used in a SQL WHERE clause as a
+	 * search pattern.
+	 * <ul>
+	 * <li> Any contained <code>'%'</code> characters are quoted/escaped.</li>
+	 * <li> Wildcard characters <code>'*'</code> and <code>'?'</code> are
+	 * replaced with corresponding SQL wildcard characters <code>'%'</code> and
+	 * <code>'_'</code>.</li>
+	 * </ul>
+	 * <p>
+	 * E.g.: <code>"Foo%Bar*xxx?Hoo"</code> =&gt; <code>"Foo\%Bar%xxx_Hoo"</code>
+	 * 
+	 * @param s
+	 *            The string to be prepared for SQL search
+	 * @param surroundWithWildcard
+	 *            <code>true</code> to prepend/append <code>'%'</code>
+	 *            character, if pattern does not start with/end with SQL
+	 *            wildcard character; otherwise <code>false</code>
+	 * @return A prepared search string
+	 */
+	public static String prepareForSearch(final String s, final boolean surroundWithWildcard) {
+		String value = s.trim().replaceAll("%", quoteReplacement("\\%")).replaceAll("\\*", quoteReplacement("%"))
+				.replaceAll("\\?", quoteReplacement("_"));
+		if (surroundWithWildcard) {
+			if (value.charAt(0) != '%') {
+				// Prepend '%' character
+				value = new StringBuilder(value.length() + 1).append('%').append(value).toString();
+			}
+			if (value.charAt(value.length() - 1) != '%'
+					|| (value.length() > 1 && value.charAt(value.length() - 2) != '\\')) {
+				// Append '%' character
+				value = new StringBuilder(value.length() + 1).append(value).append('%').toString();
+			}
+		}
+		return value;
+	}
+
+	/**
 	 * Returns a literal replacement <code>String</code> for the specified
 	 * <code>String</code>.
 	 * 
