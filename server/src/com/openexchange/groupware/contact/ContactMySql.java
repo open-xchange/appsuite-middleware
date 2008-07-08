@@ -735,7 +735,7 @@ public class ContactMySql implements ContactSql {
 	}
 
 	public String getRangeSearch(final String field, final String a, final String b, final String sh) {
-		final StringBuilder sb = new StringBuilder(100);
+		final StringBuilder sb = new StringBuilder(32);
 
 		String von = "*";
 		String bis = "*";
