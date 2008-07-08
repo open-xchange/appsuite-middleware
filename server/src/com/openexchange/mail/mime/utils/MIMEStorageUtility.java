@@ -61,7 +61,6 @@ import javax.mail.FetchProfile;
 import javax.mail.UIDFolder;
 
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailListField;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.UIDSet;
@@ -145,12 +144,12 @@ public final class MIMEStorageUtility {
 	}
 
 	/**
-	 * Creates an appropriate collection of {@link MailListField} enumeration
+	 * Creates an appropriate collection of {@link MailField} enumeration
 	 * constants from given fetch profile
 	 * 
 	 * @param fetchProfile
 	 *            The fetch profile
-	 * @return An appropriate collection of {@link MailListField} enumeration
+	 * @return An appropriate collection of {@link MailField} enumeration
 	 *         constants
 	 */
 	public static Collection<MailField> fetchProfile2MailListFields(final FetchProfile fetchProfile) {
