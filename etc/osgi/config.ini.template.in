@@ -6,3 +6,4 @@ eclipse.ignoreApp=true
 osgi.classloader.singleThreadLoads=true
 osgi.clean=true
 osgi.logfile=@osgilogfile@
+org.osgi.framework.bootdelegation=sun.util.*
