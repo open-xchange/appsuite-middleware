@@ -124,6 +124,9 @@ public final class StringCollection {
 	 * @return A prepared search string
 	 */
 	public static String prepareForSearch(final String s, final boolean surroundWithWildcard) {
+		if (s == null) {
+			return s;
+		}
 		String value = s.trim().replaceAll("%", quoteReplacement("\\%")).replaceAll("\\*", quoteReplacement("%"))
 				.replaceAll("\\?", quoteReplacement("_"));
 		if (surroundWithWildcard) {
