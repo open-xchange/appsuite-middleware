@@ -1,3 +1,8 @@
+* 2008-07-08 - thorben.betten@open-xchange.com
+
+ - Bugfix #9749: Setting image's content type according to "TYPE" parameter
+   in VCard object
+
 * 2008-07-08 - marcus.klein@open-xchange.com
 
  - Bugfix #11561: Added check if shared folder may be empty.

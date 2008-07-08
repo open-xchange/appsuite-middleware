@@ -860,6 +860,10 @@ public class OXContainerConverter {
 				} catch (final UnsupportedEncodingException e) {
 					LOG.error("Image could not be set", e);
 				}
+				final Parameter type = property.getParameter(P_TYPE);
+				if (type != null && type.getValueCount() == 1) {
+					contactContainer.setImageContentType(type.getValue(0).getText());
+				}
 			} else {
 				if (uriParam.getValueCount() == 1) {
 					// We expect that the URI/URL is parametes's only value
