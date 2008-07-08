@@ -1,3 +1,7 @@
+* 2008-07-08 - marcus.klein@open-xchange.com
+
+ - Bugfix #11561: Added check if shared folder may be empty.
+
 * 2008-07-07 - thorben.betten@open-xchange.com
 
  - Partially fixed bug #11474: Proper birthday when syncing contacts

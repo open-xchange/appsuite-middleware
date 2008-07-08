@@ -475,20 +475,22 @@ public class FreeBusyResults implements SearchIterator {
                 }
             }
             rs.close();
-            // Add shared folders
-            shared_folder_info = calendarsqlimp.getSharedAppointmentFolderQuery(c, cfo, con);
-
-            rs = shared_folder_info.executeQuery();
-            while (rs.next()) {
-                object_id = rs.getInt(1);
-                pfid = rs.getInt(2);
-                uid = rs.getInt(3);
-                if (!rs.wasNull()) {
-                    final PrivateFolderInformationObject pfio = new PrivateFolderInformationObject(object_id, pfid, uid);
-                    private_folder_array.add(pfio);
+            // Add shared folders and check if there are such shared folders
+            if (cfo.getSharedFolderList().length > 0) {
+                shared_folder_info = calendarsqlimp.getSharedAppointmentFolderQuery(c, cfo, con);
+    
+                rs = shared_folder_info.executeQuery();
+                while (rs.next()) {
+                    object_id = rs.getInt(1);
+                    pfid = rs.getInt(2);
+                    uid = rs.getInt(3);
+                    if (!rs.wasNull()) {
+                        final PrivateFolderInformationObject pfio = new PrivateFolderInformationObject(object_id, pfid, uid);
+                        private_folder_array.add(pfio);
+                    }
                 }
+                rs.close();
             }
-            rs.close();
         } catch(final SQLException sqle) {
             LOG.error(sqle.getMessage(), sqle);
         } finally {
