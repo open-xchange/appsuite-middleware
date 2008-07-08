@@ -91,6 +91,8 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
  */
 public class ContactMySql implements ContactSql {
 
+	private static final String STR_PERCENT = "%";
+
 	private static final Log LOG = LogFactory.getLog(ContactMySql.class);
 
 	private String select = "SELECT co.intfield01" + ",co.cid," + "co.timestampfield01," + "co.field03,"
@@ -286,7 +288,7 @@ public class ContactMySql implements ContactSql {
 						.append(field).append(" NOT LIKE 'a%')) AND ");
 			} else if (!p.trim().equals(".") && !p.trim().equals("all")) {
 				sb.append(" (UPPER(").append(field).append(") LIKE UPPER(?)) AND ");
-				injectors.add(new StringSQLInjector(p, "%"));
+				injectors.add(new StringSQLInjector(p, STR_PERCENT));
 			}
 		}
 
@@ -346,10 +348,10 @@ public class ContactMySql implements ContactSql {
 								sb.append('(');
 
 								sb.append(" ( co.").append(field).append(" LIKE ? )");
-								injectors.add(new StringSQLInjector("%", tokens[0].toUpperCase(), "%"));
+								injectors.add(new StringSQLInjector(STR_PERCENT, tokens[0].toUpperCase(), STR_PERCENT));
 								for (int j = 1; j < tokens.length; j++) {
 									sb.append(" OR").append(" ( co.").append(field).append(" LIKE ? )");
-									injectors.add(new StringSQLInjector("%", tokens[j].toUpperCase(), "%"));
+									injectors.add(new StringSQLInjector(STR_PERCENT, tokens[j].toUpperCase(), STR_PERCENT));
 								}
 
 								sb.append(") ").append(search_habit).append(' ');
@@ -458,7 +460,7 @@ public class ContactMySql implements ContactSql {
 
 				final String value = StringCollection.prepareForSearch(cso.getGivenName());
 
-				if (value.equals("%")) {
+				if (value.equals(STR_PERCENT)) {
 					sb.append(' ');
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
@@ -470,7 +472,7 @@ public class ContactMySql implements ContactSql {
 
 				final String value = StringCollection.prepareForSearch(cso.getSurname());
 
-				if (value.equals("%")) {
+				if (value.equals(STR_PERCENT)) {
 					sb.append(' ');
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
@@ -482,7 +484,7 @@ public class ContactMySql implements ContactSql {
 
 				final String value = StringCollection.prepareForSearch(cso.getDisplayName());
 
-				if (value.equals("%")) {
+				if (value.equals(STR_PERCENT)) {
 					sb.append(' ');
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
@@ -494,7 +496,7 @@ public class ContactMySql implements ContactSql {
 
 				final String value = StringCollection.prepareForSearch(cso.getEmail1());
 
-				if (value.equals("%")) {
+				if (value.equals(STR_PERCENT)) {
 					sb.append(' ');
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
@@ -506,7 +508,7 @@ public class ContactMySql implements ContactSql {
 
 				final String value = StringCollection.prepareForSearch(cso.getEmail2());
 
-				if (value.equals("%")) {
+				if (value.equals(STR_PERCENT)) {
 					sb.append(' ');
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
@@ -518,7 +520,7 @@ public class ContactMySql implements ContactSql {
 
 				final String value = StringCollection.prepareForSearch(cso.getEmail3());
 
-				if (value.equals("%")) {
+				if (value.equals(STR_PERCENT)) {
 					sb.append(' ');
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
@@ -537,10 +539,10 @@ public class ContactMySql implements ContactSql {
 						sb.append('(');
 
 						sb.append("( co.").append(field).append(" LIKE ? )");
-						injectors.add(new StringSQLInjector("%", tokens[0], "%"));
+						injectors.add(new StringSQLInjector(STR_PERCENT, tokens[0], STR_PERCENT));
 						for (int i = 1; i < tokens.length; i++) {
 							sb.append(" OR ").append("( co.").append(field).append(" LIKE ? )");
-							injectors.add(new StringSQLInjector("%", tokens[i], "%"));
+							injectors.add(new StringSQLInjector(STR_PERCENT, tokens[i], STR_PERCENT));
 						}
 
 						sb.append(") ").append(search_habit).append(' ');
@@ -552,7 +554,7 @@ public class ContactMySql implements ContactSql {
 
 				final String value = StringCollection.prepareForSearch(cso.getCompany());
 
-				if (value.equals("%")) {
+				if (value.equals(STR_PERCENT)) {
 					sb.append(' ');
 				} else {
 					sb.append("( co.").append(field).append(" LIKE ? ) ").append(search_habit).append(' ');
