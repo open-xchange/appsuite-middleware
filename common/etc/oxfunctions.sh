@@ -65,17 +65,21 @@ ox_set_JAVA_BIN() {
 }
 
 DEBIAN=1
-LSB=2
+REDHAT=2
+SUSE=4
+LSB=8
 ox_system_type() {
+    local ret=0
     if [ -f /etc/debian_version ]; then
-	return 1
+	ret=$(( $ret | $DEBIAN ))
     elif [ -f /etc/SuSE-release ]; then
-	return 2
+	ret=$(( $ret | $SUSE ))
+	ret=$(( $ret | $LSB ))
     elif [ -f /etc/redhat-release ]; then
-	return 2
-    else
-	return 0
+	ret=$(( $ret | $REDHAT ))
+	ret=$(( $ret | $LSB ))
     fi
+    return $ret
 }
 
 # init script stuff
@@ -97,7 +101,7 @@ ox_start_daemon() {
 	start-stop-daemon $runasuser $runasgroup \
 	    --background --start --oknodo --startas $path \
 	    --make-pidfile --pidfile /var/run/${name}.pid
-    elif [ $type -eq $LSB ]; then
+    elif [ $(( $type & $LSB )) -eq $LSB ]; then
 	if [ -n "$user" ] && [ "$user" != "root" ]; then
 	    su -s /bin/bash $user -c $path > /dev/null 2>&1 & echo $! > /var/run/${name}.pid
 	else
@@ -119,7 +123,7 @@ ox_stop_daemon() {
     if [ $type -eq $DEBIAN ] ; then
 	start-stop-daemon --stop --oknodo --pidfile /var/run/${name}.pid
 	rm -f /var/run/${name}.pid
-    elif [ $type -eq $LSB ]; then
+    elif [ $(( $type & $LSB )) -eq $LSB ]; then
 	if [ ! -f /var/run/${name}.pid ]; then
 	    # LSB not running
 	    return 7
