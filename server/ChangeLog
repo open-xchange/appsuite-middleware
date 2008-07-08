@@ -2,6 +2,7 @@
 
  - Bugfix #9749: Setting image's content type according to "TYPE" parameter
    in VCard object
+ - Partial fix for bug #11569: Fixed search with "%" in calendar module
 
 * 2008-07-08 - marcus.klein@open-xchange.com
 
