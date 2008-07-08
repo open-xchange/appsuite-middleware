@@ -69,8 +69,15 @@ public class GetRequest extends AbstractTaskRequest {
      */
     private final int taskId;
 
-    private final boolean failOnError;
+    private boolean failOnError;
     
+    /**
+     * @return the failOnError
+     */
+    public final boolean isFailOnError() {
+        return failOnError;
+    }
+
     /**
      * Default constructor.
      */
@@ -121,5 +128,12 @@ public class GetRequest extends AbstractTaskRequest {
      */
     public GetParser getParser() {
         return new GetParser(failOnError);
+    }
+
+    /**
+     * @param failOnError the failOnError to set
+     */
+    public final void setFailOnError(final boolean failOnError) {
+        this.failOnError = failOnError;
     }
 }
