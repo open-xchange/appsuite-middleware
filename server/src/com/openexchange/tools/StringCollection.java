@@ -60,11 +60,12 @@ import java.util.Map;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
 
 /**
- * StringCollection (written as Blur.java some years ago ;)
+ * {@link StringCollection} - rovides useful string utility methods mainly for
+ * SQL.
  * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-
 public final class StringCollection {
 
 	static final byte[] DSO = "\\".getBytes();
