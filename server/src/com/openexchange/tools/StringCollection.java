@@ -54,6 +54,7 @@ import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
@@ -345,25 +346,20 @@ public final class StringCollection {
 	 * @param Map
 	 * @return SQLInString or null
 	 */
-	public static String getSqlInStringFromMap(final Map m) {
+	public static String getSqlInStringFromMap(final Map<?, ?> m) {
+		if (m == null) {
+			return null;
+		}
 		final StringBuffer sb = new StringBuffer();
 		sb.append('(');
-		if (m != null) {
-			final int size = m.size();
-			final Iterator it = m.keySet().iterator();
-			boolean first = true;
-			for (int k = 0; k < size; k++) {
-				final String temp = it.next().toString();
-				if (!first) {
-					sb.append(',');
-					sb.append(temp);
-				} else {
-					first = false;
-					sb.append(temp);
-				}
+		final int size = m.size();
+		if (size > 0) {
+			final Iterator<?> it = m.keySet().iterator();
+			sb.append(it.next().toString());
+			for (int k = 1; k < size; k++) {
+				sb.append(',');
+				sb.append(it.next().toString());
 			}
-		} else {
-			return null;
 		}
 		sb.append(')');
 		return sb.toString();
@@ -401,28 +397,28 @@ public final class StringCollection {
 	}
 
 	public static String date2SQLString(final Date d) {
-		final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
 		return (sdf.format(d));
 	}
 
 	public static String date2String(final Date d) {
-		final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+		final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.ENGLISH);
 		return (sdf.format(d));
 	}
 
-	public static String getSelect(final int[] cols, final String table) throws IndexOutOfBoundsException {
+	public static String getSelect(final int[] cols, final String table) {
 		final StringBuffer sb = new StringBuffer(256);
 		sb.append("SELECT ");
 		int x = 0;
 		for (int a = 0; a < cols.length; a++) {
 			final String temp = CalendarCommonCollection.getFieldName(cols[a]);
 			if (temp != null) {
-				if (x != 0) {
-					sb.append(',');
-					sb.append(temp);
-				} else {
+				if (x == 0) {
 					sb.append(temp);
 					x++;
+				} else {
+					sb.append(',');
+					sb.append(temp);
 				}
 			}
 		}
