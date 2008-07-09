@@ -469,9 +469,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		if ((mails == null) || (mails.length == 0)) {
 			return SearchIterator.EMPTY_ITERATOR;
 		}
+		final boolean cachable = (mails.length < MailProperties.getInstance().getMailFetchLimit());
 		final MailField[] useFields;
 		final boolean onlyFolderAndID;
-		if (mails.length < MailProperties.getInstance().getMailFetchLimit()) {
+		if (cachable) {
 			/*
 			 * Selection fits into cache: Prepare for caching
 			 */
@@ -500,8 +501,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			 * Remove old user cache entries
 			 */
 			MailMessageCache.getInstance().removeUserMessages(session.getUserId(), ctx);
-			if ((mails != null) && (mails.length > 0)
-					&& (mails.length < MailProperties.getInstance().getMailFetchLimit())) {
+			if ((mails != null) && (mails.length > 0) && (cachable)) {
 				/*
 				 * ... and put new ones
 				 */
