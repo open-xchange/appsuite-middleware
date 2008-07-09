@@ -88,6 +88,8 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -211,6 +213,7 @@ public final class ical extends PermissionServlet {
 		
 		try {
 			final Context context = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+			final User user = UserStorage.getInstance().getUser(sessionObj.getUserId(), context);
 			
 			user_agent = getUserAgent(req);
 			
@@ -305,6 +308,7 @@ public final class ical extends PermissionServlet {
 						it = appointmentSql.getModifiedAppointmentsInFolder(calendarfolder_id, _appointmentFields, new Date(0));
 						while (it.hasNext()) {
 							final AppointmentObject appointmentObj = (AppointmentObject)it.next();
+							appointmentObj.setTimezone(user.getTimeZone());
 							vo = oxc.convertAppointment(appointmentObj);
 							
 							final int object_id = appointmentObj.getObjectID();

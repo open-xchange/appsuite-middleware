@@ -55,6 +55,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
+import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarException.Code;
 
 /**
  * AppointmentObject
@@ -135,7 +137,8 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
         if (timezone != null) {
             return timezone;
         }
-        LOG.warn("FIX ME AND PROVIDE A TIMEZONE.", new Throwable()); // TODO: Remove me
+        final OXCalendarException e = new OXCalendarException(Code.TIMEZONE_MISSING);
+        LOG.warn(e.getMessage(), e);
         return "UTC";
 	}
 	

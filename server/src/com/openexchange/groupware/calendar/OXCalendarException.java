@@ -152,7 +152,11 @@ public class OXCalendarException extends OXException {
         /**
          * Some data exceeds a field limit. Please shorten the input(s) for affected field(s).
          */
-        TRUNCATED_SQL_ERROR("Some data exceeds a field limit. Please shorten the input(s) for affected field(s).", 72, AbstractOXException.Category.TRUNCATED);
+        TRUNCATED_SQL_ERROR("Some data exceeds a field limit. Please shorten the input(s) for affected field(s).", 72, AbstractOXException.Category.TRUNCATED),
+        /**
+         * Calendar calculation requires a proper defined time zone.
+         */
+        TIMEZONE_MISSING("Calendar calculation requires a proper defined time zone.", 73, Category.CODE_ERROR);
         
         /**
          * Message of the exception.

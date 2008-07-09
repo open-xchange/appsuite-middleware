@@ -402,6 +402,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     }
                     handleFullTime(cdao);
                     if (cdao.isSequence()) {
+                        if (!cdao.containsTimezone()) {
+                            cdao.setTimezone(timezone);
+                        }                        
                         CalendarRecurringCollection.fillDAO(cdao);
                     }
                     prepareUpdate(cdao, inFolder);
