@@ -623,7 +623,7 @@ public final class MessageWriter {
 
 	/**
 	 * Convert an <code>InternetAddress</code> instance into a JSON-Array
-	 * comforming to: ["The Personal", "someone@somewhere.com"]
+	 * conforming to: ["The Personal", "someone@somewhere.com"]
 	 */
 	private static JSONArray getAddressAsArray(final InternetAddress addr) {
 		final JSONArray retval = new JSONArray();
