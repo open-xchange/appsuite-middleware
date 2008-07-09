@@ -57,6 +57,7 @@ import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.impl.ConfigTree;
+import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
@@ -92,8 +93,16 @@ public final class AvailableModules implements PreferencesItemService {
                 final Setting setting) throws SettingException {
                 final Setting[] modules = ConfigTree.getSettingByPath("modules")
                     .getElements();
-                for (int i = 0; i < modules.length; i++) {
-                    setting.addMultiValue(modules[i].getName());
+                final SettingStorage sStor = SettingStorage.getInstance(session,
+                    ctx, user, userConfig);
+                for (final Setting module : modules) {
+                    final Setting enabled = module.getElement("module");
+                    if (null != enabled) {
+                        sStor.readValues(enabled);
+                        if (Boolean.TRUE.equals(enabled.getSingleValue())) {
+                            setting.addMultiValue(module.getName());
+                        }
+                    }
                 }
             }
             public boolean isAvailable(final UserConfiguration userConfig) {

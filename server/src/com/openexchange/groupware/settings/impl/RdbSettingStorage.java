@@ -143,6 +143,17 @@ public class RdbSettingStorage extends SettingStorage {
         userConfig = Tools.getUserConfiguration(ctx, userId);
     }
 
+    RdbSettingStorage(final Session session, final Context ctx, final User user,
+        final UserConfiguration userConfig) {
+        super();
+        this.session = session;
+        this.ctx = ctx;
+        this.ctxId = ctx.getContextId();
+        this.user = user;
+        this.userId = user.getId();
+        this.userConfig = userConfig;
+    }
+    
     /**
      * Special constructor for admin daemon.
      * @param ctxId 

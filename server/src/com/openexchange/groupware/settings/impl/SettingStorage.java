@@ -51,8 +51,11 @@ package com.openexchange.groupware.settings.impl;
 
 import java.sql.Connection;
 
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
 /**
@@ -111,6 +114,11 @@ public abstract class SettingStorage {
         } catch (final SettingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static SettingStorage getInstance(final Session session,
+        final Context ctx, final User user, final UserConfiguration userConfig) {
+        return new RdbSettingStorage(session, ctx, user, userConfig);
     }
 
     /**
