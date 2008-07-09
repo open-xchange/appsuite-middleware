@@ -130,7 +130,7 @@ public class InfostoreWriter extends TimedWriter {
 			try {
 				writer.key(current.getName());
 			} catch (final JSONException e) {
-				LOG.debug("",e);
+				LOG.error("",e);
 			}
 		}
 	
@@ -272,7 +272,9 @@ public class InfostoreWriter extends TimedWriter {
 					time = Long.MAX_VALUE;
 				}
 				writeInteger(time);
-			}
+			} else {
+                writeNull();
+            }
 		}
 		
 		private void writeId(final long id) {
@@ -280,10 +282,14 @@ public class InfostoreWriter extends TimedWriter {
 		}
 	
 		private void writeString(final String string) {
-			try {
+            if(string == null) {
+                writeNull();
+                return;
+            }
+            try {
 				writer.value(string == null ? "" : string);
 			} catch (final JSONException e) {
-				LOG.debug("",e);
+				LOG.error("",e);
 			}
 		}
 	
@@ -291,15 +297,23 @@ public class InfostoreWriter extends TimedWriter {
 			try {
 				writer.value(l);
 			} catch (final JSONException e) {
-				LOG.debug("",e);
+				LOG.error("",e);
 			}
 		}
-		
-		private void writeBoolean(final boolean b) {
+
+        private void writeNull() {
+            try {
+                writer.value(null);
+            } catch (JSONException e) {
+                LOG.error("",e);
+            }
+        }
+
+        private void writeBoolean(final boolean b) {
 			try {
 				writer.value(b);
 			} catch (final JSONException e) {
-				LOG.debug("",e);
+				LOG.error("",e);
 			}
 		}
 
