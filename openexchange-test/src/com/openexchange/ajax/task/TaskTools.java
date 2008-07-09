@@ -324,7 +324,7 @@ public final class TaskTools extends Assert {
             (response.hasError() || lastModified.after(response.getTimestamp())));
         request.setFailOnError(origFail);
         if (origFail) {
-            assertFalse(response.getException().getMessage(), response.hasError());
+            assertFalse(response.getResponse().getErrorMessage(), response.hasError());
         }
         return response;
     }
