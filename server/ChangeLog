@@ -4,6 +4,7 @@
  - Bugfix #9586: Fixed with fix for bug #11318.
  - Bugfix #9677: Default log level was changed to INFO.
  - Bugfix #9862: Provided a time zone for calculating recurrences.
+ - Bugfix #10048: Increased size of task titles.
 
 * 2008-07-09 - thorben.betten@open-xchange.com
 

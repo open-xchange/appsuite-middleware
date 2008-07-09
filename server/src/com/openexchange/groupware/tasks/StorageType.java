@@ -71,6 +71,6 @@ public enum StorageType {
     /**
      * StorageTypes used for tasks.
      */
-    static final StorageType[] TYPES_AD = new StorageType[] {
+    public static final StorageType[] TYPES_AD = new StorageType[] {
         StorageType.ACTIVE, StorageType.DELETED };
 }
