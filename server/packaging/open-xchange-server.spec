@@ -126,6 +126,10 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Jul 09 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #10806: Skipping calculation of future appointments recurrences for conflicts in a series with resources.
+ - UNDOING Bugfix #6927: After discussing this with PM, this was undone, to prevent some destructive behaviour with D&D.
+ - Bugfix #10497: Corrected calculcation for nths workday in monthly series.
 * Tue Jul 08 2008 - marcus.klein@open-xchange.com
  - Bugfix #11561: Added check if shared folder may be empty.
 * Tue Jul 08 2008 - thorben.betten@open-xchange.com
@@ -133,6 +137,7 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
    in VCard object
  - Partial fix for bug #11569: Fixed search with "%" in calendar module
  - Partial fix for bug #11569: Fixed search with "%" in contact module
+ - Bugfix #11573: Proper parsing of field "imapServer" in user table
 * Mon Jul 07 2008 - thorben.betten@open-xchange.com
  - Partially fixed bug #11474: Proper birthday when syncing contacts
 * Fri Jul 04 2008 - thorben.betten@open-xchange.com
