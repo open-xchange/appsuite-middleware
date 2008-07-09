@@ -98,8 +98,10 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	/**
 	 * Gets the locale-specific folder name
 	 * 
-	 * @param id The folder ID
-	 * @param locale The locale
+	 * @param id
+	 *            The folder ID
+	 * @param locale
+	 *            The locale
 	 * @return The locale-specific folder name
 	 */
 	public static String getFolderString(final int id, final Locale locale) {
@@ -633,8 +635,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	}
 
 	/**
-	 * Returns a list of subfolder IDs. If <code>enforce</code> is set and
-	 * list has not been already loaded, their IDs are going to be loaded from
+	 * Returns a list of subfolder IDs. If <code>enforce</code> is set and list
+	 * has not been already loaded, their IDs are going to be loaded from
 	 * storage. Otherwise a exception is thrown that no subfolder IDs are
 	 * present in this folder object.
 	 */
@@ -735,8 +737,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	 *            serving as source
 	 * @param overwrite
 	 *            <code>true</code> to overwrite even if value is already
-	 *            present; <code>false</code> to only fill value if not
-	 *            present
+	 *            present; <code>false</code> to only fill value if not present
 	 * @return filled folder
 	 */
 	public final FolderObject fill(final FolderObject other, final boolean overwrite) {
@@ -872,11 +873,14 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 				getModule(), userConfig);
 		maxPerm.setAllPermission(OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
 				OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
-		final int[] groups = userConfig.getGroups();
-		final int[] idArr = new int[groups.length + 1];
-		idArr[0] = userId;
-		System.arraycopy(groups, 0, idArr, 1, groups.length);
-		Arrays.sort(idArr);
+		final int[] idArr;
+		{
+			final int[] groups = userConfig.getGroups();
+			idArr = new int[groups.length + 1];
+			idArr[0] = userId;
+			System.arraycopy(groups, 0, idArr, 1, groups.length);
+			Arrays.sort(idArr);
+		}
 		if (!containsPermissions()) {
 			setPermissionsAsArray(FolderObject.getFolderPermissions(getObjectID(), userConfig.getContext(), readConArg));
 		}
@@ -1154,8 +1158,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	 * 
 	 * @param folderId
 	 * @param ctx
-	 * @param readCon -
-	 *            may be <code>null</code>
+	 * @param readCon
+	 *            - may be <code>null</code>
 	 * @return
 	 * @throws SQLException
 	 * @throws DBPoolingException
