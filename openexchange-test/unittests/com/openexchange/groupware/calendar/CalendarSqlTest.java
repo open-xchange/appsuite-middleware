@@ -640,34 +640,6 @@ public class CalendarSqlTest extends TestCase {
         }
     }
 
-   // Bug 6927
-
-    public void testStartDateOfAppointmentSeriesMustBeChangeable() throws OXException, SQLException {
-        Date start = D("04/06/2007 10:00");
-        Date end = D("04/06/2007 12:00");
-
-        CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
-        appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
-        appointment.setDays(CalendarDataObject.MONDAY);
-        appointment.setInterval(1);
-
-        appointments.save( appointment ); clean.add(appointment);
-
-        CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
-
-        Date newStart = D("25/02/2007 10:00");
-        Date newEnd = D("25/02/2007 12:00");
-
-        update.setStartDate(newStart);
-        update.setEndDate(newEnd);
-
-        appointments.save( update );
-
-        CalendarDataObject reload = appointments.reload(appointment);
-
-        assertEquals(D("26/02/2007 10:00"), reload.getStartDate()); //Following Monday
-        assertEquals(D("26/02/2007 12:00"), reload.getEndDate());   //Following Monday
-    }
 
     // Bug 10806
 
