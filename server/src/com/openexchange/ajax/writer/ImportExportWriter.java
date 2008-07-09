@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.ajax.writer;
 
 import java.util.List;
@@ -62,56 +60,64 @@ import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.json.OXJSONWriter;
 
 /**
- * This writer's main objective is to wrap ImportResults into JSON,
- * which then is fed to the AJAX GUI of the OX.
- * TODO remove JSONWriter
+ * This writer's main objective is to wrap ImportResults into JSON, which then
+ * is fed to the AJAX GUI of the OX. TODO remove JSONWriter
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
- * @author <a href="mailto:tobias.prinz@open-xchange.org">Tobias Prinz</a> (Refactoring comment and errorhandling workaround)
+ * @author <a href="mailto:tobias.prinz@open-xchange.org">Tobias Prinz</a>
+ *         (Refactoring comment and errorhandling workaround)
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-
 public class ImportExportWriter extends DataWriter {
-	
+
+	/**
+	 * Initializes a new {@link ImportExportWriter}
+	 */
 	public ImportExportWriter() {
-		jsonwriter = new OXJSONWriter();
+		this(new OXJSONWriter());
 	}
-	
+
+	/**
+	 * Initializes a new {@link ImportExportWriter}
+	 * 
+	 * @param jsonwriter
+	 *            The JSON writer to write to
+	 */
 	public ImportExportWriter(final OXJSONWriter jsonwriter) {
-		this.jsonwriter = jsonwriter;
+		super(null, jsonwriter);
 	}
-	
+
 	public void writeObject(final ImportResult importResult) throws JSONException {
 		jsonwriter.object();
 		writeParameter(DataFields.ID, importResult.getObjectId());
 		writeParameter(DataFields.LAST_MODIFIED, importResult.getDate());
 		writeParameter(CommonFields.FOLDER_ID, importResult.getFolder());
-		
+
 		if (importResult.hasError()) {
 			final OXException exception = importResult.getException();
 			writeParameter("error", exception.getOrigMessage());
-	        if (exception.getMessageArgs() != null) {
-	        	jsonwriter.key("error_params");
-	        	jsonwriter.array();
-	            for (final Object tmp : exception.getMessageArgs()) {
-	            	jsonwriter.value(tmp);
-	            }
-	            jsonwriter.endArray();
-	        }
-	        writeParameter("category", exception.getCategory().getCode());
-	        writeParameter("code", exception.getErrorCode());
-	        writeParameter("error_id", exception.getExceptionID());
-	        writeParameter("entry_number", importResult.getEntryNumber());
+			if (exception.getMessageArgs() != null) {
+				jsonwriter.key("error_params");
+				jsonwriter.array();
+				for (final Object tmp : exception.getMessageArgs()) {
+					jsonwriter.value(tmp);
+				}
+				jsonwriter.endArray();
+			}
+			writeParameter("category", exception.getCategory().getCode());
+			writeParameter("code", exception.getErrorCode());
+			writeParameter("error_id", exception.getExceptionID());
+			writeParameter("entry_number", importResult.getEntryNumber());
 		}
 		jsonwriter.endObject();
 	}
-	
-	
-	
+
 	@Override
-	public String toString(){
+	public String toString() {
 		return getObject().toString();
 	}
-	
-	public Object getObject(){
+
+	public Object getObject() {
 		return ((OXJSONWriter) jsonwriter).getObject();
 	}
 

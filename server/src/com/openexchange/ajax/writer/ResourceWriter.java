@@ -56,18 +56,18 @@ import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.resource.Resource;
 
 /**
- * ResourceWriter
+ * {@link ResourceWriter} - Writer for resources
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-
 public class ResourceWriter extends DataWriter {
 
 	/**
 	 * Initializes a new {@link ResourceWriter}
 	 */
 	public ResourceWriter() {
-		super();
+		super(null, null);
 	}
 
 	/**
@@ -81,7 +81,7 @@ public class ResourceWriter extends DataWriter {
 	 *             If writing to JSON object fails
 	 */
 	public void writeResource(final Resource resource, final JSONObject jsonObj) throws JSONException {
-		writeParameter(ParticipantsFields.ID, resource.getIdentifier(), jsonObj);
+		writeParameter(ParticipantsFields.ID, resource.getIdentifier(), jsonObj, resource.getIdentifier() > 0);
 		writeParameter(ParticipantsFields.DISPLAY_NAME, resource.getDisplayName(), jsonObj);
 	}
 }

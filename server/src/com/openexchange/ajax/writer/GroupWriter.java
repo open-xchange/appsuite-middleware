@@ -57,29 +57,30 @@ import com.openexchange.ajax.fields.GroupFields;
 import com.openexchange.group.Group;
 
 /**
- * This class writes a group object into a JSON.
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * {@link GroupWriter} - Writes a group object into a JSON.
+ * 
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com"">Sebastian
+ *         Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class GroupWriter extends DataWriter {
 
-    public GroupWriter() {
-        super();
-    }
+	public GroupWriter() {
+		super(null, null);
+	}
 
-    public void writeGroup(final Group group, final JSONObject json)
-        throws JSONException {
-        writeParameter(GroupFields.IDENTIFIER, group.getIdentifier(), json);
-        writeParameter(GroupFields.DISPLAY_NAME, group.getDisplayName(), json);
-        writeParameter(GroupFields.NAME, group.getSimpleName(), json);
-        writeMembers(group, json);
-    }
+	public void writeGroup(final Group group, final JSONObject json) throws JSONException {
+		writeParameter(GroupFields.IDENTIFIER, group.getIdentifier(), json, group.getIdentifier() > 0);
+		writeParameter(GroupFields.DISPLAY_NAME, group.getDisplayName(), json);
+		writeParameter(GroupFields.NAME, group.getSimpleName(), json);
+		writeMembers(group, json);
+	}
 
-    protected void writeMembers(final Group group, final JSONObject json)
-        throws JSONException {
-        final JSONArray jsonArray = new JSONArray();
-        for (final int member : group.getMember()) {
-            jsonArray.put(member);
-        }
-        json.put(GroupFields.MEMBERS, jsonArray);
-    }
+	protected void writeMembers(final Group group, final JSONObject json) throws JSONException {
+		final JSONArray jsonArray = new JSONArray();
+		for (final int member : group.getMember()) {
+			jsonArray.put(member);
+		}
+		json.put(GroupFields.MEMBERS, jsonArray);
+	}
 }

@@ -58,241 +58,379 @@ import org.json.JSONObject;
 import org.json.JSONWriter;
 
 /**
- * DataWriter
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * {@link DataWriter} - Base class for all writers used throughout modules.
+ * 
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class DataWriter {
+public class DataWriter {
 
-    protected TimeZone timeZone;
+	protected TimeZone timeZone;
 
-    protected JSONWriter jsonwriter;
+	protected JSONWriter jsonwriter;
 
-    /**
-     * Constructor for subclasses.
-     */
-    protected DataWriter(final TimeZone timeZone, final JSONWriter writer) {
-        super();
-        this.timeZone = timeZone;
-        this.jsonwriter = writer;
-    }
+	/**
+	 * Constructor for subclasses.
+	 */
+	protected DataWriter(final TimeZone timeZone, final JSONWriter writer) {
+		super();
+		this.timeZone = timeZone;
+		this.jsonwriter = writer;
+	}
 
-    /**
-     * @deprecated use constructor with parameters for fields.
-     */
-    @Deprecated
-    protected DataWriter() {
-        this(null, null);
-    }
+	/**
+	 * @deprecated use constructor with parameters for fields.
+	 */
+	@Deprecated
+	protected DataWriter() {
+		this(null, null);
+	}
 
-    public void writeParameter(final String name, final String value) throws JSONException {
-        if (value != null && value.length() > 0) {
-            jsonwriter.key(name);
-            jsonwriter.value(value);
-        }
-    }
+	public void writeParameter(final String name, final String value) throws JSONException {
+		if (value != null && value.length() > 0) {
+			jsonwriter.key(name);
+			jsonwriter.value(value);
+		}
+	}
 
-    public void writeParameter(final String name, final int value) throws JSONException {
-        jsonwriter.key(name);
-        jsonwriter.value(value);
-    }
+	public void writeParameter(final String name, final int value) throws JSONException {
+		jsonwriter.key(name);
+		jsonwriter.value(value);
+	}
 
-    public void writeParameter(final String name, final long value) throws JSONException {
-        jsonwriter.key(name);
-        jsonwriter.value(value);
-    }
+	public void writeParameter(final String name, final long value) throws JSONException {
+		jsonwriter.key(name);
+		jsonwriter.value(value);
+	}
 
-    public void writeParameter(final String name, final float value) throws JSONException {
-        jsonwriter.key(name);
-        jsonwriter.value(value);
-    }
+	public void writeParameter(final String name, final float value) throws JSONException {
+		jsonwriter.key(name);
+		jsonwriter.value(value);
+	}
 
-    public void writeParameter(final String name, final boolean value) throws JSONException {
-        jsonwriter.key(name);
-        jsonwriter.value(value);
-    }
+	public void writeParameter(final String name, final boolean value) throws JSONException {
+		jsonwriter.key(name);
+		jsonwriter.value(value);
+	}
 
-    public void writeParameter(final String name, final Date value) throws JSONException {
-        if (value != null) {
-            jsonwriter.key(name);
-            jsonwriter.value(value.getTime());
-        }
-    }
+	public void writeParameter(final String name, final Date value) throws JSONException {
+		if (value != null) {
+			jsonwriter.key(name);
+			jsonwriter.value(value.getTime());
+		}
+	}
 
-    public void writeParameter(final String name, final Date value, final TimeZone timeZone) throws JSONException {
-        writeParameter(name, value, value, timeZone);
-    }
+	public void writeParameter(final String name, final Date value, final TimeZone timeZone) throws JSONException {
+		writeParameter(name, value, value, timeZone);
+	}
 
-    public void writeParameter(final String name, final Date value, final Date offsetDate, final TimeZone timeZone) throws JSONException {
-        if (value != null) {
-            jsonwriter.key(name);
-            final int offset = timeZone.getOffset(offsetDate.getTime());
-            jsonwriter.value(value.getTime() + offset);
-        }
-    }
+	public void writeParameter(final String name, final Date value, final Date offsetDate, final TimeZone timeZone)
+			throws JSONException {
+		if (value != null) {
+			jsonwriter.key(name);
+			final int offset = timeZone.getOffset(offsetDate.getTime());
+			jsonwriter.value(value.getTime() + offset);
+		}
+	}
 
-    public void writeParameter(final String name, final byte[] value) throws JSONException {
-        if (value != null) {
-            jsonwriter.key(name);
-            jsonwriter.value(new String(value));
-        }
-    }
+	public void writeParameter(final String name, final byte[] value) throws JSONException {
+		if (value != null) {
+			jsonwriter.key(name);
+			jsonwriter.value(new String(value));
+		}
+	}
 
-    public void writeValue(final String value) throws JSONException {
-           if (value != null && value.length() > 0) {
-            jsonwriter.value(value);
-        } else {
-            jsonwriter.value(JSONObject.NULL);
-        }
-    }
+	public void writeValue(final String value) throws JSONException {
+		if (value != null && value.length() > 0) {
+			jsonwriter.value(value);
+		} else {
+			jsonwriter.value(JSONObject.NULL);
+		}
+	}
 
-    public void writeValue(final int value) throws JSONException {
-        jsonwriter.value(value);
-    }
+	public void writeValue(final int value) throws JSONException {
+		jsonwriter.value(value);
+	}
 
-    public void writeValue(final float value) throws JSONException {
-        jsonwriter.value(value);
-    }
+	public void writeValue(final float value) throws JSONException {
+		jsonwriter.value(value);
+	}
 
-    public void writeValue(final long value) throws JSONException {
-        jsonwriter.value(value);
-    }
+	public void writeValue(final long value) throws JSONException {
+		jsonwriter.value(value);
+	}
 
-    public void writeValue(final boolean value) throws JSONException {
-        jsonwriter.value(value);
-    }
+	public void writeValue(final boolean value) throws JSONException {
+		jsonwriter.value(value);
+	}
 
-    public void writeValue(final Date value) throws JSONException {
-        if (value != null) {
-            jsonwriter.value(value.getTime());
-        } else {
-            jsonwriter.value(JSONObject.NULL);
-        }
-    }
+	public void writeValue(final Date value) throws JSONException {
+		if (value == null) {
+			jsonwriter.value(JSONObject.NULL);
+		} else {
+			jsonwriter.value(value.getTime());
+		}
+	}
 
-    public void writeValue(final Date value, final TimeZone timeZone) throws JSONException {
-        writeValue(value, value, timeZone);
-    }
+	public void writeValue(final Date value, final TimeZone timeZone) throws JSONException {
+		writeValue(value, value, timeZone);
+	}
 
-    public void writeValue(final Date value, final Date offsetDate, final TimeZone timeZone) throws JSONException {
-        final int offset = timeZone.getOffset(offsetDate.getTime());
-        if (value != null) {
-            jsonwriter.value(value.getTime()+offset);
-        } else {
-            jsonwriter.value(JSONObject.NULL);
-        }
-    }
+	public void writeValue(final Date value, final Date offsetDate, final TimeZone timeZone) throws JSONException {
+		final int offset = timeZone.getOffset(offsetDate.getTime());
+		if (value == null) {
+			jsonwriter.value(JSONObject.NULL);
+		} else {
+			jsonwriter.value(value.getTime() + offset);
+		}
+	}
 
-    public void writeValue(final byte[] value) throws JSONException {
-        if (value != null) {
-            jsonwriter.value(new String(value));
-        } else {
-            jsonwriter.value(JSONObject.NULL);
-        }
-    }
+	public void writeValue(final byte[] value) throws JSONException {
+		if (value == null) {
+			jsonwriter.value(JSONObject.NULL);
+		} else {
+			jsonwriter.value(new String(value));
+		}
+	}
 
-    // new implementation
+	// new implementation
 
-    public static void writeParameter(final String name, final String value, final JSONObject jsonObj) throws JSONException {
-        if (value != null && value.length() > 0) {
-            jsonObj.put(name, value);
-        }
-    }
+	public static void writeParameter(final String name, final String value, final JSONObject jsonObj)
+			throws JSONException {
+		if (value != null && value.length() > 0) {
+			jsonObj.put(name, value);
+		}
+	}
 
-    public static void writeParameter(final String name, final int value, final JSONObject jsonObj) throws JSONException {
-        jsonObj.put(name, value);
-    }
+	public static void writeParameter(final String name, final int value, final JSONObject jsonObj)
+			throws JSONException {
+		jsonObj.put(name, value);
+	}
 
-    public static void writeParameter(final String name, final long value, final JSONObject jsonObj) throws JSONException {
-        // Large values of long must be written as string. See bug 11311.
-        writeParameter(name, String.valueOf(value), jsonObj);
-    }
+	/**
+	 * Conditionally puts given <code>int</code> value into specified JSON object
+	 * 
+	 * @param name The value's name
+	 * @param value The <code>int</code> value
+	 * @param jsonObj The JSON object to put into
+	 * @param condition <code>true</code> to put; otherwise <code>false</code> to omit value
+	 * @throws JSONException If a JSON error occurs
+	 */
+	public static void writeParameter(final String name, final int value, final JSONObject jsonObj,
+			final boolean condition) throws JSONException {
+		if (condition) {
+			jsonObj.put(name, value);
+		}
+	}
 
-    public static void writeParameter(final String name, final float value, final JSONObject jsonObj) throws JSONException {
-        jsonObj.put(name, value);
-    }
+	public static void writeParameter(final String name, final long value, final JSONObject jsonObj)
+			throws JSONException {
+		// Large values of long must be written as string. See bug 11311.
+		writeParameter(name, String.valueOf(value), jsonObj);
+	}
 
-    public static void writeParameter(final String name, final boolean value, final JSONObject jsonObj) throws JSONException {
-        jsonObj.put(name, value);
-    }
+	/**
+	 * Conditionally puts given <code>long</code> value into specified JSON object
+	 * 
+	 * @param name The value's name
+	 * @param value The <code>long</code> value
+	 * @param jsonObj The JSON object to put into
+	 * @param condition <code>true</code> to put; otherwise <code>false</code> to omit value
+	 * @throws JSONException If a JSON error occurs
+	 */
+	public static void writeParameter(final String name, final long value, final JSONObject jsonObj, final boolean condition)
+			throws JSONException {
+		if (condition) {
+			// Large values of long must be written as string. See bug 11311.
+			writeParameter(name, String.valueOf(value), jsonObj);
+		}
+	}
 
-    public static void writeParameter(final String name, final Date value, final JSONObject jsonObj) throws JSONException {
-        if (value != null) {
-            jsonObj.put(name, value.getTime());
-        }
-    }
+	public static void writeParameter(final String name, final float value, final JSONObject jsonObj)
+			throws JSONException {
+		jsonObj.put(name, value);
+	}
 
-    public static void writeParameter(final String name, final Date value, final TimeZone timeZone, final JSONObject jsonObj) throws JSONException {
-        writeParameter(name, value, value, timeZone, jsonObj);
-    }
+	/**
+	 * Conditionally puts given <code>float</code> value into specified JSON object
+	 * 
+	 * @param name The value's name
+	 * @param value The <code>float</code> value
+	 * @param jsonObj The JSON object to put into
+	 * @param condition <code>true</code> to put; otherwise <code>false</code> to omit value
+	 * @throws JSONException If a JSON error occurs
+	 */
+	public static void writeParameter(final String name, final float value, final JSONObject jsonObj,
+			final boolean condition) throws JSONException {
+		if (condition) {
+			jsonObj.put(name, value);
+		}
+	}
 
-    public static void writeParameter(final String name, final Date value, final Date offsetDate, final TimeZone timeZone,  final JSONObject jsonObj) throws JSONException {
-        if (value != null) {
-            final int offset = timeZone.getOffset(offsetDate.getTime());
-            jsonObj.put(name, value.getTime() + offset);
-        }
-    }
+	public static void writeParameter(final String name, final boolean value, final JSONObject jsonObj)
+			throws JSONException {
+		jsonObj.put(name, value);
+	}
 
-    public static void writeParameter(final String name, final byte[] value, final JSONObject jsonObj) throws JSONException {
-        if (value != null) {
-            jsonObj.put(name, new String(value));
-        }
-    }
+	/**
+	 * Conditionally puts given <code>boolean</code> value into specified JSON object
+	 * 
+	 * @param name The value's name
+	 * @param value The <code>boolean</code> value
+	 * @param jsonObj The JSON object to put into
+	 * @param condition <code>true</code> to put; otherwise <code>false</code> to omit value
+	 * @throws JSONException If a JSON error occurs
+	 */
+	public static void writeParameter(final String name, final boolean value, final JSONObject jsonObj,
+			final boolean condition) throws JSONException {
+		if (condition) {
+			jsonObj.put(name, value);
+		}
+	}
 
-    public static void writeValue(final String value, final JSONArray jsonArray) {
-           if (value != null && value.length() > 0) {
-            jsonArray.put(value);
-        } else {
-            jsonArray.put(JSONObject.NULL);
-        }
-    }
+	public static void writeParameter(final String name, final Date value, final JSONObject jsonObj)
+			throws JSONException {
+		if (value != null) {
+			jsonObj.put(name, value.getTime());
+		}
+	}
 
-    public static void writeValue(final int value, final JSONArray jsonArray) {
-        jsonArray.put(value);
-    }
+	public static void writeParameter(final String name, final Date value, final TimeZone timeZone,
+			final JSONObject jsonObj) throws JSONException {
+		writeParameter(name, value, value, timeZone, jsonObj);
+	}
 
-    public static void writeValue(final float value, final JSONArray jsonArray) throws JSONException {
-        jsonArray.put(value);
-    }
+	public static void writeParameter(final String name, final Date value, final Date offsetDate,
+			final TimeZone timeZone, final JSONObject jsonObj) throws JSONException {
+		if (value != null) {
+			jsonObj.put(name, value.getTime() + timeZone.getOffset(offsetDate.getTime()));
+		}
+	}
 
-    public static void writeValue(final long value, final JSONArray jsonArray) {
-        // Large values of long must be written as string. See bug 11311.
-        jsonArray.put(String.valueOf(value));
-    }
+	public static void writeParameter(final String name, final byte[] value, final JSONObject jsonObj)
+			throws JSONException {
+		if (value != null) {
+			jsonObj.put(name, new String(value));
+		}
+	}
 
-    public static void writeValue(final boolean value, final JSONArray jsonArray) {
-        jsonArray.put(value);
-    }
+	public static void writeValue(final String value, final JSONArray jsonArray) {
+		if (value != null && value.length() > 0) {
+			jsonArray.put(value);
+		} else {
+			jsonArray.put(JSONObject.NULL);
+		}
+	}
 
-    public static void writeValue(final Date value, final JSONArray jsonArray) {
-        if (value != null) {
-            jsonArray.put(value.getTime());
-        } else {
-            jsonArray.put(JSONObject.NULL);
-        }
-    }
+	public static void writeValue(final int value, final JSONArray jsonArray) {
+		jsonArray.put(value);
+	}
 
-    public static void writeValue(final Date value, final TimeZone timeZone, final JSONArray jsonArray) {
-        writeValue(value, value, timeZone, jsonArray);
-    }
+	/**
+	 * Conditionally puts given <code>int</code> value into specified JSON array
+	 * 
+	 * @param value The <code>int</code> value
+	 * @param jsonArray The JSON array to put into
+	 * @param condition <code>true</code> to put; otherwise <code>false</code> to put {@link JSONObject#NULL}
+	 */
+	public static void writeValue(final int value, final JSONArray jsonArray, final boolean condition) {
+		if (condition) {
+			jsonArray.put(value);
+		} else {
+			jsonArray.put(JSONObject.NULL);
+		}
+	}
 
-    public static void writeValue(final Date value, final Date offsetDate, final TimeZone timeZone, final JSONArray jsonArray) {
-        if (value != null) {
-            final int offset = timeZone.getOffset(offsetDate.getTime());
-            jsonArray.put(value.getTime()+offset);
-        } else {
-            jsonArray.put(JSONObject.NULL);
-        }
-    }
+	public static void writeValue(final float value, final JSONArray jsonArray) throws JSONException {
+		jsonArray.put(value);
+	}
 
-    public static void writeValue(final byte[] value, final JSONArray jsonArray) {
-        if (value != null) {
-            jsonArray.put(new String(value));
-        } else {
-            jsonArray.put(JSONObject.NULL);
-        }
-    }
+	/**
+	 * Conditionally puts given <code>float</code> value into specified JSON array
+	 * 
+	 * @param value The <code>float</code> value
+	 * @param jsonArray The JSON array to put into
+	 * @param condition <code>true</code> to put; otherwise <code>false</code> to put {@link JSONObject#NULL}
+	 */
+	public static void writeValue(final float value, final JSONArray jsonArray, final boolean condition) throws JSONException {
+		if (condition) {
+			jsonArray.put(value);
+		} else {
+			jsonArray.put(JSONObject.NULL);
+		}
+	}
 
-    public static void writeValueNull(final JSONArray jsonArray) {
-        jsonArray.put(JSONObject.NULL);
-    }
+	public static void writeValue(final long value, final JSONArray jsonArray) {
+		// Large values of long must be written as string. See bug 11311.
+		jsonArray.put(String.valueOf(value));
+	}
+
+	/**
+	 * Conditionally puts given <code>long</code> value into specified JSON array
+	 * 
+	 * @param value The <code>long</code> value
+	 * @param jsonArray The JSON array to put into
+	 * @param condition <code>true</code> to put; otherwise <code>false</code> to put {@link JSONObject#NULL}
+	 */
+	public static void writeValue(final long value, final JSONArray jsonArray, final boolean condition) {
+		if (condition) {
+			// Large values of long must be written as string. See bug 11311.
+			jsonArray.put(String.valueOf(value));
+		} else {
+			jsonArray.put(JSONObject.NULL);
+		}
+	}
+
+	public static void writeValue(final boolean value, final JSONArray jsonArray) {
+		jsonArray.put(value);
+	}
+
+	/**
+	 * Conditionally puts given <code>boolean</code> value into specified JSON array
+	 * 
+	 * @param value The <code>boolean</code> value
+	 * @param jsonArray The JSON array to put into
+	 * @param condition <code>true</code> to put; otherwise <code>false</code> to put {@link JSONObject#NULL}
+	 */
+	public static void writeValue(final boolean value, final JSONArray jsonArray, final boolean condition) {
+		if (condition) {
+			jsonArray.put(value);
+		} else {
+			jsonArray.put(JSONObject.NULL);
+		}
+	}
+
+	public static void writeValue(final Date value, final JSONArray jsonArray) {
+		if (value == null) {
+			jsonArray.put(JSONObject.NULL);
+		} else {
+			jsonArray.put(value.getTime());
+		}
+	}
+
+	public static void writeValue(final Date value, final TimeZone timeZone, final JSONArray jsonArray) {
+		writeValue(value, value, timeZone, jsonArray);
+	}
+
+	public static void writeValue(final Date value, final Date offsetDate, final TimeZone timeZone,
+			final JSONArray jsonArray) {
+		if (value == null) {
+			jsonArray.put(JSONObject.NULL);
+		} else {
+			final int offset = timeZone.getOffset(offsetDate.getTime());
+			jsonArray.put(value.getTime() + offset);
+		}
+	}
+
+	public static void writeValue(final byte[] value, final JSONArray jsonArray) {
+		if (value == null) {
+			jsonArray.put(JSONObject.NULL);
+		} else {
+			jsonArray.put(new String(value));
+		}
+	}
+
+	public static void writeValueNull(final JSONArray jsonArray) {
+		jsonArray.put(JSONObject.NULL);
+	}
 }

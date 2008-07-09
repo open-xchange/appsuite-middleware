@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.ajax.writer;
 
 import java.util.Date;
@@ -66,46 +64,56 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.AppointmentObject;
 
 /**
- * AppointmentWriter
- *
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * {@link AppointmentWriter} - Writer for appointments
+ * 
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-
 public class AppointmentWriter extends CalendarWriter {
-	
+
 	private static final Log LOG = LogFactory.getLog(AppointmentWriter.class);
-	
+
+	/**
+	 * Initializes a new {@link AppointmentWriter}
+	 * 
+	 * @param timeZone
+	 *            The user time zone
+	 */
 	public AppointmentWriter(final TimeZone timeZone) {
-		this.timeZone = timeZone;
+		super(timeZone, null);
 	}
-	
-	public void writeArray(final AppointmentObject appointmentObj, final int cols[], final Date betweenStart, final Date betweenEnd, final JSONArray jsonArray) throws JSONException {
+
+	public void writeArray(final AppointmentObject appointmentObj, final int cols[], final Date betweenStart,
+			final Date betweenEnd, final JSONArray jsonArray) throws JSONException {
 		if (appointmentObj.getFullTime()) {
-			if (CalendarCommonCollection.inBetween(appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime(), betweenStart.getTime(), betweenEnd.getTime())) {
+			if (CalendarCommonCollection.inBetween(appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate()
+					.getTime(), betweenStart.getTime(), betweenEnd.getTime())) {
 				writeArray(appointmentObj, cols, jsonArray);
 			}
 		} else {
 			writeArray(appointmentObj, cols, jsonArray);
 		}
 	}
-	
-	public void writeArray(final AppointmentObject appointmentObject, final int cols[], final JSONArray jsonArray) throws JSONException {
+
+	public void writeArray(final AppointmentObject appointmentObject, final int cols[], final JSONArray jsonArray)
+			throws JSONException {
 		final JSONArray jsonAppointmentArray = new JSONArray();
 		for (int a = 0; a < cols.length; a++) {
 			write(cols[a], appointmentObject, jsonAppointmentArray);
 		}
 		jsonArray.put(jsonAppointmentArray);
 	}
-	
-	public void writeAppointment(final AppointmentObject appointmentObject, final JSONObject jsonObj) throws JSONException {
+
+	public void writeAppointment(final AppointmentObject appointmentObject, final JSONObject jsonObj)
+			throws JSONException {
 		writeCommonFields(appointmentObject, jsonObj);
-		
+
 		if (appointmentObject.containsTitle()) {
 			writeParameter(AppointmentFields.TITLE, appointmentObject.getTitle(), jsonObj);
 		}
-		
+
 		final boolean isFullTime = appointmentObject.getFullTime();
-		
+
 		if (isFullTime) {
 			writeParameter(AppointmentFields.START_DATE, appointmentObject.getStartDate(), jsonObj);
 			writeParameter(AppointmentFields.END_DATE, appointmentObject.getEndDate(), jsonObj);
@@ -114,55 +122,57 @@ public class AppointmentWriter extends CalendarWriter {
 				writeParameter(AppointmentFields.START_DATE, appointmentObject.getStartDate(), timeZone, jsonObj);
 				writeParameter(AppointmentFields.END_DATE, appointmentObject.getEndDate(), timeZone, jsonObj);
 			} else {
-				writeParameter(AppointmentFields.START_DATE, appointmentObject.getStartDate(), appointmentObject.getStartDate(), timeZone, jsonObj);
-				writeParameter(AppointmentFields.END_DATE, appointmentObject.getEndDate(), appointmentObject.getEndDate(), timeZone, jsonObj);
+				writeParameter(AppointmentFields.START_DATE, appointmentObject.getStartDate(), appointmentObject
+						.getStartDate(), timeZone, jsonObj);
+				writeParameter(AppointmentFields.END_DATE, appointmentObject.getEndDate(), appointmentObject
+						.getEndDate(), timeZone, jsonObj);
 			}
 		}
-		
+
 		if (appointmentObject.containsShownAs()) {
 			writeParameter(AppointmentFields.SHOW_AS, appointmentObject.getShownAs(), jsonObj);
 		}
-		
+
 		if (appointmentObject.containsLocation()) {
 			writeParameter(AppointmentFields.LOCATION, appointmentObject.getLocation(), jsonObj);
 		}
-		
+
 		if (appointmentObject.containsNote()) {
 			writeParameter(AppointmentFields.NOTE, appointmentObject.getNote(), jsonObj);
 		}
-		
+
 		if (appointmentObject.containsFullTime()) {
-			writeParameter(AppointmentFields.FULL_TIME,  appointmentObject.getFullTime(), jsonObj);
+			writeParameter(AppointmentFields.FULL_TIME, appointmentObject.getFullTime(), jsonObj);
 		}
-		
+
 		if (appointmentObject.containsCategories()) {
-			writeParameter(AppointmentFields.CATEGORIES,  appointmentObject.getCategories(), jsonObj);
+			writeParameter(AppointmentFields.CATEGORIES, appointmentObject.getCategories(), jsonObj);
 		}
-		
+
 		if (appointmentObject.containsLabel()) {
-			writeParameter(AppointmentFields.COLORLABEL,  appointmentObject.getLabel(), jsonObj);
+			writeParameter(AppointmentFields.COLORLABEL, appointmentObject.getLabel(), jsonObj);
 		}
-		
+
 		if (appointmentObject.containsAlarm()) {
 			writeParameter(AppointmentFields.ALARM, appointmentObject.getAlarm(), jsonObj);
 		}
-		
+
 		if (appointmentObject.containsRecurrenceType()) {
 			writeRecurrenceParameter(appointmentObject, jsonObj);
 		}
-		
+
 		if (appointmentObject.containsRecurrencePosition()) {
 			writeParameter(AppointmentFields.RECURRENCE_POSITION, appointmentObject.getRecurrencePosition(), jsonObj);
 		}
-		
+
 		if (appointmentObject.containsParticipants()) {
 			jsonObj.put(AppointmentFields.PARTICIPANTS, getParticipantsAsJSONArray(appointmentObject));
 		}
-		
+
 		if (appointmentObject.containsUserParticipants()) {
 			jsonObj.put(AppointmentFields.USERS, getUsersAsJSONArray(appointmentObject));
 		}
-		
+
 		if (appointmentObject.getIgnoreConflicts()) {
 			writeParameter(AppointmentFields.IGNORE_CONFLICTS, true, jsonObj);
 		}
@@ -174,158 +184,162 @@ public class AppointmentWriter extends CalendarWriter {
 		if (appointmentObject.containsRecurringStart()) {
 			writeParameter(AppointmentFields.RECURRENCE_START, appointmentObject.getRecurringStart(), jsonObj);
 		}
-		
-		if (appointmentObject instanceof CalendarDataObject && ((CalendarDataObject)appointmentObject).isHardConflict()) {
+
+		if (appointmentObject instanceof CalendarDataObject
+				&& ((CalendarDataObject) appointmentObject).isHardConflict()) {
 			writeParameter(AppointmentFields.HARD_CONFLICT, true, jsonObj);
 		}
 	}
-	
-	public void write(final int field, final AppointmentObject appointmentObject, final JSONArray jsonArray) throws JSONException {
+
+	public void write(final int field, final AppointmentObject appointmentObject, final JSONArray jsonArray)
+			throws JSONException {
 		final boolean isFullTime = appointmentObject.getFullTime();
-		
+
 		switch (field) {
-			case AppointmentObject.OBJECT_ID:
-				writeValue(appointmentObject.getObjectID(), jsonArray);
-				break;
-			case AppointmentObject.CREATED_BY:
-				writeValue(appointmentObject.getCreatedBy(), jsonArray);
-				break;
-			case AppointmentObject.CREATION_DATE:
-				writeValue(appointmentObject.getCreationDate(), timeZone, jsonArray);
-				break;
-			case AppointmentObject.MODIFIED_BY:
-				writeValue(appointmentObject.getModifiedBy(), jsonArray);
-				break;
-			case AppointmentObject.LAST_MODIFIED:
-				writeValue(appointmentObject.getLastModified(), timeZone, jsonArray);
-				break;
-			case AppointmentObject.FOLDER_ID:
-				writeValue(appointmentObject.getParentFolderID(), jsonArray);
-				break;
-			case AppointmentObject.TITLE:
-				writeValue(appointmentObject.getTitle(), jsonArray);
-				break;
-			case AppointmentObject.START_DATE:
-				if (isFullTime) {
-					writeValue(appointmentObject.getStartDate(), jsonArray);
+		case AppointmentObject.OBJECT_ID:
+			writeValue(appointmentObject.getObjectID(), jsonArray, appointmentObject.containsObjectID());
+			break;
+		case AppointmentObject.CREATED_BY:
+			writeValue(appointmentObject.getCreatedBy(), jsonArray, appointmentObject.containsCreatedBy());
+			break;
+		case AppointmentObject.CREATION_DATE:
+			writeValue(appointmentObject.getCreationDate(), timeZone, jsonArray);
+			break;
+		case AppointmentObject.MODIFIED_BY:
+			writeValue(appointmentObject.getModifiedBy(), jsonArray, appointmentObject.containsModifiedBy());
+			break;
+		case AppointmentObject.LAST_MODIFIED:
+			writeValue(appointmentObject.getLastModified(), timeZone, jsonArray);
+			break;
+		case AppointmentObject.FOLDER_ID:
+			writeValue(appointmentObject.getParentFolderID(), jsonArray, appointmentObject.containsParentFolderID());
+			break;
+		case AppointmentObject.TITLE:
+			writeValue(appointmentObject.getTitle(), jsonArray);
+			break;
+		case AppointmentObject.START_DATE:
+			if (isFullTime) {
+				writeValue(appointmentObject.getStartDate(), jsonArray);
+			} else {
+				if (appointmentObject.getRecurrenceType() == AppointmentObject.NO_RECURRENCE) {
+					writeValue(appointmentObject.getStartDate(), timeZone, jsonArray);
 				} else {
-					if (appointmentObject.getRecurrenceType() == AppointmentObject.NO_RECURRENCE) {
-						writeValue(appointmentObject.getStartDate(), timeZone, jsonArray);
-					} else {
-						writeValue(appointmentObject.getStartDate(), appointmentObject.getStartDate(), timeZone, jsonArray);
-					}
+					writeValue(appointmentObject.getStartDate(), appointmentObject.getStartDate(), timeZone, jsonArray);
 				}
-				break;
-			case AppointmentObject.END_DATE:
-				if (isFullTime) {
-					writeValue(appointmentObject.getEndDate(), jsonArray);
+			}
+			break;
+		case AppointmentObject.END_DATE:
+			if (isFullTime) {
+				writeValue(appointmentObject.getEndDate(), jsonArray);
+			} else {
+				if (appointmentObject.getRecurrenceType() == AppointmentObject.NO_RECURRENCE) {
+					writeValue(appointmentObject.getEndDate(), timeZone, jsonArray);
 				} else {
-					if (appointmentObject.getRecurrenceType() == AppointmentObject.NO_RECURRENCE) {
-						writeValue(appointmentObject.getEndDate(), timeZone, jsonArray);
-					} else {
-						writeValue(appointmentObject.getEndDate(), appointmentObject.getEndDate(), timeZone, jsonArray);
-					}
+					writeValue(appointmentObject.getEndDate(), appointmentObject.getEndDate(), timeZone, jsonArray);
 				}
-				break;
-			case AppointmentObject.SHOWN_AS:
-				writeValue(appointmentObject.getShownAs(), jsonArray);
-				break;
-			case AppointmentObject.LOCATION:
-				writeValue(appointmentObject.getLocation(), jsonArray);
-				break;
-			case AppointmentObject.CATEGORIES:
-				writeValue(appointmentObject.getCategories(), jsonArray);
-				break;
-			case AppointmentObject.COLOR_LABEL:
-				writeValue(appointmentObject.getLabel(), jsonArray);
-				break;
-			case AppointmentObject.PRIVATE_FLAG:
-				writeValue(appointmentObject.getPrivateFlag(), jsonArray);
-				break;
-			case AppointmentObject.FULL_TIME:
-				writeValue(appointmentObject.getFullTime(), jsonArray);
-				break;
-			case AppointmentObject.NOTE:
-				writeValue(appointmentObject.getNote(), jsonArray);
-				break;
-				// modification for mobility support
-			case AppointmentObject.RECURRENCE_ID:
-				writeValue(appointmentObject.getRecurrenceID(), jsonArray);
-				break;
-			case AppointmentObject.RECURRENCE_TYPE:
-				writeValue(appointmentObject.getRecurrenceType(), jsonArray);
-				break;
-			case AppointmentObject.INTERVAL:
-				writeValue(appointmentObject.getInterval(), jsonArray);
-				break;
-			case AppointmentObject.DAYS:
-				writeValue(appointmentObject.getDays(), jsonArray);
-				break;
-			case AppointmentObject.DAY_IN_MONTH:
-				writeValue(appointmentObject.getDayInMonth(), jsonArray);
-				break;
-			case AppointmentObject.MONTH:
-				writeValue(appointmentObject.getMonth(), jsonArray);
-				break;
-			case AppointmentObject.UNTIL:
-				writeValue(appointmentObject.getUntil(), jsonArray);
-				break;
-			case AppointmentObject.RECURRING_OCCURRENCE:
-				writeValue(appointmentObject.getOccurrence(), jsonArray);
-				break;
-			case AppointmentObject.RECURRENCE_DATE_POSITION:
-				writeValue(appointmentObject.getRecurrenceDatePosition(), jsonArray);
-				break;
-			case AppointmentObject.DELETE_EXCEPTIONS:
-				final JSONArray jsonDeleteExceptionArray = getExceptionAsJSONArray(appointmentObject.getDeleteException());
-				if (jsonDeleteExceptionArray != null) {
-					jsonArray.put(jsonDeleteExceptionArray);
-				} else {
-					jsonArray.put(JSONObject.NULL);
-				}
-				break;
-			case AppointmentObject.CHANGE_EXCEPTIONS:
-				final JSONArray jsonChangeExceptionArray = getExceptionAsJSONArray(appointmentObject.getChangeException());
-				if (jsonChangeExceptionArray != null) {
-					jsonArray.put(jsonChangeExceptionArray);
-				} else {
-					jsonArray.put(JSONObject.NULL);
-				}
-				break;
-				// end of modification for mobility support
-			case AppointmentObject.RECURRENCE_POSITION:
-				writeValue(appointmentObject.getRecurrencePosition(), jsonArray);
-				break;
-			case AppointmentObject.TIMEZONE:
-				writeValue(appointmentObject.getTimezone(), jsonArray);
-				break;
-			case AppointmentObject.RECURRENCE_START:
-				writeValue(appointmentObject.getRecurringStart(), jsonArray);
-				break;
-			case AppointmentObject.PARTICIPANTS:
-				final JSONArray jsonParticipantArray = getParticipantsAsJSONArray(appointmentObject);
-				if (jsonParticipantArray != null) {
-					jsonArray.put(jsonParticipantArray);
-				} else {
-					jsonArray.put(JSONObject.NULL);
-				}
-				break;
-			case AppointmentObject.USERS:
-				final JSONArray jsonUserArray = getUsersAsJSONArray(appointmentObject);
-				if (jsonUserArray != null) {
-					jsonArray.put(jsonUserArray);
-				} else {
-					jsonArray.put(JSONObject.NULL);
-				}
-				break;
-			case AppointmentObject.NUMBER_OF_ATTACHMENTS:
-				writeValue(appointmentObject.getNumberOfAttachments(), jsonArray);
-				break;
-			case AppointmentObject.NUMBER_OF_LINKS:
-				writeValue(appointmentObject.getNumberOfLinks(), jsonArray);
-				break;
-			default:
-				LOG.warn("missing field in mapping: " + field);
+			}
+			break;
+		case AppointmentObject.SHOWN_AS:
+			writeValue(appointmentObject.getShownAs(), jsonArray, appointmentObject.containsShownAs());
+			break;
+		case AppointmentObject.LOCATION:
+			writeValue(appointmentObject.getLocation(), jsonArray);
+			break;
+		case AppointmentObject.CATEGORIES:
+			writeValue(appointmentObject.getCategories(), jsonArray);
+			break;
+		case AppointmentObject.COLOR_LABEL:
+			writeValue(appointmentObject.getLabel(), jsonArray, appointmentObject.containsLabel());
+			break;
+		case AppointmentObject.PRIVATE_FLAG:
+			writeValue(appointmentObject.getPrivateFlag(), jsonArray, appointmentObject.containsPrivateFlag());
+			break;
+		case AppointmentObject.FULL_TIME:
+			writeValue(appointmentObject.getFullTime(), jsonArray, appointmentObject.containsFullTime());
+			break;
+		case AppointmentObject.NOTE:
+			writeValue(appointmentObject.getNote(), jsonArray);
+			break;
+		// modification for mobility support
+		case AppointmentObject.RECURRENCE_ID:
+			writeValue(appointmentObject.getRecurrenceID(), jsonArray, appointmentObject.containsRecurrenceID());
+			break;
+		case AppointmentObject.RECURRENCE_TYPE:
+			writeValue(appointmentObject.getRecurrenceType(), jsonArray, appointmentObject.containsRecurrenceType());
+			break;
+		case AppointmentObject.INTERVAL:
+			writeValue(appointmentObject.getInterval(), jsonArray, appointmentObject.containsInterval());
+			break;
+		case AppointmentObject.DAYS:
+			writeValue(appointmentObject.getDays(), jsonArray, appointmentObject.containsDays());
+			break;
+		case AppointmentObject.DAY_IN_MONTH:
+			writeValue(appointmentObject.getDayInMonth(), jsonArray, appointmentObject.containsDayInMonth());
+			break;
+		case AppointmentObject.MONTH:
+			writeValue(appointmentObject.getMonth(), jsonArray, appointmentObject.containsMonth());
+			break;
+		case AppointmentObject.UNTIL:
+			writeValue(appointmentObject.getUntil(), jsonArray);
+			break;
+		case AppointmentObject.RECURRING_OCCURRENCE:
+			writeValue(appointmentObject.getOccurrence(), jsonArray, appointmentObject.containsOccurrence());
+			break;
+		case AppointmentObject.RECURRENCE_DATE_POSITION:
+			writeValue(appointmentObject.getRecurrenceDatePosition(), jsonArray);
+			break;
+		case AppointmentObject.DELETE_EXCEPTIONS:
+			final JSONArray jsonDeleteExceptionArray = getExceptionAsJSONArray(appointmentObject.getDeleteException());
+			if (jsonDeleteExceptionArray == null) {
+				jsonArray.put(JSONObject.NULL);
+			} else {
+				jsonArray.put(jsonDeleteExceptionArray);
+			}
+			break;
+		case AppointmentObject.CHANGE_EXCEPTIONS:
+			final JSONArray jsonChangeExceptionArray = getExceptionAsJSONArray(appointmentObject.getChangeException());
+			if (jsonChangeExceptionArray == null) {
+				jsonArray.put(JSONObject.NULL);
+			} else {
+				jsonArray.put(jsonChangeExceptionArray);
+			}
+			break;
+		// end of modification for mobility support
+		case AppointmentObject.RECURRENCE_POSITION:
+			writeValue(appointmentObject.getRecurrencePosition(), jsonArray, appointmentObject
+					.containsRecurrencePosition());
+			break;
+		case AppointmentObject.TIMEZONE:
+			writeValue(appointmentObject.getTimezone(), jsonArray);
+			break;
+		case AppointmentObject.RECURRENCE_START:
+			writeValue(appointmentObject.getRecurringStart(), jsonArray, appointmentObject.containsRecurringStart());
+			break;
+		case AppointmentObject.PARTICIPANTS:
+			final JSONArray jsonParticipantArray = getParticipantsAsJSONArray(appointmentObject);
+			if (jsonParticipantArray == null) {
+				jsonArray.put(JSONObject.NULL);
+			} else {
+				jsonArray.put(jsonParticipantArray);
+			}
+			break;
+		case AppointmentObject.USERS:
+			final JSONArray jsonUserArray = getUsersAsJSONArray(appointmentObject);
+			if (jsonUserArray == null) {
+				jsonArray.put(JSONObject.NULL);
+			} else {
+				jsonArray.put(jsonUserArray);
+			}
+			break;
+		case AppointmentObject.NUMBER_OF_ATTACHMENTS:
+			writeValue(appointmentObject.getNumberOfAttachments(), jsonArray, appointmentObject
+					.containsNumberOfAttachments());
+			break;
+		case AppointmentObject.NUMBER_OF_LINKS:
+			writeValue(appointmentObject.getNumberOfLinks(), jsonArray, appointmentObject.containsNumberOfLinks());
+			break;
+		default:
+			LOG.warn("missing field in mapping: " + field);
 		}
 	}
 }

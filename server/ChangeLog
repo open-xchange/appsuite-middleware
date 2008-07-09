@@ -1,3 +1,8 @@
+* 2008-07-09 - thorben.betten@open-xchange.com
+
+ - Partial bugfix #11579: Conditional writing to avoid writing default
+   values of object fields that return primitive types.
+
 * 2008-07-09 - francisco.laguna@open-xchange.com
 
  - Bugfix #10806: Skipping calculation of future appointments recurrences for conflicts in a series with resources.

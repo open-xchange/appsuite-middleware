@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.ajax.writer;
 
 import java.util.Date;
@@ -63,17 +61,22 @@ import com.openexchange.ajax.fields.ReminderFields;
 import com.openexchange.groupware.reminder.ReminderObject;
 
 /**
- * ReminderWriter
- *
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * {@link ReminderWriter} - Writer for reminder
+ * 
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-
 public class ReminderWriter extends DataWriter {
-	
+
+	/**
+	 * Initializes a new {@link ReminderWriter}
+	 * 
+	 * @param timeZone
+	 *            The user time zone
+	 */
 	public ReminderWriter(final TimeZone timeZone) {
-		this.timeZone = timeZone;
+		super(timeZone, null);
 	}
-	
+
 	public void writeObject(final ReminderObject reminderObj, final JSONObject jsonObj) throws JSONException {
 		writeParameter(DataFields.ID, reminderObj.getObjectId(), jsonObj);
 		writeParameter(ReminderFields.LAST_MODIFIED, reminderObj.getLastModified(), jsonObj);

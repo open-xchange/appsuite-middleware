@@ -47,63 +47,88 @@
  *
  */
 
-
-
 package com.openexchange.ajax.writer;
+
+import java.util.TimeZone;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONWriter;
 
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.groupware.container.CommonObject;
 
 /**
- * CommonWriter
- *
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * {@link CommonWriter} - Writer for common fields
+ * 
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 
 public class CommonWriter extends DataWriter {
-	
+
+	/**
+	 * Initializes a new {@link CommonWriter}
+	 * 
+	 * @param tz
+	 *            The user time zone
+	 * @param jsonwriter
+	 *            The JSON writer to write to
+	 */
+	protected CommonWriter(final TimeZone tz, final JSONWriter jsonwriter) {
+		super(tz, jsonwriter);
+	}
+
+	/**
+	 * Writes common field from given {@link CommonObject} instance to specified
+	 * {@link JSONObject}
+	 * 
+	 * @param commonObj
+	 *            The common object
+	 * @param jsonObj
+	 *            The JSON object
+	 * @throws JSONException
+	 *             If a JSON error occurs
+	 */
 	public void writeCommonFields(final CommonObject commonObj, final JSONObject jsonObj) throws JSONException {
 		if (commonObj.containsObjectID()) {
 			writeParameter(CommonFields.ID, commonObj.getObjectID(), jsonObj);
-		} 
-		
+		}
+
 		if (commonObj.containsCreatedBy()) {
 			writeParameter(CommonFields.CREATED_BY, commonObj.getCreatedBy(), jsonObj);
 		}
-		
-		if (commonObj.containsCreationDate()) {			
+
+		if (commonObj.containsCreationDate()) {
 			writeParameter(CommonFields.CREATION_DATE, commonObj.getCreationDate(), timeZone, jsonObj);
-		} 
-		
+		}
+
 		if (commonObj.containsModifiedBy()) {
 			writeParameter(CommonFields.MODIFIED_BY, commonObj.getModifiedBy(), jsonObj);
-		} 
-	
+		}
+
 		if (commonObj.containsLastModified()) {
 			writeParameter(CommonFields.LAST_MODIFIED, commonObj.getLastModified(), timeZone, jsonObj);
-		} 
-		
+		}
+
 		if (commonObj.containsParentFolderID()) {
 			writeParameter(CommonFields.FOLDER_ID, commonObj.getParentFolderID(), jsonObj);
-		} 
-		
+		}
+
 		if (commonObj.containsCategories()) {
 			writeParameter(CommonFields.CATEGORIES, commonObj.getCategories(), jsonObj);
-		} 
-		
+		}
+
 		if (commonObj.containsLabel()) {
 			writeParameter(CommonFields.COLORLABEL, commonObj.getLabel(), jsonObj);
-		} 
-		
+		}
+
 		if (commonObj.containsPrivateFlag()) {
 			writeParameter(CommonFields.PRIVATE_FLAG, commonObj.getPrivateFlag(), jsonObj);
 		}
 
-        if (commonObj.containsNumberOfAttachments()) {
-            writeParameter(CommonFields.NUMBER_OF_ATTACHMENTS, commonObj.getNumberOfAttachments(), jsonObj);
-        }
+		if (commonObj.containsNumberOfAttachments()) {
+			writeParameter(CommonFields.NUMBER_OF_ATTACHMENTS, commonObj.getNumberOfAttachments(), jsonObj);
+		}
 	}
 }
