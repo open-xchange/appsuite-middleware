@@ -63,6 +63,7 @@ import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -88,49 +89,132 @@ public final class FolderWriter extends DataWriter {
 
 	private static final String STR_UNKNOWN_COLUMN = "Unknown column";
 
-	private final User userObj;
+	final User user;
 
-	private final UserConfiguration userConfig;
+	final UserConfiguration userConfig;
 
-	private final Context ctx;
+	final Context ctx;
 
-	private UserConfigurationStorage userConfStorage;
-
+	/**
+	 * {@link FolderFieldWriter} - A writer for folder fields
+	 * 
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben
+	 *         Betten</a>
+	 * 
+	 */
 	public static abstract class FolderFieldWriter {
+
+		/**
+		 * Initializes a new {@link FolderFieldWriter}
+		 */
+		protected FolderFieldWriter() {
+			super();
+		}
+
+		/**
+		 * Writes this writer's folder field from given {@link FolderObject} to
+		 * specified {@link JSONWriter}.
+		 * 
+		 * @param jsonwriter
+		 *            The JSON writer to write to
+		 * @param fo
+		 *            The folder object
+		 * @param withKey
+		 *            <code>true</code> to include JSON key; otherwise
+		 *            <code>false</code>
+		 * @throws JSONException
+		 *             If a JSON error occurs
+		 * @throws SQLException
+		 *             If a SQL error occurs
+		 * @throws AbstractOXException
+		 *             If an OX error occurs
+		 */
 		public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey)
-				throws JSONException, DBPoolingException, OXException, SearchIteratorException, SQLException {
+				throws JSONException, SQLException, AbstractOXException {
 			writeField(jsonwriter, fo, withKey, null, -1);
 		}
 
+		/**
+		 * Writes this writer's folder field from given {@link FolderObject} to
+		 * specified {@link JSONWriter}.
+		 * 
+		 * @param jsonwriter
+		 *            The JSON writer to write to
+		 * @param fo
+		 *            The folder object
+		 * @param withKey
+		 *            <code>true</code> to include JSON key; otherwise
+		 *            <code>false</code>
+		 * @param name
+		 *            The preferred folder name or <code>null</code> to take
+		 *            folder name from given folder object.
+		 * @param hasSubfolders
+		 *            <code>1</code> to indicate subfolders, <code>0</code> to
+		 *            indicate no subfolders, or <code>-1</code> to omit
+		 * @throws JSONException
+		 *             If a JSON error occurs
+		 * @throws SQLException
+		 *             If a SQL error occurs
+		 * @throws AbstractOXException
+		 *             If an OX error occurs
+		 */
 		public abstract void writeField(JSONWriter jsonwriter, FolderObject fo, boolean withKey, String name,
-				int hasSubfolders) throws JSONException, DBPoolingException, OXException, SearchIteratorException,
-				SQLException;
+				int hasSubfolders) throws JSONException, SQLException, AbstractOXException;
 	}
 
+	/**
+	 * Initializes a new {@link FolderWriter}
+	 * 
+	 * @param jw
+	 *            The JSON writer to write to
+	 * @param session
+	 *            The session providing neeed user data
+	 * @param ctx
+	 *            The session's context
+	 */
 	public FolderWriter(final JSONWriter jw, final Session session, final Context ctx) {
-		super();
-		this.jsonwriter = jw;
-		this.userObj = UserStorage.getStorageUser(session.getUserId(), ctx);
+		super(TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone()), jw);
+		this.user = UserStorage.getStorageUser(session.getUserId(), ctx);
 		this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
 		this.ctx = ctx;
 	}
 
-	private UserConfigurationStorage getUserConfigurationStorage() {
-		if (userConfStorage == null) {
-			userConfStorage = UserConfigurationStorage.getInstance();
-		}
-		return userConfStorage;
-	}
-
+	/**
+	 * Writes specified fields from given folder into a JSON object
+	 * 
+	 * @param fields
+	 *            The fields to write
+	 * @param fo
+	 *            The folder object
+	 * @param locale
+	 *            The user's locale to get appropriate folder name used in
+	 *            display
+	 * @throws OXException
+	 *             If an OX error occurs
+	 */
 	public void writeOXFolderFieldsAsObject(final int[] fields, final FolderObject fo, final Locale locale)
-			throws Exception {
+			throws OXException {
 		writeOXFolderFieldsAsObject(fields, fo, FolderObject.getFolderString(fo.getObjectID(), locale), -1);
 	}
 
+	/**
+	 * Writes specified fields from given folder into a JSON object
+	 * 
+	 * @param fields
+	 *            The fields to write
+	 * @param fo
+	 *            The folder object
+	 * @param name
+	 *            The preferred name or <code>null</code>
+	 * @param hasSubfolders
+	 *            <code>1</code> to indicate subfolders, <code>0</code> to
+	 *            indicate no subfolders, or <code>-1</code> to omit
+	 * @throws OXException
+	 *             If an OX error occurs
+	 */
 	public void writeOXFolderFieldsAsObject(final int[] fields, final FolderObject fo, final String name,
-			final int hasSubfolders) throws Exception {
+			final int hasSubfolders) throws OXException {
 		try {
-			jsonwriter.object();
 			final int[] fs;
 			if (fields == null) {
 				fs = ALL_FLD_FIELDS;
@@ -138,28 +222,75 @@ public final class FolderWriter extends DataWriter {
 				fs = new int[fields.length];
 				System.arraycopy(fields, 0, fs, 0, fields.length);
 			}
-			for (int i = 0; i < fs.length; i++) {
-				writeOXFolderField(fs[i], fo, true, name, hasSubfolders);
+			final FolderFieldWriter[] writers = getFolderFieldWriter(fs);
+			jsonwriter.object();
+			try {
+				for (int i = 0; i < fs.length; i++) {
+					writers[i].writeField(jsonwriter, fo, true, name, hasSubfolders);
+				}
+			} finally {
+				jsonwriter.endObject();
 			}
-		} finally {
-			jsonwriter.endObject();
+		} catch (final JSONException e) {
+			throw new OXFolderException(OXFolderException.FolderCode.JSON_ERROR, e, e.getMessage());
+		} catch (final SQLException e) {
+			throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+		} catch (final AbstractOXException e) {
+			throw new OXFolderException(e);
 		}
 	}
 
+	/**
+	 * Writes specified fields from given folder into a JSON array
+	 * 
+	 * @param fields
+	 *            The fields to write
+	 * @param fo
+	 *            The folder object
+	 * @param locale
+	 *            The user's locale to get appropriate folder name used in
+	 *            display
+	 * @throws OXException
+	 *             If an OX error occurs
+	 */
 	public void writeOXFolderFieldsAsArray(final int[] fields, final FolderObject fo, final Locale locale)
-			throws Exception {
+			throws OXException {
 		writeOXFolderFieldsAsArray(fields, fo, FolderObject.getFolderString(fo.getObjectID(), locale), -1);
 	}
 
+	/**
+	 * Writes specified fields from given folder into a JSON array
+	 * 
+	 * @param fields
+	 *            The fields to write
+	 * @param fo
+	 *            The folder object
+	 * @param name
+	 *            The preferred name or <code>null</code>
+	 * @param hasSubfolders
+	 *            <code>1</code> to indicate subfolders, <code>0</code> to
+	 *            indicate no subfolders, or <code>-1</code> to omit
+	 * @throws OXException
+	 *             If an OX error occurs
+	 */
 	public void writeOXFolderFieldsAsArray(final int[] fields, final FolderObject fo, final String name,
-			final int hasSubfolders) throws Exception {
+			final int hasSubfolders) throws OXException {
 		try {
+			final FolderFieldWriter[] writers = getFolderFieldWriter(fields);
 			jsonwriter.array();
-			for (int i = 0; i < fields.length; i++) {
-				writeOXFolderField(fields[i], fo, false, name, hasSubfolders);
+			try {
+				for (int i = 0; i < fields.length; i++) {
+					writers[i].writeField(jsonwriter, fo, false, name, hasSubfolders);
+				}
+			} finally {
+				jsonwriter.endArray();
 			}
-		} finally {
-			jsonwriter.endArray();
+		} catch (final JSONException e) {
+			throw new OXFolderException(OXFolderException.FolderCode.JSON_ERROR, e, e.getMessage());
+		} catch (final SQLException e) {
+			throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+		} catch (final AbstractOXException e) {
+			throw new OXFolderException(e);
 		}
 	}
 
@@ -170,6 +301,11 @@ public final class FolderWriter extends DataWriter {
 			FolderObject.TOTAL, FolderObject.NEW, FolderObject.UNREAD, FolderObject.DELETED, FolderObject.CAPABILITIES,
 			FolderObject.SUBSCRIBED, FolderObject.SUBSCR_SUBFLDS };
 
+	/**
+	 * Returns all known folder fields
+	 * 
+	 * @return All known folder fields
+	 */
 	public static int[] getAllFolderFields() {
 		final int[] retval = new int[ALL_FLD_FIELDS.length];
 		System.arraycopy(ALL_FLD_FIELDS, 0, retval, 0, retval.length);
@@ -298,7 +434,7 @@ public final class FolderWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderFields.TYPE);
 						}
-						jsonwriter.value(fo.containsType() ? Integer.valueOf(fo.getType(userObj.getId()))
+						jsonwriter.value(fo.containsType() ? Integer.valueOf(fo.getType(user.getId()))
 								: JSONObject.NULL);
 					}
 				};
@@ -312,10 +448,9 @@ public final class FolderWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderFields.SUBFOLDERS);
 						}
-						final boolean shared = fo.containsCreatedBy() && fo.containsType()
-								&& fo.isShared(userObj.getId());
+						final boolean shared = fo.containsCreatedBy() && fo.containsType() && fo.isShared(user.getId());
 						jsonwriter.value(hasSubfolders == -1 ? (shared ? Boolean.FALSE
-								: (fo.containsSubfolderFlag() ? Boolean.valueOf(fo.hasVisibleSubfolders(userObj,
+								: (fo.containsSubfolderFlag() ? Boolean.valueOf(fo.hasVisibleSubfolders(user,
 										userConfig, ctx)) : JSONObject.NULL)) : Boolean.valueOf(hasSubfolders > 0));
 					}
 				};
@@ -347,7 +482,7 @@ public final class FolderWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderFields.OWN_RIGHTS);
 						}
-						final OCLPermission effectivePerm = fo.getEffectiveUserPermission(userObj.getId(), userConfig);
+						final OCLPermission effectivePerm = fo.getEffectiveUserPermission(user.getId(), userConfig);
 						jsonwriter.value(createPermissionBits(effectivePerm.getFolderPermission(), effectivePerm
 								.getReadPermission(), effectivePerm.getWritePermission(), effectivePerm
 								.getDeletePermission(), effectivePerm.isFolderAdmin()));
@@ -378,7 +513,7 @@ public final class FolderWriter extends DataWriter {
 						}
 						final JSONArray ja = new JSONArray();
 						final OCLPermission[] perms = fo.getPermissionsAsArray();
-						final UserConfigurationStorage userConfStorage = getUserConfigurationStorage();
+						final UserConfigurationStorage userConfStorage = UserConfigurationStorage.getInstance();
 						try {
 							for (int k = 0; k < perms.length; k++) {
 								final OCLPermission perm;
@@ -527,18 +662,13 @@ public final class FolderWriter extends DataWriter {
 		return retval;
 	}
 
-	public void writeOXFolderField(final int field, final FolderObject fo, final boolean withKey, final String name,
-			final int hasSubfolders) throws Exception {
-		getFolderFieldWriter(new int[] { field })[0].writeField(jsonwriter, fo, withKey, name, hasSubfolders);
-	}
-
-	private static int createPermissionBits(final OCLPermission perm) throws OXFolderException {
+	static int createPermissionBits(final OCLPermission perm) throws OXFolderException {
 		return createPermissionBits(perm.getFolderPermission(), perm.getReadPermission(), perm.getWritePermission(),
 				perm.getDeletePermission(), perm.isFolderAdmin());
 	}
 
-	private static int createPermissionBits(final int fp, final int orp, final int owp, final int odp,
-			final boolean adminFlag) throws OXFolderException {
+	static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag)
+			throws OXFolderException {
 		final int[] perms = new int[5];
 		perms[0] = fp == Folder.MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : fp;
 		perms[1] = orp == Folder.MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : orp;
@@ -571,8 +701,8 @@ public final class FolderWriter extends DataWriter {
 		return retval;
 	}
 
-	private long addTimeZoneOffset(final long date) {
-		return (date + TimeZone.getTimeZone(userObj.getTimeZone()).getOffset(date));
+	protected long addTimeZoneOffset(final long date) {
+		return (date + timeZone.getOffset(date));
 	}
 
 }
