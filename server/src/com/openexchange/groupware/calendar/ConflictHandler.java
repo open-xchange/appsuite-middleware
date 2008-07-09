@@ -122,8 +122,7 @@ public class ConflictHandler {
         }
         rs = cdao.getStartDate();
         re = cdao.getEndDate();
-        boolean skipRecurrence = true;
-        final CalendarDataObject[] resources = prepareResolving( skipRecurrence );
+        final CalendarDataObject[] resources = prepareResolving( false );
         if (resources.length > 0) {
             return resources;
         }
@@ -149,21 +148,8 @@ public class ConflictHandler {
         if (request_participants) {
             return NO_CONFLICTS;
         }
-        CalendarRecurringCollection.fillDAO(cdao);
-        RecurringResults rrs;
-        if (rs == null || re == null) {
-            rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
-        } else {
-            rrs = CalendarRecurringCollection.calculateRecurring(cdao, rs.getTime(), re.getTime(), 0);
-        }
-        CalendarDataObject multi[] = new CalendarDataObject[0];
-        for (int a = 0; a < rrs.size(); a++) {
-            final RecurringResult rs = rrs.getRecurringResult(a);
-            final CalendarDataObject temp[] = resolveResourceConflicts(new Date(rs.getStart()), new Date(rs.getEnd()));
-            multi = CalendarCommonCollection.copyAndExpandCalendarDataObjectArray(temp, multi);
-            
-        }
-        return multi;
+        return resolveResourceConflicts(cdao.getStartDate(), cdao.getEndDate());
+                
     }
     
     private CalendarDataObject[] resolveParticipantConflicts(final Date start, final Date end) throws OXException {
