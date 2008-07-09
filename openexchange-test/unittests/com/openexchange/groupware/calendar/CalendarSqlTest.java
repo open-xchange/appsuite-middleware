@@ -669,6 +669,35 @@ public class CalendarSqlTest extends TestCase {
         assertEquals(D("26/02/2007 12:00"), reload.getEndDate());   //Following Monday
     }
 
+    // Bug 10806
+
+    public void testReschedulingOfPrivateRecurringAppointmentWithOneResourceParticipant() throws OXException, SQLException {
+        Date start = D("04/06/2007 10:00");
+        Date end = D("04/06/2007 12:00");
+
+        CalendarDataObject appointment = appointments.buildAppointmentWithResourceParticipants(resource1);
+        appointment.setStartDate(start);
+        appointment.setEndDate(end);
+        appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+        appointment.setDays(CalendarDataObject.MONDAY);
+        appointment.setInterval(1);
+
+        appointments.save( appointment ); clean.add(appointment);
+
+        Date newStart = D("04/06/2007 13:00");
+        Date newEnd = D("04/06/2007 14:00");
+                
+        CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
+        update.setStartDate(newStart);
+        update.setEndDate(newEnd);
+        appointments.save(update);
+
+        CalendarDataObject reloaded = appointments.reload(appointment);
+        assertEquals(reloaded.getStartDate(), newStart);
+        assertEquals(reloaded.getEndDate(), newEnd);
+
+    }
+
 
     private List<CalendarDataObject> read(SearchIterator<CalendarDataObject> si) throws OXException, SearchIteratorException {
         List<CalendarDataObject> appointments = new ArrayList<CalendarDataObject>();
