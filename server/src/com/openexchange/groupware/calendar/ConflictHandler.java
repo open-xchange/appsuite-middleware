@@ -122,7 +122,8 @@ public class ConflictHandler {
         }
         rs = cdao.getStartDate();
         re = cdao.getEndDate();
-        final CalendarDataObject[] resources = prepareResolving(false);
+        boolean skipRecurrence = true;
+        final CalendarDataObject[] resources = prepareResolving( skipRecurrence );
         if (resources.length > 0) {
             return resources;
         }

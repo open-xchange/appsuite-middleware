@@ -537,7 +537,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         if (session != null) {
             Connection writecon = null;
             final Context ctx = Tools.getContext(session);
-            final User user = Tools.getUser(session, ctx);
+             final User user = Tools.getUser(session, ctx);
             try {
                 final CalendarOperation co = new CalendarOperation();
                 final CalendarDataObject edao = cimp.loadObjectForUpdate(cdao, session, ctx, inFolder);
