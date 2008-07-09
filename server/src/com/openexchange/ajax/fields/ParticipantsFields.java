@@ -58,5 +58,7 @@ public interface ParticipantsFields {
 	public static final String TYPE = "type";
 	
 	public static final String MAIL = "mail";
+
+	public static final String STATUS = "status";
 	
 }
