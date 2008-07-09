@@ -51,7 +51,6 @@ package com.openexchange.groupware.userconfiguration;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.Initialization;
 
 /**
  * UserConfigurationStorage
@@ -73,25 +72,6 @@ public abstract class UserConfigurationStorage {
 	 */
 	protected UserConfigurationStorage() {
 		super();
-	}
-
-	/**
-	 * Initializes the user configuration storage implementation.
-	 * 
-	 * @throws UserConfigurationException
-	 *             if initialization fails.
-	 * @deprecated Use common {@link Initialization#start()}/{@link Initialization#stop()}
-	 *             on singleton instance instead
-	 */
-	@Deprecated
-	public static final void init() throws UserConfigurationException {
-		try {
-			UserConfigurationStorageInit.getInstance().start();
-		} catch (final UserConfigurationException e) {
-			throw e;
-		} catch (final AbstractOXException e) {
-			throw new UserConfigurationException(e);
-		}
 	}
 
 	/**
