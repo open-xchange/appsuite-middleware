@@ -138,7 +138,7 @@ public final class TaskTools extends Assert {
     }
 
     public static boolean timeout(final long start) {
-        return System.currentTimeMillis() < (start + TIMEOUT);
+        return System.currentTimeMillis() > (start + TIMEOUT);
     }
     
     /**
