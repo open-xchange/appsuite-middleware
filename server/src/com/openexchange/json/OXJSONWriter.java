@@ -49,8 +49,6 @@
 
 package com.openexchange.json;
 
-import java.io.Writer;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,7 +59,7 @@ import com.openexchange.tools.stack.Stack;
 
 /**
  * OXJSONWriter - extends <code>{@link JSONWriter}</code> but does not use an
- * underlying instance of <code>{@link Writer}</code> rather than creating
+ * underlying instance of <code>java.io.Writer</code> rather than creating
  * JSON objects thus this JSONWriter will always hold a valid and complete JSON
  * object accessible through <code>{@link #getObject()}</code>.
  * <p>
@@ -130,7 +128,7 @@ public final class OXJSONWriter extends JSONWriter {
 	 * <p>
 	 * <b>NOTE</b>: To get this writer into a complete state the
 	 * <code>{@link #endObject()}</code> method must be invoked since this
-	 * constructor implicitely puts the writer into the same state as
+	 * constructor implicitly puts the writer into the same state as
 	 * <code>{@link #object()}</code> does.
 	 * 
 	 * @param jsonObject -
@@ -151,7 +149,7 @@ public final class OXJSONWriter extends JSONWriter {
 	 * <p>
 	 * <b>NOTE</b>: To get this writer into a complete state the
 	 * <code>{@link #endArray()}</code> method must be invoked since this
-	 * constructor implicitely puts the writer into the same state as
+	 * constructor implicitly puts the writer into the same state as
 	 * <code>{@link #array()}</code> does.
 	 * 
 	 * @param jsonArray -
@@ -361,7 +359,7 @@ public final class OXJSONWriter extends JSONWriter {
 	 * Checks if next action can be the <code>{@link #key(String)}</code>
 	 * method.
 	 * 
-	 * @return <code>true</code> if a key is expected; otherrwise
+	 * @return <code>true</code> if a key is expected; otherwise
 	 *         <code>false</code>
 	 */
 	public boolean isExpectingKey() {
@@ -439,7 +437,7 @@ public final class OXJSONWriter extends JSONWriter {
 		}
 		if (MODE_ARR == stackObjs.top().type) {
 			/*
-			 * Set mode to arary
+			 * Set mode to array
 			 */
 			mode = MODE_ARR;
 		} else if (MODE_OBJ == stackObjs.top().type) {
