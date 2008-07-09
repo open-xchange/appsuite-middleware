@@ -78,14 +78,6 @@ public class DataWriter {
 		this.jsonwriter = writer;
 	}
 
-	/**
-	 * @deprecated use constructor with parameters for fields.
-	 */
-	@Deprecated
-	protected DataWriter() {
-		this(null, null);
-	}
-
 	public void writeParameter(final String name, final String value) throws JSONException {
 		if (value != null && value.length() > 0) {
 			jsonwriter.key(name);
