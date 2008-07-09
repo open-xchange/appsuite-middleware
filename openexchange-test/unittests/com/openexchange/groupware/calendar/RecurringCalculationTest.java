@@ -91,4 +91,33 @@ public class RecurringCalculationTest extends TestCase {
         assertEquals(dateString(recurringResult.getStart(), ny), startExpected.getTime(), recurringResult.getStart());
         assertEquals(dateString(recurringResult.getEnd(), ny), endExpected.getTime(), recurringResult.getEnd());
     }
+
+    // Bug 10497
+
+    public void testWorkweekRelativeRecurrence() throws RecurringException {
+        Date start = D("05/12/2007 10:00");
+        Date end = D("05/12/2007 12:00");
+
+        RecurringCalculation calc = new RecurringCalculation(AppointmentObject.MONTHLY,1,0);
+        calc.setStartAndEndTime(start.getTime(), end.getTime());
+        calc.setDays(AppointmentObject.WEEKDAY);
+        calc.setDayInMonth(3);
+        calc.setOccurrence(5);
+
+        RecurringResults results = calc.calculateRecurrence();
+
+        Date[] days = {
+                D("05/12/2007 10:00"),
+                D("03/01/2008 10:00"),
+                D("05/02/2008 10:00"),
+                D("05/03/2008 10:00"),
+                D("03/04/2008 10:00")
+        };
+        
+        for(int i = 0; i < 5; i++) {
+            long expected = days[i].getTime();
+            long actual = results.getRecurringResult(i).getStart();
+            assertEquals(new Date(expected)+" expected. Was: "+new Date(actual), expected, actual);
+        }
+    }
 }
