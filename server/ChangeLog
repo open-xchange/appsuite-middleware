@@ -1,6 +1,7 @@
 * 2008-07-09 - marcus.klein@open-xchange.com
 
  - Bugfix #11318: Added detail exceptions if JSON parsing of a long fails.
+ - Bugfix #9586: Fixed with fix for bug #11318.
 
 * 2008-07-09 - thorben.betten@open-xchange.com
 
