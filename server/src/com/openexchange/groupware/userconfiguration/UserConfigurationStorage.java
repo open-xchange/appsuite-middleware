@@ -53,10 +53,10 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
- * UserConfigurationStorage
+ * {@link UserConfigurationStorage} - Storage for instances of
+ * {@link UserConfiguration}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class UserConfigurationStorage {
 
@@ -168,13 +168,13 @@ public abstract class UserConfigurationStorage {
 	 * Determines the instance of <code>UserConfiguration</code> that
 	 * corresponds to given user ID.
 	 * 
-	 * @param userId -
-	 *            the user ID
-	 * @param ctx -
-	 *            the context
+	 * @param userId
+	 *            - the user ID
+	 * @param ctx
+	 *            - the context
 	 * @return the instance of <code>UserConfiguration</code>
-	 * @throws UserConfigurationException -
-	 *             if user's configuration could not be determined
+	 * @throws UserConfigurationException
+	 *             - if user's configuration could not be determined
 	 * @see #getUserConfiguration(int, int[], Context)
 	 */
 	public final UserConfiguration getUserConfiguration(final int userId, final Context ctx)
@@ -201,15 +201,15 @@ public abstract class UserConfigurationStorage {
 	 * corresponds to given user ID. If <code>groups</code> argument is set,
 	 * user's groups need not to be loaded from user storage
 	 * 
-	 * @param userId -
-	 *            the user ID
-	 * @param groups -
-	 *            user's groups
-	 * @param ctx -
-	 *            the context
+	 * @param userId
+	 *            - the user ID
+	 * @param groups
+	 *            - user's groups
+	 * @param ctx
+	 *            - the context
 	 * @return the instance of <code>UserConfiguration</code>
-	 * @throws UserConfigurationException -
-	 *             if user's configuration could not be determined
+	 * @throws UserConfigurationException
+	 *             - if user's configuration could not be determined
 	 */
 	public abstract UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx)
 			throws UserConfigurationException;
@@ -234,12 +234,12 @@ public abstract class UserConfigurationStorage {
 	 * <b>NOTE:</b> Only the instance is going to be removed from storage;
 	 * underlying database is not affected
 	 * 
-	 * @param userId -
-	 *            the user ID
-	 * @param ctx -
-	 *            the context
-	 * @throws UserConfigurationException -
-	 *             if removal fails
+	 * @param userId
+	 *            - the user ID
+	 * @param ctx
+	 *            - the context
+	 * @throws UserConfigurationException
+	 *             - if removal fails
 	 */
 	public abstract void removeUserConfiguration(int userId, Context ctx) throws UserConfigurationException;
 
