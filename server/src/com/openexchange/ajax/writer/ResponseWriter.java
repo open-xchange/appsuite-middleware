@@ -131,7 +131,9 @@ public final class ResponseWriter {
         for (final ProblematicAttribute problematic : problematics) {
             array.put(toJSON(problematic));
         }
-        json.put(PROBLEMATIC, array);
+        if (array.length() > 0) {
+            json.put(PROBLEMATIC, array);
+        }
     }
 
     public static JSONObject toJSON(final ProblematicAttribute problematic) throws JSONException {

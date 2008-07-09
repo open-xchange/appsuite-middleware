@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.fields;
 
-public interface TaskFields extends CalendarFields {
-	
+public final class TaskFields implements CalendarFields {
+
     public static final String STATUS = "status";
 
     public static final String PERCENT_COMPLETED = "percent_completed";
@@ -80,5 +80,5 @@ public interface TaskFields extends CalendarFields {
     public static final String COMPANIES = "companies";
 
     public static final String DATE_COMPLETED = "date_completed";
-	
+
 }

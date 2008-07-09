@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.parser;
 
+import static com.openexchange.ajax.fields.TaskFields.*;
+
 import java.util.TimeZone;
 
 import org.json.JSONException;
@@ -79,6 +81,8 @@ public class TaskParser extends CalendarParser {
         throws OXJSONException {
         try {
             parseElementTask(taskobject, jsonobject);
+        } catch (final OXJSONException e) {
+            throw e;
         } catch (final Exception exc) {
             throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, exc);
         }
@@ -104,12 +108,9 @@ public class TaskParser extends CalendarParser {
             taskobject.setActualCosts(parseFloat(json,
                 TaskFields.ACTUAL_COSTS));
         }
-
-        if (json.has(TaskFields.ACTUAL_DURATION)) {
-            taskobject.setActualDuration(parseLong(json,
-                TaskFields.ACTUAL_DURATION));
+        if (json.has(ACTUAL_DURATION)) {
+            taskobject.setActualDuration(parseLong(json, ACTUAL_DURATION));
         }
-
         if (json.has(TaskFields.PERCENT_COMPLETED)) {
             taskobject.setPercentComplete(parseInt(json,
                 TaskFields.PERCENT_COMPLETED));
@@ -129,12 +130,9 @@ public class TaskParser extends CalendarParser {
             taskobject.setTargetCosts(parseFloat(json,
                 TaskFields.TARGET_COSTS));
         }
-
-        if (json.has(TaskFields.TARGET_DURATION)) {
-            taskobject.setTargetDuration(parseLong(json,
-                TaskFields.TARGET_DURATION));
+        if (json.has(TARGET_DURATION)) {
+            taskobject.setTargetDuration(parseLong(json, TARGET_DURATION));
         }
-
         if (json.has(TaskFields.PRIORITY)) {
             taskobject.setPriority(parseInt(json, TaskFields.PRIORITY));
         }

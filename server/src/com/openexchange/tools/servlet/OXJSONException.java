@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.servlet;
 
 import com.openexchange.groupware.AbstractOXException;
@@ -110,7 +108,22 @@ public class OXJSONException extends AbstractOXException {
          * Exception while building JSON.
          */
         JSON_BUILD_ERROR("Exception while building JSON.", Category.CODE_ERROR,
-            4);
+            4),
+        /**
+         * Value "%1$s" of attribute %s contains non digit characters.
+         */
+        CONTAINS_NON_DIGITS("Value \"%1$s\" of attribute %2$s contains non digit characters.",
+            Category.USER_INPUT, 5),
+        /**
+         * Too many digits within field %1$s.
+         */
+        TOO_BIG_NUMBER("Too many digits within field %1$s.",
+            Category.USER_INPUT, 6),
+        /**
+         * Unable to parse value "%1$s" within field %2$s as a number.
+         */
+        NUMBER_PARSING("Unable to parse value \"%1$s\" within field %2$s as a number.",
+            Category.CODE_ERROR, 7);
 
         /**
          * Message of the exception.

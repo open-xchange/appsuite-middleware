@@ -49,18 +49,22 @@
 
 package com.openexchange.ajax.parser;
 
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.groupware.AbstractOXException.Parsing;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.servlet.OXJSONException.Code;
 
 /**
  * DataParser
@@ -69,8 +73,16 @@ import com.openexchange.tools.servlet.OXJSONException;
  */
 public abstract class DataParser {
 	
+    /**
+     * @deprecated adding strings to exception message breaks i18n.
+     */
+    @Deprecated
 	private static final String STR_VALUE = "' value '";
 
+	/**
+	 * @deprecated adding strings to exception message breaks i18n.
+	 */
+	@Deprecated
 	private static final String STR_INVALID_VALUE_IN_ATTRIBUTE = "invalid value in attribute '";
 
 	protected boolean parseAll;
@@ -186,24 +198,51 @@ public abstract class DataParser {
 			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
-	
-	public static long parseLong(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
-		if (!jsonObj.has(name)) {
-			return 0;
-		}
-		
-		final String tmp = jsonObj.getString(name);
-		if (tmp != null && tmp.length() == 0) {
-			return 0;
-		}
-		
-		try {
-			return Long.parseLong(tmp);
-		} catch (final NumberFormatException exc) {
-			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
-		}
-	}
-	
+
+	private static final Pattern DIGITS = Pattern.compile("^\\-?\\d+$");
+
+    public static long parseLong(final JSONObject jsonObj, final String name)
+        throws OXJSONException {
+        final String tmp;
+        try {
+            tmp = jsonObj.getString(name);
+        } catch (final JSONException e) {
+            return 0;
+        }
+        if (tmp != null && tmp.length() == 0) {
+            return 0;
+        }
+        final Parsing parsing = new Parsing() {
+            public String getAttribute() {
+                return name;
+            }
+        };
+        // Check for non digit characters and give specialized exception for this.
+        if (!DIGITS.matcher(tmp).matches()) {
+            final OXJSONException e = new OXJSONException(
+                Code.CONTAINS_NON_DIGITS, tmp, name);
+            e.addProblematic(parsing);
+            throw e;
+        }
+        try {
+            return Long.parseLong(tmp);
+        } catch (final NumberFormatException e1) {
+            // Check if it parses into a BigInteger.
+            try {
+                new BigInteger(tmp);
+                final OXJSONException e = new OXJSONException(
+                    Code.TOO_BIG_NUMBER, e1, name);
+                e.addProblematic(parsing);
+                throw e;
+            } catch (final NumberFormatException e2) {
+                final OXJSONException e = new OXJSONException(
+                    Code.NUMBER_PARSING, e1, tmp, name);
+                e.addProblematic(parsing);
+                throw e;
+            }
+        }
+    }
+
 	public static Date parseTime(final JSONObject jsonObj, final String name, final TimeZone timeZone) throws JSONException {
 		final Date d = parseDate(jsonObj, name);
 		if (d == null) {
