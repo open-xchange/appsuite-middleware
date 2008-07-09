@@ -547,12 +547,19 @@ public class RecurringCalculation {
                         } else if (a == CalendarObject.WEEKDAY) {
                             calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
                             calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
-                            calc.set(Calendar.DAY_OF_MONTH, 1);
-                            if (calc.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-                                calc.add(Calendar.DAY_OF_MONTH, 2 + (day_or_type-1));
-                            } else if (calc.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-                                calc.add(Calendar.DAY_OF_MONTH, 1 + (day_or_type-1));
+                            int neededWorkdays = day_or_type;
+                            int day = 1;
+                            while(neededWorkdays > 0) {
+                                calc.set(Calendar.DAY_OF_MONTH, day);
+                                if(calc.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || calc.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                                    // No Workday, so we still need thema all
+                                } else {
+                                    // Found a workday
+                                    neededWorkdays--;
+                                }
+                                day++;
                             }
+
                         } else if (a == CalendarObject.WEEKENDDAY) {
                             calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
                             calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
