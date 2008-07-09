@@ -70,7 +70,7 @@ public class Module extends AbstractModules {
 	}
 
 	public String[] getPath() {
-		return new String[] { "modules", "com.openexchange.passwordchange", "module" };
+		return new String[] { "modules", "com.openexchange.user.passwordchange", "module" };
 	}
 
 	@Override
