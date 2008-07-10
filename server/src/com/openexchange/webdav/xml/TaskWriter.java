@@ -47,9 +47,9 @@
  *
  */
 
-
-
 package com.openexchange.webdav.xml;
+
+import static com.openexchange.webdav.xml.fields.TaskFields.*;
 
 import java.io.OutputStream;
 import java.util.Date;
@@ -74,236 +74,218 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.webdav.xml.fields.CalendarFields;
-import com.openexchange.webdav.xml.fields.TaskFields;
 
 /**
- * {@link TaskWriter} - The WebDAV writer for tasks.
- *
+ * The WebDAV/XML writer for tasks.
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 public class TaskWriter extends CalendarWriter {
-	
-	protected final static int[] changeFields = {
-		DataObject.OBJECT_ID,
-		DataObject.CREATED_BY,
-		DataObject.CREATION_DATE,
-		DataObject.LAST_MODIFIED,
-		DataObject.MODIFIED_BY,
-		FolderChildObject.FOLDER_ID,
-		CommonObject.PRIVATE_FLAG,
-		CommonObject.CATEGORIES,
-		CalendarObject.TITLE,
-		CalendarObject.START_DATE,
-		CalendarObject.END_DATE,
-		CalendarObject.NOTE,
-		CalendarObject.RECURRENCE_TYPE,
-		CalendarObject.PARTICIPANTS,
-		Task.ACTUAL_COSTS,
-		Task.ACTUAL_DURATION,
-		Task.ALARM,
-		Task.BILLING_INFORMATION,
-		Task.CATEGORIES,
-		Task.COMPANIES,
-		Task.CURRENCY,
-		Task.DATE_COMPLETED,
-		Task.IN_PROGRESS,
-		Task.PERCENT_COMPLETED,
-		Task.PRIORITY,
-		Task.STATUS,
-		Task.TARGET_COSTS,
-		Task.TARGET_DURATION,
-		Task.TRIP_METER,
-		Task.COLOR_LABEL,
-                Task.NUMBER_OF_ATTACHMENTS
-	};
-	
-	protected final static int[] deleteFields = {
-		DataObject.OBJECT_ID,
-		DataObject.LAST_MODIFIED
-	};
-	
-	private static final Log LOG = LogFactory.getLog(TaskWriter.class);
-	
-	/**
-	 * Initializes a new {@link TaskWriter}
-	 */
-	public TaskWriter() {
-		super();
-	}
 
-	/**
-	 * Initializes a new {@link TaskWriter}
-	 * 
-	 * @param userObj The user object
-	 * @param ctx The user's context
-	 * @param sessionObj The session providing needed user data
-	 */
-	public TaskWriter(final User userObj, final Context ctx, final Session sessionObj) {
-		this.userObj = userObj;
-		this.ctx = ctx;
-		this.sessionObj = sessionObj;
-	}
-	
-	public void startWriter(final int objectId, final int folderId, final OutputStream os) throws Exception {
-		final Element eProp = new Element("prop", "D", "DAV:");
-		final XMLOutputter xo = new XMLOutputter();
-		try {
-			final TasksSQLInterface tasksql = new TasksSQLInterfaceImpl(sessionObj);
-			final Task taskobject = tasksql.getTaskById(objectId, folderId);
-			writeObject(taskobject, false, xo, os);
-		} catch (final OXObjectNotFoundException exc) {
-			writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
-		} catch (final Exception ex) {
-			writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
-		}
-	}
-	
-	public void startWriter(final boolean modified, final boolean deleted, final boolean bList, final int folder_id, final Date lastsync, final OutputStream os) throws Exception {
-		final TasksSQLInterface tasksql = new TasksSQLInterfaceImpl(sessionObj);
-		final XMLOutputter xo = new XMLOutputter();
-		
-		if (modified) {
-			SearchIterator<Task> it = null;
-			try {
-				it = tasksql.getModifiedTasksInFolder(folder_id, changeFields, lastsync);
-				writeIterator(it, false, xo, os);
-			} finally {
-				if (it != null) {
-					it.close();
-				}
-			}
-		}
-		
-		if (deleted) {
-			SearchIterator<Task> it = null;
-			try {
-				it = tasksql.getDeletedTasksInFolder(folder_id, deleteFields, lastsync);
-				writeIterator(it, true, xo, os);
-			} finally {
-				if (it != null) {
-					it.close();
-				}
-			}
-		}
-		
-		
-		if (bList) {
-			SearchIterator<Task> it = null;
-			try {
-				it = tasksql.getTaskList(folder_id, -1, -1, 0, null, deleteFields);
-				writeList(it, xo, os);
-			} finally {
-				if (it != null) {
-					it.close();
-				}
-			}
-		}
-	}
-	
-	public void writeIterator(final SearchIterator<Task> it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
-		while (it.hasNext()) {
-			writeObject(it.next(), delete, xo, os);
-		}
-	}
-	
-	public void writeObject(final Task taskObj, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
-		writeObject(taskObj, new Element("prop", "D", "DAV:"), delete, xo, os); 
-	}
-	
-	public void writeObject(final Task taskObj, final Element e_prop, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
-		int status = 200;
-		String description = "OK";
-		int object_id = 0;
-		
-		try {
-			object_id = taskObj.getObjectID();
-			addContent2PropElement(e_prop, taskObj, delete);
-		} catch (final Exception exc) {
-			LOG.error("writeObject", exc);
-			status = 500;
-			description = "Server Error: " + exc.getMessage();
-			object_id = 0;
-		}
-		
-		writeResponseElement(e_prop, object_id, status, description, xo, os);
-	}
-	
-	public void addContent2PropElement(final Element e_prop, final Task taskObj, final boolean delete) throws Exception {
-		if (delete) {
-			addElement(TaskFields.OBJECT_ID, taskObj.getObjectID(), e_prop);
-			addElement(TaskFields.LAST_MODIFIED, taskObj.getLastModified(), e_prop);
-			addElement("object_status", "DELETE", e_prop);
-		} else {
-			addElement("object_status", "CREATE", e_prop);
-			
-			if (taskObj.containsStartDate()) {
-				addElement(CalendarFields.START_DATE, taskObj.getStartDate(), e_prop);
-			}
-			
-			if (taskObj.containsEndDate()) {
-				addElement(CalendarFields.END_DATE, taskObj.getEndDate(), e_prop);
-			}
-			
-			if (taskObj.containsActualCosts()) {
-				addElement(TaskFields.ACTUAL_COSTS, taskObj.getActualCosts(), e_prop);
-			}
-			
-			// if (taskObj.containsActualDuration()) {
-			addElement(TaskFields.ACTUAL_DURATION, taskObj.getActualDuration(), e_prop);
-			// }
-			
-			addElement(TaskFields.BILLING_INFORMATION, taskObj.getBillingInformation(), e_prop);
-			addElement(TaskFields.COMPANIES, taskObj.getCompanies(), e_prop);
-			
-			if (taskObj.containsCurrency()) {
-				addElement(TaskFields.CURRENCY, taskObj.getCurrency(), e_prop);
-			}
-			
-			addElement(TaskFields.DATE_COMPLETED, taskObj.getDateCompleted(), e_prop);
-			
-			if (taskObj.containsPercentComplete()) {
-				addElement(TaskFields.PERCENT_COMPLETED, taskObj.getPercentComplete(), e_prop);
-			}
-			
-			if (taskObj.containsPriority()) {
-				addElement(TaskFields.PRIORITY, taskObj.getPriority(), e_prop);
-			}
-			
-			if (taskObj.containsStatus()) {
-				addElement(TaskFields.STATUS, taskObj.getStatus(), e_prop);
-			}
-			
-			if (taskObj.containsTargetCosts()) {
-				addElement(TaskFields.TARGET_COSTS, taskObj.getTargetCosts(), e_prop);
-			}
-			
-			// if (taskObj.containsTargetDuration()) {
-			addElement(TaskFields.TARGET_DURATION, taskObj.getTargetDuration(), e_prop);
-			// }
-			
-			if (taskObj.containsTripMeter()) {
-				addElement(TaskFields.TRIP_METER, taskObj.getTripMeter(), e_prop);
-			}
-			
-			if (taskObj.containsAlarm()) {
-				addElement(CalendarFields.ALARM_FLAG, true, e_prop);
-				addElement(TaskFields.ALARM, taskObj.getAlarm(), e_prop);
-			} else {
-				addElement(CalendarFields.ALARM_FLAG, false, e_prop);
-			}
-			
-			writeCalendarElements(taskObj, e_prop);
-		}
-	}
-	
-	@Override
-	protected int getModule() {
-		return Types.TASK;
-	}
-	
+    protected final static int[] changeFields = {
+        DataObject.OBJECT_ID,
+        DataObject.CREATED_BY,
+        DataObject.CREATION_DATE,
+        DataObject.LAST_MODIFIED,
+        DataObject.MODIFIED_BY,
+        FolderChildObject.FOLDER_ID,
+        CommonObject.PRIVATE_FLAG,
+        CommonObject.CATEGORIES,
+        CalendarObject.TITLE,
+        CalendarObject.START_DATE,
+        CalendarObject.END_DATE,
+        CalendarObject.NOTE,
+        CalendarObject.RECURRENCE_TYPE,
+        CalendarObject.PARTICIPANTS,
+        Task.ACTUAL_COSTS,
+        Task.ACTUAL_DURATION,
+        Task.ALARM,
+        Task.BILLING_INFORMATION,
+        Task.CATEGORIES,
+        Task.COMPANIES,
+        Task.CURRENCY,
+        Task.DATE_COMPLETED,
+        Task.IN_PROGRESS,
+        Task.PERCENT_COMPLETED,
+        Task.PRIORITY,
+        Task.STATUS,
+        Task.TARGET_COSTS,
+        Task.TARGET_DURATION,
+        Task.TRIP_METER,
+        Task.COLOR_LABEL,
+        Task.NUMBER_OF_ATTACHMENTS
+    };
+
+    protected final static int[] deleteFields = {
+        DataObject.OBJECT_ID,
+        DataObject.LAST_MODIFIED
+    };
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(TaskWriter.class);
+
+    /**
+     * Initializes a new {@link TaskWriter}
+     */
+    public TaskWriter() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link TaskWriter}
+     * @param userObj The user object
+     * @param ctx The user's context
+     * @param sessionObj The session providing needed user data
+     */
+    public TaskWriter(final User userObj, final Context ctx, final Session sessionObj) {
+        this.userObj = userObj;
+        this.ctx = ctx;
+        this.sessionObj = sessionObj;
+    }
+
+    public void startWriter(final int objectId, final int folderId, final OutputStream os) throws Exception {
+        final Element eProp = new Element("prop", "D", "DAV:");
+        final XMLOutputter xo = new XMLOutputter();
+        try {
+            final TasksSQLInterface tasksql = new TasksSQLInterfaceImpl(sessionObj);
+            final Task taskobject = tasksql.getTaskById(objectId, folderId);
+            writeObject(taskobject, false, xo, os);
+        } catch (final OXObjectNotFoundException exc) {
+            writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
+        } catch (final Exception ex) {
+            writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
+        }
+    }
+
+    public void startWriter(final boolean modified, final boolean deleted, final boolean bList, final int folder_id, final Date lastsync, final OutputStream os) throws Exception {
+        final TasksSQLInterface tasksql = new TasksSQLInterfaceImpl(sessionObj);
+        final XMLOutputter xo = new XMLOutputter();
+
+        if (modified) {
+            SearchIterator<Task> it = null;
+            try {
+                it = tasksql.getModifiedTasksInFolder(folder_id, changeFields, lastsync);
+                writeIterator(it, false, xo, os);
+            } finally {
+                if (it != null) {
+                    it.close();
+                }
+            }
+        }
+
+        if (deleted) {
+            SearchIterator<Task> it = null;
+            try {
+                it = tasksql.getDeletedTasksInFolder(folder_id, deleteFields, lastsync);
+                writeIterator(it, true, xo, os);
+            } finally {
+                if (it != null) {
+                    it.close();
+                }
+            }
+        }
+
+
+        if (bList) {
+            SearchIterator<Task> it = null;
+            try {
+                it = tasksql.getTaskList(folder_id, -1, -1, 0, null, deleteFields);
+                writeList(it, xo, os);
+            } finally {
+                if (it != null) {
+                    it.close();
+                }
+            }
+        }
+    }
+
+    public void writeIterator(final SearchIterator<Task> it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
+        while (it.hasNext()) {
+            writeObject(it.next(), delete, xo, os);
+        }
+    }
+
+    public void writeObject(final Task taskObj, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
+        writeObject(taskObj, new Element("prop", "D", "DAV:"), delete, xo, os);
+    }
+
+    public void writeObject(final Task taskObj, final Element e_prop, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
+        int status = 200;
+        String description = "OK";
+        int object_id = 0;
+
+        try {
+            object_id = taskObj.getObjectID();
+            addContent2PropElement(e_prop, taskObj, delete);
+        } catch (final Exception exc) {
+            LOG.error("writeObject", exc);
+            status = 500;
+            description = "Server Error: " + exc.getMessage();
+            object_id = 0;
+        }
+
+        writeResponseElement(e_prop, object_id, status, description, xo, os);
+    }
+
+    public void addContent2PropElement(final Element e_prop, final Task taskObj, final boolean delete) throws Exception {
+        if (delete) {
+            addElement(OBJECT_ID, taskObj.getObjectID(), e_prop);
+            addElement(LAST_MODIFIED, taskObj.getLastModified(), e_prop);
+            addElement("object_status", "DELETE", e_prop);
+        } else {
+            addElement("object_status", "CREATE", e_prop);
+            if (taskObj.containsStartDate()) {
+                addElement(START_DATE, taskObj.getStartDate(), e_prop);
+            }
+            if (taskObj.containsEndDate()) {
+                addElement(END_DATE, taskObj.getEndDate(), e_prop);
+            }
+            if (taskObj.containsActualCosts()) {
+                addElement(ACTUAL_COSTS, taskObj.getActualCosts(), e_prop);
+            }
+            if (taskObj.containsActualDuration()) {
+                addElement(ACTUAL_DURATION, taskObj.getActualDuration(), e_prop);
+            }
+            addElement(BILLING_INFORMATION, taskObj.getBillingInformation(), e_prop);
+            addElement(COMPANIES, taskObj.getCompanies(), e_prop);
+            if (taskObj.containsCurrency()) {
+                addElement(CURRENCY, taskObj.getCurrency(), e_prop);
+            }
+            addElement(DATE_COMPLETED, taskObj.getDateCompleted(), e_prop);
+            if (taskObj.containsPercentComplete()) {
+                addElement(PERCENT_COMPLETED, taskObj.getPercentComplete(), e_prop);
+            }
+            if (taskObj.containsPriority()) {
+                addElement(PRIORITY, taskObj.getPriority(), e_prop);
+            }
+            if (taskObj.containsStatus()) {
+                addElement(STATUS, taskObj.getStatus(), e_prop);
+            }
+            if (taskObj.containsTargetCosts()) {
+                addElement(TARGET_COSTS, taskObj.getTargetCosts(), e_prop);
+            }
+            if (taskObj.containsTargetDuration()) {
+                addElement(TARGET_DURATION, taskObj.getTargetDuration(), e_prop);
+            }
+            if (taskObj.containsTripMeter()) {
+                addElement(TRIP_METER, taskObj.getTripMeter(), e_prop);
+            }
+            if (taskObj.containsAlarm()) {
+                addElement(ALARM_FLAG, true, e_prop);
+                addElement(ALARM, taskObj.getAlarm(), e_prop);
+            } else {
+                addElement(ALARM_FLAG, false, e_prop);
+            }
+            writeCalendarElements(taskObj, e_prop);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected int getModule() {
+        return Types.TASK;
+    }
 }
-
-
-
-

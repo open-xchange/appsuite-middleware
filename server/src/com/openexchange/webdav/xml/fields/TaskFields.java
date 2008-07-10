@@ -47,12 +47,21 @@
  *
  */
 
-
-
 package com.openexchange.webdav.xml.fields;
 
-public interface TaskFields extends CalendarFields {
-	
+/**
+ * XML tag constants for tasks.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public class TaskFields implements CalendarFields {
+
+    /**
+     * Prevent instantiation.
+     */
+    private TaskFields() {
+        super();
+    }
+
     public static final String STATUS = "status";
 
     public static final String PERCENT_COMPLETED = "percent_completed";
@@ -82,5 +91,4 @@ public interface TaskFields extends CalendarFields {
     public static final String COMPANIES = "companies";
 
     public static final String DATE_COMPLETED = "date_completed";
-	
 }
