@@ -52,7 +52,6 @@ import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Locale;
-import java.util.TimeZone;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
@@ -100,7 +99,7 @@ public abstract class CreateCore extends ContextAbstraction {
             // fill user obj with mandatory values from console
             final String tz = (String) parser.getOptionValue(this.timezoneOption);
             if (null != tz) {
-                usr.setTimezone(TimeZone.getTimeZone(tz));
+                usr.setTimezone(tz);
             }
 
             final String languageoptionvalue = (String) parser.getOptionValue(this.languageOption);
