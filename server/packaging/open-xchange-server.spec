@@ -36,7 +36,7 @@ Requires:       open-xchange-global open-xchange-configread open-xchange-global 
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
-Requires:  java-1_5_0-ibm java-1_5_0-ibm-alsa update-alternatives
+Requires:  java-1_5_0-ibm update-alternatives
 %endif
 %if %{?suse_version} >= 1100
 BuildRequires:  java-openjdk
