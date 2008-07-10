@@ -78,11 +78,10 @@ import com.openexchange.webdav.xml.fields.CalendarFields;
 import com.openexchange.webdav.xml.fields.TaskFields;
 
 /**
- * CalendarWriter
+ * {@link TaskWriter} - The WebDAV writer for tasks.
  *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public class TaskWriter extends CalendarWriter {
 	
 	protected final static int[] changeFields = {
@@ -126,10 +125,20 @@ public class TaskWriter extends CalendarWriter {
 	
 	private static final Log LOG = LogFactory.getLog(TaskWriter.class);
 	
+	/**
+	 * Initializes a new {@link TaskWriter}
+	 */
 	public TaskWriter() {
-		
+		super();
 	}
 
+	/**
+	 * Initializes a new {@link TaskWriter}
+	 * 
+	 * @param userObj The user object
+	 * @param ctx The user's context
+	 * @param sessionObj The session providing needed user data
+	 */
 	public TaskWriter(final User userObj, final Context ctx, final Session sessionObj) {
 		this.userObj = userObj;
 		this.ctx = ctx;
@@ -155,7 +164,7 @@ public class TaskWriter extends CalendarWriter {
 		final XMLOutputter xo = new XMLOutputter();
 		
 		if (modified) {
-			SearchIterator it = null;
+			SearchIterator<Task> it = null;
 			try {
 				it = tasksql.getModifiedTasksInFolder(folder_id, changeFields, lastsync);
 				writeIterator(it, false, xo, os);
@@ -167,7 +176,7 @@ public class TaskWriter extends CalendarWriter {
 		}
 		
 		if (deleted) {
-			SearchIterator it = null;
+			SearchIterator<Task> it = null;
 			try {
 				it = tasksql.getDeletedTasksInFolder(folder_id, deleteFields, lastsync);
 				writeIterator(it, true, xo, os);
@@ -180,7 +189,7 @@ public class TaskWriter extends CalendarWriter {
 		
 		
 		if (bList) {
-			SearchIterator it = null;
+			SearchIterator<Task> it = null;
 			try {
 				it = tasksql.getTaskList(folder_id, -1, -1, 0, null, deleteFields);
 				writeList(it, xo, os);
@@ -192,9 +201,9 @@ public class TaskWriter extends CalendarWriter {
 		}
 	}
 	
-	public void writeIterator(final SearchIterator it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
+	public void writeIterator(final SearchIterator<Task> it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
 		while (it.hasNext()) {
-			writeObject((Task)it.next(), delete, xo, os);
+			writeObject(it.next(), delete, xo, os);
 		}
 	}
 	
