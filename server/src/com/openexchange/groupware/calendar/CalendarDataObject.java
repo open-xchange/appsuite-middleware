@@ -79,9 +79,9 @@ public class CalendarDataObject extends AppointmentObject {
     private boolean folder_move;
     private boolean b_recurrencestring;
     
-    private boolean fill_participants = false;
-    private boolean fill_user_participants = false;
-    private boolean fill_folder_id = false;
+    private boolean fill_participants;
+    private boolean fill_user_participants;
+    private boolean fill_folder_id;
     
     @Override
     public final void setUntil(Date until) {

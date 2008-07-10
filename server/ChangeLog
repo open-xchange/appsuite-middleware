@@ -5,6 +5,8 @@
 * 2008-07-10 - thorben.betten@open-xchange.com
 
  - Bugfix #11585: Removed warning in UDP push on appointment deletion
+ - Bugfix #9930: Fixed calculation of duration of a single item in a
+   recurring appointment
 
 * 2008-07-09 - marcus.klein@open-xchange.com
 

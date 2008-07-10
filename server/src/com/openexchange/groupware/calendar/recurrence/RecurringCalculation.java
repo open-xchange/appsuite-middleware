@@ -66,22 +66,22 @@ import com.openexchange.groupware.container.CalendarObject;
  */
 public class RecurringCalculation {
     
-    private int recurring_type = -1; // cdao.getRecurrenceType()
-    private int recurring_interval = -1; // cdao.getInterval()
+    private final int recurring_type; // cdao.getRecurrenceType()
+    private final int recurring_interval; // cdao.getInterval()
     private int recurring_days = -1; //  cdao.getDays()
     private int recurring_day_in_month = -1 ; // cdao.getDayInMonth()
     private int recurring_month = -1; // cdao.getMonth()
     
-    private String change_exceptions = null;
-    private String delete_exceptions = null;
+    private String change_exceptions;
+    private String delete_exceptions;
     
-    private boolean contains_occurrence = false;
+    private boolean contains_occurrence;
     private int occurrence_value; // occurrence
     
-    private boolean contains_days = false;
-    private boolean contains_day_in_month = false;
-    private boolean contains_month = false;
-    private boolean contains_until = false;
+    private boolean contains_days;
+    private boolean contains_day_in_month;
+    private boolean contains_month;
+    private boolean contains_until;
     
     private final int recurrence_calculator;
     
@@ -92,9 +92,9 @@ public class RecurringCalculation {
     private long e; // recurring_end - aka timestampfield02
     private long until; // real recurring_end (normalized)
     
-    private long range_start = 0;
-    private long range_end = 0;
-    private int pos = 0;
+    private long range_start;
+    private long range_end;
+    private int pos;
     
     private String calc_timezone = "UTC";
     
@@ -105,6 +105,7 @@ public class RecurringCalculation {
     private static final int days_int[] = { CalendarObject.SUNDAY, CalendarObject.MONDAY, CalendarObject.TUESDAY, CalendarObject.WEDNESDAY, CalendarObject.THURSDAY, CalendarObject.FRIDAY, CalendarObject.SATURDAY };
     
     private int first_day_of_week = Calendar.MONDAY;
+
     private final boolean calc_until = false; // what the hell is this for?
     
     /**
@@ -255,9 +256,7 @@ public class RecurringCalculation {
     public void setStartAndEndTime(final long start, final long end) {
         this.s = start;
         this.e = end;
-        final long c1 = start % CalendarRecurringCollection.MILLI_DAY;
-        final long c2 = end % CalendarRecurringCollection.MILLI_DAY;
-        diff = Math.abs(c2-c1);
+        diff = Math.abs((end - start) % CalendarRecurringCollection.MILLI_DAY);
     }
     
     /**
@@ -282,7 +281,7 @@ public class RecurringCalculation {
         contains_until = true;
     }
     
-    private void checkValues() throws RecurringException {
+    private void checkValues() {
         if (!contains_until)  {
             e = (e + (CalendarRecurringCollection.MILLI_YEAR * 99));
             this.until = e;

@@ -919,7 +919,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
     
-    public SearchIterator getObjectsById(final int[][] oids, int[] cols) throws OXException {
+    public SearchIterator<CalendarDataObject> getObjectsById(final int[][] oids, int[] cols) throws OXException {
         if (session != null) {
             if (oids.length > 0) {
                 Connection readcon = null;

@@ -459,7 +459,7 @@ public class AppointmentRequest {
 		
 		Date lastModified = null;
 		
-		SearchIterator it = null;
+		SearchIterator<CalendarDataObject> it = null;
 		
 		final HashMap<Integer, ArrayList<Integer>> recurrencePositionMap = new HashMap<Integer, ArrayList<Integer>>();
 		
@@ -512,14 +512,11 @@ public class AppointmentRequest {
 		
 		final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
 		it = appointmentsql.getObjectsById(objectIdAndFolderId, _appointmentFields);
-		
-		int counter = 0;
-		
-		final JSONArray jsonResponseArray = new JSONArray();
-		
 		try {
+			int counter = 0;
+			final JSONArray jsonResponseArray = new JSONArray();
 			while (it.hasNext()) {
-				final CalendarDataObject appointmentobject = (CalendarDataObject)it.next();
+				final CalendarDataObject appointmentobject = it.next();
 				if (null == appointmentobject) {
 				    continue;
 				}
