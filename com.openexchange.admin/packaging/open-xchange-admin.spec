@@ -136,6 +136,10 @@ ln -sf ../etc/init.d/open-xchange-admin %{buildroot}/sbin/rcopen-xchange-admin
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Thu Jul 10 2008 - choeger@open-xchange.com
+ - RMI API Change:
+   User.setTimezone and User.getTimezone now uses java.lang.String instead of java.util.TimeZone
+ - Bugfix ID#11594 Unable to create a user via commandline tool when setting a timezone
 * Mon Jun 30 2008 - choeger@open-xchange.com
  - Bugfix ID#11401 module access changes only take affect after restarting the groupware
 * Mon Jun 23 2008 - choeger@open-xchange.com
