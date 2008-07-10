@@ -77,7 +77,7 @@ public interface ReminderSQLInterface {
 
 	public void updateReminder(ReminderObject reminderObj, Connection writeCon) throws OXMandatoryFieldException, OXConflictException, OXException;
 	
-	public void deleteReminder(int objectId) throws OXException;
+	public void deleteReminder(ReminderObject reminder) throws OXException;
 	
 	public void deleteReminder(int targetId, int module) throws OXException;
 

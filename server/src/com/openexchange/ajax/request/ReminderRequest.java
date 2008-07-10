@@ -167,15 +167,14 @@ public class ReminderRequest {
                     jsonResponseArray.put(id);
                     return jsonResponseArray;
                 }
-                reminderSql.deleteReminder(id);
+                reminderSql.deleteReminder(reminder);
             } else {
-                reminderSql.deleteReminder(id);
+                reminderSql.deleteReminder(reminder);
             }
         } catch(final SQLException sqle) {
             throw new OXException("SQLException occurred", sqle);
         } catch(final OXException oxe) {
             LOG.debug(oxe.getMessage(), oxe);
-            
             if (oxe.getComponent().equals(EnumComponent.REMINDER) && oxe.getDetailNumber() == 9) {
                 jsonArray.put(id);
                 return jsonArray;
@@ -184,7 +183,6 @@ public class ReminderRequest {
         } catch(final AbstractOXException exc) {
             throw new OXException(exc);
         }
-        
         return jsonArray;
     }
     

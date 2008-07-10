@@ -286,27 +286,29 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
         }
     }
 
-    public void deleteReminder(final int objectId) throws OXException {
+    public void deleteReminder(final ReminderObject reminder) throws OXException {
         final int contextId = context.getContextId();
         Connection writeCon = null;
         PreparedStatement ps = null;
         try {
             writeCon = DBPool.pickupWriteable(context);
             int a = 0;
-
             ps = writeCon.prepareStatement(sqlDeleteWithId);
             ps.setInt(++a, contextId);
-            ps.setInt(++a, objectId);
-
+            ps.setInt(++a, reminder.getObjectId());
             final int deleted = ps.executeUpdate();
-
             if (deleted == 0) {
-                throw new ReminderException(Code.NOT_FOUND, objectId, contextId);
+                throw new ReminderException(Code.NOT_FOUND, reminder, contextId);
             }
+            reminderDeleteInterface.updateTargetObject(context, writeCon, Integer.parseInt(reminder.getTargetId()), reminder.getUser());
         } catch (final SQLException exc) {
             throw new ReminderException(ReminderException.Code.DELETE_EXCEPTION, exc);
         } catch (final DBPoolingException exc) {
             throw new ReminderException(ReminderException.Code.DELETE_EXCEPTION, exc);
+        } catch (final NumberFormatException e) {
+            throw new ReminderException(Code.MANDATORY_FIELD_TARGET_ID, "can't parse number.");
+        } catch (final AbstractOXException e) {
+            throw new ReminderException(e);
         } finally {
             if (ps != null) {
                 try {
@@ -328,11 +330,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
         }
     }
 
-    public void deleteReminder( final int targetId, final int userId, final int module) throws OXMandatoryFieldException, OXConflictException, OXException {
-        deleteReminder(String.valueOf(targetId), userId, module);
-    }
-
-    public void deleteReminder( final String targetId, final int userId, final int module) throws OXMandatoryFieldException, OXConflictException, OXException {
+    public void deleteReminder(final int targetId, final int userId, final int module) throws OXMandatoryFieldException, OXConflictException, OXException {
         Connection writeCon = null;
 
         try {
@@ -356,21 +354,6 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 
             DBPool.closeWriterSilent(context,writeCon);
         }
-    }
-
-    public void deleteReminder(final String targetId, final int userId,
-        final int module, final Connection writeCon) throws
-        OXMandatoryFieldException, OXConflictException, OXException {
-        if (targetId == null) {
-            throw new ReminderException(ReminderException.Code.MANDATORY_FIELD_TARGET_ID, "missing target id");
-        }
-        final int newId;
-        try {
-            newId = Integer.parseInt(targetId);
-        } catch (final NumberFormatException e) {
-            throw new ReminderException(Code.MANDATORY_FIELD_TARGET_ID, "can't parse number.");
-        }
-        deleteReminder(newId, userId, module, writeCon);
     }
 
     public void deleteReminder(final int targetId, final int userId,
@@ -408,11 +391,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
         }
     }
 
-    public void deleteReminder( final int targetId, final int module) throws OXMandatoryFieldException, OXConflictException, OXException {
-        deleteReminder(String.valueOf(targetId), module);
-    }
-
-    public void deleteReminder( final String targetId, final int module) throws OXMandatoryFieldException, OXConflictException, OXException {
+    public void deleteReminder(final int targetId, final int module) throws OXMandatoryFieldException, OXConflictException, OXException {
         Connection writeCon = null;
 
         try {
@@ -438,22 +417,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
         }
     }
 
-    public void deleteReminder(final String targetId, final int module,
-        final Connection writeCon) throws OXMandatoryFieldException,
-        OXConflictException, OXException {
-        if (targetId == null) {
-            throw new ReminderException(ReminderException.Code.MANDATORY_FIELD_TARGET_ID, "missing target id");
-        }
-        final int newId;
-        try {
-            newId = Integer.parseInt(targetId);
-        } catch (final NumberFormatException e) {
-            throw new ReminderException(Code.MANDATORY_FIELD_TARGET_ID, "can't parse number.");
-        }
-        deleteReminder(newId, module, writeCon);
-    }
-
-    public void deleteReminder( final int targetId, final int module,
+    public void deleteReminder(final int targetId, final int module,
         final Connection writeCon) throws OXMandatoryFieldException,
         OXConflictException, OXException {
         final int contextId = context.getContextId();
