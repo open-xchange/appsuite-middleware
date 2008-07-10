@@ -104,7 +104,8 @@ public final class StringCollection {
 	 * 
 	 * @param s
 	 *            The string to be prepared for SQL search
-	 * @return A prepared search string
+	 * @return A prepared search string for being used in
+	 *         <code>java.sql.PreparedStatement.setString()</code>
 	 */
 	public static String prepareForSearch(final String s) {
 		return prepareForSearch(s, true);
@@ -132,7 +133,8 @@ public final class StringCollection {
 	 *            <code>true</code> to prepend/append <code>'%'</code>
 	 *            character, if pattern does not start with/end with SQL
 	 *            wildcard character; otherwise <code>false</code>
-	 * @return A prepared search string
+	 * @return A prepared search string for being used in
+	 *         <code>java.sql.PreparedStatement.setString()</code>
 	 */
 	public static String prepareForSearch(final String s, final boolean surroundWithWildcard) {
 		return prepareForSearch(s, surroundWithWildcard, true);
