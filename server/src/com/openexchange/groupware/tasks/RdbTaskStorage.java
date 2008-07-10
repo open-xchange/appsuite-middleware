@@ -71,6 +71,7 @@ import com.openexchange.groupware.tasks.Mapping.Mapper;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -277,8 +278,7 @@ public class RdbTaskStorage extends TaskStorage {
                 }
             }
             if (patternCondition.length() > 0) {
-                final String pattern = search.getPattern().replace('*', '%')
-                    .replace('?', '_');
+                final String pattern = StringCollection.prepareForSearch(search.getPattern());
                 stmt.setString(pos++, pattern);
                 stmt.setString(pos++, pattern);
                 stmt.setString(pos++, pattern);
