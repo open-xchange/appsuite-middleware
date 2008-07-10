@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.calendar;
 
 import java.io.Serializable;
@@ -62,16 +60,18 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 
-
 /**
- * CalendarCache
+ * {@link CalendarCache} - Cache for calendar module.
+ * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-
-public class CalendarCache {
+public final class CalendarCache {
     
-    private static CalendarCache instance;
+    private static volatile CalendarCache instance;
+
     private static final String CACHE_NAME = "CalendarCache";
+
     private static final Log LOG = LogFactory.getLog(CalendarCache.class);
     
     private Cache jcs;
@@ -88,14 +88,18 @@ public class CalendarCache {
         }
     }
     
-    public synchronized static CalendarCache getInstance() {
-        if (instance == null) {
-            instance = new CalendarCache();
+    public static CalendarCache getInstance() {
+    	if (instance == null) {
+        	synchronized (CalendarCache.class) {
+        		if (instance == null) {
+        			instance = new CalendarCache();
+        		}
+			}
         }
         return instance;
     }
     
-    public synchronized void add(final Object key, final String groupKey, final Object o) throws CacheException {
+    public void add(final Object key, final String groupKey, final Object o) throws CacheException {
         jcs.putInGroup((Serializable) key, groupKey, (Serializable) o);
     }
     
@@ -103,15 +107,15 @@ public class CalendarCache {
         return jcs.getFromGroup((Serializable) key, groupKey);
     }
     
-    public synchronized void clear() throws CacheException {
+    public void clear() throws CacheException {
         jcs.clear();
     }
     
-    public synchronized void invalidateGroup(final int cid) {
+    public void invalidateGroup(final int cid) {
         jcs.invalidateGroup(CalendarFolderObject.createGroupKeyFromContextID(cid));
     }
     
-    public static final boolean isInitialized() {
+    public static boolean isInitialized() {
         return instance != null;
     }
     
