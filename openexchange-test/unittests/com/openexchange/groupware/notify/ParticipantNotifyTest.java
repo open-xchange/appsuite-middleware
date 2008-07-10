@@ -151,11 +151,11 @@ public class ParticipantNotifyTest extends TestCase{
 		final Calendar calendar = Calendar.getInstance(locale);
 		
 		calendar.set(2017, 4, 2, 13, 30,0);
-		String expect = "02.05.2017 13:30:00, CEST";
+		String expect = "02.05.2017 13:30:00, GMT+01:00";
 		
 		DateFormat df = new ParticipantNotify.AppointmentState().getDateFormat(locale);
 		
-		assertEquals(expect,df.format(new Date(calendar.getTimeInMillis())));
+		assertEquals(expect,df.format(calendar.getTime()));
 		
 		calendar.set(2017, 4, 2, 0, 0, 0);
 		expect = "02.05.2017";
