@@ -204,10 +204,12 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
  		}
 		
 		if(!query.equals("") && !query.equals("*") ) {
-			
+			boolean containsWildcard = query.contains("*");
+
+            query = query.replaceAll("%", "\\\\%"); // Escape \ twice, due to regexp parser in replaceAll
 			query = query.replace('*', '%');
 			query = query.replace('?', '_');
-			query = query.replaceAll("'", "\\\\'");
+            query = query.replaceAll("'", "\\\\'");// Escape \ twice, due to regexp parser in replaceAll
 	
 			final StringBuffer SQL_QUERY_OBJECTS = new StringBuffer();
 			for (final String currentField : SEARCH_FIELDS) {
@@ -215,7 +217,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 					SQL_QUERY_OBJECTS.append(" OR ");
 				}
 				
-				if (query.indexOf('%') != -1) {
+				if (containsWildcard) {
 					SQL_QUERY_OBJECTS.append(currentField);
 					SQL_QUERY_OBJECTS.append(" LIKE ('");
 					SQL_QUERY_OBJECTS.append(query);
@@ -267,8 +269,8 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 				SQL_QUERY.append(end+1);
 			}
 		}
-		
-		final Connection con = getReadConnection(ctx);
+
+        final Connection con = getReadConnection(ctx);
 		Statement stmt = null;
 		try {
 			stmt = con.createStatement();
