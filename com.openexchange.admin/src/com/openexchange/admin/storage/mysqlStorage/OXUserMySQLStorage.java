@@ -201,7 +201,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             if (usrdata.getTimezone() != null) {
                 stmt = write_ox_con.prepareStatement("UPDATE user SET timezone = ? WHERE cid = ? AND id = ?");
-                stmt.setString(1, usrdata.getTimezone().getID());
+                stmt.setString(1, usrdata.getTimezone());
                 stmt.setInt(2, context_id);
                 stmt.setInt(3, user_id);
                 stmt.executeUpdate();
@@ -765,9 +765,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 stmt.setString(6, usrdata.getPrimaryEmail());
 
-                final TimeZone timezone = usrdata.getTimezone();
+                final String timezone = usrdata.getTimezone();
                 if (null != timezone) {
-                    stmt.setString(7, timezone.getID());
+                    stmt.setString(7, timezone);
                 } else {
                     stmt.setString(7, DEFAULT_TIMEZONE_CREATE);
                 }

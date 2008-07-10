@@ -1,3 +1,9 @@
+* 2008-07-10 - choeger@open-xchange.com
+
+ - RMI API Change:
+   User.setTimezone and User.getTimezone now uses java.lang.String instead of java.util.TimeZone
+ - Bugfix ID#11594 Unable to create a user via commandline tool when setting a timezone
+   
 * 2008-06-30 - choeger@open-xchange.com
 
  - Bugfix ID#11401 module access changes only take affect after restarting the groupware

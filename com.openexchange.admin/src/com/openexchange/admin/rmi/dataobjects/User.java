@@ -58,7 +58,6 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -434,7 +433,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
 
     private boolean telephone_telexset = false;
 
-    private TimeZone timezone;
+    private String timezone;
 
     private boolean timezoneset = false;
 
@@ -3283,7 +3282,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * 
      * @return A {@link String} containing the timezone
      */
-    final public TimeZone getTimezone() {
+    final public String getTimezone() {
         if( this.timezone == null ) {
             return null;
         } else {
@@ -3296,7 +3295,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * 
      * @param timezone A {@link String} containing the timezone
      */
-    final public void setTimezone(final TimeZone timezone) {
+    final public void setTimezone(final String timezone) {
         if (null == timezone) {
             this.timezoneset = true;
         }
