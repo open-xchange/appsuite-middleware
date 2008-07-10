@@ -678,7 +678,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             if (!Arrays.asList(TimeZone.getAvailableIDs()).contains(optionValue4)) {
                 throw new InvalidDataException("The given timezone is invalid");
             }
-            usr.setTimezone(TimeZone.getTimeZone(optionValue4));
+            usr.setTimezone(optionValue4);
         }
     
         final String aliasOpt = (String) parser.getOptionValue(this.aliasesOption);

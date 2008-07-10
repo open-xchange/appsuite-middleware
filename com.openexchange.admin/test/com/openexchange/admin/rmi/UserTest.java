@@ -1311,7 +1311,7 @@ public class UserTest extends AbstractTest {
         usr.setSuffix("Suffix");
         usr.setTax_id("TaxId");
         usr.setTelephone_telex("Telex");
-        usr.setTimezone(TimeZone.getDefault());
+        usr.setTimezone("Europe/Berlin");
         usr.setTitle("Title");
         usr.setTelephone_ttytdd("TtyTdd");
         usr.setUrl("url");
