@@ -157,7 +157,7 @@ public class EventClient {
 	}
 	
 	public void delete(final AppointmentObject appointmentObj, final FolderObject folderObj) throws EventException {
-		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.DELETE, Types.APPOINTMENT, appointmentObj, null, null, null);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.DELETE, Types.APPOINTMENT, appointmentObj, null, folderObj, null);
 
 		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);

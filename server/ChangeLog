@@ -1,3 +1,7 @@
+* 2008-07-10 - thorben.betten@open-xchange.com
+
+ - Bugfix #11585: Removed warning in UDP push on appointment deletion
+
 * 2008-07-09 - marcus.klein@open-xchange.com
 
  - Bugfix #11318: Added detail exceptions if JSON parsing of a long fails.
