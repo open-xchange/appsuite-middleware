@@ -41,7 +41,7 @@
 			<include name="*.jar" />
 		</fileset>
 	</path>
-	
+
 	<target name="default" depends="interface-jar, unit-jar" />
 	
 	<target name="clean">
@@ -163,9 +163,6 @@
 
 		<fail message="Tests failed!" if="test.failed" />
 	</target>
-
-
-
 
 	<target name="run-unit-tests" depends="unit-jar">
 		<antcall target="run-tests">
