@@ -389,117 +389,109 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     
     public boolean prepareUpdateAction(final CalendarDataObject cdao, final CalendarDataObject edao, final int uid, final int inFolder, final String timezone) throws OXException, SQLException, Exception {
         boolean action = true;
-        if (cdao.getContext() != null) {
-            
-            final OXFolderAccess ofa = new OXFolderAccess(cdao.getContext());
-            if (ofa.getFolderModule(inFolder) == FolderObject.CALENDAR) {
-                
-                
-                if (cdao.containsObjectID()) {
-                    action = false;
-                    if (!cdao.containsModifiedBy()) {
-                        cdao.setModifiedBy(uid);
-                    }
-                    handleFullTime(cdao);
-                    if (cdao.isSequence()) {
-                        if (!cdao.containsTimezone()) {
-                            cdao.setTimezone(timezone);
-                        }                        
-                        CalendarRecurringCollection.fillDAO(cdao);
-                    }
-                    prepareUpdate(cdao, inFolder);
-                } else {
-                    handleFullTime(cdao);
-                    if (cdao.isSequence()) {
-                        cdao.setRecurrenceCalculator(((int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/CalendarRecurringCollection.MILLI_DAY)));
-                        if (!cdao.containsTimezone()) {
-                        	cdao.setTimezone(timezone);
-                        }                        
-                        CalendarRecurringCollection.fillDAO(cdao);
-                    }
-                    prepareInsert(cdao);
-                }
-                
-                if (action) {
-                    cdao.setCreatedBy(uid);
-                    cdao.setModifiedBy(uid);
-                    checkInsertMandatoryFields(cdao);
-                    cdao.setFolderType(ofa.getFolderType(inFolder, uid));
-                    
-                    if (cdao.getFolderType() == FolderObject.PRIVATE) {
-                        cdao.setPrivateFolderID(inFolder);
-                        cdao.setGlobalFolderID(0);
-                    }
-                    
-                } else {
-                    if (cdao.containsParentFolderID()) {
-                        cdao.setFolderType(ofa.getFolderType(cdao.getParentFolderID(), uid));
-                    } else {
-                        cdao.setFolderType(ofa.getFolderType(inFolder, uid));
-                    }
-                }
-                
-                if (cdao.getFolderType() == FolderObject.PRIVATE) {
-                    if (action || cdao.containsParticipants()) {
-                        final UserParticipant up = new UserParticipant(uid);
-                        up.setConfirm(CalendarDataObject.ACCEPT);
-                        CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
-                    }
-                } else if (cdao.getFolderType() == FolderObject.SHARED) {
-                    if (cdao.containsParentFolderID()) {
-                        cdao.setSharedFolderOwner(ofa.getFolderOwner(cdao.getParentFolderID()));
-                    } else {
-                        cdao.setSharedFolderOwner(ofa.getFolderOwner(inFolder));
-                    }
-                    if (!action && !cdao.containsUserParticipants()) {
-                        cdao.setParticipants(edao.getParticipants());
-                        cdao.setUsers(edao.getUsers());
-                    }
-                    final UserParticipant up = new UserParticipant(cdao.getSharedFolderOwner());
-                    up.setConfirm(CalendarDataObject.ACCEPT);
-                    CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
-                    
-                } else if (cdao.getFolderType() == FolderObject.PUBLIC) {
-                    if(!cdao.containsParticipants()) {
-                        if(null != edao && null != edao.getParticipants()) {
-                            cdao.setParticipants(edao.getParticipants());
-                            cdao.setUsers(edao.getUsers());
-                        }
-                        final UserParticipant up = new UserParticipant(uid);
-                        up.setConfirm(CalendarDataObject.ACCEPT);
-                        CalendarCommonCollection.checkAndConfirmIfUserUserIsParticipant(cdao, up);
-                    }
-                  }
-                
-                UserParticipant p = null;
-                if (cdao.getFolderType() == FolderObject.SHARED) {
-                    p = new UserParticipant(cdao.getSharedFolderOwner());
-                } else {
-                    p = new UserParticipant(uid);
-                }
-                p.setConfirm(CalendarDataObject.ACCEPT);
-                if ((action || cdao.containsUserParticipants()) && cdao.getFolderType() != FolderObject.PUBLIC) {
-                    CalendarCommonCollection.checkAndFillIfUserIsUser(cdao, p);
-                }
-                
-                if (!cdao.containsTimezone()) {
-                    cdao.setTimezone(timezone);
-                }
-                
-                
-            } else {
-                throw new OXCalendarException(OXCalendarException.Code.NON_CALENDAR_FOLDER);
-            }
-            
-        } else {
+        if (cdao.getContext() == null) {
             throw new OXCalendarException(OXCalendarException.Code.CONTEXT_NOT_SET);
         }
+		final OXFolderAccess ofa = new OXFolderAccess(cdao.getContext());
+		if (ofa.getFolderModule(inFolder) != FolderObject.CALENDAR) {
+		    throw new OXCalendarException(OXCalendarException.Code.NON_CALENDAR_FOLDER);
+		}
+		if (cdao.containsObjectID()) {
+		    action = false;
+		    if (!cdao.containsModifiedBy()) {
+		        cdao.setModifiedBy(uid);
+		    }
+		    handleFullTime(cdao);
+		    if (cdao.isSequence()) {
+		        if (!cdao.containsTimezone()) {
+		            cdao.setTimezone(timezone);
+		        }                        
+		        CalendarRecurringCollection.fillDAO(cdao);
+		    }
+		    prepareUpdate(cdao, inFolder);
+		} else {
+		    handleFullTime(cdao);
+		    if (cdao.isSequence()) {
+		        cdao.setRecurrenceCalculator(((int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/CalendarRecurringCollection.MILLI_DAY)));
+		        if (!cdao.containsTimezone()) {
+		        	cdao.setTimezone(timezone);
+		        }                        
+		        CalendarRecurringCollection.fillDAO(cdao);
+		    }
+		    prepareInsert(cdao);
+		}
+		
+		if (action) {
+		    cdao.setCreatedBy(uid);
+		    cdao.setModifiedBy(uid);
+		    checkInsertMandatoryFields(cdao);
+		    cdao.setFolderType(ofa.getFolderType(inFolder, uid));
+		    
+		    if (cdao.getFolderType() == FolderObject.PRIVATE) {
+		        cdao.setPrivateFolderID(inFolder);
+		        cdao.setGlobalFolderID(0);
+		    }
+		    
+		} else {
+		    if (cdao.containsParentFolderID()) {
+		        cdao.setFolderType(ofa.getFolderType(cdao.getParentFolderID(), uid));
+		    } else {
+		        cdao.setFolderType(ofa.getFolderType(inFolder, uid));
+		    }
+		}
+		
+		if (cdao.getFolderType() == FolderObject.PRIVATE) {
+		    if (action || cdao.containsParticipants()) {
+		        final UserParticipant up = new UserParticipant(uid);
+		        up.setConfirm(CalendarDataObject.ACCEPT);
+		        CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
+		    }
+		} else if (cdao.getFolderType() == FolderObject.SHARED) {
+		    if (cdao.containsParentFolderID()) {
+		        cdao.setSharedFolderOwner(ofa.getFolderOwner(cdao.getParentFolderID()));
+		    } else {
+		        cdao.setSharedFolderOwner(ofa.getFolderOwner(inFolder));
+		    }
+		    if (!action && !cdao.containsUserParticipants()) {
+		        cdao.setParticipants(edao.getParticipants());
+		        cdao.setUsers(edao.getUsers());
+		    }
+		    final UserParticipant up = new UserParticipant(cdao.getSharedFolderOwner());
+		    up.setConfirm(CalendarDataObject.ACCEPT);
+		    CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
+		    
+		} else if (cdao.getFolderType() == FolderObject.PUBLIC) {
+		    if(!cdao.containsParticipants()) {
+		        if(null != edao && null != edao.getParticipants()) {
+		            cdao.setParticipants(edao.getParticipants());
+		            cdao.setUsers(edao.getUsers());
+		        }
+		        final UserParticipant up = new UserParticipant(uid);
+		        up.setConfirm(CalendarDataObject.ACCEPT);
+		        CalendarCommonCollection.checkAndConfirmIfUserUserIsParticipant(cdao, up);
+		    }
+		  }
+		
+		UserParticipant p = null;
+		if (cdao.getFolderType() == FolderObject.SHARED) {
+		    p = new UserParticipant(cdao.getSharedFolderOwner());
+		} else {
+		    p = new UserParticipant(uid);
+		}
+		p.setConfirm(CalendarDataObject.ACCEPT);
+		if ((action || cdao.containsUserParticipants()) && cdao.getFolderType() != FolderObject.PUBLIC) {
+		    CalendarCommonCollection.checkAndFillIfUserIsUser(cdao, p);
+		}
+		
+		if (!cdao.containsTimezone()) {
+		    cdao.setTimezone(timezone);
+		}
         
         simpleDataCheck(cdao, edao, uid);
         if (action && cdao.getParticipants() == null && cdao.getFolderType() == FolderObject.PUBLIC) {
             final Participant np[] = new Participant[1];
-            final Participant p = new UserParticipant(uid);
-            np[0] = p;
+            final Participant up = new UserParticipant(uid);
+            np[0] = up;
             cdao.setParticipants(np);
         }
         fillUserParticipants(cdao);
@@ -1235,6 +1227,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                         if (cdao.getOccurrence() != edao.getOccurrence()) {
                             cdao.removeUntil();
                             edao.setUntil(new Date(CalendarRecurringCollection.normalizeLong(CalendarRecurringCollection.getOccurenceDate(cdao).getTime())));
+                            cdao.setEndDate(calculateRealRecurringEndDate(edao));
 
                             pattern_change = true;
                         }

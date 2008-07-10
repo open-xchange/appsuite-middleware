@@ -19,6 +19,8 @@
  - Bugfix #11585: Removed warning in UDP push on appointment deletion
  - Bugfix #9930: Fixed calculation of duration of a single item in a
    recurring appointment
+ - Bugfix #10113: Fixed update of a recurring appointment with an until
+   date to an occurrence setting.
 
 * 2008-07-09 - marcus.klein@open-xchange.com
 
