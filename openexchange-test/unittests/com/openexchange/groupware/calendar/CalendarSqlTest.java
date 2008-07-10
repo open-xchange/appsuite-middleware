@@ -50,7 +50,6 @@ package com.openexchange.groupware.calendar;
 
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertResourceParticipants;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertUserParticipants;
-import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertInPrivateFolder;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 
 
@@ -58,11 +57,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
-import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import junit.framework.TestCase;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.group.Group;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
@@ -83,6 +85,11 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  */
 public class CalendarSqlTest extends TestCase {
 
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(CalendarSqlTest.class);
+    
     private final List<CalendarDataObject> clean = new ArrayList<CalendarDataObject>();
     private final List<FolderObject> cleanFolders = new ArrayList<FolderObject>();
 
@@ -128,7 +135,9 @@ public class CalendarSqlTest extends TestCase {
 
         group = config.getGroup();
         final int groupid = tools.resolveGroup(group, ctx);
-        final int memberid = tools.loadGroup(groupid, ctx).getMember()[0];
+        final Group group = tools.loadGroup(groupid, ctx);
+        LOG.error("This group makes problems: " + group);
+        final int memberid = group.getMember()[0];
         member = tools.loadUser(memberid, ctx).getLoginInfo();
 
         userId = tools.resolveUser(user, ctx);
