@@ -136,7 +136,6 @@ public class CalendarSqlTest extends TestCase {
         group = config.getGroup();
         final int groupid = tools.resolveGroup(group, ctx);
         final Group group = tools.loadGroup(groupid, ctx);
-        LOG.error("This group makes problems: " + group);
         final int memberid = group.getMember()[0];
         member = tools.loadUser(memberid, ctx).getLoginInfo();
 
