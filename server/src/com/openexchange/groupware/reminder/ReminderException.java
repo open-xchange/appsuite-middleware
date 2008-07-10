@@ -64,6 +64,14 @@ public class ReminderException extends OXException {
      */
     private static final long serialVersionUID = 3162824095925586553L;
 
+    /**
+     * Constructor using other {@link AbstractOXException}.
+     * @param cause the initial cause.
+     */
+    public ReminderException(final AbstractOXException exc) {
+        super(exc);
+    }
+
     public ReminderException(final Code code, final Object... messageArgs) {
 		this(code, null, messageArgs);
 	}

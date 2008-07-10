@@ -6,6 +6,7 @@
 
  - Bugfix #11580: Made the fields estimated and actual duration optional in
    task WebDAV/XML writer.
+ - Bugfix #10747: Implemented task last modified timestamp update for reminder.
 
 * 2008-07-10 - francisco.laguna@open-xchange.com
 

@@ -74,6 +74,7 @@ public class TaskAttachmentListener implements AttachmentListener {
      */
     private static final int[] UPDATE_FIELDS = new int[] { Task.LAST_MODIFIED,
                 Task.MODIFIED_BY, Task.NUMBER_OF_ATTACHMENTS };
+
     /**
      * Logger.
      */

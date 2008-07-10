@@ -47,44 +47,59 @@
  *
  */
 
-package com.openexchange.groupware.reminder;
+package com.openexchange.groupware.tasks;
 
 import java.sql.Connection;
+import java.util.Date;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.reminder.ReminderDeleteInterface;
 
 /**
- * This interface must be implemented to remove reminder information from
- * objects if the reminder is deleted. Additionally the last modified timestamp
- * on the object should be actualized.
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface ReminderDeleteInterface {
+public final class ModifyThroughDependant implements ReminderDeleteInterface {
 
     /**
-     * All reminder information for every participant must be removed.
-     * @param ctx Context.
-     * @param con writable database connection.
-     * @param targetId identifier of the object to actualize.
-     * @throws AbstractOXException if some problem occurs actualizing the object.
+     * Attributes of a task that must be updated if an attachment is added or
+     * removed.
      */
-    void updateTargetObject(Context ctx, Connection con, int targetId)
-        throws AbstractOXException;
+    private static final int[] UPDATE_FIELDS = new int[] { Task.LAST_MODIFIED,
+        Task.MODIFIED_BY };
+
+    private static final TaskStorage stor = TaskStorage.getInstance();
 
     /**
-     * The reminder information for a specific participant must be removed.
-     * @param ctx Context.
-     * @param con writeable database connection.
-     * @param targetId identifier of the object to actualize.
-     * @param userId identifier of the user that deleted his reminder.
-     * @throws AbstractOXException if some problem occurs actualizing the object.
+     * Default constructor.
      */
-    void updateTargetObject(Context ctx, Connection con, int targetId,
-        int userId) throws AbstractOXException;    
+    public ModifyThroughDependant() {
+        super();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void updateTargetObject(final Context ctx, Connection con,
+        final int targetId) throws AbstractOXException {
+        final Task task = stor.selectTask(ctx, targetId, StorageType.ACTIVE);
+        final Date lastModified = task.getLastModified();
+        task.setLastModified(new Date());
+        stor.updateTask(ctx, con, task, lastModified,
+            new int[] { Task.LAST_MODIFIED }, StorageType.ACTIVE);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void updateTargetObject(final Context ctx, final Connection con,
+        final int targetId, final int userId) throws AbstractOXException {
+        final Task task = stor.selectTask(ctx, targetId, StorageType.ACTIVE);
+        final Date lastModified = task.getLastModified();
+        task.setLastModified(new Date());
+        task.setModifiedBy(userId);
+        stor.updateTask(ctx, con, task, lastModified, UPDATE_FIELDS,
+            StorageType.ACTIVE);
+    }
 }
-
-
-
-
-

@@ -124,8 +124,8 @@ public class OXException extends AbstractOXException {
     /**
      * {@inheritDoc}
 	 */
-    public OXException(final AbstractOXException exc) {
-        super(exc);
+    public OXException(final AbstractOXException cause) {
+        super(cause);
     }
 
     /**

@@ -86,6 +86,7 @@ import com.openexchange.groupware.reminder.EmptyReminderDeleteImpl;
 import com.openexchange.groupware.reminder.ReminderDeleteInterface;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.groupware.tasks.ModifyThroughDependant;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -138,7 +139,6 @@ public class ReminderRequest {
             final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
             final ReminderSQLInterface reminderSql = new ReminderHandler(ctx);
         	
-            final int uid = userObj.getId();
             final ReminderObject reminder = reminderSql.loadReminder(id);
             final ReminderDeleteInterface reminderDeleteInterface;
             final int module = reminder.getModule();
@@ -147,7 +147,7 @@ public class ReminderRequest {
             		reminderDeleteInterface = new EmptyReminderDeleteImpl();
             		break;
             	case Types.TASK:
-            		reminderDeleteInterface = new EmptyReminderDeleteImpl();
+            		reminderDeleteInterface = new ModifyThroughDependant();
             		break;
             	default:
             		reminderDeleteInterface = new EmptyReminderDeleteImpl();
@@ -155,23 +155,21 @@ public class ReminderRequest {
             
             reminderSql.setReminderDeleteInterface(reminderDeleteInterface);
             
-            if (reminder != null) {
-                if (reminder.isRecurrenceAppointment()) {
-                    final int targetId = Integer.parseInt(reminder.getTargetId());
-                    final int inFolder = Integer.parseInt(reminder.getFolder());
-                    
-                    final ReminderObject nextReminder = getNextRecurringReminder(targetId, recurrencePosition, inFolder, sessionObj);
-                    if (nextReminder != null) {
-                        reminder.setDate(nextReminder.getDate());
-                        reminderSql.updateReminder(reminder);
-                        final JSONArray jsonResponseArray = new JSONArray();
-                        jsonResponseArray.put(id);
-                        return jsonResponseArray;
-                    }
-                    reminderSql.deleteReminder(id);
-                } else {
-                    reminderSql.deleteReminder(id);
+            if (reminder.isRecurrenceAppointment()) {
+                final int targetId = Integer.parseInt(reminder.getTargetId());
+                final int inFolder = Integer.parseInt(reminder.getFolder());
+                
+                final ReminderObject nextReminder = getNextRecurringReminder(targetId, recurrencePosition, inFolder, sessionObj);
+                if (nextReminder != null) {
+                    reminder.setDate(nextReminder.getDate());
+                    reminderSql.updateReminder(reminder);
+                    final JSONArray jsonResponseArray = new JSONArray();
+                    jsonResponseArray.put(id);
+                    return jsonResponseArray;
                 }
+                reminderSql.deleteReminder(id);
+            } else {
+                reminderSql.deleteReminder(id);
             }
         } catch(final SQLException sqle) {
             throw new OXException("SQLException occurred", sqle);
