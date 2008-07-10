@@ -1017,338 +1017,546 @@ public class ContactTest extends AbstractAJAXTest {
 		}
 	}
 	
-	private static void parse(final int pos, final int field, final JSONArray jsonArray, final ContactObject contactObj) throws Exception {
+	private static void parse(final int pos, final int field, final JSONArray jsonArray, final ContactObject contactObj)
+			throws Exception {
 		switch (field) {
-			case ContactObject.OBJECT_ID:
+		case ContactObject.OBJECT_ID:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setObjectID(jsonArray.getInt(pos));
-				break;
-			case ContactObject.CREATED_BY:
+			}
+			break;
+		case ContactObject.CREATED_BY:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setCreatedBy(jsonArray.getInt(pos));
-				break;
-			case ContactObject.CREATION_DATE:
+			}
+			break;
+		case ContactObject.CREATION_DATE:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setCreationDate(new Date(jsonArray.getLong(pos)));
-				break;
-			case ContactObject.MODIFIED_BY:
+			}
+			break;
+		case ContactObject.MODIFIED_BY:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setModifiedBy(jsonArray.getInt(pos));
-				break;
-			case ContactObject.LAST_MODIFIED:
+			}
+			break;
+		case ContactObject.LAST_MODIFIED:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setLastModified(new Date(jsonArray.getLong(pos)));
-				break;
-			case ContactObject.FOLDER_ID:
+			}
+			break;
+		case ContactObject.FOLDER_ID:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setParentFolderID(jsonArray.getInt(pos));
-				break;
-			case ContactObject.PRIVATE_FLAG:
+			}
+			break;
+		case ContactObject.PRIVATE_FLAG:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setPrivateFlag(jsonArray.getBoolean(pos));
-				break;
-			case ContactObject.SUR_NAME:
+			}
+			break;
+		case ContactObject.SUR_NAME:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setSurName(jsonArray.getString(pos));
-				break;
-			case ContactObject.GIVEN_NAME:
+			}
+			break;
+		case ContactObject.GIVEN_NAME:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setGivenName(jsonArray.getString(pos));
-				break;
-			case ContactObject.ANNIVERSARY:
+			}
+			break;
+		case ContactObject.ANNIVERSARY:
+			if (!jsonArray.isNull(pos)) {
 				final String lAnniversary = jsonArray.getString(pos);
 				if (lAnniversary != null && !lAnniversary.equals("null")) {
 					contactObj.setAnniversary(new Date(Long.parseLong(lAnniversary)));
 				} else {
 					contactObj.setAnniversary(null);
 				}
-				break;
-			case ContactObject.ASSISTANT_NAME:
+			}
+			break;
+		case ContactObject.ASSISTANT_NAME:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setAssistantName(jsonArray.getString(pos));
-				break;
-			case ContactObject.BIRTHDAY:
+			}
+			break;
+		case ContactObject.BIRTHDAY:
+			if (!jsonArray.isNull(pos)) {
 				final String lBirthday = jsonArray.getString(pos);
 				if (lBirthday != null && !lBirthday.equals("null")) {
 					contactObj.setBirthday(new Date(Long.parseLong(lBirthday)));
 				} else {
 					contactObj.setBirthday(null);
 				}
-				break;
-			case ContactObject.BRANCHES:
+			}
+			break;
+		case ContactObject.BRANCHES:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setBranches(jsonArray.getString(pos));
-				break;
-			case ContactObject.BUSINESS_CATEGORY:
+			}
+			break;
+		case ContactObject.BUSINESS_CATEGORY:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setBusinessCategory(jsonArray.getString(pos));
-				break;
-			case ContactObject.CATEGORIES:
+			}
+			break;
+		case ContactObject.CATEGORIES:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setCategories(jsonArray.getString(pos));
-				break;
-			case ContactObject.CELLULAR_TELEPHONE1:
+			}
+			break;
+		case ContactObject.CELLULAR_TELEPHONE1:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setCellularTelephone1(jsonArray.getString(pos));
-				break;
-			case ContactObject.CELLULAR_TELEPHONE2:
+			}
+			break;
+		case ContactObject.CELLULAR_TELEPHONE2:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setCellularTelephone2(jsonArray.getString(pos));
-				break;
-			case ContactObject.CITY_HOME:
+			}
+			break;
+		case ContactObject.CITY_HOME:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setCityHome(jsonArray.getString(pos));
-				break;
-			case ContactObject.CITY_BUSINESS:
+			}
+			break;
+		case ContactObject.CITY_BUSINESS:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setCityBusiness(jsonArray.getString(pos));
-				break;
-			case ContactObject.CITY_OTHER:
+			}
+			break;
+		case ContactObject.CITY_OTHER:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setCityOther(jsonArray.getString(pos));
-				break;
-			case ContactObject.COMMERCIAL_REGISTER:
+			}
+			break;
+		case ContactObject.COMMERCIAL_REGISTER:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setCommercialRegister(jsonArray.getString(pos));
-				break;
-			case ContactObject.COMPANY:
+			}
+			break;
+		case ContactObject.COMPANY:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setCompany(jsonArray.getString(pos));
-				break;
-			case ContactObject.COUNTRY_HOME:
+			}
+			break;
+		case ContactObject.COUNTRY_HOME:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setCountryHome(jsonArray.getString(pos));
-				break;
-			case ContactObject.COUNTRY_BUSINESS:
+			}
+			break;
+		case ContactObject.COUNTRY_BUSINESS:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setCountryBusiness(jsonArray.getString(pos));
-				break;
-			case ContactObject.COUNTRY_OTHER:
+			}
+			break;
+		case ContactObject.COUNTRY_OTHER:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setCountryOther(jsonArray.getString(pos));
-				break;
-			case ContactObject.DEPARTMENT:
+			}
+			break;
+		case ContactObject.DEPARTMENT:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setDepartment(jsonArray.getString(pos));
-				break;
-			case ContactObject.DEFAULT_ADDRESS:
+			}
+			break;
+		case ContactObject.DEFAULT_ADDRESS:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setDefaultAddress(jsonArray.getInt(pos));
-				break;
-			case ContactObject.DISPLAY_NAME:
+			}
+			break;
+		case ContactObject.DISPLAY_NAME:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setDisplayName(jsonArray.getString(pos));
-				break;
-			case ContactObject.EMAIL1:
+			}
+			break;
+		case ContactObject.EMAIL1:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setEmail1(jsonArray.getString(pos));
-				break;
-			case ContactObject.EMAIL2:
+			}
+			break;
+		case ContactObject.EMAIL2:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setEmail2(jsonArray.getString(pos));
-				break;
-			case ContactObject.EMAIL3:
+			}
+			break;
+		case ContactObject.EMAIL3:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setEmail3(jsonArray.getString(pos));
-				break;
-			case ContactObject.EMPLOYEE_TYPE:
+			}
+			break;
+		case ContactObject.EMPLOYEE_TYPE:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setEmployeeType(jsonArray.getString(pos));
-				break;
-			case ContactObject.FAX_BUSINESS:
+			}
+			break;
+		case ContactObject.FAX_BUSINESS:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setFaxBusiness(jsonArray.getString(pos));
-				break;
-			case ContactObject.FAX_HOME:
+			}
+			break;
+		case ContactObject.FAX_HOME:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setFaxHome(jsonArray.getString(pos));
-				break;
-			case ContactObject.FAX_OTHER:
+			}
+			break;
+		case ContactObject.FAX_OTHER:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setFaxOther(jsonArray.getString(pos));
-				break;
-			case ContactObject.IMAGE1:
+			}
+			break;
+		case ContactObject.IMAGE1:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setImage1(jsonArray.getString(pos).getBytes());
-				break;
-				/* NO LONGER PRESENT
-			case ContactObject.NUMBER_OF_IMAGES:
-				contactObj.setNumberOfImages(jsonArray.getInt(pos));
-				break;
-				 */
-			case ContactObject.INFO:
+			}
+			break;
+		/*
+		 * NO LONGER PRESENT case ContactObject.NUMBER_OF_IMAGES:
+		 * contactObj.setNumberOfImages(jsonArray.getInt(pos)); break;
+		 */
+		case ContactObject.INFO:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setInfo(jsonArray.getString(pos));
-				break;
-			case ContactObject.INSTANT_MESSENGER1:
+			}
+			break;
+		case ContactObject.INSTANT_MESSENGER1:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setInstantMessenger1(jsonArray.getString(pos));
-				break;
-			case ContactObject.INSTANT_MESSENGER2:
+			}
+			break;
+		case ContactObject.INSTANT_MESSENGER2:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setInstantMessenger2(jsonArray.getString(pos));
-				break;
-			case ContactObject.INTERNAL_USERID:
+			}
+			break;
+		case ContactObject.INTERNAL_USERID:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setInternalUserId(jsonArray.getInt(pos));
-				break;
-			case ContactObject.COLOR_LABEL:
+			}
+			break;
+		case ContactObject.COLOR_LABEL:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setLabel(jsonArray.getInt(pos));
-				break;
-			case ContactObject.MANAGER_NAME:
+			}
+			break;
+		case ContactObject.MANAGER_NAME:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setManagerName(jsonArray.getString(pos));
-				break;
-			case ContactObject.MARITAL_STATUS:
+			}
+			break;
+		case ContactObject.MARITAL_STATUS:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setMaritalStatus(jsonArray.getString(pos));
-				break;
-			case ContactObject.MIDDLE_NAME:
+			}
+			break;
+		case ContactObject.MIDDLE_NAME:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setMiddleName(jsonArray.getString(pos));
-				break;
-			case ContactObject.NICKNAME:
+			}
+			break;
+		case ContactObject.NICKNAME:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setNickname(jsonArray.getString(pos));
-				break;
-			case ContactObject.NOTE:
+			}
+			break;
+		case ContactObject.NOTE:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setNote(jsonArray.getString(pos));
-				break;
-			case ContactObject.NUMBER_OF_CHILDREN:
+			}
+			break;
+		case ContactObject.NUMBER_OF_CHILDREN:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setNumberOfChildren(jsonArray.getString(pos));
-				break;
-			case ContactObject.NUMBER_OF_EMPLOYEE:
+			}
+			break;
+		case ContactObject.NUMBER_OF_EMPLOYEE:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setNumberOfEmployee(jsonArray.getString(pos));
-				break;
-			case ContactObject.POSITION:
+			}
+			break;
+		case ContactObject.POSITION:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setPosition(jsonArray.getString(pos));
-				break;
-			case ContactObject.POSTAL_CODE_HOME:
+			}
+			break;
+		case ContactObject.POSTAL_CODE_HOME:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setPostalCodeHome(jsonArray.getString(pos));
-				break;
-			case ContactObject.POSTAL_CODE_BUSINESS:
+			}
+			break;
+		case ContactObject.POSTAL_CODE_BUSINESS:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setPostalCodeBusiness(jsonArray.getString(pos));
-				break;
-			case ContactObject.POSTAL_CODE_OTHER:
+			}
+			break;
+		case ContactObject.POSTAL_CODE_OTHER:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setPostalCodeOther(jsonArray.getString(pos));
-				break;
-			case ContactObject.PROFESSION:
+			}
+			break;
+		case ContactObject.PROFESSION:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setProfession(jsonArray.getString(pos));
-				break;
-			case ContactObject.ROOM_NUMBER:
+			}
+			break;
+		case ContactObject.ROOM_NUMBER:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setRoomNumber(jsonArray.getString(pos));
-				break;
-			case ContactObject.SALES_VOLUME:
+			}
+			break;
+		case ContactObject.SALES_VOLUME:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setSalesVolume(jsonArray.getString(pos));
-				break;
-			case ContactObject.SPOUSE_NAME:
+			}
+			break;
+		case ContactObject.SPOUSE_NAME:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setSpouseName(jsonArray.getString(pos));
-				break;
-			case ContactObject.STATE_HOME:
+			}
+			break;
+		case ContactObject.STATE_HOME:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setStateHome(jsonArray.getString(pos));
-				break;
-			case ContactObject.STATE_BUSINESS:
+			}
+			break;
+		case ContactObject.STATE_BUSINESS:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setStateBusiness(jsonArray.getString(pos));
-				break;
-			case ContactObject.STATE_OTHER:
+			}
+			break;
+		case ContactObject.STATE_OTHER:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setStateOther(jsonArray.getString(pos));
-				break;
-			case ContactObject.STREET_HOME:
+			}
+			break;
+		case ContactObject.STREET_HOME:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setStreetHome(jsonArray.getString(pos));
-				break;
-			case ContactObject.STREET_BUSINESS:
+			}
+			break;
+		case ContactObject.STREET_BUSINESS:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setStreetBusiness(jsonArray.getString(pos));
-				break;
-			case ContactObject.STREET_OTHER:
+			}
+			break;
+		case ContactObject.STREET_OTHER:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setStreetOther(jsonArray.getString(pos));
-				break;
-			case ContactObject.SUFFIX:
+			}
+			break;
+		case ContactObject.SUFFIX:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setSuffix(jsonArray.getString(pos));
-				break;
-			case ContactObject.TAX_ID:
+			}
+			break;
+		case ContactObject.TAX_ID:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setTaxID(jsonArray.getString(pos));
-				break;
-			case ContactObject.TELEPHONE_ASSISTANT:
+			}
+			break;
+		case ContactObject.TELEPHONE_ASSISTANT:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setTelephoneAssistant(jsonArray.getString(pos));
-				break;
-			case ContactObject.TELEPHONE_BUSINESS1:
+			}
+			break;
+		case ContactObject.TELEPHONE_BUSINESS1:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setTelephoneBusiness1(jsonArray.getString(pos));
-				break;
-			case ContactObject.TELEPHONE_BUSINESS2:
+			}
+			break;
+		case ContactObject.TELEPHONE_BUSINESS2:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setTelephoneBusiness2(jsonArray.getString(pos));
-				break;
-			case ContactObject.TELEPHONE_CALLBACK:
+			}
+			break;
+		case ContactObject.TELEPHONE_CALLBACK:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setTelephoneCallback(jsonArray.getString(pos));
-				break;
-			case ContactObject.TELEPHONE_CAR:
+			}
+			break;
+		case ContactObject.TELEPHONE_CAR:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setTelephoneCar(jsonArray.getString(pos));
-				break;
-			case ContactObject.TELEPHONE_COMPANY:
+			}
+			break;
+		case ContactObject.TELEPHONE_COMPANY:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setTelephoneCompany(jsonArray.getString(pos));
-				break;
-			case ContactObject.TELEPHONE_HOME1:
+			}
+			break;
+		case ContactObject.TELEPHONE_HOME1:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setTelephoneHome1(jsonArray.getString(pos));
-				break;
-			case ContactObject.TELEPHONE_HOME2:
+			}
+			break;
+		case ContactObject.TELEPHONE_HOME2:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setTelephoneHome2(jsonArray.getString(pos));
-				break;
-			case ContactObject.TELEPHONE_IP:
+			}
+			break;
+		case ContactObject.TELEPHONE_IP:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setTelephoneIP(jsonArray.getString(pos));
-				break;
-			case ContactObject.TELEPHONE_ISDN:
+			}
+			break;
+		case ContactObject.TELEPHONE_ISDN:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setTelephoneISDN(jsonArray.getString(pos));
-				break;
-			case ContactObject.TELEPHONE_OTHER:
+			}
+			break;
+		case ContactObject.TELEPHONE_OTHER:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setTelephoneOther(jsonArray.getString(pos));
-				break;
-			case ContactObject.TELEPHONE_PAGER:
+			}
+			break;
+		case ContactObject.TELEPHONE_PAGER:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setTelephonePager(jsonArray.getString(pos));
-				break;
-			case ContactObject.TELEPHONE_PRIMARY:
+			}
+			break;
+		case ContactObject.TELEPHONE_PRIMARY:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setTelephonePrimary(jsonArray.getString(pos));
-				break;
-			case ContactObject.TELEPHONE_RADIO:
+			}
+			break;
+		case ContactObject.TELEPHONE_RADIO:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setTelephoneRadio(jsonArray.getString(pos));
-				break;
-			case ContactObject.TELEPHONE_TELEX:
+			}
+			break;
+		case ContactObject.TELEPHONE_TELEX:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setTelephoneTelex(jsonArray.getString(pos));
-				break;
-			case ContactObject.TELEPHONE_TTYTDD:
+			}
+			break;
+		case ContactObject.TELEPHONE_TTYTDD:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setTelephoneTTYTTD(jsonArray.getString(pos));
-				break;
-			case ContactObject.TITLE:
+			}
+			break;
+		case ContactObject.TITLE:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setTitle(jsonArray.getString(pos));
-				break;
-			case ContactObject.URL:
+			}
+			break;
+		case ContactObject.URL:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setURL(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD01:
+			}
+			break;
+		case ContactObject.USERFIELD01:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField01(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD02:
+			}
+			break;
+		case ContactObject.USERFIELD02:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField02(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD03:
+			}
+			break;
+		case ContactObject.USERFIELD03:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField03(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD04:
+			}
+			break;
+		case ContactObject.USERFIELD04:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField04(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD05:
+			}
+			break;
+		case ContactObject.USERFIELD05:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField05(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD06:
+			}
+			break;
+		case ContactObject.USERFIELD06:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField06(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD07:
+			}
+			break;
+		case ContactObject.USERFIELD07:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField07(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD08:
+			}
+			break;
+		case ContactObject.USERFIELD08:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField08(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD09:
+			}
+			break;
+		case ContactObject.USERFIELD09:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField09(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD10:
+			}
+			break;
+		case ContactObject.USERFIELD10:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField10(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD11:
+			}
+			break;
+		case ContactObject.USERFIELD11:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField11(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD12:
+			}
+			break;
+		case ContactObject.USERFIELD12:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField12(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD13:
+			}
+			break;
+		case ContactObject.USERFIELD13:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField13(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD14:
+			}
+			break;
+		case ContactObject.USERFIELD14:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField14(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD15:
+			}
+			break;
+		case ContactObject.USERFIELD15:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField15(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD16:
+			}
+			break;
+		case ContactObject.USERFIELD16:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField16(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD17:
+			}
+			break;
+		case ContactObject.USERFIELD17:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField17(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD18:
+			}
+			break;
+		case ContactObject.USERFIELD18:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField18(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD19:
+			}
+			break;
+		case ContactObject.USERFIELD19:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField19(jsonArray.getString(pos));
-				break;
-			case ContactObject.USERFIELD20:
+			}
+			break;
+		case ContactObject.USERFIELD20:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setUserField20(jsonArray.getString(pos));
-				break;
-			case ContactObject.LINKS:
+			}
+			break;
+		case ContactObject.LINKS:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setLinks(parseLinks(contactObj, jsonArray.getJSONArray(pos)));
-				break;
-			case ContactObject.DISTRIBUTIONLIST:
+			}
+			break;
+		case ContactObject.DISTRIBUTIONLIST:
+			if (!jsonArray.isNull(pos)) {
 				contactObj.setDistributionList(parseDistributionList(contactObj, jsonArray.getJSONArray(pos)));
-				break;
-			default:
-				throw new Exception("missing field in mapping: " + field);
-				
+			}
+			break;
+		default:
+			throw new Exception("missing field in mapping: " + field);
+
 		}
 	}
 	
