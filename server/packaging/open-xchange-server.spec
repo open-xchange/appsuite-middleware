@@ -126,10 +126,22 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Jul 10 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11585: Removed warning in UDP push on appointment deletion
 * Wed Jul 09 2008 - francisco.laguna@open-xchange.com
  - Bugfix #10806: Skipping calculation of future appointments recurrences for conflicts in a series with resources.
  - UNDOING Bugfix #6927: After discussing this with PM, this was undone, to prevent some destructive behaviour with D&D.
  - Bugfix #10497: Corrected calculcation for nths workday in monthly series.
+ - Partial Bugfix #11579: checked and corrected InfostoreWriter, checked AttachmentWriter.
+* Wed Jul 09 2008 - thorben.betten@open-xchange.com
+ - Partial bugfix #11579: Conditional writing to avoid writing default
+   values of object fields that return primitive types.
+* Wed Jul 09 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11318: Added detail exceptions if JSON parsing of a long fails.
+ - Bugfix #9586: Fixed with fix for bug #11318.
+ - Bugfix #9677: Default log level was changed to INFO.
+ - Bugfix #9862: Provided a time zone for calculating recurrences.
+ - Bugfix #10048: Increased size of task titles.
 * Tue Jul 08 2008 - marcus.klein@open-xchange.com
  - Bugfix #11561: Added check if shared folder may be empty.
 * Tue Jul 08 2008 - thorben.betten@open-xchange.com

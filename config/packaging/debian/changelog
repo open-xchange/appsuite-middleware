@@ -1,3 +1,9 @@
+open-xchange-configread (6.5.0-18) unstable; urgency=low
+
+  * first build for Beta7
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 10 Jul 2008 12:07:32 +0200
+
 open-xchange-configread (6.5.0-17) unstable; urgency=low
 
   * second build for Beta6
