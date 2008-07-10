@@ -142,10 +142,10 @@ public final class StringCollection {
 	 * Prepares specified string for being used in a statement's WHERE clause as
 	 * a search pattern.
 	 * <ul>
-	 * <li> Any contained <code>'%'</code> characters are quoted/escaped.</li>
-	 * <li> Wildcard characters <code>'*'</code> and <code>'?'</code> are
-	 * replaced with corresponding SQL wildcard characters <code>'%'</code> and
-	 * <code>'_'</code>.</li>
+	 * <li> Any contained SQL wildcard characters (<code>'%'</code> and <code>
+	 * '_'</code>) are escaped.</li> <li> Wildcard characters <code>'*'</code>
+	 * and <code>'?'</code> are replaced with corresponding SQL wildcard
+	 * characters <code>'%'</code> and <code>'_'</code>.</li>
 	 * </ul>
 	 * <p>
 	 * E.g.: <code>"Foo%Bar*xxx?Hoo"</code> =&gt; <code>"Foo\%Bar%xxx_Hoo"</code>
