@@ -81,12 +81,14 @@ public class SetSwitch implements MetadataSwitcher{
 	}
 	
 	public Object lastModified() {
-		impl.setLastModified((Date)value);
+        if(null == value) { return null; }
+        impl.setLastModified((Date)value);
 		return null;
 	}
 
 	public Object creationDate() {
-		impl.setCreationDate((Date)value);
+        if(null == value) { return null; }
+        impl.setCreationDate((Date)value);
 		return null;
 	}
 
@@ -103,12 +105,14 @@ public class SetSwitch implements MetadataSwitcher{
 	}
 
 	public Object title() {
-		impl.setTitle((String)value);
+        if(null == value) { return null; }
+        impl.setTitle((String)value);
 		return null;
 	}
 
 	public Object version() {
-		impl.setVersion(((Integer)value).intValue());
+		nullNumber();
+        impl.setVersion(((Integer)value).intValue());
 		return null;
 	}
 
@@ -118,7 +122,8 @@ public class SetSwitch implements MetadataSwitcher{
 	}
 
 	public Object id() {
-		impl.setId(((Integer)value).intValue());
+		nullNumber();
+        impl.setId(((Integer)value).intValue());
 		return null;
 	}
 
@@ -129,12 +134,14 @@ public class SetSwitch implements MetadataSwitcher{
 	}
 
 	public Object description() {
-		impl.setDescription((String)value);
+        if(null == value) { return null; }
+        impl.setDescription((String)value);
 		return null;
 	}
 
 	public Object url() {
-		impl.setURL((String)value);
+        if(null == value) { return null; }
+        impl.setURL((String)value);
 		return null;
 	}
 
@@ -145,12 +152,14 @@ public class SetSwitch implements MetadataSwitcher{
 	}
 
 	public Object fileName() {
-		impl.setFileName((String)value);
+        if(null == value) { return null; }
+        impl.setFileName((String)value);
 		return null;
 	}
 
 	public Object fileMIMEType() {
-		impl.setFileMIMEType((String)value);
+        if(null == value) { return null; }
+        impl.setFileMIMEType((String)value);
 		return null;
 	}
 
@@ -160,27 +169,32 @@ public class SetSwitch implements MetadataSwitcher{
 	}
 	
 	public Object categories(){
-		impl.setCategories((String)value);
+        if(null == value) { return null; }
+        impl.setCategories((String)value);
 		return null;
 	}
 	
 	public Object lockedUntil(){
-		impl.setLockedUntil((Date)value);
+        if(null == value) { return null; }
+        impl.setLockedUntil((Date)value);
 		return null;
 	}
 	
 	public Object fileMD5Sum(){
-		impl.setFileMD5Sum((String)value);
+        if(null == value) { return null; }
+        impl.setFileMD5Sum((String)value);
 		return null;
 	}
 
 	public Object versionComment() {
-		impl.setVersionComment((String)value);
+        if(null == value) { return null; }
+        impl.setVersionComment((String)value);
 		return null;
 	}
 
 	public Object currentVersion() {
-		impl.setIsCurrentVersion(((Boolean)value).booleanValue());
+        if(null == value) { return null; }
+        impl.setIsCurrentVersion(((Boolean)value).booleanValue());
 		return null;
 	}
 
@@ -203,7 +217,8 @@ public class SetSwitch implements MetadataSwitcher{
 	}
 
 	public Object filestoreLocation() {
-		impl.setFilestoreLocation((String)value);
+        if(null == value) { return null; }
+        impl.setFilestoreLocation((String)value);
 		return null;
 	}
 	
