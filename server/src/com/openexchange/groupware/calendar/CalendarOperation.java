@@ -85,10 +85,10 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
- * CalendarOperation
+ * {@link CalendarOperation} - Provides various operations on calendar
+ * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
-
 public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     
     public static final int READ = 0;
@@ -860,9 +860,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                  */
                 if (check_folder_id != cdao.getParentFolderID()) {                
                     throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "Object not found : uid:oid:fid:InFolder "+so.getUserId() + ":"+ cdao.getObjectID() + ":"+cdao.getParentFolderID()+":"+check_folder_id);
-                } else {
-                	cdao.setActionFolder(check_folder_id);
                 }
+				cdao.setActionFolder(check_folder_id);
                 
                 if (!CalendarCommonCollection.checkPermissions(cdao, so, c, readcon, CalendarOperation.READ, check_folder_id)) {
                     final StringBuilder colss = new StringBuilder();
@@ -880,7 +879,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     }
                     
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception (fid!inFolder) for user:oid:fid:cols ", so.getUserId(), ":", cdao.getObjectID(),":",oids[index][1],":",colss.toString() }));
+                        LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception (fid!inFolder) for user:oid:fid:cols ", Integer.valueOf(so.getUserId()), ":", Integer.valueOf(cdao.getObjectID()),":",Integer.valueOf(oids[index][1]),":",colss.toString() }));
                     }
                     throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_5));
                 }
@@ -892,7 +891,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         return null;
     }
     
-    public final SearchIterator setResultSet(final ResultSet rs, final PreparedStatement prep, final int[] cols, final CalendarSqlImp cimp, final Connection readcon, final int from, final int to, final Session so, final Context ctx) throws SQLException {
+    public final SearchIterator<CalendarDataObject> setResultSet(final ResultSet rs, final PreparedStatement prep, final int[] cols, final CalendarSqlImp cimp, final Connection readcon, final int from, final int to, final Session so, final Context ctx) throws SQLException {
         this.co_rs = rs;
         this.prep = prep;
         this.cols = cols;
