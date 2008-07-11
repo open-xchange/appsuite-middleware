@@ -3121,5 +3121,54 @@ public class AppointmentBugTests extends TestCase {
 		assertEquals("Unexpected number of occurrences: " + rss.size() + ". Should be: " + 5, 5, rss.size());
 
 	}
+
+	/**
+	 * Test for <a href=
+	 * "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=8516">bug
+	 * #8516</a>:<br>
+	 * <ul>
+	 * <li>Create a recurring appointment on 2007-12-21 with its series pattern
+	 * set to &quot;every second moday each month&quot;</li>
+	 * <li>Check recurring string to match
+	 * <i>&quot;t|5|i|1|a|2|b|2|s|1198238400000|e|1211068800000|&quot;</i></li>
+	 * <li>Check number of occurrences to be equal to 5</li>
+	 * </ul>
+	 * 
+	 * @throws Exception If an error occurs
+	 */
+	public void testBug8516() throws Exception {
+		final Context context = new ContextImpl(contextid);
+		final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(),
+				"myTestSearch");
+		final int fid = AppointmentBugTests.getPrivateFolder(userid);
+		// Create calendar data object
+		final CalendarDataObject cdao = new CalendarDataObject();
+		cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+		cdao.setParentFolderID(fid);
+		cdao.setTitle("testBug8516");
+		cdao.setIgnoreConflicts(true);
+		cdao.setTimezone("America/New_York");
+		//
+		cdao.setStartDate(new Date(1219271400000l));
+		//
+		cdao.setEndDate(new Date(1219271400000l + CalendarRecurringCollection.MILLI_HOUR));
+		//
+		cdao.setUntil(new Date(1219449600000l));
+		// Recurrence calculator aka duration of a single appointment in days
+		cdao.setRecurrenceCalculator(0);
+		// Recurrence type: 1
+		cdao.setRecurrenceType(1);
+		// Interval: 1
+		cdao.setInterval(1);
+		
+		// Create in storage
+		final CalendarSql csql = new CalendarSql(so);
+		csql.insertAppointmentObject(cdao);
+		final int object_id = cdao.getObjectID();
+		assertTrue("Object was created", object_id > 0);
+		
+		final RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+		assertEquals("Unexpected number of occurrences: " + rss.size() + ". Should be: " + 3, 3, rss.size());
+	}
     
 }
