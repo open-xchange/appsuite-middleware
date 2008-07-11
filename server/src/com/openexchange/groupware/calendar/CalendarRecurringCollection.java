@@ -73,6 +73,7 @@ public final class CalendarRecurringCollection {
 
     public static final String NO_DS = null;
     
+    public static final long MILLI_HOUR = 3600000L;
     public static final long MILLI_DAY = 86400000L;
     public static final long MILLI_WEEK = 604800000L;
     public static final long MILLI_MONTH = 2678400000L;
