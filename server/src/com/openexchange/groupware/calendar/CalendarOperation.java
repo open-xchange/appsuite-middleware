@@ -530,31 +530,31 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             }
         }
     }
-    
-    private final Date calculateRealRecurringEndDate(final CalendarDataObject cdao) {
-        long until = cdao.getUntil().getTime();
-        final long end = cdao.getEndDate().getTime();
-        long mod = until%CalendarRecurringCollection.MILLI_DAY;
-        until = until - mod;
-        mod = end%CalendarRecurringCollection.MILLI_DAY;
-        return new Date(until+mod);
-    }
-    
-    final void calculateAndSetRealRecurringStartAndEndDate(final CalendarDataObject cdao, final CalendarDataObject edao) {
-        long start_date = edao.getRecurringStart();
-        if (start_date == 0) {
-            start_date = edao.getStartDate().getTime();
-        }
-        final long end_date = edao.getUntil().getTime();
-        long start_time = cdao.getStartDate().getTime();
-        long end_time = (cdao.getEndDate().getTime() + (cdao.getRecurrenceCalculator() * CalendarRecurringCollection.MILLI_DAY));
-        start_time = start_time % CalendarRecurringCollection.MILLI_DAY;
-        end_time = end_time % CalendarRecurringCollection.MILLI_DAY;
-        cdao.setStartDate(CalendarRecurringCollection.calculateRecurringDate(start_date, start_time));
-        cdao.setEndDate(CalendarRecurringCollection.calculateRecurringDate(end_date, end_time));
-    }
-    
-    
+
+	private static final Date calculateRealRecurringEndDate(final CalendarDataObject cdao) {
+		long until = cdao.getUntil().getTime();
+		final long end = cdao.getEndDate().getTime();
+		long mod = until % CalendarRecurringCollection.MILLI_DAY;
+		until = until - mod;
+		mod = end % CalendarRecurringCollection.MILLI_DAY;
+		return new Date(until + mod);
+	}
+
+	private static final void calculateAndSetRealRecurringStartAndEndDate(final CalendarDataObject cdao,
+			final CalendarDataObject edao) {
+		long start_date = edao.getRecurringStart();
+		if (start_date == 0) {
+			start_date = edao.getStartDate().getTime();
+		}
+		final long end_date = edao.getUntil().getTime();
+		long start_time = cdao.getStartDate().getTime();
+		long end_time = (cdao.getEndDate().getTime() + (cdao.getRecurrenceCalculator() * CalendarRecurringCollection.MILLI_DAY));
+		start_time = start_time % CalendarRecurringCollection.MILLI_DAY;
+		end_time = end_time % CalendarRecurringCollection.MILLI_DAY;
+		cdao.setStartDate(CalendarRecurringCollection.calculateRecurringDate(start_date, start_time));
+		cdao.setEndDate(CalendarRecurringCollection.calculateRecurringDate(end_date, end_time));
+	}
+
     public final boolean hasNext() {
         if (co_rs != null) {
             if (result_counter != MAX_RESULT_LIMIT) {
