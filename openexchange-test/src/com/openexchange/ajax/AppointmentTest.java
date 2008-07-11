@@ -945,7 +945,9 @@ public class AppointmentTest extends AbstractAJAXTest {
 				appointmentObj.setRecurrencePosition(jsonArray.getInt(pos));
 				break;
 			case AppointmentObject.RECURRENCE_TYPE:
-				appointmentObj.setRecurrenceType(jsonArray.getInt(pos));
+			    if (!jsonArray.isNull(pos)) {
+			        appointmentObj.setRecurrenceType(jsonArray.getInt(pos));
+			    }
 				break;
 			case AppointmentObject.RECURRENCE_ID:
 				appointmentObj.setRecurrenceID(jsonArray.getInt(pos));
