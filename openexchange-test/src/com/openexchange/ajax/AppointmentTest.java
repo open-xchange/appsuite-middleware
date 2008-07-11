@@ -959,22 +959,32 @@ public class AppointmentTest extends AbstractAJAXTest {
 			    }
 				break;
 			case AppointmentObject.INTERVAL:
-				appointmentObj.setInterval(jsonArray.getInt(pos));
+                if (!jsonArray.isNull(pos)) {
+                    appointmentObj.setInterval(jsonArray.getInt(pos));
+                }
 				break;
 			case AppointmentObject.DAYS:
-				appointmentObj.setDays(jsonArray.getInt(pos));
+                if (!jsonArray.isNull(pos)) {
+                    appointmentObj.setDays(jsonArray.getInt(pos));
+                }
 				break;
 			case AppointmentObject.DAY_IN_MONTH:
-				appointmentObj.setDayInMonth(jsonArray.getInt(pos));
+                if (!jsonArray.isNull(pos)) {
+                    appointmentObj.setDayInMonth(jsonArray.getInt(pos));
+                }
 				break;
 			case AppointmentObject.MONTH:
-				appointmentObj.setMonth(jsonArray.getInt(pos));
+                if (!jsonArray.isNull(pos)) {
+                    appointmentObj.setMonth(jsonArray.getInt(pos));
+                }
 				break;
 			case AppointmentObject.UNTIL:
 				appointmentObj.setUntil(new Date(jsonArray.getLong(pos)));
 				break;
 			case AppointmentObject.RECURRING_OCCURRENCE:
-				appointmentObj.setOccurrence(jsonArray.getInt(pos));
+                if (!jsonArray.isNull(pos)) {
+                    appointmentObj.setOccurrence(jsonArray.getInt(pos));
+                }
 				break;
 			case AppointmentObject.TIMEZONE:
 			    if (!jsonArray.isNull(pos)) {
@@ -982,7 +992,9 @@ public class AppointmentTest extends AbstractAJAXTest {
 			    }
 				break;
 			case AppointmentObject.RECURRENCE_START:
-				appointmentObj.setRecurringStart(jsonArray.getLong(pos));
+                if (!jsonArray.isNull(pos)) {
+                    appointmentObj.setRecurringStart(jsonArray.getLong(pos));
+                }
 				break;
 			case AppointmentObject.PARTICIPANTS:
 				appointmentObj.setParticipants(parseParticipants(jsonArray
