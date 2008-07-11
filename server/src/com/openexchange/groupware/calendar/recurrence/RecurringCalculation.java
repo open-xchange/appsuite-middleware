@@ -519,6 +519,11 @@ public class RecurringCalculation {
             if (contains_occurrence) {
                 e += CalendarRecurringCollection.MILLI_MONTH;
             }
+            // Reset to first day in month to properly detect all occurrences
+            calc.setTimeInMillis(s);
+            calc.set(Calendar.DAY_OF_MONTH, 1);
+            s = calc.getTimeInMillis();
+            
             while (s <= e) {
                 calc.setTimeInMillis(s);
                 helper.setTimeInMillis(s);

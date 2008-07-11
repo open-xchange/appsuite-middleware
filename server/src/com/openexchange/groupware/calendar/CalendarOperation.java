@@ -501,6 +501,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     private final void prepareInsert(final CalendarDataObject cdao) throws OXException {
         if (cdao.isSequence(true)) {
             CalendarRecurringCollection.checkRecurring(cdao);
+            // XXX: Why do we again create the recurrence strign?
             CalendarRecurringCollection.createDSString(cdao);
             cdao.setRecurrenceCalculator(((int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/CalendarRecurringCollection.MILLI_DAY)));
             cdao.setEndDate(calculateRealRecurringEndDate(cdao));
@@ -533,10 +534,13 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
 	private static final Date calculateRealRecurringEndDate(final CalendarDataObject cdao) {
 		long until = cdao.getUntil().getTime();
-		final long end = cdao.getEndDate().getTime();
+		// Extract time out of until date
 		long mod = until % CalendarRecurringCollection.MILLI_DAY;
-		until = until - mod;
-		mod = end % CalendarRecurringCollection.MILLI_DAY;
+		if (mod > 0) {
+			until = until - mod;
+		}
+		// Extract time out of end date
+		mod = (cdao.getEndDate().getTime()) % CalendarRecurringCollection.MILLI_DAY;
 		return new Date(until + mod);
 	}
 

@@ -1,3 +1,8 @@
+* 2008-07-11 - thorben.betten@open-xchange.com
+
+ - Bugfix #10663: Fixed calculating number of occurrences in a monthly
+   recurring appointment
+
 * 2008-07-10 - choeger@open-xchange.com
 
  - Bugfix ID#11596 Installation fails on SLES10 64Bit
