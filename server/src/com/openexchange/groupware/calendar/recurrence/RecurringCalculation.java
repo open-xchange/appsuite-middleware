@@ -330,7 +330,7 @@ public class RecurringCalculation {
 			} else if (compare <= 0) {
 				/*
 				 * Zone offset causes to decrement day in month; therefore
-				 * subtract one day to end
+				 * subtract one day from end
 				 */
 				e = e - CalendarRecurringCollection.MILLI_DAY;
 			}
@@ -338,7 +338,7 @@ public class RecurringCalculation {
  
         while (sr <= e) {
             if (s >= sst && sr <= e) {
-                if (((range_start == 0 && range_end == 0 && pos == 0) || (s >= range_start && s <= range_end) || pos == ds_count)
+                if (((range_start == 0 && range_end == 0 && pos == 0) || ((recurrence_calculator == 0 ? s >= range_start : e >= range_start) && s <= range_end) || pos == ds_count)
                 && (!CalendarRecurringCollection.isException(sr, change_exceptions, delete_exceptions))) {
                     if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
                         CalendarRecurringCollection.fillMap(rs, calc.getTimeInMillis(), diff, recurrence_calculator, ds_count);

@@ -8,6 +8,8 @@
  - Bugfix #10663: Fixed calculating number of occurrences in a monthly
    recurring appointment
  - Bugfix #8516: Regarding time zone offset when calculating occurrences
+ - Bugfix #9823: Fixed calculating occurrences of multi-day full-time
+   appointment
 
 * 2008-07-10 - choeger@open-xchange.com
 
