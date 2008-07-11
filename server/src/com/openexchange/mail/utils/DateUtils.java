@@ -86,7 +86,7 @@ public final class DateUtils {
 	 * @throws IllegalArgumentException
 	 *             If specified string cannot be parsed to date
 	 */
-	public static final Date getDateRFC822(final String string) {
+	public static Date getDateRFC822(final String string) {
 		final String s = PATTERN_RFC822_FIX.matcher(string).replaceFirst("");
 		try {
 			synchronized (DATEFORMAT_RFC822) {
@@ -114,7 +114,7 @@ public final class DateUtils {
 	 *            The instance of {@link Date} to convert
 	 * @return The corresponding RFC822 date string
 	 */
-	public static final String toStringRFC822(final Date d) {
+	public static String toStringRFC822(final Date d) {
 		return toStringRFC822(d, TimeZone.getDefault());
 	}
 
@@ -128,7 +128,7 @@ public final class DateUtils {
 	 *            The time zone
 	 * @return The corresponding RFC822 date string
 	 */
-	public static final String toStringRFC822(final Date d, final TimeZone tz) {
+	public static String toStringRFC822(final Date d, final TimeZone tz) {
 		synchronized (DATEFORMAT_RFC822) {
 			DATEFORMAT_RFC822.setTimeZone(tz);
 			return DATEFORMAT_RFC822.format(d);
