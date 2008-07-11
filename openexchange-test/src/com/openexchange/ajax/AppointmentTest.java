@@ -1,7 +1,10 @@
 package com.openexchange.ajax;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -12,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
@@ -362,17 +366,17 @@ public class AppointmentTest extends AbstractAJAXTest {
 	}
 	
 	public static AppointmentObject[] listAppointment(final WebConversation webCon, final int inFolder, final int[] cols, final Date start, final Date end, final TimeZone userTimeZone, final boolean showAll, final String host, final String session)
-	throws Exception {
+	throws JSONException, OXConflictException, IOException, SAXException {
 		return listAppointment(webCon, inFolder, cols, start, end, userTimeZone, showAll, false, host, session);
 	}
 
 	public static AppointmentObject[] listAppointment(final WebConversation webCon, final int inFolder, final int[] cols, final Date start, final Date end, final TimeZone userTimeZone, final boolean showAll, final boolean recurrenceMaster, final String host, final String session)
-		throws Exception {
+		throws JSONException, OXConflictException, IOException, SAXException {
 		return listAppointment(webCon, inFolder, cols, start, end, userTimeZone, showAll, recurrenceMaster, -1, -1, host, session);
 	}
 
 	public static AppointmentObject[] listAppointment(final WebConversation webCon, final int inFolder, final int[] cols, final Date start, final Date end, final TimeZone userTimeZone, final boolean showAll, final boolean recurrenceMaster, final int leftHandLimit, final int rightHandLimit, String host, final String session)
-		throws Exception {
+		throws JSONException, OXConflictException, IOException, SAXException {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -402,7 +406,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 	}
 		
 	public static AppointmentObject[] listAppointment(final WebConversation webCon, final int[] cols, final URLParameter parameter, final TimeZone userTimeZone, String host, final String session)
-		throws Exception {
+		throws JSONException, OXConflictException, IOException, SAXException {
 		host = appendPrefix(host);
 		
 		final WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL
@@ -554,7 +558,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 	
 	public static AppointmentObject loadAppointment(final WebConversation webCon,
 			final int objectId, final int inFolder, final Date start, final Date end, final int[] cols, final TimeZone userTimeZone, final String host,
-			final String session) throws Exception {
+			final String session) throws JSONException, OXConflictException, IOException, SAXException, TestException {
 		
 		final boolean showAll = (inFolder == 0);
 		
@@ -856,7 +860,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 	
 	public static AppointmentObject[] jsonArray2AppointmentArray(
 			final JSONArray jsonArray, final int[] cols, final TimeZone userTimeZone)
-			throws Exception {
+			throws JSONException, OXConflictException {
 		final AppointmentObject[] appointmentArray = new AppointmentObject[jsonArray
 				.length()];
 		
@@ -881,7 +885,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 	}
 	
 	private static void parseCols(final int[] cols, final JSONArray jsonArray,
-			final AppointmentObject appointmentObj, final TimeZone userTimeZone) throws Exception {
+			final AppointmentObject appointmentObj, final TimeZone userTimeZone) throws JSONException, OXConflictException {
 		if (cols.length != jsonArray.length()) {
 			LOG.debug("expected cols: "
 					+ StringCollection.convertArray2String(cols)
@@ -897,7 +901,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 	}
 	
 	private static void parse(final int pos, final int field, final JSONArray jsonArray,
-			final AppointmentObject appointmentObj, final TimeZone userTimeZone) throws Exception {
+			final AppointmentObject appointmentObj, final TimeZone userTimeZone) throws JSONException, OXConflictException {
 		switch (field) {
 			case AppointmentObject.OBJECT_ID:
 				appointmentObj.setObjectID(jsonArray.getInt(pos));
@@ -950,7 +954,9 @@ public class AppointmentTest extends AbstractAJAXTest {
 			    }
 				break;
 			case AppointmentObject.RECURRENCE_ID:
-				appointmentObj.setRecurrenceID(jsonArray.getInt(pos));
+			    if (!jsonArray.isNull(pos)) {
+			        appointmentObj.setRecurrenceID(jsonArray.getInt(pos));
+			    }
 				break;
 			case AppointmentObject.INTERVAL:
 				appointmentObj.setInterval(jsonArray.getInt(pos));
@@ -971,7 +977,9 @@ public class AppointmentTest extends AbstractAJAXTest {
 				appointmentObj.setOccurrence(jsonArray.getInt(pos));
 				break;
 			case AppointmentObject.TIMEZONE:
-				appointmentObj.setTimezone(jsonArray.getString(pos));
+			    if (!jsonArray.isNull(pos)) {
+			        appointmentObj.setTimezone(jsonArray.getString(pos));
+			    }
 				break;
 			case AppointmentObject.RECURRENCE_START:
 				appointmentObj.setRecurringStart(jsonArray.getLong(pos));
@@ -996,7 +1004,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 	}
 	
 	private static Date[] parseExceptions(final JSONArray jsonArray)
-	throws Exception {	
+	throws JSONException {	
 		final Date[] exceptions = new Date[jsonArray.length()];
 		for (int i = 0; i < jsonArray.length(); i++) {	
 			exceptions[i] = new Date(jsonArray.getLong(i));
@@ -1006,7 +1014,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 	
 	
 	private static Participant[] parseParticipants(final JSONArray jsonArray)
-	throws Exception {
+	throws JSONException, OXConflictException {
 		final Participant[] participant = new Participant[jsonArray.length()];
 		for (int i = 0; i < jsonArray.length(); i++) {
 			final JSONObject jparticipant = jsonArray.getJSONObject(i);
