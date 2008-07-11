@@ -76,7 +76,7 @@ public class TaskSearchJSONWriter {
                 Integer.valueOf(range.length));
         }
         final JSONObject json = new JSONObject();
-        if (TaskSearchObject.NO_FOLDER == search.getFolder()) {
+        if (TaskSearchObject.NO_FOLDER != search.getFolder()) {
             json.put(AJAXServlet.PARAMETER_INFOLDER, search.getFolder());
         }
         if (TaskSearchObject.NO_RANGE != range) {
