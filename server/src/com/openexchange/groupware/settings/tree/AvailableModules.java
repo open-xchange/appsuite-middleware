@@ -102,6 +102,8 @@ public final class AvailableModules implements PreferencesItemService {
                         if (Boolean.TRUE.equals(enabled.getSingleValue())) {
                             setting.addMultiValue(module.getName());
                         }
+                    } else {
+                        setting.addMultiValue(module.getName());
                     }
                 }
             }

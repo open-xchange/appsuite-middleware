@@ -1,3 +1,8 @@
+* 2008-07-11 - marcus.klein@open-xchange.com
+
+ - Bugfix #11606: Not removing modules from availableModules if they do not
+   contain a module subvalue.
+
 * 2008-07-11 - thorben.betten@open-xchange.com
 
  - Bugfix #10663: Fixed calculating number of occurrences in a monthly
