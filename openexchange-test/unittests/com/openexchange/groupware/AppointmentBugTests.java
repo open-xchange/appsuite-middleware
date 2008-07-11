@@ -3064,5 +3064,62 @@ public class AppointmentBugTests extends TestCase {
         
     }
     
+    /**
+	 * Test for <a href=
+	 * "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=10663">bug
+	 * #10663</a>:<br>
+	 * <ul>
+	 * <li>Create a recurring appointment on 2007-12-21 with its series pattern
+	 * set to &quot;every second moday each month&quot;</li>
+	 * <li>Check recurring string to match
+	 * <i>&quot;t|5|i|1|a|2|b|2|s|1198238400000|e|1211068800000|&quot;</i></li>
+	 * <li>Check number of occurrences to be equal to 5</li>
+	 * </ul>
+	 * 
+	 * @throws Exception If an error occurs
+	 */
+	public void testBug10663() throws Exception {
+		final Context context = new ContextImpl(contextid);
+		final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(),
+				"myTestSearch");
+		final int fid = AppointmentBugTests.getPrivateFolder(userid);
+		// Create calendar data object
+		final CalendarDataObject cdao = new CalendarDataObject();
+		cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+		cdao.setParentFolderID(fid);
+		cdao.setTitle("testBug10663");
+		cdao.setIgnoreConflicts(true);
+		// 21.12.2007 13:00:00 CET
+		cdao.setStartDate(new Date(1198238400000l));
+		// 21.12.2007 14:00:00 CET
+		cdao.setEndDate(new Date(1198242000000l));
+		// 18.05.2008
+		cdao.setUntil(new Date(1211068800000l));
+		// Recurrence calculator aka duration of a single appointment in days
+		cdao.setRecurrenceCalculator(0);
+		// Recurrence type: 3
+		cdao.setRecurrenceType(3);
+		// Interval: 1
+		cdao.setInterval(1);
+		// Days: 2
+		cdao.setDays(2);
+		// Day in month: 2
+		cdao.setDayInMonth(2);
+
+		// Create in storage
+		final CalendarSql csql = new CalendarSql(so);
+		csql.insertAppointmentObject(cdao);
+		final int object_id = cdao.getObjectID();
+		assertTrue("Object was created", object_id > 0);
+
+		// Check recurrence string
+		assertTrue("Unexpected recurrence string: " + cdao.getRecurrence()
+				+ ". Should be: t|5|i|1|a|2|b|2|s|1198238400000|e|1211068800000|",
+				"t|5|i|1|a|2|b|2|s|1198238400000|e|1211068800000|".equals(cdao.getRecurrence()));
+
+		final RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+		assertEquals("Unexpected number of occurrences: " + rss.size() + ". Should be: " + 5, 5, rss.size());
+
+	}
     
 }
