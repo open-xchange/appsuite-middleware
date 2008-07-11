@@ -956,7 +956,7 @@ public class CalendarRecurringTests extends TestCase {
     /**
      * FIXME Cisco, please check this.
      */
-    public void _testCreateExceptionFromRecurringWithDatePosition() throws Throwable {
+    public void testCreateExceptionFromRecurringWithDatePosition() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         
