@@ -156,7 +156,9 @@ public class FolderTest extends AbstractAJAXTest {
 					subfolder.containsObjectID() ? subfolder.getObjectID() : -1));
 			subfolder.setFolderName(arr.getString(2));
 			subfolder.setSubfolderFlag(arr.getBoolean(3));
-			subfolder.setDefaultFolder(arr.getBoolean(4));
+			if(!arr.isNull(4)) {
+				subfolder.setDefaultFolder(arr.getBoolean(4));
+			}
 			if (!arr.isNull(5)) {
 				subfolder.setCreatedBy(arr.getInt(5));
 			}
