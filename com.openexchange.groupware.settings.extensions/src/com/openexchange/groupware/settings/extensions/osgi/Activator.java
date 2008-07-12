@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.settings.extensions.osgi;
 
 import org.osgi.framework.BundleActivator;
@@ -94,16 +95,8 @@ public class Activator implements BundleActivator {
     }
 
     private void registerListenerForConfigurationService() {
-        ServiceReference reference = context.getServiceReference(ConfigurationService.class.getName());
-        if(reference != null) {
-            ConfigurationService configuration = (ConfigurationService) context.getService(reference);
-            try {
-                handleConfigurationUpdate( configuration );
-            } finally {
-                context.ungetService(reference);                          
-            }
-        }
         this.serviceTracker = new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationTracker(context, this));
+        this.serviceTracker.open();
     }
 
     private void unregisterListenerForConfigurationService() {
@@ -123,7 +116,7 @@ public class Activator implements BundleActivator {
 
         public Object addingService(ServiceReference serviceReference) {
             final Object addedService = context.getService(serviceReference);
-            if(ConfigurationService.class.isAssignableFrom(serviceReference.getClass())) {
+            if(ConfigurationService.class.isAssignableFrom(addedService.getClass())) {
                 activator.handleConfigurationUpdate((ConfigurationService) addedService);
             }
             return addedService;
@@ -134,7 +127,7 @@ public class Activator implements BundleActivator {
         }
 
         public void removedService(ServiceReference serviceReference, Object o) {
-            // IGNORE
+            context.ungetService(serviceReference);
         }
     }
 
