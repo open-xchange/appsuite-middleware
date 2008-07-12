@@ -541,8 +541,10 @@ public final class MailMessageCache {
 			if ((mails != null) && (mails.length > 0)) {
 				final MailFieldUpdater[] updaters = createMailFieldUpdater(changedFields);
 				for (final MailMessage mail : mails) {
-					for (int i = 0; i < updaters.length; i++) {
-						updaters[i].updateField(mail, newValues[i]);
+					if (mail != null) {
+						for (int i = 0; i < updaters.length; i++) {
+							updaters[i].updateField(mail, newValues[i]);
+						}
 					}
 				}
 			}
