@@ -99,7 +99,10 @@ public final class AvailableModules implements PreferencesItemService {
                     final Setting enabled = module.getElement("module");
                     if (null != enabled) {
                         sStor.readValues(enabled);
-                        if (Boolean.TRUE.equals(enabled.getSingleValue())) {
+                        final Object tmp = enabled.getSingleValue();
+                        // The following expression deals with string "true"
+                        // and with Boolean.TRUE.
+                        if (Boolean.parseBoolean(tmp.toString())) {
                             setting.addMultiValue(module.getName());
                         }
                     } else {
