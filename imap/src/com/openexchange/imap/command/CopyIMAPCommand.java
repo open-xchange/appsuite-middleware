@@ -202,31 +202,16 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 		length = -1;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#addLoopCondition()
-	 */
 	@Override
 	protected boolean addLoopCondition() {
 		return (fast ? false : proceed);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getArgs()
-	 */
 	@Override
 	protected String[] getArgs() {
 		return args;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getCommand(int)
-	 */
 	@Override
 	protected String getCommand(final int argsIndex) {
 		final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
@@ -239,51 +224,28 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 		return sb.toString();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
-	 * getDefaultValueOnEmptyFolder()
-	 */
 	@Override
 	protected long[] getDefaultValue() {
 		return DEFAULT_RETVAL;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getReturnVal()
-	 */
 	@Override
 	protected long[] getReturnVal() {
 		return retval;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(
-	 * com.sun.mail.iap.Response)
-	 */
 	@Override
 	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
 		if (!lastResponse.isOK()) {
+			final String rest = lastResponse.getRest();
 			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
-					"UID COPY failed: " + lastResponse.getRest()));
+					new StringBuilder(rest.length() + 17).append(uid ? "UID COPY failed: " : "COPY failed: ").append(
+							rest).toString()));
 		}
 	}
 
 	private static final String COPYUID = "copyuid";
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.
-	 * sun.mail.iap.Response)
-	 */
 	@Override
 	protected void handleResponse(final Response response) throws MessagingException {
 		if (fast) {
@@ -337,23 +299,11 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
-	 */
 	@Override
 	protected boolean performHandleResult() {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
-	 * performNotifyResponseHandlers()
-	 */
 	@Override
 	protected boolean performNotifyResponseHandlers() {
 		return false;
