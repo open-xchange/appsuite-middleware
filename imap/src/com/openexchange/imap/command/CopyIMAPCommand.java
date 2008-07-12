@@ -52,6 +52,7 @@ package com.openexchange.imap.command;
 import static com.openexchange.imap.IMAPCommandsCollection.prepareStringArgument;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 import javax.mail.MessagingException;
 
@@ -251,7 +252,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 		if (fast) {
 			return;
 		}
-		final String resp = response.toString().toLowerCase();
+		final String resp = response.toString().toLowerCase(Locale.ENGLISH);
 		/**
 		 * Parse response:
 		 * 
