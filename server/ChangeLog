@@ -1,3 +1,8 @@
+* 2008-07-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #11617: Checking mail references prior to putting them into#
+   message cache
+
 * 2008-07-11 - marcus.klein@open-xchange.com
 
  - Bugfix #11606: Not removing modules from availableModules if they do not

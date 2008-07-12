@@ -220,7 +220,9 @@ public final class MailMessageCache {
 				this.map.put(k1, innerMap);
 			}
 			for (int i = 0; i < values.length; i++) {
-				innerMap.put(keys[i], values[i]);
+				if (values[i] != null) {
+					innerMap.put(keys[i], values[i]);
+				}
 			}
 		}
 
