@@ -258,7 +258,7 @@ class CalendarMySQL implements CalendarSqlImp {
     public PreparedStatement getSharedAppointmentFolderQuery(final Context c, final CalendarFolderObject cfo, final Connection readcon) throws SQLException {
         final StringBuilder sb = new StringBuilder("SELECT object_id, pfid, member_uid FROM prg_dates_members WHERE cid = ? AND pfid IN (");
         for(final Object o : cfo.getSharedFolderList()) {
-            sb.append(o).append(",");
+            sb.append(o).append(',');
         }
         sb.setCharAt(sb.length()-1, ')');
         final PreparedStatement stmt = readcon.prepareStatement(sb.toString());
