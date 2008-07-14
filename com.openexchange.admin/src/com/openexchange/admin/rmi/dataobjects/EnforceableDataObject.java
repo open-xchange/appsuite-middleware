@@ -64,6 +64,8 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  */
 public abstract class EnforceableDataObject implements Serializable, Cloneable {
 
+    private static final long serialVersionUID = 9068912974174606869L;
+
     private ArrayList<String> unset_members = null;
 
     /**

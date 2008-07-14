@@ -66,6 +66,8 @@ import com.openexchange.admin.rmi.extensions.OXCommonExtension;
  */
 public abstract class ExtendableDataObject extends EnforceableDataObject implements Serializable, Cloneable {
 
+    private static final long serialVersionUID = 5125311385480887183L;
+
     private Hashtable<String, OXCommonExtension> extensions = null;
 
     private final boolean extensionsset = false;
