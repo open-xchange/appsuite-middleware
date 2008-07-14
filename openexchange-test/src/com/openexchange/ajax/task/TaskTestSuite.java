@@ -95,6 +95,7 @@ public final class TaskTestSuite {
         tests.addTestSuite(Bug11075Test.class);
         tests.addTestSuite(Bug11397Test.class);
         tests.addTestSuite(Bug11195Test.class);
+        tests.addTestSuite(Bug11619Test.class);
         return tests;
     }
 }

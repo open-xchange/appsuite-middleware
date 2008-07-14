@@ -260,7 +260,7 @@ public final class TaskTools extends Assert {
     public static UpdateResponse update(final AJAXClient client,
         final UpdateRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return update(client.getSession(), request);
+        return (UpdateResponse) Executor.execute(client, request);
     }
 
     /**
