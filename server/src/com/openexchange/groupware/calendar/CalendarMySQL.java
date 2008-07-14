@@ -2918,6 +2918,44 @@ class CalendarMySQL implements CalendarSqlImp {
 			deleteSingleAppointment(cdao.getContextID(), cdao.getObjectID(), uid, edao.getCreatedBy(), inFolder, null, writecon, edao.getFolderType(), so, ctx, CalendarRecurringCollection.getRecurringAppointmentDeleteAction(cdao, edao), cdao, edao, clientLastModified);
 		}
 
+		// TODO: Remove false
+		if (false && cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0) {
+			final CalendarDataObject cObject;
+			/*
+			 * Check if a change exception has been deleted
+			 */
+			final int empty;
+			final boolean isChangeException = (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0 && edao.getRecurrenceID() != edao.getObjectID());
+			if (isChangeException) {
+				/*
+				 * A change exception; load real appointment
+				 */
+				cObject = new CalendarSql(so).getObjectById(edao.getRecurrenceID(), inFolder);
+				empty = 0;
+			} else {
+				cObject = edao;
+				empty = 1;
+			}
+
+			/*
+			 * Delete of a single appointment: delete exception
+			 */
+			/*
+			 * TODO: Reliably check for exisiting change exceptions
+			 */
+			final RecurringResults rresults = CalendarRecurringCollection.calculateRecurring(cObject, 0, 0, 0);
+			if (rresults.size() == empty
+					&& (cObject.getChangeException() == null || cObject.getChangeException().length == 0)) {
+				/*
+				 * TODO: Deleted last occurrence of a recurring appointment;
+				 * delete whole appointment
+				 */
+				/*
+				 * SELECT FROM prg_dates WHERE cid = 1337 AND intfield01 !=
+				 * 37305 AND intfield02 = 37305
+				 */
+			}
+		}
 	}
 
 	public void deleteAppointmentsInFolder(final Session so, final Context ctx, final ResultSet rs, final Connection readcon, final Connection writecon, final int foldertype, final int fid) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException {
