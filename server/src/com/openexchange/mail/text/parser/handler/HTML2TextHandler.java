@@ -54,6 +54,8 @@ import static com.openexchange.mail.text.HTMLProcessing.replaceHTMLEntities;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.openexchange.mail.text.parser.HTMLHandler;
 
@@ -145,11 +147,10 @@ public final class HTML2TextHandler implements HTMLHandler {
 	 * @param capacity
 	 *            The initial capacity
 	 * @param appendHref
-	 *            <code>true</code> to append URLs contained in <i>href</i>s
-	 *            and <i>src</i>s; otherwise <code>false</code>.<br>
-	 *            Example:
-	 *            <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code>
-	 *            would be <code>Link&nbsp;[www.somewhere.com]</code>
+	 *            <code>true</code> to append URLs contained in <i>href</i>s and
+	 *            <i>src</i>s; otherwise <code>false</code>.<br>
+	 *            Example: <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code> would be
+	 *            <code>Link&nbsp;[www.somewhere.com]</code>
 	 */
 	public HTML2TextHandler(final int capacity, final boolean appendHref) {
 		super();
@@ -169,7 +170,9 @@ public final class HTML2TextHandler implements HTMLHandler {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleComment(java.lang.String)
+	 * @see
+	 * com.openexchange.mail.text.parser.HTMLHandler#handleComment(java.lang
+	 * .String)
 	 */
 	public void handleComment(final String comment) {
 		// Nothing to do
@@ -178,7 +181,9 @@ public final class HTML2TextHandler implements HTMLHandler {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleDocDeclaration(java.lang.String)
+	 * @see
+	 * com.openexchange.mail.text.parser.HTMLHandler#handleDocDeclaration(java
+	 * .lang.String)
 	 */
 	public void handleDocDeclaration(final String docDecl) {
 		// Nothing to do
@@ -187,7 +192,9 @@ public final class HTML2TextHandler implements HTMLHandler {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleEndTag(java.lang.String)
+	 * @see
+	 * com.openexchange.mail.text.parser.HTMLHandler#handleEndTag(java.lang.
+	 * String)
 	 */
 	public void handleEndTag(final String tag) {
 		if (TAG_BODY.equalsIgnoreCase(tag)) {
@@ -236,7 +243,9 @@ public final class HTML2TextHandler implements HTMLHandler {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleError(java.lang.String)
+	 * @see
+	 * com.openexchange.mail.text.parser.HTMLHandler#handleError(java.lang.String
+	 * )
 	 */
 	public void handleError(final String errorMsg) {
 		// Nothing to do
@@ -245,8 +254,9 @@ public final class HTML2TextHandler implements HTMLHandler {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleSimpleTag(java.lang.String,
-	 *      java.util.Map)
+	 * @see
+	 * com.openexchange.mail.text.parser.HTMLHandler#handleSimpleTag(java.lang
+	 * .String, java.util.Map)
 	 */
 	public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
 		if (insideBody) {
@@ -273,8 +283,9 @@ public final class HTML2TextHandler implements HTMLHandler {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleStartTag(java.lang.String,
-	 *      java.util.Map)
+	 * @see
+	 * com.openexchange.mail.text.parser.HTMLHandler#handleStartTag(java.lang
+	 * .String, java.util.Map)
 	 */
 	public void handleStartTag(final String tag, final Map<String, String> attributes) {
 		if (TAG_BODY.equalsIgnoreCase(tag)) {
@@ -316,7 +327,9 @@ public final class HTML2TextHandler implements HTMLHandler {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleCDATA(java.lang.String)
+	 * @see
+	 * com.openexchange.mail.text.parser.HTMLHandler#handleCDATA(java.lang.String
+	 * )
 	 */
 	public void handleCDATA(final String text) {
 		if (insideBody && !ignore) {
@@ -324,10 +337,17 @@ public final class HTML2TextHandler implements HTMLHandler {
 		}
 	}
 
+	/**
+	 * Detects the appendix added by JTidy's pretty-printer to a text line
+	 */
+	private static final Pattern PAT_TRIM = Pattern.compile("[^\n\f\r]\r?\n +$");
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleText(java.lang.String)
+	 * @see
+	 * com.openexchange.mail.text.parser.HTMLHandler#handleText(java.lang.String
+	 * )
 	 */
 	public void handleText(final String text, final boolean ignorable) {
 		if (insideBody && !ignore) {
@@ -341,7 +361,21 @@ public final class HTML2TextHandler implements HTMLHandler {
 				textBuilder.append(replaceHTMLEntities(text));
 			} else {
 				if (!ignorable) {
-					textBuilder.append(replaceHTMLEntities(text.replaceAll("\\s+", " ")));
+					final Matcher m = PAT_TRIM.matcher(text);
+					/*
+					 * Cut off JTidy's pretty-printer appendix if present
+					 */
+					String preparedText;
+					if (m.find()) {
+						preparedText = text.substring(0, m.start() + 1);
+					} else {
+						preparedText = text;
+					}
+					/*
+					 * Remove indention(s) and any control characters
+					 */
+					preparedText = preparedText.replaceAll("[\n\f\r]+", "").replaceAll("(?:(\t)|([ ]{4}))", "");
+					textBuilder.append(replaceHTMLEntities(preparedText));
 				}
 			}
 			if (anchorTag && hrefContent != null && !text.equalsIgnoreCase(hrefContent)) {

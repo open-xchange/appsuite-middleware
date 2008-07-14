@@ -8,6 +8,8 @@
  - Bugfix #11623: Fixed renaming of folders on root level
  - Bugfix #11622: Fixed fetch of pre-sorted messages since fetch responses
    need not to be in the same order as requested sequence numbers
+ - Bugfix #11607: Removing pretty-printer's formatting on html2text
+   conversion
 
 * 2008-07-12 - thorben.betten@open-xchange.com
 
