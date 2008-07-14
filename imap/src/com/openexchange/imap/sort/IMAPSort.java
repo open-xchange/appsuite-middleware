@@ -258,9 +258,7 @@ public final class IMAPSort {
 						} else if (!isSeen1 && !isSeen2) {
 							final boolean isRecent1 = msg1.isSet(Flags.Flag.RECENT);
 							final boolean isRecent2 = msg2.isSet(Flags.Flag.RECENT);
-							if (isRecent1 && isRecent2) {
-								return 0;
-							} else if (!isRecent1 && !isRecent2) {
+							if ((isRecent1 && isRecent2) || (!isRecent1 && !isRecent2)) {
 								return 0;
 							} else if (isRecent1 && !isRecent2) {
 								return 1;
@@ -423,6 +421,21 @@ public final class IMAPSort {
 				if ((msgs == null) || (msgs.length == 0)) {
 					return EMPTY_MSGS;
 				}
+
+				// CHECK SORTING FOR DEBUG PURPOSE
+				// System.out.println("\n\tCHECKING SORTING!!!\n\n");
+				// boolean failed = false;
+				// for (int i = 0; i < seqNums.length && !failed; i++) {
+				// if (seqNums[i] != msgs[i].getMessageNumber()) {
+				// failed = true;
+				// }
+				// }
+				// if (failed) {
+				// System.out.println("\n\tSORTING LOST DURING FETCH!!!\n\n");
+				// } else {
+				// System.out.println("\n\tSORTING OK!!!\n\n");
+				// }
+
 				applicationSort = false;
 			} catch (final FolderClosedException e) {
 				/*

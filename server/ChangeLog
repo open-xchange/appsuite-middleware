@@ -1,6 +1,8 @@
 * 2008-07-14 - thorben.betten@open-xchange.com
 
  - Bugfix #11623: Fixed renaming of folders on root level
+ - Bugfix #11622: Fixed fetch of pre-sorted messages since fetch responses
+   need not to be in the same order as requested sequence numbers
 
 * 2008-07-12 - thorben.betten@open-xchange.com
 

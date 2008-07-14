@@ -52,11 +52,9 @@ package com.openexchange.imap.command;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -120,18 +118,34 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
 	private static interface SeqNumFetcher {
 		public int getNextSeqNum(int messageIndex);
+
+		public int getIndexOf(int value);
 	}
 
 	private static class MsgSeqNumFetcher implements SeqNumFetcher {
 
-		private final Message[] msgs;
+		private final SeqNumFetcher delegate;
 
 		public MsgSeqNumFetcher(final Message[] msgs) {
-			this.msgs = msgs;
+			/*
+			 * Create array from messages' sequence numbers
+			 */
+			final int[] arr = new int[msgs.length];
+			for (int i = 0; i < arr.length; i++) {
+				arr[i] = msgs[i].getMessageNumber();
+			}
+			/*
+			 * Create delegate
+			 */
+			this.delegate = new IntSeqNumFetcher(arr);
 		}
 
 		public int getNextSeqNum(final int index) {
-			return msgs[index].getMessageNumber();
+			return delegate.getNextSeqNum(index);
+		}
+
+		public int getIndexOf(final int value) {
+			return delegate.getIndexOf(value);
 		}
 	}
 
@@ -145,6 +159,15 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
 		public int getNextSeqNum(final int index) {
 			return arr[index];
+		}
+
+		public int getIndexOf(final int value) {
+			for (int i = 0; i < arr.length; i++) {
+				if (arr[i] == value) {
+					return i;
+				}
+			}
+			return -1;
 		}
 	}
 
@@ -164,7 +187,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
 	private FetchItemHandler[] itemHandlers;
 
-	private List<ExtendedMimeMessage> retval;
+	private ExtendedMimeMessage[] retval;
 
 	private final boolean loadBody;
 
@@ -223,7 +246,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		super(imapFolder);
 		this.loadBody = loadBody;
 		this.separator = imapFolder.getSeparator();
-		command = getFetchCommand(imapFolder, isRev1, fp, loadBody);
+		command = getFetchCommand(isRev1, fp, loadBody);
 		set(arr, isSequential, keepOrder);
 	}
 
@@ -248,7 +271,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		} else {
 			createArgs(arr, isSequential, keepOrder);
 		}
-		retval = new ArrayList<ExtendedMimeMessage>(length);
+		retval = new ExtendedMimeMessage[length];
 		index = 0;
 	}
 
@@ -329,8 +352,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		args = AbstractIMAPCommand.ARGS_ALL;
 		uid = false;
 		length = fetchLen;
-		command = getFetchCommand(imapFolder, isRev1, fp, loadBody);
-		retval = new ArrayList<ExtendedMimeMessage>(length);
+		command = getFetchCommand(isRev1, fp, loadBody);
+		retval = new ExtendedMimeMessage[length];
 		index = 0;
 	}
 
@@ -344,10 +367,10 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		final String arg = this.args[argsIndex];
 		if (arg.length() > 32) {
 			final int pos = arg.indexOf(',');
-			if (pos != -1) {
-				sb.append(arg.substring(0, pos)).append(",...,").append(arg.substring(arg.lastIndexOf(',') + 1));
-			} else {
+			if (pos == -1) {
 				sb.append("...");
+			} else {
+				sb.append(arg.substring(0, pos)).append(",...,").append(arg.substring(arg.lastIndexOf(',') + 1));
 			}
 		} else {
 			sb.append(arg);
@@ -356,31 +379,16 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		return sb.toString();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#addLoopCondition()
-	 */
 	@Override
 	protected boolean addLoopCondition() {
 		return (index < length);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getArgs()
-	 */
 	@Override
 	protected String[] getArgs() {
 		return args;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getCommand()
-	 */
 	@Override
 	protected String getCommand(final int argsIndex) {
 		final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
@@ -395,34 +403,16 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
 	private static final ExtendedMimeMessage[] EMPTY_ARR = new ExtendedMimeMessage[0];
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
-	 * getDefaultValueOnEmptyFolder()
-	 */
 	@Override
 	protected Message[] getDefaultValue() {
 		return EMPTY_ARR;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getReturnVal()
-	 */
 	@Override
 	protected Message[] getReturnVal() {
-		return retval.toArray(new ExtendedMimeMessage[retval.size()]);
+		return retval;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(
-	 * com.sun.mail.iap.Response)
-	 */
 	@Override
 	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
 		if (!lastResponse.isOK()) {
@@ -431,41 +421,40 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.
-	 * sun.mail.iap.Response)
-	 */
 	@Override
 	protected void handleResponse(final Response currentReponse) throws MessagingException {
 		/*
 		 * Response is null or not a FetchResponse
 		 */
-		if (currentReponse == null) {
-			return;
-		} else if (!(currentReponse instanceof FetchResponse)) {
+		if (!FetchResponse.class.isInstance(currentReponse)) {
 			return;
 		}
 		final FetchResponse fetchResponse = (FetchResponse) currentReponse;
-		final int seqnum;
-		if (null != seqNumFetcher) {
-			seqnum = seqNumFetcher.getNextSeqNum(index);
-			if (seqnum != fetchResponse.getNumber()) {
-				if (LOG.isWarnEnabled()) {
-					LOG.warn(new StringBuilder(256)
-							.append("Unexpected sequence number during FETCH command: Expected ").append(seqnum)
-							.append(" but was ").append(fetchResponse.getNumber()).toString());
-				}
-				/*
-				 * Continue with next response
-				 */
-				return;
-			}
-		} else {
+		int seqnum;
+		final int pos;
+		if (null == seqNumFetcher) {
 			seqnum = fetchResponse.getNumber();
+			pos = index;
+		} else {
+			seqnum = seqNumFetcher.getNextSeqNum(index);
+			if (seqnum == fetchResponse.getNumber()) {
+				pos = index;
+			} else {
+				/*
+				 * Assign to current response's sequence number
+				 */
+				seqnum = fetchResponse.getNumber();
+				/*
+				 * Look-up position
+				 */
+				pos = seqNumFetcher.getIndexOf(seqnum);
+				if (pos == -1) {
+					throw new MessagingException("Unexpected sequence number in untagged FETCH response: " + seqnum);
+				}
+				seqnum = fetchResponse.getNumber();
+			}
 		}
+		index++;
 		final ExtendedMimeMessage msg = new ExtendedMimeMessage(imapFolder.getFullName(), separator, seqnum);
 		final int itemCount = fetchResponse.getItemCount();
 		if ((itemHandlers == null) || (itemCount != itemHandlers.length)) {
@@ -507,28 +496,15 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 			}
 		} while (repeatItem);
 		if (!error) {
-			retval.add(msg);
+			retval[pos] = msg;
 		}
-		index++;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
-	 */
 	@Override
 	protected boolean performHandleResult() {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
-	 * performNotifyResponseHandlers()
-	 */
 	@Override
 	protected boolean performNotifyResponseHandlers() {
 		return false;
@@ -597,9 +573,9 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		public void handleHeader(String hdrValue, ExtendedMimeMessage msg) throws MessagingException, MailException;
 	}
 
-	private static final MailDateFormat mailDateFormat = new MailDateFormat();
-
 	private static abstract class FetchItemHandler {
+
+		static final MailDateFormat mailDateFormat = new MailDateFormat();
 
 		private Map<String, HeaderHandler> hdrHandlers;
 
@@ -767,177 +743,198 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
 	private static final String MULTI_SUBTYPE_MIXED = "MIXED";
 
+	/*
+	 * ++++++++++++++ Item handlers ++++++++++++++
+	 */
+
+	private static final FetchItemHandler FLAGS_ITEM_HANDLER = new FetchItemHandler() {
+		@Override
+		public void handleItem(final Item item, final ExtendedMimeMessage msg) throws MessagingException {
+			msg.setFlags((Flags) item, true);
+		}
+	};
+
+	private static final FetchItemHandler ENVELOPE_ITEM_HANDLER = new FetchItemHandler() {
+		@Override
+		public void handleItem(final Item item, final ExtendedMimeMessage msg) throws MessagingException {
+			final ENVELOPE env = (ENVELOPE) item;
+			msg.addFrom(env.from);
+			msg.setRecipients(RecipientType.TO, env.to);
+			msg.setRecipients(RecipientType.CC, env.cc);
+			msg.setRecipients(RecipientType.BCC, env.bcc);
+			msg.setReplyTo(env.replyTo);
+			msg.setHeader(MessageHeaders.HDR_IN_REPLY_TO, env.inReplyTo);
+			msg.setHeader(MessageHeaders.HDR_MESSAGE_ID, env.messageId);
+			try {
+				msg.setSubject(env.subject == null ? "" : MimeUtility.decodeText(env.subject), MailConfig
+						.getDefaultMimeCharset());
+			} catch (final UnsupportedEncodingException e) {
+				LOG.error("Unsupported encoding in a message detected and monitored.", e);
+				MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+				msg.setSubject(MIMEMessageUtility.decodeMultiEncodedHeader(env.subject));
+			}
+			msg.setSentDate(env.date);
+		}
+	};
+
+	private static final FetchItemHandler INTERNALDATE_ITEM_HANDLER = new FetchItemHandler() {
+		@Override
+		public void handleItem(final Item item, final ExtendedMimeMessage msg) {
+			msg.setReceivedDate(((INTERNALDATE) item).getDate());
+		}
+	};
+
+	private static final FetchItemHandler SIZE_ITEM_HANDLER = new FetchItemHandler() {
+		@Override
+		public void handleItem(final Item item, final ExtendedMimeMessage msg) {
+			msg.setSize(((RFC822SIZE) item).size);
+		}
+	};
+
+	private static final FetchItemHandler BODYSTRUCTURE_ITEM_HANDLER = new FetchItemHandler() {
+		@Override
+		public void handleItem(final Item item, final ExtendedMimeMessage msg) throws MailException {
+			final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
+			msg.setBodystructure(bs);
+			final StringBuilder sb = new StringBuilder();
+			sb.append(bs.type).append('/').append(bs.subtype);
+			if (bs.cParams != null) {
+				sb.append(bs.cParams);
+			}
+			try {
+				msg.setContentType(new ContentType(sb.toString()));
+			} catch (final MailException e) {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn(e.getMessage(), e);
+				}
+				msg.setContentType(new ContentType(MIMETypes.MIME_DEFAULT));
+			}
+			msg.setHasAttachment(bs.isMulti()
+					&& (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MIMEMessageUtility.hasAttachments(bs)));
+		}
+	};
+
+	private static final FetchItemHandler UID_ITEM_HANDLER = new FetchItemHandler() {
+		@Override
+		public void handleItem(final Item item, final ExtendedMimeMessage msg) {
+			msg.setUid(((UID) item).uid);
+		}
+	};
+
+	private static final FetchItemHandler HEADER_ITEM_HANDLER = new FetchItemHandler() {
+		@Override
+		public void handleItem(final Item item, final ExtendedMimeMessage msg) throws MessagingException, MailException {
+			final InternetHeaders h;
+			{
+				final InputStream headerStream;
+				if (item instanceof RFC822DATA) {
+					/*
+					 * IMAP4
+					 */
+					headerStream = ((RFC822DATA) item).getByteArrayInputStream();
+				} else {
+					/*
+					 * IMAP4rev1
+					 */
+					headerStream = ((BODY) item).getByteArrayInputStream();
+				}
+				h = new InternetHeaders();
+				if (null == headerStream) {
+					if (LOG.isWarnEnabled()) {
+						LOG.warn(new StringBuilder(32).append("Cannot retrieve headers from message #").append(
+								msg.getMessageNumber()).append(" in folder ").append(msg.getFullname()).toString());
+					}
+				} else {
+					h.load(headerStream);
+				}
+			}
+			if (!this.containsHeaderHandlers()) {
+				FetchItemHandler.createHeaderHandlers(this, h);
+			}
+			for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
+				final Header hdr = (Header) e.nextElement();
+				HeaderHandler hdrHandler = this.getHdrHandler(hdr.getName());
+				if (hdrHandler == null) {
+					FetchItemHandler.addHeaderHandlers(this, hdr);
+					hdrHandler = this.getHdrHandler(hdr.getName());
+					hdrHandler.handleHeader(hdr.getValue(), msg);
+				} else {
+					hdrHandler.handleHeader(hdr.getValue(), msg);
+				}
+			}
+		}
+	};
+
+	private static final FetchItemHandler BODY_ITEM_HANDLER = new FetchItemHandler() {
+		@Override
+		public void handleItem(final Item item, final ExtendedMimeMessage msg) throws MessagingException, MailException {
+			final InputStream msgStream;
+			if (item instanceof RFC822DATA) {
+				/*
+				 * IMAP4
+				 */
+				msgStream = ((RFC822DATA) item).getByteArrayInputStream();
+			} else {
+				/*
+				 * IMAP4rev1
+				 */
+				msgStream = ((BODY) item).getByteArrayInputStream();
+			}
+			if (null == msgStream) {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn(new StringBuilder(32).append("Cannot retrieve body from message #").append(
+							msg.getMessageNumber()).append(" in folder ").append(msg.getFullname()).toString());
+				}
+			} else {
+				msg.parseStream(msgStream);
+			}
+		}
+	};
+
 	private static FetchItemHandler[] createItemHandlers(final int itemCount, final FetchResponse f,
 			final boolean loadBody) {
 		final FetchItemHandler[] itemHandlers = new FetchItemHandler[itemCount];
 		for (int j = 0; j < itemCount; j++) {
 			final Item item = f.getItem(j);
-			/*
-			 * Check for the FLAGS item
-			 */
-			if (item instanceof Flags) {
-				itemHandlers[j] = new FetchItemHandler() {
-					@Override
-					public void handleItem(final Item item, final ExtendedMimeMessage msg) throws MessagingException {
-						msg.setFlags((Flags) item, true);
-					}
-				};
-			} else if (item instanceof ENVELOPE) {
-				itemHandlers[j] = new FetchItemHandler() {
-					@Override
-					public void handleItem(final Item item, final ExtendedMimeMessage msg) throws MessagingException {
-						final ENVELOPE env = (ENVELOPE) item;
-						msg.addFrom(env.from);
-						msg.setRecipients(RecipientType.TO, env.to);
-						msg.setRecipients(RecipientType.CC, env.cc);
-						msg.setRecipients(RecipientType.BCC, env.bcc);
-						msg.setReplyTo(env.replyTo);
-						msg.setHeader(MessageHeaders.HDR_IN_REPLY_TO, env.inReplyTo);
-						msg.setHeader(MessageHeaders.HDR_MESSAGE_ID, env.messageId);
-						try {
-							msg.setSubject(env.subject == null ? "" : MimeUtility.decodeText(env.subject), MailConfig
-									.getDefaultMimeCharset());
-						} catch (final UnsupportedEncodingException e) {
-							LOG.error("Unsupported encoding in a message detected and monitored.", e);
-							MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-							msg.setSubject(MIMEMessageUtility.decodeMultiEncodedHeader(env.subject));
-						}
-						msg.setSentDate(env.date);
-					}
-				};
+			if (item instanceof UID) {
+				itemHandlers[j] = UID_ITEM_HANDLER;
 			} else if (item instanceof INTERNALDATE) {
-				itemHandlers[j] = new FetchItemHandler() {
-					@Override
-					public void handleItem(final Item item, final ExtendedMimeMessage msg) {
-						msg.setReceivedDate(((INTERNALDATE) item).getDate());
-					}
-				};
+				itemHandlers[j] = INTERNALDATE_ITEM_HANDLER;
+			} else if (item instanceof Flags) {
+				itemHandlers[j] = FLAGS_ITEM_HANDLER;
+			} else if (item instanceof ENVELOPE) {
+				itemHandlers[j] = ENVELOPE_ITEM_HANDLER;
 			} else if (item instanceof RFC822SIZE) {
-				itemHandlers[j] = new FetchItemHandler() {
-					@Override
-					public void handleItem(final Item item, final ExtendedMimeMessage msg) {
-						msg.setSize(((RFC822SIZE) item).size);
-					}
-				};
+				itemHandlers[j] = SIZE_ITEM_HANDLER;
 			} else if (item instanceof BODYSTRUCTURE) {
-				itemHandlers[j] = new FetchItemHandler() {
-					@Override
-					public void handleItem(final Item item, final ExtendedMimeMessage msg) throws MailException {
-						final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
-						msg.setBodystructure(bs);
-						final StringBuilder sb = new StringBuilder();
-						sb.append(bs.type).append('/').append(bs.subtype);
-						if (bs.cParams != null) {
-							sb.append(bs.cParams);
-						}
-						try {
-							msg.setContentType(new ContentType(sb.toString()));
-						} catch (final MailException e) {
-							if (LOG.isWarnEnabled()) {
-								LOG.warn(e.getMessage(), e);
-							}
-							msg.setContentType(new ContentType(MIMETypes.MIME_DEFAULT));
-						}
-						msg.setHasAttachment(bs.isMulti()
-								&& (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MIMEMessageUtility
-										.hasAttachments(bs)));
-					}
-				};
-			} else if (item instanceof UID) {
-				itemHandlers[j] = new FetchItemHandler() {
-					@Override
-					public void handleItem(final Item item, final ExtendedMimeMessage msg) {
-						msg.setUid(((UID) item).uid);
-					}
-				};
+				itemHandlers[j] = BODYSTRUCTURE_ITEM_HANDLER;
 			} else if ((item instanceof RFC822DATA) || (item instanceof BODY)) {
-				itemHandlers[j] = new FetchItemHandler() {
-					@Override
-					public void handleItem(final Item item, final ExtendedMimeMessage msg) throws MessagingException,
-							MailException {
-						if (loadBody) {
-							final InputStream msgStream;
-							if (item instanceof RFC822DATA) {
-								/*
-								 * IMAP4
-								 */
-								msgStream = ((RFC822DATA) item).getByteArrayInputStream();
-							} else {
-								/*
-								 * IMAP4rev1
-								 */
-								msgStream = ((BODY) item).getByteArrayInputStream();
-							}
-							if (null == msgStream) {
-								if (LOG.isWarnEnabled()) {
-									LOG.warn(new StringBuilder(32).append("Cannot retrieve body from message #")
-											.append(msg.getMessageNumber()).append(" in folder ").append(
-													msg.getFullname()).toString());
-								}
-							} else {
-								msg.parseStream(msgStream);
-							}
-							return;
-						}
-						final InternetHeaders h;
-						{
-							final InputStream headerStream;
-							if (item instanceof RFC822DATA) {
-								/*
-								 * IMAP4
-								 */
-								headerStream = ((RFC822DATA) item).getByteArrayInputStream();
-							} else {
-								/*
-								 * IMAP4rev1
-								 */
-								headerStream = ((BODY) item).getByteArrayInputStream();
-							}
-							h = new InternetHeaders();
-							if (null == headerStream) {
-								if (LOG.isWarnEnabled()) {
-									LOG.warn(new StringBuilder(32).append("Cannot retrieve headers from message #")
-											.append(msg.getMessageNumber()).append(" in folder ").append(
-													msg.getFullname()).toString());
-								}
-							} else {
-								h.load(headerStream);
-							}
-						}
-						if (!this.containsHeaderHandlers()) {
-							FetchItemHandler.createHeaderHandlers(this, h);
-						}
-						for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
-							final Header hdr = (Header) e.nextElement();
-							HeaderHandler hdrHandler = this.getHdrHandler(hdr.getName());
-							if (hdrHandler == null) {
-								FetchItemHandler.addHeaderHandlers(this, hdr);
-								hdrHandler = this.getHdrHandler(hdr.getName());
-								hdrHandler.handleHeader(hdr.getValue(), msg);
-							} else {
-								hdrHandler.handleHeader(hdr.getValue(), msg);
-							}
-						}
-					}
-				};
+				if (loadBody) {
+					itemHandlers[j] = BODY_ITEM_HANDLER;
+				} else {
+					itemHandlers[j] = HEADER_ITEM_HANDLER;
+				}
 			}
 		}
 		return itemHandlers;
 	}
 
+	/*
+	 * ++++++++++++++ End of item handlers ++++++++++++++
+	 */
+
 	private static final String EnvelopeCmd = "ENVELOPE INTERNALDATE RFC822.SIZE";
 
-	private static String getFetchCommand(final IMAPFolder imapFolder, final boolean isRev1, final FetchProfile fp,
-			final boolean loadBody) {
+	private static String getFetchCommand(final boolean isRev1, final FetchProfile fp, final boolean loadBody) {
 		final StringBuilder command = new StringBuilder(128);
 		final boolean envelope;
 		if (fp.contains(FetchProfile.Item.ENVELOPE)) {
-			if (!loadBody) {
-				command.append(EnvelopeCmd);
-				envelope = true;
-			} else {
+			if (loadBody) {
 				command.append("INTERNALDATE");
 				envelope = false;
+			} else {
+				command.append(EnvelopeCmd);
+				envelope = true;
 			}
 		} else {
 			command.append("INTERNALDATE");
