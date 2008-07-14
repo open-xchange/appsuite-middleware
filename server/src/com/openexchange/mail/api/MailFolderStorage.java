@@ -226,8 +226,13 @@ public abstract class MailFolderStorage {
 	 */
 	public String renameFolder(final String fullname, final String newName) throws MailException {
 		final MailFolder folder = getFolder(fullname);
-		final String newPath = new StringBuilder(folder.getParentFullname()).append(folder.getSeparator()).append(
-				newName).toString();
+		final String newPath;
+		if (MailFolder.DEFAULT_FOLDER_ID.equals(folder.getParentFullname())) {
+			newPath = newName;
+		} else {
+			newPath = new StringBuilder(folder.getParentFullname()).append(folder.getSeparator()).append(newName)
+					.toString();
+		}
 		return moveFolder(fullname, newPath);
 	}
 

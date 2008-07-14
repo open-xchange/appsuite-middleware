@@ -259,7 +259,7 @@ public final class IMAPFolderConverter {
 				if (null == parent) {
 					mailFolder.setParentFullname(null);
 				} else {
-					mailFolder.setParentFullname(parent instanceof DefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME
+					mailFolder.setParentFullname(parent instanceof DefaultFolder ? MailFolder.DEFAULT_FOLDER_ID
 							: parent.getFullName());
 				}
 			}
