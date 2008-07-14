@@ -1,3 +1,8 @@
+* 2008-07-14 - marcus.klein@open-xchange.com
+
+ - Bugfix #11619: Fixed code problem if on updating task an external participant
+   is added.
+
 * 2008-07-14 - thorben.betten@open-xchange.com
 
  - Bugfix #11623: Fixed renaming of folders on root level

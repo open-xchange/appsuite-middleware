@@ -333,7 +333,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
     void deleteExternal(final Context ctx, final Connection con,
         final int taskId, final String[] addresses, final StorageType type,
         final boolean check) throws TaskException {
-        if (0 == addresses.length) {
+        if (0 == addresses.length || StorageType.REMOVED == type) {
             return;
         }
         PreparedStatement stmt = null;
