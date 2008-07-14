@@ -126,8 +126,36 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Jul 14 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11623: Fixed renaming of folders on root level
+* Sat Jul 12 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11617: Checking mail references prior to putting them into#
+   message cache
+* Fri Jul 11 2008 - thorben.betten@open-xchange.com
+ - Bugfix #10663: Fixed calculating number of occurrences in a monthly
+   recurring appointment
+ - Bugfix #8516: Regarding time zone offset when calculating occurrences
+ - Bugfix #9823: Fixed calculating occurrences of multi-day full-time
+   appointment
+* Fri Jul 11 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11606: Not removing modules from availableModules if they do not
+   contain a module subvalue.
 * Thu Jul 10 2008 - thorben.betten@open-xchange.com
  - Bugfix #11585: Removed warning in UDP push on appointment deletion
+ - Bugfix #9930: Fixed calculation of duration of a single item in a
+   recurring appointment
+ - Bugfix #10113: Fixed update of a recurring appointment with an until
+   date to an occurrence setting.
+* Thu Jul 10 2008 - francisco.laguna@open-xchange.com
+ - Partial fix for bug #11569: Fixed search with "%" in infostore module
+ - Fix for bug #11597: Changed type of field07 to TEXT.
+* Thu Jul 10 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11580: Made the fields estimated and actual duration optional in
+   task WebDAV/XML writer.
+ - Bugfix #10747: Implemented task last modified timestamp update for reminder.
+ - Bugfix #11569: Fixed search with "%" in task module.
+* Thu Jul 10 2008 - choeger@open-xchange.com
+ - Bugfix ID#11596 Installation fails on SLES10 64Bit
 * Wed Jul 09 2008 - francisco.laguna@open-xchange.com
  - Bugfix #10806: Skipping calculation of future appointments recurrences for conflicts in a series with resources.
  - UNDOING Bugfix #6927: After discussing this with PM, this was undone, to prevent some destructive behaviour with D&D.

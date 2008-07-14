@@ -1,3 +1,9 @@
+open-xchange-group-managerequest (6.5.0-11) unstable; urgency=low
+
+  * first build for Beta8
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 14 Jul 2008 11:44:45 +0200
+
 open-xchange-group-managerequest (6.5.0-10) unstable; urgency=low
 
   * first build for Beta7
