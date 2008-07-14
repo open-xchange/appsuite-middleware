@@ -72,7 +72,9 @@ public abstract class AbstractObject2JSON2Object<T> {
     public JSONObject write(final T obj) throws JSONException {
         final JSONObject json = new JSONObject();
         for (final Mapper<T> mapper : allMapper()) {
-            if (!mapper.isNull(obj)) {
+            if (mapper.isNull(obj)) {
+                json.put(mapper.getAttrName(), JSONObject.NULL);
+            } else {
                 json.put(mapper.getAttrName(), mapper.getAttribute(obj));
             }
         }
@@ -141,7 +143,9 @@ public abstract class AbstractObject2JSON2Object<T> {
             final JSONObject tmpo = new JSONObject();
             for (final String order : fields) {
                 final Mapper<T> mapper = getMapper(order);
-                if (!mapper.isNull(t)) {
+                if (mapper.isNull(t)) {
+                    tmpo.put(mapper.getAttrName(), JSONObject.NULL);
+                } else {
                     tmpo.put(mapper.getAttrName(), mapper.getAttribute(t));
                 }
             }
