@@ -39,27 +39,6 @@ Summary:        Open Xchange Admin SOAP API
 Requires:       open-xchange-admin-client >= 6.5.0
 Requires:	open-xchange-admin-plugin-hosting >= 6.5.0
 Requires:	open-xchange-axis2
-%if 0%{?suse_version}
-%if %{?suse_version} <= 1010
-# SLES10
-Requires:  java-1_5_0-ibm update-alternatives
-%endif
-%if %{?suse_version} >= 1100
-BuildRequires:  java-openjdk
-%endif
-%if %{?suse_version} > 1010 && %{?suse_version} < 1100
-Requires:  java-1_5_0-sun
-%endif
-%endif
-%if 0%{?fedora_version}
-%if %{?fedora_version} > 8
-Requires:  java-1.6.0-openjdk
-%endif
-%if %{?fedora_version} <= 8
-Requires:  java-icedtea
-%endif
-%endif
-#
 
 %description
 Open Xchange Admin SOAP API
