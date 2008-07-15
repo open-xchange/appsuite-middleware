@@ -1,21 +1,20 @@
 <?php
-
-include("ox-soap.php");
+include ("ox-soap.php");
 
 try {
-	
-	$result = getUtilClient("localhost")->listServer("*", getCredentialsObject("oxadminmaster","secret"));
-	
+
+	$result = getUtilClient("localhost")->listDatabase("*", getCredentialsObject("oxadminmaster", "secret"));
+
 	if (!is_soap_fault($result)) {
 		if (is_array($result)) {
 			foreach ($result['return'] as $val_obj) {
-				printServer($val_obj);
+				printDatabase($val_obj);
 			}
 		} else {
-			printServer($result);
+			printDatabase($result);
 		}
 	}
-	
+
 } catch (SoapFault $fault) {
 	handleSoapFault($fault);
 } catch (Exception $e) {
