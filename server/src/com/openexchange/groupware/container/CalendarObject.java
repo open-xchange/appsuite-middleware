@@ -133,69 +133,69 @@ public abstract class CalendarObject extends CommonObject
 	public static final int MONTHLY = 3;
 	public static final int YEARLY = 4;
 		
-	protected Participant participants[] = null;
-	protected UserParticipant[] users = null;
+	protected Participant participants[];
+	protected UserParticipant[] users;
 	
-	protected String title = null;
-	protected Date start_date = null;
-	protected Date end_date = null;
-	protected String note = null;
-	protected int recurrence_id = 0;
-	protected int recurrence_position = 0;
-	protected Date recurrence_date_position = null;
+	protected String title;
+	protected Date start_date;
+	protected Date end_date;
+	protected String note;
+	protected int recurrence_id;
+	protected int recurrence_position;
+	protected Date recurrence_date_position;
 	protected int recurrence_type = NO_RECURRENCE;
-	protected Date[] change_exceptions = null;
-	protected Date[] delete_exceptions = null;
-	protected int days = 0;
-	protected int day_in_month = 0;
-	protected int month = 0;
-	protected int interval = 0;
-	protected Date until = null;
-	protected boolean notification = false;
-	protected int recurrence_calculator = 0;
-	protected boolean alarmFlag = false;
-	protected int occurrence = 0;
+	protected Date[] change_exceptions;
+	protected Date[] delete_exceptions;
+	protected int days;
+	protected int day_in_month;
+	protected int month;
+	protected int interval;
+	protected Date until;
+	protected boolean notification;
+	protected int recurrence_calculator;
+	protected boolean alarmFlag;
+	protected int occurrence;
     
     /**
      * The end of a recurrence can be defined either through the until date or
      * through this count value. If this count value is used the object must
      * occur count times until the recurrence ends.
      */
-    protected int recurrence_count = 0;
+    protected int recurrence_count;
 	
-	protected int confirm = 0;
-	protected String confirmMessage = null;
+	protected int confirm;
+	protected String confirmMessage;
 	
-	protected boolean b_title = false;
-	protected boolean b_start_date = false;
-	protected boolean b_end_date = false;
-	protected boolean b_note = false;
-	protected boolean b_recurrence_id = false;
-	protected boolean b_recurrence_position = false;
-	protected boolean b_recurrence_date_position = false;
+	protected boolean b_title;
+	protected boolean b_start_date;
+	protected boolean b_end_date;
+	protected boolean b_note;
+	protected boolean b_recurrence_id;
+	protected boolean b_recurrence_position;
+	protected boolean b_recurrence_date_position;
 
     /**
      * Indicates that the attribute <code>recurrence_count</code> has been set
      * or is empty.
      */
-    protected boolean b_recurrence_count = false;
+    protected boolean b_recurrence_count;
 
-	protected boolean b_change_exceptions = false;
-	protected boolean b_delete_exceptions = false;
-	protected boolean b_days = false;
-	protected boolean b_day_in_month = false;
-	protected boolean b_month = false;
-	protected boolean b_interval = false;
-	protected boolean b_recurrence_type = false;
-	protected boolean b_until = false;
-	protected boolean b_notification = false;
+	protected boolean b_change_exceptions;
+	protected boolean b_delete_exceptions;
+	protected boolean b_days;
+	protected boolean b_day_in_month;
+	protected boolean b_month;
+	protected boolean b_interval;
+	protected boolean b_recurrence_type;
+	protected boolean b_until;
+	protected boolean b_notification;
 	
-	protected boolean b_participants = false;
-	protected boolean b_users = false;
+	protected boolean b_participants;
+	protected boolean b_users;
 	
-	protected boolean b_confirm = false;
-	protected boolean b_confirmMessage = false;
-	protected boolean b_occurrence = false;
+	protected boolean b_confirm;
+	protected boolean b_confirmMessage;
+	protected boolean b_occurrence;
 
 	// GET METHODS
 	public String getTitle ( ) 
