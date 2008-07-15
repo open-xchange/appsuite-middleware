@@ -316,9 +316,12 @@ public final class CalendarRecurringCollection {
         }
         return null;
     }
-    
+
     static void setRecurrencePositionOrDateInDAO(final CalendarDataObject cdao) throws OXException {
-        if (cdao.containsRecurrencePosition()) {
+        if (cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0) {
+        	/*
+        	 * Determine recurrence date position from recurrence position
+        	 */
             fillDAO(cdao);
             final RecurringResults rrs  = calculateRecurring(cdao, 0, 0, cdao.getRecurrencePosition());
             final  RecurringResult rr = rrs.getRecurringResult(0);
@@ -326,7 +329,10 @@ public final class CalendarRecurringCollection {
                 cdao.setRecurrenceDatePosition(new Date(rr.getNormalized()));
                 return;
             }
-        } else if (cdao.containsRecurrenceDatePosition()) {
+        } else if (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null) {
+        	/*
+        	 * Determine recurrence position from recurrence date position
+        	 */
             fillDAO(cdao);
             final RecurringResults rrs  = calculateRecurring(cdao, 0, 0, 0);
             final int x = rrs.getPositionByLong(cdao.getRecurrenceDatePosition().getTime());
