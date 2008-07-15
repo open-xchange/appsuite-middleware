@@ -204,7 +204,12 @@ public final class CalendarCommonCollection {
                 }
                 return oclp.canCreateObjects();
             } else if (action == CalendarOperation.UPDATE) {
-                if (cdao.getFolderType() != FolderObject.SHARED) {
+                if (cdao.getFolderType() == FolderObject.SHARED) {
+                    cdao.setSharedFolderOwner(access.getFolderOwner(inFolder));
+                    //cdao.setSharedFolderOwner(OXFolderTools.getFolderOwner(inFolder, cdao.getContext(), readcon));
+                    if (cdao.getPrivateFlag()) {
+                        return false;
+                    }
                     EffectivePermission oclp = null;
                     oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                     //oclp = OXFolderTools.getEffectiveFolderOCL(inFolder, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
@@ -216,11 +221,6 @@ public final class CalendarCommonCollection {
                         }
                     }
                 } else {
-                    cdao.setSharedFolderOwner(access.getFolderOwner(inFolder));
-                    //cdao.setSharedFolderOwner(OXFolderTools.getFolderOwner(inFolder, cdao.getContext(), readcon));
-                    if (cdao.getPrivateFlag()) {
-                        return false;
-                    }
                     EffectivePermission oclp = null;
                     oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                     //oclp = OXFolderTools.getEffectiveFolderOCL(inFolder, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
@@ -233,7 +233,12 @@ public final class CalendarCommonCollection {
                     }
                 }
             } else if (action == CalendarOperation.DELETE) {
-                if (cdao.getFolderType() != FolderObject.SHARED) {
+                if (cdao.getFolderType() == FolderObject.SHARED) {
+                    cdao.setSharedFolderOwner(access.getFolderOwner(inFolder));
+                    //cdao.setSharedFolderOwner(OXFolderTools.getFolderOwner(inFolder, cdao.getContext(), readcon));
+                    if (cdao.getPrivateFlag()) {
+                        return false;
+                    }
                     EffectivePermission oclp = null;
                     oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                     //oclp = OXFolderTools.getEffectiveFolderOCL(inFolder, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
@@ -245,11 +250,6 @@ public final class CalendarCommonCollection {
                         }
                     }
                 } else {
-                    cdao.setSharedFolderOwner(access.getFolderOwner(inFolder));
-                    //cdao.setSharedFolderOwner(OXFolderTools.getFolderOwner(inFolder, cdao.getContext(), readcon));
-                    if (cdao.getPrivateFlag()) {
-                        return false;
-                    }
                     EffectivePermission oclp = null;
                     oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                     //oclp = OXFolderTools.getEffectiveFolderOCL(inFolder, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
@@ -1017,10 +1017,10 @@ public final class CalendarCommonCollection {
             final PreparedStatement pst = writecon.prepareStatement(statement);
             if (types != null && fields != null && types.length > 0 && fields.length > 0) {
                 for (int a  = 0; a < types.length; a ++) {
-                    if (fields[a] != null) {
-                        pst.setObject(a+1, fields[a], types[a]);
-                    } else {
+                    if (fields[a] == null) {
                         pst.setNull(a+1, types[a]);
+                    } else {
+                        pst.setObject(a+1, fields[a], types[a]);
                     }
                 }
             }

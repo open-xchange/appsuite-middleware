@@ -180,13 +180,13 @@ class CalendarMySQL implements CalendarSqlImp {
 
 		CalendarCommonCollection.getVisibleFolderSQLInString(sb, uid, groups, c, uc, readcon);
 
-		if (CalendarCommonCollection.getFieldName(orderBy) != null && orderDir != null) {
+		if (CalendarCommonCollection.getFieldName(orderBy) == null || orderDir == null) {
+			sb.append(ORDER_BY);
+		} else {
 			sb.append(PDM_ORDER_BY);
 			sb.append(CalendarCommonCollection.getFieldName(orderBy));
 			sb.append(' ');
 			sb.append(orderDir);
-		} else {
-			sb.append(ORDER_BY);
 		}
 		final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
 		int a = 1;
@@ -523,13 +523,13 @@ class CalendarMySQL implements CalendarSqlImp {
 			sb.append(PD_CREATED_FROM_IS);
 			sb.append(uid);
 		}
-		if (CalendarCommonCollection.getFieldName(orderBy) != null && orderDir != null) {
+		if (CalendarCommonCollection.getFieldName(orderBy) == null || orderDir == null) {
+			sb.append(ORDER_BY);
+		} else {
 			sb.append(PDM_ORDER_BY);
 			sb.append(CalendarCommonCollection.getFieldName(orderBy));
 			sb.append(' ');
 			sb.append(orderDir);
-		} else {
-			sb.append(ORDER_BY);
 		}
 		final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
 		pst.setTimestamp(1, new Timestamp(d2.getTime()));
@@ -555,13 +555,13 @@ class CalendarMySQL implements CalendarSqlImp {
 			sb.append(PD_CREATED_FROM_IS);
 			sb.append(uid);
 		}
-		if (CalendarCommonCollection.getFieldName(orderBy) != null && orderDir != null) {
+		if (CalendarCommonCollection.getFieldName(orderBy) == null || orderDir == null) {
+			sb.append(ORDER_BY);
+		} else {
 			sb.append(PDM_ORDER_BY);
 			sb.append(CalendarCommonCollection.getFieldName(orderBy));
 			sb.append(' ');
 			sb.append(orderDir);
-		} else {
-			sb.append(ORDER_BY);
 		}
 		final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
 		pst.setTimestamp(1, new Timestamp(d2.getTime()));
@@ -588,13 +588,13 @@ class CalendarMySQL implements CalendarSqlImp {
 			sb.append(PD_CREATED_FROM_IS);
 			sb.append(uid);
 		}
-		if (CalendarCommonCollection.getFieldName(orderBy) != null && orderDir != null) {
+		if (CalendarCommonCollection.getFieldName(orderBy) == null || orderDir == null) {
+			sb.append(ORDER_BY);
+		} else {
 			sb.append(PDM_ORDER_BY);
 			sb.append(CalendarCommonCollection.getFieldName(orderBy));
 			sb.append(' ');
 			sb.append(orderDir);
-		} else {
-			sb.append(ORDER_BY);
 		}
 		final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
 		pst.setTimestamp(1, new Timestamp(d2.getTime()));
@@ -928,10 +928,10 @@ class CalendarMySQL implements CalendarSqlImp {
 				}
 
 				if (private_read_own.length > 0) {
-					if (!private_query) {
-						sb.append(PD_CREATED_FROM_IS);
-					} else {
+					if (private_query) {
 						sb.append(" OR pd.created_from = ");
+					} else {
+						sb.append(PD_CREATED_FROM_IS);
 					}
 					sb.append(uid);
 					sb.append(" AND (pdm.pfid IN ");
@@ -953,13 +953,13 @@ class CalendarMySQL implements CalendarSqlImp {
 				}
 
 				if (public_read_own.length > 0) {
-					if (!private_query && !public_query) {
-						sb.append(" AND pd.fid IN ");
+					if (private_query || public_query) {
+						sb.append(" OR pd.fid IN ");
 						sb.append(StringCollection.getSqlInString(public_read_own));
 						sb.append(PD_CREATED_FROM_IS);
 						sb.append(uid);
 					} else {
-						sb.append(" OR pd.fid IN ");
+						sb.append(" AND pd.fid IN ");
 						sb.append(StringCollection.getSqlInString(public_read_own));
 						sb.append(PD_CREATED_FROM_IS);
 						sb.append(uid);
@@ -1075,14 +1075,7 @@ class CalendarMySQL implements CalendarSqlImp {
 				pst.setNull(i++, java.sql.Types.VARCHAR);
 			}
 
-			if (!cdao.isSequence(true)) {
-				pst.setNull(i++, java.sql.Types.INTEGER);
-				pst.setNull(i++, java.sql.Types.INTEGER);
-				pst.setNull(i++, java.sql.Types.INTEGER);
-				pst.setNull(i++, java.sql.Types.VARCHAR);
-				pst.setNull(i++, java.sql.Types.VARCHAR);
-				pst.setNull(i++, java.sql.Types.VARCHAR);
-			} else {
+			if (cdao.isSequence(true)) {
 				if (!cdao.containsRecurrenceID()) {
 					pst.setInt(i++, cdao.getObjectID());
 					cdao.setRecurrenceID(cdao.getObjectID());
@@ -1103,6 +1096,13 @@ class CalendarMySQL implements CalendarSqlImp {
 				} else {
 					pst.setNull(i++, java.sql.Types.VARCHAR);
 				}
+			} else {
+				pst.setNull(i++, java.sql.Types.INTEGER);
+				pst.setNull(i++, java.sql.Types.INTEGER);
+				pst.setNull(i++, java.sql.Types.INTEGER);
+				pst.setNull(i++, java.sql.Types.VARCHAR);
+				pst.setNull(i++, java.sql.Types.VARCHAR);
+				pst.setNull(i++, java.sql.Types.VARCHAR);
 			}
 
 			insertParticipants(cdao, writecon);
@@ -1227,32 +1227,31 @@ class CalendarMySQL implements CalendarSqlImp {
 						} else if (cdao.getFolderType() == FolderObject.PUBLIC) {
 							pi.setNull(3, java.sql.Types.INTEGER);
 						} else if (cdao.getFolderType() == FolderObject.SHARED) {
-							if (cdao.getSharedFolderOwner() != 0) {
-								if (up[a].getIdentifier() == cdao.getSharedFolderOwner()) {
-									if (cdao.getGlobalFolderID() == 0) {
-										final int pfid = access.getDefaultFolder(cdao.getSharedFolderOwner(), FolderObject.CALENDAR).getObjectID();
-										// final int pfid =
-										// Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(cdao.getSharedFolderOwner(),
-										// cdao.getContext()));
-										pi.setInt(3, pfid);
-										up[a].setPersonalFolderId(pfid);
-										if (up[a].getIdentifier() == uid) {
-											cdao.setActionFolder(pfid);
-										}
-									} else {
-										pi.setInt(3, cdao.getGlobalFolderID());
-										up[a].setPersonalFolderId(cdao.getGlobalFolderID());
-									}
-								} else {
-									final int pfid = access.getDefaultFolder(up[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+							if (cdao.getSharedFolderOwner() == 0) {
+								throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
+							}
+							if (up[a].getIdentifier() == cdao.getSharedFolderOwner()) {
+								if (cdao.getGlobalFolderID() == 0) {
+									final int pfid = access.getDefaultFolder(cdao.getSharedFolderOwner(), FolderObject.CALENDAR).getObjectID();
 									// final int pfid =
-									// Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(up[a].getIdentifier(),
+									// Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(cdao.getSharedFolderOwner(),
 									// cdao.getContext()));
 									pi.setInt(3, pfid);
 									up[a].setPersonalFolderId(pfid);
+									if (up[a].getIdentifier() == uid) {
+										cdao.setActionFolder(pfid);
+									}
+								} else {
+									pi.setInt(3, cdao.getGlobalFolderID());
+									up[a].setPersonalFolderId(cdao.getGlobalFolderID());
 								}
 							} else {
-								throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
+								final int pfid = access.getDefaultFolder(up[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+								// final int pfid =
+								// Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(up[a].getIdentifier(),
+								// cdao.getContext()));
+								pi.setInt(3, pfid);
+								up[a].setPersonalFolderId(pfid);
 							}
 						} else {
 							throw new OXCalendarException(OXCalendarException.Code.FOLDER_TYPE_UNRESOLVEABLE);
