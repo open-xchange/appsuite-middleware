@@ -176,8 +176,19 @@ sub new {
 	my $self = {};
 	$self->{'basisUrl'} = "http://127.0.0.1/servlet/axis2/services/";
 	$self->{'serviceNs'} = "http://soap.admin.openexchange.com";
-	$self->{'Context'} = SOAP::Data->type("Context")->value(\SOAP::Data->value(SOAP::Data->name("id" => "111")));
-	$self->{'creds'} = SOAP::Data->type("Credentials")->value(\SOAP::Data->value(SOAP::Data->name("login" => "oxadmin"),SOAP::Data->name("password" => "secret")));
+	$self->{'Context'} = SOAP::Data->type("Context")->value(
+			     \SOAP::Data->value(
+                              SOAP::Data->name("id" => "424242"),
+			      SOAP::Data->name("name" => "testcontext"),
+			      SOAP::Data->name("maxQuota" => 5555)));
+	$self->{'creds'} = SOAP::Data->type("Credentials")->value(
+			     \SOAP::Data->value(
+                              SOAP::Data->name("login" => "oxadmin"),
+                              SOAP::Data->name("password" => "secret")));
+	$self->{'mastercreds'} = SOAP::Data->type("Credentials")->value(
+			     \SOAP::Data->value(
+                              SOAP::Data->name("login" => "oxadminmaster"),
+                              SOAP::Data->name("password" => "secret")));
 	
 	foreach my $opt(@ENV_OPTIONS) {
 		# Call setEnvConfigOption(opt); here
