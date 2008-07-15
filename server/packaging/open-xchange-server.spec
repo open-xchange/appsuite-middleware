@@ -58,6 +58,9 @@ Requires:  java-1.6.0-openjdk
 Requires:  java-icedtea
 %endif
 %endif
+%if 0%{?rhel_version}
+Requires:  java-1.5.0-sun
+%endif
 #
 
 %package -n	open-xchange

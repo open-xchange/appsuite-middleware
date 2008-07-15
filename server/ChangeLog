@@ -1,3 +1,8 @@
+* 2008-07-15 - choeger@open-xchange.com
+
+ - Bugfix #11642 RHEL5 Packages don't depend on Sun Java 1.5 and mysql-server
+ Packages
+ 
 * 2008-07-14 - marcus.klein@open-xchange.com
 
  - Bugfix #11619: Fixed code problem if on updating task an external participant
