@@ -1218,7 +1218,7 @@ public class UserTest extends AbstractTest {
         usr.setDisplay_name("Displayname " + ident);
         usr.setGiven_name(ident);
         usr.setSur_name("Lastname " + ident);
-        usr.setLanguage(Locale.GERMANY);
+        usr.setLanguage("de_DE");
         // new for testing
 
         usr.setEmail1("primaryemail-"+ident+"@"+AbstractTest.TEST_DOMAIN);
@@ -1541,7 +1541,7 @@ public class UserTest extends AbstractTest {
         retval.setDisplay_name(usr.getDisplay_name()+change_suffix);
         retval.setGiven_name(usr.getGiven_name()+change_suffix);
         retval.setSur_name(usr.getSur_name()+change_suffix);
-        retval.setLanguage(Locale.US);
+        retval.setLanguage("en_US");
         // new for testing
         
         final HashSet<String> aliase = usr.getAliases();
