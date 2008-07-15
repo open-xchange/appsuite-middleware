@@ -89,6 +89,7 @@ import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
+import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -750,19 +751,26 @@ public class AppointmentRequest {
 			
 			if (appointmentobject.getRecurrenceType() != CalendarObject.NONE && recurrencePosition > 0) {
 				appointmentobject.calculateRecurrence();
-				final RecurringResults recuResults = CalendarRecurringCollection.calculateRecurring(appointmentobject, 0, 0, recurrencePosition);
+				final RecurringResults recuResults = CalendarRecurringCollection.calculateRecurring(appointmentobject,
+						0, 0, recurrencePosition, CalendarRecurringCollection.MAXTC, true);
+				if (recuResults.size() == 0) {
+					if (LOG.isWarnEnabled()) {
+						LOG.warn(new StringBuilder(32).append("No occurrence at position ").append(recurrencePosition));
+					}
+					throw new OXCalendarException(OXCalendarException.Code.UNKNOWN_RECURRENCE_POSITION, Integer.valueOf(recurrencePosition));
+				}
 				final RecurringResult result = recuResults.getRecurringResult(0);
 				appointmentobject.setStartDate(new Date(result.getStart()));
 				appointmentobject.setEndDate(new Date(result.getEnd()));
 				appointmentobject.setRecurrencePosition(result.getPosition());
-				
+
 				appointmentwriter.writeAppointment(appointmentobject, jsonResponseObj);
 			} else {
 				appointmentwriter.writeAppointment(appointmentobject, jsonResponseObj);
 			}
-			
+
 			timestamp = appointmentobject.getLastModified();
-			
+
 			return jsonResponseObj;
 		} catch (final SQLException e) {
 			throw new OXException("SQLException occurred", e);
