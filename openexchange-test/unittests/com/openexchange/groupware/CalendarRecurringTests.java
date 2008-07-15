@@ -1605,6 +1605,7 @@ public class CalendarRecurringTests extends TestCase {
         delete.setIgnoreConflicts(true);        
         delete.setTitle("testCreateAndDeleteException - delete single exception and change title");
         final Date changed_exceptions[] = testobject.getChangeException();
+        final long changeExceptionDate = changed_exceptions[0].getTime();
         assertTrue("Got changed exceptions", changed_exceptions != null);
         delete.setDeleteExceptions(new Date[] { changed_exceptions[0] });
         
@@ -1623,7 +1624,10 @@ public class CalendarRecurringTests extends TestCase {
         	// this is what we want
         	final int x = 0;
         }
-        
+
+        assertTrue("Change exception has not been removed in database", test_dao.getChangeException() == null || test_dao.getChangeException().length == 0);
+        assertTrue("Delete exception has not been stored to database", test_dao.getDeleteException() != null && test_dao.getDeleteException().length == 1);
+        assertTrue("Delete exception date is not equal to previous change exception date", changeExceptionDate == test_dao.getDeleteException()[0].getTime());
     }    
     
 }
