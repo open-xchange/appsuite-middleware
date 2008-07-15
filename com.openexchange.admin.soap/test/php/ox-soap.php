@@ -11,6 +11,18 @@ class Credentials {
 	var $password;
 }
 
+function getContextClient($host) {
+
+	$client = new SoapClient(NULL, array (
+		"location" => "http://" . $host . "/servlet/axis2/services/OXContextService?wsdl",
+		"style" => SOAP_RPC,
+		"uri" => "http://soap.admin.openexchange.com",
+		"use" => SOAP_ENCODED
+	));
+
+	return $client;
+}
+
 function getUtilClient($host) {
 
 	$client = new SoapClient(NULL, array (
@@ -52,6 +64,10 @@ function printDatabase($dbObject) {
 
 function printFilestore($filestoreObject) {
 	print_r($filestoreObject);
+	//echo "ID:" . $serverObject->id . " NAME:" . $serverObject->name . "\n";
+}
+function printContext($contextObject) {
+	print_r($contextObject);
 	//echo "ID:" . $serverObject->id . " NAME:" . $serverObject->name . "\n";
 }
 ?>

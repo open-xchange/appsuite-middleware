@@ -1,0 +1,24 @@
+<?php
+
+include("ox-soap.php");
+
+try {
+	
+	$result = getContextClient("localhost")->list("*", getCredentialsObject("oxadminmaster","secret"));
+	
+	if (!is_soap_fault($result)) {
+		if (is_array($result)) {
+			foreach ($result['return'] as $val_obj) {
+				printContext($val_obj);
+			}
+		} else {
+			printContext($result);
+		}
+	}
+	
+} catch (SoapFault $fault) {
+	handleSoapFault($fault);
+} catch (Exception $e) {
+	handleExcepion($e);
+}
+?>
