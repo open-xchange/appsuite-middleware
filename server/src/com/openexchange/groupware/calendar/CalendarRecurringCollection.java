@@ -240,7 +240,7 @@ public final class CalendarRecurringCollection {
      */
     public static int getRecurringAppointmentDeleteAction(final CalendarDataObject cdao, final CalendarDataObject edao) {
         int rada = RECURRING_NO_ACTION;
-        if (edao.containsRecurrenceID()) {
+        if (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0) {
             if (edao.getRecurrenceID() == edao.getObjectID() && edao.getRecurrencePosition() == 0) {
                 if (cdao.containsRecurrencePosition()) {
                     // virtual delete
@@ -803,12 +803,13 @@ public final class CalendarRecurringCollection {
             clone.setRecurrenceDatePosition(cdao.getRecurrenceDatePosition());
         }
         CalendarRecurringCollection.setRecurrencePositionOrDateInDAO(clone);
-        cdao.setChangeExceptions(new java.util.Date[] { clone.getRecurrenceDatePosition() });
+        cdao.setChangeExceptions(CalendarCommonCollection.addException(edao.getChangeException(), clone.getRecurrenceDatePosition()));
         CalendarCommonCollection.fillObject(cdao, clone);
         clone.removeObjectID();
         clone.removeDeleteExceptions();
         clone.removeChangeExceptions();
-        clone.setChangeExceptions(new java.util.Date[] { clone.getRecurrenceDatePosition() }); // We store the date_position in the exception field
+        // We store the date_position in the exception field
+        clone.setChangeExceptions(new java.util.Date[] { clone.getRecurrenceDatePosition() });
         if (!cdao.containsStartDate()  || !cdao.containsEndDate()) {
             // Calculate real times !!!!
             CalendarRecurringCollection.fillDAO(edao);

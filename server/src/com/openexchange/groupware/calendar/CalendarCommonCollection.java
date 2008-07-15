@@ -866,6 +866,13 @@ public final class CalendarCommonCollection {
         }
     }
     
+    /**
+     * Returns a {@link Date} array with all occurrences of <code>d</code> deleted from given date array
+     * 
+     * @param date The date array
+     * @param d The date to check against
+     * @return A {@link Date} array with all occurrences of <code>d</code> deleted from given date array
+     */
     static Date[] removeException(final Date[] date, final Date d) {
         if (date != null && date.length > 0) {
             final Date ret[] = new Date[date.length-1];
@@ -873,7 +880,7 @@ public final class CalendarCommonCollection {
             for (int a = 0; a < date.length; a++) {
                 if (!date[a].equals(d)) {
                     if (x < ret.length) {
-                        ret[x++] = d;
+                        ret[x++] = date[a];
                     }
                 }
             }
@@ -883,6 +890,30 @@ public final class CalendarCommonCollection {
         }
         return null;
     }
+
+    /**
+     * Returns a {@link Date} array with <code>d</code> added to given date array
+     * if not already contained.
+     * 
+     * @param date The date array
+     * @param d The date to add
+     * @return A {@link Date} array with <code>d</code> added to given date array
+     */
+    static Date[] addException(final Date[] date, final Date d) {
+		if (date != null && date.length > 0) {
+			for (int i = 0; i < date.length; i++) {
+				if (date[i].equals(d)) {
+					return date;
+				}
+			}
+			final Date ret[] = new Date[date.length + 1];
+			System.arraycopy(date, 0, ret, 1, date.length);
+			ret[0] = d;
+			Arrays.sort(ret);
+			return ret;
+		}
+		return new Date[] { d };
+	}
     
     static CalendarDataObject fillObject(final CalendarDataObject source, final CalendarDataObject destination) {
         if (source.containsTitle()) {

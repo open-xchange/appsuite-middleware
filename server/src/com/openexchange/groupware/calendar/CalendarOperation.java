@@ -352,7 +352,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             if (CalendarCommonCollection.check(cdao.getDelExceptions(), edao.getDelExceptions())) {
                 if (CalendarCommonCollection.getFieldName(AppointmentObject.DELETE_EXCEPTIONS) != null) {
                     ucols[uc++] = AppointmentObject.DELETE_EXCEPTIONS;
-                    cdao.setDeleteExceptions(CalendarRecurringCollection.mergeExceptions(cdao.getDeleteException(), edao.getDeleteException()));
+                    //cdao.setDeleteExceptions(CalendarRecurringCollection.mergeExceptions(cdao.getDeleteException(), edao.getDeleteException()));
                 }
             }
         }
@@ -360,7 +360,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             if (CalendarCommonCollection.check(cdao.getExceptions(), edao.getExceptions())) {
                 if (CalendarCommonCollection.getFieldName(AppointmentObject.CHANGE_EXCEPTIONS) != null) {
                     ucols[uc++] = AppointmentObject.CHANGE_EXCEPTIONS;
-                    cdao.setChangeExceptions(CalendarRecurringCollection.mergeExceptions(cdao.getChangeException(), edao.getChangeException()));
+                    //cdao.setChangeExceptions(CalendarRecurringCollection.mergeExceptions(cdao.getChangeException(), edao.getChangeException()));
                 }
             }
         }
