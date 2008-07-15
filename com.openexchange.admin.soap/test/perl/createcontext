@@ -26,12 +26,11 @@ sub doRequest {
   
   my $admin = "oxadmin";
   my $adminpass = "secret";
-  my $displayname = "test4";
+  my $displayname = "admin user";
   my $surname = "admin";
   my $gname = "OX";
   my $email = "admin\@bla.de";
-  my $lang = SOAP::Data->value("Locale")->value(
-		   \SOAP::Data->value(SOAP::Data->name("language" => "de_DE")));
+  my $lang = "de_DE";
   my $timezone = "Europe/Berlin";
   my $quota = 500;
     
@@ -44,7 +43,7 @@ sub doRequest {
 			SOAP::Data->name("sur_name" => $surname),
 			SOAP::Data->name("given_name" => $gname),
 			SOAP::Data->name("primaryEmail" => $email),
-			$lang,
+			SOAP::Data->name("language" => $lang),
 			SOAP::Data->name("timezone" => $timezone)
 			)),
 		  $inSelf->{'mastercreds'}

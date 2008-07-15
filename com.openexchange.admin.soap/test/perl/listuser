@@ -105,11 +105,11 @@ sub doRequest {
         
       my @results1 = $som_entry2->paramsall;
       my @data = $inSelf->SUPER::fetch_results($fieldnames, \@results1);
-      #print Dumper(@data);
+      print Dumper(@results1);
 	  
       $inSelf->doCSVOutput($fields, \@data);
     }
-
+exit;
     foreach my $user ( @soapuserarr ) {
       my $som_entry3 = 
 	$soap->getModuleAccess($inSelf->{'Context'},
