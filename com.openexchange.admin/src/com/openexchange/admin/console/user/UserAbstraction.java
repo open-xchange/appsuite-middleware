@@ -61,7 +61,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.TimeZone;
 
 import com.openexchange.admin.console.AdminParser;
@@ -667,10 +666,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     
         final String optionValue3 = (String) parser.getOptionValue(this.languageOption);
         if (null != optionValue3) {
-            final String[] lange = optionValue3.split("_");
-            if (lange != null && lange.length == 2) {
-                usr.setLanguage(new Locale(lange[0].toLowerCase(), lange[1].toUpperCase()));
-            }
+            usr.setLanguage(optionValue3);
         }
     
         final String optionValue4 = (String) parser.getOptionValue(this.timezoneOption);

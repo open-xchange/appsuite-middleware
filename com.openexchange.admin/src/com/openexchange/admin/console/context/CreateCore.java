@@ -51,7 +51,6 @@ package com.openexchange.admin.console.context;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.Locale;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
@@ -104,10 +103,7 @@ public abstract class CreateCore extends ContextAbstraction {
 
             final String languageoptionvalue = (String) parser.getOptionValue(this.languageOption);
             if (languageoptionvalue != null) {
-                final String[] lange = languageoptionvalue.split("_");
-                if (lange != null && lange.length == 2) {
-                    usr.setLanguage(new Locale(lange[0].toLowerCase(), lange[1].toUpperCase()));
-                }
+                usr.setLanguage(languageoptionvalue);
             }
 
             parseAndSetContextQuota(parser, ctx);
