@@ -339,20 +339,16 @@ public final class CalendarRecurringCollection {
     }
     
     /**
-     * <code>normalizeLong</code> removed hours and minutes
-     * for the given long
-     *
-     * @param l a <code>long</code>
-     * @return a <code>long</code> value
-     */
-    public static long normalizeLong(long l) {
-        final long mod = l%MILLI_DAY;
-        if (mod == 0) {
-            return l;
-        }
-        l -= mod;
-        return l;
-    }
+	 * <code>normalizeLong</code> removed hours and minutes for the given long
+	 * 
+	 * @param l
+	 *            a <code>long</code>
+	 * @return The normalized <code>long</code> value
+	 */
+	public static long normalizeLong(final long l) {
+		final long mod = l % MILLI_DAY;
+		return mod == 0 ? l : l - mod;
+	}
     
     /**
      * <code>fillDAO</code> creates and fills needed
