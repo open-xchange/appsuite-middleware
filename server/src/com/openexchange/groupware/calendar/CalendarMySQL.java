@@ -1914,6 +1914,23 @@ class CalendarMySQL implements CalendarSqlImp {
 			cdao.setObjectID(clone.getObjectID());
 			cdao.setLastModified(clone.getLastModified());
 		}
+		if (clientLastModifiedCheck && (cdao.containsDeleteExceptions() || cdao.containsChangeExceptions())) {
+			/*
+			 * Direct update call: Delete and/or change exceptions were modified, thus possible last
+			 * occurrence(s) are/were deleted.
+			 */
+			if (edao.getRecurrencePosition() > 0 || edao.getRecurrenceDatePosition() != null) {
+				/*
+				 * Update single appointment; load main appointment first
+				 */
+			} else {
+				/*
+				 * Main appointment already loaded
+				 */
+			}
+
+
+		}
 		return null;
 	}
 
@@ -2927,7 +2944,8 @@ class CalendarMySQL implements CalendarSqlImp {
 			deleteSingleAppointment(cdao.getContextID(), cdao.getObjectID(), uid, edao.getCreatedBy(), inFolder, null, writecon, edao.getFolderType(), so, ctx, CalendarRecurringCollection.getRecurringAppointmentDeleteAction(cdao, edao), cdao, edao, clientLastModified);
 		}
 
-		if (cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0) {
+		if ((cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0)
+				|| (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null)) {
 			final CalendarDataObject cObject;
 			/*
 			 * Check if a change exception has been deleted
@@ -2948,20 +2966,19 @@ class CalendarMySQL implements CalendarSqlImp {
 			/*
 			 * Delete of a single appointment: delete exception
 			 */
-			/*
-			 * TODO: Reliably check for existing change exceptions
-			 */
 			final RecurringResults rresults = CalendarRecurringCollection.calculateRecurring(cObject, 0, 0, 0);
 			if (rresults.size() == empty
-					&& (cObject.getChangeException() == null || cObject.getChangeException().length == 0)) {
+					&& (cObject.getChangeException() == null || (isChangeException ? cObject.getChangeException().length == 1
+							: cObject.getChangeException().length == 0))) {
 				/*
-				 * TODO: Deleted last occurrence of a recurring appointment;
-				 * delete whole appointment
+				 * Commit current transaction
 				 */
+				//writecon.commit();
 				/*
-				 * SELECT FROM prg_dates WHERE cid = 1337 AND intfield01 !=
-				 * 37305 AND intfield02 = 37305
+				 * Delete whole recurring appointment since its last occurrence
+				 * has been deleted through previous transaction
 				 */
+				//deleteSingleAppointment(cObject.getContextID(), cObject.getObjectID(), cObject.getCreatedBy(), cObject.getCreatedBy(), inFolder, null, writecon, cObject.getFolderType(), so, ctx, CalendarRecurringCollection.RECURRING_NO_ACTION, cObject, cObject, clientLastModified);
 			}
 		}
 	}
