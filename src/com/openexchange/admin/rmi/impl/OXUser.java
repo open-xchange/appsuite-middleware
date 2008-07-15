@@ -58,7 +58,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Locale;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
@@ -122,14 +121,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     private final PropertyHandler prop;
     
     private BundleContext context = null;
-
-    public static Locale getLanguage(final User usr){
-        if (usr.getLanguage() == null) {
-            usr.setLanguage(new Locale(FALLBACK_LANGUAGE_CREATE, FALLBACK_COUNTRY_CREATE));
-        }
-        return usr.getLanguage();
-    }
-    
 
     public OXUser(final BundleContext context) throws RemoteException, StorageException {
         super();
@@ -1195,9 +1186,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     private void checkCreateUserData(final Context ctx, final User usr, final PropertyHandler prop) throws InvalidDataException, EnforceableDataObjectException, StorageException {
-        final Locale langus = OXUser.getLanguage(usr);
-        if (langus.getLanguage().indexOf('_') != -1 || langus.getCountry().indexOf('_') != -1) {
-            throw new InvalidDataException("The specified locale data (Language:" + langus.getLanguage() + " - Country:" + langus.getCountry() + ") for users language is invalid!");
+
+        final String lang = usr.getLanguage();
+        if (lang == null) {
+            usr.setLanguage(FALLBACK_LANGUAGE_CREATE + "_" + FALLBACK_COUNTRY_CREATE);
+        } else {
+            if( ! lang.contains("_") ) {
+                throw new InvalidDataException("language must contain an underscore, e.g. en_US");
+            }
         }
         
         if (usr.getPassword() == null || usr.getPassword().trim().length() == 0) {

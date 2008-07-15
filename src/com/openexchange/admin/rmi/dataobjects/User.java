@@ -56,7 +56,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -237,7 +236,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
 
     private boolean telephone_isdnset = false;
 
-    private Locale language;
+    private String language;
 
     private boolean languageset = false;
 
@@ -2394,21 +2393,24 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     /**
      * Returns the language setting of this user object
      * 
-     * @return A {@link Locale} object containing the language setting
+     * @return A {@link String} object containing the language setting
      */
-    final public Locale getLanguage() {
+    final public String getLanguage() {
         return language;
     }
 
     /**
-     * Sets the language for this user object. Note: Locale distinguishes between languages and countries.
-     * Unfortunately you have to select the country to the corresponding language here. So e.g.
-     * Locale.GERMANY not Locale.GERMAN. The only possible values are Locale.GERMANY, Locale.US and 
-     * Locale.FRANCE at the moment.
-     * 
-     * @param language A {@link Locale} object containing the language setting
+     * Sets the language for this user object. Note: Language must be constructed like
+     *   <language>_<COUNTRYCODE>
+     * See
+     *  http://www.loc.gov/standards/iso639-2/englangn.html for possible values of <language> and
+     *  http://www.iso.org/iso/country_codes/iso_3166_code_lists/english_country_names_and_code_elements.htm
+     *  for possible values of <COUNTRYCODE>
+     *  NOTE: Of course not all variants are supported by OX
+     *  
+     * @param language A {@link String} object containing the language setting
      */
-    final public void setLanguage(final Locale language) {
+    final public void setLanguage(final String language) {
         if (null == language) {
             this.languageset = true;
         }
@@ -4035,9 +4037,6 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         }
         if (null != this.anniversary) {
             object.anniversary = (Date) this.anniversary.clone();
-        }
-        if (null != this.language) {
-            object.language = (Locale) this.language.clone();
         }
         return object;
     }

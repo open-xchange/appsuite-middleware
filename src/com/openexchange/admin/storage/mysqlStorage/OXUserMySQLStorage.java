@@ -77,7 +77,6 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.impl.OXUser;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
@@ -192,7 +191,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             if (usrdata.getLanguage() != null) {
                 stmt = write_ox_con.prepareStatement("UPDATE user SET preferredlanguage = ? WHERE cid = ? AND id = ?");
-                stmt.setString(1, usrdata.getLanguage().getLanguage() + "_" + usrdata.getLanguage().getCountry());
+                stmt.setString(1, usrdata.getLanguage());
                 stmt.setInt(2, context_id);
                 stmt.setInt(3, user_id);
                 stmt.executeUpdate();
@@ -772,17 +771,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     stmt.setString(7, DEFAULT_TIMEZONE_CREATE);
                 }
 
-                final Locale langus = OXUser.getLanguage(usrdata);
-                String lang = "en_US"; // fallback when client sent INVALID
-                // locale
-                if (langus.getLanguage().indexOf('_') != -1 || langus.getCountry().indexOf('_') != -1) {
-                    // ok , wrong language/country set , language/country cannot
-                    // contain "_"
-                    log.error("Client sent wrong locale data(" + langus + ") in users language!Using fallback en_US");
-                } else {
-                    lang = langus.getLanguage().toLowerCase() + "_" + langus.getCountry().toUpperCase();
-                }
-
+                // language cannot be null, that's checked in checkCreateUserData()
+		final String lang = usrdata.getLanguage();
                 stmt.setString(8, lang);
 
                 // mailenabled
