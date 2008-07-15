@@ -2,6 +2,7 @@
 
  - Bugfix #11642 RHEL5 Packages don't depend on Sun Java 1.5 and mysql-server
   Packages
+ - Bugfix ID#11640 SP3->SP4 update fails for package open-xchange-admin-doc
 
 * 2008-07-10 - choeger@open-xchange.com
 
