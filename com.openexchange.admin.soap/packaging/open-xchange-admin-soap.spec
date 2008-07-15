@@ -21,7 +21,12 @@ BuildRequires:  java-sdk-1.5.0-sun
 BuildRequires:  java-sdk-1.5.0-sun cairo
 %endif
 %if 0%{?fedora_version}
-BuildRequires:  java-devel-icedtea
+%if %{?fedora_version} > 8
+BuildRequires:  java-1.6.0-openjdk-devel saxon
+%endif
+%if %{?fedora_version} <= 8
+BuildRequires:  java-devel-icedtea saxon
+%endif
 %endif
 Version:        6.5.0
 Release:        0
@@ -47,7 +52,12 @@ Requires:  java-1_5_0-sun
 %endif
 %endif
 %if 0%{?fedora_version}
-Requires:  jre-icedtea
+%if %{?fedora_version} > 8
+Requires:  java-1.6.0-openjdk
+%endif
+%if %{?fedora_version} <= 8
+Requires:  java-icedtea
+%endif
 %endif
 #
 
