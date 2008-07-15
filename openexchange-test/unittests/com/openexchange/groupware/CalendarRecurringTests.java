@@ -953,9 +953,6 @@ public class CalendarRecurringTests extends TestCase {
         }
     }
 
-    /**
-     * FIXME Cisco, please check this.
-     */
     public void testCreateExceptionFromRecurringWithDatePosition() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -1005,7 +1002,9 @@ public class CalendarRecurringTests extends TestCase {
         update.setEndDate(test_new_end_date);
         
         update.setTitle("testCreateExceptionFromRecurringWithDatePosition - Step 2 - Update (create exception)");
-        update.setRecurrenceDatePosition(new Date(CalendarRecurringCollection.normalizeLong(new_start)));
+        // The date when change exception shall take place
+        final long changeExceptionDate = CalendarRecurringCollection.normalizeLong(new_start);
+        update.setRecurrenceDatePosition(new Date(changeExceptionDate));
         
         
         csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
@@ -1024,7 +1023,8 @@ public class CalendarRecurringTests extends TestCase {
         final java.util.Date exceptions[] = testobject.getChangeException();
         assertTrue("Got exceptions", exceptions != null);
         
-        assertEquals("Check correct exception calculation", exception_date, exceptions[0].getTime());
+        assertEquals("Check correct exception calculation", exception_date, changeExceptionDate);
+        assertEquals("Check correct exception calculation with stored date", exception_date, exceptions[0].getTime());
         
         
         final int cols[] = new int[] { AppointmentObject.TITLE,  AppointmentObject.START_DATE, AppointmentObject.END_DATE, AppointmentObject.OBJECT_ID, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.RECURRENCE_TYPE, AppointmentObject.DELETE_EXCEPTIONS, AppointmentObject.CHANGE_EXCEPTIONS };
