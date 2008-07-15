@@ -1,19 +1,8 @@
 <?php
-$client = new SoapClient(NULL, array (
-	"location" => "http://localhost/servlet/axis2/services/OXUtilService?wsdl",
-	"style" => SOAP_RPC,
-	"uri" => "http://soap.admin.openexchange.com",
-	"use" => SOAP_ENCODED
-));
 
-class Credentials {
-	var $login;
-	var $password;
-}
+include("ox-soap.php");
 
-function printServer2Console($serverObject) {
-	echo "ID:" . $serverObject->id . " NAME " . $serverObject->name . "\n";
-}
+$client = getUtilClient("localhost");
 
 $credObj = new Credentials();
 $credObj->login = "oxadminmaster";
@@ -24,10 +13,10 @@ try {
 	if (!is_soap_fault($result)) {
 		if (is_array($result)) {
 			foreach ($result['return'] as $val_obj) {
-				printServer2Console($val_obj);
+				printServer($val_obj);
 			}
 		} else {
-			printServer2Console($result);
+			printServer($result);
 		}
 	}
 } catch (SoapFault $fault) {
