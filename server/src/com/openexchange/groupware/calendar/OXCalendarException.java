@@ -156,7 +156,11 @@ public class OXCalendarException extends OXException {
         /**
          * Calendar calculation requires a proper defined time zone.
          */
-        TIMEZONE_MISSING("Calendar calculation requires a proper defined time zone.", 73, Category.CODE_ERROR);
+        TIMEZONE_MISSING("Calendar calculation requires a proper defined time zone.", 73, Category.CODE_ERROR),
+        /**
+         * Recurrence position %1$s does not exist
+         */
+        UNKNOWN_RECURRENCE_POSITION("Recurrence position %1$s does not exist", 74, Category.USER_INPUT);
         
         /**
          * Message of the exception.
