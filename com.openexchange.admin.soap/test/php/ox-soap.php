@@ -11,6 +11,11 @@ class Credentials {
 	var $password;
 }
 
+class Context {
+	var $id;
+	var $name;
+}
+
 function getContextClient($host) {
 
 	$client = new SoapClient(NULL, array (
@@ -35,11 +40,28 @@ function getUtilClient($host) {
 	return $client;
 }
 
+function getGroupClient($host) {
+
+	$client = new SoapClient(NULL, array (
+		"location" => "http://" . $host . "/servlet/axis2/services/OXGroupService?wsdl",
+		"style" => SOAP_RPC,
+		"uri" => "http://soap.admin.openexchange.com",
+		"use" => SOAP_ENCODED
+	));
+
+	return $client;
+}
+
 function getCredentialsObject($user, $password) {
 	$credObj = new Credentials();
 	$credObj->login = $user;
 	$credObj->password = $password;
 	return $credObj;
+}
+
+function getContextObject($context_id){
+	$ctx = new Context();
+	$ctx->id = $context_id;
 }
 
 // some error handling functions
@@ -68,6 +90,10 @@ function printFilestore($filestoreObject) {
 }
 function printContext($contextObject) {
 	print_r($contextObject);
+	//echo "ID:" . $serverObject->id . " NAME:" . $serverObject->name . "\n";
+}
+function printGroup($groupObject) {
+	print_r($groupObject);
 	//echo "ID:" . $serverObject->id . " NAME:" . $serverObject->name . "\n";
 }
 ?>
