@@ -21,6 +21,7 @@ Description: The Open Xchange Admin Daemon RMI client library
 
 Package: open-xchange-admin-doc
 Conflicts: open-xchange-admin-docs-he
+Replaces: open-xchange-admin-docs-he
 Architecture: all
 Section: doc
 Depends: ${shlibs:Depends}, ${misc:Depends}
