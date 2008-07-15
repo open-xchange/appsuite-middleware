@@ -88,7 +88,7 @@ public final class CalendarRecurringCollection {
     public static final int CHANGE_RECURRING_TYPE = 6;
     public static final int RECURRING_EXCEPTION_DELETE_EXISTING = 7;    
     
-    static int MAXTC = 999;
+    public static int MAXTC = 999;
     private static int NO_END_YEARS = 4;
     
     
