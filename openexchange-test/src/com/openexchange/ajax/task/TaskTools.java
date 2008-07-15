@@ -197,6 +197,14 @@ public final class TaskTools extends Assert {
         return (InsertResponse) Executor.execute(client, request);
     }
 
+    public static InsertResponse insert(final WebConversation conversation, 
+		final String hostName, final String sessionId, final String protocol, 
+		final InsertRequest request) throws AjaxException, IOException, 
+		SAXException, JSONException {
+		return (InsertResponse) Executor.execute(new AJAXSession(
+    			conversation, sessionId), request, protocol, hostName);
+    }
+
     /**
      * @deprecated use {@link #update(AJAXSession, UpdateRequest)}
      */
@@ -360,6 +368,14 @@ public final class TaskTools extends Assert {
         return (DeleteResponse) Executor.execute(client, request);
     }
 
+    public static DeleteResponse delete(final WebConversation conversation, 
+		final String hostName, final String sessionId, final String protocol, 
+        final DeleteRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+    	return (DeleteResponse) Executor.execute(new AJAXSession(conversation, 
+    		sessionId), request, protocol, hostName);
+	}
+    
     /**
      * @deprecated use {@link #all(AJAXSession, AllRequest)}.
      */
@@ -409,6 +425,14 @@ public final class TaskTools extends Assert {
         SAXException, JSONException {
         return all(client.getSession(), request);
     }
+
+    public static AllResponse all(final WebConversation conversation, 
+		final String hostName, final String sessionId, final String protocol, 
+        final AllRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+    	return (AllResponse) Executor.execute(new AJAXSession(conversation, 
+    		sessionId), request, protocol, hostName);
+	}
 
     public static CommonUpdatesResponse updates(final AJAXClient client,
         final UpdatesRequest request) throws AjaxException, IOException,
