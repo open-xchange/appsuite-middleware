@@ -49,4 +49,9 @@ function printDatabase($dbObject) {
 	print_r($dbObject);
 	//echo "ID:" . $serverObject->id . " NAME:" . $serverObject->name . "\n";
 }
+
+function printFilestore($filestoreObject) {
+	print_r($filestoreObject);
+	//echo "ID:" . $serverObject->id . " NAME:" . $serverObject->name . "\n";
+}
 ?>
