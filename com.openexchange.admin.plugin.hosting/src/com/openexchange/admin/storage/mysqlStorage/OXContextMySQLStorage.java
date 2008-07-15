@@ -65,7 +65,6 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Vector;
 
 import org.apache.commons.io.FileUtils;
@@ -86,7 +85,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.impl.OXUser;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
@@ -1172,10 +1170,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 // create group users for context
                 // get display name for context default group resolved via
                 // admins language
-                final Locale langus = OXUser.getLanguage(admin_user);
-                final String lang = langus.getLanguage() + "_" + langus.getCountry();
 
-                final String def_group_disp_name = prop.getGroupProp("DEFAULT_CONTEXT_GROUP_" + lang.toUpperCase(), "Users");
+                final String def_group_disp_name = prop.getGroupProp("DEFAULT_CONTEXT_GROUP_" + admin_user.getLanguage().toUpperCase(), "Users");
                 this.oxcontextcommon.createStandardGroupForContext(context_id, ox_write_con, def_group_disp_name, group_id, gid_number);
 
                 
@@ -1202,7 +1198,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
 
                 final OXFolderAdminHelper oxa = new OXFolderAdminHelper();
-                oxa.addContextSystemFolders(context_id, display, lang, ox_write_con);
+                oxa.addContextSystemFolders(context_id, display, admin_user.getLanguage(), ox_write_con);
 
                 ox_write_con.commit();
 
