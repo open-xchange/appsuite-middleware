@@ -42,6 +42,7 @@
 	
 	<target name="clean">
 	    <echo message="Dir: ${basedir},${build}" />
+	    <echo message="Conf: ${conf.dir}/test.properties" />
 		<delete dir="${build}" />
 		<delete dir="${test.xml.dir}" />
 		<delete file="open-xchange-iface-tests.jar" />
@@ -109,7 +110,7 @@
 	</target>
 
 	<target name="run-interface-tests" depends="interface-jar">
-		<delete dir="${test.xml.dir}"/> 
+		<delete dir="${test.xml.dir}"/>
 		<mkdir dir="${test.xml.dir}"/> 
 		<junit errorProperty="test.failed" failureProperty="test.failed"  showoutput="yes" printsummary="yes"> 
 			<classpath>
