@@ -6,13 +6,15 @@
  * 
  */
 
+$SOAPHOST = "localhost";
+
 class Credentials {
 	var $login;
 	var $password;
 }
 
 class Context {
-	var $Id;
+	var $id;
 	var $name;
 	var $idset;
 }
@@ -62,7 +64,7 @@ function getCredentialsObject($user, $password) {
 
 function getContextObject($context_id){
 	$ctx = new Context();
-	$ctx->Id = $context_id;
+	$ctx->id = $context_id;
 	$ctx->idset = true;
 	return $ctx;
 }

@@ -4,7 +4,7 @@ include ("ox-soap.php");
 
 try {
 
-	$result = getUtilClient("localhost")->listFilestore("*", getCredentialsObject("oxadminmaster", "secret"));
+	$result = getUtilClient($SOAPHOST)->listFilestore("*", getCredentialsObject("oxadminmaster", "secret"));
 
 	if (!is_soap_fault($result)) {
 		if (is_array($result)) {

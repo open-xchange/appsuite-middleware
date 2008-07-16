@@ -4,7 +4,7 @@ include("ox-soap.php");
 
 try {
 	
-	$result = getGroupClient("localhost")->list(getContextObject(1),"*", getCredentialsObject("oxadminmaster","secret"));
+	$result = getGroupClient($SOAPHOST)->list(getContextObject(1),"*", getCredentialsObject("admin","secret"));
 	
 	if (!is_soap_fault($result)) {
 		if (is_array($result)) {
