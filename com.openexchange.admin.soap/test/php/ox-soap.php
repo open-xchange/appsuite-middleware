@@ -6,6 +6,7 @@
  * 
  */
 
+#$SOAPHOST = "10.10.10.154";
 $SOAPHOST = "localhost";
 
 $OXMASTER_ADMIN = "oxadminmaster";
@@ -32,6 +33,11 @@ class User {
 	var $idset;
 }
 
+class Server {
+	var $id;
+	var $name;
+}
+
 class Database {
 	var $clusterWeight;
 	var $currentUnits;
@@ -48,7 +54,17 @@ class Database {
 	var $poolMax;
 	var $read_id;
 	var $scheme;
-	var $url;	
+	var $url;
+}
+
+class Filestore {
+	var $currentContexts;
+	var $id;
+	var $maxContexts;
+	var $reserved;
+	var $url;
+	var $used;
+	var $size;		
 }
 
 function getContextClient($host) {
@@ -131,6 +147,7 @@ function getUserObject($user_id){
 	$usr->idset = true;
 	return $usr;
 }
+
 
 // some error handling functions
 function handleSoapFault($SoapFault) {

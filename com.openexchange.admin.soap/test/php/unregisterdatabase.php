@@ -21,7 +21,8 @@ try {
 	$result = getUtilClient($SOAPHOST)->registerDatabase($db, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
 
 	if (!is_soap_fault($result)) {
-		printDatabase($result->id);
+		$db->id = $result->id;
+		getUtilClient($SOAPHOST)->unregisterDatabase($db, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
 	}
 
 } catch (SoapFault $fault) {
