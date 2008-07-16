@@ -57,6 +57,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
@@ -1358,6 +1360,62 @@ public final class CalendarCommonCollection {
 			}				
 		}
 		return false;		
+	}
+
+	/**
+	 * Checks if specified (exception) dates occur in given recurring appointment
+	 * 
+	 * @param dates The (exception) dates
+	 * @param recurringAppointment The recurring appointment
+	 * @return <code>true</code> if every date occurs in recurring appointment; otherwise <code>false</code>
+	 * @throws OXException If occurrences cannot be calculated
+	 */
+	public static boolean checkIfDatesOccurInRecurrence(final Date[] dates, final CalendarDataObject recurringAppointment) throws OXException {
+		if (dates == null || dates.length == 0) {
+			/*
+			 * No dates given
+			 */
+			return true;
+		}
+		final RecurringResults rresults = CalendarRecurringCollection.calculateRecurring(recurringAppointment, 0, 0, 0, CalendarRecurringCollection.MAXTC, true);
+		boolean result = true;
+		for (int i = 0; i < dates.length && result; i++) {
+			result = (rresults.getPositionByLong(dates[i].getTime()) != -1);
+		}
+		return result;
+	}
+
+	/**
+	 * Merges the specified (exception) dates
+	 * 
+	 * @param ddates The first dates
+	 * @param cdates The second dates
+	 * @return The sorted and merged dates
+	 */
+	public static Date[] mergeExceptionDates(final Date[] ddates, final Date[] cdates) {
+		final Set<Date> set;
+		{
+			int initialCapacity = 0;
+			if (ddates != null) {
+				initialCapacity += ddates.length;
+			}
+			if (cdates != null) {
+				initialCapacity += cdates.length;
+			}
+			if (initialCapacity == 0) {
+				return new Date[0];
+			}
+			set = new HashSet<Date>(initialCapacity);
+		}
+		if (ddates != null) {
+			set.addAll(Arrays.asList(ddates));
+		}
+		if (cdates != null) {
+			set.addAll(Arrays.asList(cdates));
+		}
+		final Date[] merged = set.toArray(new Date[set.size()]);
+		Arrays.sort(merged);
+		return merged;
 	}
 	
 	public static void checkForInvalidCharacters(final CalendarDataObject cdao) throws OXException {

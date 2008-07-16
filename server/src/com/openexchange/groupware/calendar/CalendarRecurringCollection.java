@@ -262,14 +262,20 @@ public final class CalendarRecurringCollection {
      * <code>getRecurringAppoiontmentUpdateAction</code> detects and returns
      * the action type
      *
-     * @param cdao a <code>CalendarDataObject</code> object (tranfered)
+     * @param cdao a <code>CalendarDataObject</code> object (transfered)
      * @param edao a <code>CalendarDataObject</code> object (loaded)
      * @return a <code>int</code> value
      */
     public static int getRecurringAppoiontmentUpdateAction(final CalendarDataObject cdao, final CalendarDataObject edao) {
         int rada = RECURRING_NO_ACTION;
-        if (edao.containsRecurrenceID()) {
-            if (cdao.containsRecurrencePosition()) {
+        /*
+         * Check for edao denotes a recurring appointment
+         */
+        if (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0) {
+            /*
+             * Check if edao denotes a change exception of a recurring appointment
+             */
+        	if (cdao.containsRecurrencePosition()) {
                 rada = RECURRING_CREATE_EXCEPTION;
             } else if (cdao.containsRecurrenceDatePosition()) {
                 rada = RECURRING_CREATE_EXCEPTION;

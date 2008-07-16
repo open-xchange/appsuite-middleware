@@ -399,17 +399,36 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
     
     public CalendarDataObject getObjectById(final int oid, final int inFolder) throws OXException, SQLException, OXObjectNotFoundException, OXPermissionException {
+        return getObjectById(oid, inFolder, null);
+    }
+
+    /**
+     * Gets the appointment denoted by specified object ID in given folder
+     * 
+     * @param oid The object ID
+     * @param inFolder The folder ID
+     * @param readcon A connection with read capability (leave to <code>null</code> to fetch from pool)
+     * @return The appointment object
+     * @throws OXException
+     * @throws OXObjectNotFoundException
+     * @throws OXPermissionException
+     */
+    public CalendarDataObject getObjectById(final int oid, final int inFolder, final Connection readcon) throws OXException, OXObjectNotFoundException, OXPermissionException {
         if (session != null) {
-            Connection readcon = null;
+            Connection rcon = readcon;
+            boolean closeRead = false;
             PreparedStatement prep = null;
             ResultSet rs = null;
             final Context ctx = Tools.getContext(session);
             try {
-                readcon = DBPool.pickup(ctx);
+            	if (rcon == null) {
+            		rcon = DBPool.pickup(ctx);
+            		closeRead = true;
+            	}
                 final CalendarOperation co = new CalendarOperation();
-                prep = cimp.getPreparedStatement(readcon, cimp.loadAppointment(oid, ctx));
+                prep = cimp.getPreparedStatement(rcon, cimp.loadAppointment(oid, ctx));
                 rs = cimp.getResultSet(prep);
-                final CalendarDataObject cdao = co.loadAppointment(rs, oid, inFolder, cimp, readcon, session, ctx, CalendarOperation.READ, inFolder);
+                final CalendarDataObject cdao = co.loadAppointment(rs, oid, inFolder, cimp, rcon, session, ctx, CalendarOperation.READ, inFolder);
                 if (cdao.getRecurrenceType() != AppointmentObject.NO_RECURRENCE) {
                     final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1, 999, true);
                     final RecurringResult rr = rrs.getRecurringResultByPosition(1);
@@ -434,9 +453,9 @@ public class CalendarSql implements AppointmentSQLInterface {
             } finally {
                 CalendarCommonCollection.closeResultSet(rs);
                 CalendarCommonCollection.closePreparedStatement(prep);
-                if (readcon != null) {
+                if (closeRead && rcon != null) {
                     try {
-                        DBPool.push(ctx, readcon);
+                        DBPool.push(ctx, rcon);
                     } catch (final DBPoolingException dbpe) {
                         LOG.error(ERROR_PUSHING_DATABASE, dbpe);
                     }

@@ -1,3 +1,8 @@
+* 2008-07-16 - thorben.betten@open-xchange.com
+
+ - Bugfix #10377: Deleting whole recurring appointment if all of its
+   occurrences are marked as a delete exception
+
 * 2008-07-15 - choeger@open-xchange.com
 
  - Bugfix #11642 RHEL5 Packages don't depend on Sun Java 1.5 and mysql-server

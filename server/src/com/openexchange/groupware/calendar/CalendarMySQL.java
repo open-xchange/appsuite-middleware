@@ -1638,7 +1638,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		return updateAppointment(cdao, edao, writecon, so, ctx, inFolder, clientLastModified, true);
 	}
 
-	final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified, final boolean clientLastModifiedCheck) throws DataTruncation, SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
+	private final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified, final boolean clientLastModifiedCheck) throws DataTruncation, SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
 
 		final CalendarOperation co = new CalendarOperation();
 
@@ -1763,6 +1763,24 @@ class CalendarMySQL implements CalendarSqlImp {
 			}
 		}
 
+		/*
+		 * Check that any specified exception date is contained in recurring appointment's range
+		 */
+		if ((cdao.containsDeleteExceptions() || cdao.containsChangeExceptions()) && edao.getRecurrenceID() > 0) {
+			final CalendarDataObject tdao;
+			if (edao.getObjectID() == edao.getRecurrenceID()) {
+				// edao already denotes main appointment
+				tdao = edao;
+			} else {
+				// Load main appointment for recurring calculation
+				tdao = new CalendarSql(so).getObjectById(edao.getRecurrenceID(), inFolder);
+			}
+			if (!CalendarCommonCollection.checkIfDatesOccurInRecurrence(CalendarCommonCollection.mergeExceptionDates(
+					cdao.getDeleteException(), cdao.getChangeException()), tdao)) {
+				throw new OXCalendarException(OXCalendarException.Code.FOREIGN_EXCEPTION_DATE);
+			}
+		}
+		
 		final int ucols[] = new int[26];
 		int uc = CalendarOperation.fillUpdateArray(cdao, edao, ucols);
 		final MBoolean cup = new MBoolean(false);
@@ -1916,21 +1934,46 @@ class CalendarMySQL implements CalendarSqlImp {
 			cdao.setObjectID(clone.getObjectID());
 			cdao.setLastModified(clone.getLastModified());
 		}
-		if (clientLastModifiedCheck && (cdao.containsDeleteExceptions() || cdao.containsChangeExceptions())) {
+		if (clientLastModifiedCheck
+				&& (cdao.containsDeleteExceptions() || cdao.containsChangeExceptions())
+				&& (!cdao.containsChangeExceptions() || cdao.getChangeException() == null || cdao.getChangeException().length <= 0)
+				&& (cdao.containsDeleteExceptions() && cdao.getDeleteException() != null && cdao.getDeleteException().length > 0)) {
 			/*
-			 * Direct update call: Delete and/or change exceptions were modified, thus possible last
-			 * occurrence(s) are/were deleted.
+			 * No change exception exists for this recurring appointment;
+			 * further checking needed
 			 */
+			final CalendarDataObject main;
 			if (edao.getRecurrencePosition() > 0 || edao.getRecurrenceDatePosition() != null) {
 				/*
 				 * Update single appointment; load main appointment first
 				 */
+				main = new CalendarSql(so).getObjectById(edao.getRecurrenceID(), inFolder);
 			} else {
 				/*
 				 * Main appointment already loaded
 				 */
+				main = edao;
 			}
-
+			final RecurringResults rresults = CalendarRecurringCollection.calculateRecurring(main, 0, 0, 0,
+					CalendarRecurringCollection.MAXTC, true);
+			/*
+			 * Check if every possible occurrence is covered by a delete exception
+			 */
+			if (rresults.size() <= cdao.getDeleteException().length) {
+				/*
+				 * Commit current transaction
+				 */
+				if (!writecon.getAutoCommit()) {
+					writecon.commit();
+				}
+				/*
+				 * Delete whole recurring appointment since its last occurrence
+				 * has been deleted through previous transaction
+				 */
+				deleteSingleAppointment(main.getContextID(), main.getObjectID(), main.getCreatedBy(), main
+						.getCreatedBy(), inFolder, null, writecon, main.getFolderType(), so, ctx,
+						CalendarRecurringCollection.RECURRING_NO_ACTION, main, main, clientLastModified);
+			}
 
 		}
 		return null;
@@ -2948,7 +2991,7 @@ class CalendarMySQL implements CalendarSqlImp {
 
 		if ((cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0)
 				|| (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null)) {
-			final CalendarDataObject cObject;
+			final CalendarDataObject mdao;
 			/*
 			 * Check if a change exception has been deleted
 			 */
@@ -2958,29 +3001,33 @@ class CalendarMySQL implements CalendarSqlImp {
 				/*
 				 * A change exception; load real appointment
 				 */
-				cObject = new CalendarSql(so).getObjectById(edao.getRecurrenceID(), inFolder);
+				mdao = new CalendarSql(so).getObjectById(edao.getRecurrenceID(), inFolder);
 				empty = 0;
 			} else {
-				cObject = edao;
+				mdao = edao;
 				empty = 1;
 			}
 
 			/*
 			 * Delete of a single appointment: delete exception
 			 */
-			final RecurringResults rresults = CalendarRecurringCollection.calculateRecurring(cObject, 0, 0, 0);
+			final RecurringResults rresults = CalendarRecurringCollection.calculateRecurring(mdao, 0, 0, 0);
 			if (rresults.size() == empty
-					&& (cObject.getChangeException() == null || (isChangeException ? cObject.getChangeException().length == 1
-							: cObject.getChangeException().length == 0))) {
+					&& (mdao.getChangeException() == null || (isChangeException ? mdao.getChangeException().length == 1
+							: mdao.getChangeException().length == 0))) {
 				/*
 				 * Commit current transaction
 				 */
-				//writecon.commit();
+				if (!writecon.getAutoCommit()) {
+					writecon.commit();
+				}
 				/*
 				 * Delete whole recurring appointment since its last occurrence
 				 * has been deleted through previous transaction
 				 */
-				//deleteSingleAppointment(cObject.getContextID(), cObject.getObjectID(), cObject.getCreatedBy(), cObject.getCreatedBy(), inFolder, null, writecon, cObject.getFolderType(), so, ctx, CalendarRecurringCollection.RECURRING_NO_ACTION, cObject, cObject, clientLastModified);
+				deleteSingleAppointment(mdao.getContextID(), mdao.getObjectID(), mdao.getCreatedBy(), mdao
+						.getCreatedBy(), inFolder, null, writecon, mdao.getFolderType(), so, ctx,
+						CalendarRecurringCollection.RECURRING_NO_ACTION, mdao, mdao, clientLastModified);
 			}
 		}
 	}
@@ -3145,11 +3192,10 @@ class CalendarMySQL implements CalendarSqlImp {
 
 		if (recurring_action == CalendarRecurringCollection.RECURRING_VIRTUAL_ACTION) {
 			// this is an update with a new delete_exception
-			if (edao != null) {
-				createSingleVirtualDeleteException(cdao, edao, writecon, oid, uid, fid, so, ctx, clientLastModified);
-			} else {
+			if (edao == null) {
 				throw new OXCalendarException(OXCalendarException.Code.RECURRING_UNEXPECTED_DELETE_STATE, Integer.valueOf(uid), Integer.valueOf(oid), Integer.valueOf(-1));
 			}
+			createSingleVirtualDeleteException(cdao, edao, writecon, oid, uid, fid, so, ctx, clientLastModified);
 			return;
 		} else if (recurring_action == CalendarRecurringCollection.RECURRING_EXCEPTION_ACTION) {
 			// this is a deletion of a change exception aka existing exception
@@ -3413,7 +3459,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		try {
 			final CalendarDataObject ldao = loadObjectForUpdate(udao, so, ctx, fid);
 			udao.setDeleteExceptions(CalendarCommonCollection.addException(ldao.getDeleteException(), de));
-			updateAppointment(udao, ldao, writecon, so, ctx, fid, clientLastModified);
+			updateAppointment(udao, ldao, writecon, so, ctx, fid, clientLastModified, false);
 		} catch (final OXException oxe) {
 			throw oxe;
 		} catch (final LdapException lde) {
