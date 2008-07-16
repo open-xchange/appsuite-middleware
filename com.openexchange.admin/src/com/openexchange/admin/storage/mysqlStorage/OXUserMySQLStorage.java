@@ -288,7 +288,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             if (usrdata.getPasswordMech() != null) {
                 stmt = write_ox_con.prepareStatement("UPDATE user SET  passwordMech = ? WHERE cid = ? AND id = ?");
-                stmt.setString(1, usrdata.getPasswordMech2String());
+                stmt.setString(1, usrdata.getPasswordMech());
                 stmt.setInt(2, context_id);
                 stmt.setInt(3, user_id);
                 stmt.executeUpdate();
@@ -330,6 +330,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // Define all those fields which are contained in the user table
             notallowed.add("Id");
             notallowed.add("Password");
+            notallowed.add("PasswordMech");
             notallowed.add("PrimaryEmail");
             notallowed.add("TimeZone");
             notallowed.add("Enabled");
@@ -707,21 +708,23 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     private String password2crypt(final User user) throws StorageException, NoSuchAlgorithmException, UnsupportedEncodingException {
         String passwd = null;
         if (user.getPasswordMech() == null) {
-            final String pwmech = this.cache.getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
-            if (pwmech.equalsIgnoreCase("crypt")) {
-                user.setPasswordMech(User.PASSWORDMECH.CRYPT);
-            } else if (pwmech.equalsIgnoreCase("sha")) {
-                user.setPasswordMech(User.PASSWORDMECH.SHA);
+            String pwmech = this.cache.getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
+            pwmech = "{" + pwmech + "}";
+            if (pwmech.equalsIgnoreCase(User.CRYPT_MECH)) {
+                user.setPasswordMech(User.CRYPT_MECH);
+            } else if (pwmech.equalsIgnoreCase(User.SHA_MECH)) {
+                user.setPasswordMech(User.SHA_MECH);
             } else {
                 log.warn("WARNING: unknown password mechanism " + pwmech + " using SHA");
-                user.setPasswordMech(User.PASSWORDMECH.SHA);
+                user.setPasswordMech(User.SHA_MECH);
             }
         }
-        if (user.getPasswordMech() == User.PASSWORDMECH.CRYPT) {
+        if (user.getPasswordMech().equals(User.CRYPT_MECH)) {
             passwd = UnixCrypt.crypt(user.getPassword());
-        } else if (user.getPasswordMech() == User.PASSWORDMECH.SHA) {
+        } else if (user.getPasswordMech().equals(User.SHA_MECH)) {
             passwd = SHACrypt.makeSHAPasswd(user.getPassword());
         } else {
+            log.error("unsupported password mechanism: " + user.getPasswordMech());
             throw new StorageException("unsupported password mechanism: " + user.getPasswordMech());
         }
         return passwd;
@@ -755,7 +758,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(1, ctx.getId().intValue());
                 stmt.setInt(2, internal_user_id);
                 stmt.setString(3, passwd);
-                stmt.setString(4, usrdata.getPasswordMech2String());
+                stmt.setString(4, usrdata.getPasswordMech());
 
                 if (usrdata.getPassword_expired() == null) {
                     usrdata.setPassword_expired(false);

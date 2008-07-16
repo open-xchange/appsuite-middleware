@@ -849,19 +849,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 if (null != value) {
                     optionAndMethod.getMethod().invoke(usr, value);
                 }
-            } else if (optionAndMethod.getReturntype().equals(PASSWORDMECH_CLASS)) {
-                final String value = (String)parser.getOptionValue(optionAndMethod.getOption());
-                if( null != value ) {
-                    User.PASSWORDMECH pwmech = null;
-                    if (value.equalsIgnoreCase("sha")) {
-                        pwmech = User.PASSWORDMECH.SHA;
-                    } else if (value.equalsIgnoreCase("crypt")) {
-                        pwmech = User.PASSWORDMECH.CRYPT;
-                    } else {
-                        throw new IllegalArgumentException("Argument for " + OPT_PASSWORD_LONG + " is wrong.");
-                    }
-                    optionAndMethod.getMethod().invoke(usr, pwmech);
-                }
             }
         }
     }

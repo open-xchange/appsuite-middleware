@@ -69,7 +69,6 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.dataobjects.User.PASSWORDMECH;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -207,14 +206,6 @@ public abstract class ListCore extends UserAbstraction {
         }
     }
 
-    protected final String passwordtostring(final PASSWORDMECH passwordmech2) {
-        if (passwordmech2 == PASSWORDMECH.CRYPT) {
-            return "crypt";
-        } else {
-            return "sha";
-        }
-    }
-
     protected final void sysoutOutput(final User[] users) throws InvalidDataException {
 
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
@@ -323,8 +314,6 @@ public abstract class ListCore extends UserAbstraction {
                     datarow.add(hashtostring((HashSet<?>)methodandnames.getMethod().invoke(user, (Object[]) null)));
                 } else if (returntype.equals(JAVA_UTIL_MAP)) {
                     datarow.add(maptostring((HashMap<?,?>)methodandnames.getMethod().invoke(user, (Object[]) null)));
-                } else if (returntype.equals(PASSWORDMECH_CLASS)) {
-                    datarow.add(passwordtostring((PASSWORDMECH)methodandnames.getMethod().invoke(user, (Object[]) null)));
                 } else if (returntype.equals(JAVA_UTIL_TIME_ZONE)) {
                     datarow.add(timezonetostring((TimeZone)methodandnames.getMethod().invoke(user, (Object[]) null)));
                 } else if (returntype.equals(JAVA_UTIL_LOCALE)) {
