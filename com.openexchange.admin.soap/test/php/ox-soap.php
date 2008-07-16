@@ -12,8 +12,9 @@ class Credentials {
 }
 
 class Context {
-	var $id;
+	var $Id;
 	var $name;
+	var $idset;
 }
 
 function getContextClient($host) {
@@ -61,7 +62,9 @@ function getCredentialsObject($user, $password) {
 
 function getContextObject($context_id){
 	$ctx = new Context();
-	$ctx->id = $context_id;
+	$ctx->Id = $context_id;
+	$ctx->idset = true;
+	return $ctx;
 }
 
 // some error handling functions
