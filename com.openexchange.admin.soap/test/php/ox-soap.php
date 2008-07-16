@@ -8,6 +8,13 @@
 
 $SOAPHOST = "localhost";
 
+$OXMASTER_ADMIN = "oxadminmaster";
+$OXMASTER_ADMIN_PASS = "secret";
+
+$CONTEXT_ID = 1;
+$CONTEXT_ADMIN = "oxadmin";
+$CONTEXT_ADMIN_PASS = "secret";
+
 class Credentials {
 	var $login;
 	var $password;

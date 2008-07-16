@@ -4,7 +4,7 @@ include("ox-soap.php");
 
 try {
 	
-	$result = getUtilClient($SOAPHOST)->listServer("*", getCredentialsObject("oxadminmaster","secret"));
+	$result = getUtilClient($SOAPHOST)->listServer("*", getCredentialsObject($OXMASTER_ADMIN,$OXMASTER_ADMIN_PASS));
 	
 	if (!is_soap_fault($result)) {
 		if (is_array($result)) {
