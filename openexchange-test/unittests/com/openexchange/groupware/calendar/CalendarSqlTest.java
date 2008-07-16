@@ -70,15 +70,15 @@ import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.container.*;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.events.TestEventAdmin;
+import static com.openexchange.tools.events.EventAssertions.assertModificationEvent;
+import static com.openexchange.tools.events.EventAssertions.assertModificationEventWithOldObject;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -112,6 +112,8 @@ public class CalendarSqlTest extends TestCase {
     @Override
 	public void setUp() throws Exception {
         Init.startServer();
+
+        TestEventAdmin.getInstance().clearEvents();
 
         final CalendarTestConfig config = new CalendarTestConfig();
 
@@ -678,6 +680,25 @@ public class CalendarSqlTest extends TestCase {
 
     }
 
+
+    // Bug #9950
+
+    public void testParticipantChangeTriggersEvent() throws OXException {
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
+
+        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1);
+        appointments.save( appointment ); clean.add( appointment );
+
+        TestEventAdmin.getInstance().clearEvents();
+
+        CalendarDataObject update = appointments.createIdentifyingCopy( appointment );
+        update.setParticipants( tools.users( ctx, participant1,  participant2) );
+        appointments.save( update );
+
+        assertModificationEventWithOldObject(AppointmentObject.class, appointment.getParentFolderID(), appointment.getObjectID());
+
+
+    }
 
     private List<CalendarDataObject> read(SearchIterator<CalendarDataObject> si) throws OXException, SearchIteratorException {
         List<CalendarDataObject> appointments = new ArrayList<CalendarDataObject>();

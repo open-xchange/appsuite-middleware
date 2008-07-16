@@ -22,8 +22,18 @@ public class MockUserLookup {
 		}
 		return users.get(uid);
 	}
-	
-	public MockUserLookup() {
+
+    public User getUserByMail(String mail) {
+        for(User user : users.values()) {
+            String cur_mail = user.getMail();
+            if(cur_mail != null && cur_mail.equals(mail)) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+    public MockUserLookup() {
 		
 		final String tz = "Europe/Berlin";
 		
@@ -58,7 +68,7 @@ public class MockUserLookup {
 		user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("User 3");
-		user.setPreferredLanguage("de_DE");
+		user.setPreferredLanguage("en_US");
 		user.setTimeZone("Pacific/Samoa");
 		user.setMail("user3@test.invalid");
 		user.setGroups(new int[]{1,4});

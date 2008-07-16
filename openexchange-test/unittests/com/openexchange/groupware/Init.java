@@ -42,6 +42,10 @@ import com.openexchange.test.TestInit;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 import com.openexchange.tools.servlet.http.HttpManagersInit;
+import com.openexchange.event.impl.EventQueue;
+import com.openexchange.event.impl.EventDispatcher;
+import com.openexchange.event.impl.AppointmentEventInterface;
+import com.openexchange.event.impl.TaskEventInterface;
 
 /**
  * This class contains methods for initialising tests.
@@ -180,7 +184,7 @@ public final class Init {
 		startAndInjectI18NBundle();
 		startAndInjectMonitoringBundle();
 		startAndInjectSessiondBundle();
-		startAndInjectPushUDPBundle();
+		startAndInjectEventBundle();
 		startAndInjectResourceService();
 	}
 
@@ -244,8 +248,18 @@ public final class Init {
 		ServerServiceRegistry.getInstance().addService(SessiondService.class, new SessiondServiceImpl());
 	}
 
-	private static void startAndInjectPushUDPBundle() throws Exception {
-		ServerServiceRegistry.getInstance().addService(EventAdmin.class, TestEventAdmin.getInstance());
+	private static void startAndInjectEventBundle() throws Exception {
+        EventQueue.setNewEventDispatcher(new EventDispatcher() {
+
+            public void addListener(AppointmentEventInterface listener) {
+
+            }
+
+            public void addListener(TaskEventInterface listener) {
+
+            }
+        });
+        ServerServiceRegistry.getInstance().addService(EventAdmin.class, TestEventAdmin.getInstance());
 		EventAdminService.getInstance().setService(TestEventAdmin.getInstance());
 
 		// SessiondService.getInstance().setService(new

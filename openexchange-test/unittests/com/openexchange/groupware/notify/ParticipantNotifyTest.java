@@ -6,16 +6,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 
 import junit.framework.TestCase;
 
@@ -192,7 +183,7 @@ public class ParticipantNotifyTest extends TestCase{
 		participantNames = parseParticipants( msg );
 		
 		assertNames( msg.addresses, "user3@test.invalid" );
-		assertLanguage( DE , msg );
+		assertLanguage( EN , msg );
 		assertNames( participantNames,"User 3" );
 		assertEquals(400, msg.folderId);
         assertTrue(msg.internal);
@@ -354,6 +345,31 @@ public class ParticipantNotifyTest extends TestCase{
     }
 
 
+    // Bug 9950
+
+    public void testShouldNotifyOldAndNewParticipants() throws Exception{
+        Participant[] oldParticipants = getParticipants(U(2,4,10),G(),S(), R());
+		Task oldTask = getTask(oldParticipants);
+
+        Participant[] newParticipants = getParticipants(U(4, 8, 10), G(), S(), R());
+        Task newTask = getTask(newParticipants);
+
+        notify.taskModified(oldTask, newTask, session);
+
+        List<Message> messages = notify.getMessages();
+
+        List<String> mailAddresses = new LinkedList<String>();
+        for(Message message : messages) { mailAddresses.addAll(message.addresses); }
+
+        Message msg = messages.get(0);
+
+        String[] participantNames = parseParticipants( msg );
+
+		assertNames( mailAddresses, "user1@test.invalid", "user3@test.invalid", "user7@test.invalid", "user9@test.invalid" );
+		assertLanguage( EN , msg );
+		assertNames( participantNames,"User 3","User 7", "User 9");
+    }
+
 
     public static final void assertLanguage(final int lang, final Message msg) {
 		assertEquals(lang,guessLanguage(msg));
@@ -369,7 +385,8 @@ public class ParticipantNotifyTest extends TestCase{
 		for(final String name : names) {
 			assertTrue(names.toString(), expectSet.remove(name));
 		}
-	}
+        assertTrue("Didn't find "+ expectSet, expectSet.isEmpty());
+    }
 	
 	public static final void assertAddresses(final Collection<Message> messages, final String...addresses) {
 		final List<String> collected = new ArrayList<String>();

@@ -78,6 +78,8 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.events.TestEventAdmin;
+import static com.openexchange.tools.events.EventAssertions.assertDeleteEvent;
+import static com.openexchange.tools.events.EventAssertions.assertModificationEvent;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 
@@ -150,7 +152,7 @@ public class CalendarDowngradeUserTest extends TestCase {
         runDelete(user);
 
         assertAppointmentNotFound(cdao.getParentFolderID(), cdao.getObjectID());
-        assertDeleteEvent(cdao.getParentFolderID(), cdao.getObjectID());
+        assertDeleteEvent(AppointmentObject.class, cdao.getParentFolderID(), cdao.getObjectID());
     }
 
     public void testRemoveFromParticipants() throws OXException{
@@ -158,7 +160,7 @@ public class CalendarDowngradeUserTest extends TestCase {
         runDelete(user);
 
         assertNotInUserParticipants(cdao.getParentFolderID(), cdao.getObjectID(), user);
-        assertModificationEvent(cdao.getParentFolderID(), cdao.getObjectID());
+        assertModificationEvent(AppointmentObject.class, cdao.getParentFolderID(), cdao.getObjectID());
     }
 
     public void testRemoveAppointmentWhenOnlyParticipant() throws OXException {
@@ -166,7 +168,7 @@ public class CalendarDowngradeUserTest extends TestCase {
         runDelete(user);
 
         assertAppointmentNotFound(cdao.getParentFolderID(), cdao.getObjectID());
-        assertDeleteEvent(cdao.getParentFolderID(), cdao.getObjectID());
+        assertDeleteEvent(AppointmentObject.class, cdao.getParentFolderID(), cdao.getObjectID());
         
     }
 
@@ -344,22 +346,5 @@ public class CalendarDowngradeUserTest extends TestCase {
         }
     }
     
-    private void assertDeleteEvent(final int parentFolderID, final int objectID) {
-         assertEvent(CommonEvent.DELETE, parentFolderID, objectID);
-    }
 
-    private void assertModificationEvent(final int parentFolderID, final int objectID) {
-        assertEvent(CommonEvent.UPDATE, parentFolderID, objectID);
-    }
-
-    private void assertEvent(final int action, final int parentFolderID, final int objectID) {
-        final TestEventAdmin events = TestEventAdmin.getInstance();
-
-        final CommonEvent event = events.getNewest();
-        final AppointmentObject appointment = (AppointmentObject) event.getActionObj();
-
-        assertEquals(action, event.getAction());
-        assertEquals(parentFolderID, appointment.getParentFolderID());
-        assertEquals(objectID, appointment.getObjectID());
-    }
 }
