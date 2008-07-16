@@ -35,12 +35,12 @@ License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
-Summary:        The Open-Xchange Server i18n Bundle
+Summary:        The Open-Xchange i18n Bundle
 Requires:       open-xchange-common open-xchange-configread open-xchange-global
 #
 
 %description
-The Open-Xchange Server i18n Bundle
+The Open-Xchange i18n Bundle
 
 Authors:
 --------
