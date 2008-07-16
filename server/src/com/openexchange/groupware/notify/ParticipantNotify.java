@@ -72,14 +72,13 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.TaskEventInterface;
+import com.openexchange.event.impl.AppointmentEventInterface2;
+import com.openexchange.event.impl.TaskEventInterface2;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.container.*;
 import com.openexchange.groupware.container.mail.MailObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -113,7 +112,7 @@ import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
-public class ParticipantNotify implements AppointmentEventInterface, TaskEventInterface {
+public class ParticipantNotify implements AppointmentEventInterface2, TaskEventInterface2 {
 	
 	//TODO: Signatur?
 	//TODO: Abgesagt / Zugesagt
@@ -204,34 +203,42 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 	
 	public void appointmentCreated(final AppointmentObject appointmentObj,
 			final Session sessionObj) {
-		sendNotification(appointmentObj, sessionObj, Notifications.APPOINTMENT_CREATE_MAIL,Notifications.APPOINTMENT_CREATE_TITLE, new AppointmentState(),false, false);
+		sendNotification(null, appointmentObj, sessionObj, Notifications.APPOINTMENT_CREATE_MAIL,Notifications.APPOINTMENT_CREATE_TITLE, new AppointmentState(),false, false);
 	}
 
 	public void appointmentModified(final AppointmentObject appointmentObj,
 			final Session sessionObj) {
        
-        sendNotification(appointmentObj, sessionObj, Notifications.APPOINTMENT_UPDATE_MAIL,Notifications.APPOINTMENT_UPDATE_TITLE, new AppointmentState(), false, false);
+        sendNotification(null, appointmentObj, sessionObj, Notifications.APPOINTMENT_UPDATE_MAIL,Notifications.APPOINTMENT_UPDATE_TITLE, new AppointmentState(), false, false);
 	}
 
-	public void appointmentDeleted(final AppointmentObject appointmentObj,
+    public void appointmentModified(AppointmentObject oldAppointment, AppointmentObject newAppointment, Session sessionObj) {
+        sendNotification(oldAppointment, newAppointment, sessionObj, Notifications.APPOINTMENT_UPDATE_MAIL,Notifications.APPOINTMENT_UPDATE_TITLE, new AppointmentState(), false, false);
+    }
+
+    public void appointmentDeleted(final AppointmentObject appointmentObj,
 			final Session sessionObj) {
-		sendNotification(appointmentObj, sessionObj, Notifications.APPOINTMENT_DELETE_MAIL,Notifications.APPOINTMENT_DELETE_TITLE, new AppointmentState(), NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false), true);
+		sendNotification(null, appointmentObj, sessionObj, Notifications.APPOINTMENT_DELETE_MAIL,Notifications.APPOINTMENT_DELETE_TITLE, new AppointmentState(), NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false), true);
 	}
 	
 	public void taskCreated(final Task taskObj, final Session sessionObj) {
-		sendNotification(taskObj, sessionObj, Notifications.TASK_CREATE_MAIL,Notifications.TASK_CREATE_TITLE, new TaskState(),false, false);	
+		sendNotification(null, taskObj, sessionObj, Notifications.TASK_CREATE_MAIL,Notifications.TASK_CREATE_TITLE, new TaskState(),false, false);
 	}
 
 	public void taskModified(final Task taskObj, final Session sessionObj) {
-		sendNotification(taskObj, sessionObj, Notifications.TASK_UPDATE_MAIL,Notifications.TASK_UPDATE_TITLE, new TaskState(), false, false);
+		sendNotification(null, taskObj, sessionObj, Notifications.TASK_UPDATE_MAIL,Notifications.TASK_UPDATE_TITLE, new TaskState(), false, false);
 		
 	}
 
+    public void taskModified(Task oldTask, Task newTask, Session sessionObj) {
+        sendNotification(oldTask, newTask, sessionObj, Notifications.TASK_UPDATE_MAIL,Notifications.TASK_UPDATE_TITLE, new TaskState(), false, false);
+    }
+
 	public void taskDeleted(final Task taskObj, final Session sessionObj) {
-		sendNotification(taskObj, sessionObj, Notifications.TASK_DELETE_MAIL,Notifications.TASK_DELETE_TITLE, new TaskState(),NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false), true);
+		sendNotification(null, taskObj, sessionObj, Notifications.TASK_DELETE_MAIL,Notifications.TASK_DELETE_TITLE, new TaskState(),NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false), true);
 	}
 	
-	private void sendNotification(final CalendarObject obj, final Session session, final String msgKey, final String titleKey, final State state, final boolean forceNotifyOthers, final boolean suppressOXReminderHeader) {
+	private void sendNotification(final CalendarObject oldObj, final CalendarObject newObj, final Session session, final String msgKey, final String titleKey, final State state, final boolean forceNotifyOthers, final boolean suppressOXReminderHeader) {
 
 
         final ServerSession sessionObj;
@@ -242,12 +249,14 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
             return;
         }
 
-        if(!obj.getNotification() && obj.getCreatedBy() == sessionObj.getUserId() && !forceNotifyOthers) {
+        if(!newObj.getNotification() && newObj.getCreatedBy() == sessionObj.getUserId() && !forceNotifyOthers) {
 			return;
 		}
-		if(obj.getParticipants() == null) {
+		if(newObj.getParticipants() == null) {
 			return;
 		}
+
+
 
         final SortedSet<String> participantSet = new TreeSet<String>();
 		final SortedSet<String> resourceSet = new TreeSet<String>();
@@ -255,23 +264,32 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 		final Map<Locale,List<EmailableParticipant>> receivers = new HashMap<Locale, List<EmailableParticipant>>();
 		
 		final Map<String,EmailableParticipant> all = new HashMap<String,EmailableParticipant>();
-		final UserParticipant[] users = obj.getUsers();
+		final UserParticipant[] users = newObj.getUsers();
 		if(null == users) {
-            sortParticipants(obj.getParticipants(), participantSet, resourceSet, receivers, sessionObj, all);
+            Participant[] oldParticipants = new Participant[0];
+            if(oldObj != null) { oldParticipants = oldObj.getParticipants(); }
+            sortParticipants(oldParticipants, newObj.getParticipants(), participantSet, resourceSet, receivers, sessionObj, all);
 		} else {
-            sortUserParticipants(obj.getUsers(), participantSet, receivers, sessionObj,all);
-			sortExternalParticipantsAndResources(obj.getParticipants(),participantSet,resourceSet,receivers, sessionObj,all);
+            UserParticipant[] oldUsers = new UserParticipant[0];
+            if(oldObj != null) {
+                oldUsers = oldObj.getUsers();
+            }
+            Participant[] oldParticipants = new Participant[0];
+            if(oldObj != null) { oldParticipants = oldObj.getParticipants(); }
+            
+            sortUserParticipants(oldUsers, newObj.getUsers(), participantSet, receivers, sessionObj,all);
+			sortExternalParticipantsAndResources(oldParticipants, newObj.getParticipants(),participantSet,resourceSet,receivers, sessionObj,all);
 		}
 		
 		String createdByDisplayName = "UNKNOWN";
 		String modifiedByDisplayName = "UNKNOWN";
 		try {
 			final Context ctx = sessionObj.getContext();
-			if(0 != obj.getCreatedBy()) {
-				createdByDisplayName = resolveUsers(ctx,obj.getCreatedBy())[0].getDisplayName();
+			if(0 != newObj.getCreatedBy()) {
+				createdByDisplayName = resolveUsers(ctx,newObj.getCreatedBy())[0].getDisplayName();
 			}
-			if(0 != obj.getModifiedBy()) {
-				modifiedByDisplayName = resolveUsers(ctx,obj.getModifiedBy())[0].getDisplayName();
+			if(0 != newObj.getModifiedBy()) {
+				modifiedByDisplayName = resolveUsers(ctx,newObj.getModifiedBy())[0].getDisplayName();
 			}
 		} catch (final LdapException e) {
 			createdByDisplayName = e.toString();
@@ -296,30 +314,30 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
                 if(isUser(sessionObj.getContext(), p)) {
 					try {
 						final UserSettingMail userSettingMail = getUserSettingMail(p.id, sessionObj.getContext());
-						sendMail = state.sendMail(userSettingMail) && obj.getModifiedBy() != p.id && (obj.getNotification() || p.id == obj.getCreatedBy() || forceNotifyOthers);
+						sendMail = state.sendMail(userSettingMail) && newObj.getModifiedBy() != p.id && (newObj.getNotification() || p.id == newObj.getCreatedBy() || forceNotifyOthers);
 						tz = p.timeZone;
 					} catch (final AbstractOXException e) {
 						LL.log(e);
 					}
 				} else {
-					sendMail = obj.getNotification() || (obj.getModifiedBy() != p.id && forceNotifyOthers);
+					sendMail = newObj.getNotification() || (newObj.getModifiedBy() != p.id && forceNotifyOthers);
 				}
 				
 				if(sendMail) {
 					df.setTimeZone(tz);
 
 					final Map<String,String> m = m(
-						"start" 	,	(null == obj.getStartDate()) ? "" : df.format(obj.getStartDate()),
-						"end"		,	(null == obj.getEndDate()) ? "" : df.format(obj.getEndDate()),
-						"title"		,	(null == obj.getTitle()) ? "" : obj.getTitle(),
+						"start" 	,	(null == newObj.getStartDate()) ? "" : df.format(newObj.getStartDate()),
+						"end"		,	(null == newObj.getEndDate()) ? "" : df.format(newObj.getEndDate()),
+						"title"		,	(null == newObj.getTitle()) ? "" : newObj.getTitle(),
 						"participants",		list(participantSet),
 						"resources"	,	(resourceSet.size() > 0) ? list(resourceSet) : strings.getString(Notifications.NO_RESOURCES),
 						"created_by",		createdByDisplayName,
 						"changed_by",		modifiedByDisplayName,
-						"description",		(null == obj.getNote()) ? "" : obj.getNote()
+						"description",		(null == newObj.getNote()) ? "" : newObj.getNote()
 					);
 							
-					state.addSpecial(obj,m,p);
+					state.addSpecial(newObj,m,p);
 							
 					
 					final MailMessage msg = new MailMessage();
@@ -334,7 +352,7 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 		}
 		
 		for(final MailMessage mmsg : messages) {
-			sendMessage(mmsg.title, mmsg.message, mmsg.addresses, sessionObj, obj, mmsg.folderId, state, suppressOXReminderHeader, mmsg.internal);
+			sendMessage(mmsg.title, mmsg.message, mmsg.addresses, sessionObj, newObj, mmsg.folderId, state, suppressOXReminderHeader, mmsg.internal);
 		}
 		
 	}
@@ -373,12 +391,52 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 		return retval;
     }
 	
-	private void sortExternalParticipantsAndResources(final Participant[] participants, final Set<String> participantSet, final Set<String> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession sessionObj,final Map<String,EmailableParticipant> all) {
-		if(participants == null) {
+	private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<String> participantSet, final Set<String> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession sessionObj,final Map<String,EmailableParticipant> all) {
+		sortNewExternalParticipantsAndResources(newParticipants, participantSet, resourceSet, receivers, sessionObj, all);
+        sortOldExternalParticipantsAndResources(newParticipants, receivers, all, sessionObj);
+    }
+
+    private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants,  final Map<Locale, List<EmailableParticipant>> receivers, final Map<String,EmailableParticipant> all, final ServerSession sessionObj) {
+            if(oldParticipants == null) {
+                return ;
+            }
+            final Context ctx = sessionObj.getContext();
+            for(final Participant participant : oldParticipants) {
+                switch(participant.getType()) {
+                case Participant.USER:
+                    break;
+                case Participant.EXTERNAL_USER :
+                    EmailableParticipant p = getExternalParticipant(participant);
+                    if(p != null) {
+                        addReceiver(p, receivers, all);
+                    }
+
+                    break;
+                case Participant.RESOURCE :
+                    p = getResourceParticipant(participant,ctx);
+                    if(p == null) {
+                        // Might be user added as resource (!)
+                        p = getUserParticipant(participant, ctx);
+                    }
+                    if(p != null) {
+                        addReceiver(p, receivers, all);
+                    }
+                    break;
+                case Participant.GROUP :
+                break;
+                default:
+                    throw new IllegalArgumentException("Unknown Participant Type: "+participant.getType());
+                }
+            }
+        }
+
+
+    private void sortNewExternalParticipantsAndResources(final Participant[] newParticipants, final Set<String> participantSet, final Set<String> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession sessionObj,final Map<String,EmailableParticipant> all) {
+        if(newParticipants == null) {
 			return ;
 		}
 		final Context ctx = sessionObj.getContext();
-		for(final Participant participant : participants) {					
+		for(final Participant participant : newParticipants) {
 			switch(participant.getType()) {
 			case Participant.USER:
 				break;
@@ -387,7 +445,7 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 				if(p != null) {
 					addSingleParticipant(p, participantSet, sessionObj, receivers,all,false);
 				}
-				
+
 				break;
 			case Participant.RESOURCE :
 				p = getResourceParticipant(participant,ctx);
@@ -400,20 +458,90 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 					resourceSet.add(p.displayName);
 				}
 				break;
-			case Participant.GROUP : 
+			case Participant.GROUP :
 			break;
 			default:
 				throw new IllegalArgumentException("Unknown Participant Type: "+participant.getType());
 			}
 		}
-	}
-	
-	private void sortParticipants(final Participant[] participants, final Set<String> participantSet, final Set<String> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession sessionObj, final Map<String,EmailableParticipant> all) {
-		if(participants == null) {
+    }
+
+    private void sortParticipants(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<String> participantSet, final Set<String> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession sessionObj, final Map<String,EmailableParticipant> all) {
+		sortNewParticipants(newParticipants, participantSet, resourceSet, receivers, sessionObj, all);
+        sortOldParticipants(oldParticipants, receivers, all, sessionObj);
+
+    }
+
+    private void sortOldParticipants(Participant[] oldParticipants, Map<Locale, List<EmailableParticipant>> receivers, final Map<String,EmailableParticipant> all, ServerSession sessionObj) {
+        if(oldParticipants == null) {
 			return ;
 		}
 		final Context ctx = sessionObj.getContext();
-		for(final Participant participant : participants) {					
+		for(final Participant participant : oldParticipants) {
+			switch(participant.getType()) {
+			case Participant.USER:
+				EmailableParticipant p = getUserParticipant(participant, ctx);
+				if(p != null) {
+					addReceiver(p, receivers, all);
+				}
+				break;
+			case Participant.EXTERNAL_USER :
+				p = getExternalParticipant(participant);
+				if(p != null) {
+					addReceiver(p, receivers, all);
+				}
+
+				break;
+			case Participant.RESOURCE :
+				p = getResourceParticipant(participant,ctx);
+				if(p != null) {
+					addReceiver(p, receivers, all);
+				}
+				break;
+			case Participant.GROUP :
+				try {
+					//FIXME 101 SELECT problem
+					final Group group = resolveGroups(ctx, participant.getIdentifier())[0];
+					final int[] members = group.getMember();
+					final User[] memberObjects = resolveUsers(ctx , members);
+					for(final User user : memberObjects) {
+
+						final String lang = user.getPreferredLanguage();
+						final int[] groups = user.getGroups();
+						final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
+
+						if(user.getMail() != null) {
+							p = new EmailableParticipant(
+								Participant.USER,
+								user.getId(),
+								groups,
+								user.getMail(),
+								user.getDisplayName(),
+								user.getLocale(),
+								tz,
+								10,
+								-1
+							);
+							addReceiver(p, receivers,all );
+						}
+						}
+					} catch (final LdapException e) {
+						LL.log(e);
+					}
+				break;
+			default:
+				throw new IllegalArgumentException("Unknown Participant Type: "+participant.getType());
+			}
+
+        }
+    }
+
+    private void sortNewParticipants(final Participant[] newParticipants, final Set<String> participantSet, final Set<String> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession sessionObj, final Map<String,EmailableParticipant> all) {
+        if(newParticipants == null) {
+			return ;
+		}
+		final Context ctx = sessionObj.getContext();
+		for(final Participant participant : newParticipants) {
 			switch(participant.getType()) {
 			case Participant.USER:
 				EmailableParticipant p = getUserParticipant(participant, ctx);
@@ -426,27 +554,27 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 				if(p != null) {
 					addSingleParticipant(p, participantSet, sessionObj, receivers,all,false);
 				}
-				
+
 				break;
-			case Participant.RESOURCE : 
+			case Participant.RESOURCE :
 				p = getResourceParticipant(participant,ctx);
 				if(p != null) {
 					addSingleParticipant(p, participantSet, sessionObj, receivers, all,true);
 					resourceSet.add(p.displayName);
 				}
 				break;
-			case Participant.GROUP : 
+			case Participant.GROUP :
 				try {
 					//FIXME 101 SELECT problem
 					final Group group = resolveGroups(ctx, participant.getIdentifier())[0];
 					final int[] members = group.getMember();
 					final User[] memberObjects = resolveUsers(ctx , members);
 					for(final User user : memberObjects) {
-							
+
 						final String lang = user.getPreferredLanguage();
 						final int[] groups = user.getGroups();
 						final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
-							
+
 						if(user.getMail() != null) {
 							p = new EmailableParticipant(
 								Participant.USER,
@@ -469,10 +597,12 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 			default:
 				throw new IllegalArgumentException("Unknown Participant Type: "+participant.getType());
 			}
-		}
-	}
-	
-	private EmailableParticipant getExternalParticipant(final Participant participant) {
+
+        }
+    }
+
+        
+    private EmailableParticipant getExternalParticipant(final Participant participant) {
         if(null == participant.getEmailAddress()) {
 			return null;
 		}
@@ -576,23 +706,29 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 		return null;
 	}
 
-	private void sortUserParticipants(final UserParticipant[] participants, final Set<String> participantSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession sessionObj, final Map<String,EmailableParticipant> all) {
-		if(participants == null) {
+	private void sortUserParticipants(final UserParticipant[] oldParticipants, final UserParticipant[] newParticipants, final Set<String> participantSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession sessionObj, final Map<String,EmailableParticipant> all) {
+		if(newParticipants == null) {
 			return ;
 		}
 		final Context ctx = sessionObj.getContext();
-		for(final Participant participant : participants) {					
+		for(final Participant participant : newParticipants) {
 			final EmailableParticipant p = getUserParticipant(participant, ctx);
 			if(p != null) {
 				addSingleParticipant(p, participantSet, sessionObj, receivers,all,false);
 			}
 		}
-	}
 
-	private void addSingleParticipant(final EmailableParticipant participant, final Set<String> participantSet, final ServerSession sessionObj, final Map<Locale,List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final boolean /* HACK */ resource) {
-		
-		boolean onlyAddToLocaleList = false;
-		
+        for(final Participant participant : oldParticipants) {
+			final EmailableParticipant p = getUserParticipant(participant, ctx);
+			if(p != null) {
+				addReceiver(p, receivers, all);
+			}
+		}
+
+    }
+
+    private void addReceiver(final EmailableParticipant participant, final Map<Locale,List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all) {
+
 		if(all.containsKey(participant.email)){
 			final EmailableParticipant other = all.get(participant.email);
 			if(other.reliability < participant.reliability) {
@@ -602,7 +738,36 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 				}
 				final List<EmailableParticipant> p = receivers.get(other.locale);
 				p.remove(p.indexOf(other));
-				onlyAddToLocaleList = true;
+			}
+			return;
+		}
+		Locale l = null;
+
+		l = participant.locale;
+
+		List<EmailableParticipant> p = receivers.get(l);
+		if(p == null) {
+			p = new ArrayList<EmailableParticipant>();
+			receivers.put(l,p);
+		}
+
+		all.put(participant.email, participant);
+		p.add(participant);
+
+    }
+
+    private void addSingleParticipant(final EmailableParticipant participant, final Set<String> participantSet, final ServerSession sessionObj, final Map<Locale,List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final boolean /* HACK */ resource) {
+		
+
+		if(all.containsKey(participant.email)){
+			final EmailableParticipant other = all.get(participant.email);
+			if(other.reliability < participant.reliability) {
+				if(other.locale.equals(participant.locale)) {
+					other.copy(participant);
+					return;
+				}
+				final List<EmailableParticipant> p = receivers.get(other.locale);
+				p.remove(p.indexOf(other));
 			}
 			return;
 		}
@@ -619,9 +784,6 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 		all.put(participant.email, participant);
 		p.add(participant);
 		
-		if(onlyAddToLocaleList) {
-			return;
-		}
 		
 		if(resource) {
 			return;
@@ -630,8 +792,8 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
         if(name == null) { name = participant.email; }
         participantSet.add(name);
 	}
-	
-	public static final class EmailableParticipant {
+
+    public static final class EmailableParticipant {
 		public String email;
 		public String displayName;
 		public Locale locale;

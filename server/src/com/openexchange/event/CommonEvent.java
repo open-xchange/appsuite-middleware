@@ -49,6 +49,8 @@
 
 package com.openexchange.event;
 
+import com.openexchange.session.Session;
+
 
 /**
  * CommonEvent
@@ -83,4 +85,6 @@ public interface CommonEvent {
 	public Object getDestinationFolder();
 
 	public int getAction();
-} 
+
+    Session getSession();
+}

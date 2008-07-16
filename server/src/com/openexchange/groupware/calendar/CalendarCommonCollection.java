@@ -78,6 +78,8 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -91,6 +93,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.cache.impl.FolderCacheManager;
 
 /**
  * CalendarCommonCollection
@@ -620,7 +623,28 @@ public final class CalendarCommonCollection {
                 throw new OXCalendarException(OXCalendarException.Code.UNSUPPORTED_ACTION_TYPE, Integer.valueOf(action));
         }
     }
-    
+
+    public static void triggerModificationEvent(final Session session, final AppointmentObject oldAppointment, final AppointmentObject newAppointment) throws OXCalendarException {
+        final EventClient eventclient = new EventClient(session);
+        try {
+            FolderObject sourceFolder = getFolder(session, oldAppointment.getParentFolderID());
+            eventclient.modify(oldAppointment, newAppointment, sourceFolder); // TODO
+        } catch (final Exception e) {
+            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(17));
+        }
+
+    }
+
+    private static FolderObject getFolder(Session session, int fid) throws OXException, ContextException {
+        Context ctx = ContextStorage.getStorageContext(session);
+        
+        if (FolderCacheManager.isEnabled()) {
+            return FolderCacheManager.getInstance().getFolderObject(fid, true, ctx, null);
+        } else {
+            return FolderObject.loadFolderObjectFromDB(fid, ctx, null);
+        }
+    }
+
     public static String getSQLInStringForParticipants(final UserParticipant[] userParticipant) {
         final StringBuilder sb = new StringBuilder(32);
         if (userParticipant != null && userParticipant.length > 0) {

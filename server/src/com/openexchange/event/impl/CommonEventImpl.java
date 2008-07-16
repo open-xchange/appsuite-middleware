@@ -50,6 +50,7 @@
 package com.openexchange.event.impl;
 
 import com.openexchange.event.CommonEvent;
+import com.openexchange.session.Session;
 
 
 /**
@@ -75,8 +76,10 @@ public class CommonEventImpl implements CommonEvent {
 	protected final Object destinationFolder;
 
 	protected final int action;
-	
-	public CommonEventImpl(final int userId, final int contextId, final int action, final int module, final Object actionObj, final Object oldObj, final Object sourceFolder, final Object destinationFolder) {
+
+    protected final Session session;
+
+    public CommonEventImpl(final int userId, final int contextId, final int action, final int module, final Object actionObj, final Object oldObj, final Object sourceFolder, final Object destinationFolder, Session session) {
 		this.userId = userId;
 		this.contextId = contextId;
 		this.action = action;
@@ -85,7 +88,8 @@ public class CommonEventImpl implements CommonEvent {
 		this.oldObj = oldObj;
 		this.sourceFolder = sourceFolder;
 		this.destinationFolder = destinationFolder;
-	}
+        this.session = session;
+    }
 
 	public int getContextId() {
 		return contextId;
@@ -118,4 +122,8 @@ public class CommonEventImpl implements CommonEvent {
 	public int getAction() {
 		return action;
 	}
+
+    public Session getSession() {
+        return session;
+    }
 } 

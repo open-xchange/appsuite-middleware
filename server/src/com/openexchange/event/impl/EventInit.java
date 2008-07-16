@@ -98,8 +98,8 @@ public class EventInit implements Initialization {
 			LOG.info("Adding Notification Listener");
 		}
         final ParticipantNotify notify = new ParticipantNotify();
-		EventQueue.addAppointmentEvent(notify);
-		EventQueue.addTaskEvent(notify);
+		EventQueue.addModernListener((AppointmentEventInterface) notify);
+		EventQueue.addModernListener((TaskEventInterface) notify);
 
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Adding LinkEventHandler");

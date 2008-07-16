@@ -1928,7 +1928,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		final boolean solo_reminder = CalendarCommonCollection.checkForSoloReminderUpdate(cdao, uc, cup);
 		CalendarCommonCollection.checkAndRemovePastReminders(cdao, edao);
 		if (!solo_reminder) {
-			CalendarCommonCollection.triggerEvent(so, CalendarOperation.UPDATE, cdao);
+			CalendarCommonCollection.triggerModificationEvent(so, edao, cdao);
 		}
 		if (clone != null) {
 			cdao.setObjectID(clone.getObjectID());

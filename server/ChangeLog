@@ -1,3 +1,7 @@
+* 2008-07-16 - francisco.laguna@open-xchange.com
+
+ - Bugfix #9950: Using modern event handling (OSGi EventAdmin) to send mails to both old and new participants.
+
 * 2008-07-16 - thorben.betten@open-xchange.com
 
  - Bugfix #10377: Deleting whole recurring appointment if all of its

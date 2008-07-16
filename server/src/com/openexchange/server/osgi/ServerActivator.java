@@ -52,12 +52,15 @@ package com.openexchange.server.osgi;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -96,6 +99,8 @@ import com.openexchange.systemname.internal.JVMRouteSystemNameImpl;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
 import com.openexchange.user.UserService;
 import com.openexchange.user.internal.UserServiceImpl;
+import com.openexchange.event.impl.osgi.OSGiEventDispatcher;
+import com.openexchange.event.impl.EventQueue;
 
 /**
  * {@link ServerActivator} - The activator for server bundle
@@ -248,7 +253,14 @@ public final class ServerActivator extends DeferredActivator {
 				new ContactServiceListener(context)));
 		// Add cache dynamically to database pooling. it works without, too.
 		serviceTrackerList.add(new ServiceTracker(context, CacheService.class.getName(), new CacheCustomizer(context)));
-		/*
+
+        /*
+         * Register Services
+         */
+        OSGiEventDispatcher dispatcher = new OSGiEventDispatcher();
+        EventQueue.setNewEventDispatcher(dispatcher);
+        dispatcher.registerService(context);
+        /*
 		 * Start server dependent on whether admin bundle is available or not
 		 */
 		if (adminBundleInstalled.booleanValue()) {

@@ -201,11 +201,17 @@ public final class EventQueue {
 
 	private static TimerTask timerTask;
 
-	private EventQueue() {
+    private static EventDispatcher newEventDispatcher = null;
+
+    private EventQueue() {
 		super();
 	}
 
-	/**
+    public static void setNewEventDispatcher(EventDispatcher eventDispatcher) {
+        newEventDispatcher = eventDispatcher;
+    }
+
+    /**
 	 * Initializes the {@link EventQueue}.
 	 * 
 	 * @param config
@@ -601,7 +607,23 @@ public final class EventQueue {
 		}
 	}
 
-	/**
+    public static void addModernListener(AppointmentEventInterface listener) {
+        checkEventDispatcher();
+        newEventDispatcher.addListener(listener);
+    }
+
+    public static void addModernListener(TaskEventInterface listener) {
+        checkEventDispatcher();
+        newEventDispatcher.addListener(listener);
+    }
+
+    private static void checkEventDispatcher() {
+        if(null == newEventDispatcher) {
+            throw new IllegalStateException("The event dispatcher must have been initialized before adding listeners.");
+        }
+    }
+
+    /**
 	 * Stops execution of events after the next run, still delivers all
 	 * remaining events. Method blocks until all remaining tasks have been
 	 * completed
