@@ -85,6 +85,7 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
             // Define all those fields which are contained in the user table
             notallowed.add("Id");
             notallowed.add("Password");
+            notallowed.add("PasswordMech");
             notallowed.add("PrimaryEmail");
             notallowed.add("Timezone");
             notallowed.add("Mailenabled");
@@ -105,6 +106,7 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
             method2field.put("ImapServer", "imapserver");
             method2field.put("ImapLogin", "imapLogin");
             method2field.put("SmtpServer", "smtpserver");
+            method2field.put("PasswordMech", "passwordMech");
 
             method2field.put("Display_name", "field01");
             method2field.put("Sur_name", "field02");

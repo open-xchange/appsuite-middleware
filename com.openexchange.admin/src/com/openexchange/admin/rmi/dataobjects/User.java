@@ -92,7 +92,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
 
     private boolean passwordset = false;
 
-    private PASSWORDMECH passwordMech;
+    private String passwordMech;
 
     private boolean passwordMechset = false;
 
@@ -553,37 +553,6 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         super();
         init();
         this.id = id;
-    }
-
-    /**
-     * An enumeration which lists the different password mechanisms
-     * 
-     * @author d7
-     */
-    public enum PASSWORDMECH {
-        CRYPT, SHA
-    }
-
-    /**
-     * Returns the String representation of password mechanism as used in the
-     * data store as SQL or LDAP
-     * 
-     * @return String representation of PASSWORDMECH
-     */
-    final public String getPasswordMech2String() {
-        if (null != this.passwordMech) {
-            switch (this.passwordMech) {
-            case CRYPT:
-                return "{CRYPT}";
-            case SHA:
-                return "{SHA}";
-
-            default:
-                return null;
-            }
-        } else {
-            return null;
-        }
     }
 
     /**
@@ -4238,25 +4207,40 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         }
     }
 
+    final public static String CRYPT_MECH = "{CRYPT}";
+    final public static String SHA_MECH = "{SHA}";
+    
     /**
      * @return the passwordMech
      */
-    final public PASSWORDMECH getPasswordMech() {
+    final public String getPasswordMech() {
         return passwordMech;
     }
 
     /**
      * Represents the password encryption mechanism, value is a password
-     * mechanism
+     * mechanism. Currently supported mechanisms are "{CRYPT}" and "{SHA}",
+     * see {@link User.CRYPT_MECH} and {@link User.SHA_MECH}.  
      * 
      * @param passwordMech
      *                the passwordMech to set
      */
-    final public void setPasswordMech(final PASSWORDMECH passwordMech) {
+    final public void setPasswordMech(final String passwordMech) {
         if (null == passwordMech) {
             this.passwordMechset = true;
         }
-        this.passwordMech = passwordMech;
+        if( passwordMech != null ) {
+            if( passwordMech.equalsIgnoreCase(CRYPT_MECH) ) {
+                this.passwordMech = CRYPT_MECH;
+            } else if( passwordMech.equalsIgnoreCase(SHA_MECH) ) {
+                this.passwordMech = SHA_MECH;
+            } else {
+                // sane default
+                this.passwordMech = SHA_MECH;
+            }
+        } else {
+            this.passwordMech = passwordMech;
+        }
     }
 
     /**
