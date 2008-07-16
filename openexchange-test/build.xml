@@ -5,6 +5,7 @@
 	<property name="prefix" value="/opt/open-xchange"/>
 
 	<!-- Constants -->
+    <property name="conf.dir" value="conf"/>
 	<property name="tmp.dir" value="tmp"/>
 
 	<property file="META-INF/MANIFEST.MF"/>
@@ -27,17 +28,12 @@
 	<!-- Runtime constants -->
 	<property name="test.xml.dir" location="test-results" />
 	
-	<!-- NOTE: Make sure all jars from CVS/openexchange-common/common/jars/ are accessible under common.libs! -->
-
 	<!-- Classpath -->
 	<path id="project.classpath">
 		<fileset dir="${bundlesdir}">
 			<include name="**/*.jar" />
 		</fileset>
 		<fileset dir="${lib}">
-			<include name="*.jar" />
-		</fileset>
-		<fileset dir="${common.libs}">
 			<include name="*.jar" />
 		</fileset>
 	</path>
