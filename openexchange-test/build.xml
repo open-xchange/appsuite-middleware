@@ -41,7 +41,7 @@
 	<target name="default" depends="interface-jar, unit-jar" />
 	
 	<target name="clean">
-	    <echo message="Dir: ${build}" />
+	    <echo message="Dir: ${basedir},${build}" />
 		<delete dir="${build}" />
 		<delete dir="${test.xml.dir}" />
 		<delete file="open-xchange-iface-tests.jar" />
