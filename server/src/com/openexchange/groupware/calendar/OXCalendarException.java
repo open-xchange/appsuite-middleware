@@ -160,7 +160,11 @@ public class OXCalendarException extends OXException {
         /**
          * Recurrence position %1$s does not exist
          */
-        UNKNOWN_RECURRENCE_POSITION("Recurrence position %1$s does not exist", 74, Category.USER_INPUT);
+        UNKNOWN_RECURRENCE_POSITION("Recurrence position %1$s does not exist", 74, Category.USER_INPUT),
+        /**
+         * One or more exception dates are not contained in recurring appointment
+         */
+        FOREIGN_EXCEPTION_DATE("One or more exception dates are not contained in recurring appointment", 75, Category.USER_INPUT);
         
         /**
          * Message of the exception.
