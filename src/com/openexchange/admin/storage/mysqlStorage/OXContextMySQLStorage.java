@@ -85,6 +85,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.impl.OXUser;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
@@ -1077,6 +1078,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         final int context_id = ctx.getId();
         try {
             if (admin_user != null) {
+                OXUser.checkAndSetLanguage(admin_user);
+                
                 final OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
                 // Get config_db/ox_db connection from pool
                 configdb_write_con = cache.getConnectionForConfigDB();
