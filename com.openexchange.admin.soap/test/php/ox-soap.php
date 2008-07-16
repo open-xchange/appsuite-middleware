@@ -26,6 +26,12 @@ class Context {
 	var $idset;
 }
 
+class User {
+	var $id;
+	var $name;
+	var $idset;
+}
+
 function getContextClient($host) {
 
 	$client = new SoapClient(NULL, array (
@@ -62,6 +68,30 @@ function getGroupClient($host) {
 	return $client;
 }
 
+function getResourceClient($host) {
+
+	$client = new SoapClient(NULL, array (
+		"location" => "http://" . $host . "/servlet/axis2/services/OXResourceService?wsdl",
+		"style" => SOAP_RPC,
+		"uri" => "http://soap.admin.openexchange.com",
+		"use" => SOAP_ENCODED
+	));
+
+	return $client;
+}
+
+function getUserClient($host) {
+
+	$client = new SoapClient(NULL, array (
+		"location" => "http://" . $host . "/servlet/axis2/services/OXUserService?wsdl",
+		"style" => SOAP_RPC,
+		"uri" => "http://soap.admin.openexchange.com",
+		"use" => SOAP_ENCODED
+	));
+
+	return $client;
+}
+
 function getCredentialsObject($user, $password) {
 	$credObj = new Credentials();
 	$credObj->login = $user;
@@ -74,6 +104,13 @@ function getContextObject($context_id){
 	$ctx->id = $context_id;
 	$ctx->idset = true;
 	return $ctx;
+}
+
+function getUserObject($user_id){
+	$usr = new User();
+	$usr->id = $user_id;
+	$usr->idset = true;
+	return $usr;
 }
 
 // some error handling functions
@@ -106,6 +143,14 @@ function printContext($contextObject) {
 }
 function printGroup($groupObject) {
 	print_r($groupObject);
+	//echo "ID:" . $serverObject->id . " NAME:" . $serverObject->name . "\n";
+}
+function printResource($resourceObject) {
+	print_r($resourceObject);
+	//echo "ID:" . $serverObject->id . " NAME:" . $serverObject->name . "\n";
+}
+function printUser($userObject) {
+	print_r($userObject);
 	//echo "ID:" . $serverObject->id . " NAME:" . $serverObject->name . "\n";
 }
 ?>
