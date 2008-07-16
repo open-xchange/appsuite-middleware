@@ -3,6 +3,8 @@ package com.openexchange.groupware.infostore;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
 
 import junit.framework.TestCase;
 
@@ -176,8 +178,44 @@ public class InfostoreFacadeTest extends TestCase {
 		cleanFolders.add(folder);
 		return folder.getObjectID();
 	}
-	
-	private DocumentMetadata createEntry(final int fid) throws OXException {
+
+    // Bug 11521
+
+    public void testShouldRemoveMIMETypeWhenRemovingLastVersionOfAFile() throws OXException {
+        DocumentMetadata dm = new DocumentMetadataImpl();
+        dm.setFolderId(folderId);
+        dm.setTitle("Exists Test");
+
+        try {
+            infostore.startTransaction();
+            infostore.saveDocumentMetadata(dm, System.currentTimeMillis(), session);
+            dm.setFileMIMEType("text/plain");
+            dm.setFileName("bla.txt");
+            dm.setFileSize(12);
+            infostore.saveDocument(dm, new ByteArrayInputStream("Hallo".getBytes("UTF-8")), Long.MAX_VALUE, session);
+            infostore.removeVersion(dm.getId(), new int[]{1}, session);
+            infostore.commit();
+        } catch(OXException x) {
+            infostore.rollback();
+            throw x;
+        } catch (UnsupportedEncodingException e) {
+            // Subba!
+        } finally {
+            infostore.finish();
+
+        }
+
+        dm = infostore.getDocumentMetadata(dm.getId(), InfostoreFacade.CURRENT_VERSION, ctx, user, userConfig);
+
+        assertEquals("", dm.getFileMIMEType());
+        assertNull(dm.getFileName());
+        assertEquals(0, dm.getFileSize());
+
+        clean.add(dm);
+
+    }
+
+    private DocumentMetadata createEntry(final int fid) throws OXException {
 		final DocumentMetadata dm = new DocumentMetadataImpl();
 		dm.setFolderId(fid);
 		dm.setTitle("Exists Test");
