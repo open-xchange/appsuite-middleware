@@ -1108,6 +1108,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
      */
     private void checkChangeUserData(final Context ctx, final User newuser, final User dbuser, final PropertyHandler prop) throws StorageException, InvalidDataException {
     
+        final String lang = newuser.getLanguage();
+        if (lang != null) {
+            if( ! lang.contains("_") ) {
+                throw new InvalidDataException("language must contain an underscore, e.g. en_US");
+            }
+        }
+
         if( !prop.getUserProp(AdminProperties.User.PRIMARY_MAIL_UNCHANGEABLE, true) ) {
             if( newuser.getPrimaryEmail() != null && ! newuser.getPrimaryEmail().equals(dbuser.getPrimaryEmail()) ) {
                 throw new InvalidDataException("primary mail must not be changed");
@@ -1185,16 +1192,20 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
-    private void checkCreateUserData(final Context ctx, final User usr, final PropertyHandler prop) throws InvalidDataException, EnforceableDataObjectException, StorageException {
-
-        final String lang = usr.getLanguage();
+    public static void checkAndSetLanguage(User user) throws InvalidDataException {
+        final String lang = user.getLanguage();
         if (lang == null) {
-            usr.setLanguage(FALLBACK_LANGUAGE_CREATE + "_" + FALLBACK_COUNTRY_CREATE);
+            user.setLanguage(FALLBACK_LANGUAGE_CREATE + "_" + FALLBACK_COUNTRY_CREATE);
         } else {
             if( ! lang.contains("_") ) {
                 throw new InvalidDataException("language must contain an underscore, e.g. en_US");
             }
         }
+    }
+    
+    private void checkCreateUserData(final Context ctx, final User usr, final PropertyHandler prop) throws InvalidDataException, EnforceableDataObjectException, StorageException {
+
+        checkAndSetLanguage(usr);
         
         if (usr.getPassword() == null || usr.getPassword().trim().length() == 0) {
             throw new InvalidDataException("Empty password is not allowed");
