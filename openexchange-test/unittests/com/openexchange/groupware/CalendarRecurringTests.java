@@ -2,8 +2,10 @@
 package com.openexchange.groupware;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
 
@@ -1628,6 +1630,212 @@ public class CalendarRecurringTests extends TestCase {
         assertTrue("Change exception has not been removed in database", test_dao.getChangeException() == null || test_dao.getChangeException().length == 0);
         assertTrue("Delete exception has not been stored to database", test_dao.getDeleteException() != null && test_dao.getDeleteException().length == 1);
         assertTrue("Delete exception date is not equal to previous change exception date", changeExceptionDate == test_dao.getDeleteException()[0].getTime());
-    }    
-    
+    }
+
+    public void testDeleteException() throws Throwable {
+        final Context context = new ContextImpl(contextid);
+        final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        
+        final int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
+        
+        final CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+        cdao.setParentFolderID(folder_id);
+        
+        CalendarTest.fillDatesInDao(cdao);
+        
+        cdao.setTitle("testDeleteException");
+        cdao.setRecurrenceType(CalendarObject.DAILY);
+        cdao.setRecurrenceCalculator(1);
+        cdao.setInterval(1);
+        cdao.setDays(1);
+        
+        cdao.setIgnoreConflicts(true);
+        
+        final CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        final int object_id = cdao.getObjectID();
+        final Date last = cdao.getLastModified();
+        
+        final CalendarDataObject update = new CalendarDataObject();
+        update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+        update.setObjectID(object_id);
+        update.setIgnoreConflicts(true);
+        
+        // Get all occurrences
+        final RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0, CalendarRecurringCollection.MAXTC, true);
+        
+        // Create one delete exception first
+        final RecurringResult first = rss.getRecurringResult(0);
+        final long deleteExceptionDate = CalendarRecurringCollection.normalizeLong(first.getStart());
+        update.setDeleteExceptions(new Date[] { new Date(deleteExceptionDate) });
+        
+        csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
+        
+        // Reload
+        final CalendarDataObject tdao = csql.getObjectById(object_id, folder_id);
+        
+        assertTrue("Delete exception not contained in recurring appointment", tdao.containsDeleteExceptions() && tdao.getDeleteException().length > 0);
+        
+
+    }
+
+    public void testDeleteExceptionUntilFullDelete() throws Throwable {
+        final Context context = new ContextImpl(contextid);
+        final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        
+        final int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
+        
+        final CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+        cdao.setParentFolderID(folder_id);
+        
+        CalendarTest.fillDatesInDao(cdao);
+        
+        cdao.setTitle("testDeleteExceptionUntilFullDelete");
+        cdao.setRecurrenceType(CalendarObject.DAILY);
+        cdao.setRecurrenceCalculator(1);
+        cdao.setInterval(1);
+        cdao.setDays(1);
+        
+        cdao.setIgnoreConflicts(true);
+        
+        final CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        final int object_id = cdao.getObjectID();
+        final Date last = cdao.getLastModified();
+        
+        final CalendarDataObject update = new CalendarDataObject();
+        update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+        update.setObjectID(object_id);
+        update.setIgnoreConflicts(true);
+        
+        // Get all occurrences
+        final RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0, CalendarRecurringCollection.MAXTC, true);
+
+        final int size = rss.size();
+        final List<Date> ddates = new ArrayList<Date>(size);
+        for (int i = 0; i < size; i++) {
+        	final RecurringResult rs = rss.getRecurringResult(i);
+        	final long deleteExceptionDate = CalendarRecurringCollection.normalizeLong(rs.getStart());
+        	ddates.add(new Date(deleteExceptionDate));
+		}
+
+        update.setDeleteExceptions(ddates.toArray(new Date[ddates.size()]));
+        
+        csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
+        
+        // Reload should fail since all occurrences were deleted
+        try {
+        	final CalendarDataObject check_object = csql.getObjectById(object_id, folder_id);
+        	fail("The recurring appointment still exists but should have been deleted!");
+        } catch(final OXObjectNotFoundException e) { 
+        	// this is what we want
+        	final int x = 0;
+        }
+    }
+ 
+    public void testDeleteSingleRecurringAppointmentsUntilFullDelete() throws Throwable {
+        final Context context = new ContextImpl(contextid);
+        final CalendarDataObject cdao = new CalendarDataObject();
+        
+        long s = System.currentTimeMillis();
+        long cals = s;
+        final long calsmod = s%CalendarRecurringCollection.MILLI_DAY;
+        cals = cals- calsmod;
+        final long endcalc = 3600000;
+        long mod = s%3600000;
+        s = s - mod;
+        final long saves = s;
+        final long e = s + endcalc;
+        final long savee = e;
+        long u = s + (CalendarRecurringCollection.MILLI_DAY * 10);
+        mod = u%CalendarRecurringCollection.MILLI_DAY;
+        u = u - mod;
+        
+        
+        final Calendar start = Calendar.getInstance(TimeZone.getTimeZone(("Europe/Berlin")));
+        start.setTimeInMillis(saves);
+        final Calendar ende = Calendar.getInstance(TimeZone.getTimeZone(("Europe/Berlin")));
+        ende.setTimeInMillis(savee);
+        
+        final String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
+        final int uid2 = resolveUser(user2);
+        
+        final int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
+        final int folder_id2 = CalendarTest.getCalendarDefaultFolderForUser(uid2, context);
+        
+        cdao.setStartDate(new Date(s));
+        cdao.setEndDate(new Date(e));
+        cdao.setUntil(new Date(u));
+        cdao.setTitle("testDeleteSingleRecurringAppointment - step 1 - insert ");
+        cdao.setRecurrenceType(CalendarObject.DAILY);
+        cdao.setRecurrenceCalculator(1);
+        cdao.setInterval(1);
+        cdao.setDays(1);
+        
+        cdao.setParentFolderID(folder_id);
+        
+        final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        final SessionObject so2 = SessionObjectWrapper.createSessionObject(uid2, context.getContextId(), "myTestIdentifier");
+        
+        final Participants p = new Participants();
+        final Participant pa = new UserParticipant(userid);
+        p.add(pa);
+        
+        final Participant pa2 = new UserParticipant(uid2);        
+        p.add(pa2);
+        
+        cdao.setParticipants(p.getList());
+        
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+        cdao.setIgnoreConflicts(true);
+        final CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        final int object_id = cdao.getObjectID();
+        final Date last = cdao.getLastModified();
+
+        RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, cals, u, 0);
+        assertEquals("Testing size ", rss.size(), 10);
+        for (int a = 0; a < rss.size(); a++) {
+            final RecurringResult rs = rss.getRecurringResult(a);
+            assertEquals("Testing start time", rs.getStart(), start.getTimeInMillis());
+            assertEquals("Testing end time", rs.getEnd(), ende.getTimeInMillis());
+            assertEquals("Testing Position", a+1, rs.getPosition());
+            start.add(Calendar.DAY_OF_MONTH, 1);
+            ende.add(Calendar.DAY_OF_MONTH, 1);
+        }
+        
+        // Delete all single appointments in the sequence
+        final CalendarDataObject test_delete = csql.getObjectById(object_id, folder_id);
+        rss = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+        assertEquals("Testing size ", rss.size(), 11);
+        
+        for (int i = 1; i <= rss.size(); i++) {
+        	final RecurringResults foo = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, i);
+        	final RecurringResult bar = foo.getRecurringResult(0);
+        	assertTrue("Recurrence position is null",bar != null);
+        	assertEquals("Recurrence position mismatch", bar.getPosition(), i);
+        }
+
+        for (int i = 1; i <= rss.size(); i++) {
+        	 final CalendarDataObject delete_owner = new CalendarDataObject();
+             delete_owner.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+             delete_owner.setRecurrencePosition(i);
+             delete_owner.setObjectID(object_id);
+             csql.deleteAppointmentObject(delete_owner, folder_id, new Date(SUPER_END));
+		}
+        
+        // Check if full delete has been performed since all occurrences were deleted
+        try {
+        	final CalendarDataObject check_object = csql.getObjectById(object_id, folder_id);
+        	fail("The recurring appointment still exists but should have been deleted! " + check_object.getObjectID());
+        } catch(final OXObjectNotFoundException exc) { 
+        	// this is what we want
+        	final int x = 0;
+        }
+        
+        
+        
+    }
 }
