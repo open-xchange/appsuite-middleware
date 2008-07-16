@@ -32,8 +32,14 @@ sub doRequest {
   my $email = "testuser\@bla.de";
   my $lang = "de_DE";
   my $timezone = "Europe/Berlin";
-#  print Dumper($lang);
-#exit;
+#
+# the lexical representation of the date time as follows
+# '-'? yyyy '-' mm '-' dd 'T' hh ':' mm ':' ss ('.' s+)? (zzzzzz)?
+# see org.apache.axis2.databinding.utils.ConverterUtil.class
+#
+  my $birthday = "1900-01-01T00:00:00.00Z";
+  my $pwmech = "{CRYPT}";
+
   my $som_entry = 
     $soap->create($inSelf->{'Context'},
 		  SOAP::Data->value("User")->value(\SOAP::Data->value(
@@ -45,7 +51,9 @@ sub doRequest {
 			SOAP::Data->name("primaryEmail" => $email),
 			SOAP::Data->name("email1" => $email),
 			SOAP::Data->name("language" => $lang),
-			SOAP::Data->name("timezone" => $timezone)
+			SOAP::Data->name("timezone" => $timezone),
+			SOAP::Data->name("birthday" => $birthday),
+			SOAP::Data->name("passwordMech" => $pwmech)
    	          )),
 		  $inSelf->{'creds'}
 		 );
