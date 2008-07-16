@@ -1,6 +1,7 @@
 * 2008-07-16 - francisco.laguna@open-xchange.com
 
  - Bugfix #9950: Using modern event handling (OSGi EventAdmin) to send mails to both old and new participants.
+ - Bugfix #11655: Fixed counting of weekenddays in monthly recurrences.
 
 * 2008-07-16 - thorben.betten@open-xchange.com
 

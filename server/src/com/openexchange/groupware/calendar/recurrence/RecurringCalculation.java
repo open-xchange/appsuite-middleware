@@ -587,11 +587,19 @@ public class RecurringCalculation {
                             calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
                             calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
                             calc.set(Calendar.DAY_OF_MONTH, 1);
-                            final int x  = Calendar.DAY_OF_WEEK;
-                            if (x != Calendar.SATURDAY || x == Calendar.SUNDAY) {
-                                calc.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY); // TODO: Check if we need to calculate this by outself
-                                calc.add(Calendar.DAY_OF_MONTH, + (((day_or_type-1) * day_or_type) * 7));
+                            int neededWeekenddays = day_or_type;
+                            int day = 1;
+                            while(neededWeekenddays > 0) {
+                                calc.set(Calendar.DAY_OF_MONTH, day);
+                                if(calc.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || calc.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                                    // Found a weekendday
+                                    neededWeekenddays--;
+                                } else {
+                                    // Found a workday
+                                }
+                                day++;    
                             }
+
                         }
                     }
                 } else {
