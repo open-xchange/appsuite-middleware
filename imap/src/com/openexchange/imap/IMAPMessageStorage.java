@@ -739,6 +739,19 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			 */
 			final Message[] msgs = MIMEMessageConverter.convertMailMessages(mailMessages);
 			/*
+			 * Check if destination folder supports user flags
+			 */
+			final boolean supportsUserFlags = UserFlagsCache.supportsUserFlags(imapFolder, true, session);
+			if (!supportsUserFlags) {
+				/*
+				 * Remove all user flags from messages before appending to
+				 * folder
+				 */
+				for (final Message message : msgs) {
+					removeUserFlagsFromMessage(message);
+				}
+			}
+			/*
 			 * Mark first message for later lookup
 			 */
 			final String hash = plainStringToMD5(String.valueOf(System.currentTimeMillis()));
@@ -746,20 +759,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			/*
 			 * ... and append them to folder
 			 */
-			final AppendUID[] appendUIDs = imapFolder.appendUIDMessages(msgs);
-			if ((appendUIDs != null) && (appendUIDs.length > 0) && (appendUIDs[0] != null)) {
-				/*
-				 * Assume a proper APPENDUID response code
-				 */
-				return appendUID2Long(appendUIDs);
+			long[] retval = checkAndConvertAppendUID(imapFolder.appendUIDMessages(msgs));
+			if (retval.length > 0) {
+				return retval;
 			}
 			/*
-			 * Missing APPENDUID
+			 * Missing UID information in APPENDUID response
 			 */
 			if (LOG.isWarnEnabled()) {
-				LOG.warn("Missing APPENDUID response code");
+				LOG.warn("Missing UID information in APPENDUID response");
 			}
-			final long[] retval = new long[msgs.length];
+			retval = new long[msgs.length];
 			long uid = IMAPCommandsCollection.findMarker(hash, imapFolder);
 			if (uid == -1) {
 				Arrays.fill(retval, -1L);
@@ -1134,12 +1144,53 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		}
 	}
 
-	private static long[] appendUID2Long(final AppendUID[] appendUIDs) {
+	/**
+	 * Checks and converts specified APPENDUID response.
+	 * 
+	 * @param appendUIDs
+	 *            The APPENDUID response
+	 * @return An array of long for each valid {@link AppendUID} element or a
+	 *         zero size array of long if an invalid {@link AppendUID} element
+	 *         was detected.
+	 */
+	private static long[] checkAndConvertAppendUID(final AppendUID[] appendUIDs) {
+		if (appendUIDs == null || appendUIDs.length == 0) {
+			return new long[0];
+		}
 		final long[] retval = new long[appendUIDs.length];
-		for (int i = 0; i < retval.length; i++) {
+		for (int i = 0; i < appendUIDs.length; i++) {
+			if (appendUIDs[i] == null) {
+				/*
+				 * A null element means the server didn't return UID information
+				 * for the appended message.
+				 */
+				return new long[0];
+			}
 			retval[i] = appendUIDs[i].uid;
 		}
 		return retval;
+	}
+
+	/**
+	 * Removes all user flags from given message's flags
+	 * 
+	 * @param message
+	 *            The message whose user flags shall be removed
+	 * @throws MessagingException
+	 *             If removing user flags fails
+	 */
+	private static void removeUserFlagsFromMessage(final Message message) throws MessagingException {
+		final Flags flags = message.getFlags();
+		final String[] userFlags = flags.getUserFlags();
+		if (userFlags.length > 0) {
+			for (final String userFlag : userFlags) {
+				flags.remove(userFlag);
+			}
+			/*
+			 * Set new flags with removed user flags
+			 */
+			message.setFlags(flags, true);
+		}
 	}
 
 	private static final String ALG_MD5 = "MD5";
@@ -1152,7 +1203,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			 */
 			md = MessageDigest.getInstance(ALG_MD5);
 		} catch (final NoSuchAlgorithmException e) {
-			LOG.error("Unable to generate ID", e);
+			LOG.error("Unable to generate OX marker", e);
 			return input;
 		}
 		/*
@@ -1168,7 +1219,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			/*
 			 * Should not occur since utf-8 is a known encoding
 			 */
-			LOG.error("Unable to generate file ID", e);
+			LOG.error("Unable to generate OX marker", e);
 			return input;
 		}
 		/*
