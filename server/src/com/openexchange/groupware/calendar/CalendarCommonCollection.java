@@ -869,45 +869,56 @@ public final class CalendarCommonCollection {
     /**
      * Returns a {@link Date} array with all occurrences of <code>d</code> deleted from given date array
      * 
-     * @param date The date array
+     * @param dates The date array
      * @param d The date to check against
      * @return A {@link Date} array with all occurrences of <code>d</code> deleted from given date array
      */
-    static Date[] removeException(final Date[] date, final Date d) {
-        if (date != null && date.length > 0) {
-            final Date ret[] = new Date[date.length-1];
-            int x = 0;
-            for (int a = 0; a < date.length; a++) {
-                if (!date[a].equals(d)) {
-                    if (x < ret.length) {
-                        ret[x++] = date[a];
-                    }
-                }
-            }
-            if (x > 0) {
-                return ret;
-            }
-        }
-        return null;
+    static Date[] removeException(final Date[] dates, final Date d) {
+        return removeException(dates, d.getTime());
     }
+
+    /**
+     * Returns a {@link Date} array with all occurrences of <code>d</code> deleted from given date array
+     * 
+     * @param dates The date array
+     * @param dateTime The date time to check against
+     * @return A {@link Date} array with all occurrences of <code>d</code> deleted from given date array
+     */
+    static Date[] removeException(final Date[] dates, final long dateTime) {
+		if (dates != null && dates.length > 0) {
+			final Date ret[] = new Date[dates.length - 1];
+			int x = 0;
+			for (int a = 0; a < dates.length; a++) {
+				if (dates[a].getTime() != dateTime) {
+					if (x < ret.length) {
+						ret[x++] = dates[a];
+					}
+				}
+			}
+			if (x > 0) {
+				return ret;
+			}
+		}
+		return null;
+	}
 
     /**
      * Returns a {@link Date} array with <code>d</code> added to given date array
      * if not already contained.
      * 
-     * @param date The date array
+     * @param dates The date array
      * @param d The date to add
      * @return A {@link Date} array with <code>d</code> added to given date array
      */
-    static Date[] addException(final Date[] date, final Date d) {
-		if (date != null && date.length > 0) {
-			for (int i = 0; i < date.length; i++) {
-				if (date[i].equals(d)) {
-					return date;
+    static Date[] addException(final Date[] dates, final Date d) {
+		if (dates != null && dates.length > 0) {
+			for (int i = 0; i < dates.length; i++) {
+				if (dates[i].equals(d)) {
+					return dates;
 				}
 			}
-			final Date ret[] = new Date[date.length + 1];
-			System.arraycopy(date, 0, ret, 1, date.length);
+			final Date ret[] = new Date[dates.length + 1];
+			System.arraycopy(dates, 0, ret, 1, dates.length);
 			ret[0] = d;
 			Arrays.sort(ret);
 			return ret;
