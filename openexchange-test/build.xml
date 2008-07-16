@@ -92,7 +92,7 @@
 	<target name="run-mail-tests" depends="interface-jar">
 		<delete dir="${test.xml.dir}"/> 
 		<mkdir dir="${test.xml.dir}"/> 
-		<junit errorProperty="test.failed" failureProperty="test.failed"  showoutput="yes" printsummary="yes"> 
+		<junit dir="${basedir}" errorProperty="test.failed" failureProperty="test.failed"  showoutput="yes" printsummary="yes"> 
 			<classpath>
 				<path refid="project.classpath" />
 				<pathelement location="open-xchange-iface-tests.jar"/>
@@ -112,7 +112,7 @@
 	<target name="run-interface-tests" depends="interface-jar">
 		<delete dir="${test.xml.dir}"/>
 		<mkdir dir="${test.xml.dir}"/> 
-		<junit errorProperty="test.failed" failureProperty="test.failed"  showoutput="yes" printsummary="yes"> 
+		<junit dir="${basedir}" errorProperty="test.failed" failureProperty="test.failed"  showoutput="yes" printsummary="yes"> 
 			<classpath>
 				<path refid="project.classpath" />
 				<pathelement location="open-xchange-iface-tests.jar"/>
@@ -172,7 +172,7 @@
 	<target name="run-tests">
 		<delete dir="${test.xml.dir}"/> 
 		<mkdir dir="${test.xml.dir}"/> 
-		<junit errorProperty="test.failed" failureProperty="test.failed"  showoutput="yes" printsummary="yes"> 
+		<junit dir="${basedir}" errorProperty="test.failed" failureProperty="test.failed"  showoutput="yes" printsummary="yes"> 
 			<classpath>
 				<path refid="project.classpath" />
 				<pathelement location="${test.jar}"/>
