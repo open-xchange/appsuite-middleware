@@ -32,6 +32,25 @@ class User {
 	var $idset;
 }
 
+class Database {
+	var $clusterWeight;
+	var $currentUnits;
+	var $driver;
+	var $id;
+	var $login;
+	var $master;
+	var $masterId;
+	var $maxUnits;
+	var $name;
+	var $password;
+	var $poolHardLimit;
+	var $poolInitial;
+	var $poolMax;
+	var $read_id;
+	var $scheme;
+	var $url;	
+}
+
 function getContextClient($host) {
 
 	$client = new SoapClient(NULL, array (
