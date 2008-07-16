@@ -3,7 +3,7 @@
 
 Name:           open-xchange-i18n
 BuildArch:	noarch
-BuildRequires:  ant open-xchange-common open-xchange-configread open-xchange-server
+BuildRequires:  ant open-xchange-common open-xchange-configread open-xchange-global
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
@@ -36,7 +36,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Server i18n Bundle
-Requires:       open-xchange-common open-xchange-configread open-xchange-server
+Requires:       open-xchange-common open-xchange-configread open-xchange-global
 #
 
 %description
