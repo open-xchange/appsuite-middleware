@@ -75,6 +75,7 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
+import com.openexchange.groupware.calendar.CalendarReminderDelete;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
@@ -144,7 +145,7 @@ public class ReminderRequest {
             final int module = reminder.getModule();
             switch (module) {
             	case Types.APPOINTMENT:
-            		reminderDeleteInterface = new EmptyReminderDeleteImpl();
+            		reminderDeleteInterface = new CalendarReminderDelete();
             		break;
             	case Types.TASK:
             		reminderDeleteInterface = new ModifyThroughDependant();
