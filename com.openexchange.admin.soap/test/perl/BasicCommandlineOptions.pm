@@ -357,10 +357,19 @@ sub doCSVOutput {
         	my $sb = "";
         	foreach my $data_column (@$data_list) {
         		if (defined($data_column)) {
-        			$sb .= "\"".$data_column."\"";
-        		}
-        		$sb .= ",";
-        	}
+			  if( ref($data_column) eq "ARRAY" ) {
+			    $sb .= "\"";
+			    foreach my $p ( @$data_column ) {
+			      $sb .= "$p,";
+			    }
+			    $sb = substr($sb,0,length($sb)-1);
+			    $sb .= "\"";
+			  } else {
+			    $sb .= "\"".$data_column."\"";
+			  }
+			}
+			$sb .= ",";
+		      }
         	if (length $sb > 0) {
         		# remove trailing ","
         		chop($sb);
