@@ -2,6 +2,7 @@
 
  - Bugfix #9950: Using modern event handling (OSGi EventAdmin) to send mails to both old and new participants.
  - Bugfix #11655: Fixed counting of weekenddays in monthly recurrences.
+ - Bugfix #11521: When removing the last file switch the mimetype to none.
 
 * 2008-07-16 - thorben.betten@open-xchange.com
 

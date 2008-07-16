@@ -1141,14 +1141,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			
 			final DocumentMetadata version0 = new DocumentMetadataImpl(metadata);
 			version0.setVersion(0);
+            version0.setFileMIMEType("");
 
-			final UpdateVersionAction updateVersion = new UpdateVersionAction();
+            final UpdateVersionAction updateVersion = new UpdateVersionAction();
 			updateVersion.setContext(sessionObj.getContext());
 			updateVersion.setDocuments(Arrays.asList(version0));
 			updateVersion.setModified(Metadata.DESCRIPTION_LITERAL,
 					Metadata.TITLE_LITERAL, Metadata.URL_LITERAL,
 					Metadata.LAST_MODIFIED_LITERAL,
-					Metadata.MODIFIED_BY_LITERAL);
+					Metadata.MODIFIED_BY_LITERAL,
+                    Metadata.FILE_MIMETYPE_LITERAL
+                    );
 			updateVersion.setOldDocuments(Arrays.asList(oldVersion0));
 			updateVersion.setProvider(this);
 			updateVersion.setQueryCatalog(QUERIES);
