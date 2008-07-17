@@ -157,12 +157,14 @@ public class ReminderRequest {
             reminderSql.setReminderDeleteInterface(reminderDeleteInterface);
             
             if (reminder.isRecurrenceAppointment()) {
-                final int targetId = Integer.parseInt(reminder.getTargetId());
-                final int inFolder = Integer.parseInt(reminder.getFolder());
+                final int targetId = reminder.getTargetId();
+                final int inFolder = reminder.getFolder();
                 
                 final ReminderObject nextReminder = getNextRecurringReminder(targetId, recurrencePosition, inFolder, sessionObj);
                 if (nextReminder != null) {
                     reminder.setDate(nextReminder.getDate());
+                    reminder.setRecurrenceAppointment(nextReminder.isRecurrenceAppointment());
+                    reminder.setRecurrencePosition(nextReminder.getRecurrencePosition());
                     reminderSql.updateReminder(reminder);
                     final JSONArray jsonResponseArray = new JSONArray();
                     jsonResponseArray.put(id);
@@ -203,8 +205,8 @@ public class ReminderRequest {
                 final ReminderObject reminderObj = (ReminderObject)it.next();
                 
                 if (reminderObj.isRecurrenceAppointment()) {
-                    final int targetId = Integer.parseInt(reminderObj.getTargetId());
-                    final int inFolder = Integer.parseInt(reminderObj.getFolder());
+                    final int targetId = reminderObj.getTargetId();
+                    final int inFolder = reminderObj.getFolder();
                     
 //                    currently disabled because not used by the UI
 //                    final ReminderObject latestReminder = getLatestReminder(targetId, inFolder, sessionObj, end);
@@ -252,8 +254,8 @@ public class ReminderRequest {
                 final ReminderObject reminderObj = (ReminderObject)it.next();
                 
                 if (reminderObj.isRecurrenceAppointment()) {
-                    final int targetId = Integer.parseInt(reminderObj.getTargetId());
-                    final int inFolder = Integer.parseInt(reminderObj.getFolder());
+                    final int targetId = reminderObj.getTargetId();
+                    final int inFolder = reminderObj.getFolder();
                     final Date oldReminderDate = reminderObj.getDate();
                     
                     ReminderObject latestReminder = null;

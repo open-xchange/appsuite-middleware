@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.reminder;
 
 import java.util.Date;
@@ -57,127 +55,118 @@ import com.openexchange.groupware.container.SystemObject;
 
 /**
  * ReminderObject
- * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-
 public class ReminderObject extends SystemObject {
-	
-	private Date lastModified;
-	
-	private int userId;
-	
-	private Date date;
-	
-	private int objectId;
-    
-	private String targetId;
-	
-	private int module;
-	
-	private String description;
-	
-	private String folder;
-	
-	private boolean isRecurrenceAppointment;
-    
+
+    private Date lastModified;
+
+    private int userId;
+
+    private Date date;
+
+    private int objectId;
+
+    private int targetId;
+
+    private int module;
+
+    private String description;
+
+    private int folder;
+
+    private boolean isRecurrenceAppointment;
+
     private int recurrencePosition;
-	
-	public ReminderObject() {
-		super();
-	}
-	
-	public void setUser( final int userId )
-	{
-		this.userId = userId;
-	}
-	
-	public int getUser( )
-	{
-		return userId;
-	}
-	
-	public void setRecurrenceAppointment( final boolean isRecurrenceAppointment) {
-		this.isRecurrenceAppointment = isRecurrenceAppointment;
-	}
-	
-	public boolean isRecurrenceAppointment() {
-		return isRecurrenceAppointment;
-	}
-	
-	public void setDate( final Date date )
-	{
-		this.date = date;
-	}
-	
-	public Date getDate( )
-	{
-		return date;
-	}
-	
-	public void setTargetId( final String targetId )
-	{
-		this.targetId = targetId;
-	}
-	
-	public void setTargetId( final int targetId )
-	{
-		this.targetId = String.valueOf(targetId);
-	}
-	
-	public String getTargetId( )
-	{
-		return targetId;
-	}
-	
-	public void setObjectId( final int objectId )
-	{
-		this.objectId = objectId;
-	}
 
-	public int getObjectId( )
-	{
-		return objectId;
-	}
-	
-	public void setModule( final int module )
-	{
-		this.module = module;
-	}
-	
-	public int getModule( )
-	{
-		return module;
-	}
-	
-	public void setDescription( final String description) {
-		this.description = description;
-	}
-	
-	public String getDescription() {
-		return description;
-	}
+    public ReminderObject() {
+        super();
+    }
 
-	public void setFolder( final String folder) {
-		this.folder = folder;
-	}
+    public void setUser( final int userId )
+    {
+        this.userId = userId;
+    }
 
-	public String getFolder() {
-		return folder;
-	}
-	
-	public void setLastModified(final Date lastModified) {
-		this.lastModified = new Date(lastModified.getTime());
-	}
-	
-	public Date getLastModified() {
-		return lastModified;
-	}
-    
+    public int getUser( )
+    {
+        return userId;
+    }
+
+    public void setRecurrenceAppointment( final boolean isRecurrenceAppointment) {
+        this.isRecurrenceAppointment = isRecurrenceAppointment;
+    }
+
+    public boolean isRecurrenceAppointment() {
+        return isRecurrenceAppointment;
+    }
+
+    public void setDate( final Date date )
+    {
+        this.date = date;
+    }
+
+    public Date getDate( )
+    {
+        return date;
+    }
+
+    public void setTargetId(final int targetId) {
+        this.targetId = targetId;
+    }
+
+    public int getTargetId() {
+        return targetId;
+    }
+
+    public void setObjectId( final int objectId )
+    {
+        this.objectId = objectId;
+    }
+
+    public int getObjectId( )
+    {
+        return objectId;
+    }
+
+    public void setModule( final int module )
+    {
+        this.module = module;
+    }
+
+    public int getModule( )
+    {
+        return module;
+    }
+
+    public void setDescription( final String description) {
+        this.description = description;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setFolder(final int folder) {
+        this.folder = folder;
+    }
+
+    public int getFolder() {
+        return folder;
+    }
+
+    public void setLastModified(final Date lastModified) {
+        this.lastModified = new Date(lastModified.getTime());
+    }
+
+    public Date getLastModified() {
+        return lastModified;
+    }
+
     public void setRecurrencePosition(final int recurrencePosition) {
         this.recurrencePosition = recurrencePosition;
     }
-    
+
     public int getRecurrencePosition() {
         return recurrencePosition;
     }

@@ -222,6 +222,18 @@ public final class DBUtils {
 		}
 	}
 
+	/**
+	 * Convenience method to set the autocommit of a connection to <code>true</code>.
+	 * @param con connection that should go into autocommit mode.
+	 */
+	public static void autocommit(final Connection con) {
+        try {
+            con.setAutoCommit(true);
+        } catch (final SQLException e) {
+            LOG.error(e.getMessage(), e);
+        }
+	}
+
 	private static final Pattern PAT_TRUNCATED_IDS = Pattern.compile("([^']*')(\\S+)('[^']*)");
 
 	/**

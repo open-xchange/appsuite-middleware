@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.api2;
 
 import java.sql.Connection;
@@ -57,6 +55,7 @@ import java.util.Date;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.groupware.reminder.ReminderDeleteInterface;
+import com.openexchange.groupware.reminder.ReminderException;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -73,9 +72,16 @@ public interface ReminderSQLInterface {
 
 	public int insertReminder(ReminderObject reminderObj, Connection writeCon) throws OXMandatoryFieldException, OXConflictException, OXException;
 	
-	public void updateReminder(ReminderObject reminderObj) throws OXMandatoryFieldException, OXConflictException, OXException;
+	void updateReminder(ReminderObject reminder) throws ReminderException;
 
-	public void updateReminder(ReminderObject reminderObj, Connection writeCon) throws OXMandatoryFieldException, OXConflictException, OXException;
+	/**
+	 * This method updates a reminder.
+	 * @param reminder object with new values for the reminder.
+	 * @param con writable database connection.
+	 * @throws ReminderException TODO
+	 */
+	void updateReminder(ReminderObject reminder, Connection con)
+        throws ReminderException;
 	
 	public void deleteReminder(ReminderObject reminder) throws OXException;
 	

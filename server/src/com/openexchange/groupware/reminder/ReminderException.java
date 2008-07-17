@@ -84,25 +84,51 @@ public class ReminderException extends OXException {
 	}
 	
 	public enum Code {
-		MANDATORY_FIELD_USER("Required value \"user\" was not supplied.", 1,
-            AbstractOXException.Category.CODE_ERROR),
-		MANDATORY_FIELD_TARGET_ID(
-            "Required value \"End Date\" was not supplied.", 2,
-            AbstractOXException.Category.CODE_ERROR),
-		MANDATORY_FIELD_ALARM("Required value \"Title\" was not supplied.", 3,
-            AbstractOXException.Category.CODE_ERROR),
+		/**
+		 * User is missing for the reminder.
+		 */
+		MANDATORY_FIELD_USER("User is missing for the reminder.", 1,
+		    Category.CODE_ERROR),
+		/**
+		 * Identifier of the object is missing.
+		 */
+		MANDATORY_FIELD_TARGET_ID("Identifier of the object is missing.", 2,
+            Category.CODE_ERROR),
+		/**
+		 * Alarm date for the reminder is missing.
+		 */
+		MANDATORY_FIELD_ALARM("Alarm date for the reminder is missing.", 3,
+            Category.CODE_ERROR),
 		INSERT_EXCEPTION("Unable to insert reminder", 4,
-            AbstractOXException.Category.CODE_ERROR),
-		UPDATE_EXCEPTION("Unable to update reminder", 5,
-            AbstractOXException.Category.CODE_ERROR),
+            Category.CODE_ERROR),
+		UPDATE_EXCEPTION("Unable to update reminder.", 5,
+            Category.CODE_ERROR),
 		DELETE_EXCEPTION("Unable to delete reminder", 6,
-            AbstractOXException.Category.CODE_ERROR),
+            Category.CODE_ERROR),
 		LOAD_EXCEPTION("Unable to load reminder", 7,
-            AbstractOXException.Category.CODE_ERROR),
+            Category.CODE_ERROR),
 		LIST_EXCEPTION("Unable to list reminder", 8,
-            AbstractOXException.Category.CODE_ERROR),
+            Category.CODE_ERROR),
         NOT_FOUND("Cannot find reminder (identifier %d). Context %d.", 9,
-            Category.CODE_ERROR);
+            Category.CODE_ERROR),
+        /**
+         * Folder of the object is missing.
+         */
+        MANDATORY_FIELD_FOLDER("Folder of the object is missing.", 10,
+            Category.CODE_ERROR),
+        /**
+         * Module type of the object is missing.
+         */
+        MANDATORY_FIELD_MODULE("Module type of the object is missing.", 11,
+            Category.CODE_ERROR),
+        /**
+         * Updated too much reminder.
+         */
+        TOO_MUCH("Updated too much reminder.", 12, Category.CODE_ERROR),
+        /**
+         * SQL Problem: "%s".
+         */
+        SQL_ERROR("SQL Problem: \"%s\".", 13, Category.CODE_ERROR);
 		
 		/**
 		 * Message of the exception.

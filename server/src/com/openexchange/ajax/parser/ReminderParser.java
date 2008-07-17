@@ -99,7 +99,7 @@ public class ReminderParser extends DataParser {
             reminder.setTargetId(parseInt(json, ReminderFields.TARGET_ID));
         }
         if (json.has(ReminderFields.FOLDER)) {
-            reminder.setFolder(String.valueOf(parseInt(json, ReminderFields.FOLDER)));
+            reminder.setFolder(parseInt(json, ReminderFields.FOLDER));
         }
         if (json.has(ReminderFields.ALARM)) {
             reminder.setDate(parseTime(json, ReminderFields.ALARM, getTimeZone()));

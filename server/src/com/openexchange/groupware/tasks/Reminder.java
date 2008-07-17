@@ -97,7 +97,7 @@ final class Reminder {
         remind.setDate(task.getAlarm());
         remind.setModule(Types.TASK);
         remind.setTargetId(task.getObjectID());
-        remind.setFolder(String.valueOf(task.getParentFolderID()));
+        remind.setFolder(task.getParentFolderID());
         remind.setUser(task.getCreatedBy());
         final ReminderSQLInterface reminder = new ReminderHandler(ctx);
         reminder.insertReminder(remind);
@@ -122,8 +122,8 @@ final class Reminder {
                     folder.getUser(), Types.TASK);
                 final int folderId = folder.getIdentifier();
                 try {
-                    if (Integer.parseInt(remind.getFolder()) != folderId) {
-                        remind.setFolder(String.valueOf(folderId));
+                    if (remind.getFolder() != folderId) {
+                        remind.setFolder(folderId);
                         reminder.updateReminder(remind);
                     }
                 } catch (final NumberFormatException nfe) {
@@ -155,9 +155,8 @@ final class Reminder {
             remind.setDate(task.getAlarm());
             remind.setModule(Types.TASK);
             remind.setTargetId(taskId);
-            remind.setFolder(String.valueOf(task.getParentFolderID()));
+            remind.setFolder(task.getParentFolderID());
             remind.setUser(userId);
-    		
     		if (reminder.existsReminder(taskId, userId, Types.TASK)) {
                 reminder.updateReminder(remind);
     		} else {

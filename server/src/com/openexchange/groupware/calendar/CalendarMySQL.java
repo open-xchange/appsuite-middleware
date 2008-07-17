@@ -2972,7 +2972,7 @@ class CalendarMySQL implements CalendarSqlImp {
 				ro.setModule(Types.APPOINTMENT);
 				ro.setRecurrenceAppointment(sequence);
 				ro.setDate(reminder_date);
-				ro.setFolder("" + fid);
+				ro.setFolder(fid);
 				if (rsql.existsReminder(oid, uid, Types.APPOINTMENT)) {
 					rsql.updateReminder(ro);
 				} else {
