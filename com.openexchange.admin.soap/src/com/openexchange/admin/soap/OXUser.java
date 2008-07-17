@@ -90,7 +90,7 @@ public class OXUser extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
-    public void changeModuleAccess(Context ctx, User user, UserModuleAccess moduleAccess, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    public void changeByModuleAccess(Context ctx, User user, UserModuleAccess moduleAccess, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         reconnect();
         try {
             ((OXUserInterface)rmistub).changeModuleAccess(ctx, user, moduleAccess, auth);
@@ -101,7 +101,7 @@ public class OXUser extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
-    public void changeModuleAccessByName(Context ctx, User user, String access_combination_name, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    public void changeByModuleAccessName(Context ctx, User user, String access_combination_name, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         reconnect();
         try {
             ((OXUserInterface)rmistub).changeModuleAccess(ctx, user, access_combination_name, auth);
@@ -112,7 +112,7 @@ public class OXUser extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
-    public User createModuleAccess(Context ctx, User usrdata, UserModuleAccess access, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+    public User createByModuleAccess(Context ctx, User usrdata, UserModuleAccess access, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
             return ((OXUserInterface)rmistub).create(ctx, usrdata, access, auth);
@@ -122,7 +122,7 @@ public class OXUser extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
-    public User createModuleAccessByName(Context ctx, User usrdata, String access_combination_name, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+    public User createByModuleAccessName(Context ctx, User usrdata, String access_combination_name, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
             return ((OXUserInterface)rmistub).create(ctx, usrdata, access_combination_name, auth);
