@@ -1,5 +1,6 @@
 * 2008-07-17 - francisco.laguna@open-xchange.com
  - Bugfix #11050: Fixed in Infostore, and Calendar.
+ - Partial Fix Bug #11453: Detect update to alarm only and omit modification event.
 
 * 2008-07-17 - thorben.betten@open-xchange.com
 

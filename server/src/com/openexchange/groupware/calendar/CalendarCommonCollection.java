@@ -1345,10 +1345,17 @@ public final class CalendarCommonCollection {
         return null;
     }
     
-    static boolean checkForSoloReminderUpdate(final CalendarDataObject cdao, final int uc, final MBoolean cup) {
-        if (uc > 2 || cup.getMBoolean()) {
+    static boolean checkForSoloReminderUpdate(final CalendarDataObject cdao, final int[] ucols, final MBoolean cup) {
+        if (cup.getMBoolean()) {
             return false;
-        } else if (CalendarConfig.getSoloReminderTriggerEvent() && cdao.containsAlarm()) {
+        } else if (CalendarConfig.getSoloReminderTriggerEvent()) {
+            Set<Integer> IGNORE_FIELDS = new HashSet<Integer>(Arrays.asList(AppointmentObject.ALARM, AppointmentObject.LAST_MODIFIED, AppointmentObject.MODIFIED_BY, 0));
+            for (int i = 0; i < ucols.length; i++) {
+                int ucol = ucols[i];
+                if(!IGNORE_FIELDS.contains(ucol)) {
+                    return false;
+                }
+            }
             return true;
         }
         return false;

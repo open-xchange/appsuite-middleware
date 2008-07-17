@@ -1925,7 +1925,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		}
 		cdao.setParentFolderID(cdao.getActionFolder());
 
-		final boolean solo_reminder = CalendarCommonCollection.checkForSoloReminderUpdate(cdao, uc, cup);
+		final boolean solo_reminder = CalendarCommonCollection.checkForSoloReminderUpdate(cdao, ucols, cup);
 		CalendarCommonCollection.checkAndRemovePastReminders(cdao, edao);
 		if (!solo_reminder) {
 			CalendarCommonCollection.triggerModificationEvent(so, edao, cdao);
@@ -2048,7 +2048,7 @@ class CalendarMySQL implements CalendarSqlImp {
 				check_up -= deleted_userparticipants.length;
 			}
 		}
-
+        boolean onlyAlarmChange = modified_userparticipants == null;
 		modified_userparticipants = CalendarCommonCollection.checkAndModifyAlarm(cdao, modified_userparticipants, uid, edao.getUsers());
 
 		if (check_up < 1) {
@@ -2285,7 +2285,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		}
 
 		if (modified_userparticipants != null && modified_userparticipants.length > 0) {
-			cup.setMBoolen(true);
+			cup.setMBoolen(!onlyAlarmChange);
 			PreparedStatement pu = null;
 			try {
 				pu = writecon.prepareStatement("update prg_dates_members SET confirm = ?, reason = ?, pfid = ?, reminder = ? WHERE object_id = ? AND cid = ? and member_uid = ?");
