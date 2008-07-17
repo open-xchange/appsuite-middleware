@@ -130,7 +130,7 @@ public final class TransportProviderRegistry {
 	 * as protocol.
 	 * 
 	 * @param serverUrl
-	 *            The mail server URL
+	 *            The transport server URL
 	 * @return The appropriate transport provider
 	 */
 	public static TransportProvider getTransportProviderByURL(final String serverUrl) {
