@@ -58,6 +58,7 @@ import com.openexchange.cache.OXCachingException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -130,8 +131,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		} catch (final ContextException e) {
 			throw new MailException(e);
 		}
-		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx).hasWebMail()) {
-			throw new MailException(MailException.Code.NO_MAIL_ACCESS);
+		try {
+			if (!UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx).hasWebMail()) {
+				throw new MailException(MailException.Code.NO_MAIL_ACCESS);
+			}
+		} catch (final UserConfigurationException e) {
+			throw new MailException(e);
 		}
 		if (/* IMAPProperties.noAdminMailbox() && */session.getUserId() == ctx.getMailadmin()) {
 			throw new MailException(MailException.Code.ACCOUNT_DOES_NOT_EXIST, Integer.valueOf(ctx.getContextId()));

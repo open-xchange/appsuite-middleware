@@ -8,6 +8,8 @@
    being notified about a non-existing user.
  - Bugfix #11669: Check for null reference prior to composing a new 
    subject for a forward mail
+ - Bugfix #11670: Checking unknown user configuration before checking mail
+   access permission
 
 * 2008-07-16 - francisco.laguna@open-xchange.com
 
