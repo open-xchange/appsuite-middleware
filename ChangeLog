@@ -1,3 +1,7 @@
+* 2008-07-17 - choeger@open-xchange.com
+
+  - Bugfix ID#11572 CLT jmx tools do not work any more when jmx auth is enabled
+
 * 2008-07-07 - holger.achtziger@open-xchange.com
 
   - Bugfix ID#11575 OX installer fails if configjump.properties does not exist

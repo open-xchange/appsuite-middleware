@@ -51,6 +51,7 @@ package com.openexchange.admin.console;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -120,6 +121,14 @@ public class StatisticTools extends BasicCommandlineOptions {
     private static final char OPT_DOOPERATIONS_STATS_SHORT = 'd';
 
     private static final String OPT_DOOPERATIONS_STATS_LONG = "dooperation";
+    
+    private static final String OPT_JMX_AUTH_USER_LONG = "jmxauthuser";
+
+    private static final char OPT_JMX_AUTH_USER_SHORT = 'J';
+
+    private static final String OPT_JMX_AUTH_PASSWORD_LONG = "jmxauthpassword";
+
+    private static final char OPT_JMX_AUTH_PASSWORD_SHORT = 'P';
 
     private String JMX_HOST = "localhost";
 
@@ -139,11 +148,15 @@ public class StatisticTools extends BasicCommandlineOptions {
 
     private Option allstats = null;
 
-    private Option admindaemonstats;
+    private Option admindaemonstats = null;
 
-    private Option showoperation;
+    private Option showoperation = null;
 
-    private Option dooperation;
+    private Option dooperation = null;
+    
+    private Option jmxuser = null;
+    
+    private Option jmxpass = null;
 
     /**
      * This method is called after a hostname change and input parsing, because
@@ -167,6 +180,20 @@ public class StatisticTools extends BasicCommandlineOptions {
         try {
             parser.ownparse(args);
 
+            final String jmxuser = (String)parser.getOptionValue(this.jmxuser);
+            final String jmxpass = (String)parser.getOptionValue(this.jmxpass);
+            HashMap<String, String[]> env = null;
+            
+            if( jmxuser != null && jmxuser.trim().length() > 0 ) {
+                if( jmxpass == null ) {
+                    throw new IllegalOptionValueException(this.jmxpass,null);
+                }
+                env = new HashMap<String, String[]>();
+                String[] creds = new String[]{ jmxuser, jmxpass };
+                env.put(JMXConnector.CREDENTIALS, creds);
+            }
+                
+
             boolean admin = false;
             final String host = (String) parser.getOptionValue(this.host);
             if (null != host) {
@@ -177,13 +204,13 @@ public class StatisticTools extends BasicCommandlineOptions {
             }
             int count = 0;
             if (null != parser.getOptionValue(this.xchangestats)) {
-                final MBeanServerConnection initConnection = initConnection(admin);
+                final MBeanServerConnection initConnection = initConnection(admin, env);
                 showOXData(initConnection, admin);
                 count++;
             }
             if (null != parser.getOptionValue(this.runtimestats)) {
                 if (0 == count) {
-                    final MBeanServerConnection initConnection = initConnection(admin);
+                    final MBeanServerConnection initConnection = initConnection(admin, env);
                     showStats(initConnection, "sun.management.RuntimeImpl");
                     showMemoryPoolData(initConnection);
                 }
@@ -191,7 +218,7 @@ public class StatisticTools extends BasicCommandlineOptions {
             }
             if (null != parser.getOptionValue(this.osstats)) {
                 if (0 == count) {
-                    final MBeanServerConnection initConnection = initConnection(admin);
+                    final MBeanServerConnection initConnection = initConnection(admin, env);
                     showStats(initConnection, "com.sun.management.UnixOperatingSystem");
                 }
                 count++;
@@ -199,7 +226,7 @@ public class StatisticTools extends BasicCommandlineOptions {
             }
             if (null != parser.getOptionValue(this.threadingstats)) {
                 if (0 == count) {
-                    final MBeanServerConnection initConnection = initConnection(admin);
+                    final MBeanServerConnection initConnection = initConnection(admin, env);
                     showSysThreadingData(initConnection);
                 }
                 count++;
@@ -207,7 +234,7 @@ public class StatisticTools extends BasicCommandlineOptions {
             }
             if (null != parser.getOptionValue(this.allstats)) {
                 if (0 == count) {
-                    final MBeanServerConnection initConnection = initConnection(admin);
+                    final MBeanServerConnection initConnection = initConnection(admin, env);
                     showOXData(initConnection, admin);
                     showStats(initConnection, "com.sun.management.UnixOperatingSystem");
                     showStats(initConnection, "sun.management.RuntimeImpl");
@@ -219,7 +246,7 @@ public class StatisticTools extends BasicCommandlineOptions {
             }
             if (null != parser.getOptionValue(this.showoperation)) {
                 if (0 == count) {
-                    final MBeanServerConnection initConnection = initConnection(admin);
+                    final MBeanServerConnection initConnection = initConnection(admin, env);
                     showOperations(initConnection);
                 }
                 count++;
@@ -228,7 +255,7 @@ public class StatisticTools extends BasicCommandlineOptions {
             final String operation = (String) parser.getOptionValue(this.dooperation);
             if (null != operation) {
                 if (0 == count) {
-                    final MBeanServerConnection initConnection = initConnection(admin);
+                    final MBeanServerConnection initConnection = initConnection(admin, env);
                     final Object result = doOperation(initConnection, operation);
                     if (null != result) {
                         System.out.println(result);
@@ -302,21 +329,26 @@ public class StatisticTools extends BasicCommandlineOptions {
         this.admindaemonstats = setShortLongOpt(parser, OPT_ADMINDAEMON_STATS_SHORT, OPT_ADMINDAEMON_STATS_LONG, "shows stats for the admin instead of the groupware", false, NeededQuadState.notneeded);
         this.showoperation = setShortLongOpt(parser, OPT_SHOWOPERATIONS_STATS_SHORT, OPT_SHOWOPERATIONS_STATS_LONG, "shows the operations for the registered beans", false, NeededQuadState.notneeded);
         this.dooperation = setShortLongOpt(parser, OPT_DOOPERATIONS_STATS_SHORT, OPT_DOOPERATIONS_STATS_LONG, "operation", "Syntax is <canonical object name (the first part from showoperatons)>!<operationname>", false);
+        this.jmxuser = setShortLongOpt(parser, OPT_JMX_AUTH_USER_SHORT, OPT_JMX_AUTH_USER_LONG, "jmx username (required when jmx authentication enabled)", true, NeededQuadState.notneeded);
+        this.jmxpass = setShortLongOpt(parser, OPT_JMX_AUTH_PASSWORD_SHORT, OPT_JMX_AUTH_PASSWORD_LONG, "jmx username (required when jmx authentication enabled)", true, NeededQuadState.notneeded);
     }
 
-    private MBeanServerConnection initConnection(final boolean adminstats) throws InterruptedException, IOException {
+    private MBeanServerConnection initConnection(final boolean adminstats, final HashMap<String, String[]> env) throws InterruptedException, IOException {
         updatejmxurl(adminstats);
         // Set timeout here, it is given in ms
         final long timeout = 2000;
         final JMXServiceURL serviceurl = new JMXServiceURL(ox_jmx_url);
         final IOException[] exc = new IOException[1];
+        final RuntimeException[] excr = new RuntimeException[1];
         final Thread t = new Thread() {
             @Override
             public void run() {
                 try {
-                    c = JMXConnectorFactory.connect(serviceurl);
+                    c = JMXConnectorFactory.connect(serviceurl,env);
                 } catch (IOException e) {
                     exc[0] = e;
+                } catch (RuntimeException e) {
+                    excr[0] = e;
                 }
             }
         };
@@ -328,6 +360,9 @@ public class StatisticTools extends BasicCommandlineOptions {
         }
         if (exc[0] != null) {
             throw exc[0];
+        }
+        if (excr[0] != null) {
+            throw excr[0];
         }
         return c.getMBeanServerConnection();
     }
