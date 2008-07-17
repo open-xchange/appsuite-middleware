@@ -10,7 +10,6 @@ try {
 	if (!is_soap_fault($result)) {
 		if (is_array($result)) {
 			foreach ($result['return'] as $val_obj) {
-				printUser($val_obj->id);
 				$tmp_user = getUserObject($val_obj->id);				
 				$tmp_user_data = $client->getData(getContextObject($CONTEXT_ID),$tmp_user,$creds);
 				printUser($tmp_user_data);
