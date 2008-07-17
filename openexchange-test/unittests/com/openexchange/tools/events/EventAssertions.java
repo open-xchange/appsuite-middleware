@@ -52,6 +52,8 @@ import com.openexchange.event.CommonEvent;
 import com.openexchange.groupware.container.CommonObject;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
+
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -98,6 +100,7 @@ public class EventAssertions {
         final CommonEvent event = events.getNewest();
         final CommonObject commonObject = (CommonObject) event.getActionObj();
 
+        assertNotNull(commonObject);
         assertTrue(type.isAssignableFrom(commonObject.getClass()));
         assertEquals(action, event.getAction());
         assertEquals(parentFolderID, commonObject.getParentFolderID());
