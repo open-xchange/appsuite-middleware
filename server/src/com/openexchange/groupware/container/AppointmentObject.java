@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.container;
 
 import org.apache.commons.logging.Log;
@@ -59,10 +57,10 @@ import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.OXCalendarException.Code;
 
 /**
- * AppointmentObject
+ * {@link AppointmentObject} - The appointment object
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public class AppointmentObject extends CalendarObject implements Cloneable {
 
     /**
@@ -87,25 +85,28 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
 	
 	protected int DEFAULTFOLDER = -1;
 	
-	protected String location = null;
-	protected boolean fulltime = false;
-	protected int shown_as = 0;
-	protected int alarm = 0;
+	protected String location;
+	protected boolean fulltime;
+	protected int shown_as;
+	protected int alarm;
 	protected long recurring_start;
         
-	protected boolean ignoreConflicts = false;
+	protected boolean ignoreConflicts;
 	
-	protected String timezone = null;
+	protected String timezone;
 	
-	protected boolean b_location = false;
-	protected boolean b_fulltime = false;
-	protected boolean b_shown_as = false;
-	protected boolean bAlarm = false;
-	protected boolean b_timezone = false;
-        protected boolean b_recurring_start = false;
+	protected boolean b_location;
+	protected boolean b_fulltime;
+	protected boolean b_shown_as;
+	protected boolean bAlarm;
+	protected boolean b_timezone;
+    protected boolean b_recurring_start;
 	
+	/**
+	 * Initializes a new {@link AppointmentObject}
+	 */
 	public AppointmentObject() {
-		
+		super();
 	}
 	
 	// GET METHODS
@@ -142,14 +143,10 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
         return "UTC";
 	}
 	
-        public final void setRecurringStart(long recurring_start) {
-        	final long mod = recurring_start%CalendarRecurringCollection.MILLI_DAY;
-            if (mod != 0) {
-                recurring_start = recurring_start-mod;
-            }
-            this.recurring_start = recurring_start;
-            b_recurring_start = true;
-        }     
+    public final void setRecurringStart(final long recurring_start) {
+        this.recurring_start = CalendarRecurringCollection.normalizeLong(recurring_start);
+        b_recurring_start = true;
+    }     
         
 	// SET METHODS
 	public void setLocation( final String location ) {

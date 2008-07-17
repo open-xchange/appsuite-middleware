@@ -89,19 +89,19 @@ public abstract class CommonObject extends FolderChildObject {
 	
 	public static final int NUMBER_OF_ATTACHMENTS = 104;
 
-	protected int personal_folder_id = 0;
-	protected int number_of_attachments = 0;
-	protected int number_of_links = 0;
-	protected String categories = null;
-	protected boolean privateFlag = false;
-	protected int label = 0;
+	protected int personal_folder_id;
+	protected int number_of_attachments;
+	protected int number_of_links;
+	protected String categories;
+	protected boolean privateFlag;
+	protected int label;
 
-	protected boolean b_personal_folder_id = false;
-	protected boolean b_number_of_attachments = false;
-	protected boolean b_number_of_links = false;
-	protected boolean b_categories = false;
-	protected boolean b_private_flag = false;
-	protected boolean bLabel = false;
+	protected boolean b_personal_folder_id;
+	protected boolean b_number_of_attachments;
+	protected boolean b_number_of_links;
+	protected boolean b_categories;
+	protected boolean b_private_flag;
+	protected boolean bLabel;
 	
 	// GET METHODS
 	public String getCategories( ) {

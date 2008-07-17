@@ -70,17 +70,17 @@ public abstract class DataObject extends SystemObject {
 	
 	public static final int LAST_MODIFIED = 5;	
 	
-	protected int objectId = 0;
-	protected int createdBy = 0;
-	protected int modifiedBy = 0;
-	protected Date creationDate = null;
-	protected Date lastModified = null;
+	protected int objectId;
+	protected int createdBy;
+	protected int modifiedBy;
+	protected Date creationDate;
+	protected Date lastModified;
 	
-	protected boolean b_object_id = false;
-	protected boolean b_created_by = false;
-	protected boolean b_modified_by = false;
-	protected boolean b_creation_date = false;	
-	protected boolean b_last_modified = false;	
+	protected boolean b_object_id;
+	protected boolean b_created_by;
+	protected boolean b_modified_by;
+	protected boolean b_creation_date;	
+	protected boolean b_last_modified;	
 	
 	// GET METHODS
 	public int getObjectID( ) {
