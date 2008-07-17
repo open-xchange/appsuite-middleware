@@ -700,6 +700,31 @@ public class CalendarSqlTest extends TestCase {
 
     }
 
+    // Bug 11453
+
+    public void testShouldOmitEventOnUpdateToAlarmFlag() throws OXException {
+        Date start = D("04/06/2007 10:00");
+        Date end = D("04/06/2007 12:00");
+
+        CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
+        appointment.setAlarm(15);
+        appointment.setAlarmFlag(true);
+
+        appointments.save( appointment ); clean.add(appointment);
+
+        CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
+        update.setAlarmFlag(false);
+        update.setAlarm(-1);
+
+        TestEventAdmin eventAdmin = TestEventAdmin.getInstance();
+        eventAdmin.clearEvents();
+        appointments.save( update );
+
+        assertTrue(eventAdmin.getEvents().isEmpty());
+        
+
+    }
+
     private List<CalendarDataObject> read(SearchIterator<CalendarDataObject> si) throws OXException, SearchIteratorException {
         List<CalendarDataObject> appointments = new ArrayList<CalendarDataObject>();
         while(si.hasNext()) { appointments.add( si.next() ); }
