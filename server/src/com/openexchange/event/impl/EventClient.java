@@ -129,7 +129,7 @@ public class EventClient {
         final int folderId = appointmentObj.getParentFolderID();
 		if (folderId > 0) {
 			final FolderObject folderObj = getFolder(folderId, ctx);
-			modify(appointmentObj, null, folderObj);
+			modify(null, appointmentObj, folderObj);
 		}
 	}
 
