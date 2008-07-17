@@ -177,7 +177,11 @@ public class OXCalendarException extends OXException {
         /**
          * Appointment's owner must not be removed from participants
          */
-        OWNER_REMOVAL_EXCEPTION("Appointment's owner must not be removed from participants", 76, Category.PERMISSION);
+        OWNER_REMOVAL_EXCEPTION("Appointment's owner must not be removed from participants", 76, Category.PERMISSION),
+        /**
+         * An event error occurred: %1$s
+         */
+        EVENT_ERROR("An event error occurred: %1$s", 77, Category.CODE_ERROR);
         
         /**
          * Message of the exception.
