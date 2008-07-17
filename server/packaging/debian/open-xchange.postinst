@@ -206,6 +206,14 @@ postFix() {
       ox_exists_property imapAttachmentDisplaySizeLimit $imap && {
 	  v_delprop imapAttachmentDisplaySizeLimit $imap
       } || true
+      # -----------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/groupware/server.properties
+      ox_exists_property JMXLogin $pfile || {
+	  v_setprop JMXLogin "" $pfile
+      }
+      ox_exists_property JMXPassword $pfile || {
+	  v_setprop JMXPassword "" $pfile
+      }
   fi
 }
 
