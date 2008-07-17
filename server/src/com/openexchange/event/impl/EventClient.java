@@ -142,7 +142,7 @@ public class EventClient {
 		final Event event = new Event("com/openexchange/groupware/appointment/update", ht);
 		triggerEvent(event);
 
-		final EventObject eventObject = new EventObject(oldAppointmentObj, CHANGED, session);
+		final EventObject eventObject = new EventObject(newAppointmentObj, CHANGED, session);
 		EventQueue.add(eventObject);
 	}
 
