@@ -1,10 +1,10 @@
 #!/usr/bin/make -f
-# Build open-xchange-authentication-fhtw
+# Build open-xchange-authentication-database
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-oxroot=$(CURDIR)/debian/open-xchange-authentication-fhtw
+oxroot=$(CURDIR)/debian/open-xchange-authentication-database
 instprefix=/opt/open-xchange
 
 configure: configure-stamp
