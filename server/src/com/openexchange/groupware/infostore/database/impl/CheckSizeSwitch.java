@@ -50,160 +50,116 @@
 package com.openexchange.groupware.infostore.database.impl;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.*;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
+import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.encoding.Charsets;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 @OXExceptionSource(
 		classId=Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_CHECKSIZESWITCH,
 		component=EnumComponent.INFOSTORE
 )
-public class CheckSizeSwitch implements MetadataSwitcher {
+public class CheckSizeSwitch {
 	
 	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(CheckSizeSwitch.class);
-	
-	@OXThrows(
+    private static final Log LOG = LogFactory.getLog(CheckSizeSwitch.class);
+
+    private static Map<Metadata, Integer> SIZES = new HashMap<Metadata, Integer>();
+    private DBProvider provider;
+    private Context ctx;
+
+    private static final Set<Metadata> FIELDS_TO_CHECK = new HashSet<Metadata>() {{
+        add(Metadata.CATEGORIES_LITERAL);
+        add(Metadata.FILE_MIMETYPE_LITERAL);
+        add(Metadata.FILENAME_LITERAL);
+        add(Metadata.URL_LITERAL);
+    }};
+
+    public CheckSizeSwitch(DBProvider provider, Context ctx) {
+        this.provider = provider;
+        this.ctx = ctx;
+    }
+
+    @OXThrows(
 			category = Category.TRUNCATED,
 			desc = "The User entered values that are to long for the database schema.",
 			exceptionId = 0,
 			msg = "Some fields have values, that are too long"
 	)
-	public static void checkSizes(final DocumentMetadata metadata) throws OXException {
+	public static void checkSizes(final DocumentMetadata metadata, DBProvider provider, Context ctx) throws OXException {
 		boolean error = false;
 		
-		final CheckSizeSwitch checkSize = new CheckSizeSwitch();
+		final CheckSizeSwitch checkSize = new CheckSizeSwitch(provider, ctx);
 		final GetSwitch get = new GetSwitch(metadata);
 		
 		final List<Metadata> tooLongData = new ArrayList<Metadata>();
-		for(final Metadata m : Metadata.VALUES) {
-			checkSize.setValue(m.doSwitch(get));
-			if (!((Boolean)m.doSwitch(checkSize)).booleanValue()) {
-				tooLongData.add(m);
-				error = true;
-			}
-		}
+        final OXException x = EXCEPTIONS.create(0);
+        
+        for(final Metadata m : Metadata.VALUES) {
+            if(!FIELDS_TO_CHECK.contains(m)) {
+                continue;
+            }
+            Object value = m.doSwitch(get);
+            int maxSize = checkSize.getSize(m);
+            int valueLength;
+            if (value instanceof String) {
+                valueLength = Charsets.getBytes((String) value, Charsets.UTF_8).length;
+            } else {
+                valueLength = 0;
+            }
+            if(maxSize < valueLength) {
+                AbstractOXException.ProblematicAttribute attr = new SimpleTruncatedAttribute(m.getId(), maxSize, valueLength);
+                x.addProblematic(attr);
+                error = true;
+            }
+        }
 		
 		if(error) {
-			
-			final OXException x = EXCEPTIONS.create(0);
-			for(final Metadata m : tooLongData) {
-				x.addTruncatedId(m.getId());
-			}
 			throw x;
 		}
 	}
 	
-	private int length;
-	
-	public void setValue(final Object value) {
-		length = 0;
-		
-		if (value!= null && value instanceof String) {
-			final String s = (String) value;
-			try {
-				length = s.getBytes("UTF-8").length;
-			} catch (final UnsupportedEncodingException e) {
-				length = s.length();
-			}
-		}
-	}
-	
-	public Object categories() {
-		return Boolean.valueOf(length < 255);
-	}
 
-	public Object colorLabel() {
-		return Boolean.TRUE;
-	}
 
-	public Object content() {
-		return Boolean.TRUE;
-	}
+    public int getSize(Metadata field) {
+        if(SIZES.containsKey(field)) {
+            return SIZES.get(field);
+        }
 
-	public Object createdBy() {
-		return Boolean.TRUE;
-	}
+        Connection con = null;
+        try {
+            con = provider.getWriteConnection(ctx);
+            String[] tuple = new InfostoreQueryCatalog().getFieldTuple(field, new InfostoreQueryCatalog.VersionWins());
+            int size = DBUtils.getColumnSize(con, tuple[0], tuple[1]);
+            SIZES.put(field, size);
+            return size;
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            return 0;
+        } catch (TransactionException e) {
+            LOG.error(e.getMessage(),  e);
+            return 0;
+        } finally {
+            provider.releaseWriteConnection(ctx, con);
+        }
 
-	public Object creationDate() {
-		return Boolean.TRUE;
-	}
-
-	public Object currentVersion() {
-		return Boolean.TRUE;
-	}
-
-	public Object description() {
-		return Boolean.TRUE;
-	}
-
-	public Object fileMD5Sum() {
-		return Boolean.TRUE;
-	}
-
-	public Object fileMIMEType() {
-		return Boolean.valueOf(length <= 255);
-	}
-
-	public Object fileName() {
-		return Boolean.valueOf(length <= 255);
-	}
-
-	public Object fileSize() {
-		return Boolean.TRUE;
-	}
-
-	public Object folderId() {
-		return Boolean.TRUE;
-	}
-
-	public Object id() {
-		return Boolean.TRUE;
-	}
-
-	public Object lastModified() {
-		return Boolean.TRUE;
-	}
-
-	public Object lockedUntil() {
-		return Boolean.TRUE;
-	}
-
-	public Object modifiedBy() {
-		return Boolean.TRUE;
-	}
-
-	public Object sequenceNumber() {
-		return Boolean.TRUE;
-	}
-
-	public Object title() {
-		return Boolean.valueOf(length <= 128);
-	}
-
-	public Object url() {
-		return Boolean.valueOf(length <= 256);
-	}
-
-	public Object version() {
-		return Boolean.TRUE;
-	}
-
-	public Object versionComment() {
-		return Boolean.TRUE;
-	}
-
-	public Object filestoreLocation() {
-		return Boolean.TRUE;
-	}
+    }
 
 }

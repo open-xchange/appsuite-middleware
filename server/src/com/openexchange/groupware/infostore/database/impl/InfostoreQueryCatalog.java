@@ -548,16 +548,24 @@ public class InfostoreQueryCatalog {
 		return "ASC";
 	}
 
-	private String fieldName(final Metadata sort, final FieldChooser wins) {
+    public String[] getFieldTuple(final Metadata field, final FieldChooser wins) {
+        final Table t = wins.choose(field);
+        final String col = (String) field.doSwitch(t.getFieldSwitcher());
+        if(col == null) {
+            return null;
+        }
+		return new String[]{t.getTablename(), col};            
+    }
+
+    private String fieldName(final Metadata sort, final FieldChooser wins) {
 		if(sort == Metadata.CURRENT_VERSION_LITERAL) {
 			return "(infostore.version = infostore_document.version_number) AS current_version";
 		}
-		final Table t = wins.choose(sort);
-		final String col = (String) sort.doSwitch(t.getFieldSwitcher());
-		if(col == null) {
-			return null;
-		}
-		return new StringBuilder(t.getTablename()).append('.').append(col).toString();
+		String[] tuple = getFieldTuple(sort, wins);
+		if(tuple == null) {
+            return null;
+        }
+        return new StringBuilder(tuple[0]).append('.').append(tuple[1]).toString();
 	}
 
 	private String fields(final Metadata[] metadata, final FieldChooser wins) {
@@ -573,7 +581,7 @@ public class InfostoreQueryCatalog {
 	}
 
 
-	private static final class InfostoreColumnsSwitch implements MetadataSwitcher{
+	public static final class InfostoreColumnsSwitch implements MetadataSwitcher{
 
 		public Object categories() {
 			return null;
@@ -666,7 +674,7 @@ public class InfostoreQueryCatalog {
 		
 	}
 		
-	private static final class InfostoreDocumentColumnsSwitch implements MetadataSwitcher{
+	public static final class InfostoreDocumentColumnsSwitch implements MetadataSwitcher{
 
 		public Object categories() {
 			return "categories";

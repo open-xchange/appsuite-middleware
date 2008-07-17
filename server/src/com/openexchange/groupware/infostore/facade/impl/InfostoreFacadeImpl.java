@@ -86,20 +86,7 @@ import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
-import com.openexchange.groupware.infostore.database.impl.CreateVersionAction;
-import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
-import com.openexchange.groupware.infostore.database.impl.DeleteDocumentAction;
-import com.openexchange.groupware.infostore.database.impl.DeleteVersionAction;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.infostore.database.impl.GetSwitch;
-import com.openexchange.groupware.infostore.database.impl.InfostoreIterator;
-import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
-import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
-import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
-import com.openexchange.groupware.infostore.database.impl.SetSwitch;
-import com.openexchange.groupware.infostore.database.impl.UpdateDocumentAction;
-import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
+import com.openexchange.groupware.infostore.database.impl.*;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.validation.InvalidCharactersValidator;
 import com.openexchange.groupware.infostore.validation.ValidationChain;
@@ -441,7 +428,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 	public void saveDocument(final DocumentMetadata document, final InputStream data,
 			final long sequenceNumber, final ServerSession sessionObj) throws OXException {
 		security.checkFolderId(document.getFolderId(), sessionObj.getContext());
-		if (document.getId() == InfostoreFacade.NEW) {
+
+        if (document.getId() == InfostoreFacade.NEW) {
 			final EffectivePermission isperm = security.getFolderPermission(document
 					.getFolderId(), sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
 			if (!isperm.canCreateObjects()) {
@@ -451,12 +439,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			checkUniqueFilename(document.getFileName(), document.getFolderId(), document.getId(), sessionObj.getContext());
 			
 			VALIDATION.validate(document);
-			
-			Connection writeCon = null;
+            CheckSizeSwitch.checkSizes(document, getProvider(), sessionObj.getContext());
+
+
+            Connection writeCon = null;
 			try {
 				startDBTransaction();
 				writeCon = getWriteConnection(sessionObj.getContext());
-				document.setId(getId(sessionObj.getContext(), writeCon));
+
+                document.setId(getId(sessionObj.getContext(), writeCon));
 				commitDBTransaction();
 			} catch (final SQLException e) {
 				throw EXCEPTIONS.create(20, e);
@@ -688,8 +679,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 					throw EXCEPTIONS.create(21);
 				}
 			}
-			
-			final DocumentMetadata oldDocument = checkWriteLock(document.getId(), sessionObj);
+
+            CheckSizeSwitch.checkSizes(document, getProvider(), sessionObj.getContext());
+
+
+            final DocumentMetadata oldDocument = checkWriteLock(document.getId(), sessionObj);
 			
 			
 			

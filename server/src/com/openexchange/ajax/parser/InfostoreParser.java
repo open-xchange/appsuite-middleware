@@ -85,8 +85,6 @@ public class InfostoreParser {
 	public DocumentMetadata getDocumentMetadata(final String json) throws JSONException, OXException {
 		
 		final DocumentMetadata m = new JSONDocumentMetadata(json);
-		CheckSizeSwitch.checkSizes(m);
-		
 		return m;
 	}
 
