@@ -1,3 +1,6 @@
+* 2008-07-17 - dennis.sieben@open-xchange.com
+ - Bugfix #11672: NullPointerException in MailfilterAction.java
+
 * 2008-07-17 - francisco.laguna@open-xchange.com
  - Bugfix #11050: Fixed in Infostore, and Calendar.
  - Partial Fix Bug #11453: Detect update to alarm only and omit modification event.

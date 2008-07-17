@@ -555,18 +555,21 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             }
         } else if (MailFilterProperties.LoginTypes.USER.name.equals(logintype)) {
             storageUser = UserStorage.getStorageUser(creds.getUserid(), creds.getContextid());
-            final String mailServerURL = storageUser.getImapServer();
-            
-            final Matcher m = p.matcher(mailServerURL);
-            if (m.matches()) {
-                sieve_server = m.group(2);
+            if (null != storageUser) {
+                final String mailServerURL = storageUser.getImapServer();
+                final Matcher m = p.matcher(mailServerURL);
+                if (m.matches()) {
+                    sieve_server = m.group(2);
+                } else {
+                    throw new OXMailfilterException(Code.NO_SERVERNAME_IN_SERVERURL);
+                }
+                try {
+                    sieve_port = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_PORT.property));
+                } catch (final RuntimeException e) {
+                    throw new OXMailfilterException(Code.PROPERTY_ERROR, e, MailFilterProperties.Values.SIEVE_PORT.property);
+                }
             } else {
-                throw new OXMailfilterException(Code.NO_SERVERNAME_IN_SERVERURL);
-            }
-            try {
-                sieve_port = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_PORT.property));
-            } catch (final RuntimeException e) {
-                throw new OXMailfilterException(Code.PROPERTY_ERROR, e, MailFilterProperties.Values.SIEVE_PORT.property);
+                throw new OXMailfilterException(Code.INVALID_CREDENTIALS, "Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
             }
         } else {
             throw new OXMailfilterException(Code.NO_VALID_LOGIN_TYPE);
@@ -587,7 +590,11 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 authname = storageUser.getImapLogin();
             } else {
                 storageUser = UserStorage.getStorageUser(creds.getUserid(), creds.getContextid());
-                authname = storageUser.getImapLogin();
+                if (null != storageUser) {
+                    authname = storageUser.getImapLogin();
+                } else {
+                    throw new OXMailfilterException(Code.INVALID_CREDENTIALS, "Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
+                }
             }
             final String username = creds.getUsername();
             final String password = creds.getPassword();
