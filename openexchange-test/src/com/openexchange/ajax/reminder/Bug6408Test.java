@@ -53,7 +53,7 @@ public class Bug6408Test extends ReminderTest {
 		
 		final ReminderObject reminderObj = new ReminderObject();
 		reminderObj.setTargetId(targetId);
-		reminderObj.setFolder(String.valueOf(folderId));
+		reminderObj.setFolder(folderId);
 		reminderObj.setDate(new Date(startTime-(alarmMinutes*60*1000)));
 		
 		ReminderObject[] reminderArray = listReminder(getWebConversation(), new Date(endTime), timeZone, getHostName(), getSessionId());

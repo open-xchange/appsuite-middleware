@@ -104,7 +104,7 @@ public class ReminderTest extends TestCase {
 		reminderObj = reminderSql.loadReminder(targetId, userId, Types.CONTACT);
 		
 		assertNotNull("is reminder object not null", reminderObj);
-		assertEquals("targetId", targetId, Integer.parseInt(reminderObj.getTargetId()));
+		assertEquals("targetId", targetId, reminderObj.getTargetId());
 		assertEquals("module", Types.CONTACT, reminderObj.getModule());
 		assertNotNull("date", reminderObj.getDate());
 		assertEquals("userId", userId, reminderObj.getUser());

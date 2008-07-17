@@ -85,7 +85,7 @@ public final class ReminderTools extends Assert {
         final int targetId) {
         ReminderObject retval = null;
         for (final ReminderObject reminder : list) {
-            if (Integer.parseInt(reminder.getTargetId()) == targetId) {
+            if (reminder.getTargetId() == targetId) {
                 retval = reminder;
                 break;
             }

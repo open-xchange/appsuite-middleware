@@ -66,7 +66,7 @@ public class ReminderTest extends AbstractAJAXTest {
 			
 			reminderObj[a].setObjectId(DataParser.parseInt(jsonReminder, ReminderFields.ID));
 			reminderObj[a].setTargetId(DataParser.parseInt(jsonReminder, ReminderFields.TARGET_ID));
-			reminderObj[a].setFolder(DataParser.parseString(jsonReminder, ReminderFields.FOLDER));
+			reminderObj[a].setFolder(DataParser.parseInt(jsonReminder, ReminderFields.FOLDER));
 			reminderObj[a].setDate(DataParser.parseTime(jsonReminder, ReminderFields.ALARM, timeZone));
 			reminderObj[a].setLastModified(DataParser.parseDate(jsonReminder, ReminderFields.LAST_MODIFIED));
 			reminderObj[a].setUser(DataParser.parseInt(jsonReminder, ReminderFields.USER_ID));
@@ -107,7 +107,7 @@ public class ReminderTest extends AbstractAJAXTest {
 			
 			reminderObj[a].setObjectId(DataParser.parseInt(jsonReminder, ReminderFields.ID));
 			reminderObj[a].setTargetId(DataParser.parseInt(jsonReminder, ReminderFields.TARGET_ID));
-			reminderObj[a].setFolder(DataParser.parseString(jsonReminder, ReminderFields.FOLDER));
+			reminderObj[a].setFolder(DataParser.parseInt(jsonReminder, ReminderFields.FOLDER));
 			reminderObj[a].setDate(DataParser.parseDate(jsonReminder, ReminderFields.ALARM));
 			reminderObj[a].setLastModified(DataParser.parseDate(jsonReminder, ReminderFields.LAST_MODIFIED));
 			reminderObj[a].setUser(DataParser.parseInt(jsonReminder, ReminderFields.USER_ID));
