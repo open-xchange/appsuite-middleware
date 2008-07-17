@@ -1,0 +1,33 @@
+<?php
+
+include("ox-soap.php");
+
+try {
+	
+	srand(microtime()*1000000);
+	$random_id = rand(1, 99999);
+	
+	// name,displayname,givenname,surname,password,email
+	$user = new User();
+	$name = "soap_test_user_".$random_id;	
+	$user->name =  $name;
+	$user->displayname = "OX Soap Test User ".$random_id;	
+	$user->given_name = "Soap Given Name".$random_id;
+	$user->sur_name = "Soap Surname".$random_id;
+	$user->password = "secret";
+	$user->email = $name."@context".$CONTEXT_ID.".org";
+	
+	
+	$result = getUserClient($SOAPHOST)->create(getContextObject($CONTEXT_ID),$user, getCredentialsObject($CONTEXT_ADMIN,$CONTEXT_ADMIN_PASS));
+	
+	if (!is_soap_fault($result)) {
+		$user->id = $result->id;
+		$result = getUserClient($SOAPHOST)->delete(getContextObject($CONTEXT_ID),$user, getCredentialsObject($CONTEXT_ADMIN,$CONTEXT_ADMIN_PASS));
+	}
+	
+} catch (SoapFault $fault) {
+	handleSoapFault($fault);
+} catch (Exception $e) {
+	handleExcepion($e);
+}
+?>
