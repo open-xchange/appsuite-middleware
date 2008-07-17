@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import com.openexchange.api2.OXException;
@@ -62,9 +61,9 @@ import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.encoding.Charsets;
+import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
 
 import java.sql.Connection;
 import java.sql.SQLException;

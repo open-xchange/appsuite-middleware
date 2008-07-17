@@ -1499,7 +1499,18 @@ public final class CalendarCommonCollection {
             }
         }
     }
-    
-	
-	
+
+
+    public static String getString(CalendarDataObject cdao, int fieldID) {
+        switch(fieldID) {
+            case AppointmentObject.TITLE : return cdao.getTitle();
+            case AppointmentObject.LOCATION  : return cdao.getLocation();
+            case AppointmentObject.NOTE : return cdao.getNote();
+            case AppointmentObject.CATEGORIES : return cdao.getCategories();
+            case AppointmentObject.TIMEZONE : return cdao.getTimezone();
+            case AppointmentObject.DELETE_EXCEPTIONS : return cdao.getDelExceptions();
+            case AppointmentObject.CHANGE_EXCEPTIONS : return cdao.getExceptions();
+        }
+        return null;
+    }
 }

@@ -75,11 +75,13 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -497,7 +499,14 @@ public class CalendarSql implements AppointmentSQLInterface {
                         int id = -1;
                         for (int a = 0; a < fid.length; a++) {
                             id = CalendarCommonCollection.getFieldId(fields[a]);
-                            oxe.addTruncatedId(id);
+                            String value = CalendarCommonCollection.getString(cdao, id);
+                            if(value == null) {
+                                oxe.addTruncatedId(id);
+                            } else {
+                                int valueLength = Charsets.getBytes(value, Charsets.UTF_8).length;
+                                int maxLength = DBUtils.getColumnSize(writecon, "prg_dates", fields[a]);
+                                oxe.addProblematic(new SimpleTruncatedAttribute(id, maxLength, valueLength));
+                            }
                         }
                         throw oxe;
                     } catch(final SQLException sqle) {
@@ -523,7 +532,20 @@ public class CalendarSql implements AppointmentSQLInterface {
                 int id = -1;
                 for (int a = 0; a < fid.length; a++) {
                     id = CalendarCommonCollection.getFieldId(fields[a]);
-                    oxe.addTruncatedId(id);
+                    String value = CalendarCommonCollection.getString(cdao, id);
+                    if(value == null) {
+                        oxe.addTruncatedId(id);
+                    } else {
+                        int valueLength = Charsets.getBytes(value, Charsets.UTF_8).length;
+                        int maxLength = 0;
+                        try {
+                            maxLength = DBUtils.getColumnSize(writecon, "prg_dates", fields[a]);
+                            oxe.addProblematic(new SimpleTruncatedAttribute(id, maxLength, valueLength));
+                        } catch (SQLException e) {
+                            LOG.error(e.getMessage(), e);
+                            oxe.addTruncatedId(id);
+                        }
+                    }
                 }
                 throw oxe;
             } catch (final SQLException sqle) {
@@ -582,7 +604,14 @@ public class CalendarSql implements AppointmentSQLInterface {
                             int id = -1;
                             for (int a = 0; a < fid.length; a++) {
                                 id = CalendarCommonCollection.getFieldId(fields[a]);
-                                oxe.addTruncatedId(id);
+                                String value = CalendarCommonCollection.getString(cdao, id);
+                                if(value == null) {
+                                    oxe.addTruncatedId(id);
+                                } else {
+                                    int valueLength = Charsets.getBytes(value, Charsets.UTF_8).length;
+                                    int maxLength = DBUtils.getColumnSize(writecon, "prg_dates", fields[a]);
+                                    oxe.addProblematic(new SimpleTruncatedAttribute(id, maxLength, valueLength));
+                                }
                             }
                             throw oxe;
                         } catch(final SQLException sqle) {
@@ -610,7 +639,21 @@ public class CalendarSql implements AppointmentSQLInterface {
                 int id = -1;
                 for (int a = 0; a < fid.length; a++) {
                     id = CalendarCommonCollection.getFieldId(fields[a]);
-                    oxe.addTruncatedId(id);
+                    String value = CalendarCommonCollection.getString(cdao, id);
+                    if(value == null) {
+                        oxe.addTruncatedId(id);
+                    } else {
+                        int valueLength = Charsets.getBytes(value, Charsets.UTF_8).length;
+                        int maxLength = 0;
+                        try {
+                            maxLength = DBUtils.getColumnSize(writecon, "prg_dates", fields[a]);
+                            oxe.addProblematic(new SimpleTruncatedAttribute(id, maxLength, valueLength));
+                        } catch (SQLException e) {
+                            LOG.error(e.getMessage(), e);
+                            oxe.addTruncatedId(id);
+                        }
+
+                    }
                 }
                 throw oxe;
             } catch(final SQLException sqle) {
