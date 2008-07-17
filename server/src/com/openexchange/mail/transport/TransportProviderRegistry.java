@@ -103,8 +103,19 @@ public final class TransportProviderRegistry {
 			 */
 			provider = null;
 		}
-		final String protocol = extractProtocol(TransportConfig.getTransportServerURL(session),
-				TransportProvider.PROTOCOL_FALLBACK);
+		final String transportServerURL = TransportConfig.getTransportServerURL(session);
+		final String protocol;
+		if (transportServerURL == null) {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(new StringBuilder(128).append(
+						"Missing transport server URL. Transport server URL not set for user ").append(
+						session.getUserId()).append(" in context ").append(session.getContextId()).append(
+						". Using fallback protocol ").append(TransportProvider.PROTOCOL_FALLBACK));
+			}
+			protocol = TransportProvider.PROTOCOL_FALLBACK;
+		} else {
+			protocol = extractProtocol(transportServerURL, TransportProvider.PROTOCOL_FALLBACK);
+		}
 		if ((null != provider) && !provider.isDeprecated() && provider.supportsProtocol(protocol)) {
 			return provider;
 		}

@@ -75,6 +75,9 @@ public final class ProviderUtility {
 	 * @return Extracted protocol or <code>fallback</code> parameter
 	 */
 	public static String extractProtocol(final String serverUrl, final String fallback) {
+		if (serverUrl == null) {
+			return fallback;
+		}
 		final int len = serverUrl.length();
 		char c = '\0';
 		String protocol = null;

@@ -101,7 +101,18 @@ public final class MailProviderRegistry {
 			 */
 			provider = null;
 		}
-		final String protocol = extractProtocol(MailConfig.getMailServerURL(session), MailProvider.PROTOCOL_FALLBACK);
+		final String mailServerURL = MailConfig.getMailServerURL(session);
+		final String protocol;
+		if (mailServerURL == null) {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(new StringBuilder(128).append("Missing mail server URL. Mail server URL not set for user ")
+						.append(session.getUserId()).append(" in context ").append(session.getContextId()).append(
+								". Using fallback protocol ").append(MailProvider.PROTOCOL_FALLBACK));
+			}
+			protocol = MailProvider.PROTOCOL_FALLBACK;
+		} else {
+			protocol = extractProtocol(mailServerURL, MailProvider.PROTOCOL_FALLBACK);
+		}
 		if ((null != provider) && !provider.isDeprecated() && provider.supportsProtocol(protocol)) {
 			return provider;
 		}
