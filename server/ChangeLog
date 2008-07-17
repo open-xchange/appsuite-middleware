@@ -15,6 +15,8 @@
    access permission
  - Bugfix #11647: Sending proper error code (403 - FORBIDDEN) to Outlook on
    permission error
+ - Bugfix #11184: Loading user's group IDs prior to fetching corresponding
+   configuration from database
 
 * 2008-07-16 - francisco.laguna@open-xchange.com
 

@@ -101,8 +101,9 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.groupware.UserConfigurationStorage#getUserConfiguration(int,
-	 *      int[])
+	 * @see
+	 * com.openexchange.groupware.UserConfigurationStorage#getUserConfiguration
+	 * (int, int[])
 	 */
 	@Override
 	public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx)
@@ -136,8 +137,9 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.groupware.UserConfigurationStorage#removeUserConfiguration(int,
-	 *      com.openexchange.groupware.contexts.Context)
+	 * @see
+	 * com.openexchange.groupware.UserConfigurationStorage#removeUserConfiguration
+	 * (int, com.openexchange.groupware.contexts.Context)
 	 */
 	@Override
 	public void removeUserConfiguration(final int userId, final Context ctx) throws UserConfigurationException {
@@ -156,16 +158,17 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 	 * <code>true</code> an INSERT command is performed, otherwise an UPDATE
 	 * command.
 	 * 
-	 * @param userConfig -
-	 *            the user configuration to save
-	 * @param insert -
-	 *            <code>true</code> for an INSERT; otherwise UPDATE
-	 * @param writeCon -
-	 *            the writeable connection; may be <code>null</code>
-	 * @throws SQLException -
-	 *             if saving fails due to a SQL error
-	 * @throws DBPoolingException -
-	 *             if a writeable connection could not be obtained from database
+	 * @param userConfig
+	 *            - the user configuration to save
+	 * @param insert
+	 *            - <code>true</code> for an INSERT; otherwise UPDATE
+	 * @param writeCon
+	 *            - the writeable connection; may be <code>null</code>
+	 * @throws SQLException
+	 *             - if saving fails due to a SQL error
+	 * @throws DBPoolingException
+	 *             - if a writeable connection could not be obtained from
+	 *             database
 	 */
 	public static void saveUserConfiguration(final UserConfiguration userConfig, final boolean insert,
 			final Connection writeCon) throws SQLException, DBPoolingException {
@@ -178,10 +181,10 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 	 * Saves given user configuration to database by self-determining if an
 	 * INSERT or UPDATE is going to be performed.
 	 * 
-	 * @param userConfig -
-	 *            the user configuration to save
-	 * @throws OXException -
-	 *             if saving fails
+	 * @param userConfig
+	 *            - the user configuration to save
+	 * @throws OXException
+	 *             - if saving fails
 	 */
 	public static void saveUserConfiguration(final UserConfiguration userConfig) throws OXException {
 		boolean insert = false;
@@ -216,18 +219,19 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 	 * <code>true</code> an INSERT command is performed, otherwise an UPDATE
 	 * command.
 	 * 
-	 * @param userConfig -
-	 *            the user configuration to save
-	 * @param insert -
-	 *            <code>true</code> for an INSERT; otherwise UPDATE
-	 * @param ctx -
-	 *            the context
-	 * @param writeConArg -
-	 *            the writebale connection; may be <code>null</code>
-	 * @throws SQLException -
-	 *             if saving fails due to a SQL error
-	 * @throws DBPoolingException -
-	 *             if a writeable connection could not be obtained from database
+	 * @param userConfig
+	 *            - the user configuration to save
+	 * @param insert
+	 *            - <code>true</code> for an INSERT; otherwise UPDATE
+	 * @param ctx
+	 *            - the context
+	 * @param writeConArg
+	 *            - the writebale connection; may be <code>null</code>
+	 * @throws SQLException
+	 *             - if saving fails due to a SQL error
+	 * @throws DBPoolingException
+	 *             - if a writeable connection could not be obtained from
+	 *             database
 	 */
 	public static void saveUserConfiguration(final UserConfiguration userConfig, final boolean insert,
 			final Context ctx, final Connection writeConArg) throws SQLException, DBPoolingException {
@@ -272,22 +276,21 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 	 * Loads the user configuration from database specified through user ID and
 	 * context
 	 * 
-	 * @param userId -
-	 *            the user ID
-	 * @param ctx -
-	 *            the context
+	 * @param userId
+	 *            - the user ID
+	 * @param ctx
+	 *            - the context
 	 * @return the instance of <code>{@link UserConfiguration}</code>
-	 * @throws SQLException -
-	 *             if user configuration could not be loaded from database
-	 * @throws LdapException -
-	 *             if user's groups are <code>null</code> and could not be
-	 *             determined by <code>{@link UserStorage}</code>
-	 *             implementation
-	 * @throws DBPoolingException -
-	 *             if a readable connection could not be obtained from
+	 * @throws SQLException
+	 *             - if user configuration could not be loaded from database
+	 * @throws LdapException
+	 *             - if user's groups are <code>null</code> and could not be
+	 *             determined by <code>{@link UserStorage}</code> implementation
+	 * @throws DBPoolingException
+	 *             - if a readable connection could not be obtained from
 	 *             connection pool
-	 * @throws OXException -
-	 *             if no matching user configuration is kept in database
+	 * @throws OXException
+	 *             - if no matching user configuration is kept in database
 	 */
 	public static UserConfiguration loadUserConfiguration(final int userId, final Context ctx) throws SQLException,
 			LdapException, DBPoolingException, OXException {
@@ -298,24 +301,23 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 	 * Loads the user configuration from database specified through user ID and
 	 * context
 	 * 
-	 * @param userId -
-	 *            the user ID
-	 * @param groups -
-	 *            the group IDs the user belongs to; may be <code>null</code>
-	 * @param ctx -
-	 *            the context
+	 * @param userId
+	 *            - the user ID
+	 * @param groups
+	 *            - the group IDs the user belongs to; may be <code>null</code>
+	 * @param ctx
+	 *            - the context
 	 * @return the instance of <code>{@link UserConfiguration}</code>
-	 * @throws SQLException -
-	 *             if user configuration could not be loaded from database
-	 * @throws LdapException -
-	 *             if user's groups are <code>null</code> and could not be
-	 *             determined by <code>{@link UserStorage}</code>
-	 *             implementation
-	 * @throws DBPoolingException -
-	 *             if a readable connection could not be obtained from
+	 * @throws SQLException
+	 *             - if user configuration could not be loaded from database
+	 * @throws LdapException
+	 *             - if user's groups are <code>null</code> and could not be
+	 *             determined by <code>{@link UserStorage}</code> implementation
+	 * @throws DBPoolingException
+	 *             - if a readable connection could not be obtained from
 	 *             connection pool
-	 * @throws OXException -
-	 *             if no matching user configuration is kept in database
+	 * @throws OXException
+	 *             - if no matching user configuration is kept in database
 	 */
 	public static UserConfiguration loadUserConfiguration(final int userId, final int[] groups, final Context ctx)
 			throws SQLException, LdapException, DBPoolingException, OXException {
@@ -328,19 +330,19 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 	 * instance of {@link UserConfiguration} is returned that does not hold any
 	 * permissions.
 	 * 
-	 * @param userId -
-	 *            the user ID
-	 * @param groups -
-	 *            the group IDs the user belongs to; may be <code>null</code>
-	 * @param cid -
-	 *            the context ID
-	 * @param readConArg-
-	 *            the readable context; may be <code>null</code>
+	 * @param userId
+	 *            - the user ID
+	 * @param groups
+	 *            - the group IDs the user belongs to; may be <code>null</code>
+	 * @param cid
+	 *            - the context ID
+	 * @param readConArg
+	 *            - the readable context; may be <code>null</code>
 	 * @return the instance of <code>{@link UserConfiguration}</code>
-	 * @throws SQLException -
-	 *             if user configuration could not be loaded from database
-	 * @throws DBPoolingException -
-	 *             if a readable connection could not be obtained from
+	 * @throws SQLException
+	 *             - if user configuration could not be loaded from database
+	 * @throws DBPoolingException
+	 *             - if a readable connection could not be obtained from
 	 *             connection pool
 	 */
 	public static UserConfiguration adminLoadUserConfiguration(final int userId, final int[] groups, final int cid,
@@ -374,30 +376,29 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 	 * Loads the user configuration from database specified through user ID and
 	 * context
 	 * 
-	 * @param userId -
-	 *            the user ID
-	 * @param groupsArg -
-	 *            the group IDs the user belongs to; may be <code>null</code>
-	 * @param ctx -
-	 *            the context
-	 * @param readConArg -
-	 *            the readable context; may be <code>null</code>
+	 * @param userId
+	 *            - the user ID
+	 * @param groupsArg
+	 *            - the group IDs the user belongs to; may be <code>null</code>
+	 * @param ctx
+	 *            - the context
+	 * @param readConArg
+	 *            - the readable context; may be <code>null</code>
 	 * @return the instance of <code>{@link UserConfiguration}</code>
-	 * @throws SQLException -
-	 *             if user configuration could not be loaded from database
-	 * @throws LdapException -
-	 *             if user's groups are <code>null</code> and could not be
-	 *             determined by <code>{@link UserStorage}</code>
-	 *             implementation
-	 * @throws DBPoolingException -
-	 *             if a readable connection could not be obtained from
+	 * @throws SQLException
+	 *             - if user configuration could not be loaded from database
+	 * @throws LdapException
+	 *             - if user's groups are <code>null</code> and could not be
+	 *             determined by <code>{@link UserStorage}</code> implementation
+	 * @throws DBPoolingException
+	 *             - if a readable connection could not be obtained from
 	 *             connection pool
-	 * @throws OXException -
-	 *             if no matching user configuration is kept in database
+	 * @throws OXException
+	 *             - if no matching user configuration is kept in database
 	 */
 	public static UserConfiguration loadUserConfiguration(final int userId, final int[] groupsArg, final Context ctx,
 			final Connection readConArg) throws SQLException, LdapException, DBPoolingException, OXException {
-		int[] groups = groupsArg;
+		final int[] groups = groupsArg == null ? UserStorage.getInstance().getUser(userId, ctx).getGroups() : groupsArg;
 		Connection readCon = readConArg;
 		boolean closeCon = false;
 		PreparedStatement stmt = null;
@@ -412,9 +413,6 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 			stmt.setInt(2, userId);
 			rs = stmt.executeQuery();
 			if (rs.next()) {
-				if (groups == null) {
-					groups = UserStorage.getInstance().getUser(userId, ctx).getGroups();
-				}
 				return new UserConfiguration(rs.getInt(1), userId, groups, ctx);
 			}
 			throw new UserConfigurationException(UserConfigurationCode.NOT_FOUND, Integer.valueOf(userId), Integer
@@ -435,14 +433,14 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 	 * whereby connection is set to <code>null</code>, thus a new writeable
 	 * connection is going to be obtained from connection pool.
 	 * 
-	 * @param userId -
-	 *            the user ID
-	 * @param ctx -
-	 *            the context
-	 * @throws SQLException -
-	 *             if user configuration cannot be removed from database
-	 * @throws DBPoolingException -
-	 *             if no writeable connection could be obtained
+	 * @param userId
+	 *            - the user ID
+	 * @param ctx
+	 *            - the context
+	 * @throws SQLException
+	 *             - if user configuration cannot be removed from database
+	 * @throws DBPoolingException
+	 *             - if no writeable connection could be obtained
 	 */
 	public static void deleteUserConfiguration(final int userId, final Context ctx) throws SQLException,
 			DBPoolingException {
@@ -455,16 +453,16 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 	 * Deletes the user configuration from database specified through ID and
 	 * context.
 	 * 
-	 * @param userId -
-	 *            the user ID
-	 * @param writeConArg -
-	 *            the writeable connection
-	 * @param ctx -
-	 *            the context
-	 * @throws SQLException -
-	 *             if user configuration cannot be removed from database
-	 * @throws DBPoolingException -
-	 *             if no writeable connection could be obtained
+	 * @param userId
+	 *            - the user ID
+	 * @param writeConArg
+	 *            - the writeable connection
+	 * @param ctx
+	 *            - the context
+	 * @throws SQLException
+	 *             - if user configuration cannot be removed from database
+	 * @throws DBPoolingException
+	 *             - if no writeable connection could be obtained
 	 */
 	public static void deleteUserConfiguration(final int userId, final Connection writeConArg, final Context ctx)
 			throws SQLException, DBPoolingException {
