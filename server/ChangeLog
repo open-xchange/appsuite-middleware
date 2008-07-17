@@ -4,6 +4,8 @@
    removed as participant
  - Bugfix #11673: Checking for null reference when determining a user's
    mail/transport provider by URL string.
+ - Bugfix #11671: Invoking "unsafe" user retrieval on user storage for
+   being notified about a non-existing user.
 
 * 2008-07-16 - francisco.laguna@open-xchange.com
 
