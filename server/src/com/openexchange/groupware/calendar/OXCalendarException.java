@@ -65,6 +65,15 @@ public class OXCalendarException extends OXException {
 	 */
 	private static final long serialVersionUID = -33608409653330247L;
 
+	/**
+	 * Initializes a new {@link OXCalendarException}
+	 * 
+	 * @param cause The init cause
+	 */
+	public OXCalendarException(final AbstractOXException cause) {
+		super(cause);
+	}
+
 	public OXCalendarException(final Code code, final Object... messageArgs) {
         this(code, null, messageArgs);
     }
@@ -164,7 +173,11 @@ public class OXCalendarException extends OXException {
         /**
          * One or more exception dates are not contained in recurring appointment
          */
-        FOREIGN_EXCEPTION_DATE("One or more exception dates are not contained in recurring appointment", 75, Category.USER_INPUT);
+        FOREIGN_EXCEPTION_DATE("One or more exception dates are not contained in recurring appointment", 75, Category.USER_INPUT),
+        /**
+         * Appointment's owner must not be removed from participants
+         */
+        OWNER_REMOVAL_EXCEPTION("Appointment's owner must not be removed from participants", 76, Category.PERMISSION);
         
         /**
          * Message of the exception.
