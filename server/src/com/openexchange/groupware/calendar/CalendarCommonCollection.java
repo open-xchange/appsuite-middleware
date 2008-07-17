@@ -68,8 +68,11 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.caching.CacheException;
+import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
@@ -78,8 +81,8 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -93,7 +96,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
-import com.openexchange.cache.impl.FolderCacheManager;
 
 /**
  * CalendarCommonCollection
@@ -624,26 +626,28 @@ public final class CalendarCommonCollection {
         }
     }
 
-    public static void triggerModificationEvent(final Session session, final AppointmentObject oldAppointment, final AppointmentObject newAppointment) throws OXCalendarException {
-        final EventClient eventclient = new EventClient(session);
-        try {
-            FolderObject sourceFolder = getFolder(session, oldAppointment.getParentFolderID());
-            eventclient.modify(oldAppointment, newAppointment, sourceFolder); // TODO
-        } catch (final Exception e) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(17));
-        }
+    public static void triggerModificationEvent(final Session session, final CalendarDataObject oldAppointment,
+			final CalendarDataObject newAppointment) throws OXCalendarException {
+		final EventClient eventclient = new EventClient(session);
+		try {
+			final FolderObject sourceFolder = getFolder(session, oldAppointment.getEffectiveFolderId());
+			eventclient.modify(oldAppointment, newAppointment, sourceFolder); // TODO
+		} catch (final AbstractOXException e) {
+			throw new OXCalendarException(e);
+		} catch (final EventException e) {
+			throw new OXCalendarException(OXCalendarException.Code.EVENT_ERROR, e, e.getMessage());
+		}
 
-    }
+	}
 
-    private static FolderObject getFolder(Session session, int fid) throws OXException, ContextException {
-        Context ctx = ContextStorage.getStorageContext(session);
-        
-        if (FolderCacheManager.isEnabled()) {
-            return FolderCacheManager.getInstance().getFolderObject(fid, true, ctx, null);
-        } else {
-            return FolderObject.loadFolderObjectFromDB(fid, ctx, null);
-        }
-    }
+	private static FolderObject getFolder(final Session session, final int fid) throws OXException, ContextException {
+		final Context ctx = ContextStorage.getStorageContext(session);
+
+		if (FolderCacheManager.isEnabled()) {
+			return FolderCacheManager.getInstance().getFolderObject(fid, true, ctx, null);
+		}
+		return FolderObject.loadFolderObjectFromDB(fid, ctx, null);
+	}
 
     public static String getSQLInStringForParticipants(final UserParticipant[] userParticipant) {
         final StringBuilder sb = new StringBuilder(32);

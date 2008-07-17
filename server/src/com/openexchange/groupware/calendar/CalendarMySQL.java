@@ -1561,16 +1561,21 @@ class CalendarMySQL implements CalendarSqlImp {
 						}
 						up.setPersonalFolderId(pfid);
 					} else if (cdao.getFolderType() == FolderObject.SHARED) {
-						if (cdao.getSharedFolderOwner() != 0) {
-							if (cdao.getSharedFolderOwner() == tuid) {
+						if (cdao.getSharedFolderOwner() == 0) {
+							throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
+						}
+						if (cdao.getSharedFolderOwner() == tuid) {
+							cdao.setGlobalFolderID(pfid);
+							cdao.setPrivateFolderID(pfid);
+							up.setPersonalFolderId(pfid);
+						} else {
+							if (uid == tuid) {
 								cdao.setGlobalFolderID(pfid);
 								cdao.setPrivateFolderID(pfid);
-								up.setPersonalFolderId(pfid);
 							} else {
-								up.setPersonalFolderId(pfid);
+								cdao.setActionFolder(pfid);
 							}
-						} else {
-							throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
+							up.setPersonalFolderId(pfid);
 						}
 					} else if (uid == tuid) {
 						cdao.setGlobalFolderID(pfid);
@@ -1835,24 +1840,24 @@ class CalendarMySQL implements CalendarSqlImp {
 						pst.setInt(a + 1, cdao.getShownAs());
 						break;
 					case AppointmentObject.LOCATION:
-						if (cdao.getLocation() != null) {
-							pst.setString(a + 1, cdao.getLocation());
-						} else {
+						if (cdao.getLocation() == null) {
 							pst.setNull(a + 1, java.sql.Types.VARCHAR);
+						} else {
+							pst.setString(a + 1, cdao.getLocation());
 						}
 						break;
 					case AppointmentObject.NOTE:
-						if (cdao.getNote() != null) {
-							pst.setString(a + 1, cdao.getNote());
-						} else {
+						if (cdao.getNote() == null) {
 							pst.setNull(a + 1, java.sql.Types.VARCHAR);
+						} else {
+							pst.setString(a + 1, cdao.getNote());
 						}
 						break;
 					case AppointmentObject.CATEGORIES:
-						if (cdao.getCategories() != null) {
-							pst.setString(a + 1, cdao.getCategories());
-						} else {
+						if (cdao.getCategories() == null) {
 							pst.setNull(a + 1, java.sql.Types.VARCHAR);
+						} else {
+							pst.setString(a + 1, cdao.getCategories());
 						}
 						break;
 					case AppointmentObject.FULL_TIME:
@@ -1865,12 +1870,12 @@ class CalendarMySQL implements CalendarSqlImp {
 						pst.setInt(a + 1, cdao.getModifiedBy());
 						break;
 					case AppointmentObject.LAST_MODIFIED:
-						if (!cdao.containsLastModified()) {
+						if (cdao.containsLastModified()) {
+							pst.setLong(a + 1, cdao.getLastModified().getTime());
+						} else {
 							final Timestamp t = new Timestamp(System.currentTimeMillis());
 							pst.setLong(a + 1, t.getTime());
 							cdao.setLastModified(t);
-						} else {
-							pst.setLong(a + 1, cdao.getLastModified().getTime());
 						}
 						break;
 					case AppointmentObject.PRIVATE_FLAG:
@@ -1934,6 +1939,9 @@ class CalendarMySQL implements CalendarSqlImp {
 			cdao.setObjectID(clone.getObjectID());
 			cdao.setLastModified(clone.getLastModified());
 		}
+		/*
+		 * Check if last occurrence(s) of a recurring appointment was deleted
+		 */
 		if (clientLastModifiedCheck
 				&& (cdao.containsDeleteExceptions() || cdao.containsChangeExceptions())
 				&& (!cdao.containsChangeExceptions() || cdao.getChangeException() == null || cdao.getChangeException().length <= 0)
@@ -2031,6 +2039,17 @@ class CalendarMySQL implements CalendarSqlImp {
 			}
 			deleted_userparticipants = CalendarOperation.getDeletedUserParticipants(old_users, users, uid);
 			if (deleted_userparticipants != null) {
+				/*
+				 * TODO: Check that appointment's owner is not removed as participant
+				 */
+//				for (final UserParticipant userParticipant : deleted_userparticipants) {
+//					if (userParticipant.getIdentifier() == edao.getCreatedBy()) {
+//						/*
+//						 * Deny to remove owner from participants
+//						 */
+//						throw new OXCalendarException(OXCalendarException.Code.OWNER_REMOVAL_EXCEPTION);
+//					}
+//				}
 				check_up -= deleted_userparticipants.length;
 			}
 		}
@@ -2106,13 +2125,7 @@ class CalendarMySQL implements CalendarSqlImp {
 			try {
 				pd = writecon.prepareStatement("delete from prg_date_rights WHERE object_id = ? AND cid = ? AND id = ? AND type = ?");
 				for (int a = 0; a < deleted_participants.length; a++) {
-					if (deleted_participants[a].getType() != Participant.EXTERNAL_USER && deleted_participants[a].getType() != Participant.EXTERNAL_GROUP) {
-						pd.setInt(1, cdao.getObjectID());
-						pd.setInt(2, cid);
-						pd.setInt(3, deleted_participants[a].getIdentifier());
-						pd.setInt(4, deleted_participants[a].getType());
-						pd.addBatch();
-					} else {
+					if (deleted_participants[a].getType() == Participant.EXTERNAL_USER || deleted_participants[a].getType() == Participant.EXTERNAL_GROUP) {
 						if (pde == null) {
 							pde = writecon.prepareStatement("delete from prg_date_rights WHERE object_id = ? AND cid = ? AND type = ? AND ma LIKE ?");
 						}
@@ -2121,6 +2134,12 @@ class CalendarMySQL implements CalendarSqlImp {
 						pde.setInt(3, deleted_participants[a].getType());
 						pde.setString(4, deleted_participants[a].getEmailAddress());
 						pde.addBatch();
+					} else {
+						pd.setInt(1, cdao.getObjectID());
+						pd.setInt(2, cid);
+						pd.setInt(3, deleted_participants[a].getIdentifier());
+						pd.setInt(4, deleted_participants[a].getType());
+						pd.addBatch();
 					}
 				}
 				pd.executeBatch();
@@ -2155,18 +2174,15 @@ class CalendarMySQL implements CalendarSqlImp {
 						} else {
 							pi.setInt(3, new_userparticipants[a].getConfirm());
 						}
-						if (new_userparticipants[a].getConfirmMessage() != null) {
-							pi.setString(4, new_userparticipants[a].getConfirmMessage());
-						} else {
+						if (new_userparticipants[a].getConfirmMessage() == null) {
 							pi.setNull(4, java.sql.Types.VARCHAR);
+						} else {
+							pi.setString(4, new_userparticipants[a].getConfirmMessage());
 						}
 
 						if (edao.getFolderType() == FolderObject.PRIVATE) {
 							if (new_userparticipants[a].getIdentifier() == uid) {
-								if (cdao.getGlobalFolderID() != 0) {
-									pi.setInt(5, cdao.getGlobalFolderID());
-									new_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
-								} else {
+								if (cdao.getGlobalFolderID() == 0) {
 									try {
 										final int pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
 										// final int pfid =
@@ -2177,6 +2193,9 @@ class CalendarMySQL implements CalendarSqlImp {
 									} catch (final Exception fe) {
 										throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(3));
 									}
+								} else {
+									pi.setInt(5, cdao.getGlobalFolderID());
+									new_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
 								}
 							} else {
 								try {
@@ -2196,42 +2215,41 @@ class CalendarMySQL implements CalendarSqlImp {
 						} else if (edao.getFolderType() == FolderObject.PUBLIC) {
 							pi.setNull(5, java.sql.Types.INTEGER);
 						} else if (edao.getFolderType() == FolderObject.SHARED) {
-							if (edao.getSharedFolderOwner() != 0) {
-								if (edao.getSharedFolderOwner() == new_userparticipants[a].getIdentifier()) {
-									if (cdao.getGlobalFolderID() != 0) {
-										pi.setInt(5, cdao.getGlobalFolderID());
-										new_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
-									} else {
-										try {
-											final int pfid = access.getDefaultFolder(edao.getSharedFolderOwner(), FolderObject.CALENDAR).getObjectID();
-											// final int pfid =
-											// Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(edao.getSharedFolderOwner(),
-											// cdao.getContext()));
-											pi.setInt(5, pfid);
-											new_userparticipants[a].setPersonalFolderId(pfid);
-										} catch (final Exception fe) {
-											throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(5));
-										}
+							if (edao.getSharedFolderOwner() == 0) {
+								throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
+							}
+							if (edao.getSharedFolderOwner() == new_userparticipants[a].getIdentifier()) {
+								if (cdao.getGlobalFolderID() == 0) {
+									try {
+										final int pfid = access.getDefaultFolder(edao.getSharedFolderOwner(), FolderObject.CALENDAR).getObjectID();
+										// final int pfid =
+										// Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(edao.getSharedFolderOwner(),
+										// cdao.getContext()));
+										pi.setInt(5, pfid);
+										new_userparticipants[a].setPersonalFolderId(pfid);
+									} catch (final Exception fe) {
+										throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(5));
 									}
 								} else {
-									if (cdao.getGlobalFolderID() != 0) {
-										pi.setInt(5, cdao.getGlobalFolderID());
-										new_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
-									} else {
-										try {
-											final int pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
-											// final int pfid =
-											// Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(new_userparticipants[a].getIdentifier(),
-											// cdao.getContext()));
-											pi.setInt(5, pfid);
-											new_userparticipants[a].setPersonalFolderId(pfid);
-										} catch (final Exception fe) {
-											throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(3));
-										}
-									}
+									pi.setInt(5, cdao.getGlobalFolderID());
+									new_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
 								}
 							} else {
-								throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
+								if (cdao.getGlobalFolderID() == 0) {
+									try {
+										final int pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+										// final int pfid =
+										// Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(new_userparticipants[a].getIdentifier(),
+										// cdao.getContext()));
+										pi.setInt(5, pfid);
+										new_userparticipants[a].setPersonalFolderId(pfid);
+									} catch (final Exception fe) {
+										throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(3));
+									}
+								} else {
+									pi.setInt(5, cdao.getGlobalFolderID());
+									new_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
+								}
 							}
 						} else {
 							throw new OXCalendarException(OXCalendarException.Code.FOLDER_TYPE_UNRESOLVEABLE);
@@ -2280,17 +2298,14 @@ class CalendarMySQL implements CalendarSqlImp {
 				for (int a = 0; a < modified_userparticipants.length; a++) {
 					// TODO: Enhance this and add a condition for lastid
 					pu.setInt(1, modified_userparticipants[a].getConfirm());
-					if (modified_userparticipants[a].getConfirmMessage() != null) {
-						pu.setString(2, modified_userparticipants[a].getConfirmMessage());
-					} else {
+					if (modified_userparticipants[a].getConfirmMessage() == null) {
 						pu.setNull(2, java.sql.Types.VARCHAR);
+					} else {
+						pu.setString(2, modified_userparticipants[a].getConfirmMessage());
 					}
 					if (modified_userparticipants[a].getIdentifier() == uid) {
 						if (cdao.getFolderType() == FolderObject.PRIVATE) {
-							if (cdao.getGlobalFolderID() != 0) {
-								pu.setInt(3, cdao.getGlobalFolderID());
-								modified_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
-							} else {
+							if (cdao.getGlobalFolderID() == 0) {
 								try {
 									int pfid = 0;
 									if (modified_userparticipants[a].getPersonalFolderId() > 0) {
@@ -2306,15 +2321,15 @@ class CalendarMySQL implements CalendarSqlImp {
 								} catch (final Exception fe) {
 									throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(6));
 								}
+							} else {
+								pu.setInt(3, cdao.getGlobalFolderID());
+								modified_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
 							}
 						} else if (cdao.getFolderType() == FolderObject.PUBLIC) {
 							pu.setNull(3, java.sql.Types.INTEGER);
 						} else if (cdao.getFolderType() == FolderObject.SHARED) {
 							if (modified_userparticipants[a].getIdentifier() == uid && uid == cdao.getSharedFolderOwner()) {
-								if (cdao.getGlobalFolderID() != 0) {
-									pu.setInt(3, cdao.getGlobalFolderID());
-									modified_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
-								} else {
+								if (cdao.getGlobalFolderID() == 0) {
 									try {
 										int pfid = 0;
 										if (modified_userparticipants[a].getPersonalFolderId() > 0) {
@@ -2330,6 +2345,9 @@ class CalendarMySQL implements CalendarSqlImp {
 									} catch (final Exception fe) {
 										throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(6));
 									}
+								} else {
+									pu.setInt(3, cdao.getGlobalFolderID());
+									modified_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
 								}
 							} else {
 								try {
@@ -2364,33 +2382,32 @@ class CalendarMySQL implements CalendarSqlImp {
 						} else if (cdao.getFolderType() == FolderObject.PUBLIC) {
 							pu.setNull(3, java.sql.Types.INTEGER);
 						} else if (cdao.getFolderType() == FolderObject.SHARED) {
-							if (edao.getSharedFolderOwner() != 0) {
-								if (edao.getSharedFolderOwner() == modified_userparticipants[a].getIdentifier()) {
-									if (cdao.getGlobalFolderID() != 0) {
-										pu.setInt(3, cdao.getGlobalFolderID());
-										modified_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
-									} else {
-										if (cdao.getActionFolder() == 0) {
-											try {
-												final int pfid = access.getDefaultFolder(edao.getSharedFolderOwner(), FolderObject.CALENDAR).getObjectID();
-												// final int pfid =
-												// Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(edao.getSharedFolderOwner(),
-												// cdao.getContext()));
-												pu.setInt(3, pfid);
-												modified_userparticipants[a].setPersonalFolderId(pfid);
-											} catch (final Exception fe) {
-												throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(7));
-											}
-										} else {
-											pu.setInt(3, cdao.getActionFolder());
-											modified_userparticipants[a].setPersonalFolderId(cdao.getActionFolder());
+							if (edao.getSharedFolderOwner() == 0) {
+								throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
+							}
+							if (edao.getSharedFolderOwner() == modified_userparticipants[a].getIdentifier()) {
+								if (cdao.getGlobalFolderID() == 0) {
+									if (cdao.getActionFolder() == 0) {
+										try {
+											final int pfid = access.getDefaultFolder(edao.getSharedFolderOwner(), FolderObject.CALENDAR).getObjectID();
+											// final int pfid =
+											// Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(edao.getSharedFolderOwner(),
+											// cdao.getContext()));
+											pu.setInt(3, pfid);
+											modified_userparticipants[a].setPersonalFolderId(pfid);
+										} catch (final Exception fe) {
+											throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(7));
 										}
+									} else {
+										pu.setInt(3, cdao.getActionFolder());
+										modified_userparticipants[a].setPersonalFolderId(cdao.getActionFolder());
 									}
 								} else {
-									pu.setInt(3, modified_userparticipants[a].getPersonalFolderId());
+									pu.setInt(3, cdao.getGlobalFolderID());
+									modified_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
 								}
 							} else {
-								throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
+								pu.setInt(3, modified_userparticipants[a].getPersonalFolderId());
 							}
 						} else {
 							throw new OXCalendarException(OXCalendarException.Code.FOLDER_TYPE_UNRESOLVEABLE);
@@ -2494,10 +2511,10 @@ class CalendarMySQL implements CalendarSqlImp {
 				for (int a = 0; a < newdel_up.length; a++) {
 					pid.setInt(1, cdao.getObjectID());
 					pid.setInt(2, newdel_up[a].getIdentifier());
-					if (cdao.getGlobalFolderID() != 0) {
-						pid.setNull(3, java.sql.Types.INTEGER);
-					} else {
+					if (cdao.getGlobalFolderID() == 0) {
 						pid.setInt(3, newdel_up[a].getPersonalFolderId());
+					} else {
+						pid.setNull(3, java.sql.Types.INTEGER);
 					}
 					pid.setInt(4, cid);
 					if (newdel_up[a].containsConfirm()) {
@@ -2768,12 +2785,24 @@ class CalendarMySQL implements CalendarSqlImp {
 		return ret;
 	}
 
+	private static final String SQL_CHECK_DEL_MASTER = "SELECT intfield01 FROM del_dates WHERE intfield01 = ? AND cid = ?";
+
+	/**
+	 * Checks if an entry can be found in backup table for specified identifier
+	 * 
+	 * @param oid The master's object ID
+	 * @param cid The master's context ID
+	 * @param context The context
+	 * @return <code>true</code> if an entry can be found in backup table for specified identifier; otherwise <code>false</code>
+	 * @throws OXException If an OX error occurs
+	 * @throws SQLException If a SQL error occurs
+	 */
 	private final boolean checkForDeletedMasterObject(final int oid, final int cid, final Context context) throws OXException, SQLException {
 		Connection readcon = null;
 		boolean ret = false;
 		try {
 			readcon = DBPool.pickup(context);
-			final PreparedStatement pst = readcon.prepareStatement("SELECT intfield01 from del_dates WHERE intfield01 = ? AND cid = ?");
+			final PreparedStatement pst = readcon.prepareStatement(SQL_CHECK_DEL_MASTER);
 			pst.setInt(1, oid);
 			pst.setInt(2, cid);
 			final ResultSet rs = getResultSet(pst);
@@ -2798,12 +2827,25 @@ class CalendarMySQL implements CalendarSqlImp {
 		return ret;
 	}
 
+	private static final String SQL_CHECK_DEL_PART = "SELECT object_id FROM del_dates_members WHERE object_id = ? AND cid = ? AND member_uid = ?";
+
+	/**
+	 * Checks if specified participant is contained in participants' backup table.
+	 * 
+	 * @param uid The participant's identifier
+	 * @param cid The context ID
+	 * @param oid The corresponding appointment's ID
+	 * @param context The context
+	 * @return <code>true</code> if specified participant is contained in participants' backup table; otherwise <code>false</code>
+	 * @throws OXException If an OX error occurs
+	 * @throws SQLException If a SQL error occurs
+	 */
 	private final boolean checkForDeletedParticipants(final int uid, final int cid, final int oid, final Context context) throws OXException, SQLException {
 		Connection readcon = null;
 		boolean ret = false;
 		try {
 			readcon = DBPool.pickup(context);
-			final PreparedStatement pst = readcon.prepareStatement("SELECT object_id from del_dates_members WHERE object_id = ? AND cid = ? AND member_uid = ?");
+			final PreparedStatement pst = readcon.prepareStatement(SQL_CHECK_DEL_PART);
 			pst.setInt(1, oid);
 			pst.setInt(2, cid);
 			pst.setInt(3, uid);
@@ -3113,6 +3155,7 @@ class CalendarMySQL implements CalendarSqlImp {
 					} else {
 						createSingleVirtualDeleteException(cdao, edao, writecon, oid, uid, fid, so, ctx, clientLastModified);
 					}
+					return;
 				} else if (recurring_action == CalendarRecurringCollection.RECURRING_EXCEPTION_ACTION) {
 					if (checkIfUserIstheOnlyParticipant(cid, oid, readcon)) {
 						// remove this real existing exception and update main
@@ -3171,8 +3214,8 @@ class CalendarMySQL implements CalendarSqlImp {
 							throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(10));
 						}
 					}
+					return;
 				}
-				return;
 			} catch (final SQLException sqle) {
 				throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
 			} catch (final OXException oxe) {
