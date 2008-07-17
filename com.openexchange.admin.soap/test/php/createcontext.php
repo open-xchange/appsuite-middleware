@@ -10,12 +10,13 @@ try {
 	$user = new User();
 	$name = "soap_test_admin_" . $random_id;
 	$user->name = $name;
-	$user->displayname = "OX Soap Admin User " . $random_id;
+	$user->display_name = "OX Soap Admin User " . $random_id;
 	$user->given_name = "Soap Given Name" . $random_id;
 	$user->sur_name = "Soap Surname" . $random_id;
 	$user->password = "secret";
-	$user->email = $name . "@context" . $CONTEXT_ID . ".org";
-
+	$user->email1 = $name . "@context" . $CONTEXT_ID . ".org";
+	$user->primaryEmail = $name."@context".$CONTEXT_ID.".org";
+	
 	$ctx = new Context();
 	$ctx->id = $random_id;
 	$ctx->maxQuota = 10;

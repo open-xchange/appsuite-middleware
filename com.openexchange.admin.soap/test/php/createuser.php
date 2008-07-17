@@ -11,12 +11,12 @@ try {
 	$user = new User();
 	$name = "soap_test_user_".$random_id;	
 	$user->name =  $name;
-	$user->displayname = "OX Soap Test User ".$random_id;	
+	$user->display_name = "OX Soap Test User ".$random_id;	
 	$user->given_name = "Soap Given Name".$random_id;
 	$user->sur_name = "Soap Surname".$random_id;
 	$user->password = "secret";
-	$user->email = $name."@context".$CONTEXT_ID.".org";
-	
+	$user->primaryEmail = $name."@context".$CONTEXT_ID.".org";
+	$user->email1 = $name."@context".$CONTEXT_ID.".org";
 	
 	$result = getUserClient($SOAPHOST)->create(getContextObject($CONTEXT_ID),$user, getCredentialsObject($CONTEXT_ADMIN,$CONTEXT_ADMIN_PASS));
 	
