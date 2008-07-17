@@ -72,6 +72,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -343,6 +344,16 @@ public abstract class XmlServlet extends PermissionServlet {
 		} catch (final org.jdom.JDOMException exc) {
 			LOG.error("doPropFind", exc);
 			doError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "XML ERROR");
+		} catch (final AbstractOXException exc) {
+			if (AbstractOXException.Category.PERMISSION.equals(exc.getCategory())) {
+				doError(req, resp, HttpServletResponse.SC_FORBIDDEN, exc.getMessage());
+			} else if (AbstractOXException.Category.CONCURRENT_MODIFICATION.equals(exc.getCategory())) {
+				LOG.error("doPropFind", exc);
+				doError(req, resp, HttpServletResponse.SC_CONFLICT, "Conflict: " + exc.getMessage());
+			} else {
+				LOG.error("doPropFind", exc);
+				doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error");
+			}
 		} catch (final Exception exc) {
 			LOG.error("doPropFind", exc);
 			doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error");

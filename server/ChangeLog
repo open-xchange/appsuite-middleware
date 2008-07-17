@@ -13,6 +13,8 @@
    subject for a forward mail
  - Bugfix #11670: Checking unknown user configuration before checking mail
    access permission
+ - Bugfix #11647: Sending proper error code (403 - FORBIDDEN) to Outlook on
+   permission error
 
 * 2008-07-16 - francisco.laguna@open-xchange.com
 
