@@ -181,14 +181,17 @@ public final class MimeForward {
 				 * Set its headers. Start with subject constructed from first
 				 * message.
 				 */
-				final String origSubject = MimeUtility.unfold(originalMsgs[0].getHeader(MessageHeaders.HDR_SUBJECT,
-						null));
-				if (origSubject != null) {
-					final String subjectPrefix = new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx)
-							.getLocale()).getString(MailStrings.FORWARD_SUBJECT_PREFIX);
+				final String subjectPrefix = new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx)
+						.getLocale()).getString(MailStrings.FORWARD_SUBJECT_PREFIX);
+				String origSubject = originalMsgs[0].getHeader(MessageHeaders.HDR_SUBJECT, null);
+				if (origSubject == null) {
+					forwardMsg.setSubject(subjectPrefix, MailConfig.getDefaultMimeCharset());
+				} else {
+					origSubject = MimeUtility.unfold(origSubject);
 					final String subject = MIMEMessageUtility.decodeMultiEncodedHeader(origSubject.regionMatches(true,
-							0, subjectPrefix, 0, subjectPrefix.length()) ? origSubject : new StringBuilder().append(
-							subjectPrefix).append(origSubject).toString());
+							0, subjectPrefix, 0, subjectPrefix.length()) ? origSubject : new StringBuilder(
+							subjectPrefix.length() + origSubject.length()).append(subjectPrefix).append(origSubject)
+							.toString());
 					forwardMsg.setSubject(subject, MailConfig.getDefaultMimeCharset());
 				}
 			}
