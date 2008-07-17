@@ -86,7 +86,7 @@ class User {
 	var $city_other;
 	var $commercial_register;
 	var $company;
-	var $contextadmin;
+	var $contextadmin = false;
 	var $country_business;
 	var $country_home;
 	var $country_other;
