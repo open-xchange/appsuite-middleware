@@ -105,7 +105,7 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
 				} else {
 					LOG.warn(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString())
 							.append("' could not be added.").append(
-									"Another provider which supports the protocol has already been registered."));
+									" Another provider which supports the protocol has already been registered."));
 				}
 			} catch (final MailException e) {
 				LOG.error(e.getMessage(), e);
