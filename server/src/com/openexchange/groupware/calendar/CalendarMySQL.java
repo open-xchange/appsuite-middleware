@@ -2983,12 +2983,16 @@ class CalendarMySQL implements CalendarSqlImp {
 	}
 
 	public final void deleteAppointment(final int uid, final CalendarDataObject cdao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
-		Connection readcon = null;
-		CalendarDataObject edao = null;
+		final Connection readcon;
+		try {
+			readcon = DBPool.pickup(ctx);
+		} catch (final DBPoolingException e) {
+			throw new OXException(e);
+		}
+		final CalendarDataObject edao;
 		PreparedStatement prep = null;
 		ResultSet rs = null;
 		try {
-			readcon = DBPool.pickup(ctx);
 			final CalendarOperation co = new CalendarOperation();
 			prep = getPreparedStatement(readcon, loadAppointment(cdao.getObjectID(), cdao.getContext()));
 			rs = getResultSet(prep);
@@ -2999,32 +3003,26 @@ class CalendarMySQL implements CalendarSqlImp {
 			throw oxpe;
 		} catch (final OXException oxe) {
 			throw oxe;
-		} catch (final DBPoolingException dbpe) {
-			throw new OXException(dbpe);
 		} finally {
 			CalendarCommonCollection.closeResultSet(rs);
 			CalendarCommonCollection.closePreparedStatement(prep);
-			if (readcon != null) {
-				try {
-					DBPool.push(ctx, readcon);
-				} catch (final DBPoolingException dbpe) {
-					LOG.error("DBPoolingException:deleteAppointment (push)", dbpe);
-				}
+			try {
+				DBPool.push(ctx, readcon);
+			} catch (final DBPoolingException dbpe) {
+				LOG.error("DBPoolingException:deleteAppointment (push)", dbpe);
 			}
 		}
 		if (clientLastModified == null) {
 			throw new OXCalendarException(OXCalendarException.Code.LAST_MODIFIED_IS_NULL);
-		} else if (edao != null && edao.getLastModified() == null) {
+		} else if (edao.getLastModified() == null) {
 			throw new OXCalendarException(OXCalendarException.Code.LAST_MODIFIED_IS_NULL);
 		}
 
-		if (edao != null && edao.getLastModified().getTime() > clientLastModified.getTime()) {
+		if (edao.getLastModified().getTime() > clientLastModified.getTime()) {
 			throw new OXConcurrentModificationException(EnumComponent.APPOINTMENT, OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
 		}
 
-		if (edao != null) {
-			deleteSingleAppointment(cdao.getContextID(), cdao.getObjectID(), uid, edao.getCreatedBy(), inFolder, null, writecon, edao.getFolderType(), so, ctx, CalendarRecurringCollection.getRecurringAppointmentDeleteAction(cdao, edao), cdao, edao, clientLastModified);
-		}
+		deleteSingleAppointment(cdao.getContextID(), cdao.getObjectID(), uid, edao.getCreatedBy(), inFolder, null, writecon, edao.getFolderType(), so, ctx, CalendarRecurringCollection.getRecurringAppointmentDeleteAction(cdao, edao), cdao, edao, clientLastModified);
 
 		if ((cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0)
 				|| (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null)) {
