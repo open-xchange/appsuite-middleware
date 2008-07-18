@@ -1047,6 +1047,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     public User[] list(final Context ctx, final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        try {
+            doNullCheck(ctx,search_pattern,auth);
+        } catch (final InvalidDataException e1) {
+            log.error("One of the given arguments for list is null", e1);
+            throw e1;
+        }
+
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + auth.toString());
         }

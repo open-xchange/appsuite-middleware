@@ -1,3 +1,7 @@
+* 2008-07-18 - choeger@open-xchange.com
+
+ - Bugfix ID#11682 [L3] NullPointerException when switching to debug mode for admin daemon
+ 
 * 2008-07-15 - choeger@open-xchange.com
 
  - Bugfix #11642 RHEL5 Packages don't depend on Sun Java 1.5 and mysql-server
