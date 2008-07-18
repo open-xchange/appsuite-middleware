@@ -3262,7 +3262,7 @@ class CalendarMySQL implements CalendarSqlImp {
 							/*
 							 * Determine recurrence date position
 							 */
-							edao.setRecurrenceDatePosition(new Date(CalendarRecurringCollection.normalizeLong(edao.getStartDate().getTime())));
+							edao.setRecurrenceDatePosition(edao.getChangeException()[0]);
 						}
 						//update.setChangeExceptions(CalendarCommonCollection.removeException(edao.getDeleteException(), edao.getRecurrenceDatePosition()));
 						//update.setDeleteExceptions(new java.util.Date[] { edao.getRecurrenceDatePosition() });
@@ -3621,7 +3621,7 @@ class CalendarMySQL implements CalendarSqlImp {
 			}
 			al = new ArrayList<Integer>(8);
 			final StringBuilder query = new StringBuilder(128);
-			query.append("select intfield01, timestampfield01 FROM prg_dates pd WHERE intfield02 = ");
+			query.append("select intfield01, field08 FROM prg_dates pd WHERE intfield02 = ");
 			query.append(rec_id);
 			query.append(" AND cid = ");
 			query.append(c.getContextId());
@@ -3632,7 +3632,7 @@ class CalendarMySQL implements CalendarSqlImp {
 			final List<Long> longs = new ArrayList<Long>();
 			while (rs.next()) {
 				al.add(Integer.valueOf(rs.getInt(1)));
-				longs.add(Long.valueOf(CalendarRecurringCollection.normalizeLong(rs.getTimestamp(2).getTime())));
+				longs.add(Long.valueOf(rs.getString(2)));
 			}
 			dates.addAll(longs);
 		} catch (final SQLException sqle) {
