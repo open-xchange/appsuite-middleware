@@ -93,7 +93,7 @@ public class ReminderParser extends DataParser {
     protected void parseElementReminder(final ReminderObject reminder,
         final JSONObject json) throws JSONException, OXJSONException {
         if (json.has(ReminderFields.LAST_MODIFIED)) {
-            reminder.setLastModified(parseTime(json, ReminderFields.LAST_MODIFIED, getTimeZone()));
+            reminder.setLastModified(parseDate(json, ReminderFields.LAST_MODIFIED));
         }
         if (json.has(ReminderFields.TARGET_ID)) {
             reminder.setTargetId(parseInt(json, ReminderFields.TARGET_ID));
@@ -110,15 +110,16 @@ public class ReminderParser extends DataParser {
         if (json.has(ReminderFields.USER_ID)) {
             reminder.setUser(parseInt(json, ReminderFields.USER_ID));
         }
-        // RECURRENCE_POSITION isn't parsed
-        // writeParameter(CalendarFields.RECURRENCE_POSITION, 0);
-        // SERVER_TIME isn't parsed
-        // writeParameter(ReminderFields.SERVER_TIME, new Date(), timeZone);
+        if (json.has(ReminderFields.RECURRENCE_APPOINTMENT)) {
+            reminder.setRecurrenceAppointment(parseBoolean(json, ReminderFields.RECURRENCE_APPOINTMENT));
+        }
+        /* SERVER_TIME isn't parsed
+         * writeParameter(ReminderFields.SERVER_TIME, new Date(), timeZone); */
 
-        // parseElementDataObject(reminder, json); doesn't work because
-        // ReminderObject is not a subclass of DataObject
+        /* parseElementDataObject(reminder, json); doesn't work because
+         * ReminderObject is not a subclass of DataObject */
         if (json.has(DataFields.ID)) {
-            reminder.setObjectId(parseInt(json, DataFields.ID));
+            reminder.setObjectId(parseInt(json, ReminderFields.ID));
         }
     }
 }
