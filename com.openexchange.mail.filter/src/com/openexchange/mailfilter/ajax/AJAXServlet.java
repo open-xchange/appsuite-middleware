@@ -157,23 +157,21 @@ public abstract class AJAXServlet extends HttpServlet {
         try {
             final AbstractRequest request = createRequest();
             request.setSession(new AbstractRequest.Session() {
+                final SessionWrapper session = getSession(req);
+                
                 public Object getAttribute(final String name) throws OXMailfilterException, SessiondException {
-                    final SessionWrapper session = getSession(req);
                     return session.getParameter(name);
                 }
 
                 public void setAttribute(final String name, final Object value) throws OXMailfilterException, SessiondException {
-                    final SessionWrapper session = getSession(req);
                     session.setParameter(name, value);
                 }
 
                 public void removeAttribute(final String name) throws OXMailfilterException, SessiondException {
-                    final SessionWrapper session = getSession(req);
                     session.removeParameter(name);
                 }
 
                 public Credentials getCredentails() throws SessiondException, OXMailfilterException {
-                    final SessionWrapper session = getSession(req);
                     return session.getCredentials();
                 }
 
@@ -220,23 +218,21 @@ public abstract class AJAXServlet extends HttpServlet {
         try {
             final AbstractRequest request = createRequest();
             request.setSession(new AbstractRequest.Session() {
+                final SessionWrapper session = getSession(req);
+                
                 public Object getAttribute(final String name) throws OXMailfilterException, SessiondException {
-                    final SessionWrapper session = getSession(req);
                     return session.getParameter(name);
                 }
 
                 public void setAttribute(final String name, final Object value) throws OXMailfilterException, SessiondException {
-                    final SessionWrapper session = getSession(req);
                     session.setParameter(name, value);
                 }
 
                 public void removeAttribute(final String name) throws OXMailfilterException, SessiondException {
-                    final SessionWrapper session = getSession(req);
                     session.removeParameter(name);
                 }
 
                 public Credentials getCredentails() throws SessiondException, OXMailfilterException {
-                    final SessionWrapper session = getSession(req);
                     return session.getCredentials();
                 }
             });
