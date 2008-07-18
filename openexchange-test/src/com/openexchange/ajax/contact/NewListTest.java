@@ -109,7 +109,7 @@ public class NewListTest extends AbstractAJAXSession {
         }
         
         
-        final MultipleResponse mInsert = Executor.multiple(getClient(), new MultipleRequest(inserts));
+        final MultipleResponse mInsert = Executor.execute(getClient(), new MultipleRequest(inserts));
 
         // A now gets all of the folder.
         final int[] columns = new int[] { ContactObject.SUR_NAME, ContactObject.OBJECT_ID, ContactObject.FOLDER_ID };
@@ -125,7 +125,7 @@ public class NewListTest extends AbstractAJAXSession {
             deletes1[i] = new DeleteRequest(folderA, insertR.getId(), allR
                 .getTimestamp());
         }
-        Executor.multiple(clientA, new MultipleRequest(deletes1));
+        Executor.execute(clientA, new MultipleRequest(deletes1));
 
         // List request of A must now not contain the deleted objects and give
         // no error.
@@ -157,6 +157,6 @@ public class NewListTest extends AbstractAJAXSession {
             }
         }
         
-        Executor.multiple(getClient(), new MultipleRequest(deletes2)); 
+        Executor.execute(getClient(), new MultipleRequest(deletes2)); 
     }
 }

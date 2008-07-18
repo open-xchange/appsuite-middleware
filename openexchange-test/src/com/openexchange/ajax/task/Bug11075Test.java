@@ -91,7 +91,7 @@ public final class Bug11075Test extends AbstractTaskTest {
             inserts[i] = new InsertRequest(createFolder("Bug11075Test_" + i,
                 client.getValues().getUserId()));
         }
-        final MultipleResponse mInsert = Executor.multiple(client,
+        final MultipleResponse mInsert = Executor.execute(client,
             new MultipleRequest(inserts));
         final int[] folderIds = new int[inserts.length];
         Date timestamp = new Date(0);

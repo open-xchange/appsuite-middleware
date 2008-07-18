@@ -135,7 +135,7 @@ public class NewListTest extends AbstractAJAXSession {
             deletes1[i] = new DeleteRequest(insertR.getId(), folderA, allR
                 .getTimestamp());
         }
-        Executor.multiple(clientA, new MultipleRequest(deletes1));
+        Executor.execute(clientA, new MultipleRequest(deletes1));
 
         // List request of A must now not contain the deleted objects and give
         // no error.
@@ -148,6 +148,6 @@ public class NewListTest extends AbstractAJAXSession {
             deletes2[i] = new DeleteRequest(insertR.getId(), folderA,
             listR.getTimestamp());
         }
-        Executor.multiple(getClient(), new MultipleRequest(deletes2)); 
+        Executor.execute(getClient(), new MultipleRequest(deletes2)); 
     }
 }

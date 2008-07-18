@@ -52,17 +52,16 @@ public class DeleteTest extends ReminderTest {
 		appointmentObj.setIgnoreConflicts(true);
 		
 		final int targetId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
-		final String target = String.valueOf(targetId);
 		
 		final ReminderObject[] reminderObj = listReminder(getWebConversation(), new Date(endTime), timeZone, getHostName(), getSessionId());
 
 		int pos = -1;
 		for (int a = 0; a < reminderObj.length; a++) {
-			if (target.equals(reminderObj[a].getTargetId())) {
+			if (reminderObj[a].getTargetId() == targetId) {
 				pos = a;
 			}
 		}
-		
+		assertNotSame("Reminder not found.", -1, pos);
 		deleteReminder(getWebConversation(), reminderObj[pos].getObjectId(), getHostName(), getSessionId());
 		AppointmentTest.deleteAppointment(getWebConversation(), targetId, folderId, getHostName(), getSessionId());
 	} 
@@ -79,9 +78,7 @@ public class DeleteTest extends ReminderTest {
 		c.set(Calendar.MILLISECOND, 0);
 		
 		long startTime = c.getTimeInMillis();
-		startTime += timeZone.getOffset(startTime);
 		final long endTime = startTime + 3600000;
-		
 		
 		final FolderObject folderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
 		final int folderId = folderObj.getObjectID();
@@ -96,17 +93,16 @@ public class DeleteTest extends ReminderTest {
 		appointmentObj.setIgnoreConflicts(true);
 		
 		final int targetId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
-		final String target = String.valueOf(targetId);
 		
 		final ReminderObject[] reminderObj = listReminder(getWebConversation(), new Date(endTime), timeZone, getHostName(), getSessionId());
 
 		int pos = -1;
 		for (int a = 0; a < reminderObj.length; a++) {
-			if (target.equals(reminderObj[a].getTargetId())) {
+			if (reminderObj[a].getTargetId() == targetId) {
 				pos = a;
 			}
 		}
-
+        assertNotSame("Reminder not found.", -1, pos);
 		final int[] failedObjects = deleteReminder(getWebConversation(), reminderObj[pos].getObjectId()+1000, getHostName(), getSessionId());
 		assertTrue("failed object size is not > 0", failedObjects.length > 0);
 		assertEquals("fail object id not equals expected", reminderObj[pos].getObjectId()+1000, failedObjects[0]);

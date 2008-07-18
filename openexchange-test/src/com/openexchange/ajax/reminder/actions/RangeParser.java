@@ -58,12 +58,12 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GetParser extends AbstractAJAXParser {
+public class RangeParser extends AbstractAJAXParser<RangeResponse> {
 
     /**
      * Default constructor.
      */
-    GetParser() {
+    RangeParser() {
         super(true);
     }
 
@@ -71,8 +71,8 @@ public class GetParser extends AbstractAJAXParser {
      * {@inheritDoc}
      */
     @Override
-    protected GetResponse createResponse(final Response response)
+    protected RangeResponse createResponse(final Response response)
         throws JSONException {
-        return new GetResponse(response);
+        return new RangeResponse(response);
     }
 }

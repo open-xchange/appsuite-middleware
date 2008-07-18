@@ -107,6 +107,6 @@ public class InsertTest extends AbstractTaskTest {
             task.setParentFolderID(folderId);
             inserts[i] = new InsertRequest(task, timeZone);
         }
-        Executor.multiple(client, new MultipleRequest(inserts));
+        Executor.execute(client, new MultipleRequest(inserts));
     }
 }

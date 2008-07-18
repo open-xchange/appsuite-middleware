@@ -58,7 +58,7 @@ import org.json.JSONException;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface AJAXRequest {
+public interface AJAXRequest<T extends AbstractAJAXResponse> {
 
     enum Method {
         GET,
@@ -191,7 +191,7 @@ public interface AJAXRequest {
      */
     Parameter[] getParameters();
 
-    AbstractAJAXParser getParser();
+    AbstractAJAXParser<T> getParser();
 
     Object getBody() throws JSONException;
 }

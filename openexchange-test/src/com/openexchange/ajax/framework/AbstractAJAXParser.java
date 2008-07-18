@@ -57,6 +57,7 @@ import org.json.JSONException;
 
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.parser.ResponseParser;
 
 /**
  * Abstract implementation of an AJAX response parser. This parser also does
@@ -83,7 +84,7 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse>
     }
 
     protected Response getResponse(final String body) throws JSONException {
-        final Response response = Response.parse(body);
+        final Response response = ResponseParser.parse(body);
         assertFalse(response.getErrorMessage(), failOnError && response
             .hasError());
         return response;

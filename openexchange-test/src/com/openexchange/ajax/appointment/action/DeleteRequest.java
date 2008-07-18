@@ -62,7 +62,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * Stores parameters for the delete request.
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class DeleteRequest extends AbstractAppointmentRequest {
+public class DeleteRequest extends AbstractAppointmentRequest<DeleteResponse> {
 
     private final int objectId;
     

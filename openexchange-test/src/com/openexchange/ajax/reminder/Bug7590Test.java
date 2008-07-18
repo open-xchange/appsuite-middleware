@@ -29,17 +29,14 @@ public class Bug7590Test extends ReminderTest {
 		calendar.set(Calendar.MILLISECOND, 0);
 		
 		long startTime = calendar.getTimeInMillis();
-		startTime += timeZone.getOffset(startTime);
 		final long endTime = startTime + 3600000;
 		
-		calendar.add(Calendar.HOUR_OF_DAY, -1);
-		final long alarmLong = calendar.getTimeInMillis();
-		final Date alarm = new Date(alarmLong+timeZone.getOffset(alarmLong));		
+        final int alarmMinutes = 60;
+		calendar.add(Calendar.MINUTE, -alarmMinutes);
+		final Date alarm = calendar.getTime();		
 		
 		final FolderObject folderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
 		final int folderId = folderObj.getObjectID();
-		
-		final int alarmMinutes = 60;
 		
 		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testBug7590");
@@ -54,7 +51,6 @@ public class Bug7590Test extends ReminderTest {
 		appointmentObj.setIgnoreConflicts(true);
 		
 		final int targetId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
-		final String target = String.valueOf(targetId);
 		
 		final ReminderObject reminderObj = new ReminderObject();
 		reminderObj.setTargetId(targetId);
@@ -67,7 +63,7 @@ public class Bug7590Test extends ReminderTest {
 		
 		int pos = -1;
 		for (int a = 0; a < reminderArray.length; a++) {
-			if (target.equals(reminderArray[a].getTargetId())) {
+			if (reminderArray[a].getTargetId() == targetId) {
 				pos = a;
 				reminderObj.setObjectId(reminderArray[a].getObjectId());
 				compareReminder(reminderObj, reminderArray[a]);

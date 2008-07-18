@@ -68,14 +68,14 @@ import com.openexchange.tools.servlet.OXJSONException;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GetResponse extends AbstractAJAXResponse {
+public class RangeResponse extends AbstractAJAXResponse {
 
     private List<ReminderObject> reminders;
     
     /**
      * @param response
      */
-    GetResponse(final Response response) {
+    RangeResponse(final Response response) {
         super(response);
     }
 

@@ -55,6 +55,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.groupware.container.AppointmentObject;
 
@@ -62,7 +63,7 @@ import com.openexchange.groupware.container.AppointmentObject;
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public abstract class AbstractAppointmentRequest implements AJAXRequest {
+public abstract class AbstractAppointmentRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     /**
      * URL of the calendar AJAX interface.

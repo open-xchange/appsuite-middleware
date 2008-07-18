@@ -40,7 +40,7 @@ public class MultipleTest extends ContactTest {
 		final InsertRequest insertRequest3 = new InsertRequest(contactObj, true);
 		
 		final MultipleRequest multipleInsertRequest = new MultipleRequest(new AJAXRequest[] { insertRequest1, insertRequest2, insertRequest3 });
-		final MultipleResponse multipleInsertResponse = Executor.multiple(new AJAXClient(ajaxSession), multipleInsertRequest);
+		final MultipleResponse multipleInsertResponse = Executor.execute(new AJAXClient(ajaxSession), multipleInsertRequest);
 		
 		assertFalse("first insert request has errors: ", multipleInsertResponse.getResponse(0).hasError()); 
 		assertFalse("second insert request has errors: ", multipleInsertResponse.getResponse(1).hasError()); 

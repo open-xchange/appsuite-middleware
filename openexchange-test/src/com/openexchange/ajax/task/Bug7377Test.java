@@ -124,9 +124,9 @@ public class Bug7377Test extends AbstractTaskTest {
                 new UpdateRequest(task, tz1));
             task.setLastModified(uResponse.getTimestamp());
             // Check reminder
-            final com.openexchange.ajax.reminder.actions.GetResponse rResponse =
+            final com.openexchange.ajax.reminder.actions.RangeResponse rResponse =
                 ReminderTools.get(client1, new com.openexchange.ajax.reminder
-                .actions.GetRequest(remindDate));
+                .actions.RangeRequest(remindDate));
             final ReminderObject reminder = rResponse.getReminderByTarget(tz1,
                 task.getObjectID());
 
@@ -203,9 +203,9 @@ public class Bug7377Test extends AbstractTaskTest {
             task.getObjectID()));
         // Check reminder
         {
-            final com.openexchange.ajax.reminder.actions.GetResponse response =
+            final com.openexchange.ajax.reminder.actions.RangeResponse response =
                 ReminderTools.get(client1, new com.openexchange.ajax.reminder
-                .actions.GetRequest(remindDate));
+                .actions.RangeRequest(remindDate));
             final ReminderObject reminder = response.getReminderByTarget(tz1,
                 task.getObjectID());
             assertNotNull("Can't find reminder for task.", reminder);
@@ -213,9 +213,9 @@ public class Bug7377Test extends AbstractTaskTest {
                 Integer.valueOf(reminder.getFolder()));
         }
         {
-            final com.openexchange.ajax.reminder.actions.GetResponse response =
+            final com.openexchange.ajax.reminder.actions.RangeResponse response =
                 ReminderTools.get(client2, new com.openexchange.ajax.reminder
-                .actions.GetRequest(remindDate));
+                .actions.RangeRequest(remindDate));
             final ReminderObject reminder = response.getReminderByTarget(tz2,
                 task.getObjectID());
             assertNotNull("Can't find reminder for task.", reminder);

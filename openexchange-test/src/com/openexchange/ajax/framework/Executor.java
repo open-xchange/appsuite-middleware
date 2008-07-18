@@ -89,34 +89,28 @@ public class Executor extends Assert {
         super();
     }
 
-    public static MultipleResponse multiple(final AJAXClient client,
-        final MultipleRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return (MultipleResponse) execute(client, request);
-    }
-
-    public static AbstractAJAXResponse execute(final AJAXClient client,
-        final AJAXRequest request) throws AjaxException, IOException,
+    public static <T extends AbstractAJAXResponse> T execute(final AJAXClient client,
+        final AJAXRequest<T> request) throws AjaxException, IOException,
         SAXException, JSONException {
         return execute(client.getSession(), request);
     }
 
-    public static AbstractAJAXResponse execute(final AJAXSession session,
-        final AJAXRequest request) throws AjaxException, IOException,
+    public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session,
+        final AJAXRequest<T> request) throws AjaxException, IOException,
         SAXException, JSONException {
 		return execute(session, request,
             AJAXConfig.getProperty(Property.PROTOCOL),
             AJAXConfig.getProperty(Property.HOSTNAME));
 	}
 
-    public static AbstractAJAXResponse execute(final AJAXSession session,
-        final AJAXRequest request, final String hostname) throws AjaxException,
+    public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session,
+        final AJAXRequest<T> request, final String hostname) throws AjaxException,
         IOException, SAXException, JSONException {
         return execute(session, request, AJAXConfig
             .getProperty(Property.PROTOCOL), hostname);
     }
 
-	public static AbstractAJAXResponse execute(final AJAXSession session, final AJAXRequest request,
+	public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session, final AJAXRequest<T> request,
 			final String protocol, final String hostname) throws AjaxException, IOException, SAXException,
 			JSONException {
 
@@ -155,10 +149,10 @@ public class Executor extends Assert {
 			resp = conv.getResponse(req);
 		}
 		final long requestDuration = System.currentTimeMillis() - startRequest;
-		final AbstractAJAXParser<?> parser = request.getParser();
+		final AbstractAJAXParser<T> parser = request.getParser();
 		parser.checkResponse(resp);
 		final long startParse = System.currentTimeMillis();
-		final AbstractAJAXResponse retval = parser.parse(resp.getText());
+		final T retval = parser.parse(resp.getText());
 		final long parseDuration = System.currentTimeMillis() - startParse;
 		retval.setRequestDuration(requestDuration);
 		retval.setParseDuration(parseDuration);
@@ -166,7 +160,7 @@ public class Executor extends Assert {
 	}
 
     private static void addParameter(final WebRequest req,
-        final AJAXSession session, final AJAXRequest request) {
+        final AJAXSession session, final AJAXRequest<?> request) {
         if (null != session.getId()) {
             req.setParameter(AJAXServlet.PARAMETER_SESSION, session.getId());
         }
@@ -177,7 +171,7 @@ public class Executor extends Assert {
         }
     }
 
-    private static void addFieldParameter(final PostMethodWebRequest post, final AJAXRequest request) {
+    private static void addFieldParameter(final PostMethodWebRequest post, final AJAXRequest<?> request) {
 		for (final Parameter param : request.getParameters()) {
 			if (param instanceof FieldParameter) {
 				final FieldParameter fparam = (FieldParameter) param;
@@ -187,7 +181,7 @@ public class Executor extends Assert {
 	}
 
     private static void addFileParameter(final PostMethodWebRequest post,
-        final AJAXRequest request) {
+        final AJAXRequest<?> request) {
         for (final Parameter param : request.getParameters()) {
             if (param instanceof FileParameter) {
                 final FileParameter fparam = (FileParameter) param;
@@ -198,7 +192,7 @@ public class Executor extends Assert {
     }
 
     private static String getPUTParameter(final AJAXSession session,
-        final AJAXRequest request) throws UnsupportedEncodingException {
+        final AJAXRequest<?> request) throws UnsupportedEncodingException {
         final URLParameter parameter = new URLParameter();
         if (null != session.getId()) {
             parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session

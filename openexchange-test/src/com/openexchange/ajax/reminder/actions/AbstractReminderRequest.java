@@ -50,12 +50,13 @@
 package com.openexchange.ajax.reminder.actions;
 
 import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractReminderRequest implements AJAXRequest {
+public abstract class AbstractReminderRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     /**
      * URL of the reminder AJAX interface.

@@ -59,11 +59,11 @@ import com.openexchange.ajax.AJAXServlet;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class MultipleRequest implements AJAXRequest {
+public class MultipleRequest implements AJAXRequest<MultipleResponse> {
 
-    private final AJAXRequest[] requests;
+    private final AJAXRequest<?>[] requests;
     
-    public MultipleRequest(final AJAXRequest[] requests) {
+    public MultipleRequest(final AJAXRequest<?>[] requests) {
         this.requests = requests.clone();
     }
 
@@ -90,7 +90,7 @@ public class MultipleRequest implements AJAXRequest {
 
     public Object getBody() throws JSONException {
         final JSONArray array = new JSONArray();
-        for (final AJAXRequest request : requests) {
+        for (final AJAXRequest<?> request : requests) {
             final JSONObject object = new JSONObject();
             final String path = request.getServletPath();
             String module = path.substring(path.lastIndexOf('/') + 1);

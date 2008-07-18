@@ -76,6 +76,6 @@ public class MultipleTest extends AppointmentTest {
             appointmentObj.setIgnoreConflicts(true);
             inserts[i] = new InsertRequest(appointmentObj, client.getValues().getTimeZone(), true);
         }
-        Executor.multiple(client, new MultipleRequest(inserts));
+        Executor.execute(client, new MultipleRequest(inserts));
 	}
 }

@@ -105,7 +105,7 @@ public class Bug10119Test extends AbstractTaskTest {
                 task.setTitle("Initial" + (i + 1));
                 initialInserts[i] = new InsertRequest(task, timeZone);
             }
-            mInsert =  Executor.multiple(client, new MultipleRequest(
+            mInsert =  Executor.execute(client, new MultipleRequest(
                 initialInserts));
         }
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
@@ -152,7 +152,7 @@ public class Bug10119Test extends AbstractTaskTest {
                 firstInsert.getTimestamp());
             deletes[1] = new DeleteRequest(folderId, iResponse.getId(),
                 iResponse.getTimestamp());
-            Executor.multiple(client, new MultipleRequest(deletes));
+            Executor.execute(client, new MultipleRequest(deletes));
         }
     }
 }

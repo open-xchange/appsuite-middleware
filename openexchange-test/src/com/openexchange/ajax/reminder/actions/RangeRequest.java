@@ -54,13 +54,12 @@ import java.util.Date;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GetRequest extends AbstractReminderRequest {
+public class RangeRequest extends AbstractReminderRequest<RangeResponse> {
 
     /**
      * Reminder until this date will be fetched from server.
@@ -71,7 +70,7 @@ public class GetRequest extends AbstractReminderRequest {
      * Default constructor.
      * @param end reminder until this date will be fetched from server.
      */
-    public GetRequest(final Date end) {
+    public RangeRequest(final Date end) {
         super();
         this.end = new Date(end.getTime());
     }
@@ -105,8 +104,8 @@ public class GetRequest extends AbstractReminderRequest {
     /**
      * {@inheritDoc}
      */
-    public AbstractAJAXParser getParser() {
-        return new GetParser();
+    public RangeParser getParser() {
+        return new RangeParser();
     }
 
 }

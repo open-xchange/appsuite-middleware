@@ -100,7 +100,7 @@ public class UpdatesTest extends AbstractTaskTest {
             task.setTitle("Task " + (i + 1));
             inserts[i] = new InsertRequest(task, timeZone);
         }
-        final MultipleResponse mInsert =  Executor.multiple(client,
+        final MultipleResponse mInsert =  Executor.execute(client,
             new MultipleRequest(inserts));
         int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.FOLDER_ID };
         final CommonAllResponse allR = TaskTools.all(client, new AllRequest(
@@ -119,7 +119,7 @@ public class UpdatesTest extends AbstractTaskTest {
             task.setLastModified(insertR.getTimestamp());
             updates[i] = new UpdateRequest(task, timeZone);
         }
-        final MultipleResponse mUpdate = Executor.multiple(client,
+        final MultipleResponse mUpdate = Executor.execute(client,
             new MultipleRequest(updates));
         // And delete 2
         final DeleteRequest[] deletes = new DeleteRequest[DELETES];
@@ -129,7 +129,7 @@ public class UpdatesTest extends AbstractTaskTest {
             deletes[i] = new DeleteRequest(folderId, insertR.getId(), insertR
                 .getTimestamp());
         }
-        Executor.multiple(client, new MultipleRequest(deletes));
+        Executor.execute(client, new MultipleRequest(deletes));
         // Now request updates for the list
         columns = new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.TITLE,
             Task.START_DATE, Task.END_DATE, Task.PERCENT_COMPLETED,
