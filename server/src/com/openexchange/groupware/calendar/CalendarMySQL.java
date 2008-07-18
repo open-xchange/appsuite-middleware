@@ -1732,6 +1732,9 @@ class CalendarMySQL implements CalendarSqlImp {
 			if (edao.containsPrivateFlag() && cdao.containsPrivateFlag() && edao.getPrivateflag() != cdao.getPrivateflag()) {
 				throw new OXCalendarException(OXCalendarException.Code.RECURRING_EXCEPTION_PRIVATE_FLAG);
 			}
+			/*
+			 * Create a clone for the "new" change exception
+			 */
 			clone = CalendarRecurringCollection.cloneObjectForRecurringException(cdao, edao);
 			try {
 				cdao.setRecurrenceCalculator(edao.getRecurrenceCalculator());
@@ -1743,6 +1746,10 @@ class CalendarMySQL implements CalendarSqlImp {
 					}
 					cdao.removeAlarm();
 				}
+				final long lastModified = System.currentTimeMillis();
+				clone.setCreatingDate(new Timestamp(lastModified));
+				clone.setLastModified(new Date(lastModified));
+				clone.setChangingDate(new Timestamp(lastModified));
 				insertAppointment(clone, writecon, so);
 				CalendarCommonCollection.removeFieldsFromObject(cdao);
 				// no update here
@@ -1750,6 +1757,7 @@ class CalendarMySQL implements CalendarSqlImp {
 				cdao.setUsers(edao.getUsers());
 				cdao.setRecurrence(edao.getRecurrence());
 				cdao.setLastModified(clone.getLastModified());
+				cdao.setChangingDate(clone.getChangingDate());
 			} catch (final SQLException sqle) {
 				throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle, new Object[0]);
 			} catch (final LdapException ldape) {
@@ -2048,7 +2056,7 @@ class CalendarMySQL implements CalendarSqlImp {
 				check_up -= deleted_userparticipants.length;
 			}
 		}
-        boolean onlyAlarmChange = modified_userparticipants == null;
+        final boolean onlyAlarmChange = modified_userparticipants == null;
 		modified_userparticipants = CalendarCommonCollection.checkAndModifyAlarm(cdao, modified_userparticipants, uid, edao.getUsers());
 
 		if (check_up < 1) {

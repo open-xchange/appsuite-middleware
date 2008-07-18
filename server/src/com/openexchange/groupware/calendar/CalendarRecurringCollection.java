@@ -50,13 +50,16 @@
 
 package com.openexchange.groupware.calendar;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.recurrence.RecurringCalculation;
 import com.openexchange.groupware.calendar.recurrence.RecurringException;
 import com.openexchange.groupware.container.CalendarObject;
@@ -809,8 +812,28 @@ public final class CalendarRecurringCollection {
             clone.setRecurrenceDatePosition(cdao.getRecurrenceDatePosition());
         }
         CalendarRecurringCollection.setRecurrencePositionOrDateInDAO(clone);
-        cdao.setChangeExceptions(CalendarCommonCollection.addException(edao.getChangeException(), clone.getRecurrenceDatePosition()));
-        CalendarCommonCollection.fillObject(cdao, clone);
+        /*
+		 * Check that change exception's date is contained in recurring
+		 * appointment's range
+		 */
+		if (!CalendarCommonCollection.checkIfDateOccursInRecurrence(clone.getRecurrenceDatePosition(), edao)) {
+			throw new OXCalendarException(OXCalendarException.Code.FOREIGN_EXCEPTION_DATE);
+		}
+		{
+			final Date[] newChangeExcs = CalendarCommonCollection.addException(edao.getChangeException(), clone
+					.getRecurrenceDatePosition());
+			/*
+			 * Check that no other change exception exists on specified date;
+			 * meaning another user already created a change exception on this
+			 * date in the meantime
+			 */
+			if (Arrays.equals(edao.getChangeException(), newChangeExcs)) {
+				throw new OXConcurrentModificationException(EnumComponent.APPOINTMENT,
+						OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
+			}
+			cdao.setChangeExceptions(newChangeExcs);
+		}
+		CalendarCommonCollection.fillObject(cdao, clone);
         clone.removeObjectID();
         clone.removeDeleteExceptions();
         clone.removeChangeExceptions();

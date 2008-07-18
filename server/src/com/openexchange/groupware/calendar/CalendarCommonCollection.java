@@ -1349,9 +1349,9 @@ public final class CalendarCommonCollection {
         if (cup.getMBoolean()) {
             return false;
         } else if (CalendarConfig.getSoloReminderTriggerEvent()) {
-            Set<Integer> IGNORE_FIELDS = new HashSet<Integer>(Arrays.asList(AppointmentObject.ALARM, AppointmentObject.LAST_MODIFIED, AppointmentObject.MODIFIED_BY, 0));
+            final Set<Integer> IGNORE_FIELDS = new HashSet<Integer>(Arrays.asList(AppointmentObject.ALARM, AppointmentObject.LAST_MODIFIED, AppointmentObject.MODIFIED_BY, 0));
             for (int i = 0; i < ucols.length; i++) {
-                int ucol = ucols[i];
+                final int ucol = ucols[i];
                 if(!IGNORE_FIELDS.contains(ucol)) {
                     return false;
                 }
@@ -1395,6 +1395,25 @@ public final class CalendarCommonCollection {
 			}				
 		}
 		return false;		
+	}
+
+	/**
+	 * Checks if specified (exception) date occurs in given recurring appointment
+	 * 
+	 * @param date The normalized (exception) date
+	 * @param recurringAppointment The recurring appointment
+	 * @return <code>true</code> if date occurs in recurring appointment; otherwise <code>false</code>
+	 * @throws OXException If occurrences cannot be calculated
+	 */
+	public static boolean checkIfDateOccursInRecurrence(final Date date, final CalendarDataObject recurringAppointment) throws OXException {
+		if (date == null) {
+			/*
+			 * No dates given
+			 */
+			return true;
+		}
+		final RecurringResults rresults = CalendarRecurringCollection.calculateRecurring(recurringAppointment, 0, 0, 0, CalendarRecurringCollection.MAXTC, true);
+		return (rresults.getPositionByLong(date.getTime()) != -1);
 	}
 
 	/**
@@ -1508,7 +1527,7 @@ public final class CalendarCommonCollection {
     }
 
 
-    public static String getString(CalendarDataObject cdao, int fieldID) {
+    public static String getString(final CalendarDataObject cdao, final int fieldID) {
         switch(fieldID) {
             case AppointmentObject.TITLE : return cdao.getTitle();
             case AppointmentObject.LOCATION  : return cdao.getLocation();

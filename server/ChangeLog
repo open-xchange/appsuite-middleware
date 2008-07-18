@@ -1,3 +1,8 @@
+* 2008-07-18 - thorben.betten@open-xchange.com
+
+ - Bugfix #11370: Updating main recurring appointment's last-modified
+   timestamp when creating a change exception
+
 * 2007-07-17 - marcus.klein@open-xchange.com
 
  - Bugfix #11337: Fixed reminder update SQL statement. Removing broken reminder.
