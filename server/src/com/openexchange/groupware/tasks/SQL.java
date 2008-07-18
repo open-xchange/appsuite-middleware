@@ -268,7 +268,10 @@ public final class SQL {
                 sql.append("))");
             }
             if (own.size() > 0) {
-                sql.append(" OR (folder in (");
+                if (sql.length() > 1) {
+                    sql.append(" OR ");
+                }
+                sql.append("(folder in (");
                 for (int i = 0; i < own.size(); i++) {
                     sql.append("?,");
                 }
@@ -276,7 +279,10 @@ public final class SQL {
                 sql.append(") AND created_from=?)");
             }
             if (shared.size() > 0) {
-                sql.append(" OR (folder in (");
+                if (sql.length() > 1) {
+                    sql.append(" OR ");
+                }
+                sql.append("(folder in (");
                 for (int i = 0; i < shared.size(); i++) {
                     sql.append("?,");
                 }

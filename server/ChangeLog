@@ -1,3 +1,8 @@
+* 2008-07-18 - marcus.klein@open-xchange.com
+
+ - Bugfix #11650: Fixed wrong SQL query if a search for tasks is done in a
+   shared folder or folder with "see only own objects" right.
+
 * 2008-07-18 - thorben.betten@open-xchange.com
 
  - Bugfix #11370: Updating main recurring appointment's last-modified
