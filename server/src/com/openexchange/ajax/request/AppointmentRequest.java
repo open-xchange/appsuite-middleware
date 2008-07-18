@@ -242,6 +242,7 @@ public class AppointmentRequest {
 		
 		if (conflicts == null) {
 			jsonResponseObj.put(AppointmentFields.ID, appointmentObj.getObjectID());
+			timestamp = appointmentObj.getLastModified();
 		} else {
 			final JSONArray jsonConflictArray = new JSONArray();
 			final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
@@ -273,13 +274,12 @@ public class AppointmentRequest {
 		
 		final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
 		final CalendarDataObject[] conflicts = appointmentsql.updateAppointmentObject(appointmentObj, inFolder, timestamp);
-
-		timestamp.setTime(appointmentObj.getLastModified().getTime());
 		
 		final JSONObject jsonResponseObj = new JSONObject();
 		
 		if (conflicts == null) {
 			jsonResponseObj.put(AppointmentFields.ID, appointmentObj.getObjectID());
+			timestamp = appointmentObj.getLastModified();
 		} else {
 			final JSONArray jsonConflictArray = new JSONArray();
 			final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
@@ -945,11 +945,9 @@ public class AppointmentRequest {
 					}
 				}
 				
-				lastModified = appointmentobject.getLastModified();
-				
-				if (timestamp.getTime() < lastModified.getTime()) {
-					timestamp = lastModified;
-				}
+                if (timestamp.before(appointmentobject.getLastModified())) {
+                    timestamp = appointmentobject.getLastModified();
+                }
 				
 				if (hasLimit && counter >= limit) {
 					break;
@@ -1037,11 +1035,9 @@ public class AppointmentRequest {
 					}
 				}
 				
-				lastModified = appointmentobject.getLastModified();
-				
-				if (timestamp.getTime() < lastModified.getTime()) {
-					timestamp = lastModified;
-				}
+                if (timestamp.before(appointmentobject.getLastModified())) {
+                    timestamp = appointmentobject.getLastModified();
+                }
 			}
 			
 			for (int a = 0; a < appointmentList.size(); a++) {
@@ -1085,8 +1081,10 @@ public class AppointmentRequest {
 				final JSONObject jsonAppointmentObj = new JSONObject();
 				appointmentWriter.writeAppointment(appointmentObj, jsonAppointmentObj);
 				jsonResponseArray.put(jsonAppointmentObj);
+				if (timestamp.before(appointmentObj.getLastModified())) {
+				    timestamp = appointmentObj.getLastModified();
+				}
 			}
-			
 			return jsonResponseArray;
 		} finally {
 			if (it != null) {
@@ -1131,6 +1129,7 @@ public class AppointmentRequest {
 			}
 		} else {
 			jsonResponseObj.put(AppointmentFields.ID, appointmentObj.getObjectID());
+			timestamp = appointmentObj.getLastModified();
 		}
 		
 		return jsonResponseObj;

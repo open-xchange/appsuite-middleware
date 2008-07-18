@@ -200,7 +200,7 @@ public class ContactRequest {
 		}
 		contactInterface.setSession(sessionObj);
 		contactInterface.insertContactObject(contactObj);
-
+		timestamp = contactObj.getLastModified();
 		final JSONObject jsonResponseObject = new JSONObject();
 		jsonResponseObject.put(DataFields.ID, contactObj.getObjectID());
 
@@ -236,9 +236,7 @@ public class ContactRequest {
 		}
 		contactInterface.setSession(sessionObj);
 		contactInterface.updateContactObject(contactobject, inFolder, timestamp);
-		
-		timestamp.setTime(contactobject.getLastModified().getTime());
-
+		timestamp = contactobject.getLastModified();
 		return new JSONObject();
 	}
 
@@ -255,8 +253,6 @@ public class ContactRequest {
 		if (ignore == null) {
 			ignore = "deleted";
 		}
-
-		Date lastModified = null;
 
 		final JSONArray jsonResponseArray = new JSONArray();
 
@@ -296,10 +292,8 @@ public class ContactRequest {
 				contactWriter.writeArray(contactObj, columns, jsonContactArray);
 				jsonResponseArray.put(jsonContactArray);
 
-				lastModified = contactObj.getLastModified();
-
-				if (timestamp.getTime() < lastModified.getTime()) {
-					timestamp = lastModified;
+				if (timestamp.before(contactObj.getLastModified())) {
+					timestamp = contactObj.getLastModified();
 				}
 			}
 
@@ -310,11 +304,9 @@ public class ContactRequest {
 
 					jsonResponseArray.put(contactObj.getObjectID());
 
-					lastModified = contactObj.getLastModified();
-
-					if (timestamp.getTime() < lastModified.getTime()) {
-						timestamp = lastModified;
-					}
+	                if (timestamp.before(contactObj.getLastModified())) {
+	                    timestamp = contactObj.getLastModified();
+	                }
 				}
 			}
 
@@ -416,11 +408,9 @@ public class ContactRequest {
 						contactwriter.writeArray(contactObj, columns, jsonContactArray);
 						jsonResponseArray.put(jsonContactArray);
 
-						lastModified = contactObj.getLastModified();
-
-						if (timestamp.getTime() < lastModified.getTime()) {
-							timestamp = lastModified;
-						}
+		                if (timestamp.before(contactObj.getLastModified())) {
+		                    timestamp = contactObj.getLastModified();
+		                }
 					}
 				} else {
 					// costs more performance because every object in the array
@@ -472,8 +462,6 @@ public class ContactRequest {
 			SearchIteratorException, OXException, AjaxException {
 		timestamp = new Date(0);
 
-		Date lastModified = null;
-
 		final SearchIterator<ContactObject> it = null;
 
 		final JSONArray jsonResponseArray = new JSONArray();
@@ -508,11 +496,9 @@ public class ContactRequest {
 					contactwriter.writeArray(contactObj, columns, jsonContactArray);
 					jsonResponseArray.put(jsonContactArray);
 
-					lastModified = contactObj.getLastModified();
-
-					if (timestamp.getTime() < lastModified.getTime()) {
-						timestamp = lastModified;
-					}
+	                if (timestamp.before(contactObj.getLastModified())) {
+	                    timestamp = contactObj.getLastModified();
+	                }
 				}
 			} catch (final JSONException e) {
 				throw new OXException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]));
@@ -538,8 +524,6 @@ public class ContactRequest {
 		final int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
 
 		timestamp = new Date(0);
-
-		Date lastModified = null;
 
 		final JSONArray jsonResponseArray = new JSONArray();
 
@@ -580,11 +564,9 @@ public class ContactRequest {
 				contactwriter.writeArray(contactObj, columns, jsonContactArray);
 				jsonResponseArray.put(jsonContactArray);
 
-				lastModified = contactObj.getLastModified();
-
-				if (timestamp.getTime() < lastModified.getTime()) {
-					timestamp = lastModified;
-				}
+                if (timestamp.before(contactObj.getLastModified())) {
+                    timestamp = contactObj.getLastModified();
+                }
 			}
 
 			return jsonResponseArray;
@@ -662,8 +644,6 @@ public class ContactRequest {
 		boolean startletter = false;
 
 		timestamp = new Date(0);
-
-		Date lastModified = null;
 
 		final JSONArray jsonResponseArray = new JSONArray();
 
@@ -746,11 +726,9 @@ public class ContactRequest {
 					contactwriter.writeArray(contactObj, columns, jsonContactArray);
 					jsonResponseArray.put(jsonContactArray);
 
-					lastModified = contactObj.getLastModified();
-
-					if (timestamp.getTime() < lastModified.getTime()) {
-						timestamp = lastModified;
-					}
+	                if (timestamp.before(contactObj.getLastModified())) {
+	                    timestamp = contactObj.getLastModified();
+	                }
 				}
 			} else {
 				it = contactInterface.getContactsByExtendedSearch(searchObj, orderBy, orderDir, internalColumns);
@@ -761,11 +739,9 @@ public class ContactRequest {
 					contactwriter.writeArray(contactObj, columns, jsonContactArray);
 					jsonResponseArray.put(jsonContactArray);
 
-					lastModified = contactObj.getLastModified();
-
-					if (timestamp.getTime() < lastModified.getTime()) {
-						timestamp = lastModified;
-					}
+	                if (timestamp.before(contactObj.getLastModified())) {
+	                    timestamp = contactObj.getLastModified();
+	                }
 				}
 			}
 
@@ -827,7 +803,7 @@ public class ContactRequest {
 
 		final JSONObject jsonResponseObject = new JSONObject();
 		jsonResponseObject.put(DataFields.ID, contactObj.getObjectID());
-
+		timestamp = contactObj.getLastModified();
 		return jsonResponseObject;
 	}
 
