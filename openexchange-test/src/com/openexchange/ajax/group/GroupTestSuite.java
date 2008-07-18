@@ -47,75 +47,28 @@
  *
  */
 
-package com.openexchange.ajax.group.actions;
+package com.openexchange.ajax.group;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.DataFields;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
- *
+ * Combines all group tests.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ListRequest extends AbstractGroupRequest<ListResponse> {
-
-    private final int[] groupIds;
-
-    private final boolean failOnError;
+public final class GroupTestSuite {
 
     /**
-     * @param groupIds
-     * @param failOnError
+     * Prevent instantiation.
      */
-    public ListRequest(final int[] groupIds, final boolean failOnError) {
+    private GroupTestSuite() {
         super();
-        this.groupIds = groupIds;
-        this.failOnError = failOnError;
     }
 
-    /**
-     * @param groupIds
-     */
-    public ListRequest(final int[] groupIds) {
-        this(groupIds, true);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        final JSONArray json = new JSONArray();
-        for (final int groupId : groupIds) {
-            final JSONObject obj = new JSONObject();
-            obj.put(DataFields.ID, groupId);
-            json.put(obj);
-        }
-        return json;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST)
-        };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public ListParser getParser() {
-        return new ListParser(failOnError);
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTestSuite(FunctionTest.class);
+        tests.addTestSuite(Bug11659Test.class);
+        return tests;
     }
 }

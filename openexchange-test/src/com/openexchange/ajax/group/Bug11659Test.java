@@ -47,75 +47,33 @@
  *
  */
 
-package com.openexchange.ajax.group.actions;
+package com.openexchange.ajax.group;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.group.actions.ListRequest;
+import com.openexchange.group.Group;
 
 /**
- *
+ * Checks if group 0 lacks its identifier in JSON.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ListRequest extends AbstractGroupRequest<ListResponse> {
-
-    private final int[] groupIds;
-
-    private final boolean failOnError;
+public class Bug11659Test extends AbstractAJAXSession {
 
     /**
-     * @param groupIds
-     * @param failOnError
+     * Default constructor.
+     * @param name name of the test.
      */
-    public ListRequest(final int[] groupIds, final boolean failOnError) {
-        super();
-        this.groupIds = groupIds;
-        this.failOnError = failOnError;
+    public Bug11659Test(final String name) {
+        super(name);
     }
 
     /**
-     * @param groupIds
+     * Lists group 0 and checks if returned group contains its identifier.
      */
-    public ListRequest(final int[] groupIds) {
-        this(groupIds, true);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        final JSONArray json = new JSONArray();
-        for (final int groupId : groupIds) {
-            final JSONObject obj = new JSONObject();
-            obj.put(DataFields.ID, groupId);
-            json.put(obj);
-        }
-        return json;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST)
-        };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public ListParser getParser() {
-        return new ListParser(failOnError);
+    public void testForMissingIdentifier() throws Throwable {
+        final Group[] groups = Executor.execute(getClient(),
+            new ListRequest(new int[] { 0 })).getGroups();
+        assertTrue("Identifier for group 0 is missing.", groups[0].getIdentifier() == 0);
     }
 }

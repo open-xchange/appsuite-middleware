@@ -50,12 +50,13 @@
 package com.openexchange.ajax.group.actions;
 
 import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-abstract class AbstractGroupRequest implements AJAXRequest {
+abstract class AbstractGroupRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     /**
      * URL for group servlet.
