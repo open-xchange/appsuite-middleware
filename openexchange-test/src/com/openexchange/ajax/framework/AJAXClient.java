@@ -117,6 +117,18 @@ public class AJAXClient {
         return session;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            logout();
+        } finally {  
+            super.finalize();
+        }
+    }
+
     public void logout() throws AjaxException, IOException, SAXException,
         JSONException {
         if (null != session.getId()) {

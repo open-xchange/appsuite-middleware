@@ -56,12 +56,13 @@ import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.CommonDeleteParser;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
 
 /**
- * 
+ * Stores the parameters to delete a folder.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class DeleteRequest extends AbstractFolderRequest {
+public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
 
     private final int[] folderIds;
 

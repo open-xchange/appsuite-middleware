@@ -49,50 +49,25 @@
 
 package com.openexchange.ajax.framework;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonSearchParser extends AbstractAJAXParser<CommonSearchResponse> {
-
-    private final int[] columns;
+public class CommonSearchParser extends AbstractSearchParser<CommonSearchResponse> {
 
     /**
      * Default constructor.
      */
     protected CommonSearchParser(final boolean failOnError, final int[] columns) {
-        super(failOnError);
-        this.columns = columns;
+        super(failOnError, columns);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected CommonSearchResponse createResponse(final Response response)
-        throws JSONException {
-        final CommonSearchResponse retval = instanciateResponse(response);
-        retval.setColumns(columns);
-        if (isFailOnError()) {
-            final JSONArray array = (JSONArray) retval.getData();
-            final Object[][] values = new Object[array.length()][];
-            for (int i = 0; i < array.length(); i++) {
-                final JSONArray inner = array.getJSONArray(i);
-                values[i] = new Object[inner.length()];
-                for (int j = 0; j < inner.length(); j++) {
-                    values[i][j] = inner.get(j);
-                }
-            }
-            retval.setArray(values);
-        }
-        return retval;
-    }
-
     protected CommonSearchResponse instanciateResponse(final Response response) {
         return new CommonSearchResponse(response);
     }

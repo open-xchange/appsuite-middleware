@@ -57,14 +57,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * 
+ * Shared information for all task requests.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractTaskRequest implements AJAXRequest {
+public abstract class AbstractTaskRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     /**
      * URL of the tasks AJAX interface.

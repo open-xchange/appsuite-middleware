@@ -47,30 +47,51 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.framework;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractSearchParser;
 
 /**
- *
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class SearchParser extends AbstractSearchParser<SearchResponse> {
+public abstract class AbstractSearchParser<T extends CommonSearchResponse> extends AbstractAJAXParser<T> {
+
+    private final int[] columns;
 
     /**
-     * @param failOnError
-     * @param columns
+     * Default constructor.
      */
-    public SearchParser(final boolean failOnError, final int[] columns) {
-        super(failOnError, columns);
+    protected AbstractSearchParser(final boolean failOnError, final int[] columns) {
+        super(failOnError);
+        this.columns = columns;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected SearchResponse instanciateResponse(final Response response) {
-        return new SearchResponse(response);
+    protected T createResponse(final Response response)
+        throws JSONException {
+        final T retval = instanciateResponse(response);
+        retval.setColumns(columns);
+        if (isFailOnError()) {
+            final JSONArray array = (JSONArray) retval.getData();
+            final Object[][] values = new Object[array.length()][];
+            for (int i = 0; i < array.length(); i++) {
+                final JSONArray inner = array.getJSONArray(i);
+                values[i] = new Object[inner.length()];
+                for (int j = 0; j < inner.length(); j++) {
+                    values[i][j] = inner.get(j);
+                }
+            }
+            retval.setArray(values);
+        }
+        return retval;
     }
+
+    protected abstract T instanciateResponse(final Response response);
 }

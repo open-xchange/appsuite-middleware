@@ -57,6 +57,7 @@ import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
@@ -64,7 +65,7 @@ import com.openexchange.server.impl.OCLPermission;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-abstract class AbstractFolderRequest implements AJAXRequest {
+abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     /**
      * URL of the folder AJAX interface.

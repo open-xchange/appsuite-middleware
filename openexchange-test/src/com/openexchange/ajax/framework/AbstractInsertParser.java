@@ -47,30 +47,46 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.framework;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractSearchParser;
+import com.openexchange.ajax.fields.DataFields;
 
 /**
- *
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class SearchParser extends AbstractSearchParser<SearchResponse> {
+public abstract class AbstractInsertParser<T extends CommonInsertResponse> extends AbstractAJAXParser<T> {
 
     /**
      * @param failOnError
-     * @param columns
      */
-    public SearchParser(final boolean failOnError, final int[] columns) {
-        super(failOnError, columns);
+    public AbstractInsertParser(final boolean failOnError) {
+        super(failOnError);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected SearchResponse instanciateResponse(final Response response) {
-        return new SearchResponse(response);
+    protected T createResponse(final Response response)
+        throws JSONException {
+        final T retval = instantiateResponse(response);
+        if (isFailOnError()) {
+            final JSONObject data = (JSONObject) response.getData();
+            if (data.has(DataFields.ID)) {
+                final int objectId = data.getInt(DataFields.ID);
+                assertTrue("Problem while inserting object.", objectId > 0);
+                retval.setId(objectId);
+            } else {
+                fail("Missing created object identifier: " + response.getJSON());
+            }
+        }
+        return retval;
     }
+
+    protected abstract T instantiateResponse(final Response response);
 }

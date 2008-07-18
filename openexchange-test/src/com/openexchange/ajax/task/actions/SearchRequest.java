@@ -63,10 +63,10 @@ import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException;
 
 /**
- * 
+ * Stores the parameter for searching for tasks.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class SearchRequest extends AbstractTaskRequest {
+public class SearchRequest extends AbstractTaskRequest<SearchResponse> {
 
     final TaskSearchObject search;
 

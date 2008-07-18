@@ -50,6 +50,7 @@
 package com.openexchange.ajax.framework;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.groupware.container.DataObject;
 
 /**
  * 
@@ -80,5 +81,14 @@ public class CommonInsertResponse extends AbstractAJAXResponse {
      */
     public void setId(final int id) {
         this.id = id;
+    }
+
+    /**
+     * Puts the data of this insert response into the object. This are
+     * especially the identifier and the modified time stamp. 
+     */
+    public void fillObject(final DataObject obj) {
+        obj.setObjectID(getId());
+        obj.setLastModified(getTimestamp());
     }
 }

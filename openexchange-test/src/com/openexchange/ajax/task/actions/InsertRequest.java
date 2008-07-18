@@ -61,7 +61,7 @@ import com.openexchange.groupware.tasks.Task;
  * Stores the parameters for inserting the task.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class InsertRequest extends AbstractTaskRequest {
+public class InsertRequest extends AbstractTaskRequest<InsertResponse> {
 
     /**
      * Task to insert.
