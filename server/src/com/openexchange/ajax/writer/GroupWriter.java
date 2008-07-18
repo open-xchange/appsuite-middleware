@@ -70,7 +70,7 @@ public class GroupWriter extends DataWriter {
 	}
 
 	public void writeGroup(final Group group, final JSONObject json) throws JSONException {
-		writeParameter(GroupFields.IDENTIFIER, group.getIdentifier(), json, group.getIdentifier() > 0);
+		writeParameter(GroupFields.IDENTIFIER, group.getIdentifier(), json);
 		writeParameter(GroupFields.DISPLAY_NAME, group.getDisplayName(), json);
 		writeParameter(GroupFields.NAME, group.getSimpleName(), json);
 		writeMembers(group, json);

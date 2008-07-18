@@ -4,6 +4,7 @@
    shared folder or folder with "see only own objects" right.
  - Bugfix #11384: Returning the last modified timestamp if appointment/contact
    is created/modified.
+ - Bugfix #11659: Identifier of group must not be written conditionally.
 
 * 2008-07-18 - thorben.betten@open-xchange.com
 
