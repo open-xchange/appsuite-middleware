@@ -219,7 +219,6 @@ public class Contact extends DataServlet {
 					final Object responseObj = contactRequest.action(action, jsonObj);
 					response.setTimestamp(contactRequest.getTimestamp());
 					response.setData(responseObj);
-
 				} else if (data.charAt(0) == '{') {
 					final JSONObject jsonDataObj = new JSONObject(data);
 					jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataObj);
@@ -229,6 +228,9 @@ public class Contact extends DataServlet {
 					response.setData(responseObj);
 				} else {
 					httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");
+				}
+				if (null != contactRequest.getTimestamp()) {
+					response.setTimestamp(contactRequest.getTimestamp());
 				}
 			} else {
 				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "no data found");

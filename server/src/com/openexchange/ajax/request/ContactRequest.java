@@ -236,6 +236,8 @@ public class ContactRequest {
 		}
 		contactInterface.setSession(sessionObj);
 		contactInterface.updateContactObject(contactobject, inFolder, timestamp);
+		
+		timestamp.setTime(contactobject.getLastModified().getTime());
 
 		return new JSONObject();
 	}

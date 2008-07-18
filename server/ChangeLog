@@ -9,6 +9,8 @@
    timestamp when creating a change exception
  - Bugfix #10998: Added checks to recurrence pattern building routine to
    ensure no invalid pattern finds its way into database
+ - Partial bugfix #11384: Sending proper timestamp to GUI after
+   contact/appointment update
 
 * 2007-07-17 - marcus.klein@open-xchange.com
 
