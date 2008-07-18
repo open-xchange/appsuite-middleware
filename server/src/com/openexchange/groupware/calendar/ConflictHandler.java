@@ -112,11 +112,11 @@ public class ConflictHandler {
             //}
         }
         if (!containsResources()) {
-            if (!cdao.getIgnoreConflicts()) {
-                if (cdao.getRecurrenceType() == 0) {
-                    return prepareResolving(true);
-                }
-                return NO_CONFLICTS;
+        	if (cdao.getIgnoreConflicts()) {
+        		return NO_CONFLICTS;
+        	}
+            if (cdao.getRecurrenceType() == 0) {
+                return prepareResolving(true);
             }
             return NO_CONFLICTS;
         }
