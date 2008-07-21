@@ -281,15 +281,15 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
             public Object getAttribute(final Rule obj) throws JSONException {
                 final RuleComment ruleComment = obj.getRuleComment();
                 if (null != ruleComment) {
-                    return ruleComment.getRulename();
+                    final String rulename = ruleComment.getRulename();
+                    return (null == rulename) ? JSONObject.NULL :rulename;
                 } else {
-                    return null;
+                    return JSONObject.NULL;
                 }
             }
 
             public boolean isNull(final Rule obj) {                
-                final RuleComment ruleComment = obj.getRuleComment();
-                return ((null == ruleComment) || (null == ruleComment.getRulename()));
+                return false;
             }
 
             public void setAttribute(final Rule obj, final Object attr) throws JSONException {                
