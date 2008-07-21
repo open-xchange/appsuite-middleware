@@ -1149,7 +1149,7 @@ public final class OXFolderSQL {
 
 	private static final String SQL_GET_CONTEXT_MAILADMIN = "SELECT user FROM user_setting_admin WHERE cid = ?";
 
-	public static int getContextMailAdmin(final Connection readConArg, final Context ctx) throws DBPoolingException,
+	static int getContextMailAdmin(final Connection readConArg, final Context ctx) throws DBPoolingException,
 			SQLException {
 		Connection readCon = readConArg;
 		boolean createReadCon = false;
