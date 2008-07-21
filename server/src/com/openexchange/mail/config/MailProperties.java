@@ -139,6 +139,8 @@ public final class MailProperties {
 
 	private String[] phishingHeaders;
 
+	private String defaultMailProvider;
+
 	/**
 	 * Initializes a new {@link MailProperties}
 	 */
@@ -199,6 +201,7 @@ public final class MailProperties {
 		watcherFrequency = 0;
 		watcherShallClose = false;
 		supportSubscription = false;
+		defaultMailProvider = null;
 	}
 
 	private void loadProperties0() throws MailConfigException {
@@ -287,8 +290,7 @@ public final class MailProperties {
 			} catch (final NumberFormatException e) {
 				attachDisplaySize = 8192;
 				logBuilder.append("\tAttachment Display Size Limit: Non parseable value \"").append(
-						attachDisplaySizeStr).append(fallbackPrefix).append(attachDisplaySize)
-						.append('\n');
+						attachDisplaySizeStr).append(fallbackPrefix).append(attachDisplaySize).append('\n');
 			}
 		}
 
@@ -328,6 +330,13 @@ public final class MailProperties {
 		}
 
 		{
+			final String defaultMailProviderStr = configuration.getProperty(
+					"com.openexchange.mail.defaultMailProvider", "imap").trim();
+			defaultMailProvider = defaultMailProviderStr;
+			logBuilder.append("\tDefault Mail Provider: ").append(defaultMailProvider).append('\n');
+		}
+
+		{
 			final String ignoreSubsStr = configuration.getProperty("com.openexchange.mail.ignoreSubscription",
 					STR_FALSE).trim();
 			ignoreSubscription = Boolean.parseBoolean(ignoreSubsStr);
@@ -361,8 +370,8 @@ public final class MailProperties {
 				logBuilder.append("\tMax Number of Connections: ").append(maxNumOfConnections).append('\n');
 			} catch (final NumberFormatException e) {
 				maxNumOfConnections = 0;
-				logBuilder.append("\tMax Number of Connections: Invalid value \"").append(maxNum).append(
-						fallbackPrefix).append(maxNumOfConnections).append('\n');
+				logBuilder.append("\tMax Number of Connections: Invalid value \"").append(maxNum)
+						.append(fallbackPrefix).append(maxNumOfConnections).append('\n');
 			}
 		}
 
@@ -415,8 +424,8 @@ public final class MailProperties {
 				logBuilder.append("\tWatcher Time: ").append(watcherTime).append('\n');
 			} catch (final NumberFormatException e) {
 				watcherTime = 60000;
-				logBuilder.append("\tWatcher Time: Invalid value \"").append(watcherTimeStr).append(
-						fallbackPrefix).append(watcherTime).append('\n');
+				logBuilder.append("\tWatcher Time: Invalid value \"").append(watcherTimeStr).append(fallbackPrefix)
+						.append(watcherTime).append('\n');
 			}
 		}
 
@@ -428,8 +437,8 @@ public final class MailProperties {
 				logBuilder.append("\tWatcher Frequency: ").append(watcherFrequency).append('\n');
 			} catch (final NumberFormatException e) {
 				watcherFrequency = 10000;
-				logBuilder.append("\tWatcher Frequency: Invalid value \"").append(watcherFeqStr).append(
-						fallbackPrefix).append(watcherFrequency).append('\n');
+				logBuilder.append("\tWatcher Frequency: Invalid value \"").append(watcherFeqStr).append(fallbackPrefix)
+						.append(watcherFrequency).append('\n');
 			}
 		}
 
@@ -474,27 +483,37 @@ public final class MailProperties {
 		}
 	}
 
-	protected Properties readPropertiesFromFile(final String propFile) throws MailConfigException {
+	/**
+	 * Reads the properties from specified property file and returns an
+	 * appropriate instance of {@link Properties}
+	 * 
+	 * @param propFile
+	 *            The property file
+	 * @return The appropriate instance of {@link Properties}
+	 * @throws MailConfigException
+	 *             If reading property file fails
+	 */
+	protected static Properties readPropertiesFromFile(final String propFile) throws MailConfigException {
 		final Properties properties = new Properties();
-		FileInputStream fis = null;
+		final FileInputStream fis;
 		try {
-			properties.load((fis = new FileInputStream(new File(propFile))));
-			return properties;
+			fis = new FileInputStream(new File(propFile));
 		} catch (final FileNotFoundException e) {
 			throw new MailConfigException(new StringBuilder(256).append("Properties not found at location: ").append(
 					propFile).toString(), e);
+		}
+		try {
+			properties.load(fis);
+			return properties;
 		} catch (final IOException e) {
 			throw new MailConfigException(new StringBuilder(256).append(
 					"I/O error while reading properties from file \"").append(propFile).append("\": ").append(
 					e.getMessage()).toString(), e);
 		} finally {
-			if (null != fis) {
-				try {
-					fis.close();
-				} catch (final IOException e) {
-					LOG.error(e.getLocalizedMessage(), e);
-				}
-				fis = null;
+			try {
+				fis.close();
+			} catch (final IOException e) {
+				LOG.error(e.getLocalizedMessage(), e);
 			}
 		}
 	}
@@ -533,6 +552,15 @@ public final class MailProperties {
 	 */
 	public String getDefaultMimeCharset() {
 		return defaultMimeCharset;
+	}
+
+	/**
+	 * Gets the defaultMailProvider
+	 * 
+	 * @return the defaultMailProvider
+	 */
+	public String getDefaultMailProvider() {
+		return defaultMailProvider;
 	}
 
 	/**

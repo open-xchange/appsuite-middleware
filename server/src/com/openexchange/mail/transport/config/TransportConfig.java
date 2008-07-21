@@ -160,4 +160,13 @@ public abstract class TransportConfig extends MailConfig {
 		return TransportProperties.getInstance().getReferencedPartLimit();
 	}
 
+	/**
+	 * Gets the default transport provider
+	 * 
+	 * @return The default transport provider
+	 */
+	public static String getDefaultTransportProvider() {
+		return TransportProperties.getInstance().getDefaultTransportProvider();
+	}
+
 }

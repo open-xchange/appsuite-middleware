@@ -67,13 +67,6 @@ import com.openexchange.spamhandler.SpamHandlerRegistry;
  */
 public abstract class MailProvider {
 
-	/**
-	 * The protocol fallback if URL does not contain a protocol
-	 * <p>
-	 * TODO: Make configurable
-	 */
-	public static final String PROTOCOL_FALLBACK = "imap";
-
 	private final int hashCode;
 
 	private boolean deprecated;

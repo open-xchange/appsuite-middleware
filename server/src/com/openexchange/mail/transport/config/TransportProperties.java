@@ -83,6 +83,8 @@ public final class TransportProperties {
 	 */
 	private int referencedPartLimit;
 
+	private String defaultTransportProvider;
+
 	/**
 	 * Initializes a new {@link TransportProperties}
 	 */
@@ -144,6 +146,13 @@ public final class TransportProperties {
 			}
 		}
 
+		{
+			final String defaultTransProvStr = configuration.getProperty(
+					"com.openexchange.mail.defaultTransportProvider", "smtp").trim();
+			defaultTransportProvider = defaultTransProvStr;
+			logBuilder.append("\tDefault Transport Provider: ").append(defaultTransportProvider).append('\n');
+		}
+
 		logBuilder.append("Global transport properties successfully loaded!");
 		if (LOG.isInfoEnabled()) {
 			LOG.info(logBuilder.toString());
@@ -157,5 +166,14 @@ public final class TransportProperties {
 	 */
 	int getReferencedPartLimit() {
 		return referencedPartLimit;
+	}
+
+	/**
+	 * Gets the default transport provider
+	 * 
+	 * @return The default transport provider
+	 */
+	String getDefaultTransportProvider() {
+		return defaultTransportProvider;
 	}
 }

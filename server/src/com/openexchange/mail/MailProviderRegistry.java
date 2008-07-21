@@ -57,6 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.session.Session;
 
 /**
@@ -107,11 +108,11 @@ public final class MailProviderRegistry {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(new StringBuilder(128).append("Missing mail server URL. Mail server URL not set for user ")
 						.append(session.getUserId()).append(" in context ").append(session.getContextId()).append(
-								". Using fallback protocol ").append(MailProvider.PROTOCOL_FALLBACK));
+								". Using fallback protocol ").append(MailProperties.getInstance().getDefaultMailProvider()));
 			}
-			protocol = MailProvider.PROTOCOL_FALLBACK;
+			protocol = MailProperties.getInstance().getDefaultMailProvider();
 		} else {
-			protocol = extractProtocol(mailServerURL, MailProvider.PROTOCOL_FALLBACK);
+			protocol = extractProtocol(mailServerURL, MailProperties.getInstance().getDefaultMailProvider());
 		}
 		if ((null != provider) && !provider.isDeprecated() && provider.supportsProtocol(protocol)) {
 			return provider;
@@ -144,7 +145,7 @@ public final class MailProviderRegistry {
 		/*
 		 * Get appropriate provider
 		 */
-		return getMailProvider(extractProtocol(serverUrl, MailProvider.PROTOCOL_FALLBACK));
+		return getMailProvider(extractProtocol(serverUrl, MailProperties.getInstance().getDefaultMailProvider()));
 	}
 
 	/**

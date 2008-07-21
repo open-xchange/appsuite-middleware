@@ -70,13 +70,6 @@ import com.openexchange.session.Session;
  */
 public abstract class TransportProvider {
 
-	/**
-	 * The protocol fallback if URL does not contain a protocol
-	 * <p>
-	 * TODO: Make configurable
-	 */
-	public static final String PROTOCOL_FALLBACK = "smtp";
-
 	private final int hashCode;
 
 	private boolean deprecated;

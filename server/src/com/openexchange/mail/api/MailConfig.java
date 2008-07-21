@@ -398,6 +398,15 @@ public abstract class MailConfig {
 	}
 
 	/**
+	 * Gets the defaultMailProvider
+	 * 
+	 * @return the defaultMailProvider
+	 */
+	public static final String getDefaultMailProvider() {
+		return MailProperties.getInstance().getDefaultMailProvider();
+	}
+
+	/**
 	 * Gets the defaultSeparator
 	 * 
 	 * @return the defaultSeparator

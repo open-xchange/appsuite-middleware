@@ -110,11 +110,11 @@ public final class TransportProviderRegistry {
 				LOG.warn(new StringBuilder(128).append(
 						"Missing transport server URL. Transport server URL not set for user ").append(
 						session.getUserId()).append(" in context ").append(session.getContextId()).append(
-						". Using fallback protocol ").append(TransportProvider.PROTOCOL_FALLBACK));
+						". Using fallback protocol ").append(TransportConfig.getDefaultTransportProvider()));
 			}
-			protocol = TransportProvider.PROTOCOL_FALLBACK;
+			protocol = TransportConfig.getDefaultTransportProvider();
 		} else {
-			protocol = extractProtocol(transportServerURL, TransportProvider.PROTOCOL_FALLBACK);
+			protocol = extractProtocol(transportServerURL, TransportConfig.getDefaultTransportProvider());
 		}
 		if ((null != provider) && !provider.isDeprecated() && provider.supportsProtocol(protocol)) {
 			return provider;
@@ -148,7 +148,7 @@ public final class TransportProviderRegistry {
 		/*
 		 * Get appropriate provider
 		 */
-		return getTransportProvider(extractProtocol(serverUrl, TransportProvider.PROTOCOL_FALLBACK));
+		return getTransportProvider(extractProtocol(serverUrl, TransportConfig.getDefaultTransportProvider()));
 	}
 
 	/**
