@@ -137,7 +137,7 @@ public final class OXFolderSQL {
 
 	private static final String SQL_DEFAULTFLD = "SELECT ot.fuid FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.created_from = ? AND ot.module = ? AND ot.default_flag = 1";
 
-	public static int getUserDefaultFolder(final int userId, final int module, final Connection readConArg,
+	static int getUserDefaultFolder(final int userId, final int module, final Connection readConArg,
 			final Context ctx) throws DBPoolingException, SQLException {
 		Connection readCon = readConArg;
 		boolean closeReadCon = false;
