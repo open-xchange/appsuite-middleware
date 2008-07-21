@@ -250,6 +250,7 @@ public final class OXFolderAdminHelper {
 		/*
 		 * Insert system internal users folder aka 'Global Address Book'
 		 */
+		// TODO: Whether to enable/disable internal-user-edit should be set by caller (admin) as a parameter
 		if (OXFolderProperties.isEnableInternalUsersEdit()) {
 			systemPermission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS,
 					OCLPermission.WRITE_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS);
