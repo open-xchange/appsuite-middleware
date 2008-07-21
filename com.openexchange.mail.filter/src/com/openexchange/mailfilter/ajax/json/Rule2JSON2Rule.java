@@ -339,7 +339,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
             }
 
             public boolean isNull(final Rule obj) {                
-                return ((null == obj.getRuleComment()) || (null == obj.getRuleComment().getRulename()));
+                return false;
             }
 
             public void setAttribute(final Rule rule, final Object obj) throws JSONException {
