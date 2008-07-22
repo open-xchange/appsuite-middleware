@@ -829,71 +829,70 @@ public final class CalendarCommonCollection {
         } catch (final DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } catch (final SearchIteratorException sie) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sie, 1);
+            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sie, Integer.valueOf(1));
         }
-        if (cfo != null) {
-            final  Object private_read_all[] = cfo.getPrivateReadableAll();
-            final Object private_read_own[] = cfo.getPrivateReadableOwn();
-            final Object public_read_all[] = cfo.getPublicReadableAll();
-            final Object public_read_own[] = cfo.getPublicReadableOwn();
-            
-            boolean private_query = false;
-            boolean public_query = false;
-            int brack = 0;
-            if (private_read_all.length > 0) {
-                sb.append(" AND (pdm.pfid IN ");
-                brack++;
-                sb.append(StringCollection.getSqlInString(private_read_all));
-                private_query = true;
-            }
-            
-            if (private_read_own.length > 0) {
-                if (!private_query) {
-                    sb.append(" AND (pd.created_from = ");
-                } else {
-                    sb.append("OR (pd.created_from = ");
-                }
-                sb.append(uid);
-                sb.append(" AND (pdm.pfid IN ");
-                sb.append(StringCollection.getSqlInString(private_read_own));
-                sb.append("))");
-                private_query = true;
-            }
-            
-            
-            if (public_read_all.length > 0) {
-                if (private_query) {
-                    sb.append(" OR pd.fid IN ");
-                    sb.append(StringCollection.getSqlInString(public_read_all));
-                    public_query = true;
-                } else {
-                    sb.append(" AND pd.fid IN ");
-                    sb.append(StringCollection.getSqlInString(public_read_all));
-                    public_query = true;
-                }
-            }
-            
-            if (public_read_own.length > 0) {
-                if (!private_query && !public_query) {
-                    sb.append(" AND (pd.fid IN ");
-                    sb.append(StringCollection.getSqlInString(public_read_own));
-                    sb.append(" AND (pd.created_from = ");
-                    sb.append(uid);
-                    sb.append("))");
-                } else {
-                    sb.append(" OR (pd.fid IN ");
-                    sb.append(StringCollection.getSqlInString(public_read_own));
-                    sb.append(" AND (pd.created_from = ");
-                    sb.append(uid);
-                    sb.append("))");
-                }
-            }
-            for (int a = 0; a < brack; a++) {
-                sb.append(")");
-            }
-        } else {
+        if (cfo == null) {
             throw new OXCalendarException(OXCalendarException.Code.CFO_NOT_INITIALIZIED);
         }
+		final  Object private_read_all[] = cfo.getPrivateReadableAll();
+		final Object private_read_own[] = cfo.getPrivateReadableOwn();
+		final Object public_read_all[] = cfo.getPublicReadableAll();
+		final Object public_read_own[] = cfo.getPublicReadableOwn();
+		
+		boolean private_query = false;
+		boolean public_query = false;
+		int brack = 0;
+		if (private_read_all.length > 0) {
+		    sb.append(" AND (pdm.pfid IN ");
+		    brack++;
+		    sb.append(StringCollection.getSqlInString(private_read_all));
+		    private_query = true;
+		}
+		
+		if (private_read_own.length > 0) {
+		    if (private_query) {
+		        sb.append("OR (pd.created_from = ");
+		    } else {
+		        sb.append(" AND (pd.created_from = ");
+		    }
+		    sb.append(uid);
+		    sb.append(" AND (pdm.pfid IN ");
+		    sb.append(StringCollection.getSqlInString(private_read_own));
+		    sb.append("))");
+		    private_query = true;
+		}
+		
+		
+		if (public_read_all.length > 0) {
+		    if (private_query) {
+		        sb.append(" OR pd.fid IN ");
+		        sb.append(StringCollection.getSqlInString(public_read_all));
+		        public_query = true;
+		    } else {
+		        sb.append(" AND pd.fid IN ");
+		        sb.append(StringCollection.getSqlInString(public_read_all));
+		        public_query = true;
+		    }
+		}
+		
+		if (public_read_own.length > 0) {
+		    if (private_query || public_query) {
+		        sb.append(" OR (pd.fid IN ");
+		        sb.append(StringCollection.getSqlInString(public_read_own));
+		        sb.append(" AND (pd.created_from = ");
+		        sb.append(uid);
+		        sb.append("))");
+		    } else {
+		        sb.append(" AND (pd.fid IN ");
+		        sb.append(StringCollection.getSqlInString(public_read_own));
+		        sb.append(" AND (pd.created_from = ");
+		        sb.append(uid);
+		        sb.append("))");
+		    }
+		}
+		for (int a = 0; a < brack; a++) {
+		    sb.append(')');
+		}
     }
     
     /**
