@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.webdav.xml;
 
 import java.io.OutputStream;
@@ -81,11 +79,10 @@ import com.openexchange.webdav.xml.fields.AppointmentFields;
 import com.openexchange.webdav.xml.fields.CalendarFields;
 
 /**
- * AppointmentWriter
+ * {@link AppointmentWriter} - The WebDAV/XML writer for calendar module.
  *
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-
 public class AppointmentWriter extends CalendarWriter {
 	
 	protected final static int[] changeFields = {
@@ -125,12 +122,22 @@ public class AppointmentWriter extends CalendarWriter {
 	
 	private static final Log LOG = LogFactory.getLog(AppointmentWriter.class);
 	
+	/**
+	 * Initializes a new {@link AppointmentWriter}
+	 */
 	public AppointmentWriter() {
 		 userObj = null;
 		 ctx = null;
 		 sessionObj = null;
 	}
 	
+	/**
+	 * Initializes a new {@link AppointmentWriter}
+	 * 
+	 * @param userObj The user
+	 * @param ctx The context
+	 * @param sessionObj The session providing needed user data
+	 */
 	public AppointmentWriter(final User userObj, final Context ctx, final Session sessionObj) {
 		this.userObj = userObj;
 		this.ctx = ctx;
@@ -157,7 +164,7 @@ public class AppointmentWriter extends CalendarWriter {
 		final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
 		final XMLOutputter xo = new XMLOutputter();
 		
-		SearchIterator it = null;
+		SearchIterator<? extends AppointmentObject> it = null;
 		
 		if (bModified) {
 			try {
@@ -193,9 +200,9 @@ public class AppointmentWriter extends CalendarWriter {
 		}
 	}
 	
-	public void writeIterator(final SearchIterator it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
+	public void writeIterator(final SearchIterator<? extends AppointmentObject> it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
 		while (it.hasNext()) {
-			writeObject((AppointmentObject)it.next(), delete, xo, os);
+			writeObject(it.next(), delete, xo, os);
 		}
 	}
 	
