@@ -93,6 +93,9 @@ public class OXCalendarException extends OXException {
          */
         CALENDAR_SQL_ERROR("Unexpected SQL Error!", 5, AbstractOXException.Category.SUBSYSTEM_OR_SERVICE_DOWN),
         LAST_MODIFIED_IS_NULL("clientLastModified IS NULL. Abort action!", 6, AbstractOXException.Category.CODE_ERROR),
+        /**
+         * Unexpected exception %d!
+         */
         UNEXPECTED_EXCEPTION("Unexpected exception %d!", 7, AbstractOXException.Category.INTERNAL_ERROR),
         EXTERNAL_PARTICIPANTS_MANDATORY_FIELD("Mandatory field mail address for external participants", 8, AbstractOXException.Category.USER_INPUT),
         UPDATE_WITHOUT_PARTICIPANTS("FATAL: Would create an object without participants", 9, AbstractOXException.Category.CODE_ERROR),
