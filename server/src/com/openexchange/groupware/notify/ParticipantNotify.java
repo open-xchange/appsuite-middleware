@@ -70,15 +70,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.event.impl.AppointmentEventInterface;
-import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.event.impl.AppointmentEventInterface2;
 import com.openexchange.event.impl.TaskEventInterface2;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.*;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.mail.MailObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -123,6 +124,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 	private final static LoggingLogic LL = LoggingLogic.getLoggingLogic(ParticipantNotify.class);
 	
 	public ParticipantNotify() {
+		super();
 	}
 
 	protected void sendMessage(final String messageTitle, final String message, final List<String> name, final ServerSession session, final CalendarObject obj, int folderId, final State state, final boolean suppressOXReminderHeader, final boolean internal) {
@@ -212,7 +214,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         sendNotification(null, appointmentObj, sessionObj, Notifications.APPOINTMENT_UPDATE_MAIL,Notifications.APPOINTMENT_UPDATE_TITLE, new AppointmentState(), false, false);
 	}
 
-    public void appointmentModified(AppointmentObject oldAppointment, AppointmentObject newAppointment, Session sessionObj) {
+    public void appointmentModified(final AppointmentObject oldAppointment, final AppointmentObject newAppointment, final Session sessionObj) {
         sendNotification(oldAppointment, newAppointment, sessionObj, Notifications.APPOINTMENT_UPDATE_MAIL,Notifications.APPOINTMENT_UPDATE_TITLE, new AppointmentState(), false, false);
     }
 
@@ -230,7 +232,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		
 	}
 
-    public void taskModified(Task oldTask, Task newTask, Session sessionObj) {
+    public void taskModified(final Task oldTask, final Task newTask, final Session sessionObj) {
         sendNotification(oldTask, newTask, sessionObj, Notifications.TASK_UPDATE_MAIL,Notifications.TASK_UPDATE_TITLE, new TaskState(), false, false);
     }
 
@@ -472,7 +474,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     }
 
-    private void sortOldParticipants(Participant[] oldParticipants, Map<Locale, List<EmailableParticipant>> receivers, final Map<String,EmailableParticipant> all, ServerSession sessionObj) {
+    private void sortOldParticipants(final Participant[] oldParticipants, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String,EmailableParticipant> all, final ServerSession sessionObj) {
         if(oldParticipants == null) {
 			return ;
 		}
