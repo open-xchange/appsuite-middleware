@@ -114,8 +114,6 @@ public abstract class XmlServlet extends PermissionServlet {
 	
 	public static final int APPOINTMENT_CONFLICT_STATUS = 1006;
 	
-	public static final int USER_INPUT_STATUS = 1100;
-	
 	public static final int BAD_REQUEST_STATUS = 1400;
 	
 	public static final int SERVER_ERROR_STATUS = 1500;
