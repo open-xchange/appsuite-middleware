@@ -585,9 +585,12 @@ public class CalendarSql implements AppointmentSQLInterface {
                 final CalendarDataObject edao = cimp.loadObjectForUpdate(cdao, session, ctx, inFolder);
                 if (!co.prepareUpdateAction(cdao, edao, session.getUserId(), inFolder, user.getTimeZone())) {
                 	CalendarCommonCollection.checkForInvalidCharacters(cdao);
-                    final CalendarDataObject conflict_dao = CalendarCommonCollection.fillFieldsForConflictQuery(cdao, edao, false);
-                    final ConflictHandler ch = new ConflictHandler(conflict_dao, session, false);
-                    final CalendarDataObject conflicts[] = ch.getConflicts();
+                	final CalendarDataObject[] conflicts;
+                	{
+	                    final CalendarDataObject conflict_dao = CalendarCommonCollection.fillFieldsForConflictQuery(cdao, edao, false);
+	                    final ConflictHandler ch = new ConflictHandler(conflict_dao, session, false);
+	                    conflicts = ch.getConflicts();
+                	}
                     if (conflicts.length == 0) {
                         writecon = DBPool.pickupWriteable(ctx);
                         try {

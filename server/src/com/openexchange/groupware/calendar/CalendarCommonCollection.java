@@ -1139,14 +1139,35 @@ public final class CalendarCommonCollection {
         if (clone.getUsers() == null) {
             clone.setUsers(edao.getUsers());
         }
-        if (!cdao.containsResources() && edao.containsResources()) {
-            // TODO: Take care if edao contains Ressources and remove and new ones !!! We have to merge this!
+        if (cdao.containsParticipants() && cdao.getParticipants() != null) {
+        	// cdao contains participants informations; just ensure containsResources is set correctly
+        	if (!cdao.containsResources()) {
+            	// Ensure containsResources is set properly
+            	final Participant[] participants = cdao.getParticipants();
+        		for (int i = 0; i < participants.length; i++) {
+    				if (participants[i].getType() == Participant.RESOURCE) {
+    					clone.setContainsResources(true);
+    					break;
+    				}
+    			}
+        	}
+        } else {
+        	// fill participants information from edao
+        	// TODO: Take care if edao contains Ressources and remove and new ones !!! We have to merge this!
             clone.setParticipants(edao.getParticipants());
             clone.setContainsResources(edao.containsResources());
             if (!clone.containsParticipants()) {
                 clone.setParticipants(edao.getParticipants());
             }
-        }
+        }      
+//        if (!cdao.containsParticipants() && !cdao.containsResources() && edao.containsResources()) {
+//            // TODO: Take care if edao contains Ressources and remove and new ones !!! We have to merge this!
+//            clone.setParticipants(edao.getParticipants());
+//            clone.setContainsResources(edao.containsResources());
+//            if (!clone.containsParticipants()) {
+//                clone.setParticipants(edao.getParticipants());
+//            }
+//        }
         if (edao.getRecurrenceType() != CalendarObject.NONE) {
             if (cdao.containsRecurrenceDatePosition()) {
                 clone.setRecurrenceDatePosition(cdao.getRecurrenceDatePosition());

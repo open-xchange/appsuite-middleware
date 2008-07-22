@@ -3215,6 +3215,9 @@ class CalendarMySQL implements CalendarSqlImp {
 							throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(10));
 						}
 					}
+					if (edao.getRecurrenceID() > 0 && !cdao.containsRecurrenceID()) {
+						cdao.setRecurrenceID(edao.getRecurrenceID());
+					}
 					return;
 				}
 			} catch (final SQLException sqle) {
@@ -3308,6 +3311,10 @@ class CalendarMySQL implements CalendarSqlImp {
 							throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(10));
 						}
 					}
+					if (edao.getRecurrenceID() > 0 && !cdao.containsRecurrenceID()) {
+						cdao.setRecurrenceID(edao.getRecurrenceID());
+					}
+					return;
 				} catch (final SQLException sqle) {
 					throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
 				} catch (final OXException oxe) {
