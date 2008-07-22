@@ -51,10 +51,10 @@ package com.openexchange.ajax.user;
 
 import java.io.IOException;
 
-import junit.framework.Assert;
-
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+
+import junit.framework.Assert;
 
 import com.meterware.httpunit.WebConversation;
 import com.openexchange.ajax.UserTest;
@@ -80,20 +80,15 @@ public final class UserTools extends Assert {
         super();
     }
 
-    public static SearchResponse search(final AJAXClient client,
-        final SearchRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return (SearchResponse) Executor.execute(client, request);
-    }
-
     public static UserImpl4Test[] searchUser(final WebConversation webCon,
-        final String searchpattern, final String session) throws Exception {
+        final String searchpattern, final String session) throws AjaxException,
+        IOException, SAXException, JSONException {
         final ContactSearchObject search = new ContactSearchObject();
         search.setPattern(searchpattern);
         search.setFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
         final SearchRequest request = new SearchRequest(search, UserTest.CONTACT_FIELDS);
         final AJAXClient client = new AJAXClient(new AJAXSession(webCon, session));
-        final SearchResponse response = search(client, request);
+        final SearchResponse response = Executor.execute(client, request);
     	assertNotNull("timestamp", response.getTimestamp());
     	return response.getUser();
     }

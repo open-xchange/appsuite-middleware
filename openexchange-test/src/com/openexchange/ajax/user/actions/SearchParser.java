@@ -50,13 +50,13 @@
 package com.openexchange.ajax.user.actions;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.CommonSearchParser;
+import com.openexchange.ajax.framework.AbstractSearchParser;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class SearchParser extends CommonSearchParser {
+public final class SearchParser extends AbstractSearchParser<SearchResponse> {
 
     /**
      * @param failOnError

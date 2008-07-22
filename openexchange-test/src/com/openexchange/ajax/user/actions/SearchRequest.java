@@ -60,7 +60,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
  * This class stores the values for searching users.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class SearchRequest extends AbstractContactRequest {
+public final class SearchRequest extends AbstractContactRequest<SearchResponse> {
 
     private final ContactSearchObject search;
 

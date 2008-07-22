@@ -55,6 +55,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.groupware.container.ContactObject;
 
@@ -62,7 +63,7 @@ import com.openexchange.groupware.container.ContactObject;
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public abstract class AbstractContactRequest implements AJAXRequest {
+public abstract class AbstractContactRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     /**
      * URL of the contacts AJAX interface.
