@@ -60,10 +60,10 @@ import com.openexchange.groupware.container.FolderObject;
 public interface OXFolderManager {
 
 	/**
-	 * Creates a folder filled with values from given folder object. <b>NOTE:</b>
-	 * given instance of <tt>FolderObject</tt> is going to be completely
-	 * filled from storage. Thus it does not matter if you further work on this
-	 * routine's return value or with parameter value.
+	 * Creates a folder filled with values from given folder object.
+	 * <b>NOTE:</b> given instance of <tt>FolderObject</tt> is going to be
+	 * completely filled from storage. Thus it does not matter if you further
+	 * work on this routine's return value or with parameter value.
 	 * 
 	 * 
 	 * @return an instance of <tt>FolderObject</tt> representing newly created
@@ -73,37 +73,43 @@ public interface OXFolderManager {
 
 	/**
 	 * Updates an existing folder according to changes contained in given folder
-	 * object. <b>NOTE:</b> given instance of <tt>FolderObject</tt> is going
-	 * to be completely filled from storage. Thus it does not matter if you
-	 * further work on this routine's return value or with parameter value.
+	 * object. <b>NOTE:</b> given instance of <tt>FolderObject</tt> is going to
+	 * be completely filled from storage. Thus it does not matter if you further
+	 * work on this routine's return value or with parameter value.
 	 * 
 	 * <p>
 	 * Possible operations here: rename, move and/or permissions update: When a
 	 * rename should be performed, given folder object should contain field
 	 * 'folder name', so that invokation of
-	 * <tt>FolderObject.containsFolderName()</tt> returns <tt>true</tt>. If
-	 * a move should be done, routine
+	 * <tt>FolderObject.containsFolderName()</tt> returns <tt>true</tt>. If a
+	 * move should be done, routine
 	 * <tt>FolderObject.containsParentFolderID()</tt> should return
-	 * <tt>true</tt>. Last, but not least, if an update of folder's
-	 * permissions should be done, routine
-	 * <tt>FolderObject.containsPermissions()</tt> should return <tt>true</tt>.
+	 * <tt>true</tt>. Last, but not least, if an update of folder's permissions
+	 * should be done, routine <tt>FolderObject.containsPermissions()</tt>
+	 * should return <tt>true</tt>.
 	 * </p>
 	 * 
-	 * @return an instance of <tt>FolderObject</tt> representing modified
-	 *         folder
+	 * @return an instance of <tt>FolderObject</tt> representing modified folder
 	 */
 	public FolderObject updateFolder(FolderObject fo, boolean checkPermissions, long lastModified) throws OXException;
 
 	/**
-	 * Deletes a folder identifed by given folder object. This operation causes
+	 * Deletes a folder identified by given folder object. This operation causes
 	 * a recursive traversal of all folder's subfolders to check if user can
 	 * delete them, too. Furthermore user's permission on contained objects are
-	 * checked as well. <b>NOTE:</b> given instance of <tt>FolderObject</tt>
-	 * is going to be completely filled from storage. Thus it does not matter if
+	 * checked as well. <b>NOTE:</b> given instance of <tt>FolderObject</tt> is
+	 * going to be completely filled from storage. Thus it does not matter if
 	 * you further work on this routine's return value or with parameter value.
 	 * 
-	 * @return an instance of <tt>FolderObject</tt> representing deleted
-	 *         folder
+	 * @param fo
+	 *            The folder object at least containing the ID of the folder
+	 *            that shall be deleted
+	 * @param checkPermissions
+	 *            Whether permissions shall be checked or not
+	 * @param lastModified
+	 *            The last-modified time stamp which is written into database;
+	 *            usually {@link System#currentTimeMillis()}.
+	 * @return an instance of <tt>FolderObject</tt> representing deleted folder
 	 */
 	public FolderObject deleteFolder(FolderObject fo, boolean checkPermissions, long lastModified) throws OXException;
 
@@ -116,7 +122,6 @@ public interface OXFolderManager {
 	 * 
 	 * @return the cleaned instance of <tt>FolderObject</tt>
 	 */
-	public FolderObject clearFolder(FolderObject fo, boolean checkPermissions, long lastModified)
-			throws OXException;
+	public FolderObject clearFolder(FolderObject fo, boolean checkPermissions, long lastModified) throws OXException;
 
 }
