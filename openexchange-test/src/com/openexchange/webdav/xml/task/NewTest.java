@@ -6,6 +6,8 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TaskException;
+import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.FolderTest;
@@ -95,7 +97,7 @@ public class NewTest extends TaskTest {
 			deleteTask(getWebConversation(), objectId, parentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 			fail("conflict exception expected!");
 		} catch (final TestException exc) {
-			assertExceptionMessage(exc.getMessage(), XmlServlet.USER_INPUT_STATUS);
+			assertExceptionMessage(exc.getMessage(), new TaskException(Code.PRIVATE_FLAG).getErrorCode());
 		}
 	}
 }

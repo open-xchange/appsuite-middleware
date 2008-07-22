@@ -3,8 +3,10 @@ package com.openexchange.webdav.xml.contact;
 import java.io.ByteArrayInputStream;
 
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
+import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -78,7 +80,7 @@ public class NewTest extends ContactTest {
 			deleteContact(getWebConversation(), objectId, parentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 			fail("conflict exception expected!");
 		} catch (final TestException exc) {
-			assertExceptionMessage(exc.getMessage(), XmlServlet.CONFLICT_STATUS);
+			assertExceptionMessage(exc.getMessage(), new ContactException(Category.USER_INPUT, "", 171).getErrorCode());
 		}
 	}	
 	

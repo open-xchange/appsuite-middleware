@@ -281,6 +281,10 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		return "http://" + host;
 	}
 	
+	/**
+	 * @deprecated XML now uses AJAX server error codes.
+	 */
+	@Deprecated
 	protected static void assertExceptionMessage(final String message, final int expectedStatus) throws Exception {
 		assertExceptionMessage(message, String.valueOf(expectedStatus));
 	}
