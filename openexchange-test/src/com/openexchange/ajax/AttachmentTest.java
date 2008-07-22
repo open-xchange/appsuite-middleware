@@ -43,12 +43,17 @@ public class AttachmentTest extends AbstractAJAXTest {
 	
 	@Override
 	public void tearDown() throws Exception {
+		removeAttachments();
+		super.tearDown();
+	}
+	
+	public void removeAttachments() throws Exception{
 		for(final AttachmentMetadata attachment : clean) {
 			detach(getWebConversation(), sessionId, attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), new int[]{attachment.getId()});
 		}
 		clean.clear();
 	}
-	
+
 	public Response attach(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final List<File> uploads) throws JSONException, IOException {
 		return attach(webConv, sessionId, folderId, attachedId, moduleId, uploads, new HashMap<File,String>(), new HashMap<File,String>());
 	}
