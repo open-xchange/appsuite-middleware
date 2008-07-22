@@ -1081,7 +1081,7 @@ public class AppointmentRequest {
 				final JSONObject jsonAppointmentObj = new JSONObject();
 				appointmentWriter.writeAppointment(appointmentObj, jsonAppointmentObj);
 				jsonResponseArray.put(jsonAppointmentObj);
-				if (timestamp.before(appointmentObj.getLastModified())) {
+				if (null != appointmentObj.getLastModified() && timestamp.before(appointmentObj.getLastModified())) {
 				    timestamp = appointmentObj.getLastModified();
 				}
 			}
