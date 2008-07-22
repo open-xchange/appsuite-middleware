@@ -148,10 +148,8 @@ public class FreeBusyTest extends AppointmentTest {
 		final int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		
 		final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
-		participants[0] = new UserParticipant();
-		participants[0].setIdentifier(userId);
-		participants[1] = new ResourceParticipant();
-		participants[1].setIdentifier(resourceParticipantId);
+		participants[0] = new UserParticipant(userId);
+		participants[1] = new ResourceParticipant(resourceParticipantId);
 		
 		appointmentObj.setParticipants(participants);
 		

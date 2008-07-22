@@ -31,6 +31,7 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.parser.AppointmentParser;
+import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api.OXConflictException;
@@ -828,16 +829,16 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		final Response response = Response.parse(resp.getText());
+		final Response response = ResponseParser.parse(resp.getText());
 		
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
 		}
 		
-		final boolean isArray = ((JSONArray) response.getData()) instanceof JSONArray;
+		final boolean isArray = response.getData() instanceof JSONArray;
 		assertTrue("response object is not an array", isArray);
 		
-		final JSONArray jsonArray = ((JSONArray) response.getData());
+		final JSONArray jsonArray = (JSONArray) response.getData();
 		return jsonArray2AppointmentArray(jsonArray, userTimeZone);
 	}
 	
