@@ -132,7 +132,7 @@ public class FunctionTests extends AbstractAJAXSession {
         final AJAXClient client = getClient();
         final GetResponse origGet = ConfigTools.get(client, new GetRequest(Tree
             .GUI));
-        final String testValue = RandomString.generateLetter(20);
+        final String testValue = RandomString.generateChars(20);
         try {
             ConfigTools.set(client, new SetRequest(Tree.GUI, testValue));
             final GetResponse testGet = ConfigTools.get(client, new GetRequest(
