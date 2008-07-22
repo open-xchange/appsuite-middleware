@@ -21,6 +21,7 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.parser.ResponseParser;
 
 public class InfostoreAJAXTest extends AbstractAJAXTest {
 
@@ -313,8 +314,12 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		if(response == null) {
 			throw new IOException("Didn't receive response");
 		}
+		final Response respO = ResponseParser.parse(response);
+		if (respO.hasError()) {
+			throw new IOException(respO.getErrorMessage());
+		}
 		if(!"".equals(response.optString("error"))) {
-			throw new IOException(response.getString("error"));
+			
 		}
 		try {
 			return response.getInt("data");
