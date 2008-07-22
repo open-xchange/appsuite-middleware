@@ -48,6 +48,9 @@
  */
 package com.openexchange.groupware.calendar;
 
+import static com.openexchange.tools.events.EventAssertions.assertDeleteEvent;
+import static com.openexchange.tools.events.EventAssertions.assertModificationEvent;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
@@ -59,7 +62,6 @@ import junit.framework.TestCase;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.event.CommonEvent;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
@@ -78,8 +80,6 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.events.TestEventAdmin;
-import static com.openexchange.tools.events.EventAssertions.assertDeleteEvent;
-import static com.openexchange.tools.events.EventAssertions.assertModificationEvent;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 
@@ -197,7 +197,7 @@ public class CalendarDowngradeUserTest extends TestCase {
             writecon = DBPool.pickupWriteable(ctx);
             final OXFolderManager oxma = new OXFolderManagerImpl(session, writecon, writecon);
             for(final FolderObject folder : cleanFolders) {
-                oxma.deleteFolder(folder,false, Long.MAX_VALUE);
+                oxma.deleteFolder(folder,false, System.currentTimeMillis());
             }
         } catch (final DBPoolingException e) {
             // IGNORE

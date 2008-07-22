@@ -88,7 +88,9 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
@@ -567,7 +569,7 @@ public class CalendarTest extends TestCase {
             assertTrue("Got some results by searching \"*e*\"", !gotresults);
             si.close();
         } finally {
-        	oxma.deleteFolder(new FolderObject(public_folder_id), true, SUPER_END);
+        	oxma.deleteFolder(new FolderObject(public_folder_id), true, System.currentTimeMillis());
             //ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
         }
         
@@ -670,7 +672,7 @@ public class CalendarTest extends TestCase {
             update3.setIgnoreConflicts(true);
             csql.updateAppointmentObject(update3, private_folder_id, new Date(SUPER_END));        
         } finally {
-        	oxma.deleteFolder(new FolderObject(public_folder_id), true, SUPER_END);
+        	oxma.deleteFolder(new FolderObject(public_folder_id), true, System.currentTimeMillis());
             //ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
         }
 
@@ -731,6 +733,7 @@ public class CalendarTest extends TestCase {
         final int public_folder_id = fo.getObjectID();
         CalendarDataObject testobject = null;
         try {
+        	final long startTime = System.currentTimeMillis();
             // TODO: "Move" folder to a public folder
             final CalendarDataObject update1 = new CalendarDataObject();
             update1.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
@@ -783,10 +786,10 @@ public class CalendarTest extends TestCase {
             
             deleteAllAppointments();
                         
-            SearchIterator si = csql.getModifiedAppointmentsInFolder(public_folder_id, cols, new Date(0));
+            SearchIterator<CalendarDataObject> si = csql.getModifiedAppointmentsInFolder(public_folder_id, cols, new Date(0));
             boolean found = false;
             while (si.hasNext()) {
-                final CalendarDataObject tdao = (CalendarDataObject)si.next();
+                final CalendarDataObject tdao = si.next();
                 System.out.println(">>> "+tdao.getTitle());
                 found = true;
             }
@@ -796,11 +799,21 @@ public class CalendarTest extends TestCase {
             // Magic test
         
             si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
-            assertTrue("Got results", !si.hasNext());
+            while (si.hasNext()) {
+            	final CalendarDataObject tdao = si.next();
+            	final Date compare = tdao.getLastModified() == null ? tdao.getChangingDate() : tdao.getLastModified();
+            	if (compare != null) {
+					assertFalse("Got results. An available appointment created in test case! " + tdao.getTitle(), compare.getTime() >= startTime && tdao.getTitle().startsWith("testInsertMoveAllDelete"));
+				} else {
+					fail("Missing last-modified time stamp in appointment");
+				}
+            }
+            
+            //assertTrue("Got results", !si.hasNext());
             
             si.close();
         } finally {
-        	oxma.deleteFolder(new FolderObject(public_folder_id), true, SUPER_END);
+        	oxma.deleteFolder(new FolderObject(public_folder_id), true, System.currentTimeMillis());
             //ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
         }
 
@@ -888,7 +901,19 @@ public class CalendarTest extends TestCase {
         si.close();
         System.out.println("DEBUG: deleted : "+counter);
         si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0, null);
-        assertTrue("Check that we deleted them all", !si.hasNext());
+
+        while (si.hasNext()) {
+			final CalendarDataObject cdao = (CalendarDataObject) si.next();
+
+			final EffectivePermission ep = new OXFolderAccess(context).getFolderPermission(cdao.getEffectiveFolderId(),
+					userid, UserConfigurationStorage.getInstance().getUserConfiguration(userid, context));
+
+			if (ep.getDeletePermission() != OCLPermission.NO_PERMISSIONS
+					&& (ep.canDeleteAllObjects() || (cdao.getCreatedBy() == userid && ep.canDeleteOwnObjects()))) {
+				fail("Not all appointments were deleted: objectID=" + cdao.getObjectID() + " title=" + cdao.getTitle());
+			}
+		}
+
         DBPool.push(context, readcon);
     }
     
@@ -979,8 +1004,18 @@ public class CalendarTest extends TestCase {
         final int fid = getCalendarDefaultFolderForUser(userid, context);    
         final CalendarSql csql = new CalendarSql(so);                
         
-        final SearchIterator si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
-        assertTrue("Got no results", si.hasNext() == false);
+        final SearchIterator<CalendarDataObject> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
+        while (si.hasNext()) {
+			final CalendarDataObject cdao = si.next();
+
+			final EffectivePermission ep = new OXFolderAccess(context).getFolderPermission(cdao.getEffectiveFolderId(),
+					userid, UserConfigurationStorage.getInstance().getUserConfiguration(userid, context));
+
+			if (ep.getDeletePermission() != OCLPermission.NO_PERMISSIONS
+					&& (ep.canDeleteAllObjects() || (cdao.getCreatedBy() == userid && ep.canDeleteOwnObjects()))) {
+				fail("Not all appointments were deleted: objectID=" + cdao.getObjectID() + " title=" + cdao.getTitle());
+			}
+		}
         si.close();
         
         final CalendarDataObject cdao = new CalendarDataObject();
@@ -1167,7 +1202,7 @@ public class CalendarTest extends TestCase {
         } finally {
             try {
                 if (shared_folder_id > 0) {
-                	oxma.deleteFolder(new FolderObject(shared_folder_id), true, SUPER_END);
+                	oxma.deleteFolder(new FolderObject(shared_folder_id), true, System.currentTimeMillis());
                     //ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
                 } else {
                     fail("Folder was not created.");
@@ -1381,7 +1416,7 @@ public class CalendarTest extends TestCase {
             }
             
         } finally {
-        	oxma.deleteFolder(new FolderObject(public_folder_id), true, SUPER_END);
+        	oxma.deleteFolder(new FolderObject(public_folder_id), true, System.currentTimeMillis());
             //ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
         }
 

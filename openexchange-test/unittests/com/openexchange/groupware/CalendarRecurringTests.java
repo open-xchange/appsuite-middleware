@@ -1523,7 +1523,7 @@ public class CalendarRecurringTests extends TestCase {
         } finally {
             try {
                 if (test_folder > 0) {
-                    oxma.deleteFolder(new FolderObject(test_folder), true, SUPER_END);
+                    oxma.deleteFolder(new FolderObject(test_folder), true, System.currentTimeMillis());
                 } 
             } catch(final Exception e) {
                 e.printStackTrace();

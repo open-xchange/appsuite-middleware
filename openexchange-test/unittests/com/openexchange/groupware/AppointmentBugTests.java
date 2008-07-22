@@ -573,7 +573,7 @@ public class AppointmentBugTests extends TestCase {
             try {
                 if (shared_folder_id > 0) {
                     //ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
-                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, SUPER_END);
+                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, System.currentTimeMillis());
                 } 
             } catch(final Exception e) {
                 e.printStackTrace();
@@ -812,7 +812,7 @@ public class AppointmentBugTests extends TestCase {
             try {
                 if (shared_folder_id > 0) {
                     //ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
-                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, SUPER_END);
+                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, System.currentTimeMillis());
                 } 
             } catch(final Exception e) {
                 e.printStackTrace();
@@ -1035,7 +1035,7 @@ public class AppointmentBugTests extends TestCase {
             try {
                 if (shared_folder_id > 0) {
                     //ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
-                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, SUPER_END);
+                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, System.currentTimeMillis());
                 } 
             } catch(final Exception e) {
                 e.printStackTrace();
@@ -1341,7 +1341,7 @@ public class AppointmentBugTests extends TestCase {
         } finally {
             try {
                 if (shared_folder_id > 0) {
-                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, SUPER_END);
+                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, System.currentTimeMillis());
                 } 
             } catch(final Exception e) {
                 e.printStackTrace();
@@ -1452,7 +1452,7 @@ public class AppointmentBugTests extends TestCase {
             final int x = 0;
             try {
                 if (subfolder_id > 0) {
-                    oxma.deleteFolder(new FolderObject(subfolder_id), true, SUPER_END);
+                    oxma.deleteFolder(new FolderObject(subfolder_id), true, System.currentTimeMillis());
                 } 
             } catch(final Exception e) {
                 e.printStackTrace();
@@ -1557,7 +1557,7 @@ public class AppointmentBugTests extends TestCase {
             final int x = 0;
             try {
                 if (subfolder_id > 0) {
-                    oxma.deleteFolder(new FolderObject(subfolder_id), true, SUPER_END);
+                    oxma.deleteFolder(new FolderObject(subfolder_id), true, System.currentTimeMillis());
                 } 
             } catch(final Exception e) {
                 e.printStackTrace();
@@ -2244,7 +2244,7 @@ public class AppointmentBugTests extends TestCase {
         } finally {
             try {
                 if (shared_folder_id > 0) {
-                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, SUPER_END);
+                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, System.currentTimeMillis());
                 } 
             } catch(final Exception e) {
                 e.printStackTrace();
@@ -2345,7 +2345,7 @@ public class AppointmentBugTests extends TestCase {
         } finally {
             try {
                 if (shared_folder_id > 0) {
-                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, SUPER_END);
+                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, System.currentTimeMillis());
                 } 
             } catch(final Exception e) {
                 e.printStackTrace();
@@ -2543,7 +2543,7 @@ public class AppointmentBugTests extends TestCase {
         } finally {
             try {
                 if (shared_folder_id > 0) {
-                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, SUPER_END);
+                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, System.currentTimeMillis());
                 } 
             } catch(final Exception e) {
                 e.printStackTrace();
@@ -2778,7 +2778,7 @@ public class AppointmentBugTests extends TestCase {
         } finally {
             try {
                 if (public_folder_id > 0) {
-                    oxma.deleteFolder(new FolderObject(public_folder_id), true, SUPER_END);
+                    oxma.deleteFolder(new FolderObject(public_folder_id), true, System.currentTimeMillis());
                 } else {
                     fail("Public folder was not created");
                 }
@@ -2982,7 +2982,7 @@ public class AppointmentBugTests extends TestCase {
         } finally {
             try {
                 if (shared_folder_id > 0) {
-                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, SUPER_END);
+                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, System.currentTimeMillis());
                 } 
             } catch(final Exception e) {
                 e.printStackTrace();
