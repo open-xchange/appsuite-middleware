@@ -56,7 +56,10 @@ import java.util.TimeZone;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
+import com.openexchange.ajax.appointment.action.GetRequest;
+import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.config.ConfigTools;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -122,7 +125,9 @@ public class UpdatesTest extends ReminderTest {
 		final long expectedAlarm = startTime - (45*60*1000);
 		assertEquals("alarm is not equals", new Date(expectedAlarm), reminderObj[pos].getDate());
 		
-		Executor.execute(new AJAXSession(getWebConversation(), getSessionId()), new DeleteRequest(targetId, folderId, new Date()), getHostName());
+		final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+		final GetResponse aGetR = Executor.execute(client, new GetRequest(folderId, targetId));
+		Executor.execute(client, new DeleteRequest(targetId, folderId, aGetR.getTimestamp()));
 	} 
 }
 

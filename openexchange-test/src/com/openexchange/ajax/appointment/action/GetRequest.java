@@ -61,7 +61,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class GetRequest extends AbstractAppointmentRequest {
+public class GetRequest extends AbstractAppointmentRequest<GetResponse> {
 
     /**
      * Appointment is requested through this folder.
