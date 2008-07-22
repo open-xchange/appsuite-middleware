@@ -8,6 +8,7 @@
     <property file="META-INF/MANIFEST.MF"/>
     <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
+    <property name="bundletest.name" value="${Bundle-SymbolicName}-test.jar"/>
 	<property name="composite.name" value="open-xchange-mailfilter-${version}"/>
     <property name="test.xml.dir" value="test-results" />
 	<property name="serverconfdir" value="etc/groupware"/>
@@ -50,6 +51,26 @@
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
     </path>
 
+	<!-- jars for tests -->
+    <property name="httpunit" value="../openexchange-test/lib/httpunit-1.6.2.jar"/>
+    <property name="junit" value="/usr/share/java/junit4.jar"/>
+
+	<path id="projecttest.classpath">
+        <pathelement location="${bundlesdir}/${osgibundle}"/>
+        <pathelement location="${bundlesdir}/${osgiservicesbundle}"/>
+		<pathelement location="${bundlesdir}/${commonsloggingbundle}" />
+		<pathelement location="${bundlesdir}/${serverbundle}"/>
+		<pathelement location="${bundlesdir}/${globalbundle}"/>
+		<pathelement location="${bundlesdir}/${configbundle}"/>
+		<pathelement location="${bundlesdir}/${servletbundle}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${mail}"/>
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
+    	<pathelement location="${httpunit}"/>
+    	<pathelement location="${junit}"/>
+    	<pathelement location="jar/${bundle.name}"/>
+    </path>
+
+	
     <!--                    TARGETS                      -->
     <target name="prepare">
     	<delete dir="src/org/apache/jsieve/parser/generated"/>
@@ -93,7 +114,23 @@
         manifest="META-INF/MANIFEST.MF"/>
     </target>
 
-    <target name="clean">
+    <target name="testcompile">
+        <mkdir dir="classes"/>
+        <javac failonerror="true" srcdir="test" debug="true" destdir="classes">
+            <classpath>
+                <path refid="projecttest.classpath"/>
+            </classpath>
+        </javac>
+    </target>
+
+	<target name="testjar" depends="testcompile, jar">
+        <mkdir dir="jar"/>
+        <jar jarfile="jar/${bundletest.name}"
+        basedir="classes"
+        manifest="META-INF/MANIFEST.MF"/>
+    </target>
+
+	<target name="clean">
         <delete dir="classes"/>
         <delete dir="jar"/>
     </target>
