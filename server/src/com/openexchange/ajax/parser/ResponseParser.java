@@ -84,21 +84,26 @@ public final class ResponseParser {
 
     /**
      * Deserializes a response into the Response object.
-     * 
-     * @param body
-     *            JSON response string.
+     * @param body JSON response string.
      * @return the parsed object.
-     * @throws JSONException 
-     * @throws JSONException
-     *             if parsing fails.
+     * @throws JSONException if parsing fails.
      */
     public static Response parse(final String body) throws JSONException {
-        final JSONObject response = new JSONObject(body);
-        final Response retval = new Response(response);
-        parse(retval, response);
-        return retval;
+        return parse(new JSONObject(body));
     }
 
+    /**
+     * Deserializes a JSON response into the Response object.
+     * @param json JSON response.
+     * @return the parsed object.
+     * @throws JSONException if parsing fails.
+     */
+    public static Response parse(final JSONObject json) throws JSONException {
+        final Response retval = new Response(json);
+        parse(retval, json);
+        return retval;
+    }
+    
     public static void parse(final Response response, final JSONObject json) throws JSONException {
         if (json.has(ResponseFields.DATA)) {
             response.setData(json.get(ResponseFields.DATA));
