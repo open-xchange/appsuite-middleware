@@ -139,7 +139,6 @@
             <test name="com.openexchange.ajax.task.TaskTestSuite" todir="${test.xml.dir}" />
 
             <test name="com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite" todir="${test.xml.dir}" />
-            <test name="com.openexchange.webdav.xml.appointment.AppointmentBugTestSuite" todir="${test.xml.dir}" />
             <test name="com.openexchange.webdav.xml.contact.ContactWebdavSuite" todir="${test.xml.dir}" />
             <test name="com.openexchange.webdav.xml.folder.FolderWebdavSuite" todir="${test.xml.dir}" />
             <test name="com.openexchange.webdav.xml.task.TaskWebdavSuite" todir="${test.xml.dir}" />
