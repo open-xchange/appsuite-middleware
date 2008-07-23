@@ -60,10 +60,9 @@ import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 
 /**
- * MailFolder - a data container object for a mail folder
+ * {@link MailFolder} - a data container object for a mail folder
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class MailFolder implements Serializable {
 
