@@ -98,6 +98,8 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
 	private static final String STYLE = "style";
 
+	private static final String CLASS = "class";
+
 	private static final String HEAD = "head";
 
 	private static final String BODY = "body";
@@ -485,6 +487,12 @@ public final class HTMLFilterHandler implements HTMLHandler {
 						attrBuilder.append(' ').append(STYLE).append("='").append(checkedCSS).append('\'');
 					}
 				}
+			} else if (CLASS.equals(e.getKey())) {
+				/*
+				 * TODO: Is it safe to allow "class" attribute in any case
+				 */
+				attrBuilder.append(' ').append(CLASS).append(VAL_START).append(htmlFormat(e.getValue(), false)).append(
+						'"');
 			} else {
 				if (null == attribs) {
 					attrBuilder.append(' ').append(e.getKey()).append(VAL_START)
