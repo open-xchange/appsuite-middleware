@@ -63,6 +63,9 @@ import com.openexchange.groupware.contexts.Context;
  */
 
 public class CalendarDataObject extends AppointmentObject {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(CalendarDataObject.class);
     
     private Timestamp creating_date, changing_date;
     private String rec_string;
@@ -259,14 +262,37 @@ public class CalendarDataObject extends AppointmentObject {
     
     @Override
     public final Date getUntil() {
-        if (!containsUntil()) {
-            if (getRecurrenceType() != CalendarObject.YEARLY) {
-                return new Date(CalendarRecurringCollection.normalizeLong(getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * CalendarRecurringCollection.getMAX_END_YEARS())));
-            }
-            return new Date(CalendarRecurringCollection.normalizeLong(getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * 99)));
-        }
-        return super.getUntil();
-    }
+		if (!containsUntil()) {
+			/*
+			 * Determine max. end date
+			 */
+			final long maxEnd = getRecurrenceType() == CalendarObject.YEARLY ? (CalendarRecurringCollection
+					.normalizeLong(getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * 99)))
+					: (CalendarRecurringCollection
+							.normalizeLong(getStartDate().getTime()
+									+ (CalendarRecurringCollection.MILLI_YEAR * CalendarRecurringCollection
+											.getMAX_END_YEARS())));
+			/*
+			 * Create a clone for calculation purpose
+			 */
+			final CalendarDataObject clone = (CalendarDataObject) this.clone();
+			clone.setEndDate(new Date(maxEnd));
+			final RecurringResults rresults;
+			try {
+				rresults = CalendarRecurringCollection.calculateRecurring(clone, 0, 0, 0);
+			} catch (final OXException e) {
+				LOG.error(e.getMessage(), e);
+				return new Date(maxEnd);
+			}
+			final RecurringResult rresult = rresults
+					.getRecurringResultByPosition(CalendarRecurringCollection.MAXTC + 1);
+			if (rresult != null) {
+				return new Date(CalendarRecurringCollection.normalizeLong(rresult.getEnd()));
+			}
+			return new Date(maxEnd);
+		}
+		return super.getUntil();
+	}
     
     public final boolean isSequence(final boolean what) {
         if (what) {
