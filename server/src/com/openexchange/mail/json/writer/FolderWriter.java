@@ -604,7 +604,7 @@ public final class FolderWriter {
 							 * Put value
 							 */
 							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.SUBSCRIBED, boolVal);
+								((JSONObject) jsonContainer).put(FolderFields.SUBSCR_SUBFLDS, boolVal);
 							} else {
 								((JSONArray) jsonContainer).put(boolVal);
 							}
