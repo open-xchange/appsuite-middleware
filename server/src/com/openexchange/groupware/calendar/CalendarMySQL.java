@@ -102,11 +102,10 @@ import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
- * CalendarSql
+ * CalendarMySQL
  * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
-
 class CalendarMySQL implements CalendarSqlImp {
 
     private static final String SELECT_ALL_PRIVATE_FOLDERS_IN_WHICH_A_USER_IS_A_PARTICIPANT = "SELECT object_id, pfid, member_uid FROM prg_dates_members WHERE member_uid = ? and cid = ?";
