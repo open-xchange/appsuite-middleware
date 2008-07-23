@@ -1,3 +1,8 @@
+* 2008-07-23 - marcus.klein@open-xchange.com
+
+ - Bugfix #9591: Eliminating dublicate found tasks in search over all folder by
+   a "GROUP BY" SQL statement.
+
 * 2008-07-22 - thorben.betten@open-xchange.com
 
  - Bugfix #10845: No conflict warning on appointment update if causing

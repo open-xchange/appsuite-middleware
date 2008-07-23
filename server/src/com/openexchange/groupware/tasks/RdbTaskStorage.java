@@ -247,6 +247,7 @@ public class RdbTaskStorage extends TaskStorage {
             sql.append(" AND ");
             sql.append(patternCondition);
         }
+        sql.append(" GROUP BY task.id");
         sql.append(SQL.getOrder(orderBy, orderDir));
         final Connection con;
         try {
