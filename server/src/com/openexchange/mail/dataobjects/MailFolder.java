@@ -310,7 +310,12 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * @return the subscribed
+	 * Returns whether the denoted mail folder is subscribed or not
+	 * <p>
+	 * If mailing system does not support subscription, <code>true</code> is
+	 * supposed to be returned.
+	 * 
+	 * @return Whether the denoted mail folder is subscribed or not
 	 */
 	public boolean isSubscribed() {
 		return subscribed;
@@ -325,7 +330,7 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Removes the subscribed
+	 * Removes the subscription status
 	 */
 	public void removeSubscribed() {
 		subscribed = false;
@@ -333,8 +338,13 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
+	 * Sets the subscription status for this mail folder.
+	 * <p>
+	 * If mailing system does not support subscription, <code>true</code> is
+	 * supposed to be set as subscription status.
+	 * 
 	 * @param subscribed
-	 *            the subscribed to set
+	 *            the subscription status to set
 	 */
 	public void setSubscribed(final boolean subscribed) {
 		this.subscribed = subscribed;
@@ -342,9 +352,9 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Gets the deletedMessageCount
+	 * Gets the number of messages marked for deletion in this folder
 	 * 
-	 * @return the deletedMessageCount
+	 * @return The number of messages marked for deletion in this folder
 	 */
 	public int getDeletedMessageCount() {
 		return deletedMessageCount;
@@ -359,7 +369,7 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Removes the deletedMessageCount
+	 * Removes the number of messages marked for deletion in this folder
 	 */
 	public void removeDeletedMessageCount() {
 		deletedMessageCount = 0;
@@ -367,10 +377,10 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Sets the deletedMessageCount
+	 * Sets the number of messages marked for deletion in this folder
 	 * 
 	 * @param deletedMessageCount
-	 *            the deletedMessageCount to set
+	 *            the number of messages marked for deletion
 	 */
 	public void setDeletedMessageCount(final int deletedMessageCount) {
 		this.deletedMessageCount = deletedMessageCount;
@@ -416,9 +426,9 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Gets the messageCount
+	 * Gets the number of messages
 	 * 
-	 * @return the messageCount
+	 * @return The number of messages
 	 */
 	public int getMessageCount() {
 		return messageCount;
@@ -441,10 +451,10 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Sets the messageCount
+	 * Sets the number of messages
 	 * 
 	 * @param messageCount
-	 *            the messageCount to set
+	 *            The number of messages
 	 */
 	public void setMessageCount(final int messageCount) {
 		this.messageCount = messageCount;
@@ -452,9 +462,10 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Gets the newMessageCount
+	 * Gets the number of new messages (since last time this folder was
+	 * accessed)
 	 * 
-	 * @return the newMessageCount
+	 * @return The number of new messages
 	 */
 	public int getNewMessageCount() {
 		return newMessageCount;
@@ -477,10 +488,10 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Sets the newMessageCount
+	 * Sets the number of new messages
 	 * 
 	 * @param newMessageCount
-	 *            the newMessageCount to set
+	 *            The number of new messages
 	 */
 	public void setNewMessageCount(final int newMessageCount) {
 		this.newMessageCount = newMessageCount;
@@ -488,9 +499,9 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Gets the unreadMessageCount
+	 * Gets the number of unread messages
 	 * 
-	 * @return the unreadMessageCount
+	 * @return The number of unread messages
 	 */
 	public int getUnreadMessageCount() {
 		return unreadMessageCount;
@@ -513,10 +524,10 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Sets the unreadMessageCount
+	 * Sets the number of unread messages
 	 * 
 	 * @param unreadMessageCount
-	 *            the unreadMessageCount to set
+	 *            The number of unread messages
 	 */
 	public void setUnreadMessageCount(final int unreadMessageCount) {
 		this.unreadMessageCount = unreadMessageCount;
