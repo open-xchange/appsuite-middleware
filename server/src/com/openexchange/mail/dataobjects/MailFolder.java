@@ -296,6 +296,11 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
+	 * Sets this mail folder's name.
+	 * <p>
+	 * If this mail folder denotes the root folder, {@link #DEFAULT_FOLDER_NAME}
+	 * is supposed to be set as name.
+	 * 
 	 * @param name
 	 *            the name to set
 	 */
