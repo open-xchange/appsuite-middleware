@@ -96,9 +96,9 @@ public class DistributionListEntryObject {
 	
 	public DistributionListEntryObject(final String displayname, final String emailaddress, final int emailfield)
 	{
-		this.displayname = displayname;
-		this.emailaddress = emailaddress;
-		this.emailfield = emailfield;
+		setDisplayname(displayname);
+		setEmailaddress(emailaddress);
+		setEmailfield(emailfield);
 	}
 	
 	// GET METHODS
