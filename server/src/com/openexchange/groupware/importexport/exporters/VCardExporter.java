@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.importexport.exporters;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
@@ -77,8 +77,10 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -107,6 +109,9 @@ category={
 	 * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
 	 */
 	public class VCardExporter implements Exporter {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(VCardExporter.class);
 	
 	private static ImportExportExceptionFactory importExportExceptionFactory = new ImportExportExceptionFactory(VCardExporter.class);
 	
@@ -222,7 +227,7 @@ category={
 		}
 		
 		final int folderId = Integer.parseInt(folder);
-		FolderObject fo;
+		final FolderObject fo;
 		try {
 			fo = new OXFolderAccess(sessObj.getContext()).getFolderObject(folderId);
 		} catch (final OXException e) {
@@ -237,7 +242,7 @@ category={
 			return false;
 		}
 		//check read access to folder
-		EffectivePermission perm;
+		final EffectivePermission perm;
 		try {
 			perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
 		} catch (final DBPoolingException e) {
@@ -270,17 +275,25 @@ category={
 			final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
 			final SearchIterator<ContactObject> searchIterator = contactSql.getModifiedContactsInFolder(Integer.parseInt(folder), fieldsToBeExported, new Date(0));
 			
-			while (searchIterator.hasNext()) {
-				exportContact(oxContainerConverter, contactDef, versitWriter, searchIterator.next());
+			try {
+				while (searchIterator.hasNext()) {
+					exportContact(oxContainerConverter, contactDef, versitWriter, searchIterator.next());
+				}
+				versitWriter.flush();
+			} finally {
+				closeVersitResources(oxContainerConverter, versitWriter);
+				try {
+					searchIterator.close();
+				} catch (final SearchIteratorException e) {
+					LOG.error(e.getMessage(), e);
+				}
 			}
-			
-			versitWriter.flush();
 		} catch (final Exception exc) {
 			throw importExportExceptionFactory.create(3, exc, folder);
 		}
 		
 		return new SizedInputStream(
-				new ByteArrayInputStream(byteArrayOutputStream.toByteArray()),
+				new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray()),
 				byteArrayOutputStream.size(),
 				Format.VCARD);
 	}
@@ -294,14 +307,17 @@ category={
 			
 			final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
 			final ContactObject contactObj = contactSql.getObjectById(objectId, Integer.parseInt(folder));
-			
-			exportContact(oxContainerConverter, contactDef, versitWriter, contactObj);
+			try {
+				exportContact(oxContainerConverter, contactDef, versitWriter, contactObj);
+			} finally {
+				closeVersitResources(oxContainerConverter, versitWriter);
+			}
 		} catch (final Exception exc) {
 			throw importExportExceptionFactory.create(3, exc, folder);
 		}
 		
 		return new SizedInputStream(
-				new ByteArrayInputStream(byteArrayOutputStream.toByteArray()),
+				new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray()),
 				byteArrayOutputStream.size(),
 				Format.VCARD);
 	}
@@ -310,5 +326,18 @@ category={
 		final VersitObject versitObject = oxContainerConverter.convertContact(contactObj, "3.0");
 		versitDef.write(writer, versitObject);
 		writer.flush();
+	}
+
+	private static void closeVersitResources(final OXContainerConverter oxContainerConverter, final VersitDefinition.Writer versitWriter) {
+		if (oxContainerConverter != null) {
+			oxContainerConverter.close();
+		}
+		if (versitWriter != null) {
+			try {
+				versitWriter.close();
+			} catch (final IOException e) {
+				LOG.error(e.getMessage(), e);
+			}
+		}
 	}
 }
