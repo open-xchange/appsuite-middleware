@@ -228,7 +228,7 @@ public class ICalExporter implements Exporter {
 			final VersitDefinition taskDef = versitDefinition.getChildDef("VTODO");
 			final OXContainerConverter oxContainerConverter = new OXContainerConverter(sessObj);
 			
-			FolderObject fo;
+			final FolderObject fo;
 			try {
 				fo = new OXFolderAccess(sessObj.getContext()).getFolderObject(Integer.parseInt(folder));
 			} catch (final OXException e) {
