@@ -132,6 +132,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	 * Constructor which only uses <code>Session</code>. Optional connections
 	 * are going to be set to <code>null</code>.
 	 * 
+	 * @param session
+	 *            The session providing needed user data
 	 * @throws OXFolderException
 	 *             If instantiation fails
 	 */
