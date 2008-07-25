@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.importexport.exporters;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.sql.SQLException;
 import java.util.Date;
@@ -84,6 +83,7 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -270,7 +270,7 @@ public class ICalExporter implements Exporter {
 		}
 		
 		return new SizedInputStream(
-				new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), 
+				new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray()), 
 				byteArrayOutputStream.size(),
 				Format.ICAL);
 	}
@@ -312,7 +312,7 @@ public class ICalExporter implements Exporter {
 		}
 		
 		return new SizedInputStream(
-				new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), 
+				new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray()), 
 				byteArrayOutputStream.size(),
 				Format.ICAL);
 	}
