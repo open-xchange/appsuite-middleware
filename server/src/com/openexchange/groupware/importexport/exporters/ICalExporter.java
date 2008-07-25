@@ -50,6 +50,7 @@
 package com.openexchange.groupware.importexport.exporters;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
@@ -81,6 +82,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -114,7 +116,12 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface; fixes)
  */
 public class ICalExporter implements Exporter {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(ICalExporter.class);
 	
+	private static final Date DATE_ZERO = new Date(0);
+
 	private final static int[] _appointmentFields = {
 		DataObject.OBJECT_ID,
 		DataObject.CREATED_BY,
@@ -240,13 +247,19 @@ public class ICalExporter implements Exporter {
 				}
 				
 				final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
-				final SearchIterator<?> searchIterator = appointmentSql.getModifiedAppointmentsInFolder(Integer.parseInt(folder), fieldsToBeExported, new Date(0));
+				final SearchIterator<?> searchIterator = appointmentSql.getModifiedAppointmentsInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO);
 				try {
 					while (searchIterator.hasNext()) {
 						exportAppointment(oxContainerConverter, eventDef, versitWriter, (AppointmentObject)searchIterator.next());
 					}
+					versitDefinition.writeEnd(versitWriter, versitObjectContainer);
 				} finally {
-					searchIterator.close();
+					closeVersitResources(oxContainerConverter, versitWriter);
+					try {
+						searchIterator.close();
+					} catch (final SearchIteratorException e) {
+						LOG.error(e.getMessage(), e);
+					}
 				}
 			} else if (fo.getModule() == FolderObject.TASK) {
 				if (fieldsToBeExported == null) {
@@ -254,13 +267,19 @@ public class ICalExporter implements Exporter {
 				}
 				
 				final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(sessObj);
-				final SearchIterator<Task> searchIterator = taskSql.getModifiedTasksInFolder(Integer.parseInt(folder), fieldsToBeExported, new Date(0));
+				final SearchIterator<Task> searchIterator = taskSql.getModifiedTasksInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO);
 				try {
 					while (searchIterator.hasNext()) {
 						exportTask(oxContainerConverter, taskDef, versitWriter, searchIterator.next());
 					}
+					versitDefinition.writeEnd(versitWriter, versitObjectContainer);
 				} finally {
-					searchIterator.close();
+					closeVersitResources(oxContainerConverter, versitWriter);
+					try {
+						searchIterator.close();
+					} catch (final SearchIteratorException e) {
+						LOG.error(e.getMessage(), e);
+					}
 				}
 			} else {
 				throw importExportExceptionFactory.create(3, Integer.valueOf(fo.getModule()));
@@ -295,13 +314,21 @@ public class ICalExporter implements Exporter {
 			if (fo.getModule() == FolderObject.CALENDAR) {
 				final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
 				final AppointmentObject appointmentObj = appointmentSql.getObjectById(objectId, Integer.parseInt(folder));
-				
-				exportAppointment(oxContainerConverter, eventDef, versitWriter, appointmentObj);
+				try {
+					exportAppointment(oxContainerConverter, eventDef, versitWriter, appointmentObj);
+					versitDefinition.writeEnd(versitWriter, versitObjectContainer);
+				} finally {
+					closeVersitResources(oxContainerConverter, versitWriter);
+				}
 			} else if (fo.getModule() == FolderObject.TASK) {
 				final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(sessObj);
 				final Task taskObj = taskSql.getTaskById(objectId, Integer.parseInt(folder));
-				
-				exportTask(oxContainerConverter, taskDef, versitWriter, taskObj);
+				try {
+					exportTask(oxContainerConverter, taskDef, versitWriter, taskObj);
+					versitDefinition.writeEnd(versitWriter, versitObjectContainer);
+				} finally {
+					closeVersitResources(oxContainerConverter, versitWriter);
+				}
 			} else {
 				throw importExportExceptionFactory.create(3, Integer.valueOf(fo.getModule()));
 			}
@@ -327,5 +354,18 @@ public class ICalExporter implements Exporter {
 		final VersitObject versitObject = oxContainerConverter.convertTask(taskObj);
 		versitDef.write(writer, versitObject);
 		writer.flush();
+	}
+
+	private static void closeVersitResources(final OXContainerConverter oxContainerConverter, final VersitDefinition.Writer versitWriter) {
+		if (oxContainerConverter != null) {
+			oxContainerConverter.close();
+		}
+		if (versitWriter != null) {
+			try {
+				versitWriter.close();
+			} catch (final IOException e) {
+				LOG.error(e.getMessage(), e);
+			}
+		}
 	}
 }

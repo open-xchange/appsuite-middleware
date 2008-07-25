@@ -4,6 +4,7 @@
    blockquotes in plain-text messages
  - Bugfix #11699: Fixed removing another pretty-printer formatting on
    html2text conversion
+ - Bugfix #11701: Added ending "END:VCALENDAR" on ICal export
 
 * 2008-07-23 - thorben.betten@open-xchange.com
 
