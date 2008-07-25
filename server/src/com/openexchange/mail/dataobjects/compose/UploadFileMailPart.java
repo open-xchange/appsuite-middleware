@@ -122,7 +122,12 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
 					/*
 					 * Guess charset for textual attachment
 					 */
-					getContentType().setCharsetParameter(detectCharset(new FileInputStream(uploadFile)));
+					final String cs = detectCharset(new FileInputStream(uploadFile));
+					getContentType().setCharsetParameter(cs);
+					if (LOG.isWarnEnabled()) {
+						LOG.warn(new StringBuilder("Uploaded file contains textual content but").append(
+								" does not specify a charset. Assumed charset is: ").append(cs).toString());
+					}
 				}
 				dataSource = new MessageDataSource(new FileInputStream(uploadFile), getContentType());
 			} catch (final IOException e) {
@@ -235,7 +240,8 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
+	 * @see
+	 * com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
 	 */
 	public ComposedPartType getType() {
 		return ComposedMailPart.ComposedPartType.FILE;
