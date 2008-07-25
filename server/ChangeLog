@@ -1,3 +1,8 @@
+* 2008-07-25 - thorben.betten@open-xchange.com
+
+ - Bugfix #11693: Fixed formatting simple quotes ('>') to colored
+   blockquotes in plain-text messages
+
 * 2008-07-23 - thorben.betten@open-xchange.com
 
  - Bugfix #10306: Setting proper end date for recurring appointments with

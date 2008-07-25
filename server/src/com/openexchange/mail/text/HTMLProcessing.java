@@ -956,7 +956,7 @@ public final class HTMLProcessing {
 
 	private static final String STR_HTML_QUOTE = "&gt;";
 
-	private static final String STR_SPLIT_BR = "<br/?>";
+	private static final String STR_SPLIT_BR = "<br[ \t]*/?>";
 
 	private static final String HTML_BREAK = "<br>";
 
@@ -966,13 +966,14 @@ public final class HTMLProcessing {
 	 * 
 	 * @param htmlText
 	 *            The HTML text
-	 * @return HTML text with simple quotes replaced with block quotes
+	 * @return The HTML text with simple quotes replaced with block quotes
 	 */
 	public static String replaceHTMLSimpleQuotesForDisplay(final String htmlText) {
 		final StringBuilder sb = new StringBuilder(htmlText.length());
 		final String[] lines = htmlText.split(STR_SPLIT_BR);
 		int levelBefore = 0;
-		for (int i = 0; i < lines.length; i++) {
+		final int llen = lines.length - 1;
+		for (int i = 0; i <= llen; i++) {
 			String line = lines[i];
 			int currentLevel = 0;
 			int offset = 0;
@@ -1015,7 +1016,7 @@ public final class HTMLProcessing {
 				}
 			}
 			sb.append(line);
-			if (i < lines.length - 1) {
+			if (i < llen) {
 				sb.append(HTML_BREAK);
 			}
 		}
