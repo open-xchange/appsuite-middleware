@@ -350,9 +350,11 @@ public final class HTML2TextHandler implements HTMLHandler {
 	/**
 	 * Detects indentions: \t or "    "
 	 */
-	private static final Pattern PAT_INDENT = Pattern.compile("(?:(\t)|([ ]{4}))");
+	private static final Pattern PAT_INDENT = Pattern.compile("(?:(\t)|([ ]{4}))+");
 
 	private static final String STR_EMPTY = "";
+
+	private static final String STR_BLANK = " ";
 
 	/*
 	 * (non-Javadoc)
@@ -384,10 +386,22 @@ public final class HTML2TextHandler implements HTMLHandler {
 						preparedText = text;
 					}
 					/*
-					 * Remove indention(s) and any control characters
+					 * Remove any control characters
 					 */
 					preparedText = PAT_CONTROL.matcher(preparedText).replaceAll(STR_EMPTY);
-					preparedText = PAT_INDENT.matcher(preparedText).replaceAll(STR_EMPTY);
+					/*
+					 * Remove first indention
+					 */
+					{
+						final Matcher mIndent = PAT_INDENT.matcher(preparedText);
+						if (mIndent.find() && mIndent.start() == 0) {
+							preparedText = preparedText.substring(mIndent.end());
+						}
+					}
+					/*
+					 * Turn remaining indentions to space characters
+					 */
+					preparedText = PAT_INDENT.matcher(preparedText).replaceAll(STR_BLANK);
 					textBuilder.append(replaceHTMLEntities(preparedText));
 				}
 			}

@@ -2,6 +2,8 @@
 
  - Bugfix #11693: Fixed formatting simple quotes ('>') to colored
    blockquotes in plain-text messages
+ - Bugfix #11699: Fixed removing another pretty-printer formatting on
+   html2text conversion
 
 * 2008-07-23 - thorben.betten@open-xchange.com
 
