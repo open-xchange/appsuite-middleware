@@ -12,6 +12,7 @@ import java.util.TimeZone;
 import junit.framework.TestCase;
 
 import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api2.OXException;
 import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
@@ -173,18 +174,32 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setTimezone(TIMEZONE);
         
         CalendarTest.fillDatesInDao(cdao);
-        cdao.removeUntil();
-        assertFalse("test if no until is set", cdao.containsUntil());
-        assertFalse("test if no Occurrence is set", cdao.containsOccurrence());
-        
-        long test_until = cdao.getEndDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * CalendarRecurringCollection.getMAX_END_YEARS());
-        test_until = CalendarRecurringCollection.normalizeLong(test_until);
         
         cdao.setTitle("testBasicRecurringWithoutUntilAndWithoutOccurrence");
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setInterval(1);
         
         CalendarRecurringCollection.fillDAO(cdao);
+        
+        cdao.removeUntil();
+        assertFalse("test if no until is set", cdao.containsUntil());
+        assertFalse("test if no Occurrence is set", cdao.containsOccurrence());
+        
+        long test_until = cdao.getEndDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * CalendarRecurringCollection.getMAX_END_YEARS());
+        test_until = CalendarRecurringCollection.normalizeLong(test_until);
+        final CalendarDataObject clone = (CalendarDataObject) cdao.clone();
+		clone.setEndDate(new Date(test_until));
+		final RecurringResults rresults;
+		try {
+			rresults = CalendarRecurringCollection.calculateRecurring(clone, 0, 0, 0);
+			final RecurringResult rresult = rresults
+					.getRecurringResultByPosition(CalendarRecurringCollection.MAXTC + 1);
+			if (rresult != null) {
+				test_until = CalendarRecurringCollection.normalizeLong(rresult.getEnd());
+			}
+		} catch (final OXException e) {
+			// Keep max. end date
+		}
         
         assertEquals("Check correct until for tis Occurrence", test_until, cdao.getUntil().getTime());
         
@@ -649,7 +664,7 @@ public class CalendarRecurringTests extends TestCase {
         
         final int cols[] = new int[] { AppointmentObject.TITLE,  AppointmentObject.OBJECT_ID, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.RECURRENCE_TYPE, AppointmentObject.DELETE_EXCEPTIONS, AppointmentObject.CHANGE_EXCEPTIONS };
         
-        SearchIterator si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last);
+        SearchIterator si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last, true);
         
         boolean found_exception = false;
         while (si.hasNext()) {
@@ -680,7 +695,7 @@ public class CalendarRecurringTests extends TestCase {
         delete_all.setObjectID(object_id);
         csql.deleteAppointmentObject(delete_all, folder_id, new Date(SUPER_END));
         
-        si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last);
+        si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last, true);
         while (si.hasNext()) {
             final CalendarDataObject tcdao = (CalendarDataObject)si.next();
             assertFalse("Object should not exists anymore ", tcdao.getRecurrenceID() == object_id);
@@ -902,7 +917,7 @@ public class CalendarRecurringTests extends TestCase {
         
         
         final int cols[] = new int[] { AppointmentObject.TITLE,  AppointmentObject.START_DATE, AppointmentObject.END_DATE, AppointmentObject.OBJECT_ID, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.RECURRENCE_TYPE, AppointmentObject.DELETE_EXCEPTIONS, AppointmentObject.CHANGE_EXCEPTIONS };
-        SearchIterator si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last);
+        SearchIterator si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last, true);
         
         boolean found_exception = false;
         while (si.hasNext()) {
@@ -1030,7 +1045,7 @@ public class CalendarRecurringTests extends TestCase {
         
         
         final int cols[] = new int[] { AppointmentObject.TITLE,  AppointmentObject.START_DATE, AppointmentObject.END_DATE, AppointmentObject.OBJECT_ID, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.RECURRENCE_TYPE, AppointmentObject.DELETE_EXCEPTIONS, AppointmentObject.CHANGE_EXCEPTIONS };
-        SearchIterator si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last);
+        SearchIterator si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last, true);
         
         boolean found_exception = false;
         while (si.hasNext()) {
@@ -1103,7 +1118,22 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setDays(AppointmentObject.WEDNESDAY);
         CalendarRecurringCollection.fillDAO(cdao);
         
-        final long check_until = CalendarRecurringCollection.normalizeLong( (cdao.getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR *  CalendarRecurringCollection.getMAX_END_YEARS())) );
+        long check_until = CalendarRecurringCollection
+				.normalizeLong((cdao.getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * CalendarRecurringCollection
+						.getMAX_END_YEARS())));
+		final CalendarDataObject clone = (CalendarDataObject) cdao.clone();
+		clone.setEndDate(new Date(check_until));
+		final RecurringResults rresults;
+		try {
+			rresults = CalendarRecurringCollection.calculateRecurring(clone, 0, 0, 0);
+			final RecurringResult rresult = rresults
+					.getRecurringResultByPosition(CalendarRecurringCollection.MAXTC + 1);
+			if (rresult != null) {
+				check_until = CalendarRecurringCollection.normalizeLong(rresult.getEnd());
+			}
+		} catch (final OXException e) {
+			// Keep max. end date
+		}
         
         assertEquals("Check correct until for !yearly " , check_until , cdao.getUntil().getTime());
         

@@ -1253,7 +1253,7 @@ public class AppointmentBugTests extends TestCase {
      3. Verify the shared folder of user B
      4. Verify the private calendar folder of user A
      
-     Note: The server should not move sucn an appointment because the current user would be removed
+     Note: The server should not move such an appointment because the current user would be removed
      and the shared folder owner must be added as participant.
      */    
      public void testBug6910() throws Throwable {
@@ -1745,7 +1745,7 @@ public class AppointmentBugTests extends TestCase {
         CalendarDataObject testobject2 = csql2.getObjectById(object_id, fid2);
         assertTrue("Check that userB has no alarm set in the cdao", !testobject2.containsAlarm());
         
-        SearchIterator si = csql.getModifiedAppointmentsInFolder(fid, cols, cdao.getLastModified());
+        SearchIterator si = csql.getModifiedAppointmentsInFolder(fid, cols, cdao.getLastModified(), true);
         boolean found = false;
         while (si.hasNext()) {
             final CalendarDataObject tdao = (CalendarDataObject)si.next();
@@ -1757,7 +1757,7 @@ public class AppointmentBugTests extends TestCase {
         }
         assertTrue("Found our object (userA)", found);
         
-        SearchIterator si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, cdao.getLastModified());
+        SearchIterator si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, cdao.getLastModified(), true);
         found = false;
         while (si2.hasNext()) {
             final CalendarDataObject tdao = (CalendarDataObject)si2.next();
@@ -1786,7 +1786,7 @@ public class AppointmentBugTests extends TestCase {
         testobject2 = csql2.getObjectById(object_id, fid2);
         assertTrue("Check that userB has no alarm set in the cdao", !testobject2.containsAlarm()); 
         
-        si = csql.getModifiedAppointmentsInFolder(fid, cols, cdao.getLastModified());
+        si = csql.getModifiedAppointmentsInFolder(fid, cols, cdao.getLastModified(), true);
         found = false;
         while (si.hasNext()) {
             final CalendarDataObject tdao = (CalendarDataObject)si.next();
@@ -1798,7 +1798,7 @@ public class AppointmentBugTests extends TestCase {
         }
         assertTrue("Found our object (userA)", found);         
         
-        si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, cdao.getLastModified());
+        si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, cdao.getLastModified(), true);
         found = false;
         while (si2.hasNext()) {
             final CalendarDataObject tdao = (CalendarDataObject)si2.next();
@@ -2228,7 +2228,7 @@ public class AppointmentBugTests extends TestCase {
             }
             
             boolean found = false;
-            final SearchIterator si = csql2.getModifiedAppointmentsInFolder(shared_folder_id, CalendarTest.cols, new Date(0));
+            final SearchIterator si = csql2.getModifiedAppointmentsInFolder(shared_folder_id, CalendarTest.cols, new Date(0), true);
             while (si.hasNext()) {
                 final CalendarDataObject tdao = (CalendarDataObject)si.next();
                 if (tdao.getObjectID() == object_id) {
@@ -2419,7 +2419,7 @@ public class AppointmentBugTests extends TestCase {
         final int object_id2 = update.getObjectID();
         assertTrue("Got new object_id", object_id2 > 0 && object_id2 != object_id);
         
-        final SearchIterator si = csql.getModifiedAppointmentsInFolder(fid, CalendarTest.cols, cdao.getLastModified());
+        final SearchIterator si = csql.getModifiedAppointmentsInFolder(fid, CalendarTest.cols, cdao.getLastModified(), true);
         
         int check_rec_reminder = -1;
         int check_exc_reminder = -1;
