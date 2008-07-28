@@ -63,13 +63,19 @@ test -f $OXFUNCTIONS || {
 # some defaults
 SERVER_NAME=
 SERVER_NAME_LONG=servername
-IMAP_SERVER=localhost
+IMAP_SERVER="$(hostname -f)"
 IMAP_SERVER_LONG=imapserver
+SMTP_SERVER="$(hostname -f)"
+SMTP_SERVER_LONG=smtpserver
 IMAP_LOGIN_TYPE=user
 IMAP_LOGIN_TYPE_LONG=imaplogintype
 IMAP_LOGIN_TYPE_VALUES="user config global"
-SERVER_MEMORY=50
+SERVER_MEMORY=512
 SERVER_MEMORY_LONG=servermemory
+ADMIN_MEMORY=100
+ADMIN_MEMORY_LONG=adminmemory
+CLT_MEMORY=50
+CLT_MEMORY_LONG=clt-memory
 TMPDIR_PATH=/tmp
 TMPDIR_PATH_LONG=tmpdir-path
 AJP_JVM_ROUTE=APP1
@@ -87,6 +93,8 @@ AMCACHEPORT=57461
 AMCACHEPORT_LONG=groupware-cache-port
 GWCACHEPORT=57462
 GWCACHEPORT_LONG=admin-cache-port
+GWSCACHEPORT=58849
+GWSCACHEPORT_LONG=gwsession-cache-port
 SESSIONCONTAINERTIMEOUT=4200000
 SESSIONCONTAINERTIMEOUT_LONG=SesssionContTimeout
 NUMBEROFSESSIONCONTAINERS=8
@@ -104,8 +112,6 @@ CONFIGDB_USER=openexchange
 CONFIGDB_USER_LONG=configdb-user
 CONFIGDB_PASS=
 CONFIGDB_PASS_LONG=configdb-pass
-CONFIGDB_POOL=5
-CONFIGDB_POOL_LONG=configdb-poolsize
 CONFIGDB_READ=localhost
 CONFIGDB_READ_LONG=configdb-readhost
 CONFIGDB_WRITE=$CONFIGDB_READ
@@ -120,13 +126,14 @@ MASTER_PASS=
 MASTER_PASS_LONG=master-pass
 MASTER_USER=oxadminmaster
 MASTER_USER_LONG=master-user
-DISABLE_RMI_AUTH=
+DISABLE_RMI_AUTH=false
 DISABLE_RMI_AUTH_LONG=disableauth
-URL="http://localhost/?cid=%c&login=%u&pass=%p"
+DISABLE_RMI_AUTH_VALUES="true false"
+URL="http://$(hostname -f)/"
 URL_LONG=extras-link
 OXOBJECT_LINK_HOSTNAME="$(hostname -f)"
 OXOBJECT_LINK_HOSTNAME_LONG=object-link-hostname
-OXCLUSTERIP=
+OXCLUSTERIP=$(hostname -i)
 OXCLUSTERIP_LONG=ip-of-oxcluster
 PUSHMCPORT=9982
 PUSHMCPORT_LONG=push-udp-disc-port
@@ -134,7 +141,7 @@ OLPORT=44335
 OLPORT_LONG=push-outlook-port
 
 MUSTOPTS="SERVER_NAME CONFIGDB_PASS OXOBJECT_LINK_HOSTNAME"
-LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$IMAP_LOGIN_TYPE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_POOL_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$SERVER_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:,$AJP_JVM_ROUTE_LONG:,$AJP_BIND_ADDR_LONG:,$CREDSRC_LONG:,$OXOBJECT_LINK_HOSTNAME_LONG:,$URL_LONG:,$UDPDISCOVERYADDR_LONG:,$UDPDISCOVERYPORT_LONG:,$AMCACHEPORT_LONG:,$GWCACHEPORT_LONG:,$OXCLUSTERIP_LONG:,$PUSHMCPORT_LONG:,$OLPORT_LONG:,$SESSIONCONTAINERTIMEOUT_LONG:,$NUMBEROFSESSIONCONTAINERS_LONG:,$MAXSESSION_LONG:,$ISDOUBLELOGINPERMITTED_LONG:,$SESSIONDEFAULTLIFETIME_LONG:,$DISABLE_RMI_AUTH_LONG'
+LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$SMTP_SERVER_LONG:,$IMAP_LOGIN_TYPE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$SERVER_MEMORY_LONG:,$ADMIN_MEMORY_LONG:,$CLT_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:,$AJP_JVM_ROUTE_LONG:,$AJP_BIND_ADDR_LONG:,$CREDSRC_LONG:,$OXOBJECT_LINK_HOSTNAME_LONG:,$URL_LONG:,$UDPDISCOVERYADDR_LONG:,$UDPDISCOVERYPORT_LONG:,$AMCACHEPORT_LONG:,$GWCACHEPORT_LONG:,$GWSCACHEPORT_LONG:,$OXCLUSTERIP_LONG:,$PUSHMCPORT_LONG:,$OLPORT_LONG:,$SESSIONCONTAINERTIMEOUT_LONG:,$NUMBEROFSESSIONCONTAINERS_LONG:,$MAXSESSION_LONG:,$ISDOUBLELOGINPERMITTED_LONG:,$SESSIONDEFAULTLIFETIME_LONG:,$DISABLE_RMI_AUTH_LONG'
 
 usage() {
     echo
@@ -157,7 +164,7 @@ cat<<EOF
 
 Example:
 
-  $0 --servername=ox6 --configdb-pass=secret --master-pass=secret --configdb-poolsize=10
+  $0 --servername=ox6 --configdb-pass=secret --master-pass=secret
 
 use -D for Debug mode
 
@@ -196,14 +203,15 @@ v_comment() {
 
 v_cache_hosting(){
     local propfile="$1"
-    v_comment jcs.auxiliary.LTCP.attributes.TcpServers add $propfile
-    v_comment jcs.auxiliary.LTCP.attributes.UdpDiscoveryEnabled remove $propfile
-    v_comment jcs.auxiliary.LTCP.attributes.UdpDiscoveryAddr remove $propfile
-    v_comment jcs.auxiliary.LTCP.attributes.UdpDiscoveryPort remove $propfile
-    v_comment jcs.auxiliary.LTCP.attributes.TcpListenerPort remove $propfile
-    v_setprop jcs.auxiliary.LTCP.attributes.UdpDiscoveryEnabled true $propfile
-    v_setprop jcs.auxiliary.LTCP.attributes.UdpDiscoveryAddr $UDPDISCOVERYADDR $propfile 
-    v_setprop jcs.auxiliary.LTCP.attributes.UdpDiscoveryPort $UDPDISCOVERYPORT $propfile
+    local cachename="$2"
+    v_comment jcs.auxiliary.${cachename}.attributes.TcpServers add $propfile
+    v_comment jcs.auxiliary.${cachename}.attributes.UdpDiscoveryEnabled remove $propfile
+    v_comment jcs.auxiliary.${cachename}.attributes.UdpDiscoveryAddr remove $propfile
+    v_comment jcs.auxiliary.${cachename}.attributes.UdpDiscoveryPort remove $propfile
+    v_comment jcs.auxiliary.${cachename}.attributes.TcpListenerPort remove $propfile
+    v_setprop jcs.auxiliary.${cachename}.attributes.UdpDiscoveryEnabled true $propfile
+    v_setprop jcs.auxiliary.${cachename}.attributes.UdpDiscoveryAddr $UDPDISCOVERYADDR $propfile 
+    v_setprop jcs.auxiliary.${cachename}.attributes.UdpDiscoveryPort $UDPDISCOVERYPORT $propfile
 }
 
 TEMP=$(POSIXLY_CORRECT=true getopt -o s:i:l:hD --long "$(eval echo $LONGOPTS),help" -- "$@") \
@@ -221,6 +229,10 @@ while true; do
 	    IMAP_SERVER=$2
 	    shift 2
 	    ;;
+	--$SMTP_SERVER_LONG)
+	    SMTP_SERVER=$2
+	    shift 2
+	    ;;
 	--$IMAP_LOGIN_TYPE_LONG)
 	    IMAP_LOGIN_TYPE=$2
 	    shift 2
@@ -231,10 +243,6 @@ while true; do
 	    ;;
 	--$CONFIGDB_PASS_LONG)
 	    CONFIGDB_PASS=$2
-	    shift 2
-	    ;;
-	--$CONFIGDB_POOL_LONG)
-	    CONFIGDB_POOL=$2
 	    shift 2
 	    ;;
 	--$CONFIGDB_READ_LONG)
@@ -259,6 +267,14 @@ while true; do
 	    ;;
 	--$SERVER_MEMORY_LONG)
 	    SERVER_MEMORY=$2
+	    shift 2
+	    ;;
+	--$ADMIN_MEMORY_LONG)
+	    ADMIN_MEMORY=$2
+	    shift 2
+	    ;;
+	--$CLT_MEMORY_LONG)
+	    CLT_MEMORY=$2
 	    shift 2
 	    ;;
 	--$TMPDIR_PATH_LONG)
@@ -311,6 +327,10 @@ while true; do
 	    ;;
     --$GWCACHEPORT_LONG)
         GWCACHEPORT=$2
+        shift 2
+        ;;
+    --$GWSCACHEPORT_LONG)
+        GWSCACHEPORT=$2
         shift 2
         ;;
 	--$OXCLUSTERIP_LONG)
@@ -412,6 +432,8 @@ echo setting up groupware configuration ${SERVERCONF}
 NSIZE=$(( ${SERVER_MEMORY} / 2 ))
 SERVEROPTS="-Xms${SERVER_MEMORY}m -Xmx${SERVER_MEMORY}m -XX:+UseConcMarkSweepGC -XX:NewSize=${NSIZE}m -XX:MaxNewSize=${NSIZE}m -XX:SurvivorRatio=6"
 
+v_setprop JAVA_XTRAOPTS "$SERVEROPTS" ${SERVERCONF}/ox-scriptconf.sh
+
 GLOBIGNORE='*'
 v_setprop AJP_JVM_ROUTE "$AJP_JVM_ROUTE" ${SERVERCONF}/ajp.properties
 v_setprop AJP_BIND_ADDR "$AJP_BIND_ADDR" ${SERVERCONF}/ajp.properties
@@ -423,7 +445,6 @@ v_setprop URL "$URL" ${SERVERCONF}/configjump.properties
 
 v_setprop com.openexchange.mail.credSrc "$CREDSRC" ${SERVERCONF}/mail.properties
 
-v_setprop JAVA_XTRAOPTS "$SERVEROPTS" ${SERVERCONF}/ox-scriptconf.sh
 
 SQLHOST=$CONFIGDB_READ
 SQLPORT=$CONFIGDB_READ_PORT
@@ -447,6 +468,7 @@ v_setprop writeProperty.2 "password=$CONFIGDB_PASS" ${SERVERCONF}/configdb.prope
 
 v_setprop SERVER_NAME $SERVER_NAME ${SERVERCONF}/system.properties
 v_setprop com.openexchange.mail.mailServer $IMAP_SERVER ${SERVERCONF}/mail.properties
+v_setprop com.openexchange.mail.transportServer $SMTP_SERVER ${SERVERCONF}/mail.properties
 v_setprop com.openexchange.mail.loginType  $IMAP_LOGIN_TYPE ${SERVERCONF}/mail.properties
 
 v_setprop UPLOAD_DIRECTORY "$TMPDIR_PATH" ${SERVERCONF}/server.properties
@@ -457,8 +479,11 @@ v_setprop com.openexchange.sessiond.maxSession "$MAXSESSION" ${SERVERCONF}/sessi
 v_setprop com.openexchange.sessiond.isDoubleLoginPermitted "$ISDOUBLELOGINPERMITTED" ${SERVERCONF}/sessiond.properties
 v_setprop com.openexchange.sessiond.sessionDefaultLifeTime "$SESSIONDEFAULTLIFETIME" ${SERVERCONF}/sessiond.properties
 
-v_cache_hosting ${SERVERCONF}/cache.ccf
+v_cache_hosting ${SERVERCONF}/cache.ccf LTCP
 v_setprop jcs.auxiliary.LTCP.attributes.TcpListenerPort $GWCACHEPORT ${SERVERCONF}/cache.ccf
+
+v_cache_hosting ${SERVERCONF}/sessioncache.ccf SessionLTCP
+v_setprop jcs.auxiliary.SessionLTCP.attributes.TcpListenerPort $GWSCACHEPORT ${SERVERCONF}/sessioncache.ccf
 
 v_setprop com.openexchange.push.udp.senderAddress "$OXCLUSTERIP" ${SERVERCONF}/push.properties
 v_setprop com.openexchange.push.udp.multicastAddress "$UDPDISCOVERYADDR" ${SERVERCONF}/push.properties
@@ -481,6 +506,15 @@ echo setting up admin daemon configuration ${ADMINCONF}
 v_setprop SERVER_NAME $SERVER_NAME ${ADMINCONF}/system.properties
 v_setprop SERVER_NAME $SERVER_NAME ${ADMINCONF}/AdminDaemon.properties
 
+# this formular and parameters are from Holger
+NSIZE=$(( ${ADMIN_MEMORY} / 2 ))
+ADMINOPTS="-Xms${ADMIN_MEMORY}m -Xmx${ADMIN_MEMORY}m -XX:+UseConcMarkSweepGC -XX:NewSize=${NSIZE}m -XX:MaxNewSize=${NSIZE}m -XX:SurvivorRatio=6"
+v_setprop JAVA_XTRAOPTS "$ADMINOPTS" ${ADMINCONF}/ox-admin-scriptconf.sh
+
+NSIZE=$(( ${CLT_MEMORY} / 2 ))
+CLTOPTS="-Xms${CLT_MEMORY}m -Xmx${CLT_MEMORY}m -XX:+UseConcMarkSweepGC -XX:NewSize=${NSIZE}m -XX:MaxNewSize=${NSIZE}m -XX:SurvivorRatio=6 -Djava.net.preferIPv4Stack=true"
+v_setprop JAVA_OXCMD_OPTS "$CLTOPTS" ${ADMINCONF}/ox-admin-scriptconf.sh
+
 SQLHOST=$CONFIGDB_WRITE
 SQLPORT=$CONFIGDB_WRITE_PORT
 EVAL_SQL_URL=$(eval echo $SQL_URL)
@@ -499,7 +533,7 @@ v_setprop readProperty.2 "password=$CONFIGDB_PASS" ${ADMINCONF}/configdb.propert
 v_setprop writeProperty.1 "user=$CONFIGDB_USER" ${ADMINCONF}/configdb.properties
 v_setprop writeProperty.2 "password=$CONFIGDB_PASS" ${ADMINCONF}/configdb.properties
 
-v_cache_hosting ${ADMINCONF}/cache.ccf
+v_cache_hosting ${ADMINCONF}/cache.ccf LTCP
 v_setprop jcs.auxiliary.LTCP.attributes.TcpListenerPort $AMCACHEPORT ${ADMINCONF}/cache.ccf
 
 if [ -z "$DISABLE_RMI_AUTH" ]; then
