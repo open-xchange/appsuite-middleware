@@ -456,7 +456,12 @@ public class StatisticTools extends BasicCommandlineOptions {
         if (2 == split.length) {
             final ObjectName objectName = new ObjectName(split[0]);
             final Object result = mbc.invoke(objectName, split[1], null, null);
-            return result;
+            	if ( result instanceof Object[] ) {
+            		return Arrays.toString((Object[])result);
+            	}
+            	else {
+            		return result;
+            	}
         } else {
             throw new InvalidDataException("The given operationname is not valid. It couldn't be split at \"!\"");
         }
