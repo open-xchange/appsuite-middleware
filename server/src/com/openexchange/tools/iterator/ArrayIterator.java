@@ -85,6 +85,7 @@ public class ArrayIterator<T> implements SearchIterator<T> {
 	}
 
 	public void close() {
+		// Does not apply to array-backed iterator
 	}
 
 	public int size() {
@@ -96,6 +97,7 @@ public class ArrayIterator<T> implements SearchIterator<T> {
 	}
 
 	public void addWarning(final AbstractOXException warning) {
+		// Does not apply to array-backed iterator
 	}
 
 	public AbstractOXException[] getWarnings() {
