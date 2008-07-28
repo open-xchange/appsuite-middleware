@@ -261,7 +261,7 @@ public class CommonAppointments {
         final List<CalendarDataObject> cdao = new ArrayList<CalendarDataObject>();
         try {
 
-            final SearchIterator<CalendarDataObject> iterator = calendar.getModifiedAppointmentsInFolder(folderId, new Date(0), new Date(Long.MAX_VALUE),new int[]{CalendarDataObject.OBJECT_ID}, new Date(since));
+            final SearchIterator<CalendarDataObject> iterator = calendar.getModifiedAppointmentsInFolder(folderId, new Date(0), new Date(Long.MAX_VALUE),new int[]{CalendarDataObject.OBJECT_ID}, new Date(since), true);
             while(iterator.hasNext()) {
                 cdao.add(iterator.next());
             }
