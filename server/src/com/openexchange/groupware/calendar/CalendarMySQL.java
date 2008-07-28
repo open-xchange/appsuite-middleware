@@ -1674,9 +1674,9 @@ class CalendarMySQL implements CalendarSqlImp {
 		if (rec_action == CalendarRecurringCollection.CHANGE_RECURRING_TYPE) {
 			final List<Integer> exceptions = getExceptionList(null, ctx, edao.getRecurrenceID());
 			if (exceptions != null && !exceptions.isEmpty()) {
-				final Object oids[] = exceptions.toArray();
+				final Integer oids[] = exceptions.toArray(new Integer[exceptions.size()]);
 				if (oids.length > 0) {
-					deleteAllRecurringExceptions(StringCollection.getSqlInString(oids), so, writecon);
+					deleteAllRecurringExceptions(oids, so, writecon);
 					for (int a = 0; a < exceptions.size(); a++) {
 						triggerDeleteEvent(exceptions.get(a).intValue(), inFolder, so, ctx, null);
 					}
@@ -1685,9 +1685,9 @@ class CalendarMySQL implements CalendarSqlImp {
 		} else if (rec_action == CalendarRecurringCollection.RECURRING_EXCEPTION_DELETE) {
 			final List<Integer> exceptions = getExceptionList(null, ctx, edao.getRecurrenceID());
 			if (exceptions != null && !exceptions.isEmpty()) {
-				final Object oids[] = exceptions.toArray();
+				final Integer oids[] = exceptions.toArray(new Integer[exceptions.size()]);
 				if (oids.length > 0) {
-					deleteAllRecurringExceptions(StringCollection.getSqlInString(oids), so, writecon);
+					deleteAllRecurringExceptions(oids, so, writecon);
 					for (int a = 0; a < exceptions.size(); a++) {
 						triggerDeleteEvent(exceptions.get(a).intValue(), inFolder, so, ctx, null);
 					}
@@ -1708,9 +1708,9 @@ class CalendarMySQL implements CalendarSqlImp {
 					final List<Long> dates = new ArrayList<Long>(oids.length);
 					final List<Integer> real_ids = getDeletedExceptionList(null, ctx, edao.getRecurrenceID(),
 							StringCollection.getSqlInString(oids), dates);
-					final Object oids_to_delete[] = real_ids.toArray();
+					final Integer[] oids_to_delete = real_ids.toArray(new Integer[real_ids.size()]);
 					if (oids_to_delete.length > 0) {
-						deleteAllRecurringExceptions(StringCollection.getSqlInString(oids_to_delete), so, writecon);
+						deleteAllRecurringExceptions(oids_to_delete, so, writecon);
 					}
 					for (int a = 0; a < delete_exceptions.size(); a++) {
 						triggerDeleteEvent(delete_exceptions.get(a).intValue(), inFolder, so, ctx, null);
@@ -3160,9 +3160,7 @@ class CalendarMySQL implements CalendarSqlImp {
 					return;
 				} else if (recurring_action == CalendarRecurringCollection.RECURRING_EXCEPTION_ACTION) {
 					if (checkIfUserIstheOnlyParticipant(cid, oid, readcon)) {
-						// remove this real existing exception and update main
-						// object
-						removeSingleExistingException(edao, writecon, so);
+						// removal of change exception happens in updateAppointment()
 						final CalendarDataObject update = new CalendarDataObject();
 						update.setContext(ctx);
 						update.setObjectID(edao.getRecurrenceID());
@@ -3256,9 +3254,7 @@ class CalendarMySQL implements CalendarSqlImp {
 						close_read = true;
 					}
 					if ((foldertype == FolderObject.PRIVATE && uid == owner) || checkIfUserIstheOnlyParticipant(cid, oid, readcon)) {
-						// remove this real existing exception and update main
-						// object
-						removeSingleExistingException(edao, writecon, so);
+						// removal of change exception happens in updateAppointment()
 						final CalendarDataObject update = new CalendarDataObject();
 						update.setContext(ctx);
 						update.setObjectID(edao.getRecurrenceID());
@@ -3335,9 +3331,9 @@ class CalendarMySQL implements CalendarSqlImp {
 		} else if (recurring_action == CalendarRecurringCollection.RECURRING_FULL_DELETE) {
 			final List<Integer> al = getExceptionList(readcon, ctx, edao.getRecurrenceID());
 			if (al != null && !al.isEmpty()) {
-				final Object oids[] = al.toArray();
+				final Integer oids[] = al.toArray(new Integer[al.size()]);
 				if (oids.length > 0) {
-					deleteAllRecurringExceptions(StringCollection.getSqlInString(oids), so, writecon);
+					deleteAllRecurringExceptions(oids, so, writecon);
 				}
 				for (int a = 0; a < al.size(); a++) {
 					triggerDeleteEvent(al.get(a).intValue(), fid, so, ctx, null);
@@ -3346,119 +3342,14 @@ class CalendarMySQL implements CalendarSqlImp {
 			oid = edao.getRecurrenceID();
 		}
 
-		PreparedStatement d_dates = null;
-		PreparedStatement d_members = null;
-		PreparedStatement copy_members = null;
-		PreparedStatement copy_rights = null;
-		PreparedStatement copy_dates = null;
-		PreparedStatement del_dates = null;
-		PreparedStatement del_members = null;
-		PreparedStatement del_rights = null;
-		PreparedStatement update = null;
-
 		if (edao != null && edao.getRecurrenceID() > 0 && !cdao.containsRecurrenceID()) {
 			cdao.setRecurrenceID(edao.getRecurrenceID());
 		}
 
-		long modified = 0;
-
-		try {
-			StringBuilder delete_statement = new StringBuilder(128);
-			delete_statement.append("delete from del_dates WHERE cid = ");
-			delete_statement.append(cid);
-			delete_statement.append(DATES_IDENTIFIER_IS);
-			delete_statement.append(oid);
-			d_dates = writecon.prepareStatement(delete_statement.toString());
-			d_dates.addBatch();
-			d_dates.executeBatch();
-			delete_statement = new StringBuilder(128);
-			delete_statement.append("delete from del_dates_members WHERE cid = ");
-			delete_statement.append(cid);
-			delete_statement.append(PARTICIPANTS_IDENTIFIER_IS);
-			delete_statement.append(oid);
-			d_members = writecon.prepareStatement(delete_statement.toString());
-			d_members.addBatch();
-			d_members.executeBatch();
-
-			delete_statement = new StringBuilder(128);
-			delete_statement.append("INSERT INTO del_dates_members SELECT * FROM prg_dates_members WHERE cid = ");
-			delete_statement.append(cid);
-			delete_statement.append(PARTICIPANTS_IDENTIFIER_IS);
-			delete_statement.append(oid);
-			copy_members = writecon.prepareStatement(delete_statement.toString());
-			copy_members.addBatch();
-
-			delete_statement = new StringBuilder(128);
-			delete_statement.append("INSERT INTO del_date_rights SELECT * FROM prg_date_rights WHERE cid = ");
-			delete_statement.append(cid);
-			delete_statement.append(PARTICIPANTS_IDENTIFIER_IS);
-			delete_statement.append(oid);
-			copy_rights = writecon.prepareStatement(delete_statement.toString());
-			copy_rights.addBatch();
-
-			delete_statement = new StringBuilder(128);
-			delete_statement.append("INSERT INTO del_dates SELECT * FROM prg_dates WHERE cid = ");
-			delete_statement.append(cid);
-			delete_statement.append(DATES_IDENTIFIER_IS);
-			delete_statement.append(oid);
-			copy_dates = writecon.prepareStatement(delete_statement.toString());
-			copy_dates.addBatch();
-
-			delete_statement = new StringBuilder(128);
-			delete_statement.append("delete from prg_dates WHERE cid = ");
-			delete_statement.append(cid);
-			delete_statement.append(DATES_IDENTIFIER_IS);
-			delete_statement.append(oid);
-			del_dates = writecon.prepareStatement(delete_statement.toString());
-			del_dates.addBatch();
-
-			delete_statement = new StringBuilder(128);
-			delete_statement.append("delete from prg_dates_members WHERE cid = ");
-			delete_statement.append(cid);
-			delete_statement.append(PARTICIPANTS_IDENTIFIER_IS);
-			delete_statement.append(oid);
-			del_members = writecon.prepareStatement(delete_statement.toString());
-			del_members.addBatch();
-			delete_statement = new StringBuilder(128);
-			delete_statement.append("delete from prg_date_rights WHERE cid = ");
-			delete_statement.append(cid);
-			delete_statement.append(PARTICIPANTS_IDENTIFIER_IS);
-			delete_statement.append(oid);
-			del_rights = writecon.prepareStatement(delete_statement.toString());
-			del_rights.addBatch();
-
-			modified = System.currentTimeMillis();
-
-			delete_statement = new StringBuilder(128);
-			delete_statement.append("UPDATE del_dates SET changing_date = ?, changed_from = ? WHERE cid = ");
-			delete_statement.append(cid);
-			delete_statement.append(DATES_IDENTIFIER_IS);
-			delete_statement.append(oid);
-			update = writecon.prepareStatement(delete_statement.toString());
-			update.setLong(1, modified);
-			update.setInt(2, uid);
-			update.addBatch();
-
-			copy_members.executeBatch();
-			copy_rights.executeBatch();
-			copy_dates.executeBatch();
-
-			del_dates.executeBatch();
-			del_members.executeBatch();
-			del_rights.executeBatch();
-			update.executeBatch();
-
-		} finally {
-			CalendarCommonCollection.closePreparedStatement(d_dates);
-			CalendarCommonCollection.closePreparedStatement(d_members);
-			CalendarCommonCollection.closePreparedStatement(copy_members);
-			CalendarCommonCollection.closePreparedStatement(copy_rights);
-			CalendarCommonCollection.closePreparedStatement(copy_dates);
-			CalendarCommonCollection.closePreparedStatement(del_dates);
-			CalendarCommonCollection.closePreparedStatement(del_members);
-			CalendarCommonCollection.closePreparedStatement(del_rights);
-			CalendarCommonCollection.closePreparedStatement(update);
-		}
+		/*
+		 * Backup appointment's data and delete from working tables 
+		 */
+		final long modified = deleteAppointment(writecon, cid, oid, uid);
 
 		if (edao == null) {
 			triggerDeleteEvent(oid, fid, so, ctx, null);
@@ -3519,47 +3410,114 @@ class CalendarMySQL implements CalendarSqlImp {
 		}
 	}
 
+	private static final String SQL_DEL_DATES = "DELETE FROM del_dates WHERE cid = ? AND intfield01 = ?";
+
+	private static final String SQL_DEL_DATES_MEMBERS = "DELETE FROM del_dates_members WHERE cid = ? AND object_id = ?";
+
+	private static final String SQL_BACKUP_MEMBERS = "INSERT INTO del_dates_members SELECT * FROM prg_dates_members WHERE cid = ? AND object_id = ?";
+
+	private static final String SQL_BACKUP_RIGHTS = "INSERT INTO del_date_rights SELECT * FROM prg_date_rights WHERE cid = ? AND object_id = ?";
+
+	private static final String SQL_BACKUP_DATES = "INSERT INTO del_dates SELECT * FROM prg_dates WHERE cid = ? AND intfield01 = ?";
+
+	private static final String SQL_DEL_WORKING_DATES = "DELETE FROM prg_dates WHERE cid = ? AND intfield01 = ?";
+
+	private static final String SQL_DEL_WORKING_MEMBERS = "DELETE FROM prg_dates_members WHERE cid = ? AND object_id = ?";
+
+	private static final String SQL_DEL_WORKING_RIGHTS = "DELETE FROM prg_date_rights WHERE cid = ? AND object_id = ?";
+
+	private static final String SQL_UPDATE_DEL_DATES = "UPDATE del_dates SET changing_date = ?, changed_from = ? WHERE cid = ? AND intfield01 = ?";
+
 	/**
-	 * Removes the change exception denoted by <code>edao</code> from working tables: <code>prg_dates</code>, <code>prg_dates_members</code>, and <code>prg_date_rights</code>.
+	 * Backups appointment data identified through specified <code>oid</code> and <code>cid</code> arguments and removes from working tables.
 	 * 
-	 * @param edao The data object denoting the change exception
 	 * @param writecon A connection with write capability
-	 * @param so The session providing needed user data
+	 * @param cid The context ID
+	 * @param oid The object ID
+	 * @param uid The user ID in whose name this operation takes place
+	 * @return The last-modified timestamp
 	 * @throws SQLException If a SQL error occurs
 	 */
-	private final void removeSingleExistingException(final CalendarDataObject edao, final Connection writecon, final Session so) throws SQLException {
-		PreparedStatement del_dates = null;
-		PreparedStatement del_members = null;
-		PreparedStatement del_rights = null;
+	private static final long deleteAppointment(final Connection writecon, final int cid, final int oid, final int uid) throws SQLException {
+		PreparedStatement stmt = null;
 		try {
-			final StringBuilder del_dates_ps = new StringBuilder(128);
-			del_dates_ps.append("delete from prg_dates WHERE cid = ");
-			del_dates_ps.append(so.getContextId());
-			del_dates_ps.append(DATES_IDENTIFIER_IS);
-			del_dates_ps.append(edao.getObjectID());
-			del_dates = writecon.prepareStatement(del_dates_ps.toString());
-			del_dates.addBatch();
-			final StringBuilder del_members_ps = new StringBuilder(128);
-			del_members_ps.append("delete from prg_dates_members WHERE cid = ");
-			del_members_ps.append(so.getContextId());
-			del_members_ps.append(PARTICIPANTS_IDENTIFIER_IS);
-			del_members_ps.append(edao.getObjectID());
-			del_members = writecon.prepareStatement(del_members_ps.toString());
-			del_members.addBatch();
-			final StringBuilder del_rights_ps = new StringBuilder(128);
-			del_rights_ps.append("delete from prg_date_rights WHERE cid = ");
-			del_rights_ps.append(so.getContextId());
-			del_rights_ps.append(PARTICIPANTS_IDENTIFIER_IS);
-			del_rights_ps.append(edao.getObjectID());
-			del_rights = writecon.prepareStatement(del_rights_ps.toString());
-			del_rights.addBatch();
-			del_dates.executeBatch();
-			del_members.executeBatch();
-			del_rights.executeBatch();
+			stmt = writecon.prepareStatement(SQL_DEL_DATES);
+			int pos = 1;
+			stmt.setInt(pos++, cid);
+			stmt.setInt(pos++, oid);
+			stmt.executeUpdate();
+			stmt.close();
+			stmt = null;
+
+			stmt = writecon.prepareStatement(SQL_DEL_DATES_MEMBERS);
+			pos = 1;
+			stmt.setInt(pos++, cid);
+			stmt.setInt(pos++, oid);
+			stmt.executeUpdate();
+			stmt.close();
+			stmt = null;
+
+			stmt = writecon.prepareStatement(SQL_BACKUP_MEMBERS);
+			pos = 1;
+			stmt.setInt(pos++, cid);
+			stmt.setInt(pos++, oid);
+			stmt.executeUpdate();
+			stmt.close();
+			stmt = null;
+
+			stmt = writecon.prepareStatement(SQL_BACKUP_RIGHTS);
+			pos = 1;
+			stmt.setInt(pos++, cid);
+			stmt.setInt(pos++, oid);
+			stmt.executeUpdate();
+			stmt.close();
+			stmt = null;
+
+			stmt = writecon.prepareStatement(SQL_BACKUP_DATES);
+			pos = 1;
+			stmt.setInt(pos++, cid);
+			stmt.setInt(pos++, oid);
+			stmt.executeUpdate();
+			stmt.close();
+			stmt = null;
+
+			stmt = writecon.prepareStatement(SQL_DEL_WORKING_DATES);
+			pos = 1;
+			stmt.setInt(pos++, cid);
+			stmt.setInt(pos++, oid);
+			stmt.executeUpdate();
+			stmt.close();
+			stmt = null;
+
+			stmt = writecon.prepareStatement(SQL_DEL_WORKING_MEMBERS);
+			pos = 1;
+			stmt.setInt(pos++, cid);
+			stmt.setInt(pos++, oid);
+			stmt.executeUpdate();
+			stmt.close();
+			stmt = null;
+
+			stmt = writecon.prepareStatement(SQL_DEL_WORKING_RIGHTS);
+			pos = 1;
+			stmt.setInt(pos++, cid);
+			stmt.setInt(pos++, oid);
+			stmt.executeUpdate();
+			stmt.close();
+			stmt = null;
+
+			final long modified = System.currentTimeMillis();
+			stmt = writecon.prepareStatement(SQL_UPDATE_DEL_DATES);
+			pos = 1;
+			stmt.setLong(pos++, modified);
+			stmt.setInt(pos++, uid);
+			stmt.setInt(pos++, cid);
+			stmt.setInt(pos++, oid);
+			stmt.executeUpdate();
+			stmt.close();
+			stmt = null;
+			return modified;
 		} finally {
-			CalendarCommonCollection.closePreparedStatement(del_dates);
-			CalendarCommonCollection.closePreparedStatement(del_members);
-			CalendarCommonCollection.closePreparedStatement(del_rights);
+			CalendarCommonCollection.closePreparedStatement(stmt);
 		}
 	}
 
@@ -3670,39 +3628,9 @@ class CalendarMySQL implements CalendarSqlImp {
 	 * @param writecon A connection with write capability
 	 * @throws SQLException If a SQL error occurs
 	 */
-	private final void deleteAllRecurringExceptions(final String inoids, final Session so, final Connection writecon) throws SQLException {
-		PreparedStatement del_rights = null;
-		PreparedStatement del_members = null;
-		PreparedStatement del_dates = null;
-		try {
-			final StringBuilder del_rights_ps = new StringBuilder(128);
-			del_rights_ps.append("delete from prg_date_rights WHERE cid = ");
-			del_rights_ps.append(so.getContextId());
-			del_rights_ps.append(" AND object_id IN ");
-			del_rights_ps.append(inoids);
-			del_rights = writecon.prepareStatement(del_rights_ps.toString());
-			del_rights.addBatch();
-			final StringBuilder del_members_ps = new StringBuilder(128);
-			del_members_ps.append("delete from prg_dates_members WHERE cid = ");
-			del_members_ps.append(so.getContextId());
-			del_members_ps.append(" AND object_id IN ");
-			del_members_ps.append(inoids);
-			del_members = writecon.prepareStatement(del_members_ps.toString());
-			del_members.executeBatch();
-			final StringBuilder del_dates_ps = new StringBuilder(128);
-			del_dates_ps.append("delete FROM prg_dates  WHERE cid = ");
-			del_dates_ps.append(so.getContextId());
-			del_dates_ps.append(" AND intfield01 IN ");
-			del_dates_ps.append(inoids);
-			del_dates = writecon.prepareStatement(del_dates_ps.toString());
-			del_dates.addBatch();
-			del_rights.executeBatch();
-			del_members.executeBatch();
-			del_dates.executeBatch();
-		} finally {
-			CalendarCommonCollection.closePreparedStatement(del_rights);
-			CalendarCommonCollection.closePreparedStatement(del_members);
-			CalendarCommonCollection.closePreparedStatement(del_dates);
+	private static final void deleteAllRecurringExceptions(final Integer[] oids, final Session so, final Connection writecon) throws SQLException {
+		for (final Integer oid : oids) {
+			deleteAppointment(writecon, so.getContextId(), oid.intValue(), so.getUserId());
 		}
 	}
 

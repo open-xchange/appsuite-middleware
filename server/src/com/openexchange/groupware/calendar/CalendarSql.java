@@ -688,46 +688,69 @@ public class CalendarSql implements AppointmentSQLInterface {
     
     public void deleteAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified) throws OXException, SQLException, OXPermissionException, OXConcurrentModificationException {
         if (session != null) {
-            Connection writecon = null;
-            final Context ctx = Tools.getContext(session);
+        	final Context ctx = Tools.getContext(session);
+        	final Connection writecon;
+			try {
+				writecon = DBPool.pickupWriteable(ctx);
+			} catch (final DBPoolingException e) {
+				throw new OXCalendarException(e);
+			}
             try  {
-                writecon = DBPool.pickupWriteable(ctx);
-                try {
-                    writecon.setAutoCommit(false);
-                    cimp.deleteAppointment(session.getUserId(), cdao, writecon, session, ctx, inFolder, clientLastModified);
-                } catch(final SQLException sqle) {
-                    try {
-                        writecon.rollback();
-                    } catch(final SQLException rb) {
-                        throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, rb);
-                    }
-                    throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
-                } finally {
-                    try {
-                        writecon.setAutoCommit(true);
-                    } catch(final SQLException ac) {
-                        throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, ac);
-                    }
-                }
+                writecon.setAutoCommit(false);
+                cimp.deleteAppointment(session.getUserId(), cdao, writecon, session, ctx, inFolder, clientLastModified);
+                writecon.commit();
             } catch(final OXConcurrentModificationException oxcme) {
+            	try {
+                    writecon.rollback();
+                } catch(final SQLException rb) {
+                	LOG.error(rb.getMessage(), rb);
+                }
                 throw oxcme;
             } catch(final OXPermissionException oxpe) {
+            	try {
+                    writecon.rollback();
+                } catch(final SQLException rb) {
+                	LOG.error(rb.getMessage(), rb);
+                }
                 throw oxpe;
             } catch(final OXObjectNotFoundException oxonfe) {
+            	try {
+                    writecon.rollback();
+                } catch(final SQLException rb) {
+                	LOG.error(rb.getMessage(), rb);
+                }
                 throw oxonfe;
             } catch(final OXCalendarException oxc) {
+            	try {
+                    writecon.rollback();
+                } catch(final SQLException rb) {
+                	LOG.error(rb.getMessage(), rb);
+                }
                 throw oxc;
             } catch(final OXException oxe) {
+            	try {
+                    writecon.rollback();
+                } catch(final SQLException rb) {
+                	LOG.error(rb.getMessage(), rb);
+                }
                 throw oxe;
-            } catch(final Exception e) {
-                throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(28));
+            } catch(final SQLException e) {
+            	try {
+                    writecon.rollback();
+                } catch(final SQLException rb) {
+                	LOG.error(rb.getMessage(), rb);
+                }
+                throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e, Integer.valueOf(28));
             } finally {
-                if (writecon != null) {
-                    try {
-                        DBPool.pushWrite(ctx, writecon);
-                    } catch (final DBPoolingException dbpe) {
-                        LOG.error(ERROR_PUSHING_WRITEABLE_CONNECTION,  dbpe);
-                    }
+            	try {
+                    writecon.setAutoCommit(true);
+                } catch(final SQLException ac) {
+                	LOG.error(ac.getMessage(), ac);
+                }
+                try {
+                    DBPool.pushWrite(ctx, writecon);
+                } catch (final DBPoolingException dbpe) {
+                    LOG.error(ERROR_PUSHING_WRITEABLE_CONNECTION,  dbpe);
                 }
             }
         } else {

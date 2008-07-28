@@ -2,6 +2,8 @@
 
  - Bugfix #11654: Sending a DELETE for appointments in shared folders on
    which the private flag was set.
+ - Bugfix #11690: Adding an entry to backup tables when deleting a change
+   exception for proper Outlook synchronization
 
 * 2008-07-25 - thorben.betten@open-xchange.com
 
