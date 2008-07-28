@@ -79,7 +79,7 @@ msgstr "InfoStore"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:80
 msgid "Userstore"
-msgstr "UserStore"
+msgstr "Userstore"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:82
 
