@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import java.io.Serializable;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,9 +62,14 @@ import com.openexchange.groupware.Component;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class Protocol implements Component {
+public final class Protocol implements Component, Serializable {
 
-	private static final Pattern PAT_PROT = Pattern.compile("([a-z]+)(?:((?:_[a-z]+)*))?");
+	/**
+     * For serialization.
+     */
+    private static final long serialVersionUID = -4384010555880806765L;
+
+    private static final Pattern PAT_PROT = Pattern.compile("([a-z]+)(?:((?:_[a-z]+)*))?");
 
 	/**
 	 * Parses specified protocol string whose syntax match pattern:<br>
