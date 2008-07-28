@@ -541,6 +541,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 		}
 		// Extract time out of end date
 		mod = (cdao.getEndDate().getTime()) % CalendarRecurringCollection.MILLI_DAY;
+		if (cdao.getFullTime()) {
+			/*
+			 * Add one day for general handling of full-time appointments: from 00:00h day 1 to 00:00h day 2
+			 */
+			return new Date(until + CalendarRecurringCollection.MILLI_DAY);
+		}
 		return new Date(until + mod);
 	}
 

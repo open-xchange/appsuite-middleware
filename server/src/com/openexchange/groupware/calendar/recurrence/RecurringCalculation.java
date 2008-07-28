@@ -320,19 +320,21 @@ public class RecurringCalculation {
         
         {
 			final int zoneHourOffset = (TimeZone.getTimeZone(calc_timezone).getRawOffset() / (int) CalendarRecurringCollection.MILLI_HOUR);
-			final int compare = (calc.get(Calendar.HOUR_OF_DAY) - (zoneHourOffset));
-			if (compare > 24) {
-				/*
-				 * Zone offset causes to increment day in month; therefore add
-				 * one day to end
-				 */
-				e = e + CalendarRecurringCollection.MILLI_DAY;
-			} else if (compare <= 0) {
-				/*
-				 * Zone offset causes to decrement day in month; therefore
-				 * subtract one day from end
-				 */
-				e = e - CalendarRecurringCollection.MILLI_DAY;
+			if (zoneHourOffset != 0) {
+				final int compare = (calc.get(Calendar.HOUR_OF_DAY) - (zoneHourOffset));
+				if (compare > 24) {
+					/*
+					 * Zone offset causes to increment day in month; therefore add
+					 * one day to end
+					 */
+					e = e + CalendarRecurringCollection.MILLI_DAY;
+				} else if (compare <= 0) {
+					/*
+					 * Zone offset causes to decrement day in month; therefore
+					 * subtract one day from end
+					 */
+					e = e - CalendarRecurringCollection.MILLI_DAY;
+				}
 			}
 		}
  
