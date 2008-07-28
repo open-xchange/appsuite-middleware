@@ -317,19 +317,18 @@ public final class StringCollection {
 	 * @return SQLInString or null
 	 */
 	public static String getSqlInString(final Object arr[]) {
-		final StringBuffer sb = new StringBuffer();
-		if (arr.length > 0) {
-			sb.append('(');
-			for (int a = 0; a < arr.length; a++) {
-				if (a > 0) {
-					sb.append(',');
-					sb.append(arr[a]);
-				} else {
-					sb.append(arr[a]);
-				}
-			}
-		} else {
+		if (arr == null || arr.length == 0) {
 			return null;
+		}
+		final StringBuffer sb = new StringBuffer(arr.length * 5);
+		sb.append('(');
+		for (int a = 0; a < arr.length; a++) {
+			if (a > 0) {
+				sb.append(',');
+				sb.append(arr[a]);
+			} else {
+				sb.append(arr[a]);
+			}
 		}
 		sb.append(')');
 		return sb.toString();
