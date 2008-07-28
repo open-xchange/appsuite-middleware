@@ -1,3 +1,8 @@
+* 2008-07-28 - thorben.betten@open-xchange.com
+
+ - Bugfix #11654: Sending a DELETE for appointments in shared folders on
+   which the private flag was set.
+
 * 2008-07-25 - thorben.betten@open-xchange.com
 
  - Bugfix #11693: Fixed formatting simple quotes ('>') to colored

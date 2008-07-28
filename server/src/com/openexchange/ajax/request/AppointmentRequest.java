@@ -348,9 +348,9 @@ public class AppointmentRequest {
 					it = appointmentsql.getModifiedAppointmentsBetween(sessionObj.getUserId(), start, end, _appointmentFields, requestedTimestamp, 0, null);
 				} else {
 					if (start == null || end == null) {
-						it = appointmentsql.getModifiedAppointmentsInFolder(folderId, _appointmentFields, requestedTimestamp);
+						it = appointmentsql.getModifiedAppointmentsInFolder(folderId, _appointmentFields, requestedTimestamp, true);
 					} else {
-						it = appointmentsql.getModifiedAppointmentsInFolder(folderId, start, end, _appointmentFields, requestedTimestamp);
+						it = appointmentsql.getModifiedAppointmentsInFolder(folderId, start, end, _appointmentFields, requestedTimestamp, true);
 					}
 				}
 				
@@ -815,7 +815,7 @@ public class AppointmentRequest {
 		
 		timestamp = new Date(0);
 		
-		Date lastModified = null;
+		final Date lastModified = null;
 		
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		final AppointmentSearchObject searchObj = new AppointmentSearchObject();
@@ -989,7 +989,7 @@ public class AppointmentRequest {
 		
 		timestamp = new Date(0);
 		
-		Date lastModified = null;
+		final Date lastModified = null;
 		
 		final AppointmentSearchObject searchObj = new AppointmentSearchObject();
 		searchObj.setRange(new Date[] { start, end } );

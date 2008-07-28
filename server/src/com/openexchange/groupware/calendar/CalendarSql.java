@@ -248,7 +248,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 		throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
     }
     
-    public SearchIterator<CalendarDataObject> getModifiedAppointmentsInFolder(final int fid, final Date start, final Date end, int[] cols, final Date since) throws OXException, SQLException {
+    public SearchIterator<CalendarDataObject> getModifiedAppointmentsInFolder(final int fid, final Date start, final Date end, int[] cols, final Date since, final boolean includePrivateFlag) throws OXException, SQLException {
         if (session != null) {
             Connection readcon = null;
             PreparedStatement prep = null;
@@ -286,7 +286,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     final EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), userConfig);
                     mayRead(oclp);
                     final int shared_folder_owner = ofa.getFolderOwner(fid);
-                    prep = cimp.getSharedFolderModifiedSinceSQL(ctx, session.getUserId(), shared_folder_owner, user.getGroups(), fid, since, StringCollection.getSelect(cols, DATES_TABLE_NAME), oclp.canReadAllObjects(), readcon, start, end);
+                    prep = cimp.getSharedFolderModifiedSinceSQL(ctx, session.getUserId(), shared_folder_owner, user.getGroups(), fid, since, StringCollection.getSelect(cols, DATES_TABLE_NAME), oclp.canReadAllObjects(), readcon, start, end, includePrivateFlag);
                     rs = cimp.getResultSet(prep);
                     co.setRequestedFolder(fid);
                     co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
@@ -328,8 +328,8 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
-    public SearchIterator<CalendarDataObject> getModifiedAppointmentsInFolder(final int fid, final int cols[], final Date since) throws OXException, SQLException {
-        return getModifiedAppointmentsInFolder(fid, null, null, cols, since);
+    public SearchIterator<CalendarDataObject> getModifiedAppointmentsInFolder(final int fid, final int cols[], final Date since, final boolean includePrivateFlag) throws OXException, SQLException {
+        return getModifiedAppointmentsInFolder(fid, null, null, cols, since, includePrivateFlag);
     }
     
     public SearchIterator<CalendarDataObject> getDeletedAppointmentsInFolder(final int fid, int cols[], final Date since) throws OXException, SQLException {

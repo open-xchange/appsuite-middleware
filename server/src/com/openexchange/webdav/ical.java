@@ -305,7 +305,7 @@ public final class ical extends PermissionServlet {
 				
 				if (calendarfolder_id != 0) {
 					try {
-						it = appointmentSql.getModifiedAppointmentsInFolder(calendarfolder_id, _appointmentFields, new Date(0));
+						it = appointmentSql.getModifiedAppointmentsInFolder(calendarfolder_id, _appointmentFields, new Date(0), true);
 						while (it.hasNext()) {
 							final AppointmentObject appointmentObj = (AppointmentObject)it.next();
 							appointmentObj.setTimezone(user.getTimeZone());

@@ -163,20 +163,40 @@ public class AppointmentWriter extends CalendarWriter {
 	public void startWriter(final boolean bModified, final boolean bDeleted, final boolean bList, final int folder_id, final Date lastsync, final OutputStream os) throws Exception {
 		final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
 		final XMLOutputter xo = new XMLOutputter();
-		
+
 		SearchIterator<? extends AppointmentObject> it = null;
-		
-		if (bModified) {
+
+		if (bModified || bDeleted) {
 			try {
-				it = appointmentsql.getModifiedAppointmentsInFolder(folder_id, changeFields, lastsync);
-				writeIterator(it, false, xo, os);
+				it = appointmentsql.getModifiedAppointmentsInFolder(folder_id, changeFields, lastsync, false);
+				while (it.hasNext()) {
+					/*
+					 * Check whether 'modify' or 'delete' shall be sent
+					 */
+					final AppointmentObject appObject = it.next();
+					if (appObject.getPrivateFlag() && sessionObj.getUserId() != appObject.getCreatedBy()) {
+						if (bDeleted) {
+							/*
+							 * Appointment has been set to private: send as 'delete' for requesting user
+							 */
+							writeObject(appObject, true, xo, os);
+						}
+					} else {
+						if (bModified) {	
+							/*
+							 * Send common 'modify' for current appointment
+							 */
+							writeObject(appObject, false, xo, os);
+						}
+					}
+				}
 			} finally {
 				if (it != null) {
 					it.close();
 				}
 			}
 		}
-		
+
 		if (bDeleted) {
 			try {
 				it = appointmentsql.getDeletedAppointmentsInFolder(folder_id, deleteFields, lastsync);
@@ -190,7 +210,7 @@ public class AppointmentWriter extends CalendarWriter {
 		
 		if (bList) {
 			try {
-				it = appointmentsql.getModifiedAppointmentsInFolder(folder_id, changeFields, new Date(0));
+				it = appointmentsql.getModifiedAppointmentsInFolder(folder_id, changeFields, new Date(0), true);
 				writeList(it, xo, os);
 			} finally {
 				if (it != null) {

@@ -118,10 +118,12 @@ public interface AppointmentSQLInterface {
 	 * fields that will be added to the data object
 	 * @param since
 	 * all modification >= since
+	 * @param includePrivateFlag
+	 * <code>true</code> to include private-flag information, meaning to exclude private appointments when querying s shared folder; otherwise <code>false</code>
 	 * @return A SearchIterator contains AppointmentObject
 	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
 	 */	 
-	public SearchIterator<CalendarDataObject> getModifiedAppointmentsInFolder(int fid, int[] cols, Date since) throws OXException, SQLException;
+	public SearchIterator<CalendarDataObject> getModifiedAppointmentsInFolder(int fid, int[] cols, Date since, boolean includePrivateFlag) throws OXException, SQLException;
 	
 	/**
 	 * Lists all modified objects where the user is participant 
@@ -152,10 +154,12 @@ public interface AppointmentSQLInterface {
 	 * fields that will be added to the data object
 	 * @param since
 	 * all modification >= since
+	 * @param includePrivateFlag
+	 * <code>true</code> to include private-flag information, meaning to exclude private appointments when querying s shared folder; otherwise <code>false</code>
 	 * @return A SearchIterator contains AppointmentObject
 	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
 	 */	 
-	public SearchIterator<CalendarDataObject> getModifiedAppointmentsInFolder(int fid, Date start, Date end, int[] cols, Date since) throws OXException, SQLException;
+	public SearchIterator<CalendarDataObject> getModifiedAppointmentsInFolder(int fid, Date start, Date end, int[] cols, Date since, boolean includePrivateFlag) throws OXException, SQLException;
 	
 	/**
 	 * Lists all deleted objects in a folder

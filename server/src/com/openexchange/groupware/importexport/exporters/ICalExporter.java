@@ -247,7 +247,7 @@ public class ICalExporter implements Exporter {
 				}
 				
 				final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
-				final SearchIterator<?> searchIterator = appointmentSql.getModifiedAppointmentsInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO);
+				final SearchIterator<?> searchIterator = appointmentSql.getModifiedAppointmentsInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO, true);
 				try {
 					while (searchIterator.hasNext()) {
 						exportAppointment(oxContainerConverter, eventDef, versitWriter, (AppointmentObject)searchIterator.next());

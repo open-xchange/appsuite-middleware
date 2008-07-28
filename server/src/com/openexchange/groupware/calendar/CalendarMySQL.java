@@ -632,7 +632,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		return pst;
 	}
 
-	public final PreparedStatement getSharedFolderModifiedSinceSQL(final Context c, final int uid, final int shared_folder_owner, final int groups[], final int fid, final java.util.Date since, final String select, final boolean readall, final Connection readcon, final java.util.Date d1, final java.util.Date d2) throws SQLException {
+	public final PreparedStatement getSharedFolderModifiedSinceSQL(final Context c, final int uid, final int shared_folder_owner, final int groups[], final int fid, final java.util.Date since, final String select, final boolean readall, final Connection readcon, final java.util.Date d1, final java.util.Date d2, final boolean includePrivateFlag) throws SQLException {
 		final StringBuilder sb = new StringBuilder(32);
 		sb.append(parseSelect(select));
 		sb.append(JOIN_DATES);
@@ -646,7 +646,9 @@ class CalendarMySQL implements CalendarSqlImp {
 			getRange(sb);
 		}
 		sb.append(PD_FID_IS_NULL);
-		sb.append(" AND pd.pflag = 0 ");
+		if (includePrivateFlag) {	
+			sb.append(" AND pd.pflag = 0 ");
+		}
 		sb.append(PDM_PFID_IS);
 		sb.append(fid);
 		sb.append(PDM_MEMBER_UID_IS);
