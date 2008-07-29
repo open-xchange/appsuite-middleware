@@ -139,8 +139,86 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Jul 29 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11695: Proper calculation of a weekly recurring appointment
+ - Bugfix #10313: No additional English text to exception message to obey
+   i18n rules
+* Mon Jul 28 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11654: Sending a DELETE for appointments in shared folders on
+   which the private flag was set.
+ - Bugfix #11690: Adding an entry to backup tables when deleting a change
+   exception for proper Outlook synchronization
+ - Bugfix #11719: Fixed calculation of daily recurring full-time
+   appointment
+* Fri Jul 25 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11693: Fixed formatting simple quotes ('>') to colored
+   blockquotes in plain-text messages
+ - Bugfix #11699: Fixed removing another pretty-printer formatting on
+   html2text conversion
+ - Bugfix #11701: Added ending "END:VCALENDAR" on ICal export
+* Wed Jul 23 2008 - marcus.klein@open-xchange.com
+ - Bugfix #9591: Eliminating dublicate found tasks in search over all folder by
+   a "GROUP BY" SQL statement.
+* Wed Jul 23 2008 - thorben.betten@open-xchange.com
+ - Bugfix #10306: Setting proper end date for recurring appointments with
+   infinite occurrences
+* Tue Jul 22 2008 - thorben.betten@open-xchange.com
+ - Bugfix #10845: No conflict warning on appointment update if causing
+   resource(s) were removed through update
+* Fri Jul 18 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11370: Updating main recurring appointment's last-modified
+   timestamp when creating a change exception
+ - Bugfix #10998: Added checks to recurrence pattern building routine to
+   ensure no invalid pattern finds its way into database
+ - Partial bugfix #11384: Sending proper timestamp to GUI after
+   contact/appointment update
+* Fri Jul 18 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11650: Fixed wrong SQL query if a search for tasks is done in a
+   shared folder or folder with "see only own objects" right.
+ - Bugfix #11384: Returning the last modified timestamp if appointment/contact
+   is created/modified.
+ - Bugfix #11659: Identifier of group must not be written conditionally.
+* Thu Jul 17 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11661: Fixed deletion of an appointment in which owner was
+   removed as participant
+ - Bugfix #11673: Checking for null reference when determining a user's
+   mail/transport provider by URL string.
+ - Bugfix #11671: Invoking "unsafe" user retrieval on user storage for
+   being notified about a non-existing user.
+ - Bugfix #11669: Check for null reference prior to composing a new 
+   subject for a forward mail
+ - Bugfix #11670: Checking unknown user configuration before checking mail
+   access permission
+ - Bugfix #11647: Sending proper error code (403 - FORBIDDEN) to Outlook on
+   permission error
+ - Partial bugfix #11184: Loading user's group IDs prior to fetching corresponding
+   configuration from database
+* Thu Jul 17 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #11050: Fixed in Infostore, and Calendar.
+ - Partial Fix Bug #11453: Detect update to alarm only and omit modification event.
+* Thu Jul 17 2008 - dennis.sieben@open-xchange.com
+ - Bugfix #11672: NullPointerException in MailfilterAction.java
+* Wed Jul 16 2008 - thorben.betten@open-xchange.com
+ - Bugfix #10377: Deleting whole recurring appointment if all of its
+   occurrences are marked as a delete exception
+ - Bugfix #10748: Wrote ReminderDeleteInterface implementation for calendar
+   module
+* Wed Jul 16 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #9950: Using modern event handling (OSGi EventAdmin) to send mails to both old and new participants.
+ - Bugfix #11655: Fixed counting of weekenddays in monthly recurrences.
+ - Bugfix #11521: When removing the last file switch the mimetype to none.
+* Tue Jul 15 2008 - choeger@open-xchange.com
+ - Bugfix #11642 RHEL5 Packages don't depend on Sun Java 1.5 and mysql-server
+ Packages
 * Mon Jul 14 2008 - thorben.betten@open-xchange.com
  - Bugfix #11623: Fixed renaming of folders on root level
+ - Bugfix #11622: Fixed fetch of pre-sorted messages since fetch responses
+   need not to be in the same order as requested sequence numbers
+ - Bugfix #11607: Removing pretty-printer's formatting on html2text
+   conversion
+* Mon Jul 14 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11619: Fixed code problem if on updating task an external participant
+   is added.
 * Sat Jul 12 2008 - thorben.betten@open-xchange.com
  - Bugfix #11617: Checking mail references prior to putting them into#
    message cache
@@ -1219,6 +1297,8 @@ infostore* Fri Aug 03 2007 - thorben.betten@open-xchange.com
    GeneralMonitor interface
 * Tue Jul 17 2007 - francisco.laguna@open-xchange.com
  - Fix for bug #8478: Changed LogLevel.
+* Tue Jul 17 2007 - marcus.klein@open-xchange.com
+ - Bugfix #11337: Fixed reminder update SQL statement. Removing broken reminder.
 * Fri Jul 13 2007 - thorben.betten@open-xchange.com
  - Slightly fastened AJP processing
  - Added file name extraction method to UploadEvent

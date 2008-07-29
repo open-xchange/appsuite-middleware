@@ -1,3 +1,9 @@
+open-xchange-management (6.5.0-20) unstable; urgency=low
+
+  * first build for Beta9
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 29 Jul 2008 13:14:18 +0200
+
 open-xchange-management (6.5.0-19) unstable; urgency=low
 
   * first build for Beta8

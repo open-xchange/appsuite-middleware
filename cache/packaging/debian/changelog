@@ -1,3 +1,9 @@
+open-xchange-cache (6.5.0-18) unstable; urgency=low
+
+  * first build for Beta9
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 29 Jul 2008 13:14:24 +0200
+
 open-xchange-cache (6.5.0-17) unstable; urgency=low
 
   * first build for Beta8
