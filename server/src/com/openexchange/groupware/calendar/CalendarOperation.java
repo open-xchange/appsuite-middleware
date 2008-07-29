@@ -203,7 +203,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     }
                 }
             } else {
-                throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "Object "+oid+" in context "+cdao.getContextID()+" does not exists");
+            	LOG.error("Object Not Found: "+ "Object "+oid+" in context "+cdao.getContextID()+" does not exists", new Throwable());
+                throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
             }
         } finally {
             load_resultset.close();
@@ -860,8 +861,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     System.out.println("\n\n");
                 }
                  */
-                if (check_folder_id != cdao.getParentFolderID()) {                
-                    throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "Object not found : uid:oid:fid:InFolder "+so.getUserId() + ":"+ cdao.getObjectID() + ":"+cdao.getParentFolderID()+":"+check_folder_id);
+                if (check_folder_id != cdao.getParentFolderID()) {
+                	LOG.error("Object Not Found: " + "Object not found : uid:oid:fid:InFolder "+so.getUserId() + ':'+ cdao.getObjectID() + ':' + cdao.getParentFolderID() + ':' + check_folder_id, new Throwable());
+                    throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
                 }
 				cdao.setActionFolder(check_folder_id);
                 

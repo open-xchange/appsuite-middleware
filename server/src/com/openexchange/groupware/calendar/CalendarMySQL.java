@@ -2645,8 +2645,8 @@ class CalendarMySQL implements CalendarSqlImp {
 					CalendarCommonCollection.triggerEvent(so, CalendarOperation.UPDATE, ao);
 				}
 			} else if (changes[0] == 0) {
-				LOG.warn(StringCollection.convertArraytoString(new Object[] { "Object not found: setUserConfirmation: prg_dates_members object_id = ", Integer.valueOf(oid), " cid = ", Integer.valueOf(so.getContextId()), " uid = ", Integer.valueOf(uid) }));
-				throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "Unable to set User Confirmation");
+				LOG.error(StringCollection.convertArraytoString(new Object[] { "Object not found: setUserConfirmation: prg_dates_members object_id = ", Integer.valueOf(oid), " cid = ", Integer.valueOf(so.getContextId()), " uid = ", Integer.valueOf(uid) }), new Throwable());
+				throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
 			} else {
 				LOG.warn(StringCollection.convertArraytoString(new Object[] { "Result of setUserConfirmation was ", Integer.valueOf(changes[0]), ". Check prg_dates_members object_id = ", Integer.valueOf(oid), " cid = ", Integer.valueOf(so.getContextId()), " uid = ", Integer.valueOf(uid) }));
 			}
@@ -2695,7 +2695,8 @@ class CalendarMySQL implements CalendarSqlImp {
 			if (rs.next()) {
 				number_of_attachments = rs.getInt(1);
 			} else {
-				throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "Unable to handle attachment action");
+				LOG.error("Object Not Found: " + "Unable to handle attachment action", new Throwable());
+				throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
 			}
 		} catch (final DBPoolingException dbpe) {
 			throw new OXException(dbpe);
@@ -2714,8 +2715,8 @@ class CalendarMySQL implements CalendarSqlImp {
 		} else {
 			number_of_attachments--;
 			if (number_of_attachments < 0) {
-				LOG.warn(StringCollection.convertArraytoString(new Object[] { "Object seems to be corrupted: attachmentAction:", Boolean.valueOf(action), " oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }));
-				throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "Unable to processed attachment action. Got no attachments");
+				LOG.error(StringCollection.convertArraytoString(new Object[] { "Object seems to be corrupted: attachmentAction:", Boolean.valueOf(action), " oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }), new Throwable());
+				throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
 			}
 		}
 
@@ -2732,8 +2733,8 @@ class CalendarMySQL implements CalendarSqlImp {
 			pst.addBatch();
 			changes = pst.executeBatch();
 			if (changes[0] == 0) {
-				LOG.warn(StringCollection.convertArraytoString(new Object[] { "Object not found: attachmentAction: oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }));
-				throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "Unable to processed attachment action (update).");
+				LOG.error(StringCollection.convertArraytoString(new Object[] { "Object not found: attachmentAction: oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }), new Throwable());
+				throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
 			}
 			LOG.warn(StringCollection.convertArraytoString(new Object[] { "Result of attachmentAction was ", Integer.valueOf(changes[0]), ". Check prg_dates oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }));
 		} catch (final DBPoolingException dbpe) {
