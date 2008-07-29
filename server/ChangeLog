@@ -1,3 +1,7 @@
+* 2008-07-29 - thorben.betten@open-xchange.com
+
+ - Bugfix #11695: Proper calculation of a weekly recurring appointment
+
 * 2008-07-28 - thorben.betten@open-xchange.com
 
  - Bugfix #11654: Sending a DELETE for appointments in shared folders on
