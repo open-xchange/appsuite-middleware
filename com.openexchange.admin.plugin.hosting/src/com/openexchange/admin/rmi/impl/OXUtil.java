@@ -263,7 +263,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         
         basicauth.doAuthentication(auth);
 
-        log.debug(db.toString());
+        log.debug(db);
 
         try {
             if (!db.mandatoryCreateMembersSet()) {
@@ -291,7 +291,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         
         basicauth.doAuthentication(auth);
 
-        log.debug(db.toString());
+        log.debug(db);
 
         try {
             if (!db.mandatoryDeleteMembersSet()) {
@@ -314,7 +314,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         
         basicauth.doAuthentication(auth);
 
-        log.debug(db.toString());
+        log.debug(db);
 
         try {
             if (!db.mandatoryRegisterMembersSet()) {
@@ -378,7 +378,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         
         basicauth.doAuthentication(auth);
 
-        log.debug(srv.getName());
+        log.debug(srv);
 
         if (srv.getName().trim().length() == 0) {
             throw new InvalidDataException("Invalid server name");
@@ -496,7 +496,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         
         basicauth.doAuthentication(auth);
 
-        log.debug(db.toString());
+        log.debug(db);
 
         setIdOrGetIDFromNameAndIdObject(null, db);
         final Integer id = db.getId();
