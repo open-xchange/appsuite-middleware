@@ -184,7 +184,11 @@ public class OXCalendarException extends OXException {
         /**
          * An event error occurred: %1$s
          */
-        EVENT_ERROR("An event error occurred: %1$s", 77, Category.CODE_ERROR);
+        EVENT_ERROR("An event error occurred: %1$s", 77, Category.CODE_ERROR),
+        /**
+         * Value %1$d exceeds max. supported value of  %2$d.
+         */
+        RECURRING_VALUE_CONSTRAINT("Value %1$d exceeds max. supported value of  %2$d.", 78, Category.USER_INPUT);
         
         /**
          * Message of the exception.
