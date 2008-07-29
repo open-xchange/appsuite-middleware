@@ -97,6 +97,10 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Mon Jul 28 2008 - holgi@open-xchange.com
+  - Bugfix ID#11715 showruntimestats -d not usable for com.openexchange.caching
+* Thu Jul 17 2008 - choeger@open-xchange.com
+  - Bugfix ID#11572 CLT jmx tools do not work any more when jmx auth is enabled
 * Mon Jul 07 2008 - choeger@open-xchange.com
   - Bugfix ID#11500 JMX error when starting admindaemon
     do not set contextclassloader
