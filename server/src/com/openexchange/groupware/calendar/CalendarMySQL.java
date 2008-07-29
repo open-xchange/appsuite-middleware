@@ -2968,7 +2968,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		changeReminder(oid, uid, fid, c, false, null, null, CalendarOperation.DELETE);
 	}
 
-	private final void changeReminder(final int oid, final int uid, final int fid, final Context c, final boolean sequence, final java.util.Date end_date, final java.util.Date reminder_date, final int action) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
+	private static final void changeReminder(final int oid, final int uid, final int fid, final Context c, final boolean sequence, final java.util.Date end_date, final java.util.Date reminder_date, final int action) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
 		final ReminderSQLInterface rsql = new ReminderHandler(c);
 		if (action == CalendarOperation.DELETE) {
 			if (rsql.existsReminder(oid, uid, Types.APPOINTMENT)) {
