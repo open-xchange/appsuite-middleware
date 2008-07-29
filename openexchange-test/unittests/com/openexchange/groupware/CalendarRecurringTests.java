@@ -44,7 +44,7 @@ import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 
 public class CalendarRecurringTests extends TestCase {
     
-    public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
+    //public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
     public static final String TIMEZONE = "Europe/Berlin";
     private static int userid = 11; // bishoph
     public final static int contextid = 1;
@@ -640,7 +640,7 @@ public class CalendarRecurringTests extends TestCase {
         delete_owner.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         delete_owner.setRecurrencePosition(3);
         delete_owner.setObjectID(object_id);
-        csql.deleteAppointmentObject(delete_owner, folder_id, new Date(SUPER_END));
+        csql.deleteAppointmentObject(delete_owner, folder_id, new Date());
         
         final CalendarDataObject test_object = csql.getObjectById(object_id, folder_id);
         rss = CalendarRecurringCollection.calculateRecurring(test_object, 0, 0, 0);
@@ -656,7 +656,7 @@ public class CalendarRecurringTests extends TestCase {
         test_delete_not_owner.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         test_delete_not_owner.setObjectID(object_id);
         test_delete_not_owner.setRecurrencePosition(5);
-        csql2.deleteAppointmentObject(test_delete_not_owner, folder_id2, new Date(SUPER_END));
+        csql2.deleteAppointmentObject(test_delete_not_owner, folder_id2, new Date());
         
         final CalendarDataObject test_master_object = csql.getObjectById(object_id, folder_id);
         final UserParticipant up[] = test_master_object.getUsers();
@@ -693,7 +693,7 @@ public class CalendarRecurringTests extends TestCase {
         final CalendarDataObject delete_all = new CalendarDataObject();
         delete_all.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         delete_all.setObjectID(object_id);
-        csql.deleteAppointmentObject(delete_all, folder_id, new Date(SUPER_END));
+        csql.deleteAppointmentObject(delete_all, folder_id, new Date());
         
         si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last, true);
         while (si.hasNext()) {
@@ -740,7 +740,7 @@ public class CalendarRecurringTests extends TestCase {
         update.setObjectID(object_id);
         update.setIgnoreConflicts(true);
         
-        csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
+        csql.updateAppointmentObject(update, folder_id, new Date());
         
         CalendarDataObject testobject_update = csql.getObjectById(object_id, folder_id);
         assertEquals("Check start date", save_start, testobject_update.getStartDate());
@@ -761,7 +761,7 @@ public class CalendarRecurringTests extends TestCase {
         update_with_times.setEndDate(new Date(rs.getEnd()));
         update_with_times.setIgnoreConflicts(true);
         
-        csql.updateAppointmentObject(update_with_times, folder_id, new Date(SUPER_END));
+        csql.updateAppointmentObject(update_with_times, folder_id, new Date());
         
         testobject_update = csql.getObjectById(object_id, folder_id);
         assertEquals("Check start date", save_start, testobject_update.getStartDate());
@@ -778,7 +778,7 @@ public class CalendarRecurringTests extends TestCase {
         update_with_changed_times.setEndDate(new Date(rs.getEnd()+3600000));
         update_with_changed_times.setIgnoreConflicts(true);
         
-        csql.updateAppointmentObject(update_with_changed_times, folder_id, new Date(SUPER_END));
+        csql.updateAppointmentObject(update_with_changed_times, folder_id, new Date());
         
         testobject_update = csql.getObjectById(object_id, folder_id);
         assertEquals("Check start date", new Date(save_start.getTime()+3600000), testobject_update.getStartDate());
@@ -818,7 +818,7 @@ public class CalendarRecurringTests extends TestCase {
         update.setUntil(cdao.getUntil());
         update.setIgnoreConflicts(true);
         
-        csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
+        csql.updateAppointmentObject(update, folder_id, new Date());
         
         final CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
         
@@ -840,7 +840,7 @@ public class CalendarRecurringTests extends TestCase {
         update_normal.setRecurrenceType(CalendarObject.NO_RECURRENCE);
         update_normal.setIgnoreConflicts(true);
         
-        csql.updateAppointmentObject(update_normal, folder_id, new Date(SUPER_END));
+        csql.updateAppointmentObject(update_normal, folder_id, new Date());
         
         final CalendarDataObject testobject2 = csql.getObjectById(object_id, folder_id);
         assertEquals("Check if appointment is no sequence", CalendarDataObject.NO_RECURRENCE, testobject2.getRecurrenceType());
@@ -896,7 +896,7 @@ public class CalendarRecurringTests extends TestCase {
         update.setRecurrencePosition(3);
         
         
-        csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
+        csql.updateAppointmentObject(update, folder_id, new Date());
         assertTrue("Got a new object_id" , object_id != update.getObjectID());
         
         final CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
@@ -933,7 +933,7 @@ public class CalendarRecurringTests extends TestCase {
         si.close();
         assertTrue("Found exception",  found_exception);
         
-        si = csql.getAppointmentsBetweenInFolder(folder_id, cols, new Date(0), new Date(SUPER_END), 0, null);
+        si = csql.getAppointmentsBetweenInFolder(folder_id, cols, new Date(0), new Date(253402210800000L), 0, null);
         int counter = 0;
         while (si.hasNext()) {
             final CalendarDataObject tcdao = (CalendarDataObject)si.next();
@@ -1024,7 +1024,7 @@ public class CalendarRecurringTests extends TestCase {
         update.setRecurrenceDatePosition(new Date(changeExceptionDate));
         
         
-        csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
+        csql.updateAppointmentObject(update, folder_id, new Date());
         
         final CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
         final RecurringResults rss_test = CalendarRecurringCollection.calculateRecurring(testobject, 0, 0, 3, 999, true);
@@ -1061,7 +1061,7 @@ public class CalendarRecurringTests extends TestCase {
         si.close();
         assertTrue("Found exception",  found_exception);
         
-        si = csql.getAppointmentsBetweenInFolder(folder_id, cols, new Date(0), new Date(SUPER_END), 0, null);
+        si = csql.getAppointmentsBetweenInFolder(folder_id, cols, new Date(0), new Date(253402210800000L), 0, null);
         int counter = 0;
         while (si.hasNext()) {
             final CalendarDataObject tcdao = (CalendarDataObject)si.next();
@@ -1518,7 +1518,7 @@ public class CalendarRecurringTests extends TestCase {
             exception.setTitle("testMoveExceptionToDifferentFolerAndSetPrivateFlag - Update (create exception)");
             exception.setRecurrencePosition(3);            
             
-            csql.updateAppointmentObject(exception, fid, new Date(SUPER_END));
+            csql.updateAppointmentObject(exception, fid, new Date());
             final int exception_id = exception.getObjectID();
             assertTrue("Object was created", exception_id > 0);
             assertTrue("Got a new object_id" , object_id != exception_id);
@@ -1529,7 +1529,7 @@ public class CalendarRecurringTests extends TestCase {
             test_move_folder.setParentFolderID(test_folder);
             test_move_folder.setIgnoreConflicts(true);
             try {
-                csql.updateAppointmentObject(test_move_folder, fid, new Date(SUPER_END));
+                csql.updateAppointmentObject(test_move_folder, fid, new Date());
                 fail("An exception should not be moved to a different folder");
             } catch(final OXCalendarException oxca) {
                 // this is what we want
@@ -1543,7 +1543,7 @@ public class CalendarRecurringTests extends TestCase {
             test_private_flag.setPrivateFlag(true);
             test_private_flag.setIgnoreConflicts(true);
             try {
-                csql.updateAppointmentObject(test_private_flag, fid, new Date(SUPER_END));
+                csql.updateAppointmentObject(test_private_flag, fid, new Date());
                 fail("An exception should not be flagged as private");
             } catch(final OXCalendarException oxca) {
                 // this is what we want
@@ -1615,7 +1615,7 @@ public class CalendarRecurringTests extends TestCase {
         update.setRecurrencePosition(3);
         
         
-        csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
+        csql.updateAppointmentObject(update, folder_id, new Date());
         assertTrue("Got a new object_id" , object_id != update.getObjectID());
         
         final int exception_object_id = update.getObjectID();
@@ -1641,7 +1641,7 @@ public class CalendarRecurringTests extends TestCase {
         assertTrue("Got changed exceptions", changed_exceptions != null);
         delete.setDeleteExceptions(new Date[] { changed_exceptions[0] });
         
-        csql.updateAppointmentObject(delete, folder_id, new Date(SUPER_END));
+        csql.updateAppointmentObject(delete, folder_id, new Date());
         
         final CalendarDataObject test_dao = csql.getObjectById(object_id, folder_id);
         assertTrue("Check if recurring_id is set", test_dao.containsRecurrenceID());
@@ -1700,7 +1700,7 @@ public class CalendarRecurringTests extends TestCase {
         final long deleteExceptionDate = CalendarRecurringCollection.normalizeLong(first.getStart());
         update.setDeleteExceptions(new Date[] { new Date(deleteExceptionDate) });
         
-        csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
+        csql.updateAppointmentObject(update, folder_id, new Date());
         
         // Reload
         final CalendarDataObject tdao = csql.getObjectById(object_id, folder_id);
@@ -1753,7 +1753,7 @@ public class CalendarRecurringTests extends TestCase {
 
         update.setDeleteExceptions(ddates.toArray(new Date[ddates.size()]));
         
-        csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
+        csql.updateAppointmentObject(update, folder_id, new Date());
         
         // Reload should fail since all occurrences were deleted
         try {
@@ -1853,7 +1853,7 @@ public class CalendarRecurringTests extends TestCase {
              delete_owner.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
              delete_owner.setRecurrencePosition(i);
              delete_owner.setObjectID(object_id);
-             csql.deleteAppointmentObject(delete_owner, folder_id, new Date(SUPER_END));
+             csql.deleteAppointmentObject(delete_owner, folder_id, new Date());
 		}
         
         // Check if full delete has been performed since all occurrences were deleted

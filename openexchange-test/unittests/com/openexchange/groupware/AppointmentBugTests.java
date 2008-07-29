@@ -913,7 +913,7 @@ public class AppointmentBugTests extends TestCase {
         delete.setContext(ContextStorage.getInstance().getContext(so2.getContextId()));
         delete.setObjectID(object_id);
           
-        csql2.deleteAppointmentObject(delete, fid2, new Date(CalendarTest.SUPER_END));
+        csql2.deleteAppointmentObject(delete, fid2, new Date());
         
         try {
             final CalendarDataObject testobject = csql2.getObjectById(object_id, fid2);
