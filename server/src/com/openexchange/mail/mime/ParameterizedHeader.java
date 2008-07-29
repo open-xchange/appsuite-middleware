@@ -201,6 +201,9 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
 	 * @return The prepared parameterized header's string.
 	 */
 	protected static final String prepareParameterizedHeader(final String paramHdrArg) {
+		if (paramHdrArg == null) {
+			return paramHdrArg;
+		}
 		String paramHdr = paramHdrArg.trim().replaceAll("\\s*=\\s*", "=");
 		if (paramHdr.length() > 0) {
 			final int lastPos = paramHdr.length() - 1;

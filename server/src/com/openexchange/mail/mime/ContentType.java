@@ -179,6 +179,7 @@ public final class ContentType extends ParameterizedHeader {
 	private void parseContentType(final String contentTypeArg, final boolean paramList) throws MailException {
 		if ((null == contentTypeArg) || (contentTypeArg.length() == 0)) {
 			setContentType(DEFAULT_CONTENT_TYPE);
+			return;
 		}
 		final String contentType = prepareParameterizedHeader(contentTypeArg);
 		final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(contentType);
