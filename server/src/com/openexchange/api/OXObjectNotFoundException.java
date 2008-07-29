@@ -131,6 +131,9 @@ public class OXObjectNotFoundException extends OXException
     }      
     
     public enum Code {
+    	/**
+    	 * Object not found. %s
+    	 */
         OBJECT_NOT_FOUND("Object not found. %s", 1, AbstractOXException.Category.USER_INPUT)
         ;
         
