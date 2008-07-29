@@ -1,6 +1,5 @@
 .level=SEVERE
 
-com.openexchange.daemons.AdminDaemon.level=INFO
 com.openexchange.admin.tools.monitoring.level=INFO
 com.openexchange.admin.level=INFO
 
@@ -13,7 +12,6 @@ java.util.logging.FileHandler.formatter=java.util.logging.SimpleFormatter
 java.util.logging.FileHandler.append=true
 
 sun.rmi.level=SEVERE
-com.openexchange.server.ContextHandler.level=SEVERE
 org.apache.level=SEVERE
 com.sun.level=SEVERE
 javax.management.level=SEVERE

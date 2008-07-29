@@ -249,7 +249,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
             
             if (log.isDebugEnabled()) {
-                log.debug(ctx.toString() + " - " + usrdata.toString() + " - " + auth.toString());
+                log.debug(ctx + " - " + usrdata + " - " + auth);
             }
 
             final User[] dbuser = oxu.getData(ctx, new User[]{usrdata});
@@ -349,7 +349,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + user + " - "+ moduleAccess.toString() + " - " + auth.toString());
+            log.debug(ctx + " - " + user + " - "+ moduleAccess + " - " + auth);
         }
 
         try {
@@ -405,7 +405,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + user + " - "+ access_combination_name+ " - " + auth.toString());
+            log.debug(ctx + " - " + user + " - " + access_combination_name
+                + " - " + auth);
         }
 
         try {
@@ -485,7 +486,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 		}
 
 		if (log.isDebugEnabled()) {
-			log.debug(ctx.toString() + " - " + usrdata.toString() + " - "+ access_combination_name.toString() + " - "+ auth.toString());
+			log.debug(ctx + " - " + usrdata + " - " + access_combination_name
+			    + " - " + auth);
 		}
 
 		basicauth.doAuthentication(auth, ctx);
@@ -520,7 +522,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 		}
 
 		if (log.isDebugEnabled()) {
-			log.debug(ctx.toString() + " - " + usrdata.toString() + " - "+ auth.toString());
+			log.debug(ctx + " - " + usrdata + " - "+ auth);
 		}
 
 		basicauth.doAuthentication(auth, ctx);
@@ -548,7 +550,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }        
         
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + usr.toString() + " - " + access.toString() + " - " + auth.toString());
+            log.debug(ctx + " - " + usr + " - " + access + " - " + auth);
         }
         
         try {
@@ -668,7 +670,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         basicauth.doAuthentication(auth,ctx);       
         
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + Arrays.toString(users) + " - " + auth.toString());
+            log.debug(ctx + " - " + Arrays.toString(users) + " - " + auth);
         }        
         checkSchemaBeingLocked(ctx);
         
@@ -822,7 +824,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + Arrays.toString(users) + " - " + auth.toString());
+            log.debug(ctx + " - " + Arrays.toString(users) + " - " + auth);
         }
                 
         try {
@@ -938,10 +940,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final InvalidDataException invalidDataException = new InvalidDataException("User object is null");
             log.error(invalidDataException.getMessage(), invalidDataException);
             throw invalidDataException;
-        }        
+        }
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + user + " - " + auth.toString());
-        }        
+            log.debug(ctx + " - " + user + " - " + auth);
+        }
         try {
             basicauth.doAuthentication(auth, ctx);
             checkSchemaBeingLocked(ctx);
@@ -984,8 +986,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw invalidDataException;
         }        
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + user + " - " + auth.toString());
-        }        
+            log.debug(ctx + " - " + user + " - " + auth);
+        }
         try {
             basicauth.doAuthentication(auth, ctx);
             checkSchemaBeingLocked(ctx);
@@ -1055,7 +1057,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + auth.toString());
+            log.debug(ctx + " - " + auth);
         }
         
         basicauth.doAuthentication(auth,ctx);
