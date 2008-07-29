@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.request;
 
+import static com.openexchange.ajax.AJAXServlet.*;
+
 import java.util.Date;
 
 import org.json.JSONArray;
@@ -159,21 +161,17 @@ public class GroupRequest {
         return jsonResponseArray;
     }
 
-    public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException, OXJSONException, AjaxException {
-        final int identifier = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
-
+    public JSONObject actionGet(final JSONObject json) throws JSONException,
+        LdapException, OXJSONException, AjaxException {
+        final int groupId = DataParser.checkInt(json, PARAMETER_ID);
         timestamp = new Date(0);
-
         final GroupStorage groupStorage = GroupStorage.getInstance(true);
-        final Group group = groupStorage.getGroup(identifier, ctx);
-
+        final Group group = groupStorage.getGroup(groupId, ctx);
         final GroupWriter groupWriter = new GroupWriter();
-        final JSONObject jsonGroupObj = new JSONObject();
-        groupWriter.writeGroup(group, jsonGroupObj);
-
+        final JSONObject retval = new JSONObject();
+        groupWriter.writeGroup(group, retval);
         timestamp = group.getLastModified();
-
-        return jsonGroupObj;
+        return retval;
     }
 
     public JSONArray actionSearch(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException, GroupException, AjaxException {
