@@ -3258,6 +3258,13 @@ public class AppointmentBugTests extends TestCase {
 		assertEquals("Unexpected number of occurrences: " + rss.size() + ". Should be: " + 1, 1, rss.size());
 	}
 
+	/**
+	 * Test for <a href=
+	 * "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=11719">bug
+	 * #11719</a>:<br>&quot;<i>Last day of a recurring appointment is dropped</i>&quot;
+	 * 
+	 * @throws Exception If an error occurs
+	 */
 	public void testBug11719() throws Exception {
 		final Context context = new ContextImpl(contextid);
 		final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(),
