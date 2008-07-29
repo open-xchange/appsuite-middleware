@@ -153,8 +153,8 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         setIdOrGetIDFromNameAndIdObject(ctx, grp);
 
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + grp + " - "
-                    + Arrays.toString(members) + " - " + auth.toString());
+            log.debug(ctx + " - " + grp + " - " + Arrays.toString(members)
+                + " - " + auth);
         }
 
         checkSchemaBeingLocked(ctx, tool);
@@ -214,7 +214,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + grp.toString() + " - " + auth.toString());
+            log.debug(ctx + " - " + grp + " - " + auth);
         }
 
         try {
@@ -351,8 +351,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + grp.toString() + " - "
-                    + auth.toString());
+            log.debug(ctx + " - " + grp + " - " + auth);
         }
 
         checkSchemaBeingLocked(ctx, tool);
@@ -541,8 +540,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             }
 
             if (log.isDebugEnabled()) {
-                log.debug(ctx.toString() + " - " + Arrays.toString(grp) + " - "
-                        + auth.toString());
+                log.debug(ctx + " - " + Arrays.toString(grp) + " - " + auth);
             }
             checkSchemaBeingLocked(ctx, tool);
 
@@ -666,12 +664,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         
         setIdOrGetIDFromNameAndIdObject(ctx, grp);
         
-        final int grp_id = grp.getId();
+        final int grp_id = grp.getId().intValue();
 
         if (log.isDebugEnabled()) {
-            log
-                    .debug(ctx.toString() + " - " + grp_id + " - "
-                            + auth.toString());
+            log.debug(ctx + " - " + grp_id + " - " + auth);
         }
         checkSchemaBeingLocked(ctx, tool);
 
@@ -724,8 +720,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         try {
             basicauth.doAuthentication(auth, ctx);
             if (log.isDebugEnabled()) {
-                log.debug(ctx.toString() + " - " + groups + " - "
-                        + auth.toString());
+                log.debug(ctx + " - " + Arrays.toString(groups) + " - " + auth);
             }
             checkSchemaBeingLocked(ctx, tool);
 
@@ -804,7 +799,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             InvalidDataException, DatabaseUpdateException {
         basicauth.doAuthentication(auth, ctx);
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + auth.toString());
+            log.debug(ctx + " - " + auth);
         }
         checkSchemaBeingLocked(ctx, tool);
 
@@ -836,12 +831,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         }
 
         setIdOrGetIDFromNameAndIdObject(ctx, grp);
-        final int grp_id = grp.getId();
+        final int grp_id = grp.getId().intValue();
 
         if (log.isDebugEnabled()) {
-            log
-                    .debug(ctx.toString() + " - " + grp_id + " - "
-                            + auth.toString());
+            log.debug(ctx + " - " + grp_id + " - " + auth);
         }
 
         checkSchemaBeingLocked(ctx, tool);
@@ -873,8 +866,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + pattern + " - "
-                    + auth.toString());
+            log.debug(ctx + " - " + pattern + " - " + auth);
         }
 
         checkSchemaBeingLocked(ctx, tool);
@@ -909,7 +901,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + usr + " - " + auth.toString());
+            log.debug(ctx + " - " + usr + " - " + auth);
         }
 
         checkSchemaBeingLocked(ctx, tool);
@@ -946,10 +938,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         }
 
         setIdOrGetIDFromNameAndIdObject(ctx, grp);
-        final int grp_id = grp.getId();
+        final int grp_id = grp.getId().intValue();
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + grp_id + " - "
-                    + Arrays.toString(members) + " - " + auth.toString());
+            log.debug(ctx + " - " + grp_id + " - " + Arrays.toString(members)
+                + " - " + auth);
         }
 
         checkSchemaBeingLocked(ctx, tool);
