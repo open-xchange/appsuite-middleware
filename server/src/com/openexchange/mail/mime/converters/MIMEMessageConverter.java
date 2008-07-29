@@ -152,6 +152,8 @@ public final class MIMEMessageConverter {
 
 	}
 
+	private static final String STR_EMPTY = "";
+
 	/**
 	 * Prevent instantiation
 	 */
@@ -1842,7 +1844,12 @@ public final class MIMEMessageConverter {
 			headers = new HeaderCollection();
 			for (final Enumeration<?> e = part.getAllHeaders(); e.hasMoreElements();) {
 				final Header h = (Header) e.nextElement();
-				headers.addHeader(h.getName(), h.getValue());
+				final String value = h.getValue();
+				if (value == null || isEmpty(value)) {
+					headers.addHeader(h.getName(), STR_EMPTY);
+				} else {
+					headers.addHeader(h.getName(), value);
+				}
 			}
 		} catch (final MessagingException e) {
 			if (LOG.isWarnEnabled()) {
@@ -1950,9 +1957,23 @@ public final class MIMEMessageConverter {
 		final Matcher m = PATTERN_PARSE_HEADER.matcher(unfold(messageSrc.substring(0, i)));
 		final HeaderCollection headers = new HeaderCollection();
 		while (m.find()) {
-			headers.addHeader(m.group(1), m.group(2));
+			final String value = m.group(2);
+			if (value == null || isEmpty(value)) {
+				headers.addHeader(m.group(1), STR_EMPTY);
+			} else {
+				headers.addHeader(m.group(1), value);
+			}
 		}
 		return headers;
+	}
+
+	private static boolean isEmpty(final String value) {
+		final char[] chars = value.toCharArray();
+		boolean empty = true;
+		for (int i = 0; i < chars.length && empty; i++) {
+			empty = ((chars[i] == ' ') || (chars[i] == '\t'));
+		}
+		return empty;
 	}
 
 	private static InternetAddress[] getAddressesOnParseError(final String[] addrs) {
