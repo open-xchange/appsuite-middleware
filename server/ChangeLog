@@ -3,6 +3,8 @@
  - Bugfix #11695: Proper calculation of a weekly recurring appointment
  - Bugfix #10313: No additional English text to exception message to obey
    i18n rules
+ - Bugfix #11735: Added limit for recurrence's integer values for interval
+   and occurrences
 
 * 2008-07-28 - thorben.betten@open-xchange.com
 

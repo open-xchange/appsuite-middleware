@@ -153,7 +153,21 @@ public final class CalendarRecurringCollection {
     }
     
     private static void checkAndCorrectErrors(final CalendarDataObject cdao) {
-        if (cdao.getRecurrenceType() == CalendarDataObject.DAILY) {
+    	if (cdao.getInterval() > CalendarRecurringCollection.MAXTC) {
+			final OXCalendarException exc = new OXCalendarException(
+					OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao.getInterval()), Integer
+							.valueOf(CalendarRecurringCollection.MAXTC));
+			LOG.warn(exc.getMessage() + " Auto-corrected to " + CalendarRecurringCollection.MAXTC, exc);
+			cdao.setInterval(CalendarRecurringCollection.MAXTC);
+		}
+		if (cdao.getOccurrence() > CalendarRecurringCollection.MAXTC) {
+			final OXCalendarException exc = new OXCalendarException(
+					OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao.getOccurrence()), Integer
+							.valueOf(CalendarRecurringCollection.MAXTC));
+			LOG.warn(exc.getMessage() + " Auto-corrected to " + CalendarRecurringCollection.MAXTC, exc);
+			cdao.setOccurrence(CalendarRecurringCollection.MAXTC);
+		}
+    	if (cdao.getRecurrenceType() == CalendarDataObject.DAILY) {
             if (cdao.getInterval() < 1) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Auto correction (daily), set interval to 1, the given interval was: "+cdao.getInterval());
@@ -397,11 +411,24 @@ public final class CalendarRecurringCollection {
         if (cdao.containsStartDate()) {
             final StringBuilder sb = new StringBuilder(64);
             final int t = cdao.getRecurrenceType();
-            final int i = cdao.getInterval(); // i
+            int i = cdao.getInterval(); // i
+			if (i > CalendarRecurringCollection.MAXTC) {
+				final OXCalendarException exc = new OXCalendarException(
+						OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(i), Integer
+								.valueOf(CalendarRecurringCollection.MAXTC));
+				LOG.warn(exc.getMessage() + " Auto-corrected to " + CalendarRecurringCollection.MAXTC, exc);
+				i = CalendarRecurringCollection.MAXTC;
+			}
             final int a = cdao.getDays();
             final int b = cdao.getDayInMonth();
             final int c = cdao.getMonth();
             int o = cdao.getOccurrence();
+            if (o > CalendarRecurringCollection.MAXTC) {
+            	final OXCalendarException exc = new OXCalendarException(OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(o),
+						Integer.valueOf(CalendarRecurringCollection.MAXTC));
+            	LOG.warn(exc.getMessage() + " Auto-corrected to " + CalendarRecurringCollection.MAXTC, exc);
+				o = CalendarRecurringCollection.MAXTC;
+			}
             if (!cdao.containsUntil() && !cdao.containsOccurrence()) {
                 o = -1;
             }
@@ -766,6 +793,14 @@ public final class CalendarRecurringCollection {
     }
     
     public static void checkRecurring(final CalendarObject cdao) throws OXException {
+    	if (cdao.getInterval() > CalendarRecurringCollection.MAXTC) {
+			throw new OXCalendarException(OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao
+					.getInterval()), Integer.valueOf(CalendarRecurringCollection.MAXTC));
+		}
+		if (cdao.getOccurrence() > CalendarRecurringCollection.MAXTC) {
+			throw new OXCalendarException(OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao
+					.getOccurrence()), Integer.valueOf(CalendarRecurringCollection.MAXTC));
+		}
         if (cdao.getRecurrenceType() == CalendarDataObject.DAILY) {
             if (cdao.getInterval() < 1) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_OR_WRONG_VALUE_INTERVAL, Integer.valueOf(cdao.getInterval()));
