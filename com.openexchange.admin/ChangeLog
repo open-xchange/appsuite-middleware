@@ -2,6 +2,8 @@
 
  - Bugfix #11681: Removed a lot of .toString() in debug messages to prevent
    NullPointerExceptions.
+ - Bugfix #11740: Checking for possible null value for guiPreferences attribute
+   in User.equals method.
 
 * 2008-07-18 - choeger@open-xchange.com
 
