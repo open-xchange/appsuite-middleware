@@ -150,6 +150,12 @@ ln -sf ../etc/init.d/open-xchange-admin %{buildroot}/sbin/rcopen-xchange-admin
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Fri Jul 18 2008 - choeger@open-xchange.com
+ - Bugfix ID#11682 [L3] NullPointerException when switching to debug mode for admin daemon
+* Tue Jul 15 2008 - choeger@open-xchange.com
+ - Bugfix #11642 RHEL5 Packages don't depend on Sun Java 1.5 and mysql-server
+  Packages
+ - Bugfix ID#11640 SP3->SP4 update fails for package open-xchange-admin-doc
 * Thu Jul 10 2008 - choeger@open-xchange.com
  - RMI API Change:
    User.setTimezone and User.getTimezone now uses java.lang.String instead of java.util.TimeZone
