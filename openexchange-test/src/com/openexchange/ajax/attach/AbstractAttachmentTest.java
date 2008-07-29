@@ -91,8 +91,15 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		
 		assertNoError(res);
 		final JSONArray arrayOfArrays = (JSONArray) res.getData();
+		// Ugly extract of updates in response.
+		int updates = 0;
+		for (int i = 0; i < arrayOfArrays.length(); i++) {
+		    if (arrayOfArrays.get(i) instanceof JSONArray) {
+		        updates++;
+		    }
+		}
 		
-		assertEquals(arrayOfArrays.toString(), createdLater.size(), arrayOfArrays.length());
+		assertEquals(arrayOfArrays.toString(), createdLater.size(), updates);
 		
 		for(int i = 0; i < arrayOfArrays.length(); i++) {
 			final JSONArray values = arrayOfArrays.getJSONArray(i);
