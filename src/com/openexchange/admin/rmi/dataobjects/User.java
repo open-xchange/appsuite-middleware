@@ -4910,7 +4910,12 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
             return false;
         if (given_nameset != other.given_nameset)
             return false;
-        if (!guiPreferences.equals(other.guiPreferences))
+        if (guiPreferences == null) {
+            if (other.guiPreferences != null)
+                return false;
+        } else if (!guiPreferences.equals(other.guiPreferences))
+            return false;
+        if (guiPreferencesset != other.guiPreferencesset)
             return false;
         if (gui_spam_filter_enabled == null) {
             if (other.gui_spam_filter_enabled != null)
