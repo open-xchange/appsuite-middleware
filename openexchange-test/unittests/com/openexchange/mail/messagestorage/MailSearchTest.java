@@ -359,9 +359,8 @@ public final class MailSearchTest extends AbstractMailTest {
 				final long uid;
 				{
 					final MailMessage mail = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes("US-ASCII"));
-					assertTrue("Unexpected or missing Message-ID header",
-							"<32496175.17311207643539009.JavaMail.open-xchange@oxee>".equals(mail
-									.getHeader("Message-ID")));
+					assertEquals("Unexpected or missing Message-ID header: ",
+							"<32496175.17311207643539009.JavaMail.open-xchange@oxee>", mail.getFirstHeader("Message-ID"));
 					uid = mailAccess.getMessageStorage().appendMessages(fullname, new MailMessage[] { mail })[0];
 				}
 
