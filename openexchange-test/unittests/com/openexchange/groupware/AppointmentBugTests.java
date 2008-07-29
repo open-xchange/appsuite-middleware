@@ -1,6 +1,8 @@
 package com.openexchange.groupware;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -34,6 +36,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
@@ -99,14 +102,60 @@ public class AppointmentBugTests extends TestCase {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "deleteAllApps");
         final CalendarSql csql = new CalendarSql(so);        
-        final SearchIterator si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
+        final SearchIterator<CalendarDataObject> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
         while (si.hasNext()) {
-            final CalendarDataObject cdao = (CalendarDataObject)si.next();
+            final CalendarDataObject cdao = si.next();
             testDelete(cdao);
         }
         si.close();
         DBPool.push(context, readcon);                
-    }    
+    }
+
+    private static final String SQL_DEL_WORKING_DATES = "DELETE FROM prg_dates WHERE cid = ? AND intfield01 = ?";
+
+	private static final String SQL_DEL_WORKING_MEMBERS = "DELETE FROM prg_dates_members WHERE cid = ? AND object_id = ?";
+
+	private static final String SQL_DEL_WORKING_RIGHTS = "DELETE FROM prg_date_rights WHERE cid = ? AND object_id = ?";
+
+    private void hardDelete(final int oid, final Context ctx, final int uid) {
+    	final Connection writecon;
+    	try {
+			writecon = DBPool.pickup(ctx);
+		} catch (final DBPoolingException e) {
+			e.printStackTrace();
+			return;
+		}
+    	PreparedStatement stmt = null;
+		try {
+			stmt = writecon.prepareStatement(SQL_DEL_WORKING_DATES);
+			int pos = 1;
+			stmt.setInt(pos++, ctx.getContextId());
+			stmt.setInt(pos++, oid);
+			stmt.executeUpdate();
+			stmt.close();
+			stmt = null;
+
+			stmt = writecon.prepareStatement(SQL_DEL_WORKING_MEMBERS);
+			pos = 1;
+			stmt.setInt(pos++, ctx.getContextId());
+			stmt.setInt(pos++, oid);
+			stmt.executeUpdate();
+			stmt.close();
+			stmt = null;
+
+			stmt = writecon.prepareStatement(SQL_DEL_WORKING_RIGHTS);
+			pos = 1;
+			stmt.setInt(pos++, ctx.getContextId());
+			stmt.setInt(pos++, oid);
+			stmt.executeUpdate();
+			stmt.close();
+			stmt = null;
+		} catch (final SQLException e) {
+			e.printStackTrace();
+		} finally {
+			CalendarCommonCollection.closePreparedStatement(stmt);
+		}
+    }
     
     private void testDelete(final CalendarDataObject cdao) throws Exception {        
         final Connection writecon = DBPool.pickupWriteable(getContext());
@@ -121,7 +170,7 @@ public class AppointmentBugTests extends TestCase {
             if (fid == 0) {
                 final int x = 0;
             }
-            csql.deleteAppointmentObject(deleteit, fid, new Date(SUPER_END));
+            csql.deleteAppointmentObject(deleteit, fid, new Date());
         } catch(final Exception e) { 
             e.printStackTrace();
         }
@@ -248,7 +297,7 @@ public class AppointmentBugTests extends TestCase {
         delete.setObjectID(object_id);
         
         final CalendarSql csql2 = new CalendarSql(so2);        
-        csql2.deleteAppointmentObject(delete, fid2, new Date(SUPER_END));
+        csql2.deleteAppointmentObject(delete, fid2, new Date());
         
         boolean test_exists = false;
         try {
@@ -303,7 +352,7 @@ public class AppointmentBugTests extends TestCase {
         update.setInterval(1);
         update.setDays(AppointmentObject.MONDAY);        
         update.setIgnoreConflicts(true);
-        csql.updateAppointmentObject(update, fid, new Date(SUPER_END));
+        csql.updateAppointmentObject(update, fid, new Date());
         
         final CalendarDataObject testobject = csql.getObjectById(object_id, fid);
         assertEquals("Test that app is a recurring appointment", AppointmentObject.WEEKLY, testobject.getRecurrenceType());
@@ -356,7 +405,7 @@ public class AppointmentBugTests extends TestCase {
         update.setParticipants(pu);
         update.setIgnoreConflicts(true);
         
-        final CalendarDataObject conflicts[] = csql.updateAppointmentObject(update, fid, new Date(SUPER_END));
+        final CalendarDataObject conflicts[] = csql.updateAppointmentObject(update, fid, new Date());
         assertTrue("Got no conflicts ", conflicts == null);
         
         final CalendarDataObject testobject = csql.getObjectById(object_id, fid);
@@ -1439,7 +1488,7 @@ public class AppointmentBugTests extends TestCase {
             update.setParentFolderID(fid);        
 
             try {
-                csql.updateAppointmentObject(update, subfolder_id, new Date(SUPER_END));
+                csql.updateAppointmentObject(update, subfolder_id, new Date());
                 final int object_id_exception = update.getObjectID();
                 fail("Test failed. An exception can not be moved into a different folder.");
             } catch(final OXCalendarException e) {
@@ -1683,12 +1732,12 @@ public class AppointmentBugTests extends TestCase {
         update.setRecurrenceDatePosition(test_exception_date);
         
         
-        csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
+        csql.updateAppointmentObject(update, folder_id, new Date());
  
         final CalendarDataObject testdelete = new CalendarDataObject();
         testdelete.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         testdelete.setObjectID(update.getObjectID());
-        csql.deleteAppointmentObject(testdelete, folder_id, new Date(SUPER_END));
+        csql.deleteAppointmentObject(testdelete, folder_id, new Date());
         
         assertTrue("Check that we got the recurrence id back", testdelete.containsRecurrenceID());
         assertEquals("Check that we got the correct recurrence id", object_id, testdelete.getRecurrenceID());
@@ -2221,7 +2270,7 @@ public class AppointmentBugTests extends TestCase {
             update.setIgnoreConflicts(true);
             
             try {
-                csql2.updateAppointmentObject(update, shared_folder_id, new Date(SUPER_END));
+                csql2.updateAppointmentObject(update, shared_folder_id, new Date());
             } catch(final OXPermissionException oxpe) {
                 // wunderbar, das möchten wir
                 final int x = 0;
@@ -2333,7 +2382,7 @@ public class AppointmentBugTests extends TestCase {
             move.setParentFolderID(shared_folder_id);
             
             try {
-                csql.updateAppointmentObject(move, fid, new Date(SUPER_END));
+                csql.updateAppointmentObject(move, fid, new Date());
                 fail("Move not allowed");
             } catch(final OXCalendarException oxce) {
                 // perfect
@@ -2415,7 +2464,7 @@ public class AppointmentBugTests extends TestCase {
         update.setIgnoreConflicts(true);
         update.setRecurrencePosition(2);
         
-        csql.updateAppointmentObject(update, fid, new Date(SUPER_END));
+        csql.updateAppointmentObject(update, fid, new Date());
         final int object_id2 = update.getObjectID();
         assertTrue("Got new object_id", object_id2 > 0 && object_id2 != object_id);
         
@@ -2617,7 +2666,7 @@ public class AppointmentBugTests extends TestCase {
         update.setEndDate(update_end);
         update.setIgnoreConflicts(true);
         
-        csql.updateAppointmentObject(update, fid, new Date(SUPER_END));
+        csql.updateAppointmentObject(update, fid, new Date());
         
         ro = rh.loadReminder(object_id, userid, Types.APPOINTMENT);
         final Date check_date_update = ro.getDate();
@@ -2683,7 +2732,7 @@ public class AppointmentBugTests extends TestCase {
         }
         update.setUsers(up);
         update.setIgnoreConflicts(true);
-        csql2.updateAppointmentObject(update, fid2, new Date(SUPER_END));
+        csql2.updateAppointmentObject(update, fid2, new Date());
         
         final CalendarDataObject temp2 = csql.getObjectById(object_id, fid);
         final UserParticipant up_check2[] = temp2.getUsers();        
@@ -2700,7 +2749,7 @@ public class AppointmentBugTests extends TestCase {
         update_with_time_change.setEndDate(new Date(cdao.getEndDate().getTime() - 3600000L));
         update_with_time_change.setIgnoreConflicts(true);
         
-        csql.updateAppointmentObject(update_with_time_change, fid, new Date(SUPER_END));
+        csql.updateAppointmentObject(update_with_time_change, fid, new Date());
         
         final CalendarDataObject temp3 = csql.getObjectById(object_id, fid);
         final UserParticipant up_check3[] = temp3.getUsers();        
@@ -2769,7 +2818,7 @@ public class AppointmentBugTests extends TestCase {
             update.setIgnoreConflicts(true);
             update.setPrivateFlag(true);
             try {
-                csql.updateAppointmentObject(update, public_folder_id, new Date(SUPER_END));
+                csql.updateAppointmentObject(update, public_folder_id, new Date());
                 fail("Set the private flag is not allowed in a public folder");
             } catch(final OXCalendarException oxca) {
                 // this is what we want
@@ -2858,7 +2907,7 @@ public class AppointmentBugTests extends TestCase {
         update.setIgnoreConflicts(true);
         update.setObjectID(object_id);
 
-        csql.updateAppointmentObject(update, fid, new Date(SUPER_END));
+        csql.updateAppointmentObject(update, fid, new Date());
         
         final CalendarDataObject temp = csql.getObjectById(object_id, fid);
         final UserParticipant up[] = temp.getUsers();
@@ -2950,7 +2999,7 @@ public class AppointmentBugTests extends TestCase {
             update.setObjectID(object_id);
             update.setTitle("testBug10154 - step 2");
 
-            csql.updateAppointmentObject(update, shared_folder_id, new Date(SUPER_END));            
+            csql.updateAppointmentObject(update, shared_folder_id, new Date());            
             
             
             final CalendarDataObject update2 = new CalendarDataObject();
@@ -2962,7 +3011,7 @@ public class AppointmentBugTests extends TestCase {
             update2.setEndDate(check_end_date); 
             update2.setTitle("testBug10154 - step 3");
             
-            csql2.updateAppointmentObject(update2, shared_folder_id, new Date(SUPER_END));
+            csql2.updateAppointmentObject(update2, shared_folder_id, new Date());
             
             final CalendarDataObject temp = csql.getObjectById(object_id, shared_folder_id);
             final UserParticipant up[] = temp.getUsers();
@@ -3044,7 +3093,7 @@ public class AppointmentBugTests extends TestCase {
         update.setObjectID(object_id);
         update.setTitle("testBug10154 - step 2");
 
-        csql.updateAppointmentObject(update, fid, new Date(SUPER_END));        
+        csql.updateAppointmentObject(update, fid, new Date());        
         assertEquals("Check participants length", 2, update.getParticipants().length);
         
         final CalendarDataObject update_user_delete = new CalendarDataObject();
@@ -3058,7 +3107,7 @@ public class AppointmentBugTests extends TestCase {
         update_user_delete.setObjectID(object_id);
         update_user_delete.setTitle("testBug10154 - step 2");
 
-        csql.updateAppointmentObject(update_user_delete, fid, new Date(SUPER_END));        
+        csql.updateAppointmentObject(update_user_delete, fid, new Date());        
         assertEquals("Check participants length", 1, update_user_delete.getParticipants().length);        
         
         
@@ -3208,5 +3257,64 @@ public class AppointmentBugTests extends TestCase {
 		final RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, 1193176800000l, 1193263200000l, 0);
 		assertEquals("Unexpected number of occurrences: " + rss.size() + ". Should be: " + 1, 1, rss.size());
 	}
-    
+
+	public void testBug11719() throws Exception {
+		final Context context = new ContextImpl(contextid);
+		final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(),
+				"testBug11719");
+		final int fid = AppointmentBugTests.getPrivateFolder(userid);
+		// Create calendar data object
+		final CalendarDataObject cdao = new CalendarDataObject();
+		cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+		cdao.setParentFolderID(fid);
+		cdao.setTitle("testBug11719");
+		cdao.setIgnoreConflicts(true);
+		cdao.setTimezone(TIMEZONE);
+		// 28.07.2008 00:00h
+		cdao.setStartDate(new Date(1217203200000l));
+		// 29.07.2008 00:00h
+		cdao.setEndDate(new Date(1217289600000l));
+		// Full-time
+		cdao.setFullTime(true);
+		// Recurrence calculator aka duration of a single appointment in days
+		cdao.setRecurrenceCalculator(1);
+		// Recurrence type: 1
+		cdao.setRecurrenceType(1);
+		// Interval: 1
+		cdao.setInterval(1);
+		// Until 03.08.2008
+		cdao.setUntil(new Date(1217721600000l));
+
+		// Create in storage
+		final CalendarSql csql = new CalendarSql(so);
+		csql.insertAppointmentObject(cdao);
+		final int object_id = cdao.getObjectID();
+		assertTrue("Object was not created", object_id > 0);
+		
+		try {
+			// Load from storage
+			final CalendarDataObject edao = csql.getObjectById(object_id, fid);
+			assertTrue("Loading from storage failed", edao != null);
+			
+			// edao should denote the first occurrence in recurring appointment
+			// Start time: 1217203200000l = 28.07.2008 00:00h
+			assertEquals("Unexpected start time in first occurrence", 1217203200000l, edao.getStartDate().getTime());
+			
+			// End time: 1217289600000l = 29.07.2008 00:00h
+			assertEquals("Unexpected end time in first occurrence", 1217289600000l, edao.getEndDate().getTime());
+
+			// Calculate last occurrence
+			final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0, CalendarRecurringCollection.MAXTC, true);
+            final RecurringResult rr = rrs.getRecurringResultByPosition(rrs.size());
+            assertTrue("Calculated last occurrence is null", rr != null);
+            
+            // Last occurrence should be on 03.08.2008: 1217721600000
+            assertEquals("Unexpected last occurrence's start time: ", 1217721600000l, rr.getStart());
+            
+            // Check end date which should be 04.08.2008: 1217808000000
+			assertEquals("Unexpected last occurrence's end time: ", 1217808000000l, rr.getEnd());
+		} finally {
+			hardDelete(object_id, context, userid);
+		}
+	}
 }
