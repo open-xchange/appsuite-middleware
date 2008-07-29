@@ -117,7 +117,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         new BasicAuthenticator().doAuthentication(auth);
         
         if (log.isDebugEnabled()) {
-            log.debug(ctx + " - " + admin_user + " ");
+            log.debug(ctx + " - " + admin_user);
         }
         
         try {

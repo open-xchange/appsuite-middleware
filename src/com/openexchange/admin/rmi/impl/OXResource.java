@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.58 2008/07/01 13:01:58 choeger Exp $
+ * $Id: OXResource.java,v 1.59 2008/07/29 15:12:11 marcus Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -133,7 +133,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         }
         
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + res.toString() + " - " + auth.toString());
+            log.debug(ctx + " - " + res + " - " + auth);
         }
         
         try {
@@ -232,7 +232,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
        }
       
        if (log.isDebugEnabled()) {
-           log.debug(ctx.toString() + " - " + res.toString() + " - " + auth.toString()); 
+           log.debug(ctx + " - " + res + " - " + auth); 
        }
 
        checkSchemaBeingLocked(ctx, tool);
@@ -331,7 +331,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             
             setIdOrGetIDFromNameAndIdObject(ctx, res);
             if (log.isDebugEnabled()) {
-                log.debug(ctx.toString() + " - " + res + " - " + auth.toString());
+                log.debug(ctx + " - " + res + " - " + auth);
             }
             checkSchemaBeingLocked(ctx, tool);
             if (!tool.existsResource(ctx, res.getId())) {
@@ -408,10 +408,10 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         
         setIdOrGetIDFromNameAndIdObject(ctx, res);
         
-        final int resource_id = res.getId();
+        final int resource_id = res.getId().intValue();
         
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + resource_id + " - " + auth.toString());
+            log.debug(ctx + " - " + resource_id + " - " + auth);
         }
         
         checkSchemaBeingLocked(ctx, tool);
@@ -457,7 +457,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             basicauth.doAuthentication(auth,ctx);
         
             if (log.isDebugEnabled()) {
-                log.debug(ctx.toString() + " - " + Arrays.toString(resources) + " - " + auth.toString());
+                log.debug(ctx + " - " + Arrays.toString(resources) + " - " + auth);
             }
 
             checkSchemaBeingLocked(ctx, tool);
@@ -539,7 +539,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         }
         
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + pattern + " - " + auth.toString());
+            log.debug(ctx + " - " + pattern + " - " + auth);
         }
         
         checkSchemaBeingLocked(ctx, tool);
