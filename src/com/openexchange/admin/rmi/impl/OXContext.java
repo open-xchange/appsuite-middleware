@@ -180,7 +180,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 		}
 
 		if (log.isDebugEnabled()) {
-			log.debug(ctx.toString() + " - " + admin_user.toString() + " - "+ access_combination_name.toString() + " - "+ auth.toString());
+			log.debug(ctx + " - " + admin_user + " - "+ access_combination_name
+			    + " - "+ auth);
 		}
 		
 		final BasicAuthenticator basicAuthenticator = new BasicAuthenticator();

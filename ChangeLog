@@ -1,3 +1,8 @@
+* 2008-07-29 - marcus.klein@open-xchange.com
+
+ - Bugfix #11681: Removed a lot of .toString() in debug messages to prevent
+   NullPointerExceptions.
+
 * 2008-07-28 - holgi@open-xchange.com
 
   - Bugfix ID#11715 showruntimestats -d not usable for com.openexchange.caching
