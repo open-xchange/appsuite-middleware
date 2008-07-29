@@ -56,7 +56,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException.Code;
-import com.openexchange.server.impl.Starter;
 import com.openexchange.session.Session;
 
 /**
@@ -74,7 +73,7 @@ public abstract class ContextStorage {
     /**
      * Singleton implementation.
      */
-    private static ContextStorage impl;
+    private static volatile ContextStorage impl;
 
     /**
      * Will be returned if a context cannot be found through its login info.
