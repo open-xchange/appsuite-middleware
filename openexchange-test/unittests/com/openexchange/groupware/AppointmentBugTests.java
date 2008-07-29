@@ -3311,7 +3311,7 @@ public class AppointmentBugTests extends TestCase {
 			assertEquals("Unexpected end time in first occurrence", 1217289600000l, edao.getEndDate().getTime());
 
 			// Calculate last occurrence
-			final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0, CalendarRecurringCollection.MAXTC, true);
+			final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(edao, 0, 0, 0, CalendarRecurringCollection.MAXTC, true);
             final RecurringResult rr = rrs.getRecurringResultByPosition(rrs.size());
             assertTrue("Calculated last occurrence is null", rr != null);
             
@@ -3320,6 +3320,78 @@ public class AppointmentBugTests extends TestCase {
             
             // Check end date which should be 04.08.2008: 1217808000000
 			assertEquals("Unexpected last occurrence's end time: ", 1217808000000l, rr.getEnd());
+		} finally {
+			hardDelete(object_id, context, userid);
+		}
+	}
+
+	/**
+	 * Test for <a href=
+	 * "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=11695">bug
+	 * #11695</a>:<br>&quot;<i>Recurring whole day appointment isn't created correctly</i>&quot;
+	 * 
+	 * @throws Exception If an error occurs
+	 */
+	public void testBug11695() throws Exception {
+		final Context context = new ContextImpl(contextid);
+		final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(),
+				"testBug11695");
+		final int fid = AppointmentBugTests.getPrivateFolder(userid);
+		// Create calendar data object
+		final CalendarDataObject cdao = new CalendarDataObject();
+		cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+		cdao.setParentFolderID(fid);
+		cdao.setTitle("testBug11695");
+		cdao.setIgnoreConflicts(true);
+		cdao.setTimezone(TIMEZONE);
+		// 22.09.2008 12:00h
+		cdao.setStartDate(new Date(1222084800000l));
+		// 22.09.2008 13:00h
+		cdao.setEndDate(new Date(1222088400000l));
+		// No full-time
+		cdao.setFullTime(false);
+		// Recurrence calculator aka duration of a single appointment in days
+		cdao.setRecurrenceCalculator(0);
+		// Recurrence type: 1
+		cdao.setRecurrenceType(2);
+		// Interval: 1
+		cdao.setInterval(1);
+		// days: Mo - Fr
+		cdao.setDays(62);
+		// Until 29.09.2008 00:00h
+		cdao.setUntil(new Date(1222646400000l));
+
+		// Create in storage
+		final CalendarSql csql = new CalendarSql(so);
+		csql.insertAppointmentObject(cdao);
+		final int object_id = cdao.getObjectID();
+		assertTrue("Object was not created", object_id > 0);
+		
+		try {
+			// Load from storage
+			final CalendarDataObject edao = csql.getObjectById(object_id, fid);
+			assertTrue("Loading from storage failed", edao != null);
+			
+			// edao should denote the first occurrence in recurring appointment
+			// Start time: 1217203200000l = 28.07.2008 00:00h
+			assertEquals("Unexpected start time in first occurrence", 1222084800000l, edao.getStartDate().getTime());
+			
+			// End time: 1217289600000l = 29.07.2008 00:00h
+			assertEquals("Unexpected end time in first occurrence", 1222088400000l, edao.getEndDate().getTime());
+
+			// Calculate last occurrence
+			final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(edao, 0, 0, 0, CalendarRecurringCollection.MAXTC, true);
+			assertTrue("Calculating recurrence failed", rrs != null);
+			assertEquals("Unexpected number of occurrences: ", 6, rrs.size());
+
+			final RecurringResult rr = rrs.getRecurringResultByPosition(rrs.size());
+            assertTrue("Calculated last occurrence is null", rr != null);
+            
+            // Last occurrence should be on 29.09.2008 12:00h: 1222689600000
+            assertEquals("Unexpected last occurrence's start time: ", 1222689600000l, rr.getStart());
+            
+            // Check end date which should be 29.09.2008 13:00h: 1222693200000
+			assertEquals("Unexpected last occurrence's end time: ", 1222693200000l, rr.getEnd());
 		} finally {
 			hardDelete(object_id, context, userid);
 		}

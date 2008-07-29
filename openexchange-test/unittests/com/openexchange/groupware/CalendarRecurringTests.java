@@ -497,7 +497,7 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setDays(AppointmentObject.MONDAY + AppointmentObject.SUNDAY);
         CalendarRecurringCollection.fillDAO(cdao);
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
-        assertEquals("Check calculation", 5, m.size());
+        assertEquals("Check calculation", 4, m.size());
         
         c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
         assertEquals("First day check (SUNDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.SUNDAY);
