@@ -233,10 +233,14 @@ public abstract class MailMessage extends MailPart {
 	 * @throws MailException
 	 */
 	public static int getColorLabelIntValue(final String cl) throws MailException {
-		if (!cl.startsWith(COLOR_LABEL_PREFIX)) {
+		if (cl == null || !cl.startsWith(COLOR_LABEL_PREFIX)) {
 			throw new MailException(MailException.Code.UNKNOWN_COLOR_LABEL, cl);
 		}
-		return Integer.parseInt(cl.substring(3));
+		try {
+			return Integer.parseInt(cl.substring(3));
+		} catch (final NumberFormatException e) {
+			throw new MailException(MailException.Code.UNKNOWN_COLOR_LABEL, e, cl);
+		}
 	}
 
 	/**
