@@ -49,17 +49,15 @@
 
 package internal;
 
-import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 
 import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.tasks.Task;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface AttributeConverter<U extends CalendarObject> {
+public interface AttributeConverter<T extends CalendarComponent, U extends CalendarObject> {
 
     /**
      * Checks if the attribute is defined in the task.
@@ -68,10 +66,10 @@ public interface AttributeConverter<U extends CalendarObject> {
      */
     boolean isSet(final U u);
 
-    void emit(final U u, final CalendarComponent component);
+    void emit(final U u, final T t);
 
-    boolean hasProperty(final Component component);
+    boolean hasProperty(final T t);
 
-    void parse(final Component component, final Task task);
+    void parse(final T t, final U u);
 
 }

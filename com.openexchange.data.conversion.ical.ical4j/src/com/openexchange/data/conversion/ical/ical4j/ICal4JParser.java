@@ -190,7 +190,7 @@ public class ICal4JParser implements ICalParser {
     protected Task convertTask(VToDo vtodo, TimeZone defaultTZ, Context ctx) {
         final TimeZone tz = determineTimeZone(vtodo, defaultTZ);
         final Task task = new Task();
-        for (final AttributeConverter<Task> converter : TaskConverters.ALL) {
+        for (final AttributeConverter<VToDo, Task> converter : TaskConverters.ALL) {
             if (converter.hasProperty(vtodo)) {
                 converter.parse(vtodo, task);
             }

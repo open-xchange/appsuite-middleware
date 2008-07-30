@@ -64,6 +64,7 @@ import java.util.Date;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.property.*;
 import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.component.VToDo;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -89,8 +90,8 @@ public class ICal4JEmitter implements ICalEmitter {
         final List<ConversionWarning> warnings) {
         final Calendar calendar = new Calendar();
         for (final Task task : tasks) {
-            final VEvent event = createEvent(task);
-            calendar.getComponents().add(event);
+            final VToDo vtodo = createEvent(task);
+            calendar.getComponents().add(vtodo);
         }
         return calendar.toString();
     }
@@ -135,15 +136,15 @@ public class ICal4JEmitter implements ICalEmitter {
      * @param task task to convert.
      * @return the iCal event representing the task.
      */
-    private VEvent createEvent(final Task task) {
-        final VEvent vevent = new VEvent();
-        for (final AttributeConverter<Task> converter : TaskConverters.ALL) {
+    private VToDo createEvent(final Task task) {
+        final VToDo vtodo = new VToDo();
+        for (final AttributeConverter<VToDo, Task> converter : TaskConverters.ALL) {
             if (converter.isSet(task)) {
-                converter.emit(task, vevent);
+                converter.emit(task, vtodo);
             }
         }
-        vevent.getProperties().add(new Description(task.getNote()));
-        return vevent;
+        vtodo.getProperties().add(new Description(task.getNote()));
+        return vtodo;
     }
     
     private net.fortuna.ical4j.model.Date date(Date endDate) {

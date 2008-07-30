@@ -52,6 +52,8 @@ package internal.task;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.fortuna.ical4j.model.component.VToDo;
+
 import internal.AttributeConverter;
 
 import com.openexchange.groupware.tasks.Task;
@@ -62,7 +64,7 @@ import com.openexchange.groupware.tasks.Task;
  */
 public final class TaskConverters {
 
-    public static final AttributeConverter<Task>[] ALL;
+    public static final AttributeConverter<VToDo, Task>[] ALL;
 
     /**
      * Prevent instantiation.
@@ -72,9 +74,9 @@ public final class TaskConverters {
     }
 
     static {
-        final List<AttributeConverter<Task>> tmp = new ArrayList<AttributeConverter<Task>>();
+        final List<AttributeConverter<VToDo, Task>> tmp = new ArrayList<AttributeConverter<VToDo, Task>>();
         tmp.add(new Title());
         tmp.add(new Note());
-        ALL = (AttributeConverter<Task>[]) tmp.toArray();
+        ALL = (AttributeConverter<VToDo, Task>[]) tmp.toArray();
     }
 }

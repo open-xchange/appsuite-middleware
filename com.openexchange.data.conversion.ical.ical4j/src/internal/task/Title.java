@@ -49,8 +49,7 @@
 
 package internal.task;
 
-import net.fortuna.ical4j.model.Component;
-import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.Summary;
 
 import com.openexchange.groupware.tasks.Task;
@@ -61,7 +60,7 @@ import internal.AttributeConverter;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Title implements AttributeConverter<Task> {
+public final class Title implements AttributeConverter<VToDo, Task> {
 
     /**
      * Default constructor.
@@ -80,15 +79,15 @@ public final class Title implements AttributeConverter<Task> {
     /**
      * {@inheritDoc}
      */
-    public void emit(final Task task, final CalendarComponent component) {
-        component.getProperties().add(new Summary(task.getTitle()));
+    public void emit(final Task task, final VToDo vtodo) {
+        vtodo.getProperties().add(new Summary(task.getTitle()));
     }
 
-    public boolean hasProperty(final Component component) {
-        return component.getProperty(Summary.SUMMARY) != null;
+    public boolean hasProperty(final VToDo vtodo) {
+        return vtodo.getProperty(Summary.SUMMARY) != null;
     }
 
-    public void parse(final Component component, final Task task) {
-        task.setTitle(component.getProperty(Summary.SUMMARY).getValue());
+    public void parse(final VToDo vtodo, final Task task) {
+        task.setTitle(vtodo.getProperty(Summary.SUMMARY).getValue());
     }
 }
