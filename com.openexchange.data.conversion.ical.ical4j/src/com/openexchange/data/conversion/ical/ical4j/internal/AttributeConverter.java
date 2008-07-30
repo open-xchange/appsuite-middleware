@@ -47,7 +47,7 @@
  *
  */
 
-package internal;
+package com.openexchange.data.conversion.ical.ical4j.internal;
 
 import net.fortuna.ical4j.model.component.CalendarComponent;
 

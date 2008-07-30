@@ -47,36 +47,47 @@
  *
  */
 
-package internal.task;
-
-import java.util.ArrayList;
-import java.util.List;
+package com.openexchange.data.conversion.ical.ical4j.internal.task;
 
 import net.fortuna.ical4j.model.component.VToDo;
+import net.fortuna.ical4j.model.property.Summary;
 
-import internal.AttributeConverter;
-
+import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
 import com.openexchange.groupware.tasks.Task;
+
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class TaskConverters {
-
-    public static final AttributeConverter<VToDo, Task>[] ALL;
+public final class Title implements AttributeConverter<VToDo, Task> {
 
     /**
-     * Prevent instantiation.
+     * Default constructor.
      */
-    private TaskConverters() {
+    public Title() {
         super();
     }
 
-    static {
-        final List<AttributeConverter<VToDo, Task>> tmp = new ArrayList<AttributeConverter<VToDo, Task>>();
-        tmp.add(new Title());
-        tmp.add(new Note());
-        ALL = (AttributeConverter<VToDo, Task>[]) tmp.toArray();
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isSet(final Task task) {
+        return task.containsTitle();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void emit(final Task task, final VToDo vtodo) {
+        vtodo.getProperties().add(new Summary(task.getTitle()));
+    }
+
+    public boolean hasProperty(final VToDo vtodo) {
+        return vtodo.getProperty(Summary.SUMMARY) != null;
+    }
+
+    public void parse(final VToDo vtodo, final Task task) {
+        task.setTitle(vtodo.getProperty(Summary.SUMMARY).getValue());
     }
 }
