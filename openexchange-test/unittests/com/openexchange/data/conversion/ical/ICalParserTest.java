@@ -46,28 +46,42 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.data.conversion.ical;
+
+import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import static com.openexchange.groupware.calendar.tools.CommonAppointments.recalculate;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
-import java.util.*;
-import java.text.SimpleDateFormat;
-
-import com.openexchange.groupware.container.*;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.MockUserLookup;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.tasks.Task;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.ResourceParticipant;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.MockUserLookup;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tasks.Task;
 
-
-import static com.openexchange.groupware.calendar.tools.CommonAppointments.*;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class ICalParserTest extends TestCase {
+
     private ICALFixtures fixtures;
     private ICalParser parser;
     private MockUserLookup users;

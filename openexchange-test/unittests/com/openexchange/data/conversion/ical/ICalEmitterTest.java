@@ -46,31 +46,37 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.data.conversion.ical;
 
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 
-import java.util.*;
-import java.io.Reader;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 
 import junit.framework.TestCase;
+
+import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class ICalEmitterTest extends TestCase {
-    private ICal4JEmitter emitter;
 
+    private ICal4JEmitter emitter;
 
     private AppointmentObject getDefault() {
         AppointmentObject app = new AppointmentObject();
-
 
         Date start = D("24/02/1981 10:00");
         Date end = D("24/02/1981 12:00");
@@ -107,7 +113,6 @@ public class ICalEmitterTest extends TestCase {
 
     public void testAppRecurrence() throws IOException {
 
-
         // DAILY
 
         AppointmentObject appointment = getDefault();
@@ -119,9 +124,7 @@ public class ICalEmitterTest extends TestCase {
 
         assertProperty(ical, "RRULE", "FREQ=DAILY;INTERVAL=2;COUNT=3");
 
-
         // WEEKLY
-
 
         appointment.setRecurrenceType(AppointmentObject.WEEKLY);
 
@@ -258,10 +261,19 @@ public class ICalEmitterTest extends TestCase {
         
     }
 
+    // --------------------------------- Tasks ---------------------------------
 
-    // Tasks
-
-    // TODO
+    /**
+     * Tests task emitter for title and note.
+     */
+    public void testTaskSimpleFields() throws IOException {
+        final Task task = new Task();
+        task.setTitle("The Title");
+        task.setNote("The Note");
+        final ICalFile ical = serialize(task);
+        assertProperty(ical, "SUMMARY", "The Title");
+        assertProperty(ical, "DESCRIPTION", "The Note");
+    }
 
     // SetUp
 
@@ -294,40 +306,44 @@ public class ICalEmitterTest extends TestCase {
         String icalText = emitter.writeAppointments(Arrays.asList(app), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
         return new ICalFile(new StringReader(icalText));
     }
-     
+
+    /**
+     * Serializes a task.
+     * @param task task to serialize.
+     * @return an iCal file.
+     * @throws IOException if serialization fails.
+     */
+    private ICalFile serialize(final Task task) throws IOException {
+        return new ICalFile(new StringReader(
+            emitter.writeTasks(
+                Arrays.asList(task),
+                new ArrayList<ConversionError>(),
+                new ArrayList<ConversionWarning>())));
+    }
 
     private static class ICalFile {
 
         private final List<String[]> lines = new ArrayList<String[]>();
-        private final StringBuffer allLines = new StringBuffer();
 
-        public ICalFile(Reader reader) throws IOException {
-            BufferedReader lines = new BufferedReader(reader);
+        public ICalFile(final Reader reader) throws IOException {
+            final BufferedReader lines = new BufferedReader(reader);
             String line = null;
             while((line = lines.readLine()) != null) {
                 addLine(line);
             }
         }
 
-        private void addLine(String line) {
-            allLines.append(line).append("\n");
-            StringBuilder b = new StringBuilder();
-            String key = null;
-            String value = null;
-            boolean buildValue = false;
-            for(int i = 0, size = line.length(); i < size; i++) {
-                char c = line.charAt(i);
-                if(c == ':' && !buildValue) {
-                    buildValue = true;
-                    key = b.toString();
-                    b.setLength(0);
-                } else {
-                    b.append(c);
-                }
+        private void addLine(final String line) {
+            int colonPos = line.indexOf(':');
+            final String key;
+            final String value;
+            if (-1 == colonPos) {
+                key = line;
+                value = "";
+            } else {
+                key = line.substring(0, colonPos);
+                value = line.substring(colonPos + 1);
             }
-
-            value = b.toString();
-
             lines.add(new String[]{key, value});
         }
 
@@ -335,8 +351,8 @@ public class ICalEmitterTest extends TestCase {
             return lines;
         }
 
-        public String getValue(String key) {
-            for(String[] line : lines) {
+        public String getValue(final String key) {
+            for(final String[] line : lines) {
                 if(line[0].equals(key)) {
                     return line[1];
                 }
@@ -344,8 +360,23 @@ public class ICalEmitterTest extends TestCase {
             return null;
         }
 
+        /**
+         * {@inheritDoc}
+         */
+        @Override
         public String toString() {
-            return allLines.toString();
+            final StringBuilder sb = new StringBuilder();
+            for (final String[] line : lines) {
+                final String key = line[0];
+                final String value = line[1];
+                sb.append(key);
+                if (!"".equals(value)) {
+                    sb.append(':');
+                    sb.append(value);
+                }
+                sb.append('\n');
+            }
+            return sb.toString();
         }
     }
 }
