@@ -1,4 +1,4 @@
-<project name="com.openexchange.data.conversion" default="install" basedir=".">
+<project name="com.openexchange.data.conversion.ical.ical4j" default="install" basedir=".">
 
     <!-- Customizable values -->
     <property name="destdir" value=""/>
@@ -12,7 +12,7 @@
 
     <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
-    <property name="composite.name" value="open-xchange-data-conversion-${version}"/>
+    <property name="composite.name" value="open-xchange-data-conversion-ical4j-${version}"/>
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
@@ -22,12 +22,21 @@
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
     <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
+    <property name="conversionjar" value="com.openexchange.data.conversion.jar"/>
+
+    <!-- Third party libs -->
+    <fileset dir="${lib.dir}" id="3rdpartyjars">
+        <include name="*.jar"/>
+        <exclude name="CVS"/>
+    </fileset>
 
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
+        <pathelement location="${bundlesdir}/${conversionjar}"/>
+        <fileset refid="3rdpartyjars"/>
     </path>
 
     <!-- Compile -->
@@ -47,6 +56,7 @@
         <jar jarfile="${tmp.dir}/${bundle.name}"
             manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
+            <fileset refid="3rdpartyjars"/>
         </jar>
     </target>
 
