@@ -55,6 +55,9 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.tasks.Task;
 
+import internal.AttributeConverter;
+import internal.task.TaskConverters;
+
 import java.util.List;
 import java.util.Date;
 
@@ -134,7 +137,11 @@ public class ICal4JEmitter implements ICalEmitter {
      */
     private VEvent createEvent(final Task task) {
         final VEvent vevent = new VEvent();
-        vevent.getProperties().add(new Summary(task.getTitle()));
+        for (final AttributeConverter<Task> converter : TaskConverters.ALL) {
+            if (converter.isSet(task)) {
+                converter.emit(task, vevent);
+            }
+        }
         vevent.getProperties().add(new Description(task.getNote()));
         return vevent;
     }
