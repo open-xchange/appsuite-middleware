@@ -127,13 +127,14 @@ public final class MailSaveDraftTest extends AbstractMailTest {
 				 * Check existence of former draft version
 				 */
 				Exception exc = null;
+				MailMessage tmp = null;
 				try {
-					mailAccess.getMessageStorage().getMessage(draftFullname, prevUid, false);
+					tmp = mailAccess.getMessageStorage().getMessage(draftFullname, prevUid, false);
 				} catch (final MailException e) {
 					prevUid = -1;
 					exc = e;
 				}
-				assertTrue("Former draft version still available", exc != null);
+				assertTrue("Former draft version still available", exc != null || tmp == null);
 				/*
 				 * Check content again
 				 */

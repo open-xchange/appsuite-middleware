@@ -68,6 +68,7 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.impl.OCLPermission;
@@ -480,25 +481,28 @@ public final class MailFolderTest extends AbstractMailTest {
 
 				final MailFolder updatedFolder = mailAccess.getFolderStorage().getFolder(fullname);
 				final OCLPermission[] perms = updatedFolder.getPermissions();
+				if (mailAccess.getMailConfig().getCapabilities().hasPermissions()) {
 
-				assertTrue("Unexpected number of permissions: " + perms.length, perms.length == 2);
+					assertTrue("Unexpected number of permissions: " + perms.length, perms.length == 2);
 
-				for (final OCLPermission permission : perms) {
-					if (permission.getEntity() == getUser()) {
-						assertTrue(permission.getFolderPermission() >= OCLPermission.CREATE_SUB_FOLDERS);
-						assertTrue(permission.getReadPermission() >= OCLPermission.READ_ALL_OBJECTS);
-						assertTrue(permission.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS);
-						assertTrue(permission.getDeletePermission() >= OCLPermission.DELETE_ALL_OBJECTS);
-						assertTrue(permission.isFolderAdmin());
-					} else if (permission.getEntity() == getSecondUser()) {
-						assertTrue(permission.getFolderPermission() == OCLPermission.READ_FOLDER);
-						assertTrue(permission.getReadPermission() >= OCLPermission.READ_ALL_OBJECTS);
-						assertTrue(permission.getWritePermission() == OCLPermission.NO_PERMISSIONS);
-						assertTrue(permission.getDeletePermission() == OCLPermission.NO_PERMISSIONS);
-						assertFalse(permission.isFolderAdmin());
+					for (final OCLPermission permission : perms) {
+						if (permission.getEntity() == getUser()) {
+							assertTrue(permission.getFolderPermission() >= OCLPermission.CREATE_SUB_FOLDERS);
+							assertTrue(permission.getReadPermission() >= OCLPermission.READ_ALL_OBJECTS);
+							assertTrue(permission.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS);
+							assertTrue(permission.getDeletePermission() >= OCLPermission.DELETE_ALL_OBJECTS);
+							assertTrue(permission.isFolderAdmin());
+						} else if (permission.getEntity() == getSecondUser()) {
+							assertTrue(permission.getFolderPermission() == OCLPermission.READ_FOLDER);
+							assertTrue(permission.getReadPermission() >= OCLPermission.READ_ALL_OBJECTS);
+							assertTrue(permission.getWritePermission() == OCLPermission.NO_PERMISSIONS);
+							assertTrue(permission.getDeletePermission() == OCLPermission.NO_PERMISSIONS);
+							assertFalse(permission.isFolderAdmin());
+						}
 					}
+				} else {
+					assertTrue("No default permission set!" + perms.length, perms.length == 1 && DefaultMailPermission.class.isInstance(perms[0]));
 				}
-
 			} finally {
 				if (fullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
