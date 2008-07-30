@@ -1125,7 +1125,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     final RecurringResults rss = CalendarRecurringCollection.calculateFirstRecurring(temp);
                     if (rss != null) {
                         final RecurringResult rs = rss.getRecurringResult(0);
-                        if (rss != null) {
+                        if (rs != null) {
                             cdao.setStartDate(new Date(rs.getStart()));
                             cdao.setEndDate(new Date(rs.getEnd()));
                         }
@@ -1140,41 +1140,29 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     // and then modify the recurring. Assume all data has been provided
                     boolean pattern_change = false;
                     
-                    if (cdao.containsInterval()) {
-                        if (cdao.getInterval() != edao.getInterval()) {
-                            pattern_change = true;
-                        }
-                    }
-                    if (cdao.containsDays()) {
-                        if (cdao.getDays() != edao.getDays()) {
-                            pattern_change = true;
-                        }
-                    }
-                    if (cdao.containsDayInMonth()) {
-                        if (cdao.getDayInMonth() != edao.getDayInMonth()) {
-                            pattern_change = true;
-                        }
-                    }
-                    if (cdao.containsMonth()) {
-                        if (cdao.getMonth() != edao.getMonth()) {
-                            pattern_change = true;
-                        }
-                    }
-                    if (cdao.containsOccurrence()) {
-                        if (cdao.getOccurrence() != edao.getOccurrence()) {
-                            cdao.removeUntil();
-                            edao.setUntil(new Date(CalendarRecurringCollection.normalizeLong(CalendarRecurringCollection.getOccurenceDate(cdao).getTime())));
-                            cdao.setEndDate(calculateRealRecurringEndDate(edao));
+                    if (cdao.containsInterval() && cdao.getInterval() != edao.getInterval()) {
+					    pattern_change = true;
+					}
+                    if (cdao.containsDays() && cdao.getDays() != edao.getDays()) {
+					    pattern_change = true;
+					}
+                    if (cdao.containsDayInMonth() && cdao.getDayInMonth() != edao.getDayInMonth()) {
+					    pattern_change = true;
+					}
+                    if (cdao.containsMonth() && cdao.getMonth() != edao.getMonth()) {
+					    pattern_change = true;
+					}
+                    if (cdao.containsOccurrence() && cdao.getOccurrence() != edao.getOccurrence()) {
+					    cdao.removeUntil();
+					    edao.setUntil(new Date(CalendarRecurringCollection.normalizeLong(CalendarRecurringCollection.getOccurenceDate(cdao).getTime())));
+					    cdao.setEndDate(calculateRealRecurringEndDate(edao));
 
-                            pattern_change = true;
-                        }
-                    }
-                    if (cdao.containsUntil()) {
-                        if (CalendarCommonCollection.check(cdao.getUntil(), edao.getUntil())) {
-                            cdao.setEndDate(calculateRealRecurringEndDate(cdao));
-                            pattern_change = true;
-                        }
-                    }
+					    pattern_change = true;
+					}
+                    if (cdao.containsUntil() && CalendarCommonCollection.check(cdao.getUntil(), edao.getUntil())) {
+					    cdao.setEndDate(calculateRealRecurringEndDate(cdao));
+					    pattern_change = true;
+					}
 
                     if(pattern_change) {
                         cdao.setRecurrence(null);
