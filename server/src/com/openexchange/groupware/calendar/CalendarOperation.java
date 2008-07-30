@@ -442,11 +442,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     }
     
     private final void prepareUpdate(final CalendarDataObject cdao, final int inFolder) {
-        if (cdao.containsParentFolderID()) {
-            if (inFolder != cdao.getParentFolderID()) {
-                cdao.setFolderMove(true);
-            }
-        }
+        if (cdao.containsParentFolderID() && inFolder != cdao.getParentFolderID()) {
+		    cdao.setFolderMove(true);
+		}
     }
     
     public static final void handleFullTime(final CalendarDataObject cdao) {
@@ -497,22 +495,20 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 	}
 
     public final boolean hasNext() {
-        if (co_rs != null) {
-            if (result_counter != MAX_RESULT_LIMIT) {
-                final boolean ret = has_next;
-                if (from == 0 && to == 0) {
-                    return ret;
-                }
-                if (ret) {
-                    from++;
-                    if (from <= to) {
-                        return ret;
-                    }
-                } else {
-                    return ret;
-                }
-            }
-        }
+        if (co_rs != null && result_counter != MAX_RESULT_LIMIT) {
+		    final boolean ret = has_next;
+		    if (from == 0 && to == 0) {
+		        return ret;
+		    }
+		    if (ret) {
+		        from++;
+		        if (from <= to) {
+		            return ret;
+		        }
+		    } else {
+		        return ret;
+		    }
+		}
         return false;
     }
     
@@ -556,212 +552,211 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             cdao.setContext(c);
             int g = 1;
             boolean bbs = false;
-            if (co_rs != null && cols != null) {
-                for (int a = 0; a < cols.length; a++) {
-                    try {
-                        switch (cols[a]) {
-                            case AppointmentObject.OBJECT_ID:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.OBJECT_ID) != null) {
-                                    cdao.setObjectID(setInt(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.TITLE:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.TITLE) != null) {
-                                    cdao.setTitle(setString(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.USERS:
-                                if (!cdao.containsUserParticipants() && !CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
-                                    final Participants users = cimp.getUserParticipants(cdao, readcon, uid);
-                                    cdao.setUsers(users.getUsers());
-                                    bbs = true;
-                                } else {
-                                    cdao.setFillUserParticipants();
-                                }
-                                break;
-                            case AppointmentObject.PARTICIPANTS:
-                                if (!CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
-                                    final Participants participants = cimp.getParticipants(cdao, readcon);
-                                    cdao.setParticipants(participants.getList());
-                                } else {
-                                    cdao.setFillParticipants();
-                                }
-                                break;
-                            case AppointmentObject.FOLDER_ID:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.FOLDER_ID) != null) {
-                                    if (oids == null) {
-                                        if (requested_folder != 0) {
-                                            cdao.setGlobalFolderID(requested_folder);
-                                            g++;
+            if (co_rs == null || cols == null) {
+            	throw new OXCalendarException(OXCalendarException.Code.SEARCH_ITERATOR_NULL);
+            }
+            for (int a = 0; a < cols.length; a++) {
+                try {
+                    switch (cols[a]) {
+                        case AppointmentObject.OBJECT_ID:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.OBJECT_ID) != null) {
+                                cdao.setObjectID(setInt(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.TITLE:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.TITLE) != null) {
+                                cdao.setTitle(setString(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.USERS:
+                            if (cdao.containsUserParticipants() || CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
+                                cdao.setFillUserParticipants();
+                            } else {
+                                final Participants users = cimp.getUserParticipants(cdao, readcon, uid);
+                                cdao.setUsers(users.getUsers());
+                                bbs = true;
+                            }
+                            break;
+                        case AppointmentObject.PARTICIPANTS:
+                            if (CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
+                                cdao.setFillParticipants();
+                            } else {
+                                final Participants participants = cimp.getParticipants(cdao, readcon);
+                                cdao.setParticipants(participants.getList());
+                            }
+                            break;
+                        case AppointmentObject.FOLDER_ID:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.FOLDER_ID) != null) {
+                                if (oids == null) {
+                                    if (requested_folder == 0) {
+                                        final int x = setInt(g++, co_rs);
+                                        if (x > 0) {
+                                            cdao.setGlobalFolderID(x);
                                         } else {
-                                            final int x = setInt(g++, co_rs);
-                                            if (x > 0) {
-                                                cdao.setGlobalFolderID(x);
+                                            if (bbs) {
+                                                cdao.setGlobalFolderID(cdao.getEffectiveFolderId());
+                                            } else if (!CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
+                                                final Participants users = cimp.getUserParticipants(cdao, readcon, uid);
+                                                cdao.setUsers(users.getUsers());
+                                                cdao.setGlobalFolderID(cdao.getEffectiveFolderId());
                                             } else {
-                                                if (bbs) {
-                                                    cdao.setGlobalFolderID(cdao.getEffectiveFolderId());
-                                                } else if (!CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
-                                                    final Participants users = cimp.getUserParticipants(cdao, readcon, uid);
-                                                    cdao.setUsers(users.getUsers());
-                                                    cdao.setGlobalFolderID(cdao.getEffectiveFolderId());
-                                                } else {
-                                                    cdao.setFillFolderID();
-                                                }
+                                                cdao.setFillFolderID();
                                             }
                                         }
                                     } else {
-                                        int index = result_counter;
-                                        if (oids[index][0] != cdao.getObjectID()) {
-                                            for (int x = 0; x < oids.length; x++) {
-                                                if (oids[x][0] == cdao.getObjectID()) {
-                                                    index = x;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                        cdao.setGlobalFolderID(oids[index][1]);
+                                        cdao.setGlobalFolderID(requested_folder);
                                         g++;
                                     }
-                                }
-                                break;
-                            case AppointmentObject.LOCATION:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.LOCATION) != null) {
-                                    cdao.setLocation(setString(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.SHOWN_AS:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.SHOWN_AS) != null) {
-                                    cdao.setShownAs(setInt(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.NOTE:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.NOTE) != null) {
-                                    cdao.setNote(setString(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.START_DATE:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.START_DATE) != null) {
-                                    cdao.setStartDate(setDate(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.END_DATE:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.END_DATE) != null) {
-                                    cdao.setEndDate(setDate(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.CREATED_BY:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.CREATED_BY) != null) {
-                                    cdao.setCreatedBy(setInt(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.MODIFIED_BY:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.MODIFIED_BY) != null) {
-                                    cdao.setModifiedBy(setInt(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.CREATION_DATE:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.CREATION_DATE) != null) {
-                                    cdao.setCreatingDate(setTimestamp(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.LAST_MODIFIED:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.LAST_MODIFIED) != null) {
-                                    cdao.setChangingDate(setTimestampFromLong(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.FULL_TIME:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.FULL_TIME) != null) {
-                                    cdao.setFullTime(setBooleanToInt(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.COLOR_LABEL:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.COLOR_LABEL) != null) {
-                                    cdao.setLabel(setInt(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.PRIVATE_FLAG:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.PRIVATE_FLAG) != null) {
-                                    cdao.setPrivateFlag(setBooleanToInt(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.NUMBER_OF_ATTACHMENTS:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.NUMBER_OF_ATTACHMENTS) != null) {
-                                    cdao.setNumberOfAttachments(setInt(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.RECURRENCE_ID:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.RECURRENCE_ID) != null) {
-                                    cdao.setRecurrenceID(setInt(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.CATEGORIES:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.CATEGORIES) != null) {
-                                    cdao.setCategories(setString(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.RECURRENCE_TYPE:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.RECURRENCE_TYPE) != null) {
-                                    cdao.setRecurrence(setString(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.CHANGE_EXCEPTIONS:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.CHANGE_EXCEPTIONS) != null) {
-                                    cdao.setExceptions(setString(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.DELETE_EXCEPTIONS:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.DELETE_EXCEPTIONS) != null) {
-                                    cdao.setDelExceptions(setString(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.RECURRENCE_CALCULATOR:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.RECURRENCE_CALCULATOR) != null) {
-                                    cdao.setRecurrenceCalculator(setInt(g++, co_rs));
-                                }
-                                break;
-                            case AppointmentObject.RECURRENCE_POSITION:
-                                if (CalendarCommonCollection.getFieldName(AppointmentObject.RECURRENCE_POSITION) != null) {
-                                    cdao.setRecurrencePosition(setInt(g++, co_rs));
-                                }
-                                break;
-                            case CalendarDataObject.TIMEZONE:
-                                if (CalendarCommonCollection.getFieldName(CalendarDataObject.TIMEZONE) != null) {
-                                    cdao.setTimezone(setString(g++, co_rs));
-                                    break;
-                                }
-                            default:
-                                throw new SearchIteratorException(SearchIteratorException.SearchIteratorCode.NOT_IMPLEMENTED, com.openexchange.groupware.EnumComponent.APPOINTMENT, cols[a]);
-                        }
-                    } catch(final SQLException sqle) {
-                        throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
-                    }
-                }
-                
-                if (cdao.isSequence()) {
-                    CalendarRecurringCollection.fillDAO(cdao);
-                    if (cdao.getObjectID() != cdao.getRecurrenceID()) {
-                        CalendarCommonCollection.removeRecurringType(cdao);
-                        if (cdao.getExceptions() != null) {
-                            try {
-                                final long exc = new Long(cdao.getExceptions()).longValue();
-                                cdao.setRecurrenceDatePosition(new Date(exc));
-                            } catch(final NumberFormatException nfe) {
-                                if (LOG.isWarnEnabled()) {
-                                    LOG.warn("Unable to calculate exception oid:context:exceptions "+cdao.getObjectID()+":"+cdao.getContextID()+":"+cdao.getExceptions());
+                                } else {
+                                    int index = result_counter;
+                                    if (oids[index][0] != cdao.getObjectID()) {
+                                        for (int x = 0; x < oids.length; x++) {
+                                            if (oids[x][0] == cdao.getObjectID()) {
+                                                index = x;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    cdao.setGlobalFolderID(oids[index][1]);
+                                    g++;
                                 }
                             }
-                        }
-                    } else {
-                        if (cdao.containsOccurrence()) {
-                            if (!cdao.containsUntil()) {
-                                // INFO: Sombody needs this value, have to check for side effects
-                                cdao.setUntil(new Date(CalendarRecurringCollection.normalizeLong((cdao.getStartDate().getTime() + (CalendarRecurringCollection.MILLI_DAY * cdao.getRecurrenceCalculator())))));
+                            break;
+                        case AppointmentObject.LOCATION:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.LOCATION) != null) {
+                                cdao.setLocation(setString(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.SHOWN_AS:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.SHOWN_AS) != null) {
+                                cdao.setShownAs(setInt(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.NOTE:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.NOTE) != null) {
+                                cdao.setNote(setString(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.START_DATE:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.START_DATE) != null) {
+                                cdao.setStartDate(setDate(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.END_DATE:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.END_DATE) != null) {
+                                cdao.setEndDate(setDate(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.CREATED_BY:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.CREATED_BY) != null) {
+                                cdao.setCreatedBy(setInt(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.MODIFIED_BY:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.MODIFIED_BY) != null) {
+                                cdao.setModifiedBy(setInt(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.CREATION_DATE:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.CREATION_DATE) != null) {
+                                cdao.setCreatingDate(setTimestamp(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.LAST_MODIFIED:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.LAST_MODIFIED) != null) {
+                                cdao.setChangingDate(setTimestampFromLong(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.FULL_TIME:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.FULL_TIME) != null) {
+                                cdao.setFullTime(setBooleanToInt(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.COLOR_LABEL:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.COLOR_LABEL) != null) {
+                                cdao.setLabel(setInt(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.PRIVATE_FLAG:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.PRIVATE_FLAG) != null) {
+                                cdao.setPrivateFlag(setBooleanToInt(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.NUMBER_OF_ATTACHMENTS:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.NUMBER_OF_ATTACHMENTS) != null) {
+                                cdao.setNumberOfAttachments(setInt(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.RECURRENCE_ID:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.RECURRENCE_ID) != null) {
+                                cdao.setRecurrenceID(setInt(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.CATEGORIES:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.CATEGORIES) != null) {
+                                cdao.setCategories(setString(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.RECURRENCE_TYPE:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.RECURRENCE_TYPE) != null) {
+                                cdao.setRecurrence(setString(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.CHANGE_EXCEPTIONS:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.CHANGE_EXCEPTIONS) != null) {
+                                cdao.setExceptions(setString(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.DELETE_EXCEPTIONS:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.DELETE_EXCEPTIONS) != null) {
+                                cdao.setDelExceptions(setString(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.RECURRENCE_CALCULATOR:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.RECURRENCE_CALCULATOR) != null) {
+                                cdao.setRecurrenceCalculator(setInt(g++, co_rs));
+                            }
+                            break;
+                        case AppointmentObject.RECURRENCE_POSITION:
+                            if (CalendarCommonCollection.getFieldName(AppointmentObject.RECURRENCE_POSITION) != null) {
+                                cdao.setRecurrencePosition(setInt(g++, co_rs));
+                            }
+                            break;
+                        case CalendarDataObject.TIMEZONE:
+                            if (CalendarCommonCollection.getFieldName(CalendarDataObject.TIMEZONE) != null) {
+                                cdao.setTimezone(setString(g++, co_rs));
+                                break;
+                            }
+                        default:
+                            throw new SearchIteratorException(SearchIteratorException.SearchIteratorCode.NOT_IMPLEMENTED, com.openexchange.groupware.EnumComponent.APPOINTMENT, cols[a]);
+                    }
+                } catch(final SQLException sqle) {
+                    throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+                }
+            }
+            
+            if (cdao.isSequence()) {
+                CalendarRecurringCollection.fillDAO(cdao);
+                if (cdao.getObjectID() != cdao.getRecurrenceID()) {
+                    CalendarCommonCollection.removeRecurringType(cdao);
+                    if (cdao.getExceptions() != null) {
+                        try {
+                            final long exc = new Long(cdao.getExceptions()).longValue();
+                            cdao.setRecurrenceDatePosition(new Date(exc));
+                        } catch(final NumberFormatException nfe) {
+                            if (LOG.isWarnEnabled()) {
+                                LOG.warn("Unable to calculate exception oid:context:exceptions "+cdao.getObjectID()+":"+cdao.getContextID()+":"+cdao.getExceptions());
                             }
                         }
                     }
+                } else {
+                    if (cdao.containsOccurrence()) {
+                        if (!cdao.containsUntil()) {
+                            // INFO: Sombody needs this value, have to check for side effects
+                            cdao.setUntil(new Date(CalendarRecurringCollection.normalizeLong((cdao.getStartDate().getTime() + (CalendarRecurringCollection.MILLI_DAY * cdao.getRecurrenceCalculator())))));
+                        }
+                    }
                 }
-            } else {
-                throw new OXCalendarException(OXCalendarException.Code.SEARCH_ITERATOR_NULL);
             }
             if (strict && oids != null) {
                 int index = result_counter;
