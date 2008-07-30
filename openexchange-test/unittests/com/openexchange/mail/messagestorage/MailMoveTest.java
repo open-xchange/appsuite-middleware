@@ -260,12 +260,13 @@ public final class MailMoveTest extends AbstractMailTest {
 
 					for (int i = 0; i < uids.length; i++) {
 						Exception exc = null;
+						MailMessage tmp = null;
 						try {
-							mailAccess.getMessageStorage().getMessage("INBOX", uids[i], false);
+							tmp = mailAccess.getMessageStorage().getMessage("INBOX", uids[i], false);
 						} catch (final Exception e) {
 							exc = e;
 						}
-						assertTrue("A moved message still exists in source folder", exc != null);
+						assertTrue("A moved message still exists in source folder", exc != null || tmp == null);
 					}
 
 				} finally {
