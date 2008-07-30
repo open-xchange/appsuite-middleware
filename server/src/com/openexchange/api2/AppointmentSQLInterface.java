@@ -119,7 +119,7 @@ public interface AppointmentSQLInterface {
 	 * @param since
 	 * all modification >= since
 	 * @param includePrivateFlag
-	 * <code>true</code> to include private-flag information, meaning to exclude private appointments when querying s shared folder; otherwise <code>false</code>
+	 * <code>true</code> to include private-flag information, meaning to exclude private appointments when querying a shared folder; otherwise <code>false</code>
 	 * @return A SearchIterator contains AppointmentObject
 	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
 	 */	 
