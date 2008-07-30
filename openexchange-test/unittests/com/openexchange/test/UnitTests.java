@@ -123,6 +123,8 @@ public class UnitTests {
 
 		tests.addTestSuite(com.openexchange.groupware.attach.AttachmentBaseTest.class);
 
+		tests.addTestSuite(com.openexchange.data.conversion.ical.ICalParserTest.class);
+        tests.addTestSuite(com.openexchange.data.conversion.ical.ICalEmitterTest.class);
 		tests.addTest(com.openexchange.groupware.importexport.ImportExportStandaloneSuite.suite());
 
 		tests.addTestSuite(com.openexchange.webdav.action.behaviour.RequestSpecificBehaviourRegistryTest.class);
