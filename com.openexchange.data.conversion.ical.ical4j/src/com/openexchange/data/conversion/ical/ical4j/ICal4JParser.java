@@ -50,6 +50,8 @@
 package com.openexchange.data.conversion.ical.ical4j;
 
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.groupware.container.*;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -92,7 +94,7 @@ public class ICal4JParser implements ICalParser {
     }
 
 
-    public List<AppointmentObject> parseAppointments(String icalText, TimeZone defaultTZ, Context ctx) {
+    public List<AppointmentObject> parseAppointments(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) {
         List<AppointmentObject> appointments = new ArrayList<AppointmentObject>();
         net.fortuna.ical4j.model.Calendar calendar = parse(icalText);
         for(Object componentObj : calendar.getComponents("VEVENT")) {
@@ -103,7 +105,7 @@ public class ICal4JParser implements ICalParser {
         return appointments;
     }
 
-    public List<Task> parseTasks(String icalText, TimeZone defaultTZ, Context ctx) {
+    public List<Task> parseTasks(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) {
         List<Task> tasks = new ArrayList<Task>();
         net.fortuna.ical4j.model.Calendar calendar = parse(icalText);
         for(Object componentObj : calendar.getComponents("VTODO")) {

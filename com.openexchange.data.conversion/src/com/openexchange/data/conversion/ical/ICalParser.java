@@ -60,7 +60,7 @@ import java.util.List;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public interface ICalParser {
-    List<AppointmentObject> parseAppointments(String icalText, TimeZone defaultTZ, Context ctx);
+    List<AppointmentObject> parseAppointments(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings);
 
-    List<Task> parseTasks(String icalText, TimeZone defaultTZ, Context context);
+    List<Task> parseTasks(String icalText, TimeZone defaultTZ, Context context, List<ConversionError> errors, List<ConversionWarning> warnings);
 }

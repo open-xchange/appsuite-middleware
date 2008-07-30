@@ -49,8 +49,18 @@
 
 package com.openexchange.data.conversion.ical;
 
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.tasks.Task;
+
+import java.util.List;
+
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public interface ICalEmitter {
+    //TODO: What about mixed exports?Tasks and Appointments
+    public String writeAppointments(List<AppointmentObject> appointmentObjects, List<ConversionError> errors, List<ConversionWarning> warnings);
+    public String writeTasks(List<Task> tasks, List<ConversionError> errors, List<ConversionWarning> warnings);
+
+    
 }

@@ -50,7 +50,10 @@
 package com.openexchange.data.conversion.ical.ical4j;
 
 import com.openexchange.data.conversion.ical.ICalEmitter;
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.tasks.Task;
 
 import java.util.List;
 import java.util.Date;
@@ -63,7 +66,7 @@ import net.fortuna.ical4j.model.component.VEvent;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class ICal4JEmitter implements ICalEmitter {
-    public String write(List<AppointmentObject> appointmentObjects) {
+    public String writeAppointments(List<AppointmentObject> appointmentObjects, List<ConversionError> errors, List<ConversionWarning> warnings) {
         Calendar calendar = new Calendar();
 
         for(AppointmentObject appointment : appointmentObjects) {
@@ -72,6 +75,10 @@ public class ICal4JEmitter implements ICalEmitter {
         }
 
         return calendar.toString();
+    }
+
+    public String writeTasks(List<Task> tasks, List<ConversionError> errors, List<ConversionWarning> warnings) {
+        return "";
     }
 
     private VEvent createEvent(AppointmentObject appointment) {
