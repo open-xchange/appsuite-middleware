@@ -49,31 +49,66 @@
 
 package com.openexchange.data.conversion.ical.ical4j;
 
-import com.openexchange.data.conversion.ical.ICalParser;
-import com.openexchange.data.conversion.ical.ConversionError;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.groupware.container.*;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tasks.Task;
+import internal.AttributeConverter;
+import internal.task.TaskConverters;
 
-import java.util.*;
-import java.util.TimeZone;
-import java.util.Calendar;
-import java.util.Date;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
-import net.fortuna.ical4j.model.*;
-import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.ComponentList;
+import net.fortuna.ical4j.model.DateList;
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.Dur;
+import net.fortuna.ical4j.model.NumberList;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.Recur;
+import net.fortuna.ical4j.model.WeekDay;
+import net.fortuna.ical4j.model.WeekDayList;
+import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.component.VAlarm;
+import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
-import net.fortuna.ical4j.model.property.*;
+import net.fortuna.ical4j.model.property.Attendee;
+import net.fortuna.ical4j.model.property.Categories;
+import net.fortuna.ical4j.model.property.Completed;
+import net.fortuna.ical4j.model.property.DateProperty;
+import net.fortuna.ical4j.model.property.DtEnd;
+import net.fortuna.ical4j.model.property.DtStart;
+import net.fortuna.ical4j.model.property.Due;
+import net.fortuna.ical4j.model.property.Duration;
+import net.fortuna.ical4j.model.property.ExDate;
+import net.fortuna.ical4j.model.property.RRule;
+import net.fortuna.ical4j.model.property.Resources;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.container.ResourceParticipant;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -97,27 +132,36 @@ public class ICal4JParser implements ICalParser {
     public List<AppointmentObject> parseAppointments(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) {
         List<AppointmentObject> appointments = new ArrayList<AppointmentObject>();
         net.fortuna.ical4j.model.Calendar calendar = parse(icalText);
-        for(Object componentObj : calendar.getComponents("VEVENT")) {
-            Component vevent = (Component) componentObj;
-            appointments.add(convertAppointment( vevent, defaultTZ, ctx ));
+        for (final Object componentObj : calendar.getComponents(VEvent.VEVENT)) {
+            if (componentObj instanceof VEvent) {
+                final VEvent vevent = (VEvent) componentObj;
+                appointments.add(convertAppointment(vevent, defaultTZ, ctx));
+            } else {
+                // FIXME
+            }
         }
-       
         return appointments;
     }
 
-    public List<Task> parseTasks(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) {
+    /**
+     * {@inheritDoc}
+     */
+    public List<Task> parseTasks(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
         List<Task> tasks = new ArrayList<Task>();
         net.fortuna.ical4j.model.Calendar calendar = parse(icalText);
-        for(Object componentObj : calendar.getComponents("VTODO")) {
-            Component vtodo = (Component) componentObj;
-            tasks.add(convertTask( vtodo, defaultTZ, ctx ));
+        for (final Object componentObj : calendar.getComponents(VToDo.VTODO)) {
+            if (componentObj instanceof VToDo) {
+                final VToDo vtodo = (VToDo) componentObj;
+                tasks.add(convertTask( vtodo, defaultTZ, ctx));
+            } else {
+                // FIXME
+            }
         }
-
         return tasks;
     }
 
 
-    protected AppointmentObject convertAppointment(Component vevent, TimeZone defaultTZ, Context ctx) {
+    protected AppointmentObject convertAppointment(final VEvent vevent, TimeZone defaultTZ, Context ctx) {
 
         AppointmentObject appointment = new AppointmentObject();
 
@@ -143,13 +187,15 @@ public class ICal4JParser implements ICalParser {
         return appointment;
     }
 
-    protected Task convertTask(Component vtodo, TimeZone defaultTZ, Context ctx) {
-        Task task = new Task();
+    protected Task convertTask(VToDo vtodo, TimeZone defaultTZ, Context ctx) {
+        final TimeZone tz = determineTimeZone(vtodo, defaultTZ);
+        final Task task = new Task();
+        for (final AttributeConverter<Task> converter : TaskConverters.ALL) {
+            if (converter.hasProperty(vtodo)) {
+                converter.parse(vtodo, task);
+            }
+        }
 
-        TimeZone tz = determineTimeZone(vtodo, defaultTZ);
-
-        setTitle(task, vtodo);
-        setDescription(task, vtodo);
         setStart(task, vtodo, tz);
         setEnd(task, vtodo, tz);
         if(null == task.getEndDate())  {
@@ -537,10 +583,10 @@ public class ICal4JParser implements ICalParser {
         return date;
     }
 
-    private TimeZone determineTimeZone(Component vevent, TimeZone defaultTZ) {
+    private TimeZone determineTimeZone(final CalendarComponent component, TimeZone defaultTZ) {
 
         for(String name : new String[]{"DTSTART", "DTEND", "DUE", "COMPLETED"}) {
-            DateProperty dateProp = (DateProperty) vevent.getProperty(name);
+            DateProperty dateProp = (DateProperty) component.getProperty(name);
             if(dateProp != null) {
                 return chooseTimeZone(dateProp, defaultTZ);
             }

@@ -49,9 +49,11 @@
 
 package internal;
 
-import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.component.CalendarComponent;
 
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  *
@@ -66,6 +68,10 @@ public interface AttributeConverter<U extends CalendarObject> {
      */
     boolean isSet(final U u);
 
-    void emit(final U u, final VEvent vevent);
+    void emit(final U u, final CalendarComponent component);
+
+    boolean hasProperty(final Component component);
+
+    void parse(final Component component, final Task task);
 
 }

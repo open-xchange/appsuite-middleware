@@ -49,7 +49,8 @@
 
 package internal.task;
 
-import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.Description;
 
 import com.openexchange.groupware.tasks.Task;
@@ -79,7 +80,15 @@ public final class Note implements AttributeConverter<Task> {
     /**
      * {@inheritDoc}
      */
-    public void emit(final Task task, final VEvent vevent) {
-        vevent.getProperties().add(new Description(task.getNote()));
+    public void emit(final Task task, final CalendarComponent component) {
+        component.getProperties().add(new Description(task.getNote()));
+    }
+
+    public boolean hasProperty(final Component component) {
+        return null != component.getProperty(Description.DESCRIPTION);
+    }
+
+    public void parse(final Component component, final Task task) {
+        task.setNote(component.getProperty(Description.DESCRIPTION).getValue());
     }
 }
