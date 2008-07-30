@@ -52,6 +52,8 @@ package com.openexchange.data.conversion.ical.ical4j;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.task.TaskConverters;
 import com.openexchange.groupware.container.*;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -74,8 +76,6 @@ import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import internal.AttributeConverter;
-import internal.task.TaskConverters;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -133,20 +133,25 @@ public class ICal4JParser implements ICalParser {
 
         TimeZone tz = determineTimeZone(vevent, defaultTZ);
 
-        setStart(appointment, vevent, tz);
+        if(!setStart(appointment, vevent, tz)) {
+            throw new ConversionError("Missing DTSTART");
+        }
         setEnd(appointment, vevent, tz);
         applyDuration(appointment, vevent);
-        applyClass(appointment, vevent);
+        if(!appointment.containsEndDate())  {
+            throw new ConversionError("DTEND or Duration required");
+        }
+        applyClass(appointment, vevent, warnings);
         setTitle(appointment, vevent);
         setDescription(appointment, vevent);
         setLocation(appointment,  vevent);
         applyTransparency(appointment, vevent);
         setParticipants(appointment, vevent, ctx);
         setCategories(appointment, vevent);
-        setRecurrence(appointment, vevent, tz);
+        setRecurrence(appointment, vevent, tz, warnings);
         setDeleteExceptions(appointment, vevent, tz);
 
-        setAlarm(appointment, vevent, tz);
+        setAlarm(appointment, vevent, tz, warnings);
 
         appointment.setTimezone(getTimeZoneID(tz));
 
@@ -161,7 +166,7 @@ public class ICal4JParser implements ICalParser {
                 converter.parse(vtodo, task);
             }
         }
-
+        
         setTitle(task, vtodo);
         setDescription(task, vtodo);
         setStart(task, vtodo, tz);
@@ -171,12 +176,12 @@ public class ICal4JParser implements ICalParser {
         }
         setDateCompleted(task, vtodo, tz);
         applyDuration(task, vtodo);
-        applyClass(task, vtodo);
+        applyClass(task, vtodo, warnings);
         setParticipants(task, vtodo, ctx);
         setCategories(task, vtodo);
-        setRecurrence(task, vtodo, tz);
+        setRecurrence(task, vtodo, tz, warnings);
         setDeleteExceptions(task, vtodo, tz);
-        setAlarm(task, vtodo, tz);
+        setAlarm(task, vtodo, tz, warnings);
 
         setPercentComplete(task, vtodo);
         setPriority(task, vtodo);
@@ -185,13 +190,14 @@ public class ICal4JParser implements ICalParser {
         return task;
     }
 
-    private void setStart(CalendarObject cObj, Component component, TimeZone tz) {
+    private boolean setStart(CalendarObject cObj, Component component, TimeZone tz) {
         DtStart start = (DtStart) component.getProperty("DTSTART");
         if(null == start) {
-            return;
+            return false;
         }
         Date startDate = toDate(start, tz);
         cObj.setStartDate(startDate);
+        return true;
     }
 
     private void setEnd(CalendarObject cObj, Component component, TimeZone tz) {
@@ -273,9 +279,19 @@ public class ICal4JParser implements ICalParser {
         cObj.setEndDate(endDate);
     }
 
-    private void applyClass(CalendarObject cObj, Component component) {
+    private void applyClass(CalendarObject cObj, Component component, List<ConversionWarning> warnings) throws ConversionError {
         if(component.getProperty("CLASS") != null) {
-            cObj.setPrivateFlag("private".equals(component.getProperty("CLASS").getValue()));
+            String clazz = component.getProperty("CLASS").getValue();
+            if(clazz.equalsIgnoreCase("private")) {
+                cObj.setPrivateFlag(true);
+            } else if (clazz.equalsIgnoreCase("public")) {
+                cObj.setPrivateFlag(false);
+            } else if(clazz.equalsIgnoreCase("confidential")) {
+                throw new ConversionError("Cowardly refusing to convert confidential appointment");
+            } else {
+                warnings.add(new ConversionWarning("Unknown Class: %s", clazz));
+            }
+
         }
     }
 
@@ -363,7 +379,7 @@ public class ICal4JParser implements ICalParser {
         cObj.setCategories(bob.toString());
     }
 
-    private void setRecurrence(CalendarObject cObj, Component component, TimeZone tz) {
+    private void setRecurrence(CalendarObject cObj, Component component, TimeZone tz, List<ConversionWarning> warnings) throws ConversionError {
         if(null == cObj.getStartDate()) {
             return;
         }
@@ -373,6 +389,9 @@ public class ICal4JParser implements ICalParser {
         PropertyList list = component.getProperties("RRULE");
         if(list.isEmpty()) {
             return;
+        }
+        if(list.size() > 1) {
+            warnings.add(new ConversionWarning("Only converting first recurrence rule, additional recurrence rules will be ignored."));
         }
         Recur rrule = ((RRule) list.get(0)).getRecur();
 
@@ -397,6 +416,8 @@ public class ICal4JParser implements ICalParser {
             }
 
 
+        } else {
+            warnings.add(new ConversionWarning("Can only convert DAILY, WEEKLY, MONTHLY and YEARLY recurrences"));
         }
         cObj.setInterval(rrule.getInterval());
         int count = rrule.getCount();
@@ -408,7 +429,7 @@ public class ICal4JParser implements ICalParser {
 
     }
 
-    private void setMonthDay(CalendarObject cObj, Recur rrule, Calendar startDate) {
+    private void setMonthDay(CalendarObject cObj, Recur rrule, Calendar startDate) throws ConversionError {
         NumberList monthDayList = rrule.getMonthDayList();
         if(!monthDayList.isEmpty()) {
             cObj.setDayInMonth((Integer)monthDayList.get(0));
@@ -426,13 +447,17 @@ public class ICal4JParser implements ICalParser {
         }
     }
 
-    private void setDays(CalendarObject cObj, Recur rrule, Calendar startDate) {
+    private void setDays(CalendarObject cObj, Recur rrule, Calendar startDate) throws ConversionError {
         WeekDayList weekdayList = rrule.getDayList();
         if(!weekdayList.isEmpty()) {
             int days = 0;
             for(int i = 0, size = weekdayList.size(); i < size; i++) {
                 WeekDay weekday = (WeekDay) weekdayList.get(i);
-                days |= weekdays.get(weekday.getDay());
+                Integer day = weekdays.get(weekday.getDay());
+                if(null == day) {
+                    throw new ConversionError("Unknown day: %s", weekday.getDay());
+                }
+                days |= day;
             }
             cObj.setDays(days);
         } else {
@@ -479,9 +504,9 @@ public class ICal4JParser implements ICalParser {
         return new Date(icaldate.getTime());
     }
 
-    private void setAlarm(CalendarObject cObj, Component component, TimeZone tz) {
+    private void setAlarm(CalendarObject cObj, Component component, TimeZone tz, List<ConversionWarning> warnings) {
 
-        VAlarm alarm = getAlarm(component);
+        VAlarm alarm = getAlarm(component, warnings);
 
         if(alarm == null) {
             return;
@@ -519,7 +544,7 @@ public class ICal4JParser implements ICalParser {
 
     }
 
-    private VAlarm getAlarm(Component component) {
+    private VAlarm getAlarm(Component component, List<ConversionWarning> warnings) {
         ComponentList alarms = null;
         if(VEvent.class.isAssignableFrom(component.getClass())) {
             VEvent event = (VEvent) component;
@@ -538,6 +563,7 @@ public class ICal4JParser implements ICalParser {
             if("DISPLAY".equalsIgnoreCase(alarm.getAction().getValue())) {
                 return alarm;
             }
+            warnings.add(new ConversionWarning("Can only convert DISPLAY alarms"));
 
         }
         return null;

@@ -52,11 +52,10 @@ package com.openexchange.data.conversion.ical.ical4j;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.task.TaskConverters;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.tasks.Task;
-
-import internal.AttributeConverter;
-import internal.task.TaskConverters;
 
 import java.util.List;
 import java.util.Date;

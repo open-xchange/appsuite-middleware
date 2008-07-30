@@ -77,6 +77,6 @@ public final class TaskConverters {
         final List<AttributeConverter<VToDo, Task>> tmp = new ArrayList<AttributeConverter<VToDo, Task>>();
         tmp.add(new Title());
         tmp.add(new Note());
-        ALL = (AttributeConverter<VToDo, Task>[]) tmp.toArray();
+        ALL = (AttributeConverter<VToDo, Task>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
     }
 }
