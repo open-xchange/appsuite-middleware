@@ -47,48 +47,37 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.ical4j.internal.task;
+package com.openexchange.data.conversion.ical.ical4j.internal;
 
-import java.util.TimeZone;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.fortuna.ical4j.model.component.VToDo;
-import net.fortuna.ical4j.model.property.Description;
 
-import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
+
+import com.openexchange.data.conversion.ical.ical4j.internal.task.Note;
+import com.openexchange.data.conversion.ical.ical4j.internal.task.Title;
 import com.openexchange.groupware.tasks.Task;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Note implements AttributeConverter<VToDo, Task> {
+public final class TaskConverters {
+
+    public static final AttributeConverter<VToDo, Task>[] ALL;
 
     /**
-     * Default constructor.
+     * Prevent instantiation.
      */
-    public Note() {
+    private TaskConverters() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public boolean isSet(final Task task) {
-        return task.containsNote();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void emit(final Task task, final VToDo vtodo) {
-        vtodo.getProperties().add(new Description(task.getNote()));
-    }
-
-    public boolean hasProperty(final VToDo vtodo) {
-        return null != vtodo.getProperty(Description.DESCRIPTION);
-    }
-
-    public void parse(final VToDo vtodo, final Task task, final TimeZone timeZone) {
-        task.setNote(vtodo.getProperty(Description.DESCRIPTION).getValue());
+    static {
+        final List<AttributeConverter<VToDo, Task>> tmp = new ArrayList<AttributeConverter<VToDo, Task>>();
+        tmp.add(new Title());
+        tmp.add(new Note());
+        ALL = (AttributeConverter<VToDo, Task>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
     }
 }

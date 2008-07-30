@@ -49,6 +49,8 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
+import java.util.TimeZone;
+
 import net.fortuna.ical4j.model.component.CalendarComponent;
 
 import com.openexchange.groupware.container.CalendarObject;
@@ -64,12 +66,12 @@ public interface AttributeConverter<T extends CalendarComponent, U extends Calen
      * @param task Task object.
      * @return <code>true</code> if the attribute is defined.
      */
-    boolean isSet(final U u);
+    boolean isSet(U u);
 
-    void emit(final U u, final T t);
+    void emit(U u, T t);
 
-    boolean hasProperty(final T t);
+    boolean hasProperty(T t);
 
-    void parse(final T t, final U u);
+    void parse(T t, U u, TimeZone timeZone);
 
 }

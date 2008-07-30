@@ -49,33 +49,67 @@
 
 package com.openexchange.data.conversion.ical.ical4j;
 
-import com.openexchange.data.conversion.ical.ICalParser;
-import com.openexchange.data.conversion.ical.ConversionError;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
-import com.openexchange.data.conversion.ical.ical4j.internal.task.TaskConverters;
-import com.openexchange.groupware.container.*;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tasks.Task;
 
-import java.util.*;
-import java.util.TimeZone;
-import java.util.Calendar;
-import java.util.Date;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
-import net.fortuna.ical4j.model.*;
-import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.ComponentList;
+import net.fortuna.ical4j.model.DateList;
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.Dur;
+import net.fortuna.ical4j.model.NumberList;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.Recur;
+import net.fortuna.ical4j.model.WeekDay;
+import net.fortuna.ical4j.model.WeekDayList;
+import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.component.VAlarm;
+import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
-import net.fortuna.ical4j.model.property.*;
+import net.fortuna.ical4j.model.property.Attendee;
+import net.fortuna.ical4j.model.property.Categories;
+import net.fortuna.ical4j.model.property.Completed;
+import net.fortuna.ical4j.model.property.DateProperty;
+import net.fortuna.ical4j.model.property.DtEnd;
+import net.fortuna.ical4j.model.property.DtStart;
+import net.fortuna.ical4j.model.property.Due;
+import net.fortuna.ical4j.model.property.Duration;
+import net.fortuna.ical4j.model.property.ExDate;
+import net.fortuna.ical4j.model.property.RRule;
+import net.fortuna.ical4j.model.property.Resources;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
+import com.openexchange.data.conversion.ical.ical4j.internal.Tools;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.container.ResourceParticipant;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -163,7 +197,7 @@ public class ICal4JParser implements ICalParser {
         final Task task = new Task();
         for (final AttributeConverter<VToDo, Task> converter : TaskConverters.ALL) {
             if (converter.hasProperty(vtodo)) {
-                converter.parse(vtodo, task);
+                converter.parse(vtodo, task, tz);
             }
         }
         
@@ -424,7 +458,7 @@ public class ICal4JParser implements ICalParser {
         if(-1 != count) {
             cObj.setRecurrenceCount(rrule.getCount());
         } else {
-            cObj.setUntil(recalculate(new Date(rrule.getUntil().getTime()), tz));
+            cObj.setUntil(Tools.recalculate(new Date(rrule.getUntil().getTime()), tz));
         }
 
     }
@@ -499,7 +533,7 @@ public class ICal4JParser implements ICalParser {
             mustRecalculate = !dateTime.isUtc();
         }
         if(mustRecalculate) {
-            return recalculate(icaldate, tz);
+            return Tools.recalculate(icaldate, tz);
         }
         return new Date(icaldate.getTime());
     }
@@ -571,17 +605,17 @@ public class ICal4JParser implements ICalParser {
 
     private Date toDate(DateProperty dateProperty, TimeZone tz) {
         Date date = new Date(dateProperty.getDate().getTime());
-        if(inDefaultTimeZone(dateProperty, tz)) {
-            date = recalculate(date, tz);
+        if (Tools.inDefaultTimeZone(dateProperty, tz)) {
+            date = Tools.recalculate(date, tz);
         }
         return date;
     }
 
-    private TimeZone determineTimeZone(Component vevent, TimeZone defaultTZ) throws ConversionError {
-
-        for(String name : new String[]{"DTSTART", "DTEND", "DUE", "COMPLETED"}) {
-            DateProperty dateProp = (DateProperty) vevent.getProperty(name);
-            if(dateProp != null) {
+    private static final TimeZone determineTimeZone(final CalendarComponent component,
+        final TimeZone defaultTZ) throws ConversionError {
+        for (String name : new String[] { DtStart.DTSTART, DtEnd.DTEND, Due.DUE, Completed.COMPLETED }) {
+            final DateProperty dateProp = (DateProperty) component.getProperty(name);
+            if (dateProp != null) {
                 return chooseTimeZone(dateProp, defaultTZ);
             }
         }
@@ -589,13 +623,12 @@ public class ICal4JParser implements ICalParser {
         return null;
     }
 
-    private TimeZone chooseTimeZone(DateProperty start, TimeZone defaultTZ) {
+    private static final TimeZone chooseTimeZone(DateProperty dateProperty, TimeZone defaultTZ) {
         TimeZone tz = defaultTZ;
-        if(start.isUtc()) {
+        if (dateProperty.isUtc()) {
             tz = TimeZone.getTimeZone("UTC");
         }
-
-        TimeZone inTZID = (null != start.getParameter("TZID")) ? TimeZone.getTimeZone(start.getParameter("TZID").getValue()) : null;
+        TimeZone inTZID = (null != dateProperty.getParameter("TZID")) ? TimeZone.getTimeZone(dateProperty.getParameter("TZID").getValue()) : null;
         if (null != inTZID) {
             tz = inTZID;
         }
@@ -611,28 +644,6 @@ public class ICal4JParser implements ICalParser {
         }
         return tz.getID();
     }                                                                                                                                           
-
-    private boolean inDefaultTimeZone(DateProperty dateProperty, TimeZone tz) {
-        if(dateProperty.getParameter("TZID") != null) {
-            return false;
-        }
-        return !dateProperty.isUtc();
-    }
-
-    // Transforms date from the default timezone to the date in the given timezone.
-    private Date recalculate(Date date, TimeZone tz) {
-
-        java.util.Calendar inDefault = new GregorianCalendar();
-        inDefault.setTime(date);
-
-        java.util.Calendar inTimeZone = new GregorianCalendar();
-        inTimeZone.setTimeZone(tz);
-        inTimeZone.set(inDefault.get(java.util.Calendar.YEAR), inDefault.get(java.util.Calendar.MONTH), inDefault.get(java.util.Calendar.DATE), inDefault.get(java.util.Calendar.HOUR_OF_DAY), inDefault.get(java.util.Calendar.MINUTE), inDefault.get(java.util.Calendar.SECOND));
-        inTimeZone.set(java.util.Calendar.MILLISECOND, 0);
-        return inTimeZone.getTime();
-    }
-
-
 
     private net.fortuna.ical4j.model.Calendar parse(String icalText) {
         CalendarBuilder builder = new CalendarBuilder();

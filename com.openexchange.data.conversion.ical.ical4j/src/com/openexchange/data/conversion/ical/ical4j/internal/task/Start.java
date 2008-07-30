@@ -51,44 +51,54 @@ package com.openexchange.data.conversion.ical.ical4j.internal.task;
 
 import java.util.TimeZone;
 
+import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.component.VToDo;
-import net.fortuna.ical4j.model.property.Description;
+import net.fortuna.ical4j.model.property.DtStart;
 
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.Tools;
 import com.openexchange.groupware.tasks.Task;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Note implements AttributeConverter<VToDo, Task> {
+public final class Start implements AttributeConverter<VToDo, Task> {
 
     /**
      * Default constructor.
      */
-    public Note() {
+    public Start() {
         super();
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean isSet(final Task task) {
-        return task.containsNote();
+    public void emit(final Task task, final VToDo vtodo) {
+        final DtStart start = new DtStart();
+        start.setDate(new Date(task.getStartDate()));
+        vtodo.getProperties().add(start);
     }
 
     /**
      * {@inheritDoc}
      */
-    public void emit(final Task task, final VToDo vtodo) {
-        vtodo.getProperties().add(new Description(task.getNote()));
-    }
-
     public boolean hasProperty(final VToDo vtodo) {
-        return null != vtodo.getProperty(Description.DESCRIPTION);
+        return null != vtodo.getProperty(DtStart.DTSTART);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isSet(final Task task) {
+        return task.containsStartDate();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void parse(final VToDo vtodo, final Task task, final TimeZone timeZone) {
-        task.setNote(vtodo.getProperty(Description.DESCRIPTION).getValue());
+        task.setStartDate(Tools.parseDate(vtodo, new DtStart(), timeZone));
     }
 }

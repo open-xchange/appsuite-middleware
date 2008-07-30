@@ -49,6 +49,8 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal.task;
 
+import java.util.TimeZone;
+
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.Summary;
 
@@ -83,11 +85,17 @@ public final class Title implements AttributeConverter<VToDo, Task> {
         vtodo.getProperties().add(new Summary(task.getTitle()));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public boolean hasProperty(final VToDo vtodo) {
-        return vtodo.getProperty(Summary.SUMMARY) != null;
+        return null != vtodo.getProperty(Summary.SUMMARY);
     }
 
-    public void parse(final VToDo vtodo, final Task task) {
+    /**
+     * {@inheritDoc}
+     */
+    public void parse(final VToDo vtodo, final Task task, final TimeZone timeZone) {
         task.setTitle(vtodo.getProperty(Summary.SUMMARY).getValue());
     }
 }
