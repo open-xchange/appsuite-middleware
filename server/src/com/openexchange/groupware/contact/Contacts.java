@@ -629,6 +629,35 @@ public final class Contacts {
 		}
 	}
 
+	/**
+	 * Gets the folder ID from storage (since GUI misses to keep current folder ID in its requests)
+	 * <p>
+	 * This a only a work-around, so delete if bug #11753 is fixed by GUI team!
+	 * 
+	 * @param objectId The contact ID
+	 * @param user The user ID
+	 * @param group The user's group IDs
+	 * @param uc The user configuration
+	 * @param ctx The context
+	 * @return The folder ID fetched from storage
+	 * @throws OXException If folder ID cannot be fetched from storage
+	 */
+	private static int getRealFolderID(final int objectId, final int user, final int[] group,
+			final UserConfiguration uc, final Context ctx) throws OXException {
+		final Connection readCon;
+		try {
+			readCon = DBPool.pickup(ctx);
+		} catch (final DBPoolingException e) {
+			throw new ContactException(e);
+		}
+		try {
+			return Contacts.getContactById(objectId, user, group, ctx, uc, readCon).getParentFolderID();
+		} finally {
+			DBPool.closeReaderSilent(ctx, readCon);
+		}
+
+	}
+
 	@OXThrowsMultiple(category = { Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION,
 			Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR, Category.PERMISSION, Category.PERMISSION,
 			Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT,
@@ -660,7 +689,7 @@ public final class Contacts {
 			"Unable to compare contacts for update. Make sure you have entered a valid display name. Context %1$d Object %2$d",
 			"The name you entered is not available. Choose another display name. Context %1$d Object %2$d",
 			ContactException.NO_DELETE_PERMISSION_MSG, "Primary email address in system contact must not be edited: Context %1$d Object %2$d User %3$d" })
-	public static void performContactStorageUpdate(final ContactObject co, final int fid,
+	public static void performContactStorageUpdate(final ContactObject co, final int fidArg,
 			final java.util.Date client_date, final int user, final int[] group, final Context ctx,
 			final UserConfiguration uc) throws ContactException, OXConflictException, OXObjectNotFoundException,
 			OXConcurrentModificationException, OXException {
@@ -672,6 +701,8 @@ public final class Contacts {
 		 * co.getDisplayName() == null || co.getDisplayName().length() < 1)){
 		 * throw EXCEPTIONS.createOXConflictException(63,ctx.getContextId()); }
 		 */
+		// Get real folder ID since GUI misses to keep current folder ID in its request
+		final int fid = getRealFolderID(co.getObjectID(), user, group, uc, ctx);
 
 		if (FolderObject.SYSTEM_LDAP_FOLDER_ID == fid && co.containsEmail1() && ctx.getMailadmin() != user) {
 			final Connection readCon;
