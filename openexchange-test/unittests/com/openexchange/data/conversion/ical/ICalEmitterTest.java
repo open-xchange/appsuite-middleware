@@ -49,7 +49,6 @@
 package com.openexchange.data.conversion.ical;
 
 import com.openexchange.groupware.container.AppointmentObject;
-import static com.openexchange.data.conversion.ical.DateHelper.*;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 
@@ -262,6 +261,7 @@ public class ICalEmitterTest extends TestCase {
 
     // Tasks
 
+    // TODO
 
     // SetUp
 
