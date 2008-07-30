@@ -47,58 +47,64 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.ical4j.internal.task;
+package com.openexchange.data.conversion.ical.ical4j.internal;
 
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import net.fortuna.ical4j.model.Date;
-import net.fortuna.ical4j.model.component.VToDo;
-import net.fortuna.ical4j.model.property.DtStart;
-
-import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
-import com.openexchange.data.conversion.ical.ical4j.internal.Tools;
-import com.openexchange.groupware.tasks.Task;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.property.DateProperty;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Start implements AttributeConverter<VToDo, Task> {
+public final class ParserTools {
 
     /**
-     * Default constructor.
+     * Prevent instantiation.
      */
-    public Start() {
+    private ParserTools() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void emit(final Task task, final VToDo vtodo) {
-        final DtStart start = new DtStart();
-        start.setDate(new Date(task.getStartDate()));
-        vtodo.getProperties().add(start);
+    public static final Date parseDate(final CalendarComponent component,
+        final DateProperty property, final TimeZone timeZone) {
+        final DateProperty value = (DateProperty) component.getProperty(
+            property.getName());
+        Date retval = new Date(value.getDate().getTime());
+        if (inDefaultTimeZone(value, timeZone)) {
+            retval = recalculate(retval, timeZone);
+        }
+        return retval;
+    }
+
+    public static boolean inDefaultTimeZone(final DateProperty dateProperty,
+        final TimeZone timeZone) {
+        if (dateProperty.getParameter("TZID") != null) {
+            return false;
+        }
+        return !dateProperty.isUtc();
     }
 
     /**
-     * {@inheritDoc}
+     * Transforms date from the default timezone to the date in the given timezone.
      */
-    public boolean hasProperty(final VToDo vtodo) {
-        return null != vtodo.getProperty(DtStart.DTSTART);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public boolean isSet(final Task task) {
-        return task.containsStartDate();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void parse(final VToDo vtodo, final Task task, final TimeZone timeZone) {
-        task.setStartDate(Tools.parseDate(vtodo, new DtStart(), timeZone));
+    public static Date recalculate(final Date date, final TimeZone timeZone) {
+    
+        java.util.Calendar inDefault = new GregorianCalendar();
+        inDefault.setTime(date);
+    
+        java.util.Calendar inTimeZone = new GregorianCalendar();
+        inTimeZone.setTimeZone(timeZone);
+        inTimeZone.set(inDefault.get(java.util.Calendar.YEAR),
+            inDefault.get(java.util.Calendar.MONTH),
+            inDefault.get(java.util.Calendar.DATE),
+            inDefault.get(java.util.Calendar.HOUR_OF_DAY),
+            inDefault.get(java.util.Calendar.MINUTE),
+            inDefault.get(java.util.Calendar.SECOND));
+        inTimeZone.set(java.util.Calendar.MILLISECOND, 0);
+        return inTimeZone.getTime();
     }
 }

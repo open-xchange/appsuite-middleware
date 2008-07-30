@@ -47,40 +47,59 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.ical4j.internal;
+package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-import java.util.ArrayList;
-import java.util.List;
+import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDateTime;
+import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.parseDate;
 
-import net.fortuna.ical4j.model.component.VToDo;
+import java.util.TimeZone;
 
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.End;
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Start;
-import com.openexchange.data.conversion.ical.ical4j.internal.task.Note;
-import com.openexchange.data.conversion.ical.ical4j.internal.task.Title;
-import com.openexchange.groupware.tasks.Task;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.property.DtStart;
+
+import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
+import com.openexchange.groupware.container.CalendarObject;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class TaskConverters {
-
-    public static final AttributeConverter<VToDo, Task>[] ALL;
+public final class Start<T extends CalendarComponent, U extends CalendarObject> implements AttributeConverter<T, U> {
 
     /**
-     * Prevent instantiation.
+     * Default constructor.
      */
-    private TaskConverters() {
+    public Start() {
         super();
     }
 
-    static {
-        final List<AttributeConverter<VToDo, Task>> tmp = new ArrayList<AttributeConverter<VToDo, Task>>();
-        tmp.add(new Title());
-        tmp.add(new Note());
-        tmp.add(new Start<VToDo, Task>());
-        tmp.add(new End<VToDo, Task>());
-        ALL = (AttributeConverter<VToDo, Task>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
+    /**
+     * {@inheritDoc}
+     */
+    public void emit(final CalendarObject calendar, final CalendarComponent component) {
+        final DtStart start = new DtStart();
+        start.setDate(toDateTime(calendar.getStartDate()));
+        component.getProperties().add(start);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasProperty(final CalendarComponent component) {
+        return null != component.getProperty(DtStart.DTSTART);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isSet(final CalendarObject calendar) {
+        return calendar.containsStartDate();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void parse(final CalendarComponent component, final CalendarObject calendar, final TimeZone timeZone) {
+        calendar.setStartDate(parseDate(component, new DtStart(), timeZone));
     }
 }

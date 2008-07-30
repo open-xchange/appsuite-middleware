@@ -101,7 +101,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
-import com.openexchange.data.conversion.ical.ical4j.internal.Tools;
+import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -200,11 +200,6 @@ public class ICal4JParser implements ICalParser {
                 converter.parse(vtodo, task, tz);
             }
         }
-        
-        setTitle(task, vtodo);
-        setDescription(task, vtodo);
-        setStart(task, vtodo, tz);
-        setEnd(task, vtodo, tz);
         if(null == task.getEndDate())  {
             setDueDate(task, vtodo, tz);
         }
@@ -458,7 +453,7 @@ public class ICal4JParser implements ICalParser {
         if(-1 != count) {
             cObj.setRecurrenceCount(rrule.getCount());
         } else {
-            cObj.setUntil(Tools.recalculate(new Date(rrule.getUntil().getTime()), tz));
+            cObj.setUntil(ParserTools.recalculate(new Date(rrule.getUntil().getTime()), tz));
         }
 
     }
@@ -533,7 +528,7 @@ public class ICal4JParser implements ICalParser {
             mustRecalculate = !dateTime.isUtc();
         }
         if(mustRecalculate) {
-            return Tools.recalculate(icaldate, tz);
+            return ParserTools.recalculate(icaldate, tz);
         }
         return new Date(icaldate.getTime());
     }
@@ -605,8 +600,8 @@ public class ICal4JParser implements ICalParser {
 
     private Date toDate(DateProperty dateProperty, TimeZone tz) {
         Date date = new Date(dateProperty.getDate().getTime());
-        if (Tools.inDefaultTimeZone(dateProperty, tz)) {
-            date = Tools.recalculate(date, tz);
+        if (ParserTools.inDefaultTimeZone(dateProperty, tz)) {
+            date = ParserTools.recalculate(date, tz);
         }
         return date;
     }

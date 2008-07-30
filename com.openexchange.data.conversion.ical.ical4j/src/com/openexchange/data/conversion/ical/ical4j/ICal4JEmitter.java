@@ -142,7 +142,6 @@ public class ICal4JEmitter implements ICalEmitter {
                 converter.emit(task, vtodo);
             }
         }
-        vtodo.getProperties().add(new Description(task.getNote()));
         return vtodo;
     }
     

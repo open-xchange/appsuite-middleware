@@ -49,62 +49,27 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.property.DateProperty;
+import net.fortuna.ical4j.model.DateTime;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Tools {
+public final class EmitterTools {
 
     /**
      * Prevent instantiation.
      */
-    private Tools() {
+    private EmitterTools() {
         super();
     }
 
-    public static final Date parseDate(final CalendarComponent component,
-        final DateProperty property, final TimeZone timeZone) {
-        final DateProperty value = (DateProperty) component.getProperty(
-            property.getName());
-        Date retval = new Date(value.getDate().getTime());
-        if (inDefaultTimeZone(value, timeZone)) {
-            retval = recalculate(retval, timeZone);
-        }
-        return retval;
-    }
-
-    public static boolean inDefaultTimeZone(final DateProperty dateProperty,
-        final TimeZone timeZone) {
-        if (dateProperty.getParameter("TZID") != null) {
-            return false;
-        }
-        return !dateProperty.isUtc();
-    }
-
     /**
-     * Transforms date from the default timezone to the date in the given timezone.
+     * TODO add default timezone
      */
-    public static Date recalculate(final Date date, final TimeZone timeZone) {
-    
-        java.util.Calendar inDefault = new GregorianCalendar();
-        inDefault.setTime(date);
-    
-        java.util.Calendar inTimeZone = new GregorianCalendar();
-        inTimeZone.setTimeZone(timeZone);
-        inTimeZone.set(inDefault.get(java.util.Calendar.YEAR),
-            inDefault.get(java.util.Calendar.MONTH),
-            inDefault.get(java.util.Calendar.DATE),
-            inDefault.get(java.util.Calendar.HOUR_OF_DAY),
-            inDefault.get(java.util.Calendar.MINUTE),
-            inDefault.get(java.util.Calendar.SECOND));
-        inTimeZone.set(java.util.Calendar.MILLISECOND, 0);
-        return inTimeZone.getTime();
+    public static final DateTime toDateTime(final java.util.Date date) {
+        final DateTime retval = new DateTime(true);
+        retval.setTime(date.getTime());
+        return retval;
     }
 }
