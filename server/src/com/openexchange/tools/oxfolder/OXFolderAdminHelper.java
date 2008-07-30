@@ -582,10 +582,10 @@ public final class OXFolderAdminHelper {
 	 *            The last modified timestamp that should be taken on folder
 	 *            modifications
 	 * @param readCon
-	 *            A readable connection if a writeable connection should not be
+	 *            A readable connection if a writable connection should not be
 	 *            used for read access to database
 	 * @param writeCon
-	 *            A writeable connection
+	 *            A writable connection
 	 * @param cid
 	 *            The context ID
 	 * @throws OXException
