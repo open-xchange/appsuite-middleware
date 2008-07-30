@@ -66,6 +66,7 @@ import net.fortuna.ical4j.model.component.VEvent;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class ICal4JEmitter implements ICalEmitter {
+
     public String writeAppointments(List<AppointmentObject> appointmentObjects, List<ConversionError> errors, List<ConversionWarning> warnings) {
         Calendar calendar = new Calendar();
 
@@ -77,8 +78,18 @@ public class ICal4JEmitter implements ICalEmitter {
         return calendar.toString();
     }
 
-    public String writeTasks(List<Task> tasks, List<ConversionError> errors, List<ConversionWarning> warnings) {
-        return "";
+    /**
+     * {@inheritDoc}
+     */
+    public String writeTasks(final List<Task> tasks,
+        final List<ConversionError> errors,
+        final List<ConversionWarning> warnings) {
+        final Calendar calendar = new Calendar();
+        for (final Task task : tasks) {
+            final VEvent event = createEvent(task);
+            calendar.getComponents().add(event);
+        }
+        return calendar.toString();
     }
 
     private VEvent createEvent(AppointmentObject appointment) {
@@ -116,6 +127,18 @@ public class ICal4JEmitter implements ICalEmitter {
         return vevent;
     }
 
+    /**
+     * Converts a task object into an iCal event.
+     * @param task task to convert.
+     * @return the iCal event representing the task.
+     */
+    private VEvent createEvent(final Task task) {
+        final VEvent vevent = new VEvent();
+        vevent.getProperties().add(new Summary(task.getTitle()));
+        vevent.getProperties().add(new Description(task.getNote()));
+        return vevent;
+    }
+    
     private net.fortuna.ical4j.model.Date date(Date endDate) {
         net.fortuna.ical4j.model.Date d = new net.fortuna.ical4j.model.DateTime();
         d.setTime(endDate.getTime());
