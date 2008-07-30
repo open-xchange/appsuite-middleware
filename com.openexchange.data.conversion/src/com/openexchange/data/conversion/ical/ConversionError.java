@@ -52,10 +52,14 @@ package com.openexchange.data.conversion.ical;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class ConversionError extends Throwable{
+public class ConversionError extends ConversionWarning{
 
     /**
      * For serialization.
      */
     private static final long serialVersionUID = -8257376167243573600L;
+
+    public ConversionError(String message, Object... args) {
+        super(message, args);
+    }
 }

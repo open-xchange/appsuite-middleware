@@ -58,4 +58,18 @@ public class ConversionWarning extends Throwable{
      * For serialization.
      */
     private static final long serialVersionUID = -7593693106963732974L;
+
+    private String message;
+    private Object[] args;
+
+
+    public ConversionWarning(String message, Object...args) {
+        this.message = message;
+        this.args = args;
+    }
+
+    public String getFormattedMessage() {
+        return String.format(this.message, args);
+    }
+
 }
