@@ -67,6 +67,7 @@ import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
+import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.UserParticipant;
 

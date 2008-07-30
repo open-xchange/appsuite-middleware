@@ -52,7 +52,6 @@ package com.openexchange.ajax.contact;
 import java.util.Date;
 import java.util.Iterator;
 
-import com.openexchange.ajax.appointment.Tools;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.AllResponse;
 import com.openexchange.ajax.contact.action.DeleteRequest;
@@ -65,6 +64,7 @@ import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
+import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.groupware.container.ContactObject;
 
 /**

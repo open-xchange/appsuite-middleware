@@ -275,6 +275,16 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "DESCRIPTION", "The Note");
     }
 
+    public void testTaskDateFields() throws IOException {
+        final Task task = new Task();
+        final Date start = D("13/07/1976 15:00");
+        final Date end = D("13/07/1976 17:00");
+        task.setStartDate(start);
+        task.setEndDate(end);
+        final ICalFile ical = serialize(task);
+        assertStandardAppFields(ical, start, end);
+    }
+
     // SetUp
 
     public void setUp() {

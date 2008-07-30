@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.appointment;
+package com.openexchange.groupware.calendar;
 
 /**
  *

@@ -66,6 +66,7 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.ListIDInt;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.groupware.container.AppointmentObject;
 
 /**
