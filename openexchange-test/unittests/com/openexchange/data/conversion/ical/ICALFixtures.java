@@ -111,6 +111,20 @@ public class ICALFixtures {
         beginCalendar(bob);
         beginEvent(bob);
 
+        timezoneDTStartAndDTEnd(bob, start, end, timeZone.getID());
+
+        endEvent(bob);
+        endCalendar(bob);
+
+        return bob.toString();
+    }
+
+    public String veventWithDTStartAndEndInTimeZone(Date start, Date end, String timeZone) {
+        StringBuilder bob = new StringBuilder();
+
+        beginCalendar(bob);
+        beginEvent(bob);
+
         timezoneDTStartAndDTEnd(bob, start, end, timeZone);
 
         endEvent(bob);
@@ -119,9 +133,10 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    private void timezoneDTStartAndDTEnd(StringBuilder bob, Date start, Date end, TimeZone timeZone) {
-        bob.append("DTSTART;TZID=").append(timeZone.getID()).append(":").append(dateTime.format(start)).append("\n");
-        bob.append("DTEND;TZID=").append(timeZone.getID()).append(":").append(dateTime.format(end)).append("\n");
+
+    private void timezoneDTStartAndDTEnd(StringBuilder bob, Date start, Date end, String timeZone) {
+        bob.append("DTSTART;TZID=").append(timeZone).append(":").append(dateTime.format(start)).append("\n");
+        bob.append("DTEND;TZID=").append(timeZone).append(":").append(dateTime.format(end)).append("\n");
     }
 
 
@@ -383,7 +398,7 @@ public class ICALFixtures {
         beginCalendar(bob);
         beginTodo(bob);
 
-        timezoneDTStartAndDTEnd(bob, start, end, timeZone);
+        timezoneDTStartAndDTEnd(bob, start, end, timeZone.getID());
 
         endTodo(bob);
         endCalendar(bob);
@@ -556,6 +571,66 @@ public class ICALFixtures {
         endTodo(bob);
         endCalendar(bob);
 
+        return bob.toString();
+    }
+
+
+    //Error Cases
+    
+    public String veventWithEnd(Date date) {
+        return veventWithOneDate("DTEND", date);
+    }
+
+
+    public String veventWithStart(Date date) {
+        return veventWithOneDate("DTSTART", date);
+    }
+
+    private String veventWithOneDate(String property, Date date) {
+        StringBuilder bob = new StringBuilder();
+
+        beginCalendar(bob);
+        beginEvent(bob);
+
+        bob.append(property).append(":").append(dateTime.format(date)).append("\n");
+
+        endEvent(bob);
+        endCalendar(bob);
+
+        return bob.toString();
+    }
+
+    public String veventWithUnspecifiedVTimeZone(Date start, Date end) {
+        StringBuilder bob = new StringBuilder();
+
+        beginCalendar(bob);
+
+        
+        beginEvent(bob);
+
+        customTimezoneDTStartAndDTEnd(bob, start, end);
+
+        endEvent(bob);
+        endCalendar(bob);
+
+        return bob.toString();
+    }
+
+    public String veventWithTwoRecurrences(Date start, Date end) {
+       return veventWithSimpleProperties(start, end, "RRULE", "FREQ=DAILY;INTERVAL=1;COUNT=3", "RRULE", "FREQ=DAILY;INTERVAL=2;COUNT=6");
+    }
+
+    public String veventWithAudioAlarm(Date start, Date end, String trigger, String audioFile) {
+        StringBuilder bob = new StringBuilder();
+        standardAppFields(bob, start,end);
+
+        bob.append("BEGIN:VALARM\n");
+        bob.append(trigger).append("\n");
+        bob.append("ACTION:AUDIO\n");
+        bob.append("ATTACH:").append(audioFile).append("\n");
+        bob.append("END:VALARM\n");
+
+        endStandardAppFields(bob);
         return bob.toString();
     }
 }

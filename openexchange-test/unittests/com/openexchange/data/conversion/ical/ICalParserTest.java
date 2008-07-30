@@ -909,47 +909,53 @@ public class ICalParserTest extends TestCase {
     }
 
 
-
     // Errors and Warnings
 
     public void testAppShouldIncludeErrorOnMissingStartDate() {
-
+        String icalText = fixtures.veventWithEnd(D("24/02/1981 10:00"));
+        assertErrorWhenParsingAppointment(icalText, "Missing DTSTART");
     }
 
     public void testAppShouldIncludeErrorOnMissingEndDateAndMissingDuration() {
-        
+        String icalText = fixtures.veventWithStart(D("24/02/1981 10:00"));
+        assertErrorWhenParsingAppointment(icalText, "DTEND or Duration required");
     }
 
-    public void testAppShouldIncludeErrorOnUnknownTimeZone() {
-
+    public void testAppShouldIncludeErrorOnConfidentialAppointments() {
+        String icalText = fixtures.veventWithSimpleProperties(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "CLASS", "CONFIDENTIAL");
+        assertErrorWhenParsingAppointment(icalText, "Cowardly refusing to convert confidential appointment");
     }
 
-    public void testAppShouldIncludeErrorOnUnknownVTimeZone() {
-        
-    }
-
-    public void testAppShouldIncludeWarningOnConfidentialAppointments() {
-
-    }
-
-    public void testAppShouldIncludeWarningForUnkownTransp() {
-        
-    }
-
+    
     public void testAppShouldIncludeWarningForAdditionalRecurrences() {
-        
+        String icalText = fixtures.veventWithTwoRecurrences(D("24/02/1981 10:00"), D("24/02/1981 12:00"));
+        assertWarningWhenParsingAppointment(icalText, "Only converting first recurrence rule, additional recurrence rules will be ignored.");
     }
 
     public void testAppShouldWarnOnUnsupportedRecurrenceIntervals() {
-        
+        warningOnAppRecurrence("FREQ=SECONDLY;INTERVAL=1;COUNT=3", "Can only convert DAILY, WEEKLY, MONTHLY and YEARLY recurrences");
+        warningOnAppRecurrence("FREQ=MINUTELY;INTERVAL=1;COUNT=3", "Can only convert DAILY, WEEKLY, MONTHLY and YEARLY recurrences");
+        warningOnAppRecurrence("FREQ=HOURLY;INTERVAL=1;COUNT=3", "Can only convert DAILY, WEEKLY, MONTHLY and YEARLY recurrences");
+
     }
 
-    public void testAppShouldWarnOnUnkownClass() {
-        
+    public void testAppShouldInlcudeWarningOnUnkownClass() {
+        String icalText = fixtures.veventWithSimpleProperties(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "CLASS", "SUPERCALIFRAGILISTICEXPLIALIDOCIOUS");
+        assertWarningWhenParsingAppointment(icalText, "Unknown Class: SUPERCALIFRAGILISTICEXPLIALIDOCIOUS");
     }
 
-    public void testAppShouldWarnOnUndisplayableAlarms() {
-        
+    public void testAppShouldIncludeWarningOnUndisplayableAlarms() {
+        String icalText = fixtures.veventWithAudioAlarm(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "TRIGGER:-PT15M", "alarm.wav");
+        assertWarningWhenParsingAppointment(icalText, "Can only convert DISPLAY alarms");
+    }
+
+    public void testAppShouldIncludeErrorForUnknownDayInRRule() {
+        String icalText =  fixtures.veventWithSimpleProperties(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "RRULE", "FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=WU,NI;BYWEEKNO=3");
+        assertErrorWhenParsingAppointment(icalText, "Unknown day: WU");    
+    }
+
+    public void testAppShouldWarnOnUnhandleableFields() {
+        //TODO        
     }
 
     @Override
@@ -1023,5 +1029,30 @@ public class ICalParserTest extends TestCase {
         Task task = parseTask(icalText, utc);
         
         return task;
+    }
+
+    protected void assertWarningWhenParsingAppointment(String icalText, String warning) {
+        ArrayList<ConversionError> errors = new ArrayList<ConversionError>();
+        ArrayList<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+        List<AppointmentObject> result = parser.parseAppointments(icalText, TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);
+
+        assertTrue(0 != result.size()); // Warnings don't abort parsing of the object
+        assertEquals(1, warnings.size());
+        assertEquals(warning, warnings.get(0).getFormattedMessage());
+    }
+
+    protected void assertErrorWhenParsingAppointment(String icalText, String error) {
+        ArrayList<ConversionError> errors = new ArrayList<ConversionError>();
+        ArrayList<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+        parser.parseAppointments(icalText, TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);
+        assertEquals(1, errors.size());
+        assertEquals(error, errors.get(0).getFormattedMessage());
+            
+    }
+
+    protected void warningOnAppRecurrence(String recurrence, String warning) {
+        String icalText = fixtures.veventWithSimpleProperties(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "RRULE", recurrence);
+        assertWarningWhenParsingAppointment(icalText, warning);
+
     }
 }
