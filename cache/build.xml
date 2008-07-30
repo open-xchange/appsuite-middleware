@@ -28,8 +28,8 @@
     <property name="managementjar" value="com.openexchange.management.jar"/>
 
     <!-- Third party libs -->
-    <fileset dir="${lib.dir}" id="3rdpartyjars">
-        <include name="*.jar"/>
+    <fileset dir="${basedir}" id="3rdpartyjars">
+        <include name="${lib.dir}/*.jar"/>
         <exclude name="CVS"/>
     </fileset>
 
