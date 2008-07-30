@@ -10,9 +10,9 @@
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
 
-	<property name="version" value="${Bundle-Version}"/>
+    <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
-	<property name="composite.name" value="open-xchange-data-conversion-${version}" />
+    <property name="composite.name" value="open-xchange-data-conversion-${version}" />
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
@@ -20,14 +20,14 @@
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
-	<property name="globaljar" value="com.openexchange.global.jar" />
-	<property name="serverjar" value="com.openexchange.server.jar" />
+    <property name="globaljar" value="com.openexchange.global.jar" />
+    <property name="serverjar" value="com.openexchange.server.jar" />
 
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
-		<pathelement location="${bundlesdir}/${globaljar}"/>
-		<pathelement location="${bundlesdir}/${serverjar}"/>
+        <pathelement location="${bundlesdir}/${globaljar}"/>
+        <pathelement location="${bundlesdir}/${serverjar}"/>
     </path>
 
     <!-- Compile -->
@@ -51,7 +51,10 @@
     </target>
 
     <!-- Install -->
-    <target name="install" depends="installJar,installConfig"/>
+    <target name="install">
+        <antcall target="installJar"/>
+        <antcall target="installConfig"/>
+    </target>
 
     <target name="installConfig">
         <mkdir dir="${destdir}/${bundle.d}"/>
@@ -68,10 +71,10 @@
         </copy>
     </target>
 
-	<!-- Dist -->
-	<target name="dist" depends="clean">
-		<property name="dist-package" value="dist-package"/>
-    	<delete dir="${dist-package}"/>
+    <!-- Dist -->
+    <target name="dist" depends="clean">
+        <property name="dist-package" value="dist-package"/>
+        <delete dir="${dist-package}"/>
         <mkdir dir="${dist-package}/${composite.name}"/>
         <copy todir="${dist-package}/${composite.name}">
             <fileset dir=".">
@@ -82,10 +85,10 @@
             </fileset>
         </copy>
         <tar destfile="../${composite.name}.tar.gz"
-	        basedir="${dist-package}"
-    	    includes="${composite.name}/"
-         	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
-    	<delete dir="${dist-package}"/>
+            basedir="${dist-package}"
+            includes="${composite.name}/"
+             compression="gzip"/>        <!-- dpkg-source does not like anything else -->
+        <delete dir="${dist-package}"/>
     </target>
 
     <target name="clean">
