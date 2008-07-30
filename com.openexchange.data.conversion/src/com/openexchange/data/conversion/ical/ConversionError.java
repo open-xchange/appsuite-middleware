@@ -46,10 +46,16 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.data.conversion.ical;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class ConversionError extends Throwable{
+
+    /**
+     * For serialization.
+     */
+    private static final long serialVersionUID = -8257376167243573600L;
 }

@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Data conversion service interfaces
+Bundle-SymbolicName: com.openexchange.data.conversion
+Bundle-Version: 6.5.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.groupware.container,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.tasks,
+ org.osgi.framework
+Export-Package: com.openexchange.data.conversion.ical

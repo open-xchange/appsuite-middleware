@@ -46,10 +46,16 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.data.conversion.ical;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class ConversionWarning extends Throwable{
+
+    /**
+     * For serialization.
+     */
+    private static final long serialVersionUID = -7593693106963732974L;
 }
