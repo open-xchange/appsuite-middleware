@@ -157,10 +157,6 @@ public class ICalParserTest extends TestCase {
 
     }
 
-    public void testAppConfidentialThrowsException() {
-        //TODO 
-    }
-
     public void testAppNote() {
         Date start = D("24/02/1981 10:00");
         Date end = D("24/02/1981 12:00");
@@ -898,6 +894,50 @@ public class ICalParserTest extends TestCase {
         assertTrue(task.getAlarmFlag());
     }
 
+
+
+    // Errors and Warnings
+
+    public void testAppShouldIncludeErrorOnMissingStartDate() {
+
+    }
+
+    public void testAppShouldIncludeErrorOnMissingEndDateAndMissingDuration() {
+        
+    }
+
+    public void testAppShouldIncludeErrorOnUnknownTimeZone() {
+
+    }
+
+    public void testAppShouldIncludeErrorOnUnknownVTimeZone() {
+        
+    }
+
+    public void testAppShouldIncludeWarningOnConfidentialAppointments() {
+
+    }
+
+    public void testAppShouldIncludeWarningForUnkownTransp() {
+        
+    }
+
+    public void testAppShouldIncludeWarningForAdditionalRecurrences() {
+        
+    }
+
+    public void testAppShouldWarnOnUnsupportedRecurrenceIntervals() {
+        
+    }
+
+    public void testAppShouldWarnOnUnkownClass() {
+        
+    }
+
+    public void testAppShouldWarnOnUndisplayableAlarms() {
+        
+    }
+
     @Override
     protected void setUp() throws Exception {
         fixtures = new ICALFixtures();
@@ -936,7 +976,7 @@ public class ICalParserTest extends TestCase {
     }
 
     protected AppointmentObject parseAppointment(String icalText, TimeZone defaultTZ) {
-        return parser.parseAppointments(icalText, defaultTZ, new ContextImpl(23)).get(0);
+        return parser.parseAppointments(icalText, defaultTZ, new ContextImpl(23), new ArrayList<ConversionError>() , new ArrayList<ConversionWarning>() ).get(0);
     }
 
     protected AppointmentObject parseAppointment(String icalText) {
@@ -944,11 +984,11 @@ public class ICalParserTest extends TestCase {
     }
 
     protected Task parseTask(String icalText,  TimeZone defaultTZ) {
-        return parser.parseTasks(icalText, defaultTZ, new ContextImpl(23)).get(0);
+        return parser.parseTasks(icalText, defaultTZ, new ContextImpl(23), new ArrayList<ConversionError>() , new ArrayList<ConversionWarning>()).get(0);
     }
 
     protected Task parseTask(String icalText) {
-        return parser.parseTasks(icalText, TimeZone.getDefault(), new ContextImpl(23)).get(0);
+        return parser.parseTasks(icalText, TimeZone.getDefault(), new ContextImpl(23), new ArrayList<ConversionError>() , new ArrayList<ConversionWarning>()).get(0);
     }
 
     protected AppointmentObject appointmentWithRecurrence(String recurrence, Date start, Date end) {

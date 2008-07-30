@@ -291,7 +291,7 @@ public class ICalEmitterTest extends TestCase {
 
 
     private ICalFile serialize(AppointmentObject app) throws IOException {
-        String icalText = emitter.write(Arrays.asList(app));
+        String icalText = emitter.writeAppointments(Arrays.asList(app), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
         return new ICalFile(new StringReader(icalText));
     }
      
