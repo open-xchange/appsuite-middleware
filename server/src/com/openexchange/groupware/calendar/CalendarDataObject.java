@@ -293,18 +293,18 @@ public class CalendarDataObject extends AppointmentObject {
 		}
 		return super.getUntil();
 	}
-    
+
+    /**
+     * Checks if this calendar data object denotes a recurring appointment
+     * 
+     * @param what <code>true</code> to check by recurrence pattern or recurrence type; otherwise <code>false</code> to check by recurrence ID and recurrence type
+     * @return <code>true</code> if this calendar data object denotes a recurring appointment; otherwise <code>false</code>
+     */
     public final boolean isSequence(final boolean what) {
         if (what) {
-            if (containsRecurrenceString() || (containsRecurrenceType() && getRecurrenceType() > 0 && getInterval() > 0)) {
-                return true;
-            }
-        } else {
-            if (containsRecurrenceID() && containsRecurrenceType() && getRecurrenceType() > 0 && getInterval() > 0) {
-                return true;
-            }
+        	return (containsRecurrenceString() || (containsRecurrenceType() && getRecurrenceType() > 0 && getInterval() > 0));
         }
-        return false;
+        return (containsRecurrenceID() && containsRecurrenceType() && getRecurrenceType() > 0 && getInterval() > 0);
     }
     
     public final boolean isSequence() {
