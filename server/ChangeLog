@@ -1,3 +1,8 @@
+* 2008-07-30 - thorben.betten@open-xchange.com
+
+ - Bugfix #10111: No duplicate reminder for recurring appointment if a
+   change exception has been created
+
 * 2008-07-29 - thorben.betten@open-xchange.com
 
  - Bugfix #11695: Proper calculation of a weekly recurring appointment

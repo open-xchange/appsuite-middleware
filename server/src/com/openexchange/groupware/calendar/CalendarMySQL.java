@@ -1277,7 +1277,7 @@ class CalendarMySQL implements CalendarSqlImp {
 						}
 						if (up[a].getAlarmMinutes() >= 0 && up[a].getIdentifier() == uid) {
 							final long la = up[a].getAlarmMinutes() * 60000L;
-							changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), cdao.getEndDate(), new java.util.Date(cdao.getStartDate().getTime() - la), CalendarOperation.INSERT);
+							changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), cdao.getEndDate(), new java.util.Date(cdao.getStartDate().getTime() - la), CalendarOperation.INSERT, false);
 						}
 						pi.setInt(7, cdao.getContextID());
 						CalendarCommonCollection.checkUserParticipantObject(up[a], cdao.getFolderType());
@@ -2274,7 +2274,8 @@ class CalendarMySQL implements CalendarSqlImp {
 							} else {
 								end_date = edao.getEndDate();
 							}
-							changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), end_date, new java.util.Date(calc_date.getTime() - la), CalendarOperation.INSERT);
+							final boolean isSequence = cdao.isSequence(true);
+							changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), isSequence, end_date, new java.util.Date(calc_date.getTime() - la), CalendarOperation.INSERT, (isSequence ? checkRecurrenceChange(cdao, edao) : false));
 						} else {
 							pi.setNull(6, java.sql.Types.INTEGER);
 						}
@@ -2437,10 +2438,12 @@ class CalendarMySQL implements CalendarSqlImp {
 						}
 						final long la = modified_userparticipants[a].getAlarmMinutes() * 60000L;
 						final java.util.Date reminder = new java.util.Date(calc_date.getTime() - la);
-						changeReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), folder_id, cdao.getContext(), cdao.isSequence(true), end_date, reminder, CalendarOperation.UPDATE);
+						final boolean isSequence = cdao.isSequence(true);
+						changeReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), folder_id, cdao.getContext(), isSequence, end_date, reminder, CalendarOperation.UPDATE, isSequence ? checkRecurrenceChange(cdao, edao) : false);
 					} else {
 						pu.setNull(4, java.sql.Types.INTEGER);
-						changeReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), -1, cdao.getContext(), cdao.isSequence(true), null, null, CalendarOperation.DELETE);
+						deleteReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), cdao.getContext());
+						//changeReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), -1, cdao.getContext(), cdao.isSequence(true), null, null, CalendarOperation.DELETE, false);
 					}
 
 					pu.setInt(5, cdao.getObjectID());
@@ -2477,7 +2480,8 @@ class CalendarMySQL implements CalendarSqlImp {
 					} else {
 						end_date = edao.getEndDate();
 					}
-					changeReminder(cdao.getObjectID(), uid, -1, cdao.getContext(), cdao.isSequence(true), end_date, new java.util.Date(calc_date.getTime() + deleted_userparticipants[a].getAlarmMinutes()), CalendarOperation.DELETE);
+					deleteReminder(cdao.getObjectID(), uid, cdao.getContext());
+					//changeReminder(cdao.getObjectID(), uid, -1, cdao.getContext(), cdao.isSequence(true), end_date, new java.util.Date(calc_date.getTime() + deleted_userparticipants[a].getAlarmMinutes()), CalendarOperation.DELETE, false);
 					new_deleted.add(deleted_userparticipants[a]);
 				}
 				pd.executeBatch();
@@ -2904,7 +2908,8 @@ class CalendarMySQL implements CalendarSqlImp {
 		pd.setInt(2, cid);
 		pd.setInt(3, uid);
 		pd.addBatch();
-		changeReminder(oid, uid, -1, c, false, null, null, CalendarOperation.DELETE);
+		deleteReminder(oid, uid, c);
+		//changeReminder(oid, uid, -1, c, false, null, null, CalendarOperation.DELETE, false);
 		pd.executeBatch();
 		boolean master_del_update = true;
 		final PreparedStatement pdr = writecon.prepareStatement("delete from prg_date_rights WHERE object_id = ? AND cid = ? AND id = ? AND type = ?");
@@ -2965,10 +2970,25 @@ class CalendarMySQL implements CalendarSqlImp {
 		ao.setObjectID(oid);
 		ao.setParentFolderID(fid);
 		CalendarCommonCollection.triggerEvent(so, CalendarOperation.UPDATE, ao);
-		changeReminder(oid, uid, fid, c, false, null, null, CalendarOperation.DELETE);
+		deleteReminder(oid, uid, c);
+		//changeReminder(oid, uid, fid, c, false, null, null, CalendarOperation.DELETE, false);
 	}
 
-	private static final void changeReminder(final int oid, final int uid, final int fid, final Context c, final boolean sequence, final java.util.Date end_date, final java.util.Date reminder_date, final int action) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
+	/**
+	 * Deletes the reminder entry for specified appointment and user/participant
+	 * 
+	 * @param oid The apointment's object ID
+	 * @param uid The user's/participant's ID
+	 * @param c The context
+	 * @throws OXMandatoryFieldException If deleting reminder fails
+	 * @throws OXConflictException If deleting reminder fails
+	 * @throws OXException If deleting reminder fails
+	 */
+	private static final void deleteReminder(final int oid, final int uid, final Context c) throws OXMandatoryFieldException, OXConflictException, OXException {
+		changeReminder(oid, uid, -1, c, false, null, null, CalendarOperation.DELETE, false);
+	}
+
+	private static final void changeReminder(final int oid, final int uid, final int fid, final Context c, final boolean sequence, final java.util.Date end_date, final java.util.Date reminder_date, final int action, final boolean recurrenceChange) throws OXMandatoryFieldException, OXConflictException, OXException {
 		final ReminderSQLInterface rsql = new ReminderHandler(c);
 		if (action == CalendarOperation.DELETE) {
 			if (rsql.existsReminder(oid, uid, Types.APPOINTMENT)) {
@@ -2984,12 +3004,67 @@ class CalendarMySQL implements CalendarSqlImp {
 				ro.setDate(reminder_date);
 				ro.setFolder(fid);
 				if (rsql.existsReminder(oid, uid, Types.APPOINTMENT)) {
-					rsql.updateReminder(ro);
+					if (sequence && !recurrenceChange) {
+						/*
+						 * A recurring appointment's reminder update whose
+						 * recurrence pattern has not changed; verify that no
+						 * already verified reminder appears again through
+						 * comparing storage's reminder date with the one that
+						 * shall be written to storage. If storage's reminder
+						 * date is greater than or equal to specified reminder,
+						 * leave unchanged.
+						 */
+						if (rsql.loadReminder(oid, uid, Types.APPOINTMENT).getDate().getTime() < reminder_date
+								.getTime()) {
+							rsql.updateReminder(ro);
+						} else if (LOG.isDebugEnabled()) {
+							LOG.debug("No recurrence change! Leave corresponding reminder unchanged");
+						}
+					} else {
+						rsql.updateReminder(ro);
+					}
 				} else {
 					rsql.insertReminder(ro);
 				}
 			}
 		}
+	}
+
+	/**
+	 * Checks if specified current calendar data object contains recurrence time
+	 * and/or type changes compared to storage's calendar data object
+	 * 
+	 * @param cdao
+	 *            The current calendar data object
+	 * @param edao
+	 *            The storage's calendar data object
+	 * @return <code>true</code> if specified current calendar data object
+	 *         contains recurrence time and/or type changes compared to
+	 *         storage's calendar data object; otherwise <code>false</code>
+	 */
+	private static final boolean checkRecurrenceChange(final CalendarDataObject cdao, final CalendarDataObject edao) {
+		/*
+		 * Recurrence pattern has changed
+		 */
+		if (cdao.getRecurrence() != null && !cdao.getRecurrence().equals(edao.getRecurrence())) {
+			return true;
+		}
+		/*
+		 * Recurrence start has changed
+		 */
+		if (cdao.containsStartDate() && cdao.getStartDate() != null && !cdao.getStartDate().equals(edao.getStartDate())) {
+			return true;
+		}
+		/*
+		 * Recurrence end has changed
+		 */
+		if (cdao.containsEndDate() && cdao.getEndDate() != null && !cdao.getEndDate().equals(edao.getEndDate())) {
+			return true;
+		}
+		/*
+		 * No recurrence time and/or type change
+		 */
+		return false;
 	}
 
 	public final void deleteAppointment(final int uid, final CalendarDataObject cdao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
