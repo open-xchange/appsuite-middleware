@@ -1,3 +1,7 @@
+* 2008-07-30 - dennis.sieben@open-xchange.com
+
+ - Bugfix #11764: If no output is created the last chars of the output must not be deleted
+
 * 2008-07-30 - thorben.betten@open-xchange.com
 
  - Bugfix #10111: No duplicate reminder for recurring appointment if a

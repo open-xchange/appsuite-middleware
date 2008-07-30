@@ -251,7 +251,9 @@ public class Visitor implements SieveParserVisitor {
             output = ((List<OwnType>) jjtAccept).get(((List<OwnType>) jjtAccept).size() - 1).getOutput();
             output.append(", ");
         }
-        output.delete(output.length() - 2, output.length());
+        if (null != output) {
+            output.delete(output.length() - 2, output.length());
+        }
         final Object visitChildren = jjtAccept;
         if (firstToken != lastToken) {
             final OwnType ownType = ((List<OwnType>) visitChildren).get(((List<OwnType>) data).size() - 1);
