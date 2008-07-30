@@ -1,132 +1,105 @@
+# translation of server.de_DE.po to deutsch
+# translation of server.new.de_DE.po to
 # translation of server.de_DE.po to
 # Antje Faber, 2007.
 # Antje Faber, 2007.
 # Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
-# Antje Faber, 2007.
+# Antje Faber <antje.faber@open-xchange.com>, 2008.
 msgid ""
 msgstr ""
 "Project-Id-Version: server.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2007-09-05 10:44+0200\n"
-"Last-Translator: Antje Faber\n"
-"Language-Team:  <de@li.org>\n"
+"PO-Revision-Date: 2008-07-29 09:38+0200\n"
+"Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
+"Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: KBabel 1.10.2\n"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:62
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:62
 msgid "Private folders"
-msgstr "Private Ordner"
+msgstr "Persönliche Ordner"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:64
-
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:64
 msgid "Public folders"
 msgstr "Öffentliche Ordner"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:66
-
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:66
 msgid "Shared folders"
 msgstr "Freigegebene Ordner"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:68
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:68
 msgid "System"
 msgstr "System"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:70
-
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:70
 msgid "Shared address book"
 msgstr "Freigegebenes Adressbuch"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:72
-
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:72
 msgid "Global address book"
 msgstr "Globales Adressbuch"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:74
-
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:74
 msgid "OX folders"
 msgstr "OX-Ordner"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:76
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:76
 msgid "Projects"
 msgstr "Projekte"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:78
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:78
 msgid "Infostore"
 msgstr "InfoStore"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:80
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:80
 msgid "Userstore"
 msgstr "Userstore"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:82
-
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:82
 msgid "Other task folders"
 msgstr "Weitere Aufgabenordner"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:84
-
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:84
 msgid "Other calendar folders"
 msgstr "Weitere Kalenderordner"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:86
-
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:86
 msgid "Other contact folders"
 msgstr "Weitere Kontaktordner"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:88
-
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:88
 msgid "Other infostore folders"
 msgstr "Weitere InfoStore-Ordner"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:90
-
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:90
 msgid "My infostore folder"
 msgstr "Mein InfoStore-Ordner"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:92
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:92
 msgid "Tasks"
 msgstr "Aufgaben"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:94
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
 msgid "Calendar"
 msgstr "Kalender"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:96
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:96
 msgid "Contacts"
 msgstr "Kontakte"
 
-#: com/openexchange/groupware/i18n/Groups.java:68
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Groups.java:68
 msgid "All internal users"
-msgstr "Alle internen Benutzer"
+msgstr "Alle internen Anwender"
 
-#: com/openexchange/groupware/i18n/MailStrings.java:62
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:62
 msgid "Read Acknowledgement"
 msgstr "Lesebestätigung"
 
-#: com/openexchange/groupware/i18n/MailStrings.java:64
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:64
 msgid ""
 "This is a Return Receipt for the mail that you sent on #DATE# to #RECIPIENT# "
 "with subject \"#SUBJECT#\".\n"
@@ -135,22 +108,19 @@ msgid ""
 "on the recipients computer. There is no guarantee that the recipient has "
 "read or understood the message contents."
 msgstr ""
-"Dies ist eine Empfangsbestätigung für die am #DATE# an #RECIPIENT# gesendete "
-"E-Mail mit dem Betreff \"#SUBJECT#\".\n"
+"Dies ist eine Empfangsbestätigung für die am #DATE# gesendete E-Mail an #RECIPIENT# mit dem Betreff \"#SUBJECT#\".\n"
 "\n"
-"Hinweis: Diese Empfangsbestätigung bestätigt lediglich die Anzeige der "
-"Nachricht am Rechner des Empfängers. Es gibt keine Garantie, dass der "
-"Empfänger die Nachricht gelesen oder deren Inhalt verstanden hat."
+"Bitte beachten Sie, dass diese Empfangsbestätigung lediglich das Anzeigen der Nachricht auf dem Rechner des Empfängers bestätigt. Es gibt keine Garantie, dass der Empfänger die E-Mail gelesen oder deren Inhalt verstanden hat."
 
-#: com/openexchange/groupware/i18n/MailStrings.java:66
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:66
 msgid "On #DATE# at #TIME# #SENDER# wrote:"
 msgstr "#SENDER# hat am #DATE# um #TIME# geschrieben:"
 
-#: com/openexchange/groupware/i18n/MailStrings.java:68
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:68
 msgid "Fwd: "
 msgstr "Weiterleiten: "
 
-#: com/openexchange/groupware/i18n/MailStrings.java:70
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:70
 msgid ""
 "---------- Original Message ----------\n"
 "From: #FROM#\n"
@@ -164,11 +134,11 @@ msgstr ""
 "Datum: #DATE# at #TIME#\n"
 "Betreff: #SUBJECT#"
 
-#: com/openexchange/groupware/i18n/MailStrings.java:72
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:72
 msgid "[No Subject]"
 msgstr "[Kein Betreff]"
 
-#: com/openexchange/groupware/i18n/Notifications.java:54
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:54
 msgid ""
 "A new appointment has been created by [created_by].\n"
 "\n"
@@ -199,7 +169,7 @@ msgid ""
 msgstr ""
 "Ein neuer Termin wurde erstellt von [created_by].\n"
 "\n"
-"Direkte Verknüpfung: [link]\n"
+"Direkter Link: [link]\n"
 "\n"
 "Termin\n"
 "======\n"
@@ -224,7 +194,7 @@ msgstr ""
 "\n"
 "=========================================="
 
-#: com/openexchange/groupware/i18n/Notifications.java:83
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:83
 msgid ""
 "A new task has been created by [created_by].\n"
 "\n"
@@ -254,7 +224,7 @@ msgid ""
 msgstr ""
 "Eine neue Aufgabe wurde erstellt von [created_by].\n"
 "\n"
-"Direkte Verknüpfung: [link]\n"
+"Direkter Link: [link]\n"
 "\n"
 "Aufgabe\n"
 "=======\n"
@@ -278,7 +248,7 @@ msgstr ""
 "\n"
 "=========================================="
 
-#: com/openexchange/groupware/i18n/Notifications.java:111
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:111
 msgid ""
 "This appointment has been deleted by [changed_by].\n"
 "\n"
@@ -316,7 +286,8 @@ msgstr ""
 "\n"
 "=========================================="
 
-#: com/openexchange/groupware/i18n/Notifications.java:130
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:130
+
 msgid ""
 "This task has been deleted by [changed_by].\n"
 "\n"
@@ -341,14 +312,14 @@ msgstr ""
 "Erstellt von:  [created_by]\n"
 "Titel:         [title]\n"
 "\n"
-"Beginnt am:  [start]\n"
-"Endet am:    [end]\n"
+"Beginnt am:    [start]\n"
+"Endet am:      [end]\n"
 "\n"
 "Beschreibung:\n"
 "[description]\n"
 "=========================================="
 
-#: com/openexchange/groupware/i18n/Notifications.java:146
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:146
 msgid ""
 "This appointment has been changed by [changed_by].\n"
 "\n"
@@ -379,7 +350,7 @@ msgid ""
 msgstr ""
 "Dieser Termin wurde geändert von [changed_by].\n"
 "\n"
-"Direkte Verknüpfung: [link]\n"
+"Direkter Link: [link]\n"
 "\n"
 "Termin\n"
 "======\n"
@@ -387,8 +358,8 @@ msgstr ""
 "Titel:         [title]\n"
 "Ort:           [location]\n"
 "\n"
-"Beginnt am:  [start]\n"
-"Endet am:    [end]\n"
+"Beginnt am:    [start]\n"
+"Endet am:      [end]\n"
 "\n"
 "Beschreibung:\n"
 "[description]\n"
@@ -404,7 +375,7 @@ msgstr ""
 "\n"
 "=========================================="
 
-#: com/openexchange/groupware/i18n/Notifications.java:175
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:175
 msgid ""
 "This task has been changed by [changed_by].\n"
 "\n"
@@ -434,7 +405,7 @@ msgid ""
 msgstr ""
 "Diese Aufgabe wurde geändert von [changed_by].\n"
 "\n"
-"Direkte Verknüpfung: [link]\n"
+"Direkter Link: [link]\n"
 "\n"
 "Aufgabe\n"
 "=======\n"
@@ -458,31 +429,38 @@ msgstr ""
 "\n"
 "=========================================="
 
-#: com/openexchange/groupware/i18n/Notifications.java:202
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:202
+
 msgid "A new appointment has been created"
 msgstr "Ein neuer Termin wurde erstellt"
 
-#: com/openexchange/groupware/i18n/Notifications.java:203
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:203
+
 msgid "An appointment has been changed"
 msgstr "Ein Termin wurde geändert"
 
-#: com/openexchange/groupware/i18n/Notifications.java:204
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:204
+
 msgid "An appointment has been removed"
 msgstr "Ein Termin wurde gelöscht"
 
-#: com/openexchange/groupware/i18n/Notifications.java:205
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:205
+
 msgid "A new task has been created"
 msgstr "Eine neue Aufgabe wurde erstellt"
 
-#: com/openexchange/groupware/i18n/Notifications.java:206
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:206
+
 msgid "A task has been changed"
 msgstr "Eine Aufgabe wurde geändert"
 
-#: com/openexchange/groupware/i18n/Notifications.java:207
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:207
+
 msgid "A task has been removed"
 msgstr "Eine Aufgabe wurde gelöscht"
 
-#: com/openexchange/groupware/i18n/Notifications.java:208
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:208
+
 msgid "No resources have been scheduled."
 msgstr "Es wurden keine Ressourcen zugewiesen."
 
