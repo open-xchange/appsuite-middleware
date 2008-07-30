@@ -1,9 +1,9 @@
 
 # norootforbuild
 
-Name:           open-xchange-data-conversion
+Name:           open-xchange-data-conversion-ical4j
 BuildArch:	noarch
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-server
+BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-server open-xchange-data-conversion
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
@@ -35,14 +35,14 @@ License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
-Summary:        The Open-Xchange data conversion service interfaces
-Requires:       open-xchange-common open-xchange-global open-xchange-server
+Summary:        The Open-Xchange data conversion iCal4j implementation
+Requires:       open-xchange-common open-xchange-global open-xchange-server open-xchange-data-conversion
 #
 
 %description
-The Open-Xchange data conversion service interfaces contains only interfaces for
-converting data into some internal or external types.
-
+iCal conversion services are implemented with this bundle by using the iCal4j
+library.
+  
 Authors:
 --------
     Open-Xchange

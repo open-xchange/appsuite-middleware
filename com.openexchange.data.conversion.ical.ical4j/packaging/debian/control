@@ -1,4 +1,4 @@
-Source: open-xchange-data-conversion-ica4j
+Source: open-xchange-data-conversion-ical4j
 Section: unknown
 Priority: optional
 Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
@@ -10,4 +10,4 @@ Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common (>= 6.5.0), open-xchange-global (>=6.5.0), open-xchange-server (>=6.5.0), open-xchange-data-conversion (>=6.5.0)
 Description: The Open-Xchange data conversion iCal4j implementation
  iCal conversion services are implemented with this bundle by using the iCal4j
- library.  
+ library.
