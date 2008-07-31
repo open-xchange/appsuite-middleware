@@ -46,45 +46,48 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-package com.openexchange.data.conversion.ical.ical4j.internal;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ConversionError;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import net.fortuna.ical4j.model.component.VToDo;
-
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.*;
-import com.openexchange.data.conversion.ical.ical4j.internal.task.DueDate;
-import com.openexchange.data.conversion.ical.ical4j.internal.task.DateCompleted;
-import com.openexchange.groupware.tasks.Task;
+import java.util.TimeZone;
 
 /**
- *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public final class TaskConverters {
+public class Klass<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
 
-    public static final AttributeConverter<VToDo, Task>[] ALL;
-
-    /**
-     * Prevent instantiation.
-     */
-    private TaskConverters() {
-        super();
+    public boolean isSet(U cObj) {
+        return true; // Can always map
     }
 
-    static {
-        final List<AttributeConverter<VToDo, Task>> tmp = new ArrayList<AttributeConverter<VToDo, Task>>();
-        tmp.add(new Title<VToDo, Task>());
-        tmp.add(new Note<VToDo, Task>());
-        tmp.add(new Start<VToDo, Task>());
-        tmp.add(new End<VToDo, Task>());
-        tmp.add(new Duration<VToDo, Task>());
-        tmp.add(new DueDate());
-        tmp.add(new Klass<VToDo, Task>());
-        tmp.add(new DateCompleted());
-        tmp.add(new Participants<VToDo, Task>());
-        ALL = (AttributeConverter<VToDo, Task>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
+    public void emit(U cObj, T component, List<ConversionWarning> warnings) throws ConversionError {
+        //Todo
+    }
+
+    public boolean hasProperty(T component) {
+        return component.getProperty("CLASS") != null;
+    }
+
+    public void parse(T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+        if(component.getProperty("CLASS") != null) {
+            String clazz = component.getProperty("CLASS").getValue();
+            if(clazz.equalsIgnoreCase("private")) {
+                cObj.setPrivateFlag(true);
+            } else if (clazz.equalsIgnoreCase("public")) {
+                cObj.setPrivateFlag(false);
+            } else if(clazz.equalsIgnoreCase("confidential")) {
+                throw new ConversionError("Cowardly refusing to convert confidential appointment");
+            } else {
+                warnings.add(new ConversionWarning("Unknown Class: %s", clazz));
+            }
+
+        }
     }
 }

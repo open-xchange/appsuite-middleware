@@ -51,6 +51,7 @@ package com.openexchange.data.conversion.ical.ical4j.internal.task;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.Due;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.data.conversion.ical.ConversionWarning;
@@ -76,7 +77,7 @@ public class DueDate extends AbstractVerifyingAttributeConverter<VToDo, Task> {
         return null != vToDo.getDue();
     }
 
-    public void parse(VToDo vToDo, Task task, TimeZone timeZone, List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(VToDo vToDo, Task task, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
         if(task.containsEndDate()) {
             return;
         }

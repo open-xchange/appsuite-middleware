@@ -48,39 +48,82 @@
  */
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.property.Attendee;
+import net.fortuna.ical4j.model.property.Resources;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.container.ResourceParticipant;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionError;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.contexts.Context;
-import net.fortuna.ical4j.model.component.CalendarComponent;
 
 import java.util.List;
 import java.util.TimeZone;
-import java.util.Date;
+import java.util.LinkedList;
+import java.util.Iterator;
+import java.net.URI;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class Duration<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
-    public boolean isSet(U calendar) {
-        return false; // Always emitting endDate
+public class Participants<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
+
+    public static UserResolver userResolver = null;
+
+    public boolean isSet(U cObj) {
+        return cObj.containsParticipants();
     }
 
-    public void emit(U u, T t, List<ConversionWarning> warnings) throws ConversionError {
-        return; // Always emitting endDate
+    public void emit(U cObj, T component, List<ConversionWarning> warnings) throws ConversionError {
+        //Todo
     }
 
-    public boolean hasProperty(T t) {
-        return null != t.getProperty("Duration");
+    public boolean hasProperty(T component) {
+        PropertyList properties = component.getProperties("ATTENDEE");
+        PropertyList resourcesList = component.getProperties("RESOURCES");
+        return properties.size() > 0 || resourcesList.size() > 0;
     }
 
     public void parse(T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
-       net.fortuna.ical4j.model.property.Duration duration = (net.fortuna.ical4j.model.property.Duration) component.getProperty("Duration");
-        if(duration == null) {
-            return;
+        PropertyList properties = component.getProperties("ATTENDEE");
+        List<String> mails = new LinkedList<String>();
+
+        for(int i = 0, size = properties.size(); i < size; i++) {
+            Attendee attendee = (Attendee) properties.get(i);
+            URI uri = attendee.getCalAddress();
+            if("mailto".equalsIgnoreCase(uri.getScheme())) {
+                String mail = uri.getSchemeSpecificPart();
+                mails.add( mail );
+            }
         }
-        Date endDate = duration.getDuration().getTime(cObj.getStartDate());
-        cObj.setEndDate(endDate);
+
+        List<User> users = userResolver.findUsers(mails, ctx);
+
+        for(User user : users) {
+            cObj.addParticipant( new UserParticipant(user.getId()) );
+            mails.remove(user.getMail());
+        }
+
+        for(String mail : mails) {
+            ExternalUserParticipant external = new ExternalUserParticipant(mail);
+            external.setDisplayName(null);
+            cObj.addParticipant(external);
+        }
+
+        PropertyList resourcesList = component.getProperties("RESOURCES");
+        for(int i = 0, size = resourcesList.size(); i < size; i++) {
+            Resources resources = (Resources) resourcesList.get(i);
+            for(Iterator<Object> resObjects = resources.getResources().iterator(); resObjects.hasNext();) {
+                ResourceParticipant participant = new ResourceParticipant();
+                participant.setDisplayName(resObjects.next().toString());
+                cObj.addParticipant(participant);
+            }
+        }
     }
 }

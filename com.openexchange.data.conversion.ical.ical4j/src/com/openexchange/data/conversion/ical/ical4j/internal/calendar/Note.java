@@ -52,15 +52,13 @@ package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 import java.util.TimeZone;
 import java.util.List;
 
-import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.Description;
 
-import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.contexts.Context;
 
 /**
  *
@@ -93,7 +91,7 @@ public final class Note<T extends CalendarComponent, U extends CalendarObject> e
         return null != calendarComponent.getProperty(Description.DESCRIPTION);
     }
 
-    public void parse(final T calendarComponent, final U calendarObject, final TimeZone timeZone, List<ConversionWarning> warnings) {
+    public void parse(final T calendarComponent, final U calendarObject, final TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) {
         calendarObject.setNote(calendarComponent.getProperty(Description.DESCRIPTION).getValue());
     }
 }

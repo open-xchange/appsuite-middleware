@@ -53,6 +53,8 @@ import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.*;
 import com.openexchange.data.conversion.ical.ical4j.internal.appointment.RequireStartDate;
 import com.openexchange.data.conversion.ical.ical4j.internal.appointment.RequireEndDate;
+import com.openexchange.data.conversion.ical.ical4j.internal.appointment.Location;
+import com.openexchange.data.conversion.ical.ical4j.internal.appointment.Transparency;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -84,6 +86,13 @@ public class AppointmentConverters {
         Duration<VEvent, AppointmentObject> duration = new Duration<VEvent, AppointmentObject>();
         duration.setVerifier(new RequireEndDate());
         tmp.add(duration);
+
+        tmp.add(new Klass<VEvent, AppointmentObject>());
+
+        tmp.add(new Location());
+        tmp.add(new Transparency());
+
+        tmp.add(new Participants<VEvent, AppointmentObject>());
 
         ALL = (AttributeConverter<VEvent, AppointmentObject>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
     }

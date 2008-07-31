@@ -46,45 +46,35 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.data.conversion.ical.ical4j.internal.appointment;
 
-package com.openexchange.data.conversion.ical.ical4j.internal;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ConversionError;
+import net.fortuna.ical4j.model.component.VEvent;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import net.fortuna.ical4j.model.component.VToDo;
-
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.*;
-import com.openexchange.data.conversion.ical.ical4j.internal.task.DueDate;
-import com.openexchange.data.conversion.ical.ical4j.internal.task.DateCompleted;
-import com.openexchange.groupware.tasks.Task;
+import java.util.TimeZone;
 
 /**
- *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public final class TaskConverters {
-
-    public static final AttributeConverter<VToDo, Task>[] ALL;
-
-    /**
-     * Prevent instantiation.
-     */
-    private TaskConverters() {
-        super();
+public class Location extends AbstractVerifyingAttributeConverter<VEvent, AppointmentObject> {
+    public boolean isSet(AppointmentObject appointmentObject) {
+        return appointmentObject.containsLocation();
     }
 
-    static {
-        final List<AttributeConverter<VToDo, Task>> tmp = new ArrayList<AttributeConverter<VToDo, Task>>();
-        tmp.add(new Title<VToDo, Task>());
-        tmp.add(new Note<VToDo, Task>());
-        tmp.add(new Start<VToDo, Task>());
-        tmp.add(new End<VToDo, Task>());
-        tmp.add(new Duration<VToDo, Task>());
-        tmp.add(new DueDate());
-        tmp.add(new Klass<VToDo, Task>());
-        tmp.add(new DateCompleted());
-        tmp.add(new Participants<VToDo, Task>());
-        ALL = (AttributeConverter<VToDo, Task>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
+    public void emit(AppointmentObject appointmentObject, VEvent event, List<ConversionWarning> warnings) throws ConversionError {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public boolean hasProperty(VEvent event) {
+        return event.getLocation() != null;
+    }
+
+    public void parse(VEvent event, AppointmentObject appointment, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+        appointment.setLocation(event.getProperty("LOCATION").getValue());
     }
 }

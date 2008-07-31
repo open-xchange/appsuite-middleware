@@ -55,6 +55,7 @@ import java.util.List;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionError;
 
@@ -75,7 +76,7 @@ public interface AttributeConverter<T extends CalendarComponent, U extends Calen
 
     boolean hasProperty(T t);
 
-    void parse(T t, U u, TimeZone timeZone, List<ConversionWarning> warnings) throws ConversionError;
+    void parse(T t, U u, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError;
 
     public void verify(U object, List<ConversionWarning> warnings) throws ConversionError;
 }

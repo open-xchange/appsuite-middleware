@@ -170,15 +170,11 @@ public class ICal4JParser implements ICalParser {
 
         for (final AttributeConverter<VEvent, AppointmentObject> converter : AppointmentConverters.ALL) {
             if (converter.hasProperty(vevent)) {
-                converter.parse(vevent, appointment, tz, warnings);
+                converter.parse(vevent, appointment, tz, ctx, warnings);
             }
             converter.verify(appointment, warnings);
         }
 
-        applyClass(appointment, vevent, warnings);
-        setLocation(appointment,  vevent);
-        applyTransparency(appointment, vevent);
-        setParticipants(appointment, vevent, ctx);
         setCategories(appointment, vevent);
         setRecurrence(appointment, vevent, tz, warnings);
         setDeleteExceptions(appointment, vevent, tz);
@@ -195,14 +191,11 @@ public class ICal4JParser implements ICalParser {
         final Task task = new Task();
         for (final AttributeConverter<VToDo, Task> converter : TaskConverters.ALL) {
             if (converter.hasProperty(vtodo)) {
-                converter.parse(vtodo, task, tz, warnings);
+                converter.parse(vtodo, task, tz, ctx, warnings);
             }
             converter.verify(task, warnings);
         }
         
-        setDateCompleted(task, vtodo, tz);
-        applyClass(task, vtodo, warnings);
-        setParticipants(task, vtodo, ctx);
         setCategories(task, vtodo);
         setRecurrence(task, vtodo, tz, warnings);
         setDeleteExceptions(task, vtodo, tz);

@@ -58,10 +58,10 @@ import java.util.List;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DtStart;
 
-import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.contexts.Context;
 
 /**
  *
@@ -102,7 +102,7 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
     /**
      * {@inheritDoc}
      */
-    public void parse(final T component, final U calendar, final TimeZone timeZone, List<ConversionWarning> warnings) {
+    public void parse(final T component, final U calendar, final TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) {
         calendar.setStartDate(parseDate(component, new DtStart(), timeZone));
     }
 }
