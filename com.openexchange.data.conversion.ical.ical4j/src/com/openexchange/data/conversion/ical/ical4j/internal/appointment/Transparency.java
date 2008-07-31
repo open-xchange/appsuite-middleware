@@ -49,6 +49,7 @@
 package com.openexchange.data.conversion.ical.ical4j.internal.appointment;
 
 import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.Transp;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
@@ -66,8 +67,15 @@ public class Transparency extends AbstractVerifyingAttributeConverter<VEvent, Ap
         return appointment.containsShownAs();
     }
 
-    public void emit(AppointmentObject appointmentObject, VEvent event, List<ConversionWarning> warnings) throws ConversionError {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public void emit(AppointmentObject appointment, VEvent event, List<ConversionWarning> warnings) throws ConversionError {
+        switch(appointment.getShownAs()) {
+            case AppointmentObject.RESERVED :
+                event.getProperties().add(new Transp("OPAQUE"));
+                break;
+            case AppointmentObject.FREE :
+                event.getProperties().add(new Transp("TRANSPARENT"));
+                break;
+        }
     }
 
     public boolean hasProperty(VEvent event) {

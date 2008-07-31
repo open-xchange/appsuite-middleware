@@ -134,15 +134,6 @@ public class ICal4JEmitter implements ICalEmitter {
             vevent.getProperties().add(new Clazz("private"));
         }
 
-        switch(appointment.getShownAs()) {
-            case AppointmentObject.RESERVED :
-                vevent.getProperties().add(new Transp("OPAQUE"));
-                break;
-            case AppointmentObject.FREE :
-                vevent.getProperties().add(new Transp("TRANSPARENT"));
-                break;
-        }
-
         return vevent;
     }
 

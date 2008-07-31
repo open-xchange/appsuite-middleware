@@ -67,7 +67,8 @@ public class Location extends AbstractVerifyingAttributeConverter<VEvent, Appoin
     }
 
     public void emit(AppointmentObject appointmentObject, VEvent event, List<ConversionWarning> warnings) throws ConversionError {
-        //To change body of implemented methods use File | Settings | File Templates.
+        net.fortuna.ical4j.model.property.Location location = new net.fortuna.ical4j.model.property.Location(appointmentObject.getLocation());
+        event.getProperties().add(location);
     }
 
     public boolean hasProperty(VEvent event) {
