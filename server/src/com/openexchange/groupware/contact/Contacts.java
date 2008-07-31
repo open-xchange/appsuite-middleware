@@ -629,35 +629,6 @@ public final class Contacts {
 		}
 	}
 
-	/**
-	 * Gets the folder ID from storage (since GUI misses to keep current folder ID in its requests)
-	 * <p>
-	 * This a only a work-around, so delete if bug #11753 is fixed by GUI team!
-	 * 
-	 * @param objectId The contact ID
-	 * @param user The user ID
-	 * @param group The user's group IDs
-	 * @param uc The user configuration
-	 * @param ctx The context
-	 * @return The folder ID fetched from storage
-	 * @throws OXException If folder ID cannot be fetched from storage
-	 */
-	private static int getRealFolderID(final int objectId, final int user, final int[] group,
-			final UserConfiguration uc, final Context ctx) throws OXException {
-		final Connection readCon;
-		try {
-			readCon = DBPool.pickup(ctx);
-		} catch (final DBPoolingException e) {
-			throw new ContactException(e);
-		}
-		try {
-			return Contacts.getContactById(objectId, user, group, ctx, uc, readCon).getParentFolderID();
-		} finally {
-			DBPool.closeReaderSilent(ctx, readCon);
-		}
-
-	}
-
 	@OXThrowsMultiple(category = { Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION,
 			Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR, Category.PERMISSION, Category.PERMISSION,
 			Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT,
@@ -704,38 +675,6 @@ public final class Contacts {
 		 * throw EXCEPTIONS.createOXConflictException(63,ctx.getContextId()); }
 		 */
 
-		/*
-		 * Check if contact really exists in specified folder
-		 */
-		if (fid != getRealFolderID(co.getObjectID(), user, group, uc, ctx)) {
-			throw EXCEPTIONS.createOXPermissionException(74, Integer.valueOf(co.getObjectID()), Integer.valueOf(fid),
-					Integer.valueOf(ctx.getContextId()));
-		}
-
-		if (FolderObject.SYSTEM_LDAP_FOLDER_ID == fid && co.containsEmail1() && ctx.getMailadmin() != user) {
-			final Connection readCon;
-			try {
-				readCon = DBPool.pickup(ctx);
-			} catch (final DBPoolingException e) {
-				throw new ContactException(e);
-			}
-			try {
-				if (Contacts.getContactById(co.getObjectID(), user, group, ctx, uc, readCon).getInternalUserId() == user) {
-					/*
-					 * User tries to edit his primary email address which is
-					 * allowed by administrator only since this email address is
-					 * used in various places throughout the system. Therefore
-					 * it is denied.
-					 */
-					throw EXCEPTIONS.createOXPermissionException(73, Integer.valueOf(ctx.getContextId()), Integer
-							.valueOf(co.getObjectID()), Integer.valueOf(user));
-
-				}
-			} finally {
-				DBPool.closeReaderSilent(ctx, readCon);
-			}
-		}
-
 		validateEmailAddress(co);
 
 		boolean can_edit_only_own = false;
@@ -752,6 +691,36 @@ public final class Contacts {
 		Connection readcon = null;
 		try {
 			readcon = DBPool.pickup(ctx);
+			
+			try {
+				original = getContactById(co.getObjectID(), user, group, ctx, uc, readcon);
+			} catch (final Exception e) {
+				throw EXCEPTIONS.createOXObjectNotFoundException(16, e, Integer.valueOf(ctx.getContextId()), Integer
+						.valueOf(co.getObjectID()));
+				// throw new OXObjectNotFoundException("UNABLE TO LOAD CONTACT
+				// FOR UPDATE cid="+ctx.getContextId()+" oid"+co.getObjectID(),
+				// e);
+			}
+			
+			/*
+			 * Check if contact really exists in specified folder
+			 */
+			if (fid != original.getParentFolderID()) {
+				throw EXCEPTIONS.createOXPermissionException(74, Integer.valueOf(co.getObjectID()), Integer
+						.valueOf(fid), Integer.valueOf(ctx.getContextId()));
+			}
+
+			if (FolderObject.SYSTEM_LDAP_FOLDER_ID == fid && co.containsEmail1() && ctx.getMailadmin() != user
+					&& original.getInternalUserId() == user) {
+				/*
+				 * User tries to edit his primary email address which is allowed
+				 * by administrator only since this email address is used in
+				 * various places throughout the system. Therefore it is denied.
+				 */
+				throw EXCEPTIONS.createOXPermissionException(73, Integer.valueOf(ctx.getContextId()), Integer
+						.valueOf(co.getObjectID()), Integer.valueOf(user));
+
+			}
 
 			/*
 			 * Check Rights for Source Folder
@@ -842,19 +811,9 @@ public final class Contacts {
 			}
 
 			/*
-			 * ALL RIGHTS CHECK SO FAR NOW LOAD THE OLD OBJECT AND CHECK FOR
-			 * READ ONLY OWN
+			 * ALL RIGHTS CHECK SO FAR, CHECK FOR READ ONLY OWN
 			 */
 
-			try {
-				original = getContactById(co.getObjectID(), user, group, ctx, uc, readcon);
-			} catch (final Exception e) {
-				throw EXCEPTIONS.createOXObjectNotFoundException(16, e, Integer.valueOf(ctx.getContextId()), Integer
-						.valueOf(co.getObjectID()));
-				// throw new OXObjectNotFoundException("UNABLE TO LOAD CONTACT
-				// FOR UPDATE cid="+ctx.getContextId()+" oid"+co.getObjectID(),
-				// e);
-			}
 			if (can_edit_only_own && (original.getCreatedBy() != user)) {
 				throw EXCEPTIONS.createOXConflictException(17, Integer.valueOf(fid), Integer
 						.valueOf(ctx.getContextId()), Integer.valueOf(user));
