@@ -53,18 +53,21 @@ import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools
 import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.parseDate;
 
 import java.util.TimeZone;
+import java.util.List;
 
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DtEnd;
 
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.groupware.container.CalendarObject;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class End<T extends CalendarComponent, U extends CalendarObject> implements AttributeConverter<T, U> {
+public final class End<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
 
     /**
      * Default constructor.
@@ -76,7 +79,7 @@ public final class End<T extends CalendarComponent, U extends CalendarObject> im
     /**
      * {@inheritDoc}
      */
-    public void emit(final CalendarObject calendar, final CalendarComponent component) {
+    public void emit(final U calendar, final T component, List<ConversionWarning> warnings) {
         final DtEnd end = new DtEnd();
         end.setDate(toDateTime(calendar.getEndDate()));
         component.getProperties().add(end);
@@ -85,21 +88,21 @@ public final class End<T extends CalendarComponent, U extends CalendarObject> im
     /**
      * {@inheritDoc}
      */
-    public boolean hasProperty(final CalendarComponent component) {
+    public boolean hasProperty(final T component) {
         return null != component.getProperty(DtEnd.DTEND);
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean isSet(final CalendarObject calendar) {
+    public boolean isSet(final U calendar) {
         return calendar.containsEndDate();
     }
 
     /**
      * {@inheritDoc}
      */
-    public void parse(final CalendarComponent component, final CalendarObject calendar, TimeZone timeZone) {
+    public void parse(final T component, final U calendar, TimeZone timeZone, List<ConversionWarning> warnings) {
         calendar.setEndDate(parseDate(component, new DtEnd(), timeZone));
     }
 

@@ -46,73 +46,22 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.data.conversion.ical.ical4j.internal.appointment;
 
-package com.openexchange.data.conversion.ical.ical4j.internal;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.data.conversion.ical.ical4j.internal.ObjectVerifier;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ConversionError;
 
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.property.DateProperty;
+import java.util.List;
 
 /**
- *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public final class ParserTools {
-
-    /**
-     * Prevent instantiation.
-     */
-    private ParserTools() {
-        super();
-    }
-
-    public static final Date parseDate(final CalendarComponent component,
-        final DateProperty property, final TimeZone timeZone) {
-        final DateProperty value = (DateProperty) component.getProperty(
-            property.getName());
-        Date retval = new Date(value.getDate().getTime());
-        if (inDefaultTimeZone(value, timeZone)) {
-            retval = recalculate(retval, timeZone);
+public class RequireEndDate  implements ObjectVerifier<AppointmentObject> {
+    public void verify(AppointmentObject object, List<ConversionWarning> warnings) throws ConversionError {
+        if(!object.containsEndDate()) {
+            throw new ConversionError("DTEND or Duration required");
         }
-        return retval;
-    }
-
-    public static boolean inDefaultTimeZone(final DateProperty dateProperty,
-        final TimeZone timeZone) {
-        if (dateProperty.getParameter("TZID") != null) {
-            return false;
-        }
-        return !dateProperty.isUtc();
-    }
-
-    /**
-     * Transforms date from the default timezone to the date in the given timezone.
-     */
-    public static Date recalculate(final Date date, final TimeZone timeZone) {
-    
-        java.util.Calendar inDefault = new GregorianCalendar();
-        inDefault.setTime(date);
-    
-        java.util.Calendar inTimeZone = new GregorianCalendar();
-        inTimeZone.setTimeZone(timeZone);
-        inTimeZone.set(inDefault.get(java.util.Calendar.YEAR),
-            inDefault.get(java.util.Calendar.MONTH),
-            inDefault.get(java.util.Calendar.DATE),
-            inDefault.get(java.util.Calendar.HOUR_OF_DAY),
-            inDefault.get(java.util.Calendar.MINUTE),
-            inDefault.get(java.util.Calendar.SECOND));
-        inTimeZone.set(java.util.Calendar.MILLISECOND, 0);
-        return inTimeZone.getTime();
-    }
-
-    public static Date toDate(DateProperty dateProperty, TimeZone tz) {
-        Date date = new Date(dateProperty.getDate().getTime());
-        if (ParserTools.inDefaultTimeZone(dateProperty, tz)) {
-            date = ParserTools.recalculate(date, tz);
-        }
-        return date;
     }
 }

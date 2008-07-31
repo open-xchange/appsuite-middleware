@@ -50,10 +50,13 @@
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
 import java.util.TimeZone;
+import java.util.List;
 
 import net.fortuna.ical4j.model.component.CalendarComponent;
 
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ConversionError;
 
 /**
  *
@@ -68,10 +71,11 @@ public interface AttributeConverter<T extends CalendarComponent, U extends Calen
      */
     boolean isSet(U u);
 
-    void emit(U u, T t);
+    void emit(U u, T t, List<ConversionWarning> warnings) throws ConversionError;
 
     boolean hasProperty(T t);
 
-    void parse(T t, U u, TimeZone timeZone);
+    void parse(T t, U u, TimeZone timeZone, List<ConversionWarning> warnings) throws ConversionError;
 
+    public void verify(U object, List<ConversionWarning> warnings) throws ConversionError;
 }

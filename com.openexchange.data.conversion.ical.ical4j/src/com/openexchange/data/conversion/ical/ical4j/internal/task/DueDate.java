@@ -46,73 +46,45 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.data.conversion.ical.ical4j.internal.task;
 
-package com.openexchange.data.conversion.ical.ical4j.internal;
+import net.fortuna.ical4j.model.component.VToDo;
+import net.fortuna.ical4j.model.property.Due;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ConversionError;
 
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.TimeZone;
-
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.property.DateProperty;
+import java.util.Date;
 
 /**
- *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public final class ParserTools {
-
-    /**
-     * Prevent instantiation.
-     */
-    private ParserTools() {
-        super();
+public class DueDate extends AbstractVerifyingAttributeConverter<VToDo, Task> {
+    public boolean isSet(Task task) {
+        return false;  // EndDate only
     }
 
-    public static final Date parseDate(final CalendarComponent component,
-        final DateProperty property, final TimeZone timeZone) {
-        final DateProperty value = (DateProperty) component.getProperty(
-            property.getName());
-        Date retval = new Date(value.getDate().getTime());
-        if (inDefaultTimeZone(value, timeZone)) {
-            retval = recalculate(retval, timeZone);
+    public void emit(Task task, VToDo vToDo, List<ConversionWarning> warnings) throws ConversionError {
+       return; // EndDate only
+    }
+
+    public boolean hasProperty(VToDo vToDo) {
+        return null != vToDo.getDue();
+    }
+
+    public void parse(VToDo vToDo, Task task, TimeZone timeZone, List<ConversionWarning> warnings) throws ConversionError {
+        if(task.containsEndDate()) {
+            return;
         }
-        return retval;
-    }
-
-    public static boolean inDefaultTimeZone(final DateProperty dateProperty,
-        final TimeZone timeZone) {
-        if (dateProperty.getParameter("TZID") != null) {
-            return false;
+        Due due = vToDo.getDue();
+        if(null == due) {
+            return;
         }
-        return !dateProperty.isUtc();
-    }
-
-    /**
-     * Transforms date from the default timezone to the date in the given timezone.
-     */
-    public static Date recalculate(final Date date, final TimeZone timeZone) {
-    
-        java.util.Calendar inDefault = new GregorianCalendar();
-        inDefault.setTime(date);
-    
-        java.util.Calendar inTimeZone = new GregorianCalendar();
-        inTimeZone.setTimeZone(timeZone);
-        inTimeZone.set(inDefault.get(java.util.Calendar.YEAR),
-            inDefault.get(java.util.Calendar.MONTH),
-            inDefault.get(java.util.Calendar.DATE),
-            inDefault.get(java.util.Calendar.HOUR_OF_DAY),
-            inDefault.get(java.util.Calendar.MINUTE),
-            inDefault.get(java.util.Calendar.SECOND));
-        inTimeZone.set(java.util.Calendar.MILLISECOND, 0);
-        return inTimeZone.getTime();
-    }
-
-    public static Date toDate(DateProperty dateProperty, TimeZone tz) {
-        Date date = new Date(dateProperty.getDate().getTime());
-        if (ParserTools.inDefaultTimeZone(dateProperty, tz)) {
-            date = ParserTools.recalculate(date, tz);
-        }
-        return date;
+        Date endDate = ParserTools.toDate(due, timeZone);
+        task.setEndDate(endDate);
     }
 }

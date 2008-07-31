@@ -54,10 +54,8 @@ import java.util.List;
 
 import net.fortuna.ical4j.model.component.VToDo;
 
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.End;
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Start;
-import com.openexchange.data.conversion.ical.ical4j.internal.task.Note;
-import com.openexchange.data.conversion.ical.ical4j.internal.task.Title;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.*;
+import com.openexchange.data.conversion.ical.ical4j.internal.task.DueDate;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -77,10 +75,12 @@ public final class TaskConverters {
 
     static {
         final List<AttributeConverter<VToDo, Task>> tmp = new ArrayList<AttributeConverter<VToDo, Task>>();
-        tmp.add(new Title());
-        tmp.add(new Note());
+        tmp.add(new Title<VToDo, Task>());
+        tmp.add(new Note<VToDo, Task>());
         tmp.add(new Start<VToDo, Task>());
         tmp.add(new End<VToDo, Task>());
+        tmp.add(new Duration<VToDo, Task>());
+        tmp.add(new DueDate());
         ALL = (AttributeConverter<VToDo, Task>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
     }
 }

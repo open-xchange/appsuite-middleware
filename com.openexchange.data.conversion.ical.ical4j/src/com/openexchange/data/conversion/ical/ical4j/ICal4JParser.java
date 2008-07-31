@@ -102,6 +102,7 @@ import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
+import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -167,17 +168,14 @@ public class ICal4JParser implements ICalParser {
 
         TimeZone tz = determineTimeZone(vevent, defaultTZ);
 
-        if(!setStart(appointment, vevent, tz)) {
-            throw new ConversionError("Missing DTSTART");
+        for (final AttributeConverter<VEvent, AppointmentObject> converter : AppointmentConverters.ALL) {
+            if (converter.hasProperty(vevent)) {
+                converter.parse(vevent, appointment, tz, warnings);
+            }
+            converter.verify(appointment, warnings);
         }
-        setEnd(appointment, vevent, tz);
-        applyDuration(appointment, vevent);
-        if(!appointment.containsEndDate())  {
-            throw new ConversionError("DTEND or Duration required");
-        }
+
         applyClass(appointment, vevent, warnings);
-        setTitle(appointment, vevent);
-        setDescription(appointment, vevent);
         setLocation(appointment,  vevent);
         applyTransparency(appointment, vevent);
         setParticipants(appointment, vevent, ctx);
@@ -197,14 +195,12 @@ public class ICal4JParser implements ICalParser {
         final Task task = new Task();
         for (final AttributeConverter<VToDo, Task> converter : TaskConverters.ALL) {
             if (converter.hasProperty(vtodo)) {
-                converter.parse(vtodo, task, tz);
+                converter.parse(vtodo, task, tz, warnings);
             }
+            converter.verify(task, warnings);
         }
-        if(null == task.getEndDate())  {
-            setDueDate(task, vtodo, tz);
-        }
+        
         setDateCompleted(task, vtodo, tz);
-        applyDuration(task, vtodo);
         applyClass(task, vtodo, warnings);
         setParticipants(task, vtodo, ctx);
         setCategories(task, vtodo);

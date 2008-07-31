@@ -46,49 +46,40 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-package com.openexchange.data.conversion.ical.ical4j.internal.task;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.groupware.container.CalendarObject;
+import net.fortuna.ical4j.model.component.CalendarComponent;
 
+import java.util.List;
 import java.util.TimeZone;
-
-import net.fortuna.ical4j.model.component.VToDo;
-import net.fortuna.ical4j.model.property.Description;
-
-import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
-import com.openexchange.groupware.tasks.Task;
+import java.util.Date;
 
 /**
- *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public final class Note implements AttributeConverter<VToDo, Task> {
-
-    /**
-     * Default constructor.
-     */
-    public Note() {
-        super();
+public class Duration<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
+    public boolean isSet(U calendar) {
+        return false; // Always emitting endDate
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public boolean isSet(final Task task) {
-        return task.containsNote();
+    public void emit(U u, T t, List<ConversionWarning> warnings) throws ConversionError {
+        return; // Always emitting endDate
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void emit(final Task task, final VToDo vtodo) {
-        vtodo.getProperties().add(new Description(task.getNote()));
+    public boolean hasProperty(T t) {
+        return null != t.getProperty("Duration");
     }
 
-    public boolean hasProperty(final VToDo vtodo) {
-        return null != vtodo.getProperty(Description.DESCRIPTION);
-    }
-
-    public void parse(final VToDo vtodo, final Task task, final TimeZone timeZone) {
-        task.setNote(vtodo.getProperty(Description.DESCRIPTION).getValue());
+    public void parse(T component, U cObj, TimeZone timeZone, List<ConversionWarning> warnings) throws ConversionError {
+       net.fortuna.ical4j.model.property.Duration duration = (net.fortuna.ical4j.model.property.Duration) component.getProperty("Duration");
+        if(duration == null) {
+            return;
+        }
+        Date endDate = duration.getDuration().getTime(cObj.getStartDate());
+        cObj.setEndDate(endDate);
     }
 }

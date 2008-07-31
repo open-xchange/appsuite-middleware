@@ -47,55 +47,53 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.ical4j.internal.task;
+package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
 import java.util.TimeZone;
+import java.util.List;
 
 import net.fortuna.ical4j.model.component.VToDo;
-import net.fortuna.ical4j.model.property.Summary;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.property.Description;
 
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.groupware.tasks.Task;
-
+import com.openexchange.groupware.container.CalendarObject;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Title implements AttributeConverter<VToDo, Task> {
+public final class Note<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
 
     /**
      * Default constructor.
      */
-    public Title() {
+    public Note() {
         super();
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean isSet(final Task task) {
-        return task.containsTitle();
+    public boolean isSet(final U calendarObject) {
+        return calendarObject.containsNote();
     }
 
     /**
      * {@inheritDoc}
      */
-    public void emit(final Task task, final VToDo vtodo) {
-        vtodo.getProperties().add(new Summary(task.getTitle()));
+    public void emit(final U calendarObject, final T calendarComponent, List<ConversionWarning> warnings) {
+        calendarComponent.getProperties().add(new Description(calendarObject.getNote()));
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public boolean hasProperty(final VToDo vtodo) {
-        return null != vtodo.getProperty(Summary.SUMMARY);
+    public boolean hasProperty(final T calendarComponent) {
+        return null != calendarComponent.getProperty(Description.DESCRIPTION);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void parse(final VToDo vtodo, final Task task, final TimeZone timeZone) {
-        task.setTitle(vtodo.getProperty(Summary.SUMMARY).getValue());
+    public void parse(final T calendarComponent, final U calendarObject, final TimeZone timeZone, List<ConversionWarning> warnings) {
+        calendarObject.setNote(calendarComponent.getProperty(Description.DESCRIPTION).getValue());
     }
 }

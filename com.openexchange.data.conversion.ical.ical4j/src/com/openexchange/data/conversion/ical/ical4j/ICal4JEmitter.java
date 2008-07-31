@@ -89,8 +89,13 @@ public class ICal4JEmitter implements ICalEmitter {
         final List<ConversionWarning> warnings) {
         final Calendar calendar = new Calendar();
         for (final Task task : tasks) {
-            final VToDo vtodo = createEvent(task);
-            calendar.getComponents().add(vtodo);
+            final VToDo vtodo;
+            try {
+                vtodo = createEvent(task, warnings);
+                calendar.getComponents().add(vtodo);
+            } catch (ConversionError conversionError) {
+                errors.add( conversionError );
+            }
         }
         return calendar.toString();
     }
@@ -135,11 +140,11 @@ public class ICal4JEmitter implements ICalEmitter {
      * @param task task to convert.
      * @return the iCal event representing the task.
      */
-    private VToDo createEvent(final Task task) {
+    private VToDo createEvent(final Task task, List<ConversionWarning> warnings) throws ConversionError {
         final VToDo vtodo = new VToDo();
         for (final AttributeConverter<VToDo, Task> converter : TaskConverters.ALL) {
             if (converter.isSet(task)) {
-                converter.emit(task, vtodo);
+                converter.emit(task, vtodo, warnings);
             }
         }
         return vtodo;
