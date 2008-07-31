@@ -208,6 +208,12 @@ public abstract class ContextStorage {
         impl = null;
     }
 
+    /**
+     * Convenience method for getting the context.
+     * @param session The session providing the context ID
+     * @return the context data object or null if the context with the given identifier can't be found.
+     * @throws ContextException if getting the context fails.
+     */
     public static Context getStorageContext(final Session session)
         throws ContextException {
         return getStorageContext(session.getContextId());
@@ -216,7 +222,7 @@ public abstract class ContextStorage {
     /**
      * Convenience method for getting the context.
      * @param contextId unique identifier of the context.
-     * @return the context data object.
+     * @return the context data object or null if the context with the given identifier can't be found.
      * @throws ContextException if getting the context fails.
      */
     public static Context getStorageContext(final int contextId)
