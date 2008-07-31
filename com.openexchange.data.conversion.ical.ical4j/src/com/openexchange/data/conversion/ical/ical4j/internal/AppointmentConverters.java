@@ -76,13 +76,13 @@ public class AppointmentConverters {
         tmp.add(new Note<VEvent, AppointmentObject>());
 
         Start<VEvent, AppointmentObject> start = new Start<VEvent, AppointmentObject>();
-        start.setVerfifier(new RequireStartDate());
+        start.setVerifier(new RequireStartDate());
         tmp.add(start);
 
         tmp.add(new End<VEvent, AppointmentObject>());
 
         Duration<VEvent, AppointmentObject> duration = new Duration<VEvent, AppointmentObject>();
-        duration.setVerfifier(new RequireEndDate());
+        duration.setVerifier(new RequireEndDate());
         tmp.add(duration);
 
         ALL = (AttributeConverter<VEvent, AppointmentObject>[]) tmp.toArray(new AttributeConverter[tmp.size()]);

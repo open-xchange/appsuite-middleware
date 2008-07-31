@@ -61,7 +61,7 @@ import java.util.List;
 public abstract class AbstractVerifyingAttributeConverter<T extends CalendarComponent, U extends CalendarObject> implements AttributeConverter<T , U >{
     private ObjectVerifier<U> verifier;
 
-    public void setVerfifier(ObjectVerifier<U> verifier) {
+    public void setVerifier(ObjectVerifier<U> verifier) {
         this.verifier = verifier;
     }
 
