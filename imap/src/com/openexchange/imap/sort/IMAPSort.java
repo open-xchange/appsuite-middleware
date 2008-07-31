@@ -302,13 +302,22 @@ public final class IMAPSort {
 			}
 		}
 
+		private static final Integer COLOR_FLAG_MIN = Integer.valueOf(-99);
+
 		static Integer getColorFlag(final String[] userFlags) {
 			for (int i = 0; i < userFlags.length; i++) {
 				if (userFlags[i].startsWith(MailMessage.COLOR_LABEL_PREFIX)) {
-					return Integer.valueOf(userFlags[i].substring(3));
+					try {
+						final int cf = Integer.parseInt(userFlags[i].substring(3));
+						return cf == MailMessage.COLOR_LABEL_NONE ? COLOR_FLAG_MIN : Integer.valueOf(cf * -1);
+					} catch (final NumberFormatException e) {
+						if (LOG.isDebugEnabled()) {
+							LOG.debug("Skipped invalid color flag detected in user flags: " + userFlags[i]);
+						}
+					}
 				}
 			}
-			return Integer.valueOf(MailMessage.COLOR_LABEL_NONE);
+			return COLOR_FLAG_MIN;
 		}
 
 		public int compare(final Message msg1, final Message msg2) {
@@ -450,8 +459,14 @@ public final class IMAPSort {
 				 */
 				throw e;
 			} catch (final IMAPException e) {
-				if (LOG.isWarnEnabled()) {
-					LOG.warn(e.getLocalizedMessage(), e);
+				if (e.getDetailNumber() == IMAPException.Code.UNSUPPORTED_SORT_FIELD.getNumber()) {
+					if (LOG.isDebugEnabled()) {
+						LOG.debug(e.getLocalizedMessage(), e);
+					}
+				} else {
+					if (LOG.isWarnEnabled()) {
+						LOG.warn(e.getLocalizedMessage(), e);
+					}
 				}
 				applicationSort = true;
 			} catch (final MessagingException e) {
