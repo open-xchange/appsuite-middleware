@@ -148,11 +148,11 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
 			final OXFolderAccess access = new OXFolderAccess(con, ctx);
 			for(final DocumentMetadata m : metadata) {
 				final EffectivePermission isperm;
-				if(!cache.containsKey(Long.valueOf(m.getFolderId()))) {
+				if(cache.containsKey(Integer.valueOf((int) m.getFolderId()))) {
+					isperm = cache.get(Integer.valueOf((int) m.getFolderId()));
+				} else {
 					isperm = access.getFolderPermission((int) m.getFolderId(), user.getId(), userConfig);
 					cache.put(Integer.valueOf((int) m.getFolderId()), isperm);
-				} else {
-					isperm = cache.get(Integer.valueOf((int) m.getFolderId()));
 				}
 				permissions.add(new EffectiveInfostorePermission(isperm, m,user));
 			}

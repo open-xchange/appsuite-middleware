@@ -100,11 +100,11 @@ public class FormatDate {
      */
     public String formatDate(final String originalDate, String originalPattern, final String wantedPattern) throws ParseException {
 	
-	if ((originalPattern == null) && (originalPattern.trim().length() <= 0)) {
+	if ((originalPattern == null) || (originalPattern.trim().length() <= 0)) {
 	    originalPattern = "MM.dd.yyyy HH:mm";
 	}
 
-	if ((wantedPattern == null) && (wantedPattern.trim().length() <= 0)) {
+	if ((wantedPattern == null) || (wantedPattern.trim().length() <= 0)) {
 	    originalPattern = "dd.MM.yyyy HH:mm";
 	}
 
