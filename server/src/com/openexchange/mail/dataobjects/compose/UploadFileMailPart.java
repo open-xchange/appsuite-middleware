@@ -64,7 +64,6 @@ import javax.mail.Part;
 
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.MIMETypes;
@@ -85,7 +84,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(UploadFileMailPart.class);
 
-	private final transient File uploadFile;
+	private final File uploadFile;
 
 	private transient DataSource dataSource;
 
@@ -151,7 +150,15 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
 		if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
 			String charset = getContentType().getCharsetParameter();
 			if (charset == null) {
-				charset = System.getProperty("file.encoding", MailConfig.getDefaultMimeCharset());
+				try {
+					charset = detectCharset(new FileInputStream(uploadFile));
+					if (LOG.isWarnEnabled()) {
+						LOG.warn(new StringBuilder("Uploaded file contains textual content but").append(
+								" does not specify a charset. Assumed charset is: ").append(charset).toString());
+					}
+				} catch (final FileNotFoundException e) {
+					throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+				}
 			}
 			FileInputStream fis = null;
 			try {
@@ -226,6 +233,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
 	 */
 	@Override
 	public void loadContent() {
+		// Nothing to do
 	}
 
 	/*
@@ -235,6 +243,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
 	 */
 	@Override
 	public void prepareForCaching() {
+		// Nothing to do
 	}
 
 	/*
