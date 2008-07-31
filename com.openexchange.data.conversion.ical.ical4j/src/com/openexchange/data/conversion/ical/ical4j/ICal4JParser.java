@@ -175,11 +175,8 @@ public class ICal4JParser implements ICalParser {
             converter.verify(appointment, warnings);
         }
 
-        setRecurrence(appointment, vevent, tz, warnings);
-        setDeleteExceptions(appointment, vevent, tz);
-
-        setAlarm(appointment, vevent, tz, warnings);
-
+        
+        
         appointment.setTimezone(getTimeZoneID(tz));
 
         return appointment;
@@ -195,10 +192,7 @@ public class ICal4JParser implements ICalParser {
             converter.verify(task, warnings);
         }
         
-        setRecurrence(task, vtodo, tz, warnings);
-        setDeleteExceptions(task, vtodo, tz);
-        setAlarm(task, vtodo, tz, warnings);
-
+        
         setPercentComplete(task, vtodo);
         setPriority(task, vtodo);
         setStatus(task, vtodo);

@@ -55,6 +55,8 @@ import java.util.TimeZone;
 
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DateProperty;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.DateTime;
 
 /**
  *
@@ -114,5 +116,19 @@ public final class ParserTools {
             date = ParserTools.recalculate(date, tz);
         }
         return date;
+    }
+
+    public static Date recalculateAsNeeded(net.fortuna.ical4j.model.Date icaldate, Property property, TimeZone tz) {
+        boolean mustRecalculate = true;
+        if(property.getParameter("TZID") != null) {
+            mustRecalculate = false;
+        } else if(DateTime.class.isAssignableFrom(icaldate.getClass())) {
+            DateTime dateTime = (DateTime) icaldate;
+            mustRecalculate = !dateTime.isUtc();
+        }
+        if(mustRecalculate) {
+            return ParserTools.recalculate(icaldate, tz);
+        }
+        return new Date(icaldate.getTime());
     }
 }

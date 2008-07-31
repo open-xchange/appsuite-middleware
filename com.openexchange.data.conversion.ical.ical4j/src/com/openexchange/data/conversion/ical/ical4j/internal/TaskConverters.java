@@ -86,6 +86,9 @@ public final class TaskConverters {
         tmp.add(new DateCompleted());
         tmp.add(new Participants<VToDo, Task>());
         tmp.add(new Categories<VToDo, Task>());
+        tmp.add(new Recurrence<VToDo, Task>());
+        tmp.add(new DeleteExceptions<VToDo, Task>());
+        tmp.add(new Alarm<VToDo, Task>());
 
         ALL = (AttributeConverter<VToDo, Task>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
     }
