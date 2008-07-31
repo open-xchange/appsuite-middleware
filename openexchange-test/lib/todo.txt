@@ -1,0 +1,2 @@
+Some jars are duplicate here to jars in bundles. This is needed because for test
+execution we are not able to reference jars in bundle jars.
