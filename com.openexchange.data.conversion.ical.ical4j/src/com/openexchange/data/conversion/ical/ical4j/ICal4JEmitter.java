@@ -54,6 +54,7 @@ import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
+import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.tasks.Task;
 
@@ -74,7 +75,7 @@ public class ICal4JEmitter implements ICalEmitter {
         Calendar calendar = new Calendar();
 
         for(AppointmentObject appointment : appointmentObjects) {
-            VEvent event = createEvent(appointment);
+            VEvent event = createEvent(appointment, errors, warnings);
             calendar.getComponents().add(event);
         }
 
@@ -100,8 +101,19 @@ public class ICal4JEmitter implements ICalEmitter {
         return calendar.toString();
     }
 
-    private VEvent createEvent(AppointmentObject appointment) {
-        VEvent vevent = new VEvent();
+    private VEvent createEvent(AppointmentObject appointment, List<ConversionError> errors, List<ConversionWarning> warnings) {
+
+        final VEvent vevent = new VEvent();
+        for (final AttributeConverter<VEvent, AppointmentObject> converter : AppointmentConverters.ALL) {
+            if (converter.isSet(appointment)) {
+                try {
+                    converter.emit(appointment, vevent, warnings);
+                } catch (ConversionError conversionError) {
+                    errors.add( conversionError );
+                }
+            }
+        }
+
         vevent.getProperties().add(new DtStart());
         vevent.getStartDate().setDate(date(appointment.getStartDate()));
         vevent.getStartDate().setUtc(true);
@@ -112,8 +124,7 @@ public class ICal4JEmitter implements ICalEmitter {
 
         vevent.getProperties().add(new Summary(appointment.getTitle()));
         vevent.getProperties().add(new Description(appointment.getNote()));
-        vevent.getProperties().add(new Location(appointment.getLocation()));
-
+        
         if(null != appointment.getCategories()) {
             vevent.getProperties().add(new Categories(appointment.getCategories()));
         }
