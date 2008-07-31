@@ -348,6 +348,11 @@ public final class HTML2TextHandler implements HTMLHandler {
 	private static final Pattern PAT_CONTROL = Pattern.compile("[\n\f\r]+");
 
 	/**
+	 * Detects starting: \t or " "
+	 */
+	private static final Pattern PAT_STARTING_BLANKS = Pattern.compile("[\t ]+");
+
+	/**
 	 * Detects indentions: \t or "    "
 	 */
 	private static final Pattern PAT_INDENT = Pattern.compile("(?:(\t)|([ ]{4}))+");
@@ -390,10 +395,10 @@ public final class HTML2TextHandler implements HTMLHandler {
 					 */
 					preparedText = PAT_CONTROL.matcher(preparedText).replaceAll(STR_EMPTY);
 					/*
-					 * Remove first indention
+					 * Remove starting blanks
 					 */
 					{
-						final Matcher mIndent = PAT_INDENT.matcher(preparedText);
+						final Matcher mIndent = PAT_STARTING_BLANKS.matcher(preparedText);
 						if (mIndent.find() && mIndent.start() == 0) {
 							preparedText = preparedText.substring(mIndent.end());
 						}
