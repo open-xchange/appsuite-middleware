@@ -58,13 +58,18 @@
  *
  * @author jdumas@zgs.com (John Dumas)
  */
+
 package com.openexchange.passwordchange.mechs;
 
 import java.io.UnsupportedEncodingException;
 
-public class UnixCrypt {
-    
-    public static String encoding = "UTF-8";
+public final class UnixCrypt {
+
+	private UnixCrypt() {
+		super();
+	}
+
+    private static final String encoding = "UTF-8";
     
     private static final char[] saltChars =
     ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./".toCharArray());

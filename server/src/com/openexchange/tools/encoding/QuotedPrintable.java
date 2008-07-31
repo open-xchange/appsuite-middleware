@@ -55,7 +55,10 @@ package com.openexchange.tools.encoding;
  * @author <a href="mailto:martin.kauss@netline-is.de">Martin Kauss</a>
  */
 
-public class QuotedPrintable {
+public final class QuotedPrintable {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(QuotedPrintable.class);
 
 	private QuotedPrintable() {
 		super();
@@ -72,7 +75,8 @@ public class QuotedPrintable {
 			final byte b[] = s.getBytes();
 
 			for (int a = 0; a < b.length; a++) {
-				if ((b[a] >= 32) && (b[a] <= 127) && (b[a] != 61)) {
+				final int unsignedInt = (0xff & b[a]);
+				if ((unsignedInt >= 32) && (unsignedInt <= 127) && (unsignedInt != 61)) {
 					sb.append((char) b[a]);
 				} else {
 					i = b[a];
@@ -121,7 +125,7 @@ public class QuotedPrintable {
 				}
 			}
 		} catch (final Exception exc) {
-			System.out.println("decode error: " + exc);
+			LOG.error(exc.getMessage(), exc);
 		}
 
 		return sb.toString();
