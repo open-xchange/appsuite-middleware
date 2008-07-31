@@ -51,7 +51,6 @@ package com.openexchange.mail;
 
 import org.json.JSONObject;
 
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -59,7 +58,6 @@ import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * {@link MailJSONHandlerTest}
@@ -212,9 +210,7 @@ public final class MailJSONHandlerTest extends AbstractMailTest {
 
 	public void testMailGet() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 
 			final MailMessage mail = MIMEMessageConverter.convertMessage(SRC.getBytes("US-ASCII"));
 

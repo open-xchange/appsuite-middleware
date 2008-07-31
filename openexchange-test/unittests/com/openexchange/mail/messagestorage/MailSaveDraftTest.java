@@ -60,7 +60,6 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.smtp.dataobjects.SMTPMailMessage;
 
 /**
@@ -87,9 +86,7 @@ public final class MailSaveDraftTest extends AbstractMailTest {
 
 	public void testMailDraft() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 			final Context dummyContext = new ContextImpl(session.getContextId());
 
 			ComposedMailMessage draftMail = new SMTPMailMessage("The first line", session, dummyContext);

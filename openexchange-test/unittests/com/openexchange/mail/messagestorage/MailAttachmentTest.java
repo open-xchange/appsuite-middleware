@@ -274,9 +274,7 @@ public final class MailAttachmentTest extends AbstractMailTest {
 
 	public void testMailAttachment() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 			final MailMessage[] mails = getMessages(getTestMailDir(), -1);
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);

@@ -52,7 +52,6 @@ package com.openexchange.mail.messagestorage;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -62,7 +61,6 @@ import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * {@link MailRFC2231Test}
@@ -298,9 +296,7 @@ public final class MailRFC2231Test extends AbstractMailTest {
 
 	public void testRFC2231Part1() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 
 			final MailMessage rfc2231Mail = MIMEMessageConverter.convertMessage(RFC2231_1.getBytes("US-ASCII"));
 			final JSONMessageHandler messageHandler = new JSONMessageHandler(null, rfc2231Mail, DisplayMode.DISPLAY,
@@ -331,9 +327,7 @@ public final class MailRFC2231Test extends AbstractMailTest {
 
 	public void testRFC2231Part2() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 
 			final MailMessage rfc2231Mail = MIMEMessageConverter.convertMessage(RFC2231_2.getBytes("US-ASCII"));
 			final JSONMessageHandler messageHandler = new JSONMessageHandler(null, rfc2231Mail, DisplayMode.DISPLAY,

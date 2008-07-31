@@ -79,9 +79,7 @@ public final class MailAccessTest extends AbstractMailTest {
 
 	public void testMailAccess() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 			MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
 			System.out.println("Active connections: " + MailAccess.getCounter());

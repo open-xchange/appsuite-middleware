@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.folderstorage;
 
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
@@ -59,7 +58,6 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * {@link MailFolderSpecialCharsTest}
@@ -87,9 +85,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 
 	public void testFolderCreateAndSubfolders() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
@@ -211,9 +207,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 
 	public void testFailIfSeparatorContained() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();

@@ -49,13 +49,11 @@
 
 package com.openexchange.mail;
 
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.DumperMessageHandler;
 import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * {@link MailLogicToolsTest}
@@ -164,9 +162,7 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 
 	public void testForward() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect(/* mailConfig */);
 			try {
@@ -208,9 +204,7 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 
 	public void testReply() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 			final MailAccess<?, ?> mailConnection = MailAccess.getInstance(session);
 			mailConnection.connect(/* mailConfig */);
 			try {

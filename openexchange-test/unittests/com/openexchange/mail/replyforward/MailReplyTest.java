@@ -71,7 +71,6 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * {@link MailReplyTest}
@@ -299,8 +298,7 @@ public final class MailReplyTest extends AbstractMailTest {
 			final MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes("US-ASCII"));
 
 			final Context ctx = new ContextImpl(getCid());
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), ctx, "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
@@ -368,8 +366,7 @@ public final class MailReplyTest extends AbstractMailTest {
 			final MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_REPLY_ALL.getBytes("US-ASCII"));
 
 			final Context ctx = new ContextImpl(getCid());
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), ctx, "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
@@ -444,8 +441,7 @@ public final class MailReplyTest extends AbstractMailTest {
 			MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes("US-ASCII"));
 
 			final Context ctx = new ContextImpl(getCid());
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), ctx, "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();

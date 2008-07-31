@@ -49,11 +49,9 @@
 
 package com.openexchange.mail;
 
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * {@link MailFolderTest}
@@ -79,9 +77,7 @@ public class MailFolderTest extends AbstractMailTest {
 
 	public void testGetINBOXFolder() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()),
-					"mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
@@ -100,9 +96,7 @@ public class MailFolderTest extends AbstractMailTest {
 
 	public void testGetSubfolders() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()),
-					"mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect(/* mailConfig */);
 			try {

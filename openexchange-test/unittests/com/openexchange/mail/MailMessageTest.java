@@ -50,13 +50,11 @@
 package com.openexchange.mail;
 
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.Collections.SmartLongArray;
 
 /**
@@ -87,9 +85,7 @@ public final class MailMessageTest extends AbstractMailTest {
 
 	public void testGetMessages() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 			final MailAccess<?, ?> mailConnection = MailAccess.getInstance(session);
 			mailConnection.connect(/* mailConfig */);
 			try {
@@ -155,9 +151,7 @@ public final class MailMessageTest extends AbstractMailTest {
 
 	public void notestGetAllMessages() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 			final MailAccess<?, ?> mailConnection = MailAccess.getInstance(session);
 			mailConnection.connect(/* mailConfig */);
 			try {

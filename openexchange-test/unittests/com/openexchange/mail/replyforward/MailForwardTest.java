@@ -70,7 +70,6 @@ import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * {@link MailForwardTest}
@@ -233,8 +232,7 @@ public final class MailForwardTest extends AbstractMailTest {
 			final MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes("US-ASCII"));
 
 			final Context ctx = new ContextImpl(getCid());
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), ctx, "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
@@ -342,8 +340,7 @@ public final class MailForwardTest extends AbstractMailTest {
 			final MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_FORWARD.getBytes("US-ASCII"));
 
 			final Context ctx = new ContextImpl(getCid());
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), ctx, "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
@@ -444,8 +441,7 @@ public final class MailForwardTest extends AbstractMailTest {
 		try {
 
 			final Context ctx = new ContextImpl(getCid());
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), ctx, "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();

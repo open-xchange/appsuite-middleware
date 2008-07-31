@@ -53,7 +53,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
@@ -79,7 +78,6 @@ import com.openexchange.mail.search.ToTerm;
 import com.openexchange.mail.utils.DateUtils;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * {@link MailSearchTest}
@@ -117,9 +115,7 @@ public final class MailSearchTest extends AbstractMailTest {
 
 	public void testMailSearch() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 			final MailMessage[] mails = getMessages(getTestMailDir(), -1);
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
@@ -312,9 +308,7 @@ public final class MailSearchTest extends AbstractMailTest {
 
 	public void testMailSearchSmallMailbox() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
@@ -488,9 +482,7 @@ public final class MailSearchTest extends AbstractMailTest {
 
 	public void testMailSearchLargeMailbox() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();

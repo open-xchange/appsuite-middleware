@@ -64,9 +64,12 @@ import junit.framework.TestCase;
 
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * {@link AbstractMailTest}
@@ -146,6 +149,15 @@ public abstract class AbstractMailTest extends TestCase {
 	}
 
 	/**
+	 * Gets the localIP
+	 * 
+	 * @return the login
+	 */
+	protected final String getLocalIP() {
+	    return "127.0.0.1";
+	}
+	
+	/**
 	 * Gets the second login
 	 * 
 	 * @return the second login
@@ -199,6 +211,12 @@ public abstract class AbstractMailTest extends TestCase {
 		return user;
 	}
 
+	protected final SessionObject getSession() {
+            final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()), "mail-test-session");
+            session.setPassword(getPassword());
+            session.setLocalIp(getLocalIP());
+            return session;
+	}
 	/**
 	 * Gets the test mail directory
 	 * 

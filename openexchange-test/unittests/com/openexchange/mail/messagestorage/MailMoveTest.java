@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.messagestorage;
 
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
@@ -61,7 +60,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * {@link MailMoveTest}
@@ -99,9 +97,7 @@ public final class MailMoveTest extends AbstractMailTest {
 
 	public void testMailMove() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
-			session.setPassword(getPassword());
+			final SessionObject session = getSession();
 			final MailMessage[] mails = getMessages(getTestMailDir(), -1);
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);

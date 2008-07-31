@@ -49,14 +49,12 @@
 
 package com.openexchange.mail;
 
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * MailConverterTest
@@ -479,12 +477,7 @@ public class MailConverterTest extends AbstractMailTest {
 
 	public void testMIMEConverter() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
-					new ContextImpl(getCid()), "mail-test-session");
-			session.setPassword(getPassword());
-
-			
-			
+			final SessionObject session = getSession();
 			
 			final MailMessage mail = MIMEMessageConverter.convertMessage(SRC.getBytes("US-ASCII"));
 			
