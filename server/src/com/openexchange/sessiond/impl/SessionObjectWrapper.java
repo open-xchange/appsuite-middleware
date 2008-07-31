@@ -59,7 +59,11 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SessionObjectWrapper {
+public final class SessionObjectWrapper {
+
+	private SessionObjectWrapper() {
+		super();
+	}
 
 	/**
 	 * Creates a dummy instance of {@link SessionObject} assigned to user whose
@@ -76,7 +80,7 @@ public class SessionObjectWrapper {
 	 *             If corresponding {@link Context} object could not be loaded
 	 *             from given <code>context_id</code>
 	 */
-	public static final SessionObject createSessionObject(final int user_id, final int context_id,
+	public static SessionObject createSessionObject(final int user_id, final int context_id,
 			final String sessionobjectidentifier) throws ContextException {
 		final Context context = ContextStorage.getInstance().getContext(context_id);
 		return createSessionObject(user_id, context, sessionobjectidentifier);
@@ -94,11 +98,31 @@ public class SessionObjectWrapper {
 	 *            The session identifier
 	 * @return a dummy instance of {@link SessionObject}
 	 */
-	public static final SessionObject createSessionObject(final int user_id, final Context ctx,
+	public static SessionObject createSessionObject(final int user_id, final Context ctx,
 			final String sessionobjectidentifier) {
+		return createSessionObject(user_id, ctx, sessionobjectidentifier, null);
+	}
+
+	/**
+	 * Creates a dummy instance of {@link SessionObject} assigned to user whose
+	 * ID matches given <code>user_id</code>
+	 * 
+	 * @param user_id
+	 *            The user ID
+	 * @param ctx
+	 *            The context
+	 * @param sessionobjectidentifier
+	 *            The session identifier
+	 * @param localIP
+	 *            The local IP
+	 * @return a dummy instance of {@link SessionObject}
+	 */
+	public static SessionObject createSessionObject(final int user_id, final Context ctx,
+			final String sessionobjectidentifier, final String localIP) {
 		final SessionObject so = new SessionObject(sessionobjectidentifier);
 		so.setContextId(ctx.getContextId());
-        so.setUsername(String.valueOf(user_id));
+		so.setUsername(String.valueOf(user_id));
+		so.setLocalIp(localIP);
 		return so;
 	}
 
