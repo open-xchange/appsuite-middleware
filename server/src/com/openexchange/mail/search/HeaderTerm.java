@@ -105,7 +105,7 @@ public final class HeaderTerm extends SearchTerm<String[]> {
 			}
 			return false;
 		}
-		return (val.toLowerCase(Locale.ENGLISH).indexOf(hdr[1]) != -1);
+		return (val.toLowerCase(Locale.ENGLISH).contains(hdr[1].toLowerCase(Locale.ENGLISH)));
 	}
 
 	@Override
@@ -121,7 +121,7 @@ public final class HeaderTerm extends SearchTerm<String[]> {
 		}
 		boolean found = false;
 		for (int i = 0; i < val.length && !found; i++) {
-			found = (val[i].toLowerCase(Locale.ENGLISH).indexOf(hdr[1]) != -1);
+			found = (val[i].toLowerCase(Locale.ENGLISH).contains(hdr[1].toLowerCase(Locale.ENGLISH)));
 		}
 		return found;
 	}
