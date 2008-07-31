@@ -94,6 +94,8 @@ public class AppointmentConverters {
 
         tmp.add(new Participants<VEvent, AppointmentObject>());
 
+        tmp.add(new Categories<VEvent, AppointmentObject>());
+
         ALL = (AttributeConverter<VEvent, AppointmentObject>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
     }
 }

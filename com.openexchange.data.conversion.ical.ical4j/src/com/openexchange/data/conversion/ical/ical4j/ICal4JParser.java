@@ -175,7 +175,6 @@ public class ICal4JParser implements ICalParser {
             converter.verify(appointment, warnings);
         }
 
-        setCategories(appointment, vevent);
         setRecurrence(appointment, vevent, tz, warnings);
         setDeleteExceptions(appointment, vevent, tz);
 
@@ -196,7 +195,6 @@ public class ICal4JParser implements ICalParser {
             converter.verify(task, warnings);
         }
         
-        setCategories(task, vtodo);
         setRecurrence(task, vtodo, tz, warnings);
         setDeleteExceptions(task, vtodo, tz);
         setAlarm(task, vtodo, tz, warnings);

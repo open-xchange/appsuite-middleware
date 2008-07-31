@@ -46,47 +46,50 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-package com.openexchange.data.conversion.ical.ical4j.internal;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.PropertyList;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ConversionError;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import net.fortuna.ical4j.model.component.VToDo;
-
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.*;
-import com.openexchange.data.conversion.ical.ical4j.internal.task.DueDate;
-import com.openexchange.data.conversion.ical.ical4j.internal.task.DateCompleted;
-import com.openexchange.groupware.tasks.Task;
+import java.util.TimeZone;
+import java.util.Date;
+import java.util.Iterator;
 
 /**
- *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public final class TaskConverters {
-
-    public static final AttributeConverter<VToDo, Task>[] ALL;
-
-    /**
-     * Prevent instantiation.
-     */
-    private TaskConverters() {
-        super();
+public class Categories<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
+    public boolean isSet(U calendar) {
+        return calendar.containsCategories();
     }
 
-    static {
-        final List<AttributeConverter<VToDo, Task>> tmp = new ArrayList<AttributeConverter<VToDo, Task>>();
-        tmp.add(new Title<VToDo, Task>());
-        tmp.add(new Note<VToDo, Task>());
-        tmp.add(new Start<VToDo, Task>());
-        tmp.add(new End<VToDo, Task>());
-        tmp.add(new Duration<VToDo, Task>());
-        tmp.add(new DueDate());
-        tmp.add(new Klass<VToDo, Task>());
-        tmp.add(new DateCompleted());
-        tmp.add(new Participants<VToDo, Task>());
-        tmp.add(new Categories<VToDo, Task>());
+    public void emit(U u, T t, List<ConversionWarning> warnings) throws ConversionError {
+        return; // TODO
+    }
 
-        ALL = (AttributeConverter<VToDo, Task>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
+    public boolean hasProperty(T t) {
+        PropertyList categoriesList = t.getProperties("CATEGORIES");
+        return categoriesList.size() > 0;
+    }
+
+    public void parse(T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+       PropertyList categoriesList = component.getProperties("CATEGORIES");
+        StringBuilder bob = new StringBuilder();
+        for(int i = 0, size = categoriesList.size(); i < size; i++) {
+            net.fortuna.ical4j.model.property.Categories categories = (net.fortuna.ical4j.model.property.Categories) categoriesList.get(i);
+            for(Iterator<Object> catObjects = categories.getCategories().iterator(); catObjects.hasNext();) {
+                bob.append(catObjects.next()).append(",");
+            }
+        }
+        if(bob.length() > 0) {
+            bob.setLength(bob.length()-1);
+        }
+        cObj.setCategories(bob.toString());
     }
 }
