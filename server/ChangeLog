@@ -1,3 +1,7 @@
+* 2008-07-31 - thorben.betten@open-xchange.com
+
+ - Bugfix #11772: Fixed ordering of color flags in list view
+
 * 2008-07-30 - dennis.sieben@open-xchange.com
 
  - Bugfix #11764: If no output is created the last chars of the output must not be deleted
