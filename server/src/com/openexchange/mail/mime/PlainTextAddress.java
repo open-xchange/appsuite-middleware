@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.mime;
 
+import java.util.Locale;
+
 import javax.mail.internet.InternetAddress;
 
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
@@ -97,7 +99,7 @@ public final class PlainTextAddress extends InternetAddress {
 	 */
 	public PlainTextAddress(final String address) {
 		this.address = MIMEMessageUtility.decodeMultiEncodedHeader(address);
-		hashCode = address.toLowerCase().hashCode();
+		hashCode = address.toLowerCase(Locale.ENGLISH).hashCode();
 	}
 
 	@Override

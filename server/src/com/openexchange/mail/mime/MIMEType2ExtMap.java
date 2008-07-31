@@ -62,6 +62,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -241,7 +242,7 @@ public final class MIMEType2ExtMap {
 		if (s1.length() == 0) {
 			return MIMETypes.MIME_APPL_OCTET;
 		}
-		final String type = type_hash.get(s1.toLowerCase());
+		final String type = type_hash.get(s1.toLowerCase(Locale.ENGLISH));
 		if (null == type) {
 			return MIMETypes.MIME_APPL_OCTET;
 		}
@@ -268,8 +269,8 @@ public final class MIMEType2ExtMap {
 		if (!initialized.get()) {
 			init();
 		}
-		return ext_hash.containsKey(mimeType.toLowerCase()) ? Collections.unmodifiableList(ext_hash.get(mimeType))
-				: DEFAULT_EXT;
+		return ext_hash.containsKey(mimeType.toLowerCase(Locale.ENGLISH)) ? Collections.unmodifiableList(ext_hash
+				.get(mimeType)) : DEFAULT_EXT;
 	}
 
 	/**
@@ -395,10 +396,10 @@ public final class MIMEType2ExtMap {
 		} else {
 			final String[] tokens = entry.split("[ \t\n\r\f]+");
 			if (tokens.length > 1) {
-				final String type = tokens[0].toLowerCase();
+				final String type = tokens[0].toLowerCase(Locale.ENGLISH);
 				final List<String> set = new ArrayList<String>();
 				for (int i = 1; i < tokens.length; i++) {
-					final String ext = tokens[i].toLowerCase();
+					final String ext = tokens[i].toLowerCase(Locale.ENGLISH);
 					set.add(ext);
 					type_hash.put(ext, type);
 				}

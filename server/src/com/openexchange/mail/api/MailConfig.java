@@ -50,6 +50,7 @@
 package com.openexchange.mail.api;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
@@ -748,7 +749,7 @@ public abstract class MailConfig {
 		char c = '\0';
 		for (int i = 0; (i < len) && ((c = server.charAt(i)) != '/'); i++) {
 			if (c == ':' && ((c = server.charAt(i + 1)) == '/') && ((c = server.charAt(i + 2)) == '/')) {
-				final String s = server.substring(0, i).toLowerCase();
+				final String s = server.substring(0, i).toLowerCase(Locale.ENGLISH);
 				if (isValidProtocol(s)) {
 					int start = i + 1;
 					while (server.charAt(start) == '/') {

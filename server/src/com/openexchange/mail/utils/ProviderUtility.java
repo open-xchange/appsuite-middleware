@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.utils;
 
+import java.util.Locale;
+
 /**
  * {@link ProviderUtility}
  * 
@@ -86,7 +88,7 @@ public final class ProviderUtility {
 		 */
 		for (int i = 0; (i < len) && ((c = serverUrl.charAt(i)) != '/'); i++) {
 			if ((c == ':') && ((c = serverUrl.charAt(i + 1)) == '/') && ((c = serverUrl.charAt(i + 2)) == '/')) {
-				final String s = serverUrl.substring(0, i).toLowerCase();
+				final String s = serverUrl.substring(0, i).toLowerCase(Locale.ENGLISH);
 				if (isValidProtocol(s)) {
 					protocol = s;
 				}

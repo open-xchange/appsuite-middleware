@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -93,14 +94,14 @@ public final class MimeTypeFileLineParser {
 
 	private void parse(final String entry) {
 		int pos = -1;
-		if ((pos = entry.toLowerCase().indexOf(STR_TYPE)) != -1) {
+		if ((pos = entry.toLowerCase(Locale.ENGLISH).indexOf(STR_TYPE)) != -1) {
 			final Matcher m = PAT_VAL.matcher(entry);
 			final int start = pos + 5;
 			if (m.find(start) && (m.start() == start)) {
 				type = m.group();
 			}
 		}
-		if ((pos = entry.toLowerCase().indexOf(STR_EXTS)) != -1) {
+		if ((pos = entry.toLowerCase(Locale.ENGLISH).indexOf(STR_EXTS)) != -1) {
 			final Matcher m = PAT_VAL.matcher(entry);
 			final int start = pos + 5;
 			if (m.find(start) && (m.start() == start)) {

@@ -111,8 +111,8 @@ public final class CcTerm extends SearchTerm<String> {
 	@Override
 	public boolean matches(final Message msg) throws MailException {
 		try {
-			return (getAllAddresses((InternetAddress[]) msg.getRecipients(Message.RecipientType.CC)).toLowerCase()
-					.indexOf(addr.toLowerCase(Locale.ENGLISH)) != -1);
+			return (getAllAddresses((InternetAddress[]) msg.getRecipients(Message.RecipientType.CC)).toLowerCase(
+					Locale.ENGLISH).indexOf(addr.toLowerCase(Locale.ENGLISH)) != -1);
 		} catch (final MessagingException e) {
 			throw MIMEMailException.handleMessagingException(e);
 		}

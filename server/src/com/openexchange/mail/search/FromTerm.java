@@ -111,7 +111,7 @@ public final class FromTerm extends SearchTerm<String> {
 	@Override
 	public boolean matches(final Message msg) throws MailException {
 		try {
-			return (getAllAddresses((InternetAddress[]) msg.getFrom()).toLowerCase().indexOf(
+			return (getAllAddresses((InternetAddress[]) msg.getFrom()).toLowerCase(Locale.ENGLISH).indexOf(
 					addr.toLowerCase(Locale.ENGLISH)) != -1);
 		} catch (final MessagingException e) {
 			throw MIMEMailException.handleMessagingException(e);
