@@ -191,12 +191,8 @@ public class ICal4JParser implements ICalParser {
             }
             converter.verify(task, warnings);
         }
-        
-        
         setPercentComplete(task, vtodo);
         setPriority(task, vtodo);
-        setStatus(task, vtodo);
-
         return task;
     }
 

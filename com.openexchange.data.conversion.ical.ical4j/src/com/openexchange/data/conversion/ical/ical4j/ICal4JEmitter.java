@@ -151,7 +151,7 @@ public class ICal4JEmitter implements ICalEmitter {
     }
     
     private net.fortuna.ical4j.model.Date date(Date endDate) {
-        net.fortuna.ical4j.model.Date d = new net.fortuna.ical4j.model.DateTime();
+        net.fortuna.ical4j.model.Date d = new net.fortuna.ical4j.model.DateTime(true);
         d.setTime(endDate.getTime());
         return d;
     }

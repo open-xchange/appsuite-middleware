@@ -49,10 +49,13 @@
 
 package com.openexchange.data.conversion.ical;
 
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
+
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class ConversionWarning extends Throwable{
+public class ConversionWarning extends AbstractOXException {
 
     /**
      * For serialization.
@@ -62,14 +65,82 @@ public class ConversionWarning extends Throwable{
     private String message;
     private Object[] args;
 
-
+    /**
+     * @deprecated use {@link #ConversionWarning(Code, Object...)}.
+     */
+    @Deprecated
     public ConversionWarning(String message, Object...args) {
         this.message = message;
         this.args = args;
     }
 
+    /**
+     * @deprecated use {@link #getMessage()}.
+     */
+    @Deprecated
     public String getFormattedMessage() {
         return String.format(this.message, args);
     }
 
+    public ConversionWarning(final Code code, final Object... args) {
+        super(EnumComponent.ICAL, code.getCategory(), code.getNumber(),
+            code.getMessage(), null);
+        setMessageArgs(args);
+    }
+
+    public enum Code {
+        /**
+         * Unable to convert task status "%1$s".
+         */
+        INVALID_STATUS("Unable to convert task status \"%1$s\".", Category.USER_INPUT, 1);
+
+        /**
+         * Message of the exception.
+         */
+        private final String message;
+
+        /**
+         * Category of the exception.
+         */
+        private final Category category;
+
+        /**
+         * Detail number of the exception.
+         */
+        private final int number;
+
+        /**
+         * Default constructor.
+         * @param message message.
+         * @param category category.
+         * @param number detail number.
+         */
+        private Code(final String message, final Category category,
+            final int number) {
+            this.message = message;
+            this.category = category;
+            this.number = number;
+        }
+
+        /**
+         * @return the message
+         */
+        public String getMessage() {
+            return message;
+        }
+
+        /**
+         * @return the category
+         */
+        public Category getCategory() {
+            return category;
+        }
+
+        /**
+         * @return the number
+         */
+        public int getNumber() {
+            return number;
+        }
+    }
 }

@@ -52,7 +52,7 @@ package com.openexchange.data.conversion.ical;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class ConversionError extends ConversionWarning{
+public class ConversionError extends ConversionWarning {
 
     /**
      * For serialization.
