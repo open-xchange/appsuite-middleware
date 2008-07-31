@@ -662,10 +662,11 @@ public final class Contacts {
 			Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR, Category.PERMISSION, Category.PERMISSION,
 			Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT,
 			Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT, Category.TRY_AGAIN,
-			Category.TRY_AGAIN, Category.TRY_AGAIN, Category.TRY_AGAIN, Category.PERMISSION, Category.PERMISSION }, desc = { "10", "11",
+			Category.TRY_AGAIN, Category.TRY_AGAIN, Category.TRY_AGAIN, Category.PERMISSION, Category.PERMISSION,
+			Category.PERMISSION }, desc = { "10", "11",
 			"12", "13", "14", "15", "16", "17", "65", "18", "19", "20", "21", "22", "23", "24", "55", "56", "59", "63",
-			"66", "67", "69", "73" }, exceptionId = { 10, 11, 12, 13, 14, 15, 16, 17, 65, 18, 19, 20, 21, 22, 23, 24, 55, 56,
-			59, 63, 66, 67, 69, 73 }, msg = {
+			"66", "67", "69", "73", "74" }, exceptionId = { 10, 11, 12, 13, 14, 15, 16, 17, 65, 18, 19, 20, 21, 22, 23, 24, 55, 56,
+			59, 63, 66, 67, 69, 73, 74 }, msg = {
 			ContactException.NON_CONTACT_FOLDER_MSG,
 			ContactException.NO_PERMISSION_MSG,
 			ContactException.NO_PERMISSION_MSG,
@@ -688,8 +689,9 @@ public final class Contacts {
 			"Mandatory field last name is not set.",
 			"Unable to compare contacts for update. Make sure you have entered a valid display name. Context %1$d Object %2$d",
 			"The name you entered is not available. Choose another display name. Context %1$d Object %2$d",
-			ContactException.NO_DELETE_PERMISSION_MSG, "Primary email address in system contact must not be edited: Context %1$d Object %2$d User %3$d" })
-	public static void performContactStorageUpdate(final ContactObject co, final int fidArg,
+			ContactException.NO_DELETE_PERMISSION_MSG, "Primary email address in system contact must not be edited: Context %1$d Object %2$d User %3$d",
+			ContactException.NOT_IN_FOLDER })
+	public static void performContactStorageUpdate(final ContactObject co, final int fid,
 			final java.util.Date client_date, final int user, final int[] group, final Context ctx,
 			final UserConfiguration uc) throws ContactException, OXConflictException, OXObjectNotFoundException,
 			OXConcurrentModificationException, OXException {
@@ -701,8 +703,14 @@ public final class Contacts {
 		 * co.getDisplayName() == null || co.getDisplayName().length() < 1)){
 		 * throw EXCEPTIONS.createOXConflictException(63,ctx.getContextId()); }
 		 */
-		// Get real folder ID since GUI misses to keep current folder ID in its request
-		final int fid = getRealFolderID(co.getObjectID(), user, group, uc, ctx);
+
+		/*
+		 * Check if contact really exists in specified folder
+		 */
+		if (fid != getRealFolderID(co.getObjectID(), user, group, uc, ctx)) {
+			throw EXCEPTIONS.createOXPermissionException(74, Integer.valueOf(co.getObjectID()), Integer.valueOf(fid),
+					Integer.valueOf(ctx.getContextId()));
+		}
 
 		if (FolderObject.SYSTEM_LDAP_FOLDER_ID == fid && co.containsEmail1() && ctx.getMailadmin() != user) {
 			final Connection readCon;

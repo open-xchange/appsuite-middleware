@@ -6,8 +6,7 @@
 
  - Bugfix #10111: No duplicate reminder for recurring appointment if a
    change exception has been created
- - Work-around for bug #11753: Loading real contact's current folder ID
-   update request
+ - Bugfix #11753: Loading real contact's current folder ID update request
 
 * 2008-07-29 - thorben.betten@open-xchange.com
 
