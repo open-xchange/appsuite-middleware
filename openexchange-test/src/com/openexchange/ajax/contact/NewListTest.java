@@ -64,7 +64,7 @@ import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
-import com.openexchange.groupware.calendar.Tools;
+import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.ContactObject;
 
 /**
@@ -94,8 +94,8 @@ public class NewListTest extends AbstractAJAXSession {
         final int folderA = clientA.getValues().getPrivateContactFolder();
 
         // Create some tasks.
-        final Date listStart = new Date(Tools.getHour(-1));
-        final Date listEnd = new Date(Tools.getHour(2));
+        final Date listStart = new Date(TimeTools.getHour(-1));
+        final Date listEnd = new Date(TimeTools.getHour(2));
         
                
         final InsertRequest[] inserts = new InsertRequest[NUMBER];

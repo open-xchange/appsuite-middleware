@@ -53,12 +53,12 @@ package com.openexchange.groupware.calendar;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Tools {
+public final class TimeTools {
 
     /**
      * Prevent instantiation.
      */
-    private Tools() {
+    private TimeTools() {
         super();
     }
 

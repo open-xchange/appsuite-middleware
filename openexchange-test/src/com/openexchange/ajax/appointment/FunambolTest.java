@@ -63,7 +63,7 @@ import com.openexchange.ajax.appointment.action.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.groupware.calendar.Tools;
+import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.AppointmentObject;
 
 /**
@@ -93,8 +93,8 @@ public final class FunambolTest extends AbstractAJAXSession {
         final AppointmentObject app = new AppointmentObject();
         app.setParentFolderID(folder);
         app.setTitle("TestCreationTime");
-        app.setStartDate(new Date(Tools.getHour(0)));
-        app.setEndDate(new Date(Tools.getHour(1)));
+        app.setStartDate(new Date(TimeTools.getHour(0)));
+        app.setEndDate(new Date(TimeTools.getHour(1)));
         app.setIgnoreConflicts(true);
         final Date serverTime = client.getValues().getServerTime();
         System.out.println("ServerTime: " + serverTime);

@@ -67,7 +67,7 @@ import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
-import com.openexchange.groupware.calendar.Tools;
+import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.UserParticipant;
 
@@ -98,10 +98,10 @@ public class NewListTest extends AbstractAJAXSession {
         final int folderA = clientA.getValues().getPrivateAppointmentFolder();
 
         // Create some tasks.
-        final Date appStart = new Date(Tools.getHour(0));
-        final Date appEnd = new Date(Tools.getHour(1));
-        final Date listStart = new Date(Tools.getHour(-1));
-        final Date listEnd = new Date(Tools.getHour(2));
+        final Date appStart = new Date(TimeTools.getHour(0));
+        final Date appEnd = new Date(TimeTools.getHour(1));
+        final Date listStart = new Date(TimeTools.getHour(-1));
+        final Date listEnd = new Date(TimeTools.getHour(2));
         final InsertRequest[] inserts = new InsertRequest[NUMBER];
         for (int i = 0; i < inserts.length; i++) {
             final AppointmentObject app = new AppointmentObject();

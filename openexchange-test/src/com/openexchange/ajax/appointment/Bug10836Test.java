@@ -66,7 +66,7 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.ListIDInt;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.groupware.calendar.Tools;
+import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.AppointmentObject;
 
 /**
@@ -99,8 +99,8 @@ public final class Bug10836Test extends AbstractAJAXSession {
 		final AppointmentObject app = new AppointmentObject();
 		app.setParentFolderID(folderA);
 		app.setTitle("Bug10836Test");
-		app.setStartDate(new Date(Tools.getHour(0)));
-		app.setEndDate(new Date(Tools.getHour(1)));
+		app.setStartDate(new Date(TimeTools.getHour(0)));
+		app.setEndDate(new Date(TimeTools.getHour(1)));
 		app.setIgnoreConflicts(true);
 		final InsertResponse insertR = (InsertResponse) Executor.execute(
 				clientA, new InsertRequest(app, tz));
