@@ -67,18 +67,20 @@ import java.util.Set;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.LocaleTools;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * OXFolderAdminHelper
@@ -250,7 +252,8 @@ public final class OXFolderAdminHelper {
 		/*
 		 * Insert system internal users folder aka 'Global Address Book'
 		 */
-		// TODO: Whether to enable/disable internal-user-edit should be set by caller (admin) as a parameter
+		// TODO: Whether to enable/disable internal-user-edit should be set by
+		// caller (admin) as a parameter
 		if (OXFolderProperties.isEnableInternalUsersEdit()) {
 			systemPermission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS,
 					OCLPermission.WRITE_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS);
@@ -576,8 +579,7 @@ public final class OXFolderAdminHelper {
 	 *            The ID of the user who has been modified
 	 * @param changedFields
 	 *            The changed fields of the user taken from constants defined in
-	 *            {@link ContactObject}; e.g.
-	 *            {@link ContactObject#DISPLAY_NAME}
+	 *            {@link ContactObject}; e.g. {@link ContactObject#DISPLAY_NAME}
 	 * @param lastModified
 	 *            The last modified timestamp that should be taken on folder
 	 *            modifications
@@ -628,10 +630,14 @@ public final class OXFolderAdminHelper {
 		 * Update user's default infostore folder name
 		 */
 		try {
-			final int defaultInfostoreId = OXFolderSQL.getUserDefaultFolder(userId, FolderObject.INFOSTORE, readCon,
-					ctx);
-			OXFolderSQL.updateName(defaultInfostoreId, UserStorage.getInstance().getUser(userId, ctx).getDisplayName(),
-					contextAdminID, userId, writeCon, ctx);
+			final int defaultInfostoreFolderId = OXFolderSQL.getUserDefaultFolder(userId, FolderObject.INFOSTORE,
+					readCon, ctx);
+			final String newDisplayName = getUserDisplayName(userId, cid, readCon == null ? writeCon : readCon);
+			if (newDisplayName == null) {
+				throw new LdapException(EnumComponent.USER, LdapException.Code.USER_NOT_FOUND, Integer.valueOf(userId),
+						Integer.valueOf(cid));
+			}
+			OXFolderSQL.updateName(defaultInfostoreFolderId, newDisplayName, contextAdminID, userId, writeCon, ctx);
 			/*
 			 * Reload cache entry
 			 */
@@ -639,7 +645,7 @@ public final class OXFolderAdminHelper {
 				/*
 				 * Distribute remove among remote caches
 				 */
-				FolderCacheManager.getInstance().removeFolderObject(defaultInfostoreId, ctx);
+				FolderCacheManager.getInstance().removeFolderObject(defaultInfostoreFolderId, ctx);
 			}
 		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
@@ -647,6 +653,49 @@ public final class OXFolderAdminHelper {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(cid));
 		} catch (final LdapException e) {
 			throw new OXFolderException(FolderCode.LDAP_ERROR, e, Integer.valueOf(cid));
+		}
+	}
+
+	private static final String SQL_SELECT_DISPLAY_NAME = "SELECT "
+			+ Contacts.mapping[ContactObject.DISPLAY_NAME].getDBFieldName() + " FROM prg_contacts WHERE cid = ? AND "
+			+ Contacts.mapping[ContactObject.INTERNAL_USERID].getDBFieldName() + " = ?";
+
+	/**
+	 * Load specified user's display name with given connection (which is
+	 * possibly in non-auto-commit mode). Thus we obtain most up-to-date data
+	 * and do not read old value.
+	 * 
+	 * @param userId
+	 *            The user ID
+	 * @param cid
+	 *            The context ID
+	 * @param con
+	 *            The connection
+	 * @return The user's display name or <code>null</code> if no such user
+	 *         exists
+	 * @throws OXException
+	 *             If user's display name cannot be loaded
+	 */
+	private static String getUserDisplayName(final int userId, final int cid, final Connection con) throws OXException {
+		final PreparedStatement stmt;
+		try {
+			stmt = con.prepareStatement(SQL_SELECT_DISPLAY_NAME);
+		} catch (final SQLException e) {
+			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+		}
+		ResultSet rs = null;
+		try {
+			stmt.setInt(1, cid);
+			stmt.setInt(2, userId);
+			rs = stmt.executeQuery();
+			if (rs.next()) {
+				return rs.getString(1);
+			}
+			return null;
+		} catch (final SQLException e) {
+			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+		} finally {
+			DBUtils.closeSQLStuff(rs, stmt);
 		}
 	}
 
@@ -682,7 +731,7 @@ public final class OXFolderAdminHelper {
 			final StringHelper strHelper = new StringHelper(LocaleTools.getLocale(language));
 			/*
 			 * Check infostore sibling
-			 */                        
+			 */
 			if (OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, displayName, FolderObject.INFOSTORE,
 					writeCon, ctx) != -1) {
 				throw new OXFolderException(FolderCode.NO_DEFAULT_INFOSTORE_CREATE, displayName,
@@ -705,18 +754,18 @@ public final class OXFolderAdminHelper {
 				defaultTaskName = DEFAULT_TASK_NAME;
 			}
 			/*
-			 * GlobalConfig.loadLanguageCodes(propfile); String stdCalFolderName =
-			 * GlobalConfig.getCode(language +
-			 * "oxfolder_standardfolder_calendar"); if (stdCalFolderName == null ||
-			 * stdCalFolderName.length() == 0) { stdCalFolderName = "My
+			 * GlobalConfig.loadLanguageCodes(propfile); String stdCalFolderName
+			 * = GlobalConfig.getCode(language +
+			 * "oxfolder_standardfolder_calendar"); if (stdCalFolderName == null
+			 * || stdCalFolderName.length() == 0) { stdCalFolderName = "My
 			 * Calendar"; } String stdConFolderName =
 			 * GlobalConfig.getCode(language +
-			 * "oxfolder_standardfolder_contact"); if (stdConFolderName == null ||
-			 * stdConFolderName.length() == 0) { stdConFolderName = "My
+			 * "oxfolder_standardfolder_contact"); if (stdConFolderName == null
+			 * || stdConFolderName.length() == 0) { stdConFolderName = "My
 			 * Contacts"; } String stdTaskFolderName =
 			 * GlobalConfig.getCode(language + "oxfolder_standardfolder_task");
-			 * if (stdTaskFolderName == null || stdTaskFolderName.length() == 0) {
-			 * stdTaskFolderName = "My Tasks"; }
+			 * if (stdTaskFolderName == null || stdTaskFolderName.length() == 0)
+			 * { stdTaskFolderName = "My Tasks"; }
 			 */
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder("Folder names determined for default folders:\n\t").append("Calendar=")

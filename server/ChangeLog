@@ -1,6 +1,7 @@
 * 2008-07-31 - thorben.betten@open-xchange.com
 
  - Bugfix #11772: Fixed ordering of color flags in list view
+ - Bugfix #11737: Fixed propagating changing of user's display name
 
 * 2008-07-30 - dennis.sieben@open-xchange.com
 
