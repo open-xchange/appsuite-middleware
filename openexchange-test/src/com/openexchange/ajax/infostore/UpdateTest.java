@@ -35,9 +35,10 @@ public class UpdateTest extends InfostoreAJAXTest {
 				"color_label" , "1"
 		));
 		assertNoError(res);
-		
-		
-		res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
+        assertNotNull(res.getTimestamp());
+
+
+        res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
 		
 		final JSONObject object = (JSONObject) res.getData();

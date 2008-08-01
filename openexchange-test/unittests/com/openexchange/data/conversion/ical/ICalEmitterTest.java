@@ -65,8 +65,9 @@ import java.util.TimeZone;
 import junit.framework.TestCase;
 
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.*;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.ExternalParticipant;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -144,7 +145,7 @@ public class ICalEmitterTest extends TestCase {
         // First form: on 23rd day every 2 months
 
         appointment.setRecurrenceType(AppointmentObject.MONTHLY);
-        appointment.setDays(-1);
+        appointment.removeDays();
         appointment.setDayInMonth(23);
 
         ical = serialize(appointment);
@@ -163,7 +164,7 @@ public class ICalEmitterTest extends TestCase {
 
         ical = serialize(appointment);
 
-        assertProperty(ical, "RRULE", "FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=MO,TU;BYWEEKNO=3");
+        assertProperty(ical, "RRULE", "FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYWEEKNO=3;BYDAY=MO,TU");
 
 
         // Second form : the last tuesday every 2 months
@@ -173,19 +174,20 @@ public class ICalEmitterTest extends TestCase {
 
         ical = serialize(appointment);
 
-        assertProperty(ical, "RRULE", "FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=TU;BYWEEKNO=-1");
+        assertProperty(ical, "RRULE", "FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYWEEKNO=-1;BYDAY=TU");
 
-        appointment.setDays(-1);
+        appointment.removeDays();
 
         // YEARLY
 
         // First form: Every 2 years, the 23rd of March
+        appointment.removeDays();
         appointment.setRecurrenceType(AppointmentObject.YEARLY);
         appointment.setMonth(2);
         appointment.setDayInMonth(23);
         ical = serialize(appointment);
 
-        assertProperty(ical, "RRULE", "FREQ=YEARLY;INTERVAL=2;COUNT=3;BYMONTHDAY=23;BYMONTH=3");
+        assertProperty(ical, "RRULE", "FREQ=YEARLY;INTERVAL=2;COUNT=3;BYMONTH=3;BYMONTHDAY=23");
 
         // Second form: 2nd monday and wednesday in april every 2 years
         appointment.setMonth(3);
@@ -197,33 +199,48 @@ public class ICalEmitterTest extends TestCase {
         appointment.setDays(days);
         ical = serialize(appointment);
 
-        assertProperty(ical, "RRULE", "FREQ=YEARLY;INTERVAL=2;COUNT=3;BYDAY=MO,WE;BYMONTH=4;BYWEEKNO=2");
+        assertProperty(ical, "RRULE", "FREQ=YEARLY;INTERVAL=2;COUNT=3;BYMONTH=4;BYWEEKNO=2;BYDAY=MO,WE");
 
         // UNTIL
 
         appointment = getDefault();
-        appointment.setRecurrenceType(AppointmentObject.YEARLY);
+        appointment.setRecurrenceType(AppointmentObject.DAILY);
         appointment.setInterval(2);
-        appointment.setUntil(D("04/23/1989"));
+        appointment.setUntil(D("23/04/1989 00:00"));
         ical = serialize(appointment);
 
-        assertProperty(ical, "RRULE", "FREQ=YEARLY;INTERVAL=2;UNTIL=19890423");
+        assertProperty(ical, "RRULE", "FREQ=DAILY;INTERVAL=2;UNTIL=19890423");
 
     }
 
 
-    public void testAppAlarm() {
+    public void testAppAlarm() throws IOException {
+        int MINUTES = 60*1000;
+
+        AppointmentObject appointment = getDefault();
+        appointment.setAlarm(15 *MINUTES);
+        appointment.setAlarmFlag(true);
+
+        ICalFile ical = serialize(appointment);
+
+        assertProperty(ical, "BEGIN", "VALARM");
+        assertProperty(ical, "ACTION", "DISPLAY");
+        assertProperty(ical, "TRIGGER", "-PT15M");
+
 
     }
 
     public void testAppPrivateFlag() throws IOException {
         AppointmentObject app = getDefault();
 
-        app.setPrivateFlag(true);
-
         ICalFile ical = serialize(app);
 
-        assertProperty(ical, "CLASS", "private");        
+        assertProperty(ical, "CLASS", "public");
+
+        app.setPrivateFlag(true);
+        ical = serialize(app);
+
+        assertProperty(ical, "CLASS", "private");
     }
 
     public void testAppTransparency() throws IOException {
@@ -235,7 +252,7 @@ public class ICalEmitterTest extends TestCase {
 
         ICalFile ical = serialize(app);
 
-        assertProperty(ical, "TRANSP", "OPAQUE");  
+        assertProperty(ical, "TRANSP", "OPAQUE");
 
         // FREE
 
@@ -249,17 +266,85 @@ public class ICalEmitterTest extends TestCase {
 
     }
 
-    public void testAppAttendees() {
+    public void testAppAttendees() throws IOException {
+        AppointmentObject app = getDefault();
+        setParticipants(app, new String[]{"user1@internal.invalid", "user2@internal.invalid"}, new String[]{"external1@external.invalid", "external2@external.invalid"});
+
+        ICalFile ical = serialize(app);
+
+        assertProperty(ical, "ATTENDEE", "MAILTO:user1@internal.invalid");
+        assertProperty(ical, "ATTENDEE", "MAILTO:user2@internal.invalid");
+        assertProperty(ical, "ATTENDEE", "MAILTO:external1@external.invalid");
+        assertProperty(ical, "ATTENDEE", "MAILTO:external2@external.invalid");
+
 
     }
 
-    public void testAppResources() {
+
+
+    private void setParticipants(CalendarObject calendarObject, String[] internal, String[] external) {
+        Participant[] allParticipants = new Participant[internal.length+ external.length];
+        UserParticipant[] users = new UserParticipant[internal.length];
+
+
+        int i = 0,j = 0;
+        for(String mail : internal) {
+            UserParticipant p = new UserParticipant(-1);
+            p.setEmailAddress(mail);
+            allParticipants[i++] = p;
+            users[j++] = p;
+        }
+
+        j = 0;
+        for(String mail : external) {
+            ExternalUserParticipant p = new ExternalUserParticipant(mail);
+            p.setEmailAddress(mail);
+            allParticipants[i++] = p;
+
+        }
+
+        calendarObject.setParticipants(allParticipants);
+        calendarObject.setUsers(users);
 
     }
-    
-    public void testAppDeleteExceptions() {
-        
+
+
+    public void testAppResources() throws IOException {
+        AppointmentObject app = getDefault();
+        setResources(app, "beamer", "toaster", "deflector");
+        ICalFile ical = serialize(app);
+
+        assertProperty(ical, "RESOURCES", "beamer,toaster,deflector");
+
+
     }
+
+    private void setResources(CalendarObject calendarObject, String...displayNames) {
+        Participant[] participants = new Participant[displayNames.length];
+        int i = 0;
+        for(String displayName : displayNames) {
+            ResourceParticipant p = new ResourceParticipant(-1);
+            p.setDisplayName(displayName);
+            participants[i++] = p;
+        }
+        calendarObject.setParticipants(participants);
+
+    }
+
+    public void testAppDeleteExceptions() throws IOException {
+        AppointmentObject app = getDefault();
+        app.setRecurrenceType(AppointmentObject.DAILY);
+        app.setInterval(3);
+        app.setRecurrenceCount(5);
+        app.setDeleteExceptions(new Date[]{D("25/02/2009 10:00"), D("28/02/2009 12:00")});
+
+        ICalFile ical = serialize(app);
+
+        assertProperty(ical, "EXDATE", "20090225T100000Z,20090228T120000Z");
+    }
+
+    // Omitting: DURATION. This is all handled with DTStart and DTEnd in emitting
+
 
     // --------------------------------- Tasks ---------------------------------
 
@@ -270,9 +355,16 @@ public class ICalEmitterTest extends TestCase {
         final Task task = new Task();
         task.setTitle("The Title");
         task.setNote("The Note");
+        task.setCategories("cat1, cat2, cat3");
+        task.setDateCompleted(D("24/02/2009 10:00"));
+        task.setPercentComplete(23);
+
         final ICalFile ical = serialize(task);
         assertProperty(ical, "SUMMARY", "The Title");
         assertProperty(ical, "DESCRIPTION", "The Note");
+        assertProperty(ical, "CATEGORIES","cat1, cat2, cat3");
+        assertProperty(ical, "COMPLETED", "20090224T100000Z");
+        assertProperty(ical, "PERCENT-COMPLETE", "23");
     }
 
     public void testTaskDateFields() throws IOException {
@@ -303,9 +395,12 @@ public class ICalEmitterTest extends TestCase {
     }
 
     private static void assertProperty(ICalFile ical, String name, String value) {
-        String valueFromFile = ical.getValue(name);
-        assertNotNull(name+" missing in: \n"+ical.toString(), valueFromFile);
-        assertEquals(ical.toString(), valueFromFile, value);
+
+        assertTrue(name+" missing in: \n"+ical.toString(), ical.containsPair(name, value));
+    }
+
+    private static void assertLine(ICalFile ical, String line) {
+        assertTrue(line+" missing in: \n"+ical.toString(), ical.containsLine(line));
     }
 
 
@@ -387,6 +482,26 @@ public class ICalEmitterTest extends TestCase {
                 sb.append('\n');
             }
             return sb.toString();
+        }
+
+        public boolean containsPair(String name, String value) {
+            for (final String[] line : lines) {
+                final String key = line[0];
+                final String val = line[1];
+                if(key.equals(name) && val.equals(value)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public boolean containsLine(String line) {
+            for (final String[] l : lines) {
+                final String key = l[0];
+                if(key.equals(line)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

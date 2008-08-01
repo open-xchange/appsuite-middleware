@@ -64,6 +64,8 @@ import java.util.TimeZone;
 import junit.framework.TestCase;
 
 import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
+import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -962,8 +964,8 @@ public class ICalParserTest extends TestCase {
     protected void setUp() throws Exception {
         fixtures = new ICALFixtures();
         users = new MockUserLookup();
-        parser = new ICal4JParser() {
-            @Override
+        parser = new ICal4JParser();
+        Participants.userResolver = new UserResolver(){
             public List<User> findUsers(List<String> mails, Context ctx) {
                 List<User> found = new LinkedList<User>();
                 for(String mail : mails) {
@@ -973,8 +975,8 @@ public class ICalParserTest extends TestCase {
                     }
                 }
 
-                return found;    
-            }
+                return found;
+            }    
         };
     }
 
