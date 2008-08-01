@@ -353,24 +353,51 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 		setCreatedBy(creator);
 	}
 
+	/**
+	 * Checks if this folder denotes a user's default folder
+	 * 
+	 * @return <code>true</code> if this folder denotes a user's default folder;
+	 *         otherwise <code>false</code>
+	 */
 	public boolean isDefaultFolder() {
 		return defaultFolder;
 	}
 
+	/**
+	 * Checks if default folder status has been set in this folder object
+	 * 
+	 * @return <code>true</code> if default folder status has been set in this
+	 *         folder object; otherwise <code>false</code>
+	 */
 	public boolean containsDefaultFolder() {
 		return b_defaultFolder;
 	}
 
+	/**
+	 * Sets the default folder status for this folder object
+	 * 
+	 * @param defaultFolder
+	 *            <code>true</code> if this folder denotes a user's default
+	 *            folder; otherwise <code>false</code>
+	 */
 	public void setDefaultFolder(final boolean defaultFolder) {
 		this.defaultFolder = defaultFolder;
 		b_defaultFolder = true;
 	}
 
+	/**
+	 * Removes the default folder status from this folder object
+	 */
 	public void removeDefaultFolder() {
 		this.defaultFolder = false;
 		b_defaultFolder = false;
 	}
 
+	/**
+	 * Gets the folder name
+	 * 
+	 * @return The folder name
+	 */
 	public String getFolderName() {
 		return folderName;
 	}
