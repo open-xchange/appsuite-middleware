@@ -588,6 +588,23 @@ public final class FolderCacheManager {
 		}
 	}
 
+	/**
+	 * Removes all folder objects from this cache
+	 * 
+	 * @throws OXException
+	 *             If folder cache cannot be cleared
+	 */
+	public void clearAll() throws OXException {
+		if (null == folderCache) {
+			return;
+		}
+		try {
+			folderCache.clear();
+		} catch (final CacheException e) {
+			throw new OXException(e);
+		}
+	}
+
 	private ElementAttributes getAppliedAttributes(final CacheKey key, final ElementAttributes givenAttribs)
 			throws CacheException {
 		if (folderCache.get(key) != null) {
