@@ -1198,6 +1198,23 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 		return -1;
 	}
 
+	/**
+	 * Loads folder permissions from database. Creates a new connection if
+	 * <code>null</code> is given.
+	 * 
+	 * @param folderId
+	 *            The folder ID
+	 * @param ctx
+	 *            The context
+	 * @param readConArg
+	 *            A connection with read capability; may be <code>null</code> to
+	 *            fetch from pool
+	 * @return The folder's permissions
+	 * @throws SQLException
+	 *             If a SQL error occurs
+	 * @throws DBPoolingException
+	 *             If a pooling error occurs
+	 */
 	public static final OCLPermission[] getFolderPermissions(final int folderId, final Context ctx,
 			final Connection readConArg) throws SQLException, DBPoolingException {
 		return getFolderPermissions(folderId, ctx, readConArg, TABLE_OP);
@@ -1216,6 +1233,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	 * @param readCon
 	 *            A connection with read capability; may be <code>null</code> to
 	 *            fetch from pool
+	 * @param table
+	 *            Either folder permissions working or backup table name
 	 * @return The folder's permissions
 	 * @throws SQLException
 	 *             If a SQL error occurs
