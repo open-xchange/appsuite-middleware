@@ -53,10 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-import java.util.Date;
-import java.util.Map;
-import java.util.List;
-import java.util.LinkedList;
+import java.util.*;
 
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
@@ -256,8 +253,9 @@ public class ICalExporter implements Exporter {
 				List<AppointmentObject> appointments = new LinkedList<AppointmentObject>();
                 try {
 					while (searchIterator.hasNext()) {
-					    appointments.add( (AppointmentObject)searchIterator.next() );
-					}
+                        AppointmentObject appointment =  (AppointmentObject)searchIterator.next();
+                        appointments.add( appointment );
+				   	}
                     List<ConversionError> errors = new LinkedList<ConversionError>();
                     List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
                     icalText = emitter.writeAppointments(appointments, sessObj.getContext(), errors, warnings);
