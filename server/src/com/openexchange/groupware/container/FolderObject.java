@@ -308,14 +308,40 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
 	protected boolean b_fullName;
 
+	/**
+	 * Initializes a new {@link FolderObject}
+	 */
 	public FolderObject() {
 		super();
 	}
 
+	/**
+	 * Initializes a new {@link FolderObject}
+	 * 
+	 * @param objectId
+	 *            The folder's object ID
+	 */
 	public FolderObject(final int objectId) {
 		setObjectID(objectId);
 	}
 
+	/**
+	 * Initializes a new {@link FolderObject}
+	 * 
+	 * @param folderName
+	 *            The folder name
+	 * @param objectId
+	 *            The object ID
+	 * @param module
+	 *            The module; {@link #TASK}, {@link #CALENDAR}, {@link #CONTACT}
+	 *            , {@link #UNBOUND}, {@link #SYSTEM_MODULE}, {@link #PROJECT},
+	 *            {@link #MAIL}, or {@link #INFOSTORE}
+	 * @param type
+	 *            The type; {@link #PRIVATE}, {@link #PUBLIC}, or
+	 *            {@link #SYSTEM_TYPE}
+	 * @param creator
+	 *            The folder creator
+	 */
 	public FolderObject(final String folderName, final int objectId, final int module, final int type, final int creator) {
 		this.folderName = folderName;
 		b_folderName = true;
