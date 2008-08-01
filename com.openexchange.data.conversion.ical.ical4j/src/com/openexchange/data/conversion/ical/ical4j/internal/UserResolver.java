@@ -1,6 +1,7 @@
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.contexts.Context;
 
 import java.util.List;
@@ -9,5 +10,6 @@ import java.util.List;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public interface UserResolver {
-    public List<User> findUsers(List<String> mails, Context ctx);
+    public List<User> findUsers(List<String> mails, Context ctx) throws LdapException;
+    public User loadUser(int userId, Context ctx) throws LdapException;
 }

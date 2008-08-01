@@ -51,9 +51,12 @@ package com.openexchange.groupware.importexport.exporters;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
+import java.util.List;
+import java.util.LinkedList;
 
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
@@ -81,6 +84,7 @@ import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -91,6 +95,9 @@ import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
+import com.openexchange.data.conversion.ical.ICalEmitter;
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
 
 @OXExceptionSource(
 		classId=ImportExportExceptionClasses.ICALEXPORTER,
@@ -101,15 +108,17 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 	Category.SUBSYSTEM_OR_SERVICE_DOWN,
 	Category.USER_INPUT,
 	Category.CODE_ERROR,
-	Category.CODE_ERROR},
+	Category.CODE_ERROR,
+    Category.SETUP_ERROR},
 		desc={"","","","",""},
-		exceptionId={0,1,2,3,4},
+		exceptionId={0,1,2,3,4,5},
 		msg={
 	"Could not import into the folder %s.",
 	"Could not import into folder %s",
 	"User input error %s",
 	"Could not import into folder %s",
-	"Could not load folder %s"})
+	"Could not load folder %s",
+    "Could not find ICalEmitter service. Has the service been exported?"})
 	
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
@@ -225,17 +234,13 @@ public class ICalExporter implements Exporter {
 	}
 	
 	public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
-		final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
-		try {
-			final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");
-			final VersitDefinition.Writer versitWriter = versitDefinition.getWriter(byteArrayOutputStream, "UTF-8");
-			final VersitObject versitObjectContainer = OXContainerConverter.newCalendar("2.0");
-			versitDefinition.writeProperties(versitWriter, versitObjectContainer);
-			final VersitDefinition eventDef = versitDefinition.getChildDef("VEVENT");
-			final VersitDefinition taskDef = versitDefinition.getChildDef("VTODO");
-			final OXContainerConverter oxContainerConverter = new OXContainerConverter(sessObj);
-			
-			final FolderObject fo;
+		String icalText;
+        try {
+            ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
+            if(null == emitter) {
+                throw importExportExceptionFactory.create(5);
+            }
+            final FolderObject fo;
 			try {
 				fo = new OXFolderAccess(sessObj.getContext()).getFolderObject(Integer.parseInt(folder));
 			} catch (final OXException e) {
@@ -248,33 +253,41 @@ public class ICalExporter implements Exporter {
 				
 				final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
 				final SearchIterator<?> searchIterator = appointmentSql.getModifiedAppointmentsInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO, true);
-				try {
+				List<AppointmentObject> appointments = new LinkedList<AppointmentObject>();
+                try {
 					while (searchIterator.hasNext()) {
-						exportAppointment(oxContainerConverter, eventDef, versitWriter, (AppointmentObject)searchIterator.next());
+					    appointments.add( (AppointmentObject)searchIterator.next() );
 					}
-					versitDefinition.writeEnd(versitWriter, versitObjectContainer);
-				} finally {
-					closeVersitResources(oxContainerConverter, versitWriter);
-					try {
+                    List<ConversionError> errors = new LinkedList<ConversionError>();
+                    List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
+                    icalText = emitter.writeAppointments(appointments, sessObj.getContext(), errors, warnings);
+                    log(errors, warnings);
+                } finally {
+                    try {
 						searchIterator.close();
 					} catch (final SearchIteratorException e) {
 						LOG.error(e.getMessage(), e);
 					}
 				}
-			} else if (fo.getModule() == FolderObject.TASK) {
+                
+            } else if (fo.getModule() == FolderObject.TASK) {
 				if (fieldsToBeExported == null) {
 					fieldsToBeExported = _taskFields;
 				}
 				
 				final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(sessObj);
 				final SearchIterator<Task> searchIterator = taskSql.getModifiedTasksInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO);
-				try {
+                List<Task> tasks = new LinkedList<Task>();
+                try {
 					while (searchIterator.hasNext()) {
-						exportTask(oxContainerConverter, taskDef, versitWriter, searchIterator.next());
-					}
-					versitDefinition.writeEnd(versitWriter, versitObjectContainer);
-				} finally {
-					closeVersitResources(oxContainerConverter, versitWriter);
+                        tasks.add(searchIterator.next());
+                    }
+                    List<ConversionError> errors = new LinkedList<ConversionError>();
+                    List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
+                    icalText = emitter.writeTasks(tasks, errors, warnings, sessObj.getContext());
+                    log(errors, warnings);
+
+                } finally {
 					try {
 						searchIterator.close();
 					} catch (final SearchIteratorException e) {
@@ -287,14 +300,29 @@ public class ICalExporter implements Exporter {
 		} catch (final Exception exc) {
 			throw importExportExceptionFactory.create(3, exc, folder);
 		}
-		
-		return new SizedInputStream(
-				new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray()), 
-				byteArrayOutputStream.size(),
+        byte[] bytes = new byte[0];
+        try {
+            bytes = icalText.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            LOG.error(e.getMessage(), e); // Impropable
+        }
+        return new SizedInputStream(
+				new UnsynchronizedByteArrayInputStream(bytes), 
+				bytes.length,
 				Format.ICAL);
 	}
-	
-	public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
+
+    private void log(List<ConversionError> errors, List<ConversionWarning> warnings) {
+        for(ConversionError error : errors) {
+            LOG.warn(error.getMessage());
+        }
+
+        for(ConversionWarning warning : warnings) {
+            LOG.warn(warning.getMessage());
+        }
+    }
+
+    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
 		final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
 		try {
 			final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");

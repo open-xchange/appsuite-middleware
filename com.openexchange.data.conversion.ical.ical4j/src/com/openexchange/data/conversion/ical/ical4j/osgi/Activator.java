@@ -57,6 +57,15 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
+import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.contexts.Context;
+
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Publishes the iCal4j parser and emitter services.
@@ -82,7 +91,8 @@ public class Activator implements BundleActivator {
 	        new ICal4JParser(), null);
 	    emitterRegistration = context.registerService(ICalEmitter.class
 	        .getName(), new ICal4JEmitter(), null);
-	}
+        Participants.userResolver = new OXUserResolver();
+    }
 
 	/**
 	 * {@inheritDoc}
@@ -91,4 +101,20 @@ public class Activator implements BundleActivator {
 	    emitterRegistration.unregister();
 	    parserRegistration.unregister();
 	}
+
+    private static final class OXUserResolver implements UserResolver {
+
+        public List<User> findUsers(List<String> mails, Context ctx) throws LdapException {
+            List<User> users = new ArrayList<User>();
+            UserStorage storage = UserStorage.getInstance();
+            for(String mail : mails) {
+                users.add( storage.searchUser(mail, ctx) );
+            }
+            return users; 
+        }
+
+        public User loadUser(int userId, Context ctx) throws LdapException {
+            return UserStorage.getStorageUser(userId, ctx);
+        }
+    }
 }
