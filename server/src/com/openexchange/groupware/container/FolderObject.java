@@ -83,7 +83,7 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
- * FolderObject
+ * {@link FolderObject} - Represents of folder
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.bettens@open-xchange.org">Thorben Betten</a>
