@@ -10,4 +10,3 @@ Import-Package: com.openexchange.groupware,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.tasks,
  org.osgi.framework
-Export-Package: com.openexchange.data.conversion.ical
