@@ -78,6 +78,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
+import com.openexchange.groupware.Init;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.oxfolder.OXFolderException;
 
@@ -88,7 +89,9 @@ public class ICalImportTest extends AbstractICalImportTest {
 		return new JUnit4TestAdapter(ICalImportTest.class);
 	}
 	
-	
+	public void setUp() throws Exception {
+        Init.startServer();
+    }
 	
 	@Test public void test7386() throws UnsupportedEncodingException, ImportExportException, DBPoolingException, SQLException, LdapException, OXFolderException {
 		folderId = createTestFolder(FolderObject.TASK, sessObj, ctx, "icalTaskTestFolder");

@@ -51,6 +51,7 @@ package com.openexchange.data.conversion.ical;
 
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.recalculate;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1036,7 +1037,7 @@ public class ICalParserTest extends TestCase {
     protected void assertWarningWhenParsingAppointment(String icalText, String warning) {
         ArrayList<ConversionError> errors = new ArrayList<ConversionError>();
         ArrayList<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
-        List<AppointmentObject> result = parser.parseAppointments(icalText, TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);
+        List<CalendarDataObject> result = parser.parseAppointments(icalText, TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);
 
         assertTrue(0 != result.size()); // Warnings don't abort parsing of the object
         assertEquals(1, warnings.size());

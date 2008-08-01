@@ -46,6 +46,10 @@ import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.EventDispatcher;
 import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.TaskEventInterface;
+import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
+import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
+import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.data.conversion.ical.ICalEmitter;
 
 /**
  * This class contains methods for initialising tests.
@@ -186,7 +190,8 @@ public final class Init {
 		startAndInjectSessiondBundle();
 		startAndInjectEventBundle();
 		startAndInjectResourceService();
-	}
+        startAndInjectICalServices();
+    }
 
 	private static void startAndInjectI18NBundle() throws FileNotFoundException {
 		final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
@@ -273,7 +278,19 @@ public final class Init {
 		ServerServiceRegistry.getInstance().addService(CacheService.class, cache);
 	}
 
-	public static void stopServer() {
+    public static void startAndInjectICalServices() {
+        ICal4JParser parser = new ICal4JParser();
+        ICal4JEmitter emitter = new ICal4JEmitter();
+        
+        services.put(ICalParser.class, parser);
+        services.put(ICalEmitter.class, emitter);
+
+        ServerServiceRegistry.getInstance().addService(ICalParser.class, parser) ;
+        ServerServiceRegistry.getInstance().addService(ICalEmitter.class, emitter);
+    }
+
+
+    public static void stopServer() {
 		// for(Initialization init: started) { init.stop(); }
 	}
 
