@@ -88,6 +88,16 @@ public final class PropertyWatcher implements FileListener {
 	}
 
 	/**
+	 * Removes an existing property watcher bound to given property name
+	 * 
+	 * @param name
+	 *            The property name
+	 */
+	public static void removePropertWatcher(final String name) {
+		watchers.remove(name);
+	}
+
+	/**
 	 * Adds a new property watcher bound to given property name. If a previous
 	 * property watcher has already been bound to specified property name, the
 	 * existing one is returned and no new watcher is created.
@@ -97,8 +107,8 @@ public final class PropertyWatcher implements FileListener {
 	 * @param value
 	 *            The property value
 	 * @param caseInsensitive
-	 *            <code>true</code> to compare changed values
-	 *            case-insensitive; otherwise <code>false</code>
+	 *            <code>true</code> to compare changed values case-insensitive;
+	 *            otherwise <code>false</code>
 	 * @return The either newly created or existing property watcher bound to
 	 *         given property name
 	 */
@@ -128,8 +138,8 @@ public final class PropertyWatcher implements FileListener {
 	 * @param value
 	 *            The current property value
 	 * @param caseInsensitive
-	 *            <code>true</code> to compare changed values
-	 *            case-insensitive; otherwise <code>false</code>
+	 *            <code>true</code> to compare changed values case-insensitive;
+	 *            otherwise <code>false</code>
 	 */
 	private PropertyWatcher(final String name, final String value, final boolean caseInsensitive) {
 		super();
@@ -151,10 +161,36 @@ public final class PropertyWatcher implements FileListener {
 		}
 	}
 
+	/**
+	 * Removes specified instance of {@link PropertyListener} from this
+	 * watcher's listeners
+	 * 
+	 * @param listener
+	 *            The listener to remove
+	 */
+	public void removePropertyListener(final PropertyListener listener) {
+		if (listeners.containsKey(listener.getClass())) {
+			listeners.remove(listener.getClass());
+		}
+	}
+
+	/**
+	 * Checks if this property watcher is empty; meaning zero number of added
+	 * property listeners
+	 * 
+	 * @return <code>true</code> if this property watcher is empty; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isEmpty() {
+		return listeners.isEmpty();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.config.internal.filewatcher.FileListener#onChange(java.io.File)
+	 * @see
+	 * com.openexchange.config.internal.filewatcher.FileListener#onChange(java
+	 * .io.File)
 	 */
 	public void onChange(final File file) {
 		FileInputStream fis = null;

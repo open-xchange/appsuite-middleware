@@ -211,12 +211,6 @@ public final class ConfigurationImpl implements ConfigurationService {
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.config.Configuration#getProperty(java.lang.String,
-	 * java.lang.Object, com.openexchange.config.PropertyListener)
-	 */
 	public String getProperty(final String name, final String defaultValue, final PropertyListener listener) {
 		if (properties.containsKey(name)) {
 			final PropertyWatcher pw = PropertyWatcher.addPropertyWatcher(name, properties.get(name), true);
@@ -227,6 +221,16 @@ public final class ConfigurationImpl implements ConfigurationService {
 			return properties.get(name);
 		}
 		return defaultValue;
+	}
+
+	public void removePropertyListener(final String name, final PropertyListener listener) {
+		final PropertyWatcher pw = PropertyWatcher.getPropertyWatcher(name);
+		if (pw != null) {
+			pw.removePropertyListener(listener);
+			if (pw.isEmpty()) {
+				PropertyWatcher.removePropertWatcher(name);
+			}
+		}
 	}
 
 	/**
@@ -274,7 +278,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 				} else {
 					value = getProperty(entry.getKey(), listener);
 				} // FIXME: this could have been overriden by some property
-					// external to the requested folder.
+				// external to the requested folder.
 				retval.put(entry.getKey(), value);
 			}
 		}
