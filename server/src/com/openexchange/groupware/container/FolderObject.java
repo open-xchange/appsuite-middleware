@@ -79,6 +79,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
+import com.openexchange.tools.oxfolder.OXFolderProperties;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
@@ -1293,6 +1294,58 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 		boolean closeCon = false;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
+		if (folderId == SYSTEM_LDAP_FOLDER_ID && TABLE_OP.equals(table)) {
+			boolean update = false;
+			int owp = OCLPermission.NO_PERMISSIONS;
+			try {
+				if (readCon == null) {
+					readCon = DBPool.pickup(ctx);
+					closeCon = true;
+				}
+				stmt = readCon.prepareStatement(SQL_LOAD_P.replaceFirst("#TABLE#", table));
+				stmt.setInt(1, ctx.getContextId());
+				stmt.setInt(2, folderId);
+				rs = stmt.executeQuery();
+				final OCLPermission[] permissions = new OCLPermission[1];
+				if (rs.next()) {
+					final int entity = rs.getInt(1);
+					final OCLPermission p = new OCLPermission();
+					p.setEntity(entity);
+					/*
+					 * Get object-write-permission
+					 */
+					owp = rs.getInt(4);
+					if (OXFolderProperties.isEnableInternalUsersEdit() && owp < OCLPermission.WRITE_OWN_OBJECTS) {
+						/*
+						 * Object-write-permission is out of sync with database
+						 */
+						owp = OCLPermission.WRITE_OWN_OBJECTS;
+						update = true;
+					} else if (!OXFolderProperties.isEnableInternalUsersEdit() && owp > OCLPermission.NO_PERMISSIONS) {
+						/*
+						 * Object-write-permission is out of sync with database
+						 */
+						owp = OCLPermission.NO_PERMISSIONS;
+						update = true;
+					}
+					p.setAllPermission(rs.getInt(2), rs.getInt(3), owp, rs.getInt(5));
+					p.setFolderAdmin(rs.getInt(6) > 0 ? true : false);
+					p.setGroupPermission(rs.getInt(7) > 0 ? true : false);
+					permissions[0] = p;
+				}
+				stmt.close();
+				rs = null;
+				stmt = null;
+				return permissions;
+			} finally {
+				closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
+				if (update) {
+					OXFolderSQL.updateSinglePermission(folderId, OCLPermission.ALL_GROUPS_AND_USERS,
+							OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, owp,
+							OCLPermission.NO_PERMISSIONS, null, ctx);
+				}
+			}
+		}
 		try {
 			if (readCon == null) {
 				readCon = DBPool.pickup(ctx);
@@ -1313,6 +1366,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 				permList.add(p);
 			}
 			stmt.close();
+			rs = null;
+			stmt = null;
 			return permList.toArray(new OCLPermission[permList.size()]);
 		} finally {
 			closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);

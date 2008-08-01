@@ -49,24 +49,25 @@
 
 package com.openexchange.tools.oxfolder;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.SystemConfig;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.PropertyEvent;
+import com.openexchange.config.PropertyListener;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * <tt>OXFolderProperties</tt> contains both folder properties and folder
- * cache properties
+ * <tt>OXFolderProperties</tt> contains both folder properties and folder cache
+ * properties
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -91,7 +92,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 	 */
 	private final AtomicBoolean started = new AtomicBoolean();
 
-	private Properties folderProperties;
+	private PropertyListener propertyListener;
 
 	private boolean enableDBGrouping = true;
 
@@ -106,7 +107,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 	}
 
 	public void start() throws AbstractOXException {
-		if (started.get()) {
+		if (!started.compareAndSet(false, true)) {
 			LOG.error("Folder properties have already been started", new Throwable());
 			return;
 		}
@@ -119,13 +120,28 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 			FolderCacheManager.initInstance();
 		}
 		FolderQueryCacheManager.initInstance();
-		started.set(true);
+		/*
+		 * Add listener to important ENABLE_INTERNAL_USER_EDIT
+		 */
+
 	}
 
 	public void stop() throws AbstractOXException {
-		if (!started.get()) {
+		if (!started.compareAndSet(true, false)) {
 			LOG.error("Folder properties cannot be stopped since they have not been started before", new Throwable());
 			return;
+		}
+		{
+			/*
+			 * Remove listener from property
+			 */
+			final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(
+					ConfigurationService.class);
+			if (configurationService == null) {
+				LOG.error("Cannot look-up configuration service");
+			} else {
+				configurationService.removePropertyListener("ENABLE_INTERNAL_USER_EDIT", propertyListener);
+			}
 		}
 		final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
 		if (reg != null) {
@@ -134,7 +150,6 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 		FolderCacheManager.releaseInstance();
 		FolderQueryCacheManager.releaseInstance();
 		reset();
-		started.set(false);
 	}
 
 	public void handleAvailability() throws AbstractOXException {
@@ -160,61 +175,81 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 	}
 
 	private void reset() {
-		folderProperties = null;
+		propertyListener = null;
 		enableDBGrouping = true;
 		enableFolderCache = true;
 		ignoreSharedAddressbook = false;
 		enableInternalUsersEdit = false;
 	}
 
-	private void init() throws ConfigurationException {
-		folderProperties = new Properties();
-		final String propFileName = SystemConfig.getProperty(PROPFILE);
-		if (null == propFileName) {
-			LOG.error("Cannot find property \"" + PROPFILE + "\" in system.properties.");
+	private void init() {
+		final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(
+				ConfigurationService.class);
+		if (configurationService == null) {
+			LOG.error("Cannot look-up configuration service");
 			return;
 		}
-		try {
-			FileInputStream fis = null;
-			try {
-				fis = new FileInputStream(propFileName);
-				folderProperties.load(fis);
-			} finally {
-				if (fis != null) {
-					try {
-						fis.close();
-					} catch (final IOException e) {
-						LOG.error(e.getLocalizedMessage(), e);
+		final String trueStr = "true";
+		/*
+		 * ENABLE_DB_GROUPING
+		 */
+		enableDBGrouping = trueStr.equalsIgnoreCase(configurationService.getProperty("ENABLE_DB_GROUPING", "true"));
+		/*
+		 * ENABLE_FOLDER_CACHE
+		 */
+		enableFolderCache = trueStr.equalsIgnoreCase(configurationService.getProperty("ENABLE_FOLDER_CACHE", "true"));
+		/*
+		 * IGNORE_SHARED_ADDRESSBOOK
+		 */
+		ignoreSharedAddressbook = trueStr.equalsIgnoreCase(configurationService.getProperty(
+				"IGNORE_SHARED_ADDRESSBOOK", "false"));
+		/*
+		 * ENABLE_INTERNAL_USER_EDIT and add listener
+		 */
+		enableInternalUsersEdit = trueStr.equalsIgnoreCase(configurationService.getProperty(
+				"ENABLE_INTERNAL_USER_EDIT", "false", (propertyListener = new PropertyListener() {
+					public void onPropertyChange(final PropertyEvent event) {
+						if (PropertyEvent.Type.CHANGED.equals(event.getType())) {
+							final boolean enableInternalUsersEditNew = trueStr.equalsIgnoreCase(event.getValue());
+							if (enableInternalUsersEditNew == enableInternalUsersEdit) {
+								/*
+								 * Changed to same value; ignore
+								 */
+								return;
+							}
+							enableInternalUsersEdit = enableInternalUsersEditNew;
+						} else {
+							if (!enableInternalUsersEdit) {
+								/*
+								 * Already set to false
+								 */
+								return;
+							}
+							enableInternalUsersEdit = false;
+						}
+						if (LOG.isInfoEnabled()) {
+							LOG.info("Property 'ENABLE_INTERNAL_USER_EDIT' change propagated."
+									+ " ENABLE_INTERNAL_USER_EDIT=" + enableInternalUsersEdit);
+						}
+						/*
+						 * Clear folder cache to ensure removal of all cached
+						 * instances of global address book
+						 */
+						if (FolderCacheManager.isInitialized()) {
+							try {
+								FolderCacheManager.getInstance().clearAll();
+							} catch (final FolderCacheNotEnabledException e) {
+								LOG.error(e.getMessage(), e);
+							} catch (final OXException e) {
+								LOG.error(e.getMessage(), e);
+							}
+						}
 					}
-					fis = null;
-				}
-			}
-			final String trueStr = "true";
-			/*
-			 * ENABLE_DB_GROUPING
-			 */
-			enableDBGrouping = trueStr.equalsIgnoreCase(folderProperties.getProperty("ENABLE_DB_GROUPING", "true"));
-			/*
-			 * ENABLE_FOLDER_CACHE
-			 */
-			enableFolderCache = trueStr.equalsIgnoreCase(folderProperties.getProperty("ENABLE_FOLDER_CACHE", "true"));
-			/*
-			 * IGNORE_SHARED_ADDRESSBOOK
-			 */
-			ignoreSharedAddressbook = trueStr.equalsIgnoreCase(folderProperties.getProperty(
-					"IGNORE_SHARED_ADDRESSBOOK", "false"));
-			/*
-			 * ENABLE_INTERNAL_USER_EDIT
-			 */
-			enableInternalUsersEdit = trueStr.equalsIgnoreCase(folderProperties.getProperty(
-					"ENABLE_INTERNAL_USER_EDIT", "false"));
-			/*
-			 * Log info
-			 */
-			logInfo();
-		} catch (final IOException e) {
-			throw new ConfigurationException(ConfigurationException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		}
+				})));
+		/*
+		 * Log info
+		 */
+		logInfo();
 	}
 
 	private void logInfo() {
@@ -232,8 +267,8 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 	private static final String WARN_FOLDER_PROPERTIES_INIT = "Folder properties have not been started.";
 
 	/**
-	 * @return <code>true</code> if database grouping is enabled (<code>GROUB BY</code>);
-	 *         otherwise <code>false</code>
+	 * @return <code>true</code> if database grouping is enabled (
+	 *         <code>GROUB BY</code>); otherwise <code>false</code>
 	 */
 	public static boolean isEnableDBGrouping() {
 		if (!instance.started.get()) {
@@ -269,8 +304,8 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 	 * with write permission set to {@link OCLPermission#WRITE_OWN_OBJECTS} if
 	 * this property is set to <code>true</code>
 	 * 
-	 * @return <code>true</code> if contacts located in global address book
-	 *         may be edited; otherwise <code>false</code>
+	 * @return <code>true</code> if contacts located in global address book may
+	 *         be edited; otherwise <code>false</code>
 	 */
 	public static boolean isEnableInternalUsersEdit() {
 		if (!instance.started.get()) {

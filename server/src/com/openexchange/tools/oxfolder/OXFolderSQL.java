@@ -50,6 +50,7 @@
 package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -137,8 +138,8 @@ public final class OXFolderSQL {
 
 	private static final String SQL_DEFAULTFLD = "SELECT ot.fuid FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.created_from = ? AND ot.module = ? AND ot.default_flag = 1";
 
-	static int getUserDefaultFolder(final int userId, final int module, final Connection readConArg,
-			final Context ctx) throws DBPoolingException, SQLException {
+	static int getUserDefaultFolder(final int userId, final int module, final Connection readConArg, final Context ctx)
+			throws DBPoolingException, SQLException {
 		Connection readCon = readConArg;
 		boolean closeReadCon = false;
 		PreparedStatement stmt = null;
@@ -223,11 +224,11 @@ public final class OXFolderSQL {
 	 * @param folderId
 	 *            The folder ID
 	 * @param lastModified
-	 *            The new last modified timestamp to set
+	 *            The new last-modified timestamp to set
 	 * @param modifiedBy
 	 *            The user who shall be inserted as modified-by
 	 * @param writeConArg
-	 *            A writeable connection or <code>null</code> to fetch a new one
+	 *            A writable connection or <code>null</code> to fetch a new one
 	 *            from pool
 	 * @param ctx
 	 *            The context
@@ -252,6 +253,47 @@ public final class OXFolderSQL {
 			stmt.setInt(2, modifiedBy);
 			stmt.setInt(3, ctx.getContextId());
 			stmt.setInt(4, folderId);
+			stmt.executeUpdate();
+		} finally {
+			closeResources(null, stmt, closeWriteCon ? writeCon : null, false, ctx);
+		}
+	}
+
+	private static final String SQL_UPDATE_LAST_MOD2 = "UPDATE oxfolder_tree SET changing_date = ? WHERE cid = ? AND fuid = ?";
+
+	/**
+	 * Updates the last modified timestamp of the folder whose ID matches given
+	 * parameter <code>folderId</code>.
+	 * 
+	 * @param folderId
+	 *            The folder ID
+	 * @param lastModified
+	 *            The new last-modified timestamp to set
+	 * @param writeConArg
+	 *            A writable connection or <code>null</code> to fetch a new one
+	 *            from pool
+	 * @param ctx
+	 *            The context
+	 * @throws DBPoolingException
+	 *             If parameter <code>writeConArg</code> is <code>null</code>
+	 *             and a pooling error occurs
+	 * @throws SQLException
+	 *             If a SQL error occurs
+	 */
+	private static void updateLastModified(final int folderId, final long lastModified, final Connection writeConArg,
+			final Context ctx) throws DBPoolingException, SQLException {
+		Connection writeCon = writeConArg;
+		boolean closeWriteCon = false;
+		PreparedStatement stmt = null;
+		try {
+			if (writeCon == null) {
+				writeCon = DBPool.pickupWriteable(ctx);
+				closeWriteCon = true;
+			}
+			stmt = writeCon.prepareStatement(SQL_UPDATE_LAST_MOD2);
+			stmt.setLong(1, lastModified);
+			stmt.setInt(2, ctx.getContextId());
+			stmt.setInt(3, folderId);
 			stmt.executeUpdate();
 		} finally {
 			closeResources(null, stmt, closeWriteCon ? writeCon : null, false, ctx);
@@ -388,6 +430,72 @@ public final class OXFolderSQL {
 			return rs.next();
 		} finally {
 			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
+		}
+	}
+
+	private static final String SQL_UPDATE_PERMS = "UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ?, odp = ? WHERE cid = ? AND fuid = ? AND permission_id = ?";
+
+	/**
+	 * Updates a single folder permission and updates folder's last-modified
+	 * time stamp
+	 * 
+	 * @param folderId
+	 *            The folder ID
+	 * @param permissionId
+	 *            The entity ID; either user or group ID
+	 * @param folderPermission
+	 *            The folder permission to set
+	 * @param objectReadPermission
+	 *            The object read permission to set
+	 * @param objectWritePermission
+	 *            The object write permission to set
+	 * @param objectDeletePermission
+	 *            The object delete permission to set
+	 * @param writeCon
+	 *            A connection with write capability; may be <code>null</code>
+	 *            to fetch from pool
+	 * @param ctx
+	 *            The context
+	 * @return <code>true</code> if corresponding entry was successfully
+	 *         updated; otherwise <code>false</code>
+	 * @throws DBPoolingException
+	 *             If a pooling error occurred
+	 * @throws SQLException
+	 *             If a SQL error occurred
+	 */
+	public static boolean updateSinglePermission(final int folderId, final int permissionId,
+			final int folderPermission, final int objectReadPermission, final int objectWritePermission,
+			final int objectDeletePermission, final Connection writeCon, final Context ctx) throws DBPoolingException,
+			SQLException {
+		Connection wc = writeCon;
+		boolean closeWriteCon = false;
+		PreparedStatement stmt = null;
+		try {
+			if (wc == null) {
+				wc = DBPool.pickupWriteable(ctx);
+				closeWriteCon = true;
+			}
+			stmt = wc.prepareStatement(SQL_UPDATE_PERMS);
+			int pos = 1;
+			stmt.setInt(pos++, folderPermission);
+			stmt.setInt(pos++, objectReadPermission);
+			stmt.setInt(pos++, objectWritePermission);
+			stmt.setInt(pos++, objectDeletePermission);
+			stmt.setInt(pos++, ctx.getContextId());
+			stmt.setInt(pos++, folderId);
+			stmt.setInt(pos++, permissionId);
+			if (stmt.executeUpdate() != 1) {
+				return false;
+			}
+			closeSQLStuff(null, stmt);
+			stmt = null;
+			/*
+			 * Update last-modified to propagate changes to clients
+			 */
+			updateLastModified(folderId, System.currentTimeMillis(), wc, ctx);
+			return true;
+		} finally {
+			closeResources(null, stmt, closeWriteCon ? wc : null, false, ctx);
 		}
 	}
 
