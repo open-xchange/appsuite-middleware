@@ -977,7 +977,11 @@ public class ICalParserTest extends TestCase {
                 }
 
                 return found;
-            }    
+            }
+
+            public User loadUser(int userId, Context ctx) throws LdapException {
+                return ICalParserTest.this.users.getUser(userId);
+            }
         };
     }
 

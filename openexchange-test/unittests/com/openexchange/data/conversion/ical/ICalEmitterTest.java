@@ -56,18 +56,18 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 import junit.framework.TestCase;
 
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
+import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.groupware.container.*;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.ExternalParticipant;
+import com.openexchange.groupware.ldap.MockUserLookup;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.contexts.Context;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -75,6 +75,7 @@ import com.openexchange.groupware.tasks.ExternalParticipant;
 public class ICalEmitterTest extends TestCase {
 
     private ICal4JEmitter emitter;
+    private MockUserLookup users;
 
     private AppointmentObject getDefault() {
         AppointmentObject app = new AppointmentObject();
@@ -111,6 +112,21 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "CATEGORIES","cat1, cat2, cat3");
         assertProperty(ical, "LOCATION","The Location");
     }
+
+    public void testCategoriesMayBeNull() throws Exception {
+        AppointmentObject app = new AppointmentObject();
+        app.setCategories(null);
+        serialize(app);
+        assertTrue("Just testing survival", true);
+    }
+
+    public void testDeleteExceptionsMayBeNull() throws Exception {
+        AppointmentObject app = new AppointmentObject();
+        app.setDeleteExceptions(null);
+        serialize(app);
+        assertTrue("Just testing survival", true);
+    }
+
 
     public void testAppRecurrence() throws IOException {
 
@@ -277,9 +293,33 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "ATTENDEE", "MAILTO:external1@external.invalid");
         assertProperty(ical, "ATTENDEE", "MAILTO:external2@external.invalid");
 
+        app = getDefault();
+
+        setUserParticipants(app, 2,4,6);
+
+        ical = serialize(app);
+
+        assertProperty(ical, "ATTENDEE", "MAILTO:user1@test.invalid");
+        assertProperty(ical, "ATTENDEE", "MAILTO:user3@test.invalid");
+        assertProperty(ical, "ATTENDEE", "MAILTO:user5@test.invalid");
+                
 
     }
 
+    private void setUserParticipants(AppointmentObject app, int...ids) {
+        Participant[] allParticipants = new Participant[ids.length];
+        UserParticipant[] users = new UserParticipant[ids.length];
+
+
+        int i = 0,j = 0;
+        for(int id : ids) {
+            UserParticipant p = new UserParticipant(id);
+            allParticipants[i++] = p;
+            users[j++] = p;
+        }
+        app.setParticipants(allParticipants);
+        app.setUsers(users);
+    }
 
 
     private void setParticipants(CalendarObject calendarObject, String[] internal, String[] external) {
@@ -380,7 +420,25 @@ public class ICalEmitterTest extends TestCase {
     // SetUp
 
     public void setUp() {
+        users = new MockUserLookup();
         emitter = new ICal4JEmitter();
+        com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants.userResolver = new UserResolver(){
+            public List<User> findUsers(List<String> mails, Context ctx) {
+                List<User> found = new LinkedList<User>();
+                for(String mail : mails) {
+                    User user = ICalEmitterTest.this.users.getUserByMail(mail);
+                    if(user != null) {
+                        found.add( user );
+                    }
+                }
+
+                return found;
+            }
+
+            public User loadUser(int userId, Context ctx) throws LdapException {
+                return ICalEmitterTest.this.users.getUser(userId);
+            }
+        };
     }
 
     // Asserts
@@ -408,7 +466,7 @@ public class ICalEmitterTest extends TestCase {
 
 
     private ICalFile serialize(AppointmentObject app) throws IOException {
-        String icalText = emitter.writeAppointments(Arrays.asList(app), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+        String icalText = emitter.writeAppointments(Arrays.asList(app), null, new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
         return new ICalFile(new StringReader(icalText));
     }
 
@@ -423,7 +481,7 @@ public class ICalEmitterTest extends TestCase {
             emitter.writeTasks(
                 Arrays.asList(task),
                 new ArrayList<ConversionError>(),
-                new ArrayList<ConversionWarning>())));
+                new ArrayList<ConversionWarning>(), null)));
     }
 
     private static class ICalFile {
