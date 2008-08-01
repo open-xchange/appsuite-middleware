@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.webdav;
 
 import java.io.IOException;
@@ -62,6 +60,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -75,8 +74,11 @@ import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -95,9 +97,11 @@ import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -109,810 +113,910 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * ical
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-
 public final class ical extends PermissionServlet {
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 8198514314235297665L;
 
-	private static final String _doPut = "doPut";
-	
-	private final static int[] _appointmentFields = {
-		DataObject.OBJECT_ID,
-		DataObject.CREATED_BY,
-		DataObject.CREATION_DATE,
-		DataObject.LAST_MODIFIED,
-		DataObject.MODIFIED_BY,
-		FolderChildObject.FOLDER_ID,
-		CommonObject.PRIVATE_FLAG,
-		CommonObject.CATEGORIES,
-		CalendarObject.TITLE,
-		AppointmentObject.LOCATION,
-		CalendarObject.START_DATE,
-		CalendarObject.END_DATE,
-		CalendarObject.NOTE,
-		CalendarObject.RECURRENCE_TYPE,
+    /**
+     * For serialization.
+     */
+    private static final long serialVersionUID = 8198514314235297665L;
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(ical.class);
+
+    private final static int[] _appointmentFields = {
+        DataObject.OBJECT_ID,
+        DataObject.CREATED_BY,
+        DataObject.CREATION_DATE,
+        DataObject.LAST_MODIFIED,
+        DataObject.MODIFIED_BY,
+        FolderChildObject.FOLDER_ID,
+        CommonObject.PRIVATE_FLAG,
+        CommonObject.CATEGORIES,
+        CalendarObject.TITLE,
+        AppointmentObject.LOCATION,
+        CalendarObject.START_DATE,
+        CalendarObject.END_DATE,
+        CalendarObject.NOTE,
+        CalendarObject.RECURRENCE_TYPE,
         CalendarObject.RECURRENCE_ID,
-		CalendarObject.PARTICIPANTS,
-		CalendarObject.USERS,
-		AppointmentObject.SHOWN_AS,
-		AppointmentObject.FULL_TIME,
-		AppointmentObject.COLOR_LABEL
-	};
-	
-	protected final static int[] _taskFields = {
-		DataObject.OBJECT_ID,
-		DataObject.CREATED_BY,
-		DataObject.CREATION_DATE,
-		DataObject.LAST_MODIFIED,
-		DataObject.MODIFIED_BY,
-		FolderChildObject.FOLDER_ID,
-		CommonObject.PRIVATE_FLAG,
-		CommonObject.CATEGORIES,
-		CalendarObject.TITLE,
-		CalendarObject.START_DATE,
-		CalendarObject.END_DATE,
-		CalendarObject.NOTE,
-		CalendarObject.RECURRENCE_TYPE,
-		CalendarObject.PARTICIPANTS,
-		Task.ACTUAL_COSTS,
-		Task.ACTUAL_DURATION,
-		Task.ALARM,
-		Task.BILLING_INFORMATION,
-		Task.CATEGORIES,
-		Task.COMPANIES,
-		Task.CURRENCY,
-		Task.DATE_COMPLETED,
-		Task.IN_PROGRESS,
-		Task.PERCENT_COMPLETED,
-		Task.PRIORITY,
-		Task.STATUS,
-		Task.TARGET_COSTS,
-		Task.TARGET_DURATION,
-		Task.TRIP_METER,
-		Task.COLOR_LABEL
-	};
-	
-	private static final String CALENDARFOLDER = "calendarfolder";
-	private static final String TASKFOLDER = "taskfolder";
-	private static final String ENABLEDELETE = "enabledelete";
-	
-	private static String SQL_PRINCIPAL_SELECT = "SELECT object_id, calendarfolder, taskfolder FROM ical_principal WHERE cid = ? AND principal = ?";
-	private static String SQL_PRINCIPAL_INSERT = "INSERT INTO ical_principal (object_id, cid, principal, calendarfolder, taskfolder) VALUES (?, ?, ?, ?, ?)";
-	private static String SQL_PRINCIPAL_UPDATE = "UPDATE ical_principal SET calendarfolder = ?, taskfolder = ? WHERE object_id = ?";
-	
-	private static String SQL_ENTRIES_LOAD = "SELECT object_id, client_id, target_object_id, module FROM ical_ids WHERE cid = ? AND principal_id = ?";
-	private static String SQL_ENTRY_INSERT = "INSERT INTO ical_ids (object_id, cid, principal_id, client_id, target_object_id, module) VALUES (?, ?, ?, ? ,?, ?)";
-	private static String SQL_ENTRY_DELETE = "DELETE FROM ical_ids WHERE target_object_id = ? AND principal_id = ?";
-	
-	private static transient final Log LOG = LogFactory.getLog(ical.class);
-	
-	public void oxinit() throws ServletException {
-		
-	}
-	
-	@Override
-	public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("GET");
-		}
-		
-		OutputStream os = null;
-		
-		VersitDefinition.Writer w = null;
-		
-		String user_agent = null;
-		String principal = null;
-		
-		int calendarfolder_id = 0;
-		int taskfolder_id = 0;
-		
-		final Session sessionObj = getSession(req);
-		
-		try {
-			final Context context = ContextStorage.getInstance().getContext(sessionObj.getContextId());
-			final User user = UserStorage.getInstance().getUser(sessionObj.getUserId(), context);
-			
-			user_agent = getUserAgent(req);
-			
-			principal = user_agent + '_' + sessionObj.getUserId();
-			
-			calendarfolder_id = getCalendarFolderID(req);
-			taskfolder_id = getTaskFolderID(req);
-			
-			if (calendarfolder_id == 0 && taskfolder_id == 0) {
-				final OXFolderAccess oAccess = new OXFolderAccess(context);
-				calendarfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.CALENDAR).getObjectID();
-				taskfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.TASK).getObjectID();
-				/*calendarfolder_id = OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserObject().getId(), context);
-				taskfolder_id = OXFolderTools.getTaskDefaultFolder(sessionObj.getUserObject().getId(), context);*/
-			}
-			
-			HashMap entries_db = new HashMap();
-			HashMap entries_db_reverse = new HashMap();
-			HashMap entries_module = new HashMap();
-			final HashMap<String, String> entries = new HashMap<String, String>();
-			
-			Connection readCon = null;
-			
-			boolean exists = false;
-			
-			int principal_id = 0;
-			int db_calendarfolder_id = 0;
-			int db_taskfolder_id = 0;
-			
-			PreparedStatement principalStatement = null;
-			ResultSet rs = null;
-			
-			try {
-				readCon = DBPool.pickup(context);
-				
-				principalStatement = readCon.prepareStatement(SQL_PRINCIPAL_SELECT);
-				principalStatement.setLong(1, context.getContextId());
-				principalStatement.setString(2, principal);
-				rs = principalStatement.executeQuery();
-				
-				exists = rs.next();
-				
-				if (exists) {
-					principal_id = rs.getInt(1);
-					db_calendarfolder_id = rs.getInt(2);
-					db_taskfolder_id = rs.getInt(3);
-					
-					final HashMap h[] = loadDBEntries(context, principal_id);
-					entries_db = h[0];
-					entries_module = h[1];
-					entries_db_reverse = h[2];
-				}
-			} finally {
-				if (rs != null) {
-					rs.close();
-				}
-				
-				if (principalStatement != null) {
-					principalStatement.close();
-				}
-				
-				if (readCon != null) {
-					DBPool.closeReaderSilent(context, readCon);
-				}
-			}
-			
-			resp.setStatus(HttpServletResponse.SC_OK);
-			resp.setContentType("text/calendar");
-			
-			resp.setHeader("Accept-Ranges", "bytes");
-			resp.setHeader("Keep-Alive", "timeout=15 max=100");
-			
-			os = resp.getOutputStream();
-			
-			final VersitDefinition def = Versit.getDefinition("text/calendar");
-			w = def.getWriter(os, "UTF-8");
-			final VersitObject ical = OXContainerConverter.newCalendar("2.0");
-			def.writeProperties(w, ical);
-			final VersitDefinition eventDef = def.getChildDef("VEVENT");
-			final VersitDefinition taskDef = def.getChildDef("VTODO");
-			final OXContainerConverter oxc = new OXContainerConverter(sessionObj);
-			
-			SearchIterator it = null;
-			
-			try {
-				VersitObject vo = null;
-				
-				final AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
-				
-				if (calendarfolder_id != 0) {
-					try {
-						it = appointmentSql.getModifiedAppointmentsInFolder(calendarfolder_id, _appointmentFields, new Date(0), true);
-						while (it.hasNext()) {
-							final AppointmentObject appointmentObj = (AppointmentObject)it.next();
-							appointmentObj.setTimezone(user.getTimeZone());
-							vo = oxc.convertAppointment(appointmentObj);
-							
-							final int object_id = appointmentObj.getObjectID();
-							
-							final Property uid = vo.getProperty("UID");
-							if (entries_db_reverse.containsKey(String.valueOf(object_id))) {
-								uid.setValue(entries_db_reverse.get(String.valueOf(object_id)));
-							}
-							
-							eventDef.write(w, vo);
-							
-							entries.put(uid.getValue().toString(), String.valueOf(object_id));
-							if (!entries_module.containsKey(String.valueOf(object_id))) {
-								entries_module.put(String.valueOf(object_id), String.valueOf(Types.APPOINTMENT));
-							}
-							
-						}
-					} catch (final ConverterException exc) {
-						LOG.error("ical.createVEVENT", exc);
-					}
-				}
+        CalendarObject.PARTICIPANTS,
+        CalendarObject.USERS,
+        AppointmentObject.SHOWN_AS,
+        AppointmentObject.FULL_TIME,
+        AppointmentObject.COLOR_LABEL
+    };
 
-				final TasksSQLInterface taskInterface = new TasksSQLInterfaceImpl(sessionObj);
-				
-				if (taskfolder_id != 0) {
-					try {
-						it = taskInterface.getModifiedTasksInFolder(taskfolder_id, _taskFields, new Date(0));
-						while (it.hasNext()) {
-							final Task taskObj = (Task)it.next();
-							vo = oxc.convertTask(taskObj);
-							
-							final int object_id = taskObj.getObjectID();
-							
-							final Property uid = vo.getProperty("UID");
-							if (entries_db_reverse.containsKey(String.valueOf(object_id))) {
-								uid.setValue(entries_db_reverse.get(String.valueOf(object_id)).toString());
-							}
-							
-							taskDef.write(w, vo);
-							
-							entries.put(uid.getValue().toString(), String.valueOf(object_id));
-							if (!entries_module.containsKey(String.valueOf(object_id))) {
-								entries_module.put(String.valueOf(object_id), String.valueOf(Types.TASK));
-							}
-						}
-					} catch (final ConverterException exc) {
-						LOG.error("ical.createVTODO", exc);
-					}
-				}
+    protected final static int[] _taskFields = {
+        DataObject.OBJECT_ID,
+        DataObject.CREATED_BY,
+        DataObject.CREATION_DATE,
+        DataObject.LAST_MODIFIED,
+        DataObject.MODIFIED_BY,
+        FolderChildObject.FOLDER_ID,
+        CommonObject.PRIVATE_FLAG,
+        CommonObject.CATEGORIES,
+        CalendarObject.TITLE,
+        CalendarObject.START_DATE,
+        CalendarObject.END_DATE,
+        CalendarObject.NOTE,
+        CalendarObject.RECURRENCE_TYPE,
+        CalendarObject.PARTICIPANTS,
+        Task.ACTUAL_COSTS,
+        Task.ACTUAL_DURATION,
+        Task.ALARM,
+        Task.BILLING_INFORMATION,
+        Task.CATEGORIES,
+        Task.COMPANIES,
+        Task.CURRENCY,
+        Task.DATE_COMPLETED,
+        Task.IN_PROGRESS,
+        Task.PERCENT_COMPLETED,
+        Task.PRIORITY,
+        Task.STATUS,
+        Task.TARGET_COSTS,
+        Task.TARGET_DURATION,
+        Task.TRIP_METER,
+        Task.COLOR_LABEL
+    };
 
-				def.writeEnd(w, ical);
-			} finally {
-				os.flush();
-				w.flush();
-				oxc.close();
-				
-				if (it != null) {
-					it.close();
-				}
-			}
-			
-			Connection writeCon = null;
-			PreparedStatement ps = null;
-			
-			try {
-				writeCon = DBPool.pickupWriteable(context);
-				
-				if (exists) {
-					if (!(db_calendarfolder_id == calendarfolder_id && db_taskfolder_id == taskfolder_id)) {
-						ps = writeCon.prepareStatement(SQL_PRINCIPAL_UPDATE);
-						ps.setInt(1, calendarfolder_id);
-						ps.setInt(2, taskfolder_id);
-						ps.setInt(3, principal_id);
-						
-						ps.executeUpdate();
-						ps.close();
-					}
-				} else {
-					writeCon.setAutoCommit(false);
-					principal_id = IDGenerator.getId(context, Types.ICAL, writeCon);
-					
-					ps = writeCon.prepareStatement(SQL_PRINCIPAL_INSERT);
-					ps.setInt(1, principal_id);
-					ps.setLong(2, context.getContextId());
-					ps.setString(3, principal);
-					ps.setInt(4, calendarfolder_id);
-					ps.setInt(5, taskfolder_id);
-					
-					ps.executeUpdate();
-					ps.close();
-					
-					writeCon.commit();
-				}
-			} catch (final SQLException exc) {
-				writeCon.rollback();
-				throw exc;
-			} finally {
-				if (ps != null) {
-					ps.close();
-				}
-				
-				if (writeCon != null) {
-					if (!writeCon.getAutoCommit()) {
-						writeCon.setAutoCommit(true);
-					}
-					
-					DBPool.closeWriterSilent(context, writeCon);
-				} 
-			}
-			
-			final Iterator iterator = entries.keySet().iterator();
-			while (iterator.hasNext()) {
-				final String client_id = iterator.next().toString();
-				final String s_object_id = entries.get(client_id);
-				
-				if (!entries_db.containsKey(client_id)) {
-					if (entries_module.containsKey(s_object_id)) {
-						final int i_module = Integer.parseInt(entries_module.get(s_object_id).toString());
-						addEntry(context, principal_id, Integer.parseInt(s_object_id), client_id, i_module);
-					} else {
-						throw new OXConflictException("no module found!");
-					}
-				}
-			}
-			
-			final Iterator databaseIterator = entries_db.keySet().iterator();
-			while (databaseIterator.hasNext()) {
-				final String client_id = databaseIterator.next().toString();
-				final String s_object_id = entries_db.get(client_id).toString();
-				
-				if (!entries.containsKey(client_id)) {
-					deleteEntry(context, principal_id, Integer.parseInt(s_object_id));
-				}
-			}
-		} catch (final OXConflictException exc) {
-			LOG.debug("ical.doGet", exc);
-			doError(resp, HttpServletResponse.SC_CONFLICT, exc.getMessage());
-		} catch (final Exception exc) {
-			LOG.error("ical.doGet", exc);
-			doError(resp);
-		}
-	}
-	
-	@Override
-	public void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("PUT");
-		}
-		
-		int calendarfolder_id = 0;
-		int taskfolder_id = 0;
-		
-		String user_agent = null;
-		String principal = null;
-		
-		String content_type = null;
-		
-		final Session sessionObj = getSession(req);
-		
-		try {
-			final Context context = ContextStorage.getInstance().getContext(sessionObj.getContextId());
-			
-			user_agent = getUserAgent(req);
-			content_type = req.getContentType();
-			
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("read ical content_type: " + content_type);
-			}
-			
-			calendarfolder_id = getCalendarFolderID(req);
-			taskfolder_id = getTaskFolderID(req);
-			
-			if (calendarfolder_id == 0 && taskfolder_id == 0) {
-				final OXFolderAccess oAccess = new OXFolderAccess(context);
-				calendarfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.CALENDAR).getObjectID();
-				taskfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.TASK).getObjectID();
-				/*calendarfolder_id = OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserObject().getId(), context);
-				taskfolder_id = OXFolderTools.getTaskDefaultFolder(sessionObj.getUserObject().getId(), context);*/
-			}
-			
-			if (content_type == null) {
-				content_type = "text/calendar";
-			}
-			
-			if (user_agent == null) {
-				throw new OXConflictException("missing header field: user-agent");
-			}
-			
-			principal = user_agent + '_' + sessionObj.getUserId();
-			
-			calendarfolder_id = getCalendarFolderID(req);
-			taskfolder_id = getTaskFolderID(req);
-			
-			if (calendarfolder_id == 0 && taskfolder_id == 0) {
-				final OXFolderAccess oAccess = new OXFolderAccess(context);
-				calendarfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.CALENDAR).getObjectID();
-				taskfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.TASK).getObjectID();
-				/*calendarfolder_id = OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserObject().getId(), context);
-				taskfolder_id = OXFolderTools.getTaskDefaultFolder(sessionObj.getUserObject().getId(), context);*/
-			}
-			
-			final boolean enabledelete = getEnableDelete(req);
-			
-			HashMap entries_db = new HashMap();
-			HashMap<String, String> entries_module = new HashMap<String, String>();
-			final HashSet<String> entries = new HashSet<String>();
-			
-			Connection readCon = null;
-			PreparedStatement ps = null;
-			ResultSet rs = null;
-			
-			int principal_id = 0;
-			
-			try {
-				readCon = DBPool.pickup(context);
-				ps = readCon.prepareStatement(SQL_PRINCIPAL_SELECT);
-				ps.setInt(1, context.getContextId());
-				ps.setString(2, principal);
-				rs = ps.executeQuery();
-				
-				int db_calendarfolder_id = 0;
-				int db_taskfolder_id = 0;
-				
-				final boolean exists = rs.next();
-				
-				if (exists) {
-					principal_id = rs.getInt(1);
-					db_calendarfolder_id = rs.getInt(2);
-					db_taskfolder_id = rs.getInt(3);
-					
-					if (!(db_calendarfolder_id == calendarfolder_id && db_taskfolder_id == taskfolder_id)) {
-						throw new OXConflictException("no principal found for the given folders: " + principal);
-					}
-					
-					final HashMap<String, String>[] h = loadDBEntries(context, principal_id);
-					entries_db = h[0];
-					entries_module = h[1];
-				} else {
-					throw new OXConflictException("no principal found: " + principal);
-				}
-			} finally {
-				if (rs != null) {
-					rs.close();
-				}
-				
-				if (ps != null) {
-					ps.close();
-				}
-				
-				if (readCon != null) {
-					DBPool.closeReaderSilent(context, readCon);
-				}
-			}
-			
-			final VersitDefinition def = Versit.getDefinition(content_type);
-			final VersitDefinition.Reader r = def.getReader(req.getInputStream(), "UTF-8");
-			final OXContainerConverter oxc = new OXContainerConverter(sessionObj);
-			
-			final AppointmentSQLInterface appointmentInterface = new CalendarSql(sessionObj);
-			final TasksSQLInterface taskInterface = new TasksSQLInterfaceImpl(sessionObj);
+    private static final String _doPut = "doPut";
 
-			final Date timestamp = new Date();
-			
-			try {
-				final VersitObject root_vo = def.parseBegin(r);
-				VersitObject vo = def.parseChild(r, root_vo);
-				while (vo != null) {
-					int object_id = 0;
-					
-					try {
-						final Property property = vo.getProperty("UID");
-						
-						String client_id = null;
-						
-						
-						if (property != null) {
-							client_id = property.getValue().toString();
-						}
-						
-						if ("VEVENT".equals(vo.name)) {
-							final CalendarDataObject appointmentObj = oxc.convertAppointment(vo);
-							appointmentObj.setContext(context);
-							
-							if (client_id != null && entries_db.containsKey(client_id)) {
-								try {
-									object_id = Integer.parseInt(entries_db.get(client_id).toString());
-								} catch (final NumberFormatException exc) {
-									if (LOG.isDebugEnabled()) {
-										LOG.debug("object id is not an int");
-									}
-								}
-								
-								if (object_id > 0) {
-									appointmentObj.setObjectID(object_id);
-								}
-								
-								appointmentObj.setParentFolderID(calendarfolder_id);
-								
-								if (appointmentObj.containsObjectID()) {
-									appointmentInterface.updateAppointmentObject(appointmentObj, calendarfolder_id, timestamp);
-								} else {
-									appointmentInterface.insertAppointmentObject(appointmentObj);
-								}
-								
-								entries.add(client_id);
-							} else {
-								appointmentObj.setParentFolderID(calendarfolder_id);
-								
-								if (appointmentObj.containsObjectID()) {
-									appointmentInterface.updateAppointmentObject(appointmentObj, calendarfolder_id, timestamp);
-								} else {
-									appointmentInterface.insertAppointmentObject(appointmentObj);
-								}
-								
-								if (client_id != null) {
-									entries.add(client_id);
-									object_id = appointmentObj.getObjectID();
-									addEntry(context, principal_id, object_id, client_id, Types.APPOINTMENT);
-									
-									if (!entries_module.containsKey(String.valueOf(object_id))) {
-										entries_module.put(String.valueOf(object_id), String.valueOf(Types.APPOINTMENT));
-									}
-								}
-							}
-							
-							LOG.debug("STATUS: OK");
-						} else if ("VTODO".equals(vo.name)) {
-							final Task taskObj = oxc.convertTask(vo);
-							
-							if (client_id != null && entries_db.containsKey(client_id)) {
-								try {
-									object_id = Integer.parseInt(entries_db.get(client_id).toString());
-								} catch (final NumberFormatException exc) {
-									LOG.debug("object id is not an int");
-								}
-								
-								if (object_id > 0) {
-									taskObj.setObjectID(object_id);
-								}
-								
-								taskObj.setParentFolderID(taskfolder_id);
-								
-								if (taskObj.containsObjectID()) {
-									taskInterface.updateTaskObject(taskObj, taskfolder_id, timestamp);
-								} else {
-									taskInterface.insertTaskObject(taskObj);
-								}
-								
-								entries.add(client_id);
-							} else {
-								taskObj.setParentFolderID(taskfolder_id);
-								
-								if (taskObj.containsObjectID()) {
-									taskInterface.updateTaskObject(taskObj, taskfolder_id, timestamp);
-								} else {
-									taskInterface.insertTaskObject(taskObj);
-								}
-								
-								if (client_id != null) {
-									entries.add(client_id);
-									object_id = taskObj.getObjectID();
-									addEntry(context, principal_id, object_id, client_id, Types.TASK);
-									
-									if (!entries_module.containsKey(String.valueOf(object_id))) {
-										entries_module.put(String.valueOf(object_id), String.valueOf(Types.TASK));
-									}
-								}
-							}
-							
-							LOG.debug("STATUS: OK");
-						} else {
-							LOG.warn("invalid versit object: " + vo.name);
-						}
-					} catch (final OXObjectNotFoundException exc) {
-						LOG.debug("object was already delete", exc);
-					}
-					
-					vo = def.parseChild(r, root_vo);
-				}
-			} finally {
-				oxc.close();
-			}
-			
-			final CalendarDataObject appointmentObject = new CalendarDataObject();
-			
-			final Iterator it = entries_db.keySet().iterator();
-			while (it.hasNext()) {
-				final String tmp = it.next().toString();
-				if (!entries.contains(tmp)) {
-					final int object_id = Integer.parseInt(entries_db.get(tmp).toString());
-					final int i_module = Integer.parseInt(entries_module.get(String.valueOf(object_id)));
-					
-					deleteEntry(context, principal_id, object_id);
-					
-					if (enabledelete) {
-						try {
-							if (i_module == Types.APPOINTMENT) {
-								appointmentObject.reset();
-								appointmentObject.setObjectID(object_id);
-								appointmentObject.setParentFolderID(calendarfolder_id);
-								appointmentInterface.deleteAppointmentObject(appointmentObject, calendarfolder_id, timestamp);
-							} else if (i_module == Types.TASK) {
-								taskInterface.deleteTaskObject(object_id, taskfolder_id, timestamp);
-							} else {
-								throw new OXConflictException("unknown module: " + i_module);
-							}
-						} catch (final OXObjectNotFoundException exc) {
-							LOG.debug("object was already delete", exc);
-						}
-					}
-				}
-			}
-			
-			resp.setStatus(HttpServletResponse.SC_OK);
-		} catch (final OXMandatoryFieldException exc) {
-			LOG.debug(_doPut, exc);
-			doError(resp, HttpServletResponse.SC_CONFLICT, exc.getMessage());
-		} catch (final OXPermissionException exc) {
-			LOG.debug(_doPut, exc);
-			doError(resp, HttpServletResponse.SC_FORBIDDEN, exc.getMessage());
-		} catch (final OXConflictException exc) {
-			LOG.debug(_doPut, exc);
-			doError(resp, HttpServletResponse.SC_CONFLICT, exc.getMessage());
-		} catch (final Exception exc) {
-			LOG.error(_doPut, exc);
-			doError(resp);
-		}
-	}
-	
-	private void doError(final HttpServletResponse resp) throws ServletException {
-		doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error");
-	}
-	
-	private void doError(final HttpServletResponse resp, final int code, final String msg) throws ServletException {
-		try {
-			log(code + " msg --> " + msg);
-			
-			resp.setStatus(code);
-			resp.setContentType("text/html");
-			final OutputStream os = resp.getOutputStream();
-			os.write(("<html><body>" + msg + "</body></html>").getBytes());
-		} catch (final Exception exc) {
-			log("Error while doError --> " + exc);
-			exc.printStackTrace();
-		}
-	}
-	
-	private String getUserAgent(final HttpServletRequest req) throws OXConflictException {
-		final Enumeration e = req.getHeaderNames();
-		while (e.hasMoreElements()) {
-			final String tmp = e.nextElement().toString().toLowerCase();
-			if ("user-agent".equals(tmp)) {
-				return req.getHeader("user-agent");
-			}
-		}
-		
-		throw new OXConflictException("missing header field: user-agent");
-	}
-	
-	private int getCalendarFolderID(final HttpServletRequest req) throws OXConflictException {
-		if ( req.getParameter(CALENDARFOLDER) != null) {
-			try {
-				return Integer.parseInt(req.getParameter(CALENDARFOLDER));
-			} catch (final NumberFormatException exc) {
-				throw new OXConflictException(CALENDARFOLDER + " is not a number");
-			}
-		}
-		
-		return 0;
-	}
-	
-	private int getTaskFolderID(final HttpServletRequest req) throws OXConflictException {
-		if ( req.getParameter(TASKFOLDER) != null) {
-			try {
-				return Integer.parseInt(req.getParameter(TASKFOLDER));
-			} catch (final NumberFormatException exc) {
-				throw new OXConflictException(TASKFOLDER + " is not a number");
-			}
-		}
-		
-		return 0;
-	}
-	
-	private boolean getEnableDelete(final HttpServletRequest req) {
-		if (( req.getParameter(ENABLEDELETE) != null) && (req.getParameter(ENABLEDELETE).toLowerCase().equals("yes"))) {
-			return true;
-		}
-		
-		return false;
-	}
-	
-	private void addEntry(final Context context, final int principal_id, final int object_target_id, final String client_id, final int module) throws Exception {
-		Connection writeCon = null;
-		PreparedStatement ps = null;
-		
-		try {
-			writeCon = DBPool.pickupWriteable(context);
-			writeCon.setAutoCommit(false);
-			final int objectId = IDGenerator.getId(context, Types.ICAL, writeCon);
-			ps = writeCon.prepareStatement(SQL_ENTRY_INSERT);
-			ps.setInt(1, objectId);
-			ps.setLong(2, context.getContextId());
-			ps.setInt(3, principal_id);
-			ps.setString(4, client_id);
-			ps.setInt(5, object_target_id);
-			ps.setInt(6, module);
-			
-			ps.executeUpdate();
-			writeCon.commit();
-		} catch (final SQLException exc) {
-			if (writeCon != null) {
-				writeCon.rollback();
-			}
-			throw exc;
-		} finally {
-			if (ps != null) {
-				ps.close();
-			}
-			
-			if (writeCon != null) {
-				if (!writeCon.getAutoCommit()) {
-					writeCon.setAutoCommit(true);
-				}
-				DBPool.closeWriterSilent(context, writeCon);
-			}
-		}
-	}
-	
-	private void deleteEntry(final Context context, final int principal_id, final int object_target_id) throws Exception {
-		Connection writeCon = null;
-		PreparedStatement ps = null;
-		
-		try {
-			writeCon = DBPool.pickupWriteable(context);
-			ps = writeCon.prepareStatement(SQL_ENTRY_DELETE);
-			ps.setInt(1, object_target_id);
-			ps.setInt(2, principal_id);
-			
-			ps.executeUpdate();
-		} finally {
-			if (ps != null) {
-				ps.close();
-			}
-			
-			if (writeCon != null) {
-				DBPool.closeWriterSilent(context, writeCon);
-			}
-		}
-	}
-	
-	private HashMap<String, String>[] loadDBEntries(final Context context, final int principal_object_id) throws Exception {
-		final HashMap<String, String>[] h = new HashMap[3];
-		final HashMap<String, String> entries_db = new HashMap<String, String>();
-		final HashMap<String, String> entries_db_reverse = new HashMap<String, String>();
-		final HashMap<String, String> entries_module = new HashMap<String, String>();
-		
-		Connection readCon = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		try {
-			readCon = DBPool.pickup(context);
-			
-			ps = readCon.prepareStatement(SQL_ENTRIES_LOAD);
-			ps.setInt(1, principal_object_id);
-			ps.setLong(2, context.getContextId());
-			rs = ps.executeQuery();
-			
-			String client_id = null;
-			int target_id = 0;
-			int module = 0;
-			
-			while (rs.next()) {
-				client_id = rs.getString(2);
-				target_id = rs.getInt(3);
-				module = rs.getInt(4);
-				
-				entries_db.put(client_id, String.valueOf(target_id));
-				entries_db_reverse.put(String.valueOf(target_id), client_id);
-				entries_module.put(String.valueOf(target_id), String.valueOf(module));
-			}
-		} finally {
-			if (rs != null) {
-				rs.close();
-			}
-			
-			if (ps != null) {
-				ps.close();
-			}
-			
-			if (readCon != null) {
-				DBPool.closeReaderSilent(context, readCon);
-			}
-		}
-		
-		h[0] = entries_db;
-		h[1] = entries_module;
-		h[2] = entries_db_reverse;
+    private static final String CALENDARFOLDER = "calendarfolder";
+    private static final String TASKFOLDER = "taskfolder";
+    private static final String ENABLEDELETE = "enabledelete";
 
-		return h;
-	}
-	
-	@Override
-	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
-		final UserConfiguration uc =  UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx);
-		return (uc.hasICal() && uc.hasCalendar() && uc.hasTask());
-	}
+    private static final String SQL_PRINCIPAL_SELECT = "SELECT object_id, calendarfolder, taskfolder FROM ical_principal WHERE cid = ? AND principal = ?";
+    private static final String SQL_PRINCIPAL_INSERT = "INSERT INTO ical_principal (object_id, cid, principal, calendarfolder, taskfolder) VALUES (?, ?, ?, ?, ?)";
+    private static final String SQL_PRINCIPAL_UPDATE = "UPDATE ical_principal SET calendarfolder = ?, taskfolder = ? WHERE object_id = ?";
+
+    private static final String SQL_ENTRIES_LOAD = "SELECT object_id, client_id, target_object_id, module FROM ical_ids WHERE cid = ? AND principal_id = ?";
+    private static final String SQL_ENTRY_INSERT = "INSERT INTO ical_ids (object_id, cid, principal_id, client_id, target_object_id, module) VALUES (?, ?, ?, ? ,?, ?)";
+    private static final String SQL_ENTRY_DELETE = "DELETE FROM ical_ids WHERE cid=? AND principal_id=? AND target_object_id=? AND module=?";
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("GET");
+        }
+
+        OutputStream os = null;
+
+        VersitDefinition.Writer w = null;
+
+        int calendarfolder_id = 0;
+        int taskfolder_id = 0;
+
+        final Session sessionObj = getSession(req);
+
+        try {
+            final Context context = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+            final User user = UserStorage.getInstance().getUser(sessionObj.getUserId(), context);
+
+            final String user_agent = getUserAgent(req);
+            final String principalS = user_agent + '_' + sessionObj.getUserId();
+
+            calendarfolder_id = getCalendarFolderID(req);
+            taskfolder_id = getTaskFolderID(req);
+
+            if (calendarfolder_id == 0 && taskfolder_id == 0) {
+                final OXFolderAccess oAccess = new OXFolderAccess(context);
+                calendarfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.CALENDAR).getObjectID();
+                taskfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.TASK).getObjectID();
+                /*calendarfolder_id = OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserObject().getId(), context);
+                taskfolder_id = OXFolderTools.getTaskDefaultFolder(sessionObj.getUserObject().getId(), context);*/
+            }
+
+            final Mapping mapping;
+            final Map<String, Integer> entriesApp = new HashMap<String, Integer>();
+            final Map<String, Integer> entriesTask = new HashMap<String, Integer>();
+            Principal principal = loadPrincipal(context, principalS);
+            if (null != principal) {
+                mapping = loadDBEntriesNew(context, principal);
+            } else {
+                mapping = new Mapping();
+            }
+
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.setContentType("text/calendar");
+
+            resp.setHeader("Accept-Ranges", "bytes");
+            resp.setHeader("Keep-Alive", "timeout=15 max=100");
+
+            os = resp.getOutputStream();
+
+            final VersitDefinition def = Versit.getDefinition("text/calendar");
+            w = def.getWriter(os, "UTF-8");
+            final VersitObject ical = OXContainerConverter.newCalendar("2.0");
+            def.writeProperties(w, ical);
+            final VersitDefinition eventDef = def.getChildDef("VEVENT");
+            final VersitDefinition taskDef = def.getChildDef("VTODO");
+            final OXContainerConverter oxc = new OXContainerConverter(sessionObj);
+
+            SearchIterator<?> it = null;
+
+            try {
+                VersitObject vo = null;
+                if (calendarfolder_id != 0) {
+                    final AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
+                    try {
+                        it = appointmentSql.getModifiedAppointmentsInFolder(calendarfolder_id, _appointmentFields, new Date(0), true);
+                        while (it.hasNext()) {
+                            final AppointmentObject appointmentObj = (AppointmentObject)it.next();
+                            appointmentObj.setTimezone(user.getTimeZone());
+                            vo = oxc.convertAppointment(appointmentObj);
+                            final int appId = appointmentObj.getObjectID();
+                            final Property uid = vo.getProperty("UID");
+                            String clientId = mapping.getClientAppId(appId); 
+                            if (null == clientId) {
+                                clientId = uid.getValue().toString();
+                                entriesApp.put(clientId, Integer.valueOf(appId));
+                            } else {
+                                uid.setValue(clientId);
+                            }
+                            eventDef.write(w, vo);
+                        }
+                    } catch (final ConverterException exc) {
+                        LOG.error("ical.createVEVENT", exc);
+                    }
+                }
+                if (taskfolder_id != 0) {
+                    final TasksSQLInterface taskInterface = new TasksSQLInterfaceImpl(sessionObj);
+                    try {
+                        it = taskInterface.getModifiedTasksInFolder(taskfolder_id, _taskFields, new Date(0));
+                        while (it.hasNext()) {
+                            final Task taskObj = (Task)it.next();
+                            vo = oxc.convertTask(taskObj);
+                            final int taskId = taskObj.getObjectID();
+                            final Property uid = vo.getProperty("UID");
+                            String clientId = mapping.getClientTaskId(taskId);
+                            if (null == clientId) {
+                                clientId = uid.getValue().toString();
+                                entriesTask.put(clientId, Integer.valueOf(taskId));
+                            } else {
+                                uid.setValue(clientId);
+                            }
+                            taskDef.write(w, vo);
+                        }
+                    } catch (final ConverterException exc) {
+                        LOG.error("ical.createVTODO", exc);
+                    }
+                }
+                def.writeEnd(w, ical);
+            } finally {
+                os.flush();
+                w.flush();
+                oxc.close();
+                if (it != null) {
+                    it.close();
+                }
+            }
+            final Connection writeCon = DBPool.pickupWriteable(context);
+            PreparedStatement ps = null;
+            try {
+                if (null != principal) {
+                    if (principal.getCalendarFolder() != calendarfolder_id
+                        || principal.getTaskFolder() == taskfolder_id) {
+                        ps = writeCon.prepareStatement(SQL_PRINCIPAL_UPDATE);
+                        ps.setInt(1, calendarfolder_id);
+                        ps.setInt(2, taskfolder_id);
+                        ps.setInt(3, principal.getId());
+
+                        ps.executeUpdate();
+                        ps.close();
+                    }
+                } else {
+                    writeCon.setAutoCommit(false);
+                    final int id = IDGenerator.getId(context, Types.ICAL, writeCon);
+                    principal = new Principal(id, principalS, calendarfolder_id, taskfolder_id);
+                    ps = writeCon.prepareStatement(SQL_PRINCIPAL_INSERT);
+                    ps.setInt(1, id);
+                    ps.setLong(2, context.getContextId());
+                    ps.setString(3, principalS);
+                    ps.setInt(4, calendarfolder_id);
+                    ps.setInt(5, taskfolder_id);
+                    ps.executeUpdate();
+                    ps.close();
+                    writeCon.commit();
+                }
+            } catch (final SQLException exc) {
+                writeCon.rollback();
+                throw exc;
+            } finally {
+                if (ps != null) {
+                    ps.close();
+                }
+                if (!writeCon.getAutoCommit()) {
+                    writeCon.setAutoCommit(true);
+                }
+                DBPool.closeWriterSilent(context, writeCon);
+            }
+            addEntries(context, principal, entriesApp, entriesTask);
+            deleteEntries(context, principal, mapping, entriesApp, entriesTask);
+        } catch (final OXConflictException exc) {
+            LOG.debug("ical.doGet", exc);
+            doError(resp, HttpServletResponse.SC_CONFLICT, exc.getMessage());
+        } catch (final Exception exc) {
+            LOG.error("ical.doGet", exc);
+            doError(resp);
+        }
+    }
+
+    @Override
+    public void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("PUT");
+        }
+
+        int calendarfolder_id = 0;
+        int taskfolder_id = 0;
+
+        String user_agent = null;
+        String principal = null;
+
+        String content_type = null;
+
+        final Session sessionObj = getSession(req);
+
+        try {
+            final Context context = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+
+            user_agent = getUserAgent(req);
+            content_type = req.getContentType();
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("read ical content_type: " + content_type);
+            }
+
+            calendarfolder_id = getCalendarFolderID(req);
+            taskfolder_id = getTaskFolderID(req);
+
+            if (calendarfolder_id == 0 && taskfolder_id == 0) {
+                final OXFolderAccess oAccess = new OXFolderAccess(context);
+                calendarfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.CALENDAR).getObjectID();
+                taskfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.TASK).getObjectID();
+                /*calendarfolder_id = OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserObject().getId(), context);
+                taskfolder_id = OXFolderTools.getTaskDefaultFolder(sessionObj.getUserObject().getId(), context);*/
+            }
+
+            if (content_type == null) {
+                content_type = "text/calendar";
+            }
+
+            if (user_agent == null) {
+                throw new OXConflictException("missing header field: user-agent");
+            }
+
+            principal = user_agent + '_' + sessionObj.getUserId();
+
+            calendarfolder_id = getCalendarFolderID(req);
+            taskfolder_id = getTaskFolderID(req);
+
+            if (calendarfolder_id == 0 && taskfolder_id == 0) {
+                final OXFolderAccess oAccess = new OXFolderAccess(context);
+                calendarfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.CALENDAR).getObjectID();
+                taskfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.TASK).getObjectID();
+                /*calendarfolder_id = OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserObject().getId(), context);
+                taskfolder_id = OXFolderTools.getTaskDefaultFolder(sessionObj.getUserObject().getId(), context);*/
+            }
+
+            final boolean enabledelete = getEnableDelete(req);
+
+            Map entries_db = new HashMap();
+            Map<String, String> entries_module = new HashMap<String, String>();
+            final HashSet<String> entries = new HashSet<String>();
+
+            Connection readCon = null;
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+
+            int principal_id = 0;
+
+            try {
+                readCon = DBPool.pickup(context);
+                ps = readCon.prepareStatement(SQL_PRINCIPAL_SELECT);
+                ps.setInt(1, context.getContextId());
+                ps.setString(2, principal);
+                rs = ps.executeQuery();
+
+                int db_calendarfolder_id = 0;
+                int db_taskfolder_id = 0;
+
+                final boolean exists = rs.next();
+
+                if (exists) {
+                    principal_id = rs.getInt(1);
+                    db_calendarfolder_id = rs.getInt(2);
+                    db_taskfolder_id = rs.getInt(3);
+
+                    if (!(db_calendarfolder_id == calendarfolder_id && db_taskfolder_id == taskfolder_id)) {
+                        throw new OXConflictException("no principal found for the given folders: " + principal);
+                    }
+
+                    final Map<String, String>[] h = loadDBEntries(context, principal_id);
+                    entries_db = h[0];
+                    entries_module = h[1];
+                } else {
+                    throw new OXConflictException("no principal found: " + principal);
+                }
+            } finally {
+                if (rs != null) {
+                    rs.close();
+                }
+
+                if (ps != null) {
+                    ps.close();
+                }
+
+                if (readCon != null) {
+                    DBPool.closeReaderSilent(context, readCon);
+                }
+            }
+
+            final VersitDefinition def = Versit.getDefinition(content_type);
+            final VersitDefinition.Reader r = def.getReader(req.getInputStream(), "UTF-8");
+            final OXContainerConverter oxc = new OXContainerConverter(sessionObj);
+
+            final AppointmentSQLInterface appointmentInterface = new CalendarSql(sessionObj);
+            final TasksSQLInterface taskInterface = new TasksSQLInterfaceImpl(sessionObj);
+
+            final Date timestamp = new Date();
+
+            try {
+                final VersitObject root_vo = def.parseBegin(r);
+                VersitObject vo = def.parseChild(r, root_vo);
+                while (vo != null) {
+                    int object_id = 0;
+
+                    try {
+                        final Property property = vo.getProperty("UID");
+
+                        String client_id = null;
+
+
+                        if (property != null) {
+                            client_id = property.getValue().toString();
+                        }
+
+                        if ("VEVENT".equals(vo.name)) {
+                            final CalendarDataObject appointmentObj = oxc.convertAppointment(vo);
+                            appointmentObj.setContext(context);
+
+                            if (client_id != null && entries_db.containsKey(client_id)) {
+                                try {
+                                    object_id = Integer.parseInt(entries_db.get(client_id).toString());
+                                } catch (final NumberFormatException exc) {
+                                    if (LOG.isDebugEnabled()) {
+                                        LOG.debug("object id is not an int");
+                                    }
+                                }
+
+                                if (object_id > 0) {
+                                    appointmentObj.setObjectID(object_id);
+                                }
+
+                                appointmentObj.setParentFolderID(calendarfolder_id);
+
+                                if (appointmentObj.containsObjectID()) {
+                                    appointmentInterface.updateAppointmentObject(appointmentObj, calendarfolder_id, timestamp);
+                                } else {
+                                    appointmentInterface.insertAppointmentObject(appointmentObj);
+                                }
+
+                                entries.add(client_id);
+                            } else {
+                                appointmentObj.setParentFolderID(calendarfolder_id);
+
+                                if (appointmentObj.containsObjectID()) {
+                                    appointmentInterface.updateAppointmentObject(appointmentObj, calendarfolder_id, timestamp);
+                                } else {
+                                    appointmentInterface.insertAppointmentObject(appointmentObj);
+                                }
+
+                                if (client_id != null) {
+                                    entries.add(client_id);
+                                    object_id = appointmentObj.getObjectID();
+                                    addEntry(context, principal_id, object_id, client_id, Types.APPOINTMENT);
+
+                                    if (!entries_module.containsKey(String.valueOf(object_id))) {
+                                        entries_module.put(String.valueOf(object_id), String.valueOf(Types.APPOINTMENT));
+                                    }
+                                }
+                            }
+
+                            LOG.debug("STATUS: OK");
+                        } else if ("VTODO".equals(vo.name)) {
+                            final Task taskObj = oxc.convertTask(vo);
+
+                            if (client_id != null && entries_db.containsKey(client_id)) {
+                                try {
+                                    object_id = Integer.parseInt(entries_db.get(client_id).toString());
+                                } catch (final NumberFormatException exc) {
+                                    LOG.debug("object id is not an int");
+                                }
+
+                                if (object_id > 0) {
+                                    taskObj.setObjectID(object_id);
+                                }
+
+                                taskObj.setParentFolderID(taskfolder_id);
+
+                                if (taskObj.containsObjectID()) {
+                                    taskInterface.updateTaskObject(taskObj, taskfolder_id, timestamp);
+                                } else {
+                                    taskInterface.insertTaskObject(taskObj);
+                                }
+
+                                entries.add(client_id);
+                            } else {
+                                taskObj.setParentFolderID(taskfolder_id);
+
+                                if (taskObj.containsObjectID()) {
+                                    taskInterface.updateTaskObject(taskObj, taskfolder_id, timestamp);
+                                } else {
+                                    taskInterface.insertTaskObject(taskObj);
+                                }
+
+                                if (client_id != null) {
+                                    entries.add(client_id);
+                                    object_id = taskObj.getObjectID();
+                                    addEntry(context, principal_id, object_id, client_id, Types.TASK);
+
+                                    if (!entries_module.containsKey(String.valueOf(object_id))) {
+                                        entries_module.put(String.valueOf(object_id), String.valueOf(Types.TASK));
+                                    }
+                                }
+                            }
+
+                            LOG.debug("STATUS: OK");
+                        } else {
+                            LOG.warn("invalid versit object: " + vo.name);
+                        }
+                    } catch (final OXObjectNotFoundException exc) {
+                        LOG.debug("object was already delete", exc);
+                    }
+
+                    vo = def.parseChild(r, root_vo);
+                }
+            } finally {
+                oxc.close();
+            }
+
+            final CalendarDataObject appointmentObject = new CalendarDataObject();
+
+            final Iterator it = entries_db.keySet().iterator();
+            while (it.hasNext()) {
+                final String tmp = it.next().toString();
+                if (!entries.contains(tmp)) {
+                    final int object_id = Integer.parseInt(entries_db.get(tmp).toString());
+                    final int i_module = Integer.parseInt(entries_module.get(String.valueOf(object_id)));
+
+                    deleteEntry(context, principal_id, object_id, i_module);
+
+                    if (enabledelete) {
+                        try {
+                            if (i_module == Types.APPOINTMENT) {
+                                appointmentObject.reset();
+                                appointmentObject.setObjectID(object_id);
+                                appointmentObject.setParentFolderID(calendarfolder_id);
+                                appointmentInterface.deleteAppointmentObject(appointmentObject, calendarfolder_id, timestamp);
+                            } else if (i_module == Types.TASK) {
+                                taskInterface.deleteTaskObject(object_id, taskfolder_id, timestamp);
+                            } else {
+                                throw new OXConflictException("unknown module: " + i_module);
+                            }
+                        } catch (final OXObjectNotFoundException exc) {
+                            LOG.debug("object was already delete", exc);
+                        }
+                    }
+                }
+            }
+
+            resp.setStatus(HttpServletResponse.SC_OK);
+        } catch (final OXMandatoryFieldException exc) {
+            LOG.debug(_doPut, exc);
+            doError(resp, HttpServletResponse.SC_CONFLICT, exc.getMessage());
+        } catch (final OXPermissionException exc) {
+            LOG.debug(_doPut, exc);
+            doError(resp, HttpServletResponse.SC_FORBIDDEN, exc.getMessage());
+        } catch (final OXConflictException exc) {
+            LOG.debug(_doPut, exc);
+            doError(resp, HttpServletResponse.SC_CONFLICT, exc.getMessage());
+        } catch (final Exception exc) {
+            LOG.error(_doPut, exc);
+            doError(resp);
+        }
+    }
+
+    private void doError(final HttpServletResponse resp) throws ServletException {
+        doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error");
+    }
+
+    private void doError(final HttpServletResponse resp, final int code, final String msg) throws ServletException {
+        try {
+            log(code + " msg --> " + msg);
+
+            resp.setStatus(code);
+            resp.setContentType("text/html");
+            final OutputStream os = resp.getOutputStream();
+            os.write(("<html><body>" + msg + "</body></html>").getBytes());
+        } catch (final Exception exc) {
+            log("Error while doError --> " + exc);
+            exc.printStackTrace();
+        }
+    }
+
+    private String getUserAgent(final HttpServletRequest req) throws OXConflictException {
+        final Enumeration e = req.getHeaderNames();
+        while (e.hasMoreElements()) {
+            final String tmp = e.nextElement().toString().toLowerCase();
+            if ("user-agent".equals(tmp)) {
+                return req.getHeader("user-agent");
+            }
+        }
+
+        throw new OXConflictException("missing header field: user-agent");
+    }
+
+    private int getCalendarFolderID(final HttpServletRequest req) throws OXConflictException {
+        if (req.getParameter(CALENDARFOLDER) != null) {
+            try {
+                return Integer.parseInt(req.getParameter(CALENDARFOLDER));
+            } catch (final NumberFormatException exc) {
+                throw new OXConflictException(CALENDARFOLDER + " is not a number");
+            }
+        }
+        return 0;
+    }
+
+    private int getTaskFolderID(final HttpServletRequest req) throws OXConflictException {
+        if ( req.getParameter(TASKFOLDER) != null) {
+            try {
+                return Integer.parseInt(req.getParameter(TASKFOLDER));
+            } catch (final NumberFormatException exc) {
+                throw new OXConflictException(TASKFOLDER + " is not a number");
+            }
+        }
+
+        return 0;
+    }
+
+    private boolean getEnableDelete(final HttpServletRequest req) {
+        if (( req.getParameter(ENABLEDELETE) != null) && (req.getParameter(ENABLEDELETE).toLowerCase().equals("yes"))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private class Principal {
+        private final int id;
+        private final String userAgent;
+        private final int calendarFolder;
+        private final int taskFolder;
+        private Principal(int id, String userAgent, int calendarFolder, int taskFolder) {
+            super();
+            this.id = id;
+            this.userAgent = userAgent;
+            this.calendarFolder = calendarFolder;
+            this.taskFolder = taskFolder;
+        }
+        final int getId() { return id; }
+        final String getUserAgent() { return userAgent; }
+        final int getCalendarFolder() { return calendarFolder; }
+        final int getTaskFolder() { return taskFolder; }
+    }
+
+    private Principal loadPrincipal(final Context ctx, final String userAgent) throws OXException {
+        final Connection con;
+        try {
+            con = DBPool.pickup(ctx);
+        } catch (final DBPoolingException e) {
+            throw new OXException(e);
+        }
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        final Principal retval;
+        try {
+            ps = con.prepareStatement(SQL_PRINCIPAL_SELECT);
+            ps.setLong(1, ctx.getContextId());
+            ps.setString(2, userAgent);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                retval = new Principal(rs.getInt(1), userAgent, rs.getInt(2), rs.getInt(3));
+            } else {
+                retval = null;
+            }
+        } catch (final SQLException e) {
+            throw new OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999,
+                e.getMessage(), e);
+        } finally {
+            DBUtils.closeSQLStuff(rs, ps);
+            DBPool.closeReaderSilent(ctx, con);
+        }
+        return retval;
+    }
+
+    private void addEntry(final Context context, final int principal_id, final int object_target_id, final String client_id, final int module) throws Exception {
+        Connection writeCon = null;
+        PreparedStatement ps = null;
+
+        try {
+            writeCon = DBPool.pickupWriteable(context);
+            writeCon.setAutoCommit(false);
+            final int objectId = IDGenerator.getId(context, Types.ICAL, writeCon);
+            ps = writeCon.prepareStatement(SQL_ENTRY_INSERT);
+            ps.setInt(1, objectId);
+            ps.setLong(2, context.getContextId());
+            ps.setInt(3, principal_id);
+            ps.setString(4, client_id);
+            ps.setInt(5, object_target_id);
+            ps.setInt(6, module);
+
+            ps.executeUpdate();
+            writeCon.commit();
+        } catch (final SQLException exc) {
+            if (writeCon != null) {
+                writeCon.rollback();
+            }
+            throw exc;
+        } finally {
+            if (ps != null) {
+                ps.close();
+            }
+
+            if (writeCon != null) {
+                if (!writeCon.getAutoCommit()) {
+                    writeCon.setAutoCommit(true);
+                }
+                DBPool.closeWriterSilent(context, writeCon);
+            }
+        }
+    }
+
+    private void addEntries(final Context ctx, final Principal principal,
+        final Map<String, Integer> entriesApp,
+        final Map<String, Integer> entriesTask) throws OXException {
+        final Connection con;
+        try {
+            con = DBPool.pickupWriteable(ctx);
+        } catch (final DBPoolingException e) {
+            throw new OXException(e);
+        }
+        PreparedStatement ps = null;
+        try {
+            con.setAutoCommit(false);
+            ps = con.prepareStatement(SQL_ENTRY_INSERT);
+            for (Map.Entry<String, Integer> entry : entriesApp.entrySet()) {
+                final int objectId = IDGenerator.getId(ctx, Types.ICAL, con);
+                ps.setInt(1, objectId);
+                ps.setLong(2, ctx.getContextId());
+                ps.setInt(3, principal.getId());
+                ps.setString(4, entry.getKey());
+                ps.setInt(5, entry.getValue().intValue());
+                ps.setInt(6, Types.APPOINTMENT);
+                ps.addBatch();
+            }
+            for (Map.Entry<String, Integer> entry : entriesTask.entrySet()) {
+                final int objectId = IDGenerator.getId(ctx, Types.ICAL, con);
+                ps.setInt(1, objectId);
+                ps.setLong(2, ctx.getContextId());
+                ps.setInt(3, principal.getId());
+                ps.setString(4, entry.getKey());
+                ps.setInt(5, entry.getValue().intValue());
+                ps.setInt(6, Types.TASK);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+            con.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw new OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999,
+                e.getMessage(), e);
+        } finally {
+            DBUtils.closeSQLStuff(null, ps);
+            DBUtils.autocommit(con);
+            DBPool.closeWriterSilent(ctx, con);
+        }
+    }
+
+    private void deleteEntries(final Context ctx, final Principal principal,
+        final Mapping mapping, final Map<String, Integer> entriesApp,
+        final Map<String, Integer> entriesTask) throws OXException {
+        final Connection con;
+        try {
+            con = DBPool.pickupWriteable(ctx);
+        } catch (final DBPoolingException e) {
+            throw new OXException(e);
+        }
+        PreparedStatement ps = null;
+        try {
+            con.setAutoCommit(false);
+            ps = con.prepareStatement(SQL_ENTRY_DELETE);
+            for (final String clientId : mapping.client2App.keySet()) {
+                if (!entriesApp.containsKey(clientId)) {
+                    ps.setInt(1, ctx.getContextId());
+                    ps.setInt(2, principal.getId());
+                    ps.setInt(3, mapping.client2App.get(clientId).intValue());
+                    ps.setInt(4, Types.APPOINTMENT);
+                    ps.addBatch();
+                }
+            }
+            for (final String clientId : mapping.client2Task.keySet()) {
+                if (!entriesTask.containsKey(clientId)) {
+                    ps.setInt(1, ctx.getContextId());
+                    ps.setInt(2, principal.getId());
+                    ps.setInt(3, mapping.client2Task.get(clientId).intValue());
+                    ps.setInt(4, Types.TASK);
+                    ps.addBatch();
+                }
+            }
+            ps.executeBatch();
+            con.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw new OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999,
+                e.getMessage(), e);
+        } finally {
+            DBUtils.closeSQLStuff(null, ps);
+            DBUtils.autocommit(con);
+            DBPool.closeWriterSilent(ctx, con);
+        }
+    }
+
+    private void deleteEntry(final Context context, final int principal_id, final int object_target_id, final int module) throws Exception {
+        Connection writeCon = null;
+        PreparedStatement ps = null;
+
+        try {
+            writeCon = DBPool.pickupWriteable(context);
+            ps = writeCon.prepareStatement(SQL_ENTRY_DELETE);
+            ps.setInt(1, context.getContextId());
+            ps.setInt(2, principal_id);
+            ps.setInt(3, object_target_id);
+            ps.setInt(4, module);
+
+            ps.executeUpdate();
+        } finally {
+            if (ps != null) {
+                ps.close();
+            }
+
+            if (writeCon != null) {
+                DBPool.closeWriterSilent(context, writeCon);
+            }
+        }
+    }
+    
+    private Map<String, String>[] loadDBEntries(final Context context, final int principal_object_id) throws Exception {
+        final HashMap<String, String> entries_db = new HashMap<String, String>();
+        final HashMap<String, String> entries_db_reverse = new HashMap<String, String>();
+        final HashMap<String, String> entries_module = new HashMap<String, String>();
+        final Connection readCon = DBPool.pickup(context);
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            ps = readCon.prepareStatement(SQL_ENTRIES_LOAD);
+            ps.setInt(1, principal_object_id);
+            ps.setLong(2, context.getContextId());
+            rs = ps.executeQuery();
+
+            String client_id = null;
+            int target_id = 0;
+            int module = 0;
+
+            while (rs.next()) {
+                client_id = rs.getString(2);
+                target_id = rs.getInt(3);
+                module = rs.getInt(4);
+
+                entries_db.put(client_id, String.valueOf(target_id));
+                entries_db_reverse.put(String.valueOf(target_id), client_id);
+                entries_module.put(String.valueOf(target_id), String.valueOf(module));
+            }
+        } finally {
+            DBUtils.closeSQLStuff(rs, ps);
+            DBPool.closeReaderSilent(context, readCon);
+        }
+        final Map<String, String>[] h = new Map[3];
+        h[0] = entries_db;
+        h[1] = entries_module;
+        h[2] = entries_db_reverse;
+        return h;
+    }
+
+    private class Mapping {
+        private final Map<String, Integer> client2App = new HashMap<String, Integer>();
+        private final Map<String, Integer> client2Task = new HashMap<String, Integer>();
+        private final Map<Integer, String> app2Client = new HashMap<Integer, String>();
+        private final Map<Integer, String> task2Client = new HashMap<Integer, String>();
+        private Mapping() {
+            super();
+        }
+        public void addAppointment(String clientId, int targetId) {
+            client2App.put(clientId, Integer.valueOf(targetId));
+            app2Client.put(Integer.valueOf(targetId), clientId);
+        }
+        public void addTask(String clientId, int targetId) {
+            client2Task.put(clientId, Integer.valueOf(targetId));
+            task2Client.put(Integer.valueOf(targetId), clientId);
+        }
+        public String getClientAppId(final int appId) {
+            return app2Client.get(Integer.valueOf(appId));
+        }
+        public String getClientTaskId(final int taskId) {
+            return task2Client.get(Integer.valueOf(taskId));
+        }
+    }
+
+    private Mapping loadDBEntriesNew(final Context context,
+        final Principal principal) throws OXException {
+        final Connection readCon;
+        try {
+            readCon = DBPool.pickup(context);
+        } catch (final DBPoolingException e) {
+            throw new OXException(e);
+        }
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        final Mapping mapping = new Mapping();
+        try {
+            ps = readCon.prepareStatement(SQL_ENTRIES_LOAD);
+            ps.setInt(1, principal.getId());
+            ps.setLong(2, context.getContextId());
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                final String client_id = rs.getString(2);
+                final int target_id = rs.getInt(3);
+                final int module = rs.getInt(4);
+                switch (module) {
+                case Types.APPOINTMENT:
+                    mapping.addAppointment(client_id, target_id);
+                    break;
+                case Types.TASK:
+                    mapping.addTask(client_id, target_id);
+                    break;
+                default:
+                    LOG.warn("Unknown iCal object mapping module " + module);
+                }
+            }
+        } catch (final SQLException e) {
+            throw new OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999,
+                e.getMessage(), e);
+        } finally {
+            DBUtils.closeSQLStuff(rs, ps);
+            DBPool.closeReaderSilent(context, readCon);
+        }
+        return mapping;
+    }
+
+    @Override
+    protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
+        final UserConfiguration uc =  UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx);
+        return (uc.hasICal() && uc.hasCalendar() && uc.hasTask());
+    }
 }
