@@ -101,6 +101,8 @@ import com.openexchange.user.UserService;
 import com.openexchange.user.internal.UserServiceImpl;
 import com.openexchange.event.impl.osgi.OSGiEventDispatcher;
 import com.openexchange.event.impl.EventQueue;
+import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.data.conversion.ical.ICalEmitter;
 
 /**
  * {@link ServerActivator} - The activator for server bundle
@@ -123,7 +125,7 @@ public final class ServerActivator extends DeferredActivator {
 			EventAdmin.class };
 
 	private static final Class<?>[] NEEDED_SERVICES_SERVER = { ConfigurationService.class, CacheService.class,
-			EventAdmin.class, SessiondService.class };
+			EventAdmin.class, SessiondService.class};
 
 	private final Starter starter;
 
@@ -253,6 +255,14 @@ public final class ServerActivator extends DeferredActivator {
 				new ContactServiceListener(context)));
 		// Add cache dynamically to database pooling. it works without, too.
 		serviceTrackerList.add(new ServiceTracker(context, CacheService.class.getName(), new CacheCustomizer(context)));
+
+
+        // ICal Parser
+        serviceTrackerList.add(new ServiceTracker(context, ICalParser.class.getName(), new RegistryCustomizer<ICalParser>(context, ICalParser.class)));
+
+        // ICal Emitter
+        serviceTrackerList.add(new ServiceTracker(context, ICalEmitter.class.getName(), new RegistryCustomizer<ICalEmitter>(context, ICalEmitter.class)));
+
 
         /*
          * Register Services
