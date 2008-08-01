@@ -58,8 +58,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.database.Database;
 import com.openexchange.database.Server;
@@ -86,8 +84,6 @@ public class SchemaStoreImpl extends SchemaStore {
 
 	private final AtomicBoolean tableCreated;
 
-	private final Lock createTableLock;
-
 	/**
 	 * SQL command for selecting the version from the schema.
 	 */
@@ -105,7 +101,6 @@ public class SchemaStoreImpl extends SchemaStore {
 	public SchemaStoreImpl() {
 		super();
 		tableCreated = new AtomicBoolean();
-		createTableLock = new ReentrantLock();
 	}
 
 	/**
@@ -114,8 +109,7 @@ public class SchemaStoreImpl extends SchemaStore {
 	@Override
 	public Schema getSchema(final int contextId) throws SchemaException {
 		if (!tableCreated.get()) {
-			createTableLock.lock();
-			try {
+			synchronized(tableCreated) {
 				if (!tableCreated.get()) {
 					if (!existsTable(contextId)) {
 						createVersionTable(contextId);
@@ -125,8 +119,6 @@ public class SchemaStoreImpl extends SchemaStore {
 					}
 					tableCreated.set(true);
 				}
-			} finally {
-				createTableLock.unlock();
 			}
 		}
 		return loadSchema(contextId);
