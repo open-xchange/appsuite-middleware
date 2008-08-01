@@ -58,10 +58,13 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -459,9 +462,10 @@ class CalendarMySQL implements CalendarSqlImp {
 					cdao.setTimezone(rs.getString(9));
 					if (CalendarRecurringCollection.fillDAO(cdao)) {
 						final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(cdao, start, end, 0);
+						final TimeZone zone = Tools.getTimeZone(cdao.getTimezone());
 						for (int a = 0; a < rrs.size(); a++) {
 							final RecurringResult rr = rrs.getRecurringResult(a);
-							fillActiveDates(start, rr.getStart(), rr.getEnd(), activeDates);
+							fillActiveDates(start, rr.getStart(), rr.getEnd(), activeDates, exceedsHourOfDay(rr.getStart(), zone));
 						}
 					} else {
 						if (LOG.isWarnEnabled()) {
@@ -469,7 +473,7 @@ class CalendarMySQL implements CalendarSqlImp {
 						}
 					}
 				} else {
-					fillActiveDates(start, s.getTime(), e.getTime(), activeDates);
+					fillActiveDates(start, s.getTime(), e.getTime(), activeDates, false);
 				}
 			}
 			// CalendarCommonCollection.debugActiveDates (start, end,
@@ -482,7 +486,24 @@ class CalendarMySQL implements CalendarSqlImp {
 		return activeDates;
 	}
 
-	private final void fillActiveDates(final long start, long s, final long e, final boolean activeDates[]) {
+	/**
+	 * Checks if specified date in increases day in month if adding given time
+	 * zone's offset.
+	 * 
+	 * @param millis
+	 *            The time millis
+	 * @param zone
+	 *            The time zone
+	 * @return <code>true</code> if specified date in increases day in month if
+	 *         adding given time zone's offset; otherwise <code>false</code>
+	 */
+	private static boolean exceedsHourOfDay(final long millis, final TimeZone zone) {
+		final Calendar cal = GregorianCalendar.getInstance(CalendarRecurringCollection.ZONE_UTC);
+		cal.setTimeInMillis(millis);
+		return cal.get(Calendar.HOUR_OF_DAY) + (zone.getOffset(millis) / CalendarRecurringCollection.MILLI_HOUR) >= 24;
+	}
+
+	private final void fillActiveDates(final long start, long s, final long e, final boolean activeDates[], final boolean exceedsHourOfDay) {
 		if (start > s) {
 			s = start;
 		}
@@ -495,12 +516,17 @@ class CalendarMySQL implements CalendarSqlImp {
 		}
 
 		if (s >= start) {
-			start_pos = (int) ((s - start) / CalendarRecurringCollection.MILLI_DAY);
+			final long startDiff = (s - start);
+			start_pos = (int) (startDiff / CalendarRecurringCollection.MILLI_DAY);
+			if (exceedsHourOfDay) {
+				start_pos++;
+			}
 			if (start_pos > activeDates.length) {
 				return;
 			}
 		}
-		for (int a = start_pos; a <= start_pos + len; a++) {
+		final int length = start_pos + len;
+		for (int a = start_pos; a <= length; a++) {
 			if (a >= activeDates.length) {
 				return;
 			}

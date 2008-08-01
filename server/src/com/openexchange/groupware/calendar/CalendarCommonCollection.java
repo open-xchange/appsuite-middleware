@@ -1396,7 +1396,7 @@ public final class CalendarCommonCollection {
     }
 
     static long getUserTimeUTCDate(final Date date, final String timezone) {
-        final TimeZone tz = TimeZone.getTimeZone(timezone);
+        final TimeZone tz = Tools.getTimeZone(timezone);
         final int offset = tz.getOffset(date.getTime());
         long ndl = date.getTime()+offset;
         final long off = ndl%CalendarRecurringCollection.MILLI_DAY;

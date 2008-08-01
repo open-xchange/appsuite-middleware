@@ -53,10 +53,10 @@ package com.openexchange.groupware.calendar.recurrence;
 
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.TimeZone;
 
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.RecurringResults;
+import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.groupware.container.CalendarObject;
 
 
@@ -310,7 +310,7 @@ public class RecurringCalculation {
         if (recurring_interval < 1) {
             throw new RecurringException(RecurringException.RECURRING_MISSING_INTERVAL, recurring_interval);
         }
-        final Calendar calc = Calendar.getInstance(TimeZone.getTimeZone(calc_timezone));
+        final Calendar calc = Calendar.getInstance(Tools.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(first_day_of_week);
         int ds_count = 1;
         final long sst = sr;
@@ -319,13 +319,13 @@ public class RecurringCalculation {
         calc.setTimeInMillis(s);
         
         {
-			final int zoneHourOffset = (TimeZone.getTimeZone(calc_timezone).getRawOffset() / (int) CalendarRecurringCollection.MILLI_HOUR);
+			final int zoneHourOffset = (Tools.getTimeZone(calc_timezone).getOffset(s) / (int) CalendarRecurringCollection.MILLI_HOUR);
 			if (zoneHourOffset != 0) {
 				final int compare = (calc.get(Calendar.HOUR_OF_DAY) - (zoneHourOffset));
 				if (compare > 24) {
 					/*
-					 * Zone offset causes to increment day in month; therefore add
-					 * one day to end
+					 * Zone offset causes to increment day in month; therefore
+					 * add one day to end
 					 */
 					e = e + CalendarRecurringCollection.MILLI_DAY;
 				} else if (compare <= 0) {
@@ -363,7 +363,7 @@ public class RecurringCalculation {
         if (recurring_interval < 1) {
             throw new RecurringException(RecurringException.RECURRING_MISSING_INTERVAL, recurring_interval);
         }
-        final Calendar calc = Calendar.getInstance(TimeZone.getTimeZone(calc_timezone));
+        final Calendar calc = Calendar.getInstance(Tools.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(first_day_of_week);
         int ds_count = 1;
         final long sst = sr;
@@ -463,7 +463,7 @@ public class RecurringCalculation {
         if (recurring_interval < 1) {
             throw new RecurringException(RecurringException.RECURRING_MISSING_INTERVAL, recurring_interval);
         }
-        final Calendar calc = Calendar.getInstance(TimeZone.getTimeZone(calc_timezone));
+        final Calendar calc = Calendar.getInstance(Tools.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(first_day_of_week);
         int ds_count = 1;
         final long sst = sr;
@@ -675,7 +675,7 @@ public class RecurringCalculation {
         if (recurring_interval < 1) {
             throw new RecurringException(RecurringException.RECURRING_MISSING_INTERVAL, recurring_interval);
         }
-        final Calendar calc = Calendar.getInstance(TimeZone.getTimeZone(calc_timezone));
+        final Calendar calc = Calendar.getInstance(Tools.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(first_day_of_week);
         int ds_count = 1;
         final long sst = sr;

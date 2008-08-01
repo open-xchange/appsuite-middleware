@@ -49,6 +49,10 @@
 
 package com.openexchange.groupware.calendar;
 
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
+
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -61,37 +65,56 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.session.Session;
 
 /**
- *
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Tools {
 
-    /**
-     * Prevent instantiation.
-     */
-    private Tools() {
-        super();
-    }
+	private static final Map<String, TimeZone> zoneCache = new ConcurrentHashMap<String, TimeZone>();
 
-    static Context getContext(final Session so) throws OXException {
-        try {
-            return ContextStorage.getInstance().getContext(so.getContextId());
-        } catch (final ContextException e) {
-            throw new OXException(e);
-        }
-    }
+	/**
+	 * Prevent instantiation.
+	 */
+	private Tools() {
+		super();
+	}
 
-    static User getUser(final Session so, final Context ctx) throws OXException {
-        try {
-            return UserStorage.getInstance().getUser(so.getUserId(), ctx);
-        } catch (final LdapException e) {
-            throw new OXException(e);
-        }
-    }
+	static Context getContext(final Session so) throws OXException {
+		try {
+			return ContextStorage.getInstance().getContext(so.getContextId());
+		} catch (final ContextException e) {
+			throw new OXException(e);
+		}
+	}
 
-    static UserConfiguration getUserConfiguration(final Context ctx,
-        final int userId) throws OXException {
-        return UserConfigurationStorage.getInstance().getUserConfiguration(
-            userId, ctx);
-    }
+	static User getUser(final Session so, final Context ctx) throws OXException {
+		try {
+			return UserStorage.getInstance().getUser(so.getUserId(), ctx);
+		} catch (final LdapException e) {
+			throw new OXException(e);
+		}
+	}
+
+	static UserConfiguration getUserConfiguration(final Context ctx, final int userId) throws OXException {
+		return UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
+	}
+
+	/**
+	 * Gets the <code>TimeZone</code> for the given ID.
+	 * 
+	 * @param ID
+	 *            The ID for a <code>TimeZone</code>, either an abbreviation
+	 *            such as "PST", a full name such as "America/Los_Angeles", or a
+	 *            custom ID such as "GMT-8:00".
+	 * @return The specified <code>TimeZone</code>, or the GMT zone if the given
+	 *         ID cannot be understood.
+	 */
+	public static TimeZone getTimeZone(final String ID) {
+		TimeZone zone = zoneCache.get(ID);
+		if (zone == null) {
+			zone = TimeZone.getTimeZone(ID);
+			zoneCache.put(ID, zone);
+		}
+		return zone;
+	}
 }
