@@ -1121,6 +1121,26 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
 	private static final String TABLE_OP = "oxfolder_permissions";
 
+	/**
+	 * Loads specified folder from database.
+	 * 
+	 * @param folderId
+	 *            The folder ID
+	 * @param ctx
+	 *            The context
+	 * @param readConArg
+	 *            A connection with read capability; may be <code>null</code> to
+	 *            fetch from pool
+	 * @param loadPermissions
+	 *            <code>true</code> to load folder's permissions, otherwise
+	 *            <code>false</code>
+	 * @param loadSubfolderList
+	 *            <code>true</code> to load subfolders, otherwise
+	 *            <code>false</code>
+	 * @return The loaded folder object from database
+	 * @throws OXException
+	 *             If folder cannot be loaded
+	 */
 	public static final FolderObject loadFolderObjectFromDB(final int folderId, final Context ctx,
 			final Connection readConArg, final boolean loadPermissions, final boolean loadSubfolderList)
 			throws OXException {
@@ -1129,6 +1149,30 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
 	private static final String SQL_LOAD_F = "SELECT parent, fname, module, type, creating_date, created_from, changing_date, changed_from, permission_flag, subfolder_flag, default_flag FROM #TABLE# WHERE cid = ? AND fuid = ?";
 
+	/**
+	 * Loads specified folder from database.
+	 * 
+	 * @param folderId
+	 *            The folder ID
+	 * @param ctx
+	 *            The context
+	 * @param readConArg
+	 *            A connection with read capability; may be <code>null</code> to
+	 *            fetch from pool
+	 * @param loadPermissions
+	 *            <code>true</code> to load folder's permissions, otherwise
+	 *            <code>false</code>
+	 * @param loadSubfolderList
+	 *            <code>true</code> to load subfolders, otherwise
+	 *            <code>false</code>
+	 * @param table
+	 *            The folder's working or backup table name
+	 * @param permTable
+	 *            The folder permissions' working or backup table name
+	 * @return The loaded folder object from database
+	 * @throws OXException
+	 *             If folder cannot be loaded
+	 */
 	public static final FolderObject loadFolderObjectFromDB(final int folderId, final Context ctx,
 			final Connection readConArg, final boolean loadPermissions, final boolean loadSubfolderList,
 			final String table, final String permTable) throws OXException {
