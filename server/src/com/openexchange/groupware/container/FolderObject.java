@@ -1210,12 +1210,17 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	 * <code>null</code> is given.
 	 * 
 	 * @param folderId
+	 *            The folder ID
 	 * @param ctx
+	 *            The context
 	 * @param readCon
-	 *            - may be <code>null</code>
-	 * @return
+	 *            A connection with read capability; may be <code>null</code> to
+	 *            fetch from pool
+	 * @return The folder's permissions
 	 * @throws SQLException
+	 *             If a SQL error occurs
 	 * @throws DBPoolingException
+	 *             If a pooling error occurs
 	 */
 	public static final OCLPermission[] getFolderPermissions(final int folderId, final Context ctx,
 			final Connection readConArg, final String table) throws SQLException, DBPoolingException {
