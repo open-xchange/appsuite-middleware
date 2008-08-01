@@ -1147,7 +1147,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 		return loadFolderObjectFromDB(folderId, ctx, readConArg, loadPermissions, loadSubfolderList, TABLE_OT, TABLE_OP);
 	}
 
-	private static final String SQL_LOAD_F = "SELECT parent, fname, module, type, creating_date, created_from, changing_date, changed_from, permission_flag, subfolder_flag, default_flag FROM #TABLE# WHERE cid = ? AND fuid = ?";
+	private static final String SQL_LOAD_F = "SELECT parent, fname, module, type, creating_date, created_from,"
+			+ " changing_date, changed_from, permission_flag, subfolder_flag, default_flag"
+			+ " FROM #TABLE# WHERE cid = ? AND fuid = ?";
 
 	/**
 	 * Loads specified folder from database.
