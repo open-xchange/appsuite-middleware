@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.data.conversion.ical.ical4j.internal.task;
 
 import net.fortuna.ical4j.model.component.VToDo;
@@ -63,29 +64,52 @@ import java.util.Date;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class DueDate extends AbstractVerifyingAttributeConverter<VToDo, Task> {
-    public boolean isSet(Task task) {
+
+    /**
+     * Default constructor.
+     */
+    public DueDate() {
+        super();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isSet(final Task task) {
         return false;  // EndDate only
     }
 
-    public void emit(Task task, VToDo vToDo, List<ConversionWarning> warnings) throws ConversionError {
+    /**
+     * {@inheritDoc}
+     */
+    public void emit(final Task task, final VToDo vToDo,
+        final List<ConversionWarning> warnings) throws ConversionError {
        return; // EndDate only
     }
 
-    public boolean hasProperty(VToDo vToDo) {
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasProperty(final VToDo vToDo) {
         return null != vToDo.getDue();
     }
 
-    public void parse(VToDo vToDo, Task task, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+    /**
+     * {@inheritDoc}
+     */
+    public void parse(final VToDo vToDo, final Task task, final TimeZone timeZone,
+        final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         if(task.containsEndDate()) {
             return;
         }
-        Due due = vToDo.getDue();
+        final Due due = vToDo.getDue();
         if(null == due) {
             return;
         }
-        Date endDate = ParserTools.toDate(due, timeZone);
+        final Date endDate = ParserTools.toDate(due, timeZone);
         task.setEndDate(endDate);
     }
 }
