@@ -133,7 +133,7 @@ public class SchemaStoreImpl extends SchemaStore {
 	}
 
 	@OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "", "" }, exceptionId = { 14,
-			15 }, msg = { "An SQL error occurred while creating table 'version': %1$s.",
+			15 }, msg = { "A SQL error occurred while creating table 'version': %1$s.",
 			"A database error occurred while creating table 'version': %1$s." })
 	private static final void createVersionTable(final int contextId) throws SchemaException {
 		/*
@@ -160,7 +160,7 @@ public class SchemaStoreImpl extends SchemaStore {
 	}
 
 	@OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "", "" }, exceptionId = { 30,
-			31 }, msg = { "An SQL error occurred while creating table 'version': %1$s.",
+			31 }, msg = { "A SQL error occurred while creating table 'version': %1$s.",
 			"A database error occurred while creating table 'version': %1$s." })
 	private static final void insertInitialEntry(final int contextId) throws SchemaException {
 		/*
@@ -208,7 +208,7 @@ public class SchemaStoreImpl extends SchemaStore {
 	 */
 	@OXThrowsMultiple(category = { Category.CODE_ERROR, Category.INTERNAL_ERROR, Category.PERMISSION,
 			Category.INTERNAL_ERROR }, desc = { "", "", "", "" }, exceptionId = { 6, 7, 8, 9 }, msg = {
-			"An SQL error occurred while reading schema version information: %1$s.",
+			"A SQL error occurred while reading schema version information: %1$s.",
 			"Though expected, SQL query returned no result.",
 			"Update conflict detected. Another process is currently updating schema %1$s.",
 			"Table update failed. Schema %1$s could not be locked." })
@@ -298,7 +298,7 @@ public class SchemaStoreImpl extends SchemaStore {
 	 */
 	@OXThrowsMultiple(category = { Category.CODE_ERROR, Category.INTERNAL_ERROR, Category.PERMISSION,
 			Category.INTERNAL_ERROR }, desc = { "", "", "", "" }, exceptionId = { 10, 11, 12, 13 }, msg = {
-			"An SQL error occurred while reading schema version information: %1$s.",
+			"A SQL error occurred while reading schema version information: %1$s.",
 			"Though expected, SQL query returned no result.",
 			"Update conflict detected. Schema %1$s is not marked as LOCKED.",
 			"Table update failed. Schema %1$s could not be unlocked." })
@@ -392,7 +392,7 @@ public class SchemaStoreImpl extends SchemaStore {
 	 */
 	@OXThrowsMultiple(category = { Category.CODE_ERROR, Category.SETUP_ERROR, Category.SETUP_ERROR, Category.CODE_ERROR }, desc = {
 			"", "", "", "" }, exceptionId = { 1, 2, 4, 16 }, msg = {
-			"An SQL error occurred while reading schema version information: " + "%1$s.",
+			"A SQL error occurred while reading schema version information: " + "%1$s.",
 			"No row found in table update.", "Multiple rows found.",
 			"A database error occurred while reading schema version information: %1$s." })
 	private Schema loadSchema(final int contextId) throws SchemaException {
