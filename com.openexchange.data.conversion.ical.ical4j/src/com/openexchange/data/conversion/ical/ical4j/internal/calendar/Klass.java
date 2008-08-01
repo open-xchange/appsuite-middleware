@@ -49,6 +49,7 @@
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
 import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.property.Clazz;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
@@ -68,7 +69,11 @@ public class Klass<T extends CalendarComponent, U extends CalendarObject> extend
     }
 
     public void emit(U cObj, T component, List<ConversionWarning> warnings) throws ConversionError {
-        //Todo
+        if( cObj.getPrivateFlag() ) {
+            component.getProperties().add(new Clazz("private"));
+        } else {
+            component.getProperties().add(new Clazz("public"));
+        }
     }
 
     public boolean hasProperty(T component) {

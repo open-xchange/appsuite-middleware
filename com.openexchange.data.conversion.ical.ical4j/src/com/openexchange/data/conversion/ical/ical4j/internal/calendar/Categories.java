@@ -70,7 +70,7 @@ public class Categories<T extends CalendarComponent, U extends CalendarObject> e
     }
 
     public void emit(U u, T t, List<ConversionWarning> warnings) throws ConversionError {
-        return; // TODO
+        t.getProperties().add(new net.fortuna.ical4j.model.property.Categories(u.getCategories()));
     }
 
     public boolean hasProperty(T t) {

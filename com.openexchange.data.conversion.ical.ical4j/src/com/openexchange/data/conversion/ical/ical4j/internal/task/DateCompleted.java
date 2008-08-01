@@ -54,6 +54,7 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
+import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionError;
 
@@ -70,7 +71,8 @@ public class DateCompleted extends AbstractVerifyingAttributeConverter<VToDo, Ta
     }
 
     public void emit(Task task, VToDo vToDo, List<ConversionWarning> warnings) throws ConversionError {
-        //TODO
+        Completed completed = new Completed(EmitterTools.toDateTime(task.getDateCompleted()));
+        vToDo.getProperties().add(completed);
     }
 
     public boolean hasProperty(VToDo vToDo) {

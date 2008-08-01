@@ -62,4 +62,8 @@ public class ConversionError extends ConversionWarning {
     public ConversionError(String message, Object... args) {
         super(message, args);
     }
+
+    public ConversionError(Code code, Object...args) {
+        super(code, args);
+    }
 }

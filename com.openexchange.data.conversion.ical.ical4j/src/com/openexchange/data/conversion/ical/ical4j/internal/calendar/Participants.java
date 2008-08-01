@@ -50,12 +50,10 @@ package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.ResourceList;
 import net.fortuna.ical4j.model.property.Attendee;
 import net.fortuna.ical4j.model.property.Resources;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.container.ExternalUserParticipant;
-import com.openexchange.groupware.container.ResourceParticipant;
+import com.openexchange.groupware.container.*;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
@@ -68,11 +66,17 @@ import java.util.TimeZone;
 import java.util.LinkedList;
 import java.util.Iterator;
 import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Participants<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
+
+    private static Log LOG = LogFactory.getLog(Participants.class);
 
     public static UserResolver userResolver = null;
 
@@ -81,7 +85,48 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
     }
 
     public void emit(U cObj, T component, List<ConversionWarning> warnings) throws ConversionError {
-        //Todo
+        List<ResourceParticipant> resources = new LinkedList<ResourceParticipant>();
+        for(Participant p : cObj.getParticipants()) {
+            switch(p.getType()) {
+                case Participant.USER:
+                    addUserAttendee((UserParticipant)p, component);
+                    break;
+                case Participant.EXTERNAL_USER:
+                    addExternalAttendee((ExternalUserParticipant)p, component);
+                    break;
+                case Participant.RESOURCE:
+                    resources.add((ResourceParticipant) p);
+
+            }
+        }
+        setResources(component, resources);
+    }
+
+    private void setResources(T component, List<ResourceParticipant> resources) {
+        ResourceList list = new ResourceList();
+        for(ResourceParticipant p : resources) { list.add(p.getDisplayName()); }
+        Resources property = new Resources(list);
+        component.getProperties().add(property);
+    }
+
+    private void addExternalAttendee(ExternalUserParticipant externalUserParticipant, T component) {
+        Attendee attendee = new Attendee();
+        try {
+            attendee.setValue("MAILTO:"+externalUserParticipant.getEmailAddress());
+            component.getProperties().add(attendee);
+        } catch (URISyntaxException e) {
+            LOG.error(e); // Shouldn't happen
+        }
+    }
+
+    private void addUserAttendee(UserParticipant userParticipant, T component) {
+        Attendee attendee = new Attendee();
+        try {
+            attendee.setValue("MAILTO:"+userParticipant.getEmailAddress());
+            component.getProperties().add(attendee);
+        } catch (URISyntaxException e) {
+            LOG.error(e); // Shouldn't happen
+        }
     }
 
     public boolean hasProperty(T component) {

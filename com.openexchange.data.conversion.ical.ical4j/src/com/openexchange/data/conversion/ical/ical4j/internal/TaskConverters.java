@@ -55,9 +55,12 @@ import java.util.List;
 import net.fortuna.ical4j.model.component.VToDo;
 
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.*;
-import com.openexchange.data.conversion.ical.ical4j.internal.task.DueDate;
 import com.openexchange.data.conversion.ical.ical4j.internal.task.DateCompleted;
+import com.openexchange.data.conversion.ical.ical4j.internal.task.DueDate;
 import com.openexchange.data.conversion.ical.ical4j.internal.task.State;
+import com.openexchange.data.conversion.ical.ical4j.internal.task.Priority;
+import com.openexchange.data.conversion.ical.ical4j.internal.task.PercentComplete;
+
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -91,6 +94,8 @@ public final class TaskConverters {
         tmp.add(new DeleteExceptions<VToDo, Task>());
         tmp.add(new Alarm<VToDo, Task>());
         tmp.add(new State());
+        tmp.add(new PercentComplete());
+        tmp.add(new Priority());
         ALL = (AttributeConverter<VToDo, Task>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
     }
 }

@@ -50,6 +50,7 @@
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
 import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.Date;
 
 /**
  *
@@ -69,6 +70,12 @@ public final class EmitterTools {
      */
     public static final DateTime toDateTime(final java.util.Date date) {
         final DateTime retval = new DateTime(true);
+        retval.setTime(date.getTime());
+        return retval;
+    }
+
+    public static final Date toDate(final java.util.Date date) {
+        final Date retval = new Date();
         retval.setTime(date.getTime());
         return retval;
     }

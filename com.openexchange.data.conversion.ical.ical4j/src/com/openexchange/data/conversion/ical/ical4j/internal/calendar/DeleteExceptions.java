@@ -56,6 +56,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
+import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionError;
 
@@ -72,8 +73,19 @@ public class DeleteExceptions<T extends CalendarComponent, U extends CalendarObj
         return calendar.containsDeleteExceptions();
     }
 
-    public void emit(U u, T t, List<ConversionWarning> warnings) throws ConversionError {
-        return; // ToDo
+    public void emit(U calendar, T t, List<ConversionWarning> warnings) throws ConversionError {
+        Date[] dates = calendar.getDeleteException();
+        DateList deleteExceptions = new DateList(dates.length);
+        for(int i = 0, size = dates.length; i < size; i++) {
+            deleteExceptions.add(EmitterTools.toDateTime(dates[i]));
+        }
+
+        deleteExceptions.setUtc(true);
+
+        ExDate property = new ExDate(deleteExceptions);
+        t.getProperties().add(property);
+
+        return;
     }
 
     public boolean hasProperty(T t) {

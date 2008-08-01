@@ -54,12 +54,15 @@ import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.*;
 import net.fortuna.ical4j.model.property.ExDate;
+import net.fortuna.ical4j.model.property.Trigger;
+import net.fortuna.ical4j.model.property.Action;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
+import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionError;
 
@@ -76,9 +79,40 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
         return calendar.getAlarmFlag();
     }
 
-    public void emit(U u, T t, List<ConversionWarning> warnings) throws ConversionError {
+    public void emit(U calendar, T component, List<ConversionWarning> warnings) throws ConversionError {
+        if(Task.class.isAssignableFrom(calendar.getClass())) {
+            emitTaskAlarm((Task)calendar, (VToDo) component, warnings);
+        }  else if ( AppointmentObject.class.isAssignableFrom(calendar.getClass())) {
+            emitAppointmentAlarm((AppointmentObject)calendar, (VEvent) component, warnings);
+        }
         return; // ToDo
     }
+
+    private void emitAppointmentAlarm(AppointmentObject appointmentObject, VEvent component, List<ConversionWarning> warnings) {
+        VAlarm alarm = new VAlarm();
+        Dur duration = new Dur(String.format("-PT%dM", appointmentObject.getAlarm() / 60000));
+        Trigger trigger = new Trigger(duration);
+        alarm.getProperties().add(trigger);
+
+        Action action = new Action("DISPLAY");
+        alarm.getProperties().add(action);
+
+        component.getAlarms().add(alarm);
+
+        
+    }
+
+    private void emitTaskAlarm(Task task, VToDo component, List<ConversionWarning> warnings) {
+        VAlarm alarm = new VAlarm();
+        Trigger trigger = new Trigger(EmitterTools.toDateTime(task.getAlarm()));
+        alarm.getProperties().add(trigger);
+
+        Action action = new Action("DISPLAY");
+        alarm.getProperties().add(action);
+
+        component.getAlarms().add(alarm);
+    }
+
 
     public boolean hasProperty(T t) {
         return true; // Not strictly true, but to inlcude the warning we have to enter #parse always

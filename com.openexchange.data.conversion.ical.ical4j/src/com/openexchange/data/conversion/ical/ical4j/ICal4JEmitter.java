@@ -114,26 +114,6 @@ public class ICal4JEmitter implements ICalEmitter {
             }
         }
 
-        vevent.getProperties().add(new DtStart());
-        vevent.getStartDate().setDate(date(appointment.getStartDate()));
-        vevent.getStartDate().setUtc(true);
-
-        vevent.getProperties().add(new DtEnd());
-        vevent.getEndDate().setDate(date(appointment.getEndDate()));
-        vevent.getEndDate().setUtc(true);
-
-        vevent.getProperties().add(new Summary(appointment.getTitle()));
-        vevent.getProperties().add(new Description(appointment.getNote()));
-        
-        if(null != appointment.getCategories()) {
-            vevent.getProperties().add(new Categories(appointment.getCategories()));
-        }
-
-
-        if( appointment.getPrivateFlag() ) {
-            vevent.getProperties().add(new Clazz("private"));
-        }
-
         return vevent;
     }
 
