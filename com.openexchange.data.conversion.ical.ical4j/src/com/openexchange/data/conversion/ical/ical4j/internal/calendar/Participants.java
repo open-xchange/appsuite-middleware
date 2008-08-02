@@ -55,6 +55,7 @@ import net.fortuna.ical4j.model.property.Attendee;
 import net.fortuna.ical4j.model.property.Resources;
 import com.openexchange.groupware.container.*;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
@@ -148,7 +149,13 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             }
         }
 
-        List<User> users = userResolver.findUsers(mails, ctx);
+        List<User> users;
+	try {
+            users = userResolver.findUsers(mails, ctx);
+        } catch (final LdapException e) {
+            // FIXME
+            throw new ConversionError();
+        }
 
         for(User user : users) {
             cObj.addParticipant( new UserParticipant(user.getId()) );
