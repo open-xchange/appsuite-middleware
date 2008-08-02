@@ -56,6 +56,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 
 import java.util.List;
@@ -71,7 +72,7 @@ import net.fortuna.ical4j.model.component.VToDo;
  */
 public class ICal4JEmitter implements ICalEmitter {
 
-    public String writeAppointments(List<AppointmentObject> appointmentObjects, List<ConversionError> errors, List<ConversionWarning> warnings) {
+    public String writeAppointments(List<AppointmentObject> appointmentObjects, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) {
         Calendar calendar = new Calendar();
 
         for(AppointmentObject appointment : appointmentObjects) {
@@ -87,7 +88,7 @@ public class ICal4JEmitter implements ICalEmitter {
      */
     public String writeTasks(final List<Task> tasks,
         final List<ConversionError> errors,
-        final List<ConversionWarning> warnings) {
+        final List<ConversionWarning> warnings, Context ctx) {
         final Calendar calendar = new Calendar();
         for (final Task task : tasks) {
             final VToDo vtodo;
