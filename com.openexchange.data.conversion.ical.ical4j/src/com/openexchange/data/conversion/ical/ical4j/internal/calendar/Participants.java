@@ -154,7 +154,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             users = userResolver.findUsers(mails, ctx);
         } catch (final LdapException e) {
             // FIXME
-            throw new ConversionError();
+            throw new ConversionError("FIX ME");
         }
 
         for(User user : users) {
