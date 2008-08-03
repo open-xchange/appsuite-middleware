@@ -214,6 +214,7 @@ public final class FolderCacheManager {
 					.getLocalizedMessage());
 		}
 		folderCache = null;
+		initialAttribs = null;
 	}
 
 	private static ReadWriteLock getContextLock(final Context ctx) {
