@@ -158,7 +158,7 @@ public final class OXFolderIteratorSQL {
 		if (tableAlias == null) {
 			alias = STR_EMPTY;
 		} else {
-			alias = new StringBuilder(tableAlias).append('.').toString();
+			alias = new StringBuilder(tableAlias.length() + 1).append(tableAlias).append('.').toString();
 		}
 		final StringBuilder sb = new StringBuilder(STR_ORDER_BY);
 		sb.append(alias).append(strings[0]);
@@ -253,8 +253,7 @@ public final class OXFolderIteratorSQL {
 	 * instances which are located beneath system's private folder.
 	 */
 	private static SearchIterator<FolderObject> getVisiblePrivateFolders(final int userId, final int[] groups,
-			final int[] accessibleModules, final Context ctx, final Timestamp since) throws OXException,
-			SearchIteratorException {
+			final int[] accessibleModules, final Context ctx, final Timestamp since) throws OXException {
 		final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type = ").append(FolderObject.PRIVATE)
 				.append(" AND ot.created_from = ").append(userId).append(") AND (ot.parent = ?)").append(
 						(since == null ? STR_EMPTY : " AND (changing_date >= ?)"));
@@ -277,6 +276,25 @@ public final class OXFolderIteratorSQL {
 				stmt.setLong(6, since.getTime());
 			}
 			rs = stmt.executeQuery();
+			/*
+			 * Ensure ordering of private default folder follows: calendar,
+			 * contacts, tasks
+			 */
+			final List<FolderObject> list = new FolderObjectIterator(rs, stmt, false, ctx, readCon, true).asList();
+			if (list.size() >= 3
+					&& (list.get(0).getModule() != FolderObject.CALENDAR
+							|| list.get(1).getModule() != FolderObject.CONTACT || list.get(2).getModule() != FolderObject.TASK)) {
+				final FolderObject[] defaultFolders = new FolderObject[] { list.remove(0), list.remove(0),
+						list.remove(0) };
+				/*
+				 * Restore order
+				 */
+				switchElements(defaultFolders);
+				for (int i = 0; i < defaultFolders.length; i++) {
+					list.add(i, defaultFolders[i]);
+				}
+			}
+			return new FolderObjectIterator(list, false);
 		} catch (final SQLException e) {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
@@ -287,7 +305,26 @@ public final class OXFolderIteratorSQL {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(ctx.getContextId()));
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
+		// return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
+	}
+
+	private static final int[] DEF_MODULES = { FolderObject.CALENDAR, FolderObject.CONTACT, FolderObject.TASK };
+
+	private static void switchElements(final FolderObject[] folders) {
+		for (int i = 0; i < folders.length; i++) {
+			boolean switched = false;
+			for (int j = 0; j < DEF_MODULES.length && !switched; j++) {
+				if (folders[i].getModule() == DEF_MODULES[j] && i != j) {
+					/*
+					 * Switch elements
+					 */
+					final FolderObject tmp = folders[j];
+					folders[j] = folders[i];
+					folders[i] = tmp;
+					switched = true;
+				}
+			}
+		}
 	}
 
 	/**
@@ -586,9 +623,9 @@ public final class OXFolderIteratorSQL {
 	}
 
 	/**
-	 * Returns a <code>SearchIterator</code> of <code>FolderObject</code>
-	 * which represent all visible folders lying on path from given folder to
-	 * root folder.
+	 * Returns a <code>SearchIterator</code> of <code>FolderObject</code> which
+	 * represent all visible folders lying on path from given folder to root
+	 * folder.
 	 */
 	public static SearchIterator<FolderObject> getFoldersOnPathToRoot(final int folderId, final int userId,
 			final UserConfiguration userConfig, final Locale locale, final Context ctx) throws OXException,
@@ -982,8 +1019,8 @@ public final class OXFolderIteratorSQL {
 	 * instances which represent <b>all</b> modified folders greater than a
 	 * given date.
 	 * <p>
-	 * Quote from <a
-	 * href="http://www.open-xchange.com/wiki/index.php?title=HTTP_API#Updates">HTTP
+	 * Quote from <a href=
+	 * "http://www.open-xchange.com/wiki/index.php?title=HTTP_API#Updates">HTTP
 	 * API Updates</a>:
 	 * 
 	 * <code>

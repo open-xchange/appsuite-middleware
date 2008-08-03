@@ -164,12 +164,13 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 			"created_from", "changing_date", "changed_from", "permission_flag", "subfolder_flag", "default_flag" };
 
 	/**
-	 * Gets all necessary fields in right order to be used in an SQL <i>SELECT</i>
-	 * statement needed to create instances of {@link FolderObject}.
+	 * Gets all necessary fields in right order to be used in an SQL
+	 * <i>SELECT</i> statement needed to create instances of
+	 * {@link FolderObject}.
 	 * 
 	 * @param tableAlias
-	 *            The table alias used throughout corresponding SQL <i>SELECT</i>
-	 *            statement or <code>null</code> if no alias used.
+	 *            The table alias used throughout corresponding SQL
+	 *            <i>SELECT</i> statement or <code>null</code> if no alias used.
 	 * @return All necessary fields in right order to be used in an SQL
 	 *         <i>SELECT</i> statement
 	 */
@@ -592,7 +593,23 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 	 *             if any error occurs
 	 */
 	public Queue<FolderObject> asQueue() throws SearchIteratorException {
-		final Queue<FolderObject> retval = new LinkedList<FolderObject>();
+		return asLinkedList();
+	}
+
+	/**
+	 * Creates a <code>java.util.List</code> containing all iterator's elements.
+	 * All resources are closed immediately.
+	 * 
+	 * @return iterator's content backed up by a <code>java.util.List</code>
+	 * @throws SearchIteratorException
+	 *             if any error occurs
+	 */
+	public List<FolderObject> asList() throws SearchIteratorException {
+		return asLinkedList();
+	}
+
+	private LinkedList<FolderObject> asLinkedList() throws SearchIteratorException {
+		final LinkedList<FolderObject> retval = new LinkedList<FolderObject>();
 		if (isClosed) {
 			return retval;
 		}
@@ -631,5 +648,4 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 			isClosed = true;
 		}
 	}
-
 }

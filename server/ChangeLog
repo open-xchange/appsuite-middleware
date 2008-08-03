@@ -1,3 +1,8 @@
+* 2008-08-03 - thorben.betten@open-xchange.com
+
+ - Bugfix #11817: Fixed ordering of user's private default folders
+   according to module panel
+
 * 2008-07-31 - thorben.betten@open-xchange.com
 
  - Bugfix #11772: Fixed ordering of color flags in list view
