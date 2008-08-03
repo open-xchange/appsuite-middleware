@@ -90,6 +90,9 @@ public final class OXFolderSQL {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(OXFolderSQL.class);
 
+	/**
+	 * Initializes a new OXFolderSQL
+	 */
 	private OXFolderSQL() {
 		super();
 	}
@@ -138,18 +141,35 @@ public final class OXFolderSQL {
 
 	private static final String SQL_DEFAULTFLD = "SELECT ot.fuid FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.created_from = ? AND ot.module = ? AND ot.default_flag = 1";
 
-	static int getUserDefaultFolder(final int userId, final int module, final Connection readConArg, final Context ctx)
+	/**
+	 * Gets the specified user's default folder of given module
+	 * 
+	 * @param userId
+	 *            The user ID
+	 * @param module
+	 *            The module
+	 * @param readCon
+	 *            A connection with read capability
+	 * @param ctx
+	 *            The context
+	 * @return The folder ID of user's default folder of given module
+	 * @throws DBPoolingException
+	 *             If a pooling error occurs
+	 * @throws SQLException
+	 *             If a SQL error occurs
+	 */
+	static int getUserDefaultFolder(final int userId, final int module, final Connection readCon, final Context ctx)
 			throws DBPoolingException, SQLException {
-		Connection readCon = readConArg;
+		Connection rc = readCon;
 		boolean closeReadCon = false;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			if (readCon == null) {
-				readCon = DBPool.pickup(ctx);
+			if (rc == null) {
+				rc = DBPool.pickup(ctx);
 				closeReadCon = true;
 			}
-			stmt = readCon.prepareStatement(SQL_DEFAULTFLD);
+			stmt = rc.prepareStatement(SQL_DEFAULTFLD);
 			stmt.setInt(1, ctx.getContextId());
 			stmt.setInt(2, userId);
 			stmt.setInt(3, module);
@@ -159,7 +179,7 @@ public final class OXFolderSQL {
 			}
 			return -1;
 		} finally {
-			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
+			closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
 		}
 	}
 
