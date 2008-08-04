@@ -1,3 +1,8 @@
+* 2008-08-04 - thorben.betten@open-xchange.com
+
+ - Bugfix #11827: Fixed setting proper end date if updating a recurrence
+   appointment without until/occurrence setting
+
 * 2008-08-03 - thorben.betten@open-xchange.com
 
  - Bugfix #11817: Fixed ordering of user's private default folders

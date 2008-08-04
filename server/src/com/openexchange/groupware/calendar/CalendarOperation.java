@@ -1163,6 +1163,13 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 					    cdao.setEndDate(calculateRealRecurringEndDate(cdao));
 					    pattern_change = true;
 					}
+					if (!cdao.containsOccurrence() && !cdao.containsUntil()) {
+						/*
+						 * Neither occurrences nor until date set; calculate end
+						 * date from last possible occurrence
+						 */
+						cdao.setEndDate(calculateRealRecurringEndDate(cdao));
+					}
 
                     if(pattern_change) {
                         cdao.setRecurrence(null);

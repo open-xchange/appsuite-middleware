@@ -284,6 +284,9 @@ public class CalendarDataObject extends AppointmentObject {
 				LOG.error(e.getMessage(), e);
 				return new Date(maxEnd);
 			}
+			if (rresults == null) {
+				return new Date(maxEnd);
+			}
 			final RecurringResult rresult = rresults
 					.getRecurringResultByPosition(CalendarRecurringCollection.MAXTC + 1);
 			if (rresult != null) {
