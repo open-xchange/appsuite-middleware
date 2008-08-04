@@ -60,10 +60,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 
 import java.util.List;
-import java.util.Date;
 
 import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.property.*;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
 
@@ -131,11 +129,5 @@ public class ICal4JEmitter implements ICalEmitter {
             }
         }
         return vtodo;
-    }
-    
-    private net.fortuna.ical4j.model.Date date(Date endDate) {
-        net.fortuna.ical4j.model.Date d = new net.fortuna.ical4j.model.DateTime(true);
-        d.setTime(endDate.getTime());
-        return d;
     }
 }
