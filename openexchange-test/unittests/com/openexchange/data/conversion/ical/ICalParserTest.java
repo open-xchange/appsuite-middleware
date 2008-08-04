@@ -51,7 +51,6 @@ package com.openexchange.data.conversion.ical;
 
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.recalculate;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,8 +64,8 @@ import java.util.TimeZone;
 import junit.framework.TestCase;
 
 import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -1041,7 +1040,7 @@ public class ICalParserTest extends TestCase {
     protected void assertWarningWhenParsingAppointment(String icalText, String warning) throws ConversionError {
         ArrayList<ConversionError> errors = new ArrayList<ConversionError>();
         ArrayList<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
-        List<CalendarDataObject> result = parser.parseAppointments(icalText, TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);
+        List<AppointmentObject> result = parser.parseAppointments(icalText, TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);
 
         assertTrue(0 != result.size()); // Warnings don't abort parsing of the object
         assertEquals(1, warnings.size());
