@@ -148,7 +148,7 @@ public final class ical extends PermissionServlet {
         AppointmentObject.COLOR_LABEL
     };
 
-    protected final static int[] _taskFields = {
+    private final static int[] _taskFields = {
         DataObject.OBJECT_ID,
         DataObject.CREATED_BY,
         DataObject.CREATION_DATE,
@@ -203,38 +203,28 @@ public final class ical extends PermissionServlet {
         if (LOG.isDebugEnabled()) {
             LOG.debug("GET");
         }
-
         OutputStream os = null;
-
         VersitDefinition.Writer w = null;
-
-        int calendarfolder_id = 0;
-        int taskfolder_id = 0;
-
         final Session sessionObj = getSession(req);
-
         try {
             final Context context = ContextStorage.getInstance().getContext(sessionObj.getContextId());
             final User user = UserStorage.getInstance().getUser(sessionObj.getUserId(), context);
 
-            final String user_agent = getUserAgent(req);
-            final String principalS = user_agent + '_' + sessionObj.getUserId();
-
-            calendarfolder_id = getCalendarFolderID(req);
-            taskfolder_id = getTaskFolderID(req);
-
+            int calendarfolder_id = getCalendarFolderID(req);
+            int taskfolder_id = getTaskFolderID(req);
             if (calendarfolder_id == 0 && taskfolder_id == 0) {
                 final OXFolderAccess oAccess = new OXFolderAccess(context);
-                calendarfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.CALENDAR).getObjectID();
-                taskfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.TASK).getObjectID();
-                /*calendarfolder_id = OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserObject().getId(), context);
-                taskfolder_id = OXFolderTools.getTaskDefaultFolder(sessionObj.getUserObject().getId(), context);*/
+                calendarfolder_id = oAccess.getDefaultFolder(user.getId(), FolderObject.CALENDAR).getObjectID();
+                taskfolder_id = oAccess.getDefaultFolder(user.getId(), FolderObject.TASK).getObjectID();
             }
+
+            final String user_agent = getUserAgent(req);
+            final String principalS = user_agent + '_' + sessionObj.getUserId();
+            Principal principal = loadPrincipal(context, principalS);
 
             final Mapping mapping;
             final Map<String, Integer> entriesApp = new HashMap<String, Integer>();
             final Map<String, Integer> entriesTask = new HashMap<String, Integer>();
-            Principal principal = loadPrincipal(context, principalS);
             if (null != principal) {
                 mapping = loadDBEntriesNew(context, principal);
             } else {
@@ -243,7 +233,6 @@ public final class ical extends PermissionServlet {
 
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType("text/calendar");
-
             resp.setHeader("Accept-Ranges", "bytes");
             resp.setHeader("Keep-Alive", "timeout=15 max=100");
 
@@ -258,53 +247,50 @@ public final class ical extends PermissionServlet {
             final OXContainerConverter oxc = new OXContainerConverter(sessionObj);
 
             SearchIterator<?> it = null;
-
+//            final List<CalendarObject> calendar = new ArrayList<CalendarObject>();
             try {
-                VersitObject vo = null;
-                if (calendarfolder_id != 0) {
-                    final AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
-                    try {
-                        it = appointmentSql.getModifiedAppointmentsInFolder(calendarfolder_id, _appointmentFields, new Date(0), true);
-                        while (it.hasNext()) {
-                            final AppointmentObject appointmentObj = (AppointmentObject)it.next();
-                            appointmentObj.setTimezone(user.getTimeZone());
-                            vo = oxc.convertAppointment(appointmentObj);
-                            final int appId = appointmentObj.getObjectID();
-                            final Property uid = vo.getProperty("UID");
-                            String clientId = mapping.getClientAppId(appId); 
-                            if (null == clientId) {
-                                clientId = uid.getValue().toString();
-                                entriesApp.put(clientId, Integer.valueOf(appId));
-                            } else {
-                                uid.setValue(clientId);
-                            }
-                            eventDef.write(w, vo);
+                final AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
+                try {
+                    it = appointmentSql.getModifiedAppointmentsInFolder(calendarfolder_id, _appointmentFields, new Date(0), true);
+                    while (it.hasNext()) {
+                        final AppointmentObject appointment = (AppointmentObject) it.next();
+                        appointment.setTimezone(user.getTimeZone());
+//                        calendar.add(appointment);
+                        final VersitObject vo = oxc.convertAppointment(appointment);
+                        final int appId = appointment.getObjectID();
+                        final Property uid = vo.getProperty("UID");
+                        String clientId = mapping.getClientAppId(appId); 
+                        if (null == clientId) {
+                            clientId = uid.getValue().toString();
+                            entriesApp.put(clientId, Integer.valueOf(appId));
+                        } else {
+                            uid.setValue(clientId);
                         }
-                    } catch (final ConverterException exc) {
-                        LOG.error("ical.createVEVENT", exc);
+                        eventDef.write(w, vo);
                     }
+                } catch (final ConverterException exc) {
+                    LOG.error("ical.createVEVENT", exc);
                 }
-                if (taskfolder_id != 0) {
-                    final TasksSQLInterface taskInterface = new TasksSQLInterfaceImpl(sessionObj);
-                    try {
-                        it = taskInterface.getModifiedTasksInFolder(taskfolder_id, _taskFields, new Date(0));
-                        while (it.hasNext()) {
-                            final Task taskObj = (Task)it.next();
-                            vo = oxc.convertTask(taskObj);
-                            final int taskId = taskObj.getObjectID();
-                            final Property uid = vo.getProperty("UID");
-                            String clientId = mapping.getClientTaskId(taskId);
-                            if (null == clientId) {
-                                clientId = uid.getValue().toString();
-                                entriesTask.put(clientId, Integer.valueOf(taskId));
-                            } else {
-                                uid.setValue(clientId);
-                            }
-                            taskDef.write(w, vo);
+                final TasksSQLInterface taskInterface = new TasksSQLInterfaceImpl(sessionObj);
+                try {
+                    it = taskInterface.getModifiedTasksInFolder(taskfolder_id, _taskFields, new Date(0));
+                    while (it.hasNext()) {
+                        final Task task = (Task)it.next();
+//                        calendar.add(task);
+                        final VersitObject vo = oxc.convertTask(task);
+                        final int taskId = task.getObjectID();
+                        final Property uid = vo.getProperty("UID");
+                        String clientId = mapping.getClientTaskId(taskId);
+                        if (null == clientId) {
+                            clientId = uid.getValue().toString();
+                            entriesTask.put(clientId, Integer.valueOf(taskId));
+                        } else {
+                            uid.setValue(clientId);
                         }
-                    } catch (final ConverterException exc) {
-                        LOG.error("ical.createVTODO", exc);
+                        taskDef.write(w, vo);
                     }
+                } catch (final ConverterException exc) {
+                    LOG.error("ical.createVTODO", exc);
                 }
                 def.writeEnd(w, ical);
             } finally {
@@ -315,6 +301,13 @@ public final class ical extends PermissionServlet {
                     it.close();
                 }
             }
+//            {
+//                final ICalEmitter emitter = ServerServiceRegistry.getInstance()
+//                    .getService(ICalEmitter.class);
+//                final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+//                final List<ConversionError> errors = new ArrayList<ConversionError>();
+//                emitter.writeCalendar(calendar, context, errors, warnings);
+//            }
             final Connection writeCon = DBPool.pickupWriteable(context);
             PreparedStatement ps = null;
             try {
@@ -367,7 +360,7 @@ public final class ical extends PermissionServlet {
     }
 
     @Override
-    public void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {
+    public void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         if (LOG.isDebugEnabled()) {
             LOG.debug("PUT");
         }
@@ -426,7 +419,7 @@ public final class ical extends PermissionServlet {
 
             final boolean enabledelete = getEnableDelete(req);
 
-            Map entries_db = new HashMap();
+            Map<String, String> entries_db = new HashMap<String, String>();
             Map<String, String> entries_module = new HashMap<String, String>();
             final HashSet<String> entries = new HashSet<String>();
 
@@ -608,9 +601,9 @@ public final class ical extends PermissionServlet {
 
             final CalendarDataObject appointmentObject = new CalendarDataObject();
 
-            final Iterator it = entries_db.keySet().iterator();
+            final Iterator<String> it = entries_db.keySet().iterator();
             while (it.hasNext()) {
-                final String tmp = it.next().toString();
+                final String tmp = it.next();
                 if (!entries.contains(tmp)) {
                     final int object_id = Integer.parseInt(entries_db.get(tmp).toString());
                     final int i_module = Integer.parseInt(entries_module.get(String.valueOf(object_id)));
@@ -652,26 +645,20 @@ public final class ical extends PermissionServlet {
         }
     }
 
-    private void doError(final HttpServletResponse resp) throws ServletException {
+    private void doError(final HttpServletResponse resp) throws IOException {
         doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error");
     }
 
-    private void doError(final HttpServletResponse resp, final int code, final String msg) throws ServletException {
-        try {
-            log(code + " msg --> " + msg);
-
-            resp.setStatus(code);
-            resp.setContentType("text/html");
-            final OutputStream os = resp.getOutputStream();
-            os.write(("<html><body>" + msg + "</body></html>").getBytes());
-        } catch (final Exception exc) {
-            log("Error while doError --> " + exc);
-            exc.printStackTrace();
-        }
+    private void doError(final HttpServletResponse resp, final int code, final String msg) throws IOException {
+        log(code + " msg --> " + msg);
+        resp.setStatus(code);
+        resp.setContentType("text/html");
+        final OutputStream os = resp.getOutputStream();
+        os.write(("<html><body>" + msg + "</body></html>").getBytes());
     }
 
     private String getUserAgent(final HttpServletRequest req) throws OXConflictException {
-        final Enumeration e = req.getHeaderNames();
+        final Enumeration<?> e = req.getHeaderNames();
         while (e.hasMoreElements()) {
             final String tmp = e.nextElement().toString().toLowerCase();
             if ("user-agent".equals(tmp)) {

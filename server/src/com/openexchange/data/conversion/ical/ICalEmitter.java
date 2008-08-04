@@ -63,5 +63,11 @@ public interface ICalEmitter {
     public String writeAppointments(List<AppointmentObject> appointmentObjects, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
     public String writeTasks(List<Task> tasks, List<ConversionError> errors, List<ConversionWarning> warnings, Context ctx) throws ConversionError;
 
-    
+//    ICalSession createSession();
+//    ICalItem writeAppointment(ICalSession session, AppointmentObject appointment, Context context,
+//        List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+//    ICalItem writeTask(ICalSession session, Task task, Context context,
+//        List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+//    void writeSession(OutputStream stream);
+
 }
