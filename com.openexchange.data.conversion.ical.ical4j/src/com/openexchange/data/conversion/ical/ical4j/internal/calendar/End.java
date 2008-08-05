@@ -79,7 +79,7 @@ public final class End<T extends CalendarComponent, U extends CalendarObject> ex
     /**
      * {@inheritDoc}
      */
-    public void emit(final U calendar, final T component, List<ConversionWarning> warnings) {
+    public void emit(int index, final U calendar, final T component, List<ConversionWarning> warnings, Context ctx) {
         final DtEnd end = new DtEnd();
         end.setDate(toDateTime(calendar.getEndDate()));
         component.getProperties().add(end);
@@ -102,7 +102,7 @@ public final class End<T extends CalendarComponent, U extends CalendarObject> ex
     /**
      * {@inheritDoc}
      */
-    public void parse(final T component, final U calendar, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) {
+    public void parse(int index, final T component, final U calendar, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) {
         calendar.setEndDate(parseDate(component, new DtEnd(), timeZone));
     }
 

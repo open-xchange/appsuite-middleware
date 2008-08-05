@@ -59,9 +59,9 @@ import java.util.List;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class RequireEndDate  implements ObjectVerifier<AppointmentObject> {
-    public void verify(AppointmentObject object, List<ConversionWarning> warnings) throws ConversionError {
+    public void verify(int index, AppointmentObject object, List<ConversionWarning> warnings) throws ConversionError {
         if(!object.containsEndDate()) {
-            throw new ConversionError("DTEND or Duration required");
+            throw new ConversionError(index, "DTEND or Duration required");
         }
     }
 }

@@ -63,10 +63,10 @@ import java.util.TimeZone;
  */
 public class Location extends AbstractVerifyingAttributeConverter<VEvent, AppointmentObject> {
     public boolean isSet(AppointmentObject appointmentObject) {
-        return appointmentObject.containsLocation();
+        return appointmentObject.containsLocation() && null != appointmentObject.getLocation() && appointmentObject.getLocation().length() != 0;
     }
 
-    public void emit(AppointmentObject appointmentObject, VEvent event, List<ConversionWarning> warnings) throws ConversionError {
+    public void emit(int index, AppointmentObject appointmentObject, VEvent event, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
         net.fortuna.ical4j.model.property.Location location = new net.fortuna.ical4j.model.property.Location(appointmentObject.getLocation());
         event.getProperties().add(location);
     }
@@ -75,7 +75,7 @@ public class Location extends AbstractVerifyingAttributeConverter<VEvent, Appoin
         return event.getLocation() != null;
     }
 
-    public void parse(VEvent event, AppointmentObject appointment, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(int index, VEvent event, AppointmentObject appointment, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
         appointment.setLocation(event.getProperty("LOCATION").getValue());
     }
 }

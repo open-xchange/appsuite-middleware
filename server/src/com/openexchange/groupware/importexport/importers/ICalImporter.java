@@ -52,11 +52,7 @@ package com.openexchange.groupware.importexport.importers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -68,11 +64,14 @@ import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarField;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.importexport.AbstractImporter;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
@@ -85,6 +84,7 @@ import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.versit.ICalendar;
@@ -94,18 +94,22 @@ import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.ConverterPrivacyException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
+import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
 
 @OXExceptionSource(classId = ImportExportExceptionClasses.ICALIMPORTER, component = EnumComponent.IMPORT_EXPORT)
 @OXThrowsMultiple(category = { Category.PERMISSION, Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.USER_INPUT,
 		Category.USER_INPUT, Category.CODE_ERROR, Category.USER_INPUT, Category.USER_INPUT, Category.PERMISSION,
-		Category.PERMISSION, Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT }, desc = { "", "", "", "",
-		"", "", "", "", "", "", "", "" }, exceptionId = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 }, msg = {
+		Category.PERMISSION, Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT, Category.SETUP_ERROR }, desc = { "", "", "", "",
+		"", "", "", "", "", "", "", "", "" }, exceptionId = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }, msg = {
 		"Could not import into the folder %s.", "Subsystem down", "User input error %s",
 		"Problem while reading ICal file: %s.", "Could not load folder %s", "Broken file uploaded: %s",
 		"Cowardly refusing to import an entry flagged as confidential.",
 		"Module Calendar not enabled for user, cannot import appointments.",
 		"Module Tasks not enabled for user, cannot import tasks.", "The element %s is not supported.",
-		"Couldn't convert object: %s", "No ICal to import found." })
+		"Couldn't convert object: %s", "No ICal to import found.",
+        "Could not find suitable ICalParser. Is an ICalParser exported as a service?"})
 /*
  * Imports ICal files. ICal files can be translated to either tasks or
  * appointments within the OX, so the importer works with both SQL interfaces.
@@ -239,11 +243,109 @@ public class ICalImporter extends AbstractImporter {
 			taskInterface = new TasksSQLInterfaceImpl(session);
 		}
 
-		OXContainerConverter oxContainerConverter = null;
 
-		final List<ImportResult> list = new ArrayList<ImportResult>();
+        ICalParser parser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
+        if(null == parser) {
+            throw EXCEPTIONS.create(12);    
+        }
 
-		try {
+
+        final List<ImportResult> list = new ArrayList<ImportResult>();
+
+        Context ctx = session.getContext();
+        TimeZone defaultTz = TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
+
+        List<ConversionError> errors = new ArrayList<ConversionError>();
+        List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+
+        if(importAppointment) {
+            List<CalendarDataObject> appointments;
+            try {
+                appointments = parser.parseAppointments(is, defaultTz, ctx, errors, warnings );
+            } catch (ConversionError conversionError) {
+                throw new ImportExportException(conversionError);
+            }
+            Map<Integer, ConversionError> errorMap = new HashMap<Integer, ConversionError>();
+
+            for(ConversionError error : errors) { errorMap.put(error.getIndex(), error); }
+            
+            int index = 0;
+            Iterator<CalendarDataObject> iter = appointments.iterator();
+            while(iter.hasNext()) {
+                final ImportResult importResult = new ImportResult();
+                ConversionError error = errorMap.get(index);
+                if(error != null) {
+                    errorMap.remove(index);
+                    importResult.setException(new ImportExportException(error));
+                } else {
+                    // IGNORE WARNINGS. Protocol doesn't allow for warnings. TODO: Verify This
+                    CalendarDataObject appointmentObj = iter.next();
+                    appointmentObj.setContext(session.getContext());
+                    appointmentObj.setParentFolderID(appointmentFolderId);
+                    appointmentObj.setIgnoreConflicts(true);
+                    try {
+                        appointmentInterface.insertAppointmentObject(appointmentObj);
+                        importResult.setObjectId(String.valueOf(appointmentObj.getObjectID()));
+                        importResult.setDate(appointmentObj.getLastModified());
+                    } catch (OXException e) {
+                        importResult.setException(e);
+                    }
+
+                }
+                importResult.setEntryNumber(index);
+                list.add(importResult);
+                index++;
+            }
+            for(ConversionError error : errorMap.values()) {
+                final ImportResult importResult = new ImportResult();
+                importResult.setEntryNumber(error.getIndex());
+                importResult.setException(new ImportExportException(error));
+            }
+        }
+        if(importTask) {
+            List<Task> tasks;
+            try {
+                tasks = parser.parseTasks(is, defaultTz, ctx, errors, warnings);
+            } catch (ConversionError conversionError) {
+                throw new ImportExportException(conversionError);
+            }
+            Map<Integer, ConversionError> errorMap = new HashMap<Integer, ConversionError>();
+
+            for(ConversionError error : errors) { errorMap.put(error.getIndex(), error); }
+
+            int index = 0;
+            Iterator<Task> iter = tasks.iterator();
+            while(iter.hasNext()) {
+                final ImportResult importResult = new ImportResult();
+                ConversionError error = errorMap.get(index);
+                if(error != null) {
+                    errorMap.remove(index);
+                    importResult.setException(new ImportExportException(error));
+                } else {
+                    // IGNORE WARNINGS. Protocol doesn't allow for warnings. TODO: Verify This
+                    Task task = iter.next();
+                    task.setParentFolderID(taskFolderId);
+                    try {
+                        taskInterface.insertTaskObject(task);
+                        importResult.setObjectId(String.valueOf(task.getObjectID()));
+                        importResult.setDate(task.getLastModified());
+                    } catch (OXException e) {
+                        importResult.setException(e);
+                    }
+
+                }
+                importResult.setEntryNumber(index);
+                list.add(importResult);
+                index++;
+            }
+            for(ConversionError error : errorMap.values()) {
+                final ImportResult importResult = new ImportResult();
+                importResult.setEntryNumber(error.getIndex());
+                importResult.setException(new ImportExportException(error));
+            }
+        }
+
+        /*try {
 			oxContainerConverter = new OXContainerConverter(session);
 			final VersitDefinition def = ICalendar.definition;
 			final VersitDefinition.Reader versitReader = def.getReader(is, "UTF-8");
@@ -350,7 +452,7 @@ public class ICalImporter extends AbstractImporter {
 			if (oxContainerConverter != null) {
 				oxContainerConverter.close();
 			}
-		}
+		} */
 
 		return list;
 	}

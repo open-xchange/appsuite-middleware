@@ -61,6 +61,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverte
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.contexts.Context;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -79,9 +80,9 @@ public class ICal4JEmitter implements ICalEmitter {
 
     public String writeAppointments(List<AppointmentObject> appointmentObjects, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) {
         Calendar calendar = new Calendar();
-
+        int i = 0;
         for(AppointmentObject appointment : appointmentObjects) {
-            VEvent event = createEvent(appointment, errors, warnings);
+            VEvent event = createEvent(i++, appointment, ctx, errors, warnings);
             calendar.getComponents().add(event);
         }
 
@@ -95,10 +96,11 @@ public class ICal4JEmitter implements ICalEmitter {
         final List<ConversionError> errors,
         final List<ConversionWarning> warnings, Context ctx) {
         final Calendar calendar = new Calendar();
+        int i = 0;
         for (final Task task : tasks) {
             final VToDo vtodo;
             try {
-                vtodo = createEvent(task, warnings);
+                vtodo = createEvent(i++, task, ctx, warnings);
                 calendar.getComponents().add(vtodo);
             } catch (ConversionError conversionError) {
                 errors.add( conversionError );
@@ -107,13 +109,13 @@ public class ICal4JEmitter implements ICalEmitter {
         return calendar.toString();
     }
 
-    private VEvent createEvent(AppointmentObject appointment, List<ConversionError> errors, List<ConversionWarning> warnings) {
+    private VEvent createEvent(int index, AppointmentObject appointment, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) {
 
         final VEvent vevent = new VEvent();
         for (final AttributeConverter<VEvent, AppointmentObject> converter : AppointmentConverters.ALL) {
             if (converter.isSet(appointment)) {
                 try {
-                    converter.emit(appointment, vevent, warnings);
+                    converter.emit(index, appointment, vevent, warnings, ctx);
                 } catch (ConversionError conversionError) {
                     errors.add( conversionError );
                 }
@@ -128,11 +130,11 @@ public class ICal4JEmitter implements ICalEmitter {
      * @param task task to convert.
      * @return the iCal event representing the task.
      */
-    private VToDo createEvent(final Task task, List<ConversionWarning> warnings) throws ConversionError {
+    private VToDo createEvent(int index, final Task task, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
         final VToDo vtodo = new VToDo();
         for (final AttributeConverter<VToDo, Task> converter : TaskConverters.ALL) {
             if (converter.isSet(task)) {
-                converter.emit(task, vtodo, warnings);
+                converter.emit(index, task, vtodo, warnings, ctx);
             }
         }
         return vtodo;
@@ -147,10 +149,11 @@ public class ICal4JEmitter implements ICalEmitter {
         final List<ConversionError> errors, final List<ConversionWarning> warnings)
         throws ConversionError {
         final Calendar calendar = getCalendar(session);
-        final VEvent event = createEvent(appointment, errors, warnings);
+        final VEvent event = createEvent(getAndIncreaseIndex(session), appointment,ctx, errors, warnings);
         calendar.getComponents().add(event);
         return new ICal4jItem(event);
     }
+
 
     public void writeSession(final ICalSession session, final OutputStream stream) throws ConversionError {
         final Calendar calendar = getCalendar(session);
@@ -158,9 +161,9 @@ public class ICal4JEmitter implements ICalEmitter {
         try {
             outputter.output(calendar, stream);
         } catch (final IOException e) {
-            throw new ConversionError(Code.WRITE_PROBLEM, e);
+            throw new ConversionError(-1, Code.WRITE_PROBLEM, e);
         } catch (final ValidationException e) {
-            throw new ConversionError(Code.VALIDATION, e);
+            throw new ConversionError(-1, Code.VALIDATION, e);
         }
     }
 
@@ -168,15 +171,23 @@ public class ICal4JEmitter implements ICalEmitter {
         final Context context, final List<ConversionError> errors,
         final List<ConversionWarning> warnings) throws ConversionError {
         final Calendar calendar = getCalendar(session);
-        final VToDo vToDo = createEvent(task, warnings);
+        final VToDo vToDo = createEvent(getAndIncreaseIndex(session), task,context, warnings);
         calendar.getComponents().add(vToDo);
         return new ICal4jItem(vToDo);
     }
 
     private Calendar getCalendar(final ICalSession session) throws ConversionError {
         if (!(session instanceof ICal4jSession)) {
-            throw new ConversionError(Code.INVALID_SESSION, session.getClass().getName());
+            throw new ConversionError(-1, Code.INVALID_SESSION, session.getClass().getName());
         }
         return ((ICal4jSession) session).getCalendar();
+    }
+
+
+    private int getAndIncreaseIndex(ICalSession session) throws ConversionError {
+        if (!(session instanceof ICal4jSession)) {
+            throw new ConversionError(-1, Code.INVALID_SESSION, session.getClass().getName());
+        }
+        return ((ICal4jSession) session).getAndIncreaseIndex();
     }
 }

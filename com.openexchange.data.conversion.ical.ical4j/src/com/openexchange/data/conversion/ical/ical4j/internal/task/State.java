@@ -77,10 +77,10 @@ public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task
     /**
      * {@inheritDoc}
      */
-    public void emit(final Task task, final VToDo vtodo,
-        final List<ConversionWarning> warnings) throws ConversionError {
+    public void emit(int index, final Task task, final VToDo vtodo,
+                     final List<ConversionWarning> warnings, Context ctx) throws ConversionError {
         try {
-            final Status status = new Status(toStatus(task.getStatus()).getValue());
+            final Status status = new Status(toStatus(index, task.getStatus()).getValue());
             vtodo.getProperties().add(status);
         } catch (final ConversionWarning e) {
             warnings.add(e);
@@ -104,16 +104,16 @@ public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task
     /**
      * {@inheritDoc}
      */
-    public void parse(final VToDo vtodo, final Task task, final TimeZone timeZone, final Context ctx,
+    public void parse(int index, final VToDo vtodo, final Task task, final TimeZone timeZone, final Context ctx,
         final List<ConversionWarning> warnings) throws ConversionError {
         try {
-            task.setStatus(toTask(vtodo.getStatus()));
+            task.setStatus(toTask(index, vtodo.getStatus()));
         } catch (final ConversionWarning e) {
             warnings.add(e);
         }
     }
 
-    public static final Status toStatus(final int taskState) throws ConversionWarning {
+    public static final Status toStatus(final int index, final int taskState) throws ConversionWarning {
         Status retval = null;
         switch (taskState) {
         case Task.NOT_STARTED:
@@ -130,13 +130,13 @@ public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task
             retval = Status.VTODO_CANCELLED;
             break;
         default:
-            throw new ConversionWarning(ConversionWarning.Code.INVALID_STATUS,
+            throw new ConversionWarning(index, ConversionWarning.Code.INVALID_STATUS,
                 Integer.valueOf(taskState));
         }
         return retval;
     }
 
-    public static final int toTask(final Status status) throws ConversionWarning {
+    public static final int toTask(final int index, final Status status) throws ConversionWarning {
         int retval;
         if (Status.VTODO_NEEDS_ACTION.equals(status)) {
             retval = Task.NOT_STARTED;
@@ -147,7 +147,7 @@ public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task
         } else if (Status.VTODO_CANCELLED.equals(status)) {
             retval = Task.DEFERRED;
         } else {
-            throw new ConversionWarning(ConversionWarning.Code.INVALID_STATUS,
+            throw new ConversionWarning(index,ConversionWarning.Code.INVALID_STATUS,
                 status.getValue());
         }
         return retval;

@@ -73,11 +73,11 @@ public abstract class AbstractVerifyingAttributeConverter<T extends CalendarComp
         this.verifier = verifier;
     }
 
-    public void verify(U object, List<ConversionWarning> warnings) throws ConversionError {
+    public void verify(int index, U object, List<ConversionWarning> warnings) throws ConversionError {
         if(null == verifier) {
             return;
         }
-        this.verifier.verify(object, warnings);
+        this.verifier.verify(index, object, warnings);
     }
 
 }

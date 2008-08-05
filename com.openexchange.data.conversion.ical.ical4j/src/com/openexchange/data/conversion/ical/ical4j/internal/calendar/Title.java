@@ -84,7 +84,7 @@ public final class Title<T extends CalendarComponent, U extends CalendarObject> 
     /**
      * {@inheritDoc}
      */
-    public void emit(final U calendarObject, final T calendarComponent, List<ConversionWarning> warnings) {
+    public void emit(int index, final U calendarObject, final T calendarComponent, List<ConversionWarning> warnings, Context ctx) {
         calendarComponent.getProperties().add(new Summary(calendarObject.getTitle()));
     }
 
@@ -98,7 +98,7 @@ public final class Title<T extends CalendarComponent, U extends CalendarObject> 
     /**
      * {@inheritDoc}
      */
-    public void parse(final T calendarComponent, final U calendarObject, final TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) {
+    public void parse(int index, final T calendarComponent, final U calendarObject, final TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) {
         calendarObject.setTitle(calendarComponent.getProperty(Summary.SUMMARY).getValue());
     }
 }

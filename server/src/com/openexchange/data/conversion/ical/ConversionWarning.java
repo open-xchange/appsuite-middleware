@@ -64,14 +64,16 @@ public class ConversionWarning extends AbstractOXException {
 
     private String message;
     private Object[] args;
+    private int index;
 
     /**
      * @deprecated use {@link #ConversionWarning(Code, Object...)}.
      */
     @Deprecated
-    public ConversionWarning(String message, Object...args) {
+    public ConversionWarning(int index, String message, Object...args) {
         this.message = message;
         this.args = args;
+        this.index = index;
     }
 
     /**
@@ -82,11 +84,18 @@ public class ConversionWarning extends AbstractOXException {
         return String.format(this.message, args);
     }
 
-    public ConversionWarning(final Code code, final Object... args) {
+    public ConversionWarning(int index, final Code code, final Object... args) {
         super(EnumComponent.ICAL, code.getCategory(), code.getNumber(),
             code.getMessage(), null);
         setMessageArgs(args);
+        this.index = index;
     }
+
+
+    public int getIndex() {
+        return index;
+    }
+
 
     public enum Code {
         /**
@@ -110,7 +119,11 @@ public class ConversionWarning extends AbstractOXException {
         /**
          * Validation of calendar failed.
          */
-        VALIDATION("Validation of calendar failed.", Category.CODE_ERROR, 7);
+        VALIDATION("Validation of calendar failed.", Category.CODE_ERROR, 7),
+
+        CANT_RESOLVE_USER("Can not resolve user: %d", Category.INTERNAL_ERROR, 8),
+
+        PARSE_EXCEPTION("Parsing error parsing ical: %s", Category.USER_INPUT, 9);
 
         /**
          * Message of the exception.

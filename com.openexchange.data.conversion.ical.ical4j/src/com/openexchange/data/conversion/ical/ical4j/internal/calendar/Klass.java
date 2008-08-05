@@ -68,7 +68,7 @@ public class Klass<T extends CalendarComponent, U extends CalendarObject> extend
         return true; // Can always map
     }
 
-    public void emit(U cObj, T component, List<ConversionWarning> warnings) throws ConversionError {
+    public void emit(int index, U cObj, T component, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
         if( cObj.getPrivateFlag() ) {
             component.getProperties().add(new Clazz("private"));
         } else {
@@ -80,7 +80,7 @@ public class Klass<T extends CalendarComponent, U extends CalendarObject> extend
         return component.getProperty("CLASS") != null;
     }
 
-    public void parse(T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(int index,T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
         if(component.getProperty("CLASS") != null) {
             String clazz = component.getProperty("CLASS").getValue();
             if(clazz.equalsIgnoreCase("private")) {
@@ -88,9 +88,9 @@ public class Klass<T extends CalendarComponent, U extends CalendarObject> extend
             } else if (clazz.equalsIgnoreCase("public")) {
                 cObj.setPrivateFlag(false);
             } else if(clazz.equalsIgnoreCase("confidential")) {
-                throw new ConversionError("Cowardly refusing to convert confidential appointment");
+                throw new ConversionError(index, "Cowardly refusing to convert confidential appointment");
             } else {
-                warnings.add(new ConversionWarning("Unknown Class: %s", clazz));
+                warnings.add(new ConversionWarning(index, "Unknown Class: %s", clazz));
             }
 
         }

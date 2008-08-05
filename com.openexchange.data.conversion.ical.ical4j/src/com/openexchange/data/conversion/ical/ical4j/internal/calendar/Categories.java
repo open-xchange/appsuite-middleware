@@ -58,7 +58,6 @@ import com.openexchange.data.conversion.ical.ConversionError;
 
 import java.util.List;
 import java.util.TimeZone;
-import java.util.Date;
 import java.util.Iterator;
 
 /**
@@ -69,8 +68,12 @@ public class Categories<T extends CalendarComponent, U extends CalendarObject> e
         return calendar.containsCategories();
     }
 
-    public void emit(U u, T t, List<ConversionWarning> warnings) throws ConversionError {
-        t.getProperties().add(new net.fortuna.ical4j.model.property.Categories(u.getCategories()));
+    public void emit(int index, U u, T t, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
+        String categories = u.getCategories();
+        if(null == categories){
+            return;
+        }
+        t.getProperties().add(new net.fortuna.ical4j.model.property.Categories(categories));
     }
 
     public boolean hasProperty(T t) {
@@ -78,7 +81,7 @@ public class Categories<T extends CalendarComponent, U extends CalendarObject> e
         return categoriesList.size() > 0;
     }
 
-    public void parse(T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(int index, T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
        PropertyList categoriesList = component.getProperties("CATEGORIES");
         StringBuilder bob = new StringBuilder();
         for(int i = 0, size = categoriesList.size(); i < size; i++) {

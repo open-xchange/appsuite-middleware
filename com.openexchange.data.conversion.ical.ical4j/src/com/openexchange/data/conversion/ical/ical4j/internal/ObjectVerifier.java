@@ -10,5 +10,5 @@ import java.util.List;
  */
 public interface ObjectVerifier<T> {
 
-    public void verify(T object, List<ConversionWarning> warnings) throws ConversionError;
+    public void verify(int index, T object, List<ConversionWarning> warnings) throws ConversionError;
 }

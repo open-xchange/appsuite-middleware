@@ -53,7 +53,6 @@ import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.*;
-import net.fortuna.ical4j.model.property.ExDate;
 import net.fortuna.ical4j.model.property.Trigger;
 import net.fortuna.ical4j.model.property.Action;
 import com.openexchange.groupware.container.CalendarObject;
@@ -69,7 +68,6 @@ import com.openexchange.data.conversion.ical.ConversionError;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.Date;
-import java.util.ArrayList;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -79,13 +77,12 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
         return calendar.getAlarmFlag();
     }
 
-    public void emit(U calendar, T component, List<ConversionWarning> warnings) throws ConversionError {
+    public void emit(int index, U calendar, T component, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
         if(Task.class.isAssignableFrom(calendar.getClass())) {
             emitTaskAlarm((Task)calendar, (VToDo) component, warnings);
         }  else if ( AppointmentObject.class.isAssignableFrom(calendar.getClass())) {
             emitAppointmentAlarm((AppointmentObject)calendar, (VEvent) component, warnings);
         }
-        return; // ToDo
     }
 
     private void emitAppointmentAlarm(AppointmentObject appointmentObject, VEvent component, List<ConversionWarning> warnings) {
@@ -118,13 +115,12 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
         return true; // Not strictly true, but to inlcude the warning we have to enter #parse always
     }
 
-    public void parse(T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
-       VAlarm alarm = getAlarm(component, warnings);
+    public void parse(int index, T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+       VAlarm alarm = getAlarm(index, component, warnings);
 
         if(alarm == null) {
             return;
         }
-
 
         net.fortuna.ical4j.model.Date icaldate = alarm.getTrigger().getDateTime();
         if(null == icaldate) {
@@ -156,7 +152,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
         }
     }
 
-    private VAlarm getAlarm(Component component, List<ConversionWarning> warnings) {
+    private VAlarm getAlarm(int index, Component component, List<ConversionWarning> warnings) {
         ComponentList alarms = null;
         if(VEvent.class.isAssignableFrom(component.getClass())) {
             VEvent event = (VEvent) component;
@@ -172,10 +168,11 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
 
         for(int i = 0, size = alarms.size(); i < size; i++) {
             VAlarm alarm = (VAlarm) alarms.get(0);
-            if("DISPLAY".equalsIgnoreCase(alarm.getAction().getValue())) {
+            
+            if(null != alarm.getTrigger() && "DISPLAY".equalsIgnoreCase(alarm.getAction().getValue())) {
                 return alarm;
             }
-            warnings.add(new ConversionWarning("Can only convert DISPLAY alarms"));
+            warnings.add(new ConversionWarning(index, "Can only convert DISPLAY alarms with triggers"));
 
         }
         return null;

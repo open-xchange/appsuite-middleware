@@ -67,7 +67,7 @@ public class Duration<T extends CalendarComponent, U extends CalendarObject> ext
         return false; // Always emitting endDate
     }
 
-    public void emit(U u, T t, List<ConversionWarning> warnings) throws ConversionError {
+    public void emit(int index, U u, T t, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
         return; // Always emitting endDate
     }
 
@@ -75,7 +75,7 @@ public class Duration<T extends CalendarComponent, U extends CalendarObject> ext
         return null != t.getProperty("Duration");
     }
 
-    public void parse(T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(int index, T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
        net.fortuna.ical4j.model.property.Duration duration = (net.fortuna.ical4j.model.property.Duration) component.getProperty("Duration");
         if(duration == null) {
             return;

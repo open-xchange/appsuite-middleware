@@ -79,7 +79,7 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
     /**
      * {@inheritDoc}
      */
-    public void emit(final U calendar, final T component, List<ConversionWarning> warnings) {
+    public void emit(int index, final U calendar, final T component, List<ConversionWarning> warnings, Context ctx) {
         final DtStart start = new DtStart();
         start.setDate(toDateTime(calendar.getStartDate()));
         component.getProperties().add(start);
@@ -102,7 +102,7 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
     /**
      * {@inheritDoc}
      */
-    public void parse(final T component, final U calendar, final TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) {
+    public void parse(int index, final T component, final U calendar, final TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) {
         calendar.setStartDate(parseDate(component, new DtStart(), timeZone));
     }
 }

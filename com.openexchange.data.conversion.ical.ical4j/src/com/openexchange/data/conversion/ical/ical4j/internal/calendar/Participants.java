@@ -85,12 +85,12 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         return cObj.containsParticipants();
     }
 
-    public void emit(U cObj, T component, List<ConversionWarning> warnings) throws ConversionError {
+    public void emit(int index, U cObj, T component, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
         List<ResourceParticipant> resources = new LinkedList<ResourceParticipant>();
         for(Participant p : cObj.getParticipants()) {
             switch(p.getType()) {
                 case Participant.USER:
-                    addUserAttendee((UserParticipant)p, component);
+                    addUserAttendee(index, (UserParticipant)p, ctx, component);
                     break;
                 case Participant.EXTERNAL_USER:
                     addExternalAttendee((ExternalUserParticipant)p, component);
@@ -100,10 +100,12 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
 
             }
         }
+        if(resources.size() == 0) { return; }
         setResources(component, resources);
     }
 
     private void setResources(T component, List<ResourceParticipant> resources) {
+
         ResourceList list = new ResourceList();
         for(ResourceParticipant p : resources) { list.add(p.getDisplayName()); }
         Resources property = new Resources(list);
@@ -120,10 +122,20 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         }
     }
 
-    private void addUserAttendee(UserParticipant userParticipant, T component) {
+    private void addUserAttendee(int index, UserParticipant userParticipant, Context ctx, T component) throws ConversionError {
         Attendee attendee = new Attendee();
         try {
-            attendee.setValue("MAILTO:"+userParticipant.getEmailAddress());
+            String address = userParticipant.getEmailAddress();
+            if(address == null) {
+                try {
+                    User user = userResolver.loadUser(userParticipant.getIdentifier(), ctx);
+                    address = user.getMail();
+                } catch (LdapException e) {
+                    LOG.error(e.getMessage(), e);
+                    throw new ConversionError(index, ConversionWarning.Code.CANT_RESOLVE_USER, userParticipant.getIdentifier() );
+                }
+            }
+            attendee.setValue("MAILTO:"+ address);
             component.getProperties().add(attendee);
         } catch (URISyntaxException e) {
             LOG.error(e); // Shouldn't happen
@@ -136,7 +148,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         return properties.size() > 0 || resourcesList.size() > 0;
     }
 
-    public void parse(T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(int index, T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
         PropertyList properties = component.getProperties("ATTENDEE");
         List<String> mails = new LinkedList<String>();
 
@@ -150,11 +162,11 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         }
 
         List<User> users;
-	try {
+	    try {
             users = userResolver.findUsers(mails, ctx);
         } catch (final LdapException e) {
             // FIXME
-            throw new ConversionError("FIX ME");
+            throw new ConversionError(index, "FIX ME");
         }
 
         for(User user : users) {

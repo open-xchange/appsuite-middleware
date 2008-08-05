@@ -82,11 +82,7 @@ public class DueDate extends AbstractVerifyingAttributeConverter<VToDo, Task> {
         return false;  // EndDate only
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void emit(final Task task, final VToDo vToDo,
-        final List<ConversionWarning> warnings) throws ConversionError {
+    public void emit(int index, Task task, VToDo vToDo, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
        return; // EndDate only
     }
 
@@ -97,11 +93,7 @@ public class DueDate extends AbstractVerifyingAttributeConverter<VToDo, Task> {
         return null != vToDo.getDue();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void parse(final VToDo vToDo, final Task task, final TimeZone timeZone,
-        final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(int index, VToDo vToDo, Task task, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
         if(task.containsEndDate()) {
             return;
         }

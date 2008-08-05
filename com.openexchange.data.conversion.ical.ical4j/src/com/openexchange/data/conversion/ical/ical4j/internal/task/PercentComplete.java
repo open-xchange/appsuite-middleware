@@ -66,7 +66,7 @@ public class PercentComplete extends AbstractVerifyingAttributeConverter<VToDo, 
         return task.containsPercentComplete();
     }
 
-    public void emit(Task task, VToDo vToDo, List<ConversionWarning> warnings) throws ConversionError {
+    public void emit(int index, Task task, VToDo vToDo, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
         net.fortuna.ical4j.model.property.PercentComplete percentage = new net.fortuna.ical4j.model.property.PercentComplete(task.getPercentComplete());
         vToDo.getProperties().add(percentage);
     }
@@ -75,7 +75,7 @@ public class PercentComplete extends AbstractVerifyingAttributeConverter<VToDo, 
         return vToDo.getPercentComplete() != null;
     }
 
-    public void parse(VToDo todo, Task task, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(int index, VToDo todo, Task task, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
         if(null == todo.getPercentComplete()) {
             return;
         }

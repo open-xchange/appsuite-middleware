@@ -59,9 +59,9 @@ import java.util.List;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class RequireStartDate implements ObjectVerifier<AppointmentObject> {
-    public void verify(AppointmentObject object, List<ConversionWarning> warnings) throws ConversionError {
+    public void verify(int index, AppointmentObject object, List<ConversionWarning> warnings) throws ConversionError {
         if(!object.containsStartDate()) {
-            throw new ConversionError("Missing DTSTART");
+            throw new ConversionError(index, "Missing DTSTART");
         }
     }
 }

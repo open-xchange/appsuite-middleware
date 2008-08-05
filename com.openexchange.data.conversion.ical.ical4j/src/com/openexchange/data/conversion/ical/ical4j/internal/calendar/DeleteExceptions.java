@@ -73,8 +73,9 @@ public class DeleteExceptions<T extends CalendarComponent, U extends CalendarObj
         return calendar.containsDeleteExceptions();
     }
 
-    public void emit(U calendar, T t, List<ConversionWarning> warnings) throws ConversionError {
+    public void emit(int index, U calendar, T t, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
         Date[] dates = calendar.getDeleteException();
+        if(null == dates) { return; }
         DateList deleteExceptions = new DateList(dates.length);
         for(int i = 0, size = dates.length; i < size; i++) {
             deleteExceptions.add(EmitterTools.toDateTime(dates[i]));
@@ -92,7 +93,7 @@ public class DeleteExceptions<T extends CalendarComponent, U extends CalendarObj
         return null != t.getProperty("EXDATE");
     }
 
-    public void parse(T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(int index, T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
        PropertyList exdates = component.getProperties("EXDATE");
         for(int i = 0, size = exdates.size(); i < size; i++) {
             ExDate exdate = (ExDate) exdates.get(0);

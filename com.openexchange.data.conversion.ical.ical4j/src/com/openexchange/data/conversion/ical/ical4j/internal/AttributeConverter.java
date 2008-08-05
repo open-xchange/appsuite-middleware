@@ -72,11 +72,11 @@ public interface AttributeConverter<T extends CalendarComponent, U extends Calen
      */
     boolean isSet(U u);
 
-    void emit(U u, T t, List<ConversionWarning> warnings) throws ConversionError;
+    void emit(int index, U u, T t, List<ConversionWarning> warnings, Context ctx) throws ConversionError;
 
     boolean hasProperty(T t);
 
-    void parse(T t, U u, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError;
+    void parse(int index, T t, U u, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError;
 
-    public void verify(U object, List<ConversionWarning> warnings) throws ConversionError;
+    public void verify(int index, U object, List<ConversionWarning> warnings) throws ConversionError;
 }

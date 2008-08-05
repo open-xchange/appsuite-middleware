@@ -67,7 +67,7 @@ public class Transparency extends AbstractVerifyingAttributeConverter<VEvent, Ap
         return appointment.containsShownAs();
     }
 
-    public void emit(AppointmentObject appointment, VEvent event, List<ConversionWarning> warnings) throws ConversionError {
+    public void emit(int index, AppointmentObject appointment, VEvent event, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
         switch(appointment.getShownAs()) {
             case AppointmentObject.RESERVED :
                 event.getProperties().add(new Transp("OPAQUE"));
@@ -82,7 +82,7 @@ public class Transparency extends AbstractVerifyingAttributeConverter<VEvent, Ap
         return event.getTransparency() != null;
     }
 
-    public void parse(VEvent event, AppointmentObject appointment, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(int index, VEvent event, AppointmentObject appointment, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
         String value = event.getProperty("TRANSP").getValue().toLowerCase();
         if(value.equals("opaque"))  {
             appointment.setShownAs(AppointmentObject.RESERVED);

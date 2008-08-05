@@ -52,6 +52,8 @@ package com.openexchange.data.conversion.ical.ical4j;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -111,6 +113,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -130,14 +133,23 @@ public class ICal4JParser implements ICalParser {
         weekdays.put("SO", AppointmentObject.SUNDAY);
     }
 
+    public List<CalendarDataObject> parseAppointments(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+        try {
+            return parseAppointments(new ByteArrayInputStream(icalText.getBytes("UTF-8")), defaultTZ, ctx, errors, warnings);
+        } catch (UnsupportedEncodingException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return new LinkedList<CalendarDataObject>();
+    }
 
-    public List<AppointmentObject> parseAppointments(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) {
-        List<AppointmentObject> appointments = new ArrayList<AppointmentObject>();
-        net.fortuna.ical4j.model.Calendar calendar = parse(icalText);
+    public List<CalendarDataObject> parseAppointments(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+        List<CalendarDataObject> appointments = new ArrayList<CalendarDataObject>();
+        net.fortuna.ical4j.model.Calendar calendar = parse(ical);
+        int i = 0;
         for(Object componentObj : calendar.getComponents("VEVENT")) {
             Component vevent = (Component) componentObj;
             try {
-                appointments.add(convertAppointment( (VEvent)vevent, defaultTZ, ctx, warnings ));
+                appointments.add(convertAppointment(i++, (VEvent)vevent, defaultTZ, ctx, warnings ));
             } catch (ConversionError conversionError) {
                 errors.add(conversionError);
             }
@@ -146,13 +158,23 @@ public class ICal4JParser implements ICalParser {
         return appointments;
     }
 
-    public List<Task> parseTasks(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) {
+    public List<Task> parseTasks(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+        try {
+            return parseTasks(new ByteArrayInputStream(icalText.getBytes("UTF-8")), defaultTZ, ctx, errors, warnings);
+        } catch (UnsupportedEncodingException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return new LinkedList<Task>();
+    }
+
+    public List<Task> parseTasks(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
         List<Task> tasks = new ArrayList<Task>();
-        net.fortuna.ical4j.model.Calendar calendar = parse(icalText);
+        net.fortuna.ical4j.model.Calendar calendar = parse(ical);
+        int i = 0;
         for(Object componentObj : calendar.getComponents("VTODO")) {
             Component vtodo = (Component) componentObj;
             try {
-                tasks.add(convertTask( (VToDo) vtodo, defaultTZ, ctx, warnings ));
+                tasks.add(convertTask(i++, (VToDo) vtodo, defaultTZ, ctx, warnings ));
             } catch (ConversionError conversionError) {
                 errors.add(conversionError);
             }
@@ -162,17 +184,17 @@ public class ICal4JParser implements ICalParser {
     }
 
 
-    protected AppointmentObject convertAppointment(final VEvent vevent, TimeZone defaultTZ, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+    protected CalendarDataObject convertAppointment(int index, final VEvent vevent, TimeZone defaultTZ, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
 
-        AppointmentObject appointment = new AppointmentObject();
+        CalendarDataObject appointment = new CalendarDataObject();
 
         TimeZone tz = determineTimeZone(vevent, defaultTZ);
 
         for (final AttributeConverter<VEvent, AppointmentObject> converter : AppointmentConverters.ALL) {
             if (converter.hasProperty(vevent)) {
-                converter.parse(vevent, appointment, tz, ctx, warnings);
+                converter.parse(index, vevent, appointment, tz, ctx, warnings);
             }
-            converter.verify(appointment, warnings);
+            converter.verify(index, appointment, warnings);
         }
 
         
@@ -182,405 +204,18 @@ public class ICal4JParser implements ICalParser {
         return appointment;
     }
 
-    protected Task convertTask(VToDo vtodo, TimeZone defaultTZ, Context ctx, List<ConversionWarning> warnings) throws ConversionError{
+    protected Task convertTask(int index, VToDo vtodo, TimeZone defaultTZ, Context ctx, List<ConversionWarning> warnings) throws ConversionError{
         final TimeZone tz = determineTimeZone(vtodo, defaultTZ);
         final Task task = new Task();
         for (final AttributeConverter<VToDo, Task> converter : TaskConverters.ALL) {
             if (converter.hasProperty(vtodo)) {
-                converter.parse(vtodo, task, tz, ctx, warnings);
+                converter.parse(index, vtodo, task, tz, ctx, warnings);
             }
-            converter.verify(task, warnings);
+            converter.verify(index, task, warnings);
         }
-        setPriority(task, vtodo);
         return task;
     }
 
-    private boolean setStart(CalendarObject cObj, Component component, TimeZone tz) {
-        DtStart start = (DtStart) component.getProperty("DTSTART");
-        if(null == start) {
-            return false;
-        }
-        Date startDate = toDate(start, tz);
-        cObj.setStartDate(startDate);
-        return true;
-    }
-
-    private void setEnd(CalendarObject cObj, Component component, TimeZone tz) {
-        DtEnd end = (DtEnd) component.getProperty("DTEND");
-        if(null == end) {
-            return;
-        }
-        Date endDate = toDate(end, tz);
-        cObj.setEndDate(endDate);
-    }
-
-    private void setDueDate(Task task, Component component, TimeZone tz) {
-        Due due = (Due) component.getProperty("DUE");
-        if(null == due) {
-            return;
-        }
-        Date endDate = toDate(due, tz);
-        task.setEndDate(endDate);
-    }
-
-    private void setDateCompleted(Task task, Component  component, TimeZone tz) {
-        Completed completed = (Completed) component.getProperty("COMPLETED");
-        if(null == completed) {
-            return;
-        }
-        Date completedDate = toDate(completed,tz);
-        task.setDateCompleted(completedDate);
-    }
-
-    private void setPercentComplete(Task task, Component component) {
-        VToDo todo = (VToDo) component;
-        if(null == todo.getPercentComplete()) {
-            return;
-        }
-        int percentage = todo.getPercentComplete().getPercentage();
-        task.setPercentComplete(percentage);
-    }
-
-    private void setPriority(Task task, Component component) {
-        VToDo todo = (VToDo) component;
-        if(null == todo.getPriority()) {
-            return;
-        }
-        int priority = todo.getPriority().getLevel();
-        if(priority < 5) {
-            task.setPriority(Task.HIGH);
-            return;
-        }
-        if(priority > 5) {
-            task.setPriority(Task.LOW);
-            return;
-        }
-        task.setPriority(Task.NORMAL);
-    }
-
-    private void setStatus(Task task, Component component) {
-        VToDo todo = (VToDo) component;
-        if(null == todo.getStatus()) {
-            return;
-        }
-        String status = todo.getStatus().getValue();
-        if (status.equals("NEEDS-ACTION")) {
-            task.setStatus(Task.NOT_STARTED);
-        } else if (status.equals("IN-PROCESS")) {
-            task.setStatus(Task.IN_PROGRESS);
-        } else if (status.equals("COMPLETED")) {
-            task.setStatus(Task.DONE);
-        } else if (status.equals("CANCELLED")) {
-            task.setStatus(Task.DEFERRED);
-        }
-    }
-
-    private void applyDuration(CalendarObject cObj,Component component) {
-        Duration duration = (Duration) component.getProperty("Duration");
-        if(duration == null) {
-            return;
-        }
-        Date endDate = duration.getDuration().getTime(cObj.getStartDate());
-        cObj.setEndDate(endDate);
-    }
-
-    private void applyClass(CalendarObject cObj, Component component, List<ConversionWarning> warnings) throws ConversionError {
-        if(component.getProperty("CLASS") != null) {
-            String clazz = component.getProperty("CLASS").getValue();
-            if(clazz.equalsIgnoreCase("private")) {
-                cObj.setPrivateFlag(true);
-            } else if (clazz.equalsIgnoreCase("public")) {
-                cObj.setPrivateFlag(false);
-            } else if(clazz.equalsIgnoreCase("confidential")) {
-                throw new ConversionError("Cowardly refusing to convert confidential appointment");
-            } else {
-                warnings.add(new ConversionWarning("Unknown Class: %s", clazz));
-            }
-
-        }
-    }
-
-    private void setDescription(CalendarObject cObj, Component component) {
-        if(component.getProperty("DESCRIPTION") != null) {
-            cObj.setNote(component.getProperty("DESCRIPTION").getValue());
-        }
-    }
-
-    private void setLocation(AppointmentObject appointment, Component vevent) {
-        if(vevent.getProperty("LOCATION") != null) {
-            appointment.setLocation(vevent.getProperty("LOCATION").getValue());
-        }
-    }
-
-    private void setTitle(CalendarObject cObj, Component component) {
-        if(component.getProperty("SUMMARY") != null) {
-            cObj.setTitle(component.getProperty("SUMMARY").getValue());
-        }
-    }
-
-    private void applyTransparency(AppointmentObject appointment, Component vevent) {
-        if(vevent.getProperty("TRANSP") != null) {
-            String value = vevent.getProperty("TRANSP").getValue().toLowerCase();
-            if(value.equals("opaque"))  {
-                appointment.setShownAs(AppointmentObject.RESERVED);
-            } else if (value.equals("transparent")) {
-                appointment.setShownAs(AppointmentObject.FREE);
-            }
-        }
-    }
-
-    private void setParticipants(CalendarObject cObj, Component component, Context ctx) {
-
-        PropertyList properties = component.getProperties("ATTENDEE");
-        List<String> mails = new LinkedList<String>();
-
-        for(int i = 0, size = properties.size(); i < size; i++) {
-            Attendee attendee = (Attendee) properties.get(i);
-            URI uri = attendee.getCalAddress();
-            if("mailto".equalsIgnoreCase(uri.getScheme())) {
-                String mail = uri.getSchemeSpecificPart();
-                mails.add( mail );
-            }
-        }
-
-        List<User> users = findUsers(mails, ctx);
-
-        for(User user : users) {
-            cObj.addParticipant( new UserParticipant(user.getId()) );
-            mails.remove(user.getMail());
-        }
-
-        for(String mail : mails) {
-            ExternalUserParticipant external = new ExternalUserParticipant(mail);
-            external.setDisplayName(null);
-            cObj.addParticipant(external);
-        }
-
-        PropertyList resourcesList = component.getProperties("RESOURCES");
-        for(int i = 0, size = resourcesList.size(); i < size; i++) {
-            Resources resources = (Resources) resourcesList.get(i);
-            for(Iterator<Object> resObjects = resources.getResources().iterator(); resObjects.hasNext();) {
-                ResourceParticipant participant = new ResourceParticipant();
-                participant.setDisplayName(resObjects.next().toString());
-                cObj.addParticipant(participant);
-            }
-
-        }
-
-    }
-
-    private void setCategories(CalendarObject cObj, Component component) {
-        PropertyList categoriesList = component.getProperties("CATEGORIES");
-        StringBuilder bob = new StringBuilder();
-        for(int i = 0, size = categoriesList.size(); i < size; i++) {
-            Categories categories = (Categories) categoriesList.get(i);
-            for(Iterator<Object> catObjects = categories.getCategories().iterator(); catObjects.hasNext();) {
-                bob.append(catObjects.next()).append(",");
-            }
-        }
-        if(bob.length() > 0) {
-            bob.setLength(bob.length()-1);
-        }
-        cObj.setCategories(bob.toString());
-    }
-
-    private void setRecurrence(CalendarObject cObj, Component component, TimeZone tz, List<ConversionWarning> warnings) throws ConversionError {
-        if(null == cObj.getStartDate()) {
-            return;
-        }
-        Calendar startDate = new GregorianCalendar();
-        startDate.setTime(cObj.getStartDate());
-
-        PropertyList list = component.getProperties("RRULE");
-        if(list.isEmpty()) {
-            return;
-        }
-        if(list.size() > 1) {
-            warnings.add(new ConversionWarning("Only converting first recurrence rule, additional recurrence rules will be ignored."));
-        }
-        Recur rrule = ((RRule) list.get(0)).getRecur();
-
-        if("DAILY".equalsIgnoreCase(rrule.getFrequency())) {
-            cObj.setRecurrenceType(AppointmentObject.DAILY);
-        } else if ("WEEKLY".equalsIgnoreCase(rrule.getFrequency())) {
-            cObj.setRecurrenceType(AppointmentObject.WEEKLY);
-            setDays(cObj, rrule, startDate);
-        } else if ("MONTHLY".equalsIgnoreCase(rrule.getFrequency())) {
-            cObj.setRecurrenceType(AppointmentObject.MONTHLY);
-            setMonthDay(cObj, rrule, startDate);
-        } else if ("YEARLY".equalsIgnoreCase(rrule.getFrequency())) {
-            cObj.setRecurrenceType(AppointmentObject.YEARLY);
-            NumberList monthList = rrule.getMonthList();
-            if(!monthList.isEmpty()) {
-                cObj.setMonth((Integer)monthList.get(0) - 1);
-                setMonthDay(cObj, rrule, startDate);
-            } else {
-                cObj.setMonth(startDate.get(Calendar.MONTH));
-                setMonthDay(cObj, rrule, startDate);
-
-            }
-
-
-        } else {
-            warnings.add(new ConversionWarning("Can only convert DAILY, WEEKLY, MONTHLY and YEARLY recurrences"));
-        }
-        cObj.setInterval(rrule.getInterval());
-        int count = rrule.getCount();
-        if(-1 != count) {
-            cObj.setRecurrenceCount(rrule.getCount());
-        } else {
-            cObj.setUntil(ParserTools.recalculate(new Date(rrule.getUntil().getTime()), tz));
-        }
-
-    }
-
-    private void setMonthDay(CalendarObject cObj, Recur rrule, Calendar startDate) throws ConversionError {
-        NumberList monthDayList = rrule.getMonthDayList();
-        if(!monthDayList.isEmpty()) {
-            cObj.setDayInMonth((Integer)monthDayList.get(0));
-        } else {
-            NumberList weekNoList = rrule.getWeekNoList();
-            if(!weekNoList.isEmpty()) {
-                int week = (Integer)weekNoList.get(0);
-                if(week == -1) { week = 5; }
-                cObj.setDayInMonth(week); // Day in month stores week
-                setDays(cObj, rrule, startDate);
-            } else {
-                // Default to monthly series on specific day of month
-                cObj.setDayInMonth(startDate.get(Calendar.DAY_OF_MONTH));
-            }
-        }
-    }
-
-    private void setDays(CalendarObject cObj, Recur rrule, Calendar startDate) throws ConversionError {
-        WeekDayList weekdayList = rrule.getDayList();
-        if(!weekdayList.isEmpty()) {
-            int days = 0;
-            for(int i = 0, size = weekdayList.size(); i < size; i++) {
-                WeekDay weekday = (WeekDay) weekdayList.get(i);
-                Integer day = weekdays.get(weekday.getDay());
-                if(null == day) {
-                    throw new ConversionError("Unknown day: %s", weekday.getDay());
-                }
-                days |= day;
-            }
-            cObj.setDays(days);
-        } else {
-            int day_of_week = startDate.get(Calendar.DAY_OF_WEEK);
-            int days = -1;
-            switch(day_of_week) {
-                case Calendar.MONDAY : days = AppointmentObject.MONDAY; break;
-                case Calendar.TUESDAY : days = AppointmentObject.TUESDAY; break;
-                case Calendar.WEDNESDAY : days = AppointmentObject.WEDNESDAY; break;
-                case Calendar.THURSDAY : days = AppointmentObject.THURSDAY; break;
-                case Calendar.FRIDAY : days = AppointmentObject.FRIDAY; break;
-                case Calendar.SATURDAY : days = AppointmentObject.SATURDAY; break;
-                case Calendar.SUNDAY : days = AppointmentObject.SUNDAY; break;
-            }
-            cObj.setDays(days);
-        }
-    }
-
-    private void setDeleteExceptions(CalendarObject cObj, Component component, TimeZone tz) {
-        PropertyList exdates = component.getProperties("EXDATE");
-        for(int i = 0, size = exdates.size(); i < size; i++) {
-            ExDate exdate = (ExDate) exdates.get(0);
-
-            DateList dates = exdate.getDates();
-            for(int j = 0, size2 = dates.size(); j < size2; j++) {
-                net.fortuna.ical4j.model.Date icaldate = (net.fortuna.ical4j.model.Date) dates.get(j);
-                Date date = recalculateAsNeeded(icaldate, exdate, tz);
-                cObj.addDeleteException(date);
-            }
-        }
-    }
-
-    private Date recalculateAsNeeded(net.fortuna.ical4j.model.Date icaldate, Property property, TimeZone tz) {
-        boolean mustRecalculate = true;
-        if(property.getParameter("TZID") != null) {
-            mustRecalculate = false;
-        } else if(DateTime.class.isAssignableFrom(icaldate.getClass())) {
-            DateTime dateTime = (DateTime) icaldate;
-            mustRecalculate = !dateTime.isUtc();
-        }
-        if(mustRecalculate) {
-            return ParserTools.recalculate(icaldate, tz);
-        }
-        return new Date(icaldate.getTime());
-    }
-
-    private void setAlarm(CalendarObject cObj, Component component, TimeZone tz, List<ConversionWarning> warnings) {
-
-        VAlarm alarm = getAlarm(component, warnings);
-
-        if(alarm == null) {
-            return;
-        }
-
-
-        net.fortuna.ical4j.model.Date icaldate = alarm.getTrigger().getDateTime();
-        if(null == icaldate) {
-            icaldate = alarm.getTrigger().getDate();
-        }
-
-        Date remindOn = null;
-
-        if(null != icaldate) {
-            remindOn = recalculateAsNeeded(icaldate, alarm.getTrigger(), tz);
-        } else {
-            Dur duration = alarm.getTrigger().getDuration();
-            if(!duration.isNegative()) {
-                return;
-            }
-            remindOn = duration.getTime(cObj.getStartDate());
-        }
-
-        int delta = (int) (cObj.getStartDate().getTime() - remindOn.getTime());
-
-        if(AppointmentObject.class.isAssignableFrom(cObj.getClass())) {
-            final AppointmentObject appObj = (AppointmentObject) cObj;
-            appObj.setAlarm(delta);
-            appObj.setAlarmFlag(true); // bugfix: 7473
-        } else {
-            final Task taskObj = (Task) cObj;
-            taskObj.setAlarm(new Date(taskObj.getStartDate().getTime() - delta));
-            taskObj.setAlarmFlag(true); // bugfix: 7473
-        }
-
-    }
-
-    private VAlarm getAlarm(Component component, List<ConversionWarning> warnings) {
-        ComponentList alarms = null;
-        if(VEvent.class.isAssignableFrom(component.getClass())) {
-            VEvent event = (VEvent) component;
-            alarms = event.getAlarms();
-        } else if (VToDo.class.isAssignableFrom(component.getClass())) {
-            VToDo todo = (VToDo) component;
-            alarms = todo.getAlarms();
-        }
-
-        if(alarms.size() == 0) {
-            return null;
-        }
-
-        for(int i = 0, size = alarms.size(); i < size; i++) {
-            VAlarm alarm = (VAlarm) alarms.get(0);
-            if("DISPLAY".equalsIgnoreCase(alarm.getAction().getValue())) {
-                return alarm;
-            }
-            warnings.add(new ConversionWarning("Can only convert DISPLAY alarms"));
-
-        }
-        return null;
-     }
-
-    private Date toDate(DateProperty dateProperty, TimeZone tz) {
-        Date date = new Date(dateProperty.getDate().getTime());
-        if (ParserTools.inDefaultTimeZone(dateProperty, tz)) {
-            date = ParserTools.recalculate(date, tz);
-        }
-        return date;
-    }
 
     private static final TimeZone determineTimeZone(final CalendarComponent component,
         final TimeZone defaultTZ) throws ConversionError {
@@ -614,24 +249,20 @@ public class ICal4JParser implements ICalParser {
             return "UTC";
         }
         return tz.getID();
-    }                                                                                                                                           
+    }
 
-    private net.fortuna.ical4j.model.Calendar parse(String icalText) {
+    private net.fortuna.ical4j.model.Calendar parse(InputStream icalText) throws ConversionError {
         CalendarBuilder builder = new CalendarBuilder();
-        
+
         try {
-            return builder.build(new ByteArrayInputStream(icalText.getBytes("UTF-8"))); // FIXME: Encoding!
+            return builder.build(icalText); // FIXME: Encoding!
         } catch (IOException e) {
             //IGNORE
         } catch (ParserException e) {
-            System.out.println(icalText);
-            e.printStackTrace();
-            //TODO: Rethrow
+            LOG.warn(e.getMessage(), e);
+            throw new ConversionError(-1, ConversionWarning.Code.PARSE_EXCEPTION, e.getMessage());
         }
         return null;
     }
-    
-    protected List<User> findUsers(List<String> mails, Context ctx) {
-        return null; // TODO
-    }
+
 }

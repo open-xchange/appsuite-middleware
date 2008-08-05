@@ -66,7 +66,7 @@ public class Priority extends AbstractVerifyingAttributeConverter<VToDo, Task> {
         return task.containsPriority();
     }
 
-    public void emit(Task task, VToDo vToDo, List<ConversionWarning> warnings) throws ConversionError {
+    public void emit(int index, Task task, VToDo vToDo, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
         int icalPrio = 0;
         switch(task.getPriority()) {
             case Task.HIGH :
@@ -76,7 +76,7 @@ public class Priority extends AbstractVerifyingAttributeConverter<VToDo, Task> {
             case Task.LOW :
                 icalPrio = 9; break;
             default:
-                warnings.add(new ConversionWarning(ConversionWarning.Code.INVALID_PRIORITY,task.getPriority()));
+                warnings.add(new ConversionWarning(index, ConversionWarning.Code.INVALID_PRIORITY,task.getPriority()));
         }
         net.fortuna.ical4j.model.property.Priority prio = new net.fortuna.ical4j.model.property.Priority(icalPrio);
         vToDo.getProperties().add(prio);
@@ -86,7 +86,7 @@ public class Priority extends AbstractVerifyingAttributeConverter<VToDo, Task> {
         return vToDo.getPriority() != null;
     }
 
-    public void parse(VToDo todo, Task task, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(int index, VToDo todo, Task task, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
         if(null == todo.getPriority()) {
             return;
         }
