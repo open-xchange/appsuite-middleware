@@ -60,6 +60,7 @@ import com.openexchange.data.conversion.ical.ICalSession;
 public final class ICal4jSession implements ICalSession {
 
     private final Calendar calendar = new Calendar();
+    private int index;
 
     /**
      * Default constructor.
@@ -73,5 +74,13 @@ public final class ICal4jSession implements ICalSession {
      */
     public Calendar getCalendar() {
         return calendar;
+    }
+
+    /**
+     * Counts the number of elements already parsed for error messages
+     * @return
+     */
+    public int getAndIncreaseIndex() {
+        return index++;
     }
 }

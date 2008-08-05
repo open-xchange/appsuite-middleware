@@ -88,14 +88,14 @@ public final class Uid<T extends CalendarComponent, U extends CalendarObject> ex
     /**
      * {@inheritDoc}
      */
-    public void emit(final U calendar, final T component,
-        final List<ConversionWarning> warnings) throws ConversionError {
+    public void emit(int index, final U calendar, final T component,
+        final List<ConversionWarning> warnings, Context ctx) throws ConversionError {
         final UidGenerator generator;
         try {
             generator = new UidGenerator(String.valueOf(Thread.currentThread().getId()));
         } catch (final SocketException e) {
             LOG.error(e.getMessage(), e);
-            throw new ConversionError(Code.CANT_GENERATE_UID, e);
+            throw new ConversionError(index, Code.CANT_GENERATE_UID, e);
         }
         component.getProperties().add(generator.generateUid());
     }
@@ -114,7 +114,7 @@ public final class Uid<T extends CalendarComponent, U extends CalendarObject> ex
         return false;
     }
 
-    public void parse(final T component, final U calendar, final TimeZone timeZone,
+    public void parse(int index, final T component, final U calendar, final TimeZone timeZone,
         final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         // Nothing to parse.
     }
