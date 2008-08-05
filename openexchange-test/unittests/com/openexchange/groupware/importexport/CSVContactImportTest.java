@@ -67,6 +67,7 @@ import org.junit.Test;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.ContactObject;
@@ -263,7 +264,7 @@ public class CSVContactImportTest extends AbstractContactTest {
 		
 		tempRes = results2.get(0);
 		assertTrue("Attempt 2 has error", tempRes.hasError());
-		OXException exc = tempRes.getException();
+		AbstractOXException exc = tempRes.getException();
 		assertEquals("Malformed date?" , malformedDate, exc.getErrorCode());
 		
 		tempRes = results3.get(0);
@@ -292,7 +293,7 @@ public class CSVContactImportTest extends AbstractContactTest {
 		final List<ImportResult> results = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + "," + ContactField.SUFFIX.getReadableName() + "\nAli, Hadschi Halef Omar, Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah");
 		assertEquals("One result?" , 1, results.size());
 		final ImportResult res = results.get(0);
-		final OXException exc = res.getException();
+		final AbstractOXException exc = res.getException();
 		assertEquals("Category correct?" , exc.getCategory(), Category.TRUNCATED);
 		assertEquals("Fields correct?" ,  ContactField.SUFFIX.getReadableName() , exc.getMessageArgs()[0]);
 	}

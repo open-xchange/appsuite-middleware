@@ -62,6 +62,7 @@ import org.junit.Test;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -122,7 +123,7 @@ public class Bug7732Test extends AbstractICalImportTest {
 			"END:VCALENDAR";
 		final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7732-b", ctx, true);
 		assertTrue(res.hasError());
-		final OXException x = res.getException();
+		final AbstractOXException x = res.getException();
 		x.printStackTrace();
 		
 		assertEquals("RRULE without DTSTART", x.getMessageArgs()[0]);

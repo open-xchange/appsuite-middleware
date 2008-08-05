@@ -66,6 +66,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.ContactObject;
@@ -90,7 +91,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(vcard.getBytes("UTF-8")), folders, null);
 		assertEquals("One import?" , 1 , results.size());
 		assertTrue("Should have an error" , results.get(0).hasError() );
-		final OXException e = results.get(0).getException();
+		final AbstractOXException e = results.get(0).getException();
 		assertEquals("Should be truncation error" , Category.TRUNCATED , e.getCategory());
 		assertEquals("GIVEN NAME was too long" , ContactField.SUR_NAME.getVCardElementName() , e.getMessageArgs()[0]);
 	}

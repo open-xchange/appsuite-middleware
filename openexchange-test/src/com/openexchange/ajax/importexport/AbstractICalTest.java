@@ -1,7 +1,58 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
 package com.openexchange.ajax.importexport;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -11,7 +62,9 @@ import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
@@ -23,6 +76,13 @@ import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.config.ConfigTools;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.CommonFields;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.importexport.actions.ICalImportRequest;
+import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -36,6 +96,7 @@ import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
+import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -112,83 +173,59 @@ public class AbstractICalTest extends AbstractAJAXTest {
         ctx = null; // FIXME
     }
 	
-	public static ImportResult[] importICal(final WebConversation webCon, final AppointmentObject[] appointmentObj, final int folderId, final TimeZone timeZone, final String emailaddress, final String host, final String session) throws Exception, TestException {
-		return importICal(webCon, appointmentObj, null, folderId, -1, timeZone, emailaddress, host, session);
+	public static ImportResult[] importICal(final WebConversation webCon,
+	    final AppointmentObject[] appointments, final int folderId, final String host,
+	    final String session) throws ConversionError, AjaxException, IOException,
+	    SAXException, JSONException {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final ICalEmitter emitter = new ICal4JEmitter();
+        final ICalSession icalSession = emitter.createSession();
+        for (int a = 0; a < appointments.length; a++) {
+            emitter.writeAppointment(icalSession, appointments[a], null,
+                new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+        }
+        emitter.writeSession(icalSession, baos);
+        final ByteArrayInputStream input = new ByteArrayInputStream(baos.toByteArray());
+        return importICal(webCon, input, folderId, host, session);
 	}
 	
-	public static ImportResult[] importICal(final WebConversation webCon, final Task[] taskObj, final int folderId, final TimeZone timeZone, final String emailaddress, final String host, final String session) throws Exception, TestException {
-		return importICal(webCon, null, taskObj, -1, folderId, timeZone, emailaddress, host, session);
-	}
-	
-	public static ImportResult[] importICal(final WebConversation webCon, final AppointmentObject[] appointmentObj, final Task[] taskObj, final int appointmentFolderId, final int taskFolderId, final TimeZone timeZone, final String emailaddress, String host, final String session) throws Exception, TestException {
-		host = appendPrefix(host);
-		
-		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		
-		ICalEmitter emitter = new ICal4JEmitter();
-		ICalSession icalSession = emitter.createSession();
-		if (appointmentObj != null) {
-			for (int a = 0; a < appointmentObj.length; a++) {
-				emitter.writeAppointment(icalSession, appointmentObj[a], null, new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
-			}
-		}
-		
-		if (taskObj != null) {
-			for (int a = 0; a < taskObj.length; a++) {
-				emitter.writeTask(icalSession, taskObj[a], null, new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
-			}
-		}
-		
-		emitter.writeSession(icalSession, byteArrayOutputStream);
-		
-		return importICal(webCon, new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), appointmentFolderId, taskFolderId, timeZone, emailaddress, host, session);
+	public static ImportResult[] importICal(final WebConversation webCon,
+	    final Task[] tasks, final int folderId, final String host,
+	    final String session) throws AjaxException, IOException, SAXException,
+	    JSONException, ConversionError {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final ICalEmitter emitter = new ICal4JEmitter();
+        final ICalSession icalSession = emitter.createSession();
+        for (int a = 0; a < tasks.length; a++) {
+            emitter.writeTask(icalSession, tasks[a], null,
+                new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+        }
+        emitter.writeSession(icalSession, baos);
+        final ByteArrayInputStream input = new ByteArrayInputStream(baos.toByteArray());
+        return importICal(webCon, input, folderId, host, session);
 	}
 		
-	public static ImportResult[] importICal(final WebConversation webCon, final ByteArrayInputStream byteArrayInputStream, final int appointmentFolderId, final int taskFolderId, final TimeZone timeZone, final String emailaddress, String host, final String session) throws Exception, TestException {
-		host = appendPrefix(host);
-		
-		final URLParameter parameter = new URLParameter(true);
-		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, Format.ICAL.getConstantName());
-		if (appointmentFolderId != -1) {
-			parameter.setParameter("folder", appointmentFolderId);
+	public static ImportResult[] importICal(final WebConversation webCon,
+        final InputStream input, final int folderId, final String host,
+        final String session) throws AjaxException, IOException, SAXException,
+        JSONException {
+	    final AJAXSession aSession = new AJAXSession(webCon, session);
+	    final ICalImportRequest request = new ICalImportRequest(folderId, input);
+	    final ICalImportResponse iResponse = Executor.execute(aSession, request, host);
+	    final Response[] responses = iResponse.getImports();
+		final ImportResult[] importResult = new ImportResult[responses.length];
+		for (int i = 0; i < responses.length; i++) {
+		    if (responses[i].hasError()) {
+		        importResult[i] = new ImportResult();
+		        importResult[i].setException(responses[i].getException());
+		    } else {
+		        final JSONObject jsonObj = responses[i].getJSON();
+                final String objectId = jsonObj.getString(DataFields.ID);
+                final String folder = jsonObj.getString(CommonFields.FOLDER_ID);
+                final long timestamp = jsonObj.getLong(DataFields.LAST_MODIFIED);
+                importResult[i] = new ImportResult(objectId, folder, timestamp);
+		    }
 		}
-		
-		if (taskFolderId != -1) {
-			parameter.setParameter("folder", taskFolderId);
-		}
-		
-		final WebRequest req = new PostMethodWebRequest(host + "/ajax/import" + parameter.getURLParameters());
-		
-		((PostMethodWebRequest)req).setMimeEncoded(true);
-		req.selectFile("file", "ical-test.ics", byteArrayInputStream, Format.ICAL.getMimeType());
-		
-		final WebResponse resp = webCon.getResource(req);
-		
-		assertEquals(200, resp.getResponseCode());
-		
-		final JSONObject response = extractFromCallback( resp.getText() );
-		
-		final JSONArray jsonArray = response.getJSONArray("data");
-		
-		assertNotNull("json array in response is null", jsonArray);
-		
-		final ImportResult[] importResult = new ImportResult[jsonArray.length()];
-		for (int a = 0; a < jsonArray.length(); a++) {
-			final JSONObject jsonObj = jsonArray.getJSONObject(a);
-			
-			if (jsonObj.has("error")) {
-				importResult[a] = new ImportResult();
-				importResult[a].setException(new OXException( jsonObj.getString("error")));
-			} else {
-                final String objectId = jsonObj.getString("id");
-				final String folder = jsonObj.getString("folder_id");
-				final long timestamp = jsonObj.getLong("last_modified");
-			
-				importResult[a] = new ImportResult(objectId, folder, timestamp);
-			} 
-		}
-		
 		return importResult;
 	}
 	

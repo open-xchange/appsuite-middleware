@@ -67,6 +67,7 @@ import org.junit.Test;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.ContactObject;
@@ -167,7 +168,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		assertEquals("One result?" , 1, results.size());
 		final ImportResult res = results.get(0);
 		assertTrue("Has error" , res.hasError());
-		final OXException dirk = res.getException();
+		final AbstractOXException dirk = res.getException();
 		assertEquals("Is truncation error?" , Category.TRUNCATED , dirk.getCategory());
 		assertEquals("GIVEN_NAME is too long?" , ContactField.GIVEN_NAME.getEnglishOutlookName() , dirk.getMessageArgs()[0]);
 	}

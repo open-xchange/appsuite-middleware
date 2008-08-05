@@ -55,13 +55,14 @@ import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.importexport.Format;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractImportRequest implements AJAXRequest {
+public abstract class AbstractImportRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     /**
      * URL of the tasks AJAX interface.
