@@ -883,23 +883,23 @@ class CalendarMySQL implements CalendarSqlImp {
 		return ret;
 	}
 
-	private final void getRange(final StringBuilder sb) {
+	private static final void getRange(final StringBuilder sb) {
 		sb.append(" pd.timestampfield01 <= ? AND pd.timestampfield02 > ?");
 	}
 
-	private final void getConflictRange(final StringBuilder sb) {
+	private static final void getConflictRange(final StringBuilder sb) {
 		sb.append(" pd.timestampfield01 < ? AND pd.timestampfield02 > ?");
 	}
 
-	private final void getConflictRangeFullTime(final StringBuilder sb) {
+	private static final void getConflictRangeFullTime(final StringBuilder sb) {
 		sb.append(" intfield07 = 1 AND pd.timestampfield01 < ? AND pd.timestampfield02 > ?");
 	}
 
-	private final void getSince(final StringBuilder sb) {
+	private static final void getSince(final StringBuilder sb) {
 		sb.append(" pd.changing_date >= ?");
 	}
 
-	private final String parseSelect(final String select) {
+	private static final String parseSelect(final String select) {
 		if (select != null) {
 			return select;
 		}
