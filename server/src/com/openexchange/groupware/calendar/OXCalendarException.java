@@ -131,9 +131,15 @@ public class OXCalendarException extends OXException {
         RECURRING_MISSING_START_DATE("Missing start date, unable to calculate recurring!", 39, AbstractOXException.Category.CODE_ERROR),
         RECURRING_MISSING_DAILY_INTERVAL("Fatal error. (DAILY) Missing or wrong Interval value: %d", 40, AbstractOXException.Category.USER_INPUT),
         RECURRING_MISSING_WEEKLY_INTERVAL("Fatal error. (WEEKLY) Missing or wrong Interval value: %d", 41, AbstractOXException.Category.USER_INPUT),
+        /**
+         * Fatal error. (MONTHLY) Missing or wrong value DayInMonth : %d
+         */
         RECURRING_MISSING_MONTLY_INTERVAL("Fatal error. (MONTHLY) Missing or wrong value DayInMonth : %d", 42, AbstractOXException.Category.USER_INPUT),
         RECURRING_MISSING_MONTLY_INTERVAL_2("Fatal error. (MONTHLY) Missing or wrong value Month : %d", 43, AbstractOXException.Category.USER_INPUT),
         RECURRING_MISSING_MONTLY_DAY("Fatal error. (MONTHLY2) Missing or wrong Day value: %d", 44, AbstractOXException.Category.USER_INPUT),
+        /**
+         * Fatal error. (MONTHLY2) Missing or wrong DayInMonth value: %d
+         */
         RECURRING_MISSING_MONTLY_DAY_2("Fatal error. (MONTHLY2) Missing or wrong DayInMonth value: %d", 45, AbstractOXException.Category.USER_INPUT),
         RECURRING_MISSING_YEARLY_INTERVAL("Fatal error. (YEARLY) Missing or wrong value DayInMonth : %d", 46, AbstractOXException.Category.USER_INPUT),
         RECURRING_MISSING_YEARLY_DAY("Fatal error. (YEARLY2) Missing or wrong value day : %d", 47, AbstractOXException.Category.USER_INPUT),
