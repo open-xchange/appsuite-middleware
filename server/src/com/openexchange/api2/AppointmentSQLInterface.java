@@ -123,7 +123,7 @@ public interface AppointmentSQLInterface {
 	 * @return A SearchIterator contains AppointmentObject
 	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
 	 */	 
-	public SearchIterator<CalendarDataObject> getModifiedAppointmentsInFolder(int fid, int[] cols, Date since, boolean includePrivateFlag) throws OXException, SQLException;
+	public SearchIterator<CalendarDataObject> getModifiedAppointmentsInFolder(int fid, int[] cols, Date since, boolean includePrivateFlag) throws OXException;
 	
 	/**
 	 * Lists all modified objects where the user is participant 

@@ -81,7 +81,6 @@ import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
-import com.openexchange.data.conversion.ical.ICalItem;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
@@ -95,19 +94,23 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.versit.Property;
@@ -227,17 +230,21 @@ public final class ical extends PermissionServlet {
             final String principalS = user_agent + '_' + sessionObj.getUserId();
             Principal principal = loadPrincipal(context, principalS);
 
-            final Mapping mapping;
-            final Map<String, Integer> entriesApp = new HashMap<String, Integer>();
-            final Map<String, Integer> entriesTask = new HashMap<String, Integer>();
-            if (null != principal) {
-                mapping = loadDBEntriesNew(context, principal);
-            } else {
-                mapping = new Mapping();
-            }
+//            final Mapping mapping;
+//            final Map<String, Integer> entriesApp = new HashMap<String, Integer>();
+//            final Map<String, Integer> entriesTask = new HashMap<String, Integer>();
+//            if (null != principal) {
+//                mapping = loadDBEntriesNew(context, principal);
+//            } else {
+//                mapping = new Mapping();
+//            }
 
             final ICalEmitter emitter = ServerServiceRegistry.getInstance()
                 .getService(ICalEmitter.class);
+            if (null == emitter) {
+                throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
+                    ICalEmitter.class.getName());
+            }
             final ICalSession iSession = emitter.createSession();
             final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
             final List<ConversionError> errors = new ArrayList<ConversionError>();
@@ -250,20 +257,32 @@ public final class ical extends PermissionServlet {
                 while (itApp.hasNext()) {
                     final AppointmentObject appointment = itApp.next();
                     appointment.setTimezone(user.getTimeZone());
-                    final ICalItem item = emitter.writeAppointment(iSession,
-                        appointment, context, errors, warnings);
-                    final int appId = appointment.getObjectID();
-                    String clientId = mapping.getClientAppId(appId); 
-                    if (null == clientId) {
-                        clientId = item.getUID();
-                        entriesApp.put(clientId, Integer.valueOf(appId));
-                    } else {
-                        item.setUID(clientId);
-                    }
+                    emitter.writeAppointment(iSession, appointment, context,
+                        errors, warnings);
+//                    final ICalItem item = emitter.writeAppointment(iSession,
+//                        appointment, context, errors, warnings);
+//                    final int appId = appointment.getObjectID();
+//                    String clientId = mapping.getClientAppId(appId); 
+//                    if (null == clientId) {
+//                        clientId = item.getUID();
+//                        entriesApp.put(clientId, Integer.valueOf(appId));
+//                    } else {
+//                        item.setUID(clientId);
+//                    }
                 }
+            } catch (final SearchIteratorException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final ConversionError e) {
+                LOG.error(e.getMessage(), e);
             } finally {
                 if (null != itApp) {
-                    itApp.close();
+                    try {
+                        itApp.close();
+                    } catch (final SearchIteratorException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
                 }
             }
             final TasksSQLInterface taskInterface = new TasksSQLInterfaceImpl(sessionObj);
@@ -272,26 +291,41 @@ public final class ical extends PermissionServlet {
                 itTask = taskInterface.getModifiedTasksInFolder(taskfolderId, _taskFields, new Date(0));
                 while (itTask.hasNext()) {
                     final Task task = itTask.next();
-                    final ICalItem item = emitter.writeTask(iSession, task,
-                        context, errors, warnings);
-                    final int taskId = task.getObjectID();
-                    String clientId = mapping.getClientTaskId(taskId);
-                    if (null == clientId) {
-                        clientId = item.getUID();
-                        entriesTask.put(clientId, Integer.valueOf(taskId));
-                    } else {
-                        item.setUID(clientId);
-                    }
+                    emitter.writeTask(iSession, task, context, errors, warnings);
+//                    final ICalItem item = emitter.writeTask(iSession, task,
+//                        context, errors, warnings);
+//                    final int taskId = task.getObjectID();
+//                    String clientId = mapping.getClientTaskId(taskId);
+//                    if (null == clientId) {
+//                        clientId = item.getUID();
+//                        entriesTask.put(clientId, Integer.valueOf(taskId));
+//                    } else {
+//                        item.setUID(clientId);
+//                    }
                 }
+            } catch (final SearchIteratorException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final ConversionError e) {
+                LOG.error(e.getMessage(), e);
             } finally {
                 if (null != itTask) {
-                    itTask.close();
+                    try {
+                        itTask.close();
+                    } catch (final SearchIteratorException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
                 }
             }
 
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType("text/calendar");
-            emitter.writeSession(iSession, resp.getOutputStream());
+            try {
+                emitter.writeSession(iSession, resp.getOutputStream());
+            } catch (final ConversionError e) {
+                LOG.error(e.getMessage(), e);
+            }
 
             if (null != principal) {
                 if (principal.getCalendarFolder() != calendarfolderId
@@ -304,14 +338,23 @@ public final class ical extends PermissionServlet {
                 principal = new Principal(0, principalS, calendarfolderId, taskfolderId);
                 insertPrincipal(context, principal);
             }
-            addEntries(context, principal, entriesApp, entriesTask);
-            deleteEntries(context, principal, mapping, entriesApp, entriesTask);
-        } catch (final OXConflictException exc) {
-            LOG.debug("ical.doGet", exc);
-            doError(resp, HttpServletResponse.SC_CONFLICT, exc.getMessage());
-        } catch (final Exception exc) {
-            LOG.error("ical.doGet", exc);
-            doError(resp);
+//            addEntries(context, principal, entriesApp, entriesTask);
+//            deleteEntries(context, principal, mapping, entriesApp, entriesTask);
+        } catch (final ContextException e) {
+            LOG.error(e.getMessage(), e);
+            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (final LdapException e) {
+            LOG.error(e.getMessage(), e);
+            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (final ServiceException e) {
+            LOG.error(e.getMessage(), e);
+            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (final OXConflictException e) {
+            LOG.error(e.getMessage(), e);
+            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 

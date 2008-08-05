@@ -248,7 +248,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 		throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
     }
     
-    public SearchIterator<CalendarDataObject> getModifiedAppointmentsInFolder(final int fid, final Date start, final Date end, int[] cols, final Date since, final boolean includePrivateFlag) throws OXException, SQLException {
+    public SearchIterator<CalendarDataObject> getModifiedAppointmentsInFolder(final int fid, final Date start, final Date end, int[] cols, final Date since, final boolean includePrivateFlag) throws OXException {
         if (session != null) {
             Connection readcon = null;
             PreparedStatement prep = null;
@@ -328,11 +328,11 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
-    public SearchIterator<CalendarDataObject> getModifiedAppointmentsInFolder(final int fid, final int cols[], final Date since, final boolean includePrivateFlag) throws OXException, SQLException {
+    public SearchIterator<CalendarDataObject> getModifiedAppointmentsInFolder(final int fid, final int cols[], final Date since, final boolean includePrivateFlag) throws OXException {
         return getModifiedAppointmentsInFolder(fid, null, null, cols, since, includePrivateFlag);
     }
     
-    public SearchIterator<CalendarDataObject> getDeletedAppointmentsInFolder(final int fid, int cols[], final Date since) throws OXException, SQLException {
+    public SearchIterator<CalendarDataObject> getDeletedAppointmentsInFolder(final int fid, int cols[], final Date since) throws OXException {
         if (session != null) {
             Connection readcon = null;
             PreparedStatement prep = null;
