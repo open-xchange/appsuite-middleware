@@ -168,7 +168,7 @@ public final class Mapping {
             }
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
-                stmt.setBoolean(pos, get(task));
+                stmt.setBoolean(pos, task.getPrivateFlag());
             }
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
@@ -179,10 +179,10 @@ public final class Mapping {
                 return task1.getPrivateFlag() == task2.getPrivateFlag();
             }
             public Boolean get(final Task task) {
-                return task.getPrivateFlag();
+                return Boolean.valueOf(task.getPrivateFlag());
             }
             public void set(final Task task, final Boolean value) {
-                task.setPrivateFlag(value);
+                task.setPrivateFlag(value.booleanValue());
             }
         },
         new Mapper<Date>() {
@@ -269,10 +269,10 @@ public final class Mapping {
                 return task1.getCreatedBy() == task2.getCreatedBy();
             }
             public Integer get(final Task task) {
-                return task.getCreatedBy();
+                return Integer.valueOf(task.getCreatedBy());
             }
             public void set(final Task task, final Integer value) {
-                task.setCreatedBy(value);
+                task.setCreatedBy(value.intValue());
             }
         },
         new Mapper<Integer>() {
@@ -300,10 +300,10 @@ public final class Mapping {
                 return task1.getModifiedBy() == task2.getModifiedBy();
             }
             public Integer get(final Task task) {
-                return task.getModifiedBy();
+                return Integer.valueOf(task.getModifiedBy());
             }
             public void set(final Task task, final Integer value) {
-                task.setModifiedBy(value);
+                task.setModifiedBy(value.intValue());
             }
         },
         new Mapper<Date>() {
@@ -512,10 +512,10 @@ public final class Mapping {
                 return task1.getPriority() == task2.getPriority();
             }
             public Integer get(final Task task) {
-                return task.getPriority();
+                return Integer.valueOf(task.getPriority());
             }
             public void set(final Task task, final Integer value) {
-                task.setPriority(value);
+                task.setPriority(value.intValue());
             }
         },
         new Mapper<Integer>() {
@@ -543,10 +543,10 @@ public final class Mapping {
                 return task1.getPercentComplete() == task2.getPercentComplete();
             }
             public Integer get(final Task task) {
-                return task.getPercentComplete();
+                return Integer.valueOf(task.getPercentComplete());
             }
             public void set(final Task task, final Integer value) {
-                task.setPercentComplete(value);
+                task.setPercentComplete(value.intValue());
             }
         },
         new Mapper<String>() {
@@ -610,10 +610,10 @@ public final class Mapping {
                 return task1.getProjectID() == task2.getProjectID();
             }
             public Integer get(final Task task) {
-                return task.getProjectID();
+                return Integer.valueOf(task.getProjectID());
             }
             public void set(final Task task, final Integer value) {
-                task.setProjectID(value);
+                task.setProjectID(value.intValue());
             }
         },
         new Mapper<Long>() {
@@ -641,10 +641,10 @@ public final class Mapping {
                 return task1.getTargetDuration() == task2.getTargetDuration();
             }
             public Long get(final Task task) {
-                return task.getTargetDuration();
+                return Long.valueOf(task.getTargetDuration());
             }
             public void set(final Task task, final Long value) {
-                task.setTargetDuration(value);
+                task.setTargetDuration(value.longValue());
             }
         },
         new Mapper<Long>() {
@@ -672,10 +672,10 @@ public final class Mapping {
                 return task1.getActualDuration() == task2.getActualDuration();
             }
             public Long get(final Task task) {
-                return task.getActualDuration();
+                return Long.valueOf(task.getActualDuration());
             }
             public void set(final Task task, final Long value) {
-                task.setActualDuration(value);
+                task.setActualDuration(value.longValue());
             }
         },
         new Mapper<Float>() {
@@ -703,10 +703,10 @@ public final class Mapping {
                 return task1.getTargetCosts() == task2.getTargetCosts();
             }
             public Float get(final Task task) {
-                return task.getTargetCosts();
+                return Float.valueOf(task.getTargetCosts());
             }
             public void set(final Task task, final Float value) {
-                task.setTargetCosts(value);
+                task.setTargetCosts(value.floatValue());
             }
         },
         new Mapper<Float>() {
@@ -734,10 +734,10 @@ public final class Mapping {
                 return task1.getActualCosts() == task2.getActualCosts();
             }
             public Float get(final Task task) {
-                return task.getActualCosts();
+                return Float.valueOf(task.getActualCosts());
             }
             public void set(final Task task, final Float value) {
-                task.setActualCosts(value);
+                task.setActualCosts(value.floatValue());
             }
         },
         new Mapper<String>() {
@@ -909,10 +909,10 @@ public final class Mapping {
                 return task1.getLabel() == task2.getLabel();
             }
             public Integer get(final Task task) {
-                return task.getLabel();
+                return Integer.valueOf(task.getLabel());
             }
             public void set(final Task task, final Integer value) {
-                task.setLabel(value);
+                task.setLabel(value.intValue());
             }
         },
         new Mapper<Integer>() {
@@ -938,10 +938,10 @@ public final class Mapping {
                 return task1.getRecurrenceType() == task2.getRecurrenceType();
             }
             public Integer get(final Task task) {
-                return task.getRecurrenceType();
+                return Integer.valueOf(task.getRecurrenceType());
             }
             public void set(final Task task, final Integer value) {
-                task.setRecurrenceType(value);
+                task.setRecurrenceType(value.intValue());
             }
         },
         new Mapper<Integer>() {
@@ -969,10 +969,10 @@ public final class Mapping {
                 return task1.getInterval() == task2.getInterval();
             }
             public Integer get(final Task task) {
-                return task.getInterval();
+                return Integer.valueOf(task.getInterval());
             }
             public void set(final Task task, final Integer value) {
-                task.setInterval(value);
+                task.setInterval(value.intValue());
             }
         },
         new Mapper<Integer>() {
@@ -1000,10 +1000,10 @@ public final class Mapping {
                 return task1.getDays() == task2.getDays();
             }
             public Integer get(final Task task) {
-                return task.getDays();
+                return Integer.valueOf(task.getDays());
             }
             public void set(final Task task, final Integer value) {
-                task.setDays(value);
+                task.setDays(value.intValue());
             }
         },
         new Mapper<Integer>() {
@@ -1031,10 +1031,10 @@ public final class Mapping {
                 return task1.getDayInMonth() == task2.getDayInMonth();
             }
             public Integer get(final Task task) {
-                return task.getDayInMonth();
+                return Integer.valueOf(task.getDayInMonth());
             }
             public void set(final Task task, final Integer value) {
-                task.setDayInMonth(value);
+                task.setDayInMonth(value.intValue());
             }
         },
         new Mapper<Integer>() {
@@ -1062,10 +1062,10 @@ public final class Mapping {
                 return task1.getMonth() == task2.getMonth();
             }
             public Integer get(final Task task) {
-                return task.getMonth();
+                return Integer.valueOf(task.getMonth());
             }
             public void set(final Task task, final Integer value) {
-                task.setMonth(value);
+                task.setMonth(value.intValue());
             }
         },
         new Mapper<Date>() {
@@ -1129,10 +1129,10 @@ public final class Mapping {
                 return task1.getOccurrence() == task2.getOccurrence();
             }
             public Integer get(final Task task) {
-                return task.getOccurrence();
+                return Integer.valueOf(task.getOccurrence());
             }
             public void set(final Task task, final Integer value) {
-                task.setOccurrence(value);
+                task.setOccurrence(value.intValue());
             }
         },
         new Mapper<Integer>() {
@@ -1161,10 +1161,10 @@ public final class Mapping {
                     .getNumberOfAttachments();
             }
             public Integer get(final Task task) {
-                return task.getNumberOfAttachments();
+                return Integer.valueOf(task.getNumberOfAttachments());
             }
             public void set(final Task task, final Integer value) {
-                task.setNumberOfAttachments(value);
+                task.setNumberOfAttachments(value.intValue());
             }
         }
     };
@@ -1186,7 +1186,7 @@ public final class Mapping {
      * This map does the mapping from the unique field identifier to the
      * according mapper.
      */
-    private static final Map<Integer, Mapper> ID_MAPPING;
+    private static final Map<Integer, Mapper<?>> ID_MAPPING;
 
     /**
      * This set contains all possible fields that can be used with tasks.
@@ -1197,7 +1197,7 @@ public final class Mapping {
      * @param attributeId identifier of the attribute.
      * @return the mapper implementation for the given attribute.
      */
-    public static Mapper getMapping(final int attributeId) {
+    public static Mapper<?> getMapping(final int attributeId) {
         return ID_MAPPING.get(Integer.valueOf(attributeId));
     }
 
@@ -1216,11 +1216,11 @@ public final class Mapping {
     }
 
     static {
-        final Map<Integer, Mapper> tmp = new HashMap<Integer, Mapper>();
-        for (final Mapper mapper : MAPPERS) {
+        final Map<Integer, Mapper<?>> tmp = new HashMap<Integer, Mapper<?>>();
+        for (final Mapper<?> mapper : MAPPERS) {
             tmp.put(Integer.valueOf(mapper.getId()), mapper);
         }
-        final Mapper identifier = new Mapper<Integer>() {
+        final Mapper<Integer> identifier = new Mapper<Integer>() {
             public int getId() {
                 return Task.OBJECT_ID;
             }
