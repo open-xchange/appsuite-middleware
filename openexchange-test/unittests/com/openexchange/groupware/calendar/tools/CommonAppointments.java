@@ -268,9 +268,6 @@ public class CommonAppointments {
             return cdao;
         } catch (final OXException e) {
             throw e;
-        } catch (final SQLException e) {
-            e.printStackTrace();
-            return Collections.EMPTY_LIST;
         } catch (final SearchIteratorException e) {
             e.printStackTrace();
             return Collections.EMPTY_LIST;
@@ -288,9 +285,6 @@ public class CommonAppointments {
             return cdao;
         } catch (final OXException e) {
             throw e;
-        } catch (final SQLException e) {
-            e.printStackTrace();
-            return Collections.EMPTY_LIST;
         } catch (final SearchIteratorException e) {
             e.printStackTrace();
             return Collections.EMPTY_LIST;
