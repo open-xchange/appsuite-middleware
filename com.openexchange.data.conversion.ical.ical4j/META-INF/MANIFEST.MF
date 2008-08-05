@@ -7,15 +7,16 @@ Bundle-Activator: com.openexchange.data.conversion.ical.ical4j.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.data.conversion.ical,
+ com.openexchange.groupware,
+ com.openexchange.groupware.calendar,
  com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.tasks,
- com.openexchange.groupware.calendar,
- org.apache.commons.logging,
  org.apache.commons.codec,
  org.apache.commons.codec.binary,
  org.apache.commons.codec.net,
+ org.apache.commons.logging,
  org.osgi.framework
 Bundle-ClassPath: lib/ical4j-1.0-beta4.jar,
  lib/commons-lang-2.3.jar,
