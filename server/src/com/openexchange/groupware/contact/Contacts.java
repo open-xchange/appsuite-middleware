@@ -154,28 +154,22 @@ public final class Contacts {
 
 	@OXThrows(category = Category.USER_INPUT, desc = "0", exceptionId = 0, msg = "The application was unable to validate a given email address from this contact: %s")
 	private static void validateEmailAddress(final ContactObject co) throws OXException {
-
-		String email = "";
-		try {
-			if ((ContactConfig.getProperty(PROP_VALIDATE_CONTACT_EMAIL) != null)
-					&& ContactConfig.getProperty(PROP_VALIDATE_CONTACT_EMAIL).equalsIgnoreCase("true")) {
+		if ((ContactConfig.getProperty(PROP_VALIDATE_CONTACT_EMAIL) != null)
+				&& "true".equalsIgnoreCase(ContactConfig.getProperty(PROP_VALIDATE_CONTACT_EMAIL))) {
+			String email = null;
+			try {
 				if (co.containsEmail1() && (co.getEmail1() != null)) {
-					email = co.getEmail1();
-					final InternetAddress ia = new InternetAddress(email);
-					ia.validate();
+					new InternetAddress((email = co.getEmail1())).validate();
 				} else if (co.containsEmail2() && (co.getEmail2() != null)) {
-					email = co.getEmail2();
-					final InternetAddress ia = new InternetAddress(email);
-					ia.validate();
+					new InternetAddress((email = co.getEmail2())).validate();
 				} else if (co.containsEmail3() && (co.getEmail3() != null)) {
-					email = co.getEmail3();
-					final InternetAddress ia = new InternetAddress(email);
-					ia.validate();
+					new InternetAddress((email = co.getEmail3())).validate();
 				}
+			} catch (final AddressException ae) {
+				final ContactException ce = EXCEPTIONS.create(0, ae, email);
+				LOG.error(ce.getMessage(), ce);
+				throw ce;
 			}
-		} catch (final AddressException ae) {
-			LOG.info("Email Validation Failed", ae);
-			throw EXCEPTIONS.create(0, ae, email);
 		}
 	}
 
