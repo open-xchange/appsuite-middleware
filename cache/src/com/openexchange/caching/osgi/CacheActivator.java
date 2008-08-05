@@ -52,6 +52,9 @@ package com.openexchange.caching.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
 
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -84,6 +87,7 @@ public final class CacheActivator extends DeferredActivator {
 
 	private ServiceRegistration serviceRegistration;
 
+	private ObjectName objectName;
 
 	private ServiceTracker tracker;
 
@@ -122,7 +126,7 @@ public final class CacheActivator extends DeferredActivator {
 		 */
 		serviceRegistration = context.registerService(CacheService.class.getName(), JCSCacheService.getInstance(),
 				dictionary);
-		/*tracker = new ServiceTracker(context, ManagementService.class.getName(),
+		tracker = new ServiceTracker(context, ManagementService.class.getName(),
 		    new ServiceTrackerCustomizer() {
             public Object addingService(final ServiceReference reference) {
                 final ManagementService management = (ManagementService) context.getService(reference);
@@ -140,7 +144,7 @@ public final class CacheActivator extends DeferredActivator {
                 context.ungetService(reference);
             }
 		});
-		tracker.open();   */
+		tracker.open();
 	}
 
 	@Override
@@ -159,7 +163,49 @@ public final class CacheActivator extends DeferredActivator {
 		JCSCacheServiceInit.getInstance().stop();
 	}
 
+	private void registerCacheMBean(final ManagementService management) {
+		if (objectName == null) {
+            try {
+    			objectName = getObjectName(JCSCacheInformation.class.getName(), CacheInformationMBean.CACHE_DOMAIN);
+    			management.registerMBean(objectName, new JCSCacheInformation());
+            } catch (final MalformedObjectNameException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final NotCompliantMBeanException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final ManagementException e) {
+                LOG.error(e.getMessage(), e);
+            }
+		}
+	}
 
-    
+	private void unregisterCacheMBean(final ManagementService management) {
+		if (objectName != null) {
+			try {
+				management.unregisterMBean(objectName);
+			} catch (final ManagementException e) {
+                LOG.error(e.getMessage(), e);
+            } finally {
+				objectName = null;
+			}
+		}
+	}
+
+	/**
+	 * Creates an appropriate instance of {@link ObjectName} from specified
+	 * class name and domain name.
+	 * 
+	 * @param className
+	 *            The class name to use as object name
+	 * @param domain
+	 *            The domain name
+	 * @return An appropriate instance of {@link ObjectName}
+	 * @throws MalformedObjectNameException
+	 *             If instantiation of {@link ObjectName} fails
+	 */
+	private static ObjectName getObjectName(final String className, final String domain)
+			throws MalformedObjectNameException {
+		final int pos = className.lastIndexOf('.');
+		return new ObjectName(domain, "name", pos == -1 ? className : className.substring(pos + 1));
+	}
 
 }
