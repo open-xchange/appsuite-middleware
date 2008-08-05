@@ -94,7 +94,23 @@ public class ConversionWarning extends AbstractOXException {
          */
         INVALID_STATUS("Unable to convert task status \"%1$s\".", Category.USER_INPUT, 1),
         INVALID_PRIORITY("Unable to convert task priority %d.", Category.USER_INPUT, 2),
-        CANT_CREATE_RRULE("Can not create RRule: %s", Category.CODE_ERROR, 3);
+        CANT_CREATE_RRULE("Can not create RRule: %s", Category.CODE_ERROR, 3),
+        /**
+         * Invalid session given to implementation "%1$s".
+         */
+        INVALID_SESSION("Invalid session given to implementation \"%1$s\".", Category.CODE_ERROR, 4),
+        /**
+         * Can't generate uid.
+         */
+        CANT_GENERATE_UID("Can't generate uid.", Category.CODE_ERROR, 5),
+        /**
+         * Problem writing to stream.
+         */
+        WRITE_PROBLEM("Problem writing to stream.", Category.SOCKET_CONNECTION, 6),
+        /**
+         * Validation of calendar failed.
+         */
+        VALIDATION("Validation of calendar failed.", Category.CODE_ERROR, 7);
 
         /**
          * Message of the exception.

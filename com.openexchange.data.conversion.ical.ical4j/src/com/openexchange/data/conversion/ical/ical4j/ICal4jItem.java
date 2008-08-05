@@ -47,43 +47,42 @@
  *
  */
 
-package com.openexchange.data.conversion.ical;
+package com.openexchange.data.conversion.ical.ical4j;
 
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.contexts.Context;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.property.Uid;
 
-import java.io.OutputStream;
-import java.util.List;
+import com.openexchange.data.conversion.ical.ICalItem;
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface ICalEmitter {
-    //TODO: What about mixed exports?Tasks and Appointments
-    public String writeAppointments(List<AppointmentObject> appointmentObjects, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
-    public String writeTasks(List<Task> tasks, List<ConversionError> errors, List<ConversionWarning> warnings, Context ctx) throws ConversionError;
+public final class ICal4jItem implements ICalItem {
 
-    ICalSession createSession();
+    private final CalendarComponent component;
 
     /**
-     * @throws ConversionError if a wrong session is given that is not created
-     * with this implementations {@link #createSession()} method. 
+     * Default constructor.
      */
-    ICalItem writeAppointment(ICalSession session, AppointmentObject appointment, Context context,
-        List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+    public ICal4jItem(final CalendarComponent component) {
+        super();
+        this.component = component;
+    }
 
     /**
-     * @throws ConversionError if a wrong session is given that is not created
-     * with this implementations {@link #createSession()} method. 
+     * {@inheritDoc}
      */
-    ICalItem writeTask(ICalSession session, Task task, Context context,
-        List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+    public String getUID() {
+        return component.getProperty(Uid.UID).getValue();
+    }
 
     /**
-     * @throws ConversionError if a wrong session is given that is not created
-     * with this implementations {@link #createSession()} method. 
+     * {@inheritDoc}
      */
-    void writeSession(ICalSession session, OutputStream stream) throws ConversionError;
-
+    public void setUID(final String value) {
+        final Uid uid = (Uid) component.getProperty(Property.UID);
+        uid.setValue(value);
+    }
 }

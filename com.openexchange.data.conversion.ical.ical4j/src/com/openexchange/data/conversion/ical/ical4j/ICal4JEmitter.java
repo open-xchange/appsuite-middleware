@@ -52,6 +52,9 @@ package com.openexchange.data.conversion.ical.ical4j;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ICalItem;
+import com.openexchange.data.conversion.ical.ICalSession;
+import com.openexchange.data.conversion.ical.ConversionWarning.Code;
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
@@ -59,9 +62,13 @@ import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
+import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
 
@@ -129,5 +136,47 @@ public class ICal4JEmitter implements ICalEmitter {
             }
         }
         return vtodo;
+    }
+
+    public ICalSession createSession() {
+        return new ICal4jSession();
+    }
+
+    public ICalItem writeAppointment(final ICalSession session,
+        final AppointmentObject appointment, final Context ctx,
+        final List<ConversionError> errors, final List<ConversionWarning> warnings)
+        throws ConversionError {
+        final Calendar calendar = getCalendar(session);
+        final VEvent event = createEvent(appointment, errors, warnings);
+        calendar.getComponents().add(event);
+        return new ICal4jItem(event);
+    }
+
+    public void writeSession(final ICalSession session, final OutputStream stream) throws ConversionError {
+        final Calendar calendar = getCalendar(session);
+        final CalendarOutputter outputter = new CalendarOutputter(true);
+        try {
+            outputter.output(calendar, stream);
+        } catch (final IOException e) {
+            throw new ConversionError(Code.WRITE_PROBLEM, e);
+        } catch (final ValidationException e) {
+            throw new ConversionError(Code.VALIDATION, e);
+        }
+    }
+
+    public ICalItem writeTask(final ICalSession session, final Task task,
+        final Context context, final List<ConversionError> errors,
+        final List<ConversionWarning> warnings) throws ConversionError {
+        final Calendar calendar = getCalendar(session);
+        final VToDo vToDo = createEvent(task, warnings);
+        calendar.getComponents().add(vToDo);
+        return new ICal4jItem(vToDo);
+    }
+
+    private Calendar getCalendar(final ICalSession session) throws ConversionError {
+        if (!(session instanceof ICal4jSession)) {
+            throw new ConversionError(Code.INVALID_SESSION, session.getClass().getName());
+        }
+        return ((ICal4jSession) session).getCalendar();
     }
 }

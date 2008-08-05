@@ -49,41 +49,20 @@
 
 package com.openexchange.data.conversion.ical;
 
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.contexts.Context;
-
-import java.io.OutputStream;
-import java.util.List;
-
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * Interface for interacting with single objects converted into iCal format.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface ICalEmitter {
-    //TODO: What about mixed exports?Tasks and Appointments
-    public String writeAppointments(List<AppointmentObject> appointmentObjects, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
-    public String writeTasks(List<Task> tasks, List<ConversionError> errors, List<ConversionWarning> warnings, Context ctx) throws ConversionError;
-
-    ICalSession createSession();
+public interface ICalItem {
 
     /**
-     * @throws ConversionError if a wrong session is given that is not created
-     * with this implementations {@link #createSession()} method. 
+     * @return the unique client object identifier.
      */
-    ICalItem writeAppointment(ICalSession session, AppointmentObject appointment, Context context,
-        List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+    String getUID();
 
     /**
-     * @throws ConversionError if a wrong session is given that is not created
-     * with this implementations {@link #createSession()} method. 
+     * @param uid unique client object identifier to set.
      */
-    ICalItem writeTask(ICalSession session, Task task, Context context,
-        List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
-
-    /**
-     * @throws ConversionError if a wrong session is given that is not created
-     * with this implementations {@link #createSession()} method. 
-     */
-    void writeSession(ICalSession session, OutputStream stream) throws ConversionError;
+    void setUID(String uid);
 
 }

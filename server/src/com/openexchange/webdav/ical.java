@@ -55,11 +55,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -76,6 +78,11 @@ import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ICalEmitter;
+import com.openexchange.data.conversion.ical.ICalItem;
+import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -98,6 +105,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -106,7 +114,6 @@ import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
@@ -188,8 +195,8 @@ public final class ical extends PermissionServlet {
     private static final String ENABLEDELETE = "enabledelete";
 
     private static final String SQL_PRINCIPAL_SELECT = "SELECT object_id, calendarfolder, taskfolder FROM ical_principal WHERE cid = ? AND principal = ?";
-    private static final String SQL_PRINCIPAL_INSERT = "INSERT INTO ical_principal (object_id, cid, principal, calendarfolder, taskfolder) VALUES (?, ?, ?, ?, ?)";
-    private static final String SQL_PRINCIPAL_UPDATE = "UPDATE ical_principal SET calendarfolder = ?, taskfolder = ? WHERE object_id = ?";
+    private static final String SQL_PRINCIPAL_INSERT = "INSERT INTO ical_principal (object_id,cid,principal,calendarfolder,taskfolder) VALUES (?,?,?,?,?)";
+    private static final String SQL_PRINCIPAL_UPDATE = "UPDATE ical_principal SET calendarfolder=?,taskfolder=? WHERE cid=? AND object_id=?";
 
     private static final String SQL_ENTRIES_LOAD = "SELECT object_id, client_id, target_object_id, module FROM ical_ids WHERE cid = ? AND principal_id = ?";
     private static final String SQL_ENTRY_INSERT = "INSERT INTO ical_ids (object_id, cid, principal_id, client_id, target_object_id, module) VALUES (?, ?, ?, ? ,?, ?)";
@@ -203,19 +210,17 @@ public final class ical extends PermissionServlet {
         if (LOG.isDebugEnabled()) {
             LOG.debug("GET");
         }
-        OutputStream os = null;
-        VersitDefinition.Writer w = null;
         final Session sessionObj = getSession(req);
         try {
             final Context context = ContextStorage.getInstance().getContext(sessionObj.getContextId());
             final User user = UserStorage.getInstance().getUser(sessionObj.getUserId(), context);
 
-            int calendarfolder_id = getCalendarFolderID(req);
-            int taskfolder_id = getTaskFolderID(req);
-            if (calendarfolder_id == 0 && taskfolder_id == 0) {
+            int calendarfolderId = getCalendarFolderID(req);
+            int taskfolderId = getTaskFolderID(req);
+            if (calendarfolderId == 0 && taskfolderId == 0) {
                 final OXFolderAccess oAccess = new OXFolderAccess(context);
-                calendarfolder_id = oAccess.getDefaultFolder(user.getId(), FolderObject.CALENDAR).getObjectID();
-                taskfolder_id = oAccess.getDefaultFolder(user.getId(), FolderObject.TASK).getObjectID();
+                calendarfolderId = oAccess.getDefaultFolder(user.getId(), FolderObject.CALENDAR).getObjectID();
+                taskfolderId = oAccess.getDefaultFolder(user.getId(), FolderObject.TASK).getObjectID();
             }
 
             final String user_agent = getUserAgent(req);
@@ -231,122 +236,73 @@ public final class ical extends PermissionServlet {
                 mapping = new Mapping();
             }
 
-            resp.setStatus(HttpServletResponse.SC_OK);
-            resp.setContentType("text/calendar");
-            resp.setHeader("Accept-Ranges", "bytes");
-            resp.setHeader("Keep-Alive", "timeout=15 max=100");
+            final ICalEmitter emitter = ServerServiceRegistry.getInstance()
+                .getService(ICalEmitter.class);
+            final ICalSession iSession = emitter.createSession();
+            final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+            final List<ConversionError> errors = new ArrayList<ConversionError>();
 
-            os = resp.getOutputStream();
-
-            final VersitDefinition def = Versit.getDefinition("text/calendar");
-            w = def.getWriter(os, "UTF-8");
-            final VersitObject ical = OXContainerConverter.newCalendar("2.0");
-            def.writeProperties(w, ical);
-            final VersitDefinition eventDef = def.getChildDef("VEVENT");
-            final VersitDefinition taskDef = def.getChildDef("VTODO");
-            final OXContainerConverter oxc = new OXContainerConverter(sessionObj);
-
-            SearchIterator<?> it = null;
-//            final List<CalendarObject> calendar = new ArrayList<CalendarObject>();
+            final AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
+            SearchIterator<CalendarDataObject> itApp = null;
             try {
-                final AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
-                try {
-                    it = appointmentSql.getModifiedAppointmentsInFolder(calendarfolder_id, _appointmentFields, new Date(0), true);
-                    while (it.hasNext()) {
-                        final AppointmentObject appointment = (AppointmentObject) it.next();
-                        appointment.setTimezone(user.getTimeZone());
-//                        calendar.add(appointment);
-                        final VersitObject vo = oxc.convertAppointment(appointment);
-                        final int appId = appointment.getObjectID();
-                        final Property uid = vo.getProperty("UID");
-                        String clientId = mapping.getClientAppId(appId); 
-                        if (null == clientId) {
-                            clientId = uid.getValue().toString();
-                            entriesApp.put(clientId, Integer.valueOf(appId));
-                        } else {
-                            uid.setValue(clientId);
-                        }
-                        eventDef.write(w, vo);
+                itApp = appointmentSql.getModifiedAppointmentsInFolder(
+                    calendarfolderId, _appointmentFields, new Date(0), true);
+                while (itApp.hasNext()) {
+                    final AppointmentObject appointment = itApp.next();
+                    appointment.setTimezone(user.getTimeZone());
+                    final ICalItem item = emitter.writeAppointment(iSession,
+                        appointment, context, errors, warnings);
+                    final int appId = appointment.getObjectID();
+                    String clientId = mapping.getClientAppId(appId); 
+                    if (null == clientId) {
+                        clientId = item.getUID();
+                        entriesApp.put(clientId, Integer.valueOf(appId));
+                    } else {
+                        item.setUID(clientId);
                     }
-                } catch (final ConverterException exc) {
-                    LOG.error("ical.createVEVENT", exc);
                 }
-                final TasksSQLInterface taskInterface = new TasksSQLInterfaceImpl(sessionObj);
-                try {
-                    it = taskInterface.getModifiedTasksInFolder(taskfolder_id, _taskFields, new Date(0));
-                    while (it.hasNext()) {
-                        final Task task = (Task)it.next();
-//                        calendar.add(task);
-                        final VersitObject vo = oxc.convertTask(task);
-                        final int taskId = task.getObjectID();
-                        final Property uid = vo.getProperty("UID");
-                        String clientId = mapping.getClientTaskId(taskId);
-                        if (null == clientId) {
-                            clientId = uid.getValue().toString();
-                            entriesTask.put(clientId, Integer.valueOf(taskId));
-                        } else {
-                            uid.setValue(clientId);
-                        }
-                        taskDef.write(w, vo);
-                    }
-                } catch (final ConverterException exc) {
-                    LOG.error("ical.createVTODO", exc);
-                }
-                def.writeEnd(w, ical);
             } finally {
-                os.flush();
-                w.flush();
-                oxc.close();
-                if (it != null) {
-                    it.close();
+                if (null != itApp) {
+                    itApp.close();
                 }
             }
-//            {
-//                final ICalEmitter emitter = ServerServiceRegistry.getInstance()
-//                    .getService(ICalEmitter.class);
-//                final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
-//                final List<ConversionError> errors = new ArrayList<ConversionError>();
-//                emitter.writeCalendar(calendar, context, errors, warnings);
-//            }
-            final Connection writeCon = DBPool.pickupWriteable(context);
-            PreparedStatement ps = null;
+            final TasksSQLInterface taskInterface = new TasksSQLInterfaceImpl(sessionObj);
+            SearchIterator<Task> itTask = null;
             try {
-                if (null != principal) {
-                    if (principal.getCalendarFolder() != calendarfolder_id
-                        || principal.getTaskFolder() == taskfolder_id) {
-                        ps = writeCon.prepareStatement(SQL_PRINCIPAL_UPDATE);
-                        ps.setInt(1, calendarfolder_id);
-                        ps.setInt(2, taskfolder_id);
-                        ps.setInt(3, principal.getId());
-
-                        ps.executeUpdate();
-                        ps.close();
+                itTask = taskInterface.getModifiedTasksInFolder(taskfolderId, _taskFields, new Date(0));
+                while (itTask.hasNext()) {
+                    final Task task = itTask.next();
+                    final ICalItem item = emitter.writeTask(iSession, task,
+                        context, errors, warnings);
+                    final int taskId = task.getObjectID();
+                    String clientId = mapping.getClientTaskId(taskId);
+                    if (null == clientId) {
+                        clientId = item.getUID();
+                        entriesTask.put(clientId, Integer.valueOf(taskId));
+                    } else {
+                        item.setUID(clientId);
                     }
-                } else {
-                    writeCon.setAutoCommit(false);
-                    final int id = IDGenerator.getId(context, Types.ICAL, writeCon);
-                    principal = new Principal(id, principalS, calendarfolder_id, taskfolder_id);
-                    ps = writeCon.prepareStatement(SQL_PRINCIPAL_INSERT);
-                    ps.setInt(1, id);
-                    ps.setLong(2, context.getContextId());
-                    ps.setString(3, principalS);
-                    ps.setInt(4, calendarfolder_id);
-                    ps.setInt(5, taskfolder_id);
-                    ps.executeUpdate();
-                    ps.close();
-                    writeCon.commit();
                 }
-            } catch (final SQLException exc) {
-                writeCon.rollback();
-                throw exc;
             } finally {
-                if (ps != null) {
-                    ps.close();
+                if (null != itTask) {
+                    itTask.close();
                 }
-                if (!writeCon.getAutoCommit()) {
-                    writeCon.setAutoCommit(true);
+            }
+
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.setContentType("text/calendar");
+            emitter.writeSession(iSession, resp.getOutputStream());
+
+            if (null != principal) {
+                if (principal.getCalendarFolder() != calendarfolderId
+                    || principal.getTaskFolder() != taskfolderId) {
+                    principal.setCalendarFolder(calendarfolderId);
+                    principal.setTaskFolder(taskfolderId);
+                    updatePrincipal(context, principal);
                 }
-                DBPool.closeWriterSilent(context, writeCon);
+            } else {
+                principal = new Principal(0, principalS, calendarfolderId, taskfolderId);
+                insertPrincipal(context, principal);
             }
             addEntries(context, principal, entriesApp, entriesTask);
             deleteEntries(context, principal, mapping, entriesApp, entriesTask);
@@ -701,10 +657,10 @@ public final class ical extends PermissionServlet {
     }
 
     private class Principal {
-        private final int id;
+        private int id;
         private final String userAgent;
-        private final int calendarFolder;
-        private final int taskFolder;
+        private int calendarFolder;
+        private int taskFolder;
         private Principal(int id, String userAgent, int calendarFolder, int taskFolder) {
             super();
             this.id = id;
@@ -713,9 +669,16 @@ public final class ical extends PermissionServlet {
             this.taskFolder = taskFolder;
         }
         final int getId() { return id; }
+        final void setId(final int id) { this.id = id; }
         final String getUserAgent() { return userAgent; }
         final int getCalendarFolder() { return calendarFolder; }
+        final void setCalendarFolder(final int calendarFolder) {
+            this.calendarFolder = calendarFolder;
+        }
         final int getTaskFolder() { return taskFolder; }
+        final void setTaskFolder(final int taskFolder) {
+            this.taskFolder = taskFolder;
+        }
     }
 
     private Principal loadPrincipal(final Context ctx, final String userAgent) throws OXException {
@@ -746,6 +709,60 @@ public final class ical extends PermissionServlet {
             DBPool.closeReaderSilent(ctx, con);
         }
         return retval;
+    }
+
+    private void insertPrincipal(final Context ctx, final Principal principal) throws OXException {
+        final Connection con;
+        try {
+            con = DBPool.pickupWriteable(ctx);
+        } catch (final DBPoolingException e) {
+            throw new OXException(e);
+        }
+        PreparedStatement ps = null;
+        try {
+            con.setAutoCommit(false);
+            principal.id = IDGenerator.getId(ctx, Types.ICAL, con);
+            ps = con.prepareStatement(SQL_PRINCIPAL_INSERT);
+            ps.setInt(1, principal.getId());
+            ps.setLong(2, ctx.getContextId());
+            ps.setString(3, principal.getUserAgent());
+            ps.setInt(4, principal.getCalendarFolder());
+            ps.setInt(5, principal.getTaskFolder());
+            ps.executeUpdate();
+            con.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw new OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999,
+                e.getMessage(), e);
+        } finally {
+            DBUtils.closeSQLStuff(null, ps);
+            DBUtils.autocommit(con);
+            DBPool.closeWriterSilent(ctx, con);
+        }
+    }
+
+    private void updatePrincipal(final Context ctx, final Principal principal) throws OXException {
+        final Connection con;
+        try {
+            con = DBPool.pickupWriteable(ctx);
+        } catch (final DBPoolingException e) {
+            throw new OXException(e);
+        }
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement(SQL_PRINCIPAL_UPDATE);
+            ps.setInt(1, principal.getCalendarFolder());
+            ps.setInt(2, principal.getTaskFolder());
+            ps.setInt(3, ctx.getContextId());
+            ps.setInt(4, principal.getId());
+            ps.executeUpdate();
+        } catch (final SQLException e) {
+            throw new OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999,
+                e.getMessage(), e);
+        } finally {
+            DBUtils.closeSQLStuff(null, ps);
+            DBPool.closeWriterSilent(ctx, con);
+        }
     }
 
     private void addEntry(final Context context, final int principal_id, final int object_target_id, final String client_id, final int module) throws Exception {
