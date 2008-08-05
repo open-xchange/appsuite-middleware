@@ -154,8 +154,7 @@ public final class Contacts {
 
 	@OXThrows(category = Category.USER_INPUT, desc = "0", exceptionId = 0, msg = "The application was unable to validate a given email address from this contact: %s")
 	private static void validateEmailAddress(final ContactObject co) throws OXException {
-		if ((ContactConfig.getProperty(PROP_VALIDATE_CONTACT_EMAIL) != null)
-				&& "true".equalsIgnoreCase(ContactConfig.getProperty(PROP_VALIDATE_CONTACT_EMAIL))) {
+		if ("true".equalsIgnoreCase(ContactConfig.getProperty(PROP_VALIDATE_CONTACT_EMAIL))) {
 			String email = null;
 			try {
 				if (co.containsEmail1() && (co.getEmail1() != null)) {
