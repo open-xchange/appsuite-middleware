@@ -88,6 +88,14 @@ public final class Uid<T extends CalendarComponent, U extends CalendarObject> ex
     /**
      * {@inheritDoc}
      */
+    public boolean isSet(final CalendarObject calendar) {
+        // Must be true. Otherwise emit() is not called. 
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void emit(int index, final U calendar, final T component,
         final List<ConversionWarning> warnings, Context ctx) throws ConversionError {
         final UidGenerator generator;
@@ -110,10 +118,6 @@ public final class Uid<T extends CalendarComponent, U extends CalendarObject> ex
     /**
      * {@inheritDoc}
      */
-    public boolean isSet(final CalendarObject calendar) {
-        return false;
-    }
-
     public void parse(int index, final T component, final U calendar, final TimeZone timeZone,
         final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         // Nothing to parse.

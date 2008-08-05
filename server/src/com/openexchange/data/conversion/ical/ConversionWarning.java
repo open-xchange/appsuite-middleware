@@ -85,12 +85,15 @@ public class ConversionWarning extends AbstractOXException {
     }
 
     public ConversionWarning(int index, final Code code, final Object... args) {
+        this(index, code, null, args);
+    }
+
+    public ConversionWarning(int index, final Code code, final Throwable cause, final Object... args) {
         super(EnumComponent.ICAL, code.getCategory(), code.getNumber(),
-            code.getMessage(), null);
+            code.getMessage(), cause);
         setMessageArgs(args);
         this.index = index;
     }
-
 
     public int getIndex() {
         return index;

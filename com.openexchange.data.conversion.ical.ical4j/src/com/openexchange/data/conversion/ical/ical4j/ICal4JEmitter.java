@@ -61,7 +61,6 @@ import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverte
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.contexts.Context;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -70,8 +69,11 @@ import java.util.List;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.ValidationException;
+import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
+import net.fortuna.ical4j.model.property.ProdId;
+import net.fortuna.ical4j.model.property.Version;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -141,7 +143,9 @@ public class ICal4JEmitter implements ICalEmitter {
     }
 
     public ICalSession createSession() {
-        return new ICal4jSession();
+        final ICal4jSession retval = new ICal4jSession();
+        initCalendar(retval.getCalendar());
+        return retval;
     }
 
     public ICalItem writeAppointment(final ICalSession session,
@@ -174,6 +178,12 @@ public class ICal4JEmitter implements ICalEmitter {
         final VToDo vToDo = createEvent(getAndIncreaseIndex(session), task,context, warnings);
         calendar.getComponents().add(vToDo);
         return new ICal4jItem(vToDo);
+    }
+
+    private void initCalendar(final Calendar calendar) {
+        final PropertyList properties = calendar.getProperties();
+        properties.add(new ProdId());
+        properties.add(Version.VERSION_2_0);
     }
 
     private Calendar getCalendar(final ICalSession session) throws ConversionError {

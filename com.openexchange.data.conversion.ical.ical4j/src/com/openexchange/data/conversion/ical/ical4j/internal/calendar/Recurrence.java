@@ -183,12 +183,11 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
 
     private StringBuilder getRecurBuilder(String frequency, U calendar) {
         StringBuilder recur =  new StringBuilder("FREQ=").append(frequency).append(";INTERVAL=").append(calendar.getInterval());
-        if(calendar.containsRecurrenceCount()) {
+        if (calendar.containsRecurrenceCount()) {
             recur.append(";COUNT=").append(calendar.getRecurrenceCount());
-        } else {
+        } else if (calendar.containsUntil()) {
             recur.append(";UNTIL=").append(date.format(calendar.getUntil()));
         }
-
         return recur;
     }
 

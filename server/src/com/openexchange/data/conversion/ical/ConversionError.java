@@ -68,6 +68,10 @@ public class ConversionError extends ConversionWarning {
     }
 
     public ConversionError(int index, Code code, Object...args) {
-        super(index, code, args);
+        this(index, code, null, args);
+    }
+
+    public ConversionError(int index, Code code, Throwable cause, Object... args) {
+        super(index, code, cause, args);
     }
 }
