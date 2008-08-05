@@ -62,10 +62,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionError;
 
-import java.util.List;
-import java.util.TimeZone;
-import java.util.LinkedList;
-import java.util.Iterator;
+import java.util.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -79,7 +76,16 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
 
     private static Log LOG = LogFactory.getLog(Participants.class);
 
-    public static UserResolver userResolver = null;
+    public static UserResolver userResolver = new UserResolver() {
+
+        public List<User> findUsers(List<String> mails, Context ctx) throws LdapException {
+            return new ArrayList<User>();
+        }
+
+        public User loadUser(int userId, Context ctx) throws LdapException {
+            return null;
+        }
+    };
 
     public boolean isSet(U cObj) {
         return cObj.containsParticipants();
