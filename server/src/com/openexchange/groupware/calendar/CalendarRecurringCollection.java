@@ -467,6 +467,9 @@ public final class CalendarRecurringCollection {
             		throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_MONTLY_INTERVAL, Integer.valueOf(b));
                 }
                 if (a <= 0) {
+                	if (b > 31) {
+                		throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_MONTLY_INTERVAL, Integer.valueOf(b));
+                    }
                     dsf(sb, 3);
                     dsf(sb, 'i', i);
                     sb.append('b').append(DELIMITER_PIPE).append(b).append(DELIMITER_PIPE);
@@ -499,7 +502,7 @@ public final class CalendarRecurringCollection {
                 }
             } else if (t == CalendarObject.YEARLY) {
                 if (a <= 0) {
-                	if (b <= 0) {
+                	if (b <= 0 || b > 31) {
                 		throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_INTERVAL, Integer.valueOf(b));
                     }
                     dsf(sb, 4);

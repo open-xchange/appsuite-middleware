@@ -1,3 +1,7 @@
+* 2008-08-05 - thorben.betten@open-xchange.com
+
+ - Bugfix #11829: Validating freely writable recurrence information
+
 * 2008-08-04 - thorben.betten@open-xchange.com
 
  - Bugfix #11827: Fixed setting proper end date if updating a recurrence
