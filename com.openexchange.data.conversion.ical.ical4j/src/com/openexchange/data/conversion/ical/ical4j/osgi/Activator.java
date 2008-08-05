@@ -102,19 +102,4 @@ public class Activator implements BundleActivator {
 	    parserRegistration.unregister();
 	}
 
-    private static final class OXUserResolver implements UserResolver {
-
-        public List<User> findUsers(List<String> mails, Context ctx) throws LdapException {
-            List<User> users = new ArrayList<User>();
-            UserStorage storage = UserStorage.getInstance();
-            for(String mail : mails) {
-                users.add( storage.searchUser(mail, ctx) );
-            }
-            return users; 
-        }
-
-        public User loadUser(int userId, Context ctx) throws LdapException {
-            return UserStorage.getStorageUser(userId, ctx);
-        }
-    }
 }

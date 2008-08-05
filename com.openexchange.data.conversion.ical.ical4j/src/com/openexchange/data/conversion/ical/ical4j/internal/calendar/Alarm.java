@@ -87,7 +87,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
 
     private void emitAppointmentAlarm(AppointmentObject appointmentObject, VEvent component, List<ConversionWarning> warnings) {
         VAlarm alarm = new VAlarm();
-        Dur duration = new Dur(String.format("-PT%dM", appointmentObject.getAlarm() / 60000));
+        Dur duration = new Dur(String.format("-PT%dM", appointmentObject.getAlarm()));
         Trigger trigger = new Trigger(duration);
         alarm.getProperties().add(trigger);
 
@@ -143,7 +143,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
 
         if(AppointmentObject.class.isAssignableFrom(cObj.getClass())) {
             final AppointmentObject appObj = (AppointmentObject) cObj;
-            appObj.setAlarm(delta);
+            appObj.setAlarm(delta / 60000);
             appObj.setAlarmFlag(true); // bugfix: 7473
         } else {
             final Task taskObj = (Task) cObj;

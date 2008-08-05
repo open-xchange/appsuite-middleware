@@ -46,22 +46,38 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.data.conversion.ical.ical4j.internal.appointment;
+package com.openexchange.data.conversion.ical.ical4j.osgi;
 
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.data.conversion.ical.ical4j.internal.ObjectVerifier;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.contexts.Context;
 
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class RequireStartDate implements ObjectVerifier<AppointmentObject> {
-    public void verify(int index, AppointmentObject object, List<ConversionWarning> warnings) throws ConversionError {
-        if(!object.containsStartDate()) {
-            throw new ConversionError(index, ConversionWarning.Code.MISSING_DTSTART);
+public class OXUserResolver implements UserResolver {
+
+    public List<User> findUsers(List<String> mails, Context ctx) throws LdapException {
+        List<User> users = new ArrayList<User>();
+        UserStorage storage = UserStorage.getInstance();
+        for(String mail : mails) {
+            try {
+                users.add( storage.searchUser(mail, ctx) );
+            } catch (LdapException x) {
+                if(x.getDetailNumber() != 14) {  // 14 == user not found
+                    throw x;
+                }
+            }
         }
+        return users;
+    }
+
+    public User loadUser(int userId, Context ctx) throws LdapException {
+        return UserStorage.getStorageUser(userId, ctx);
     }
 }

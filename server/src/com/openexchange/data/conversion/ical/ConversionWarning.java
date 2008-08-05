@@ -117,7 +117,7 @@ public class ConversionWarning extends AbstractOXException {
         /**
          * Can't generate uid.
          */
-        CANT_GENERATE_UID("Can't generate uid.", Category.CODE_ERROR, 5),
+        CANT_GENERATE_UID("Can not generate uid.", Category.CODE_ERROR, 5),
         /**
          * Problem writing to stream.
          */
@@ -138,7 +138,12 @@ public class ConversionWarning extends AbstractOXException {
          * Cowardly refusing to convert confidential classified objects.
          */
         CLASS_CONFIDENTIAL("Cowardly refusing to convert confidential classified objects.",
-            Category.USER_INPUT, 11);
+            Category.USER_INPUT, 11),
+        /**
+         * Missing DTStart in appointment
+         */
+        MISSING_DTSTART("Missing DTSTART", Category.USER_INPUT, 12)
+        ;
 
         /**
          * Message of the exception.

@@ -301,6 +301,7 @@ public class ICalImporter extends AbstractImporter {
                 final ImportResult importResult = new ImportResult();
                 importResult.setEntryNumber(error.getIndex());
                 importResult.setException(new ImportExportException(error));
+                list.add(importResult);
             }
         }
         if(importTask) {
@@ -344,6 +345,7 @@ public class ICalImporter extends AbstractImporter {
                 final ImportResult importResult = new ImportResult();
                 importResult.setEntryNumber(error.getIndex());
                 importResult.setException(new ImportExportException(error));
+                list.add(importResult);
             }
         }
 

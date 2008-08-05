@@ -106,10 +106,7 @@ public class Klass<T extends CalendarComponent, U extends CalendarObject> extend
         return component.getProperty(CLASS) != null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void parse(final int index, final T component, final U cObj,
+   public void parse(final int index, final T component, final U cObj,
         final TimeZone timeZone, final Context ctx,
         final List<ConversionWarning> warnings) throws ConversionError {
         final Clazz clazz = (Clazz) component.getProperty(CLASS);
