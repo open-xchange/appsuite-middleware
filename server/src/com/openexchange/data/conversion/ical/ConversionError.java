@@ -59,6 +59,10 @@ public class ConversionError extends ConversionWarning {
      */
     private static final long serialVersionUID = -8257376167243573600L;
 
+    /**
+     * @deprecated use {@link #ConversionError(int, Code, Object...)}.
+     */
+    @Deprecated
     public ConversionError(int index, String message, Object... args) {
         super(index,message, args);
     }
