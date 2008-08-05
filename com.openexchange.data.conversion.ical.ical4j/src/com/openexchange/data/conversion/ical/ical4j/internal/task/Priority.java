@@ -46,59 +46,94 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.data.conversion.ical.ical4j.internal.task;
 
-import net.fortuna.ical4j.model.component.VToDo;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ConversionError;
+import static net.fortuna.ical4j.model.property.Priority.HIGH;
+import static net.fortuna.ical4j.model.property.Priority.LOW;
+import static net.fortuna.ical4j.model.property.Priority.MEDIUM;
+import static net.fortuna.ical4j.model.property.Priority.UNDEFINED;
 
 import java.util.List;
 import java.util.TimeZone;
+
+import net.fortuna.ical4j.model.component.VToDo;
+
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ConversionWarning.Code;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Priority extends AbstractVerifyingAttributeConverter<VToDo, Task> {
-    public boolean isSet(Task task) {
+
+    /**
+     * Default constructor.
+     */
+    public Priority() {
+        super();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isSet(final Task task) {
         return task.containsPriority();
     }
 
-    public void emit(int index, Task task, VToDo vToDo, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
-        int icalPrio = 0;
+    /**
+     * {@inheritDoc}
+     */
+    public void emit(final int index, final Task task, final VToDo vToDo,
+        final List<ConversionWarning> warnings, final Context ctx)
+        throws ConversionError {
+        final net.fortuna.ical4j.model.property.Priority prio;
         switch(task.getPriority()) {
-            case Task.HIGH :
-                icalPrio = 1; break;
-            case Task.NORMAL :
-                icalPrio = 5; break;
-            case Task.LOW :
-                icalPrio = 9; break;
+            case Task.HIGH:
+                prio = HIGH; break;
+            case Task.NORMAL:
+                prio = MEDIUM; break;
+            case Task.LOW:
+                prio = LOW; break;
             default:
-                warnings.add(new ConversionWarning(index, ConversionWarning.Code.INVALID_PRIORITY,task.getPriority()));
+                warnings.add(new ConversionWarning(index, Code.INVALID_PRIORITY,
+                    Integer.valueOf(task.getPriority())));
+                prio = UNDEFINED;
         }
-        net.fortuna.ical4j.model.property.Priority prio = new net.fortuna.ical4j.model.property.Priority(icalPrio);
         vToDo.getProperties().add(prio);
     }
 
-    public boolean hasProperty(VToDo vToDo) {
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasProperty(final VToDo vToDo) {
         return vToDo.getPriority() != null;
     }
 
-    public void parse(int index, VToDo todo, Task task, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
-        if(null == todo.getPriority()) {
-            return;
-        }
-        int priority = todo.getPriority().getLevel();
-        if(priority < 5) {
-            task.setPriority(Task.HIGH);
-            return;
-        }
-        if(priority > 5) {
+    /**
+     * {@inheritDoc}
+     */
+    public void parse(final int index, final VToDo todo, final Task task,
+        final TimeZone timeZone, final Context ctx,
+        final List<ConversionWarning> warnings) throws ConversionError {
+        final float lowMed = (LOW.getLevel() + MEDIUM.getLevel()) / 2;
+        final float medHigh = (MEDIUM.getLevel() + HIGH.getLevel()) / 2;
+        final int priority = todo.getPriority().getLevel();
+        if (priority >= lowMed) {
             task.setPriority(Task.LOW);
-            return;
+        } else if (priority >= medHigh) {
+            task.setPriority(Task.NORMAL);
+        } else if (priority >= HIGH.getLevel()) {
+            task.setPriority(Task.HIGH);
+        } else if (priority == UNDEFINED.getLevel()) {
+            task.removePriority();
+        } else {
+            warnings.add(new ConversionWarning(index, Code.INVALID_PRIORITY,
+                Integer.valueOf(priority)));
         }
-        task.setPriority(Task.NORMAL);
     }
 }
