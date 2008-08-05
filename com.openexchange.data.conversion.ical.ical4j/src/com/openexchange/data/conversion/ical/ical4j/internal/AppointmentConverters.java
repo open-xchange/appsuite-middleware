@@ -101,7 +101,7 @@ public class AppointmentConverters {
         tmp.add(new DeleteExceptions<VEvent, AppointmentObject>());
 
         tmp.add(new Alarm<VEvent, AppointmentObject>());
-
+        tmp.add(new Uid<VEvent, AppointmentObject>());
         ALL = (AttributeConverter<VEvent, AppointmentObject>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
     }
 }

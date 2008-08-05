@@ -58,7 +58,7 @@ import java.util.List;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public abstract class AbstractVerifyingAttributeConverter<T extends CalendarComponent, U extends CalendarObject> implements AttributeConverter<T , U >{
+public abstract class AbstractVerifyingAttributeConverter<T extends CalendarComponent, U extends CalendarObject> implements AttributeConverter<T, U >{
 
     /**
      * Default constructor.
