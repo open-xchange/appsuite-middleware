@@ -38,7 +38,7 @@ public class ICalExportTest extends AbstractICalTest {
 		
 		final int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword());
 
-		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, emailaddress, timeZone, getHostName(), getSessionId());
+		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, emailaddress, timeZone, getHostName(), getSessionId(), ctx);
 		
 		boolean found = false;
 		for (int a = 0; a < appointmentArray.length; a++) {
@@ -47,7 +47,7 @@ public class ICalExportTest extends AbstractICalTest {
 				//java.util.Date d = null;
 				//appointmentArray[a].setUntil(d);
 				appointmentObj.setUntil(appointmentArray[a].getUntil());
-				
+				appointmentArray[a].setParentFolderID(appointmentFolderId); // Not Exported
 				AppointmentTest.compareObject(appointmentObj, appointmentArray[a]);
 			}
 		}
@@ -58,13 +58,7 @@ public class ICalExportTest extends AbstractICalTest {
 	}
 	
 	
-	/*
-	 * This test is broken. The versitObject send by the server is correct
-	 * but the received versitObject is wrong (the hours/minutes/seconds
-	 * of the end date are not set correct, in fact, they are missing)
-	 * 
-	 */
-	public void _testExportICalTask() throws Exception {
+	public void testExportICalTask() throws Exception {
 		final String title = "testExportICalTask" + System.currentTimeMillis();
 		
 		final Task taskObj = new Task();
@@ -75,7 +69,7 @@ public class ICalExportTest extends AbstractICalTest {
 		
 		final int objectId = TaskTest.insertTask(getWebConversation(), taskObj, getHostName(), getLogin(), getPassword());
 
-		final Task[] taskArray = exportTask(getWebConversation(), taskFolderId, emailaddress, timeZone, getHostName(), getSessionId());
+		final Task[] taskArray = exportTask(getWebConversation(), taskFolderId, emailaddress, timeZone, getHostName(), getSessionId(), ctx);
 		
 		boolean found = false;
 		for (int a = 0; a < taskArray.length; a++) {
@@ -84,13 +78,13 @@ public class ICalExportTest extends AbstractICalTest {
 				taskObj.setStartDate(taskArray[a].getStartDate());
 
 				//System.out.println(taskObj.getEndDate().getTimezoneOffset()+" | "+taskArray[a].getEndDate().getTimezoneOffset());
-						
+				taskArray[a].setParentFolderID(taskFolderId);		
 				TaskTest.compareObject(taskObj, taskArray[a]);
 			}
 		}
 		
 		assertTrue("task with id: " + objectId + " not found", found);
 		
-		//TaskTest.deleteTask(getWebConversation(), objectId, taskFolderId, getHostName(), getLogin(), getPassword());
+		TaskTest.deleteTask(getWebConversation(), objectId, taskFolderId, getHostName(), getLogin(), getPassword());
 	}
 }

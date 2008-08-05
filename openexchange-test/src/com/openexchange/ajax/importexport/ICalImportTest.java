@@ -28,7 +28,7 @@ public class ICalImportTest extends AbstractICalTest {
 		
 	}
 	
-	public void _notestImportICalWithAppointment() throws Exception {
+	public void testImportICalWithAppointment() throws Exception {
 		final AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testImportICalWithAppointment" + System.currentTimeMillis());
 		appointmentObj.setStartDate(startTime);
@@ -43,15 +43,15 @@ public class ICalImportTest extends AbstractICalTest {
 		
 		assertTrue("object id is 0", objectId > 0);
 		
-		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, emailaddress, timeZone, getHostName(), getSessionId());
+		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, emailaddress, timeZone, getHostName(), getSessionId(), ctx);
 		
 		boolean found = false;
 		
 		for (int a = 0; a < appointmentArray.length; a++) {
 			if (appointmentArray[a].getTitle().equals(appointmentObj.getTitle())) {
-				appointmentObj.setParentFolderID(appointmentFolderId);
-				AppointmentTest.compareObject(appointmentObj, appointmentArray[a]);
-				
+                appointmentObj.setUntil(appointmentArray[a].getUntil());
+                AppointmentTest.compareObject(appointmentObj, appointmentArray[a]);
+
 				found = true;
 			}
 		}
@@ -61,7 +61,7 @@ public class ICalImportTest extends AbstractICalTest {
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestImportICalWithTask() throws Exception {
+	public void testImportICalWithTask() throws Exception {
 		final Task taskObj = new Task();
 		taskObj.setTitle("testImportICalWithTask" + System.currentTimeMillis());
 		taskObj.setStartDate(startTime);
@@ -75,16 +75,16 @@ public class ICalImportTest extends AbstractICalTest {
 		
 		assertTrue("object id is 0", objectId > 0);
 		
-		final Task[] taskArray = exportTask(getWebConversation(), taskFolderId, emailaddress, timeZone, getHostName(), getSessionId());
+		final Task[] taskArray = exportTask(getWebConversation(), taskFolderId, emailaddress, timeZone, getHostName(), getSessionId(), ctx);
 		
 		boolean found = false;
 		
 		for (int a = 0; a < taskArray.length; a++) {
 			if (taskArray[a].getTitle().equals(taskObj.getTitle())) {
-				taskObj.setParentFolderID(appointmentFolderId);
+				taskObj.setParentFolderID(0);
 				TaskTest.compareObject(taskObj, taskArray[a]);
-				
-				found = true;
+                
+                found = true;
 			}
 		}
 		
@@ -92,8 +92,9 @@ public class ICalImportTest extends AbstractICalTest {
 		
 		TaskTest.deleteTask(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), taskFolderId, getHostName(), getLogin(), getPassword());
 	}
-	
-	public void _testImportICalWithBrokenAppointment() throws Exception {
+
+    // FIXME: Need to survive individual invalid element
+    public void _notestImportICalWithBrokenAppointment() throws Exception {
 		final String title1 = "testImportICalWithBrokenAppointment1_" + System.currentTimeMillis();
 		final String title2 = "testImportICalWithBrokenAppointment2_" + System.currentTimeMillis();
 		final String title3 = "testImportICalWithBrokenAppointment3_" + System.currentTimeMillis();
@@ -140,7 +141,7 @@ public class ICalImportTest extends AbstractICalTest {
 		assertTrue("server errors of server", importResult[1].hasError());
 		assertTrue("server errors of server", importResult[2].isCorrect());
 		
-		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, emailaddress, timeZone, getHostName(), getSessionId());
+		final AppointmentObject[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, emailaddress, timeZone, getHostName(), getSessionId(), ctx);
 		
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[2].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());

@@ -25,6 +25,9 @@ import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -38,6 +41,9 @@ import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
+import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
+import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
+import com.openexchange.data.conversion.ical.*;
 
 public class AbstractICalTest extends AbstractAJAXTest {
 	
@@ -58,8 +64,10 @@ public class AbstractICalTest extends AbstractAJAXTest {
 	protected String emailaddress = null;
 	
 	protected TimeZone timeZone = null;
-	
-	private static final Log LOG = LogFactory.getLog(AbstractICalTest.class);
+
+    protected Context ctx;
+
+    private static final Log LOG = LogFactory.getLog(AbstractICalTest.class);
 	
 	public AbstractICalTest(final String name) {
 		super(name);
@@ -100,7 +108,9 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		startTime = c.getTime();
 		// startTime.setTime(sta + timeZone.getOffset(startTime.getTime()));
 		endTime = new Date(startTime.getTime() + 3600000);
-	}
+
+        ctx = null; // FIXME
+    }
 	
 	public static ImportResult[] importICal(final WebConversation webCon, final AppointmentObject[] appointmentObj, final int folderId, final TimeZone timeZone, final String emailaddress, final String host, final String session) throws Exception, TestException {
 		return importICal(webCon, appointmentObj, null, folderId, -1, timeZone, emailaddress, host, session);
@@ -115,32 +125,21 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		
 		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		
-		final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");
-		final VersitDefinition.Writer versitWriter = versitDefinition.getWriter(byteArrayOutputStream, "UTF-8");
-		final VersitObject versitObjectContainer = OXContainerConverter.newCalendar("2.0");
-		versitDefinition.writeProperties(versitWriter, versitObjectContainer);
-		final VersitDefinition eventDef = versitDefinition.getChildDef("VEVENT");
-		final VersitDefinition taskDef = versitDefinition.getChildDef("VTODO");
-		final OXContainerConverter oxContainerConverter = new OXContainerConverter(timeZone, emailaddress);
-		
+		ICalEmitter emitter = new ICal4JEmitter();
+		ICalSession icalSession = emitter.createSession();
 		if (appointmentObj != null) {
 			for (int a = 0; a < appointmentObj.length; a++) {
-				final VersitObject versitObject = oxContainerConverter.convertAppointment(appointmentObj[a]);
-				eventDef.write(versitWriter, versitObject);
+				emitter.writeAppointment(icalSession, appointmentObj[a], null, new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
 			}
 		}
 		
 		if (taskObj != null) {
 			for (int a = 0; a < taskObj.length; a++) {
-				final VersitObject versitObject = oxContainerConverter.convertTask(taskObj[a]);
-				taskDef.write(versitWriter, versitObject);
+				emitter.writeTask(icalSession, taskObj[a], null, new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
 			}
 		}
 		
-		versitDefinition.writeEnd(versitWriter, versitObjectContainer);
-		byteArrayOutputStream.flush();
-		versitWriter.flush();
-		oxContainerConverter.close();
+		emitter.writeSession(icalSession, byteArrayOutputStream);
 		
 		return importICal(webCon, new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), appointmentFolderId, taskFolderId, timeZone, emailaddress, host, session);
 	}
@@ -182,7 +181,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
 				importResult[a] = new ImportResult();
 				importResult[a].setException(new OXException( jsonObj.getString("error")));
 			} else {
-				final String objectId = jsonObj.getString("id");
+                final String objectId = jsonObj.getString("id");
 				final String folder = jsonObj.getString("folder_id");
 				final long timestamp = jsonObj.getLong("last_modified");
 			
@@ -193,7 +192,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		return importResult;
 	}
 	
-	public AppointmentObject[] exportAppointment(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session) throws Exception, TestException {
+	public AppointmentObject[] exportAppointment(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session, Context ctx) throws Exception, TestException {
 		host = appendPrefix(host);
 		
 		final String contentType = "text/calendar";
@@ -209,36 +208,23 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		assertEquals(200, resp.getResponseCode());
 		
 		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(resp.getText().getBytes());
-		final OXContainerConverter oxContainerConverter = new OXContainerConverter(timeZone, mailaddress);
-		
-		final List<AppointmentObject> exportData = new ArrayList<AppointmentObject>();
-		
+
+		List<CalendarDataObject> exportData = null;
 		try {
-			final VersitDefinition def = Versit.getDefinition(contentType);
-			final VersitDefinition.Reader versitReader = def.getReader(byteArrayInputStream, "UTF-8");
-			final VersitObject rootVersitObject = def.parseBegin(versitReader);
-			VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
-			while (versitObject != null) {
-				final Property property = versitObject.getProperty("UID");
-				
-				if ("VEVENT".equals(versitObject.name)) {
-					final AppointmentObject appointmentObj = oxContainerConverter.convertAppointment(versitObject);
-					appointmentObj.setParentFolderID(appointmentFolderId);
-					exportData.add(appointmentObj);
-				} else {
-					LOG.warn("invalid versit object: " + versitObject.name);
-				}
-				
-				versitObject = def.parseChild(versitReader, rootVersitObject);
-			}
-		} catch (final Exception exc) {
-			System.out.println("error: " + exc);
-		}
+            ICalParser parser = new ICal4JParser();
+            List<ConversionError> errors = new ArrayList<ConversionError>();
+            List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+            exportData = parser.parseAppointments(byteArrayInputStream, timeZone, ctx, errors, warnings);
+        } catch (final Exception exc) {
+            exc.printStackTrace();
+            System.out.println("error: " + exc);
+            exportData = new ArrayList<CalendarDataObject>();
+        }
 		
 		return exportData.toArray(new AppointmentObject[exportData.size()]);
 	}
 	
-	public Task[] exportTask(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session) throws Exception, TestException {
+	public Task[] exportTask(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session, Context ctx) throws Exception, TestException {
 		host = appendPrefix(host);
 		
 		final String contentType = "text/calendar";
@@ -257,26 +243,13 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(resp.getText().getBytes());
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter(timeZone, mailaddress);
 		
-		final List<Task> exportData = new ArrayList<Task>();
+		List<Task> exportData = new ArrayList<Task>();
 		
 		try {
-			final VersitDefinition def = Versit.getDefinition(contentType);
-			final VersitDefinition.Reader versitReader = def.getReader(byteArrayInputStream, "UTF-8");
-			final VersitObject rootVersitObject = def.parseBegin(versitReader);
-			VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
-			while (versitObject != null) {
-				final Property property = versitObject.getProperty("UID");
-				
-				if ("VTODO".equals(versitObject.name)) {
-					final Task taskObj = oxContainerConverter.convertTask(versitObject);
-					taskObj.setParentFolderID(taskFolderId);
-					exportData.add(taskObj);
-				} else {
-					LOG.warn("invalid versit object: " + versitObject.name);
-				}
-				
-				versitObject = def.parseChild(versitReader, rootVersitObject);
-			}
+			ICalParser parser = new ICal4JParser();
+            List<ConversionError> errors = new ArrayList<ConversionError>();
+            List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+            exportData = parser.parseTasks(byteArrayInputStream, timeZone, ctx, errors, warnings);
 		} catch (final Exception exc) {
 			System.out.println("error: " + exc);
 		}
