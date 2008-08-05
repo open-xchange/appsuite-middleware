@@ -78,8 +78,12 @@ public class Bug8527 extends AbstractICalImportTest {
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(Bug8527.class);
 	}
-	
-	@Test public void bugritMilleniumHandAndShrimp() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, ContextException, LdapException {
+
+    @Test public void testDummy() {
+        // do nothing
+    }
+    // FIXME!
+    public void bugritMilleniumHandAndShrimp() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, ContextException, LdapException {
 		final String ical =
 				"BEGIN:VCALENDAR\n" +
 				"METHOD:REQUEST\n" +

@@ -231,7 +231,7 @@ public class ICalEmitterTest extends TestCase {
 
 
     public void testAppAlarm() throws IOException {
-        int MINUTES = 60*1000;
+        int MINUTES = 1;
 
         AppointmentObject appointment = getDefault();
         appointment.setAlarm(15 *MINUTES);

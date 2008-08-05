@@ -126,7 +126,7 @@ public class Bug7732Test extends AbstractICalImportTest {
 		final AbstractOXException x = res.getException();
 		x.printStackTrace();
 		
-		assertEquals("RRULE without DTSTART", x.getMessageArgs()[0]);
+		assertTrue(x.getMessage(), x.getMessage().contains("Missing DTSTART"));
 		
 	}
 

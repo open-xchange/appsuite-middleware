@@ -48,6 +48,8 @@ import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
+import com.openexchange.data.conversion.ical.ical4j.osgi.OXUserResolver;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 
@@ -281,7 +283,9 @@ public final class Init {
     public static void startAndInjectICalServices() {
         ICal4JParser parser = new ICal4JParser();
         ICal4JEmitter emitter = new ICal4JEmitter();
-        
+
+        Participants.userResolver = new OXUserResolver();
+
         services.put(ICalParser.class, parser);
         services.put(ICalEmitter.class, emitter);
 

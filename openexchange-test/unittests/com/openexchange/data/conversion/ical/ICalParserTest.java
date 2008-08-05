@@ -424,6 +424,21 @@ public class ICalParserTest extends TestCase {
         assertTrue(AppointmentObject.MONDAY == (AppointmentObject.MONDAY & days));
         assertTrue(AppointmentObject.WEDNESDAY == (AppointmentObject.WEDNESDAY & days)); // Is this correct? Can an appintment recur on more than one day in YEARLY series?
 
+        // Third form: every second sunday in april
+
+        appointment = appointmentWithRecurrence("FREQ=YEARLY;BYDAY=2SU;BYMONTH=4", start, end);
+        assertEquals(3, appointment.getMonth());
+        assertEquals(2, appointment.getDayInMonth());
+        assertEquals(AppointmentObject.SUNDAY, appointment.getDays());
+        assertEquals(1, appointment.getInterval());
+
+        // Third form: last sunday in april
+        appointment = appointmentWithRecurrence("FREQ=YEARLY;BYDAY=-1SU;BYMONTH=4", start, end);
+        assertEquals(3, appointment.getMonth());
+        assertEquals(5, appointment.getDayInMonth());
+        assertEquals(AppointmentObject.SUNDAY, appointment.getDays());
+        assertEquals(1, appointment.getInterval());
+        
 
         // Default
 
@@ -490,7 +505,7 @@ public class ICalParserTest extends TestCase {
 
         TimeZone utc = TimeZone.getTimeZone("UTC");
 
-        int MINUTES = 60*1000;
+        int MINUTES = 1;
 
         String icalText = fixtures.veventWithDisplayAlarm(start, end, "TRIGGER:-PT15M", "Description");
         AppointmentObject appointment = parseAppointment(icalText, utc);

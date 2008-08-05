@@ -515,7 +515,7 @@ public class AbstractContactTest {
 		assertEquals("Correct number of results?", expectedErrors.length, results.size());
 		
 		for(int i = 0; i < expectedErrors.length; i++){
-			assertEquals("Entry " +i+ " is as expected?" , expectedErrors[i], results.get(i).hasError());
+			assertEquals("Entry " +i+ " is as expected? "+results.get(i).getException() , expectedErrors[i], results.get(i).hasError());
 		}
 		return results;
 	}
