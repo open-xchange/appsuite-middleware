@@ -62,13 +62,17 @@ public class TestConfig extends AbstractConfig {
      */
     public static enum Property {
         /**
-         * ajax.properties.
+         * ajax.properties
          */
         AJAX_PROPS("ajaxPropertiesFile"),
         /**
          * mail.properties
          */
-        MAIL_PROPS("mailPropertiesFile");
+        MAIL_PROPS("mailPropertiesFile"),
+        /**
+         * webdav.properties
+         */
+        WEBDAV_PROPS("webdavPropertiesFile");
 
         /**
          * Name of the property in the test.properties file.

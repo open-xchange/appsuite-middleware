@@ -55,11 +55,11 @@ import com.openexchange.tools.conf.AbstractConfig;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class AJAXConfig extends AbstractConfig {
+public class WebDAVConfig extends AbstractConfig {
 
-    private static final TestConfig.Property KEY = TestConfig.Property.AJAX_PROPS;
+    private static final TestConfig.Property KEY = TestConfig.Property.WEBDAV_PROPS;
 
-    private static AJAXConfig singleton;
+    private static WebDAVConfig singleton;
 
     /**
      * {@inheritDoc}
@@ -81,7 +81,7 @@ public class AJAXConfig extends AbstractConfig {
     public static void init() throws ConfigurationException {
         TestConfig.init();
         if (null == singleton) {
-            singleton = new AJAXConfig();
+            singleton = new WebDAVConfig();
             singleton.loadPropertiesInternal();
         }
     }
@@ -113,29 +113,7 @@ public class AJAXConfig extends AbstractConfig {
         /**
          * Second user login.
          */
-        SECONDUSER("seconduser"),
-        /**
-         * Whether SP3 or SP4 data
-         */
-        IS_SP3("isSP3"),
-
-        /**
-         * USER PARTICIPANTS
-         */
-        USER_PARTICIPANT1("user_participant1"),
-        USER_PARTICIPANT2("user_participant2"),
-        USER_PARTICIPANT3("user_participant3"),
-        /**
-         * Resource Participants
-         */
-        RESOURCE_PARTICIPANT1("resource_participant1"),
-        RESOURCE_PARTICIPANT2("resource_participant2"),
-        RESOURCE_PARTICIPANT3("resource_participant3"),
-        /**
-         * Group Participant
-         */
-        GROUP_PARTICIPANT("group_participant");
-        ;
+        SECONDUSER("secondlogin");
 
         /**
          * Name of the property in the ajax.properties file.
