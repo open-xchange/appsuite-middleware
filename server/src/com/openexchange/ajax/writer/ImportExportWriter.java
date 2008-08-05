@@ -55,7 +55,7 @@ import org.json.JSONException;
 
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.json.OXJSONWriter;
 
@@ -94,7 +94,7 @@ public class ImportExportWriter extends DataWriter {
 		writeParameter(CommonFields.FOLDER_ID, importResult.getFolder());
 
 		if (importResult.hasError()) {
-			final OXException exception = importResult.getException();
+			final AbstractOXException exception = importResult.getException();
 			writeParameter("error", exception.getOrigMessage());
 			if (exception.getMessageArgs() != null) {
 				jsonwriter.key("error_params");
