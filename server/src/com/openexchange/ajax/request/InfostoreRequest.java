@@ -967,8 +967,11 @@ public class InfostoreRequest extends CommonRequest {
 
 		}
 		try {
-			w.object().endObject();
-		} catch (final JSONException e) {
+			w.object();
+            w.key(ResponseFields.TIMESTAMP);
+            w.value(updated.getLastModified().getTime());
+            w.endObject();
+        } catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		}
 	}
