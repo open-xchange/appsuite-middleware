@@ -46,53 +46,81 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.property.Clazz;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ConversionError;
+import static net.fortuna.ical4j.model.Property.CLASS;
+import static net.fortuna.ical4j.model.property.Clazz.CONFIDENTIAL;
+import static net.fortuna.ical4j.model.property.Clazz.PRIVATE;
+import static net.fortuna.ical4j.model.property.Clazz.PUBLIC;
 
 import java.util.List;
 import java.util.TimeZone;
+
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.property.Clazz;
+
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ConversionWarning.Code;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.contexts.Context;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Klass<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
 
-    public boolean isSet(U cObj) {
-        return true; // Can always map
+    /**
+     * Default constructor.
+     */
+    public Klass() {
+        super();
     }
 
-    public void emit(int index, U cObj, T component, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
-        if( cObj.getPrivateFlag() ) {
-            component.getProperties().add(new Clazz("private"));
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isSet(final U cObj) {
+        return cObj.containsPrivateFlag();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void emit(final int index, final U cObj, final T component,
+        final List<ConversionWarning> warnings, final Context ctx)
+        throws ConversionError {
+        if (cObj.getPrivateFlag()) {
+            component.getProperties().add(PRIVATE);
         } else {
-            component.getProperties().add(new Clazz("public"));
+            component.getProperties().add(PUBLIC);
         }
     }
 
-    public boolean hasProperty(T component) {
-        return component.getProperty("CLASS") != null;
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasProperty(final T component) {
+        return component.getProperty(CLASS) != null;
     }
 
-    public void parse(int index,T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
-        if(component.getProperty("CLASS") != null) {
-            String clazz = component.getProperty("CLASS").getValue();
-            if(clazz.equalsIgnoreCase("private")) {
-                cObj.setPrivateFlag(true);
-            } else if (clazz.equalsIgnoreCase("public")) {
-                cObj.setPrivateFlag(false);
-            } else if(clazz.equalsIgnoreCase("confidential")) {
-                throw new ConversionError(index, "Cowardly refusing to convert confidential appointment");
-            } else {
-                warnings.add(new ConversionWarning(index, "Unknown Class: %s", clazz));
-            }
-
+    /**
+     * {@inheritDoc}
+     */
+    public void parse(final int index, final T component, final U cObj,
+        final TimeZone timeZone, final Context ctx,
+        final List<ConversionWarning> warnings) throws ConversionError {
+        final Clazz clazz = (Clazz) component.getProperty(CLASS);
+        if (PRIVATE.equals(clazz)) {
+            cObj.setPrivateFlag(true);
+        } else if (CONFIDENTIAL.equals(clazz)) {
+            throw new ConversionError(index, Code.CLASS_CONFIDENTIAL);
+        } else if (PUBLIC.equals(clazz)) {
+            cObj.setPrivateFlag(false);
+        } else {
+            warnings.add(new ConversionWarning(index, Code.UNKNOWN_CLASS, clazz));
         }
     }
 }

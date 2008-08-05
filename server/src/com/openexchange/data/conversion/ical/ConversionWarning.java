@@ -126,7 +126,16 @@ public class ConversionWarning extends AbstractOXException {
 
         CANT_RESOLVE_USER("Can not resolve user: %d", Category.INTERNAL_ERROR, 8),
 
-        PARSE_EXCEPTION("Parsing error parsing ical: %s", Category.USER_INPUT, 9);
+        PARSE_EXCEPTION("Parsing error parsing ical: %s", Category.USER_INPUT, 9),
+        /**
+         * Unknown Class: %1$s
+         */
+        UNKNOWN_CLASS("Unknown Class: %1$s", Category.USER_INPUT, 10),
+        /**
+         * Cowardly refusing to convert confidential classified objects.
+         */
+        CLASS_CONFIDENTIAL("Cowardly refusing to convert confidential classified objects.",
+            Category.USER_INPUT, 11);
 
         /**
          * Message of the exception.
