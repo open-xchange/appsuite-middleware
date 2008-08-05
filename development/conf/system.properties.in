@@ -7,7 +7,7 @@ com.openexchange.caching.configfile:@oxgroupwaresysconfdir@/cache.ccf
 # obtained and managed by ServiceHolder class will be tracked to ensure
 # all services are put back (via unget) within a certain amount of time.
 # The time range can be defined through property 'serviceUsageTimeout'.
-serviceUsageInspection=false
+serviceUsageInspection=true
 
 # The service usage timeout in milliseconds. This property only has
 # effect if property 'serviceUsageInspection' is set to 'true'.
