@@ -755,7 +755,8 @@ public class InfostoreRequest extends CommonRequest {
 		final SearchEngine searchEngine = getSearchEngine();
 
 		int[] notDetached = new int[0];
-		if (ids.length != 0) {
+        long newTimestamp = 0;
+        if (ids.length != 0) {
 			try {
 
 				infostore.startTransaction();
@@ -763,9 +764,10 @@ public class InfostoreRequest extends CommonRequest {
 
 				notDetached = infostore.removeVersion(objectId, ids, sessionObj);
 
-				searchEngine.index(infostore.getDocumentMetadata(objectId, InfostoreFacade.CURRENT_VERSION, ctx,
-						user, userConfiguration), ctx, user, userConfiguration);
-
+                DocumentMetadata currentVersion = infostore.getDocumentMetadata(objectId, InfostoreFacade.CURRENT_VERSION, ctx,
+                        user, userConfiguration);
+                searchEngine.index(currentVersion, ctx, user, userConfiguration);
+                newTimestamp = currentVersion.getLastModified().getTime();
 				infostore.commit();
 				searchEngine.commit();
 			} catch (final Throwable t) {
@@ -797,6 +799,8 @@ public class InfostoreRequest extends CommonRequest {
 				w.value(nd);
 			}
 			w.endArray();
+            w.key(ResponseFields.TIMESTAMP);
+            w.value(newTimestamp);
             w.endObject();
         } catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
@@ -1050,8 +1054,14 @@ public class InfostoreRequest extends CommonRequest {
 
 			infostore.commit();
 
-			try {
-				w.object().endObject();
+            DocumentMetadata currentVersion = infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx,
+                    user, userConfiguration);
+
+            try {
+				w.object();
+                w.key(ResponseFields.TIMESTAMP);
+                w.value(currentVersion.getLastModified().getTime());
+                w.endObject();
 			} catch (final JSONException e) {
 				LOG.error(e.getLocalizedMessage(), e);
 			}
@@ -1083,8 +1093,12 @@ public class InfostoreRequest extends CommonRequest {
 			infostore.unlock(id, sessionObj);
 
 			infostore.commit();
-			try {
-				w.object().endObject();
+
+            DocumentMetadata currentVersion = infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx,
+                                user, userConfiguration);
+
+            try {
+				w.object().key(ResponseFields.TIMESTAMP).value(currentVersion.getLastModified().getTime()).endObject();
 			} catch (final JSONException e) {
 				LOG.error(e.getLocalizedMessage(), e);
 			}
