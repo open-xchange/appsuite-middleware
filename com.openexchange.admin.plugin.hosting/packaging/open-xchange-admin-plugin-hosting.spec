@@ -97,6 +97,9 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Tue Jul 29 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11681: Removed a lot of .toString() in debug messages to prevent
+   NullPointerExceptions.
 * Mon Jul 28 2008 - holgi@open-xchange.com
   - Bugfix ID#11715 showruntimestats -d not usable for com.openexchange.caching
 * Thu Jul 17 2008 - choeger@open-xchange.com
