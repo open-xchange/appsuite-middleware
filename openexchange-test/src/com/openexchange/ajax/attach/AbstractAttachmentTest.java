@@ -119,7 +119,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		final JSONArray arrayOfIds = (JSONArray) res.getData();
         // Ugly extract of deletes in response.
         updates = 0;
-        for (int i = 0; i < arrayOfArrays.length(); i++) {
+        for (int i = 0; i < arrayOfIds.length(); i++) {
             if (arrayOfIds.get(i) instanceof Integer) {
                 updates++;
             }
@@ -147,15 +147,23 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		final Response res = all(getWebConversation(),sessionId,folderId,attachedId, moduleId, new int[]{AttachmentField.ID, AttachmentField.FILENAME}, AttachmentField.CREATION_DATE, "ASC");
 		assertNoError(res);
 		final JSONArray arrayOfArrays = (JSONArray) res.getData();
-		
-		assertEquals(clean.size(), arrayOfArrays.length());
-		
+        // Ugly extract of updates in response.
+        int updates = 0;
+        for (int i = 0; i < arrayOfArrays.length(); i++) {
+            if (arrayOfArrays.get(i) instanceof JSONArray) {
+                updates++;
+            }
+        }
+		assertEquals(arrayOfArrays.toString(), clean.size(), updates);
 		for(int i = 0; i < arrayOfArrays.length(); i++) {
-			final JSONArray values = arrayOfArrays.getJSONArray(i);
-			final AttachmentMetadata attachment = clean.get(i);
-			
-			assertEquals(values.getInt(0),attachment.getId());
-			assertEquals(testFile.getName(), values.getString(1));
+            final Object tmp = arrayOfArrays.get(i);
+            if (tmp instanceof JSONArray) {
+                final JSONArray values = (JSONArray) tmp;
+    			final AttachmentMetadata attachment = clean.get(i);
+    			
+    			assertEquals(values.getInt(0),attachment.getId());
+    			assertEquals(testFile.getName(), values.getString(1));
+            }
 		}
 	}
 	
