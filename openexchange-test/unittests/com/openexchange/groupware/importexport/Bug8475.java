@@ -69,6 +69,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 
 public class Bug8475 extends AbstractICalImportTest{
 	
@@ -132,6 +133,8 @@ public class Bug8475 extends AbstractICalImportTest{
 		final Participant[] participants = task.getParticipants();
 		assertEquals("One participant?" , 1, participants.length);
 		final Participant p =  participants[0];
-		assertEquals("User " + testUser.getMail() + " gets participant \"" + p + "\".", testUser.getId() , p.getIdentifier());
-	}
+		assertEquals("User " + testUser.getMail() + " gets participant \"" + p + "\"."+ " using resolver "+ Participants.userResolver, testUser.getId() , p.getIdentifier());
+        // FIXME: Grossly violates encapsulation
+
+    }
 }
