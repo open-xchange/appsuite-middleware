@@ -25,12 +25,11 @@ public class SearchTest extends InfostoreAJAXTest {
 	
 	@Override
 	public void setUp() throws Exception{
-		
-		this.sessionId = getSessionId();
-		final int userId = FolderTest.getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
-		this.folderId = FolderTest.getMyInfostoreFolder(getWebConversation(),getHostName(),sessionId,userId).getObjectID();
-		
-		all = new String[26];
+
+        super.setUp();
+        super.removeAll();
+
+        all = new String[26];
 		
 		final char[] alphabet = new char[]{'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
 		
@@ -59,26 +58,26 @@ public class SearchTest extends InfostoreAJAXTest {
 	}
 
 	public void testPattern() throws Exception {
-		Response res = search(getWebConversation(), getHostName(), sessionId, "*", COLS);
+		Response res = search(getWebConversation(), getHostName(), sessionId, "*", COLS, folderId);
 		assertNoError(res);
 		assertTitles(res,all);
 		
 		
-		res = search(getWebConversation(), getHostName(), sessionId, "Test ?5", COLS);
+		res = search(getWebConversation(), getHostName(), sessionId, "Test ?5", COLS, folderId);
 		assertNoError(res);
 		assertTitles(res,"Test 15", "Test 25");
 		
 	}
 	
 	public void testAll() throws Exception {
-		final Response res = search(getWebConversation(), getHostName(), sessionId, "", COLS);
+		final Response res = search(getWebConversation(), getHostName(), sessionId, "", COLS, folderId);
 		assertNoError(res);
 		assertTitles(res,all);
 	}
 	
 	
 	public void testCaseInsensitive() throws Exception {
-		final Response res = search(getWebConversation(), getHostName(), sessionId, "test", COLS);
+		final Response res = search(getWebConversation(), getHostName(), sessionId, "test", COLS, folderId);
 		assertNoError(res);
 		assertTitles(res,all);
 	}
@@ -224,12 +223,13 @@ public class SearchTest extends InfostoreAJAXTest {
 	
 	public static void assertTitles(final Response res, final String...titles) throws JSONException {
 		final JSONArray arrayOfarrays = (JSONArray) res.getData();
-		assertEquals(titles.length, arrayOfarrays.length());
-		
-		final Set<String> titlesSet = new HashSet<String>(Arrays.asList(titles));
+        final Set<String> titlesSet = new HashSet<String>(Arrays.asList(titles));
+
+        String error = "Expected: " + titlesSet + " but got " + arrayOfarrays;
+        assertEquals(error, titles.length, arrayOfarrays.length());
 		for(int i = 0; i < arrayOfarrays.length(); i++) {
 			final JSONArray entry = arrayOfarrays.getJSONArray(i);
-			assertTrue(titlesSet.remove(entry.getString(0)));
+			assertTrue(error, titlesSet.remove(entry.getString(0)));
 		}
 	}
 	

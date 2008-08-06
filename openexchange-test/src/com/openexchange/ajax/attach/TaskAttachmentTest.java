@@ -104,6 +104,7 @@ public class TaskAttachmentTest extends AbstractAttachmentTest {
     @Override
     public void removeAttachable(final int folder, final int taskId,
         final String sessionId) throws Exception {
+
         final Response response = TaskTools.getTask(getWebConversation(),
             getHostName(), sessionId, folderId, taskId);
         final Date lastModified = response.getTimestamp();

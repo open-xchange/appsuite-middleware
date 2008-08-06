@@ -44,8 +44,7 @@ public class UpdatesTest extends InfostoreAJAXTest{
 		
 		ts = res.getTimestamp().getTime();
 		
-		tearDown();
-		clean.clear();
+		removeAll();
 		
 		res = updates(getWebConversation(),getHostName(),sessionId,folderId, new int[]{Metadata.TITLE,Metadata.DESCRIPTION}, ts);
 		

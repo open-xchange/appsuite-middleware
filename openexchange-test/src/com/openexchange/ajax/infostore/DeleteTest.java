@@ -19,9 +19,18 @@ public class DeleteTest extends InfostoreAJAXTest {
 	}
 	
 	public void testBasic() throws Exception{
-		tearDown();
-		
-		final Response res = this.all(getWebConversation(),getHostName(),sessionId, folderId, new int[]{Metadata.ID});
+        final int[][] toDelete = new int[clean.size()][2];
+
+        for(int i = 0; i < toDelete.length; i++) {
+            toDelete[i][0] = folderId; // FIXME: Put a correct folderId here
+            toDelete[i][1] = clean.get(i);
+        }
+
+        final int[] notDeleted = delete(getWebConversation(),getHostName(),sessionId, Long.MAX_VALUE, toDelete);
+
+        assertEquals(0, notDeleted.length);
+
+        final Response res = this.all(getWebConversation(),getHostName(),sessionId, folderId, new int[]{Metadata.ID});
 		
 		assertNoError(res);
 		

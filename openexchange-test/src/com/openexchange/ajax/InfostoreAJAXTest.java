@@ -22,6 +22,8 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.parser.ResponseParser;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.FolderObject;
 
 public class InfostoreAJAXTest extends AbstractAJAXTest {
 
@@ -43,7 +45,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 	public void setUp() throws Exception {
 		this.sessionId = getSessionId();
 		final int userId = FolderTest.getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
-		this.folderId = FolderTest.getMyInfostoreFolder(getWebConversation(),getHostName(),sessionId,userId).getObjectID();
+		this.folderId = createFolderForTest(userId);
 		
 		Map<String,String> create = m(
 			"folder_id" 		,	((Integer)folderId).toString(),
@@ -66,23 +68,36 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		
 		clean.add(c);
 	}
-	
-	@Override
+
+    private int createFolderForTest(int userId) throws JSONException, OXException, IOException, SAXException {
+        int parent = FolderTest.getMyInfostoreFolder(getWebConversation(),getHostName(),sessionId,userId).getObjectID();
+        return FolderTest.insertFolder(getWebConversation(), getHostName(), getSessionId(), userId, false,parent,
+                "NewInfostoreFolder"+System.currentTimeMillis(), "infostore", FolderObject.PUBLIC, -1, true);
+    }
+
+    @Override
 	public void tearDown() throws Exception {
-		final int[][] toDelete = new int[clean.size()][2];
-		
-		for(int i = 0; i < toDelete.length; i++) {
-			toDelete[i][0] = folderId; // FIXME: Put a correct folderId here
-			toDelete[i][1] = clean.get(i);
-		}
-		
-		final int[] notDeleted = delete(getWebConversation(),getHostName(),sessionId, System.currentTimeMillis(), toDelete);
-		
-		//assertEquals("Couldn't delete "+j(notDeleted),0,notDeleted.length);
+		removeAll();
+        FolderTest.deleteFolders(getWebConversation(), getHostName(), sessionId, new int[]{folderId}, Long.MAX_VALUE, false);
+
+        //assertEquals("Couldn't delete "+j(notDeleted),0,notDeleted.length);
 	}
-	
-	
-	private String j(final int[] ids) {
+
+    public void removeAll() throws JSONException, IOException, SAXException {
+        final int[][] toDelete = new int[clean.size()][2];
+
+        for(int i = 0; i < toDelete.length; i++) {
+            toDelete[i][0] = folderId; // FIXME: Put a correct folderId here
+            toDelete[i][1] = clean.get(i);
+        }
+
+        final int[] notDeleted = delete(getWebConversation(),getHostName(),sessionId, Long.MAX_VALUE, toDelete);
+
+        clean.clear();
+    }
+
+
+    private String j(final int[] ids) {
 		final StringBuffer b = new StringBuffer("[ ");
 		for(final int i : ids) {
 			b.append(i);
@@ -562,8 +577,12 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 	public Response search(final WebConversation webConv, final String hostname, final String sessionId, final String query, final int[] columns) throws MalformedURLException, JSONException, IOException, SAXException {
 		return search(webConv,hostname,sessionId,query,columns,-1,-1,null, -1, -1);
 	}
-	
-	public Response search(final WebConversation webConv, final String hostname, final String sessionId, final String query, final int[] columns, final int folderId, final int sort, final String order, final int start, final int end) throws MalformedURLException, JSONException, IOException, SAXException {
+
+    public Response search(final WebConversation webConv, final String hostname, final String sessionId, final String query, final int[] columns, final int folderId) throws JSONException, IOException, SAXException {
+        return search(webConv,hostname,sessionId,query,columns,folderId,-1,null, -1, -1);
+    }
+
+    public Response search(final WebConversation webConv, final String hostname, final String sessionId, final String query, final int[] columns, final int folderId, final int sort, final String order, final int start, final int end) throws MalformedURLException, JSONException, IOException, SAXException {
 		final StringBuffer url = getUrl(sessionId,"search", hostname);
 		url.append("&columns=");
 		for(final int c : columns) {
