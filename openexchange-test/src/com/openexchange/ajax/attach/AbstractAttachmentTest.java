@@ -117,14 +117,23 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		res = updates(getWebConversation(),sessionId,folderId,attachedId, moduleId, timestamp, new int[]{AttachmentField.ID, AttachmentField.FILENAME}, AttachmentField.CREATION_DATE, "ASC");
 		
 		final JSONArray arrayOfIds = (JSONArray) res.getData();
+        // Ugly extract of deletes in response.
+        updates = 0;
+        for (int i = 0; i < arrayOfArrays.length(); i++) {
+            if (arrayOfArrays.get(i) instanceof Integer) {
+                updates++;
+            }
+        }
 		
-		assertEquals(copy.size(), arrayOfIds.length());
+		assertEquals(arrayOfIds.toString(), copy.size(), updates);
 		
 		for(int i = 0; i < arrayOfIds.length(); i++) {
-			final int id = arrayOfIds.getInt(i);
-			final AttachmentMetadata attachment = copy.get(i);
-			
-			assertEquals(id,attachment.getId());
+		    final Object tmp = arrayOfIds.get(i);
+		    if (tmp instanceof Integer) {
+    			final int id = ((Integer) tmp).intValue();
+    			final AttachmentMetadata attachment = copy.get(i);
+    			assertEquals(id, attachment.getId());
+		    }
 		}
 	}
 	
