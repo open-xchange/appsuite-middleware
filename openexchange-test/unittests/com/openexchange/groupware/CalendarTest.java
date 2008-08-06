@@ -801,7 +801,7 @@ public class CalendarTest extends TestCase {
             si = csql.getAppointmentsBetween(userid, new Date(0), new Date(253402210800000L), cols, 0,  null);
             while (si.hasNext()) {
             	final CalendarDataObject tdao = si.next();
-            	final Date compare = tdao.getLastModified() == null ? tdao.getChangingDate() : tdao.getLastModified();
+            	final Date compare = tdao.getLastModified();
             	if (compare != null) {
 					assertFalse("Got results. An available appointment created in test case! " + tdao.getTitle(), compare.getTime() >= startTime && tdao.getTitle().startsWith("testInsertMoveAllDelete"));
 				} else {
