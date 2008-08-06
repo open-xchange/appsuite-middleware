@@ -149,5 +149,24 @@ public class RecurringCalculationTest extends TestCase {
             assertEquals(new Date(expected)+" expected. Was: "+new Date(actual), expected, actual);
         }
     }
+
+    // Bug 11730
+    public void testRecurrencesGoOnUntil99YearsInTheFuture() throws RecurringException {
+        RecurringCalculation calc = new RecurringCalculation(AppointmentObject.YEARLY,1,0);
+        calc.setStartAndEndTime(D("05/11/1900 10:00").getTime(), D("05/11/1900 12:00").getTime());
+        calc.setDayInMonth(11);
+        calc.setMonth(4);
+
+        RecurringResults results = calc.calculateRecurrence();
+
+        long threshold = new Date().getTime() + 40 * CalendarRecurringCollection.MILLI_DAY;
+        for(int i = 0, size = results.size(); i < size; i++) {
+            if(threshold < results.getRecurringResult(i).getStart()) {
+                return;
+            }
+        }
+        fail("Couldn't find future recurrence for unlimited series");
+
+    }
     
 }
