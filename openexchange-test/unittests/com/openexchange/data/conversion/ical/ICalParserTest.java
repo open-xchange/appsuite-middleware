@@ -532,7 +532,14 @@ public class ICalParserTest extends TestCase {
         assertEquals(50 *MINUTES ,appointment.getAlarm());
         assertTrue(appointment.getAlarmFlag());
     }
-    
+
+    public void testAppFullTime() throws ConversionError {
+        String icalText = fixtures.veventWithWholeDayEvent(D("24/02/1990 12:00"));
+        AppointmentObject appointment = parseAppointment(icalText);
+
+        assertTrue(appointment.getFullTime());
+    }
+
     // Tasks
 
     public void testTskTitle() throws ConversionError {

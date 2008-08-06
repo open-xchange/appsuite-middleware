@@ -633,4 +633,18 @@ public class ICALFixtures {
         endStandardAppFields(bob);
         return bob.toString();
     }
+
+    public String veventWithWholeDayEvent(Date start) {
+        StringBuilder bob = new StringBuilder();
+
+        beginCalendar(bob);
+        beginEvent(bob);
+
+        bob.append("DTSTART;VALUE=DATE:").append(date.format(start)).append("\n");
+
+        endEvent(bob);
+        endCalendar(bob);
+
+        return bob.toString();
+    }
 }
