@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar;
 
-import java.sql.Timestamp;
 import java.util.Date;
 
 import com.openexchange.api2.OXException;
@@ -61,31 +60,29 @@ import com.openexchange.groupware.contexts.Context;
  * CalendarDataObject
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
-
 public class CalendarDataObject extends AppointmentObject {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(CalendarDataObject.class);
-    
-    private Timestamp creating_date, changing_date;
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+            .getLog(CalendarDataObject.class);
+
     private String rec_string;
-    
+
     private Context context;
     private int folder_type = -1;
     private int pfid, action_folder;
     private int shared_folder_owner;
     private int folder_move_action;
-    
+
     private boolean is_hard_conflict;
-    
+
     private boolean contains_resources;
     private boolean folder_move;
     private boolean b_recurrencestring;
-    
+
     private boolean fill_participants;
     private boolean fill_user_participants;
     private boolean fill_folder_id;
-    
+
     @Override
     public final void setUntil(Date until) {
         if (until != null) {
@@ -96,90 +93,61 @@ public class CalendarDataObject extends AppointmentObject {
             super.setUntil(until);
         }
     }
-    
+
     public final void setSharedFolderOwner(final int shared_folder_owner) {
         this.shared_folder_owner = shared_folder_owner;
     }
-    
+
     public final int getSharedFolderOwner() {
         return shared_folder_owner;
     }
-    
+
     public final void setFolderType(final int folder_type) {
         this.folder_type = folder_type;
     }
-    
+
     public final int getFolderType() {
         return folder_type;
     }
-    
+
     public final void setActionFolder(final int action_folder) {
         this.action_folder = action_folder;
     }
-    
+
     public final int getActionFolder() {
         return action_folder;
     }
-    
+
     public final int getFulltime() {
         if (!super.getFullTime()) {
             return 0;
         }
         return 1;
     }
-    
+
     public final int getPrivateflag() {
         if (!super.getPrivateFlag()) {
             return 0;
         }
         return 1;
     }
-    
-    public void setCreatingDate(final Timestamp creating_date) {
-        this.creating_date = creating_date;
-        super.setCreationDate(new Date(creating_date.getTime()));
-    }
-    
-    public final Timestamp getCreatingDate() {
-        if (creating_date != null) {
-            return creating_date;
-        }
-        if (getLastModified() != null) {
-            return new Timestamp(getLastModified().getTime());
-        }
-        return new Timestamp(System.currentTimeMillis());
-    }
-    
-    public final void setChangingDate(final Timestamp changing_date) {
-        if (changing_date != null) {
-            this.changing_date = changing_date;
-            super.setLastModified(new Date(changing_date.getTime()));
-        }
-    }
-    
-    public final Timestamp getChangingDate() {
-        if (changing_date != null) {
-            return changing_date;
-        }
-        return new Timestamp(System.currentTimeMillis());
-    }
-    
+
     public final void setGlobalFolderID(final int fid) {
         super.setParentFolderID(fid);
     }
-    
+
     public final int getGlobalFolderID() {
         return getParentFolderID();
     }
-    
+
     public final void setPrivateFolderID(final int pfid) {
         this.pfid = pfid;
     }
-    
+
     public final int getPrivateFolderID() {
         return pfid;
     }
-    
+
     public int getEffectiveFolderId() {
         if (getParentFolderID() != 0) {
             return getParentFolderID();
@@ -192,37 +160,37 @@ public class CalendarDataObject extends AppointmentObject {
             return 0;
         }
     }
-    
+
     public final void setContext(final Context context) {
         this.context = context;
     }
-    
+
     public final Context getContext() {
         return context;
     }
-    
+
     public final int getContextID() {
         if (context != null) {
             return context.getContextId();
         }
         return 0;
     }
-    
+
     public final void setRecurrence(final String rec_string) {
         this.rec_string = rec_string;
         if (rec_string != null) {
             b_recurrencestring = true;
         }
     }
-    
+
     public final boolean containsRecurrenceString() {
         return b_recurrencestring;
     }
-    
+
     public final String getRecurrence() {
         return rec_string;
     }
-    
+
     public final void setDelExceptions(final String delete_execptions) {
         if (delete_execptions != null) {
             super.setDeleteExceptions(CalendarCommonCollection.convertString2Dates(delete_execptions));
@@ -230,14 +198,14 @@ public class CalendarDataObject extends AppointmentObject {
             setDeleteExceptions(null);
         }
     }
-    
+
     public final String getDelExceptions() {
         if (containsDeleteExceptions()) {
             return CalendarCommonCollection.convertDates2String(getDeleteException());
         }
         return null;
     }
-    
+
     public final void setExceptions(final String change_exceptions) {
         if (change_exceptions != null) {
             super.setChangeExceptions(CalendarCommonCollection.convertString2Dates(change_exceptions));
@@ -245,130 +213,130 @@ public class CalendarDataObject extends AppointmentObject {
             setChangeExceptions(null);
         }
     }
-    
+
     public final String getExceptions() {
         if (containsChangeExceptions()) {
             return CalendarCommonCollection.convertDates2String(getChangeException());
         }
         return null;
     }
-    
+
     public final boolean calculateRecurrence() throws OXException {
         if (isSequence(true)) {
             return CalendarRecurringCollection.fillDAO(this);
         }
         return false;
     }
-    
+
     @Override
     public final Date getUntil() {
-		if (!containsUntil()) {
-			/*
-			 * Determine max. end date
-			 */
-			final long maxEnd = getRecurrenceType() == CalendarObject.YEARLY ? (CalendarRecurringCollection
-					.normalizeLong(getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * 99)))
-					: (CalendarRecurringCollection
-							.normalizeLong(getStartDate().getTime()
-									+ (CalendarRecurringCollection.MILLI_YEAR * CalendarRecurringCollection
-											.getMAX_END_YEARS())));
-			/*
-			 * Create a clone for calculation purpose
-			 */
-			final CalendarDataObject clone = (CalendarDataObject) this.clone();
-			clone.setEndDate(new Date(maxEnd));
-			final RecurringResults rresults;
-			try {
-				rresults = CalendarRecurringCollection.calculateRecurring(clone, 0, 0, 0);
-			} catch (final OXException e) {
-				LOG.error(e.getMessage(), e);
-				return new Date(maxEnd);
-			}
-			if (rresults == null) {
-				return new Date(maxEnd);
-			}
-			final RecurringResult rresult = rresults
-					.getRecurringResultByPosition(CalendarRecurringCollection.MAXTC + 1);
-			if (rresult != null) {
-				return new Date(CalendarRecurringCollection.normalizeLong(rresult.getEnd()));
-			}
-			return new Date(maxEnd);
-		}
-		return super.getUntil();
-	}
+        if (!containsUntil()) {
+            /*
+             * Determine max. end date
+             */
+            final long maxEnd = getRecurrenceType() == CalendarObject.YEARLY ? (CalendarRecurringCollection
+                    .normalizeLong(getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * 99)))
+                    : (CalendarRecurringCollection
+                            .normalizeLong(getStartDate().getTime()
+                                    + (CalendarRecurringCollection.MILLI_YEAR * CalendarRecurringCollection
+                                            .getMAX_END_YEARS())));
+            /*
+             * Create a clone for calculation purpose
+             */
+            final CalendarDataObject clone = (CalendarDataObject) this.clone();
+            clone.setEndDate(new Date(maxEnd));
+            final RecurringResults rresults;
+            try {
+                rresults = CalendarRecurringCollection.calculateRecurring(clone, 0, 0, 0);
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+                return new Date(maxEnd);
+            }
+            if (rresults == null) {
+                return new Date(maxEnd);
+            }
+            final RecurringResult rresult = rresults
+                    .getRecurringResultByPosition(CalendarRecurringCollection.MAXTC + 1);
+            if (rresult != null) {
+                return new Date(CalendarRecurringCollection.normalizeLong(rresult.getEnd()));
+            }
+            return new Date(maxEnd);
+        }
+        return super.getUntil();
+    }
 
     /**
      * Checks if this calendar data object denotes a recurring appointment
-     * 
+     *
      * @param what <code>true</code> to check by recurrence pattern or recurrence type; otherwise <code>false</code> to check by recurrence ID and recurrence type
      * @return <code>true</code> if this calendar data object denotes a recurring appointment; otherwise <code>false</code>
      */
     public final boolean isSequence(final boolean what) {
         if (what) {
-        	return (containsRecurrenceString() || (containsRecurrenceType() && getRecurrenceType() > 0 && getInterval() > 0));
+            return (containsRecurrenceString() || (containsRecurrenceType() && getRecurrenceType() > 0 && getInterval() > 0));
         }
         return (containsRecurrenceID() && containsRecurrenceType() && getRecurrenceType() > 0 && getInterval() > 0);
     }
-    
+
     public final boolean isSequence() {
         return isSequence(true);
     }
-    
+
     public void setFolderMove(final boolean folder_move) {
         this.folder_move = folder_move;
     }
-    
+
     public boolean getFolderMove() {
         return folder_move;
     }
-    
+
     public void setFolderMoveAction(final int folder_move_action) {
         this.folder_move_action = folder_move_action;
     }
-    
+
     public int getFolderMoveAction() {
         return folder_move_action;
     }
-    
+
     public void setContainsResources(final boolean contains_resources) {
         this.contains_resources = contains_resources;
     }
-    
+
     public boolean containsResources() {
         return contains_resources;
     }
-    
+
     public boolean isHardConflict() {
         return is_hard_conflict;
     }
-    
+
     void setHardConflict() {
         is_hard_conflict = true;
     }
-    
+
      void setFillParticipants() {
         fill_participants = true;
     }
-     
+
      boolean fillParticipants() {
         return fill_participants;
     }
-    
+
      void setFillUserParticipants() {
         fill_user_participants = true;
     }
-     
+
      boolean fillUserParticipants() {
         return fill_user_participants;
-    }     
+    }
      void setFillFolderID() {
         fill_folder_id = true;
     }
-     
+
      boolean fillFolderID() {
         return fill_folder_id;
-    }     
-     
+    }
+
     @Override
     public Object clone() {
         final CalendarDataObject clone = new CalendarDataObject();
@@ -387,9 +355,6 @@ public class CalendarDataObject extends AppointmentObject {
         }
         if (containsEndDate()) {
             clone.setEndDate(getEndDate());
-        }
-        if (containsCreationDate()) {
-            clone.setCreatingDate(getCreatingDate());
         }
         if (containsCreatedBy()) {
             clone.setCreatedBy(getCreatedBy());
@@ -465,13 +430,13 @@ public class CalendarDataObject extends AppointmentObject {
         clone.setFolderMoveAction(getFolderMoveAction());
         clone.setFolderMove(getFolderMove());
         clone.setSharedFolderOwner(getSharedFolderOwner());
-        
-        
+
+
         return clone;
     }
-    
+
     private static final String STR_DELIM = " - ";
-    
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -520,5 +485,4 @@ public class CalendarDataObject extends AppointmentObject {
         sb.append(getDayInMonth());
         return sb.toString();
     }
-    
 }

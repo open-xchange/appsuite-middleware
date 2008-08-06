@@ -140,9 +140,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         try {
             if (load_resultset.next()) {
                 int i = 1;
-                cdao.setCreatingDate(setTimestamp(i++, load_resultset));
+                cdao.setCreationDate(setTimestamp(i++, load_resultset));
                 cdao.setCreatedBy(setInt(i++, load_resultset));
-                cdao.setChangingDate(setTimestampFromLong(i++, load_resultset));
+                cdao.setLastModified(setTimestampFromLong(i++, load_resultset));
                 cdao.setModifiedBy(setInt(i++, load_resultset));
                 cdao.setGlobalFolderID(setInt(i++, load_resultset));
                 cdao.setPrivateFlag(setBooleanToInt(i++, load_resultset));
@@ -659,12 +659,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                             break;
                         case AppointmentObject.CREATION_DATE:
                             if (CalendarCommonCollection.getFieldName(AppointmentObject.CREATION_DATE) != null) {
-                                cdao.setCreatingDate(setTimestamp(g++, co_rs));
+                                cdao.setCreationDate(setTimestamp(g++, co_rs));
                             }
                             break;
                         case AppointmentObject.LAST_MODIFIED:
                             if (CalendarCommonCollection.getFieldName(AppointmentObject.LAST_MODIFIED) != null) {
-                                cdao.setChangingDate(setTimestampFromLong(g++, co_rs));
+                                cdao.setLastModified(setTimestampFromLong(g++, co_rs));
                             }
                             break;
                         case AppointmentObject.FULL_TIME:

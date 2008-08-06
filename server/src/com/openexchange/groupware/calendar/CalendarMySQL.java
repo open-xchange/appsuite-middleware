@@ -1060,12 +1060,12 @@ class CalendarMySQL implements CalendarSqlImp {
 			pst = writecon.prepareStatement("insert into prg_dates (creating_date, created_from, changing_date, changed_from," + "fid, pflag, cid, timestampfield01, timestampfield02, timezone, intfield01, intfield03, intfield06, intfield07, intfield08, " + "field01, field02, field04, field09, intfield02, intfield04, intfield05, field06, field07, field08) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 			cdao.setObjectID(IDGenerator.getId(cdao.getContext(), Types.APPOINTMENT, writecon));
 
-			pst.setTimestamp(i++, cdao.getCreatingDate());
+			pst.setTimestamp(i++, new Timestamp(cdao.getCreationDate().getTime()));
 			if (!cdao.containsLastModified()) {
-				cdao.setLastModified(cdao.getCreatingDate());
+				cdao.setLastModified(cdao.getCreationDate());
 			}
 			pst.setInt(i++, cdao.getCreatedBy());
-			pst.setLong(i++, cdao.getChangingDate().getTime());
+			pst.setLong(i++, cdao.getLastModified().getTime());
 			pst.setInt(i++, cdao.getModifiedBy());
 
 			if (cdao.getFolderType() == FolderObject.PRIVATE || cdao.getFolderType() == FolderObject.SHARED) {
@@ -1774,9 +1774,8 @@ class CalendarMySQL implements CalendarSqlImp {
 					cdao.removeAlarm();
 				}
 				final long lastModified = System.currentTimeMillis();
-				clone.setCreatingDate(new Timestamp(lastModified));
+				clone.setCreationDate(new Date(lastModified));
 				clone.setLastModified(new Date(lastModified));
-				clone.setChangingDate(new Timestamp(lastModified));
 				insertAppointment(clone, writecon, so);
 				CalendarCommonCollection.removeFieldsFromObject(cdao);
 				// no update here
@@ -1784,7 +1783,6 @@ class CalendarMySQL implements CalendarSqlImp {
 				cdao.setUsers(edao.getUsers());
 				cdao.setRecurrence(edao.getRecurrence());
 				cdao.setLastModified(clone.getLastModified());
-				cdao.setChangingDate(clone.getChangingDate());
 			} catch (final SQLException sqle) {
 				throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle, new Object[0]);
 			} catch (final LdapException ldape) {
@@ -3457,7 +3455,7 @@ class CalendarMySQL implements CalendarSqlImp {
 			triggerDeleteEvent(oid, fid, so, ctx, null);
 		} else {
 			edao.setModifiedBy(uid);
-			edao.setChangingDate(new Timestamp(modified));
+			edao.setLastModified(new Date(modified));
 			triggerDeleteEvent(oid, fid, so, ctx, edao);
 		}
 	}
