@@ -941,7 +941,7 @@ public class ICalParserTest extends TestCase {
 
     public void testAppShouldIncludeErrorOnConfidentialAppointments() throws ConversionError {
         String icalText = fixtures.veventWithSimpleProperties(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "CLASS", "CONFIDENTIAL");
-        assertErrorWhenParsingAppointment(icalText, "Cowardly refusing to convert confidential appointment");
+        assertErrorWhenParsingAppointment(icalText, "Cowardly refusing to convert confidential classified objects.");
     }
 
     
