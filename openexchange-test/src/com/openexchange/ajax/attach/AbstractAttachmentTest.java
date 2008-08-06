@@ -102,11 +102,13 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		assertEquals(arrayOfArrays.toString(), createdLater.size(), updates);
 		
 		for(int i = 0; i < arrayOfArrays.length(); i++) {
-			final JSONArray values = arrayOfArrays.getJSONArray(i);
-			final AttachmentMetadata attachment = createdLater.get(i);
-			
-			assertEquals(values.getInt(0),attachment.getId());
-			assertEquals(testFile.getName(), values.getString(1));
+		    final Object tmp = arrayOfArrays.get(i);
+		    if (tmp instanceof JSONArray) {
+    			final JSONArray values = (JSONArray) tmp;
+    			final AttachmentMetadata attachment = createdLater.get(i);
+    			assertEquals(values.getInt(0),attachment.getId());
+    			assertEquals(testFile.getName(), values.getString(1));
+		    }
 		}
 		
 		final List<AttachmentMetadata> copy = new ArrayList<AttachmentMetadata>(clean);
