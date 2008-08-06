@@ -120,7 +120,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         // Ugly extract of deletes in response.
         updates = 0;
         for (int i = 0; i < arrayOfArrays.length(); i++) {
-            if (arrayOfArrays.get(i) instanceof Integer) {
+            if (arrayOfIds.get(i) instanceof Integer) {
                 updates++;
             }
         }
