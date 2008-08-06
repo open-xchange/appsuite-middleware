@@ -178,7 +178,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             contextcheck(ctx);
 
             if (!tool.existsContext(ctx)) {           
-                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed for user " + auth.getLogin());
+                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed for user " + ((null != auth) ? auth.getLogin() : "null"));
                  log.error("Requested context " + ctx.getId() + " does not exist!", invalidCredentialsException);
                  throw invalidCredentialsException;
             }
@@ -227,19 +227,19 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
             
             if(!ClientAdminThread.cache.contextAuthenticationDisabled()){
-            final int auth_user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
-            // check if given user is admin
-            if (tool.isContextAdmin(ctx, auth_user_id)) {
-                basicauth.doAuthentication(auth, ctx);
-            } else {
-                basicauth.doUserAuthentication(auth, ctx);
-                // now check if user which authed has the same id as the user he
-                // wants to change,else fail,
-                // cause then he/she wants to change not his own data!
-                if (userid.intValue() != auth_user_id) {
-                    throw new InvalidCredentialsException("Permission denied");
-                }
-            } 
+                final int auth_user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
+                // check if given user is admin
+                if (tool.isContextAdmin(ctx, auth_user_id)) {
+                    basicauth.doAuthentication(auth, ctx);
+                } else {
+                    basicauth.doUserAuthentication(auth, ctx);
+                    // now check if user which authed has the same id as the user he
+                    // wants to change,else fail,
+                    // cause then he/she wants to change not his own data!
+                    if (userid.intValue() != auth_user_id) {
+                        throw new InvalidCredentialsException("Permission denied");
+                    }
+                } 
             }
             
             if (tool.checkAndUpdateSchemaIfRequired(ctx)) {
