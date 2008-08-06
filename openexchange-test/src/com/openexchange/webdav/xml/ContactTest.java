@@ -571,6 +571,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		if (response[0].hasError()) {
 			throw new TestException(response[0].getErrorMessage());
 		}
+		// This status must be checked after throwing TestException.
         assertEquals("check response status", 200, response[0].getStatus());
 		return (ContactObject) response[0].getDataObject();
 	}
