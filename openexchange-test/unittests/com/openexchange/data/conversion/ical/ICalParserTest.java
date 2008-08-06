@@ -162,13 +162,13 @@ public class ICalParserTest extends TestCase {
 
         // Private
 
-        String icalText = fixtures.veventWithSimpleProperties(start, end, "CLASS", "private");
+        String icalText = fixtures.veventWithSimpleProperties(start, end, "CLASS", "PRIVATE");
         AppointmentObject appointment = parseAppointment(icalText, utc);
 
         assertTrue(appointment.getPrivateFlag());
 
         // Public
-        icalText = fixtures.veventWithSimpleProperties(start, end, "CLASS", "public");
+        icalText = fixtures.veventWithSimpleProperties(start, end, "CLASS", "PUBLIC");
         appointment = parseAppointment(icalText, utc);
         assertFalse(appointment.getPrivateFlag());
 
@@ -623,13 +623,13 @@ public class ICalParserTest extends TestCase {
 
         // Private
 
-        String icalText = fixtures.vtodoWithSimpleProperties("CLASS", "private");
+        String icalText = fixtures.vtodoWithSimpleProperties("CLASS", "PRIVATE");
         Task task = parseTask(icalText, utc);
 
         assertTrue(task.getPrivateFlag());
 
         // Public
-        icalText = fixtures.vtodoWithSimpleProperties("CLASS", "public");
+        icalText = fixtures.vtodoWithSimpleProperties("CLASS", "PUBLIC");
         task = parseTask(icalText, utc);
         assertFalse(task.getPrivateFlag());
     }
@@ -655,10 +655,10 @@ public class ICalParserTest extends TestCase {
     public void testTskPriority() throws ConversionError {
         priorityTest(1, Task.HIGH);
         priorityTest(2, Task.HIGH);
-        priorityTest(3, Task.HIGH);
-        priorityTest(4, Task.HIGH);
+        priorityTest(3, Task.NORMAL);
+        priorityTest(4, Task.NORMAL);
         priorityTest(5, Task.NORMAL);
-        priorityTest(6, Task.LOW);
+        priorityTest(6, Task.NORMAL);
         priorityTest(7, Task.LOW);
         priorityTest(8, Task.LOW);
         priorityTest(9, Task.LOW);

@@ -251,12 +251,12 @@ public class ICalEmitterTest extends TestCase {
 
         ICalFile ical = serialize(app);
 
-        assertProperty(ical, "CLASS", "public");
+        assertProperty(ical, "CLASS", "PUBLIC");
 
         app.setPrivateFlag(true);
         ical = serialize(app);
 
-        assertProperty(ical, "CLASS", "private");
+        assertProperty(ical, "CLASS", "PRIVATE");
     }
 
     public void testAppTransparency() throws IOException {
