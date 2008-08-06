@@ -59,8 +59,8 @@ public class LockTest extends InfostoreAJAXTest {
 		
 		Response res = this.update(getWebConversation(),getHostName(),sessionId,c,System.currentTimeMillis(),m(), testFile, "text/plain");
 		assertNoError(res);
-		
-		res = this.update(getWebConversation(),getHostName(),sessionId,c,System.currentTimeMillis(),m(), testFile, "text/plain");
+        
+        res = this.update(getWebConversation(),getHostName(),sessionId,c,System.currentTimeMillis(),m(), testFile, "text/plain");
 		assertNoError(res);
 		
 		res = this.update(getWebConversation(),getHostName(),sessionId,c,System.currentTimeMillis(),m(), testFile, "text/plain");
@@ -85,6 +85,7 @@ public class LockTest extends InfostoreAJAXTest {
 		
 		res = lock(getWebConversation(),getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
+        assertNotNull(res.getTimestamp());
 		
 		res = get(getWebConversation(),getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
@@ -114,17 +115,17 @@ public class LockTest extends InfostoreAJAXTest {
 		final int userId2 = FolderTest.getUserId(getSecondWebConversation(), getHostName(), getSeconduser(), getPassword());
 		final int folderId2 = FolderTest.getMyInfostoreFolder(getSecondWebConversation(),getHostName(),sessionId2,userId2).getObjectID();
 		
-		res = update(getSecondWebConversation(),getHostName(),sessionId2, clean.get(0), System.currentTimeMillis(), m("folder_id" , ""+folderId2));
+		res = update(getSecondWebConversation(),getHostName(),sessionId2, clean.get(0), Long.MAX_VALUE, m("folder_id" , ""+folderId2));
 		assertTrue(res.hasError());
 		
 		// Object may not be removed
-		int[] notDeleted = delete(getSecondWebConversation(),getHostName(),sessionId2, System.currentTimeMillis(), new int[][]{{folderId, clean.get(0)}});
+		int[] notDeleted = delete(getSecondWebConversation(),getHostName(),sessionId2, Long.MAX_VALUE, new int[][]{{folderId, clean.get(0)}});
 		assertEquals(1, notDeleted.length);
 		assertEquals(clean.get(0),(Integer) notDeleted[0]);
 		
 		
 		// Versions may not be removed
-		int[] notDetached = detach(getSecondWebConversation(),getHostName(),sessionId2,System.currentTimeMillis(), clean.get(0), new int[]{4});
+		int[] notDetached = detach(getSecondWebConversation(),getHostName(),sessionId2,Long.MAX_VALUE, clean.get(0), new int[]{4});
 		assertEquals(1,notDetached.length);
 		assertEquals(4,notDetached[0]);
 		
@@ -139,7 +140,7 @@ public class LockTest extends InfostoreAJAXTest {
 		assertTrue(res.hasError());
 		
 		// Lock owner may update
-		res = update(getWebConversation(),getHostName(),sessionId, clean.get(0), System.currentTimeMillis(), m("title" , "Hallo"));
+		res = update(getWebConversation(),getHostName(),sessionId, clean.get(0), Long.MAX_VALUE, m("title" , "Hallo"));
 		assertNoError(res);
 		
 		res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
@@ -148,11 +149,11 @@ public class LockTest extends InfostoreAJAXTest {
 		assertEquals("Hallo",o.get("title"));
 		
 		//Lock owner may detach
-		notDetached = detach(getWebConversation(),getHostName(),sessionId,System.currentTimeMillis(), clean.get(0), new int[]{4});
+		notDetached = detach(getWebConversation(),getHostName(),sessionId,Long.MAX_VALUE, clean.get(0), new int[]{4});
 		assertEquals(0,notDetached.length);
 		
 		//Lock owner may remove
-		notDeleted = delete(getWebConversation(),getHostName(),sessionId, System.currentTimeMillis(), new int[][]{{folderId, clean.get(0)}});
+		notDeleted = delete(getWebConversation(),getHostName(),sessionId, Long.MAX_VALUE, new int[][]{{folderId, clean.get(0)}});
 		assertEquals(0, notDeleted.length);
 		clean.remove(0);
 		
@@ -173,7 +174,8 @@ public class LockTest extends InfostoreAJAXTest {
 		// Lock owner may unlock (duh!)
 		res = unlock(getWebConversation(),getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
-		
+        assertNotNull(res.getTimestamp());
+				
 		res = get(getWebConversation(),getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
 		assertUnlocked((JSONObject)res.getData());
@@ -184,7 +186,7 @@ public class LockTest extends InfostoreAJAXTest {
 		assertNoError(res);
 		
 		// Owner may not edit
-		res = update(getWebConversation(),getHostName(),sessionId, clean.get(0), System.currentTimeMillis(), m("title" , "Hallo"));
+		res = update(getWebConversation(),getHostName(),sessionId, clean.get(0), Long.MAX_VALUE, m("title" , "Hallo"));
 		assertTrue(res.hasError());
 		
 		// Owner may unlock

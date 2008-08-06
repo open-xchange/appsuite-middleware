@@ -49,8 +49,9 @@ public class UpdateTest extends InfostoreAJAXTest {
 		assertEquals(1, object.getInt("color_label"));
 		
 		assertEquals(0, object.getInt("version"));
-		
-	}
+        assertNotNull(res.getTimestamp());
+
+    }
 	
 	public void testLongDescription() throws Exception {
 		descriptionRoundtrip(LOREM_IPSUM);
@@ -89,7 +90,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 		
 		final int id = clean.get(0);
 		
-		Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain");
+		Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m(), upload, "text/plain");
 		assertNoError(res);
 		
 		res = get(getWebConversation(),getHostName(), sessionId, id);
@@ -122,14 +123,14 @@ public class UpdateTest extends InfostoreAJAXTest {
 		
 		final int id = clean.get(0);
 		
-		Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain");
+		Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m(), upload, "text/plain");
 		assertNoError(res);
 		
 		final int id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title" , "otherFile", "description","other_desc", "folder_id" ,	((Integer)folderId).toString()));
 		
 		clean.add(id2);
 		
-		res = update(getWebConversation(),getHostName(),sessionId,id2,System.currentTimeMillis(),m(), upload, "text/plain");
+		res = update(getWebConversation(),getHostName(),sessionId,id2,Long.MAX_VALUE,m(), upload, "text/plain");
 		assertTrue(res.hasError());
 	}
 	
@@ -139,17 +140,17 @@ public class UpdateTest extends InfostoreAJAXTest {
 		
 		final int id = clean.get(0);
 		
-		Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m("filename" , "theFile.txt"), upload, "text/plain");
+		Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m("filename" , "theFile.txt"), upload, "text/plain");
 		assertNoError(res);
 		
-		res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain");
+		res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m(), upload, "text/plain");
 		assertNoError(res);
 		
 		final int id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title" , "otherFile", "description","other_desc","filename","theFile.txt","folder_id" ,	((Integer)folderId).toString()),upload,"text/plain");
 		
 		clean.add(id2);
 		
-		res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m("title","otherTitle","version","1"));
+		res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m("title","otherTitle","version","1"));
 		assertTrue(res.hasError());
 		
 	}
@@ -194,16 +195,16 @@ public class UpdateTest extends InfostoreAJAXTest {
 		
 		final int id = clean.get(0);
 		
-		Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain"); // V1
+		Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m(), upload, "text/plain"); // V1
 		assertNoError(res);
 		
-		res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain");// V2
+		res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m(), upload, "text/plain");// V2
 		assertNoError(res);
 		
-		res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain");// V3
+		res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m(), upload, "text/plain");// V3
 		assertNoError(res);
 		
-		res = update(getWebConversation(),getHostName(),sessionId,id, System.currentTimeMillis(), m("version" , "2"));
+		res = update(getWebConversation(),getHostName(),sessionId,id, Long.MAX_VALUE, m("version" , "2"));
 		assertNoError(res);
 		
 		res = get(getWebConversation(),getHostName(), sessionId, id);
@@ -221,13 +222,13 @@ public class UpdateTest extends InfostoreAJAXTest {
 		
 		final int id = clean.get(0);
 		
-		Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain"); // V1
+		Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m(), upload, "text/plain"); // V1
 		assertNoError(res);
 		
-		res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain");// V2
+		res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m(), upload, "text/plain");// V2
 		assertNoError(res);
 		
-		res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m("description","New Description"));
+		res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m("description","New Description"));
 		assertNoError(res);
 		
 		res = get(getWebConversation(), getHostName(), sessionId, id);
@@ -243,7 +244,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 		
 		final int id = clean.get(0);
 		
-		Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m("version_comment","Version Comment"), upload, "text/plain"); // V1
+		Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m("version_comment","Version Comment"), upload, "text/plain"); // V1
 		assertNoError(res);
 		
 		res = get(getWebConversation(), getHostName(), sessionId, id);
@@ -255,7 +256,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 	
 	// Bug 4269
 	public void testVirtualFolder() throws Exception {
-		final Response res = update(getWebConversation(), getHostName(), sessionId, clean.get(0), System.currentTimeMillis(), m("folder_id", ""+FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
+		final Response res = update(getWebConversation(), getHostName(), sessionId, clean.get(0), Long.MAX_VALUE, m("folder_id", ""+FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
 		assertTrue(res.hasError());
 		assertTrue(res.getErrorMessage(), res.getErrorMessage().contains("virt"));
 	}

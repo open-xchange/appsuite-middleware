@@ -47,7 +47,8 @@ public class NewTest extends InfostoreAJAXTest {
 		clean.add(id);
 		
 		Response res = get(getWebConversation(),getHostName(), sessionId, id);
-		JSONObject obj = (JSONObject) res.getData();
+        assertNotNull(res.getTimestamp());
+        JSONObject obj = (JSONObject) res.getData();
 		
 		assertEquals("test upload",obj.getString("title"));
 		assertEquals("test upload description",obj.getString("description"));
@@ -185,7 +186,7 @@ public class NewTest extends InfostoreAJAXTest {
 		
 		final int id = clean.get(0);
 		
-		final Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain");
+		final Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m(), upload, "text/plain");
 		assertNoError(res);
 		
 		try {

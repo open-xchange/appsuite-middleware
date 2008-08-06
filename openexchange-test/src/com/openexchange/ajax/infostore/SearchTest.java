@@ -185,7 +185,7 @@ public class SearchTest extends InfostoreAJAXTest {
 		
 		assertTitles(res, "The mysterious ?");
 		
-		res = update(getWebConversation(),getHostName(),sessionId,id, System.currentTimeMillis(), m("title" , "The * of all trades"));
+		res = update(getWebConversation(),getHostName(),sessionId,id, Long.MAX_VALUE, m("title" , "The * of all trades"));
 		assertNoError(res);
 		
 		res = search(getWebConversation(), getHostName(), sessionId, "\\*", COLS);
@@ -205,7 +205,7 @@ public class SearchTest extends InfostoreAJAXTest {
 	public void testCategories() throws Exception {
 		final int id = clean.get(0);
 		
-		Response res = update(getWebConversation(),getHostName(),sessionId,id, System.currentTimeMillis(), m("categories" , "[\"curiosity\", \"cat\", \"danger\"]"));
+		Response res = update(getWebConversation(),getHostName(),sessionId,id, Long.MAX_VALUE, m("categories" , "[\"curiosity\", \"cat\", \"danger\"]"));
 		assertNoError(res);
 		
 		res = search(getWebConversation(), getHostName(), sessionId, "curiosity", COLS);

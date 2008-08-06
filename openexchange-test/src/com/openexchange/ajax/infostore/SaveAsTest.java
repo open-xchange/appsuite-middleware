@@ -33,7 +33,8 @@ public class SaveAsTest extends InfostoreAJAXTest {
 		clean.add(id);
 		
 		final Response res = get(getWebConversation(),getHostName(), sessionId, id);
-		final JSONObject obj = (JSONObject) res.getData();
+		assertNotNull(res.getTimestamp());
+        final JSONObject obj = (JSONObject) res.getData();
 		
 		final File upload = attachmentTest.getTestFile();
 		

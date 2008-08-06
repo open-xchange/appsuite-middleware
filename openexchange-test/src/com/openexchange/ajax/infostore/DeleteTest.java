@@ -19,16 +19,7 @@ public class DeleteTest extends InfostoreAJAXTest {
 	}
 	
 	public void testBasic() throws Exception{
-        final int[][] toDelete = new int[clean.size()][2];
-
-        for(int i = 0; i < toDelete.length; i++) {
-            toDelete[i][0] = folderId; // FIXME: Put a correct folderId here
-            toDelete[i][1] = clean.get(i);
-        }
-
-        final int[] notDeleted = delete(getWebConversation(),getHostName(),sessionId, Long.MAX_VALUE, toDelete);
-
-        assertEquals(0, notDeleted.length);
+        super.removeAll();
 
         final Response res = this.all(getWebConversation(),getHostName(),sessionId, folderId, new int[]{Metadata.ID});
 		
@@ -77,7 +68,7 @@ public class DeleteTest extends InfostoreAJAXTest {
 	
 
     public void testDeleteSingle() throws JSONException, IOException, SAXException {
-        final int[] notDeleted = deleteSingle(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), folderId, clean.get(clean.size()-1));
+        final int[] notDeleted = deleteSingle(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, folderId, clean.get(clean.size()-1));
         assertEquals(0, notDeleted.length);
         
     }

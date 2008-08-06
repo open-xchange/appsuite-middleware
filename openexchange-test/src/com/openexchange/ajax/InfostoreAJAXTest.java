@@ -22,6 +22,7 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.parser.ResponseParser;
+import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 
@@ -444,8 +445,11 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		final String content = putS(webConv, url.toString(), data.toString());
 		JSONArray arr = null;
 		try{
-			arr = new JSONObject(content).getJSONArray("data");
-		} catch (final JSONException x) {
+            JSONObject response = new JSONObject(content);
+            arr = response.getJSONArray("data");
+            if(!response.has("error"))
+                assertNotNull(response.opt(ResponseFields.TIMESTAMP)); // FIXME!
+        } catch (final JSONException x) {
 			final Response res = Response.parse(content);
 			if(res.hasError()) {
 				throw new IOException(res.getErrorMessage());
@@ -456,7 +460,6 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		for(int i = 0; i < arr.length(); i++) {
 			notDeleted[i] = arr.getInt(i);
 		}
-		
 		return notDeleted;
 	}
 	

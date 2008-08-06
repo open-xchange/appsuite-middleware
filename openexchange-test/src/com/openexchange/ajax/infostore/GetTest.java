@@ -30,7 +30,7 @@ public class GetTest extends InfostoreAJAXTest {
 	
 	public void getVersion() throws Exception {
 		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-		Response res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m("description","New description"), upload, "text/plain");
+		Response res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),Long.MAX_VALUE,m("description","New description"), upload, "text/plain");
 		assertNoError(res);
 		
 		res = this.get(getWebConversation(), getHostName(), sessionId, clean.get(0),0);

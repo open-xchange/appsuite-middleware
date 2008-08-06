@@ -46,7 +46,8 @@ public class DetachTest extends InfostoreAJAXTest {
 	public void testRevert() throws Exception {
 		final Response res = revert(getWebConversation(),getHostName(), sessionId, System.currentTimeMillis(), clean.get(0));
 		assertNoError(res);
-		checkNoVersions();
+        assertNotNull(res.getTimestamp());
+        checkNoVersions();
 	}
 	
 	public void checkNoVersions() throws Exception {
@@ -79,7 +80,7 @@ public class DetachTest extends InfostoreAJAXTest {
 	}
 	
 	public void testSpotted() throws Exception {
-		final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,3,5});
+		final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[]{1,3,5});
 		assertEquals(0, notDetached.length);
 		
 		Response res = versions(getWebConversation(),getHostName(),sessionId, clean.get(0), new int[]{Metadata.VERSION,Metadata.CURRENT_VERSION});
@@ -96,7 +97,7 @@ public class DetachTest extends InfostoreAJAXTest {
 	}
 	
 	public void testDetachVersion0() throws Exception {
-		final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{0});
+		final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[]{0});
 		assertEquals(1, notDetached.length);
 		assertEquals(0,notDetached[0]);
 	}
@@ -123,7 +124,7 @@ public class DetachTest extends InfostoreAJAXTest {
 		final int id = clean.get(0);
 		
 		
-		final Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m("filename" , "blupp.properties"));
+		final Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m("filename" , "blupp.properties"));
 		assertNoError(res);
 		
 		final int id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title" , "otherFile", "description","other_desc", "folder_id" ,	((Integer)folderId).toString()), upload, "text/plain");
