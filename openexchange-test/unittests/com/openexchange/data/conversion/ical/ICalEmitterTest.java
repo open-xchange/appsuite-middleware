@@ -249,6 +249,7 @@ public class ICalEmitterTest extends TestCase {
     public void testAppPrivateFlag() throws IOException {
         AppointmentObject app = getDefault();
 
+        app.setPrivateFlag(false);
         ICalFile ical = serialize(app);
 
         assertProperty(ical, "CLASS", "PUBLIC");
