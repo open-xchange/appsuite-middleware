@@ -568,10 +568,10 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		final InputStream input = propFindMethod.getResponseBodyAsStream();
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(input), Types.CONTACT);
 		assertEquals("check response" , 1, response.length);
-        assertEquals("check response status", 200, response[0].getStatus());
 		if (response[0].hasError()) {
 			throw new TestException(response[0].getErrorMessage());
 		}
+        assertEquals("check response status", 200, response[0].getStatus());
 		return (ContactObject) response[0].getDataObject();
 	}
 	
