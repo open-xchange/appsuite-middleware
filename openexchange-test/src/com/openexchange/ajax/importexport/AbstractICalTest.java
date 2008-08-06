@@ -212,21 +212,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
 	    final AJAXSession aSession = new AJAXSession(webCon, session);
 	    final ICalImportRequest request = new ICalImportRequest(folderId, input);
 	    final ICalImportResponse iResponse = Executor.execute(aSession, request, host);
-	    final Response[] responses = iResponse.getImports();
-		final ImportResult[] importResult = new ImportResult[responses.length];
-		for (int i = 0; i < responses.length; i++) {
-		    if (responses[i].hasError()) {
-		        importResult[i] = new ImportResult();
-		        importResult[i].setException(responses[i].getException());
-		    } else {
-		        final JSONObject jsonObj = responses[i].getJSON();
-                final String objectId = jsonObj.getString(DataFields.ID);
-                final String folder = jsonObj.getString(CommonFields.FOLDER_ID);
-                final long timestamp = jsonObj.getLong(DataFields.LAST_MODIFIED);
-                importResult[i] = new ImportResult(objectId, folder, timestamp);
-		    }
-		}
-		return importResult;
+		return iResponse.getImports();
 	}
 	
 	public AppointmentObject[] exportAppointment(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session, Context ctx) throws Exception, TestException {

@@ -47,46 +47,34 @@
  *
  */
 
-package com.openexchange.ajax.framework;
+package com.openexchange.ajax.importexport;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
-import org.json.JSONException;
-
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.parser.ResponseParser;
 
 /**
- * This parser extracts the JSON object from the web site returned by the server
- * if an upload has been made.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * This suite is meant to be used with a running OX.
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ *
  */
-public abstract class AbstractUploadParser<T extends AbstractAJAXResponse> extends AbstractAJAXParser<T> {
+public class ImportExportServerSuite extends TestSuite {
 
-    public static final Pattern CALLBACK_ARG_PATTERN = Pattern.compile("callback\\s*\\((\\{.*?\\})\\);");
+	public static Test suite(){
+		final TestSuite tests = new TestSuite();
+		tests.addTest(ICalTestSuite.suite());
 
-    /**
-     * @param failOnError
-     */
-    public AbstractUploadParser(final boolean failOnError) {
-        super(failOnError);
-    }
+		//VCARD
+		tests.addTestSuite(VCardImportTest.class);
+		tests.addTestSuite(VCardExportTest.class);
+		tests.addTestSuite(Bug9475Test.class);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Response getResponse(final String body) throws JSONException {
-        final Matcher matcher = CALLBACK_ARG_PATTERN.matcher(body);
-        final Response response;
-        if (matcher.find()) {
-            response = ResponseParser.parse(matcher.group(1));
-        } else {
-            throw new JSONException("Can't parse body: \"" + body + "\"");
-        }
-        assertFalse(response.getErrorMessage(), isFailOnError() && response
-            .hasError());
-        return response;
-    }
+		//CSV
+		tests.addTestSuite(CSVImportExportServletTest.class);
+
+		// Overall bug tests.
+		tests.addTestSuite(Bug9209Test.class);
+
+		return tests;
+	}
 }

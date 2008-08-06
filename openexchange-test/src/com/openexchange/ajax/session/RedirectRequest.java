@@ -9,11 +9,9 @@ import com.openexchange.ajax.AJAXServlet;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class RedirectRequest extends AbstractRequest {
+public class RedirectRequest extends AbstractRequest<RedirectResponse> {
 
     private final String jvmRoute;
-
-    private final String random;
 
     /**
      * @param random
@@ -25,7 +23,6 @@ public class RedirectRequest extends AbstractRequest {
             new Parameter("random", random)
         });
         this.jvmRoute = jvmRoute;
-        this.random = random;
     }
 
     /**

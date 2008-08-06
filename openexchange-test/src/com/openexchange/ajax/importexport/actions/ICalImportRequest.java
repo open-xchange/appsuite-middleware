@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.importexport.actions;
 
+import static com.openexchange.tools.encoding.Charsets.UTF_8;
+import static com.openexchange.tools.encoding.Charsets.getBytes;
+
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 /**
@@ -73,11 +77,14 @@ public final class ICalImportRequest extends AbstractImportRequest<ICalImportRes
         this.failOnError = failOnError;
     }
 
+    public ICalImportRequest(final int folderId, final String iCal) {
+        this(folderId, new ByteArrayInputStream(getBytes(iCal, UTF_8)), true);
+    }
+
     /**
      * {@inheritDoc}
      */
     public ICalImportParser getParser() {
         return new ICalImportParser(failOnError);
     }
-
 }

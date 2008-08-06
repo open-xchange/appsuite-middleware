@@ -51,6 +51,7 @@ package com.openexchange.ajax.importexport.actions;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.groupware.importexport.ImportResult;
 
 /**
  * 
@@ -58,7 +59,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public final class ICalImportResponse extends AbstractAJAXResponse {
 
-    private Response[] imports;
+    private ImportResult[] imports;
 
     /**
      * @param response
@@ -70,14 +71,14 @@ public final class ICalImportResponse extends AbstractAJAXResponse {
     /**
      * @return the imports
      */
-    public Response[] getImports() {
+    public ImportResult[] getImports() {
         return imports;
     }
 
     /**
      * @param imports the imports to set
      */
-    public void setImports(final Response[] imports) {
+    public void setImports(final ImportResult[] imports) {
         this.imports = imports;
     }
 
@@ -88,8 +89,8 @@ public final class ICalImportResponse extends AbstractAJAXResponse {
     public boolean hasError() {
         boolean retval = super.hasError();
         if (null != imports) {
-            for (final Response response : imports) {
-                retval = retval || response.hasError();
+            for (final ImportResult result : imports) {
+                retval = retval || result.hasError();
             }
         }
         return retval;

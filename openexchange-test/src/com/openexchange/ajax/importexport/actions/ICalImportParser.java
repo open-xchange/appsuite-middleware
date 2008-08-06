@@ -54,6 +54,8 @@ import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractUploadParser;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.importexport.ImportResult;
 
 /**
  * 
@@ -81,11 +83,18 @@ public final class ICalImportParser extends AbstractUploadParser<ICalImportRespo
         final Object data = response.getData();
         if (data instanceof JSONArray) {
             final JSONArray array = (JSONArray) data;
-            final Response[] responses = new Response[array.length()];
+            final ImportResult[] results = new ImportResult[array.length()];
             for (int i = 0; i < array.length(); i++) {
-                responses[i] = Response.parse(array.getString(i));
+                results[i] = ImportExportParser.parse(array.getString(i));
             }
-            retval.setImports(responses);
+            retval.setImports(results);
+            if (failOnError) {
+                for (final ImportResult result : results) {
+                    final AbstractOXException e = result.getException();
+                    final String msg = e == null ? null : e.getMessage();
+                    assertFalse(msg, result.hasError());
+                }
+            }
         } else if (failOnError) {
             fail("Wrong data in response.");
         }

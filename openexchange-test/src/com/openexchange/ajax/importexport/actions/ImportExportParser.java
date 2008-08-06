@@ -47,46 +47,42 @@
  *
  */
 
-package com.openexchange.ajax.framework;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+package com.openexchange.ajax.importexport.actions;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.parser.ResponseParser;
+import com.openexchange.groupware.importexport.ImportResult;
 
 /**
- * This parser extracts the JSON object from the web site returned by the server
- * if an upload has been made.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractUploadParser<T extends AbstractAJAXResponse> extends AbstractAJAXParser<T> {
-
-    public static final Pattern CALLBACK_ARG_PATTERN = Pattern.compile("callback\\s*\\((\\{.*?\\})\\);");
+public final class ImportExportParser {
 
     /**
-     * @param failOnError
+     * Prevent instantiation.
      */
-    public AbstractUploadParser(final boolean failOnError) {
-        super(failOnError);
+    private ImportExportParser() {
+        super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Response getResponse(final String body) throws JSONException {
-        final Matcher matcher = CALLBACK_ARG_PATTERN.matcher(body);
-        final Response response;
-        if (matcher.find()) {
-            response = ResponseParser.parse(matcher.group(1));
+    public static final ImportResult parse(final String data) throws JSONException {
+        final Response response = ResponseParser.parse(data);
+        final ImportResult retval;
+        if (response.hasError()) {
+            retval = new ImportResult();
+            retval.setException(response.getException());
         } else {
-            throw new JSONException("Can't parse body: \"" + body + "\"");
+            final JSONObject json = response.getJSON();
+            final String id = json.getString(CommonFields.ID);
+            final String folderId = json.getString(CommonFields.FOLDER_ID);
+            final long lastModified = json.getLong(CommonFields.LAST_MODIFIED);
+            retval = new ImportResult(id, folderId, lastModified);
         }
-        assertFalse(response.getErrorMessage(), isFailOnError() && response
-            .hasError());
-        return response;
+        return retval;
     }
 }
