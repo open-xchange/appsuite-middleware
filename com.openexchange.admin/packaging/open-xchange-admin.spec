@@ -150,6 +150,13 @@ ln -sf ../etc/init.d/open-xchange-admin %{buildroot}/sbin/rcopen-xchange-admin
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Wed Aug 06 2008 - dennis.sieben@open-xchange.com
+ - Bugfix #11847: rmi: NULL not accepted any more for auth
+* Tue Jul 29 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11681: Removed a lot of .toString() in debug messages to prevent
+   NullPointerExceptions.
+ - Bugfix #11740: Checking for possible null value for guiPreferences attribute
+   in User.equals method.
 * Fri Jul 18 2008 - choeger@open-xchange.com
  - Bugfix ID#11682 [L3] NullPointerException when switching to debug mode for admin daemon
 * Tue Jul 15 2008 - choeger@open-xchange.com
