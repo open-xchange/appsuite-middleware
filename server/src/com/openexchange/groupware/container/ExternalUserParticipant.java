@@ -181,4 +181,15 @@ public class ExternalUserParticipant implements Participant, Comparable<Particip
         }
         return retval;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("ExternalUserParticipant,mail:");
+        sb.append(emailaddress);
+        return sb.toString();
+    }
 }

@@ -107,4 +107,15 @@ public class ExternalParticipant extends TaskParticipant {
     public int hashCode() {
         return null == getMail() ? super.hashCode() : getMail().hashCode();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("ExternalParticipant,mail:");
+        sb.append(getMail());
+        return sb.toString();
+    }
 }

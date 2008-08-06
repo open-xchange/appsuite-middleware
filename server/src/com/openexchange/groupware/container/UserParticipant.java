@@ -249,4 +249,15 @@ public class UserParticipant implements Participant, Comparable<Participant> {
         }
         return retval;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("UserParticipant,id:");
+        sb.append(getIdentifier());
+        return sb.toString();
+    }
 }
