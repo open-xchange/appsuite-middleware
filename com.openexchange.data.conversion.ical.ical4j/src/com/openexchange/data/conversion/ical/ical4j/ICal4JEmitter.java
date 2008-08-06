@@ -82,6 +82,7 @@ public class ICal4JEmitter implements ICalEmitter {
 
     public String writeAppointments(List<AppointmentObject> appointmentObjects, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) {
         Calendar calendar = new Calendar();
+        initCalendar(calendar);
         int i = 0;
         for(AppointmentObject appointment : appointmentObjects) {
             VEvent event = createEvent(i++, appointment, ctx, errors, warnings);
@@ -98,6 +99,7 @@ public class ICal4JEmitter implements ICalEmitter {
         final List<ConversionError> errors,
         final List<ConversionWarning> warnings, Context ctx) {
         final Calendar calendar = new Calendar();
+        initCalendar(calendar);
         int i = 0;
         for (final Task task : tasks) {
             final VToDo vtodo;
@@ -182,7 +184,9 @@ public class ICal4JEmitter implements ICalEmitter {
 
     private void initCalendar(final Calendar calendar) {
         final PropertyList properties = calendar.getProperties();
-        properties.add(new ProdId());
+        final ProdId prodId = new ProdId();
+        prodId.setValue(Version.NAME);
+        properties.add(prodId);
         properties.add(Version.VERSION_2_0);
     }
 

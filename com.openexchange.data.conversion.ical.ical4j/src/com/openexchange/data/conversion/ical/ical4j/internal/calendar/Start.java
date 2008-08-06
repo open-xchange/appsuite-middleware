@@ -50,8 +50,10 @@
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
 import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDateTime;
+import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.isDateTime;
 import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.parseDate;
 
+import java.util.Date;
 import java.util.TimeZone;
 import java.util.List;
 
@@ -60,6 +62,7 @@ import net.fortuna.ical4j.model.property.DtStart;
 
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 
@@ -103,6 +106,14 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
      * {@inheritDoc}
      */
     public void parse(int index, final T component, final U calendar, final TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) {
-        calendar.setStartDate(parseDate(component, new DtStart(), timeZone));
+        final DtStart dtStart = new DtStart();
+        final Date start = parseDate(component, dtStart, timeZone);
+        calendar.setStartDate(start);
+        if (!isDateTime(component, dtStart)) {
+            calendar.setEndDate(new Date(start.getTime() + 24 * 60 * 60 * 1000));
+            if (calendar instanceof AppointmentObject) {
+                ((AppointmentObject) calendar).setFullTime(true);
+            }
+        }
     }
 }

@@ -53,6 +53,7 @@ import java.util.List;
 
 import org.json.JSONException;
 
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.groupware.AbstractOXException;
@@ -88,28 +89,18 @@ public class ImportExportWriter extends DataWriter {
 	}
 
 	public void writeObject(final ImportResult importResult) throws JSONException {
-		jsonwriter.object();
-		writeParameter(DataFields.ID, importResult.getObjectId());
-		writeParameter(DataFields.LAST_MODIFIED, importResult.getDate());
-		writeParameter(CommonFields.FOLDER_ID, importResult.getFolder());
-
-		if (importResult.hasError()) {
-			final AbstractOXException exception = importResult.getException();
-			writeParameter("error", exception.getOrigMessage());
-			if (exception.getMessageArgs() != null) {
-				jsonwriter.key("error_params");
-				jsonwriter.array();
-				for (final Object tmp : exception.getMessageArgs()) {
-					jsonwriter.value(tmp);
-				}
-				jsonwriter.endArray();
-			}
-			writeParameter("category", exception.getCategory().getCode());
-			writeParameter("code", exception.getErrorCode());
-			writeParameter("error_id", exception.getExceptionID());
-			writeParameter("entry_number", importResult.getEntryNumber());
-		}
-		jsonwriter.endObject();
+        if (importResult.hasError()) {
+            final AbstractOXException exception = importResult.getException();
+            final Response response = new Response();
+            response.setException(exception);
+            ResponseWriter.write(response, jsonwriter);
+        } else {
+    		jsonwriter.object();
+    		writeParameter(DataFields.ID, importResult.getObjectId());
+    		writeParameter(DataFields.LAST_MODIFIED, importResult.getDate());
+    		writeParameter(CommonFields.FOLDER_ID, importResult.getFolder());
+    		jsonwriter.endObject();
+        }
 	}
 
 	@Override

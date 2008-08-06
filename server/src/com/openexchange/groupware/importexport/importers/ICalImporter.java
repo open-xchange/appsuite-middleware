@@ -289,6 +289,7 @@ public class ICalImporter extends AbstractImporter {
                         importResult.setDate(appointmentObj.getLastModified());
                         importResult.setFolder(String.valueOf(appointmentFolderId));
                     } catch (OXException e) {
+                        LOG.error(e.getMessage(), e);
                         importResult.setException(e);
                     }
 
@@ -333,6 +334,7 @@ public class ICalImporter extends AbstractImporter {
                         importResult.setDate(task.getLastModified());
                         importResult.setFolder(String.valueOf(taskFolderId));
                     } catch (OXException e) {
+                        LOG.error(e.getMessage(), e);
                         importResult.setException(e);
                     }
 

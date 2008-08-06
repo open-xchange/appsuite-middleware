@@ -1,4 +1,10 @@
+* 2008-08-06 - marcus.klein@open-xchange.com
+
+ - Bugfix #11724: Now supporting whole day iCal events without DTEND and
+   DURATION.
+
 * 2008-08-06 - francisco.laguna@open-xchange.com
+
  - Partial Fix #11384: Fixed in Infostore
 
 * 2008-08-05 - thorben.betten@open-xchange.com

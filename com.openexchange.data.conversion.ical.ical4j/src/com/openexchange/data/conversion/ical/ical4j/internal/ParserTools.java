@@ -82,6 +82,13 @@ public final class ParserTools {
         return retval;
     }
 
+    public static final boolean isDateTime(final CalendarComponent component,
+        final DateProperty property) {
+        final DateProperty value = (DateProperty) component.getProperty(
+            property.getName());
+        return value.getDate() instanceof DateTime;
+    }
+
     public static boolean inDefaultTimeZone(final DateProperty dateProperty,
         final TimeZone timeZone) {
         if (dateProperty.getParameter("TZID") != null) {
