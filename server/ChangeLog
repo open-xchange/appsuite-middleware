@@ -3,6 +3,8 @@
  - Bugfix #11724: Now supporting whole day iCal events without DTEND and
    DURATION.
 
+ - Bugfix #11655: Unlimited series run until 99 years unto the future.
+
 * 2008-08-06 - francisco.laguna@open-xchange.com
 
  - Partial Fix #11384: Fixed in Infostore

@@ -283,7 +283,7 @@ public class RecurringCalculation {
     
     private void checkValues() {
         if (!contains_until)  {
-            e = (e + (CalendarRecurringCollection.MILLI_YEAR * 99));
+            e = (System.currentTimeMillis() + (CalendarRecurringCollection.MILLI_YEAR * 99));
             this.until = e;
         }
     }

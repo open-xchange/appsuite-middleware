@@ -1060,7 +1060,7 @@ class CalendarMySQL implements CalendarSqlImp {
 			pst = writecon.prepareStatement("insert into prg_dates (creating_date, created_from, changing_date, changed_from," + "fid, pflag, cid, timestampfield01, timestampfield02, timezone, intfield01, intfield03, intfield06, intfield07, intfield08, " + "field01, field02, field04, field09, intfield02, intfield04, intfield05, field06, field07, field08) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 			cdao.setObjectID(IDGenerator.getId(cdao.getContext(), Types.APPOINTMENT, writecon));
 
-			pst.setTimestamp(i++, new Timestamp(cdao.getCreationDate().getTime()));
+            pst.setTimestamp(i++, new Timestamp(cdao.getCreationDate().getTime()));
 			if (!cdao.containsLastModified()) {
 				cdao.setLastModified(cdao.getCreationDate());
 			}
