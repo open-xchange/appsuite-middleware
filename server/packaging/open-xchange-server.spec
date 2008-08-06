@@ -139,10 +139,35 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Aug 06 2008 - francisco.laguna@open-xchange.com
+ - Partial Fix #11384: Fixed in Infostore
+* Wed Aug 06 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11724: Now supporting whole day iCal events without DTEND and
+   DURATION.
+ - Bugfix #11655: Unlimited series run until 99 years unto the future.
+* Tue Aug 05 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11829: Validating freely writable recurrence information
+* Mon Aug 04 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11827: Fixed setting proper end date if updating a recurrence
+   appointment without until/occurrence setting
+* Sun Aug 03 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11817: Fixed ordering of user's private default folders
+   according to module panel
+* Thu Jul 31 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11772: Fixed ordering of color flags in list view
+ - Bugfix #11737: Fixed propagating changing of user's display name
+* Wed Jul 30 2008 - thorben.betten@open-xchange.com
+ - Bugfix #10111: No duplicate reminder for recurring appointment if a
+   change exception has been created
+ - Bugfix #11753: Loading real contact's current folder ID update request
+* Wed Jul 30 2008 - dennis.sieben@open-xchange.com
+ - Bugfix #11764: If no output is created the last chars of the output must not be deleted
 * Tue Jul 29 2008 - thorben.betten@open-xchange.com
  - Bugfix #11695: Proper calculation of a weekly recurring appointment
  - Bugfix #10313: No additional English text to exception message to obey
    i18n rules
+ - Bugfix #11735: Added limit for recurrence's integer values for interval
+   and occurrences
 * Mon Jul 28 2008 - thorben.betten@open-xchange.com
  - Bugfix #11654: Sending a DELETE for appointments in shared folders on
    which the private flag was set.
@@ -157,7 +182,7 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
    html2text conversion
  - Bugfix #11701: Added ending "END:VCALENDAR" on ICal export
 * Wed Jul 23 2008 - marcus.klein@open-xchange.com
- - Bugfix #9591: Eliminating dublicate found tasks in search over all folder by
+ - Bugfix #9591: Eliminating duplicate found tasks in search over all folder by
    a "GROUP BY" SQL statement.
 * Wed Jul 23 2008 - thorben.betten@open-xchange.com
  - Bugfix #10306: Setting proper end date for recurring appointments with
