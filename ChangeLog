@@ -1,3 +1,7 @@
+* 2008-08-06 - dennis.sieben@open-xchange.com
+
+ - Bugfix #11847: rmi: NULL not accepted any more for auth
+
 * 2008-07-29 - marcus.klein@open-xchange.com
 
  - Bugfix #11681: Removed a lot of .toString() in debug messages to prevent
