@@ -62,6 +62,7 @@ import org.junit.Test;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.ldap.LdapException;
@@ -133,7 +134,7 @@ public class Bug8475 extends AbstractICalImportTest{
 		final Participant[] participants = task.getParticipants();
 		assertEquals("One participant?" , 1, participants.length);
 		final Participant p =  participants[0];
-		assertEquals("User " + testUser.getMail() + " gets participant \"" + p + "\"."+ " using resolver "+ Participants.userResolver, testUser.getId() , p.getIdentifier());
+		assertEquals("User \"" + testUser.getMail() + "\"" + testUser.getMail().length() + " gets participant \"" + p + "\"" + p.toString().length() + ". using resolver "+ Participants.userResolver, testUser.getId() , p.getIdentifier());
         // FIXME: Grossly violates encapsulation
 
     }
