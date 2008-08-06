@@ -134,7 +134,8 @@ public class Bug8475 extends AbstractICalImportTest{
 		final Participant[] participants = task.getParticipants();
 		assertEquals("One participant?" , 1, participants.length);
 		final Participant p =  participants[0];
-		assertEquals("User \"" + testUser.getMail() + "\"" + testUser.getMail().length() + " gets participant \"" + p + "\"" + p.toString().length() + ". using resolver "+ Participants.userResolver, testUser.getId() , p.getIdentifier());
+		final User user = Participants.userResolver.loadUser(testUser.getId(), ctx);
+		assertEquals("User \"" + testUser.getMail() + "\"" + testUser.getMail().length() + " gets participant \"" + p + "\"" + p.toString().length() + ". using resolver "+ Participants.userResolver + "\"" + user + "\"", testUser.getId() , p.getIdentifier());
         // FIXME: Grossly violates encapsulation
 
     }
