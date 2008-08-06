@@ -117,7 +117,7 @@ public class Klass<T extends CalendarComponent, U extends CalendarObject> extend
         } else if (PUBLIC.equals(clazz)) {
             cObj.setPrivateFlag(false);
         } else {
-            warnings.add(new ConversionWarning(index, Code.UNKNOWN_CLASS, clazz));
+            warnings.add(new ConversionWarning(index, Code.UNKNOWN_CLASS, clazz.getValue()));
         }
     }
 }
