@@ -354,6 +354,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 		
 		if (action) {
 		    cdao.setCreatedBy(uid);
+		    cdao.setCreationDate(new Date());
 		    cdao.setModifiedBy(uid);
 		    checkInsertMandatoryFields(cdao);
 		    cdao.setFolderType(ofa.getFolderType(inFolder, uid));
