@@ -160,8 +160,8 @@ public final class MessageWriter {
 			Fields: switch (fields[i]) {
 			case ID:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							if (withKey) {
 								((JSONObject) jsonContainer).put(DataFields.ID, mail.getMailId());
@@ -176,8 +176,8 @@ public final class MessageWriter {
 				break Fields;
 			case FOLDER_ID:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							if (withKey) {
 								((JSONObject) jsonContainer).put(FolderChildFields.FOLDER_ID, prepareFullname(mail
@@ -193,8 +193,8 @@ public final class MessageWriter {
 				break Fields;
 			case ATTACHMENT:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							if (withKey) {
 								((JSONObject) jsonContainer).put(MailJSONField.HAS_ATTACHMENTS.getKey(), mail
@@ -210,8 +210,8 @@ public final class MessageWriter {
 				break Fields;
 			case FROM:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							if (withKey) {
 								((JSONObject) jsonContainer).put(MailJSONField.FROM.getKey(), getAddressesAsArray(mail
@@ -227,8 +227,8 @@ public final class MessageWriter {
 				break Fields;
 			case TO:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							if (withKey) {
 								((JSONObject) jsonContainer).put(MailJSONField.RECIPIENT_TO.getKey(),
@@ -244,8 +244,8 @@ public final class MessageWriter {
 				break Fields;
 			case CC:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							if (withKey) {
 								((JSONObject) jsonContainer).put(MailJSONField.RECIPIENT_CC.getKey(),
@@ -261,8 +261,8 @@ public final class MessageWriter {
 				break Fields;
 			case BCC:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							if (withKey) {
 								((JSONObject) jsonContainer).put(MailJSONField.RECIPIENT_BCC.getKey(),
@@ -278,15 +278,18 @@ public final class MessageWriter {
 				break Fields;
 			case SUBJECT:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
+							final String subject = mail.getSubject();
 							if (withKey) {
-								((JSONObject) jsonContainer).put(MailJSONField.SUBJECT.getKey(), MIMEMessageUtility
-										.decodeMultiEncodedHeader(mail.getSubject().trim()));
+								if (subject != null) {
+									((JSONObject) jsonContainer).put(MailJSONField.SUBJECT.getKey(), MIMEMessageUtility
+											.decodeMultiEncodedHeader(subject.trim()));
+								}
 							} else {
-								((JSONArray) jsonContainer).put(MIMEMessageUtility.decodeMultiEncodedHeader(mail
-										.getSubject().trim()));
+								((JSONArray) jsonContainer).put(subject == null ? JSONObject.NULL : MIMEMessageUtility
+										.decodeMultiEncodedHeader(subject.trim()));
 							}
 						} catch (final JSONException e) {
 							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
@@ -296,8 +299,8 @@ public final class MessageWriter {
 				break Fields;
 			case SIZE:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							if (withKey) {
 								((JSONObject) jsonContainer).put(MailJSONField.SIZE.getKey(), mail.getSize());
@@ -312,8 +315,8 @@ public final class MessageWriter {
 				break Fields;
 			case SENT_DATE:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							if (withKey) {
 								if (mail.containsSentDate() && mail.getSentDate() != null) {
@@ -322,8 +325,6 @@ public final class MessageWriter {
 													.getStorageUser(session.getUserId(),
 															ContextStorage.getStorageContext(session.getContextId()))
 													.getTimeZone())));
-								} else {
-									((JSONObject) jsonContainer).put(MailJSONField.SENT_DATE.getKey(), JSONObject.NULL);
 								}
 							} else {
 								if (mail.containsSentDate() && mail.getSentDate() != null) {
@@ -345,8 +346,8 @@ public final class MessageWriter {
 				break Fields;
 			case RECEIVED_DATE:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							if (withKey) {
 								if (mail.containsReceivedDate() && mail.getReceivedDate() != null) {
@@ -355,9 +356,6 @@ public final class MessageWriter {
 													.getTimeZone(UserStorage.getStorageUser(session.getUserId(),
 															ContextStorage.getStorageContext(session.getContextId()))
 															.getTimeZone())));
-								} else {
-									((JSONObject) jsonContainer).put(MailJSONField.RECEIVED_DATE.getKey(),
-											JSONObject.NULL);
 								}
 							} else {
 								if (mail.containsReceivedDate() && mail.getReceivedDate() != null) {
@@ -379,8 +377,8 @@ public final class MessageWriter {
 				break Fields;
 			case FLAGS:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							if (withKey) {
 								((JSONObject) jsonContainer).put(MailJSONField.FLAGS.getKey(), mail.getFlags());
@@ -395,8 +393,8 @@ public final class MessageWriter {
 				break Fields;
 			case THREAD_LEVEL:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							if (withKey) {
 								((JSONObject) jsonContainer).put(MailJSONField.THREAD_LEVEL.getKey(), mail
@@ -412,8 +410,8 @@ public final class MessageWriter {
 				break Fields;
 			case DISPOSITION_NOTIFICATION_TO:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							final Object value;
 							if ((mail.containsPrevSeen() ? mail.isPrevSeen() : mail.isSeen())) {
@@ -423,8 +421,10 @@ public final class MessageWriter {
 										.getDispositionNotification().toUnicodeString();
 							}
 							if (withKey) {
-								((JSONObject) jsonContainer).put(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey(),
-										value);
+								if (!JSONObject.NULL.equals(value)) {
+									((JSONObject) jsonContainer).put(
+											MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey(), value);
+								}
 							} else {
 								((JSONArray) jsonContainer).put(value);
 							}
@@ -436,8 +436,8 @@ public final class MessageWriter {
 				break Fields;
 			case PRIORITY:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							if (withKey) {
 								((JSONObject) jsonContainer).put(MailJSONField.PRIORITY.getKey(), mail.getPriority());
@@ -452,12 +452,13 @@ public final class MessageWriter {
 				break Fields;
 			case MSG_REF:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							if (withKey) {
-								((JSONObject) jsonContainer).put(MailJSONField.MSGREF.getKey(),
-										mail.containsMsgref() ? mail.getMsgref() : JSONObject.NULL);
+								if (mail.containsMsgref()) {
+									((JSONObject) jsonContainer).put(MailJSONField.MSGREF.getKey(), mail.getMsgref());
+								}
 							} else {
 								((JSONArray) jsonContainer).put(mail.containsMsgref() ? mail.getMsgref()
 										: JSONObject.NULL);
@@ -470,8 +471,8 @@ public final class MessageWriter {
 				break Fields;
 			case COLOR_LABEL:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							final int colorLabel;
 							if (MailConfig.isUserFlagsEnabled() && mail.containsColorLabel()) {
@@ -492,8 +493,8 @@ public final class MessageWriter {
 				break Fields;
 			case TOTAL:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							/*
 							 * TODO: Total, New, Unread, and Deleted count
@@ -511,8 +512,8 @@ public final class MessageWriter {
 				break Fields;
 			case NEW:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							/*
 							 * TODO: Total, New, Unread, and Deleted count
@@ -530,8 +531,8 @@ public final class MessageWriter {
 				break Fields;
 			case UNREAD:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							if (withKey) {
 								((JSONObject) jsonContainer).put(MailJSONField.UNREAD.getKey(), mail
@@ -547,8 +548,8 @@ public final class MessageWriter {
 				break Fields;
 			case DELETED:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							/*
 							 * TODO: Total, New, Unread, and Deleted count
@@ -566,8 +567,8 @@ public final class MessageWriter {
 				break Fields;
 			default:
 				retval[i] = new MailFieldWriter() {
-					public void writeField(final Object jsonContainer, final MailMessage mail, final int level, final boolean withKey)
-							throws MailException {
+					public void writeField(final Object jsonContainer, final MailMessage mail, final int level,
+							final boolean withKey) throws MailException {
 						try {
 							/*
 							 * TODO: Total, New, Unread, and Deleted count
