@@ -459,17 +459,16 @@ public class TaskRequest {
 		final Date start = DataParser.parseDate(jsonObj, AJAXServlet.PARAMETER_START);
 		final Date end = DataParser.parseDate(jsonObj, AJAXServlet.PARAMETER_END);
 
-		if (start != null && end != null) {
-			final Date[] dateRange = new Date[2];
+		if (start != null) {
+		    final Date[] dateRange;
+		    if (end == null) {
+		        dateRange = new Date[1];
+		    } else {
+		        dateRange = new Date[2];
+	            dateRange[1] = end;
+		    }
 			dateRange[0] = start;
-			dateRange[1] = end;
-			// FIXME 
-			try {
-				searchObj.setRange(dateRange);
-			} catch (final Exception e) {
-				throw new OXException(e);
-			}
-
+            searchObj.setRange(dateRange);
 		}
 		
 		if (jData.has(SearchFields.PATTERN)) {

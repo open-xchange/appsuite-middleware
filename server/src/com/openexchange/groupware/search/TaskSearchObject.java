@@ -102,7 +102,7 @@ public class TaskSearchObject extends CalendarSearchObject {
         return range;
     }
 
-    public void setRange(final Date[] range) throws Exception {
+    public void setRange(final Date[] range) {
         this.range = range;
     }
 }

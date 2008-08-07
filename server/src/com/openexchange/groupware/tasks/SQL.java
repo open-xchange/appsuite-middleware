@@ -307,11 +307,16 @@ public final class SQL {
         final StringBuilder sql = new StringBuilder();
         final Date[] range = search.getRange();
         if (null != range) {
-            if (range.length == 2) {
-                sql.append("(end >= ? AND end < ?)");
-            } else {
+            if (range.length < 1 || range.length > 2) {
                 throw new TaskException(Code.WRONG_DATE_RANGE, Integer.valueOf(range.length));
             }
+            if (range.length >= 1) {
+                sql.append("(end >= ?");
+            }
+            if (range.length == 2) {
+                sql.append(" AND end < ?");
+            }
+            sql.append(')');
         }
         return sql.toString();
     }
