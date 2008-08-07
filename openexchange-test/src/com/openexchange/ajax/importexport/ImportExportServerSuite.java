@@ -52,15 +52,14 @@ package com.openexchange.ajax.importexport;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-
 /**
  * This suite is meant to be used with a running OX.
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
-public class ImportExportServerSuite extends TestSuite {
+public final class ImportExportServerSuite {
 
-	public static Test suite(){
+	public static Test suite() {
 		final TestSuite tests = new TestSuite();
 		tests.addTest(ICalTestSuite.suite());
 
