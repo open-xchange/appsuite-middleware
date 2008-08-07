@@ -47,89 +47,57 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.task;
 
-import java.util.Date;
+import java.util.TimeZone;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.task.actions.DeleteRequest;
+import com.openexchange.ajax.task.actions.GetRequest;
+import com.openexchange.ajax.task.actions.GetResponse;
+import com.openexchange.ajax.task.actions.InsertRequest;
+import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.groupware.container.GroupParticipant;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * Stores parameters for the task delete request.
+ * Checks if group 0 works for tasks.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class DeleteRequest extends AbstractTaskRequest<DeleteResponse> {
-
-    private final int folderId;
-
-    private final int taskId;
-
-    private final Date lastModified;
+public final class Bug11659Test extends AbstractTaskTest {
 
     /**
      * Default constructor.
+     * @param name test name
      */
-    public DeleteRequest(final int folderId, final int taskId,
-        final Date lastModified) {
-        super();
-        this.folderId = folderId;
-        this.taskId = taskId;
-        this.lastModified = lastModified;
+    public Bug11659Test(final String name) {
+        super(name);
     }
 
     /**
-     * @param task Task object to delete. This object must contain the folder
-     * identifier, the object identifier and the last modification timestamp.
+     * Tries to create a task with group 0 as participant.
      */
-    public DeleteRequest(final Task task) {
-        this(task.getParentFolderID(), task.getObjectID(),
-            task.getLastModified());
-    }
-
-    /**
-     * @param insert An insert response contains all necessary information for
-     * deleting the task.
-     */
-    public DeleteRequest(final InsertResponse insert) {
-        this(insert.getFolderId(), insert.getId(), insert.getTimestamp());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        final JSONObject json = new JSONObject();
-        json.put(AJAXServlet.PARAMETER_ID, taskId);
-        json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
-        return json;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_DELETE),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP,
-                String.valueOf(lastModified.getTime()))
-        };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public DeleteParser getParser() {
-        return new DeleteParser();
+    public void testAllInternalUsersGroup() throws Throwable {
+        final AJAXClient client = getClient();
+        final int folderId = client.getValues().getPrivateTaskFolder();
+        final TimeZone tz = client.getValues().getTimeZone();
+        final Task task = new Task();
+        task.setTitle("Bug 11659 test");
+        task.setParentFolderID(folderId);
+        task.setParticipants(new Participant[] { new GroupParticipant(0) });
+        final InsertResponse iResponse = Executor.execute(client,
+            new InsertRequest(task, tz));
+        try {
+            final GetResponse gResponse = Executor.execute(client,
+                new GetRequest(iResponse));
+            final Task reload = gResponse.getTask(tz);
+            final Participant[] participants = reload.getParticipants();
+            assertEquals("Participant number differs.", 1, participants.length);
+            assertEquals("Participant is not group 0.", 0, participants[0].getIdentifier());
+        } finally {
+            Executor.execute(client, new DeleteRequest(iResponse));
+        }
     }
 }

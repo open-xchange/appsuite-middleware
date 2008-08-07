@@ -57,7 +57,7 @@ import com.openexchange.ajax.AJAXServlet;
  * Retrieves a task from the server.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GetRequest extends AbstractTaskRequest {
+public class GetRequest extends AbstractTaskRequest<GetResponse> {
 
     /**
      * Task is requested through this folder.
