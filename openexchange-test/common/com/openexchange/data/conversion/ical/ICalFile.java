@@ -47,21 +47,89 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.data.conversion.ical;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ICalTestSuite extends TestSuite{
-	
-	public static Test suite(){
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(ICalImportTest.class);
-		tests.addTestSuite(ICalExportTest.class);
-		tests.addTestSuite(Bug10382Test.class);
-		tests.addTestSuite(Bug11724Test.class);
-		tests.addTestSuite(Bug11868Test.class);
-		tests.addTestSuite(Bug11871Test.class);
-		return tests;
-	}
+public class ICalFile {
+
+    private final List<String[]> lines = new ArrayList<String[]>();
+
+    public ICalFile(final Reader reader) throws IOException {
+        final BufferedReader lines = new BufferedReader(reader);
+        String line = null;
+        while((line = lines.readLine()) != null) {
+            addLine(line);
+        }
+    }
+
+    private void addLine(final String line) {
+        int colonPos = line.indexOf(':');
+        final String key;
+        final String value;
+        if (-1 == colonPos) {
+            key = line;
+            value = "";
+        } else {
+            key = line.substring(0, colonPos);
+            value = line.substring(colonPos + 1);
+        }
+        lines.add(new String[]{key, value});
+    }
+
+    public List<String[]> getLines() {
+        return lines;
+    }
+
+    public String getValue(final String key) {
+        for(final String[] line : lines) {
+            if(line[0].equals(key)) {
+                return line[1];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        for (final String[] line : lines) {
+            final String key = line[0];
+            final String value = line[1];
+            sb.append(key);
+            if (!"".equals(value)) {
+                sb.append(':');
+                sb.append(value);
+            }
+            sb.append('\n');
+        }
+        return sb.toString();
+    }
+
+    public boolean containsPair(String name, String value) {
+        for (final String[] line : lines) {
+            final String key = line[0];
+            final String val = line[1];
+            if(key.equals(name) && val.equals(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public boolean containsLine(String line) {
+        for (final String[] l : lines) {
+            final String key = l[0];
+            if(key.equals(line)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

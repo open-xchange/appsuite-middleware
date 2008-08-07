@@ -47,21 +47,47 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.ajax.importexport.actions;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.json.JSONException;
 
-public class ICalTestSuite extends TestSuite{
-	
-	public static Test suite(){
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(ICalImportTest.class);
-		tests.addTestSuite(ICalExportTest.class);
-		tests.addTestSuite(Bug10382Test.class);
-		tests.addTestSuite(Bug11724Test.class);
-		tests.addTestSuite(Bug11868Test.class);
-		tests.addTestSuite(Bug11871Test.class);
-		return tests;
-	}
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+
+/**
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public final class ICalExportParser extends AbstractAJAXParser<ICalExportResponse> {
+
+    /**
+     * @param failOnError
+     */
+    ICalExportParser(final boolean failOnError) {
+        super(failOnError);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Response getResponse(final String body) throws JSONException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ICalExportResponse parse(final String body) throws JSONException {
+        final ICalExportResponse retval = new ICalExportResponse();
+        retval.setICal(body);
+        return retval;
+    }
+
+    @Override
+    protected ICalExportResponse createResponse(final Response response)
+        throws JSONException {
+        throw new UnsupportedOperationException();
+    }
 }

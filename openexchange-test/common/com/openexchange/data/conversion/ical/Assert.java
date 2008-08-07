@@ -47,21 +47,40 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.data.conversion.ical;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
-public class ICalTestSuite extends TestSuite{
-	
-	public static Test suite(){
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(ICalImportTest.class);
-		tests.addTestSuite(ICalExportTest.class);
-		tests.addTestSuite(Bug10382Test.class);
-		tests.addTestSuite(Bug11724Test.class);
-		tests.addTestSuite(Bug11868Test.class);
-		tests.addTestSuite(Bug11871Test.class);
-		return tests;
-	}
+/**
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public class Assert extends junit.framework.Assert {
+
+    /**
+     * Prevent instantiation.
+     */
+    private Assert() {
+        super();
+    }
+
+    private static SimpleDateFormat utc = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+    static {
+        utc.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+
+    public static void assertStandardAppFields(ICalFile ical, Date start, Date end) {
+        assertProperty(ical, "DTSTART", utc.format(start));
+        assertProperty(ical, "DTEND", utc.format(end));
+    }
+
+    public static void assertProperty(ICalFile ical, String name, String value) {
+        assertTrue(name+" missing in: \n"+ical.toString(), ical.containsPair(name, value));
+    }
+
+    public static void assertLine(ICalFile ical, String line) {
+        assertTrue(line+" missing in: \n"+ical.toString(), ical.containsLine(line));
+    }
 }

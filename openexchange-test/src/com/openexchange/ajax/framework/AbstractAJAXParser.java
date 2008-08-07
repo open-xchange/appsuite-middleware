@@ -96,7 +96,8 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse>
     }
 
     public T parse(final String body) throws JSONException {
-        return createResponse(getResponse(body));
+        final Response response = getResponse(body);
+        return createResponse(response);
     }
 
     protected abstract T createResponse(final Response response)

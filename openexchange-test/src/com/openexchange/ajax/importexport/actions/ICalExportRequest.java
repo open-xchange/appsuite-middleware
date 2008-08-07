@@ -47,21 +47,21 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.ajax.importexport.actions;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.importexport.actions.AbstractImportRequest.Action;
 
-public class ICalTestSuite extends TestSuite{
-	
-	public static Test suite(){
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(ICalImportTest.class);
-		tests.addTestSuite(ICalExportTest.class);
-		tests.addTestSuite(Bug10382Test.class);
-		tests.addTestSuite(Bug11724Test.class);
-		tests.addTestSuite(Bug11868Test.class);
-		tests.addTestSuite(Bug11871Test.class);
-		return tests;
-	}
+/**
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public final class ICalExportRequest extends AbstractExportRequest<ICalExportResponse> {
+
+    public ICalExportRequest(final int folderId) {
+        super(Action.ICal, folderId);
+    }
+
+    public ICalExportParser getParser() {
+        return new ICalExportParser(true);
+    }
 }

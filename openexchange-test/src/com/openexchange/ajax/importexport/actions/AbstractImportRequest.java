@@ -51,8 +51,6 @@ package com.openexchange.ajax.importexport.actions;
 
 import java.io.InputStream;
 
-import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -89,7 +87,7 @@ public abstract class AbstractImportRequest<T extends AbstractAJAXResponse> impl
     /**
      * {@inheritDoc}
      */
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return null;
     }
 
@@ -105,7 +103,7 @@ public abstract class AbstractImportRequest<T extends AbstractAJAXResponse> impl
      */
     public Parameter[] getParameters() {
         return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, action.name),
+            new Parameter(AJAXServlet.PARAMETER_ACTION, action.getName()),
             new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId),
             new FileParameter("file", action.fileName, upload,
                 action.format.getMimeType())
@@ -124,6 +122,12 @@ public abstract class AbstractImportRequest<T extends AbstractAJAXResponse> impl
             this.name = name;
             this.fileName = fileName;
             this.format = format;
+        }
+        /**
+         * @return the name
+         */
+        public String getName() {
+            return name;
         }
     }
 

@@ -47,21 +47,80 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.ajax.importexport.actions;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Date;
 
-public class ICalTestSuite extends TestSuite{
-	
-	public static Test suite(){
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(ICalImportTest.class);
-		tests.addTestSuite(ICalExportTest.class);
-		tests.addTestSuite(Bug10382Test.class);
-		tests.addTestSuite(Bug11724Test.class);
-		tests.addTestSuite(Bug11868Test.class);
-		tests.addTestSuite(Bug11871Test.class);
-		return tests;
-	}
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
+
+/**
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public final class ICalExportResponse extends AbstractAJAXResponse {
+
+    private String iCal;
+
+    /**
+     * @param response
+     */
+    public ICalExportResponse() {
+        super(null);
+    }
+
+    /**
+     * @param iCal the iCal to set
+     */
+    public void setICal(final String iCal) {
+        this.iCal = iCal;
+    }
+
+    /**
+     * @return the iCal
+     */
+    public String getICal() {
+        return iCal;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object getData() {
+        return getICal();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public AbstractOXException getException() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ProblematicAttribute[] getProblematics() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Date getTimestamp() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean hasError() {
+        throw new UnsupportedOperationException();
+    }
 }

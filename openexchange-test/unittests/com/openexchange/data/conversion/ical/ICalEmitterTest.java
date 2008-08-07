@@ -49,25 +49,33 @@
 
 package com.openexchange.data.conversion.ical;
 
+import static com.openexchange.data.conversion.ical.Assert.assertProperty;
+import static com.openexchange.data.conversion.ical.Assert.assertStandardAppFields;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.StringReader;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 import junit.framework.TestCase;
 
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
 import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
-import com.openexchange.groupware.container.*;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.ResourceParticipant;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.MockUserLookup;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -442,27 +450,6 @@ public class ICalEmitterTest extends TestCase {
         };
     }
 
-    // Asserts
-    private static SimpleDateFormat utc = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
-    static {
-        utc.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
-
-    private static void assertStandardAppFields(ICalFile ical, Date start, Date end) {
-        assertProperty(ical, "DTSTART", utc.format(start));
-        assertProperty(ical, "DTEND", utc.format(end));
-    }
-
-    private static void assertProperty(ICalFile ical, String name, String value) {
-
-        assertTrue(name+" missing in: \n"+ical.toString(), ical.containsPair(name, value));
-    }
-
-    private static void assertLine(ICalFile ical, String line) {
-        assertTrue(line+" missing in: \n"+ical.toString(), ical.containsLine(line));
-    }
-
-
     // Helper Class
 
 
@@ -483,84 +470,5 @@ public class ICalEmitterTest extends TestCase {
                 Arrays.asList(task),
                 new ArrayList<ConversionError>(),
                 new ArrayList<ConversionWarning>(), null)));
-    }
-
-    private static class ICalFile {
-
-        private final List<String[]> lines = new ArrayList<String[]>();
-
-        public ICalFile(final Reader reader) throws IOException {
-            final BufferedReader lines = new BufferedReader(reader);
-            String line = null;
-            while((line = lines.readLine()) != null) {
-                addLine(line);
-            }
-        }
-
-        private void addLine(final String line) {
-            int colonPos = line.indexOf(':');
-            final String key;
-            final String value;
-            if (-1 == colonPos) {
-                key = line;
-                value = "";
-            } else {
-                key = line.substring(0, colonPos);
-                value = line.substring(colonPos + 1);
-            }
-            lines.add(new String[]{key, value});
-        }
-
-        public List<String[]> getLines() {
-            return lines;
-        }
-
-        public String getValue(final String key) {
-            for(final String[] line : lines) {
-                if(line[0].equals(key)) {
-                    return line[1];
-                }
-            }
-            return null;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            for (final String[] line : lines) {
-                final String key = line[0];
-                final String value = line[1];
-                sb.append(key);
-                if (!"".equals(value)) {
-                    sb.append(':');
-                    sb.append(value);
-                }
-                sb.append('\n');
-            }
-            return sb.toString();
-        }
-
-        public boolean containsPair(String name, String value) {
-            for (final String[] line : lines) {
-                final String key = line[0];
-                final String val = line[1];
-                if(key.equals(name) && val.equals(value)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        public boolean containsLine(String line) {
-            for (final String[] l : lines) {
-                final String key = l[0];
-                if(key.equals(line)) {
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 }

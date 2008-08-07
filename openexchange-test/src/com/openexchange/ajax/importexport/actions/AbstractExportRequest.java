@@ -47,21 +47,65 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.ajax.importexport.actions;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.importexport.actions.AbstractImportRequest.Action;
 
-public class ICalTestSuite extends TestSuite{
-	
-	public static Test suite(){
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(ICalImportTest.class);
-		tests.addTestSuite(ICalExportTest.class);
-		tests.addTestSuite(Bug10382Test.class);
-		tests.addTestSuite(Bug11724Test.class);
-		tests.addTestSuite(Bug11868Test.class);
-		tests.addTestSuite(Bug11871Test.class);
-		return tests;
-	}
+/**
+ * 
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public abstract class AbstractExportRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+
+    /**
+     * URL of the tasks AJAX interface.
+     */
+    public static final String EXPORT_URL = "/ajax/export";
+
+    private final Action action;
+
+    private final int folderId;
+
+    /**
+     * Default constructor.
+     */
+    public AbstractExportRequest(final Action action, final int folderId) {
+        super();
+        this.action = action;
+        this.folderId = folderId;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Object getBody() {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Method getMethod() {
+        return Method.GET;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Parameter[] getParameters() {
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, action.getName()),
+            new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId)
+        };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getServletPath() {
+        return EXPORT_URL;
+    }
 }
