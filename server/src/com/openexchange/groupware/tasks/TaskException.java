@@ -387,7 +387,12 @@ public class TaskException extends AbstractOXException {
          * The task %1$d is not stored in folder %2$s (%3$d).
          */
         NOT_IN_FOLDER("The task %1$d is not stored in folder %2$s (%3$d).",
-            Category.PERMISSION, Detail.PERMISSION, 48);
+            Category.PERMISSION, Detail.PERMISSION, 48),
+        /**
+         * Unknown participant type %1$d.
+         */
+        UNKNOWN_PARTICIPANT("Unknown participant type %1$d.", Category
+            .CODE_ERROR, Detail.OTHER, 49);
 
         /**
          * Message of the exception.

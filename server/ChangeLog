@@ -1,3 +1,7 @@
+* 2008-08-07 - marcus.klein@open-xchange.com
+
+ - Bugfix #11659: Resolving group 0 does now work for tasks.
+
 * 2008-08-06 - marcus.klein@open-xchange.com
 
  - Bugfix #11724: Now supporting whole day iCal events without DTEND and

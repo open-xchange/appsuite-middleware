@@ -393,12 +393,12 @@ public final class TaskLogic {
             case Participant.GROUP:
                 final GroupParticipant group = (GroupParticipant) participant;
                 try {
-                    final int[] member = GroupStorage.getInstance().getGroup(
+                    final int[] member = GroupStorage.getInstance(true).getGroup(
                         group.getIdentifier(), ctx).getMember();
                     for (final int userId : member) {
                         final TaskParticipant tParticipant =
                             new InternalParticipant(new UserParticipant(userId),
-                            group.getIdentifier());
+                            Integer.valueOf(group.getIdentifier()));
                         if (!retval.contains(tParticipant)) {
                             retval.add(tParticipant);
                         }
@@ -410,7 +410,10 @@ public final class TaskLogic {
             case Participant.EXTERNAL_USER:
                 retval.add(new ExternalParticipant(
                     (ExternalUserParticipant) participant));
+                break;
             default:
+                throw new TaskException(Code.UNKNOWN_PARTICIPANT,
+                    Integer.valueOf(participant.getType()));
             }
         }
         return retval;
