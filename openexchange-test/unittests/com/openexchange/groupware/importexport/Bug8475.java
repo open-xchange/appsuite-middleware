@@ -70,7 +70,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 
 public class Bug8475 extends AbstractICalImportTest{
 	
