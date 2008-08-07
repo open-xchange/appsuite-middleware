@@ -66,7 +66,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ResourceListRequest extends AbstractResourceRequest {
+public final class ResourceListRequest extends AbstractResourceRequest<ResourceListResponse> {
 
 	private final boolean failOnError;
 
@@ -83,6 +83,10 @@ public final class ResourceListRequest extends AbstractResourceRequest {
 		super();
 		this.ids = ids;
 		this.failOnError = failOnError;
+	}
+
+	public ResourceListRequest(final int[] ids) {
+	    this(ids, true);
 	}
 
 	/*

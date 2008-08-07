@@ -188,20 +188,20 @@ public final class TaskTools extends Assert {
     public static InsertResponse insert(final AJAXSession session,
         final InsertRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (InsertResponse) Executor.execute(session, request);
+        return Executor.execute(session, request);
     }
 
     public static InsertResponse insert(final AJAXClient client,
         final InsertRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (InsertResponse) Executor.execute(client, request);
+        return Executor.execute(client, request);
     }
 
     public static InsertResponse insert(final WebConversation conversation, 
 		final String hostName, final String sessionId, final String protocol, 
 		final InsertRequest request) throws AjaxException, IOException, 
 		SAXException, JSONException {
-		return (InsertResponse) Executor.execute(new AJAXSession(
+		return Executor.execute(new AJAXSession(
     			conversation, sessionId), request, protocol, hostName);
     }
 
@@ -262,13 +262,13 @@ public final class TaskTools extends Assert {
     public static UpdateResponse update(final AJAXSession session,
         final UpdateRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (UpdateResponse) Executor.execute(session, request);
+        return Executor.execute(session, request);
     }
 
     public static UpdateResponse update(final AJAXClient client,
         final UpdateRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (UpdateResponse) Executor.execute(client, request);
+        return Executor.execute(client, request);
     }
 
     /**
@@ -310,7 +310,7 @@ public final class TaskTools extends Assert {
     public static GetResponse get(final AJAXSession session,
         final GetRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (GetResponse) Executor.execute(session, request);
+        return Executor.execute(session, request);
     }
 
     public static GetResponse get(final AJAXClient client,
@@ -327,7 +327,7 @@ public final class TaskTools extends Assert {
         GetResponse response = null;
         final long start = System.currentTimeMillis();
         do {
-            response = (GetResponse) Executor.execute(client, request);
+            response = Executor.execute(client, request);
         } while (!timeout(start) &&
             (response.hasError() || lastModified.after(response.getTimestamp())));
         request.setFailOnError(origFail);
@@ -365,14 +365,14 @@ public final class TaskTools extends Assert {
     public static DeleteResponse delete(final AJAXClient client,
         final DeleteRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (DeleteResponse) Executor.execute(client, request);
+        return Executor.execute(client, request);
     }
 
     public static DeleteResponse delete(final WebConversation conversation, 
 		final String hostName, final String sessionId, final String protocol, 
         final DeleteRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-    	return (DeleteResponse) Executor.execute(new AJAXSession(conversation, 
+    	return Executor.execute(new AJAXSession(conversation, 
     		sessionId), request, protocol, hostName);
 	}
     
@@ -477,7 +477,7 @@ public final class TaskTools extends Assert {
     public static SearchResponse search(final AJAXClient client,
         final SearchRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (SearchResponse) Executor.execute(client, request);
+        return Executor.execute(client, request);
     }
 
     /**

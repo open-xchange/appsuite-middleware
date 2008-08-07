@@ -64,7 +64,7 @@ import com.openexchange.groupware.tasks.Task;
  * object identifier and the last modification timestamp.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class UpdateRequest extends AbstractTaskRequest {
+public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
 
     private final int folderId;
 

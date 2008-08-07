@@ -67,7 +67,7 @@ import com.openexchange.resource.json.ResourceWriter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ResourceNewRequest extends AbstractResourceRequest {
+public final class ResourceNewRequest extends AbstractResourceRequest<ResourceNewResponse> {
 
 	private final JSONObject resourceJSON;
 
@@ -89,6 +89,10 @@ public final class ResourceNewRequest extends AbstractResourceRequest {
 		super();
 		this.failOnError = failOnError;
 		resourceJSON = ResourceWriter.writeResource(createMe);
+	}
+
+	public ResourceNewRequest(final Resource resource) throws JSONException {
+	    this(resource, true);
 	}
 
 	/*

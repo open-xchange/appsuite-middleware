@@ -64,7 +64,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ResourceAllRequest extends AbstractResourceRequest {
+public final class ResourceAllRequest extends AbstractResourceRequest<ResourceAllResponse> {
 
 	private final boolean failOnError;
 
@@ -78,6 +78,10 @@ public final class ResourceAllRequest extends AbstractResourceRequest {
 	public ResourceAllRequest(final boolean failOnError) {
 		super();
 		this.failOnError = failOnError;
+	}
+
+	public ResourceAllRequest() {
+	    this(true);
 	}
 
 	/*

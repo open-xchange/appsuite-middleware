@@ -48,7 +48,7 @@ import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
-import com.openexchange.data.conversion.ical.ical4j.osgi.OXUserResolver;
+import com.openexchange.data.conversion.ical.ical4j.internal.OXUserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ICalEmitter;

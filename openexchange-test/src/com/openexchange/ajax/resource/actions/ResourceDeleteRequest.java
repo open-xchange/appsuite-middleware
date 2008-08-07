@@ -67,7 +67,7 @@ import com.openexchange.resource.json.ResourceWriter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ResourceDeleteRequest extends AbstractResourceRequest {
+public final class ResourceDeleteRequest extends AbstractResourceRequest<ResourceDeleteResponse> {
 
 	private final JSONObject resourceJSON;
 
@@ -95,6 +95,10 @@ public final class ResourceDeleteRequest extends AbstractResourceRequest {
 		this.failOnError = failOnError;
 		this.clientLastModified = clientLastModified;
 		resourceJSON = ResourceWriter.writeResource(deleteMe);
+	}
+
+	public ResourceDeleteRequest(final Resource resource) throws JSONException {
+	    this(resource, resource.getLastModified().getTime(), true);
 	}
 
 	/*
@@ -132,16 +136,16 @@ public final class ResourceDeleteRequest extends AbstractResourceRequest {
 	 * 
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
 	 */
-	public ResourceNewParser getParser() {
-		return new ResourceNewParser(failOnError);
+	public ResourceDeleteParser getParser() {
+		return new ResourceDeleteParser(failOnError);
 	}
 
-	private static final class ResourceNewParser extends AbstractAJAXParser<ResourceNewResponse> {
+	private static final class ResourceDeleteParser extends AbstractAJAXParser<ResourceDeleteResponse> {
 
 		/**
 		 * Default constructor.
 		 */
-		ResourceNewParser(final boolean failOnError) {
+		ResourceDeleteParser(final boolean failOnError) {
 			super(failOnError);
 		}
 
@@ -149,8 +153,8 @@ public final class ResourceDeleteRequest extends AbstractResourceRequest {
 		 * {@inheritDoc}
 		 */
 		@Override
-		protected ResourceNewResponse createResponse(final Response response) throws JSONException {
-			return new ResourceNewResponse(response);
+		protected ResourceDeleteResponse createResponse(final Response response) throws JSONException {
+			return new ResourceDeleteResponse(response);
 		}
 	}
 
