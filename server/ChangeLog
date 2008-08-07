@@ -1,6 +1,7 @@
 * 2008-08-07 - marcus.klein@open-xchange.com
 
  - Bugfix #11659: Resolving group 0 does now work for tasks.
+ - Bugfix #10852: Improved exception message if some task attribute is too long.
 
 * 2008-08-06 - marcus.klein@open-xchange.com
 
