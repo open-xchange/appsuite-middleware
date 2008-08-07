@@ -332,7 +332,7 @@ public class RdbResourceStorage extends ResourceStorage {
 	}
 
 	private static final String SQL_SELECT_RESOURCE2 = "SELECT id,identifier,displayName,mail,available,description,lastModified "
-			+ "FROM resource WHERE cid = ? AND identifier LIKE ?";
+			+ "FROM resource WHERE cid = ? AND (identifier LIKE ? OR displayName LIKE ?)";
 
 	@Override
 	public Resource[] searchResources(final String pattern, final Context context) throws LdapException {
@@ -349,6 +349,7 @@ public class RdbResourceStorage extends ResourceStorage {
 			stmt = con.prepareStatement(SQL_SELECT_RESOURCE2);
 			stmt.setLong(1, context.getContextId());
 			stmt.setString(2, LdapUtility.prepareSearchPattern(pattern));
+            stmt.setString(3, LdapUtility.prepareSearchPattern(pattern));
 			result = stmt.executeQuery();
 			while (result.next()) {
 				resources.add(createResourceFromEntry(result));

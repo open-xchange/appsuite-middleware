@@ -46,64 +46,65 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
-import net.fortuna.ical4j.model.component.VEvent;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.*;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.IgnoreConflicts;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.RequireStartDate;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.RequireEndDate;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.Location;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.Transparency;
-
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.resource.Resource;
+import com.openexchange.resource.ResourceException;
+import com.openexchange.resource.ResourceService;
+import com.openexchange.server.ServiceException;
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class AppointmentConverters {
-    public static final AttributeConverter<VEvent, AppointmentObject>[] ALL;
+public final class OXResourceResolver implements ResourceResolver {
+
+    private ResourceService resourceService;
 
     /**
-     * Prevent instantiation.
+     * Default constructor.
      */
-    private AppointmentConverters() {
+    public OXResourceResolver() {
         super();
     }
 
-    static {
-        final List<AttributeConverter<VEvent, AppointmentObject>> tmp = new ArrayList<AttributeConverter<VEvent, AppointmentObject>>();
-        tmp.add(new Title<VEvent, AppointmentObject>());
-        tmp.add(new Note<VEvent, AppointmentObject>());
+    /**
+     * {@inheritDoc}
+     */
+    public Resource load(final int resourceId, final Context ctx) throws ResourceException, ServiceException {
+        if (null == resourceService) {
+            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
+                ResourceService.class.getName());
+        }
+        return resourceService.getResource(resourceId, ctx);
+    }
 
-        Start<VEvent, AppointmentObject> start = new Start<VEvent, AppointmentObject>();
-        start.setVerifier(new RequireStartDate());
-        tmp.add(start);
+    public List<Resource> find(final List<String> resourceNames, final Context ctx)
+        throws ResourceException, ServiceException {
+        if (null == resourceService) {
+            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
+                ResourceService.class.getName());
+        }
+        final List<Resource> retval = new ArrayList<Resource>();
+        for (String name : resourceNames) {
+            final Resource[] resources = resourceService.searchResources(name,
+                ctx);
+            if (resources.length == 1) {
+                retval.add(resources[0]);
+            }
+        }
+        return retval;
+    }
 
-        tmp.add(new End<VEvent, AppointmentObject>());
-
-        Duration<VEvent, AppointmentObject> duration = new Duration<VEvent, AppointmentObject>();
-        duration.setVerifier(new RequireEndDate());
-        tmp.add(duration);
-
-        tmp.add(new Klass<VEvent, AppointmentObject>());
-
-        tmp.add(new Location());
-        tmp.add(new Transparency());
-
-        tmp.add(new Participants<VEvent, AppointmentObject>());
-
-        tmp.add(new Categories<VEvent, AppointmentObject>());
-
-        tmp.add(new Recurrence<VEvent, AppointmentObject>());
-
-        tmp.add(new DeleteExceptions<VEvent, AppointmentObject>());
-
-        tmp.add(new Alarm<VEvent, AppointmentObject>());
-        tmp.add(new IgnoreConflicts());
-        tmp.add(new Uid<VEvent, AppointmentObject>());
-        ALL = (AttributeConverter<VEvent, AppointmentObject>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
+    /**
+     * @param service the service to set
+     */
+    public void setResourceService(final ResourceService resourceService) {
+        this.resourceService = resourceService;
     }
 }

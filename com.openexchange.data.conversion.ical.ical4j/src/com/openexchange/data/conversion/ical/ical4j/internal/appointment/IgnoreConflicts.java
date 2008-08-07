@@ -46,38 +46,63 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.data.conversion.ical.ical4j.osgi;
 
-import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.contexts.Context;
+package com.openexchange.data.conversion.ical.ical4j.internal.appointment;
 
 import java.util.List;
-import java.util.ArrayList;
+import java.util.TimeZone;
+
+import net.fortuna.ical4j.model.component.VEvent;
+
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.contexts.Context;
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class OXUserResolver implements UserResolver {
+public final class IgnoreConflicts extends AbstractVerifyingAttributeConverter<VEvent, AppointmentObject> {
 
-    public List<User> findUsers(List<String> mails, Context ctx) throws LdapException {
-        List<User> users = new ArrayList<User>();
-        UserStorage storage = UserStorage.getInstance();
-        for(String mail : mails) {
-            try {
-                users.add( storage.searchUser(mail, ctx) );
-            } catch (LdapException x) {
-                if(x.getDetailNumber() != 14) {  // 14 == user not found
-                    throw x;
-                }
-            }
-        }
-        return users;
+    /**
+     * Default constructor.
+     */
+    public IgnoreConflicts() {
+        super();
     }
 
-    public User loadUser(int userId, Context ctx) throws LdapException {
-        return UserStorage.getStorageUser(userId, ctx);
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isSet(final AppointmentObject appointment) {
+        // Ignore this always on output.
+        return false;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void emit(final int index, final AppointmentObject appointment, final VEvent vEvent,
+        final List<ConversionWarning> warnings, final Context ctx) {
+        // Ignore this always on output.
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasProperty(final VEvent vEvent) {
+        // Set it always on input.
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void parse(final int index, final VEvent vEvent, final AppointmentObject appointment,
+        final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
+        // Set it always on input.
+        appointment.setIgnoreConflicts(true);
+    }
+
 }

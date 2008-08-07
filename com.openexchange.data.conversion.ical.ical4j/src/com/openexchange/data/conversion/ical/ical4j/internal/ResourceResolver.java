@@ -46,64 +46,38 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
-import net.fortuna.ical4j.model.component.VEvent;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.*;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.IgnoreConflicts;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.RequireStartDate;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.RequireEndDate;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.Location;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.Transparency;
-
 import java.util.List;
-import java.util.ArrayList;
+
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.resource.Resource;
+import com.openexchange.resource.ResourceException;
+import com.openexchange.server.ServiceException;
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class AppointmentConverters {
-    public static final AttributeConverter<VEvent, AppointmentObject>[] ALL;
+public interface ResourceResolver {
 
     /**
-     * Prevent instantiation.
+     * Loads the resource with the given unique identifier.
+     * @param resourceId unique resource identifier.
+     * @param ctx Context.
+     * @return the loaded resource.
+     * @throws ResourceException if loading the resource fails.
+     * @throws ServiceException if the resource service is not available.
      */
-    private AppointmentConverters() {
-        super();
-    }
+    Resource load(final int resourceId, final Context ctx) throws ResourceException, ServiceException;
 
-    static {
-        final List<AttributeConverter<VEvent, AppointmentObject>> tmp = new ArrayList<AttributeConverter<VEvent, AppointmentObject>>();
-        tmp.add(new Title<VEvent, AppointmentObject>());
-        tmp.add(new Note<VEvent, AppointmentObject>());
+    /**
+     * Find the resources with the given names.
+     * @param names display names of resources.
+     * @param ctx Context.
+     * @return list of found resources.
+     */
+    List<Resource> find(final List<String> names, final Context ctx) throws ResourceException, ServiceException;
 
-        Start<VEvent, AppointmentObject> start = new Start<VEvent, AppointmentObject>();
-        start.setVerifier(new RequireStartDate());
-        tmp.add(start);
-
-        tmp.add(new End<VEvent, AppointmentObject>());
-
-        Duration<VEvent, AppointmentObject> duration = new Duration<VEvent, AppointmentObject>();
-        duration.setVerifier(new RequireEndDate());
-        tmp.add(duration);
-
-        tmp.add(new Klass<VEvent, AppointmentObject>());
-
-        tmp.add(new Location());
-        tmp.add(new Transparency());
-
-        tmp.add(new Participants<VEvent, AppointmentObject>());
-
-        tmp.add(new Categories<VEvent, AppointmentObject>());
-
-        tmp.add(new Recurrence<VEvent, AppointmentObject>());
-
-        tmp.add(new DeleteExceptions<VEvent, AppointmentObject>());
-
-        tmp.add(new Alarm<VEvent, AppointmentObject>());
-        tmp.add(new IgnoreConflicts());
-        tmp.add(new Uid<VEvent, AppointmentObject>());
-        ALL = (AttributeConverter<VEvent, AppointmentObject>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
-    }
 }

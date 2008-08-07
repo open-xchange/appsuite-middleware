@@ -49,6 +49,8 @@
 
 package com.openexchange.data.conversion.ical;
 
+import com.openexchange.groupware.AbstractOXException;
+
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
@@ -73,5 +75,9 @@ public class ConversionError extends ConversionWarning {
 
     public ConversionError(int index, Code code, Throwable cause, Object... args) {
         super(index, code, cause, args);
+    }
+
+    public ConversionError(final int index, final AbstractOXException cause) {
+        super(index, cause);
     }
 }

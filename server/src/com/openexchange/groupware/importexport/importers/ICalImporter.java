@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.importexport.importers;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.*;
@@ -71,7 +70,6 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarField;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.importexport.AbstractImporter;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
@@ -87,13 +85,6 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.versit.ICalendar;
-import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.VersitException;
-import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.ConverterPrivacyException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
@@ -101,15 +92,16 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 @OXExceptionSource(classId = ImportExportExceptionClasses.ICALIMPORTER, component = EnumComponent.IMPORT_EXPORT)
 @OXThrowsMultiple(category = { Category.PERMISSION, Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.USER_INPUT,
 		Category.USER_INPUT, Category.CODE_ERROR, Category.USER_INPUT, Category.USER_INPUT, Category.PERMISSION,
-		Category.PERMISSION, Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT, Category.SETUP_ERROR }, desc = { "", "", "", "",
-		"", "", "", "", "", "", "", "", "" }, exceptionId = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }, msg = {
+		Category.PERMISSION, Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT, Category.SETUP_ERROR, Category.USER_INPUT }, desc = { "", "", "", "",
+		"", "", "", "", "", "", "", "", "", "" }, exceptionId = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 }, msg = {
 		"Could not import into the folder %s.", "Subsystem down", "User input error %s",
 		"Problem while reading ICal file: %s.", "Could not load folder %s", "Broken file uploaded: %s",
 		"Cowardly refusing to import an entry flagged as confidential.",
 		"Module Calendar not enabled for user, cannot import appointments.",
 		"Module Tasks not enabled for user, cannot import tasks.", "The element %s is not supported.",
 		"Couldn't convert object: %s", "No ICal to import found.",
-        "Could not find suitable ICalParser. Is an ICalParser exported as a service?"})
+        "Could not find suitable ICalParser. Is an ICalParser exported as a service?",
+        "Failed importing appointment due to hard conflicting resource."})
 /*
  * Imports ICal files. ICal files can be translated to either tasks or
  * appointments within the OX, so the importer works with both SQL interfaces.
@@ -284,11 +276,15 @@ public class ICalImporter extends AbstractImporter {
                     appointmentObj.setParentFolderID(appointmentFolderId);
                     appointmentObj.setIgnoreConflicts(true);
                     try {
-                        appointmentInterface.insertAppointmentObject(appointmentObj);
-                        importResult.setObjectId(String.valueOf(appointmentObj.getObjectID()));
-                        importResult.setDate(appointmentObj.getLastModified());
-                        importResult.setFolder(String.valueOf(appointmentFolderId));
-                    } catch (OXException e) {
+                        final CalendarDataObject[] conflicts = appointmentInterface.insertAppointmentObject(appointmentObj);
+                        if (conflicts.length == 0) {
+                            importResult.setObjectId(String.valueOf(appointmentObj.getObjectID()));
+                            importResult.setDate(appointmentObj.getLastModified());
+                            importResult.setFolder(String.valueOf(appointmentFolderId));
+                        } else {
+                            importResult.setException(EXCEPTIONS.create(13));
+                        }
+                    } catch (final OXException e) {
                         LOG.error(e.getMessage(), e);
                         importResult.setException(e);
                     }

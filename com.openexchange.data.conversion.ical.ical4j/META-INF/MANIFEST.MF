@@ -13,12 +13,15 @@ Import-Package: com.openexchange.data.conversion.ical,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.tasks,
+ com.openexchange.resource,
+ com.openexchange.server,
  com.openexchange.server.impl,
  org.apache.commons.codec,
  org.apache.commons.codec.binary,
  org.apache.commons.codec.net,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.osgi.util.tracker
 Bundle-ClassPath: lib/ical4j-1.0-beta4.jar,
  lib/commons-lang-2.3.jar,
  .

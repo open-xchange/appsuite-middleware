@@ -3,6 +3,7 @@
  - Bugfix #11659: Resolving group 0 does now work for tasks.
  - Bugfix #10852: Improved exception message if some task attribute is too long.
  - Bugfix #11280: Allowed open end time range in search for tasks.
+ - Bugfix #11868: Implemented proper resource handling for iCal.
 
 * 2008-08-06 - marcus.klein@open-xchange.com
 

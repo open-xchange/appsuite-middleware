@@ -93,6 +93,11 @@ public class ConversionWarning extends AbstractOXException {
         this.index = index;
     }
 
+    public ConversionWarning(final int index, final AbstractOXException cause) {
+        super(cause);
+        this.index = index;
+    }
+
     public int getIndex() {
         return index;
     }
@@ -125,7 +130,7 @@ public class ConversionWarning extends AbstractOXException {
          */
         VALIDATION("Validation of calendar failed.", Category.CODE_ERROR, 7),
 
-        CANT_RESOLVE_USER("Can not resolve user: %d", Category.INTERNAL_ERROR, 8),
+        CANT_RESOLVE_USER("Can not resolve user: %d", Category.CODE_ERROR, 8),
 
         PARSE_EXCEPTION("Parsing error parsing ical: %s", Category.USER_INPUT, 9),
         /**
@@ -140,7 +145,11 @@ public class ConversionWarning extends AbstractOXException {
         /**
          * Missing DTStart in appointment
          */
-        MISSING_DTSTART("Missing DTSTART", Category.USER_INPUT, 12)
+        MISSING_DTSTART("Missing DTSTART", Category.USER_INPUT, 12),
+        /**
+         * Can not resolve resource: %d
+         */
+        CANT_RESOLVE_RESOURCE("Can not resolve resource: %1$s", Category.CODE_ERROR, 13)
         ;
 
         /**

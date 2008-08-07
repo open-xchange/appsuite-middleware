@@ -46,28 +46,44 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.PropertyList;
-import net.fortuna.ical4j.model.ResourceList;
-import net.fortuna.ical4j.model.property.Attendee;
-import net.fortuna.ical4j.model.property.Resources;
-import com.openexchange.groupware.container.*;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ConversionError;
-
-import java.util.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.TimeZone;
+
+import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.ResourceList;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.property.Attendee;
+import net.fortuna.ical4j.model.property.Resources;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ConversionWarning.Code;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
+import com.openexchange.data.conversion.ical.ical4j.internal.ResourceResolver;
+import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.ResourceParticipant;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.resource.Resource;
+import com.openexchange.resource.ResourceException;
+import com.openexchange.server.ServiceException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -86,6 +102,8 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             return null;
         }
     };
+    
+    public static ResourceResolver resourceResolver = new OXResourceResolver();
 
     public boolean isSet(U cObj) {
         return cObj.containsParticipants();
@@ -107,13 +125,26 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             }
         }
         if(resources.size() == 0) { return; }
-        setResources(component, resources);
+        setResources(index, component, resources, ctx);
     }
 
-    private void setResources(T component, List<ResourceParticipant> resources) {
-
-        ResourceList list = new ResourceList();
-        for(ResourceParticipant p : resources) { list.add(p.getDisplayName()); }
+    private void setResources(final int index, final T component,
+        final List<ResourceParticipant> resources, final Context ctx) throws ConversionError {
+        final ResourceList list = new ResourceList();
+        for (ResourceParticipant res : resources) {
+            String displayName = res.getDisplayName();
+            if (null == displayName) {
+                try {
+                    Resource resource = resourceResolver.load(res.getIdentifier(), ctx);
+                    displayName = resource.getDisplayName();
+                } catch (final ResourceException e) {
+                    throw new ConversionError(index, e);
+                } catch (final ServiceException e) {
+                    throw new ConversionError(index, e);
+                }
+            }
+            list.add(displayName);
+        }
         Resources property = new Resources(list);
         component.getProperties().add(property);
     }
@@ -136,15 +167,14 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 try {
                     User user = userResolver.loadUser(userParticipant.getIdentifier(), ctx);
                     address = user.getMail();
-                } catch (LdapException e) {
-                    LOG.error(e.getMessage(), e);
-                    throw new ConversionError(index, ConversionWarning.Code.CANT_RESOLVE_USER, userParticipant.getIdentifier() );
+                } catch (final LdapException e) {
+                    throw new ConversionError(index, e);
                 }
             }
             attendee.setValue("MAILTO:"+ address);
             component.getProperties().add(attendee);
-        } catch (URISyntaxException e) {
-            LOG.error(e); // Shouldn't happen
+        } catch (final URISyntaxException e) {
+            LOG.error(e.getMessage(), e); // Shouldn't happen
         }
     }
 
@@ -171,8 +201,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
 	    try {
             users = userResolver.findUsers(mails, ctx);
         } catch (final LdapException e) {
-            // FIXME
-            throw new ConversionError(index, "FIX ME");
+            throw new ConversionError(index, e);
         }
 
         for(User user : users) {
@@ -186,14 +215,32 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             cObj.addParticipant(external);
         }
 
+        final List<String> resourceNames = new LinkedList<String>();
         PropertyList resourcesList = component.getProperties("RESOURCES");
-        for(int i = 0, size = resourcesList.size(); i < size; i++) {
+        for (int i = 0, size = resourcesList.size(); i < size; i++) {
             Resources resources = (Resources) resourcesList.get(i);
-            for(Iterator<Object> resObjects = resources.getResources().iterator(); resObjects.hasNext();) {
-                ResourceParticipant participant = new ResourceParticipant();
-                participant.setDisplayName(resObjects.next().toString());
-                cObj.addParticipant(participant);
+            final Iterator<?> resObjects = resources.getResources().iterator();
+            while (resObjects.hasNext()) {
+                resourceNames.add(resObjects.next().toString());
             }
+        }
+        final List<Resource> resources;
+        try {
+            resources = resourceResolver.find(resourceNames, ctx);
+        } catch (final ResourceException e) {
+            throw new ConversionError(index, e);
+        } catch (final ServiceException e) {
+            throw new ConversionError(index, e);
+        }
+
+        for (Resource resource : resources) {
+            cObj.addParticipant(new ResourceParticipant(resource.getIdentifier()));
+            resourceNames.remove(resource.getDisplayName());
+        }
+        for (String resourceName : resourceNames) {
+            final ConversionWarning warning = new ConversionWarning(index,
+                Code.CANT_RESOLVE_RESOURCE, resourceName);
+            warnings.add(warning);
         }
     }
 }

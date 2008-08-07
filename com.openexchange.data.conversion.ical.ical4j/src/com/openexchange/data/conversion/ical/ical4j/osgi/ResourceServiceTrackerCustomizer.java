@@ -46,64 +46,61 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.data.conversion.ical.ical4j.internal;
 
-import net.fortuna.ical4j.model.component.VEvent;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.*;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.IgnoreConflicts;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.RequireStartDate;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.RequireEndDate;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.Location;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.Transparency;
+package com.openexchange.data.conversion.ical.ical4j.osgi;
 
-import java.util.List;
-import java.util.ArrayList;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
+import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
+import com.openexchange.resource.ResourceService;
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class AppointmentConverters {
-    public static final AttributeConverter<VEvent, AppointmentObject>[] ALL;
+public final class ResourceServiceTrackerCustomizer implements
+    ServiceTrackerCustomizer {
+
+    private final BundleContext context;
+
+    private final OXResourceResolver resourceResolver;
 
     /**
-     * Prevent instantiation.
+     * Default constructor.
      */
-    private AppointmentConverters() {
+    public ResourceServiceTrackerCustomizer(final BundleContext context,
+        final OXResourceResolver resourceResolver) {
         super();
+        this.context = context;
+        this.resourceResolver = resourceResolver;
     }
 
-    static {
-        final List<AttributeConverter<VEvent, AppointmentObject>> tmp = new ArrayList<AttributeConverter<VEvent, AppointmentObject>>();
-        tmp.add(new Title<VEvent, AppointmentObject>());
-        tmp.add(new Note<VEvent, AppointmentObject>());
+    /**
+     * {@inheritDoc}
+     */
+    public Object addingService(final ServiceReference reference) {
+        final ResourceService resourceService = (ResourceService) context
+            .getService(reference);
+        resourceResolver.setResourceService(resourceService);
+        return resourceService;
+    }
 
-        Start<VEvent, AppointmentObject> start = new Start<VEvent, AppointmentObject>();
-        start.setVerifier(new RequireStartDate());
-        tmp.add(start);
+    /**
+     * {@inheritDoc}
+     */
+    public void modifiedService(final ServiceReference reference,
+        final Object service) {
+        // Nothing to do.
+    }
 
-        tmp.add(new End<VEvent, AppointmentObject>());
-
-        Duration<VEvent, AppointmentObject> duration = new Duration<VEvent, AppointmentObject>();
-        duration.setVerifier(new RequireEndDate());
-        tmp.add(duration);
-
-        tmp.add(new Klass<VEvent, AppointmentObject>());
-
-        tmp.add(new Location());
-        tmp.add(new Transparency());
-
-        tmp.add(new Participants<VEvent, AppointmentObject>());
-
-        tmp.add(new Categories<VEvent, AppointmentObject>());
-
-        tmp.add(new Recurrence<VEvent, AppointmentObject>());
-
-        tmp.add(new DeleteExceptions<VEvent, AppointmentObject>());
-
-        tmp.add(new Alarm<VEvent, AppointmentObject>());
-        tmp.add(new IgnoreConflicts());
-        tmp.add(new Uid<VEvent, AppointmentObject>());
-        ALL = (AttributeConverter<VEvent, AppointmentObject>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
+    /**
+     * {@inheritDoc}
+     */
+    public void removedService(final ServiceReference reference,
+        final Object service) {
+        resourceResolver.setResourceService(null);
+        context.ungetService(reference);
     }
 }
