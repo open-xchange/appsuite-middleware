@@ -52,36 +52,27 @@ package com.openexchange.test;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import com.openexchange.SmokeTestSuite;
-import com.openexchange.ajax.reminder.ReminderAJAXSuite;
-import com.openexchange.ajax.reminder.ReminderBugTestSuite;
-
-
 public class InterfaceTests {
 
     public static Test suite() {
-
 		final TestSuite tests = new TestSuite();
-
         // First of all the smoke tests.
-        tests.addTest(SmokeTestSuite.suite());
+        tests.addTest(com.openexchange.SmokeTestSuite.suite());
 
+        tests.addTest(com.openexchange.ajax.appointment.AppointmentAJAXSuite.suite());
+        tests.addTest(com.openexchange.ajax.config.ConfigTestSuite.suite());
+        tests.addTest(com.openexchange.ajax.contact.ContactAJAXSuite.suite());
+        tests.addTestSuite(com.openexchange.ajax.group.FunctionTest.class);
+        tests.addTest(com.openexchange.ajax.infostore.InfostoreAJAXSuite.suite());
+        tests.addTest(com.openexchange.ajax.reminder.ReminderAJAXSuite.suite());
+		tests.addTest(com.openexchange.ajax.reminder.ReminderBugTestSuite.suite());
         tests.addTestSuite(com.openexchange.ajax.session.LoginTest.class);
         tests.addTestSuite(com.openexchange.ajax.session.RedirectTest.class);
         tests.addTestSuite(com.openexchange.ajax.FolderTest.class);
-        tests.addTest(ReminderAJAXSuite.suite());
-		tests.addTest(ReminderBugTestSuite.suite());
-
-        tests.addTest(com.openexchange.ajax.infostore.InfostoreAJAXSuite.suite());
-        tests.addTest(com.openexchange.ajax.config.ConfigTestSuite.suite());
-        tests.addTest(com.openexchange.ajax.appointment.AppointmentAJAXSuite.suite());
-
-		tests.addTest(com.openexchange.ajax.contact.ContactAJAXSuite.suite());
+        tests.addTestSuite(com.openexchange.ajax.LinkTest.class);
+        tests.addTestSuite(com.openexchange.ajax.MultipleTest.class);
+        tests.addTestSuite(com.openexchange.ajax.ResourceTest.class);
 		tests.addTestSuite(com.openexchange.ajax.UserTest.class);
-		tests.addTestSuite(com.openexchange.ajax.group.FunctionTest.class);
-		tests.addTestSuite(com.openexchange.ajax.ResourceTest.class);
-		tests.addTestSuite(com.openexchange.ajax.LinkTest.class);
-		tests.addTestSuite(com.openexchange.ajax.MultipleTest.class);
 
 		tests.addTest(com.openexchange.ajax.importexport.ImportExportServerSuite.suite());
 
