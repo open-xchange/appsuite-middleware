@@ -48,6 +48,7 @@ import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
+import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.OXUserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.data.conversion.ical.ICalParser;
@@ -243,7 +244,9 @@ public final class Init {
 	}
 
 	private static void startAndInjectResourceService() {
-		ServerServiceRegistry.getInstance().addService(ResourceService.class, ResourceServiceImpl.getInstance());
+	    final ResourceService resources = ResourceServiceImpl.getInstance();
+	    services.put(ResourceService.class, resources);
+		ServerServiceRegistry.getInstance().addService(ResourceService.class, resources);
 	}
 
 	private static void startAndInjectSessiondBundle() throws Exception {
@@ -285,6 +288,9 @@ public final class Init {
         ICal4JEmitter emitter = new ICal4JEmitter();
 
         Participants.userResolver = new OXUserResolver();
+        final OXResourceResolver resourceResolver = new OXResourceResolver();
+        resourceResolver.setResourceService((ResourceService) services.get(ResourceService.class));
+        Participants.resourceResolver = resourceResolver;
 
         services.put(ICalParser.class, parser);
         services.put(ICalEmitter.class, emitter);
