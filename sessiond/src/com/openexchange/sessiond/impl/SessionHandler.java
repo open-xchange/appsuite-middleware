@@ -188,9 +188,7 @@ public final class SessionHandler {
 		final Session session = new SessionImpl(userId, loginName, password, context.getContextId(), sessionId, secret,
 				randomToken, clientHost);
 
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("addSession <" + sessionId + '>');
-		}
+		LOG.info("Session created. ID: " + sessionId + ", Context: " + context.getContextId() + ", User: " + userId);
 
 		addSessionInternal(session);
 
@@ -243,9 +241,7 @@ public final class SessionHandler {
 
 					return true;
 				}
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("session TIMEOUT sessionid=" + sessionid);
-				}
+				LOG.info("Session timed out. ID: " + sessionid);
 				sessionContainer.removeSessionById(sessionid);
 				numberOfActiveSessions.decrementAndGet();
 
@@ -256,10 +252,6 @@ public final class SessionHandler {
 	}
 
 	protected static boolean clearSession(final String sessionid) {
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("clearSession <" + sessionid + '>');
-		}
-
 		for (int a = 0; a < numberOfSessionContainers; a++) {
 			final SessionContainer sessionContainer = sessionList.get(a);
 
@@ -267,6 +259,7 @@ public final class SessionHandler {
 				final SessionControl sessionControl = sessionContainer.removeSessionById(sessionid);
 				numberOfActiveSessions.decrementAndGet();
 				postSessionRemoval(sessionControl.getSession());
+				LOG.info("Session closed. ID: " + sessionid);
 				return true;
 			}
 		}
@@ -307,9 +300,7 @@ public final class SessionHandler {
 					}
 					return;
 				}
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("session TIMEOUT sessionid=" + sessionid);
-				}
+				LOG.info("Session timed out. ID: " + sessionid);
 				sessionContainer.removeSessionById(sessionid);
 				numberOfActiveSessions.decrementAndGet();
 				throw new SessiondException(SessiondException.Code.PASSWORD_UPDATE_FAILED);
@@ -427,10 +418,10 @@ public final class SessionHandler {
 			LOG.debug("session cleanup");
 		}
 
-		if (LOG.isDebugEnabled()) {
+		if (LOG.isInfoEnabled()) {
 			final SessionContainer sessionContainer = sessionList.getLast();
 			for (final Iterator<String> iterator = sessionContainer.getSessionIds(); iterator.hasNext();) {
-				LOG.debug("session timeout for id: " + iterator.next());
+				LOG.info("Session timed out. ID: " + iterator.next());
 			}
 		}
 		prependContainer();
@@ -468,9 +459,7 @@ public final class SessionHandler {
 	}
 
 	protected static void decrementNumberOfActiveSessions(final int amount) {
-		for (int a = 0; a < amount; a++) {
-			numberOfActiveSessions.decrementAndGet();
-		}
+	    numberOfActiveSessions.addAndGet(-amount);
 	}
 
 	private static void postSessionRemoval(final Session session) {
