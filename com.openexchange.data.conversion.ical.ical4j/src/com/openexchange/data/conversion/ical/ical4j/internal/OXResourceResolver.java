@@ -86,11 +86,14 @@ public final class OXResourceResolver implements ResourceResolver {
 
     public List<Resource> find(final List<String> resourceNames, final Context ctx)
         throws ResourceException, ServiceException {
+        final List<Resource> retval = new ArrayList<Resource>();
+        if (0 == resourceNames.size()) {
+            return retval;
+        }
         if (null == resourceService) {
             throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
                 ResourceService.class.getName());
         }
-        final List<Resource> retval = new ArrayList<Resource>();
         for (String name : resourceNames) {
             final Resource[] resources = resourceService.searchResources(name,
                 ctx);
