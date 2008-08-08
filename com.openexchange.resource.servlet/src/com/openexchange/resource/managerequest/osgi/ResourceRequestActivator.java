@@ -55,7 +55,9 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.resource.ResourceService;
+import com.openexchange.resource.managerequest.preferences.Module;
 import com.openexchange.resource.managerequest.request.ResourceManageRequest;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
@@ -73,7 +75,9 @@ public final class ResourceRequestActivator extends DeferredActivator {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ResourceRequestActivator.class);
 
-	private ServiceRegistration serviceRegistration;
+	private ServiceRegistration handlerRegistration;
+
+	private ServiceRegistration preferencesItemRegistration;
 
 	/**
 	 * Initializes a new {@link ResourceRequestActivator}
@@ -145,17 +149,23 @@ public final class ResourceRequestActivator extends DeferredActivator {
 		/*
 		 * Register request handler
 		 */
-		serviceRegistration = context.registerService(AJAXRequestHandler.class.getName(), new ResourceManageRequest(),
-				null);
+		handlerRegistration = context.registerService(AJAXRequestHandler.class.getName(),
+		    new ResourceManageRequest(), null);
+		preferencesItemRegistration = context.registerService(
+		    PreferencesItemService.class.getName(), new Module(), null);
 	}
 
 	private void unregisterRequestHandler() {
-		if (serviceRegistration != null) {
+		if (handlerRegistration != null) {
 			/*
 			 * Unregister service
 			 */
-			serviceRegistration.unregister();
-			serviceRegistration = null;
+			handlerRegistration.unregister();
+			handlerRegistration = null;
+		}
+		if (preferencesItemRegistration != null) {
+		    preferencesItemRegistration.unregister();
+		    preferencesItemRegistration = null;
 		}
 	}
 

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.settings.tree;
+package com.openexchange.group.servlet.preferences;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -55,9 +55,6 @@ import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.impl.ConfigTree;
-import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
@@ -65,14 +62,12 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class AvailableModules implements PreferencesItemService {
-
-    private static final String NAME = "availableModules";
+public final class Module implements PreferencesItemService {
 
     /**
      * Default constructor.
      */
-    public AvailableModules() {
+    public Module() {
         super();
     }
 
@@ -80,7 +75,7 @@ public final class AvailableModules implements PreferencesItemService {
      * {@inheritDoc}
      */
     public String[] getPath() {
-        return new String[] { NAME };
+        return new String[] { "modules", "com.openexchange.group" };
     }
 
     /**
@@ -88,39 +83,21 @@ public final class AvailableModules implements PreferencesItemService {
      */
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
+            /**
+             * {@inheritDoc}
+             */
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
-                final Setting[] modules = ConfigTree.getSettingByPath("modules")
-                    .getElements();
-                final SettingStorage sStor = SettingStorage.getInstance(session,
-                    ctx, user, userConfig);
-                for (final Setting module : modules) {
-                    final Setting enabled = module.getElement("module");
-                    if (null != enabled) {
-                        sStor.readValues(enabled);
-                        final Object tmp = enabled.getSingleValue();
-                        // The following expression deals with string "true"
-                        // and with Boolean.TRUE.
-                        if (Boolean.parseBoolean(tmp.toString())) {
-                            setting.addMultiValue(module.getName());
-                        }
-                    } else if (!module.isLeaf()) {
-                        setting.addMultiValue(module.getName());
-                    } else {
-                        sStor.readValues(module);
-                        final Object tmp = module.getSingleValue();
-                        // The following expression deals with string "true"
-                        // and with Boolean.TRUE.
-                        if (Boolean.parseBoolean(tmp.toString())) {
-                            setting.addMultiValue(module.getName());
-                        }
-                    }
-                }
+                final Setting setting) {
+                setting.setSingleValue(Boolean.valueOf(userConfig.isEditGroup()));
             }
+            /**
+             * {@inheritDoc}
+             */
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
         };
     }
+
 }

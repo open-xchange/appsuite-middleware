@@ -2,6 +2,8 @@
 
  - Bugfix #11871: Replacing dates with dates of first occurrence for appointment
    series.
+ - Bugfix #11612: (partial) Loading GUI plugin enabled if group or resource
+   editing is allowed for a user.
 
 * 2008-08-07 - marcus.klein@open-xchange.com
 

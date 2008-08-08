@@ -58,7 +58,9 @@ import org.osgi.framework.ServiceRegistration;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.group.GroupService;
+import com.openexchange.group.servlet.preferences.Module;
 import com.openexchange.group.servlet.request.GroupManageRequest;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.user.UserService;
@@ -73,7 +75,9 @@ public class GroupManageActivator extends DeferredActivator {
 
     private final Lock lock = new ReentrantLock();
 
-    private ServiceRegistration registration;
+    private ServiceRegistration handlerRegistration;
+
+    private ServiceRegistration preferencesItemRegistration;
 
     /**
      * {@inheritDoc}
@@ -134,25 +138,33 @@ public class GroupManageActivator extends DeferredActivator {
         } finally {
             lock.unlock();
         }
-        if (needsRegistration && registration == null) {
-            registration = context.registerService(AJAXRequestHandler.class.getName(),
+        if (needsRegistration && handlerRegistration == null) {
+            handlerRegistration = context.registerService(AJAXRequestHandler.class.getName(),
                 new GroupManageRequest(), null);
+            preferencesItemRegistration = context.registerService(
+                PreferencesItemService.class.getName(), new Module(), null);
         }
     }
 
     private void unregisterService() {
-        ServiceRegistration unregister = null;
+        ServiceRegistration unregister1 = null;
+        ServiceRegistration unregister2 = null;
         lock.lock();
         try {
-            if (null != registration) {
-                unregister = registration;
-                registration = null;
+            if (null != handlerRegistration) {
+                unregister1 = handlerRegistration;
+                handlerRegistration = null;
+                unregister2 = preferencesItemRegistration;
+                preferencesItemRegistration = null;
             }
         } finally {
             lock.unlock();
         }
-        if (null != unregister) {
-            unregister.unregister();
+        if (null != unregister1) {
+            unregister1.unregister();
+        }
+        if (null != unregister2) {
+            unregister2.unregister();
         }
     }
 }
