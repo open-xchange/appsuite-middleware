@@ -81,6 +81,7 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
@@ -246,7 +247,9 @@ public final class ical extends PermissionServlet {
                     calendarfolderId, _appointmentFields, new Date(0), true);
                 while (itApp.hasNext()) {
                     final AppointmentObject appointment = itApp.next();
-                    appointment.setTimezone(user.getTimeZone());
+                    if (appointment.NO_RECURRENCE != appointment.getRecurrenceType()) {
+                        CalendarRecurringCollection.replaceDatesWithFirstOccurence(appointment);
+                    }
                     emitter.writeAppointment(iSession, appointment, context,
                         errors, warnings);
 //                    final ICalItem item = emitter.writeAppointment(iSession,

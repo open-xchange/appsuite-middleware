@@ -63,6 +63,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.recurrence.RecurringCalculation;
 import com.openexchange.groupware.calendar.recurrence.RecurringException;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 
 /**
@@ -905,5 +906,15 @@ public final class CalendarRecurringCollection {
         }
         return clone;
     }
-    
+
+    public static void replaceDatesWithFirstOccurence(final AppointmentObject appointment) throws OXException {
+        final RecurringResults results = calculateFirstRecurring(appointment);
+        if (0 == results.size()) {
+            throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_CALCULATE_FIRST_RECURRING);
+        }
+        final RecurringResult result = results.getRecurringResult(0);
+        appointment.setStartDate(new Date(result.getStart()));
+        appointment.setEndDate(new Date(result.getEnd()));
+        appointment.setRecurrencePosition(result.getPosition());
+    }
 }

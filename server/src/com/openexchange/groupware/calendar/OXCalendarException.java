@@ -194,7 +194,11 @@ public class OXCalendarException extends OXException {
         /**
          * Value %1$d exceeds max. supported value of %2$d.
          */
-        RECURRING_VALUE_CONSTRAINT("Value %1$d exceeds max. supported value of %2$d.", 78, Category.USER_INPUT);
+        RECURRING_VALUE_CONSTRAINT("Value %1$d exceeds max. supported value of %2$d.", 78, Category.USER_INPUT),
+        /**
+         * Unable to calculate first occurence.
+         */
+        UNABLE_TO_CALCULATE_FIRST_RECURRING("Unable to calculate first occurence.", 79, Category.CODE_ERROR);
         
         /**
          * Message of the exception.

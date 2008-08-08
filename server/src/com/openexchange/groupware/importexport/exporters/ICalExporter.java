@@ -63,6 +63,7 @@ import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
@@ -249,12 +250,15 @@ public class ICalExporter implements Exporter {
 				}
 				
 				final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
-				final SearchIterator<?> searchIterator = appointmentSql.getModifiedAppointmentsInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO, true);
+				final SearchIterator<CalendarDataObject> searchIterator = appointmentSql.getModifiedAppointmentsInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO, true);
 				List<AppointmentObject> appointments = new LinkedList<AppointmentObject>();
                 try {
 					while (searchIterator.hasNext()) {
-                        AppointmentObject appointment =  (AppointmentObject)searchIterator.next();
-                        appointments.add( appointment );
+                        final AppointmentObject appointment = searchIterator.next();
+                        if (AppointmentObject.NO_RECURRENCE != appointment.getRecurrenceType()) {
+                            CalendarRecurringCollection.replaceDatesWithFirstOccurence(appointment);
+                        }
+                        appointments.add(appointment);
 				   	}
                     List<ConversionError> errors = new LinkedList<ConversionError>();
                     List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
