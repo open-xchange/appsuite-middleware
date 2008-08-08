@@ -146,7 +146,7 @@
             <test name="com.openexchange.webdav.xml.GroupUserTest" todir="${test.xml.dir}" />
             <test name="com.openexchange.webdav.client.NaughtyClientTest" todir="${test.xml.dir}" />
 
-            <test name="com.openexchange.groupware.importexport.ImportExportServerSuite" todir="${test.xml.dir}" />
+            <test name="com.openexchange.ajax.importexport.ImportExportServerSuite" todir="${test.xml.dir}" />
 
             <formatter type="brief" usefile="false" />
             <formatter type="xml" />
