@@ -68,6 +68,11 @@ public class ContextImpl implements ContextExtended, Serializable {
     private final int contextId;
 
     /**
+     * Context name.
+     */
+    private String name;
+
+    /**
      * The login informations of a context.
      */
     private String[] loginInfo;
@@ -147,6 +152,20 @@ public class ContextImpl implements ContextExtended, Serializable {
     @Override
     public String toString() {
         return "ContextImpl cid: " + contextId;
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
     }
 
     /**

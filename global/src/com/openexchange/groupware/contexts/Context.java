@@ -73,6 +73,11 @@ public interface Context {
     int getContextId();
 
     /**
+     * @return the name of the context.
+     */
+    String getName();
+
+    /**
      * @return the login informations of a context.
      */
     String[] getLoginInfo();

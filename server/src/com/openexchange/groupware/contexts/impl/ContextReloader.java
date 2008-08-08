@@ -117,6 +117,18 @@ final class ContextReloader extends Refresher<ContextExtended> implements Contex
     /**
      * {@inheritDoc}
      */
+    public String getName() {
+        try {
+            this.delegate = refresh();
+        } catch (final AbstractOXException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+        return delegate.getName();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String[] getFileStorageAuth() {
         try {
             this.delegate = refresh();

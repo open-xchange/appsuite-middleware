@@ -74,7 +74,7 @@ public class RdbContextStorage extends ContextStorage {
      * SQL select statement for loading a context.
      */
     private static final String SELECT_CONTEXT =
-        "SELECT enabled,filestore_id,filestore_name,filestore_login,"
+        "SELECT name,enabled,filestore_id,filestore_name,filestore_login,"
         + "filestore_passwd,quota_max FROM context WHERE cid=?";
 
     /**
@@ -230,6 +230,7 @@ public class RdbContextStorage extends ContextStorage {
             if (result.next()) {
                 context = new ContextImpl(contextId);
                 int pos = 1;
+                context.setName(result.getString(pos++));
                 context.setEnabled(result.getBoolean(pos++));
                 context.setFilestoreId(result.getInt(pos++));
                 context.setFilestoreName(result.getString(pos++));
