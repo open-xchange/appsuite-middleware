@@ -53,6 +53,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.parser.ResponseParser;
@@ -78,15 +79,20 @@ public abstract class AbstractUploadParser<T extends AbstractAJAXResponse> exten
      */
     @Override
     protected Response getResponse(final String body) throws JSONException {
-        final Matcher matcher = CALLBACK_ARG_PATTERN.matcher(body);
-        final Response response;
-        if (matcher.find()) {
-            response = ResponseParser.parse(matcher.group(1));
-        } else {
-            throw new JSONException("Can't parse body: \"" + body + "\"");
-        }
+        final Response response = ResponseParser.parse(extractFromCallback(body));
         assertFalse(response.getErrorMessage(), isFailOnError() && response
             .hasError());
         return response;
+    }
+
+    public static JSONObject extractFromCallback(final String body) throws JSONException {
+        final Matcher matcher = CALLBACK_ARG_PATTERN.matcher(body);
+        final JSONObject json;
+        if (matcher.find()) {
+            json = new JSONObject(body);
+        } else {
+            throw new JSONException("Can't parse body: \"" + body + "\"");
+        }
+        return json;
     }
 }

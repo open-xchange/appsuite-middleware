@@ -55,7 +55,6 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.regex.Matcher;
 
 import junit.framework.TestCase;
 
@@ -341,11 +340,7 @@ public abstract class AbstractAJAXTest extends TestCase {
     }
 
     public static JSONObject extractFromCallback(final String html) throws JSONException {
-        final Matcher matcher = AbstractUploadParser.CALLBACK_ARG_PATTERN.matcher(html);
-        if(matcher.find()){
-            return new JSONObject(matcher.group(1));
-        }
-        return null;
+        return AbstractUploadParser.extractFromCallback(html);
     }
 
     // A poor mans hash literal
