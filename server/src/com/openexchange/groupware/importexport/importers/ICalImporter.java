@@ -277,7 +277,7 @@ public class ICalImporter extends AbstractImporter {
                     appointmentObj.setIgnoreConflicts(true);
                     try {
                         final CalendarDataObject[] conflicts = appointmentInterface.insertAppointmentObject(appointmentObj);
-                        if (conflicts.length == 0) {
+                        if (conflicts == null || conflicts.length == 0) {
                             importResult.setObjectId(String.valueOf(appointmentObj.getObjectID()));
                             importResult.setDate(appointmentObj.getLastModified());
                             importResult.setFolder(String.valueOf(appointmentFolderId));
