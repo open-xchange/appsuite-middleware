@@ -55,6 +55,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -65,6 +66,7 @@ import java.util.TimeZone;
 import junit.framework.TestCase;
 
 import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
+import com.openexchange.data.conversion.ical.ical4j.internal.ResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -79,6 +81,9 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.MockUserLookup;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.resource.Resource;
+import com.openexchange.resource.ResourceException;
+import com.openexchange.server.ServiceException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -1003,6 +1008,16 @@ public class ICalParserTest extends TestCase {
 
             public User loadUser(int userId, Context ctx) throws LdapException {
                 return ICalParserTest.this.users.getUser(userId);
+            }
+        };
+        Participants.resourceResolver = new ResourceResolver() {
+            public List<Resource> find(List<String> names, Context ctx)
+                throws ResourceException, ServiceException {
+                return Collections.emptyList();
+            }
+            public Resource load(int resourceId, Context ctx)
+                throws ResourceException, ServiceException {
+                return null;
             }
         };
     }
