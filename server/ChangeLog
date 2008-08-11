@@ -1,4 +1,5 @@
 * 2008-08-11 - francisco.laguna@open-xchange.com
+
  - Bugfix #10401: Default to priority NORMAL for undefined priorities.
 
 * 2008-08-08 - marcus.klein@open-xchange.com
