@@ -89,7 +89,7 @@ public abstract class AbstractUploadParser<T extends AbstractAJAXResponse> exten
         final Matcher matcher = CALLBACK_ARG_PATTERN.matcher(body);
         final JSONObject json;
         if (matcher.find()) {
-            json = new JSONObject(body);
+            json = new JSONObject(matcher.group(1));
         } else {
             throw new JSONException("Can't parse body: \"" + body + "\"");
         }
