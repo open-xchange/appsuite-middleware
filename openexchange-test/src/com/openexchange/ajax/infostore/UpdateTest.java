@@ -30,7 +30,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 	}
 	
 	public void testBasic() throws Exception{
-		Response res = this.update(getWebConversation(), getHostName(),sessionId,clean.get(0), System.currentTimeMillis(), m(
+		Response res = this.update(getWebConversation(), getHostName(),sessionId,clean.get(0), Long.MAX_VALUE, m(
 				"title" , "test knowledge updated",
 				"color_label" , "1"
 		));
@@ -62,7 +62,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 	}
 	
 	private void descriptionRoundtrip(final String desc) throws Exception{
-		Response res = this.update(getWebConversation(), getHostName(),sessionId,clean.get(0), System.currentTimeMillis(), m(
+		Response res = this.update(getWebConversation(), getHostName(),sessionId,clean.get(0), Long.MAX_VALUE, m(
 				"description" , desc
 		));
 		assertNoError(res);

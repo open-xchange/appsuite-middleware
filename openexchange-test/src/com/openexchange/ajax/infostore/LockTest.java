@@ -43,8 +43,8 @@ public class LockTest extends InfostoreAJAXTest {
 		final int userId = FolderTest.getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
 		final FolderObject myInfostore = FolderTest.getMyInfostoreFolder(getWebConversation(), getHostName(), getSessionId(), userId);
 		folderId = FolderTest.insertFolder(getWebConversation(), getHostName(), getSessionId(), userId, false,
-		myInfostore.getObjectID(), "NewInfostoreFolder"+System.currentTimeMillis(), "infostore", FolderObject.PUBLIC, -1, true);
-		updateFolder(getWebConversation(),getHostName(),sessionId,getLogin(),getSeconduser(),folderId,System.currentTimeMillis(),false);
+		myInfostore.getObjectID(), "NewInfostoreFolder"+Long.MAX_VALUE, "infostore", FolderObject.PUBLIC, -1, true);
+		updateFolder(getWebConversation(),getHostName(),sessionId,getLogin(),getSeconduser(),folderId,Long.MAX_VALUE,false);
 		
 		//folderId=228;
 		final Map<String,String> create = m(
@@ -57,16 +57,16 @@ public class LockTest extends InfostoreAJAXTest {
 		
 		clean.add(c);
 		
-		Response res = this.update(getWebConversation(),getHostName(),sessionId,c,System.currentTimeMillis(),m(), testFile, "text/plain");
+		Response res = this.update(getWebConversation(),getHostName(),sessionId,c,Long.MAX_VALUE,m(), testFile, "text/plain");
 		assertNoError(res);
         
-        res = this.update(getWebConversation(),getHostName(),sessionId,c,System.currentTimeMillis(),m(), testFile, "text/plain");
+        res = this.update(getWebConversation(),getHostName(),sessionId,c,Long.MAX_VALUE,m(), testFile, "text/plain");
 		assertNoError(res);
 		
-		res = this.update(getWebConversation(),getHostName(),sessionId,c,System.currentTimeMillis(),m(), testFile, "text/plain");
+		res = this.update(getWebConversation(),getHostName(),sessionId,c,Long.MAX_VALUE,m(), testFile, "text/plain");
 		assertNoError(res);
 		
-		res = this.update(getWebConversation(),getHostName(),sessionId,c,System.currentTimeMillis(),m(), testFile, "text/plain");
+		res = this.update(getWebConversation(),getHostName(),sessionId,c,Long.MAX_VALUE,m(), testFile, "text/plain");
 		assertNoError(res);
 		
 	}
@@ -75,7 +75,7 @@ public class LockTest extends InfostoreAJAXTest {
 	public void tearDown() throws Exception{
 		super.tearDown();
 		
-		FolderTest.deleteFolders(getWebConversation(),getHostName(),sessionId,new int[]{folderId},System.currentTimeMillis(),false);
+		FolderTest.deleteFolders(getWebConversation(),getHostName(),sessionId,new int[]{folderId},Long.MAX_VALUE,false);
 	}
 	
 	public void testLock() throws Exception{
@@ -106,7 +106,7 @@ public class LockTest extends InfostoreAJAXTest {
 		final String sessionId2 = this.getSecondSessionId();
 		
 		// Object may not be modified
-		res = update(getSecondWebConversation(),getHostName(),sessionId2, clean.get(0), System.currentTimeMillis(), m("title" , "Hallo"));
+		res = update(getSecondWebConversation(),getHostName(),sessionId2, clean.get(0), Long.MAX_VALUE, m("title" , "Hallo"));
 		assertTrue(res.hasError());
 		
 		// Bug #????
