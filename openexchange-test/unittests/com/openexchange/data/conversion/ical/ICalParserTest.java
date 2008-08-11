@@ -93,6 +93,8 @@ public class ICalParserTest extends TestCase {
     private ICALFixtures fixtures;
     private ICalParser parser;
     private MockUserLookup users;
+    private ResourceResolver oldResourceResolver;
+    private UserResolver oldUserResolver;
 
     // Appointments
 
@@ -993,6 +995,7 @@ public class ICalParserTest extends TestCase {
         fixtures = new ICALFixtures();
         users = new MockUserLookup();
         parser = new ICal4JParser();
+        oldUserResolver = Participants.userResolver;
         Participants.userResolver = new UserResolver(){
             public List<User> findUsers(List<String> mails, Context ctx) {
                 List<User> found = new LinkedList<User>();
@@ -1010,6 +1013,7 @@ public class ICalParserTest extends TestCase {
                 return ICalParserTest.this.users.getUser(userId);
             }
         };
+        oldResourceResolver = Participants.resourceResolver;
         Participants.resourceResolver = new ResourceResolver() {
             public List<Resource> find(List<String> names, Context ctx)
                 throws ResourceException, ServiceException {
@@ -1021,6 +1025,7 @@ public class ICalParserTest extends TestCase {
             }
         };
     }
+    
 
     protected List<User> U(int...ids) {
         List<User> found = new LinkedList<User>();
@@ -1036,6 +1041,8 @@ public class ICalParserTest extends TestCase {
 
     @Override
     protected void tearDown() throws Exception {
+        Participants.userResolver = oldUserResolver;
+        Participants.resourceResolver = oldResourceResolver;
         super.tearDown();
     }
 

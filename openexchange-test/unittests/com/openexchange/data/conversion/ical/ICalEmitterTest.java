@@ -84,6 +84,7 @@ public class ICalEmitterTest extends TestCase {
 
     private ICal4JEmitter emitter;
     private MockUserLookup users;
+    private UserResolver oldUserResolver;
 
     private AppointmentObject getDefault() {
         AppointmentObject app = new AppointmentObject();
@@ -431,6 +432,7 @@ public class ICalEmitterTest extends TestCase {
     public void setUp() {
         users = new MockUserLookup();
         emitter = new ICal4JEmitter();
+        oldUserResolver = com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants.userResolver;
         com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants.userResolver = new UserResolver(){
             public List<User> findUsers(List<String> mails, Context ctx) {
                 List<User> found = new LinkedList<User>();
@@ -448,6 +450,10 @@ public class ICalEmitterTest extends TestCase {
                 return ICalEmitterTest.this.users.getUser(userId);
             }
         };
+    }
+
+    public void tearDown() {
+        com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants.userResolver = oldUserResolver;
     }
 
     // Helper Class
