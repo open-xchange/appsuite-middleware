@@ -1,3 +1,9 @@
+open-xchange-smtp (6.6.0-0) unstable; urgency=low
+
+  * prepared for stable version build 6.6.x
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 11 Aug 2008 17:46:58 +0200
+
 open-xchange-smtp (6.5.0-19) unstable; urgency=low
 
   * first build for Beta10

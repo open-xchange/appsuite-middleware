@@ -28,7 +28,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
-Version:        6.5.0
+Version:	6.6.0
 Release:        2
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)

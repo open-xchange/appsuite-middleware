@@ -29,7 +29,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
-Version:        6.5.0
+Version:	6.6.0
 Release:        4
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -139,11 +139,25 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Aug 11 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #10401: Default to priority NORMAL for undefined priorities.
+ - Bugfix #9827: Accept resources specified as attendees of cutype resource.
+* Fri Aug 08 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11871: Replacing dates with dates of first occurrence for appointment
+   series.
+ - Bugfix #11612: (partial) Loading GUI plugin enabled if group or resource
+   editing is allowed for a user.
+* Thu Aug 07 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11659: Resolving group 0 does now work for tasks.
+ - Bugfix #10852: Improved exception message if some task attribute is too long.
+ - Bugfix #11280: Allowed open end time range in search for tasks.
+ - Bugfix #11868: Implemented proper resource handling for iCal.
 * Wed Aug 06 2008 - francisco.laguna@open-xchange.com
  - Partial Fix #11384: Fixed in Infostore
 * Wed Aug 06 2008 - marcus.klein@open-xchange.com
  - Bugfix #11724: Now supporting whole day iCal events without DTEND and
    DURATION.
+ - Bugfix #11736: Using standard group JSON writer for all requests.
  - Bugfix #11655: Unlimited series run until 99 years unto the future.
 * Tue Aug 05 2008 - thorben.betten@open-xchange.com
  - Bugfix #11829: Validating freely writable recurrence information
