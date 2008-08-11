@@ -1,3 +1,7 @@
+* 2008-08-11 - choeger@open-xchange.com
+
+ - Bugfix ID#11892 ModuleAccessDefinitions.properties wrong for pim_plus
+
 * 2008-08-06 - dennis.sieben@open-xchange.com
 
  - Bugfix #11847: rmi: NULL not accepted any more for auth
