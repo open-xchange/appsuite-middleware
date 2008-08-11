@@ -51,6 +51,7 @@ package com.openexchange.data.conversion.ical;
 
 import static com.openexchange.data.conversion.ical.Assert.assertProperty;
 import static com.openexchange.data.conversion.ical.Assert.assertStandardAppFields;
+import static com.openexchange.data.conversion.ical.Assert.assertNoProperty;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 
 import java.io.IOException;
@@ -122,11 +123,16 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "LOCATION","The Location");
     }
 
-    public void testCategoriesMayBeNull() throws Exception {
+    public void testCategoriesMayBeNullOrUnset() throws Exception {
         AppointmentObject app = new AppointmentObject();
+        ICalFile ical = serialize(app);
+
+        assertNoProperty(ical, "CATEGORIES");
+
         app.setCategories(null);
-        serialize(app);
-        assertTrue("Just testing survival", true);
+        ical = serialize(app);
+
+        assertNoProperty(ical, "CATEGORIES");
     }
 
     public void testDeleteExceptionsMayBeNull() throws Exception {
