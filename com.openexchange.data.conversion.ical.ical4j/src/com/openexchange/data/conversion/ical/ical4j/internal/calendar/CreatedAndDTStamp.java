@@ -46,66 +46,48 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.data.conversion.ical.ical4j.internal;
+package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-import net.fortuna.ical4j.model.component.VEvent;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.*;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.IgnoreConflicts;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.RequireStartDate;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.RequireEndDate;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.Location;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.Transparency;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.DateList;
+import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.property.*;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
+import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
+import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDateTime;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ConversionError;
 
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class AppointmentConverters {
-    public static final AttributeConverter<VEvent, AppointmentObject>[] ALL;
+public class CreatedAndDTStamp <T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
 
-    /**
-     * Prevent instantiation.
-     */
-    private AppointmentConverters() {
-        super();
+    public boolean isSet(U calendar) {
+        return calendar.containsCreationDate();
     }
 
-    static {
-        final List<AttributeConverter<VEvent, AppointmentObject>> tmp = new ArrayList<AttributeConverter<VEvent, AppointmentObject>>();
-        tmp.add(new Title<VEvent, AppointmentObject>());
-        tmp.add(new Note<VEvent, AppointmentObject>());
+    public void emit(int index, U calendar, T t, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
+        final Created created = new Created();
+        created.setDate(toDateTime(calendar.getCreationDate()));
+        t.getProperties().add(created);
+        return;
+    }
 
-        Start<VEvent, AppointmentObject> start = new Start<VEvent, AppointmentObject>();
-        start.setVerifier(new RequireStartDate());
-        tmp.add(start);
+    public boolean hasProperty(T t) {
+        return null != t.getProperty("CREATED") || null != t.getProperty("DTSTAMP");
+    }
 
-        tmp.add(new End<VEvent, AppointmentObject>());
-
-        Duration<VEvent, AppointmentObject> duration = new Duration<VEvent, AppointmentObject>();
-        duration.setVerifier(new RequireEndDate());
-        tmp.add(duration);
-
-        tmp.add(new Klass<VEvent, AppointmentObject>());
-
-        tmp.add(new Location());
-        tmp.add(new Transparency());
-
-        tmp.add(new Participants<VEvent, AppointmentObject>());
-
-        tmp.add(new Categories<VEvent, AppointmentObject>());
-
-        tmp.add(new Recurrence<VEvent, AppointmentObject>());
-
-        tmp.add(new DeleteExceptions<VEvent, AppointmentObject>());
-
-        tmp.add(new Alarm<VEvent, AppointmentObject>());
-        tmp.add(new IgnoreConflicts());
-        tmp.add(new Uid<VEvent, AppointmentObject>());
-
-        tmp.add(new CreatedAndDTStamp<VEvent, AppointmentObject>());
-        ALL = (AttributeConverter<VEvent, AppointmentObject>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
+    public void parse(int index, T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+        DateProperty property = (DateProperty) ((null != component.getProperty("CREATED")) ? component.getProperty("CREATED") : component.getProperty("DTSTAMP"));
+        Date creationDate = ParserTools.parseDate(component, property, timeZone);
+        cObj.setCreationDate(creationDate);
     }
 }

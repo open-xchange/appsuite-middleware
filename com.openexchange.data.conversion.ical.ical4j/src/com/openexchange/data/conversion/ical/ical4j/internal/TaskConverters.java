@@ -97,6 +97,7 @@ public final class TaskConverters {
         tmp.add(new PercentComplete());
         tmp.add(new Priority());
         tmp.add(new Uid<VToDo, Task>());
+        tmp.add(new CreatedAndDTStamp<VToDo, Task>());
         ALL = (AttributeConverter<VToDo, Task>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
     }
 }
