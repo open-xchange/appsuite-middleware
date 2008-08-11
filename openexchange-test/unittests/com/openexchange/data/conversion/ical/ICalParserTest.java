@@ -294,8 +294,7 @@ public class ICalParserTest extends TestCase {
     }
 
     public void testAppResources() throws ConversionError {
-        //FIXME: This is a bit fishy. Only DisplayNames are involved, resources are not resolved.
-
+     
         Date start = D("24/02/1981 10:00");
         Date end = D("24/02/1981 12:00");
 
@@ -306,17 +305,42 @@ public class ICalParserTest extends TestCase {
         String icalText = fixtures.veventWithResources(start, end, resources);
         AppointmentObject appointment = parseAppointment(icalText, utc);
 
-        Set<String> resourceSet = new HashSet<String>(Arrays.asList(resources));
+        Set<Integer> resourceSet = new HashSet<Integer>(Arrays.asList(1,2,3));
 
         assertNotNull(appointment.getParticipants());
         for(Participant p  : appointment.getParticipants()) {
             assertTrue(ResourceParticipant.class.isAssignableFrom(p.getClass()));
             ResourceParticipant participant = (ResourceParticipant) p;
-            assertTrue(resourceSet.remove(participant.getDisplayName()));
+            assertTrue(resourceSet.remove(participant.getIdentifier()));
         }
 
         assertTrue(resourceSet.isEmpty());
         
+    }
+
+    public void testAppResourcesInParticipants() throws ConversionError {
+        // Resources can also be specified in the attendee property with a cutype
+        Date start = D("24/02/1981 10:00");
+        Date end = D("24/02/1981 12:00");
+
+        TimeZone utc = TimeZone.getTimeZone("UTC");
+
+        String[] resources = new String[]{"Toaster", "Deflector", "Subspace Anomaly"};
+
+        String icalText = fixtures.veventWithResourcesInAttendees(start, end, resources);
+        AppointmentObject appointment = parseAppointment(icalText, utc);
+
+        Set<Integer> resourceSet = new HashSet<Integer>(Arrays.asList(1,2,3));
+
+        assertNotNull(appointment.getParticipants());
+        for(Participant p  : appointment.getParticipants()) {
+            assertTrue(ResourceParticipant.class.isAssignableFrom(p.getClass()));
+            ResourceParticipant participant = (ResourceParticipant) p;
+            assertTrue("Didn't expect: "+participant.getIdentifier(), resourceSet.remove(participant.getIdentifier()));
+        }
+
+        assertTrue(resourceSet.toString(), resourceSet.isEmpty());
+
     }
 
     public void testAppCategories() throws ConversionError {
@@ -1020,9 +1044,34 @@ public class ICalParserTest extends TestCase {
         };
         oldResourceResolver = Participants.resourceResolver;
         Participants.resourceResolver = new ResourceResolver() {
+            private List<Resource> resources = new ArrayList<Resource>() {{
+                Resource toaster = new Resource();
+                toaster.setDisplayName("Toaster");
+                toaster.setIdentifier(1);
+                add(toaster);
+
+                Resource deflector = new Resource();
+                deflector.setDisplayName("Deflector");
+                deflector.setIdentifier(2);
+                add(deflector);
+
+                Resource subspaceAnomaly = new Resource();
+                subspaceAnomaly.setDisplayName("Subspace Anomaly");
+                subspaceAnomaly.setIdentifier(3);
+                add(subspaceAnomaly);
+            }};
+
             public List<Resource> find(List<String> names, Context ctx)
                 throws ResourceException, ServiceException {
-                return Collections.emptyList();
+                List<Resource> retval = new ArrayList<Resource>();
+                for(String name : names) {
+                    for(Resource resource : resources) {
+                        if(resource.getDisplayName().equals(name)) {
+                            retval.add(resource);
+                        }
+                    }
+                }
+                return retval;
             }
             public Resource load(int resourceId, Context ctx)
                 throws ResourceException, ServiceException {

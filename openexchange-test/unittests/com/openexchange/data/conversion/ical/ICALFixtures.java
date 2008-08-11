@@ -217,6 +217,20 @@ public class ICALFixtures {
         return bob.toString();
     }
 
+
+
+    public String veventWithResourcesInAttendees(Date start, Date end, String[] resources) {
+        StringBuilder bob = new StringBuilder();
+        standardAppFields(bob, start,end);
+
+        for(String cn : resources) {
+            bob.append("ATTENDEE;CUTYPE=RESOURCE;CN=").append(cn).append(":MAILTO:ignored@bla.invalid\n");
+        }
+
+        endStandardAppFields(bob);
+        return bob.toString();
+    }
+
     public String veventWithCategories(Date start, Date end, String[] categories) {
         StringBuilder bob = new StringBuilder();
         standardAppFields(bob, start,end);
@@ -647,4 +661,5 @@ public class ICALFixtures {
 
         return bob.toString();
     }
+
 }
