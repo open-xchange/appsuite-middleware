@@ -179,10 +179,11 @@ public class RdbGroupStorage extends GroupStorage {
         try {
             stmt = con.prepareStatement(getIN("DELETE FROM groups_member "
                 + "WHERE cid=? AND id=? AND member IN (", members.length));
-            stmt.setInt(1, ctx.getContextId());
-            stmt.setInt(2, group.getIdentifier());
+            int pos = 1;
+            stmt.setInt(pos++, ctx.getContextId());
+            stmt.setInt(pos++, group.getIdentifier());
             for (final int member : members) {
-                stmt.setInt(3, member);
+                stmt.setInt(pos++, member);
             }
             stmt.execute();
         } catch (final SQLException e) {
