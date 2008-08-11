@@ -142,6 +142,15 @@ public class ICalEmitterTest extends TestCase {
         assertTrue("Just testing survival", true);
     }
 
+    public void testAppCreated() throws IOException {
+        AppointmentObject appointment = getDefault();
+        appointment.setCreationDate(D("24/02/1981 10:00"));
+
+        ICalFile ical = serialize(appointment);
+
+        assertProperty(ical, "CREATED", "19810224T100000Z");
+    }
+
 
     public void testAppRecurrence() throws IOException {
 

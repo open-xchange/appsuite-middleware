@@ -181,6 +181,33 @@ public class ICalParserTest extends TestCase {
 
     }
 
+    public void testAppCreated() throws ConversionError {
+        Date start = D("24/02/1981 10:00");
+        Date end = D("24/02/1981 12:00");
+
+        TimeZone utc = TimeZone.getTimeZone("UTC");
+
+        
+        String icalText = fixtures.veventWithSimpleProperties(start, end, "CREATED", "20081023T100000Z");
+        AppointmentObject appointment = parseAppointment(icalText, utc);
+
+        assertEquals(D("23/10/2008 10:00"), appointment.getCreationDate());
+
+    }
+
+    public void testAppDTSTAMP() throws ConversionError {
+        Date start = D("24/02/1981 10:00");
+        Date end = D("24/02/1981 12:00");
+
+        TimeZone utc = TimeZone.getTimeZone("UTC");
+
+
+        String icalText = fixtures.veventWithSimpleProperties(start, end, "DTSTAMP", "20081023T100000Z");
+        AppointmentObject appointment = parseAppointment(icalText, utc);
+
+        assertEquals(D("23/10/2008 10:00"), appointment.getCreationDate());   
+    }
+
     public void testAppNote() throws ConversionError {
         Date start = D("24/02/1981 10:00");
         Date end = D("24/02/1981 12:00");
@@ -578,6 +605,22 @@ public class ICalParserTest extends TestCase {
         Task task = parseTask(icalText, TimeZone.getTimeZone("UTC"));
 
         assertEquals("A nice title", task.getTitle());
+    }
+
+
+    public void testTskCreated() throws ConversionError {
+        String icalText = fixtures.vtodoWithSimpleProperties("CREATED", "20081023T100000Z");
+        Task task = parseTask(icalText);
+
+        assertEquals(D("23/10/2008 10:00"), task.getCreationDate());
+
+    }
+
+    public void testTskDTSTAMP() throws ConversionError {
+        String icalText = fixtures.vtodoWithSimpleProperties("DTSTAMP", "20081023T100000Z");
+        Task task = parseTask(icalText);
+
+        assertEquals(D("23/10/2008 10:00"), task.getCreationDate());
     }
 
     public void testTskNote() throws ConversionError {
