@@ -58,6 +58,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.importexport.actions.VCardImportRequest;
 import com.openexchange.ajax.importexport.actions.VCardImportResponse;
+import junit.framework.AssertionFailedError;
 
 /**
  * Checks if the problem described in bug 9475 appears again.
@@ -115,9 +116,15 @@ public final class Bug9475Test extends AbstractAJAXSession {
      */
     public void testBigFile() throws Throwable {
         final AJAXClient client = getClient();
+        try {
         final VCardImportResponse iResponse = Tools.importVCard(client,
             new VCardImportRequest(client.getValues().getPrivateContactFolder(),
             new FileInputStream(tmp), false));
         assertTrue("VCard importer does not give an error.", iResponse.hasError());
+        } catch (AssertionFailedError assertionFailed) {
+            // Response Parsing dies with an AssertionFailedError on a response code different from 200, which is also okay in our case
+            assertTrue(assertionFailed.getMessage().contains("Response code"));
+            // quite a hack
+        }
     }
 }
