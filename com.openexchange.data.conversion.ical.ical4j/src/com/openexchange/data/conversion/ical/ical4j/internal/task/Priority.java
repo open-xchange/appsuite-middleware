@@ -130,7 +130,7 @@ public class Priority extends AbstractVerifyingAttributeConverter<VToDo, Task> {
         } else if (priority >= HIGH.getLevel()) {
             task.setPriority(Task.HIGH);
         } else if (priority == UNDEFINED.getLevel()) {
-            task.removePriority();
+            task.setPriority(Task.NORMAL); // Default to normal Bug #10401
         } else {
             warnings.add(new ConversionWarning(index, Code.INVALID_PRIORITY,
                 Integer.valueOf(priority)));
