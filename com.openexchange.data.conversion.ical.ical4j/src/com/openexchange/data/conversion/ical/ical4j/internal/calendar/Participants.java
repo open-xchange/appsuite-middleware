@@ -59,6 +59,7 @@ import java.util.TimeZone;
 
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.ResourceList;
+import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.Attendee;
 import net.fortuna.ical4j.model.property.Resources;
@@ -91,6 +92,10 @@ import com.openexchange.server.ServiceException;
 public class Participants<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
 
     private static Log LOG = LogFactory.getLog(Participants.class);
+
+    private static final String CUTYPE = "CUTYPE";
+    private static final String RESOURCE = "RESOURCE";
+    private static final String CN = "CN";
 
     public static UserResolver userResolver = new UserResolver() {
 
@@ -187,14 +192,21 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
     public void parse(int index, T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
         PropertyList properties = component.getProperties("ATTENDEE");
         List<String> mails = new LinkedList<String>();
+        final List<String> resourceNames = new LinkedList<String>();
 
         for(int i = 0, size = properties.size(); i < size; i++) {
             Attendee attendee = (Attendee) properties.get(i);
-            URI uri = attendee.getCalAddress();
-            if("mailto".equalsIgnoreCase(uri.getScheme())) {
-                String mail = uri.getSchemeSpecificPart();
-                mails.add( mail );
+            if(attendee.getParameter(CUTYPE) != null && RESOURCE.equalsIgnoreCase(attendee.getParameter(CUTYPE).getValue())) {
+                Parameter cn = attendee.getParameter(CN);
+                if(cn != null) { resourceNames.add( cn.getValue() ); }
+            } else {
+                URI uri = attendee.getCalAddress();
+                if("mailto".equalsIgnoreCase(uri.getScheme())) {
+                    String mail = uri.getSchemeSpecificPart();
+                    mails.add( mail );
+                }
             }
+
         }
 
         List<User> users;
@@ -215,7 +227,6 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             cObj.addParticipant(external);
         }
 
-        final List<String> resourceNames = new LinkedList<String>();
         PropertyList resourcesList = component.getProperties("RESOURCES");
         for (int i = 0, size = resourcesList.size(); i < size; i++) {
             Resources resources = (Resources) resourcesList.get(i);
