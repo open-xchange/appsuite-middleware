@@ -36,8 +36,8 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open Xchange Admin SOAP API
-Requires:       open-xchange-admin-client >= 6.5.0
-Requires:	open-xchange-admin-plugin-hosting >= 6.5.0
+Requires:       open-xchange-admin-client >= 6.6.0
+Requires:	open-xchange-admin-plugin-hosting >= 6.6.0
 Requires:	open-xchange-axis2
 
 %description
