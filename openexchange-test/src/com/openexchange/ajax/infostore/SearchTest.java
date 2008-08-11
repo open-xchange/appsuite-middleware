@@ -157,7 +157,7 @@ public class SearchTest extends InfostoreAJAXTest {
 		
 		final int id = clean.get(0);
 		
-		Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m("title" , "File"), upload, "text/plain");
+		Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m("title" , "File"), upload, "text/plain");
 		assertNoError(res);
 		
 		res = search(getWebConversation(), getHostName(), sessionId, "File", COLS);
@@ -177,7 +177,7 @@ public class SearchTest extends InfostoreAJAXTest {
     // Tests functionality that no one requested yet
     public void notestEscape() throws Exception{
 		final int id = clean.get(0);
-		Response res = update(getWebConversation(),getHostName(),sessionId,id, System.currentTimeMillis(), m("title" , "The mysterious ?"));
+		Response res = update(getWebConversation(),getHostName(),sessionId,id, Long.MAX_VALUE, m("title" , "The mysterious ?"));
 		assertNoError(res);
 		
 		res = search(getWebConversation(), getHostName(), sessionId, "\\?", COLS);
