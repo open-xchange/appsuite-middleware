@@ -685,6 +685,11 @@ public class ICalParserTest extends TestCase {
         assertEquals("Invalid interpretation for priority "+priority, expected, task.getPriority());
     }
 
+    // Bug 10401
+    public void testTskPriorityZero() throws ConversionError {
+        priorityTest(0, Task.NORMAL);
+    }
+
     public void testTskStatus() throws ConversionError {
         statusTest("NEEDS-ACTION", Task.NOT_STARTED);
         statusTest("IN-PROCESS", Task.IN_PROGRESS);
