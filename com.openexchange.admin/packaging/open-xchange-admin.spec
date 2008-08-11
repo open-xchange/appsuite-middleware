@@ -28,7 +28,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
-Version:        6.5.0
+Version:	6.6.0
 Release:        4
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -150,6 +150,8 @@ ln -sf ../etc/init.d/open-xchange-admin %{buildroot}/sbin/rcopen-xchange-admin
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Mon Aug 11 2008 - choeger@open-xchange.com
+ - Bugfix ID#11892 ModuleAccessDefinitions.properties wrong for pim_plus
 * Wed Aug 06 2008 - dennis.sieben@open-xchange.com
  - Bugfix #11847: rmi: NULL not accepted any more for auth
 * Tue Jul 29 2008 - marcus.klein@open-xchange.com
