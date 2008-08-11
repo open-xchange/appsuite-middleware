@@ -80,6 +80,10 @@ public class Assert extends junit.framework.Assert {
         assertTrue(name+" missing in: \n"+ical.toString(), ical.containsPair(name, value));
     }
 
+    public static void assertNoProperty(ICalFile ical, String name) {
+        assertFalse("Didn't expect to find "+name+" in: \n"+ical.toString(), ical.containsKey(name));
+    }
+
     public static void assertLine(ICalFile ical, String line) {
         assertTrue(line+" missing in: \n"+ical.toString(), ical.containsLine(line));
     }

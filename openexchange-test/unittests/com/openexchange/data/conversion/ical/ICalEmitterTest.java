@@ -423,6 +423,19 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "PERCENT-COMPLETE", "23");
     }
 
+    public void testTaskCategoriesMayBeNullOrUnset() throws Exception {
+           Task task = new Task();
+           ICalFile ical = serialize(task);
+
+           assertNoProperty(ical, "CATEGORIES");
+
+           task.setCategories(null);
+           ical = serialize(task);
+
+           assertNoProperty(ical, "CATEGORIES");
+       }
+
+
     public void testTaskDateFields() throws IOException {
         final Task task = new Task();
         final Date start = D("13/07/1976 15:00");

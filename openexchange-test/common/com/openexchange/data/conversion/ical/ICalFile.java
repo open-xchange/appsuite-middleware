@@ -132,4 +132,8 @@ public class ICalFile {
         }
         return false;
     }
+
+    public boolean containsKey(String key) {
+        return containsLine(key);
+    }
 }
