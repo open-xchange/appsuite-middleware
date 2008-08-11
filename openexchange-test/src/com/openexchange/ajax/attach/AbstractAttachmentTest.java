@@ -99,7 +99,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		    }
 		}
 		
-		assertEquals(arrayOfArrays.toString(), createdLater.size(), updates);
+		assertEquals(arrayOfArrays.toString()+" were modified later than "+timestamp, createdLater.size(), updates);
 		
 		for(int i = 0; i < arrayOfArrays.length(); i++) {
 		    final Object tmp = arrayOfArrays.get(i);
