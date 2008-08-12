@@ -6,6 +6,12 @@
 
  - Added count to infinity to recurrence calculation to prematurely terminate calculation of patterns, that are too
    complex.
+ - Bugfix #11803: The short version:
+   Don't ask. Just don't.
+
+   The longer version: When saving a recurring appointment without setting the start and end dates those will be set
+   to the first ocurrences start and end date, that in turn triggering an autoaccept in the name of the user. This
+   doesn't work when updating only the delete exceptions, because no folder type is set. 
 
 * 2008-08-11 - francisco.laguna@open-xchange.com
 

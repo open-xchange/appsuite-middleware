@@ -1662,10 +1662,10 @@ class CalendarMySQL implements CalendarSqlImp {
 	}
 
 	public final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
-		return updateAppointment(cdao, edao, writecon, so, ctx, inFolder, clientLastModified, true);
+		return updateAppointment(cdao, edao, writecon, so, ctx, inFolder, clientLastModified, true, false);
 	}
 
-	private final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified, final boolean clientLastModifiedCheck) throws DataTruncation, SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
+	private final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified, final boolean clientLastModifiedCheck, boolean skipParticipants) throws DataTruncation, SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
 
 		final CalendarOperation co = new CalendarOperation();
 
@@ -1946,8 +1946,10 @@ class CalendarMySQL implements CalendarSqlImp {
 						throw new SQLException("Error: Calendar: Update: Mapping for " + ucols[a] + " not implemented!");
 					}
 				}
-				updateParticipants(cdao, edao, so.getUserId(), so.getContextId(), writecon, cup);
-				final int ret = pst.executeUpdate();
+                if(!skipParticipants) {
+                    updateParticipants(cdao, edao, so.getUserId(), so.getContextId(), writecon, cup);
+				}
+                final int ret = pst.executeUpdate();
 				if (ret == 0) {
 					throw new OXConcurrentModificationException(EnumComponent.APPOINTMENT, OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
 				}
@@ -2050,7 +2052,7 @@ class CalendarMySQL implements CalendarSqlImp {
 
 		if (time_change && users == null) {
 			users = edao.getUsers();
-		}
+        }
 
 		if (users != null) {
 			Arrays.sort(users);
@@ -3249,7 +3251,7 @@ class CalendarMySQL implements CalendarSqlImp {
 						try {
 							final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid);
 							update.setChangeExceptions(CalendarCommonCollection.addException(ldao.getChangeException(), calculated_exception));
-							updateAppointment(update, ldao, writecon, so, ctx, fid, clientLastModified, false); // MAIN
+							updateAppointment(update, ldao, writecon, so, ctx, fid, clientLastModified, false, false); // MAIN
 							// OBJECT
 						} catch (final LdapException le) {
 							throw new OXException(le);
@@ -3276,7 +3278,7 @@ class CalendarMySQL implements CalendarSqlImp {
 							final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid);
 							update.setChangeExceptions(CalendarCommonCollection.removeException(ldao.getChangeException(), edao.getRecurrenceDatePosition()));
 							update.setDeleteExceptions(CalendarCommonCollection.addException(ldao.getDeleteException(), edao.getRecurrenceDatePosition()));
-							updateAppointment(update, ldao, writecon, so, ctx, fid, clientLastModified, false); // MAIN
+							updateAppointment(update, ldao, writecon, so, ctx, fid, clientLastModified, false, false); // MAIN
 							// OBJECT
 						} catch (final LdapException le) {
 							throw new OXException(le);
@@ -3304,9 +3306,9 @@ class CalendarMySQL implements CalendarSqlImp {
 						try {
 							final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid);
 							update.setChangeExceptions(CalendarCommonCollection.addException(ldao.getChangeException(), edao.getRecurrenceDatePosition()));
-							updateAppointment(edao, ldao, writecon, so, ctx, fid, clientLastModified, false); // EXCEPTION
+							updateAppointment(edao, ldao, writecon, so, ctx, fid, clientLastModified, false, false); // EXCEPTION
 							// OBJECT
-							updateAppointment(update, ldao, writecon, so, ctx, fid, clientLastModified, false); // MAIN
+							updateAppointment(update, ldao, writecon, so, ctx, fid, clientLastModified, false, false); // MAIN
 							// OBJECT
 						} catch (final LdapException le) {
 							throw new OXException(le);
@@ -3370,7 +3372,7 @@ class CalendarMySQL implements CalendarSqlImp {
 							final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid);
 							update.setChangeExceptions(CalendarCommonCollection.removeException(ldao.getChangeException(), edao.getRecurrenceDatePosition()));
 							update.setDeleteExceptions(CalendarCommonCollection.addException(ldao.getDeleteException(), edao.getRecurrenceDatePosition()));
-							updateAppointment(update, ldao, writecon, so, ctx, fid, clientLastModified, false); // MAIN
+							updateAppointment(update, ldao, writecon, so, ctx, fid, clientLastModified, false, false); // MAIN
 							// OBJECT
 						} catch (final LdapException le) {
 							throw new OXException(le);
@@ -3398,9 +3400,9 @@ class CalendarMySQL implements CalendarSqlImp {
 						try {
 							final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid);
 							update.setChangeExceptions(CalendarCommonCollection.addException(ldao.getChangeException(), edao.getRecurrenceDatePosition()));
-							updateAppointment(edao, ldao, writecon, so, ctx, fid, clientLastModified, false); // EXCEPTION
+							updateAppointment(edao, ldao, writecon, so, ctx, fid, clientLastModified, false, false); // EXCEPTION
 							// OBJECT
-							updateAppointment(update, ldao, writecon, so, ctx, fid, clientLastModified, false); // MAIN
+							updateAppointment(update, ldao, writecon, so, ctx, fid, clientLastModified, false, false); // MAIN
 							// OBJECT
 						} catch (final LdapException le) {
 							throw new OXException(le);
@@ -3502,7 +3504,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		try {
 			final CalendarDataObject ldao = loadObjectForUpdate(udao, so, ctx, fid);
 			udao.setDeleteExceptions(CalendarCommonCollection.addException(ldao.getDeleteException(), de));
-			updateAppointment(udao, ldao, writecon, so, ctx, fid, clientLastModified, false);
+            updateAppointment(udao, ldao, writecon, so, ctx, fid, clientLastModified, false, true);
 		} catch (final OXException oxe) {
 			throw oxe;
 		} catch (final LdapException lde) {
