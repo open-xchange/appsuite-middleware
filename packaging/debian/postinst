@@ -69,7 +69,7 @@ postFix() {
 	  v_setprop TidyConfiguration etc/groupware/TidyConfiguration.properties $pfile
       }
       ox_exists_property Whitelist $pfile || {
-	  v_setprop Whitelist etc/groupware/whitelist.txt $pfile
+	  v_setprop Whitelist etc/groupware/whitelist.properties $pfile
       }
       
       # -----------------------------------------------------------------------
