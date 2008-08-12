@@ -1,3 +1,7 @@
+* 2008-08-12 - marcus.klein@open-xchange.com
+
+ - Bugfix #11936: Disallowed delete of group 0 and 1 and update of group 0.
+
 * 2008-08-12 - francisco.laguna@open-xchange.com
 
  - Added count to infinity to recurrence calculation to prematurely terminate calculation of patterns, that are too

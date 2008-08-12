@@ -163,6 +163,10 @@ final class Update {
         if (null == changed) {
             throw new GroupException(Code.NULL);
         }
+        if (0 == changed.getIdentifier()) {
+            throw new GroupException(Code.NO_GROUP_UPDATE, getOrig()
+                .getDisplayName());
+        }
         // Does the group exist? Are timestamps okay?
         if (getOrig().getLastModified().after(lastRead)) {
             throw new GroupException(Code.MODIFIED);

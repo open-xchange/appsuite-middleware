@@ -162,6 +162,11 @@ public final class Delete {
     private void check() throws GroupException {
         // Does the group exist?
         getOrig();
+        // Group 1 can not be deleted
+        if (0 == groupId || 1 == groupId) {
+            throw new GroupException(Code.NO_GROUP_DELETE, getOrig()
+                .getDisplayName());
+        }
     }
 
     /**

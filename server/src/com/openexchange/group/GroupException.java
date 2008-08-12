@@ -162,7 +162,17 @@ public class GroupException extends AbstractOXException {
          * You are not allowed to delete groups.
          */
         NO_DELETE_PERMISSION("You are not allowed to delete groups.", Category
-            .PERMISSION, 12);
+            .PERMISSION, 12),
+        /**
+         * Group %1$s can not be deleted.
+         */
+        NO_GROUP_DELETE("Group %1$s can not be deleted.", Category
+            .USER_INPUT, 13),
+        /**
+         * Group %1$s can not be changed.
+         */
+        NO_GROUP_UPDATE("Group %1$s can not be changed.", Category
+            .USER_INPUT, 14);
 
         /**
          * Message of the exception.
