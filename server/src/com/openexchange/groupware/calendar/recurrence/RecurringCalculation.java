@@ -105,7 +105,7 @@ public class RecurringCalculation {
     private int PMAXTC = 999;
 
     // Maximum number of calculations PMAXTC (maximum number of ocurrences) * 100 ops per ourrence sounds appropriate
-    private static final int TTL = 999 * 100;
+    private int TTL = 999 * 100;
     private int operationCounter = 0;
     
     /* Internal */
@@ -153,6 +153,7 @@ public class RecurringCalculation {
         builder.append("\n");
         builder.append("    private int PMAXTC;                                           = ").append(PMAXTC).append("\n");
         builder.append("\n");
+        builder.append("    private int TTL;                                              = ").append(TTL).append("\n");
         builder.append("    private int operationCounter;                                 = ").append(operationCounter).append("\n");
         return builder.toString();
     }
@@ -968,5 +969,8 @@ public class RecurringCalculation {
         }
         return ret;
     }
-    
+
+    public void setMaxOperations(int calculations) {
+        TTL = calculations;
+    }
 }

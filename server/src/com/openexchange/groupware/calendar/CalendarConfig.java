@@ -75,6 +75,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
     
     private static boolean solo_reminder_trigger_event = true;
     private static boolean check_and_remove_past_reminders = true;
+    private static int max_operations_in_recurrence_calculations;
 
     /**
      * Prevent instantiation.
@@ -175,7 +176,14 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
             if (solo_reminder_trigger_event_string.equalsIgnoreCase("FALSE")) {
                 solo_reminder_trigger_event = false;
             }
-        }           
+        }
+
+        String max_operations_in_recurrence_calculations_string = CalendarConfig.getProperty("MAX_OPERATIONS_IN_RECURRENCE_CALCULATIONS");
+        if (max_operations_in_recurrence_calculations_string != null) {
+            max_operations_in_recurrence_calculations = Integer.valueOf(max_operations_in_recurrence_calculations_string);    
+        } else {
+            max_operations_in_recurrence_calculations = 999 * 50;
+        }
     }
     
     public static boolean getCheckAndRemovePastReminders() {
@@ -184,6 +192,10 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
     
     public static boolean getSoloReminderTriggerEvent() {
         return solo_reminder_trigger_event;
+    }
+
+    public static int getMaxOperationsInRecurrenceCalculations() {
+        return max_operations_in_recurrence_calculations;
     }
     
 }

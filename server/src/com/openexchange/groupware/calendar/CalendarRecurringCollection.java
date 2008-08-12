@@ -674,6 +674,7 @@ public final class CalendarRecurringCollection {
         rc.setCalculationPosition(pos);
         rc.setRange(range_start, range_end);
         rc.setMaxCalculation(PMAXTC);
+        rc.setMaxOperations(CalendarConfig.getMaxOperationsInRecurrenceCalculations());
         rc.setExceptions(change_exceptions, delete_exceptions);
         rc.setStartAndEndTime(cdao.getStartDate().getTime(), cdao.getEndDate().getTime());        
         if (cdao instanceof CalendarDataObject) {
