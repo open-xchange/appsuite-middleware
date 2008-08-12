@@ -1,3 +1,7 @@
+* 2008-08-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #11872: Allowing "id" attribute in HTML/CSS filter
+
 * 2008-08-12 - marcus.klein@open-xchange.com
 
  - Bugfix #11936: Disallowed delete of group 0 and 1 and update of group 0.

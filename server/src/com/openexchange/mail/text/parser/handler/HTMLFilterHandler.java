@@ -100,6 +100,8 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
 	private static final String CLASS = "class";
 
+	private static final String ID = "id";
+
 	private static final String HEAD = "head";
 
 	private static final String BODY = "body";
@@ -473,7 +475,8 @@ public final class HTMLFilterHandler implements HTMLHandler {
 		final Iterator<Entry<String, String>> iter = a.entrySet().iterator();
 		for (int i = 0; i < size; i++) {
 			final Entry<String, String> e = iter.next();
-			if (STYLE.equals(e.getKey())) {
+			final String attr = e.getKey().toLowerCase(Locale.ENGLISH);
+			if (STYLE.equals(attr)) {
 				/*
 				 * Handle style attribute
 				 */
@@ -487,30 +490,28 @@ public final class HTMLFilterHandler implements HTMLHandler {
 						attrBuilder.append(' ').append(STYLE).append("='").append(checkedCSS).append('\'');
 					}
 				}
-			} else if (CLASS.equals(e.getKey())) {
+			} else if (CLASS.equals(attr) || ID.equals(attr)) {
 				/*
-				 * TODO: Is it safe to allow "class" attribute in any case
+				 * TODO: Is it safe to allow "class"/"id" attribute in any case
 				 */
-				attrBuilder.append(' ').append(CLASS).append(VAL_START).append(htmlFormat(e.getValue(), false)).append(
+				attrBuilder.append(' ').append(attr).append(VAL_START).append(htmlFormat(e.getValue(), false)).append(
 						'"');
 			} else {
 				if (null == attribs) {
-					attrBuilder.append(' ').append(e.getKey()).append(VAL_START)
-							.append(htmlFormat(e.getValue(), false)).append('"');
+					attrBuilder.append(' ').append(attr).append(VAL_START).append(htmlFormat(e.getValue(), false))
+							.append('"');
 				} else {
-					final String nameLower = e.getKey().toLowerCase(Locale.ENGLISH);
-					if (attribs.containsKey(nameLower)) {
-						final Set<String> allowedValues = attribs.get(nameLower);
+					if (attribs.containsKey(attr)) {
+						final Set<String> allowedValues = attribs.get(attr);
 						if (null == allowedValues || allowedValues.contains(e.getValue().toLowerCase(Locale.ENGLISH))) {
-							attrBuilder.append(' ').append(e.getKey()).append(VAL_START).append(
+							attrBuilder.append(' ').append(attr).append(VAL_START).append(
 									htmlFormat(e.getValue(), false)).append('"');
 						} else if (NUM_ATTRIBS == allowedValues) {
 							/*
 							 * Only numeric attribute value allowed
 							 */
 							if (PAT_NUMERIC.matcher(e.getValue().trim()).matches()) {
-								attrBuilder.append(' ').append(e.getKey()).append(VAL_START).append(e.getValue())
-										.append('"');
+								attrBuilder.append(' ').append(attr).append(VAL_START).append(e.getValue()).append('"');
 							}
 						}
 					}
