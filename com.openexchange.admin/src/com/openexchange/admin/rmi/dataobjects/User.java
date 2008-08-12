@@ -3262,7 +3262,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
-     * Sets the timezone for this user object
+     * Sets the timezone for this user object.
+     * See
+     * http://java.sun.com/j2se/1.5.0/docs/api/java/util/TimeZone.html
+     * for possible Timezone Strings
      * 
      * @param timezone A {@link String} containing the timezone
      */
