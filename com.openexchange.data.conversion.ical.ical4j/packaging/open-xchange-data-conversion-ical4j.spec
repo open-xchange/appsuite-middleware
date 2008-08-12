@@ -55,7 +55,7 @@ Authors:
 
 %install
 
-ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
+ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
 %clean
 %{__rm} -rf %{buildroot}
