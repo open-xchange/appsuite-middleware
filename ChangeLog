@@ -1,3 +1,7 @@
+* 2008-08-12 - choeger@open-xchange.com
+
+ - 11722 update from SP3, wrong cache.ccf file for admin in system.properties
+
 * 2008-08-11 - choeger@open-xchange.com
 
  - Bugfix ID#11892 ModuleAccessDefinitions.properties wrong for pim_plus

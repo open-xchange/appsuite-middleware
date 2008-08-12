@@ -48,7 +48,7 @@ postFix() {
       # -----------------------------------------------------------------------
       local pfile=/opt/open-xchange/etc/admindaemon/system.properties
       ox_exists_property com.openexchange.caching.configfile $pfile || {
-	  v_setprop com.openexchange.caching.configfile etc/groupware/cache.ccf $pfile
+	  v_setprop com.openexchange.caching.configfile etc/admindaemon/cache.ccf $pfile
       }
       ox_exists_property serviceUsageInspection $pfile || {
 	  v_setprop serviceUsageInspection false $pfile
