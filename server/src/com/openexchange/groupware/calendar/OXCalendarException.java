@@ -198,7 +198,8 @@ public class OXCalendarException extends OXException {
         /**
          * Unable to calculate first occurence.
          */
-        UNABLE_TO_CALCULATE_FIRST_RECURRING("Unable to calculate first occurence.", 79, Category.CODE_ERROR);
+        UNABLE_TO_CALCULATE_FIRST_RECURRING("Unable to calculate first occurence.", 79, Category.CODE_ERROR),
+        RECURRENCE_PATTERN_TOO_COMPLEX("The recurrence pattern is too complex. Giving up.", 80, Category.INTERNAL_ERROR);
         
         /**
          * Message of the exception.

@@ -723,6 +723,9 @@ public final class CalendarRecurringCollection {
             	throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, re, Integer.valueOf(re.getValue()));
             } else if (re.getCode() == RecurringException.UNKOWN_DAYS_VALUE) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_DAY, re, Integer.valueOf(re.getValue()));
+            } else if (re.getCode() == RecurringException.PATTERN_TOO_COMPLEX) {
+                LOG.error("Pattern too complex for "+cdao);
+                throw new OXCalendarException(OXCalendarException.Code.RECURRENCE_PATTERN_TOO_COMPLEX, re);
             } else {
                 throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, re, Integer.valueOf(re.getValue()));
             }

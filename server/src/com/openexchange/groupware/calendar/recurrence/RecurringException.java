@@ -73,7 +73,8 @@ public class RecurringException extends Exception {
     public static final Code RECURRING_MISSING_YEARLY_INTERVAL = new Code("Missing day in month", 7);
     public static final Code RECURRING_MISSING_YEARLY_DAY = new Code("Got no day for yearly calculation", 8);
     public static final Code RECURRING_MISSING_YEARLY_TYPE = new Code("Missing day in month", 9);
-    public static final Code UNEXPECTED_ERROR = new Code("Unexpected exception.", 10);    
+    public static final Code UNEXPECTED_ERROR = new Code("Unexpected exception.", 10);
+    public static final Code PATTERN_TOO_COMPLEX = new Code("Pattern is too complex, giving up", 11);
     
     static class Code {
         private final String message;
