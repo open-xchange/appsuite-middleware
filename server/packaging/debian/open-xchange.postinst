@@ -78,7 +78,7 @@ postFix() {
 	  v_setprop TidyConfiguration /opt/open-xchange/etc/groupware/TidyConfiguration.properties $pfile
       }
       ox_exists_property Whitelist $pfile || {
-	  v_setprop Whitelist /opt/open-xchange/etc/groupware/whitelist.txt $pfile
+	  v_setprop Whitelist /opt/open-xchange/etc/groupware/whitelist.properties $pfile
       }
 
       ox_exists_property LoginInfo $pfile && {
