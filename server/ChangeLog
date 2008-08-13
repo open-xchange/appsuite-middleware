@@ -3,6 +3,9 @@
  - Bugfix #11969: Resolved class name conflict by adding package names.
  - Bugfix #11928: Added parsing of resource identifier on update request from
    URL.
+ - Bugfix #10859: Prevent endless loops in recurring calculation. Removed all
+   Thread.getStackTrace() in non-debug code. Reimplemented reloading of user
+   objects to prevent too much thread blocking. 
 
 * 2008-08-13 - francisco.laguna@open-xchange.com
 
