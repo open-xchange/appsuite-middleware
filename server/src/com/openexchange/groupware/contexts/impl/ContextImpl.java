@@ -49,13 +49,11 @@
 
 package com.openexchange.groupware.contexts.impl;
 
-import java.io.Serializable;
-
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ContextImpl implements ContextExtended, Serializable {
+public class ContextImpl implements ContextExtended {
 
     /**
      * Serialization.

@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.ldap;
 
-import java.io.Serializable;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -63,7 +62,7 @@ import com.openexchange.tools.LocaleTools;
  * or stored in no.global and will be used from there.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class UserImpl implements Serializable, User, Cloneable {
+public class UserImpl implements User, Cloneable {
 
     /**
      * The group identifier for all groups and users.

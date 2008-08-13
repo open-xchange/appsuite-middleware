@@ -608,7 +608,15 @@ public class RdbUserStorage extends UserStorage {
         return user;
     }
 
-	@Override
+	/**
+     * {@inheritDoc}
+     */
+    @Override
+    public void invalidateUser(final Context ctx, final int userId) {
+        // Nothing to do.
+    }
+
+    @Override
 	protected void startInternal() throws UserException {
 	}
 

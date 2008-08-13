@@ -47,33 +47,40 @@
  *
  */
 
-package com.openexchange.groupware.contexts.impl;
+package com.openexchange.groupware.ldap;
+
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.cache.dynamic.impl.Refresher;
 import com.openexchange.groupware.AbstractOXException;
 
 /**
- * 
+ * This class is used overall behind the User interface and it manages to reload
+ * the user object into the cache if the cache invalidated it.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-final class ContextReloader extends Refresher<ContextExtended> implements ContextExtended {
+final class UserReloader extends Refresher<User> implements User {
 
     /**
      * For serialization.
      */
-    private static final long serialVersionUID = -2022359916415524347L;
+    private static final long serialVersionUID = -2424522083743916869L;
 
     /**
      * Cached delegate.
      */
-    private ContextExtended delegate;
+    private User delegate;
 
     /**
      * Default constructor.
-     * @throws AbstractOXException if some problem occurs with refreshing.
+     * @param factory Factory for loading the object from the database.
+     * @param regionName Name of the cache region that stores the object.
+     * @throws AbstractOXException if initially loading the object fails.
      */
-    public ContextReloader(final OXObjectFactory<ContextExtended> factory,
+    UserReloader(final OXObjectFactory<User> factory,
         final String regionName) throws AbstractOXException {
         super(factory, regionName);
         this.delegate = refresh();
@@ -102,68 +109,91 @@ final class ContextReloader extends Refresher<ContextExtended> implements Contex
      */
     @Override
     public String toString() {
-        return "ContextReloader: " + delegate.toString();
+        return "UserReloader: " + delegate.toString();
     }
 
     /**
      * {@inheritDoc}
      */
-    public void setUpdating(final boolean updating) {
+    public String[] getAliases() {
         updateDelegate();
-        delegate.setUpdating(updating);
+        return delegate.getAliases();
     }
 
     /**
      * {@inheritDoc}
      */
-    public int getContextId() {
-        return delegate.getContextId();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getName() {
+    public Map<String, Set<String>> getAttributes() {
         updateDelegate();
-        return delegate.getName();
+        return delegate.getAttributes();
     }
 
     /**
      * {@inheritDoc}
      */
-    public String[] getFileStorageAuth() {
+    public int getContactId() {
+        return delegate.getContactId();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getDisplayName() {
         updateDelegate();
-        return delegate.getFileStorageAuth();
+        return delegate.getDisplayName();
     }
 
     /**
      * {@inheritDoc}
      */
-    public long getFileStorageQuota() {
+    public String getGivenName() {
         updateDelegate();
-        return delegate.getFileStorageQuota();
+        return delegate.getGivenName();
     }
 
     /**
      * {@inheritDoc}
      */
-    public int getFilestoreId() {
+    public int[] getGroups() {
         updateDelegate();
-        return delegate.getFilestoreId();
+        return delegate.getGroups();
     }
 
     /**
      * {@inheritDoc}
      */
-    public String getFilestoreName() {
+    public int getId() {
+        return delegate.getId();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getImapLogin() {
         updateDelegate();
-        return delegate.getFilestoreName();
+        return delegate.getImapLogin();
     }
 
     /**
      * {@inheritDoc}
      */
-    public String[] getLoginInfo() {
+    public String getImapServer() {
+        updateDelegate();
+        return delegate.getImapServer();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Locale getLocale() {
+        updateDelegate();
+        return delegate.getLocale();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getLoginInfo() {
         updateDelegate();
         return delegate.getLoginInfo();
     }
@@ -171,25 +201,81 @@ final class ContextReloader extends Refresher<ContextExtended> implements Contex
     /**
      * {@inheritDoc}
      */
-    public int getMailadmin() {
+    public String getMail() {
         updateDelegate();
-        return delegate.getMailadmin();
+        return delegate.getMail();
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean isEnabled() {
+    public String getMailDomain() {
         updateDelegate();
-        return delegate.isEnabled();
+        return delegate.getMailDomain();
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean isUpdating() {
+    public String getPasswordMech() {
         updateDelegate();
-        return delegate.isUpdating();
+        return delegate.getPasswordMech();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getPreferredLanguage() {
+        updateDelegate();
+        return delegate.getPreferredLanguage();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getShadowLastChange() {
+        updateDelegate();
+        return delegate.getShadowLastChange();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getSmtpServer() {
+        updateDelegate();
+        return delegate.getSmtpServer();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getSurname() {
+        updateDelegate();
+        return delegate.getSurname();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getTimeZone() {
+        updateDelegate();
+        return delegate.getTimeZone();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getUserPassword() {
+        updateDelegate();
+        return delegate.getUserPassword();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isMailEnabled() {
+        updateDelegate();
+        return delegate.isMailEnabled();
     }
 
     /**

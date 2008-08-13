@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.contexts;
 
-import com.openexchange.cache.dynamic.OXNoRefresh;
+import java.io.Serializable;
 
 /**
  * The context stores all attributes that are necessary for components dealing
@@ -63,13 +63,12 @@ import com.openexchange.cache.dynamic.OXNoRefresh;
  * maps.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface Context {
+public interface Context extends Serializable {
 
     /**
      * Returns the unique identifier of the context.
      * @return unique identifier of the context.
      */
-    @OXNoRefresh
     int getContextId();
 
     /**

@@ -111,8 +111,6 @@ public final class GroupTools {
             for (final int member : userIds) {
                 storage.invalidateUser(ctx, member);
             }
-        } catch (final LdapException e) {
-            throw new GroupException(e);
         } catch (final UserException e) {
             throw new GroupException(e);
         }

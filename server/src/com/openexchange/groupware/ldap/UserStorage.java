@@ -50,7 +50,6 @@
 package com.openexchange.groupware.ldap;
 
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,107 +70,102 @@ public abstract class UserStorage {
     /**
      * Attribute name of alias.
      */
-    public static final String ALIAS;
+    public static String ALIAS;
 
     /**
      * Attribute name of appointmentDays.
      */
-    public static final String APPOINTMENTDAYS;
+    public static String APPOINTMENTDAYS;
 
     /**
      * Attribute name of the display name.
      */
-    public static final String DISPLAYNAME;
+    public static String DISPLAYNAME;
 
     /**
      * Attribute name of givenName.
      */
-    public static final String GIVENNAME;
+    public static String GIVENNAME;
 
     /**
      * Attribute name of the identifier.
      */
-    public static final String IDENTIFIER;
+    public static String IDENTIFIER;
 
     /**
      * Attribute name of imapServer.
      */
-    public static final String IMAPSERVER;
+    public static String IMAPSERVER;
 
     /**
      * Attribute name of preferredLanguage.
      */
-    public static final String LANGUAGE;
+    public static String LANGUAGE;
 
     /**
      * Attribute name of mail.
      */
-    public static final String MAIL;
+    public static String MAIL;
 
     /**
      * Attribute name of mailDomain.
      */
-    public static final String MAILDOMAIN;
+    public static String MAILDOMAIN;
 
     /**
      * Attribute name of mailEnabled.
      */
-    public static final String MAILENABLED;
+    public static String MAILENABLED;
 
     /**
      * Value of mailEnabled if user is activated..
      */
-    public static final String MAILENABLED_OK;
+    public static String MAILENABLED_OK;
 
     /**
      * Attribute name of modifyTimestamp.
      */
-    public static final String MODIFYTIMESTAMP;
+    public static String MODIFYTIMESTAMP;
 
     /**
      * Attribute name of shadowLastChange.
      */
-    public static final String SHADOWLASTCHANGE;
+    public static String SHADOWLASTCHANGE;
 
     /**
      * Attribute name of smtpServer.
      */
-    public static final String SMTPSERVER;
+    public static String SMTPSERVER;
 
     /**
      * Attribute name of sureName.
      */
-    public static final String SURENAME;
+    public static String SURENAME;
 
     /**
      * Attribute name of taskDays.
      */
-    public static final String TASKDAYS;
+    public static String TASKDAYS;
 
     /**
      * Attribute name of timeZone.
      */
-    public static final String TIMEZONE;
+    public static String TIMEZONE;
 
     /**
      * Attribute name of uid.
      */
-    public static final String UID;
+    public static String UID;
 
     /**
      * Attribute name of userPassword.
      */
-    public static final String USERPASSWORD;
-    
+    public static String USERPASSWORD;
+
     /**
      * The instance
      */
     private static UserStorage instance;
-    
-    /**
-     * Atomic boolean to keep track of initialization
-     */
-    private static final AtomicBoolean initialized = new AtomicBoolean();
 
     /**
      * Default constructor.
@@ -264,12 +258,10 @@ public abstract class UserStorage {
      * @param userId unique identifier of the user.
      * @throws UserException if removing gives an exception.
      */
-    public void invalidateUser(final Context ctx, final int userId) throws UserException {
-        // Only for caching.
-    }
+    public abstract void invalidateUser(final Context ctx, final int userId) throws UserException;
 
-    public boolean authenticate(final User user, final String password)
-        throws UserException {
+    public static final boolean authenticate(final User user,
+        final String password) throws UserException {
         boolean retval = false;
         if ("{CRYPT}".equals(user.getPasswordMech())) {
             retval = UnixCrypt.matches(user.getUserPassword(), password);
@@ -281,48 +273,42 @@ public abstract class UserStorage {
     }
 
     /**
-     * Creates a new instance implementing the user storage interface.
-     * @return an instance implementing the user storage interface.
-     * @throws LdapException if the instance can't be created.
+     * Initialization.
+     * @throws ContextException if initialization of contexts fails.
      */
-    public static UserStorage getInstance() throws LdapException {
-        if (!initialized.get()) {
-        	final boolean caching = Boolean.parseBoolean(LdapUtility
-                    .findProperty(Names.CACHING));
-        	synchronized (UserStorage.class) {
-                if (!initialized.get()) {
-                	final Class< ? extends UserStorage> implementingClass;
-                    if (caching) {
-                        implementingClass = CachingUserStorage.class;
-                    } else {
-                        final String className = LdapUtility.findProperty(Names.
-                            USERSTORAGE_IMPL);
-                        implementingClass = LdapUtility.getImplementation(
-                            className, UserStorage.class);
-                    }
-                    instance = LdapUtility.getInstance(implementingClass);
-                    initialized.set(true);
-                }
-            }
-        	
+    public static void start() throws UserException {
+        if (null != instance) {
+            LOG.error("Duplicate initialization of UserStorage.");
+            return;
         }
-        return instance;
+        try {
+            loadProperties();
+        } catch (final LdapException e) {
+            throw new UserException(e);
+        }
+        instance = new CachingUserStorage(new RdbUserStorage());
+        instance.startInternal();
     }
 
     /**
-	 * Releases the former initialized instance implementing the user storage
-	 * interface.
-	 */
-	static void releaseInstance() {
-		if (initialized.get()) {
-			synchronized (UserStorage.class) {
-				if (initialized.get()) {
-					instance = null;
-					initialized.set(false);
-				}
-			}
-		}
-	}
+     * Shutdown.
+     */
+    public static void stop() throws UserException {
+        if (null == instance) {
+            LOG.error("Duplicate shutdown of UserStorage.");
+            return;
+        }
+        instance.stopInternal();
+        instance = null;
+    }
+
+    /**
+     * Creates a new instance implementing the user storage interface.
+     * @return an instance implementing the user storage interface.
+     */
+    public static UserStorage getInstance() {
+        return instance;
+    }
 
     /**
 	 * Reads the data from a user from the underlying persistent data storage.
@@ -361,8 +347,7 @@ public abstract class UserStorage {
 		}
 	}
 
-    static {
-        try {
+    static void loadProperties() throws LdapException {
             ALIAS = LdapUtility.findProperty(Names.USER_ATTRIBUTE_ALIAS);
             APPOINTMENTDAYS = LdapUtility.findProperty(Names
                 .USER_ATTRIBUTE_APPOINTMENTDAYS);
@@ -397,8 +382,5 @@ public abstract class UserStorage {
             UID = LdapUtility.findProperty(Names.USER_ATTRIBUTE_UID);
             USERPASSWORD = LdapUtility.findProperty(Names
                 .USER_ATTRIBUTE_PASSWORD);
-        } catch (final LdapException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

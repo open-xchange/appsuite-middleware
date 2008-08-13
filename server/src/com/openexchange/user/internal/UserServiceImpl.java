@@ -90,19 +90,11 @@ public final class UserServiceImpl implements UserService {
 	}
 
 	public void invalidateUser(final Context ctx, final int userId) throws UserException {
-		try {
-			UserStorage.getInstance().invalidateUser(ctx, userId);
-		} catch (final LdapException e) {
-			throw new UserException(e);
-		}
+	    UserStorage.getInstance().invalidateUser(ctx, userId);
 	}
 
 	public int[] listAllUser(final Context context) throws UserException {
-		try {
-			return UserStorage.getInstance().listAllUser(context);
-		} catch (final LdapException e) {
-			throw new UserException(e);
-		}
+	    return UserStorage.getInstance().listAllUser(context);
 	}
 
 	public int[] listModifiedUser(final Date modifiedSince, final Context context) throws UserException {
@@ -114,11 +106,7 @@ public final class UserServiceImpl implements UserService {
 	}
 
 	public int resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
-		try {
-			return UserStorage.getInstance().resolveIMAPLogin(imapLogin, context);
-		} catch (final LdapException e) {
-			throw new UserException(e);
-		}
+	    return UserStorage.getInstance().resolveIMAPLogin(imapLogin, context);
 	}
 
 	public User searchUser(final String email, final Context context) throws UserException {

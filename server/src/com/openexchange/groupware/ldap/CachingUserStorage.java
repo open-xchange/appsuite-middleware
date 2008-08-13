@@ -57,7 +57,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.cache.dynamic.impl.CacheProxy;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
@@ -85,7 +84,7 @@ public class CachingUserStorage extends UserStorage {
 	/**
 	 * Proxy attribute for the object implementing the persistent methods.
 	 */
-	private UserStorage delegate;
+	private final UserStorage delegate;
 
 	/**
 	 * Lock for the cache.
@@ -95,8 +94,9 @@ public class CachingUserStorage extends UserStorage {
 	/**
 	 * Default constructor.
 	 */
-	public CachingUserStorage() {
+	public CachingUserStorage(final UserStorage delegate) {
 		super();
+		this.delegate = delegate;
 		cacheLock = new ReentrantLock(true);
 	}
 	
@@ -105,33 +105,29 @@ public class CachingUserStorage extends UserStorage {
 	 */
 	@Override
 	public User getUser(final int uid, final Context context) throws LdapException {
+       final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService == null) {
+            return delegate.getUser(uid, context);
+        }
 		final OXObjectFactory<User> factory = new OXObjectFactory<User>() {
 			public Serializable getKey() {
-				return ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
-						context.getContextId(), uid);
+				return cacheService.newCacheKey(context.getContextId(), uid);
 			}
-
 			public User load() throws LdapException {
-				return getUserStorage().getUser(uid, context);
+				return delegate.getUser(uid, context);
 			}
-
 			public Lock getCacheLock() {
 				return cacheLock;
 			}
 		};
-		try {
-			return CacheProxy.getCacheProxy(factory, REGION_NAME, User.class);
-		} catch (final IllegalArgumentException e) {
-			/*
-			 * Should not occur
-			 */
-			LOG.error(e.getMessage(), e);
-			return getUserStorage().getUser(uid, context);
-		} catch (final LdapException e) {
-			throw e;
-		} catch (final AbstractOXException e) {
-			throw new LdapException(e);
-		}
+        try {
+            return new UserReloader(factory, REGION_NAME);
+        } catch (final AbstractOXException e) {
+            if (e instanceof LdapException) {
+                throw (LdapException) e;
+            }
+            throw new LdapException(e);
+        }
 	}
 
 	/**
@@ -139,7 +135,7 @@ public class CachingUserStorage extends UserStorage {
 	 */
 	@Override
 	public void updateUser(final User user, final Context context) throws LdapException {
-		getUserStorage().updateUser(user, context);
+	    delegate.updateUser(user, context);
 		try {
             invalidateUser(context, user.getId());
         } catch (final UserException e) {
@@ -154,7 +150,7 @@ public class CachingUserStorage extends UserStorage {
 	public int getUserId(final String uid, final Context context) throws LdapException {
 		final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
 		if (null == cacheService) {
-			return getUserStorage().getUserId(uid, context);
+			return delegate.getUserId(uid, context);
 		}
 		try {
 			final Cache cache = cacheService.getCache(REGION_NAME);
@@ -165,7 +161,7 @@ public class CachingUserStorage extends UserStorage {
 				if (LOG.isTraceEnabled()) {
 					LOG.trace("Cache MISS. Context: " + context.getContextId() + " User: " + uid);
 				}
-				identifier = getUserStorage().getUserId(uid, context);
+				identifier = delegate.getUserId(uid, context);
 				try {
 					cache.put(key, Integer.valueOf(identifier));
 				} catch (final CacheException e) {
@@ -189,7 +185,7 @@ public class CachingUserStorage extends UserStorage {
 	@Override
 	public int[] listModifiedUser(final Date modifiedSince, final Context context) throws LdapException {
 		// Caching doesn't make any sense here.
-		return getUserStorage().listModifiedUser(modifiedSince, context);
+		return delegate.listModifiedUser(modifiedSince, context);
 	}
 
 	/**
@@ -198,7 +194,7 @@ public class CachingUserStorage extends UserStorage {
 	@Override
 	public User searchUser(final String email, final Context context) throws LdapException {
         // Caching doesn't make any sense here.
-		return getUserStorage().searchUser(email, context);
+		return delegate.searchUser(email, context);
 	}
 
 	/**
@@ -206,11 +202,7 @@ public class CachingUserStorage extends UserStorage {
 	 */
 	@Override
 	public int[] listAllUser(final Context context) throws UserException {
-		try {
-			return getUserStorage().listAllUser(context);
-		} catch (final LdapException e) {
-			throw new UserException(e);
-		}
+	    return delegate.listAllUser(context);
 	}
 
 	/**
@@ -220,11 +212,7 @@ public class CachingUserStorage extends UserStorage {
 	public int resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
 		final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
 		if (null == cacheService) {
-			try {
-				return getUserStorage().resolveIMAPLogin(imapLogin, context);
-			} catch (final LdapException e) {
-				throw new UserException(e);
-			}
+		    return delegate.resolveIMAPLogin(imapLogin, context);
 		}
 		try {
 			final Cache cache = cacheService.getCache(REGION_NAME);
@@ -232,11 +220,7 @@ public class CachingUserStorage extends UserStorage {
 			final int identifier;
 			final Integer tmp = (Integer) cache.get(key);
 			if (null == tmp) {
-				try {
-					identifier = getUserStorage().resolveIMAPLogin(imapLogin, context);
-				} catch (final LdapException e) {
-					throw new UserException(e);
-				}
+			    identifier = delegate.resolveIMAPLogin(imapLogin, context);
 				try {
 					cache.put(key, Integer.valueOf(identifier));
 				} catch (final CacheException e) {
@@ -268,33 +252,20 @@ public class CachingUserStorage extends UserStorage {
         }
     }
 
-    /**
-	 * Creates a the instance implementing the user storage interface with
-	 * persistent storing.
-	 * 
-	 * @return an instance implementing the user storage interface.
-	 * @throws LdapException
-	 *             if the instance can't be created.
-	 */
-	private UserStorage getUserStorage() throws LdapException {
-		if (null == delegate) {
-			final String className = LdapUtility.findProperty(Names.USERSTORAGE_IMPL);
-			final Class<? extends UserStorage> clazz = LdapUtility.getImplementation(className, UserStorage.class);
-			delegate = LdapUtility.getInstance(clazz);
-		}
-		return delegate;
-	}
-
 	@Override
 	protected void startInternal() throws UserException {
 	}
 
 	@Override
 	protected void stopInternal() throws UserException {
-		try {
-			ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(REGION_NAME);
-		} catch (final CacheException e) {
-			throw new UserException(e);
-		}
+        final CacheService cacheService = ServerServiceRegistry.getInstance()
+            .getService(CacheService.class);
+        if (cacheService != null) {
+    		try {
+    			cacheService.freeCache(REGION_NAME);
+    		} catch (final CacheException e) {
+    			throw new UserException(e);
+    		}
+        }
 	}
 }

@@ -222,8 +222,6 @@ public final class Logic {
                         .valueOf(userId));
                 }
             }
-        } catch (final LdapException e) {
-            throw new GroupException(e);
         } catch (final UserException e) {
             throw new GroupException(e);
         }

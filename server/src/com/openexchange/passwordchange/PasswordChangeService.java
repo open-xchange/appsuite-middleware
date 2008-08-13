@@ -217,11 +217,7 @@ public abstract class PasswordChangeService {
 		/*
 		 * Invalidate user cache
 		 */
-		try {
-			UserStorage.getInstance().invalidateUser(event.getContext(), event.getSession().getUserId());
-		} catch (final LdapException e) {
-			LOG.error("Invalidating user cache failed", e);
-		}
+		UserStorage.getInstance().invalidateUser(event.getContext(), event.getSession().getUserId());
 		/*
 		 * Update password in session
 		 */

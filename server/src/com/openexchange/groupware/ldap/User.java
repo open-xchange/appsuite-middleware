@@ -49,17 +49,16 @@
 
 package com.openexchange.groupware.ldap;
 
+import java.io.Serializable;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
-import com.openexchange.cache.dynamic.OXNoRefresh;
 
 /**
  * Interface for the user object.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface User {
+public interface User extends Serializable {
 
     /**
      * Getter for userPassword.
@@ -76,7 +75,6 @@ public interface User {
      * Getter for uid.
      * @return User identifier.
      */
-    @OXNoRefresh
     int getId();
 
     /**

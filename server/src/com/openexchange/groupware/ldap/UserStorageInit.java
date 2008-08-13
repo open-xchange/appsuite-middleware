@@ -78,23 +78,17 @@ public final class UserStorageInit implements Initialization {
 		super();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.Initialization#start()
+	/**
+	 * {@inheritDoc}
 	 */
-	public void start() throws AbstractOXException {
-		UserStorage.getInstance().startInternal();
+	public void start() throws UserException {
+        UserStorage.start();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.Initialization#stop()
+	/**
+	 * {@inheritDoc}
 	 */
-	public void stop() throws AbstractOXException {
-		UserStorage.getInstance().stopInternal();
-		UserStorage.releaseInstance();
+	public void stop() throws UserException {
+		UserStorage.stop();
 	}
-
 }

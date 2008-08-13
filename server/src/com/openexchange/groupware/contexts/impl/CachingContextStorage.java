@@ -202,15 +202,25 @@ public class CachingContextStorage extends ContextStorage {
             LOG.error("Duplicate initialization of CachingContextStorage.");
             return;
         }
+        persistantImpl.startUp();
         started = true;
     }
 
     @Override
-    protected void shutDown() {
+    protected void shutDown() throws ContextException {
         if (!started) {
             LOG.error("Duplicate shutdown of CachingContextStorage.");
             return;
         }
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService != null) {
+            try {
+                cacheService.freeCache(REGION_NAME);
+            } catch (final CacheException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        persistantImpl.shutDown();
         started = false;
     }
     

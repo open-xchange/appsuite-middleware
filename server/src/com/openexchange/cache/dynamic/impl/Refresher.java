@@ -68,7 +68,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class Refresher<T> {
+public abstract class Refresher<T extends Serializable> {
 
     /**
      * Logger.
@@ -165,7 +165,7 @@ public abstract class Refresher<T> {
             lock.lock();
             try {
                 cond.signalAll();
-                cache.put(key, (Serializable) retval);
+                cache.put(key, retval);
             } catch (final CacheException e) {
                 throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e);
             } finally {
