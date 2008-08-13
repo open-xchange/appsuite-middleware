@@ -54,7 +54,7 @@ Authors:
 
 %install
 
-ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
+ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install doc
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -72,3 +72,4 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 /opt/open-xchange/bundles/com.openexchange.axis2/META-INF
 /opt/open-xchange/bundles/com.openexchange.axis2/com.openexchange.axis2.jar
 %config(noreplace) /opt/open-xchange/etc/groupware/axis2.properties
+%doc docs
