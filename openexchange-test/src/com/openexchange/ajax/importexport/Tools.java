@@ -98,7 +98,7 @@ public final class Tools {
     public static ICalImportResponse importICal(final AJAXClient client,
         final ICalImportRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (ICalImportResponse) Executor.execute(client, request);
+        return Executor.execute(client, request);
     }
 
     public static VCardImportResponse importVCard(final AJAXClient client,

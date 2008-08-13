@@ -51,6 +51,7 @@ package com.openexchange.ajax.importexport;
 
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.groupware.AbstractOXException;
@@ -79,8 +80,8 @@ public class Bug10382Test extends AbstractAJAXSession {
         final AJAXClient client = getClient();
         final AppointmentObject appointment = new AppointmentObject();
         appointment.setTitle("Bug10382Test");
-        final ICalImportResponse response = Tools.importICal(client,
-            new ICalImportRequest(29, Tools.toICal(client, appointment),
+        final ICalImportResponse response = Executor.execute(client,
+            new ICalImportRequest(21, Tools.toICal(client, appointment),
             false));
         if (!response.hasError()) {
             fail("ICal imported without permissions.");
