@@ -174,9 +174,19 @@
         </copy>
     </target>
 
-    <target name="clean">
+	<target name="doc">
+		<exec executable="pod2html">
+			<arg value="--infile=docs/Quick-OX-Axis2-Integration-Overview.pod"/>
+			<arg value="--outfile=docs/Quick-OX-Axis2-Integration-Overview.html"/>
+		</exec>
+	</target>
+	
+	<target name="clean">
         <delete dir="${tmp.dir}"/>
         <delete dir="${output..}"/>
+    	<delete>
+    		<fileset dir="." includes="*.tmp,docs/*.html"/>
+        </delete>
     </target>
 
 </project>
