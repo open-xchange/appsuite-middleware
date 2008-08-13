@@ -595,7 +595,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                     }
                     final String text = object.getString(VacationActionFields.TEXT.getFieldname());
                     if (null != text) {
-                        arrayList.add(stringToList(text));
+                        arrayList.add(stringToList(text.replaceAll("(\r)?\n", "\r\n")));
                         return new ActionCommand(ActionCommand.Commands.VACATION, arrayList);
                     } else {
                         throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, "Parameter " + VacationActionFields.TEXT.getFieldname() + " is missing for " + 
