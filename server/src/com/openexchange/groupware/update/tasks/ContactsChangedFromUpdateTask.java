@@ -52,10 +52,11 @@ package com.openexchange.groupware.update.tasks;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
@@ -67,6 +68,7 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * ContactsChangedFromUpdateTask
@@ -77,8 +79,7 @@ import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public final class ContactsChangedFromUpdateTask implements UpdateTask {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-    .getLog(ContactsChangedFromUpdateTask.class);
+    private static final Log LOG = LogFactory.getLog(ContactsChangedFromUpdateTask.class);
 
     private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(ContactsChangedFromUpdateTask.class);
 
@@ -89,19 +90,15 @@ public final class ContactsChangedFromUpdateTask implements UpdateTask {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTask#addedWithVersion()
+    /**
+     * {@inheritDoc}
      */
     public int addedWithVersion() {
         return 14;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTask#getPriority()
+    /**
+     * {@inheritDoc}
      */
     public int getPriority() {
         /*
@@ -112,13 +109,10 @@ public final class ContactsChangedFromUpdateTask implements UpdateTask {
 
     private static final String STR_INFO = "Performing update task 'ContactsChangedFromUpdateTask'";
 
-    private static final String SQL_QUERY = "SELECT created_from,changed_from,cid FROM prg_contacts WHERE changed_from IS NULL";
+    private static final String SQL_FIX = "UPDATE prg_contacts SET changed_from=created_from WHERE changed_from IS NULL"; 
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTask#perform(com.openexchange.groupware.update.Schema,
-     *      int)
+    /**
+     * {@inheritDoc}
      */
     @OXThrowsMultiple(category = { Category.CODE_ERROR },
             desc = { "" },
@@ -129,41 +123,21 @@ public final class ContactsChangedFromUpdateTask implements UpdateTask {
         if (LOG.isInfoEnabled()) {
             LOG.info(STR_INFO);
         }
-        Connection writeCon = null;
-        PreparedStatement stmt = null;
+        final Connection con = Database.get(contextId, true);
         Statement st = null;
-        ResultSet rs = null;
         try {
-
-            writeCon = Database.get(contextId, true);
-            try {
-                st = writeCon.createStatement();
-                stmt = writeCon.prepareStatement(SQL_QUERY);
-                rs   = stmt.executeQuery();
-                while( rs.next() ) {
-                    final StringBuilder sb = new StringBuilder();
-                    final int id  = rs.getInt("created_from");
-                    final int cid = rs.getInt("cid");
-                    sb.append("UPDATE prg_contacts SET changed_from=");
-                    sb.append(id);
-                    sb.append(" WHERE created_from=");
-                    sb.append(id);
-                    sb.append(" AND cid=");
-                    sb.append(cid);
-                    st.addBatch(sb.toString());
-                }
-                rs.close();
-                stmt.close();
-                st.executeBatch();
-                st.close();
-            } catch (final SQLException e) {
-                throw EXCEPTION.create(1, e, e.getMessage());
-            }
+            con.setAutoCommit(false);
+            st = con.createStatement();
+            st.executeUpdate(SQL_FIX);
+            con.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw EXCEPTION.create(1, e, e.getMessage());
         } finally {
-            closeSQLStuff(rs, stmt);
+            DBUtils.autocommit(con);
             closeSQLStuff(null, st);
-            if (writeCon != null) {
-                Database.back(contextId, true, writeCon);
+            if (con != null) {
+                Database.back(contextId, true, con);
             }
         }
     }
