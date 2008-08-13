@@ -71,12 +71,18 @@ import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.importexport.Exporter;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.SizedInputStream;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -232,6 +238,16 @@ public class ICalExporter implements Exporter {
 	}
 	
 	public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
+	    final Context ctx;
+	    final User user;
+	    try {
+	        ctx = ContextStorage.getInstance().getContext(sessObj.getContextId());
+	        user = UserStorage.getInstance().getUser(sessObj.getUserId(), ctx);
+	    } catch (final ContextException e) {
+	        throw new ImportExportException(e);
+        } catch (final LdapException e) {
+            throw new ImportExportException(e);
+	    }
 		String icalText;
         try {
             ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
@@ -256,6 +272,9 @@ public class ICalExporter implements Exporter {
 					while (searchIterator.hasNext()) {
                         final AppointmentObject appointment = searchIterator.next();
                         if (AppointmentObject.NO_RECURRENCE != appointment.getRecurrenceType()) {
+                            if (!appointment.containsTimezone()) {
+                                appointment.setTimezone(user.getTimeZone());
+                            }
                             CalendarRecurringCollection.replaceDatesWithFirstOccurence(appointment);
                         }
                         appointments.add(appointment);

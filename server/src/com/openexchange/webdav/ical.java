@@ -61,6 +61,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -247,7 +248,10 @@ public final class ical extends PermissionServlet {
                     calendarfolderId, _appointmentFields, new Date(0), true);
                 while (itApp.hasNext()) {
                     final AppointmentObject appointment = itApp.next();
-                    if (appointment.NO_RECURRENCE != appointment.getRecurrenceType()) {
+                    if (CalendarObject.NO_RECURRENCE != appointment.getRecurrenceType()) {
+                        if (!appointment.containsTimezone()) {
+                            appointment.setTimezone(user.getTimeZone());
+                        }
                         CalendarRecurringCollection.replaceDatesWithFirstOccurence(appointment);
                     }
                     emitter.writeAppointment(iSession, appointment, context,
