@@ -60,10 +60,20 @@
         <jar update="true" jarfile="jar/${service.name}.aar" manifest="META-INF/MANIFEST.MF" basedir="classes"/>
     </target>
 
-    <target name="clean">
+	<target name="doc">
+		<exec executable="pod2html">
+			<arg value="--infile=docs/OX-Admin-SOAP.pod"/>
+			<arg value="--outfile=docs/OX-Admin-SOAP.html"/>
+		</exec>
+	</target>
+
+		<target name="clean">
 		<delete file="META-INF/MANIFEST.MF"/>
     	<delete dir="classes"/>
         <delete dir="jar"/>
+    	<delete>
+    		<fileset dir="." includes="*.tmp,docs/*.html"/>
+        </delete>
     </target>
 	
     <target name="dist" depends="clean">

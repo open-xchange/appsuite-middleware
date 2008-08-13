@@ -1,0 +1,79 @@
+
+=head1 Open-Xchange Admin SOAP Interface documentation and examples
+
+This document describes the Open-Xchange Admin SOAP Interface and
+gives some brief examples on how to use it.
+
+=head2 Architecture
+
+The SOAP service communicates with the Admin Daemon using the RMI
+interface. In fact, the Admin SOAP service is just a mapper between
+RMI and SOAP.
+
+   --------------             --------------              -------------
+  |              |           |              |            |             |
+  | Admin Daemon | <- RMI -> | SOAP Service | <- SOAP -> | SOAP client |
+  |              |           |              |            |             |
+   --------------             --------------              -------------
+
+
+=head2 Installation and Configuration
+
+In order to use the SOAP Interface of the Open-Xchange Admin Daemon,
+you need the Open-Xchange Server and the Axis2 bundle. The SOAP
+Interface is a service that must be deployed into the Axis2 Bundle.
+
+For more information about the Axis2 bundle, please refer to the
+Quick-OX-Axis2-Integration-Overview document, that ships with the
+Axis2 bundle.
+
+The default configuration of the Admin SOAP service expects the Admin
+Daemon to be accessible on localhost. To change this behaviour, the
+file
+C</opt/open-xchange/etc/admindaemon/plugin/open-xchange-admin-soap.properties>
+must changed accordingly. Just set C<RMI_HOSTNAME> to something
+different.
+
+=head2 How to check, if the SOAP service is installed and working?
+
+To check whether the Admin SOAP service is installed and working,
+point your browser to the URL
+http://localhost/servlet/axis2/services/OXContextService?wsdl
+
+It should display the WSDL (Web Services Description Language) file of
+the OXContextService.
+
+If that does not work, check the logfile of the Open-Xchange Server.
+
+=head2 What services do exist?
+
+=over
+
+=item OXContextService
+
+Context related service.
+
+=item OXUtilService
+
+Util related service.
+
+=item OXUserService
+
+User related service.
+
+=item OXGroupService
+
+Group related service.
+
+=item OXResourceService
+
+Resource related service.
+
+=back
+
+For an explanation of these services, refer to the RMI javadoc
+documentation as shipped with the Open-Xchange Admin Daemon and the
+Open-Xchange Hosting Plugin (packages C<open-xchange-admin-doc> and
+C<open-xchange-admin-plugin-hosting-doc>).
+
+=cut
