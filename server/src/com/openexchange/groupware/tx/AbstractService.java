@@ -60,8 +60,10 @@ public abstract class AbstractService implements Service {
 	protected abstract Object createTransaction()throws TransactionException;
 	protected abstract void commit(Object transaction) throws TransactionException;
 	protected abstract void rollback(Object transaction)throws TransactionException;
-	
-	public void startTransaction() throws TransactionException {
+
+    private static final boolean rememberStacks = false;
+
+    public void startTransaction() throws TransactionException {
 		final long id = Thread.currentThread().getId();
 		
 		if(txIds.containsKey(Long.valueOf(id))){
@@ -71,8 +73,10 @@ public abstract class AbstractService implements Service {
 		final Object txId = createTransaction();
 		
 		txIds.put(Long.valueOf(id),txId);
-		startedTx.put(Long.valueOf(id),Thread.currentThread().getStackTrace());
-	}
+		if(rememberStacks) {
+            startedTx.put(Long.valueOf(id),Thread.currentThread().getStackTrace());
+	    }
+    }
 	
 	public void commit() throws TransactionException{
 		commit(getActiveTransaction());
@@ -88,7 +92,9 @@ public abstract class AbstractService implements Service {
 	
 	public void finish() throws TransactionException{
 		txIds.remove(Long.valueOf(Thread.currentThread().getId()));
-		startedTx.remove(Long.valueOf(Thread.currentThread().getId()));
+		if(rememberStacks) {
+            startedTx.remove(Long.valueOf(Thread.currentThread().getId()));
+        }
 	}
 	
 }
