@@ -1,6 +1,8 @@
 * 2008-08-13 - marcus.klein@open-xchange.com
 
  - Bugfix #11969: Resolved class name conflict by adding package names.
+ - Bugfix #11928: Added parsing of resource identifier on update request from
+   URL.
 
 * 2008-08-13 - francisco.laguna@open-xchange.com
 

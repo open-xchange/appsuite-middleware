@@ -172,9 +172,11 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 		/*
 		 * Check for "data"
 		 */
+        final int identifier = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser
 				.parseResource(jData);
+		resource.setIdentifier(identifier);
 		final Date clientLastModified;
 		if (jsonObj.has(AJAXServlet.PARAMETER_TIMESTAMP) && !jsonObj.isNull(AJAXServlet.PARAMETER_TIMESTAMP)) {
 			clientLastModified = new Date(jsonObj.getLong(AJAXServlet.PARAMETER_TIMESTAMP));
