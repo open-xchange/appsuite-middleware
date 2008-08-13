@@ -65,6 +65,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -162,7 +163,7 @@ public abstract class SessionServlet extends AJAXServlet {
 			Tools.deleteCookies(req, resp);
 			final PrintWriter writer = resp.getWriter();
 			try {
-				Response.write(response, writer);
+				ResponseWriter.write(response, writer);
 				writer.flush();
 			} catch (final JSONException e1) {
 				log(RESPONSE_ERROR, e1);
@@ -176,7 +177,7 @@ public abstract class SessionServlet extends AJAXServlet {
 			Tools.deleteCookies(req, resp);
 			final PrintWriter writer = resp.getWriter();
 			try {
-				Response.write(response, writer);
+				ResponseWriter.write(response, writer);
 				writer.flush();
 			} catch (final JSONException e1) {
 				log(RESPONSE_ERROR, e1);
