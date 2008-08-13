@@ -101,9 +101,10 @@ public final class Bug11868Test extends AbstractAJAXSession {
         }
         final Resource resource = new Resource();
         {
+            final long different = System.currentTimeMillis();
             resource.setDisplayName("Bug 11868 test resource");
-            resource.setSimpleName("Bug 11868 test resource");
-            resource.setMail("bug11868testresource@example.com");
+            resource.setSimpleName("Bug 11868 test resource " + different);
+            resource.setMail("bug11868testresource" + different + "@example.com");
             final ResourceNewResponse response = Executor.execute(client,
                 new ResourceNewRequest(resource));
             resource.setIdentifier(response.getID());
