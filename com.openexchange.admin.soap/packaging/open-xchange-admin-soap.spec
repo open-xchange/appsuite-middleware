@@ -54,7 +54,7 @@ Authors:
 
 
 %install
-ant -Ddestdir=%{buildroot} install docs
+ant -Ddestdir=%{buildroot} install doc
 
 
 %clean
