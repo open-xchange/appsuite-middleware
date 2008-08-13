@@ -259,8 +259,7 @@ public class ICalEmitterTest extends TestCase {
 
         AppointmentObject appointment = getDefault();
         appointment.setAlarm(15 *MINUTES);
-        appointment.setAlarmFlag(true);
-
+        
         ICalFile ical = serialize(appointment);
 
         assertProperty(ical, "BEGIN", "VALARM");
