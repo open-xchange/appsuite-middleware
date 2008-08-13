@@ -398,8 +398,10 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 		}
 		if ((null != usingThread) && usingThread.isAlive()) {
 			sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append('\n');
-			// Only possiblity to get the current working possition of a thread.
-			// This is only called if some thread catched by MailAccessWatcher.
+			/*
+			 * Only possibility to get the current working position of a thread.
+			 * This is only called if a thread is caught by MailAccessWatcher.
+			 */
 			final StackTraceElement[] trace = usingThread.getStackTrace();
 			sBuilder.append("\tat ").append(trace[0]);
 			for (int i = 1; i < trace.length; i++) {
@@ -456,9 +458,11 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	 */
 	private final void applyNewThread() {
 		usingThread = Thread.currentThread();
-		// This is faster that Thread.getStackTrace().
-		final Throwable t = new Throwable();
-		trace = t.getStackTrace();
+		/*
+		 * This is faster than Thread.getStackTrace() since a native method is
+		 * used to fill thread's stack trace
+		 */
+		trace = new Throwable().getStackTrace();
 	}
 
 	/**
