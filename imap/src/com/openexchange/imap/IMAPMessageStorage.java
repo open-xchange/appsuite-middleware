@@ -987,7 +987,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			final MailPath msgref = composedMail.getMsgref();
 			if (msgref != null) {
 				final MailMessage refMail = getMessage(msgref.getFolder(), msgref.getUid(), false);
-				if (refMail.isDraft()) {
+				/*
+				 * Check if denoted mail is located in default drafts folder
+				 */
+				if (draftFullname.equals(refMail.getFolder())) {
 					deleteMessages(refMail.getFolder(), new long[] { refMail.getMailId() }, true);
 				}
 				composedMail.setMsgref(null);

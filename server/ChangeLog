@@ -1,3 +1,8 @@
+* 2008-08-13 - thorben.betten@open-xchange.com
+
+ - Bugfix #11888: Checking for a draft message by message's folder on
+   draft-edit
+
 * 2008-08-13 - dennis.sieben@open-xchange.com
 
  - Bugfix #11949: "\n" as linebreaks are replaced by "\r\n"
