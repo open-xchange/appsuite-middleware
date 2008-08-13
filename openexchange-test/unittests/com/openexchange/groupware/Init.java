@@ -119,6 +119,10 @@ public final class Init {
 	 */
 	com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),
 	/**
+	 * Setup of user storage.
+	 */
+	com.openexchange.groupware.ldap.UserStorageInit.getInstance(),
+	/**
 	 * Folder initialization
 	 */
 	com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
