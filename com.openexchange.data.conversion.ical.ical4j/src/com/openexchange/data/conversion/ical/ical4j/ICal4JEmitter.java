@@ -73,7 +73,6 @@ import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.ProdId;
-import net.fortuna.ical4j.model.property.Version;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -185,9 +184,9 @@ public class ICal4JEmitter implements ICalEmitter {
     private void initCalendar(final Calendar calendar) {
         final PropertyList properties = calendar.getProperties();
         final ProdId prodId = new ProdId();
-        prodId.setValue(Version.NAME);
+        prodId.setValue(com.openexchange.server.impl.Version.NAME);
         properties.add(prodId);
-        properties.add(Version.VERSION_2_0);
+        properties.add(net.fortuna.ical4j.model.property.Version.VERSION_2_0);
     }
 
     private Calendar getCalendar(final ICalSession session) throws ConversionError {

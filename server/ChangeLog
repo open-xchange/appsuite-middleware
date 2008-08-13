@@ -1,3 +1,7 @@
+* 2008-08-13 - marcus.klein@open-xchange.com
+
+ - Bugfix #11969: Resolved class name conflict by adding package names.
+
 * 2008-08-13 - francisco.laguna@open-xchange.com
 
  - Bugfix #11963: Export VAlarms regardless of AlarmFlag.
