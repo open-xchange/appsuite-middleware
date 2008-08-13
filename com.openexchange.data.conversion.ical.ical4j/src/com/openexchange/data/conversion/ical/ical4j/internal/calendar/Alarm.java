@@ -74,7 +74,7 @@ import java.util.Date;
  */
 public class Alarm<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
     public boolean isSet(U calendar) {
-        return calendar.getAlarmFlag();
+        return true;
     }
 
     public void emit(int index, U calendar, T component, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
@@ -86,6 +86,9 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
     }
 
     private void emitAppointmentAlarm(AppointmentObject appointmentObject, VEvent component, List<ConversionWarning> warnings) {
+        if(0 >= appointmentObject.getAlarm()) {
+            return;
+        }
         VAlarm alarm = new VAlarm();
         Dur duration = new Dur(String.format("-PT%dM", appointmentObject.getAlarm()));
         Trigger trigger = new Trigger(duration);
@@ -100,6 +103,9 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
     }
 
     private void emitTaskAlarm(Task task, VToDo component, List<ConversionWarning> warnings) {
+        if(task.getAlarm() == null) {
+            return;
+        }
         VAlarm alarm = new VAlarm();
         Trigger trigger = new Trigger(EmitterTools.toDateTime(task.getAlarm()));
         alarm.getProperties().add(trigger);
