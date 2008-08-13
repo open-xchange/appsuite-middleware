@@ -56,13 +56,10 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLDecoder;
-import java.sql.Timestamp;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -90,17 +87,12 @@ import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
-import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.UploadServletException;
 
@@ -112,7 +104,7 @@ import com.openexchange.tools.servlet.UploadServletException;
 public abstract class AJAXServlet extends HttpServlet implements UploadRegistry {
 
 	/**
-	 * 
+	 * For serialization.
 	 */
 	private static final long serialVersionUID = 718576864014891156L;
 
@@ -290,16 +282,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
 	public static final String PARAMETER_HARDDELETE = "harddelete";
 
-	/**
-	 * The parameter 'delete' indicates to perform a delete operation of an
-	 * object whose id matches parameter's value: delete=12345
-	 */
-	public static final String PARAMETER_DELETE = "delete";
-
-	public static final String PARAMETER_CONFIRM = "confirm";
-
-	public static final String PARAMETER_CONFIRM_MESSAGE = "confirm_message";
-
 	public static final String PARAMETER_ACTION = "action";
 
 	/**
@@ -309,18 +291,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 */
 	public static final String PARAMETER_COLUMNS = "columns";
 
-	/**
-	 * The parameter 'timestamp' delivers the client-stored, last-changed
-	 * timestamp of the considered object (folder, task, contact, appointment,
-	 * ...). This parameter works as an anchor which lets the server determine
-	 * an arising conflict when perfoming a client-initiated modification or
-	 * lets the server restrict its object query for a client request.
-	 */
-	public static final String PARAMETER_TIMESTAMP_SINCE = "since";
-
 	public static final String PARAMETER_SEARCHPATTERN = "pattern";
-
-	public static final String PARAMETER_GROUPID = "group";
 
 	public static final String PARAMETER_TIMESTAMP = "timestamp";
 
@@ -331,8 +302,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static final String PARAMETER_IGNORE = "ignore";
 
 	public static final String PARAMETER_ALL = "all";
-
-	public static final String PARAMETER_REPLY2ALL = "reply2all";
 
 	public static final String PARAMETER_ATTACHMENT = "attachment";
 
@@ -358,13 +327,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 * response for uploads.
 	 */
 	public static final String CONTENTTYPE_HTML = "text/html; charset=UTF-8";
-
-	/**
-	 * This is the error message if the session identifier isn't sent by the
-	 * client or the session timed out or no session can be found for the given
-	 * session identifier. The HTTP error code must be SC_UNAUTHORIZED.
-	 */
-	protected static final String ERROR_SESSION_NOT_FOUND = "No valid session found.";
 
 	private static final String STR_EMPTY = "";
 
@@ -415,7 +377,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		} catch (final ServletException x) {
 			throw x;
 		} catch (final Exception e) {
-			final ServletException se = new ServletException(e.getLocalizedMessage());
+			final ServletException se = new ServletException(e.getMessage());
 			se.initCause(e);
 			throw se;
 		}
@@ -423,93 +385,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
 	public static boolean containsParameter(final HttpServletRequest req, final String name) {
 		return (req.getParameter(name) != null);
-	}
-
-	/**
-	 * Parses a nonnegative integer URI parameter.
-	 * 
-	 * @param req
-	 *            The HttpServletRequest object which contains the parameter.
-	 * @param name
-	 *            The name of the parameter to parse.
-	 * @return A negative value if the parameter is missing or invalid, the
-	 *         parameter value otherwise.
-	 */
-	public static int getIntParameter(final HttpServletRequest req, final String name) {
-		final String value_str = req.getParameter(name);
-		if (value_str == null) {
-			return -1;
-		}
-		try {
-			return Integer.parseInt(value_str);
-		} catch (final NumberFormatException e) {
-			return -1;
-		}
-	}
-
-	public static long getLongParameter(final HttpServletRequest req, final String name) throws OXConflictException {
-		try {
-			return Long.parseLong(req.getParameter(name));
-		} catch (final NumberFormatException ex) {
-			throw new OXConflictException(new AjaxException(AjaxException.Code.InvalidParameter, ex, name));
-		}
-	}
-
-	public static float getFloatParameter(final HttpServletRequest req, final String name) throws OXConflictException {
-		try {
-			return Float.parseFloat(req.getParameter(name));
-		} catch (final NumberFormatException ex) {
-			throw new OXConflictException(new AjaxException(AjaxException.Code.InvalidParameter, ex, name));
-		}
-	}
-
-	public static boolean getBooleanParameter(final HttpServletRequest req, final String name) {
-		return Boolean.getBoolean(req.getParameter(name));
-	}
-
-	public static Date getDateParameter(final HttpServletRequest req, final String name) throws OXConflictException {
-		try {
-			return new Date(Long.parseLong(req.getParameter(name)));
-		} catch (final NumberFormatException ex) {
-			throw new OXConflictException(new AjaxException(AjaxException.Code.InvalidParameter, ex, name));
-		}
-	}
-
-	protected long getDateValue(final Date d, final User userObj) {
-		long retval = d.getTime();
-		final Calendar cal = Calendar.getInstance();
-		cal.setTime(d);
-		if (cal.get(Calendar.HOUR_OF_DAY) != 0 || cal.get(Calendar.MINUTE) != 0) {
-			retval += (TimeZone.getTimeZone(userObj.getTimeZone()).getOffset(retval));
-		}
-		return retval;
-	}
-
-	protected boolean getListOfObjectsFromToInFolder(final HttpServletRequest req) {
-		return (req.getParameter(PARAMETER_FOLDERID) != null && req.getParameter(PARAMETER_FROM) != null && req
-				.getParameter(PARAMETER_TO) != null);
-	}
-
-	protected boolean getObjectInfo(final HttpServletRequest req) {
-		return (req.getParameter(PARAMETER_ID) != null && req.getParameter(PARAMETER_FROM) == null && req
-				.getParameter(PARAMETER_TO) == null);
-	}
-
-	protected boolean deleteObject(final HttpServletRequest req) {
-		return req.getParameter(PARAMETER_ACTION) != null
-				&& req.getParameter(PARAMETER_ACTION).equalsIgnoreCase(ACTION_DELETE);
-	}
-
-	protected boolean confirmObject(final HttpServletRequest req) {
-		return (req.getParameter(PARAMETER_CONFIRM) != null);
-	}
-
-	public boolean saveObject(final HttpServletRequest req) throws Exception {
-		if (req.getParameter(AJAXServlet.PARAMETER_ID) != null
-				&& req.getParameter(AJAXServlet.PARAMETER_FOLDERID) != null) {
-			return true;
-		}
-		return false;
 	}
 
 	/**
@@ -567,50 +442,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	}
 
 	/**
-	 * Returns user's timezone that ought to be used to determine offset to a
-	 * <code>java.util.Date</code> instance which has its timezone set to UTC.
-	 * 
-	 * @param session
-	 * @return user's timezone
-	 * @throws ContextException
-	 *             If context cannot be loaded
-	 */
-	protected static TimeZone getUserTimeZone(final Session session) throws ContextException {
-		return TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(),
-				ContextStorage.getStorageContext(session.getContextId())).getTimeZone());
-	}
-
-	/**
-	 * Returns a <code>long</code> value with added time zone offset
-	 * 
-	 * @param d
-	 *            - the <code>java.util.Date</code> in GMT
-	 * @param session
-	 * @return a <code>long</code> value with added time zone offset
-	 * @throws ContextException
-	 *             If context cannot be loaded
-	 */
-	protected static long sendTime(final Date d, final Session session) throws ContextException {
-		return d.getTime() + getUserTimeZone(session).getOffset(d.getTime());
-	}
-
-	/**
-	 * Returns a <code>java.util.Date</code> instance with subtracted time zone
-	 * offset
-	 * 
-	 * @param time
-	 *            - number of milliseconds in local timezone
-	 * @param session
-	 * @return a <code>java.util.Date</code> instance with subtracted time zone
-	 *         offset
-	 * @throws ContextException
-	 *             If context cannot be loaded
-	 */
-	protected static Date parseTime(final long time, final Session session) throws ContextException {
-		return new Date(time - getUserTimeZone(session).getOffset(time));
-	}
-
-	/**
 	 * Returns the URI part after path to the servlet.
 	 * 
 	 * @param req
@@ -632,26 +463,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			uri = uri.substring(pos + path.length());
 		}
 		return uri;
-	}
-
-	protected static JSONObject getResponseObject(final Object data, final Timestamp serverTimestamp,
-			final String errorMsg, final String[] errorParams) throws JSONException {
-		final JSONObject retval = new JSONObject();
-		retval.put("data", data);
-		if (serverTimestamp != null) {
-			retval.put("timestamp", serverTimestamp.getTime());
-		}
-		retval.put(STR_ERROR, errorMsg == null || errorMsg.length() == 0 ? JSONObject.NULL : errorMsg);
-		if (errorParams == null || errorParams.length == 0) {
-			retval.put(STR_ERROR_PARAMS, JSONObject.NULL);
-		} else {
-			final JSONArray arr = new JSONArray();
-			for (int i = 0; i < errorParams.length; i++) {
-				arr.put(errorParams[i]);
-			}
-			retval.put(STR_ERROR_PARAMS, arr);
-		}
-		return retval;
 	}
 
 	protected static String getAction(final HttpServletRequest req) throws OXConflictException {
@@ -676,7 +487,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 *             if writing to the response fails.
 	 * @throws ServletException
 	 *             if the creation of the java script error object fails.
+	 * @deprecated use {@link Response}. 
 	 */
+	@Deprecated
 	protected static void sendErrorAsJS(final HttpServletResponse resp, final String errorMessage) throws IOException,
 			ServletException {
 		resp.setStatus(HttpServletResponse.SC_OK);
@@ -696,19 +509,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
 	protected static void sendError(final HttpServletResponse resp) throws IOException {
 		resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-	}
-
-	protected static void sendErrorAsJS(final PrintWriter w, final String errorMessage) throws ServletException {
-		try {
-			final JSONWriter jw = new JSONWriter(w);
-			jw.object();
-			jw.key(STR_ERROR);
-			jw.value(errorMessage);
-			jw.endObject();
-			w.flush();
-		} catch (final JSONException e1) {
-			throw new ServletException("Cannot create JSON object.", e1);
-		}
 	}
 
 	/**
@@ -791,23 +591,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		return s;
 	}
 
-	public static int[] intArrayCopy(final String s[]) {
-		final int i[] = new int[s.length];
-
-		for (int a = 0; a < i.length; a++) {
-			i[a] = Integer.parseInt(s[a]);
-		}
-
-		return i;
-	}
-
 	/* --------------------- STUFF FOR UPLOAD --------------------- */
 
 	public UploadEvent processUpload(final HttpServletRequest req) throws UploadException {
 		return processUploadStatic(req);
 	}
 
-	@SuppressWarnings("unchecked")
 	public static final UploadEvent processUploadStatic(final HttpServletRequest req) throws UploadException {
 		final boolean isMultipart = FileUploadBase.isMultipartContent(new ServletRequestContext(req));
 		if (isMultipart) {
@@ -941,10 +730,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		}
 
 		jsonwriter.endObject();
-	}
-
-	public static Date getCurrentTimestamp() throws Exception {
-		return new Date();
 	}
 
 	protected boolean checkRequired(final HttpServletRequest req, final HttpServletResponse res, final boolean html,
