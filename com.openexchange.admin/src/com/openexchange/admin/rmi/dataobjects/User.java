@@ -4232,18 +4232,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         if (null == passwordMech) {
             this.passwordMechset = true;
         }
-        if( passwordMech != null ) {
-            if( passwordMech.equalsIgnoreCase(CRYPT_MECH) ) {
-                this.passwordMech = CRYPT_MECH;
-            } else if( passwordMech.equalsIgnoreCase(SHA_MECH) ) {
-                this.passwordMech = SHA_MECH;
-            } else {
-                // sane default
-                this.passwordMech = SHA_MECH;
-            }
-        } else {
-            this.passwordMech = passwordMech;
-        }
+        // NOTE: Check is done in OXUser
+        this.passwordMech = passwordMech;
     }
 
     /**

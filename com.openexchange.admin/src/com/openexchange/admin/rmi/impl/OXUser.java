@@ -1105,6 +1105,15 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
     
+    private void checkValidPasswordMech(final String mech) throws InvalidDataException {
+        if( mech != null ) {
+            if( ! mech.equalsIgnoreCase(User.CRYPT_MECH) && ! mech.equalsIgnoreCase(User.SHA_MECH) ) {
+                throw new InvalidDataException("Invalid PasswordMech: " + mech + ", Valid Mechs: " + User.CRYPT_MECH +
+                        ":" + User.SHA_MECH);
+            }
+        }
+    }
+    
     /**
      * checking for some requirements when changing exisiting user data
      * 
@@ -1136,10 +1145,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw new InvalidDataException("Empty password is not allowed");
         }
 
+        checkValidPasswordMech(newuser.getPasswordMech());
+        
         if( newuser.getPasswordMech() != null && !pwchange ) {
             throw new InvalidDataException("When changing password mechanism, the password string must also be supplied");
         }
-            
+
+        // if no password mech supplied, use the old one as set in db
+        if( newuser.getPasswordMech() == null ) {
+            newuser.setPasswordMech(dbuser.getPasswordMech());
+        }
+        
         if (!tool.isContextAdmin(ctx, newuser.getId())) {
             // checks below throw InvalidDataException
             checkValidEmailsInUserObject(newuser);
@@ -1216,6 +1232,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         checkAndSetLanguage(usr);
         
+        checkValidPasswordMech(usr.getPasswordMech());
+
         if (usr.getPassword() == null || usr.getPassword().trim().length() == 0) {
             throw new InvalidDataException("Empty password is not allowed");
         }
