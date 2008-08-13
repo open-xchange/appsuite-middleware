@@ -49,8 +49,6 @@
 
 package com.openexchange.resource.managerequest.request;
 
-import static com.openexchange.json.ReadOnlyJSONArray.EMPTY_JSON_ARRAY;
-import static com.openexchange.json.ReadOnlyJSONObject.EMPTY_JSON_OBJECT;
 import static com.openexchange.resource.managerequest.services.ResourceRequestServiceRegistry.getServiceRegistry;
 
 import java.util.Arrays;
@@ -59,6 +57,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -190,7 +189,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 		/*
 		 * Write empty JSON object
 		 */
-		return new AJAXRequestResult(EMPTY_JSON_OBJECT, resource.getLastModified());
+		return new AJAXRequestResult(new JSONObject(), resource.getLastModified());
 	}
 
 	/**
@@ -229,7 +228,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 		/*
 		 * Write empty JSON array
 		 */
-		return new AJAXRequestResult(EMPTY_JSON_ARRAY, clientLastModified);
+		return new AJAXRequestResult(new JSONArray(), clientLastModified);
 	}
 
 	public String getModule() {
