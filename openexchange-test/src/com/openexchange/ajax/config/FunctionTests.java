@@ -50,6 +50,7 @@
 package com.openexchange.ajax.config;
 
 import java.util.Date;
+import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,6 +61,7 @@ import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Executor;
 import com.openexchange.tools.RandomString;
 
 /**
@@ -105,11 +107,26 @@ public class FunctionTests extends AbstractAJAXSession {
      */
     public void testCurrentTime() throws Throwable {
         final AJAXClient client = getClient();
+        final long firstServerTime;
+        {
+            final GetRequest request = new GetRequest(Tree.CurrentTime);
+            final GetResponse response = Executor.execute(client, request);
+            firstServerTime = response.getLong();
+        }
+        final int randomWait = new Random(System.currentTimeMillis()).nextInt(10000);
+        Thread.sleep(randomWait);
+        final long secondServerTime;
+        final long totalDuration;
+        {
+            final GetRequest request = new GetRequest(Tree.CurrentTime);
+            final GetResponse response = Executor.execute(client, request);
+            secondServerTime = response.getLong();
+            totalDuration = response.getTotalDuration();
+        }
         final Date sTime = client.getValues().getServerTime();
         final long localTime = System.currentTimeMillis();
-        LOG.info("Local time: " + System.currentTimeMillis() + " Server time: "
-            + sTime.getTime());
-        final long difference = Math.abs(localTime - sTime.getTime());
+        LOG.error("Local time: " + localTime + " Server time: " + sTime.getTime());
+        final long difference = Math.abs(secondServerTime - totalDuration - randomWait - firstServerTime);
         LOG.info("Time difference: " + difference);
         assertTrue("Too big time difference: " + difference, difference < MAX_DIFFERENCE);
     }

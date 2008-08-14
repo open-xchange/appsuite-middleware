@@ -50,12 +50,13 @@
 package com.openexchange.ajax.config.actions;
 
 import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-abstract class AbstractConfigRequest implements AJAXRequest {
+abstract class AbstractConfigRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     /**
      * URL of the tasks AJAX interface.
@@ -75,5 +76,4 @@ abstract class AbstractConfigRequest implements AJAXRequest {
     public String getServletPath() {
         return CONFIG_URL;
     }
-
 }
