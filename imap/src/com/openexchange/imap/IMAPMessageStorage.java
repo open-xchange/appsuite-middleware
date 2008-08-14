@@ -399,7 +399,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			final Message[] msgs = IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, order,
 					UserStorage.getStorageUser(session.getUserId(), ctx).getLocale());
 			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-			if ((msgs == null) || (msgs.length == 0)) {
+			if ((msgs == null) || (msgs.length == 0) || limit == 0) {
 				return EMPTY_RETVAL;
 			} else if (limit > 0) {
 				final int newLength = Math.min(limit, msgs.length);
