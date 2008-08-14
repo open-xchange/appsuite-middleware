@@ -94,6 +94,7 @@ import net.fortuna.ical4j.model.property.Duration;
 import net.fortuna.ical4j.model.property.ExDate;
 import net.fortuna.ical4j.model.property.RRule;
 import net.fortuna.ical4j.model.property.Resources;
+import net.fortuna.ical4j.util.CompatibilityHints;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -131,6 +132,16 @@ public class ICal4JParser implements ICalParser {
         weekdays.put("FR", AppointmentObject.FRIDAY);
         weekdays.put("SA", AppointmentObject.SATURDAY);
         weekdays.put("SO", AppointmentObject.SUNDAY);
+    }
+
+    public ICal4JParser() {
+        CompatibilityHints.setHintEnabled(
+                CompatibilityHints.KEY_RELAXED_UNFOLDING, true);
+        CompatibilityHints.setHintEnabled(
+                CompatibilityHints.KEY_OUTLOOK_COMPATIBILITY, true);
+        CompatibilityHints.setHintEnabled(
+                        CompatibilityHints.KEY_NOTES_COMPATIBILITY, true);
+
     }
 
     public List<CalendarDataObject> parseAppointments(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
