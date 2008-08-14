@@ -123,6 +123,19 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "LOCATION","The Location");
     }
 
+
+    public void testAppWholeDay() throws IOException {
+        AppointmentObject app = new AppointmentObject();
+        app.setStartDate(D("24/02/1981 00:00"));
+        app.setEndDate(D("26/02/1981 00:00"));
+        app.setFullTime(true);
+
+        ICalFile ical = serialize(app);
+
+        assertProperty(ical, "DTSTART;VALUE=DATE", "19810224");
+        assertProperty(ical, "DTEND;VALUE=DATE", "19810226");
+    }
+
     public void testCategoriesMayBeNullOrUnset() throws Exception {
         AppointmentObject app = new AppointmentObject();
         ICalFile ical = serialize(app);
