@@ -15,6 +15,8 @@
    common contact update
  - Bugfix #11912: Displaying those appointments at proper position in
    mini-calendar whose time zone offset exceeds the hour-of-day
+ - Partial bugfix #11980: Properly delegating limit argument to search method on
+   determining unread messages
 
 * 2008-08-13 - thorben.betten@open-xchange.com
 

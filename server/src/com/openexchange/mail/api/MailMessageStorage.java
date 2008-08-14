@@ -361,14 +361,19 @@ public abstract class MailMessageStorage {
 	 *            The fields to pre-fill in returned instances of
 	 *            {@link MailMessage}
 	 * @param limit
-	 *            The max. number of returned unread messages
+	 *            The max. number of returned unread messages or <code>-1</code>
+	 *            to request all unread messages in folder
 	 * @return Unread messages contained in an array of {@link MailMessage}
 	 * @throws MailException
 	 *             If unread messages cannot be returned.
 	 */
 	public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField,
 			final OrderDirection order, final MailField[] fields, final int limit) throws MailException {
-		return searchMessages(folder, IndexRange.NULL, sortField, order, TERM_FLAG_SEEN, fields);
+		if (limit == 0) {
+			return EMPTY_RETVAL;
+		}
+		return searchMessages(folder, limit < 0 ? IndexRange.NULL : new IndexRange(0, limit), sortField, order,
+				TERM_FLAG_SEEN, fields);
 	}
 
 	/**
