@@ -1665,7 +1665,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		return updateAppointment(cdao, edao, writecon, so, ctx, inFolder, clientLastModified, true, false);
 	}
 
-	private final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified, final boolean clientLastModifiedCheck, boolean skipParticipants) throws DataTruncation, SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
+	private final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified, final boolean clientLastModifiedCheck, final boolean skipParticipants) throws DataTruncation, SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
 
 		final CalendarOperation co = new CalendarOperation();
 
@@ -2018,25 +2018,43 @@ class CalendarMySQL implements CalendarSqlImp {
 	}
 
 	private final void updateParticipants(final CalendarDataObject cdao, final CalendarDataObject edao, final int uid, final int cid, final Connection writecon, final MBoolean cup) throws SQLException, OXException, LdapException {
-		final Participant participants[] = cdao.getParticipants();
-		UserParticipant users[] = cdao.getUsers();
+		final Participant[] participants = cdao.getParticipants();
+		UserParticipant[] users = cdao.getUsers();
 
 		if (users == null && cdao.getFolderMoveAction() != CalendarOperation.NO_MOVE_ACTION) {
 			users = edao.getUsers();
 			CalendarOperation.fillUserParticipants(cdao);
 		}
 
-		final Participant old_participants[] = edao.getParticipants();
-		final UserParticipant old_users[] = edao.getUsers();
+		final Participant[] old_participants = edao.getParticipants();
+		final UserParticipant[] old_users = edao.getUsers();
+
+		/*
+		 * Check if updated appointment has the private flag set. If so check if
+		 * either the updated appointment specifies more than one appointment in
+		 * participant informations (value is different from null) or the
+		 * storage version specifies more than one appointment in participant
+		 * informations
+		 */
+		if (cdao.containsPrivateFlag()
+				&& cdao.getPrivateFlag()
+				&& ((participants == null ? old_participants.length > 1 : participants.length > 1) || (users == null ? old_users.length > 1
+						: users.length > 1))) {
+			/*
+			 * Updated appointment has private flag set but contains more than
+			 * one participant
+			 */
+			throw new OXCalendarException(OXCalendarException.Code.PRIVATE_FLAG_AND_PARTICIPANTS, new Object[0]);
+		}
 
 		int check_up = old_users.length;
 
-		Participant new_participants[] = null;
-		Participant deleted_participants[] = null;
+		Participant[] new_participants = null;
+		Participant[] deleted_participants = null;
 
-		UserParticipant new_userparticipants[] = null;
-		UserParticipant modified_userparticipants[] = null;
-		UserParticipant deleted_userparticipants[] = null;
+		UserParticipant[] new_userparticipants = null;
+		UserParticipant[] modified_userparticipants = null;
+		UserParticipant[] deleted_userparticipants = null;
 
 		final Participants deleted = new Participants();
 		final Participants new_deleted = new Participants();
