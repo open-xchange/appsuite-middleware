@@ -108,6 +108,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -936,10 +937,17 @@ public final class Contacts {
 		final StringBuilder update = new StringBuilder();
 
 		try {
+			boolean modifiedDisplayName = false;
 			final int[] mod = new int[650];
 			int cnt = 0;
 			for (int i = 0; i < 650; i++) {
 				if ((mapping[i] != null) && !mapping[i].compare(co, original)) {
+					/*
+					 * Check if modified field is DISPLAY-NAME and contact denotes a system user
+					 */
+					if (i == ContactObject.DISPLAY_NAME && original.getInternalUserId() > 0) {
+						modifiedDisplayName = true;
+					}
 					mod[cnt] = i;
 					cnt++;
 				}
@@ -1044,6 +1052,14 @@ public final class Contacts {
 						LOG.error("Unable to delete Contact Image", oxee);
 					}
 				}
+			}
+			/*
+			 * Check for DISPLAY-NAME update
+			 */
+			if (modifiedDisplayName) {
+				OXFolderAdminHelper.propagateUserModification(original.getInternalUserId(),
+						new int[] { ContactObject.DISPLAY_NAME }, System.currentTimeMillis(), writecon, writecon, ctx
+								.getContextId());
 			}
 			writecon.commit();
 		} catch (final OXException ox) {
