@@ -193,8 +193,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			final IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
 			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (msg == null) {
-				throw new MailException(MailException.Code.MAIL_NOT_FOUND, String.valueOf(msgUID), imapFolder
-						.toString());
+				//throw new MailException(MailException.Code.MAIL_NOT_FOUND, String.valueOf(msgUID), imapFolder
+				//		.toString());
+				return null;
 			}
 			final MailMessage mail = MIMEMessageConverter.convertMessage(msg);
 			if (!mail.isSeen() && markSeen) {
