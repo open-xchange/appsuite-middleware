@@ -117,7 +117,7 @@ public class AppointmentBugTests extends TestCase {
 
 	private static final String SQL_DEL_WORKING_RIGHTS = "DELETE FROM prg_date_rights WHERE cid = ? AND object_id = ?";
 
-    private void hardDelete(final int oid, final Context ctx, final int uid) {
+    private void hardDelete(final int oid, final Context ctx) {
     	final Connection writecon;
     	try {
 			writecon = DBPool.pickup(ctx);
@@ -3321,7 +3321,7 @@ public class AppointmentBugTests extends TestCase {
             // Check end date which should be 04.08.2008: 1217808000000
 			assertEquals("Unexpected last occurrence's end time: ", 1217808000000l, rr.getEnd());
 		} finally {
-			hardDelete(object_id, context, userid);
+			hardDelete(object_id, context);
 		}
 	}
 
@@ -3393,7 +3393,71 @@ public class AppointmentBugTests extends TestCase {
             // Check end date which should be 29.09.2008 13:00h: 1222693200000
 			assertEquals("Unexpected last occurrence's end time: ", 1222693200000l, rr.getEnd());
 		} finally {
-			hardDelete(object_id, context, userid);
+			hardDelete(object_id, context);
+		}
+	}
+
+	/**
+	 * Test for <a href=
+	 * "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=11881">bug
+	 * #11881</a>:<br>
+	 * &quot;<i>It is possible to create a private appointment with one or more
+	 * participants</i>&quot;
+	 * 
+	 * @throws Exception
+	 *             If an error occurs
+	 */
+	public void testBug11881() throws Exception {
+		final Context context = new ContextImpl(contextid);
+		int object_id = -1;
+		try {
+			final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(),
+					"myTestSearch");
+			final int fid = AppointmentBugTests.getPrivateFolder(userid);
+
+			final CalendarDataObject cdao = new CalendarDataObject();
+			cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+			cdao.setParentFolderID(fid);
+			cdao.setTitle("testBug11881");
+			cdao.setIgnoreConflicts(true);
+			CalendarTest.fillDatesInDao(cdao);
+
+			final Participants participants = new Participants();
+			final String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
+			final int userid2 = resolveUser(user2);
+
+			final Participant p1 = new UserParticipant(userid);
+			participants.add(p1);
+
+			final Participant p2 = new UserParticipant(userid2);
+			participants.add(p2);
+
+			cdao.setParticipants(participants.getList());
+
+			final CalendarSql csql = new CalendarSql(so);
+			csql.insertAppointmentObject(cdao);
+			object_id = cdao.getObjectID();
+			assertTrue("Object creation failed", object_id > 0);
+
+			final CalendarDataObject update = new CalendarDataObject();
+			update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+
+			update.setIgnoreConflicts(true);
+			update.setObjectID(object_id);
+			update.setTitle("testBug11881 - step 2");
+			update.setPrivateFlag(true);
+
+			try {
+				csql.updateAppointmentObject(update, fid, new Date());
+				fail("Update successfull although private appointment contains multiple participants");
+			} catch (final OXCalendarException e) {
+				assertEquals("", e.getDetailNumber(), OXCalendarException.Code.PRIVATE_FLAG_AND_PARTICIPANTS
+						.getDetailNumber());
+			}
+		} finally {
+			if (object_id != -1) {
+				hardDelete(object_id, context);
+			}
 		}
 	}
 }
