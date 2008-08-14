@@ -145,6 +145,16 @@ public class ICalParserTest extends TestCase {
         assertEquals("UTC", appointment.getTimezone());
     }
 
+    public void testDTSTARTAsDateWithoutValue() throws ConversionError {
+        Date start = D("24/02/1981 00:00");
+
+        String icalText = fixtures.veventWithDTStartAsDateWithoutValue(start);
+
+        AppointmentObject appointment = parseAppointment(icalText);
+        assertNotNull(appointment.getStartDate());
+
+    }
+
     public void testAppDuration() throws ConversionError {
         Date start = D("24/02/1981 10:00");
         Date end = D("24/02/1981 12:00");

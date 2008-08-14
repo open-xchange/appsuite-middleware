@@ -662,4 +662,17 @@ public class ICALFixtures {
         return bob.toString();
     }
 
+    public String veventWithDTStartAsDateWithoutValue(Date start) {
+        StringBuilder bob = new StringBuilder();
+
+        beginCalendar(bob);
+        beginEvent(bob);
+
+        bob.append("DTSTART:").append(date.format(start)).append("\n");
+
+        endEvent(bob);
+        endCalendar(bob);
+
+        return bob.toString();
+    }
 }
