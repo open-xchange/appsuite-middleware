@@ -550,8 +550,9 @@ public class CalendarSql implements AppointmentSQLInterface {
                 }
                 throw oxe;
             } catch (final SQLException sqle) {
-                LOG.error(sqle.getMessage(), sqle);
-                throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+                OXCalendarException exception = new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+                LOG.error("Additioal info for: "+exception.getExceptionID()+": "+sqle.getMessage(), sqle);
+                throw exception;
             } catch(final DBPoolingException dbpe) {
                 throw new OXException(dbpe);
             } catch (final OXPermissionException oxpe) {
