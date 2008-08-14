@@ -637,7 +637,8 @@ public final class OXFolderAdminHelper {
 				throw new LdapException(EnumComponent.USER, LdapException.Code.USER_NOT_FOUND, Integer.valueOf(userId),
 						Integer.valueOf(cid));
 			}
-			OXFolderSQL.updateName(defaultInfostoreFolderId, newDisplayName, contextAdminID, userId, writeCon, ctx);
+			OXFolderSQL.updateName(defaultInfostoreFolderId, newDisplayName, lastModified, contextAdminID, writeCon,
+					ctx);
 			/*
 			 * Reload cache entry
 			 */
