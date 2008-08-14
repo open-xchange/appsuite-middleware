@@ -728,6 +728,60 @@ public class CalendarSqlTest extends TestCase {
 
     }
 
+    // Bug 11881
+    public void testPrivateAppointmentsDontHaveOtherParticpantsButTheOwner() throws OXException {
+        final Date start = D("04/06/2007 10:00");
+        final Date end = D("04/06/2007 12:00");
+
+        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2, user);
+        appointment.setPrivateFlag(true);
+
+        try {
+            appointments.save(appointment);
+            clean.add(appointment);
+            fail("Could create private appoinment with other participants");
+        } catch (OXException e) {
+            e.printStackTrace();
+            assertTrue(true);
+        }
+
+        // Try setting private flag later
+        appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2, user);
+        appointments.save( appointment );
+        clean.add(appointment);
+
+        CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
+        update.setPrivateFlag(true);
+
+        try {
+            appointments.save(update);
+            fail("Could create private appoinment with other participants");
+        } catch (OXException e) {
+            e.printStackTrace();
+            assertTrue(true);
+        }
+
+        // Try adding participants later
+
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        appointment = appointments.buildBasicAppointment(start, end);
+        appointment.setPrivateFlag(true);
+        appointments.save(appointment);
+
+        update = appointments.createIdentifyingCopy(appointment);
+        update.setParticipants( tools.users( ctx, participant1,  participant2) );
+
+        try {
+            appointments.save(update);
+            fail("Could create private appoinment with other participants");
+        } catch (OXException e) {
+            e.printStackTrace();
+            assertTrue(true);
+        }
+        
+
+    }
+
     private List<CalendarDataObject> read(final SearchIterator<CalendarDataObject> si) throws OXException, SearchIteratorException {
         final List<CalendarDataObject> appointments = new ArrayList<CalendarDataObject>();
         while(si.hasNext()) { appointments.add( si.next() ); }

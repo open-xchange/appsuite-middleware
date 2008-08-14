@@ -146,7 +146,8 @@ public final class Init {
 	 * User configuration init
 	 */
 	com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
-	/**
+    com.openexchange.groupware.ldap.UserStorageInit.getInstance(),
+    /**
 	 * Resource storage init
 	 */
 	com.openexchange.resource.internal.ResourceStorageInit.getInstance(),
