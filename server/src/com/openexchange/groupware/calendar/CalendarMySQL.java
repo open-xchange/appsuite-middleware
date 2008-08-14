@@ -473,7 +473,7 @@ class CalendarMySQL implements CalendarSqlImp {
 						}
 					}
 				} else {
-					fillActiveDates(start, s.getTime(), e.getTime(), activeDates, false);
+					fillActiveDates(start, s.getTime(), e.getTime(), activeDates, exceedsHourOfDay(s.getTime(), Tools.getTimeZone(rs.getString(9))));
 				}
 			}
 			// CalendarCommonCollection.debugActiveDates (start, end,

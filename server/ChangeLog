@@ -6,6 +6,8 @@
    the private flag set
  - Partial bugfix #11737: Fixed propagating display-name modification on
    common contact update
+ - Bugfix #11912: Displaying those appointments at proper position in
+   mini-calendar whose time zone offset exceeds the hour-of-day
 
 * 2008-08-13 - thorben.betten@open-xchange.com
 
