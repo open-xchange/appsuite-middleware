@@ -1,3 +1,10 @@
+* 2008-08-14 - francisco.laguna@open-xchange.com
+
+ - Bugfix #3907 and #8527: Allow folded values.
+ - Bugfix #11919: Allow date properties as DATE without saying so in a VALUE.
+ - Bugfix #11968: Export whole day appointments with DTStart and DTEnd as DATEs.
+
+
 * 2008-08-14 - thorben.betten@open-xchange.com
 
  - Bugfix #11899: Fixed routine to remove user flags from a message prior
