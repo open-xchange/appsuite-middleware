@@ -2036,8 +2036,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		 * storage version specifies more than one appointment in participant
 		 * informations
 		 */
-		if (cdao.containsPrivateFlag()
-				&& cdao.getPrivateFlag()
+		if ((cdao.containsPrivateFlag() ? cdao.getPrivateFlag() : edao.getPrivateFlag())
 				&& ((participants == null ? old_participants.length > 1 : participants.length > 1) || (users == null ? old_users.length > 1
 						: users.length > 1))) {
 			/*
