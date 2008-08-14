@@ -187,14 +187,15 @@ public final class MIMEStorageUtility {
 			set.add(MailField.COLOR_LABEL);
 		}
 		if (fetchProfile.contains(IMAPFolder.FetchProfileItem.HEADERS)) {
-			set.add(MailField.FROM);
+			set.add(MailField.HEADERS);
+			/*set.add(MailField.FROM);
 			set.add(MailField.TO);
 			set.add(MailField.CC);
 			set.add(MailField.BCC);
 			set.add(MailField.SUBJECT);
 			set.add(MailField.DISPOSITION_NOTIFICATION_TO);
 			set.add(MailField.PRIORITY);
-			set.add(MailField.SENT_DATE);
+			set.add(MailField.SENT_DATE);*/
 		} else {
 			if (fetchProfile.contains(MessageHeaders.HDR_FROM)) {
 				set.add(MailField.FROM);
