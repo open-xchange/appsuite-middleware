@@ -1183,16 +1183,20 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 	 *             If removing user flags fails
 	 */
 	private static void removeUserFlagsFromMessage(final Message message) throws MessagingException {
-		final Flags flags = message.getFlags();
-		final String[] userFlags = flags.getUserFlags();
+		final String[] userFlags = message.getFlags().getUserFlags();
 		if (userFlags.length > 0) {
+			/*
+			 * Create a new flags container necessary for later removal
+			 */
+			final Flags remove = new Flags();
 			for (final String userFlag : userFlags) {
-				flags.remove(userFlag);
+				remove.add(userFlag);
 			}
 			/*
-			 * Set new flags with removed user flags
+			 * Remove gathered user flags from message's flags; flags which do
+			 * not occur in flags object are unaffected.
 			 */
-			message.setFlags(flags, true);
+			message.setFlags(remove, false);
 		}
 	}
 
