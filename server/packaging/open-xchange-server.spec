@@ -139,6 +139,39 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Aug 14 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11899: Fixed routine to remove user flags from a message prior
+   to append that message to a folder which does not support user flags
+ - Bugfix #11881: No multiple participants added to appointment which has
+   the private flag set
+ - Partial bugfix #11737: Fixed propagating display-name modification on
+   common contact update
+* Wed Aug 13 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #11963: Export VAlarms regardless of AlarmFlag.
+* Wed Aug 13 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11969: Resolved class name conflict by adding package names.
+ - Bugfix #11928: Added parsing of resource identifier on update request from
+   URL.
+ - Bugfix #10859: Prevent endless loops in recurring calculation. Removed all
+   Thread.getStackTrace() in non-debug code. Reimplemented reloading of user
+   objects to prevent too much thread blocking. 
+* Wed Aug 13 2008 - dennis.sieben@open-xchange.com
+ - Bugfix #11949: "\n" as linebreaks are replaced by "\r\n"
+* Wed Aug 13 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11888: Checking for a draft message by message's folder on
+   draft-edit
+* Tue Aug 12 2008 - francisco.laguna@open-xchange.com
+ - Added count to infinity to recurrence calculation to prematurely terminate calculation of patterns, that are too
+   complex.
+ - Bugfix #11803: The short version:
+   Don't ask. Just don't.
+   The longer version: When saving a recurring appointment without setting the start and end dates those will be set
+   to the first ocurrences start and end date, that in turn triggering an autoaccept in the name of the user. This
+   doesn't work when updating only the delete exceptions, because no folder type is set. 
+* Tue Aug 12 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11936: Disallowed delete of group 0 and 1 and update of group 0.
+* Tue Aug 12 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11872: Allowing "id" attribute in HTML/CSS filter
 * Mon Aug 11 2008 - francisco.laguna@open-xchange.com
  - Bugfix #10401: Default to priority NORMAL for undefined priorities.
  - Bugfix #9827: Accept resources specified as attendees of cutype resource.

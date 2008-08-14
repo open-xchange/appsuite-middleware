@@ -1,3 +1,9 @@
+open-xchange-configjump-generic (6.6.0-2) unstable; urgency=low
+
+  * first build for RC4
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 14 Aug 2008 14:26:48 +0200
+
 open-xchange-configjump-generic (6.6.0-1) unstable; urgency=low
 
   * first build for RC3
