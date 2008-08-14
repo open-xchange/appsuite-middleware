@@ -536,7 +536,7 @@ v_setprop writeProperty.2 "password=$CONFIGDB_PASS" ${ADMINCONF}/configdb.proper
 v_cache_hosting ${ADMINCONF}/cache.ccf LTCP
 v_setprop jcs.auxiliary.LTCP.attributes.TcpListenerPort $AMCACHEPORT ${ADMINCONF}/cache.ccf
 
-if [ -z "$DISABLE_RMI_AUTH" ]; then
+if [ "$DISABLE_RMI_AUTH"  == "false" ] ; then
     v_setprop MASTER_AUTHENTICATION_DISABLED false ${ADMINCONF}/AdminDaemon.properties
     v_setprop CONTEXT_AUTHENTICATION_DISABLED false ${ADMINCONF}/AdminDaemon.properties
     echo
