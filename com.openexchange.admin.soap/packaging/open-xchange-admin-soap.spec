@@ -3,7 +3,7 @@
 
 Name:           open-xchange-admin-soap
 BuildArch:	noarch
-BuildRequires:  ant open-xchange-admin-client open-xchange-admin-plugin-hosting
+BuildRequires:  ant open-xchange-admin-client open-xchange-admin-plugin-hosting perl
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
