@@ -150,6 +150,10 @@ ln -sf ../etc/init.d/open-xchange-admin %{buildroot}/sbin/rcopen-xchange-admin
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Tue Aug 12 2008 - choeger@open-xchange.com
+ - 11722 update from SP3, wrong cache.ccf file for admin in system.properties
+ - Bugfix ID#11855 default for access-edit-group access-edit-resource access-edit-password
+  is on in cmdline help output
 * Mon Aug 11 2008 - choeger@open-xchange.com
  - Bugfix ID#11892 ModuleAccessDefinitions.properties wrong for pim_plus
 * Wed Aug 06 2008 - dennis.sieben@open-xchange.com
