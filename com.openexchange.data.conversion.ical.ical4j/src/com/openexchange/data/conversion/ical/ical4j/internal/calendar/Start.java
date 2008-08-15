@@ -57,6 +57,7 @@ import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.List;
+import java.util.Calendar;
 
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DtStart;
@@ -119,8 +120,22 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
         if (!isDateTime(component, dtStart)) {
             calendar.setEndDate(new Date(start.getTime() + 24 * 60 * 60 * 1000));
             if (calendar instanceof AppointmentObject) {
-                ((AppointmentObject) calendar).setFullTime(true);
+                setFullTime((AppointmentObject)calendar, start);
             }
         }
+    }
+
+    private void setFullTime(AppointmentObject appointment, Date start) {
+        appointment.setFullTime(true);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(start);
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND,0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        appointment.setStartDate(calendar.getTime());
+        appointment.setEndDate(new Date(calendar.getTime().getTime() + 24 * 60 * 60 * 1000));
+
     }
 }
