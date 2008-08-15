@@ -1072,6 +1072,25 @@ public class ICalParserTest extends TestCase {
         //TODO        
     }
 
+
+    // Bug 11987
+    public void testMultipleCalendars() throws ConversionError {
+        Date start1 = D("24/02/1981 10:00");
+        Date end1 = D("24/02/1981 12:00");
+
+        Date start2 = D("24/02/1981 10:00");
+        Date end2 = D("24/02/1981 12:00");
+
+        StringBuilder combiner = new StringBuilder();
+        combiner.append(fixtures.veventWithUTCDTStartAndDTEnd(start1, end1))
+                .append("\n")
+                .append(fixtures.veventWithUTCDTStartAndDTEnd(start2, end2));
+
+        List<CalendarDataObject> appointments = parser.parseAppointments(combiner.toString(), TimeZone.getTimeZone("UTC"),null, new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+
+        assertEquals(2, appointments.size());
+    }
+
     @Override
     protected void setUp() throws Exception {
         fixtures = new ICALFixtures();
