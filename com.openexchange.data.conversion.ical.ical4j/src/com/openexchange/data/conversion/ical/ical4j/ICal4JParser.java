@@ -50,10 +50,7 @@
 package com.openexchange.data.conversion.ical.ical4j;
 
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -155,16 +152,30 @@ public class ICal4JParser implements ICalParser {
 
     public List<CalendarDataObject> parseAppointments(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
         List<CalendarDataObject> appointments = new ArrayList<CalendarDataObject>();
-        net.fortuna.ical4j.model.Calendar calendar = parse(ical);
-        int i = 0;
-        for(Object componentObj : calendar.getComponents("VEVENT")) {
-            Component vevent = (Component) componentObj;
-            try {
-                appointments.add(convertAppointment(i++, (VEvent)vevent, defaultTZ, ctx, warnings ));
-            } catch (ConversionError conversionError) {
-                errors.add(conversionError);
+        boolean cont = true;
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(ical, "UTF-8"));
+
+            while(true) {
+                net.fortuna.ical4j.model.Calendar calendar = parse(reader);
+                if(calendar == null) { break; }
+                int i = 0;
+                for(Object componentObj : calendar.getComponents("VEVENT")) {
+                    Component vevent = (Component) componentObj;
+                    try {
+                        appointments.add(convertAppointment(i++, (VEvent)vevent, defaultTZ, ctx, warnings ));
+                    } catch (ConversionError conversionError) {
+                        errors.add(conversionError);
+                    }
+                }
             }
+            
+        } catch (UnsupportedEncodingException e) {
+            // IGNORE
         }
+
+
 
         return appointments;
     }
@@ -180,16 +191,26 @@ public class ICal4JParser implements ICalParser {
 
     public List<Task> parseTasks(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
         List<Task> tasks = new ArrayList<Task>();
-        net.fortuna.ical4j.model.Calendar calendar = parse(ical);
-        int i = 0;
-        for(Object componentObj : calendar.getComponents("VTODO")) {
-            Component vtodo = (Component) componentObj;
-            try {
-                tasks.add(convertTask(i++, (VToDo) vtodo, defaultTZ, ctx, warnings ));
-            } catch (ConversionError conversionError) {
-                errors.add(conversionError);
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(ical, "UTF-8"));
+            while(true) {
+                net.fortuna.ical4j.model.Calendar calendar = parse(reader);
+                if(calendar == null) { break; }
+                int i = 0;
+                for(Object componentObj : calendar.getComponents("VTODO")) {
+                    Component vtodo = (Component) componentObj;
+                    try {
+                        tasks.add(convertTask(i++, (VToDo) vtodo, defaultTZ, ctx, warnings ));
+                    } catch (ConversionError conversionError) {
+                        errors.add(conversionError);
+                    }
+                }
             }
+
+        } catch (UnsupportedEncodingException e) {
+            // IGNORE
         }
+
 
         return tasks;
     }
@@ -262,11 +283,27 @@ public class ICal4JParser implements ICalParser {
         return tz.getID();
     }
 
-    private net.fortuna.ical4j.model.Calendar parse(InputStream icalText) throws ConversionError {
+    private net.fortuna.ical4j.model.Calendar parse(BufferedReader reader) throws ConversionError {
         CalendarBuilder builder = new CalendarBuilder();
 
         try {
-            return builder.build(icalText); // FIXME: Encoding!
+            StringBuilder chunk = new StringBuilder();
+            String line;
+            boolean read = false;
+            // Copy until we find an END:VCALENDAR
+            while((line = reader.readLine()) != null) {
+                if(!line.startsWith("END:VCALENDAR")){
+                    if(!line.matches("\\s*")) {
+                        read = true;
+                        chunk.append(line).append("\n");
+                    }
+                } else {
+                    break;
+                }
+            }
+            if(!read) {  return null; }
+            chunk.append("END:VCALENDAR\n");
+            return builder.build(new StringReader(chunk.toString())); // FIXME: Encoding!
         } catch (IOException e) {
             //IGNORE
         } catch (ParserException e) {

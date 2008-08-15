@@ -1,6 +1,7 @@
 * 2008-08-15 - francisco.laguna@open-xchange.com
 
  - Bugfix #11986: VAlarms require description.
+ - Bugfix #11987: Chunk multiple VCalendars if needed.
 
 * 2008-08-14 - francisco.laguna@open-xchange.com
 
