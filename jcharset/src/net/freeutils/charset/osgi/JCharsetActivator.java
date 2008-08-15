@@ -51,6 +51,8 @@ package net.freeutils.charset.osgi;
 
 import java.nio.charset.spi.CharsetProvider;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -65,8 +67,7 @@ import org.osgi.framework.ServiceRegistration;
  */
 public final class JCharsetActivator implements BundleActivator {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(JCharsetActivator.class);
+	private static final Log LOG = LogFactory.getLog(JCharsetActivator.class);
 
 	private ServiceRegistration serviceRegistration;
 
