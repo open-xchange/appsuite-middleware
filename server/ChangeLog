@@ -56,7 +56,7 @@
 
  - Added count to infinity to recurrence calculation to prematurely terminate calculation of patterns, that are too
    complex.
- - Bugfix #11803: The short version:
+ - Bugfix #11798: The short version:
    Don't ask. Just don't.
 
    The longer version: When saving a recurring appointment without setting the start and end dates those will be set
