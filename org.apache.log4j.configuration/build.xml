@@ -12,24 +12,17 @@
     <property file="build.properties"/>
 
     <property name="version" value="${Bundle-Version}"/>
-    <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
+    <property name="bundle.name" value="${Bundle-SymbolicName}"/>
     <property name="composite.name" value="open-xchange-log4j-configuration-${version}" />
+
+    <fileset dir="." id="metainf">
+        <include name="META-INF/**"/>
+        <exclude name="CVS"/>
+    </fileset>
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
-
-    <!-- Compile -->
-    <target name="prepare">
-        <mkdir dir="${tmp.dir}"/>
-    </target>
-
-    <target name="jar" depends="prepare">
-        <jar jarfile="${tmp.dir}/${bundle.name}"
-            manifest="META-INF/MANIFEST.MF">
-            <include name="log4j.xml"/>
-        </jar>
-    </target>
 
     <!-- Install -->
     <target name="install">
@@ -43,11 +36,17 @@
             message="${bundlesdir}/${bundle.name}${line.separator}"/>
     </target>
 
-    <target name="installJar" depends="jar">
-        <mkdir dir="${destdir}/${bundlesdir}"/>
-        <copy todir="${destdir}/${bundlesdir}">
-            <fileset dir="${tmp.dir}">
-                <include name="${bundle.name}"/>
+    <target name="installJar">
+        <property name="bundlesdestdir" value="${destdir}${bundlesdir}"/>
+        <mkdir dir="${bundlesdestdir}"/>
+        <property name="log4jconfigurationdir" value="${bundlesdestdir}/${bundle.name}"/>
+        <mkdir dir="${log4jconfigurationdir}"/>
+        <copy todir="${log4jconfigurationdir}">
+            <fileset refid="metainf"/>
+        </copy>
+        <copy todir="${log4jconfigurationdir}">
+            <fileset dir="${basedir}">
+                <include name="log4j.xml"/>
             </fileset>
         </copy>
     </target>
