@@ -55,6 +55,7 @@ import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.*;
 import net.fortuna.ical4j.model.property.Trigger;
 import net.fortuna.ical4j.model.property.Action;
+import net.fortuna.ical4j.model.property.Description;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.contexts.Context;
@@ -97,6 +98,12 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
         Action action = new Action("DISPLAY");
         alarm.getProperties().add(action);
 
+        String note = appointmentObject.getNote();
+        if(note == null) { note = "Open-XChange"; }
+
+        Description description = new Description(note);
+        alarm.getProperties().add(description);
+
         component.getAlarms().add(alarm);
 
         
@@ -112,6 +119,12 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
 
         Action action = new Action("DISPLAY");
         alarm.getProperties().add(action);
+
+        String note = task.getNote();
+        if(note == null) { note = "Open-XChange"; }
+
+        Description description = new Description(note);
+        alarm.getProperties().add(description);
 
         component.getAlarms().add(alarm);
     }

@@ -1,3 +1,7 @@
+* 2008-08-15 - francisco.laguna@open-xchange.com
+
+ - Bugfix #11986: VAlarms require description.
+
 * 2008-08-14 - francisco.laguna@open-xchange.com
 
  - Bugfix #3907 and #8527: Allow folded values.
