@@ -364,6 +364,13 @@ sub doCSVOutput {
 			    }
 			    $sb = substr($sb,0,length($sb)-1);
 			    $sb .= "\"";
+			  } elsif( ref($data_column) eq "HASH" ) {
+			    $sb .= "\"";
+			    foreach my $p ( keys %$data_column ) {
+			      $sb .= "$p=$data_column->{$p},";
+			    }
+			    $sb = substr($sb,0,length($sb)-1);
+			    $sb .= "\"";
 			  } else {
 			    $sb .= "\"".$data_column."\"";
 			  }
