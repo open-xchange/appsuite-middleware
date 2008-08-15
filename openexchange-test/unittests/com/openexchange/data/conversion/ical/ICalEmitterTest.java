@@ -164,6 +164,14 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "CREATED", "19810224T100000Z");
     }
 
+    public void testAppLastModified() throws IOException {
+        AppointmentObject appointment = getDefault();
+        appointment.setLastModified(D("24/02/1981 10:00"));
+
+        ICalFile ical = serialize(appointment);
+
+        assertProperty(ical, "LAST-MODIFIED", "19810224T100000Z");
+    }
 
     public void testAppRecurrence() throws IOException {
 
@@ -447,16 +455,34 @@ public class ICalEmitterTest extends TestCase {
     }
 
     public void testTaskCategoriesMayBeNullOrUnset() throws Exception {
-           Task task = new Task();
-           ICalFile ical = serialize(task);
+        Task task = new Task();
+        ICalFile ical = serialize(task);
 
-           assertNoProperty(ical, "CATEGORIES");
+        assertNoProperty(ical, "CATEGORIES");
 
-           task.setCategories(null);
-           ical = serialize(task);
+        task.setCategories(null);
+        ical = serialize(task);
 
-           assertNoProperty(ical, "CATEGORIES");
-       }
+        assertNoProperty(ical, "CATEGORIES");
+    }
+
+    public void testTaskCreated() throws IOException {
+        Task task = new Task();
+        task.setCreationDate(D("24/02/1981 10:00"));
+
+        ICalFile ical = serialize(task);
+
+        assertProperty(ical, "CREATED", "19810224T100000Z");
+    }
+
+    public void testTaskLastModified() throws IOException {
+        Task task = new Task();
+        task.setLastModified(D("24/02/1981 10:00"));
+
+        ICalFile ical = serialize(task);
+
+        assertProperty(ical, "LAST-MODIFIED", "19810224T100000Z");
+    }
 
 
     public void testTaskDateFields() throws IOException {

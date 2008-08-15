@@ -205,6 +205,20 @@ public class ICalParserTest extends TestCase {
 
     }
 
+    public void testAppLastModified() throws ConversionError {
+        Date start = D("24/02/1981 10:00");
+        Date end = D("24/02/1981 12:00");
+
+        TimeZone utc = TimeZone.getTimeZone("UTC");
+
+
+        String icalText = fixtures.veventWithSimpleProperties(start, end, "LAST-MODIFIED", "20081023T100000Z");
+        AppointmentObject appointment = parseAppointment(icalText, utc);
+
+        assertEquals(D("23/10/2008 10:00"), appointment.getLastModified());
+        
+    }
+
     public void testAppDTSTAMP() throws ConversionError {
         Date start = D("24/02/1981 10:00");
         Date end = D("24/02/1981 12:00");
@@ -623,6 +637,14 @@ public class ICalParserTest extends TestCase {
         Task task = parseTask(icalText);
 
         assertEquals(D("23/10/2008 10:00"), task.getCreationDate());
+
+    }
+
+    public void testTskLastModified() throws ConversionError {
+        String icalText = fixtures.vtodoWithSimpleProperties("LAST-MODIFIED", "20081023T100000Z");
+        Task task = parseTask(icalText);
+
+        assertEquals(D("23/10/2008 10:00"), task.getLastModified());
 
     }
 
