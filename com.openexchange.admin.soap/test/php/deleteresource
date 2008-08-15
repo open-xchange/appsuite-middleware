@@ -1,3 +1,4 @@
+#! /usr/bin/php
 <?php
 
 include("ox-soap.php");
@@ -17,7 +18,8 @@ try {
 	$result = getResourceClient($SOAPHOST)->create(getContextObject($CONTEXT_ID),$res, getCredentialsObject($CONTEXT_ADMIN,$CONTEXT_ADMIN_PASS));
 	
 	if (!is_soap_fault($result)) {
-		printResource($result);
+		$res->id = $result->id;
+		$result = getResourceClient($SOAPHOST)->delete(getContextObject($CONTEXT_ID),$res, getCredentialsObject($CONTEXT_ADMIN,$CONTEXT_ADMIN_PASS));	
 	}
 	
 } catch (SoapFault $fault) {

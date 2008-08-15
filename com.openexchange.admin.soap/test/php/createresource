@@ -1,3 +1,4 @@
+#! /usr/bin/php
 <?php
 
 include("ox-soap.php");
@@ -13,15 +14,11 @@ try {
 	$res->displayname = "OX Test Resource ".$random_id;	
 	$res->email = "ox_tests_resource_".$random_id."@example.org";
 	$res->description = "Test Resource Descrption by SOAP and PHP";
-	$res->available = true;
 	
 	$result = getResourceClient($SOAPHOST)->create(getContextObject($CONTEXT_ID),$res, getCredentialsObject($CONTEXT_ADMIN,$CONTEXT_ADMIN_PASS));
 	
 	if (!is_soap_fault($result)) {
-		$res->id = $result->id;
-		$res->displayname = $res->displayname."_changed";
-		$res->description = $res->description."_changed";
-		$result = getResourceClient($SOAPHOST)->change(getContextObject($CONTEXT_ID),$res, getCredentialsObject($CONTEXT_ADMIN,$CONTEXT_ADMIN_PASS));
+		printResource($result);
 	}
 	
 } catch (SoapFault $fault) {

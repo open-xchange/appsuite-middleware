@@ -1,3 +1,4 @@
+#! /usr/bin/php
 <?php
 include ("ox-soap.php");
 
@@ -16,7 +17,7 @@ try {
 	$user->password = "secret";
 	$user->email1 = $name . "@context" . $CONTEXT_ID . ".org";
 	$user->primaryEmail = $name."@context".$CONTEXT_ID.".org";
-
+	
 	$ctx = new Context();
 	$ctx->id = $random_id;
 	$ctx->maxQuota = 10;
@@ -24,7 +25,7 @@ try {
 	$result = getContextClient($SOAPHOST)->create($ctx, $user, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
 
 	if (!is_soap_fault($result)) {
-		$result = getContextClient($SOAPHOST)->delete($ctx,getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
+		printContext($result->id);
 	}
 
 } catch (SoapFault $fault) {
