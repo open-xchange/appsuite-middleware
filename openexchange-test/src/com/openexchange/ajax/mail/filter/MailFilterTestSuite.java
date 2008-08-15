@@ -58,7 +58,7 @@ import junit.framework.TestSuite;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  *
  */
-public final class MailFilterTestSuite extends TestSuite {
+public final class MailFilterTestSuite {
 
 	/**
 	 * Initializes a new {@link MailFilterTestSuite}
