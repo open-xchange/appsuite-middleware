@@ -46,59 +46,48 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-package com.openexchange.data.conversion.ical.ical4j.internal;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.DateList;
+import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.property.*;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
+import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
+import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDateTime;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ConversionError;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import net.fortuna.ical4j.model.component.VToDo;
-
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.*;
-import com.openexchange.data.conversion.ical.ical4j.internal.task.DateCompleted;
-import com.openexchange.data.conversion.ical.ical4j.internal.task.DueDate;
-import com.openexchange.data.conversion.ical.ical4j.internal.task.State;
-import com.openexchange.data.conversion.ical.ical4j.internal.task.Priority;
-import com.openexchange.data.conversion.ical.ical4j.internal.task.PercentComplete;
-
-import com.openexchange.groupware.tasks.Task;
+import java.util.Date;
+import java.util.TimeZone;
 
 /**
- *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public final class TaskConverters {
+public class LastModified <T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
 
-    public static final AttributeConverter<VToDo, Task>[] ALL;
-
-    /**
-     * Prevent instantiation.
-     */
-    private TaskConverters() {
-        super();
+    public boolean isSet(U calendar) {
+        return calendar.containsLastModified();
     }
 
-    static {
-        final List<AttributeConverter<VToDo, Task>> tmp = new ArrayList<AttributeConverter<VToDo, Task>>();
-        tmp.add(new Title<VToDo, Task>());
-        tmp.add(new Note<VToDo, Task>());
-        tmp.add(new Start<VToDo, Task>());
-        tmp.add(new End<VToDo, Task>());
-        tmp.add(new Duration<VToDo, Task>());
-        tmp.add(new DueDate());
-        tmp.add(new Klass<VToDo, Task>());
-        tmp.add(new DateCompleted());
-        tmp.add(new Participants<VToDo, Task>());
-        tmp.add(new Categories<VToDo, Task>());
-        tmp.add(new Recurrence<VToDo, Task>());
-        tmp.add(new DeleteExceptions<VToDo, Task>());
-        tmp.add(new Alarm<VToDo, Task>());
-        tmp.add(new State());
-        tmp.add(new PercentComplete());
-        tmp.add(new Priority());
-        tmp.add(new Uid<VToDo, Task>());
-        tmp.add(new CreatedAndDTStamp<VToDo, Task>());
-        tmp.add(new LastModified<VToDo, Task>());
-        ALL = (AttributeConverter<VToDo, Task>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
+    public void emit(int index, U calendar, T t, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
+        net.fortuna.ical4j.model.property.LastModified lastModified = new net.fortuna.ical4j.model.property.LastModified();
+        lastModified.setDate(toDateTime(calendar.getLastModified()));
+        t.getProperties().add(lastModified);
+        return;
+    }
+
+    public boolean hasProperty(T t) {
+        return null != t.getProperty("LAST-MODIFIED");
+    }
+
+    public void parse(int index, T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+        DateProperty property = (DateProperty) component.getProperty("LAST-MODIFIED");
+        Date lastModified = ParserTools.parseDate(component, property, timeZone);
+        cObj.setLastModified(lastModified);
     }
 }

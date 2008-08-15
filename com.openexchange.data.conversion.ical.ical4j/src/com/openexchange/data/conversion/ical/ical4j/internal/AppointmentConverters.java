@@ -106,6 +106,8 @@ public class AppointmentConverters {
         tmp.add(new Uid<VEvent, AppointmentObject>());
 
         tmp.add(new CreatedAndDTStamp<VEvent, AppointmentObject>());
+        tmp.add(new LastModified<VEvent, AppointmentObject>());
+        
         ALL = (AttributeConverter<VEvent, AppointmentObject>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
     }
 }
