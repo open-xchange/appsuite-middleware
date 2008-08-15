@@ -33,9 +33,10 @@ sub doRequest {
   my $lang = "de_DE";
   my $timezone = "Europe/Berlin";
   my $quota = 500;
+  my $access_combi_name = "all";
     
   my $som_entry = 
-    $soap->create($inSelf->{'Context'},
+    $soap->createModuleAccessByName($inSelf->{'Context'},
 		  SOAP::Data->value("User")->value(\SOAP::Data->value(
 			SOAP::Data->name("name" => $admin),
 			SOAP::Data->name("password" => $adminpass),
@@ -46,6 +47,7 @@ sub doRequest {
 			SOAP::Data->name("language" => $lang),
 			SOAP::Data->name("timezone" => $timezone)
 			)),
+		  SOAP::Data->type("string")->value($access_combi_name),
 		  $inSelf->{'mastercreds'}
 		 );
     
