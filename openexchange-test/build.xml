@@ -148,6 +148,8 @@
 
             <test name="com.openexchange.ajax.importexport.ImportExportServerSuite" todir="${test.xml.dir}" />
 
+            <test name="com.openexchange.ajax.mail.filter.MailFilterTestSuite" todir="${test.xml.dir}" />
+        	
             <formatter type="brief" usefile="false" />
             <formatter type="xml" />
             <sysproperty key="test.propfile" value="${conf.dir}/test.properties" />
