@@ -62,6 +62,7 @@ public class ICalTestSuite extends TestSuite{
 		tests.addTestSuite(Bug11724Test.class);
 		tests.addTestSuite(Bug11868Test.class);
 		tests.addTestSuite(Bug11871Test.class);
+		tests.addTestSuite(Bug11996Test.class);
 		return tests;
 	}
 }
