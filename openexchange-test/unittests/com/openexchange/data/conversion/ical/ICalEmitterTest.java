@@ -272,12 +272,14 @@ public class ICalEmitterTest extends TestCase {
 
         AppointmentObject appointment = getDefault();
         appointment.setAlarm(15 *MINUTES);
+        appointment.setNote("Blupp");
         
         ICalFile ical = serialize(appointment);
 
         assertProperty(ical, "BEGIN", "VALARM");
         assertProperty(ical, "ACTION", "DISPLAY");
         assertProperty(ical, "TRIGGER", "-PT15M");
+        assertProperty(ical, "DESCRIPTION", "Blupp");
 
 
     }
