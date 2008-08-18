@@ -344,9 +344,10 @@ public final class FolderWriter {
 						try {
 							int permissionBits = 0;
 							if (folder.isRootFolder()) {
-								permissionBits = createPermissionBits(OCLPermission.CREATE_SUB_FOLDERS,
+								permissionBits = createPermissionBits(folder.getOwnPermission());
+								/*permissionBits = createPermissionBits(OCLPermission.CREATE_SUB_FOLDERS,
 										OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
-										OCLPermission.NO_PERMISSIONS, false);
+										OCLPermission.NO_PERMISSIONS, false);*/
 							} else {
 								permissionBits = createPermissionBits(folder.getOwnPermission());
 								if (folder.isSupportsUserFlags()) {
