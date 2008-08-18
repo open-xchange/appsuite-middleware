@@ -93,6 +93,7 @@ import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ParsingException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
+import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 import com.sun.mail.imap.protocol.BODY;
@@ -193,6 +194,39 @@ public final class IMAPCommandsCollection {
 				return null;
 			}
 		});
+	}
+
+	/**
+	 * Checks if IMAP root folder allows subfolder creation
+	 * 
+	 * @param rootFolder
+	 *            The IMAP root folder
+	 * @return <code>true</code> if IMAP root folder allows subfolder creation;
+	 *         otherwise <code>false</code>
+	 * @throws MessagingException
+	 *             If checking IMAP root folder for subfolder creation fails
+	 */
+	public static boolean canCreateSubfolder(final DefaultFolder rootFolder) throws MessagingException {
+		return ((Boolean) rootFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				/*
+				 * Encode the mbox as per RFC2060
+				 */
+				final String mboxName = prepareStringArgument(String.valueOf(System.currentTimeMillis()));
+				/*
+				 * Perform command: CREATE
+				 */
+				final StringBuilder sb = new StringBuilder(7 + mboxName.length());
+				final Response[] r = p.command(sb.append("CREATE ").append(mboxName).toString(), null);
+				final Response response = r[r.length - 1];
+				if (response.isOK()) {
+					sb.setLength(0);
+					p.command(sb.append("DELETE ").append(mboxName).toString(), null);
+					return Boolean.TRUE;
+				}
+				return Boolean.FALSE;
+			}
+		})).booleanValue();
 	}
 
 	/**
