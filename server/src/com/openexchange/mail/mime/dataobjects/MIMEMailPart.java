@@ -158,6 +158,7 @@ public final class MIMEMailPart extends MailPart {
 	 * attributes
 	 */
 	public MIMEMailPart(final Part part) {
+		super();
 		applyPart(part);
 	}
 
@@ -173,18 +174,24 @@ public final class MIMEMailPart extends MailPart {
 
 	private void applyPart(final Part part) {
 		this.part = part;
-		if (null != part) {
+		if (null == part) {
+			isMulti = false;
+		} else {
 			boolean tmp = false;
 			try {
-				tmp = isMimeType(part.getContentType(), MIMETypes.MIME_MULTIPART_ALL);
+				/*
+				 * Ensure that proper content-type is set and check if
+				 * content-type denotes a multipart/ message
+				 */
+				final String ct = part.getContentType();
+				this.setContentType(ct);
+				tmp = isMimeType(ct, MIMETypes.MIME_MULTIPART_ALL);
 			} catch (final MailException e) {
 				LOG.error(e.getMessage(), e);
 			} catch (final MessagingException e) {
 				LOG.error(e.getMessage(), e);
 			}
 			isMulti = tmp;
-		} else {
-			isMulti = false;
 		}
 	}
 

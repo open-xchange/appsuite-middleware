@@ -9,6 +9,8 @@
    parenthesis pair in IMAP QUOTA response as no resource restrictions
  - Bugfix #12001: Moved setting of "hardDelete" argument in "deleteFolder"
    and "clearFolder" routine to mail servlet interface implementation
+ - Bugfix #12003: Applying proper content-type to mail object if reference
+   to content is given
 
 * 2008-08-15 - francisco.laguna@open-xchange.com
 
