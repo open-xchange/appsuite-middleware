@@ -1186,7 +1186,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 }
                 rs = cimp.getResultSet(prep);
                 //final SearchIterator si = new FreeBusyResults(rs, prep, ctx, readcon, start.getTime(), end.getTime());
-                final SearchIterator si = new FreeBusyResults(rs, prep, ctx, session.getUserId(), user.getGroups(), userConfig, readcon, true, new Participant[0], private_folder_information, calendarsqlimp);
+                final SearchIterator si = new FreeBusyResults(rs, prep, ctx, session.getUserId(), user.getGroups(), userConfig, readcon, true, new Participant[0], private_folder_information, calendarsqlimp, start.getTime(), end.getTime());
                 close_connection = false;
                 return si;
             } catch(final SQLException sqle) {

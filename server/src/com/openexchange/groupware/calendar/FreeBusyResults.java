@@ -133,6 +133,10 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     }*/
     
     public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final int uid, final int groups[], final UserConfiguration uc, final Connection con, final boolean show_details, final Participant conflict_objects[], final PreparedStatement private_folder_information, final CalendarSqlImp calendarsqlimp) throws OXException {
+    	this(rs, prep, c, uid, groups, uc, con, show_details, conflict_objects, private_folder_information, calendarsqlimp, 0, 0);
+    }
+
+    public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final int uid, final int groups[], final UserConfiguration uc, final Connection con, final boolean show_details, final Participant conflict_objects[], final PreparedStatement private_folder_information, final CalendarSqlImp calendarsqlimp, long range_start, long range_end) throws OXException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);
     	this.rs = rs;
         this.prep = prep;
@@ -143,6 +147,8 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         this.conflict_objects = conflict_objects;
         this.calendarsqlimp = calendarsqlimp;
         this.private_folder_information = private_folder_information;
+        this.range_start = range_start;
+        this.range_end = range_end;
         if (show_details) {
             preFillPermissionArray(groups, uc);
             preFillPrivateFolderInformation();

@@ -1,6 +1,7 @@
 * 2008-08-18 - francisco.laguna@open-xchange.com
 
  - Bugfix #11797: Check all fields for length constraints, even supposedly unlimited ones.
+ - Bugfix #11803: Only return relevant appointments in freebusy result.
 
 * 2008-08-18 - thorben.betten@open-xchange.com
 
