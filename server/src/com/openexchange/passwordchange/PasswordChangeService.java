@@ -58,7 +58,6 @@ import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.caching.CacheException;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
@@ -163,8 +162,10 @@ public abstract class PasswordChangeService {
 			/*
 			 * Loading user also verifies its existence
 			 */
-			authenticationService.handleLoginInfo(new _LoginInfo(UserStorage.getStorageUser(
-					event.getSession().getUserId(), event.getContext()).getLoginInfo(), event.getOldPassword()));
+			final String login = new StringBuilder(32).append(
+					UserStorage.getStorageUser(event.getSession().getUserId(), event.getContext()).getLoginInfo())
+					.append('@').append(event.getSession().getContextId()).toString();
+			authenticationService.handleLoginInfo(new _LoginInfo(login, event.getOldPassword()));
 		} catch (final LoginException e) {
 			/*
 			 * Verification of old password failed
