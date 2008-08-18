@@ -1,3 +1,7 @@
+* 2008-08-18 - dennis.sieben@open-xchange.com
+
+ - Bugfix #11989: Fixed grammar file
+ 
 * 2008-08-18 - francisco.laguna@open-xchange.com
 
  - Bugfix #11797: Check all fields for length constraints, even supposedly unlimited ones.
