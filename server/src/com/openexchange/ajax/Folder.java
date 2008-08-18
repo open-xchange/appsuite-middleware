@@ -410,6 +410,7 @@ public class Folder extends SessionServlet {
 			final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx);
 			int parentId = -1;
 			if ((parentId = getUnsignedInteger(parentIdentifier)) != -1) {
+				// TODO: DELEGATE TO getRootFolder() if parentId is "0"
 				long lastModified = 0;
 				final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
 				final FolderFieldWriter[] writers = folderWriter.getFolderFieldWriter(columns);
