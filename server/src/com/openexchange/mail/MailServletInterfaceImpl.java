@@ -155,7 +155,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	public boolean clearFolder(final String folder) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		mailAccess.getFolderStorage().clearFolder(fullname);
+		/*
+		 * Only backup if no hard-delete is set in user's mail configuration and
+		 * fullname does not denote trash (sub)folder
+		 */
+		final boolean backup = (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx)
+				.isHardDeleteMsgs() && !(fullname.startsWith(mailAccess.getFolderStorage().getTrashFolder())));
+		mailAccess.getFolderStorage().clearFolder(fullname, !backup);
 		try {
 			/*
 			 * Update message cache
@@ -244,7 +250,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	public String deleteFolder(final String folder) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		return prepareFullname(mailAccess.getFolderStorage().deleteFolder(fullname, false));
+		/*
+		 * Only backup if fullname does not denote trash (sub)folder
+		 */
+		final String retval = prepareFullname(mailAccess.getFolderStorage().deleteFolder(fullname,
+				(fullname.startsWith(mailAccess.getFolderStorage().getTrashFolder()))));
+		try {
+			/*
+			 * Update message cache
+			 */
+			MailMessageCache.getInstance().removeFolderMessages(fullname, session.getUserId(), ctx);
+		} catch (final OXCachingException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+		}
+		return retval;
 	}
 
 	@Override

@@ -2,6 +2,8 @@
 
  - Bugfix #11614: Written own quota parse routine which treats a missing
    parenthesis pair in IMAP QUOTA response as no resource restrictions
+ - Bugfix #12001: Moved setting of "hardDelete" argument in "deleteFolder"
+   and "clearFolder" routine to mail servlet interface implementation
 
 * 2008-08-15 - francisco.laguna@open-xchange.com
 
