@@ -54,6 +54,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+
 import org.apache.jsieve.NumberArgument;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
@@ -619,6 +622,14 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
             private ActionCommand createOneParameterActionCommand(final JSONObject object, final String parameter, final ActionCommand.Commands command) throws JSONException, SieveException, OXJSONException {
                 final String stringparam = getString(object, parameter, command.getCommandname());
                 if (null != stringparam) {
+                    if (ActionCommand.Commands.REDIRECT.equals(command)) {
+                        // Check for valid email address here:
+                        try {
+                            new InternetAddress(stringparam, true);
+                        } catch (AddressException e) {
+                            throw new SieveException("The parameter for redirect must be a valid email address");
+                        }
+                    }
                     return new ActionCommand(command, createArrayArray(stringparam));
                 } else {
                     throw new JSONException("The parameter " + parameter + " is missing for action command " + 
