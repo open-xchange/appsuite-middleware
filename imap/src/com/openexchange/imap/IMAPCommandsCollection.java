@@ -53,12 +53,16 @@ import static com.openexchange.imap.sort.IMAPSort.getMessageComparator;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -69,6 +73,7 @@ import javax.mail.FolderClosedException;
 import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Quota;
 import javax.mail.Store;
 import javax.mail.StoreClosedException;
 import javax.mail.internet.InternetHeaders;
@@ -85,6 +90,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.CommandFailedException;
+import com.sun.mail.iap.ParsingException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -187,6 +193,140 @@ public final class IMAPCommandsCollection {
 				return null;
 			}
 		});
+	}
+
+	/**
+	 * Get the quotas for the quota-root associated with given IMAP folder. Note
+	 * that many folders may have the same quota-root. Quotas are controlled on
+	 * the basis of a quota-root, not (necessarily) a folder. The relationship
+	 * between folders and quota-roots depends on the IMAP server. Some servers
+	 * might implement a single quota-root for all folders owned by a user.
+	 * Other servers might implement a separate quota-root for each folder. A
+	 * single folder can even have multiple quota-roots, perhaps controlling
+	 * quotas for different resources.
+	 * 
+	 * @param imapFolder
+	 *            The IMAP folder whose quotas shall be determined
+	 * @return The quotas for the quota-root associated with given IMAP folder
+	 * @throws MessagingException
+	 *             If determining the quotas fails
+	 */
+	public static Quota[] getQuotaRoot(final IMAPFolder imapFolder) throws MessagingException {
+		return (Quota[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				/*
+				 * Encode the mbox as per RFC2060
+				 */
+				final Argument args = new Argument();
+				args.writeString(BASE64MailboxEncoder.encode(imapFolder.getFullName()));
+				/*
+				 * Perform command
+				 */
+				final Response[] r = p.command("GETQUOTAROOT", args);
+				final Response response = r[r.length - 1];
+				/*
+				 * Create map for parsed responses
+				 */
+				final Map<String, Quota> tab = new HashMap<String, Quota>(2);
+				if (response.isOK()) {
+					for (int i = 0, len = r.length; i < len; i++) {
+						if (!(r[i] instanceof IMAPResponse)) {
+							continue;
+						}
+						final IMAPResponse ir = (IMAPResponse) r[i];
+						if (ir.keyEquals("QUOTAROOT")) {
+							/*
+							 * Read name of mailbox and throw away
+							 */
+							ir.readAtomString();
+							/*
+							 * For each quota-root add a place holder quota
+							 */
+							String root = null;
+							while ((root = ir.readAtomString()) != null) {
+								tab.put(root, new Quota(root));
+							}
+							r[i] = null;
+						} else if (ir.keyEquals("QUOTA")) {
+							final Quota quota = parseQuota(ir);
+							// final Quota q = tab.get(quota.quotaRoot);
+							// if (q != null && q.resources != null) {
+							// should merge resources
+							// }
+							tab.put(quota.quotaRoot, quota);
+							r[i] = null;
+						}
+					}
+				}
+				/*
+				 * Dispatch responses and thus update folder when handling
+				 * untagged responses of EXISTS and RECENT
+				 */
+				p.notifyResponseHandlers(r);
+				p.handleResult(response);
+				/*
+				 * Create return value
+				 */
+				final Quota[] qa = new Quota[tab.size()];
+				final Iterator<Quota> iter = tab.values().iterator();
+				final int size = tab.size();
+				for (int i = 0; i < size; i++) {
+					qa[i] = iter.next();
+				}
+				return qa;
+			}
+		});
+	}
+
+	/**
+	 * Parse a QUOTA response.
+	 * 
+	 * @param r
+	 *            The IMAP response representing QUOTA response
+	 * @return The parsed instance of {@link Quota}
+	 * @throws ParsingException
+	 *             If parsing QUOTA response fails
+	 */
+	private static Quota parseQuota(final IMAPResponse r) throws ParsingException {
+		final String quotaRoot = r.readAtomString();
+		final Quota q = new Quota(quotaRoot);
+		r.skipSpaces();
+		{
+			final byte b = r.readByte();
+			if (b != '(') {
+				if (b == '\0' || b == '\r' || b == '\n') {
+					/*
+					 * Some IMAP servers indicate no resource restriction
+					 * through a missing parenthesis pair instead of an empty
+					 * one.
+					 */
+					q.resources = new Quota.Resource[0];
+					return q;
+				}
+				throw new ParsingException("parse error in QUOTA");
+			}
+		}
+		/*
+		 * quota_list ::= "(" #quota_resource ")"
+		 */
+		final List<Quota.Resource> l = new ArrayList<Quota.Resource>(4);
+		while (r.peekByte() != ')') {
+			/*
+			 * quota_resource ::= atom SP number SP number
+			 */
+			final String name = r.readAtom();
+			if (name != null) {
+				final long usage = r.readLong();
+				final long limit = r.readLong();
+				/*
+				 * Add quota resource
+				 */
+				l.add(new Quota.Resource(name, usage, limit));
+			}
+		}
+		r.readByte();
+		q.resources = l.toArray(new Quota.Resource[l.size()]);
+		return q;
 	}
 
 	/**

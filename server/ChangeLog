@@ -1,3 +1,8 @@
+* 2008-08-18 - thorben.betten@open-xchange.com
+
+ - Bugfix #11614: Written own quota parse routine which treats a missing
+   parenthesis pair in IMAP QUOTA response as no resource restrictions
+
 * 2008-08-15 - francisco.laguna@open-xchange.com
 
  - Bugfix #11986: VAlarms require description.

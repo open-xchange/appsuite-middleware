@@ -86,30 +86,47 @@ public final class Quota {
 		public String toString() {
 			return typeStr;
 		}
+
+		/**
+		 * Gets constant for unlimited quota for this resource type
+		 * 
+		 * @return The constant for unlimited quota for this resource type
+		 */
+		public Quota getUnlimited() {
+			return new Quota(Quota.UNLIMITED, Quota.UNLIMITED, this);
+		}
 	}
 
 	/**
-	 * The unlimited quota on storage space if no quota restrictions exist
-	 */
-	private static final Quota UNLIMITED_STORAGE = new Quota(Quota.UNLIMITED, Quota.UNLIMITED, Type.STORAGE);
-
-	/**
-	 * The unlimited quota on number of messages if no quota restrictions exist
-	 */
-	private static final Quota UNLIMITED_MESSAGE = new Quota(Quota.UNLIMITED, Quota.UNLIMITED, Type.MESSAGE);
-
-	/**
 	 * Gets constant for unlimited quota for specified resource type
+	 * <p>
+	 * This is a convenience method that invokes {@link Type#getUnlimited()} for
+	 * specified instance of {@link Type}.
 	 * 
 	 * @param type
 	 *            The resource type
 	 * @return The constant for unlimited quota for specified resource type
 	 */
 	public static Quota getUnlimitedQuota(final Type type) {
-		if (Type.STORAGE.equals(type)) {
-			return UNLIMITED_STORAGE;
+		return type.getUnlimited();
+	}
+
+	/**
+	 * Gets constants for unlimited quota for specified resource types
+	 * <p>
+	 * This is a convenience method that invokes {@link Type#getUnlimited()} for
+	 * each type in given array of {@link Type}.
+	 * 
+	 * @param types
+	 *            The resource types
+	 * @return The constants for unlimited quota for specified resource types
+	 */
+	public static Quota[] getUnlimitedQuotas(final Type[] types) {
+		final Quota[] quotas = new Quota[types.length];
+		for (int i = 0; i < quotas.length; i++) {
+			quotas[i] = types[i].getUnlimited();
 		}
-		return UNLIMITED_MESSAGE;
+		return quotas;
 	}
 
 	/**
