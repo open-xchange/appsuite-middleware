@@ -221,6 +221,16 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					}
 					subfolders.addAll(Arrays.asList(childFolders));
+					boolean containsInbox = false;
+					for (int i = 0; i < childFolders.length && !containsInbox; i++) {
+						containsInbox = STR_INBOX.equals(childFolders[i].getFullName());
+					}
+					if (!containsInbox) {
+						/*
+						 * Add folder INBOX manually
+						 */
+						subfolders.add(0, imapStore.getFolder(STR_INBOX));
+					}
 				}
 				/*
 				 * Merge with namespace folders
