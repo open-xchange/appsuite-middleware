@@ -782,6 +782,35 @@ public class CalendarSqlTest extends TestCase {
 
     }
 
+    // Bug 11803
+
+    public void testFreeBusyResultShouldOnlyContainRecurrenceInSpecifiedInterval() throws OXException, SearchIteratorException {
+        Date start = D("07/02/2008 10:00");
+        Date end = D("07/02/2008 12:00");
+        // Create Weekly recurrence
+        CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
+        appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+        appointment.setDays(CalendarDataObject.WEDNESDAY);
+        appointment.setTitle("Everything can happen on a Wednesday");
+        appointment.setInterval(1);
+        appointments.save(appointment); clean.add(appointment);
+
+        // Ask for freebusy information in one week containing one ocurrence
+
+        SearchIterator<CalendarDataObject> iterator = appointments.getCurrentAppointmentSQLInterface().getFreeBusyInformation(userId, Participant.USER, D("18/02/2008 00:00"), D("25/02/2008 00:00"));
+        // Verify only one ocurrence was returned
+        try {
+            assertTrue("Should find exactly one ocurrence. Found none.", iterator.hasNext());
+            CalendarDataObject occurrence = iterator.next();
+            assertFalse("Should find exactly one ocurrence. Found more than one", iterator.hasNext());
+
+            assertEquals(D("20/02/2008 10:00"), occurrence.getStartDate());
+            assertEquals(D("20/02/2008 12:00"), occurrence.getEndDate());
+        } finally {
+            iterator.close();
+        }
+    }
+
     private List<CalendarDataObject> read(final SearchIterator<CalendarDataObject> si) throws OXException, SearchIteratorException {
         final List<CalendarDataObject> appointments = new ArrayList<CalendarDataObject>();
         while(si.hasNext()) { appointments.add( si.next() ); }
