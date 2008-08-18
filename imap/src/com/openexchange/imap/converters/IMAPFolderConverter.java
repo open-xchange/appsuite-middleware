@@ -66,6 +66,7 @@ import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.NamespaceFolder;
 import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RightsCache;
+import com.openexchange.imap.cache.RootSubfolderCache;
 import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.dataobjects.IMAPMailFolder;
@@ -248,10 +249,11 @@ public final class IMAPFolderConverter {
 			 */
 			checkSubfoldersByCommands(imapFolder, mailFolder, true);
 			mailFolder.setSeparator(imapFolder.getSeparator());
+			final String imapFullname = imapFolder.getFullName();
 			if (mailFolder.isRootFolder()) {
 				mailFolder.setFullname(MailFolder.DEFAULT_FOLDER_ID);
 			} else {
-				mailFolder.setFullname(imapFolder.getFullName());
+				mailFolder.setFullname(imapFullname);
 			}
 			mailFolder.setName(mailFolder.isRootFolder() ? MailFolder.DEFAULT_FOLDER_NAME : imapFolder.getName());
 			{
@@ -289,7 +291,13 @@ public final class IMAPFolderConverter {
 				 * Properly handled in
 				 * com.openexchange.mail.json.writer.FolderWriter
 				 */
-				mailFolder.setOwnPermission(null);
+				final ACLPermission ownPermission = new ACLPermission();
+				final int fp = RootSubfolderCache.canCreateSubfolders((DefaultFolder) imapFolder, true, session)
+						.booleanValue() ? OCLPermission.CREATE_SUB_FOLDERS : OCLPermission.NO_PERMISSIONS;
+				ownPermission.setAllPermission(fp, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
+						OCLPermission.NO_PERMISSIONS);
+				ownPermission.setFolderAdmin(false);
+				mailFolder.setOwnPermission(ownPermission);
 				ownRights = (Rights) RIGHTS_EMPTY.clone();
 			} else {
 				final ACLPermission ownPermission = new ACLPermission();
@@ -306,8 +314,7 @@ public final class IMAPFolderConverter {
 						 * a common imap folder but deny it for imap server's
 						 * namespace folders
 						 */
-						if (checkForNamespaceFolder(imapFolder.getFullName(), (IMAPStore) imapFolder.getStore(),
-								session)) {
+						if (checkForNamespaceFolder(imapFullname, (IMAPStore) imapFolder.getStore(), session)) {
 							ownPermission.parseRights((ownRights = (Rights) RIGHTS_EMPTY.clone()));
 						} else {
 							ownPermission.setAllPermission(OCLPermission.CREATE_SUB_FOLDERS,
@@ -339,7 +346,7 @@ public final class IMAPFolderConverter {
 				/*
 				 * Default folder
 				 */
-				if (STR_INBOX.equals(imapFolder.getFullName())) {
+				if (STR_INBOX.equals(imapFullname)) {
 					mailFolder.setDefaultFolder(true);
 				} else if (isDefaultFoldersChecked(session)) {
 					final int len = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
@@ -365,7 +372,10 @@ public final class IMAPFolderConverter {
 				mailFolder.setUnreadMessageCount(-1);
 				mailFolder.setDeletedMessageCount(-1);
 			}
-			mailFolder.setSubscribed(MailConfig.isSupportSubscription() ? imapFolder.isSubscribed() : true);
+			mailFolder
+					.setSubscribed(MailConfig.isSupportSubscription() ? (STR_INBOX.equals(mailFolder.getFullname()) ? true
+							: imapFolder.isSubscribed())
+							: true);
 			if (imapConfig.isSupportsACLs()) {
 				if (mailFolder.isHoldsMessages() && mailFolder.exists()
 						&& (ownRights.contains(Rights.Right.READ) || ownRights.contains(Rights.Right.ADMINISTER))

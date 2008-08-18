@@ -68,7 +68,11 @@ public enum MailCacheCode {
 	/**
 	 * Namespace folders
 	 */
-	NAMESPACE_FOLDERS(3);
+	NAMESPACE_FOLDERS(3),
+	/**
+	 * Root folder allows subfolders
+	 */
+	ROOT_SUBFOLDER(4);
 
 	private final int code;
 
