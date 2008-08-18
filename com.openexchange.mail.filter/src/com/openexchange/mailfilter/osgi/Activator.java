@@ -48,6 +48,7 @@
  */
 package com.openexchange.mailfilter.osgi;
 
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.osgi.framework.ServiceRegistration;
@@ -56,6 +57,7 @@ import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.mailfilter.internal.MailFilterPreferencesItem;
+import com.openexchange.mailfilter.internal.MailFilterProperties;
 import com.openexchange.mailfilter.internal.MailFilterServletInit;
 import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 import com.openexchange.server.osgiservice.DeferredActivator;
@@ -134,10 +136,11 @@ public class Activator extends DeferredActivator {
             }
 
             MailFilterServletInit.getInstance().start();
+            
+            checkConfigfile();
 
             serviceRegistration = context.registerService(PreferencesItemService.class.getName(), new MailFilterPreferencesItem(), null);
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
 
@@ -161,6 +164,25 @@ public class Activator extends DeferredActivator {
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         } finally {
             started.set(false);
+        }
+    }
+
+
+    /**
+     * This method checks for a valid configfile and throws and exception if now configfile is there or one of the properties is missing
+     * @throws Exception 
+     */
+    private void checkConfigfile() throws Exception {
+        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final Properties file = config.getFile("mailfilter.properties");
+        if (file.isEmpty()) {
+            throw new Exception("No configfile found for mailfilter bundle");
+        } else {
+            for (final MailFilterProperties.Values type : MailFilterProperties.Values.values()) {
+                if (null == file.getProperty(type.property)) {
+                    throw new Exception("Property for mailfilter not found: " + type.property);
+                }
+            }
         }
     }
 
