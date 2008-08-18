@@ -1,3 +1,7 @@
+* 2008-08-18 - francisco.laguna@open-xchange.com
+
+ - Bugfix #11797: Check all fields for length constraints, even supposedly unlimited ones.
+
 * 2008-08-18 - thorben.betten@open-xchange.com
 
  - Bugfix #11614: Written own quota parse routine which treats a missing

@@ -89,6 +89,9 @@ public class CheckSizeSwitch {
         add(Metadata.FILE_MIMETYPE_LITERAL);
         add(Metadata.FILENAME_LITERAL);
         add(Metadata.URL_LITERAL);
+        add(Metadata.DESCRIPTION_LITERAL);
+        add(Metadata.TITLE_LITERAL);
+        add(Metadata.VERSION_COMMENT_LITERAL);
     }};
 
     public CheckSizeSwitch(DBProvider provider, Context ctx) {
@@ -108,8 +111,7 @@ public class CheckSizeSwitch {
 		final CheckSizeSwitch checkSize = new CheckSizeSwitch(provider, ctx);
 		final GetSwitch get = new GetSwitch(metadata);
 		
-		final List<Metadata> tooLongData = new ArrayList<Metadata>();
-        final OXException x = EXCEPTIONS.create(0);
+		final OXException x = EXCEPTIONS.create(0);
         
         for(final Metadata m : Metadata.VALUES) {
             if(!FIELDS_TO_CHECK.contains(m)) {
