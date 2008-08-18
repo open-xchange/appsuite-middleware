@@ -1047,10 +1047,10 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 			}
 			f.open(Folder.READ_WRITE);
 			try {
-				final String trashFullname = getTrashFolder();
+				String trashFullname = null;
 				final boolean backup = (!hardDelete
 						&& !UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx)
-								.isHardDeleteMsgs() && !(f.getFullName().startsWith(trashFullname)));
+								.isHardDeleteMsgs() && !(f.getFullName().startsWith((trashFullname = getTrashFolder()))));
 				if (backup) {
 					imapAccess.getMessageStorage().notifyIMAPFolderModification(trashFullname);
 				}
