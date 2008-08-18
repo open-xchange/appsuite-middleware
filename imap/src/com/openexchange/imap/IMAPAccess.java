@@ -270,9 +270,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 					LOG.error(e.getMessage(), e);
 				}
 			}
-			
-			tmpPass = "secret";
-			
 			try {
 				imapStore.connect(getMailConfig().getServer(), getMailConfig().getPort(), getMailConfig().getLogin(),
 						tmpPass);
