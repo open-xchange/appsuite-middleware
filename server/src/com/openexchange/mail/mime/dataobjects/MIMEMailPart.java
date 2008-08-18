@@ -354,7 +354,7 @@ public final class MIMEMailPart extends MailPart {
 					contentLoaded = true;
 				} else if (contentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
 					/*
-					 * Compose a new body part with multipart/* data
+					 * Compose a new body part with multipart/ data
 					 */
 					part = createBodyMultipart(getBytesFromMultipart((Multipart) part.getContent()), contentType
 							.toString());
@@ -424,9 +424,13 @@ public final class MIMEMailPart extends MailPart {
 			 */
 			out.defaultWriteObject();
 		} catch (final MailException e) {
-			throw new IOException(e.getMessage());
+			final IOException ioe = new IOException(e.getMessage());
+			ioe.initCause(e);
+			throw ioe;
 		} catch (final MessagingException e) {
-			throw new IOException(e.getMessage());
+			final IOException ioe = new IOException(e.getMessage());
+			ioe.initCause(e);
+			throw ioe;
 		} finally {
 			/*
 			 * Discard content created for serialization
@@ -476,7 +480,7 @@ public final class MIMEMailPart extends MailPart {
 					contentLoaded = true;
 				} else if (STYPE_MIME_BODY_MULTI == serializeType) {
 					/*
-					 * Compose a new body part with multipart/* data
+					 * Compose a new body part with multipart/ data
 					 */
 					part = createBodyMultipart(serializedContent, serializedContentType);
 					multipart = null;
@@ -489,7 +493,9 @@ public final class MIMEMailPart extends MailPart {
 					contentLoaded = true;
 				}
 			} catch (final MessagingException e) {
-				throw new IOException(e.getMessage());
+				final IOException ioe = new IOException(e.getMessage());
+				ioe.initCause(e);
+				throw ioe;
 			} finally {
 				/*
 				 * Discard content created for serialization
