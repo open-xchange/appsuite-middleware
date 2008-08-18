@@ -1,5 +1,6 @@
 * 2008-08-18 - dennis.sieben@open-xchange.com
 
+ - Bugfix #11480: Copied session handling parts from groupware
  - Bugfix #11946: The property file and the properties are now checked right
    at the beginning
  - Bugfix #11989: Fixed grammar file

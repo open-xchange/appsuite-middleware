@@ -52,6 +52,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.Login;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
 import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 import com.openexchange.server.ServiceException;
@@ -215,28 +217,29 @@ public class SessionWrapper {
         super();
         // First determine which mode to choose from the parameters
         final String username = req.getParameter(USERNAME_PARAMETER);
+        final String cookieId = req.getParameter(AJAXServlet.PARAMETER_SESSION);
         final Cookie[] cookies = req.getCookies();
         for (final Cookie cookie : cookies) {
             if (null != username && cookie.getName().startsWith("JSESSION")) {
                 // admin mode
                 this.httpSession = req.getSession(false);
-                if (null == this.httpSession) {
-                    throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, null, "Can't find session.");
+                if (null != this.httpSession) {
+                    this.httpSession.setAttribute(USERNAME_SESSION, username);
+                    return;
                 }
-                this.httpSession.setAttribute(USERNAME_SESSION, username);
-            } else if (null == username && cookie.getName().startsWith("open-xchange")) {
+            } else if (null == username && null != cookieId && new StringBuilder(Login.cookiePrefix).append(cookieId).toString().equals(cookie.getName())) {
                 // groupware mode
                 final SessiondService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(SessiondService.class);
                 if (null == service) {
                     throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE));
                 }
                 this.session = service.getSession(cookie.getValue());
-                if (null == this.session) {
-                    throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, null, "Can't find session.");
+                if (null != this.session) {
+                    return;
                 }
-                return;
             }
         }
+        throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, null, "Can't find session.");
     }
 
     public Credentials getCredentials() {
