@@ -1,3 +1,7 @@
+* 2008-08-19 - thorben.betten@open-xchange.com
+
+ - Bugfix #12023: Properly handling empty Content-Id value
+
 * 2008-08-18 - dennis.sieben@open-xchange.com
 
  - Bugfix #11993: Now checking for a valid email address in redirect

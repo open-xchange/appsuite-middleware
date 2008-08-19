@@ -143,7 +143,7 @@ public final class MIMEMessageUtility {
 
 	/**
 	 * Compares (case insensitive) the given values of message header
-	 * "Content-ID". The leading/trailing character '<code>&lt;</code>'/'
+	 * "Content-ID". The leading/trailing characters '<code>&lt;</code>' and '
 	 * <code>&gt;</code>' are ignored during comparison
 	 * 
 	 * @param contentId1Arg
@@ -154,10 +154,10 @@ public final class MIMEMessageUtility {
 	 */
 	public static boolean equalsCID(final String contentId1Arg, final String contentId2Arg) {
 		if (null != contentId1Arg && null != contentId2Arg) {
-			final String contentId1 = contentId1Arg.charAt(0) == '<' ? contentId1Arg.substring(1, contentId1Arg
-					.length() - 1) : contentId1Arg;
-			final String contentId2 = contentId2Arg.charAt(0) == '<' ? contentId2Arg.substring(1, contentId2Arg
-					.length() - 1) : contentId2Arg;
+			final String contentId1 = contentId1Arg.length() > 0 && contentId1Arg.charAt(0) == '<' ? contentId1Arg
+					.substring(1, contentId1Arg.length() - 1) : contentId1Arg;
+			final String contentId2 = contentId2Arg.length() > 0 && contentId2Arg.charAt(0) == '<' ? contentId2Arg
+					.substring(1, contentId2Arg.length() - 1) : contentId2Arg;
 			return contentId1.equalsIgnoreCase(contentId2);
 		}
 		return false;
