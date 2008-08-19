@@ -139,6 +139,26 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Aug 18 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11614: Written own quota parse routine which treats a missing
+   parenthesis pair in IMAP QUOTA response as no resource restrictions
+ - Bugfix #12001: Moved setting of "hardDelete" argument in "deleteFolder"
+   and "clearFolder" routine to mail servlet interface implementation
+ - Bugfix #12003: Applying proper content-type to mail object if reference
+   to content is given
+* Mon Aug 18 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #11797: Check all fields for length constraints, even supposedly unlimited ones.
+ - Bugfix #11803: Only return relevant appointments in freebusy result.
+* Mon Aug 18 2008 - dennis.sieben@open-xchange.com
+ - Bugfix #11993: Now checking for a valid email address in redirect
+ - Bugfix #11480: Copied session handling parts from groupware
+ - Bugfix #11946: The property file and the properties are now checked right
+   at the beginning
+ - Bugfix #11989: Fixed grammar file
+* Fri Aug 15 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #11986: VAlarms require description.
+ - Bugfix #11987: Chunk multiple VCalendars if needed.
+ - Bugfix #11973: Whole Day appointments start at 00:00 UTC.
 * Thu Aug 14 2008 - thorben.betten@open-xchange.com
  - Bugfix #11899: Fixed routine to remove user flags from a message prior
    to append that message to a folder which does not support user flags
@@ -146,6 +166,14 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
    the private flag set
  - Partial bugfix #11737: Fixed propagating display-name modification on
    common contact update
+ - Bugfix #11912: Displaying those appointments at proper position in
+   mini-calendar whose time zone offset exceeds the hour-of-day
+ - Partial bugfix #11980: Properly delegating limit argument to search method on
+   determining unread messages
+* Thu Aug 14 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #3907 and #8527: Allow folded values.
+ - Bugfix #11919: Allow date properties as DATE without saying so in a VALUE.
+ - Bugfix #11968: Export whole day appointments with DTStart and DTEnd as DATEs.
 * Wed Aug 13 2008 - francisco.laguna@open-xchange.com
  - Bugfix #11963: Export VAlarms regardless of AlarmFlag.
 * Wed Aug 13 2008 - marcus.klein@open-xchange.com
@@ -163,7 +191,7 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 * Tue Aug 12 2008 - francisco.laguna@open-xchange.com
  - Added count to infinity to recurrence calculation to prematurely terminate calculation of patterns, that are too
    complex.
- - Bugfix #11803: The short version:
+ - Bugfix #11798: The short version:
    Don't ask. Just don't.
    The longer version: When saving a recurring appointment without setting the start and end dates those will be set
    to the first ocurrences start and end date, that in turn triggering an autoaccept in the name of the user. This

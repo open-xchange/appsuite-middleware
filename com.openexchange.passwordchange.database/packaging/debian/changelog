@@ -1,3 +1,9 @@
+open-xchange-passwordchange-database (6.6.0-1) unstable; urgency=low
+
+  * first build for RC5
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 19 Aug 2008 12:08:10 +0200
+
 open-xchange-passwordchange-database (6.6.0-0) unstable; urgency=low
 
   * Initial version
