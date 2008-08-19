@@ -116,6 +116,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 
 	private static final String STR_INBOX = "INBOX";
 
+	private static final String STR_MSEC = "msec";
+
 	private final IMAPStore imapStore;
 
 	private final IMAPAccess imapAccess;
@@ -1048,7 +1050,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 				} else if (imapConfig.isSupportsACLs()) {
 					if (!RightsCache.getCachedRights(f, true, session).contains(Rights.Right.READ)) {
 						throw new IMAPException(IMAPException.Code.NO_READ_ACCESS, f.getFullName());
-					} else if (!RightsCache.getCachedRights(f, true, session).contains(Rights.Right.DELETE)) {
+					}
+					if (!RightsCache.getCachedRights(f, true, session).contains(Rights.Right.DELETE)) {
 						throw new IMAPException(IMAPException.Code.NO_DELETE_ACCESS, f.getFullName());
 					}
 				}
@@ -1089,7 +1092,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 								debug.setLength(0);
 								LOG.debug(debug.append("\"Soft Clear\": ").append(
 										"Messages copied to default trash folder \"").append(trashFullname).append(
-										"\" in ").append((System.currentTimeMillis() - start)).append("msec")
+										"\" in ").append((System.currentTimeMillis() - start)).append(STR_MSEC)
 										.toString());
 							}
 						} catch (final MessagingException e) {
@@ -1119,7 +1122,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 						if (LOG.isDebugEnabled()) {
 							debug.setLength(0);
 							LOG.debug(debug.append("EXPUNGE command executed on \"").append(f.getFullName()).append(
-									"\" in ").append((System.currentTimeMillis() - startExpunge)).append("msec")
+									"\" in ").append((System.currentTimeMillis() - startExpunge)).append(STR_MSEC)
 									.toString());
 						}
 					} catch (final FolderClosedException e) {
@@ -1129,7 +1132,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 						if (LOG.isDebugEnabled()) {
 							debug.setLength(0);
 							LOG.debug(debug.append("EXPUNGE command timed out in ").append(
-									(System.currentTimeMillis() - startExpunge)).append("msec").toString());
+									(System.currentTimeMillis() - startExpunge)).append(STR_MSEC).toString());
 						}
 						throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapConfig.getServer(), imapConfig
 								.getLogin());
@@ -1140,7 +1143,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 						if (LOG.isDebugEnabled()) {
 							debug.setLength(0);
 							LOG.debug(debug.append("EXPUNGE command timed out in ").append(
-									(System.currentTimeMillis() - startExpunge)).append("msec").toString());
+									(System.currentTimeMillis() - startExpunge)).append(STR_MSEC).toString());
 						}
 						throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapConfig.getServer(), imapConfig
 								.getLogin());
@@ -1158,7 +1161,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 							debug.setLength(0);
 							LOG.debug(debug.append("\"Soft Clear\": ").append(
 									"Messages copied to default trash folder \"").append(trashFullname)
-									.append("\" in ").append((System.currentTimeMillis() - start)).append("msec")
+									.append("\" in ").append((System.currentTimeMillis() - start)).append(STR_MSEC)
 									.toString());
 						}
 					} catch (final MessagingException e) {
@@ -1187,7 +1190,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 				if (LOG.isDebugEnabled()) {
 					debug.setLength(0);
 					LOG.info(debug.append("Folder '").append(fullname).append("' cleared in ").append(
-							System.currentTimeMillis() - startClear).append("msec"));
+							System.currentTimeMillis() - startClear).append(STR_MSEC));
 				}
 			} finally {
 				f.close(false);
@@ -1286,7 +1289,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 					} else if (imapConfig.isSupportsACLs()) {
 						if (!RightsCache.getCachedRights(f, true, session).contains(Rights.Right.READ)) {
 							throw new IMAPException(IMAPException.Code.NO_READ_ACCESS, fullname);
-						} else if (!RightsCache.getCachedRights(f, true, session).contains(Rights.Right.DELETE)) {
+						}
+						if (!RightsCache.getCachedRights(f, true, session).contains(Rights.Right.DELETE)) {
 							throw new IMAPException(IMAPException.Code.NO_DELETE_ACCESS, fullname);
 						}
 					}
@@ -1527,7 +1531,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 			try {
 				if (!RightsCache.getCachedRights(toMove, true, session).contains(Rights.Right.READ)) {
 					throw new IMAPException(IMAPException.Code.NO_READ_ACCESS, toMove.getFullName());
-				} else if (!RightsCache.getCachedRights(toMove, true, session).contains(Rights.Right.CREATE)) {
+				}
+				if (!RightsCache.getCachedRights(toMove, true, session).contains(Rights.Right.CREATE)) {
 					throw new IMAPException(IMAPException.Code.NO_CREATE_ACCESS, toMove.getFullName());
 				}
 			} catch (final MessagingException e) {
