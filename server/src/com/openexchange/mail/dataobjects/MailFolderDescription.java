@@ -336,7 +336,7 @@ public class MailFolderDescription {
 	 * Removes the separator
 	 */
 	public void removeSeparator() {
-		separator = '0';
+		separator = '\0';
 		b_separator = false;
 	}
 
@@ -413,6 +413,7 @@ public class MailFolderDescription {
 	 */
 	public void setSeparator(final char separator) {
 		this.separator = separator;
+		b_separator = true;
 	}
 
 	/**
