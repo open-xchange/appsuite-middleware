@@ -179,8 +179,8 @@ public final class BodyTerm extends SearchTerm<String> {
 	 *             If text extraction fails
 	 */
 	private static String getTextContent(final MailPart mailPart) throws MailException {
-		if (mailPart.getContentType().isMimeType("multipart/*")) {
-			final int count = mailPart.getEnclosedCount();
+		final int count = mailPart.getEnclosedCount();
+		if (count != MailPart.NO_ENCLOSED_PARTS) {
 			for (int i = 0; i < count; i++) {
 				final String text = getTextContent(mailPart.getEnclosedMailPart(i));
 				if (text != null) {
@@ -236,7 +236,7 @@ public final class BodyTerm extends SearchTerm<String> {
 	 *             If text extraction fails
 	 */
 	private static String getPartTextContent(final MailPart mailPart) throws MailException {
-		if (!mailPart.getContentType().isMimeType("text/*")) {
+		if (mailPart.getEnclosedCount() != MailPart.NO_ENCLOSED_PARTS) {
 			/*
 			 * No textual content
 			 */
