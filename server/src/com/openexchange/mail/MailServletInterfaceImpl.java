@@ -271,7 +271,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		mailAccess.getMessageStorage().deleteMessages(fullname, msgUIDs, hardDelete);
+		/*
+		 * Hard-delete if hard-delete is set in user's mail configuration or
+		 * fullname denotes trash (sub)folder
+		 */
+		final boolean hd = (hardDelete
+				|| UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs() || (fullname
+				.startsWith(mailAccess.getFolderStorage().getTrashFolder())));
+		mailAccess.getMessageStorage().deleteMessages(fullname, msgUIDs, hd);
 		try {
 			/*
 			 * Update message cache
