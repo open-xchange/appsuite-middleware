@@ -450,12 +450,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 
 	private void blockwiseDeletion(final long[] msgUIDs, final boolean backup, final String trashFullname)
 			throws MailException, MessagingException {
-		final StringBuilder debug;
-		if (LOG.isDebugEnabled()) {
-			debug = new StringBuilder(128);
-		} else {
-			debug = null;
-		}
+		final StringBuilder debug = LOG.isDebugEnabled() ? new StringBuilder(128) : null;
 		final long[] remain;
 		final int blockSize = IMAPConfig.getBlockSize();
 		if (msgUIDs.length > blockSize) {
