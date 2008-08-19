@@ -422,7 +422,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			try {
 				if (!holdsMessages()) {
 					throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
-				} else if (imapConfig.isSupportsACLs()
+				}
+				if (imapConfig.isSupportsACLs()
 						&& !RightsCache.getCachedRights(imapFolder, true, session).contains(Rights.Right.DELETE)) {
 					throw new IMAPException(IMAPException.Code.NO_DELETE_ACCESS, imapFolder.getFullName());
 				}
@@ -499,7 +500,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 						/*
 						 * We face an Over-Quota-Exception
 						 */
-						throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA);
+						throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, exc, new Object[0]);
 					}
 				}
 				throw new IMAPException(IMAPException.Code.MOVE_ON_DELETE_FAILED, e, new Object[0]);
@@ -567,7 +568,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			try {
 				if (!holdsMessages()) {
 					throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
-				} else if (move && imapConfig.isSupportsACLs()
+				}
+				if (move && imapConfig.isSupportsACLs()
 						&& !RightsCache.getCachedRights(imapFolder, true, session).contains(Rights.Right.DELETE)) {
 					throw new IMAPException(IMAPException.Code.NO_DELETE_ACCESS, imapFolder.getFullName());
 				}
@@ -733,7 +735,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			try {
 				if (!holdsMessages()) {
 					throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
-				} else if (imapConfig.isSupportsACLs()
+				}
+				if (imapConfig.isSupportsACLs()
 						&& !RightsCache.getCachedRights(imapFolder, true, session).contains(Rights.Right.INSERT)) {
 					throw new IMAPException(IMAPException.Code.NO_INSERT_ACCESS, imapFolder.getFullName());
 				}
@@ -911,7 +914,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			try {
 				if (!holdsMessages()) {
 					throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
-				} else if (imapConfig.isSupportsACLs()
+				}
+				if (imapConfig.isSupportsACLs()
 						&& !RightsCache.getCachedRights(imapFolder, true, session).contains(Rights.Right.WRITE)) {
 					throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
 				}
