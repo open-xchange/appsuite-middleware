@@ -130,6 +130,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 
 	private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
 
+	/*
+	 * String constants
+	 */
+	private static final String STR_MSEC = "msec";
+
 	/**
 	 * Initializes a new {@link IMAPMessageStorage}
 	 * 
@@ -173,7 +178,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(mailIds.length).append(
-						" messages took ").append((System.currentTimeMillis() - start)).append("msec").toString());
+						" messages took ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
 			}
 			if ((msgs == null) || (msgs.length == 0)) {
 				return EMPTY_RETVAL;
@@ -491,7 +496,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 					sb.setLength(0);
 					LOG.debug(sb.append("\"Soft Delete\": ").append(uids.length).append(
 							" messages copied to default trash folder \"").append(trashFullname).append("\" in ")
-							.append((System.currentTimeMillis() - start)).append("msec").toString());
+							.append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
 				}
 			} catch (final MessagingException e) {
 				if (e.getNextException() instanceof CommandFailedException) {
@@ -514,7 +519,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		if (LOG.isDebugEnabled()) {
 			sb.setLength(0);
 			LOG.debug(sb.append(uids.length).append(" messages marked as deleted (through system flag \\DELETED) in ")
-					.append((System.currentTimeMillis() - start)).append("msec").toString());
+					.append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
 		}
 		/*
 		 * ... and perform EXPUNGE
@@ -650,7 +655,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 						LOG.debug(new StringBuilder(128).append(
 								"A copy/move to default drafts folder => All messages' \\Draft flag in ").append(
 								destFullname).append(" set in ").append((System.currentTimeMillis() - start)).append(
-								"msec").toString());
+								STR_MSEC).toString());
 					}
 				} finally {
 					destFolder.close(false);
@@ -667,7 +672,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 						LOG.debug(new StringBuilder(128).append(
 								"A copy/move from default drafts folder => All messages' \\Draft flag in ").append(
 								destFullname).append(" unset in ").append((System.currentTimeMillis() - start)).append(
-								"msec").toString());
+								STR_MSEC).toString());
 					}
 				} finally {
 					destFolder.close(false);
@@ -686,7 +691,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		if (LOG.isDebugEnabled()) {
 			sb.setLength(0);
 			LOG.debug(sb.append(tmp.length).append(" messages copied in ").append((System.currentTimeMillis() - start))
-					.append("msec").toString());
+					.append(STR_MSEC).toString());
 		}
 		if (!fast && ((uids == null) || noUIDsAssigned(uids, tmp.length))) {
 			/*
@@ -701,7 +706,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				sb.setLength(0);
 				LOG.debug(sb.append(tmp.length).append(
 						" messages marked as expunged (through system flag \\DELETED) in ").append(
-						(System.currentTimeMillis() - start)).append("msec").toString());
+						(System.currentTimeMillis() - start)).append(STR_MSEC).toString());
 			}
 			try {
 				IMAPCommandsCollection.uidExpungeWithFallback(imapFolder, tmp);
@@ -877,7 +882,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				new FlagsIMAPCommand(imapFolder, msgUIDs, affectedFlags, set, true, false).doCommand();
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(new StringBuilder(128).append("Flags applied to ").append(msgUIDs.length).append(
-							" messages in ").append((System.currentTimeMillis() - start)).append("msec").toString());
+							" messages in ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
 				}
 			}
 			/*
@@ -935,14 +940,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(new StringBuilder(128).append("All color flags cleared from ").append(msgUIDs.length).append(
-						" messages in ").append((System.currentTimeMillis() - start)).append("msec").toString());
+						" messages in ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
 			}
 			start = System.currentTimeMillis();
 			IMAPCommandsCollection.setColorLabel(imapFolder, msgUIDs, MailMessage.getColorLabelStringValue(colorLabel));
 			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(new StringBuilder(128).append("All color flags set in ").append(msgUIDs.length).append(
-						" messages in ").append((System.currentTimeMillis() - start)).append("msec").toString());
+						" messages in ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
 			}
 			/*
 			 * Force JavaMail's cache update through folder closure
