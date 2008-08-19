@@ -411,7 +411,7 @@ public final class Pools implements Runnable {
             config.testOnIdle);
         config.testThreads = configDB.getBoolean(Property.TEST_THREADS,
             config.testThreads);
-        config.forceWriteOnly = configDB.getBoolean(Property.WRITE_ONLY, false);
+        //config.forceWriteOnly = configDB.getBoolean(Property.WRITE_ONLY, false);
         if (LOG.isInfoEnabled()) {
             final StringBuilder sb = new StringBuilder();
             sb.append("Database pooling options:\n");
@@ -437,8 +437,8 @@ public final class Pools implements Runnable {
             sb.append(config.testOnIdle);
             sb.append("\n\tTest threads for bad connection usage (SLOW): ");
             sb.append(config.testThreads);
-            sb.append("\n\tForce the use of write connections only: ");
-            sb.append(config.forceWriteOnly);
+            // sb.append("\n\tForce the use of write connections only: ");
+            // sb.append(config.forceWriteOnly);
 
             LOG.info(sb.toString());
         }

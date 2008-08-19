@@ -743,7 +743,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         public boolean testOnDeactivate;
         public boolean testOnIdle;
         public boolean testThreads;
-        public boolean forceWriteOnly;
+        //public boolean forceWriteOnly;
 
         /**
          * Default constructor.
@@ -761,7 +761,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             testOnDeactivate = true;
             testOnIdle = false;
             testThreads = false;
-            forceWriteOnly = false;
+            //forceWriteOnly = false;
         }
         /**
          * {@inheritDoc}

@@ -71,7 +71,7 @@ public final class Database {
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(Database.class);
-    private static boolean forceWriteOnly;
+    //private static boolean forceWriteOnly;
 
     /**
      * Prevent instantiation
@@ -84,7 +84,7 @@ public final class Database {
         throws DBPoolingException {
         final Assignment assign = getAssignmentStorage().getAssignment(contextId);
         final int poolId;
-        if (write || forceWriteOnly) {
+        if (write /*|| forceWriteOnly*/) {
             poolId = assign.writePoolId;
         } else {
             poolId = assign.readPoolId;
@@ -108,7 +108,7 @@ public final class Database {
         throws DBPoolingException {
         final Assignment assign = getAssignmentStorage().getConfigDBAssignment();
         final int poolId;
-        if (write || forceWriteOnly) {
+        if (write /*|| forceWriteOnly*/) {
             poolId = assign.writePoolId;
         } else {
             poolId = assign.readPoolId;
@@ -144,7 +144,7 @@ public final class Database {
         throws DBPoolingException {
         final Assignment assign = getAssignmentStorage().getAssignment(contextId);
         final int poolId;
-        if (write || forceWriteOnly) {
+        if (write /*|| forceWriteOnly*/) {
             poolId = assign.writePoolId;
         } else {
             poolId = assign.readPoolId;
@@ -193,7 +193,7 @@ public final class Database {
         // TODO remove null check to produce more error messages
         final Assignment assign = getAssignmentStorage().getConfigDBAssignment();
         final int poolId;
-        if (write || forceWriteOnly) {
+        if (write /*|| forceWriteOnly*/) {
             poolId = assign.writePoolId;
         } else {
             poolId = assign.readPoolId;
@@ -308,7 +308,7 @@ public final class Database {
         return AssignmentStorage.getInstance();
     }
 
-    public static void setForceWrite(boolean forceWriteOnly) {
+    /*public static void setForceWrite(final boolean forceWriteOnly) {
         Database.forceWriteOnly = forceWriteOnly;
-    }
+    }*/
 }
