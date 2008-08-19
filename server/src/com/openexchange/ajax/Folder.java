@@ -1461,7 +1461,7 @@ public class Folder extends SessionServlet {
 					if (updateFolder != null) {
 						final MailFolderDescription mf = new MailFolderDescription();
 						mf.setFullname(updateFolder.getFullname());
-						mf.setExists(mf.exists());
+						mf.setExists(updateFolder.exists());
 						mf.setSeparator(updateFolder.getSeparator());
 						com.openexchange.mail.json.parser.FolderParser.parse(jsonObj, mf, session);
 						retval = mailInterface.saveFolder(mf);
