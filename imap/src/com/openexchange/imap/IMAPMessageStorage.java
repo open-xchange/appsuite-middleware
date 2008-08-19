@@ -193,8 +193,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			final IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
 			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (msg == null) {
-				//throw new MailException(MailException.Code.MAIL_NOT_FOUND, String.valueOf(msgUID), imapFolder
-				//		.toString());
+				// throw new MailException(MailException.Code.MAIL_NOT_FOUND,
+				// String.valueOf(msgUID), imapFolder
+				// .toString());
 				return null;
 			}
 			final MailMessage mail = MIMEMessageConverter.convertMessage(msg);
@@ -428,6 +429,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			} catch (final MessagingException e) {
 				throw new IMAPException(IMAPException.Code.NO_ACCESS, e, imapFolder.getFullName());
 			}
+			if (hardDelete || usm.isHardDeleteMsgs()) {
+				blockwiseDeletion(msgUIDs, false, null);
+				return;
+			}
 			final String trashFullname = imapAccess.getFolderStorage().getTrashFolder();
 			if (null == trashFullname) {
 				// TODO: Bug#8992 -> What to do if trash folder is null
@@ -436,54 +441,59 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				}
 				throw new IMAPException(IMAPException.Code.MISSING_DEFAULT_FOLDER_NAME, "trash");
 			}
-			final boolean backup = (!usm.isHardDeleteMsgs() && !hardDelete && !(fullname.startsWith(trashFullname)));
-			final StringBuilder debug;
-			if (LOG.isDebugEnabled()) {
-				debug = new StringBuilder(128);
-			} else {
-				debug = null;
-			}
-			final long[] remain;
-			final int blockSize = IMAPConfig.getBlockSize();
-			if (msgUIDs.length > blockSize) {
-				/*
-				 * Block-wise deletion
-				 */
-				int offset = 0;
-				final long[] tmp = new long[blockSize];
-				for (int len = msgUIDs.length; len > blockSize; len -= blockSize) {
-					System.arraycopy(msgUIDs, offset, tmp, 0, tmp.length);
-					offset += blockSize;
-					deleteByUIDs(trashFullname, backup, tmp, debug);
-				}
-				remain = new long[msgUIDs.length - offset];
-				System.arraycopy(msgUIDs, offset, remain, 0, remain.length);
-			} else {
-				remain = msgUIDs;
-			}
-			deleteByUIDs(trashFullname, backup, remain, debug);
-			/*
-			 * Close folder to force JavaMail-internal message cache update
-			 */
-			imapFolder.close(false);
-			resetIMAPFolder();
+			final boolean backup = (!(fullname.startsWith(trashFullname)));
+			blockwiseDeletion(msgUIDs, backup, backup ? trashFullname : null);
 		} catch (final MessagingException e) {
 			throw MIMEMailException.handleMessagingException(e, imapConfig);
 		}
 	}
 
-	private void deleteByUIDs(final String trashFullname, final boolean backup, final long[] tmp, final StringBuilder sb)
-			throws MailException, IMAPException, MessagingException {
+	private void blockwiseDeletion(final long[] msgUIDs, final boolean backup, final String trashFullname)
+			throws MailException, MessagingException {
+		final StringBuilder debug;
+		if (LOG.isDebugEnabled()) {
+			debug = new StringBuilder(128);
+		} else {
+			debug = null;
+		}
+		final long[] remain;
+		final int blockSize = IMAPConfig.getBlockSize();
+		if (msgUIDs.length > blockSize) {
+			/*
+			 * Block-wise deletion
+			 */
+			int offset = 0;
+			final long[] tmp = new long[blockSize];
+			for (int len = msgUIDs.length; len > blockSize; len -= blockSize) {
+				System.arraycopy(msgUIDs, offset, tmp, 0, tmp.length);
+				offset += blockSize;
+				deleteByUIDs(trashFullname, backup, tmp, debug);
+			}
+			remain = new long[msgUIDs.length - offset];
+			System.arraycopy(msgUIDs, offset, remain, 0, remain.length);
+		} else {
+			remain = msgUIDs;
+		}
+		deleteByUIDs(trashFullname, backup, remain, debug);
+		/*
+		 * Close folder to force JavaMail-internal message cache update
+		 */
+		imapFolder.close(false);
+		resetIMAPFolder();
+	}
+
+	private void deleteByUIDs(final String trashFullname, final boolean backup, final long[] uids,
+			final StringBuilder sb) throws MailException, MessagingException {
 		if (backup) {
 			/*
 			 * Copy messages to folder "TRASH"
 			 */
 			try {
 				final long start = System.currentTimeMillis();
-				new CopyIMAPCommand(imapFolder, tmp, trashFullname, false, true).doCommand();
+				new CopyIMAPCommand(imapFolder, uids, trashFullname, false, true).doCommand();
 				if (LOG.isDebugEnabled()) {
 					sb.setLength(0);
-					LOG.debug(sb.append("\"Soft Delete\": ").append(tmp.length).append(
+					LOG.debug(sb.append("\"Soft Delete\": ").append(uids.length).append(
 							" messages copied to default trash folder \"").append(trashFullname).append("\" in ")
 							.append((System.currentTimeMillis() - start)).append("msec").toString());
 				}
@@ -504,17 +514,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		 * Mark messages as \DELETED...
 		 */
 		final long start = System.currentTimeMillis();
-		new FlagsIMAPCommand(imapFolder, tmp, FLAGS_DELETED, true, true, false).doCommand();
+		new FlagsIMAPCommand(imapFolder, uids, FLAGS_DELETED, true, true, false).doCommand();
 		if (LOG.isDebugEnabled()) {
 			sb.setLength(0);
-			LOG.debug(sb.append(tmp.length).append(" messages marked as deleted (through system flag \\DELETED) in ")
+			LOG.debug(sb.append(uids.length).append(" messages marked as deleted (through system flag \\DELETED) in ")
 					.append((System.currentTimeMillis() - start)).append("msec").toString());
 		}
 		/*
 		 * ... and perform EXPUNGE
 		 */
 		try {
-			IMAPCommandsCollection.uidExpungeWithFallback(imapFolder, tmp);
+			IMAPCommandsCollection.uidExpungeWithFallback(imapFolder, uids);
 		} catch (final FolderClosedException e) {
 			/*
 			 * Not possible to retry since connection is broken
@@ -528,7 +538,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapAccess.getMailConfig().getServer(),
 					imapAccess.getMailConfig().getLogin());
 		} catch (final MessagingException e) {
-			throw new IMAPException(IMAPException.Code.UID_EXPUNGE_FAILED, e, Arrays.toString(tmp), imapFolder
+			throw new IMAPException(IMAPException.Code.UID_EXPUNGE_FAILED, e, Arrays.toString(uids), imapFolder
 					.getFullName(), e.getMessage());
 		}
 	}
