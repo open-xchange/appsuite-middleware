@@ -100,5 +100,44 @@ public class NewTest extends TaskTest {
 			assertExceptionMessage(exc.getMessage(), new TaskException(Code.PRIVATE_FLAG).getErrorCode());
 		}
 	}
+    // Bug 12011
+    public void testBulkAdd() throws Exception {
+        int[] objectIds = null;
+
+        final int NUMBER_OF_TASKS = 30;
+        Task[] tasks = new Task[NUMBER_OF_TASKS];
+
+        for(int i = 0; i < NUMBER_OF_TASKS; i++) {
+            tasks[i] = createTask("TASK - "+i);
+        }
+
+        try {
+
+            objectIds = insertTasks(webCon, PROTOCOL + hostName, login, password, tasks);
+
+            int i = 0;
+
+            for(int objectId : objectIds) {
+                Task task = loadTask(getWebConversation(), objectId, tasks[i].getParentFolderID(), PROTOCOL + getHostName(), getLogin(), getPassword());
+                tasks[i].setObjectID(objectId);
+                compareObject(task, tasks[i]);
+                i++;
+                                
+            }
+
+        } finally {
+            if(null != objectIds) {
+                int i = 0;
+                try {
+                    for(int objectId : objectIds) {
+                        deleteTask(getWebConversation(), objectId, tasks[i].getParentFolderID(), PROTOCOL + getHostName(), getLogin(), getPassword());
+                        i++;
+                    }
+                } catch (Exception x) {
+                    x.printStackTrace(); // Not that interesting
+                }
+            }
+        }
+    }
 }
 

@@ -811,6 +811,36 @@ public class CalendarSqlTest extends TestCase {
         }
     }
 
+    // Bug 11865
+
+    public void testShouldDisallowTurningAnExceptionIntoASeries() throws OXException {
+        Date start = D("07/02/2008 10:00");
+        Date end = D("07/02/2008 12:00");
+        // Create Weekly recurrence
+        CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
+        appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+        appointment.setDays(CalendarDataObject.WEDNESDAY);
+        appointment.setTitle("Everything can happen on a Wednesday");
+        appointment.setInterval(1);
+        appointments.save(appointment); clean.add(appointment);
+
+        CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
+        update.setRecurrenceType(CalendarDataObject.WEEKLY);
+        update.setDays(CalendarDataObject.MONDAY);
+        update.setTitle("Monday! Monday!");
+        update.setInterval(1);
+        update.setRecurrencePosition(3);
+
+        appointments.save( update );
+
+        update = appointments.createIdentifyingCopy(update);
+        update.setRecurrencePosition(0);
+        update.setTitle("Exception");
+
+        appointments.save( update );
+ 
+    }
+
     private List<CalendarDataObject> read(final SearchIterator<CalendarDataObject> si) throws OXException, SearchIteratorException {
         final List<CalendarDataObject> appointments = new ArrayList<CalendarDataObject>();
         while(si.hasNext()) { appointments.add( si.next() ); }

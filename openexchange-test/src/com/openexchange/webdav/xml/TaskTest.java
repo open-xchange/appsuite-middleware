@@ -171,8 +171,61 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		
 		return objectId;
 	}
-	
-	public static void updateTask(final WebConversation webCon, final Task taskObj, final int objectId, final int inFolder, final String host, final String login, final String password) throws Exception {
+
+    public static int[] insertTasks(final WebConversation webCon, String host, final String login, final String password, final Task... tasks) throws Exception{
+        host = appendPrefix(host);
+        int[] objectIds = new int[tasks.length];
+
+        final TaskWriter taskWriter = new TaskWriter();
+
+        final Element rootElement = new Element("propertyupdate", webdav);
+		rootElement.addNamespaceDeclaration(XmlServlet.NS);
+
+        Document doc =  new Document(rootElement);
+
+        for(Task taskObj : tasks) {
+            final Element eProp = new Element("prop", webdav);
+            taskWriter.addContent2PropElement(eProp, taskObj, false);
+            final Element eSet = new Element("set", webdav);
+            eSet.addContent(eProp);
+            rootElement.addContent(eSet);
+        }
+
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        final XMLOutputter xo = new XMLOutputter();
+        xo.output(doc, baos);
+
+        final byte b[] = baos.toByteArray();
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        final WebRequest req = new PutMethodWebRequest(host + TASK_URL, bais, "text/javascript");
+        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
+        final WebResponse resp = webCon.getResponse(req);
+
+        assertEquals(207, resp.getResponseCode());
+
+        bais = new ByteArrayInputStream(resp.getText().getBytes());
+        final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.TASK);
+
+        assertEquals("check response", tasks.length, response.length);
+
+        for(int i = 0; i < tasks.length; i++) {
+            if (response[i].hasError()) {
+                throw new TestException(response[i].getErrorMessage());
+            } else {
+                Task taskObj = (Task)response[i].getDataObject();
+                objectIds[i] = taskObj.getObjectID();
+
+                assertNotNull("last modified is null", taskObj.getLastModified());
+                assertTrue("last modified is not > 0", taskObj.getLastModified().getTime() > 0);
+            }
+        }
+
+        return objectIds;
+    }
+
+    public static void updateTask(final WebConversation webCon, final Task taskObj, final int objectId, final int inFolder, final String host, final String login, final String password) throws Exception {
 		updateTask(webCon, taskObj, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password);
 	}
 	
