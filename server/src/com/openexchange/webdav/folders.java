@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.LinkedList;
@@ -70,6 +71,7 @@ import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.RdbFolderSQLInterface;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -107,7 +109,7 @@ public final class folders extends XmlServlet {
 
 	@Override
 	protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
-			final XmlPullParser parser) throws Exception {
+			final XmlPullParser parser) throws XmlPullParserException, IOException, AbstractOXException {
 		final Session session = getSession(req);
 		if (isTag(parser, "prop", "DAV:")) {
 			/*
@@ -143,14 +145,16 @@ public final class folders extends XmlServlet {
 						folderobject.removeFolderName();
 					}
 					/*
-					if (object_id == OXFolderTools.getCalendarDefaultFolder(session.getUserId(), ctx)) {
-						folderobject.removeFolderName();
-					} else if (object_id == OXFolderTools.getContactDefaultFolder(session.getUserId(), ctx)) {
-						folderobject.removeFolderName();
-					} else if (object_id == OXFolderTools.getTaskDefaultFolder(session.getUserId(), ctx)) {
-						folderobject.removeFolderName();
-					}
-					*/
+					 * if (object_id ==
+					 * OXFolderTools.getCalendarDefaultFolder(session
+					 * .getUserId(), ctx)) { folderobject.removeFolderName(); }
+					 * else if (object_id ==
+					 * OXFolderTools.getContactDefaultFolder
+					 * (session.getUserId(), ctx)) {
+					 * folderobject.removeFolderName(); } else if (object_id ==
+					 * OXFolderTools.getTaskDefaultFolder(session.getUserId(),
+					 * ctx)) { folderobject.removeFolderName(); }
+					 */
 				} else {
 					folderobject.setParentFolderID(inFolder);
 				}
@@ -171,7 +175,7 @@ public final class folders extends XmlServlet {
 	}
 
 	@Override
-	protected void performActions(final OutputStream os, final Session session) throws Exception {
+	protected void performActions(final OutputStream os, final Session session) throws IOException, AbstractOXException {
 		final FolderSQLInterface foldersql = new RdbFolderSQLInterface(session, ContextStorage.getInstance()
 				.getContext(session.getContextId()));
 		while (!pendingInvocations.isEmpty()) {
@@ -245,7 +249,7 @@ public final class folders extends XmlServlet {
 		}
 
 		public void actionPerformed(final FolderSQLInterface foldersSQL, final OutputStream os, final int user)
-				throws Exception {
+				throws IOException {
 
 			final XMLOutputter xo = new XMLOutputter();
 			final String client_id = folderParser.getClientID();
@@ -293,10 +297,6 @@ public final class folders extends XmlServlet {
 			} catch (final OXConcurrentModificationException exc) {
 				LOG.debug(_parsePropChilds, exc);
 				writeResponse(folderObject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, client_id, os, xo);
-			} catch (final XmlPullParserException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(folderObject, HttpServletResponse.SC_BAD_REQUEST, BAD_REQUEST_EXCEPTION, client_id, os,
-						xo);
 			} catch (final Exception exc) {
 				LOG.error(_parsePropChilds, exc);
 				writeResponse(folderObject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(

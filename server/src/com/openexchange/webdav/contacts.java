@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.LinkedList;
@@ -71,6 +72,7 @@ import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.Context;
@@ -104,7 +106,7 @@ public final class contacts extends XmlServlet {
 
 	@Override
 	protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
-			final XmlPullParser parser) throws Exception {
+			final XmlPullParser parser) throws XmlPullParserException, IOException, AbstractOXException {
 		final Session session = getSession(req);
 
 		if (isTag(parser, "prop", "DAV:")) {
@@ -158,7 +160,7 @@ public final class contacts extends XmlServlet {
 	}
 
 	@Override
-	protected void performActions(final OutputStream os, final Session session) throws Exception {
+	protected void performActions(final OutputStream os, final Session session) throws IOException, AbstractOXException {
 		final ContactSQLInterface contactsql = new RdbContactSQLInterface(session);
 		while (!pendingInvocations.isEmpty()) {
 			final QueuedContact qcon = pendingInvocations.poll();
@@ -236,7 +238,7 @@ public final class contacts extends XmlServlet {
 		}
 
 		public void actionPerformed(final ContactSQLInterface contactsSQL, final OutputStream os, final int user)
-				throws Exception {
+				throws IOException {
 
 			final XMLOutputter xo = new XMLOutputter();
 			final String client_id = contactParser.getClientID();
@@ -284,10 +286,6 @@ public final class contacts extends XmlServlet {
 			} catch (final OXConcurrentModificationException exc) {
 				LOG.debug(_parsePropChilds, exc);
 				writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, client_id, os, xo);
-			} catch (final XmlPullParserException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(contactObject, HttpServletResponse.SC_BAD_REQUEST, BAD_REQUEST_EXCEPTION, client_id, os,
-						xo);
 			} catch (final OXException exc) {
 				if (exc.getCategory() == Category.USER_INPUT) {
 					LOG.debug(_parsePropChilds, exc);
