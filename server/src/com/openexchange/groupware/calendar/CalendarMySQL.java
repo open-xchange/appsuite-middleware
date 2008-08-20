@@ -2149,7 +2149,7 @@ class CalendarMySQL implements CalendarSqlImp {
 							dr.setString(5, new_participants[a].getDisplayName());
 						}
 						if (new_participants[a].getEmailAddress() == null) {
-							if (new_participants[a].getIdentifier() == 0) {
+							if (Participant.GROUP == new_participants[a].getType() ? new_participants[a].getIdentifier() < 0 : new_participants[a].getIdentifier() <= 0) {
 								throw new OXCalendarException(OXCalendarException.Code.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD);
 							}
 							dr.setNull(6, java.sql.Types.VARCHAR);

@@ -4,6 +4,8 @@
    outlook will only be applied if XML could be completely parsed
  - Bugfix #10708: Adding properly base64-encoded image data to user's VCard
    attached to a mail
+ - Bugfix #11998: Allowing to add group "All internal users" to an existing
+   appointment
 
 * 2008-08-19 - thorben.betten@open-xchange.com
 
