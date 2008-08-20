@@ -173,8 +173,16 @@ public enum Tree {
     /** [inside GUI] "calendar/calendar/day" or ? */
     CalendarView("/gui/calendar/view"),
     
-    //TODO: more gui settings
+    /** [inside GUI] "1" - "7" */
+    CalendarWorkWeekCountDays("/gui/calendar/workweek/countdays"),
     
+    /** [inside GUI] "0" (=Sunday) - "6" (=Saturday) */
+    CalendarWorkWeekStartDay("/gui/calendar/workweek/startday"),
+    
+    /** [inside GUI] "1" - "8" */
+    CalendarWorkWeekNumberOfAppointments("/gui/calendar/workweek/numberofappointments"),
+    
+    //TODO: more gui settings
     
     /** A string containing GUI-specific settings. This is a JSON object that must be kept small for performance. */
     FastGUI("/fastgui"),
