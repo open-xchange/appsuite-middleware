@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.webdav.xml;
 
 import java.io.IOException;
@@ -88,11 +86,10 @@ import com.openexchange.webdav.xml.fields.CommonFields;
 import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
- * XmlHandler
+ * {@link XmlServlet} - The XML servlet
  *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public abstract class XmlServlet extends PermissionServlet {
 	
 	/**
@@ -158,8 +155,8 @@ public abstract class XmlServlet extends PermissionServlet {
 	
 	private static transient final Log LOG = LogFactory.getLog(XmlServlet.class);
 	
-	public void oxinit() throws ServletException {
-		
+	public void oxinit() /*throws ServletException*/ {
+		// Nothing to do
 	}
 	
 	@Override
@@ -190,8 +187,12 @@ public abstract class XmlServlet extends PermissionServlet {
 					parser.require(XmlPullParser.START_TAG, davUri, "propertyupdate");
 					
 					parsePropertyUpdate(req, resp, parser);
+
+					commit(resp.getOutputStream(), getSession(req));
 				} else if (isTag(parser, "propertyupdate", davUri)) {
 					parsePropertyUpdate(req, resp, parser);
+
+					commit(resp.getOutputStream(), getSession(req));
 				} else {
 					doError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "XML ERROR");
 					return ;
@@ -376,10 +377,6 @@ public abstract class XmlServlet extends PermissionServlet {
 	}
 	
 	protected void parsePropertyUpdate(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser) throws Exception {
-		final OutputStream os = resp.getOutputStream();
-		
-		os.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n").getBytes());
-		os.write(("<D:multistatus xmlns:D=\"DAV:\" buildnumber=\"" + Version.BUILDNUMBER + "\" buildname=\"" + Version.NAME + "\">").getBytes());
 		
 		while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
 			if (isTag(parser, "set", davUri)) {
@@ -388,8 +385,7 @@ public abstract class XmlServlet extends PermissionServlet {
 				parser.next();
 			}
 		}
-		
-		os.write(("</D:multistatus>").getBytes());
+
 	}
 	
 	protected void openSet(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser) throws Exception {
@@ -516,6 +512,17 @@ public abstract class XmlServlet extends PermissionServlet {
 		
 		xo.output(e_response, os);
 	}
+
+	private final void commit(final OutputStream os, final Session session) throws Exception {
+		os.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n").getBytes());
+		os.write(("<D:multistatus xmlns:D=\"DAV:\" buildnumber=\"" + Version.BUILDNUMBER + "\" buildname=\"" + Version.NAME + "\">").getBytes());
+		
+		performActions(os, session);
+		
+		os.write(("</D:multistatus>").getBytes());
+	}
+
+	protected abstract void performActions(final OutputStream os, final Session session) throws Exception;
 	
 	protected abstract void parsePropChilds(HttpServletRequest req, HttpServletResponse resp, XmlPullParser parser) throws Exception;
 	
@@ -533,7 +540,3 @@ public abstract class XmlServlet extends PermissionServlet {
 		return String.format(message, errorCode);
 	}
 }
-
-
-
-

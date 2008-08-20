@@ -51,6 +51,8 @@ package com.openexchange.webdav;
 
 import java.io.OutputStream;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -84,138 +86,226 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 /**
  * contacts
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 public final class contacts extends XmlServlet {
-	
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = -3731372041610025543L;
-	private static final Log LOG = LogFactory.getLog(contacts.class);
-	
+
+	private static final transient Log LOG = LogFactory.getLog(contacts.class);
+
+	private final Queue<QueuedContact> pendingInvocations;
+
+	public contacts() {
+		super();
+		pendingInvocations = new LinkedList<QueuedContact>();
+	}
+
 	@Override
-	protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser) throws Exception {
-		final OutputStream os = resp.getOutputStream();
-		
-		final Session sessionObj = getSession(req);
-		
-		final XMLOutputter xo = new XMLOutputter();
-		
-		final ContactParser contactparser = new ContactParser(sessionObj);
-		final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
-		
+	protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
+			final XmlPullParser parser) throws Exception {
+		final Session session = getSession(req);
+
 		if (isTag(parser, "prop", "DAV:")) {
-			String client_id = null;
-			
-			int method = 0;
-			
-			ContactObject contactobject = null;
-			
-			try {
-				contactobject = new ContactObject();
-				parser.nextTag();
-				contactparser.parse(parser, contactobject);
-				
-				method = contactparser.getMethod();
-				
-				final Date lastModified = contactobject.getLastModified();
-				contactobject.removeLastModified();
-				
-				final int inFolder = contactparser.getFolder();
-				client_id = contactparser.getClientID();
-				
-				switch (method) {
-					case DataParser.SAVE:
-						if (contactobject.containsObjectID()) {
-							if (lastModified == null) {
-								throw new OXMandatoryFieldException("missing field last_modified");
-							}
-							
-							contactsql.updateContactObject(contactobject, inFolder, lastModified);
-						} else {
-							contactobject.setParentFolderID(inFolder);
-							
-							if (contactobject.containsImage1() && contactobject.getImage1() == null) {
-								contactobject.removeImage1();
-							}
-							
-							contactsql.insertContactObject(contactobject);
-						}
-						break;
-					case DataParser.DELETE:
-						if (lastModified == null) {
-							throw new OXMandatoryFieldException("missing field last_modified");
-						}
-						
-						contactsql.deleteContactObject(contactobject.getObjectID(), inFolder, lastModified);
-						break;
-					default:
-						throw new OXConflictException("invalid method: " + method);
-				}
-				
-				writeResponse(contactobject, HttpServletResponse.SC_OK, OK, client_id, os, xo);
-			} catch (final OXMandatoryFieldException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(contactobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc, MANDATORY_FIELD_EXCEPTION), client_id, os, xo);
-			} catch (final OXPermissionException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(contactobject, HttpServletResponse.SC_FORBIDDEN, getErrorMessage(exc, PERMISSION_EXCEPTION), client_id, os, xo);
-			} catch (final OXConflictException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(contactobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc, CONFLICT_EXCEPTION), client_id, os, xo);
-			} catch (final OXObjectNotFoundException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(contactobject, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION, client_id, os, xo);
-			} catch (final OXConcurrentModificationException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(contactobject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, client_id, os, xo);
-			} catch (final XmlPullParserException exc) {
-				LOG.debug(_parsePropChilds, exc);
-				writeResponse(contactobject, HttpServletResponse.SC_BAD_REQUEST, BAD_REQUEST_EXCEPTION, client_id, os, xo);
-			} catch (final OXException exc) {
-				if (exc.getCategory() == Category.USER_INPUT) {
-					LOG.debug(_parsePropChilds, exc);
-					writeResponse(contactobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc, USER_INPUT_EXCEPTION), client_id, os, xo);
+			/*
+			 * Adjust parser
+			 */
+			parser.nextTag();
+
+			final ContactObject contactobject = new ContactObject();
+
+			final ContactParser contactparser = new ContactParser(session);
+			contactparser.parse(parser, contactobject);
+
+			final int method = contactparser.getMethod();
+
+			final Date lastModified = contactobject.getLastModified();
+			contactobject.removeLastModified();
+
+			final int inFolder = contactparser.getFolder();
+
+			/*
+			 * Prepare contact for being queued
+			 */
+			switch (method) {
+			case DataParser.SAVE:
+				if (contactobject.containsObjectID()) {
+					pendingInvocations.add(new QueuedContact(contactobject, contactparser, method, lastModified,
+							inFolder));
 				} else {
-					LOG.error(_parsePropChilds, exc);
-					writeResponse(contactobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(exc, SERVER_ERROR_EXCEPTION) + exc.toString(), client_id, os, xo);
+					contactobject.setParentFolderID(inFolder);
+
+					if (contactobject.containsImage1() && contactobject.getImage1() == null) {
+						contactobject.removeImage1();
+					}
+
+					pendingInvocations.add(new QueuedContact(contactobject, contactparser, method, lastModified,
+							inFolder));
 				}
-			} catch (final Exception exc) {
-				LOG.error(_parsePropChilds, exc);
-				writeResponse(contactobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(SERVER_ERROR_EXCEPTION, "undefinied error") + exc.toString(), client_id, os, xo);
+				break;
+			case DataParser.DELETE:
+				pendingInvocations.add(new QueuedContact(contactobject, contactparser, method, lastModified, inFolder));
+				break;
+			default:
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("invalid method: " + method);
+				}
 			}
 		} else {
 			parser.next();
 		}
 	}
-	
+
 	@Override
-	protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId, final OutputStream os) throws Exception {
+	protected void performActions(final OutputStream os, final Session session) throws Exception {
+		final ContactSQLInterface contactsql = new RdbContactSQLInterface(session);
+		while (!pendingInvocations.isEmpty()) {
+			final QueuedContact qcon = pendingInvocations.poll();
+			if (null != qcon) {
+				qcon.actionPerformed(contactsql, os, session.getUserId());
+			}
+		}
+	}
+
+	@Override
+	protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId,
+			final OutputStream os) throws Exception {
 		final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
 		final ContactWriter contactwriter = new ContactWriter(userObj, ctx, sessionObj);
 		contactwriter.startWriter(objectId, folderId, os);
 	}
 
 	@Override
-	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId, final boolean bModified, final boolean bDelete, final Date lastsync, final OutputStream os) throws Exception {
+	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId,
+			final boolean bModified, final boolean bDelete, final Date lastsync, final OutputStream os)
+			throws Exception {
 		startWriter(sessionObj, ctx, folderId, bModified, bDelete, false, lastsync, os);
 	}
-	
+
 	@Override
-	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId, final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
+	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId,
+			final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync,
+			final OutputStream os) throws Exception {
 		final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
 		final ContactWriter contactwriter = new ContactWriter(userObj, ctx, sessionObj);
 		contactwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
 	}
-	
+
 	@Override
 	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
-		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx);
+		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+				sessionObj.getUserId(), ctx);
 		return (uc.hasWebDAVXML() && uc.hasContact());
 	}
+
+	private final class QueuedContact {
+
+		private final ContactObject contactObject;
+
+		private final ContactParser contactParser;
+
+		private final int action;
+
+		private final Date lastModified;
+
+		private final int inFolder;
+
+		/**
+		 * Initializes a new {@link QueuedTask}
+		 * 
+		 * @param contactObject
+		 *            The contact object
+		 * @param contactParser
+		 *            The contact's parser
+		 * @param action
+		 *            The desired action
+		 * @param lastModified
+		 *            The last-modified date
+		 * @param inFolder
+		 *            The contact's folder
+		 */
+		public QueuedContact(final ContactObject contactObject, final ContactParser contactParser, final int action,
+				final Date lastModified, final int inFolder) {
+			super();
+			this.contactObject = contactObject;
+			this.contactParser = contactParser;
+			this.action = action;
+			this.lastModified = lastModified;
+			this.inFolder = inFolder;
+		}
+
+		public void actionPerformed(final ContactSQLInterface contactsSQL, final OutputStream os, final int user)
+				throws Exception {
+
+			final XMLOutputter xo = new XMLOutputter();
+			final String client_id = contactParser.getClientID();
+
+			try {
+				switch (action) {
+				case DataParser.SAVE:
+					if (contactObject.containsObjectID()) {
+						if (lastModified == null) {
+							throw new OXMandatoryFieldException("missing field last_modified");
+						}
+
+						contactsSQL.updateContactObject(contactObject, inFolder, lastModified);
+					} else {
+						contactsSQL.insertContactObject(contactObject);
+					}
+					break;
+				case DataParser.DELETE:
+					if (lastModified == null) {
+						throw new OXMandatoryFieldException("missing field last_modified");
+					}
+
+					contactsSQL.deleteContactObject(contactObject.getObjectID(), inFolder, lastModified);
+					break;
+				default:
+					throw new OXConflictException("invalid method: " + action);
+				}
+				writeResponse(contactObject, HttpServletResponse.SC_OK, OK, client_id, os, xo);
+			} catch (final OXMandatoryFieldException exc) {
+				LOG.debug(_parsePropChilds, exc);
+				writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
+						MANDATORY_FIELD_EXCEPTION), client_id, os, xo);
+			} catch (final OXPermissionException exc) {
+				LOG.debug(_parsePropChilds, exc);
+				writeResponse(contactObject, HttpServletResponse.SC_FORBIDDEN, getErrorMessage(exc,
+						PERMISSION_EXCEPTION), client_id, os, xo);
+			} catch (final OXConflictException exc) {
+				LOG.debug(_parsePropChilds, exc);
+				writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc, CONFLICT_EXCEPTION),
+						client_id, os, xo);
+			} catch (final OXObjectNotFoundException exc) {
+				LOG.debug(_parsePropChilds, exc);
+				writeResponse(contactObject, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION, client_id,
+						os, xo);
+			} catch (final OXConcurrentModificationException exc) {
+				LOG.debug(_parsePropChilds, exc);
+				writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, client_id, os, xo);
+			} catch (final XmlPullParserException exc) {
+				LOG.debug(_parsePropChilds, exc);
+				writeResponse(contactObject, HttpServletResponse.SC_BAD_REQUEST, BAD_REQUEST_EXCEPTION, client_id, os,
+						xo);
+			} catch (final OXException exc) {
+				if (exc.getCategory() == Category.USER_INPUT) {
+					LOG.debug(_parsePropChilds, exc);
+					writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
+							USER_INPUT_EXCEPTION), client_id, os, xo);
+				} else {
+					LOG.error(_parsePropChilds, exc);
+					writeResponse(contactObject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(exc,
+							SERVER_ERROR_EXCEPTION)
+							+ exc.toString(), client_id, os, xo);
+				}
+			} catch (final Exception exc) {
+				LOG.error(_parsePropChilds, exc);
+				writeResponse(contactObject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(
+						SERVER_ERROR_EXCEPTION, "undefinied error")
+						+ exc.toString(), client_id, os, xo);
+			}
+
+		}
+	}
 }
-
-
-
-
