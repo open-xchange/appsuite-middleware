@@ -78,6 +78,8 @@ import javax.activation.MimetypesFileTypeMap;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
+import org.apache.commons.codec.binary.Base64;
+
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
@@ -1758,31 +1760,34 @@ public class OXContainerConverter {
 		// NICKNAME
 		addProperty(object, "NICKNAME", getList(contact.getNickname(), ','));
 		// PHOTO
-		String s = null;
 		if (contact.getImage1() != null) {
+			// First try as URI
 			try {
-				s = new String(contact.getImage1(), CHARSET_ISO_8859_1);
+				addProperty(object, "PHOTO", "VALUE", new String[] { "URI" }, new URI(new String(contact.getImage1(),
+						CHARSET_ISO_8859_1)));
 			} catch (final UnsupportedEncodingException e2) {
 				LOG.error(e2);
 				throw new ConverterException(e2);
-			}
-		}
-		if (s != null) {
-			try {
-				addProperty(object, "PHOTO", "VALUE", new String[] { "URI" }, new URI(s));
 			} catch (final URISyntaxException e) {
-				try {
-					final Parameter type = new Parameter(P_TYPE);
-					type.addValue(new ParameterValue("JPEG"));
-					addProperty(object, "PHOTO", "ENCODING", new String[] { "B" },
-							(new BASE64Encoding()).decode(s).getBytes(CHARSET_ISO_8859_1)).addParameter(type);
-				} catch (final IOException e1) {
-					final ConverterException ce = new ConverterException(e.getMessage());
-					ce.initCause(e1);
-					throw ce;
+				// Insert raw base64-encoded image bytes
+				final Parameter type = new Parameter(P_TYPE);
+				{
+					final String mimeType = contact.getImageContentType();
+					final String param;
+					if (mimeType == null) {
+						param = "JPEG";
+					} else if (mimeType.indexOf('/') != -1) {
+						param = mimeType.substring(mimeType.indexOf('/') + 1).toUpperCase();
+					} else {
+						param = mimeType.toUpperCase();
+					}
+					type.addValue(new ParameterValue(param));
 				}
+				final byte[] encodedImg = Base64.encodeBase64(contact.getImage1(), true);
+				addProperty(object, "PHOTO", "ENCODING", new String[] { "B" }, encodedImg).addParameter(type);
 			}
 		}
+		String s = null;
 		// BDAY
 		addDate(object, "BDAY", contact.getBirthday(), false);
 		// ADR
@@ -2028,7 +2033,7 @@ public class OXContainerConverter {
 			return;
 		}
 		// Fill date property
-		DateTimeValue dt = new DateTimeValue();
+		final DateTimeValue dt = new DateTimeValue();
 		//dt.calendar.setTimeZone(DateTimeValue.GMT);
 		dt.calendar.setTimeInMillis(value.getTime());
 		dt.hasTime = false;
