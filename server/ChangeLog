@@ -42,8 +42,8 @@
    to append that message to a folder which does not support user flags
  - Bugfix #11881: No multiple participants added to appointment which has
    the private flag set
- - Partial bugfix #11737: Fixed propagating display-name modification on
-   common contact update
+ - Bugfix #11737: Fixed propagating display-name modification on common
+   contact update
  - Bugfix #11912: Displaying those appointments at proper position in
    mini-calendar whose time zone offset exceeds the hour-of-day
  - Partial bugfix #11980: Properly delegating limit argument to search method on
