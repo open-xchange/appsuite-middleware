@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.text.parser.handler;
 
+import static com.openexchange.mail.text.HTMLProcessing.PATTERN_HREF;
 import static com.openexchange.mail.text.HTMLProcessing.replaceHTMLEntities;
 
 import java.util.Iterator;
@@ -410,7 +411,8 @@ public final class HTML2TextHandler implements HTMLHandler {
 					textBuilder.append(replaceHTMLEntities(preparedText));
 				}
 			}
-			if (anchorTag && hrefContent != null && !text.equalsIgnoreCase(hrefContent)) {
+			if (anchorTag && hrefContent != null && !text.equalsIgnoreCase(hrefContent)
+					&& !PATTERN_HREF.matcher(text).matches()) {
 				textBuilder.append(" [").append(hrefContent).append(']');
 			}
 		}

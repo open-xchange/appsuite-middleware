@@ -6,6 +6,8 @@
    attached to a mail
  - Bugfix #11998: Allowing to add group "All internal users" to an existing
    appointment
+ - Bugfix #11984: Avoiding display of a-tag's href content in brackets if
+   a-tag's content already represents a valid link
 
 * 2008-08-19 - thorben.betten@open-xchange.com
 
