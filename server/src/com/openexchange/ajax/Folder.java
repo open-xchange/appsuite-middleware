@@ -111,7 +111,6 @@ import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.json.writer.FolderWriter.MailFolderFieldWriter;
-import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.FolderObjectIterator;
@@ -1459,12 +1458,12 @@ public class Folder extends SessionServlet {
 				try {
 					final MailFolder updateFolder = mailInterface.getFolder(folderIdentifier, true);
 					if (updateFolder != null) {
-						final MailFolderDescription mf = new MailFolderDescription();
-						mf.setFullname(updateFolder.getFullname());
-						mf.setExists(updateFolder.exists());
-						mf.setSeparator(updateFolder.getSeparator());
-						com.openexchange.mail.json.parser.FolderParser.parse(jsonObj, mf, session);
-						retval = mailInterface.saveFolder(mf);
+						final MailFolderDescription mfd = new MailFolderDescription();
+						mfd.setFullname(updateFolder.getFullname());
+						mfd.setExists(updateFolder.exists());
+						mfd.setSeparator(updateFolder.getSeparator());
+						com.openexchange.mail.json.parser.FolderParser.parse(jsonObj, mfd, session);
+						retval = mailInterface.saveFolder(mfd);
 					}
 				} finally {
 					try {
@@ -1538,11 +1537,13 @@ public class Folder extends SessionServlet {
 			if ((parentFolderId = getUnsignedInteger(parentFolder)) == -1) {
 				final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
 				try {
-					final MailFolderDescription mf = new MailFolderDescription();
-					mf.setParentFullname(MailFolderUtility.prepareMailFolderParam(parentFolder));
-					com.openexchange.mail.json.parser.FolderParser.parse(jsonObj, mf, session);
-					mf.setExists(false);
-					retval = mailInterface.saveFolder(mf);
+					final MailFolder parent = mailInterface.getFolder(parentFolder, true);
+					final MailFolderDescription mfd = new MailFolderDescription();
+					mfd.setParentFullname(parent.getFullname());
+					mfd.setSeparator(parent.getSeparator());
+					com.openexchange.mail.json.parser.FolderParser.parse(jsonObj, mfd, session);
+					mfd.setExists(false);
+					retval = mailInterface.saveFolder(mfd);
 				} finally {
 					try {
 						mailInterface.close(true);
