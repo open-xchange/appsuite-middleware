@@ -319,7 +319,11 @@ public final class IMAPException extends MIMEMailException {
 		/**
 		 * Sort field %1$s is not supported via IMAP SORT command
 		 */
-		UNSUPPORTED_SORT_FIELD("Sort field %1$s is not supported via IMAP SORT command", Category.CODE_ERROR, 2049);
+		UNSUPPORTED_SORT_FIELD("Sort field %1$s is not supported via IMAP SORT command", Category.CODE_ERROR, 2049),
+		/**
+		 * Missing personal namespace
+		 */
+		MISSING_PERSONAL_NAMESPACE("Missing personal namespace", Category.CODE_ERROR, 2050);
 
 		private final String message;
 
