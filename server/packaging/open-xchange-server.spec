@@ -139,6 +139,17 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Aug 20 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12011: Implemented a commit-mechanism that modifications sent by
+   outlook will only be applied if XML could be completely parsed
+ - Bugfix #10708: Adding properly base64-encoded image data to user's VCard
+   attached to a mail
+ - Bugfix #11998: Allowing to add group "All internal users" to an existing
+   appointment
+ - Bugfix #11984: Avoiding display of a-tag's href content in brackets if
+   a-tag's content already represents a valid link
+* Tue Aug 19 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12023: Properly handling empty Content-Id value
 * Mon Aug 18 2008 - thorben.betten@open-xchange.com
  - Bugfix #11614: Written own quota parse routine which treats a missing
    parenthesis pair in IMAP QUOTA response as no resource restrictions
@@ -164,8 +175,8 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
    to append that message to a folder which does not support user flags
  - Bugfix #11881: No multiple participants added to appointment which has
    the private flag set
- - Partial bugfix #11737: Fixed propagating display-name modification on
-   common contact update
+ - Bugfix #11737: Fixed propagating display-name modification on common
+   contact update
  - Bugfix #11912: Displaying those appointments at proper position in
    mini-calendar whose time zone offset exceeds the hour-of-day
  - Partial bugfix #11980: Properly delegating limit argument to search method on
