@@ -311,10 +311,11 @@ public final class HTML2TextHandler implements HTMLHandler {
 				preTag = true;
 			} else if (appendHref && tag.equalsIgnoreCase(TAG_A)) {
 				anchorTag = true;
+				hrefContent = null;
 				final int size = attributes.size();
 				if (size > 0) {
 					final Iterator<Entry<String, String>> iter = attributes.entrySet().iterator();
-					for (int i = 0; i < size; i++) {
+					for (int i = 0; i < size && hrefContent == null; i++) {
 						final Entry<String, String> e = iter.next();
 						if (ATTR_HREF.equalsIgnoreCase(e.getKey())) {
 							hrefContent = e.getValue();
