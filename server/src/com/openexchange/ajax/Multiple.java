@@ -212,7 +212,7 @@ public class Multiple extends SessionServlet {
 			final Session session, final Context ctx, final HttpServletRequest req, final OXJSONWriter jsonWriter)
 			throws AjaxException {
 		try {
-			if (module.equals(MODULE_CALENDAR)) {
+			if (MODULE_CALENDAR.equals(module)) {
 				writeMailRequest(req);
 				final AppointmentRequest appointmentRequest;
 				try {
@@ -244,7 +244,7 @@ public class Multiple extends SessionServlet {
 				} finally {
 					jsonWriter.endObject();
 				}
-			} else if (module.equals(MODULE_CONTACT)) {
+			} else if (MODULE_CONTACT.equals(module)) {
 				writeMailRequest(req);
 				final ContactRequest contactRequest = new ContactRequest(session, ctx);
 				jsonWriter.object();
@@ -271,7 +271,7 @@ public class Multiple extends SessionServlet {
 				} finally {
 					jsonWriter.endObject();
 				}
-			} else if (module.equals(MODULE_GROUP)) {
+			} else if (MODULE_GROUP.equals(module)) {
 				writeMailRequest(req);
 				final GroupRequest groupRequest = new GroupRequest(session, ctx);
 				jsonWriter.object();
@@ -298,7 +298,7 @@ public class Multiple extends SessionServlet {
 				} finally {
 					jsonWriter.endObject();
 				}
-			} else if (module.equals(MODULE_REMINDER)) {
+			} else if (MODULE_REMINDER.equals(module)) {
 				writeMailRequest(req);
 				final ReminderRequest reminderRequest = new ReminderRequest(session, ctx);
 				jsonWriter.object();
@@ -325,7 +325,7 @@ public class Multiple extends SessionServlet {
 				} finally {
 					jsonWriter.endObject();
 				}
-			} else if (module.equals(MODULE_RESOURCE)) {
+			} else if (MODULE_RESOURCE.equals(module)) {
 				writeMailRequest(req);
 				final ResourceRequest resourceRequest = new ResourceRequest(session, ctx);
 				jsonWriter.object();
@@ -352,7 +352,7 @@ public class Multiple extends SessionServlet {
 				} finally {
 					jsonWriter.endObject();
 				}
-			} else if (module.equals(MODULE_TASK)) {
+			} else if (MODULE_TASK.equals(module)) {
 				writeMailRequest(req);
 				final TaskRequest taskRequest = new TaskRequest(session, ctx);
 				jsonWriter.object();
@@ -379,7 +379,7 @@ public class Multiple extends SessionServlet {
 				} finally {
 					jsonWriter.endObject();
 				}
-			} else if (module.equals(MODULE_INFOSTORE)) {
+			} else if (MODULE_INFOSTORE.equals(module)) {
 				writeMailRequest(req);
 				final InfostoreRequest infoRequest = new InfostoreRequest(session, ctx, jsonWriter);
 				try {
@@ -389,7 +389,7 @@ public class Multiple extends SessionServlet {
 					ResponseWriter.writeException(e, jsonWriter);
 					jsonWriter.endObject();
 				}
-			} else if (module.equals(MODULE_FOLDER)) {
+			} else if (MODULE_FOLDER.equals(module)) {
 				writeMailRequest(req);
 				final FolderRequest folderequest = new FolderRequest(session, ctx, jsonWriter);
 				try {
@@ -406,7 +406,7 @@ public class Multiple extends SessionServlet {
 					ResponseWriter.writeException(oje, jsonWriter);
 					jsonWriter.endObject();
 				}
-			} else if (module.equals(MODULE_MAIL)) {
+			} else if (MODULE_MAIL.equals(module)) {
 				try {
 					/*
 					 * Fetch or create mail request object
@@ -457,7 +457,11 @@ public class Multiple extends SessionServlet {
 					jsonWriter.endObject();
 				}
 			} else {
-				throw new AjaxException(AjaxException.Code.UnknownAction, action);
+				final AjaxException ajaxException = new AjaxException(AjaxException.Code.UNKNOWN_MODULE, module);
+				LOG.error(ajaxException.getMessage(), ajaxException);
+				jsonWriter.object();
+				ResponseWriter.writeException(ajaxException, jsonWriter);
+				jsonWriter.endObject();
 			}
 		} catch (final JSONException e) {
 			/*
