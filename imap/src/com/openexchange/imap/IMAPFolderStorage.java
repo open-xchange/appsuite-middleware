@@ -402,6 +402,13 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 		session.setParameter(MailSessionParameterNames.PARAM_DEF_FLD_FLAG, Boolean.valueOf(checked));
 	}
 
+	/**
+	 * Stores specified separator character in session parameters for future
+	 * look-ups
+	 * 
+	 * @param separator
+	 *            The separator character
+	 */
 	private void setSeparator(final char separator) {
 		session.setParameter(MailSessionParameterNames.PARAM_SEPARATOR, Character.valueOf(separator));
 	}
@@ -436,21 +443,63 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 						 */
 						inboxFolder.setSubscribed(true);
 					}
-					final boolean noInferiors = ((inboxFolder.getType() & Folder.HOLDS_FOLDERS) == 0);
 					final StringBuilder tmp = new StringBuilder(128);
 					/*
-					 * Determine where to create default folders and store as a
-					 * prefix for folder fullname
+					 * Check for NAMESPACE capability
 					 */
-					if (!noInferiors
-							&& (!isAltNamespaceEnabled(imapStore) || MailConfig
-									.isAllowNestedDefaultFolderOnAltNamespace())) {
+					if (imapConfig.getImapCapabilities().hasNamespace()) {
 						/*
-						 * Only allow default folder below INBOX if inferiors
-						 * are permitted and either altNamespace is disabled or
-						 * nested default folder are explicitly allowed
+						 * Perform the NAMESPACE command to detect the subfolder
+						 * prefix. From rfc2342: Clients often attempt to create
+						 * mailboxes for such purposes as maintaining a record
+						 * of sent messages (e.g. "Sent Mail") or temporarily
+						 * saving messages being composed (e.g. "Drafts"). For
+						 * these clients to inter-operate correctly with the
+						 * variety of IMAP4 servers available, the user must
+						 * enter the prefix of the Personal Namespace used by
+						 * the server. Using the NAMESPACE command, a client is
+						 * able to automatically discover this prefix without
+						 * manual user configuration.
 						 */
-						tmp.append(inboxFolder.getFullName()).append(inboxFolder.getSeparator());
+						final Folder[] personalNamespaces = imapStore.getPersonalNamespaces();
+						if (personalNamespaces == null || personalNamespaces[0] == null) {
+							throw new IMAPException(IMAPException.Code.MISSING_PERSONAL_NAMESPACE);
+						}
+						setSeparator(personalNamespaces[0].getSeparator());
+						final String persPrefix = personalNamespaces[0].getFullName();
+						if ((persPrefix.length() == 0)) {
+							if (IMAPCommandsCollection.canCreateSubfolder(persPrefix, (IMAPFolder) inboxFolder)
+									&& MailConfig.isAllowNestedDefaultFolderOnAltNamespace()) {
+								/*
+								 * Personal namespace folder allows subfolders
+								 * and nested default folder are demanded, thus
+								 * use INBOX as prefix although NAMESPACE
+								 * signals to use no prefix.
+								 */
+								tmp.append(inboxFolder.getFullName()).append(inboxFolder.getSeparator());
+							}
+						} else {
+							tmp.append(persPrefix).append(personalNamespaces[0].getSeparator());
+						}
+					} else {
+						/*
+						 * Examine INBOX folder since NAMESPACE capability is
+						 * not supported
+						 */
+						setSeparator(inboxFolder.getSeparator());
+						final boolean noInferiors = ((inboxFolder.getType() & Folder.HOLDS_FOLDERS) == 0);
+						/*
+						 * Determine where to create default folders and store
+						 * as a prefix for folder fullname
+						 */
+						if (!noInferiors && (MailConfig.isAllowNestedDefaultFolderOnAltNamespace())) {
+							/*
+							 * Only allow default folder below INBOX if
+							 * inferiors are permitted nested default folder are
+							 * explicitly allowed
+							 */
+							tmp.append(inboxFolder.getFullName()).append(inboxFolder.getSeparator());
+						}
 					}
 					final String prefix = tmp.toString();
 					tmp.setLength(0);
@@ -471,7 +520,6 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 										(i != StorageUtility.INDEX_CONFIRMED_HAM)
 												&& (i != StorageUtility.INDEX_CONFIRMED_SPAM), tmp));
 					}
-					setSeparator(inboxFolder.getSeparator());
 					setDefaultFoldersChecked(true);
 				} catch (final MessagingException e) {
 					throw MIMEMailException.handleMessagingException(e, imapConfig);
@@ -1767,7 +1815,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 	 * @throws MessagingException
 	 *             - if IMAP's NAMESPACE command fails
 	 */
-	private static boolean isAltNamespaceEnabled(final IMAPStore imapStore) throws MessagingException {
+	private static boolean isPersonalNamespaceEmpty(final IMAPStore imapStore) throws MessagingException {
 		boolean altnamespace = false;
 		final Folder[] pn = imapStore.getPersonalNamespaces();
 		if ((pn.length != 0) && (pn[0].getFullName().trim().length() == 0)) {
