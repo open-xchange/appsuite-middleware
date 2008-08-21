@@ -230,6 +230,43 @@ public final class IMAPCommandsCollection {
 	}
 
 	/**
+	 * Checks if IMAP folder's prefix allows subfolder creation
+	 * 
+	 * @param prefix
+	 *            The IMAP folder's prefix
+	 * @param imapFolder
+	 *            The IMAP folder providing the IMAP connection
+	 * @return <code>true</code> if subfolder are allowed; otherwise
+	 *         <code>false</code>
+	 * @throws MessagingException
+	 *             If checking IMAP root folder for subfolder creation fails
+	 */
+	public static boolean canCreateSubfolder(final String prefix, final IMAPFolder imapFolder)
+			throws MessagingException {
+		return ((Boolean) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				/*
+				 * Encode the mbox as per RFC2060
+				 */
+				final String mboxName = prepareStringArgument(new StringBuilder(32).append(prefix).append(
+						String.valueOf(System.currentTimeMillis())).toString());
+				/*
+				 * Perform command: CREATE
+				 */
+				final StringBuilder sb = new StringBuilder(7 + mboxName.length());
+				final Response[] r = p.command(sb.append("CREATE ").append(mboxName).toString(), null);
+				final Response response = r[r.length - 1];
+				if (response.isOK()) {
+					sb.setLength(0);
+					p.command(sb.append("DELETE ").append(mboxName).toString(), null);
+					return Boolean.TRUE;
+				}
+				return Boolean.FALSE;
+			}
+		})).booleanValue();
+	}
+
+	/**
 	 * Get the quotas for the quota-root associated with given IMAP folder. Note
 	 * that many folders may have the same quota-root. Quotas are controlled on
 	 * the basis of a quota-root, not (necessarily) a folder. The relationship
