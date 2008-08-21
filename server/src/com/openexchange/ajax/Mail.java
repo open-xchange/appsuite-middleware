@@ -120,6 +120,7 @@ import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -203,7 +204,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		return new AbstractOXException(EnumComponent.MAIL, Category.INTERNAL_ERROR, 9999, cause.getMessage(), cause);
 	}
 
-	public static final char SEPERATOR = '/';
+	private static final char SEPERATOR = '/';
 
 	private static final String UPLOAD_PARAM_MAILINTERFACE = "mi";
 
@@ -2189,7 +2190,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 				}
 				final long[] msgUIDs = mailInterface.copyMessages(sourceFolder, destFolder, new long[] { uid }, false);
 				if (msgUIDs.length == 1) {
-					jsonWriter.value(new StringBuilder(destFolder).append(SEPERATOR).append(msgUIDs[0]).toString());
+					// TODO: Split response in folder and ID
+					jsonWriter.value(new StringBuilder(destFolder).append(getSeparator(session)).append(msgUIDs[0]).toString());
 				} else if (msgUIDs.length > 1) {
 					jsonWriter.array();
 					try {
@@ -2259,7 +2261,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 						response.reset();
 						sb.setLength(0);
 						final JSONArray jsonArr = new JSONArray();
-						jsonArr.put(sb.append(destFolder).append(SEPERATOR).append(msgUIDs[k]).toString());
+						// TODO: Split response in folder and ID
+						jsonArr.put(sb.append(destFolder).append(getSeparator(session)).append(msgUIDs[k]).toString());
 						response.setData(jsonArr);
 						response.setTimestamp(null);
 						ResponseWriter.write(response, writer);
@@ -3031,6 +3034,16 @@ public class Mail extends PermissionServlet implements UploadListener {
 			return uploadQuotaPerFile;
 		}
 
+	}
+
+	private static final char getSeparator(final Session session) {
+		try {
+			final Character c = (Character) session.getParameter(MailSessionParameterNames.PARAM_SEPARATOR);
+			return c == null ? SEPERATOR : c.charValue();
+		} catch (final Exception e) {
+			LOG.error(e.getMessage(), e);
+			return SEPERATOR;
+		}
 	}
 
 }
