@@ -468,8 +468,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 						setSeparator(personalNamespaces[0].getSeparator());
 						final String persPrefix = personalNamespaces[0].getFullName();
 						if ((persPrefix.length() == 0)) {
-							if (IMAPCommandsCollection.canCreateSubfolder(persPrefix, (IMAPFolder) inboxFolder)
-									&& MailConfig.isAllowNestedDefaultFolderOnAltNamespace()) {
+							if (MailConfig.isAllowNestedDefaultFolderOnAltNamespace()
+									&& IMAPCommandsCollection.canCreateSubfolder(persPrefix, (IMAPFolder) inboxFolder)) {
 								/*
 								 * Personal namespace folder allows subfolders
 								 * and nested default folder are demanded, thus
