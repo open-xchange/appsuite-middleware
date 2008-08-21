@@ -2191,7 +2191,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 				final long[] msgUIDs = mailInterface.copyMessages(sourceFolder, destFolder, new long[] { uid }, false);
 				if (msgUIDs.length == 1) {
 					// TODO: Split response in folder and ID
-					jsonWriter.value(new StringBuilder(destFolder).append(getSeparator(session)).append(msgUIDs[0]).toString());
+					jsonWriter.value(new StringBuilder(destFolder).append(getSeparator(session, mailInterface)).append(
+							msgUIDs[0]).toString());
 				} else if (msgUIDs.length > 1) {
 					jsonWriter.array();
 					try {
@@ -2262,7 +2263,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 						sb.setLength(0);
 						final JSONArray jsonArr = new JSONArray();
 						// TODO: Split response in folder and ID
-						jsonArr.put(sb.append(destFolder).append(getSeparator(session)).append(msgUIDs[k]).toString());
+						jsonArr.put(sb.append(destFolder).append(getSeparator(session, mailInterface)).append(
+								msgUIDs[k]).toString());
 						response.setData(jsonArr);
 						response.setTimestamp(null);
 						ResponseWriter.write(response, writer);
@@ -3036,10 +3038,13 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	}
 
-	private static final char getSeparator(final Session session) {
+	private static final char getSeparator(final Session session, final MailServletInterface mailInterface) {
 		try {
 			final Character c = (Character) session.getParameter(MailSessionParameterNames.PARAM_SEPARATOR);
-			return c == null ? SEPERATOR : c.charValue();
+			if (c != null) {
+				return c.charValue();
+			}
+			return mailInterface.getFolder(mailInterface.getInboxFolder(), true).getSeparator();
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 			return SEPERATOR;
