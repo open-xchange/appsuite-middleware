@@ -459,7 +459,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		final StringBuilder debug = LOG.isDebugEnabled() ? new StringBuilder(128) : null;
 		final long[] remain;
 		final int blockSize = IMAPConfig.getBlockSize();
-		if (msgUIDs.length > blockSize) {
+		if (blockSize > 0 && msgUIDs.length > blockSize) {
 			/*
 			 * Block-wise deletion
 			 */
@@ -614,7 +614,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 
 			int offset = 0;
 			final long[] remain;
-			if (msgUIDs.length > blockSize) {
+			if (blockSize > 0 && msgUIDs.length > blockSize) {
 				/*
 				 * Block-wise deletion
 				 */

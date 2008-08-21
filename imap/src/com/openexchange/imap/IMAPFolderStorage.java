@@ -1067,91 +1067,93 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 				if (backup) {
 					imapAccess.getMessageStorage().notifyIMAPFolderModification(trashFullname);
 				}
-				int msgCount = f.getMessageCount();
-				/*
-				 * Block-wise deletion
-				 */
-				final long startClear = System.currentTimeMillis();
-				final int blockSize = IMAPConfig.getBlockSize();
 				final StringBuilder debug;
 				if (LOG.isDebugEnabled()) {
 					debug = new StringBuilder(128);
 				} else {
 					debug = null;
 				}
-				while (msgCount > blockSize) {
+				final int blockSize = IMAPConfig.getBlockSize();
+				final long startClear = System.currentTimeMillis();
+				if (blockSize > 0) {
 					/*
-					 * Don't adapt sequence number since folder expunge already
-					 * resets message numbering
+					 * Block-wise deletion
 					 */
-					if (backup) {
+					int msgCount = f.getMessageCount();
+					while (msgCount > blockSize) {
+						/*
+						 * Don't adapt sequence number since folder expunge
+						 * already resets message numbering
+						 */
+						if (backup) {
+							try {
+								final long start = System.currentTimeMillis();
+								new CopyIMAPCommand(f, INT_1, blockSize, trashFullname).doCommand();
+								if (LOG.isDebugEnabled()) {
+									debug.setLength(0);
+									LOG.debug(debug.append("\"Soft Clear\": ").append(
+											"Messages copied to default trash folder \"").append(trashFullname).append(
+											"\" in ").append((System.currentTimeMillis() - start)).append(STR_MSEC)
+											.toString());
+								}
+							} catch (final MessagingException e) {
+								if (e.getNextException() instanceof CommandFailedException) {
+									final CommandFailedException exc = (CommandFailedException) e.getNextException();
+									if (exc.getMessage().indexOf("Over quota") > -1) {
+										/*
+										 * We face an Over-Quota-Exception
+										 */
+										throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, exc,
+												new Object[0]);
+									}
+								}
+								throw new IMAPException(IMAPException.Code.MOVE_ON_DELETE_FAILED, e, new Object[0]);
+							}
+						}
+						/*
+						 * Delete through storing \Deleted flag...
+						 */
+						new FlagsIMAPCommand(f, INT_1, blockSize, FLAGS_DELETED, true, true).doCommand();
+						/*
+						 * ... and perform EXPUNGE
+						 */
+						final long startExpunge = System.currentTimeMillis();
 						try {
-							final long start = System.currentTimeMillis();
-							new CopyIMAPCommand(f, INT_1, blockSize, trashFullname).doCommand();
+							IMAPCommandsCollection.fastExpunge(f);
 							if (LOG.isDebugEnabled()) {
 								debug.setLength(0);
-								LOG.debug(debug.append("\"Soft Clear\": ").append(
-										"Messages copied to default trash folder \"").append(trashFullname).append(
-										"\" in ").append((System.currentTimeMillis() - start)).append(STR_MSEC)
-										.toString());
+								LOG.debug(debug.append("EXPUNGE command executed on \"").append(f.getFullName())
+										.append("\" in ").append((System.currentTimeMillis() - startExpunge)).append(
+												STR_MSEC).toString());
 							}
-						} catch (final MessagingException e) {
-							if (e.getNextException() instanceof CommandFailedException) {
-								final CommandFailedException exc = (CommandFailedException) e.getNextException();
-								if (exc.getMessage().indexOf("Over quota") > -1) {
-									/*
-									 * We face an Over-Quota-Exception
-									 */
-									throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, exc,
-											new Object[0]);
-								}
+						} catch (final FolderClosedException e) {
+							/*
+							 * Not possible to retry since connection is broken
+							 */
+							if (LOG.isDebugEnabled()) {
+								debug.setLength(0);
+								LOG.debug(debug.append("EXPUNGE command timed out in ").append(
+										(System.currentTimeMillis() - startExpunge)).append(STR_MSEC).toString());
 							}
-							throw new IMAPException(IMAPException.Code.MOVE_ON_DELETE_FAILED, e, new Object[0]);
+							throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapConfig.getServer(),
+									imapConfig.getLogin());
+						} catch (final StoreClosedException e) {
+							/*
+							 * Not possible to retry since connection is broken
+							 */
+							if (LOG.isDebugEnabled()) {
+								debug.setLength(0);
+								LOG.debug(debug.append("EXPUNGE command timed out in ").append(
+										(System.currentTimeMillis() - startExpunge)).append(STR_MSEC).toString());
+							}
+							throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapConfig.getServer(),
+									imapConfig.getLogin());
 						}
-					}
-					/*
-					 * Delete through storing \Deleted flag...
-					 */
-					new FlagsIMAPCommand(f, INT_1, blockSize, FLAGS_DELETED, true, true).doCommand();
-					/*
-					 * ... and perform EXPUNGE
-					 */
-					final long startExpunge = System.currentTimeMillis();
-					try {
-						IMAPCommandsCollection.fastExpunge(f);
-						if (LOG.isDebugEnabled()) {
-							debug.setLength(0);
-							LOG.debug(debug.append("EXPUNGE command executed on \"").append(f.getFullName()).append(
-									"\" in ").append((System.currentTimeMillis() - startExpunge)).append(STR_MSEC)
-									.toString());
-						}
-					} catch (final FolderClosedException e) {
 						/*
-						 * Not possible to retry since connection is broken
+						 * Decrement
 						 */
-						if (LOG.isDebugEnabled()) {
-							debug.setLength(0);
-							LOG.debug(debug.append("EXPUNGE command timed out in ").append(
-									(System.currentTimeMillis() - startExpunge)).append(STR_MSEC).toString());
-						}
-						throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapConfig.getServer(), imapConfig
-								.getLogin());
-					} catch (final StoreClosedException e) {
-						/*
-						 * Not possible to retry since connection is broken
-						 */
-						if (LOG.isDebugEnabled()) {
-							debug.setLength(0);
-							LOG.debug(debug.append("EXPUNGE command timed out in ").append(
-									(System.currentTimeMillis() - startExpunge)).append(STR_MSEC).toString());
-						}
-						throw new IMAPException(IMAPException.Code.CONNECT_ERROR, e, imapConfig.getServer(), imapConfig
-								.getLogin());
+						msgCount -= blockSize;
 					}
-					/*
-					 * Decrement
-					 */
-					msgCount -= blockSize;
 				}
 				if (backup) {
 					try {
