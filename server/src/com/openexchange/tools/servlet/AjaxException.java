@@ -133,7 +133,11 @@ public class AjaxException extends AbstractOXException {
 		/**
 		 * Missing AJAX request handler for module %s
 		 */
-		MISSING_REQUEST_HANDLER("Missing AJAX request handler for module %s", Category.CODE_ERROR, 6);
+		MISSING_REQUEST_HANDLER("Missing AJAX request handler for module %s", Category.CODE_ERROR, 6),
+		/**
+		 * Unknown module: %s.
+		 */
+		UNKNOWN_MODULE("Unknown module: %s.", Category.CODE_ERROR, 7);
 
 		/**
 		 * Message of the exception.
