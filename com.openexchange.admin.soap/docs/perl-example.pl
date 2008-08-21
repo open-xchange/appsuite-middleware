@@ -49,7 +49,7 @@ my $result = $soclt->registerServer(
 			    $masterCreds
 			    );
 
-die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+#die "Error: ".$result->faultstring()."\n $@" if $result->fault();
 
 ##
 ## Registering a Database
@@ -73,7 +73,7 @@ $result = $soclt->registerDatabase(
     	      $masterCreds
     	      );
 
-die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+#die "Error: ".$result->faultstring()."\n $@" if $result->fault();
 
 ##
 ## Registering a filestore
@@ -97,7 +97,7 @@ $result = $soclt->registerFilestore(
     	      $masterCreds
     	      );
 
-die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+#die "Error: ".$result->faultstring()."\n $@" if $result->fault();
 
 ##
 ## creating a context
@@ -140,6 +140,43 @@ $result = $soclt->create($context,
 			SOAP::Data->name("timezone" => $timezone)
 			)),
 		  $masterCreds
+		 );
+
+#die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+
+##
+## creating a SOAP clients for OXUser,OXGroup and OXResource services
+##
+my $souserclt     = SOAP::Lite->ns( $nameSpace )->proxy( $baseURL."OXUserService" );
+my $sogroupclt    = SOAP::Lite->ns( $nameSpace )->proxy( $baseURL."OXGroupService" );
+my $soresourceclt = SOAP::Lite->ns( $nameSpace )->proxy( $baseURL."OXResourceService" );
+
+# mandatory user data
+my $uname    = "john";
+my $password = "secret";
+$displayname = "John Doe";
+$surname     = "Doe";
+$gname       = "John";
+$email       = "john\@example.com";
+$lang        = "de_DE";
+$timezone    = "Europe/Berlin";
+my $birthday = "1942-12-24T00:00:00.00Z";
+
+$result =
+    $souserclt->create($context,
+		  SOAP::Data->value("User")->value(\SOAP::Data->value(
+			SOAP::Data->name("name" => $uname),
+			SOAP::Data->name("password" => $password),
+			SOAP::Data->name("display_name" => $displayname),
+			SOAP::Data->name("sur_name" => $surname),
+			SOAP::Data->name("given_name" => $gname),
+			SOAP::Data->name("primaryEmail" => $email),
+			SOAP::Data->name("email1" => $email),
+			SOAP::Data->name("language" => $lang),
+			SOAP::Data->name("timezone" => $timezone),
+			SOAP::Data->name("birthday" => $birthday)
+   	          )),
+		  $ctxCreds
 		 );
 
 die "Error: ".$result->faultstring()."\n $@" if $result->fault();
