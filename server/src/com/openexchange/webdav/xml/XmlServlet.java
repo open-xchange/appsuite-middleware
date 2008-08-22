@@ -244,7 +244,7 @@ public abstract class XmlServlet extends PermissionServlet {
 			os = resp.getOutputStream();
 
 			resp.setStatus(207);
-			resp.setContentType("text/xml; charset=UTF-8");
+			resp.setContentType(_contentType);
 
 			boolean hasObjectId = false;
 			boolean hasObjectMode = false;
