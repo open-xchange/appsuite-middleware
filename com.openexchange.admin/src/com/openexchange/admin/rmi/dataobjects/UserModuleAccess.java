@@ -493,6 +493,9 @@ public class UserModuleAccess implements Serializable {
         result = prime * result + (ical ? 1231 : 1237);
         result = prime * result + (infostore ? 1231 : 1237);
         result = prime * result + (readCreateSharedFolders ? 1231 : 1237);
+        result = prime * result + (EditGroup ? 1231 : 1237);
+        result = prime * result + (EditPassword ? 1231 : 1237);
+        result = prime * result + (EditResource ? 1231 : 1237);
         return result;
     }
 
@@ -540,6 +543,12 @@ public class UserModuleAccess implements Serializable {
         if (infostore != other.infostore)
             return false;
         if (readCreateSharedFolders != other.readCreateSharedFolders)
+            return false;
+        if (EditGroup != other.EditGroup)
+            return false;
+        if (EditPassword != other.EditPassword)
+            return false;
+        if (EditResource != other.EditResource)
             return false;
         return true;
     }

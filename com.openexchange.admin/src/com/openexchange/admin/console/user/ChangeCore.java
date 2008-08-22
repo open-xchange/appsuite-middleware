@@ -126,7 +126,7 @@ public abstract class ChangeCore extends UserAbstraction {
             UserModuleAccess access = oxusr.getModuleAccess(ctx, usr, auth);                    
             
             // apply rights from commandline
-            setModuleAccessOptionsinUserChange(parser, access);
+            setModuleAccessOptions(parser, access);
             
             // apply changes in module access on server
             oxusr.changeModuleAccess(ctx, usr, access, auth);

@@ -570,70 +570,98 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         }
     }
     
-    protected final void setModuleAccessOptionsinUserChange(final AdminParser parser, final UserModuleAccess access) {
+    /**
+     * @param parser
+     * @param access
+     * @return true if options have been specified, false if not
+     */
+    protected final boolean setModuleAccessOptions(final AdminParser parser, final UserModuleAccess access) {
+        boolean changed = false;
         if ((String) parser.getOptionValue(this.accessCalendarOption) != null) {
             access.setCalendar(accessOption2BooleanCreate(parser, this.accessCalendarOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessContactOption) != null) {
             access.setContacts(accessOption2BooleanCreate(parser, this.accessContactOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessDelegateTasksOption) != null) {
             access.setDelegateTask(accessOption2BooleanCreate(parser, this.accessDelegateTasksOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessEditPublicFolderOption) != null) {
             access.setEditPublicFolders(accessOption2BooleanCreate(parser, this.accessEditPublicFolderOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessForumOption) != null) {
             access.setForum(accessOption2BooleanCreate(parser, this.accessForumOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessIcalOption) != null) {
             access.setIcal(accessOption2BooleanCreate(parser, this.accessIcalOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessInfostoreOption) != null) {
             access.setInfostore(accessOption2BooleanCreate(parser, this.accessInfostoreOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessPinboardWriteOption) != null) {
             access.setPinboardWrite(accessOption2BooleanCreate(parser, this.accessPinboardWriteOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessProjectsOption) != null) {
             access.setProjects(accessOption2BooleanCreate(parser, this.accessProjectsOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessReadCreateSharedFolderOption) != null) {
             access.setReadCreateSharedFolders(accessOption2BooleanCreate(parser, this.accessReadCreateSharedFolderOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessRssBookmarkOption) != null) {
             access.setRssBookmarks(accessOption2BooleanCreate(parser, this.accessRssBookmarkOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessRssPortalOption) != null) {
             access.setRssPortal(accessOption2BooleanCreate(parser, this.accessRssPortalOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessSyncmlOption) != null) {
             access.setSyncml(accessOption2BooleanCreate(parser, this.accessSyncmlOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessTasksOption) != null) {
             access.setTasks(accessOption2BooleanCreate(parser, this.accessTasksOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessVcardOption) != null) {
             access.setVcard(accessOption2BooleanCreate(parser, this.accessVcardOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessWebdavOption) != null) {
             access.setWebdav(accessOption2BooleanCreate(parser, this.accessWebdavOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessWebdavXmlOption) != null) {
             access.setWebdavXml(accessOption2BooleanCreate(parser, this.accessWebdavXmlOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessWebmailOption) != null) {
             access.setWebmail(accessOption2BooleanCreate(parser, this.accessWebmailOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessEditGroupOption) != null) {
             access.setEditGroup(accessOption2BooleanCreate(parser, this.accessEditGroupOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessEditResourceOption) != null) {
             access.setEditResource(accessOption2BooleanCreate(parser, this.accessEditResourceOption));
+            changed = true;
         }
         if ((String) parser.getOptionValue(this.accessEditPasswordOption) != null) {
             access.setEditPassword(accessOption2BooleanCreate(parser, this.accessEditPasswordOption));
+            changed = true;
         }
+        return changed;
     }
     
     protected final boolean accessOption2BooleanChange(final AdminParser parser, final Option accessOption) {
