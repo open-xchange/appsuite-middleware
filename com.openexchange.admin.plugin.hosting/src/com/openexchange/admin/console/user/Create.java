@@ -95,7 +95,7 @@ public class Create extends CreateCore {
             // webmail package access per default
             access.disableAll();            
             // set module access rights supplied from cmd line
-            setModuleAccessOptionsinUserChange(parser, access);
+            setModuleAccessOptions(parser, access);
             
             // if NO rights were supplied from cmd line
             // we will call the create user method without any access
