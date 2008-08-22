@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="jars/wsdl4j-1.5.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="jars/saaj.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/activation-1.1.1.jar" sourcepath="source/jaf-1_1_1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tnef-1.4.0.jar" sourcepath="source/tnef-1.4.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jdom-1.1.jar" sourcepath="source/jdom-1.1-sources.jar"/>
