@@ -336,9 +336,14 @@ public abstract class MailConfig {
 	}
 
 	/**
-	 * Gets the allowNestedDefaultFolderOnAltNamespace
+	 * Checks if default folders (e.g. "Sent Mail", "Drafts") are supposed to be
+	 * created below personal namespace folder (INBOX) even though mail server
+	 * indicates to create them on the same level as personal namespace folder.
+	 * <p>
+	 * <b>Note</b> that personal namespace folder must allow subfolder creation.
 	 * 
-	 * @return the allowNestedDefaultFolderOnAltNamespace
+	 * @return <code>true</code> if default folders are supposed to be created
+	 *         below personal namespace folder; otherwise <code>false</code>
 	 */
 	public static final boolean isAllowNestedDefaultFolderOnAltNamespace() {
 		return MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace();
