@@ -487,7 +487,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 *             if writing to the response fails.
 	 * @throws ServletException
 	 *             if the creation of the java script error object fails.
-	 * @deprecated use {@link Response}. 
+	 * @deprecated use {@link Response}.
 	 */
 	@Deprecated
 	protected static void sendErrorAsJS(final HttpServletResponse resp, final String errorMessage) throws IOException,

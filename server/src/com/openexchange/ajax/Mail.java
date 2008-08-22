@@ -2617,29 +2617,27 @@ public class Mail extends PermissionServlet implements UploadListener {
 		try {
 			final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
 			try {
-				if (req.getContentType().toLowerCase().startsWith(MIME_MULTIPART)) {
-					/*
-					 * Set response headers according to html spec
-					 */
-					resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
-					/*
-					 * Append UploadListener instances
-					 */
-					final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-					final Collection<UploadListener> listeners = new ArrayList<UploadListener>(2);
-					listeners.add(new UploadQuotaChecker(UserSettingMailStorage.getInstance().getUserSettingMail(
-							session.getUserId(), ctx), resp, actionStr));
-					listeners.add(this);
-					/*
-					 * Create and fire upload event
-					 */
-					final UploadEvent uploadEvent = processUpload(req);
-					uploadEvent.setParameter(UPLOAD_PARAM_MAILINTERFACE, mailInterface);
-					uploadEvent.setParameter(UPLOAD_PARAM_WRITER, resp.getWriter());
-					uploadEvent.setParameter(UPLOAD_PARAM_SESSION, session);
-					uploadEvent.setParameter(PARAMETER_ACTION, actionStr);
-					fireUploadEvent(uploadEvent, listeners);
-				}
+				/*
+				 * Set response headers according to html spec
+				 */
+				resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
+				/*
+				 * Append UploadListener instances
+				 */
+				final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+				final Collection<UploadListener> listeners = new ArrayList<UploadListener>(2);
+				listeners.add(new UploadQuotaChecker(UserSettingMailStorage.getInstance().getUserSettingMail(
+						session.getUserId(), ctx), resp, actionStr));
+				listeners.add(this);
+				/*
+				 * Create and fire upload event
+				 */
+				final UploadEvent uploadEvent = processUpload(req);
+				uploadEvent.setParameter(UPLOAD_PARAM_MAILINTERFACE, mailInterface);
+				uploadEvent.setParameter(UPLOAD_PARAM_WRITER, resp.getWriter());
+				uploadEvent.setParameter(UPLOAD_PARAM_SESSION, session);
+				uploadEvent.setParameter(PARAMETER_ACTION, actionStr);
+				fireUploadEvent(uploadEvent, listeners);
 			} finally {
 				if (mailInterface != null) {
 					try {
