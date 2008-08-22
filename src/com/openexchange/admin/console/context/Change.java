@@ -95,33 +95,18 @@ public class Change extends ChangeCore {
         oxctx.change(ctx, auth);
         
         
-        // needed for comparison
-        UserModuleAccess NO_RIGHTS_ACCESS = new UserModuleAccess();
-        NO_RIGHTS_ACCESS.disableAll();
+        UserModuleAccess changed_access = oxctx.getModuleAccess(ctx, auth);
+        final boolean wantsChange = setModuleAccessOptions(parser, changed_access);
         
-        // now check which create method we must call, 
-        // this depends on the access rights supplied by the client
-        UserModuleAccess parsed_access = new UserModuleAccess();
-        parsed_access.disableAll();
-        
-        // parse access options
-        setModuleAccessOptionsinUserChange(parser, parsed_access);
-        
-        String accessCombinationName = ctxabs.parseAndSetAccessCombinationName(parser);
-        
-        if(!parsed_access.equals(NO_RIGHTS_ACCESS) && null != accessCombinationName){
-        	// BOTH WAYS TO SPECIFY ACCESS RIGHTS ARE INVALID!
-        	throw new InvalidDataException(UserHostingAbstraction.ACCESS_COMBINATION_NAME_AND_ACCESS_RIGHTS_DETECTED_ERROR);        	
-        }        
-       
-        if (null != accessCombinationName ) {
-        	// Client supplied access combination name. change context with this name
-        	oxctx.changeModuleAccess(ctx,  accessCombinationName, auth);
-        }
-        
-        if(!parsed_access.equals(NO_RIGHTS_ACCESS)){
-        	// Client supplied access attributes
-        	oxctx.changeModuleAccess(ctx,  parsed_access, auth);
+        final String accessCombinationName = ctxabs.parseAndSetAccessCombinationName(parser);
+
+        if( wantsChange && accessCombinationName == null) {
+            // user wants to change individual perms
+            oxctx.changeModuleAccess(ctx, changed_access, auth);
+        } else if (accessCombinationName != null && !wantsChange) {
+            oxctx.changeModuleAccess(ctx, accessCombinationName, auth);
+        } else if ( accessCombinationName != null && wantsChange ) {
+            throw new InvalidDataException(UserHostingAbstraction.ACCESS_COMBINATION_NAME_AND_ACCESS_RIGHTS_DETECTED_ERROR);        	
         }
         
     }
