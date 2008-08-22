@@ -162,7 +162,7 @@ public class MailException extends AbstractOXException {
 		 */
 		INVALID_CONTENT_TYPE("Invalid Content-Type value: %1$s", Category.CODE_ERROR, 20),
 		/**
-		 * Messaging error: %1$s
+		 * Messaging error: %1$s. TODO: Maybe change to: Broken/Bad message
 		 */
 		MESSAGING_ERROR("Messaging error: %1$s", Category.CODE_ERROR, 21),
 		/**
