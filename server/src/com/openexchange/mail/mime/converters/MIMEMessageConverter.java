@@ -59,8 +59,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -81,6 +79,7 @@ import javax.mail.internet.MimePart;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -1610,7 +1609,7 @@ public final class MIMEMessageConverter {
 	 */
 	public static MailMessage convertMessage(final MimeMessage msg, final long uid, final String fullname,
 			final char separator, final MailField[] fields) throws MailException {
-		final Set<MailField> set = new HashSet<MailField>(Arrays.asList(fields));
+		final MailFields set = new MailFields(fields);
 		if (set.contains(MailField.FULL)) {
 			final MailMessage mail = convertMessage(msg);
 			mail.setMailId(uid);

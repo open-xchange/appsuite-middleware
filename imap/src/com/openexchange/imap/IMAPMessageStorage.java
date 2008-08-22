@@ -57,10 +57,8 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
@@ -85,6 +83,7 @@ import com.openexchange.imap.threadsort.TreeNode;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -157,7 +156,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			throws MailException {
 		final boolean body;
 		{
-			final Set<MailField> fieldSet = new HashSet<MailField>(Arrays.asList(fields));
+			final MailFields fieldSet = new MailFields(fields);
 			/*
 			 * Check for field FULL
 			 */
@@ -258,7 +257,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 					return EMPTY_RETVAL;
 				}
 			}
-			final Set<MailField> usedFields = new HashSet<MailField>();
+			final MailFields usedFields = new MailFields();
 			Message[] msgs = IMAPSort.sortMessages(imapFolder, filter, fields, sortField, order, UserStorage
 					.getStorageUser(session.getUserId(), ctx).getLocale(), usedFields, imapConfig);
 			if (indexRange != null) {
@@ -284,8 +283,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				msgs = new Message[retvalLength];
 				System.arraycopy(tmp, fromIndex, msgs, 0, retvalLength);
 			}
-			return MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(new MailField[usedFields.size()]),
-					usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL));
+			return MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(), usedFields.contains(MailField.BODY)
+					|| usedFields.contains(MailField.FULL));
 		} catch (final MessagingException e) {
 			throw MIMEMailException.handleMessagingException(e, imapConfig);
 		}
@@ -299,7 +298,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				throw new IMAPException(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED);
 			}
 			imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_ONLY);
-			final Set<MailField> usedFields = new HashSet<MailField>();
+			final MailFields usedFields = new MailFields();
 			/*
 			 * Shall a search be performed?
 			 */
@@ -386,8 +385,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				msgs = new ExtendedMimeMessage[retvalLength];
 				System.arraycopy(tmp, fromIndex, msgs, 0, retvalLength);
 			}
-			return MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(new MailField[usedFields.size()]),
-					body);
+			return MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(), body);
 		} catch (final MessagingException e) {
 			throw MIMEMailException.handleMessagingException(e, imapConfig);
 		}

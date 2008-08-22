@@ -52,8 +52,6 @@ package com.openexchange.imap.search;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 
-import java.util.Set;
-
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -66,6 +64,7 @@ import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.sun.mail.imap.IMAPFolder;
@@ -155,11 +154,7 @@ public final class IMAPSearch {
 				}
 			}
 		}
-		final MailField[] searchFields;
-		{
-			final Set<MailField> fields = MailField.getMailFieldsFromSearchTerm(searchTerm);
-			searchFields = fields.toArray(new MailField[fields.size()]);
-		}
+		final MailField[] searchFields = new MailFields(MailField.getMailFieldsFromSearchTerm(searchTerm)).toArray();
 		final Message[] allMsgs;
 		{
 			final long start = System.currentTimeMillis();

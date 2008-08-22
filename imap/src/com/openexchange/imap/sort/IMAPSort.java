@@ -60,7 +60,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import javax.mail.Address;
 import javax.mail.FetchProfile;
@@ -76,6 +75,7 @@ import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailConfig;
@@ -386,7 +386,7 @@ public final class IMAPSort {
 	 */
 	public static Message[] sortMessages(final IMAPFolder imapFolder, final int[] filter, final MailField[] fields,
 			final MailSortField sortFieldArg, final OrderDirection orderDir, final Locale locale,
-			final Set<MailField> usedFields, final IMAPConfig imapConfig) throws MessagingException {
+			final MailFields usedFields, final IMAPConfig imapConfig) throws MessagingException {
 		boolean applicationSort = true;
 		Message[] msgs = null;
 		final MailSortField sortField = sortFieldArg == null ? MailSortField.RECEIVED_DATE : sortFieldArg;
@@ -417,7 +417,7 @@ public final class IMAPSort {
 					return EMPTY_MSGS;
 				}
 				final FetchProfile fetchProfile = getFetchProfile(fields, IMAPConfig.isFastFetch());
-				usedFields.addAll(Arrays.asList(fields));
+				usedFields.addAll(fields);
 				final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
 				final long start = System.currentTimeMillis();
 				msgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), seqNums,
@@ -481,7 +481,7 @@ public final class IMAPSort {
 		if (applicationSort) {
 			final MailField sort = MailField.toField(sortField.getListField());
 			final FetchProfile fetchProfile = getFetchProfile(fields, sort, IMAPConfig.isFastFetch());
-			usedFields.addAll(Arrays.asList(fields));
+			usedFields.addAll(fields);
 			usedFields.add(sort);
 			final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
 			final long start = System.currentTimeMillis();

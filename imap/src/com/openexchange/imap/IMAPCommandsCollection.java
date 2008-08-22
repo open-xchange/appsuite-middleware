@@ -58,7 +58,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -83,6 +82,7 @@ import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -860,7 +860,7 @@ public final class IMAPCommandsCollection {
 				 */
 				final Message[] newMsgs;
 				try {
-					final Set<MailField> set = new HashSet<MailField>(Arrays.asList(fields));
+					final MailFields set = new MailFields(fields);
 					final boolean body = set.contains(MailField.BODY) || set.contains(MailField.FULL);
 					newMsgs = new FetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, getFetchProfile(fields, MailField
 							.toField(sortField.getListField()), IMAPConfig.isFastFetch()), false, false, body)

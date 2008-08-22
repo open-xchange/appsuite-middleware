@@ -52,10 +52,10 @@ package com.openexchange.mail.mime.utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.mail.FetchProfile;
 import javax.mail.UIDFolder;
@@ -153,7 +153,7 @@ public final class MIMEStorageUtility {
 	 *         constants
 	 */
 	public static Collection<MailField> fetchProfile2MailListFields(final FetchProfile fetchProfile) {
-		final Set<MailField> set = new HashSet<MailField>();
+		final EnumSet<MailField> set = EnumSet.noneOf(MailField.class);
 		/*
 		 * Folder is always set
 		 */
@@ -188,14 +188,13 @@ public final class MIMEStorageUtility {
 		}
 		if (fetchProfile.contains(IMAPFolder.FetchProfileItem.HEADERS)) {
 			set.add(MailField.HEADERS);
-			/*set.add(MailField.FROM);
-			set.add(MailField.TO);
-			set.add(MailField.CC);
-			set.add(MailField.BCC);
-			set.add(MailField.SUBJECT);
-			set.add(MailField.DISPOSITION_NOTIFICATION_TO);
-			set.add(MailField.PRIORITY);
-			set.add(MailField.SENT_DATE);*/
+			/*
+			 * set.add(MailField.FROM); set.add(MailField.TO);
+			 * set.add(MailField.CC); set.add(MailField.BCC);
+			 * set.add(MailField.SUBJECT);
+			 * set.add(MailField.DISPOSITION_NOTIFICATION_TO);
+			 * set.add(MailField.PRIORITY); set.add(MailField.SENT_DATE);
+			 */
 		} else {
 			if (fetchProfile.contains(MessageHeaders.HDR_FROM)) {
 				set.add(MailField.FROM);
@@ -224,11 +223,11 @@ public final class MIMEStorageUtility {
 
 	/**
 	 * Turns given array of <code>long</code> into an array of
-	 * <code>com.sun.mail.imap.protocol.UIDSet</code> which in turn can be
-	 * used for a varieties of <code>IMAPProtocol</code> methods.
+	 * <code>com.sun.mail.imap.protocol.UIDSet</code> which in turn can be used
+	 * for a varieties of <code>IMAPProtocol</code> methods.
 	 * 
-	 * @param uids -
-	 *            the UIDs
+	 * @param uids
+	 *            - the UIDs
 	 * @return an array of <code>com.sun.mail.imap.protocol.UIDSet</code>
 	 */
 	public static UIDSet[] toUIDSet(final long[] uids) {
@@ -302,10 +301,10 @@ public final class MIMEStorageUtility {
 		return getFetchProfile(fields, null, sortField, preferEnvelope);
 	}
 
-	private static final Set<MailField> ENV_FIELDS;
+	private static final EnumSet<MailField> ENV_FIELDS;
 
 	static {
-		ENV_FIELDS = new HashSet<MailField>(8);
+		ENV_FIELDS = EnumSet.noneOf(MailField.class);
 		/*
 		 * The Envelope is an aggregation of the common attributes of a Message:
 		 * From, To, Cc, Bcc, ReplyTo, Subject and Date.
@@ -348,7 +347,7 @@ public final class MIMEStorageUtility {
 		/*
 		 * Use a set to avoid duplicate entries
 		 */
-		final Set<MailField> set = new HashSet<MailField>();
+		final EnumSet<MailField> set = EnumSet.noneOf(MailField.class);
 		if (fields != null) {
 			set.addAll(Arrays.asList(fields));
 		}
@@ -377,54 +376,47 @@ public final class MIMEStorageUtility {
 		return retval;
 	}
 
+	private static final EnumMap<MailField, FetchProfile.Item> field2item;
+
+	private static final EnumMap<MailField, String> field2string;
+
+	static {
+		/*
+		 * Item map
+		 */
+		field2item = new EnumMap<MailField, FetchProfile.Item>(MailField.class);
+		field2item.put(MailField.HEADERS, IMAPFolder.FetchProfileItem.HEADERS);
+		field2item.put(MailField.ID, UIDFolder.FetchProfileItem.UID);
+		field2item.put(MailField.CONTENT_TYPE, FetchProfile.Item.CONTENT_INFO);
+		field2item.put(MailField.SIZE, IMAPFolder.FetchProfileItem.SIZE);
+		field2item.put(MailField.FLAGS, FetchProfile.Item.FLAGS);
+		/*
+		 * String map
+		 */
+		field2string = new EnumMap<MailField, String>(MailField.class);
+		field2string.put(MailField.FROM, MessageHeaders.HDR_FROM);
+		field2string.put(MailField.TO, MessageHeaders.HDR_TO);
+		field2string.put(MailField.CC, MessageHeaders.HDR_CC);
+		field2string.put(MailField.BCC, MessageHeaders.HDR_BCC);
+		field2string.put(MailField.SUBJECT, MessageHeaders.HDR_SUBJECT);
+		field2string.put(MailField.SENT_DATE, MessageHeaders.HDR_DATE);
+		field2string.put(MailField.DISPOSITION_NOTIFICATION_TO, MessageHeaders.HDR_DISP_NOT_TO);
+		field2string.put(MailField.PRIORITY, MessageHeaders.HDR_X_PRIORITY);
+	}
+
 	private static void addFetchItem(final FetchProfile fp, final MailField field) {
-		switch (field) {
-		case HEADERS:
-			fp.add(IMAPFolder.FetchProfileItem.HEADERS);
-			break;
-		case ID:
-			fp.add(UIDFolder.FetchProfileItem.UID);
-			break;
-		case CONTENT_TYPE:
-			fp.add(FetchProfile.Item.CONTENT_INFO);
-			break;
-		case FROM:
-			fp.add(MessageHeaders.HDR_FROM);
-			break;
-		case TO:
-			fp.add(MessageHeaders.HDR_TO);
-			break;
-		case CC:
-			fp.add(MessageHeaders.HDR_CC);
-			break;
-		case BCC:
-			fp.add(MessageHeaders.HDR_BCC);
-			break;
-		case SUBJECT:
-			fp.add(MessageHeaders.HDR_SUBJECT);
-			break;
-		case SIZE:
-			fp.add(IMAPFolder.FetchProfileItem.SIZE);
-			break;
-		case SENT_DATE:
-			fp.add(MessageHeaders.HDR_DATE);
-			break;
-		case FLAGS:
-			fp.add(FetchProfile.Item.FLAGS);
-			break;
-		case DISPOSITION_NOTIFICATION_TO:
-			fp.add(MessageHeaders.HDR_DISP_NOT_TO);
-			break;
-		case PRIORITY:
-			fp.add(MessageHeaders.HDR_X_PRIORITY);
-			break;
-		case COLOR_LABEL:
+		if (MailField.COLOR_LABEL.equals(field)) {
 			if (!fp.contains(FetchProfile.Item.FLAGS)) {
 				fp.add(FetchProfile.Item.FLAGS);
 			}
-			break;
-		default:
 			return;
+		}
+		if (field2item.containsKey(field)) {
+			fp.add(field2item.get(field));
+			return;
+		}
+		if (field2string.containsKey(field)) {
+			fp.add(field2string.get(field));
 		}
 	}
 }

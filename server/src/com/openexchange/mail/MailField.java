@@ -51,8 +51,11 @@ package com.openexchange.mail;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.openexchange.mail.search.SearchTerm;
@@ -163,6 +166,23 @@ public enum MailField {
 	 */
 	FULL(null);
 
+	private static final EnumMap<MailListField, MailField> LIST_FIELDS_MAP = new EnumMap<MailListField, MailField>(
+			MailListField.class);
+
+	private static final Map<Integer, MailField> FIELDS_MAP = new HashMap<Integer, MailField>(25);
+
+	static {
+		final MailField[] fields = MailField.values();
+		for (final MailField mailField : fields) {
+			final MailListField listField = mailField.getListField();
+			if (listField != null) {
+				LIST_FIELDS_MAP.put(listField, mailField);
+				FIELDS_MAP.put(Integer.valueOf(listField.getField()), mailField);
+			}
+		}
+		LIST_FIELDS_MAP.put(MailListField.FLAG_SEEN, MailField.FLAGS);
+	}
+
 	/**
 	 * All low cost fields
 	 */
@@ -179,6 +199,7 @@ public enum MailField {
 
 	private MailField(final MailListField listField) {
 		this.listField = listField;
+
 	}
 
 	/**
@@ -262,16 +283,8 @@ public enum MailField {
 	public static final MailField toField(final MailListField listField) {
 		if (null == listField) {
 			return null;
-		} else if (MailListField.FLAG_SEEN.equals(listField)) {
-			return MailField.FLAGS;
 		}
-		final MailField[] fields = MailField.values();
-		for (final MailField mailField : fields) {
-			if (listField.equals(mailField.getListField())) {
-				return mailField;
-			}
-		}
-		return null;
+		return LIST_FIELDS_MAP.get(listField);
 	}
 
 	private static final MailField[] EMPTY_FIELDS = new MailField[0];
@@ -312,18 +325,11 @@ public enum MailField {
 	 * @return The mapped {@link MailField} or <code>null</code> if no
 	 *         corresponding mail field could be found
 	 */
-	public static final MailField getField(final int field) {
+	public static MailField getField(final int field) {
 		if (field < 0) {
 			return MailField.BODY;
 		}
-		final MailField[] fields = MailField.values();
-		for (final MailField mailField : fields) {
-			final MailListField listField = mailField.getListField();
-			if ((listField != null) && (listField.getField() == field)) {
-				return mailField;
-			}
-		}
-		return null;
+		return FIELDS_MAP.get(Integer.valueOf(field));
 	}
 
 	/**
@@ -334,8 +340,9 @@ public enum MailField {
 	 * @return The addressed mail fields
 	 */
 	public static Set<MailField> getMailFieldsFromSearchTerm(final SearchTerm<?> searchTerm) {
-		final Set<MailField> set = new HashSet<MailField>();
+		final EnumSet<MailField> set = EnumSet.noneOf(MailField.class);
 		searchTerm.addMailField(set);
 		return set;
 	}
+
 }

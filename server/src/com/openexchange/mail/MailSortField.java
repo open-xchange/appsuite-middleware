@@ -49,6 +49,9 @@
 
 package com.openexchange.mail;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * {@link MailSortField} - An enumeration of sortable mail list fields
  * 
@@ -149,6 +152,15 @@ public enum MailSortField {
 		return retval;
 	}
 
+	private static final Map<Integer, MailSortField> field2sortfield = new HashMap<Integer, MailSortField>(25);
+
+	static {
+		final MailSortField[] fields = MailSortField.values();
+		for (final MailSortField listField : fields) {
+			field2sortfield.put(Integer.valueOf(listField.field), listField);
+		}
+	}
+
 	/**
 	 * Determines the corresponding {@link MailSortField} constant to given
 	 * <code>int</code> value
@@ -158,12 +170,6 @@ public enum MailSortField {
 	 * @return The corresponding {@link MailSortField} constant
 	 */
 	public static final MailSortField getField(final int field) {
-		final MailSortField[] fields = MailSortField.values();
-		for (final MailSortField listField : fields) {
-			if (listField.field == field) {
-				return listField;
-			}
-		}
-		return null;
+		return field2sortfield.get(Integer.valueOf(field));
 	}
 }

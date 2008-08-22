@@ -510,7 +510,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			useFields = com.openexchange.mail.mime.utils.MIMEStorageUtility.getCacheFieldsArray();
 			onlyFolderAndID = false;
 		} else {
-			useFields = MailField.toFields(MailListField.getFields(fields));
+			useFields = MailField.getFields(fields);
 			onlyFolderAndID = onlyFolderAndID(useFields);
 		}
 		if (!onlyFolderAndID) {
