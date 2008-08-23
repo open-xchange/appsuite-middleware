@@ -77,6 +77,7 @@ import com.openexchange.groupware.impl.UserNotFoundException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -135,7 +136,7 @@ public class Login extends AJAXServlet {
 				return;
 			}
 
-			Session sessionObj = null;
+			Session session = null;
 			final Response response = new Response();
 			try {
 				final Authenticated authed = Authentication.login(name, password);
@@ -187,7 +188,7 @@ public class Login extends AJAXServlet {
 
 				final String sessionId = sessiondService.addSession(userId, name, password, context, req
 						.getRemoteAddr());
-				sessionObj = sessiondService.getSession(sessionId);
+				session = sessiondService.getSession(sessionId);
 
 				try {
 					if (!context.isEnabled() || !u.isMailEnabled()) {
@@ -223,14 +224,14 @@ public class Login extends AJAXServlet {
 //			catch (final Exception e) {
 //				LOG.error("Error", e);
 //			}
-			SessionServlet.rememberSession(req, sessionObj);
+			SessionServlet.rememberSession(req, session);
 			/*
 			 * Write response
 			 */
 			JSONObject login = null;
 			if (!response.hasError()) {
 				try {
-					login = writeLogin(sessionObj);
+					login = writeLogin(session);
 				} catch (final JSONException e) {
 					final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
 					LOG.error(oje.getMessage(), oje);
@@ -243,7 +244,7 @@ public class Login extends AJAXServlet {
 			Tools.disableCaching(resp);
 			resp.setContentType(CONTENTTYPE_JAVASCRIPT);
 			if (!response.hasError()) {
-				writeCookie(resp, sessionObj);
+				writeCookie(resp, session);
 			}
 			try {
 				if (null == login) {
@@ -286,9 +287,9 @@ public class Login extends AJAXServlet {
 				}
 			}
 			if (session != null) {
-				final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
+				final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
 						SessiondService.class);
-				sessiondCon.removeSession(session);
+				sessiondService.removeSession(session);
 
 			} else if (LOG.isDebugEnabled()) {
 				LOG.debug("no session cookie found in request!");
@@ -303,12 +304,31 @@ public class Login extends AJAXServlet {
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
 				return;
 			}
-			final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-			final Session sessionObj = sessiondCon.getSessionByRandomToken(randomToken);
-
+			final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
+					SessiondService.class);
+			if (sessiondService == null) {
+				final ServiceException se = new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
+						SessiondService.class.getName());
+				LOG.error(se.getMessage(), se);
+				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+				return;
+			}
+			final Session session = sessiondService.getSessionByRandomToken(randomToken);
+			if (session == null) {
+				/*
+				 * Unknown random token; throw error
+				 */
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("No session could be found for random token: " + randomToken, new Throwable());
+				} else if (LOG.isInfoEnabled()) {
+					LOG.info("No session could be found for random token: " + randomToken);
+				}
+				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+				return;
+			}
 			try {
-				final Context context = ContextStorage.getInstance().getContext(sessionObj.getContextId());
-				final User user = UserStorage.getInstance().getUser(sessionObj.getUserId(), context);
+				final Context context = ContextStorage.getInstance().getContext(session.getContextId());
+				final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
 				if (!context.isEnabled() || !user.isMailEnabled()) {
 					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 				}
@@ -319,12 +339,8 @@ public class Login extends AJAXServlet {
 			} catch (final LdapException e) {
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 			}
-			if (null == sessionObj) {
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-			} else {
-				writeCookie(resp, sessionObj);
-				resp.sendRedirect(_redirectUrl + sessionObj.getSecret());
-			}
+			writeCookie(resp, session);
+			resp.sendRedirect(_redirectUrl + session.getSecret());
 		} else if (action.equals(ACTION_AUTOLOGIN)) {
 			final Cookie[] cookies = req.getCookies();
 			final Response response = new Response();
@@ -332,14 +348,14 @@ public class Login extends AJAXServlet {
 				if (cookies == null) {
 					throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
 				}
-				final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
+				final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
 						SessiondService.class);
 				for (final Cookie cookie : cookies) {
 					final String cookieName = cookie.getName();
 					if (cookieName.startsWith(cookiePrefix)) {
 						final String session = cookie.getValue();
-						if (sessiondCon.refreshSession(session)) {
-							final Session sessionObj = sessiondCon.getSession(session);
+						if (sessiondService.refreshSession(session)) {
+							final Session sessionObj = sessiondService.getSession(session);
 							SessionServlet.checkIP(sessionObj.getLocalIp(), req.getRemoteAddr());
 
 							try {
