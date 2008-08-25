@@ -85,6 +85,8 @@ import org.json.JSONWriter;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CommonFields;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.helper.ParamContainer;
@@ -2075,7 +2077,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		/*
 		 * Start response
 		 */
-		jsonWriter.array();
+		jsonWriter.object();
 		try {
 			final long uid = paramContainer.checkIntParam(PARAMETER_ID);
 			final String sourceFolder = paramContainer.checkStringParam(PARAMETER_FOLDERID);
@@ -2109,13 +2111,17 @@ public class Mail extends PermissionServlet implements UploadListener {
 					/*
 					 * Perform move operation
 					 */
-					mailInterface.copyMessages(sourceFolder, destFolder, new long[] { uid }, true);
+					final long id = mailInterface.copyMessages(sourceFolder, destFolder, new long[] { uid }, true)[0];
+					jsonWriter.key(FolderChildFields.FOLDER_ID).value(destFolder);
+					jsonWriter.key(DataFields.ID).value(id);
 				}
 				if (colorLabel != null) {
 					/*
 					 * Update color label
 					 */
 					mailInterface.updateMessageColorLabel(sourceFolder, new long[] { uid }, colorLabel.intValue());
+					jsonWriter.key(FolderChildFields.FOLDER_ID).value(sourceFolder);
+					jsonWriter.key(DataFields.ID).value(uid);
 				}
 				if (flagBits != null) {
 					/*
@@ -2123,6 +2129,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 					 * client
 					 */
 					mailInterface.updateMessageFlags(sourceFolder, new long[] { uid }, flagBits.intValue(), flagVal);
+					jsonWriter.key(FolderChildFields.FOLDER_ID).value(sourceFolder);
+					jsonWriter.key(DataFields.ID).value(uid);
 				}
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
@@ -2143,7 +2151,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		/*
 		 * Close response and flush print writer
 		 */
-		jsonWriter.endArray();
+		jsonWriter.endObject();
 		response.setData(jsonWriter.getObject());
 		response.setTimestamp(null);
 		return response;
@@ -2229,19 +2237,19 @@ public class Mail extends PermissionServlet implements UploadListener {
 		return response;
 	}
 
-	public final void actionPutMoveMailMultiple(final Session session, final JSONWriter writer,
-			final MailPath[] mailIDs, final String sourceFolder, final String destFolder,
-			final MailServletInterface mailInteface) throws JSONException {
+	public final void actionPutMoveMailMultiple(final Session session, final JSONWriter writer, final long[] mailIDs,
+			final String sourceFolder, final String destFolder, final MailServletInterface mailInteface)
+			throws JSONException {
 		actionPutMailMultiple(session, writer, mailIDs, sourceFolder, destFolder, true, mailInteface);
 	}
 
-	public final void actionPutCopyMailMultiple(final Session session, final JSONWriter writer,
-			final MailPath[] mailIDs, final String srcFolder, final String destFolder,
-			final MailServletInterface mailInterface) throws JSONException {
+	public final void actionPutCopyMailMultiple(final Session session, final JSONWriter writer, final long[] mailIDs,
+			final String srcFolder, final String destFolder, final MailServletInterface mailInterface)
+			throws JSONException {
 		actionPutMailMultiple(session, writer, mailIDs, srcFolder, destFolder, false, mailInterface);
 	}
 
-	public final void actionPutMailMultiple(final Session session, final JSONWriter writer, final MailPath[] mailIDs,
+	public final void actionPutMailMultiple(final Session session, final JSONWriter writer, final long[] mailIDs,
 			final String srcFolder, final String destFolder, final boolean move,
 			final MailServletInterface mailInterfaceArg) throws JSONException {
 		try {
@@ -2252,8 +2260,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					mailInterface = MailServletInterface.getInstance(session);
 					closeMailInterface = true;
 				}
-				final long[] msgUIDs = mailInterface.copyMessages(srcFolder, destFolder, MailPath.getUIDs(mailIDs),
-						move);
+				final long[] msgUIDs = mailInterface.copyMessages(srcFolder, destFolder, mailIDs, move);
 				if (msgUIDs.length > 0) {
 					final StringBuilder sb = new StringBuilder();
 					final Response response = new Response();
@@ -2301,7 +2308,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		}
 	}
 
-	public void actionPutStoreFlagsMultiple(final Session session, final JSONWriter writer, final MailPath[] mailIDs,
+	public void actionPutStoreFlagsMultiple(final Session session, final JSONWriter writer, final long[] mailIDs,
 			final String folder, final int flagsBits, final boolean flagValue,
 			final MailServletInterface mailInterfaceArg) throws JSONException {
 		try {
@@ -2312,7 +2319,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					mailInterface = MailServletInterface.getInstance(session);
 					closeMailInterface = true;
 				}
-				mailInterface.updateMessageFlags(folder, MailPath.getUIDs(mailIDs), flagsBits, flagValue);
+				mailInterface.updateMessageFlags(folder, mailIDs, flagsBits, flagValue);
 				for (int i = 0; i < mailIDs.length; i++) {
 					final Response response = new Response();
 					response.setData(new JSONArray());
@@ -2346,7 +2353,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		}
 	}
 
-	public void actionPutColorLabelMultiple(final Session session, final JSONWriter writer, final MailPath[] mailIDs,
+	public void actionPutColorLabelMultiple(final Session session, final JSONWriter writer, final long[] mailIDs,
 			final String folder, final int colorLabel, final MailServletInterface mailInterfaceArg)
 			throws JSONException {
 		try {
@@ -2357,7 +2364,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					mailInterface = MailServletInterface.getInstance(session);
 					closeMailInterface = true;
 				}
-				mailInterface.updateMessageColorLabel(folder, MailPath.getUIDs(mailIDs), colorLabel);
+				mailInterface.updateMessageColorLabel(folder, mailIDs, colorLabel);
 				for (int i = 0; i < mailIDs.length; i++) {
 					final Response response = new Response();
 					response.setData(new JSONArray());
