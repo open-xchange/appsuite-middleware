@@ -151,7 +151,7 @@ public class Login extends AJAXServlet {
 				}
 				final Context context = contextStor.getContext(contextId);
 				if (null == context) {
-					throw new ContextException(ContextException.Code.NOT_FOUND, contextId);
+					throw new ContextException(ContextException.Code.NOT_FOUND, Integer.valueOf(contextId));
 				}
 
 				int userId = -1;
@@ -186,7 +186,7 @@ public class Login extends AJAXServlet {
 					throw new LoginException(LoginException.Code.COMMUNICATION);
 				}
 
-				final String sessionId = sessiondService.addSession(userId, name, password, context, req
+				final String sessionId = sessiondService.addSession(userId, username, password, context, req
 						.getRemoteAddr());
 				session = sessiondService.getSession(sessionId);
 
