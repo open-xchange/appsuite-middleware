@@ -371,11 +371,11 @@ public class AdminCache {
      * @param ctx
      */
     public final void removeAdminCredentials(final Context ctx) {
-        if (this.adminCredentialsCache.contains(ctx)) {
-            this.adminCredentialsCache.remove(ctx);
+        if (this.adminCredentialsCache.contains(ctx.getId())) {
+            this.adminCredentialsCache.remove(ctx.getId());
         }
-        if (this.adminAuthMechCache.contains(ctx)) {
-            this.adminAuthMechCache.remove(ctx);
+        if (this.adminAuthMechCache.contains(ctx.getId())) {
+            this.adminAuthMechCache.remove(ctx.getId());
         }
     }
 

@@ -1,3 +1,7 @@
+* 2008-08-25 - choeger@open-xchange.com
+
+ - Bugfix ID#12052 listuser on non existent context returns SQL error
+
 * 2008-08-12 - choeger@open-xchange.com
 
  - 11722 update from SP3, wrong cache.ccf file for admin in system.properties
