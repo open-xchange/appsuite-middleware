@@ -620,13 +620,24 @@ public class MIMEMessageFiller {
 			/*
 			 * If any condition is true, we ought to create a multipart/ message
 			 */
-			if (sendMultipartAlternative || embeddedImages) {
-				final Multipart alternativeMultipart = createMultipartAlternative(mail, embeddedImages);
+			if (sendMultipartAlternative) {
+				final Multipart alternativeMultipart = createMultipartAlternative(mail, (String) mail.getContent(),
+						embeddedImages);
 				if (primaryMultipart == null) {
 					primaryMultipart = alternativeMultipart;
 				} else {
 					final BodyPart bodyPart = new MimeBodyPart();
 					bodyPart.setContent(alternativeMultipart);
+					primaryMultipart.addBodyPart(bodyPart);
+				}
+			} else if (embeddedImages) {
+				final Multipart relatedMultipart = createMultipartRelated(mail, (String) mail.getContent(),
+						new String[1]);
+				if (primaryMultipart == null) {
+					primaryMultipart = relatedMultipart;
+				} else {
+					final BodyPart bodyPart = new MimeBodyPart();
+					bodyPart.setContent(relatedMultipart);
 					primaryMultipart.addBodyPart(bodyPart);
 				}
 			} else {
@@ -815,6 +826,15 @@ public class MIMEMessageFiller {
 		}
 	}
 
+	/**
+	 * Gets session user's VCard as a string.
+	 * 
+	 * @param charset
+	 *            The charset to use for returned string
+	 * @return The session user's VCard as a string
+	 * @throws MailException
+	 *             If a mail error occurs
+	 */
 	protected final String getUserVCard(final String charset) throws MailException {
 		final User userObj = UserStorage.getStorageUser(session.getUserId(), ctx);
 		Connection readCon = null;
@@ -857,64 +877,43 @@ public class MIMEMessageFiller {
 	}
 
 	/**
-	 * Creates a <code>javax.mail.Multipart</code> instance of MIME type
-	 * multipart/alternative. If <code>embeddedImages</code> is
-	 * <code>true</code> a sub-multipart of MIME type multipart/related is going
-	 * to be appended as the "html" version
+	 * Creates a "multipart/alternative" object.
+	 * 
+	 * @param mail
+	 *            The source composed mail
+	 * @param mailBody
+	 *            The composed mail's HTML content
+	 * @param embeddedImages
+	 *            <code>true</code> if specified HTML content contains inline
+	 *            images (an appropriate "multipart/related" object is going to
+	 *            be created ); otherwise <code>false</code>.
+	 * @return An appropriate "multipart/alternative" object.
+	 * @throws MailException
+	 *             If a mail error occurs
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
-	protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final boolean embeddedImages)
-			throws MailException, MessagingException, IOException {
+	protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final String mailBody,
+			final boolean embeddedImages) throws MailException, MessagingException, IOException {
 		/*
 		 * Create an "alternative" multipart
 		 */
 		final Multipart alternativeMultipart = new MimeMultipart(MP_ALTERNATIVE);
 		/*
-		 * Create a body part for both text and html content
-		 */
-		final String mailBody = (String) mail.getContent();
-		/*
-		 * Define & add text content
-		 */
-		alternativeMultipart.addBodyPart(createTextBodyPart(mailBody));
-		/*
 		 * Define html content
 		 */
+		final String htmlContent;
 		if (embeddedImages) {
 			/*
 			 * Create "related" multipart
 			 */
-			final Multipart relatedMultipart = new MimeMultipart(MP_RELATED);
-			/*
-			 * Process referenced local image files and insert returned html
-			 * content as a new body part to first index
-			 */
-			relatedMultipart.addBodyPart(createHtmlBodyPart(processReferencedLocalImages(mailBody, relatedMultipart,
-					this)), 0);
-			/*
-			 * Traverse Content-IDs
-			 */
-			final List<String> cidList = MIMEMessageUtility.getContentIDs(mailBody);
-			NextImg: for (final String cid : cidList) {
-				/*
-				 * Get & remove inline image (to prevent being sent twice)
-				 */
-				final MailPart imgPart = getAndRemoveImageAttachment(cid, mail);
-				if (imgPart == null) {
-					continue NextImg;
-				}
-				/*
-				 * Create new body part from part's data handler
-				 */
-				final BodyPart relatedImageBodyPart = new MimeBodyPart();
-				relatedImageBodyPart.setDataHandler(imgPart.getDataHandler());
-				for (final Iterator<Map.Entry<String, String>> iter = imgPart.getHeadersIterator(); iter.hasNext();) {
-					final Map.Entry<String, String> e = iter.next();
-					relatedImageBodyPart.setHeader(e.getKey(), e.getValue());
-				}
-				/*
-				 * Add image to "related" multipart
-				 */
-				relatedMultipart.addBodyPart(relatedImageBodyPart);
+			final Multipart relatedMultipart;
+			{
+				final String[] arr = new String[1];
+				relatedMultipart = createMultipartRelated(mail, mailBody, arr);
+				htmlContent = arr[0];
 			}
 			/*
 			 * Add multipart/related as a body part to superior multipart
@@ -923,13 +922,80 @@ public class MIMEMessageFiller {
 			altBodyPart.setContent(relatedMultipart);
 			alternativeMultipart.addBodyPart(altBodyPart);
 		} else {
+			htmlContent = mailBody;
 			final BodyPart html = createHtmlBodyPart(mailBody);
 			/*
 			 * Add html part to superior multipart
 			 */
 			alternativeMultipart.addBodyPart(html);
 		}
+		/*
+		 * Define & add text content to first index position
+		 */
+		alternativeMultipart.addBodyPart(createTextBodyPart(htmlContent), 0);
 		return alternativeMultipart;
+	}
+
+	/**
+	 * Creates a "multipart/related" object. All inline images are going to be
+	 * added to returned "multipart/related" object and corresponding HTML
+	 * content is altered to reference these images through "Content-Id".
+	 * 
+	 * @param mail
+	 *            The source composed mail
+	 * @param mailBody
+	 *            The composed mail's HTML content
+	 * @param htmlContent
+	 *            An array of {@link String} with length <code>1</code> serving
+	 *            as a container for altered HTML content
+	 * @return The created "multipart/related" object
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 * @throws MailException
+	 *             If a mail error occurs
+	 */
+	protected Multipart createMultipartRelated(final ComposedMailMessage mail, final String mailBody,
+			final String[] htmlContent) throws MessagingException, MailException {
+		/*
+		 * Create "related" multipart
+		 */
+		final Multipart relatedMultipart = new MimeMultipart(MP_RELATED);
+		/*
+		 * Check for local images
+		 */
+		htmlContent[0] = processReferencedLocalImages(mailBody, relatedMultipart, this);
+		/*
+		 * Process referenced local image files and insert returned html content
+		 * as a new body part to first index
+		 */
+		relatedMultipart.addBodyPart(createHtmlBodyPart(htmlContent[0]), 0);
+		/*
+		 * Traverse Content-IDs occurring in original HTML content
+		 */
+		final List<String> cidList = MIMEMessageUtility.getContentIDs(mailBody);
+		NextImg: for (final String cid : cidList) {
+			/*
+			 * Get & remove inline image (to prevent being sent twice)
+			 */
+			final MailPart imgPart = getAndRemoveImageAttachment(cid, mail);
+			if (imgPart == null) {
+				continue NextImg;
+			}
+			/*
+			 * Create new body part from part's data handler
+			 */
+			final BodyPart relatedImageBodyPart = new MimeBodyPart();
+			relatedImageBodyPart.setDataHandler(imgPart.getDataHandler());
+			for (final Iterator<Map.Entry<String, String>> iter = imgPart.getHeadersIterator(); iter.hasNext();) {
+				final Map.Entry<String, String> e = iter.next();
+				relatedImageBodyPart.setHeader(e.getKey(), e.getValue());
+			}
+			/*
+			 * Add image to "related" multipart
+			 */
+			relatedMultipart.addBodyPart(relatedImageBodyPart);
+		}
+		return relatedMultipart;
 	}
 
 	protected final void addMessageBodyPart(final Multipart mp, final MailPart part, final boolean inline)
