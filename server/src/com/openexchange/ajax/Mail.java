@@ -102,7 +102,6 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -2660,7 +2659,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 			throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
 					responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
 					JS_FRAGMENT_ACTION, e.getAction() == null ? STR_NULL : e.getAction()), e.getMessage(), e);
-		} catch (final ContextException e) {
+		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			JSONObject responseObj = null;
 			try {
@@ -2673,19 +2672,20 @@ public class Mail extends PermissionServlet implements UploadListener {
 			throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
 					responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
 					JS_FRAGMENT_ACTION, actionStr == null ? STR_NULL : actionStr), e.getMessage(), e);
-		} catch (final MailException e) {
-			LOG.error(e.getMessage(), e);
+		} catch (final Exception e) {
+			final AbstractOXException wrapper = getWrappingOXException(e);
+			LOG.error(wrapper.getMessage(), wrapper);
 			JSONObject responseObj = null;
 			try {
 				final Response response = new Response();
-				response.setException(e);
+				response.setException(wrapper);
 				responseObj = ResponseWriter.getJSON(response);
 			} catch (final JSONException e1) {
 				LOG.error(e1.getMessage(), e1);
 			}
 			throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
 					responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
-					JS_FRAGMENT_ACTION, actionStr == null ? STR_NULL : actionStr), e.getMessage(), e);
+					JS_FRAGMENT_ACTION, actionStr == null ? STR_NULL : actionStr), wrapper.getMessage(), wrapper);
 		}
 	}
 
@@ -2710,7 +2710,14 @@ public class Mail extends PermissionServlet implements UploadListener {
 				if (uploadEvent.getAction().equals(ACTION_NEW)) {
 					String msgIdentifier = null;
 					{
-						final JSONObject jsonMailObj = new JSONObject(uploadEvent.getFormField(UPLOAD_FORMFIELD_MAIL));
+						final JSONObject jsonMailObj;
+						{
+							final String json0 = uploadEvent.getFormField(UPLOAD_FORMFIELD_MAIL);
+							if (json0 == null || json0.trim().length() == 0) {
+								throw new MailException(MailException.Code.MISSING_PARAM, UPLOAD_FORMFIELD_MAIL);
+							}
+							jsonMailObj = new JSONObject(json0);
+						}
 						/*
 						 * Parse
 						 */
