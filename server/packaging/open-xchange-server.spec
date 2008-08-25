@@ -148,6 +148,9 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
    appointment
  - Bugfix #11984: Avoiding display of a-tag's href content in brackets if
    a-tag's content already represents a valid link
+* Wed Aug 20 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12049: Applying proper login-info to newly created session on
+   user login
 * Tue Aug 19 2008 - thorben.betten@open-xchange.com
  - Bugfix #12023: Properly handling empty Content-Id value
 * Mon Aug 18 2008 - thorben.betten@open-xchange.com

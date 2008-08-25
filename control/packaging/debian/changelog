@@ -1,3 +1,9 @@
+open-xchange-control (6.6.0-5) unstable; urgency=low
+
+  * first build for RC7
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 25 Aug 2008 15:46:27 +0200
+
 open-xchange-control (6.6.0-4) unstable; urgency=low
 
   * first build for RC6
