@@ -1,4 +1,8 @@
-* 2008-08-20 - thorben.betten@open-xchange.com
+* 2008-08-26 - thorben.betten@open-xchange.com
+
+ - Bugfix #12045: Updating reminder's folder reference on appointment move
+
+* 2008-08-25 - thorben.betten@open-xchange.com
 
  - Bugfix #12049: Applying proper login-info to newly created session on
    user login

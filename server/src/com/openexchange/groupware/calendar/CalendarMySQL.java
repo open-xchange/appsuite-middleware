@@ -102,6 +102,8 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
@@ -1959,6 +1961,32 @@ class CalendarMySQL implements CalendarSqlImp {
 
 		}
 		cdao.setParentFolderID(cdao.getActionFolder());
+
+		if (cdao.getFolderMove()) {
+			/*
+			 * Update reminders' folder ID on move operation
+			 */
+			final ReminderSQLInterface reminderInterface = new ReminderHandler(ctx);
+			final SearchIterator<?> it = reminderInterface.listReminder(cdao.getObjectID());
+			final List<ReminderObject> toUpdate = new ArrayList<ReminderObject>();
+			try {
+				while (it.hasNext()) {
+					toUpdate.add((ReminderObject) it.next());
+				}
+			} catch (final SearchIteratorException e) {
+				LOG.error("Reminder update failed", e);
+			} finally {
+				try {
+					it.close();
+				} catch (final SearchIteratorException e) {
+					LOG.error(e.getMessage(), e);
+				}
+			}
+			for (final ReminderObject reminder : toUpdate) {
+				reminder.setFolder(cdao.getParentFolderID());
+				reminderInterface.updateReminder(reminder);
+			}
+		}
 
 		final boolean solo_reminder = CalendarCommonCollection.checkForSoloReminderUpdate(cdao, ucols, cup);
 		CalendarCommonCollection.checkAndRemovePastReminders(cdao, edao);
