@@ -151,6 +151,10 @@ my $souserclt     = SOAP::Lite->ns( $nameSpace )->proxy( $baseURL."OXUserService
 my $sogroupclt    = SOAP::Lite->ns( $nameSpace )->proxy( $baseURL."OXGroupService" );
 my $soresourceclt = SOAP::Lite->ns( $nameSpace )->proxy( $baseURL."OXResourceService" );
 
+##
+## creating a user
+##
+
 # mandatory user data
 my $uname    = "john";
 my $password = "secret";
@@ -179,4 +183,52 @@ $result =
 		  $ctxCreds
 		 );
 
+#die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+
+##
+## creating a group
+##
+
+$gname       = "testgroup";
+$displayname = "a testgroup";
+$email       = "testgroup\@example.com";
+
+# already add some members (can also be done later with a change call)
+# we already know/assume, that context admin has id 2 and John Doe has
+# id 3.
+my @members;
+push(@members, SOAP::Data->name( members => 2 ));
+push(@members, SOAP::Data->name( members => 3 ));
+
+$result =
+      $sogroupclt->create($context,
+    	      SOAP::Data->value("Group")->value(\SOAP::Data->value(
+    	           SOAP::Data->name("name" => $gname),
+    	           SOAP::Data->name("displayname" => $displayname),
+    	           SOAP::Data->name("email" => $email),
+    	           SOAP::Data->name("members" => @members )
+    	           )),
+    	      $ctxCreds
+    	     );
+
 die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+
+##
+## changing userdata
+##
+
+# new display name and password
+$displayname = "Dr. John Doe";
+$password = "verysecret";
+
+$result =
+    $souserclt->change($context,
+		  SOAP::Data->value("User")->value(\SOAP::Data->value(
+			SOAP::Data->name("name" => $uname),
+			SOAP::Data->name("password" => $password),
+			SOAP::Data->name("display_name" => $displayname)
+   	          )),
+		  $ctxCreds
+		 );
+
+#die "Error: ".$result->faultstring()."\n $@" if $result->fault();
