@@ -54,12 +54,13 @@ package com.openexchange.groupware.calendar.recurrence;
 import java.util.Arrays;
 import java.util.Calendar;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.groupware.container.CalendarObject;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -117,7 +118,7 @@ public class RecurringCalculation {
     private final boolean calc_until = false; // what the hell is this for?
 
     private final String getState() {
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder(1024);
         builder.append("===================[ Recurring Calculation State ]=======================\n");
         builder.append("    private final int recurring_type; // cdao.getRecurrenceType() = ").append(recurring_type).append("\n");
         builder.append("    private final int recurring_interval; // cdao.getInterval()   = ").append(recurring_interval).append("\n");
@@ -341,8 +342,8 @@ public class RecurringCalculation {
     private final void increaseCalculationCounter() throws RecurringException {
         operationCounter++;
         if(operationCounter > TTL) {
-            RecurringException exception = new RecurringException(RecurringException.PATTERN_TOO_COMPLEX, -1);
-            Throwable t = exception.fillInStackTrace();
+            final RecurringException exception = new RecurringException(RecurringException.PATTERN_TOO_COMPLEX, -1);
+            final Throwable t = exception.fillInStackTrace();
             LOG.error(getState(), t);
             throw exception;
         }
@@ -970,7 +971,7 @@ public class RecurringCalculation {
         return ret;
     }
 
-    public void setMaxOperations(int calculations) {
+    public void setMaxOperations(final int calculations) {
         TTL = calculations;
     }
 }
