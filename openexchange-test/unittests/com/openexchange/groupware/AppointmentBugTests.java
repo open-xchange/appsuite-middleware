@@ -551,7 +551,7 @@ public class AppointmentBugTests extends TestCase {
         final OCLPermission oclp2 = new OCLPermission();
         oclp2.setEntity(uid2);
         oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        fo.setFolderName("testSharedFolder4717");
+        fo.setFolderName("testSharedFolder4717_" + String.valueOf(System.currentTimeMillis()));
         fo.setParentFolderID(fid);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
@@ -826,7 +826,7 @@ public class AppointmentBugTests extends TestCase {
         final OCLPermission oclp2 = new OCLPermission();
         oclp2.setEntity(uid2);
         oclp2.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.NO_PERMISSIONS);
-        fo.setFolderName("testSharedFolder5130");
+        fo.setFolderName("testSharedFolder5130_" + String.valueOf(System.currentTimeMillis()));
         fo.setParentFolderID(fid);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
@@ -1026,7 +1026,7 @@ public class AppointmentBugTests extends TestCase {
         final OCLPermission oclp2 = new OCLPermission();
         oclp2.setEntity(uid2);
         oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.NO_PERMISSIONS);
-        fo.setFolderName("testSharedFolder5194");
+        fo.setFolderName("testSharedFolder5194_" + String.valueOf(System.currentTimeMillis()));
         fo.setParentFolderID(fid);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
@@ -3453,6 +3453,122 @@ public class AppointmentBugTests extends TestCase {
 			} catch (final OXCalendarException e) {
 				assertEquals("", e.getDetailNumber(), OXCalendarException.Code.PRIVATE_FLAG_AND_PARTICIPANTS
 						.getDetailNumber());
+			}
+		} finally {
+			if (object_id != -1) {
+				hardDelete(object_id, context);
+			}
+		}
+	}
+
+	/**
+	 * Test for <a href=
+	 * "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12045">bug
+	 * #12045</a>:<br>
+	 * &quot;<i>Reminder settings won't be updated when moving series
+	 * appointment to another folder</i>&quot;
+	 * 
+	 * @throws Exception
+	 *             If an error occurs
+	 */
+	public void testBug12045() throws Exception {
+		final Context context = new ContextImpl(contextid);
+		int object_id = -1;
+		try {
+			final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(),
+					"myTestSearch");
+			final int fid = AppointmentBugTests.getPrivateFolder(userid);
+			final CalendarSql csql = new CalendarSql(so);
+			{
+				/*
+				 * Create recurring appointment with reminder
+				 */
+				final CalendarDataObject cdao = new CalendarDataObject();
+				cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+				cdao.setParentFolderID(fid);
+				cdao.setTitle("testBug12045");
+				cdao.setIgnoreConflicts(true);
+
+				cdao.setStartDate(new Date(1219748400000l));
+				cdao.setEndDate(new Date(1219752000000l));
+				cdao.setFullTime(false);
+
+				cdao.setShownAs(1);
+
+				cdao.setAlarm(15);
+				cdao.setNotification(true);
+
+				cdao.setRecurrenceType(1);
+				cdao.setInterval(1);
+				cdao.setOccurrence(3);
+
+				csql.insertAppointmentObject(cdao);
+				object_id = cdao.getObjectID();
+				assertTrue("Object creation failed", object_id > 0);
+			}
+
+			/*
+			 * Check reminder
+			 */
+			final int reminderId;
+			{
+				final ReminderObject ro = new ReminderHandler(context).loadReminder(object_id, userid,
+						Types.APPOINTMENT);
+				assertTrue("Folder ID mismatch in reminder", ro.getFolder() == fid);
+				reminderId = ro.getObjectId();
+			}
+
+			/*
+			 * Create a temporary folder for move operation
+			 */
+			final OXFolderManager folderManager = new OXFolderManagerImpl(so);
+			final FolderObject fo = new FolderObject();
+			fo.setFolderName("TestFolder-testBug12045-" + String.valueOf(System.currentTimeMillis()));
+			fo.setParentFolderID(fid);
+			fo.setModule(FolderObject.CALENDAR);
+			fo.setType(FolderObject.PRIVATE);
+			{
+				final OCLPermission p = new OCLPermission(userid, fid);
+				p.setFolderAdmin(true);
+				p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
+						OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+				fo.setPermissionsAsArray(new OCLPermission[] { p });
+			}
+			folderManager.createFolder(fo, true, System.currentTimeMillis());
+			assertTrue("Folder creation failed", fo.getObjectID() > 0);
+			try {
+				/*
+				 * Move that appointment to another folder
+				 */
+				final CalendarDataObject update = new CalendarDataObject();
+				update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+
+				update.setIgnoreConflicts(true);
+				update.setObjectID(object_id);
+				update.setTitle("testBug12045 - step 2");
+
+				update.setStartDate(new Date(1219748400000l));
+				update.setEndDate(new Date(1219752000000l));
+
+				update.setNotification(true);
+
+				update.setParentFolderID(fo.getObjectID());
+
+				csql.updateAppointmentObject(update, fid, new Date());
+
+				final ReminderObject ro = new ReminderHandler(context).loadReminder(reminderId);
+				assertTrue("Reminder's folder ID not updated properly", ro.getFolder() == fo.getObjectID());
+			} finally {
+				try {
+					new ReminderHandler(context).deleteReminder(object_id, userid, Types.APPOINTMENT);
+				} catch (final Exception e) {
+					e.printStackTrace();
+				}
+				try {
+					folderManager.deleteFolder(fo, true, System.currentTimeMillis());
+				} catch (final Exception e) {
+					e.printStackTrace();
+				}
 			}
 		} finally {
 			if (object_id != -1) {
