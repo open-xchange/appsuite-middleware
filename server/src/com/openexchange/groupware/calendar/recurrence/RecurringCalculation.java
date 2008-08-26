@@ -340,13 +340,15 @@ public class RecurringCalculation {
     }
 
     private final void increaseCalculationCounter() throws RecurringException {
-        operationCounter++;
-        if(operationCounter > TTL) {
-            final RecurringException exception = new RecurringException(RecurringException.PATTERN_TOO_COMPLEX, -1);
-            final Throwable t = exception.fillInStackTrace();
-            LOG.error(getState(), t);
-            throw exception;
-        }
+        if (TTL > 0) {
+			operationCounter++;
+			if (operationCounter > TTL) {
+				final RecurringException exception = new RecurringException(RecurringException.PATTERN_TOO_COMPLEX, -1);
+				final Throwable t = exception.fillInStackTrace();
+				LOG.error(getState(), t);
+				throw exception;
+			}
+		}
     }
     
     public RecurringResults calculateRecurrence() throws RecurringException {
