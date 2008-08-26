@@ -76,5 +76,7 @@ public interface LinksSql {
 	public void iFDeleteLinkFromObject(Statement del, boolean second, int id, int type, int folder, int loadid, int loadfolder, int loadtype, int cid) throws SQLException;
 		
 	public String iFdeleteAllObjectLinks();
+
+	public String iFdeleteAllFolderLinks();
 	
 }

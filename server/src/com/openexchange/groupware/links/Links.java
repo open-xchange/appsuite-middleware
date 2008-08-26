@@ -596,5 +596,42 @@ public class Links {
 		}
 	}
 
+	/**
+	 * Deletes all links whose objects references the specified folder ID
+	 * 
+	 * @param folderId The folder ID
+	 * @param cid The context ID
+	 * @param writecon A connection with write capability
+	 * @throws OXException If deleting all folder links fails
+	 */
+	@OXThrows(
+			category=Category.CODE_ERROR,
+			desc="",
+			exceptionId=13,
+			msg="Unable to delete all links from folder. Folder %1$d Context %2$d"
+	)
+	public static void deleteAllFolderLinks(final int folderId, final int cid, final Connection writecon)
+			throws OXException {
+		final LinksSql lms = new LinksMySql();
+		PreparedStatement ps = null;
+		try {
+			ps = writecon.prepareStatement(lms.iFdeleteAllFolderLinks());
+			int pos = 1;
+			ps.setInt(pos++, folderId);
+			ps.setInt(pos++, folderId);
+			ps.setInt(pos++, cid);
+			ps.execute();
+		} catch (final SQLException se) {
+			throw EXCEPTIONS.create(12, se, Integer.valueOf(folderId), Integer.valueOf(cid));
+		} finally {
+			if (ps != null) {
+				try {
+					ps.close();
+				} catch (final SQLException e) {
+					LOG.error("Unable to close Statement", e);
+				}
+			}
+		}
+	}
 	
 }

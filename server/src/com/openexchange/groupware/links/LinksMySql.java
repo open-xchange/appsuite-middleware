@@ -118,5 +118,10 @@ public class LinksMySql implements LinksSql {
 	public String iFdeleteAllObjectLinks() {
 		return "DELETE FROM prg_links WHERE ((firstid = ? AND firstmodule = ?) OR (secondid = ? AND secondmodule = ?)) AND cid = ?";
 	}
-	
+
+	private static final String SQL_LINKS_DEL2 = "DELETE FROM prg_links WHERE ((firstfolder = ?) OR (secondfolder = ?)) AND cid = ?";
+
+	public String iFdeleteAllFolderLinks() {
+		return SQL_LINKS_DEL2;
+	}
 }

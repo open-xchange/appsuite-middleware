@@ -85,6 +85,7 @@ import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.links.Links;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.StaticDBPoolProvider;
@@ -1263,6 +1264,26 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 				FolderCacheManager.getInstance().removeFolderObject(folderID, ctx);
 			} catch (final OXException e) {
 				LOG.error(e.getLocalizedMessage(), e);
+			}
+		}
+		/*
+		 * Remove remaining links
+		 */
+		Connection wc = writeCon;
+		boolean closeWriter = false;
+		if (wc == null) {
+			try {
+				wc = DBPool.pickupWriteable(ctx);
+				closeWriter = true;
+			} catch (final DBPoolingException e) {
+				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+			}
+		}
+		try {
+			Links.deleteAllFolderLinks(folderID, ctx.getContextId(), wc);
+		} finally {
+			if (closeWriter) {
+				DBPool.closeWriterSilent(ctx, wc);
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 * 2008-08-26 - thorben.betten@open-xchange.com
 
  - Bugfix #12045: Updating reminder's folder reference on appointment move
+ - Bugfix #11181: Links now got deleted on folder deletion, too
 
 * 2008-08-25 - thorben.betten@open-xchange.com
 
