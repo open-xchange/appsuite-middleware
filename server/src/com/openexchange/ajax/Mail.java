@@ -556,8 +556,14 @@ public class Mail extends PermissionServlet implements UploadListener {
 					for (int i = 0; i < size; i++) {
 						final MailMessage mail = (MailMessage) it.next();
 						final JSONArray ja = new JSONArray();
-						for (final MailFieldWriter writer : writers) {
-							writer.writeField(ja, mail, mail.getThreadLevel(), false);
+						if (mail == null) {
+							for (int j = 0; j < writers.length; j++) {
+								ja.put(JSONObject.NULL);
+							}
+						} else {
+							for (final MailFieldWriter writer : writers) {
+								writer.writeField(ja, mail, mail.getThreadLevel(), false);
+							}
 						}
 						jsonWriter.value(ja);
 					}
@@ -581,8 +587,14 @@ public class Mail extends PermissionServlet implements UploadListener {
 					for (int i = 0; i < size; i++) {
 						final MailMessage mail = (MailMessage) it.next();
 						final JSONArray ja = new JSONArray();
-						for (final MailFieldWriter writer : writers) {
-							writer.writeField(ja, mail, 0, false);
+						if (mail == null) {
+							for (int j = 0; j < writers.length; j++) {
+								ja.put(JSONObject.NULL);
+							}
+						} else {
+							for (final MailFieldWriter writer : writers) {
+								writer.writeField(ja, mail, 0, false);
+							}
 						}
 						jsonWriter.value(ja);
 					}

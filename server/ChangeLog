@@ -2,6 +2,7 @@
 
  - Bugfix #12045: Updating reminder's folder reference on appointment move
  - Bugfix #11181: Links now got deleted on folder deletion, too
+ - Bugfix #11617: Handling a possible null reference on mail retrieval
 
 * 2008-08-25 - thorben.betten@open-xchange.com
 
