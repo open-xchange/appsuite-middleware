@@ -163,8 +163,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(Mail.class);
 
-	private static final String MIME_MULTIPART = "multipart/";
-
 	private static final String PARAMETER_COL = "col";
 
 	private static final String MIME_TEXT_HTML_CHARSET_UTF_8 = "text/html; charset=UTF-8";
