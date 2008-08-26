@@ -121,7 +121,6 @@ import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
-import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -146,6 +145,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.regex.RegexUtility;
+import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -356,12 +356,21 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	private final void actionGetUpdates(final HttpServletRequest req, final HttpServletResponse resp)
-			throws IOException, ServletException {
+			throws IOException {
 		try {
 			ResponseWriter.write(actionGetUpdates(getSessionObject(req), ParamContainer.getInstance(req,
 					EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -389,12 +398,21 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	private final void actionGetMailCount(final HttpServletRequest req, final HttpServletResponse resp)
-			throws IOException, ServletException {
+			throws IOException {
 		try {
 			ResponseWriter.write(actionGetMailCount(getSessionObject(req), ParamContainer.getInstance(req,
 					EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -450,14 +468,31 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	private final void actionGetAllMails(final HttpServletRequest req, final HttpServletResponse resp)
-			throws IOException, ServletException {
+			throws IOException {
 		try {
 			ResponseWriter.write(actionGetAllMails(getSessionObject(req), ParamContainer.getInstance(req,
 					EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		} catch (final SearchIteratorException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			LOG.error(e.getMessage(), e);
+			final Response response = new Response();
+			response.setException(e);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -592,12 +627,21 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	private final void actionGetReply(final HttpServletRequest req, final HttpServletResponse resp,
-			final boolean reply2all) throws IOException, ServletException {
+			final boolean reply2all) throws IOException {
 		try {
 			ResponseWriter.write(actionGetReply(getSessionObject(req), reply2all, ParamContainer.getInstance(req,
 					EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -660,12 +704,21 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	private final void actionGetForward(final HttpServletRequest req, final HttpServletResponse resp)
-			throws IOException, ServletException {
+			throws IOException {
 		try {
 			ResponseWriter.write(actionGetForward(getSessionObject(req), ParamContainer.getInstance(req,
 					EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -728,12 +781,21 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	private final void actionGetMessage(final HttpServletRequest req, final HttpServletResponse resp)
-			throws IOException, ServletException {
+			throws IOException {
 		try {
 			ResponseWriter.write(actionGetMessage(getSessionObject(req), ParamContainer.getInstance(req,
 					EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -876,15 +938,31 @@ public class Mail extends PermissionServlet implements UploadListener {
 				writer);
 	}
 
-	private final void actionGetNew(final HttpServletRequest req, final HttpServletResponse resp) throws IOException,
-			ServletException {
+	private final void actionGetNew(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		try {
 			ResponseWriter.write(actionGetNew(getSessionObject(req), ParamContainer.getInstance(req,
 					EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		} catch (final SearchIteratorException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			LOG.error(e.getMessage(), e);
+			final Response response = new Response();
+			response.setException(e);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -979,17 +1057,26 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	public void actionGetSaveVersit(final Session session, final Writer writer, final JSONObject requestObj,
-			final MailServletInterface mi) throws Exception {
+			final MailServletInterface mi) throws JSONException {
 		actionGetSaveVersit(session, writer, ParamContainer.getInstance(requestObj, EnumComponent.MAIL), mi);
 	}
 
 	private final void actionGetSaveVersit(final HttpServletRequest req, final HttpServletResponse resp)
-			throws IOException, ServletException {
+			throws IOException {
 		try {
 			actionGetSaveVersit(getSessionObject(req), resp.getWriter(), ParamContainer.getInstance(req,
 					EnumComponent.MAIL, resp), null);
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -1095,7 +1182,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	/**
 	 * Looks up a mail attachment and writes its content directly into response
-	 * output stream. This method is not accessible via Mutliple servlet
+	 * output stream. This method is not accessible via Multiple servlet
 	 */
 	private final void actionGetAttachment(final HttpServletRequest req, final HttpServletResponse resp) {
 		/*
@@ -1340,12 +1427,21 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	private final void actionPutForwardMultiple(final HttpServletRequest req, final HttpServletResponse resp)
-			throws IOException, ServletException {
+			throws IOException {
 		try {
 			ResponseWriter.write(actionPutForwardMultiple(getSessionObject(req), getBody(req), ParamContainer
 					.getInstance(req, EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -1388,9 +1484,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 					mailInterface.close(true);
 				}
 			}
-		} catch (final MailException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -1414,12 +1507,21 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	private final void actionPutReply(final HttpServletRequest req, final HttpServletResponse resp,
-			final boolean replyAll) throws IOException, ServletException {
+			final boolean replyAll) throws IOException {
 		try {
 			ResponseWriter.write(actionPutReply(getSessionObject(req), getBody(req), ParamContainer.getInstance(req,
 					EnumComponent.MAIL, resp), replyAll, null), resp.getWriter());
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -1452,13 +1554,21 @@ public class Mail extends PermissionServlet implements UploadListener {
 				jsonObj, EnumComponent.MAIL), mi), writer);
 	}
 
-	private final void actionPutGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException,
-			ServletException {
+	private final void actionPutGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		try {
 			ResponseWriter.write(actionPutGet(getSessionObject(req), getBody(req), ParamContainer.getInstance(req,
 					EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -1518,12 +1628,21 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	private final void actionPutAutosave(final HttpServletRequest req, final HttpServletResponse resp)
-			throws IOException, ServletException {
+			throws IOException {
 		try {
 			ResponseWriter.write(actionPutAutosave(getSessionObject(req), getBody(req), ParamContainer.getInstance(req,
 					EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -1598,13 +1717,21 @@ public class Mail extends PermissionServlet implements UploadListener {
 				.getInstance(jsonObj, EnumComponent.MAIL), mi), writer);
 	}
 
-	private final void actionPutClear(final HttpServletRequest req, final HttpServletResponse resp) throws IOException,
-			ServletException {
+	private final void actionPutClear(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		try {
 			ResponseWriter.write(actionPutClear(getSessionObject(req), getBody(req), ParamContainer.getInstance(req,
 					EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -1675,14 +1802,31 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	private final void actionPutMailSearch(final HttpServletRequest req, final HttpServletResponse resp)
-			throws IOException, ServletException {
+			throws IOException {
 		try {
 			ResponseWriter.write(actionPutMailSearch(getSessionObject(req), getBody(req), ParamContainer.getInstance(
 					req, EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		} catch (final SearchIteratorException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			LOG.error(e.getMessage(), e);
+			final Response response = new Response();
+			response.setException(e);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -1818,12 +1962,21 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	private final void actionPutMailList(final HttpServletRequest req, final HttpServletResponse resp)
-			throws IOException, ServletException {
+			throws IOException {
 		try {
 			ResponseWriter.write(actionPutMailList(getSessionObject(req), getBody(req), ParamContainer.getInstance(req,
 					EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -1968,12 +2121,21 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	private final void actionPutDeleteMails(final HttpServletRequest req, final HttpServletResponse resp)
-			throws IOException, ServletException {
+			throws IOException {
 		try {
 			ResponseWriter.write(actionPutDeleteMails(getSessionObject(req), getBody(req), ParamContainer.getInstance(
 					req, EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -2058,12 +2220,21 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	private final void actionPutUpdateMail(final HttpServletRequest req, final HttpServletResponse resp)
-			throws IOException, ServletException {
+			throws IOException {
 		try {
 			ResponseWriter.write(actionPutUpdateMail(getSessionObject(req), getBody(req), ParamContainer.getInstance(
 					req, EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -2164,12 +2335,21 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	private final void actionPutCopyMail(final HttpServletRequest req, final HttpServletResponse resp)
-			throws IOException, ServletException {
+			throws IOException {
 		try {
 			ResponseWriter.write(actionPutCopyMail(getSessionObject(req), getBody(req), ParamContainer.getInstance(req,
 					EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -2183,7 +2363,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		/*
 		 * Start response
 		 */
-		jsonWriter.array();
+		jsonWriter.object();
 		try {
 			final long uid = paramContainer.checkIntParam(PARAMETER_ID);
 			final String sourceFolder = paramContainer.checkStringParam(PARAMETER_FOLDERID);
@@ -2195,23 +2375,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 					mailInterface = MailServletInterface.getInstance(session);
 					closeMailInterface = true;
 				}
-				final long[] msgUIDs = mailInterface.copyMessages(sourceFolder, destFolder, new long[] { uid }, false);
-				if (msgUIDs.length == 1) {
-					// TODO: Split response in folder and ID
-					jsonWriter.value(new StringBuilder(destFolder).append(getSeparator(session, mailInterface)).append(
-							msgUIDs[0]).toString());
-				} else if (msgUIDs.length > 1) {
-					jsonWriter.array();
-					try {
-						for (int i = 0; i < msgUIDs.length; i++) {
-							jsonWriter.value(msgUIDs[i]);
-						}
-					} finally {
-						jsonWriter.endArray();
-					}
-				} else {
-					jsonWriter.value(JSONObject.NULL);
-				}
+				final long msgUID = mailInterface.copyMessages(sourceFolder, destFolder, new long[] { uid }, false)[0];
+				jsonWriter.key(FolderChildFields.FOLDER_ID).value(destFolder);
+				jsonWriter.key(DataFields.ID).value(msgUID);
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
@@ -2231,7 +2397,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		/*
 		 * Close response and flush print writer
 		 */
-		jsonWriter.endArray();
+		jsonWriter.endObject();
 		response.setData(jsonWriter.getObject());
 		response.setTimestamp(null);
 		return response;
@@ -2262,16 +2428,14 @@ public class Mail extends PermissionServlet implements UploadListener {
 				}
 				final long[] msgUIDs = mailInterface.copyMessages(srcFolder, destFolder, mailIDs, move);
 				if (msgUIDs.length > 0) {
-					final StringBuilder sb = new StringBuilder();
 					final Response response = new Response();
 					for (int k = 0; k < msgUIDs.length; k++) {
 						response.reset();
-						sb.setLength(0);
-						final JSONArray jsonArr = new JSONArray();
-						// TODO: Split response in folder and ID
-						jsonArr.put(sb.append(destFolder).append(getSeparator(session, mailInterface)).append(
-								msgUIDs[k]).toString());
-						response.setData(jsonArr);
+						final JSONObject jsonObj = new JSONObject();
+						// DataFields.ID | FolderChildFields.FOLDER_ID
+						jsonObj.put(FolderChildFields.FOLDER_ID, destFolder);
+						jsonObj.put(DataFields.ID, msgUIDs[k]);
+						response.setData(jsonObj);
 						response.setTimestamp(null);
 						ResponseWriter.write(response, writer);
 					}
@@ -2288,8 +2452,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 			}
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
+			final Response response = new Response();
 			for (int k = 0; k < mailIDs.length; k++) {
-				final Response response = new Response();
+				response.reset();
 				response.setException(e);
 				response.setData(JSONObject.NULL);
 				response.setTimestamp(null);
@@ -2298,8 +2463,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 		} catch (final Exception e) {
 			final AbstractOXException wrapper = getWrappingOXException(e);
 			LOG.error(wrapper.getMessage(), wrapper);
+			final Response response = new Response();
 			for (int k = 0; k < mailIDs.length; k++) {
-				final Response response = new Response();
+				response.reset();
 				response.setException(wrapper);
 				response.setData(JSONObject.NULL);
 				response.setTimestamp(null);
@@ -2320,9 +2486,14 @@ public class Mail extends PermissionServlet implements UploadListener {
 					closeMailInterface = true;
 				}
 				mailInterface.updateMessageFlags(folder, mailIDs, flagsBits, flagValue);
+				final Response response = new Response();
 				for (int i = 0; i < mailIDs.length; i++) {
-					final Response response = new Response();
-					response.setData(new JSONArray());
+					response.reset();
+					final JSONObject jsonObj = new JSONObject();
+					// DataFields.ID | FolderChildFields.FOLDER_ID
+					jsonObj.put(FolderChildFields.FOLDER_ID, folder);
+					jsonObj.put(DataFields.ID, mailIDs[i]);
+					response.setData(jsonObj);
 					response.setTimestamp(null);
 					ResponseWriter.write(response, writer);
 				}
@@ -2333,8 +2504,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 			}
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
+			final Response response = new Response();
 			for (int i = 0; i < mailIDs.length; i++) {
-				final Response response = new Response();
+				response.reset();
 				response.setException(e);
 				response.setData(JSONObject.NULL);
 				response.setTimestamp(null);
@@ -2343,8 +2515,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 		} catch (final Exception e) {
 			final AbstractOXException wrapper = getWrappingOXException(e);
 			LOG.error(wrapper.getMessage(), wrapper);
+			final Response response = new Response();
 			for (int i = 0; i < mailIDs.length; i++) {
-				final Response response = new Response();
+				response.reset();
 				response.setException(wrapper);
 				response.setData(JSONObject.NULL);
 				response.setTimestamp(null);
@@ -2365,9 +2538,14 @@ public class Mail extends PermissionServlet implements UploadListener {
 					closeMailInterface = true;
 				}
 				mailInterface.updateMessageColorLabel(folder, mailIDs, colorLabel);
+				final Response response = new Response();
 				for (int i = 0; i < mailIDs.length; i++) {
-					final Response response = new Response();
-					response.setData(new JSONArray());
+					response.reset();
+					final JSONObject jsonObj = new JSONObject();
+					// DataFields.ID | FolderChildFields.FOLDER_ID
+					jsonObj.put(FolderChildFields.FOLDER_ID, folder);
+					jsonObj.put(DataFields.ID, mailIDs[i]);
+					response.setData(jsonObj);
 					response.setTimestamp(null);
 					ResponseWriter.write(response, writer);
 				}
@@ -2378,8 +2556,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 			}
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
+			final Response response = new Response();
 			for (int i = 0; i < mailIDs.length; i++) {
-				final Response response = new Response();
+				response.reset();
 				response.setException(e);
 				response.setData(JSONObject.NULL);
 				response.setTimestamp(null);
@@ -2388,8 +2567,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 		} catch (final Exception e) {
 			final AbstractOXException wrapper = getWrappingOXException(e);
 			LOG.error(wrapper.getMessage(), wrapper);
+			final Response response = new Response();
 			for (int i = 0; i < mailIDs.length; i++) {
-				final Response response = new Response();
+				response.reset();
 				response.setException(wrapper);
 				response.setData(JSONObject.NULL);
 				response.setTimestamp(null);
@@ -2405,12 +2585,21 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	private final void actionPutAttachment(final HttpServletRequest req, final HttpServletResponse resp)
-			throws IOException, ServletException {
+			throws IOException {
 		try {
 			ResponseWriter.write(actionPutAttachment(getSessionObject(req), getBody(req), ParamContainer.getInstance(
 					req, EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -2534,12 +2723,21 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	private final void actionPutReceiptAck(final HttpServletRequest req, final HttpServletResponse resp)
-			throws IOException, ServletException {
+			throws IOException {
 		try {
 			ResponseWriter.write(actionPutReceiptAck(getSessionObject(req), getBody(req), ParamContainer.getInstance(
 					req, EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
 		}
 	}
 
@@ -3048,19 +3246,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			return uploadQuotaPerFile;
 		}
 
-	}
-
-	private static final char getSeparator(final Session session, final MailServletInterface mailInterface) {
-		try {
-			final Character c = (Character) session.getParameter(MailSessionParameterNames.PARAM_SEPARATOR);
-			if (c != null) {
-				return c.charValue();
-			}
-			return mailInterface.getFolder(mailInterface.getInboxFolder(), true).getSeparator();
-		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
-			return SEPERATOR;
-		}
 	}
 
 }
