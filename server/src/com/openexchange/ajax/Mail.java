@@ -203,8 +203,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 		return new AbstractOXException(EnumComponent.MAIL, Category.INTERNAL_ERROR, 9999, cause.getMessage(), cause);
 	}
 
-	private static final char SEPERATOR = '/';
-
 	private static final String UPLOAD_PARAM_MAILINTERFACE = "mi";
 
 	private static final String UPLOAD_PARAM_WRITER = "w";
