@@ -660,12 +660,13 @@ public final class CalendarRecurringCollection {
         String delete_exceptions = null;
         String calc_timezone = "UTC";
         if (cdao instanceof CalendarDataObject) {
+        	final CalendarDataObject calDataObject = (CalendarDataObject) cdao;
             if (!ignore_exceptions) {
-                change_exceptions = ((CalendarDataObject)cdao).getExceptions();
-                delete_exceptions = ((CalendarDataObject)cdao).getDelExceptions();
+                change_exceptions = calDataObject.getExceptions();
+                delete_exceptions = calDataObject.getDelExceptions();
             }
-            if (!((CalendarDataObject)cdao).getFullTime()) {
-                calc_timezone = ((CalendarDataObject)cdao).getTimezone();
+            if (!calDataObject.getFullTime()) {
+                calc_timezone = calDataObject.getTimezone();
             } 
         }
         
