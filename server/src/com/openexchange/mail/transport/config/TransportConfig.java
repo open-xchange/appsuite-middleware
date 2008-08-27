@@ -80,6 +80,9 @@ public abstract class TransportConfig extends MailConfig {
 	 * 
 	 * @param clazz
 	 *            The transport configuration type
+	 * @param transportConfig
+	 *            A newly created {@link TransportConfig transport
+	 *            configuration}
 	 * @param session
 	 *            The session providing needed user data
 	 * @return The user-specific transport configuration
@@ -87,8 +90,7 @@ public abstract class TransportConfig extends MailConfig {
 	 *             If user-specific transport configuration cannot be determined
 	 */
 	public static final <C extends TransportConfig> C getTransportConfig(final Class<? extends C> clazz,
-			final TransportConfig instance, final Session session) throws MailException {
-		final C transportConfig = clazz.cast(instance);
+			final C transportConfig, final Session session) throws MailException {
 		/*
 		 * Fetch user object to determine server URL
 		 */

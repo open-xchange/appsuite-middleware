@@ -173,7 +173,7 @@ public abstract class MailConfig {
 	 *            The return value type
 	 * @param clazz
 	 *            The mail configuration type
-	 * @param instance
+	 * @param mailConfig
 	 *            A newly created {@link MailConfig mail configuration}
 	 * @param session
 	 *            The session providing needed user data
@@ -181,9 +181,8 @@ public abstract class MailConfig {
 	 * @throws MailException
 	 *             If user-specific mail configuration cannot be determined
 	 */
-	public static final <C extends MailConfig> C getConfig(final Class<? extends C> clazz, final MailConfig instance,
+	public static final <C extends MailConfig> C getConfig(final Class<? extends C> clazz, final C mailConfig,
 			final Session session) throws MailException {
-		final C mailConfig = clazz.cast(instance);
 		/*
 		 * Fetch user object to determine server URL
 		 */
