@@ -1339,10 +1339,8 @@ class CalendarMySQL implements CalendarSqlImp {
 			while (rs.next()) {
 				final int oid = rs.getInt(1);
 				if (last_oid != oid) {
-					if (participants != null) {
-						if (cdao != null) {
-							cdao.setParticipants(participants.getList());
-						}
+					if (participants != null && cdao != null) {
+						cdao.setParticipants(participants.getList());
 					}
 					participants = new Participants();
 					last_oid = oid;
