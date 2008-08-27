@@ -250,9 +250,9 @@ public class CalendarDataObject extends AppointmentObject {
         return null;
     }
     
-    public final boolean calculateRecurrence() throws OXException {
+    public final boolean calculateRecurrence(final int userId, final int cid) throws OXException {
         if (isSequence(true)) {
-            return CalendarRecurringCollection.fillDAO(this);
+            return CalendarRecurringCollection.fillDAO(this, userId, cid);
         }
         return false;
     }

@@ -50,15 +50,16 @@
 
 package com.openexchange.groupware.calendar;
 
+import java.util.Calendar;
+import java.util.Date;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.recurrence.RecurringCalculation;
 import com.openexchange.groupware.calendar.recurrence.RecurringException;
 import com.openexchange.groupware.container.CalendarObject;
-
-import java.util.Calendar;
-import java.util.Date;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * CalendarRecurringCollection
@@ -302,9 +303,9 @@ public final class CalendarRecurringCollection {
      * @param pos a <code>int</code>
      * @return a <code>long</code> value
      */
-    public static long getLongByPosition(final CalendarDataObject cdao, final int pos) throws OXException {
-        fillDAO(cdao);
-        final RecurringResults rrs  = calculateRecurring(cdao, 0, 0, pos);
+    public static long getLongByPosition(final CalendarDataObject cdao, final int pos, final int userId, final int cid) throws OXException {
+        fillDAO(cdao, userId, cid);
+        final RecurringResults rrs  = calculateRecurring(cdao, 0, 0, pos, userId, cid);
         if (rrs.size() == 1) {
             final RecurringResult rr = rrs.getRecurringResult(0);
             if (pos == rr.getPosition()) {
@@ -327,18 +328,18 @@ public final class CalendarRecurringCollection {
         return null;
     }
     
-    static void setRecurrencePositionOrDateInDAO(final CalendarDataObject cdao) throws OXException {
+    static void setRecurrencePositionOrDateInDAO(final CalendarDataObject cdao, final int userId, final int cid) throws OXException {
         if (cdao.containsRecurrencePosition()) {
-            fillDAO(cdao);
-            final RecurringResults rrs  = calculateRecurring(cdao, 0, 0, cdao.getRecurrencePosition());
+            fillDAO(cdao, userId, cid);
+            final RecurringResults rrs  = calculateRecurring(cdao, 0, 0, cdao.getRecurrencePosition(), userId, cid);
             final  RecurringResult rr = rrs.getRecurringResult(0);
             if (rr != null) {
                 cdao.setRecurrenceDatePosition(new Date(rr.getNormalized()));
                 return;
             }
         } else if (cdao.containsRecurrenceDatePosition()) {
-            fillDAO(cdao);
-            final RecurringResults rrs  = calculateRecurring(cdao, 0, 0, 0);
+            fillDAO(cdao, userId, cid);
+            final RecurringResults rrs  = calculateRecurring(cdao, 0, 0, 0, userId, cid);
             final int x = rrs.getPositionByLong(cdao.getRecurrenceDatePosition().getTime());
             if (x > 0) {
                 cdao.setRecurrencePosition(x);
@@ -371,11 +372,11 @@ public final class CalendarRecurringCollection {
      * @param cdao a <code>CalendarDataObject</code>
      * @return a <code>boolean</code> value
      */
-    public static boolean fillDAO(final CalendarDataObject cdao) throws OXException {
+    public static boolean fillDAO(final CalendarDataObject cdao, final int userId, final int cid) throws OXException {
         if (cdao.getRecurrence() == null || cdao.getRecurrence().indexOf(DELIMETER_PIPE) == -1) {
             if (cdao.getRecurrenceType() != 0) {
                 if ((cdao.getInterval() != 0 || cdao.getMonth() != 0) && cdao.getStartDate() != null && cdao.getEndDate() != null) {
-                    cdao.setRecurrence(createDSString(cdao));
+                    cdao.setRecurrence(createDSString(cdao, userId, cid));
                 } else {
                     return false;
                 }
@@ -392,7 +393,7 @@ public final class CalendarRecurringCollection {
         return false;
     }
     
-    public static String createDSString(final CalendarDataObject cdao) throws OXException {
+    public static String createDSString(final CalendarDataObject cdao, final int userId, final int cid) throws OXException {
         if (cdao.containsStartDate()) {
             final StringBuilder sb = new StringBuilder();
             final int t = cdao.getRecurrenceType();
@@ -412,7 +413,7 @@ public final class CalendarRecurringCollection {
                 if (cdao.containsUntil()) {
                     dsf(sb, "e", cdao.getUntil().getTime());
                 } else if (o > 0) {
-                    cdao.setUntil(getOccurenceDate(cdao));
+                    cdao.setUntil(getOccurenceDate(cdao, userId, cid));
                     dsf(sb, "e", cdao.getUntil().getTime());
                     dsf(sb, "o", o);
                 }
@@ -425,7 +426,7 @@ public final class CalendarRecurringCollection {
                 if (cdao.containsUntil()) {
                     dsf(sb, "e", cdao.getUntil().getTime());
                 } else if (o > 0) {
-                    cdao.setUntil(getOccurenceDate(cdao));
+                    cdao.setUntil(getOccurenceDate(cdao, userId, cid));
                     dsf(sb, "e", cdao.getUntil().getTime());
                     dsf(sb, "o", o);
                 }
@@ -439,7 +440,7 @@ public final class CalendarRecurringCollection {
                     if (cdao.containsUntil()) {
                         dsf(sb, "e", cdao.getUntil().getTime());
                     } else if (o > 0) {
-                        cdao.setUntil(getOccurenceDate(cdao));
+                        cdao.setUntil(getOccurenceDate(cdao, userId, cid));
                         dsf(sb, "e", cdao.getUntil().getTime());
                         dsf(sb, "o", o);
                     }
@@ -453,7 +454,7 @@ public final class CalendarRecurringCollection {
                     if (cdao.containsUntil()) {
                         dsf(sb, "e", cdao.getUntil().getTime());
                     } else if (o > 0) {
-                        cdao.setUntil(getOccurenceDate(cdao));
+                        cdao.setUntil(getOccurenceDate(cdao, userId, cid));
                         dsf(sb, "e", cdao.getUntil().getTime());
                         dsf(sb, "o", o);
                     }
@@ -469,7 +470,7 @@ public final class CalendarRecurringCollection {
                     if (cdao.containsUntil()) {
                         dsf(sb, "e", cdao.getUntil().getTime());
                     } else if (o > 0) {
-                        cdao.setUntil(getOccurenceDate(cdao));
+                        cdao.setUntil(getOccurenceDate(cdao, userId, cid));
                         dsf(sb, "e", cdao.getUntil().getTime());
                         dsf(sb, "o", o);
                     }
@@ -484,7 +485,7 @@ public final class CalendarRecurringCollection {
                     if (cdao.containsUntil()) {
                         dsf(sb, "e", cdao.getUntil().getTime());
                     } else if (o > 0) {
-                        cdao.setUntil(getOccurenceDate(cdao));
+                        cdao.setUntil(getOccurenceDate(cdao, userId, cid));
                         dsf(sb, "e", cdao.getUntil().getTime());
                         dsf(sb, "o", o);
                     }
@@ -497,8 +498,8 @@ public final class CalendarRecurringCollection {
         throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_START_DATE);
     }
     
-    static Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
-        final RecurringResults rss = calculateRecurring(cdao, 0, 0, cdao.getOccurrence(), 1, true, true);
+    static Date getOccurenceDate(final CalendarDataObject cdao, final int userId, final int cid) throws OXException {
+        final RecurringResults rss = calculateRecurring(cdao, 0, 0, cdao.getOccurrence(), 1, true, true, userId, cid);
         final RecurringResult rs = rss.getRecurringResult(0);
         if (rs != null) {
             final long result = rs.getEnd();
@@ -536,8 +537,8 @@ public final class CalendarRecurringCollection {
      * @param cdao a <code>CalendarDataObject</code> value
      * @return a <code>RecurringResults</code> object that can be iterated
      */
-    public static RecurringResults calculateFirstRecurring(final CalendarObject cdao) throws OXException {
-        return calculateRecurring(cdao, 0, 0, 1, MAXTC, true, true);
+    public static RecurringResults calculateFirstRecurring(final CalendarObject cdao, final int userId, final int cid) throws OXException {
+        return calculateRecurring(cdao, 0, 0, 1, MAXTC, true, true, userId, cid);
     }
     
     /**
@@ -557,8 +558,8 @@ public final class CalendarRecurringCollection {
      * @param pos a <code>int</code> value
      * @return a <code>RecurringResults</code> object that can be iterated
      */
-    public static RecurringResults calculateRecurringIgnoringExceptions(final CalendarObject cdao, final long range_start,final  long range_end, final int pos) throws OXException {
-        return calculateRecurring(cdao, range_start, range_end, pos, MAXTC, true, false);
+    public static RecurringResults calculateRecurringIgnoringExceptions(final CalendarObject cdao, final long range_start,final  long range_end, final int pos, final int userId, final int cid) throws OXException {
+        return calculateRecurring(cdao, range_start, range_end, pos, MAXTC, true, false, userId, cid);
     }
     
     /**
@@ -578,12 +579,12 @@ public final class CalendarRecurringCollection {
      * @param pos a <code>int</code> value
      * @return a <code>RecurringResults</code> object that can be iterated
      */
-    public static RecurringResults calculateRecurring(final CalendarObject cdao, final long range_start, final long range_end, final int pos) throws OXException {
-        return calculateRecurring(cdao, range_start, range_end, pos, MAXTC, false, false);
+    public static RecurringResults calculateRecurring(final CalendarObject cdao, final long range_start, final long range_end, final int pos, final int userId, final int cid) throws OXException {
+        return calculateRecurring(cdao, range_start, range_end, pos, MAXTC, false, false, userId, cid);
     }
     
-    public static RecurringResults calculateRecurring(final CalendarObject cdao, final long range_start, final long range_end, final int pos, final int PMAXTC, final boolean ignore_exceptions) throws OXException {
-        return calculateRecurring(cdao, range_start, range_end, pos, MAXTC, ignore_exceptions, false);
+    public static RecurringResults calculateRecurring(final CalendarObject cdao, final long range_start, final long range_end, final int pos, final int PMAXTC, final boolean ignore_exceptions, final int userId, final int cid) throws OXException {
+        return calculateRecurring(cdao, range_start, range_end, pos, MAXTC, ignore_exceptions, false, userId, cid);
     }
     
     /**
@@ -605,26 +606,35 @@ public final class CalendarRecurringCollection {
      * @param ignore_exceptions a <code>boolean</code> value
      * @return a <code>RecurringResults</code> object to be iterated
      */
-    public static RecurringResults calculateRecurring(final CalendarObject cdao, final long range_start, final long range_end, final int pos, final int PMAXTC, final boolean ignore_exceptions, final boolean calc_until) throws OXException {
+    public static RecurringResults calculateRecurring(final CalendarObject cdao, final long range_start, final long range_end, final int pos, final int PMAXTC, final boolean ignore_exceptions, final boolean calc_until, final int userId, final int cid) throws OXException {
         
         String change_exceptions = null;
         String delete_exceptions = null;
         String calc_timezone = "UTC";
+        final String recurrencePattern;
         if (cdao instanceof CalendarDataObject) {
-            if (!ignore_exceptions) {
-                change_exceptions = ((CalendarDataObject)cdao).getExceptions();
-                delete_exceptions = ((CalendarDataObject)cdao).getDelExceptions();
-            }
-            if (((CalendarDataObject)cdao).getFullTime() != true) {
-                calc_timezone = ((CalendarDataObject)cdao).getTimezone();
-            } 
+			final CalendarDataObject cdo = (CalendarDataObject) cdao;
+			if (!ignore_exceptions) {
+				change_exceptions = cdo.getExceptions();
+				delete_exceptions = cdo.getDelExceptions();
+			}
+			if (cdo.getFullTime() != true) {
+				calc_timezone = cdo.getTimezone();
+			}
+			recurrencePattern = cdo.getRecurrence();
+		} else {
+        	recurrencePattern = null;
         }
-        
-        RecurringCalculation rc = new RecurringCalculation(cdao.getRecurrenceType(), cdao.getInterval(), cdao.getRecurrenceCalculator());
+        final RecurringCalculation rc = new RecurringCalculation(cdao.getRecurrenceType(), cdao.getInterval(), cdao.getRecurrenceCalculator());
+        rc.setObjectId(cdao.getObjectID());
+        rc.setUserId(userId);
+        rc.setContextId(cid);
+        rc.setRecurrencePattern(recurrencePattern);
         rc.setCalculationTimeZone(calc_timezone);
         rc.setCalculationPosition(pos);
         rc.setRange(range_start, range_end);
         rc.setMaxCalculation(PMAXTC);
+        rc.setMaxOperations(CalendarConfig.getMaxOperationsInRecurrenceCalculations());
         rc.setExceptions(change_exceptions, delete_exceptions);
         rc.setStartAndEndTime(cdao.getStartDate().getTime(), cdao.getEndDate().getTime());        
         if (cdao instanceof CalendarDataObject) {
@@ -651,7 +661,7 @@ public final class CalendarRecurringCollection {
         }
         try {
             return rc.calculateRecurrence();
-        } catch (RecurringException re) {
+        } catch (final RecurringException re) {
             if (re.getCode() == RecurringException.RECURRING_MISSING_INTERVAL) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_DAILY_INTERVAL, re.getValue());
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_INTERVAL) {
@@ -800,7 +810,7 @@ public final class CalendarRecurringCollection {
         }
     }
     
-    static CalendarDataObject cloneObjectForRecurringException(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
+    static CalendarDataObject cloneObjectForRecurringException(final CalendarDataObject cdao, final CalendarDataObject edao, final int userId, final int cid) throws OXException {
         final CalendarDataObject clone = (CalendarDataObject)edao.clone();
         if (cdao.containsRecurrencePosition()) {
             clone.setRecurrencePosition(cdao.getRecurrencePosition());
@@ -808,7 +818,7 @@ public final class CalendarRecurringCollection {
         if (cdao.containsRecurrenceDatePosition()) {
             clone.setRecurrenceDatePosition(cdao.getRecurrenceDatePosition());
         }
-        CalendarRecurringCollection.setRecurrencePositionOrDateInDAO(clone);
+        CalendarRecurringCollection.setRecurrencePositionOrDateInDAO(clone, userId, cid);
         cdao.setChangeExceptions(new java.util.Date[] { clone.getRecurrenceDatePosition() });
         CalendarCommonCollection.fillObject(cdao, clone);
         clone.removeObjectID();
@@ -817,8 +827,8 @@ public final class CalendarRecurringCollection {
         clone.setChangeExceptions(new java.util.Date[] { clone.getRecurrenceDatePosition() }); // We store the date_position in the exception field
         if (!cdao.containsStartDate()  || !cdao.containsEndDate()) {
             // Calculate real times !!!!
-            CalendarRecurringCollection.fillDAO(edao);
-            final RecurringResults rss = CalendarRecurringCollection.calculateRecurring(edao, 0, 0, clone.getRecurrencePosition());
+            CalendarRecurringCollection.fillDAO(edao, userId, cid);
+            final RecurringResults rss = CalendarRecurringCollection.calculateRecurring(edao, 0, 0, clone.getRecurrencePosition(), userId, cid);
             if (rss != null) {
                 final RecurringResult rs = rss.getRecurringResult(0);
                 clone.setStartDate(new Date(rs.getStart()));

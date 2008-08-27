@@ -126,7 +126,7 @@ public class AppointmentWriter extends CalendarWriter {
 		
 	}
 	
-	public AppointmentWriter(SessionObject sessionObj) {
+	public AppointmentWriter(final SessionObject sessionObj) {
 		this.sessionObj = sessionObj;
 	}
 	
@@ -138,9 +138,9 @@ public class AppointmentWriter extends CalendarWriter {
 		try {
 			final AppointmentObject appointmentobject = appointmentsql.getObjectById(objectId, folderId);
 			writeObject(appointmentobject, eProp, false, xo, os);
-		} catch (OXObjectNotFoundException exc) {
+		} catch (final OXObjectNotFoundException exc) {
 			writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			LOG.error("startWriter", ex);
 			writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
 		}
@@ -204,7 +204,7 @@ public class AppointmentWriter extends CalendarWriter {
 		try {
 			object_id = appointmentobject.getObjectID();
 			addContent2PropElement(e_prop, appointmentobject, delete);
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("writeObject", exc);
 			status = 500;
 			description = "Server Error: " + exc.toString();
@@ -233,7 +233,7 @@ public class AppointmentWriter extends CalendarWriter {
 				addElement(CalendarFields.END_DATE, ao.getEndDate(), e_prop);
 			} else {
 				if (!externalUse) {
-					final RecurringResults recuResults = CalendarRecurringCollection.calculateFirstRecurring(ao);
+					final RecurringResults recuResults = CalendarRecurringCollection.calculateFirstRecurring(ao, sessionObj == null ? -1 : sessionObj.getUserObject().getId(), sessionObj == null ? -1 : sessionObj.getContext().getContextId());
 					if (recuResults.size() == 1) {
 						ao.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
 						ao.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));

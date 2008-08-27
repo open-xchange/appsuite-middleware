@@ -49,6 +49,17 @@
 
 package com.openexchange.groupware.calendar;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.Participant;
@@ -59,15 +70,6 @@ import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -113,7 +115,7 @@ public class FreeBusyResults implements SearchIterator {
     
     private static final Log LOG = LogFactory.getLog(FreeBusyResults.class);
     
-    public FreeBusyResults(ResultSet rs, PreparedStatement prep, Context c, Connection con, long range_start, long range_end) throws OXException {
+    public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final Connection con, final long range_start, final long range_end) throws OXException {
         this.rs = rs;
         this.prep = prep;
         this.con = con;
@@ -124,7 +126,7 @@ public class FreeBusyResults implements SearchIterator {
         preFill();
     }
     
-    public FreeBusyResults(ResultSet rs, PreparedStatement prep, Context c, int uid, int groups[], UserConfiguration uc, Connection con, boolean show_details, Participant conflict_objects[], PreparedStatement private_folder_information) throws OXException {
+    public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final int uid, final int groups[], final UserConfiguration uc, final Connection con, final boolean show_details, final Participant conflict_objects[], final PreparedStatement private_folder_information) throws OXException {
         this.rs = rs;
         this.prep = prep;
         this.con = con;
@@ -147,7 +149,7 @@ public class FreeBusyResults implements SearchIterator {
                 Object o = null;
                 try {
                     o = mynext();
-                } catch (SearchIteratorException sie) {
+                } catch (final SearchIteratorException sie) {
                     throw new OXException(sie);
                 }
                 if (o != null) {
@@ -193,8 +195,8 @@ public class FreeBusyResults implements SearchIterator {
                     cdao.setExceptions(rs.getString(14));
                     cdao.setTimezone(rs.getString(15));
                     cdao.setRecurrenceID(recid);
-                    if (CalendarRecurringCollection.fillDAO(cdao)) {
-                        rrs = CalendarRecurringCollection.calculateRecurring(cdao, range_start, range_end, 0);
+                    if (CalendarRecurringCollection.fillDAO(cdao, uid, c.getContextId())) {
+                        rrs = CalendarRecurringCollection.calculateRecurring(cdao, range_start, range_end, 0, uid, c.getContextId());
                         seq = rrs.size()-1;
                         if (seq >= 0) {
                             final RecurringResult rr = rrs.getRecurringResult(seq);
@@ -206,9 +208,9 @@ public class FreeBusyResults implements SearchIterator {
                     }
                 }
             }
-        } catch (SQLException sqle) {
+        } catch (final SQLException sqle) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
-        } catch(Exception e) {
+        } catch(final Exception e) {
             LOG.error("FreeBusyResults calculation problem with oid "+oid+" / "+cdao == null ? "" : cdao.toString());
             throw new SearchIteratorException(SearchIteratorException.SearchIteratorCode.CALCULATION_ERROR, com.openexchange.groupware.Component.APPOINTMENT, oid, e);
         }
@@ -271,7 +273,7 @@ public class FreeBusyResults implements SearchIterator {
         if (rs != null) {
             try {
                 has_next = rs.next();
-            } catch (SQLException sqle) {
+            } catch (final SQLException sqle) {
                 has_next = false;
                 LOG.error("Error while getting next result set", sqle);
             }
@@ -291,7 +293,7 @@ public class FreeBusyResults implements SearchIterator {
         if (con != null) {
             try {
                 DBPool.push(c, con);
-            } catch (DBPoolingException dbpe) {
+            } catch (final DBPoolingException dbpe) {
                 LOG.error(CalendarSql.ERROR_PUSHING_DATABASE, dbpe);
             }
         }
@@ -344,16 +346,16 @@ public class FreeBusyResults implements SearchIterator {
     }
     
     private final void preFillPermissionArray(final int groups[], final UserConfiguration uc) throws OXException {
-        Connection readcon = null;
+        final Connection readcon = null;
         try {
             cfo = CalendarCommonCollection.getAllVisibleAndReadableFolderObject(uid, groups, c, uc, readcon);
-        } catch (OXException ex) {
+        } catch (final OXException ex) {
             throw new OXException(ex);
-        } catch (DBPoolingException ex) {
+        } catch (final DBPoolingException ex) {
             throw new OXException(ex);
-        } catch (SearchIteratorException ex) {
+        } catch (final SearchIteratorException ex) {
             throw new OXException(ex);
-        } catch (SQLException ex) {
+        } catch (final SQLException ex) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, ex);
         } finally {
             if (readcon != null) {
@@ -392,7 +394,7 @@ public class FreeBusyResults implements SearchIterator {
                         }
                     }
                 }
-            } catch(SQLException sqle) {
+            } catch(final SQLException sqle) {
                 throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR);
             }
         } else {
@@ -421,7 +423,7 @@ public class FreeBusyResults implements SearchIterator {
                         }
                     }
                 }
-            } catch(SQLException sqle) {
+            } catch(final SQLException sqle) {
                 throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR);
             }
         }
@@ -434,7 +436,7 @@ public class FreeBusyResults implements SearchIterator {
         int pfid = 0;
         int uid = 0;
         try {
-            ResultSet rs = private_folder_information.executeQuery();
+            final ResultSet rs = private_folder_information.executeQuery();
             while (rs.next()) {
                 object_id = rs.getInt(1);
                 pfid = rs.getInt(2);
@@ -444,7 +446,7 @@ public class FreeBusyResults implements SearchIterator {
                     private_folder_array.add(pfio);
                 }
             }
-        } catch(SQLException sqle) {
+        } catch(final SQLException sqle) {
             LOG.error(sqle.getMessage(), sqle);
         }
     }

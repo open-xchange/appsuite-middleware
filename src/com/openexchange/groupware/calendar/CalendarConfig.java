@@ -49,14 +49,14 @@
 
 package com.openexchange.groupware.calendar;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.ConfigurationException.Code;
 import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.tools.conf.AbstractConfig;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Configuration class for calendar options.
@@ -72,6 +72,7 @@ public class CalendarConfig extends AbstractConfig {
     
     private static boolean solo_reminder_trigger_event = true;
     private static boolean check_and_remove_past_reminders = true;
+    private static int max_operations_in_recurrence_calculations;
     
     /**
      * {@inheritDoc}
@@ -110,11 +111,11 @@ public class CalendarConfig extends AbstractConfig {
         if (check_max_pre_fetch_size != null){
             check_max_pre_fetch_size = check_max_pre_fetch_size.trim();
             try {
-                int mfs = Integer.valueOf(check_max_pre_fetch_size);
+                final int mfs = Integer.parseInt(check_max_pre_fetch_size);
                 if (mfs > 1 && mfs < 1000) {
                     CachedCalendarIterator.MAX_PRE_FETCH = mfs;
                 }
-            } catch(NumberFormatException nfe) {
+            } catch(final NumberFormatException nfe) {
                 LOG.error("Unable to parse config parameter MAX_PRE_FETCH: "+check_max_pre_fetch_size);
             }
         }
@@ -131,7 +132,19 @@ public class CalendarConfig extends AbstractConfig {
             if (solo_reminder_trigger_event_string.equalsIgnoreCase("FALSE")) {
                 solo_reminder_trigger_event = false;
             }
-        }           
+        }
+        String max_operations_in_recurrence_calculations_string = CalendarConfig.getProperty("MAX_OPERATIONS_IN_RECURRENCE_CALCULATIONS");
+        if (max_operations_in_recurrence_calculations_string != null) {
+        	max_operations_in_recurrence_calculations_string = max_operations_in_recurrence_calculations_string.trim();
+        	try {
+				max_operations_in_recurrence_calculations = Integer.parseInt(max_operations_in_recurrence_calculations_string);
+			} catch (final NumberFormatException e) {
+				LOG.error("Unable to parse config parameter MAX_OPERATIONS_IN_RECURRENCE_CALCULATIONS: "+max_operations_in_recurrence_calculations_string);
+				max_operations_in_recurrence_calculations = 999 * 50;
+			}
+        } else {
+            max_operations_in_recurrence_calculations = 999 * 50;
+        }
     }
     
     public static boolean getCheckAndRemovePastReminders() {
@@ -140,6 +153,10 @@ public class CalendarConfig extends AbstractConfig {
     
     public static boolean getSoloReminderTriggerEvent() {
         return solo_reminder_trigger_event;
+    }
+
+    public static int getMaxOperationsInRecurrenceCalculations() {
+        return max_operations_in_recurrence_calculations;
     }
     
 }

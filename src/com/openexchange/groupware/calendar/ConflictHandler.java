@@ -49,20 +49,22 @@
 
 package com.openexchange.groupware.calendar;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.server.DBPool;
-import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.SessionObject;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.api2.OXException;
+import com.openexchange.server.DBPool;
+import com.openexchange.server.DBPoolingException;
+import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
  * ConflictHandler
@@ -70,8 +72,8 @@ import org.apache.commons.logging.LogFactory;
  */
 public class ConflictHandler {
     
-    private CalendarDataObject cdao;
-    private SessionObject so;
+    private final CalendarDataObject cdao;
+    private final SessionObject so;
     private boolean action = true;
     private int current_results;
     
@@ -142,12 +144,12 @@ public class ConflictHandler {
         if (request_participants) {
             return NO_CONFLICTS;
         }
-        CalendarRecurringCollection.fillDAO(cdao);
+        CalendarRecurringCollection.fillDAO(cdao, so.getUserObject().getId(), so.getContext().getContextId());
         RecurringResults rrs;
         if (rs == null || re == null) {
-            rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+            rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0, so.getUserObject().getId(), so.getContext().getContextId());
         } else {
-            rrs = CalendarRecurringCollection.calculateRecurring(cdao, rs.getTime(), re.getTime(), 0);
+            rrs = CalendarRecurringCollection.calculateRecurring(cdao, rs.getTime(), re.getTime(), 0, so.getUserObject().getId(), so.getContext().getContextId());
         }
         CalendarDataObject multi[] = new CalendarDataObject[0];
         for (int a = 0; a < rrs.size(); a++) {
@@ -173,7 +175,7 @@ public class ConflictHandler {
         boolean close_connection = true;
         try {
             readcon = DBPool.pickup(so.getContext());            
-            long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, so.getUserObject().getTimeZone());
+            final long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, so.getUserObject().getTimeZone());
             long whole_day_end = CalendarCommonCollection.getUserTimeUTCDate(end, so.getUserObject().getTimeZone());
             if (whole_day_end <= whole_day_start) {
                 whole_day_end = whole_day_start+CalendarRecurringCollection.MILLI_DAY;
@@ -257,7 +259,7 @@ public class ConflictHandler {
         boolean close_connection = true;
         try {
             readcon = DBPool.pickup(so.getContext());
-            long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, so.getUserObject().getTimeZone());
+            final long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, so.getUserObject().getTimeZone());
             long whole_day_end = CalendarCommonCollection.getUserTimeUTCDate(end, so.getUserObject().getTimeZone());
             if (whole_day_end <= whole_day_start) {
                 whole_day_end = whole_day_start+CalendarRecurringCollection.MILLI_DAY;

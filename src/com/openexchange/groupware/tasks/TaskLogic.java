@@ -51,8 +51,6 @@ package com.openexchange.groupware.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.rollback;
 
-import com.openexchange.api2.OXException;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -66,12 +64,13 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.api2.OXException;
 import com.openexchange.event.EventClient;
 import com.openexchange.event.InvalidStateException;
-import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -217,7 +216,7 @@ public final class TaskLogic {
      * @throws TaskException if a string contains invalid characters.
      */
     private static void checkData(final Task task) throws TaskException {
-        for (Mapper<String> mapper : Mapping.STRING_MAPPERS) {
+        for (final Mapper<String> mapper : Mapping.STRING_MAPPERS) {
             if (mapper.isSet(task) && null != mapper.get(task)) {
                 final String result = Check.containsInvalidChars(mapper.get(task));
                 if (null != result) {
@@ -325,7 +324,7 @@ public final class TaskLogic {
      */
     private static void checkExternal(
         final Set<ExternalParticipant> participants) throws TaskException {
-        for (ExternalParticipant participant : participants) {
+        for (final ExternalParticipant participant : participants) {
             final String mail = participant.getMail();
             if (null == mail || mail.length() == 0) {
                 throw new TaskException(Code.EXTERNAL_WITHOUT_MAIL);
@@ -365,7 +364,7 @@ public final class TaskLogic {
         }
         try {
             CalendarRecurringCollection.checkRecurring(task);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new TaskException(e);
         }
     }
@@ -383,7 +382,7 @@ public final class TaskLogic {
         if (null == participants) {
             return retval;
         }
-        for (Participant participant : participants) {
+        for (final Participant participant : participants) {
             switch (participant.getType()) {
             case Participant.USER:
                 retval.add(new InternalParticipant(
@@ -394,7 +393,7 @@ public final class TaskLogic {
                 try {
                     final int[] member = GroupStorage.getInstance(ctx).getGroup(
                         group.getIdentifier()).getMember();
-                    for (int userId : member) {
+                    for (final int userId : member) {
                         final TaskParticipant tParticipant =
                             new InternalParticipant(new UserParticipant(userId),
                             group.getIdentifier());
@@ -402,7 +401,7 @@ public final class TaskLogic {
                             retval.add(tParticipant);
                         }
                     }
-                } catch (LdapException e) {
+                } catch (final LdapException e) {
                     throw new TaskException(e);
                 }
                 break;
@@ -419,7 +418,7 @@ public final class TaskLogic {
         final Set<TaskParticipant> participants) {
         final List<Participant> retval = new ArrayList<Participant>(
             participants.size());
-        for (TaskParticipant participant : participants) {
+        for (final TaskParticipant participant : participants) {
             if (Type.INTERNAL == participant.getType()) {
                 final InternalParticipant internal =
                     (InternalParticipant) participant;
@@ -434,7 +433,7 @@ public final class TaskLogic {
         final List<Participant> retval = new ArrayList<Participant>();
         final Map<Integer, Participant> groups =
             new HashMap<Integer, Participant>();
-        for (TaskParticipant participant : participants) {
+        for (final TaskParticipant participant : participants) {
             switch (participant.getType()) {
             case INTERNAL:
                 final InternalParticipant internal =
@@ -485,7 +484,7 @@ public final class TaskLogic {
         if (-1 != userId) {
             retval.add(new Folder(folderId, userId));
         }
-        for (InternalParticipant participant : participants) {
+        for (final InternalParticipant participant : participants) {
             if (participant.getIdentifier() == userId) {
                 continue;
             }
@@ -500,7 +499,7 @@ public final class TaskLogic {
 
     static int[] findModifiedFields(final Task oldTask, final Task task) {
         final List<Integer> fields = new ArrayList<Integer>();
-        for (Mapper mapper : Mapping.MAPPERS) {
+        for (final Mapper mapper : Mapping.MAPPERS) {
             if (mapper.isSet(task)
                 && (!mapper.isSet(oldTask) || !mapper.equals(task, oldTask))) {
                 fields.add(mapper.getId());
@@ -555,7 +554,7 @@ public final class TaskLogic {
             task.setUntil(new Date(Long.MAX_VALUE));
         }
         final RecurringResults rr = CalendarRecurringCollection
-            .calculateRecurring(task, 0, 0, 2);
+            .calculateRecurring(task, 0, 0, 2, task.getCreatedBy(), -1);
         if (removeUntil) {
             task.removeUntil();
         }
@@ -580,7 +579,7 @@ public final class TaskLogic {
         final Set<InternalParticipant> participants, final int groupId) {
         final Set<InternalParticipant> retval =
             new HashSet<InternalParticipant>();
-        for (InternalParticipant participant : participants) {
+        for (final InternalParticipant participant : participants) {
             if (null != participant.getGroupId()
                 && groupId == participant.getGroupId()) {
                 retval.add(participant);
@@ -619,7 +618,7 @@ public final class TaskLogic {
         Connection con;
         try {
             con = DBPool.pickupWriteable(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new TaskException(Code.NO_CONNECTION, e);
         }
         try {
@@ -634,16 +633,16 @@ public final class TaskLogic {
             foldStor.insertFolder(ctx, con, taskId, folders,
                 StorageType.ACTIVE);
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
             throw new TaskException(Code.INSERT_FAILED, e, e.getMessage());
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             rollback(con);
             throw e;
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 final TaskException tske = new TaskException(Code.AUTO_COMMIT,
                     e);
                 LOG.error(tske.getMessage(), tske);
@@ -660,7 +659,7 @@ public final class TaskLogic {
         Connection con;
         try {
             con = DBPool.pickupWriteable(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new TaskException(Code.NO_CONNECTION, e);
         }
         try {
@@ -668,16 +667,16 @@ public final class TaskLogic {
             updateTask(ctx, con, task, lastRead, modified, add, remove,
                 addFolder, removeFolder);
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
             throw new TaskException(Code.UPDATE_FAILED, e, e.getMessage());
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             rollback(con);
             throw e;
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 LOG.error("Problem setting auto commit to true.", e);
             }
             DBPool.closeWriterSilent(ctx, con);
@@ -732,7 +731,7 @@ public final class TaskLogic {
         Connection con;
         try {
             con = DBPool.pickupWriteable(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new TaskException(Code.NO_CONNECTION, e);
         }
         try {
@@ -745,16 +744,16 @@ public final class TaskLogic {
             storage.delete(ctx, con, task.getObjectID(), lastModified,
                 StorageType.ACTIVE);
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
             throw new TaskException(Code.DELETE_FAILED, e, e.getMessage());
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             rollback(con);
             throw e;
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 LOG.error("Problem setting auto commit to true.", e);
             }
             DBPool.closeWriterSilent(ctx, con);
@@ -803,7 +802,7 @@ public final class TaskLogic {
         Reminder.deleteReminder(session.getContext(), task);
         try {
             new EventClient(session).delete(task);
-        } catch (InvalidStateException e) {
+        } catch (final InvalidStateException e) {
             throw new TaskException(Code.EVENT, e);
         }
     }
@@ -862,7 +861,7 @@ public final class TaskLogic {
         Connection con;
         try {
             con = DBPool.pickupWriteable(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new TaskException(Code.NO_CONNECTION, e);
         }
         try {
@@ -876,13 +875,13 @@ public final class TaskLogic {
                 new int[] { Task.LAST_MODIFIED, Task.MODIFIED_BY }, null, null,
                 null, null);
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 LOG.error("Problem setting auto commit to true.", e);
             }
             DBPool.closeWriterSilent(ctx, con);

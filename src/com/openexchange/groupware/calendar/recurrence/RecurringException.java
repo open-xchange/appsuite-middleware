@@ -57,8 +57,12 @@ package com.openexchange.groupware.calendar.recurrence;
 
 public class RecurringException extends Exception {
     
-    private int value;
-    private Code code;    
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 6780786273935450790L;
+	private final int value;
+    private final Code code;    
     
     public static final Code UNKOWN_DAYS_VALUE = new Code("Unknown days", 1);
     public static final Code RECURRING_MISSING_INTERVAL = new Code("Interval missing", 2);
@@ -69,13 +73,18 @@ public class RecurringException extends Exception {
     public static final Code RECURRING_MISSING_YEARLY_INTERVAL = new Code("Missing day in month", 7);
     public static final Code RECURRING_MISSING_YEARLY_DAY = new Code("Got no day for yearly calculation", 8);
     public static final Code RECURRING_MISSING_YEARLY_TYPE = new Code("Missing day in month", 9);
+    public static final Code UNEXPECTED_ERROR = new Code("Unexpected exception.", 10);
+    /**
+     * Pattern is too complex, giving up
+     */
+    public static final Code PATTERN_TOO_COMPLEX = new Code("Pattern is too complex, giving up", 11);
     
     static class Code {
-        private String message;
+        private final String message;
         
-        private int id;
+        private final int id;
         
-        private Code(String message, int id) {
+        private Code(final String message, final int id) {
             this.message = message;
             this.id = id;
         }
@@ -84,7 +93,7 @@ public class RecurringException extends Exception {
    
    
     
-    public RecurringException(final Code code, int value) {
+    public RecurringException(final Code code, final int value) {
         this.code = code;
         this.value = value;
     }
