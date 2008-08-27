@@ -155,7 +155,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
         if (check_max_pre_fetch_size != null){
             check_max_pre_fetch_size = check_max_pre_fetch_size.trim();
             try {
-                final int mfs = Integer.valueOf(check_max_pre_fetch_size);
+                final int mfs = Integer.parseInt(check_max_pre_fetch_size);
                 if (mfs > 1 && mfs < 1000) {
                     CachedCalendarIterator.MAX_PRE_FETCH = mfs;
                 }
@@ -179,10 +179,16 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
         }
 
         String max_operations_in_recurrence_calculations_string = CalendarConfig.getProperty("MAX_OPERATIONS_IN_RECURRENCE_CALCULATIONS");
-        if (max_operations_in_recurrence_calculations_string != null) {
-            max_operations_in_recurrence_calculations = Integer.valueOf(max_operations_in_recurrence_calculations_string);    
-        } else {
+        if (max_operations_in_recurrence_calculations_string == null) {
             max_operations_in_recurrence_calculations = 999 * 50;
+        } else {
+        	max_operations_in_recurrence_calculations_string = max_operations_in_recurrence_calculations_string.trim();
+        	try {
+				max_operations_in_recurrence_calculations = Integer.parseInt(max_operations_in_recurrence_calculations_string);
+			} catch (final NumberFormatException e) {
+				LOG.error("Unable to parse config parameter MAX_OPERATIONS_IN_RECURRENCE_CALCULATIONS: "+max_operations_in_recurrence_calculations_string);
+				max_operations_in_recurrence_calculations = 999 * 50;
+			} 
         }
     }
     
