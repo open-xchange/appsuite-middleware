@@ -521,11 +521,10 @@ public class EventClient {
 	
 	protected void triggerEvent(final Event event) throws EventException {
 		final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
-		if (eventAdmin != null) {
-			eventAdmin.postEvent(event);
-		} else {
+		if (eventAdmin == null) {
 			throw new EventException("event service not available");
 		}
+		eventAdmin.postEvent(event);
 	}
 
     private FolderObject getFolder(final int folderId, final Context ctx) throws OXException {
