@@ -108,9 +108,7 @@ public class RecurringCalculation {
     // Maximum number of calculations PMAXTC (maximum number of ocurrences) * 100 ops per ourrence sounds appropriate
     private int TTL = 999 * 100;
     private int operationCounter = 0;
-    private int oid;
-    private int userId;
-    private int cid;
+    private CalendarObject cdao;
     private String pattern;
     
     /* Internal */
@@ -124,15 +122,11 @@ public class RecurringCalculation {
     private final String getState() {
         final StringBuilder builder = new StringBuilder(1024);
         builder.append("===================[ Recurring Calculation State ]=======================\n");
-        if (userId > 0) {
-        builder.append("    User ID                                                       = ").append(userId).append("\n");
+        if (cdao != null) {
+        builder.append("    Object ID                                                     = ").append(cdao.getObjectID()).append("\n");
+        builder.append("    Title                                                         = ").append(cdao.getTitle()).append("\n");
+        builder.append("    Creator                                                       = ").append(cdao.getCreatedBy()).append("\n");
         }
-        if (oid > 0) {
-		builder.append("    Object ID                                                     = ").append(oid).append("\n");
-		}
-        if (cid > 0) {
-		builder.append("    Context ID                                                    = ").append(cid).append("\n");
-		}
         if (pattern != null) {
 		builder.append("    Recurrence pattern                                            = ").append(pattern).append("\n");
 		}
@@ -945,16 +939,8 @@ public class RecurringCalculation {
         TTL = calculations;
     }
 
-    public void setObjectId(final int oid) {
-    	this.oid = oid;
-    }
-
-    public void setContextId(final int cid) {
-    	this.cid = cid;
-    }
-
-    public void setUserId(final int userId) {
-    	this.userId = userId;
+    public void setCalendarObject(final CalendarObject cdao) {
+    	this.cdao = cdao;
     }
 
     public void setRecurrencePattern(final String pattern) {

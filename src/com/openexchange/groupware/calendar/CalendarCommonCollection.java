@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.calendar;
 
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -86,7 +87,6 @@ import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
  * CalendarCommonCollection
@@ -331,7 +331,7 @@ public class CalendarCommonCollection {
         final UserParticipant check[] = cdao.getUsers();
         if (check != null && check.length > 0) {
             Arrays.sort(check);
-            final int x = Arrays.binarySearch(check, up);
+            int x = Arrays.binarySearch(check, up);
             if (x >= 0) {
             	return true;
             }
@@ -344,7 +344,7 @@ public class CalendarCommonCollection {
         final UserParticipant check[] = cdao.getUsers();
         if (check != null && check.length > 0) {
             Arrays.sort(check);
-            final int x = Arrays.binarySearch(check, up);
+            int x = Arrays.binarySearch(check, up);
             if (x < 0) {
                 final UserParticipant newup[] = new UserParticipant[check.length+1];
                 System.arraycopy(check, 0, newup, 0, check.length);
@@ -465,7 +465,7 @@ public class CalendarCommonCollection {
         return getNextReminderDate(oid, fid, so, 0L);
     }
     
-    public static final Date getNextReminderDate(final int oid, final int fid, final SessionObject so, final long last) throws OXException, SQLException {
+    public static final Date getNextReminderDate(final int oid, final int fid, final SessionObject so, long last) throws OXException, SQLException {
         final CalendarSql csql = new CalendarSql(so);
         final CalendarDataObject cdao = csql.getObjectById(oid, fid);
         final int alarm = cdao.getAlarm();
@@ -478,7 +478,7 @@ public class CalendarCommonCollection {
             start = ((start/CalendarRecurringCollection.MILLI_DAY)*CalendarRecurringCollection.MILLI_DAY);
         }
         final long end = (start + (CalendarRecurringCollection.MILLI_YEAR * 10L));
-        final  RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, start, end, 0, 1, false, so.getUserObject().getId(), so.getContext().getContextId());
+        final  RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, start, end, 0, 1, false);
         if (rss != null && rss.size() >= 1) {
             final RecurringResult rs = rss.getRecurringResult(0);
             return new Date(rs.getStart()-(alarm*60*1000L));
@@ -1062,7 +1062,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    static CalendarDataObject fillFieldsForConflictQuery(final CalendarDataObject cdao, final CalendarDataObject edao, final boolean action) {
+    static CalendarDataObject fillFieldsForConflictQuery(final CalendarDataObject cdao, final CalendarDataObject edao, boolean action) {
         if (!action && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType()) {
             return cdao;
         }
@@ -1263,7 +1263,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    public static final CalendarDataObject getDAOFromList(final ArrayList al, final int oid) {
+    public static final CalendarDataObject getDAOFromList(ArrayList al, int oid) {
         CalendarDataObject cdao = null;
         for (int a = 0; a < al.size(); a++) {
             cdao = (CalendarDataObject) al.get(a);
@@ -1283,7 +1283,7 @@ public class CalendarCommonCollection {
         return false;
     }
     
-    static void checkAndRemovePastReminders(final CalendarDataObject cdao, final CalendarDataObject edao) {
+    static void checkAndRemovePastReminders(CalendarDataObject cdao, CalendarDataObject edao) {
         if (CalendarConfig.getCheckAndRemovePastReminders() && cdao.containsAlarm() && cdao.getAlarm() >= 0) {
             long reminder = 0;
             if (cdao.containsStartDate()) {
@@ -1297,17 +1297,17 @@ public class CalendarCommonCollection {
         }
     }
 
-    static long getUserTimeUTCDate(final Date date, final String timezone) {
-        final TimeZone tz = TimeZone.getTimeZone(timezone);
-        final int offset = tz.getOffset(date.getTime());
+    static long getUserTimeUTCDate(Date date, String timezone) {
+        TimeZone tz = TimeZone.getTimeZone(timezone);
+        int offset = tz.getOffset(date.getTime());
         long ndl = date.getTime()+offset;
-        final long off = ndl%CalendarRecurringCollection.MILLI_DAY;
+        long off = ndl%CalendarRecurringCollection.MILLI_DAY;
         ndl -= off;
         //System.out.println(" GOT "+date+" and return "+new Date(ndl));
         return ndl;
     }
 
-	public static boolean checkIfArrayKeyExistInArray(final Object a[], final Object b[]) {
+	public static boolean checkIfArrayKeyExistInArray(Object a[], Object b[]) {
 		if (a != null && b != null) {
 			Arrays.sort(b);
 			for (int x = 0; x < a.length; x++) {
@@ -1319,7 +1319,7 @@ public class CalendarCommonCollection {
 		return false;		
 	}
 	
-	public static void checkForInvalidCharacters(final CalendarDataObject cdao) throws OXException {
+	public static void checkForInvalidCharacters(CalendarDataObject cdao) throws OXException {
 		String error = null;
 		if (cdao.containsTitle() && cdao.getTitle() != null) {
 			error = Check.containsInvalidChars(cdao.getTitle());
@@ -1346,7 +1346,7 @@ public class CalendarCommonCollection {
 			}
 		}
 		if (cdao.containsUserParticipants() && cdao.getUsers() != null) {
-			final UserParticipant up[] = cdao.getUsers();
+			UserParticipant up[] = cdao.getUsers();
 			for (int a = 0; a < up.length; a++) {
 				error = Check.containsInvalidChars(up[a].getDisplayName());
 				if (error != null) {

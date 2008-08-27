@@ -554,7 +554,7 @@ public final class TaskLogic {
             task.setUntil(new Date(Long.MAX_VALUE));
         }
         final RecurringResults rr = CalendarRecurringCollection
-            .calculateRecurring(task, 0, 0, 2, task.getCreatedBy(), -1);
+            .calculateRecurring(task, 0, 0, 2);
         if (removeUntil) {
             task.removeUntil();
         }

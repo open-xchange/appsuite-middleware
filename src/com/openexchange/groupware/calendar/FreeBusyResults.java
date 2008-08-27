@@ -195,8 +195,8 @@ public class FreeBusyResults implements SearchIterator {
                     cdao.setExceptions(rs.getString(14));
                     cdao.setTimezone(rs.getString(15));
                     cdao.setRecurrenceID(recid);
-                    if (CalendarRecurringCollection.fillDAO(cdao, uid, c.getContextId())) {
-                        rrs = CalendarRecurringCollection.calculateRecurring(cdao, range_start, range_end, 0, uid, c.getContextId());
+                    if (CalendarRecurringCollection.fillDAO(cdao)) {
+                        rrs = CalendarRecurringCollection.calculateRecurring(cdao, range_start, range_end, 0);
                         seq = rrs.size()-1;
                         if (seq >= 0) {
                             final RecurringResult rr = rrs.getRecurringResult(seq);
