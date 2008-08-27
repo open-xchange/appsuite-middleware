@@ -569,6 +569,7 @@ public class CalendarAdministration implements DeleteListener {
                 if(0 == cdao.getParentFolderID())  {
                     cdao.setParentFolderID(in_folder);
                 }
+                cdao.setNotification(false);
                 CalendarCommonCollection.triggerEvent(so, type, cdao);
 
             } catch (final OXObjectNotFoundException ex) {
