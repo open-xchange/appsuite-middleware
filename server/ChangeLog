@@ -1,3 +1,8 @@
+* 2008-08-27 - thorben.betten@open-xchange.com
+
+ - Bugfix #11229: Proper handling of possible NaN error while parsing
+   Outlook XML
+
 * 2008-08-26 - thorben.betten@open-xchange.com
 
  - Bugfix #12045: Updating reminder's folder reference on appointment move
