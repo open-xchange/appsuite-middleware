@@ -754,7 +754,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			return;
 		}
 		/*
-		 * Fetch a mail connection (either from cache or a new instance)
+		 * Fetch a mail access (either from cache or a new instance)
 		 */
 		mailAccess = MailAccess.getInstance(session);
 		if (!mailAccess.isConnected()) {
