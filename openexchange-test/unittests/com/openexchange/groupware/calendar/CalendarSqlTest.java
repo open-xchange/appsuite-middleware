@@ -55,8 +55,11 @@ import static com.openexchange.tools.events.EventAssertions.assertModificationEv
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
@@ -740,7 +743,7 @@ public class CalendarSqlTest extends TestCase {
             appointments.save(appointment);
             clean.add(appointment);
             fail("Could create private appoinment with other participants");
-        } catch (OXException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
             assertTrue(true);
         }
@@ -756,7 +759,7 @@ public class CalendarSqlTest extends TestCase {
         try {
             appointments.save(update);
             fail("Could create private appoinment with other participants");
-        } catch (OXException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
             assertTrue(true);
         }
@@ -774,7 +777,7 @@ public class CalendarSqlTest extends TestCase {
         try {
             appointments.save(update);
             fail("Could create private appoinment with other participants");
-        } catch (OXException e) {
+        } catch (final OXException e) {
             e.printStackTrace();
             assertTrue(true);
         }
@@ -785,10 +788,10 @@ public class CalendarSqlTest extends TestCase {
     // Bug 11803
 
     public void testFreeBusyResultShouldOnlyContainRecurrenceInSpecifiedInterval() throws OXException, SearchIteratorException {
-        Date start = D("07/02/2008 10:00");
-        Date end = D("07/02/2008 12:00");
+        final Date start = D("07/02/2008 10:00");
+        final Date end = D("07/02/2008 12:00");
         // Create Weekly recurrence
-        CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
+        final CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
         appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
         appointment.setDays(CalendarDataObject.WEDNESDAY);
         appointment.setTitle("Everything can happen on a Wednesday");
@@ -797,11 +800,11 @@ public class CalendarSqlTest extends TestCase {
 
         // Ask for freebusy information in one week containing one ocurrence
 
-        SearchIterator<CalendarDataObject> iterator = appointments.getCurrentAppointmentSQLInterface().getFreeBusyInformation(userId, Participant.USER, D("18/02/2008 00:00"), D("25/02/2008 00:00"));
+        final SearchIterator<CalendarDataObject> iterator = appointments.getCurrentAppointmentSQLInterface().getFreeBusyInformation(userId, Participant.USER, D("18/02/2008 00:00"), D("25/02/2008 00:00"));
         // Verify only one ocurrence was returned
         try {
             assertTrue("Should find exactly one ocurrence. Found none.", iterator.hasNext());
-            CalendarDataObject occurrence = iterator.next();
+            final CalendarDataObject occurrence = iterator.next();
             assertFalse("Should find exactly one ocurrence. Found more than one", iterator.hasNext());
 
             assertEquals(D("20/02/2008 10:00"), occurrence.getStartDate());
@@ -814,10 +817,10 @@ public class CalendarSqlTest extends TestCase {
     // Bug 11865
 
     public void testShouldDisallowTurningAnExceptionIntoASeries() throws OXException {
-        Date start = D("07/02/2008 10:00");
-        Date end = D("07/02/2008 12:00");
+        final Date start = D("07/02/2008 10:00");
+        final Date end = D("07/02/2008 12:00");
         // Create Weekly recurrence
-        CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
+        final CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
         appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
         appointment.setDays(CalendarDataObject.WEDNESDAY);
         appointment.setTitle("Everything can happen on a Wednesday");
@@ -839,6 +842,81 @@ public class CalendarSqlTest extends TestCase {
 
         appointments.save( update );
  
+    }
+
+	/**
+	 * Test for <a href=
+	 * "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12072">bug
+	 * #12072</a>
+	 * 
+	 * @throws OXException
+	 *             If an OX error occurs
+	 */
+	public void testShouldNotIndicateConflictingResources() throws OXException {
+		final long today = CalendarRecurringCollection.normalizeLong(System.currentTimeMillis());
+		final int weekDayOfToday;
+		{
+			final Calendar cal = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
+			cal.setTimeInMillis(today);
+			weekDayOfToday = cal.get(Calendar.DAY_OF_WEEK);
+		}
+		Date start = new Date(today + (10 * CalendarRecurringCollection.MILLI_HOUR));
+		Date end = new Date(today + (11 * CalendarRecurringCollection.MILLI_HOUR));
+		// Create Weekly recurrence
+		final CalendarDataObject appointment = appointments.buildAppointmentWithResourceParticipants(resource1);
+		appointment.setParentFolderID(appointments.getPrivateFolder());
+		appointment.setIgnoreConflicts(true);
+		appointment.setStartDate(start);
+		appointment.setEndDate(end);
+		appointment.setContext(ctx);
+		appointment.setTimezone("utc");
+		appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+		appointment.setDays(convertCalendarDAY_OF_WEEK2CalendarDataObjectDAY_OF_WEEK(weekDayOfToday));
+		appointment.setTitle("Everything can happen on a X-day");
+		appointment.setInterval(1);
+		appointment.setOccurrence(5);
+		appointments.save(appointment);
+		clean.add(appointment);
+		// Now create a second weekly recurrence with demanding resource on
+		// following day which should not indicate any conflicts
+		start = new Date(start.getTime() + CalendarRecurringCollection.MILLI_DAY);
+		end = new Date(end.getTime() + CalendarRecurringCollection.MILLI_DAY);
+		final CalendarDataObject update = appointments.buildAppointmentWithResourceParticipants(resource1);
+		update.setParentFolderID(appointments.getPrivateFolder());
+		update.setIgnoreConflicts(true);
+		update.setStartDate(start);
+		update.setEndDate(end);
+		update.setContext(ctx);
+		update.setTimezone("utc");
+		update.setRecurrenceType(CalendarDataObject.WEEKLY);
+		update.setDays(convertCalendarDAY_OF_WEEK2CalendarDataObjectDAY_OF_WEEK(weekDayOfToday + 1));
+		update.setTitle("Everything can happen on a X1-day");
+		update.setInterval(1);
+		update.setOccurrence(5);
+		final CalendarDataObject[] conflicts = appointments.save(update);
+		clean.add(update);
+		assertTrue("", conflicts == null || conflicts.length == 0);
+	}
+
+    private static int convertCalendarDAY_OF_WEEK2CalendarDataObjectDAY_OF_WEEK(final int calendarDAY_OF_WEEK) {
+    	switch (calendarDAY_OF_WEEK) {
+    	case Calendar.SUNDAY:
+    		return CalendarDataObject.SUNDAY;
+    	case Calendar.MONDAY:
+    		return CalendarDataObject.MONDAY;
+    	case Calendar.TUESDAY:
+    		return CalendarDataObject.TUESDAY;
+    	case Calendar.WEDNESDAY:
+    		return CalendarDataObject.WEDNESDAY;
+    	case Calendar.THURSDAY:
+    		return CalendarDataObject.THURSDAY;
+    	case Calendar.FRIDAY:
+    		return CalendarDataObject.FRIDAY;
+    	case Calendar.SATURDAY:
+    		return CalendarDataObject.SATURDAY;
+    	default:
+    		return -1;
+    	}
     }
 
     private List<CalendarDataObject> read(final SearchIterator<CalendarDataObject> si) throws OXException, SearchIteratorException {
