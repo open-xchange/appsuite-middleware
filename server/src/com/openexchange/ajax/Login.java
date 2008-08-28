@@ -359,14 +359,13 @@ public class Login extends AJAXServlet {
 				for (final Cookie cookie : cookies) {
 					final String cookieName = cookie.getName();
 					if (cookieName.startsWith(cookiePrefix)) {
-						final String session = cookie.getValue();
-						if (sessiondService.refreshSession(session)) {
-							final Session sessionObj = sessiondService.getSession(session);
-							SessionServlet.checkIP(sessionObj.getLocalIp(), req.getRemoteAddr());
-
+						final String sessionId = cookie.getValue();
+						if (sessiondService.refreshSession(sessionId)) {
+							final Session session = sessiondService.getSession(sessionId);
+							SessionServlet.checkIP(session.getLocalIp(), req.getRemoteAddr());
 							try {
-								final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
-								final User user = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
+								final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
+								final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
 								if (!ctx.isEnabled() || !user.isMailEnabled()) {
 									throw new LoginException(LoginException.Code.INVALID_CREDENTIALS);
 								}
@@ -374,7 +373,7 @@ public class Login extends AJAXServlet {
 								throw new LoginException(LoginException.Code.UNKNOWN, e);
 							}
 
-							response.setData(writeLogin(sessionObj));
+							response.setData(writeLogin(session));
 							break;
 						}
 						final Cookie respCookie = new Cookie(cookie.getName(), cookie.getValue());
