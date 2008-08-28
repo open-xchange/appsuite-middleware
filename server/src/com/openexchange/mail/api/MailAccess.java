@@ -57,9 +57,13 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.caching.CacheException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.cache.MailAccessCache;
 import com.openexchange.session.Session;
 
@@ -179,7 +183,11 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 			LOG.error(e1.getLocalizedMessage(), e1);
 		}
 		/*
-		 * No cached connection available, check if a new one may be established
+		 * No cached connection available, check for admin login
+		 */
+		checkAdminLogin(session);
+		/*
+		 * Check if a new connection may be established
 		 */
 		if ((MailConfig.getMaxNumOfConnections() > 0) && (COUNTER.get() > MailConfig.getMaxNumOfConnections())) {
 			LOCK_CON.lock();
@@ -463,6 +471,40 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 		 * used to fill thread's stack trace
 		 */
 		trace = new Throwable().getStackTrace();
+	}
+
+	/**
+	 * Checks if session's user denotes the context admin user and whether admin
+	 * user's try to login to mail system is permitted or not
+	 * 
+	 * @param session
+	 *            The session
+	 * @throws MailException
+	 *             If session's user denotes the context admin user and admin
+	 *             user's try to login to mail system is not permitted
+	 */
+	private static final void checkAdminLogin(final Session session) throws MailException {
+		if (!MailConfig.isAdminMailLoginEnabled()) {
+			/*
+			 * Admin mail login is not permitted per configuration
+			 */
+			Context ctx;
+			try {
+				ctx = (Context) session.getParameter(MailSessionParameterNames.PARAM_CONTEXT);
+			} catch (final ClassCastException e1) {
+				ctx = null;
+			}
+			if (ctx == null) {
+				try {
+					ctx = ContextStorage.getStorageContext(session.getContextId());
+				} catch (final ContextException e) {
+					throw new MailException(e);
+				}
+			}
+			if (session.getUserId() == ctx.getMailadmin()) {
+				throw new MailException(MailException.Code.ACCOUNT_DOES_NOT_EXIST, Integer.valueOf(ctx.getContextId()));
+			}
+		}
 	}
 
 	/**

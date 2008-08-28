@@ -105,7 +105,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	 * ++++++++++++++ Fields ++++++++++++++
 	 */
 
-	private Context ctx;
+	private final Context ctx;
 
 	private boolean init;
 
@@ -126,10 +126,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	 */
 	MailServletInterfaceImpl(final Session session) throws MailException {
 		super();
-		try {
-			this.ctx = ContextStorage.getStorageContext(session.getContextId());
-		} catch (final ContextException e) {
-			throw new MailException(e);
+		{
+			Context ctx;
+			try {
+				ctx = (Context) session.getParameter(MailSessionParameterNames.PARAM_CONTEXT);
+			} catch (final ClassCastException e1) {
+				ctx = null;
+			}
+			if (ctx == null) {
+				try {
+					ctx = ContextStorage.getStorageContext(session.getContextId());
+				} catch (final ContextException e) {
+					throw new MailException(e);
+				}
+			}
+			this.ctx = ctx;
 		}
 		try {
 			if (!UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx).hasWebMail()) {
@@ -138,9 +149,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		} catch (final UserConfigurationException e) {
 			throw new MailException(e);
 		}
-		if (/* IMAPProperties.noAdminMailbox() && */session.getUserId() == ctx.getMailadmin()) {
-			throw new MailException(MailException.Code.ACCOUNT_DOES_NOT_EXIST, Integer.valueOf(ctx.getContextId()));
-		}
+		session.setParameter(MailSessionParameterNames.PARAM_CONTEXT, ctx);
 		this.session = session;
 		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
 	}

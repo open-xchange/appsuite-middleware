@@ -561,6 +561,17 @@ public abstract class MailConfig {
 	}
 
 	/**
+	 * Indicates if admin mail login is enabled; meaning whether admin user's
+	 * try to login to mail system is permitted or not.
+	 * 
+	 * @return <code>true</code> if admin mail login is enabled; otherwise
+	 *         <code>false</code>
+	 */
+	public static boolean isAdminMailLoginEnabled() {
+		return MailProperties.getInstance().isAdminMailLoginEnabled();
+	}
+
+	/**
 	 * Gets the login
 	 * 
 	 * @return the login

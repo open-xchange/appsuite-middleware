@@ -141,6 +141,8 @@ public final class MailProperties {
 
 	private String defaultMailProvider;
 
+	private boolean adminMailLoginEnabled;
+
 	/**
 	 * Initializes a new {@link MailProperties}
 	 */
@@ -202,6 +204,7 @@ public final class MailProperties {
 		watcherShallClose = false;
 		supportSubscription = false;
 		defaultMailProvider = null;
+		adminMailLoginEnabled = false;
 	}
 
 	private void loadProperties0() throws MailConfigException {
@@ -334,6 +337,13 @@ public final class MailProperties {
 					"com.openexchange.mail.defaultMailProvider", "imap").trim();
 			defaultMailProvider = defaultMailProviderStr;
 			logBuilder.append("\tDefault Mail Provider: ").append(defaultMailProvider).append('\n');
+		}
+
+		{
+			final String adminMailLoginEnabledStr = configuration.getProperty(
+					"com.openexchange.mail.adminMailLoginEnabled", STR_FALSE).trim();
+			adminMailLoginEnabled = Boolean.parseBoolean(adminMailLoginEnabledStr);
+			logBuilder.append("\tAdmin Mail Login Enabled: ").append(adminMailLoginEnabled).append('\n');
 		}
 
 		{
@@ -566,6 +576,17 @@ public final class MailProperties {
 	 */
 	public String getDefaultMailProvider() {
 		return defaultMailProvider;
+	}
+
+	/**
+	 * Indicates if admin mail login is enabled; meaning whether admin user's
+	 * try to login to mail system is permitted or not.
+	 * 
+	 * @return <code>true</code> if admin mail login is enabled; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isAdminMailLoginEnabled() {
+		return adminMailLoginEnabled;
 	}
 
 	/**

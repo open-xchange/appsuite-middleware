@@ -100,4 +100,9 @@ public final class MailSessionParameterNames {
 	 */
 	public static final String PARAM_ORGANIZATION_HDR = "com.openexchange.mail.organization";
 
+	/**
+	 * The reference to session's context
+	 */
+	public static final String PARAM_CONTEXT = "com.openexchange.mail.context";
+
 }
