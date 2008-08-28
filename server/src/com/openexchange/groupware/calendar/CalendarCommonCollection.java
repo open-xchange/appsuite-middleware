@@ -60,7 +60,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1396,14 +1395,12 @@ public final class CalendarCommonCollection {
     }
 
     static long getUserTimeUTCDate(final Date date, final String timezone) {
-        final TimeZone tz = Tools.getTimeZone(timezone);
-        final int offset = tz.getOffset(date.getTime());
-        long ndl = date.getTime()+offset;
-        final long off = ndl%CalendarRecurringCollection.MILLI_DAY;
-        ndl -= off;
-        //System.out.println(" GOT "+date+" and return "+new Date(ndl));
-        return ndl;
-    }
+		final int offset = Tools.getTimeZone(timezone).getOffset(date.getTime());
+		long ndl = date.getTime() + offset;
+		ndl -= (ndl % CalendarRecurringCollection.MILLI_DAY);
+		// System.out.println(" GOT "+date+" and return "+new Date(ndl));
+		return ndl;
+	}
 
 	public static boolean checkIfArrayKeyExistInArray(final Object a[], final Object b[]) {
 		if (a != null && b != null) {
