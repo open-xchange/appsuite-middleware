@@ -417,7 +417,7 @@ public class Login extends AJAXServlet {
 			resp.setContentType(CONTENTTYPE_JAVASCRIPT);
 			try {
 				if (response.hasError()) {
-					Response.write(response, resp.getWriter());
+					ResponseWriter.write(response, resp.getWriter());
 				} else {
 					((JSONObject) response.getData()).write(resp.getWriter());
 				}
