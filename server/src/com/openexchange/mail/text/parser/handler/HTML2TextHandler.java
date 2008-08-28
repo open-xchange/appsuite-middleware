@@ -357,7 +357,7 @@ public final class HTML2TextHandler implements HTMLHandler {
 	/**
 	 * Detects indentions: \t or "    "
 	 */
-	private static final Pattern PAT_INDENT = Pattern.compile("(?:(\t)|([ ]{4}))+");
+	private static final Pattern PAT_INDENT = Pattern.compile("(?:(\t)|([ ]{2,}))+");
 
 	private static final String STR_EMPTY = "";
 
