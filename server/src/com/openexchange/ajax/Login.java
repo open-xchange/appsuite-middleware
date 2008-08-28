@@ -270,20 +270,20 @@ public class Login extends AJAXServlet {
 				return;
 			}
 			String session = null;
-			final Cookie[] cookie = req.getCookies();
-			if (cookie != null) {
-				final String cookieNanme = new StringBuilder(Login.cookiePrefix).append(cookieId).toString();
+			final Cookie[] cookies = req.getCookies();
+			if (cookies != null) {
+				final String cookieName = new StringBuilder(Login.cookiePrefix).append(cookieId).toString();
 				int stat = 0;
-				for (int a = 0; a < cookie.length && stat != 3; a++) {
-					if (cookieNanme.equals(cookie[a].getName())) {
-						session = cookie[a].getValue();
-						final Cookie respCookie = new Cookie(cookieNanme, session);
+				for (int a = 0; a < cookies.length && stat != 3; a++) {
+					if (cookieName.equals(cookies[a].getName())) {
+						session = cookies[a].getValue();
+						final Cookie respCookie = new Cookie(cookieName, session);
 						respCookie.setPath("/");
 						respCookie.setMaxAge(0); // delete
 						resp.addCookie(respCookie);
 						stat |= 1;
-					} else if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(cookie[a].getName())) {
-						final Cookie jsessionIdCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, cookie[a]
+					} else if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(cookies[a].getName())) {
+						final Cookie jsessionIdCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, cookies[a]
 								.getValue());
 						jsessionIdCookie.setPath("/");
 						jsessionIdCookie.setMaxAge(0); // delete
