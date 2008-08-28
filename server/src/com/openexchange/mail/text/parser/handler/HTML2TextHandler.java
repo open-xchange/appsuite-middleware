@@ -413,7 +413,7 @@ public final class HTML2TextHandler implements HTMLHandler {
 			}
 			if (anchorTag && hrefContent != null && !text.equalsIgnoreCase(hrefContent)
 					&& !PATTERN_HREF.matcher(text).matches()) {
-				textBuilder.append(" [").append(hrefContent).append(']');
+				textBuilder.append(" [").append(hrefContent).append("] ");
 			}
 		}
 	}
