@@ -131,10 +131,12 @@ public interface SessiondService {
 	 * 
 	 * @param randomToken
 	 *            - The random token of the session
+	 * @param localIp
+	 *            - The new local IP to apply to session
 	 * @return Return the session object or null if no session exists for the
 	 *         given random token or if the random token is already expired
 	 */
-	public Session getSessionByRandomToken(final String randomToken);
+	public Session getSessionByRandomToken(final String randomToken, final String localIp);
 
 	/**
 	 * Gets (and removes) the session bound to given secret cookie identifier in

@@ -63,6 +63,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginException;
@@ -117,8 +118,9 @@ public class Login extends AJAXServlet {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-	 *      javax.servlet.http.HttpServletResponse)
+	 * @see
+	 * javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest
+	 * , javax.servlet.http.HttpServletResponse)
 	 */
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
@@ -221,9 +223,9 @@ public class Login extends AJAXServlet {
 				LOG.error("Error", e);
 				response.setException(e);
 			}
-//			catch (final Exception e) {
-//				LOG.error("Error", e);
-//			}
+			// catch (final Exception e) {
+			// LOG.error("Error", e);
+			// }
 			SessionServlet.rememberSession(req, session);
 			/*
 			 * Write response
@@ -248,7 +250,8 @@ public class Login extends AJAXServlet {
 			}
 			try {
 				if (null == login) {
-					Response.write(response, resp.getWriter());
+					ResponseWriter.write(response, resp.getWriter());
+					// Response.write(response, resp.getWriter());
 				} else {
 					login.write(resp.getWriter());
 				}
@@ -269,20 +272,23 @@ public class Login extends AJAXServlet {
 			String session = null;
 			final Cookie[] cookie = req.getCookies();
 			if (cookie != null) {
-				for (int a = 0; a < cookie.length; a++) {
-					if (cookie[a].getName().equals(Login.cookiePrefix + cookieId)) {
+				final String cookieNanme = new StringBuilder(Login.cookiePrefix).append(cookieId).toString();
+				int stat = 0;
+				for (int a = 0; a < cookie.length && stat != 3; a++) {
+					if (cookieNanme.equals(cookie[a].getName())) {
 						session = cookie[a].getValue();
-						final Cookie respCookie = new Cookie(cookiePrefix + cookieId, session);
+						final Cookie respCookie = new Cookie(cookieNanme, session);
 						respCookie.setPath("/");
-						respCookie.setMaxAge(0);
+						respCookie.setMaxAge(0); // delete
 						resp.addCookie(respCookie);
-						break;
+						stat |= 1;
 					} else if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(cookie[a].getName())) {
 						final Cookie jsessionIdCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, cookie[a]
 								.getValue());
 						jsessionIdCookie.setPath("/");
 						jsessionIdCookie.setMaxAge(0); // delete
 						resp.addCookie(jsessionIdCookie);
+						stat |= 2;
 					}
 				}
 			}
@@ -313,7 +319,7 @@ public class Login extends AJAXServlet {
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}
-			final Session session = sessiondService.getSessionByRandomToken(randomToken);
+			final Session session = sessiondService.getSessionByRandomToken(randomToken, req.getRemoteAddr());
 			if (session == null) {
 				/*
 				 * Unknown random token; throw error

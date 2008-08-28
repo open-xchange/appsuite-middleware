@@ -309,7 +309,7 @@ public final class SessionHandler {
 		throw new SessiondException(SessiondException.Code.PASSWORD_UPDATE_FAILED);
 	}
 
-	protected static Session getSessionByRandomToken(final String randomToken) {
+	protected static Session getSessionByRandomToken(final String randomToken, final String localIp) {
 		Map<String, String> random = null;
 
 		for (int a = 0; a < numberOfSessionContainers; a++) {
@@ -325,6 +325,10 @@ public final class SessionHandler {
 					final Session session = sessionControlObject.getSession();
 					session.removeRandomToken();
 					random.remove(randomToken);
+					/*
+					 * Set local IP
+					 */
+					((SessionImpl) session).setLocalIp(localIp);
 					return session;
 				}
 			}

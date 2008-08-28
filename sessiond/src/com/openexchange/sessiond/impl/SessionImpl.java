@@ -86,7 +86,7 @@ public final class SessionImpl implements Session {
 
 	private String randomToken;
 
-	private final String localIp;
+	private String localIp;
 
 	private final Map<String, ManagedUploadFile> managedUploadFiles;
 
@@ -246,6 +246,16 @@ public final class SessionImpl implements Session {
 
 	public String getLocalIp() {
 		return localIp;
+	}
+
+	/**
+	 * Sets the local IP
+	 * 
+	 * @param localIp
+	 *            The local IP to set
+	 */
+	void setLocalIp(final String localIp) {
+		this.localIp = localIp;
 	}
 
 	public String getLoginName() {
