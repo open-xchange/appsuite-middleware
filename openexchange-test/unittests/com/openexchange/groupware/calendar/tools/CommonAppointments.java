@@ -99,6 +99,16 @@ public class CommonAppointments {
         switchUser( user );
     }
 
+	/**
+	 * 
+	 * Returns the folder ID of user's private calendar folder
+	 * 
+	 * @return The folder ID of user's private calendar folder
+	 */
+	public int getPrivateFolder() {
+		return privateFolder;
+	}
+
     public CalendarDataObject buildRecurringAppointment() {
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTitle("recurring");
