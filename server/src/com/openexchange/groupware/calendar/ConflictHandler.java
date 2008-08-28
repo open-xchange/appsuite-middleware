@@ -54,7 +54,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -79,9 +81,6 @@ public class ConflictHandler {
     private final Session so;
     private boolean action = true;
     private int current_results;
-    
-    private Date rs;
-    private Date re;
     
     public static final int MAX_CONFLICT_RESULTS = 999;
     
@@ -120,8 +119,6 @@ public class ConflictHandler {
             }
             return NO_CONFLICTS;
         }
-        rs = cdao.getStartDate();
-        re = cdao.getEndDate();
         final CalendarDataObject[] resources = prepareResolving( false );
         if (resources.length > 0) {
             return resources;
@@ -148,9 +145,30 @@ public class ConflictHandler {
         if (request_participants) {
             return NO_CONFLICTS;
         }
-        return resolveResourceConflicts(cdao.getStartDate(), cdao.getEndDate());
-                
-    }
+		/*
+		 * Check for each occurrence
+		 */
+		final RecurringResults results = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+		final int size = results.size();
+		final List<CalendarDataObject> conflicts = new ArrayList<CalendarDataObject>(size);
+		for (int i = 0; i < size && conflicts.size() < MAX_CONFLICT_RESULTS; i++) {
+			final RecurringResult result = results.getRecurringResult(i);
+			CalendarDataObject[] resultConflicts = resolveResourceConflicts(new Date(result.getStart()), new Date(
+					result.getEnd()));
+			if (resultConflicts.length + conflicts.size() > MAX_CONFLICT_RESULTS) {
+				/*
+				 * Inserting all conflicts would exceed MAX_CONFLICT_RESULTS.
+				 * Cut off exceeding elements.
+				 */
+				final int space = MAX_CONFLICT_RESULTS - conflicts.size();
+				final CalendarDataObject[] tmp = new CalendarDataObject[space];
+				System.arraycopy(resultConflicts, 0, tmp, 0, space);
+				resultConflicts = tmp;
+			}
+			conflicts.addAll(Arrays.asList(resultConflicts));
+		}
+		return conflicts.toArray(new CalendarDataObject[conflicts.size()]);
+	}
     
     private CalendarDataObject[] resolveParticipantConflicts(final Date start, final Date end) throws OXException {
         final String sql_in = CalendarCommonCollection.getSQLInStringForParticipants(cdao.getUsers());
