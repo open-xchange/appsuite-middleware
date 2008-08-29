@@ -52,15 +52,12 @@ package com.openexchange.server.osgi;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -72,10 +69,15 @@ import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.client.ConfigJump;
+import com.openexchange.data.conversion.ical.ICalEmitter;
+import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.event.impl.EventQueue;
+import com.openexchange.event.impl.osgi.OSGiEventDispatcher;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nTools;
 import com.openexchange.mail.api.MailProvider;
@@ -99,10 +101,6 @@ import com.openexchange.systemname.internal.JVMRouteSystemNameImpl;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
 import com.openexchange.user.UserService;
 import com.openexchange.user.internal.UserServiceImpl;
-import com.openexchange.event.impl.osgi.OSGiEventDispatcher;
-import com.openexchange.event.impl.EventQueue;
-import com.openexchange.data.conversion.ical.ICalParser;
-import com.openexchange.data.conversion.ical.ICalEmitter;
 
 /**
  * {@link ServerActivator} - The activator for server bundle
@@ -267,7 +265,7 @@ public final class ServerActivator extends DeferredActivator {
         /*
          * Register Services
          */
-        OSGiEventDispatcher dispatcher = new OSGiEventDispatcher();
+        final OSGiEventDispatcher dispatcher = new OSGiEventDispatcher();
         EventQueue.setNewEventDispatcher(dispatcher);
         dispatcher.registerService(context);
         /*
@@ -301,6 +299,9 @@ public final class ServerActivator extends DeferredActivator {
 			// Search for UserPasswordChange service
 			serviceTrackerList.add(new ServiceTracker(context, PasswordChangeService.class.getName(),
 					new PasswordChangeCustomizer(context)));
+			// Search for host name service
+			serviceTrackerList.add(new ServiceTracker(context, HostnameService.class.getName(),
+					new HostnameServiceCustomizer(context)));
 			// Start up server the usual way
 			starter.start();
 		}
