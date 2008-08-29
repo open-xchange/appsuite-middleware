@@ -325,28 +325,22 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
     }
 
     public void deleteReminder(final int targetId, final int userId, final int module) throws OXMandatoryFieldException, OXConflictException, OXException {
-        Connection writeCon = null;
-
+        final Connection writeCon;
         try {
-            writeCon = DBPool.pickupWriteable(context);
+			writeCon = DBPool.pickupWriteable(context);
+		} catch (final DBPoolingException e) {
+			throw new OXException(e);
+		}
+        try {
             writeCon.setAutoCommit(false);
             deleteReminder(targetId, userId, module, writeCon);
             writeCon.commit();
         } catch (final SQLException exc) {
             DBUtils.rollback(writeCon);
             throw new ReminderException(Code.DELETE_EXCEPTION, exc);
-        } catch (final DBPoolingException exc) {
-            throw new OXException(exc);
         } finally {
-            if (writeCon != null) {
-                try {
-                    writeCon.setAutoCommit(true);
-                } catch (final SQLException exc) {
-                    LOG.warn("cannot set autocommit to true on connection", exc);
-                }
-            }
-
-            DBPool.closeWriterSilent(context,writeCon);
+        	DBUtils.autocommit(writeCon);
+			DBPool.closeWriterSilent(context,writeCon);
         }
     }
 
@@ -429,7 +423,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
             reminderDeleteInterface.updateTargetObject(context, writeCon, targetId);
         } catch (final SQLException exc) {
             throw new ReminderException(Code.DELETE_EXCEPTION, exc);
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             throw new ReminderException(e);
         } finally {
             if (ps != null) {
