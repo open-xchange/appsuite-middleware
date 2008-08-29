@@ -443,9 +443,8 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
         } catch (final ReminderException exc) {
             if (Code.NOT_FOUND.getDetailNumber() == exc.getDetailNumber()) {
                 return false;
-            } else {
-                throw exc;
             }
+			throw exc;
         }
     }
 
@@ -454,17 +453,17 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
     }
 
     public ReminderObject loadReminder( final String targetId, final int userId, final int module) throws OXMandatoryFieldException, OXConflictException, OXException {
-        Connection readCon = null;
-
-        try {
-            readCon = DBPool.pickup(context);
-
-            return loadReminder(targetId, userId, module, readCon);
-        } catch (final DBPoolingException exc) {
-            throw new OXException(exc);
-        } finally {
-            DBPool.closeReaderSilent(context,readCon);
-        }
+        final Connection readCon;
+		try {
+			readCon = DBPool.pickup(context);
+		} catch (final DBPoolingException e) {
+			throw new OXException(e);
+		}
+		try {
+			return loadReminder(targetId, userId, module, readCon);
+		} finally {
+			DBPool.closeReaderSilent(context, readCon);
+		}
     }
 
     public ReminderObject loadReminder( final int targetId, final int userId, final int module, final Connection readCon) throws OXMandatoryFieldException, OXConflictException, OXException {
