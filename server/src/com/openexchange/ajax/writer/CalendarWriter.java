@@ -137,12 +137,17 @@ public abstract class CalendarWriter extends CommonWriter {
 			}
 
 			if (calendarObject.containsDayInMonth()) {
-				int dayInMonth = calendarObject.getDayInMonth();
-				if (dayInMonth == 5) {
-					dayInMonth = -1;
+				if (calendarObject.getDays() > 0 && calendarObject.getDayInMonth() >= 5) {
+					writeParameter(CalendarFields.DAY_IN_MONTH, -1, jsonObj);
+				} else {
+					writeParameter(CalendarFields.DAY_IN_MONTH, calendarObject.getDayInMonth(), jsonObj);
 				}
-
-				writeParameter(CalendarFields.DAY_IN_MONTH, dayInMonth, jsonObj);
+//				int dayInMonth = calendarObject.getDayInMonth();
+//				if (dayInMonth == 5) {
+//					dayInMonth = -1;
+//				}
+//
+//				writeParameter(CalendarFields.DAY_IN_MONTH, dayInMonth, jsonObj);
 			}
 			break;
 		case CalendarObject.YEARLY:

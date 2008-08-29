@@ -2,6 +2,7 @@
 
  - Bugfix #12036: Logging a debug message only if a reminder could not be
    found for deletion on an appointment's participants update
+ - Bugfix #11826: Writing proper value for "day_in_month" in JSON response
 
 * 2008-08-28 - thorben.betten@open-xchange.com
 
