@@ -759,7 +759,7 @@ public abstract class MailConfig {
 	 *         pattern could be found <code>null</code> is returned; meaning no
 	 *         protocol is present in specified server string.
 	 */
-	protected final static String[] parseProtocol(final String server) {
+	public final static String[] parseProtocol(final String server) {
 		final int len = server.length();
 		char c = '\0';
 		for (int i = 0; (i < len) && ((c = server.charAt(i)) != '/'); i++) {
