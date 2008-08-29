@@ -49,7 +49,10 @@
 
 package com.openexchange.mail.utils;
 
+import java.net.InetSocketAddress;
 import java.util.Locale;
+
+import com.openexchange.mail.api.MailConfig;
 
 /**
  * {@link ProviderUtility}
@@ -64,6 +67,42 @@ public final class ProviderUtility {
 	 */
 	private ProviderUtility() {
 		super();
+	}
+
+	/**
+	 * Turns given server URL to an instance of {@link InetSocketAddress}
+	 * 
+	 * @param serverUrl
+	 *            The server URL
+	 * @param defaultPort
+	 *            The default port to use if server URL does not specify a port
+	 * @return An instance of {@link InetSocketAddress} denoting given server
+	 *         URL
+	 */
+	public static InetSocketAddress toSocketAddr(final String serverUrl, final int defaultPort) {
+		if (serverUrl == null) {
+			return null;
+		}
+		String hostname;
+		{
+			final String[] parsed = MailConfig.parseProtocol(serverUrl);
+			if (parsed == null) {
+				hostname = serverUrl;
+			} else {
+				hostname = parsed[1];
+			}
+		}
+		final int port;
+		{
+			final int pos = hostname.indexOf(':');
+			if (pos > -1) {
+				port = Integer.parseInt(hostname.substring(pos + 1));
+				hostname = hostname.substring(0, pos);
+			} else {
+				port = defaultPort;
+			}
+		}
+		return new InetSocketAddress(hostname, port);
 	}
 
 	/**
