@@ -93,6 +93,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.reminder.ReminderException;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderException.Code;
@@ -3061,7 +3062,15 @@ class CalendarMySQL implements CalendarSqlImp {
 		final ReminderSQLInterface rsql = new ReminderHandler(c);
 		if (action == CalendarOperation.DELETE) {
 			if (rsql.existsReminder(oid, uid, Types.APPOINTMENT)) {
-				rsql.deleteReminder(oid, uid, Types.APPOINTMENT);
+				try {
+					rsql.deleteReminder(oid, uid, Types.APPOINTMENT);
+				} catch (final ReminderException exc) {
+					if (ReminderException.Code.NOT_FOUND.getDetailNumber() == exc.getDetailNumber()) {
+						LOG.debug("Reminder was not found for deletion", exc);
+					} else {
+						throw exc;
+					}
+				}
 			}
 		} else {
 			if (!CalendarCommonCollection.isInThePast(end_date)) {

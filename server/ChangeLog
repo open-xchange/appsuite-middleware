@@ -1,3 +1,8 @@
+* 2008-08-29 - thorben.betten@open-xchange.com
+
+ - Bugfix #12036: Logging a debug message only if a reminder could not be
+   found for deletion on an appointment's participants update
+
 * 2008-08-28 - thorben.betten@open-xchange.com
 
  - Bugfix #11849: Applying new local IP on redirect to pass future IP
