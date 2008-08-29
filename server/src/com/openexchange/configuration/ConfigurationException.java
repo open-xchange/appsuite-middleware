@@ -100,7 +100,7 @@ public class ConfigurationException extends AbstractOXException {
      * Error codes for the configuration exception.
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */
-    public enum Code {
+    public static enum Code {
         /**
          * Filename for property file is not defined.
          */
