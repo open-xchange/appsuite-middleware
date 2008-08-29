@@ -47,36 +47,52 @@
  *
  */
 
-package com.openexchange.groupware.notify.hostname;
+package com.openexchange.context.internal;
+
+import java.util.List;
+
+import com.openexchange.context.ContextService;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 
 /**
- * {@link HostnameService} - A simple interface providing the host name part in
- * generated links to internal objects:
- * 
- * <pre>
- * http://[hostname]/#m=[module]&amp;i=[object]&amp;f=[folder]
- * </pre>
+ * {@link ContextServiceImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public interface HostnameService {
+public final class ContextServiceImpl implements ContextService {
 
 	/**
-	 * Returns the host name part used in generated links to internal objects:
-	 * 
-	 * <pre>
-	 * http://[hostname]/#m=[module]&amp;i=[object]&amp;f=[folder]
-	 * </pre>
-	 * 
-	 * @param userId
-	 *            The user ID or <code>-1</code> if not available
-	 * @param contextId
-	 *            The context ID or <code>-1</code> if not available
-	 * 
-	 * @return The host name part used in generated links to internal objects or
-	 *         <code>null</code>.
+	 * Initializes a new {@link ContextServiceImpl}
 	 */
-	public String getHostname(final int userId, final int contextId);
+	public ContextServiceImpl() {
+		super();
+	}
+
+	public void close() {
+		ContextStorage.getInstance().close();
+	}
+
+	public List<Integer> getAllContextIds() throws ContextException {
+		return ContextStorage.getInstance().getAllContextIds();
+	}
+
+	public Context getContext(final int contextId) throws ContextException {
+		return ContextStorage.getInstance().getContext(contextId);
+	}
+
+	public int getContextId(final String loginContextInfo) throws ContextException {
+		return ContextStorage.getInstance().getContextId(loginContextInfo);
+	}
+
+	public void invalidateContext(final int contextId) throws ContextException {
+		ContextStorage.getInstance().invalidateContext(contextId);
+	}
+
+	public void invalidateLoginInfo(final String loginContextInfo) throws ContextException {
+		ContextStorage.getInstance().invalidateLoginInfo(loginContextInfo);
+	}
 
 }

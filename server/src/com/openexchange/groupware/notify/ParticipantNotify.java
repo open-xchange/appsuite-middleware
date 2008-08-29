@@ -516,6 +516,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
 						if(user.getMail() != null) {
 							p = new EmailableParticipant(
+								ctx.getContextId(),
 								Participant.USER,
 								user.getId(),
 								groups,
@@ -581,6 +582,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
 						if(user.getMail() != null) {
 							p = new EmailableParticipant(
+								ctx.getContextId(),
 								Participant.USER,
 								user.getId(),
 								groups,
@@ -611,6 +613,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			return null;
 		}
 		return new EmailableParticipant(
+				-1,
 				participant.getType(),
 				-1,
 				new int[0],
@@ -659,6 +662,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		EmailableParticipant p;
 		if(mail != null) {
 			p = new EmailableParticipant(
+				ctx.getContextId(),
 				participant.getType(),
 				participant.getIdentifier(),
 				groups,
@@ -695,6 +699,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		EmailableParticipant p;
 		if(mail != null) {
 			p = new EmailableParticipant(
+				ctx.getContextId(),
 				participant.getType(),
 				participant.getIdentifier(),
 				groups,
@@ -807,8 +812,10 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		public TimeZone timeZone;
 		public int reliability;
 		public int folderId;
+		public int cid;
 		
-		public EmailableParticipant(final int type, final int id, final int[] groups, final String email, final String displayName, final Locale locale, final TimeZone timeZone, final int reliability, final int folderId) {
+		public EmailableParticipant(final int cid, final int type, final int id, final int[] groups, final String email, final String displayName, final Locale locale, final TimeZone timeZone, final int reliability, final int folderId) {
+			this.cid = cid;
 			this.type = type;
 			this.email = email;
 			this.displayName = displayName;
@@ -821,6 +828,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		}
 		
 		public void copy(final EmailableParticipant participant) {
+			this.cid = participant.cid;
 			this.type = participant.type;
 			this.email = participant.email;
 			this.displayName = participant.displayName;
@@ -904,16 +912,17 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			subst.put("folder", String.valueOf(folder));
 			subst.put("object", String.valueOf(obj.getObjectID()));
 			final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
-			if (hostnameService == null) {
+			final String hostnameStr;
+			if (hostnameService == null || (hostnameStr = hostnameService.getHostname(p.id, p.cid)) == null) {
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("No host name service available; using local host name as fallback");
+					LOG.debug("No host name available; using local host name as fallback");
 				}
 				if(warnSpam != null) {
 					LOG.error("Can't resolve my own hostname, using 'localhost' instead, which is certainly not what you want.!", warnSpam);
 				}
 				subst.put("hostname", hostname);
 			} else {
-				subst.put("hostname", hostnameService.getHostname());
+				subst.put("hostname", hostnameStr);
 			}
 			
 			return object_link_template.render(subst);

@@ -47,36 +47,80 @@
  *
  */
 
-package com.openexchange.groupware.notify.hostname;
+package com.openexchange.context;
+
+import java.util.List;
+
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 
 /**
- * {@link HostnameService} - A simple interface providing the host name part in
- * generated links to internal objects:
- * 
- * <pre>
- * http://[hostname]/#m=[module]&amp;i=[object]&amp;f=[folder]
- * </pre>
+ * {@link ContextService} - Offers access method to context module.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public interface HostnameService {
+public interface ContextService {
 
 	/**
-	 * Returns the host name part used in generated links to internal objects:
+	 * Instantiates an implementation of the context interface and fill its
+	 * attributes according to the needs to be able to separate contexts.
 	 * 
-	 * <pre>
-	 * http://[hostname]/#m=[module]&amp;i=[object]&amp;f=[folder]
-	 * </pre>
-	 * 
-	 * @param userId
-	 *            The user ID or <code>-1</code> if not available
-	 * @param contextId
-	 *            The context ID or <code>-1</code> if not available
-	 * 
-	 * @return The host name part used in generated links to internal objects or
-	 *         <code>null</code>.
+	 * @param loginContextInfo
+	 *            the login info for the context.
+	 * @return the unique identifier of the context or <code>-1</code> if no
+	 *         matching context exists.
+	 * @throws ContextException
+	 *             if an error occurs.
 	 */
-	public String getHostname(final int userId, final int contextId);
+	public abstract int getContextId(String loginContextInfo) throws ContextException;
 
+	/**
+	 * Creates a context implementation for the given context unique identifier.
+	 * 
+	 * @param contextId
+	 *            unique identifier of the context.
+	 * @return an implementation of the context or <code>null</code> if the
+	 *         context with the given identifier can't be found.
+	 * @throws ContextException
+	 *             if an error occurs.
+	 */
+	public Context getContext(int contextId) throws ContextException;
+
+	/**
+	 * Invalidates the context object in cache(s).
+	 * 
+	 * @param contextId
+	 *            unique identifier of the context to invalidate
+	 * @throws ContextException
+	 * @throws ContextException
+	 *             if invalidating the context fails
+	 */
+	public void invalidateContext(int contextId) throws ContextException;
+
+	/**
+	 * Invalidates a login information in the cache.
+	 * 
+	 * @param loginContextInfo
+	 *            login information to invalidate.
+	 * @throws ContextException
+	 * @throws ContextException
+	 *             if invalidating the login information fails.
+	 */
+	public void invalidateLoginInfo(String loginContextInfo) throws ContextException;
+
+	/**
+	 * Gives a list of all context ids which are stored in the config database.
+	 * 
+	 * @return the list of context ids
+	 * @throws ContextException
+	 *             if reading the contexts fails.
+	 */
+	public abstract List<Integer> getAllContextIds() throws ContextException;
+
+	/**
+	 * Releases all resources associated with the implementation of this context
+	 * storage.
+	 */
+	public void close();
 }

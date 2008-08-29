@@ -69,6 +69,8 @@ import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.client.ConfigJump;
+import com.openexchange.context.ContextService;
+import com.openexchange.context.internal.ContextServiceImpl;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.event.impl.EventQueue;
@@ -317,6 +319,7 @@ public final class ServerActivator extends DeferredActivator {
 		registrationList.add(context.registerService(ResourceService.class.getName(),
 				ResourceServiceImpl.getInstance(), null));
 		registrationList.add(context.registerService(UserService.class.getName(), new UserServiceImpl(), null));
+		registrationList.add(context.registerService(ContextService.class.getName(), new ContextServiceImpl(), null));
 		registrationList.add(context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(), null));
 	}
 
