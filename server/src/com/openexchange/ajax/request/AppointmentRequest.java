@@ -190,32 +190,32 @@ public class AppointmentRequest {
 		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasCalendar()) {
 			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "calendar");
 		}
-		
-		if (action.equalsIgnoreCase(AJAXServlet.ACTION_CONFIRM)) {
+
+		if (AJAXServlet.ACTION_CONFIRM.equalsIgnoreCase(action)) {
 			return actionConfirm(jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
+		} else if (AJAXServlet.ACTION_NEW.equalsIgnoreCase(action)) {
 			return actionNew(jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
+		} else if (AJAXServlet.ACTION_DELETE.equalsIgnoreCase(action)) {
 			return actionDelete(jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
+		} else if (AJAXServlet.ACTION_UPDATE.equalsIgnoreCase(action)) {
 			return actionUpdate(jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
+		} else if (AJAXServlet.ACTION_UPDATES.equalsIgnoreCase(action)) {
 			return actionUpdates(jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
+		} else if (AJAXServlet.ACTION_LIST.equalsIgnoreCase(action)) {
 			return actionList(jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
+		} else if (AJAXServlet.ACTION_ALL.equalsIgnoreCase(action)) {
 			return actionAll(jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
+		} else if (AJAXServlet.ACTION_GET.equalsIgnoreCase(action)) {
 			return actionGet(jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_SEARCH)) {
+		} else if (AJAXServlet.ACTION_SEARCH.equalsIgnoreCase(action)) {
 			return actionSearch(jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW_APPOINTMENTS)) {
+		} else if (AJAXServlet.ACTION_NEW_APPOINTMENTS.equalsIgnoreCase(action)) {
 			return actionNewAppointmentsSearch(jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_HAS)) {
+		} else if (AJAXServlet.ACTION_HAS.equalsIgnoreCase(action)) {
 			return actionHas(jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_FREEBUSY)) {
+		} else if (AJAXServlet.ACTION_FREEBUSY.equalsIgnoreCase(action)) {
 			return actionFreeBusy(jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COPY)) {
+		} else if (AJAXServlet.ACTION_COPY.equalsIgnoreCase(action)) {
 			return actionCopy(jsonObject);
 		} else {
 			throw new AjaxException(AjaxException.Code.UnknownAction, action);
