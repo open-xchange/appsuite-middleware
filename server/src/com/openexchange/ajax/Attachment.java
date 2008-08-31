@@ -195,7 +195,7 @@ public class Attachment extends PermissionServlet {
 			try {
 				require(req, res,
 						PARAMETER_FOLDERID, PARAMETER_ATTACHEDID, PARAMETER_MODULE, PARAMETER_ID);
-			} catch (final OXException e) {
+			} catch (final UploadException e) {
 				handle(res, e, action, JS_FRAGMENT_POPUP);
 				return;
 			}
@@ -608,10 +608,10 @@ public class Attachment extends PermissionServlet {
 		}
 	}
 	
-	protected void require(final HttpServletRequest req, final HttpServletResponse res, final String... parameters) throws OXException {
+	protected void require(final HttpServletRequest req, final HttpServletResponse res, final String... parameters) throws UploadException {
 		for (final String param : parameters) {
 			if (req.getParameter(param) == null) {
-				throw new OXException("Missing Parameter "+param);
+				throw new UploadException(UploadCode.MISSING_PARAM, null, param);
 			}
 		}
 	}
