@@ -53,6 +53,7 @@ package com.openexchange.groupware.calendar;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
@@ -383,6 +384,38 @@ public final class CalendarRecurringCollection {
 	public static long normalizeLong(final long l) {
 		final long mod = l % MILLI_DAY;
 		return mod == 0 ? l : l - mod;
+	}
+
+	/**
+	 * Checks if specified date in increases day in month if adding given time
+	 * zone's offset.
+	 * 
+	 * @param millis
+	 *            The time millis
+	 * @param timeZoneID
+	 *            The time zone ID
+	 * @return <code>true</code> if specified date in increases day in month if
+	 *         adding given time zone's offset; otherwise <code>false</code>
+	 */
+	public static boolean exceedsHourOfDay(final long millis, final String timeZoneID) {
+		return exceedsHourOfDay(millis, Tools.getTimeZone(timeZoneID));
+	}
+
+	/**
+	 * Checks if specified date in increases day in month if adding given time
+	 * zone's offset.
+	 * 
+	 * @param millis
+	 *            The time millis
+	 * @param zone
+	 *            The time zone
+	 * @return <code>true</code> if specified date in increases day in month if
+	 *         adding given time zone's offset; otherwise <code>false</code>
+	 */
+	public static boolean exceedsHourOfDay(final long millis, final TimeZone zone) {
+		final Calendar cal = GregorianCalendar.getInstance(CalendarRecurringCollection.ZONE_UTC);
+		cal.setTimeInMillis(millis);
+		return cal.get(Calendar.HOUR_OF_DAY) + (zone.getOffset(millis) / CalendarRecurringCollection.MILLI_HOUR) >= 24;
 	}
     
     /**

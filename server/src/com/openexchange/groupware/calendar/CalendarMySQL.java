@@ -58,9 +58,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -468,7 +466,7 @@ class CalendarMySQL implements CalendarSqlImp {
 						final TimeZone zone = Tools.getTimeZone(cdao.getTimezone());
 						for (int a = 0; a < rrs.size(); a++) {
 							final RecurringResult rr = rrs.getRecurringResult(a);
-							fillActiveDates(start, rr.getStart(), rr.getEnd(), activeDates, exceedsHourOfDay(rr.getStart(), zone));
+							fillActiveDates(start, rr.getStart(), rr.getEnd(), activeDates, CalendarRecurringCollection.exceedsHourOfDay(rr.getStart(), zone));
 						}
 					} else {
 						if (LOG.isWarnEnabled()) {
@@ -476,7 +474,7 @@ class CalendarMySQL implements CalendarSqlImp {
 						}
 					}
 				} else {
-					fillActiveDates(start, s.getTime(), e.getTime(), activeDates, exceedsHourOfDay(s.getTime(), Tools.getTimeZone(rs.getString(9))));
+					fillActiveDates(start, s.getTime(), e.getTime(), activeDates, CalendarRecurringCollection.exceedsHourOfDay(s.getTime(), Tools.getTimeZone(rs.getString(9))));
 				}
 			}
 			// CalendarCommonCollection.debugActiveDates (start, end,
@@ -487,23 +485,6 @@ class CalendarMySQL implements CalendarSqlImp {
 			CalendarCommonCollection.closePreparedStatement(pst);
 		}
 		return activeDates;
-	}
-
-	/**
-	 * Checks if specified date in increases day in month if adding given time
-	 * zone's offset.
-	 * 
-	 * @param millis
-	 *            The time millis
-	 * @param zone
-	 *            The time zone
-	 * @return <code>true</code> if specified date in increases day in month if
-	 *         adding given time zone's offset; otherwise <code>false</code>
-	 */
-	private static boolean exceedsHourOfDay(final long millis, final TimeZone zone) {
-		final Calendar cal = GregorianCalendar.getInstance(CalendarRecurringCollection.ZONE_UTC);
-		cal.setTimeInMillis(millis);
-		return cal.get(Calendar.HOUR_OF_DAY) + (zone.getOffset(millis) / CalendarRecurringCollection.MILLI_HOUR) >= 24;
 	}
 
 	private final void fillActiveDates(final long start, long s, final long e, final boolean activeDates[], final boolean exceedsHourOfDay) {
