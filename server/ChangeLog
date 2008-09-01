@@ -1,3 +1,7 @@
+* 2008-09-01 - dennis.sieben@open-xchange.com
+
+ - Bugfix #12086: Changed endWith checks in SieveHandler to startWith
+ 
 * 2008-09-01 - thorben.betten@open-xchange.com
 
  - Bugfix #11302: Resolving an IMAP login to an user ID may return multiple
