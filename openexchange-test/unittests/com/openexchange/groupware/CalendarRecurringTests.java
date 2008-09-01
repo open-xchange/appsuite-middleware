@@ -132,7 +132,7 @@ public class CalendarRecurringTests extends TestCase {
         cdao.removeUntil();
         cdao.setOccurrence(5);
         assertFalse("test if no until is set", cdao.containsUntil());
-        long test_until = cdao.getEndDate().getTime() + (CalendarRecurringCollection.MILLI_DAY * 5);
+        long test_until = cdao.getEndDate().getTime() + (CalendarRecurringCollection.MILLI_DAY * 4);
         test_until = CalendarRecurringCollection.normalizeLong(test_until);
         
         cdao.setTitle("testBasicRecurringWithOccurrence");
@@ -298,7 +298,7 @@ public class CalendarRecurringTests extends TestCase {
     public void testDailyRecurringWithDAO() throws Throwable {
         final long s = 1149768000000L; // 08.06.2006 12:00 (GMT)
         final long e = 1149771600000L; // 08.06.2006 13:00 (GMT)
-        final long u = 1150156800000L; // 13.06.2006 00:00 (GMT)
+        final long u = 1150070400000L; // 12.06.2006 00:00 (GMT)
         final long u_test = 1150106400000L; // 12.06.2006 10:00 (GMT)
         final String testrecurrence = "t|1|i|1|s|"+s+"|e|"+u+"|";
         final CalendarDataObject cdao = new CalendarDataObject();
@@ -315,7 +315,7 @@ public class CalendarRecurringTests extends TestCase {
         final String check = CalendarRecurringCollection.createDSString(cdao);
         assertTrue("Checking daily sequence", check.equals(testrecurrence));
         RecurringResults m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
-        assertEquals("Check calculation", 6, m.size());
+        assertEquals("Check calculation", 5, m.size());
         
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1);
         assertEquals("Check calculation", 1, m.size());
@@ -1483,7 +1483,7 @@ public class CalendarRecurringTests extends TestCase {
         oclp1.setFolderAdmin(true);
         final OCLPermission oclp2 = new OCLPermission();
         
-        fo.setFolderName("testExceptionHandlingFolder");
+        fo.setFolderName("testExceptionHandlingFolder_" + String.valueOf(System.currentTimeMillis()));
         fo.setParentFolderID(fid);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
