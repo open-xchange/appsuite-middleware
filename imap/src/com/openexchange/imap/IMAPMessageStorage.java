@@ -88,7 +88,6 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailConfig;
-import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -108,8 +107,7 @@ import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights;
 
 /**
- * {@link IMAPMessageStorage} - The IMAP specific implementation of
- * {@link MailMessageStorage}
+ * {@link IMAPMessageStorage} - The IMAP implementation of message storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
