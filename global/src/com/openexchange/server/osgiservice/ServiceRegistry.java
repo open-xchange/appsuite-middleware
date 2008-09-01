@@ -53,6 +53,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.openexchange.server.ServiceException;
+
 /**
  * {@link ServiceRegistry} - A registry for needed services
  * 
@@ -127,6 +129,36 @@ public class ServiceRegistry {
 			/*
 			 * Service is not present
 			 */
+			return null;
+		}
+		return clazz.cast(service);
+	}
+
+	/**
+	 * Gets the service defined by given class
+	 * 
+	 * @param <S>
+	 *            The type of service's class
+	 * @param clazz
+	 *            The service's class
+	 * @param errorOnAbsence
+	 *            <code>true</code> to throw an error on service absence;
+	 *            otherwise <code>false</code>
+	 * @return The service if found; otherwise <code>null</code>
+	 * @throws ServiceException
+	 *             If <code>errorOnAbsence</code> is <code>true</code> and
+	 *             service could not be found
+	 */
+	public <S extends Object> S getService(final Class<? extends S> clazz, final boolean errorOnAbsence)
+			throws ServiceException {
+		final Object service = services.get(clazz);
+		if (null == service) {
+			/*
+			 * Service is not present
+			 */
+			if (errorOnAbsence) {
+				throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, clazz.getName());
+			}
 			return null;
 		}
 		return clazz.cast(service);
