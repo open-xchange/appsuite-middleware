@@ -82,11 +82,11 @@ public class UploadException extends AbstractOXException {
 		 */
 		NO_MULTIPART_CONTENT("Header \"content-type\" does not indicate multipart content", Category.CODE_ERROR, 4),
 		/**
-		 * Request rejected because its size (%1$d) exceeds the maximum
-		 * configured size of %2$d
+		 * Request rejected because its size (%1$s) exceeds the maximum
+		 * configured size of %2$s
 		 */
 		MAX_UPLOAD_SIZE_EXCEEDED(
-				"Request rejected because its size (%1$d) exceeds the maximum configured size of %2$d",
+				"Request rejected because its size (%1$s) exceeds the maximum configured size of %2$s",
 				Category.USER_INPUT, 5),
 		/**
 		 * Missing parameter %1$s
