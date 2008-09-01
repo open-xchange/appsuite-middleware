@@ -1160,7 +1160,7 @@ public final class IMAPCommandsCollection {
 	 */
 	public static long[] seqNums2UID(final IMAPFolder imapFolder, final int startSeqNum, final int endSeqNum)
 			throws MessagingException {
-		return _seqNums2UID(imapFolder, new String[] { new StringBuilder(16).append(startSeqNum).append(':').append(
+		return seqNums2UID(imapFolder, new String[] { new StringBuilder(16).append(startSeqNum).append(':').append(
 				endSeqNum).toString() }, endSeqNum - startSeqNum + 1);
 	}
 
@@ -1177,10 +1177,24 @@ public final class IMAPCommandsCollection {
 	 *             If an error occurs in underlying protocol
 	 */
 	public static long[] seqNums2UID(final IMAPFolder imapFolder, final int[] seqNums) throws MessagingException {
-		return _seqNums2UID(imapFolder, IMAPNumArgSplitter.splitSeqNumArg(seqNums, true), seqNums.length);
+		return seqNums2UID(imapFolder, IMAPNumArgSplitter.splitSeqNumArg(seqNums, true), seqNums.length);
 	}
 
-	private static long[] _seqNums2UID(final IMAPFolder imapFolder, final String[] args, final int size)
+	/**
+	 * Detects the corresponding UIDs to message range according to specified
+	 * arguments
+	 * 
+	 * @param imapFolder
+	 *            The IMAP folder
+	 * @param args
+	 *            The arguments
+	 * @param size
+	 *            The number of messages in folder
+	 * @return The corresponding UIDs
+	 * @throws MessagingException
+	 *             If an error occurs in underlying protocol
+	 */
+	public static long[] seqNums2UID(final IMAPFolder imapFolder, final String[] args, final int size)
 			throws MessagingException {
 		return (long[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -1197,6 +1211,7 @@ public final class IMAPCommandsCollection {
 						if (response.isOK()) {
 							for (int j = 0; j < len; j++) {
 								uids[index++] = ((UID) ((FetchResponse) r[j]).getItem(0)).uid;
+								r[j] = null;
 							}
 						}
 					} finally {
