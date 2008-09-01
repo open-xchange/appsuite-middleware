@@ -1,6 +1,7 @@
 * 2008-08-31 - thorben.betten@open-xchange.com
 
- - Partial bugfix #12080: Fixed ordering of parameters in error message
+ - Bugfix #12080: Fixed ordering of parameters in error message and bytes
+   are converted to a human readable string
 
 * 2008-08-29 - thorben.betten@open-xchange.com
 

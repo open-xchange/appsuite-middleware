@@ -99,7 +99,7 @@ import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadFile;
-import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
+import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
@@ -358,7 +358,7 @@ public class Infostore extends PermissionServlet {
 		}
 
 		if (size > maxSize) {
-			throw new UploadException(UploadCode.MAX_UPLOAD_SIZE_EXCEEDED, null, size, maxSize);
+			throw new UploadSizeExceededException(size, maxSize, true);
 		}
 	}
 
