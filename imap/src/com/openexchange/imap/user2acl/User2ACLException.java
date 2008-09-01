@@ -92,7 +92,11 @@ public final class User2ACLException extends AbstractOXException {
 		/**
 		 * Missing IMAP server arguments to resolve IMAP login to a user
 		 */
-		MISSING_ARG("Missing IMAP server arguments to resolve IMAP login to a user", Category.CODE_ERROR, 7);
+		MISSING_ARG("Missing IMAP server arguments to resolve IMAP login to a user", Category.CODE_ERROR, 7),
+		/**
+		 * IMAP login %1$s could not be resolved to a user
+		 */
+		RESOLVE_USER_FAILED("IMAP login %1$s could not be resolved to a user", Category.CODE_ERROR, 8);
 
 		/**
 		 * Category of the exception.
