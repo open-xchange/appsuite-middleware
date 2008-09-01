@@ -156,7 +156,12 @@ public class CachingUserStorage extends UserStorage {
 			final Cache cache = cacheService.getCache(REGION_NAME);
 			final CacheKey key = cache.newCacheKey(context.getContextId(), uid);
 			int identifier = -1;
-			final Integer tmp = (Integer) cache.get(key);
+			Integer tmp;
+			try {
+				tmp = (Integer) cache.get(key);
+			} catch (final ClassCastException e) {
+				tmp = null;
+			}
 			if (null == tmp) {
 				if (LOG.isTraceEnabled()) {
 					LOG.trace("Cache MISS. Context: " + context.getContextId() + " User: " + uid);
@@ -209,27 +214,33 @@ public class CachingUserStorage extends UserStorage {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
+	public int[] resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
 		final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
 		if (null == cacheService) {
 		    return delegate.resolveIMAPLogin(imapLogin, context);
 		}
 		try {
 			final Cache cache = cacheService.getCache(REGION_NAME);
-			final CacheKey key = cache.newCacheKey(context.getContextId(), imapLogin);
-			final int identifier;
-			final Integer tmp = (Integer) cache.get(key);
+			final CacheKey key = cache.newCacheKey(context.getContextId(), new StringBuilder(imapLogin.length() + 1)
+					.append('~').append(imapLogin).toString());
+			final int[] identifiers;
+			int[] tmp;
+			try {
+				tmp = (int[]) cache.get(key);
+			} catch (final ClassCastException e) {
+				tmp = null;
+			}
 			if (null == tmp) {
-			    identifier = delegate.resolveIMAPLogin(imapLogin, context);
+			    identifiers = delegate.resolveIMAPLogin(imapLogin, context);
 				try {
-					cache.put(key, Integer.valueOf(identifier));
+					cache.put(key, identifiers);
 				} catch (final CacheException e) {
 					throw new UserException(UserException.Code.CACHE_PROBLEM, e);
 				}
 			} else {
-				identifier = tmp.intValue();
+				identifiers = tmp;
 			}
-			return identifier;
+			return identifiers;
 		} catch (final CacheException e) {
 			throw new UserException(UserException.Code.CACHE_PROBLEM, e);
 		}

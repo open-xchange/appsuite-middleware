@@ -49,6 +49,8 @@
 
 package com.openexchange.imap.user2acl;
 
+import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
+
 import java.net.InetSocketAddress;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -122,6 +124,9 @@ public class CourierUser2ACL extends User2ACL {
 			return ALIAS_ANYONE;
 		}
 		final Object[] args = user2AclArgs.getArguments(IMAPServer.COURIER);
+		if (args == null || args.length == 0) {
+			throw new User2ACLException(User2ACLException.Code.MISSING_ARG);
+		}
 		final InetSocketAddress imapAddr = (InetSocketAddress) args[0];
 		final int sessionUser = ((Integer) args[1]).intValue();
 		final String sharedOwner = getSharedFolderOwner((String) args[2], ((Character) args[3]).charValue());
@@ -164,6 +169,9 @@ public class CourierUser2ACL extends User2ACL {
 			return OCLPermission.ALL_GROUPS_AND_USERS;
 		}
 		final Object[] args = user2AclArgs.getArguments(IMAPServer.COURIER);
+		if (args == null || args.length == 0) {
+			throw new User2ACLException(User2ACLException.Code.MISSING_ARG);
+		}
 		final InetSocketAddress imapAddr = (InetSocketAddress) args[0];
 		final int sessionUser = ((Integer) args[1]).intValue();
 		final String sharedOwner = getSharedFolderOwner((String) args[2], ((Character) args[3]).charValue());
@@ -199,7 +207,17 @@ public class CourierUser2ACL extends User2ACL {
 			/*
 			 * Find user name by user's imap login
 			 */
-			return UserStorage.getInstance().resolveIMAPLogin(pattern, ctx);
+			final UserStorage us = UserStorage.getInstance();
+			final int[] ids = us.resolveIMAPLogin(pattern, ctx);
+			if (ids.length == 1) {
+				return ids[0];
+			}
+			for (final int id : ids) {
+				if (imapAddr.equals(toSocketAddr(MailConfig.getMailServerURL(us.getUser(id, ctx)), 143))) {
+					return id;
+				}
+			}
+			throw new User2ACLException(User2ACLException.Code.RESOLVE_USER_FAILED, pattern);
 		}
 		/*
 		 * Find by name

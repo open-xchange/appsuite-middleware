@@ -129,17 +129,17 @@ public interface UserService {
 	public int[] listAllUser(Context context) throws UserException;
 
 	/**
-	 * Searches for a user whose IMAP login name matches the given login name.
+	 * Searches for users whose IMAP login name matches the given login name.
 	 * 
 	 * @param imapLogin
 	 *            the IMAP login name to search for
 	 * @param context
 	 *            The context.
-	 * @return The unique identifier of the user.
+	 * @return The unique identifiers of the users.
 	 * @throws UserException
 	 *             if an error occurs during the search.
 	 */
-	public int resolveIMAPLogin(String imapLogin, Context context) throws UserException;
+	public int[] resolveIMAPLogin(String imapLogin, Context context) throws UserException;
 
 	/**
 	 * Searches users who where modified later than the given date.

@@ -49,6 +49,10 @@
 
 package com.openexchange.imap.user2acl;
 
+import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
+
+import java.net.InetSocketAddress;
+
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -105,7 +109,27 @@ public final class CyrusUser2ACL extends User2ACL {
 			/*
 			 * Find user name by user's imap login
 			 */
-			return UserStorage.getInstance().resolveIMAPLogin(pattern, ctx);
+			final UserStorage us = UserStorage.getInstance();
+			final int[] ids = us.resolveIMAPLogin(pattern, ctx);
+			if (ids.length == 1) {
+				return ids[0];
+			}
+			final Object[] args = user2AclArgs.getArguments(IMAPServer.CYRUS);
+			if (args == null || args.length == 0) {
+				throw new User2ACLException(User2ACLException.Code.MISSING_ARG);
+			}
+			final InetSocketAddress imapAddr;
+			try {
+				imapAddr = (InetSocketAddress) args[0];
+			} catch (final ClassCastException e) {
+				throw new User2ACLException(User2ACLException.Code.MISSING_ARG, e, new Object[0]);
+			}
+			for (final int id : ids) {
+				if (imapAddr.equals(toSocketAddr(MailConfig.getMailServerURL(us.getUser(id, ctx)), 143))) {
+					return id;
+				}
+			}
+			throw new User2ACLException(User2ACLException.Code.RESOLVE_USER_FAILED, pattern);
 		}
 		/*
 		 * Find by name

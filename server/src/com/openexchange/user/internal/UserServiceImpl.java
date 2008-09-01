@@ -105,7 +105,7 @@ public final class UserServiceImpl implements UserService {
 		}
 	}
 
-	public int resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
+	public int[] resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
 	    return UserStorage.getInstance().resolveIMAPLogin(imapLogin, context);
 	}
 

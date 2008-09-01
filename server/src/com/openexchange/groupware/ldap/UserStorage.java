@@ -222,13 +222,13 @@ public abstract class UserStorage {
     public abstract int[] listAllUser(Context context) throws UserException;
 
     /**
-     * Searches for a user whose IMAP login name matches the given login name.
+     * Searches for users whose IMAP login name matches the given login name.
      * @param imapLogin the IMAP login name to search for
      * @param context The context.
-     * @return The unique identifier of the user.
+     * @return The unique identifiers of the users.
      * @throws UserException if an error occurs during the search. 
      */
-    public abstract int resolveIMAPLogin(String imapLogin, Context context) throws UserException;
+    public abstract int[] resolveIMAPLogin(String imapLogin, Context context) throws UserException;
 
     /**
      * Performs internal start-up

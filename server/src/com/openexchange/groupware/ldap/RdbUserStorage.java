@@ -71,6 +71,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException.Code;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.tools.Collections.SmartIntArray;
 
 /**
  * This class implements the user storage using a relational database instead
@@ -572,14 +573,14 @@ public class RdbUserStorage extends UserStorage {
      * {@inheritDoc}
      */
     @Override
-    public int resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
+    public int[] resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
             throw new UserException(UserException.Code.NO_CONNECTION, e);
         }
-        final int user;
+        final int[] users;
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -588,16 +589,16 @@ public class RdbUserStorage extends UserStorage {
             stmt.setInt(1, cid);
             stmt.setString(2, imapLogin);
             result = stmt.executeQuery();
+            final SmartIntArray sia = new SmartIntArray(4);
             if (result.next()) {
-                user = result.getInt(1);
-            } else {
+				do {
+					sia.append(result.getInt(1));
+				} while (result.next());
+			} else {
                 throw new UserException(UserException.Code.USER_NOT_FOUND,
-                    imapLogin, Integer.valueOf(cid));
+                        imapLogin, Integer.valueOf(cid));
             }
-            if (result.next()) {
-                throw new UserException(UserException.Code.USER_CONFLICT,
-                    imapLogin, Integer.valueOf(cid));
-            }
+            users = sia.toArray();
         } catch (final SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e, e
                 .getMessage());
@@ -605,7 +606,7 @@ public class RdbUserStorage extends UserStorage {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
         }
-        return user;
+        return users;
     }
 
 	/**
