@@ -114,6 +114,7 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
+import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailException;
@@ -3194,8 +3195,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 				final UploadFile uploadFile = iter.next();
 				if (uploadQuotaPerFile > 0 && uploadFile.getSize() > uploadQuotaPerFile) {
 					final MailException oxme = new MailException(MailException.Code.UPLOAD_QUOTA_EXCEEDED_FOR_FILE,
-							Long.valueOf(uploadQuotaPerFile), uploadFile.getPreparedFileName(), Long.valueOf(uploadFile
-									.getSize()));
+							UploadUtility.getSize(uploadQuotaPerFile, 2, false, true),
+							uploadFile.getPreparedFileName(), UploadUtility.getSize(uploadFile.getSize(), 2, false,
+									true));
 					JSONObject responseObj = null;
 					try {
 						final Response response = new Response();
@@ -3213,8 +3215,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 				 */
 				totalSize += uploadFile.getSize();
 				if (uploadQuota > 0 && totalSize > uploadQuota) {
-					final MailException me = new MailException(MailException.Code.UPLOAD_QUOTA_EXCEEDED, Long
-							.valueOf(uploadQuota));
+					final MailException me = new MailException(MailException.Code.UPLOAD_QUOTA_EXCEEDED, UploadUtility
+							.getSize(uploadQuota, 2, false, true));
 					JSONObject responseObj = null;
 					try {
 						final Response response = new Response();
