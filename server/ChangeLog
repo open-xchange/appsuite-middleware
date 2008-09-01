@@ -8,6 +8,7 @@
    IDs since multiple IMAP servers are allowed in one context.
  - Bugfix #4199: Checking for possible null reference prior to updating
    message cache
+ - Bugfix #9607: Setting proper end date in notification mail to participant
 
 * 2008-08-31 - thorben.betten@open-xchange.com
 

@@ -327,7 +327,15 @@ public class RecurringCalculation {
      * @param until a <code>long</code>
      */
     public void setUntil(final long until) {
-        this.e = until;
+    	if (e > 0) {
+    		/*
+    		 * Add day offset
+    		 */
+    		e = until + (e % CalendarRecurringCollection.MILLI_DAY);
+    	} else {
+    		e = until;
+    	}
+        //this.e = until;
         this.until = until;
         contains_until = true;
     }

@@ -84,11 +84,16 @@ public class CalendarDataObject extends AppointmentObject {
     private boolean fill_folder_id;
 
     @Override
-    public final void setUntil(Date until) {
+    public final void setUntil(final Date until) {
         if (until != null) {
             final long mod = until.getTime()%CalendarRecurringCollection.MILLI_DAY;
             if (mod != 0) {
-                until = new Date(((until.getTime()-mod)+CalendarRecurringCollection.MILLI_DAY));
+            	if (CalendarRecurringCollection.exceedsHourOfDay(until.getTime(), getTimezone())) {
+					until.setTime((((until.getTime() - mod) + CalendarRecurringCollection.MILLI_DAY)));
+				} else {
+					until.setTime(until.getTime() - mod);
+				}
+//                until = new Date(((until.getTime()-mod)+CalendarRecurringCollection.MILLI_DAY));
             }
             super.setUntil(until);
         }
