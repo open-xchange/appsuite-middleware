@@ -203,8 +203,6 @@ public class CourierUser2ACL extends User2ACL {
 
 	private final int getUserIDInternal(final String pattern, final Context ctx, final InetSocketAddress imapAddr)
 			throws AbstractOXException {
-		// TODO: Handle the possibility of multiple user IDs since multiple IMAP
-		// servers are supported
 		final UserService userService = getServiceRegistry().getService(UserService.class, true);
 		if (LoginType.USER.equals(MailConfig.getLoginType()) && CredSrc.USER_IMAPLOGIN.equals(MailConfig.getCredSrc())) {
 			/*
