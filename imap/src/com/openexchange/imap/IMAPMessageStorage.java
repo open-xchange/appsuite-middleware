@@ -259,7 +259,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				}
 			}
 			if (filter == null && MailSortField.RECEIVED_DATE.equals(sortField) && onlyFolderAndID(fields)) {
-				return performAllFetch(fullname, order);
+				return performAllFetch(fullname, order, indexRange);
 			}
 			final MailFields usedFields = new MailFields();
 			Message[] msgs = IMAPSort.sortMessages(imapFolder, filter, fields, sortField, order, UserStorage
@@ -1039,7 +1039,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 	 * @throws MessagingException
 	 *             If a messaging error occurs
 	 */
-	private MailMessage[] performAllFetch(final String fullname, final OrderDirection order) throws MessagingException {
+	private MailMessage[] performAllFetch(final String fullname, final OrderDirection order, final IndexRange indexRange)
+			throws MessagingException {
 		/*
 		 * Perform simple fetch
 		 */
@@ -1050,7 +1051,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			LOG.debug(new StringBuilder(128).append("IMAP all fetch >>>FETCH 1:* (UID)<<< took ").append(
 					(System.currentTimeMillis() - start)).append("msec").toString());
 		}
-		final MailMessage[] retval = new MailMessage[uids.length];
+		if (uids == null || uids.length == 0) {
+			return EMPTY_RETVAL;
+		}
+		MailMessage[] retval = new MailMessage[uids.length];
 		if (OrderDirection.ASC.equals(order)) {
 			int index = 0;
 			for (int i = uids.length - 1; i >= 0; i--) {
@@ -1060,6 +1064,29 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			for (int i = 0; i < uids.length; i++) {
 				retval[i] = new IDMailMessage(uids[i], fullname);
 			}
+		}
+		if (indexRange != null) {
+			final int fromIndex = indexRange.start;
+			int toIndex = indexRange.end;
+			if (retval.length == 0) {
+				return EMPTY_RETVAL;
+			}
+			if ((fromIndex) > retval.length) {
+				/*
+				 * Return empty iterator if start is out of range
+				 */
+				return EMPTY_RETVAL;
+			}
+			/*
+			 * Reset end index if out of range
+			 */
+			if (toIndex >= retval.length) {
+				toIndex = retval.length;
+			}
+			final MailMessage[] tmp = retval;
+			final int retvalLength = toIndex - fromIndex;
+			retval = new MailMessage[retvalLength];
+			System.arraycopy(tmp, fromIndex, retval, 0, retvalLength);
 		}
 		return retval;
 	}
