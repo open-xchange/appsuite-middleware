@@ -86,7 +86,7 @@ public final class UploadSizeExceededException extends UploadException {
 	}
 
 	/**
-	 * Initializes a new UploadSizeExceededException
+	 * Initializes a new {@link UploadSizeExceededException}
 	 * 
 	 * @param size
 	 *            The actual size in bytes
