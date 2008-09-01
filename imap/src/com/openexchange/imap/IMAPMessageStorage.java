@@ -259,29 +259,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				}
 			}
 			if (filter == null && MailSortField.RECEIVED_DATE.equals(sortField) && onlyFolderAndID(fields)) {
-				/*
-				 * Perform simple fetch
-				 */
-				final long start = System.currentTimeMillis();
-				final long[] uids = IMAPCommandsCollection.seqNums2UID(imapFolder, ARGS_ALL, imapFolder
-						.getMessageCount());
-				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-				if (LOG.isDebugEnabled()) {
-					LOG.debug(new StringBuilder(128).append("IMAP all fetch >>>FETCH 1:* (UID)<<< took ").append(
-							(System.currentTimeMillis() - start)).append("msec").toString());
-				}
-				final MailMessage[] retval = new MailMessage[uids.length];
-				if (OrderDirection.ASC.equals(order)) {
-					int index = 0;
-					for (int i = uids.length - 1; i >= 0; i--) {
-						retval[index++] = new IDMailMessage(uids[i], fullname);
-					}
-				} else {
-					for (int i = 0; i < uids.length; i++) {
-						retval[i] = new IDMailMessage(uids[i], fullname);
-					}
-				}
-				return retval;
+				return performAllFetch(fullname, order);
 			}
 			final MailFields usedFields = new MailFields();
 			Message[] msgs = IMAPSort.sortMessages(imapFolder, filter, fields, sortField, order, UserStorage
@@ -1048,6 +1026,43 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 	/*
 	 * +++++++++++++++++ Helper methods +++++++++++++++++++
 	 */
+
+	/**
+	 * Performs the FETCH command on currently active IMAP folder on all
+	 * messages using the 1:* sequence range argument.
+	 * 
+	 * @param fullname
+	 *            The IMAP folder's fullname
+	 * @param order
+	 *            The order direction (needed to possibly flip the results)
+	 * @return The fetched mail messages with only ID and folder ID set.
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 */
+	private MailMessage[] performAllFetch(final String fullname, final OrderDirection order) throws MessagingException {
+		/*
+		 * Perform simple fetch
+		 */
+		final long start = System.currentTimeMillis();
+		final long[] uids = IMAPCommandsCollection.seqNums2UID(imapFolder, ARGS_ALL, imapFolder.getMessageCount());
+		mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(new StringBuilder(128).append("IMAP all fetch >>>FETCH 1:* (UID)<<< took ").append(
+					(System.currentTimeMillis() - start)).append("msec").toString());
+		}
+		final MailMessage[] retval = new MailMessage[uids.length];
+		if (OrderDirection.ASC.equals(order)) {
+			int index = 0;
+			for (int i = uids.length - 1; i >= 0; i--) {
+				retval[index++] = new IDMailMessage(uids[i], fullname);
+			}
+		} else {
+			for (int i = 0; i < uids.length; i++) {
+				retval[i] = new IDMailMessage(uids[i], fullname);
+			}
+		}
+		return retval;
+	}
 
 	private static boolean onlyFolderAndID(final MailField[] fields) {
 		if (fields.length != 2) {
