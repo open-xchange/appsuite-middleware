@@ -53,17 +53,17 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
 /**
- * UploadException
- *
+ * {@link UploadException} - Indicates an error during an upload.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
-public final class UploadException extends AbstractOXException {
+public class UploadException extends AbstractOXException {
 
 	private static final long serialVersionUID = 8590042770250274015L;
-	
+
 	private final String action;
-	
+
 	public static enum UploadCode {
 		/**
 		 * File upload failed: %1$s
@@ -80,15 +80,15 @@ public final class UploadException extends AbstractOXException {
 		/**
 		 * Header "content-type" does not indicate multipart content
 		 */
-		NO_MULTIPART_CONTENT("Header \"content-type\" does not indicate multipart content", Category.CODE_ERROR,
-				4),
+		NO_MULTIPART_CONTENT("Header \"content-type\" does not indicate multipart content", Category.CODE_ERROR, 4),
 		/**
-		 * Request rejected because its size (%1$d) exceeds the maximum configured
-		 * size of %2$d
+		 * Request rejected because its size (%1$d) exceeds the maximum
+		 * configured size of %2$d
 		 */
-		MAX_UPLOAD_SIZE_EXCEEDED("Request rejected because its size (%1$d) exceeds the maximum configured size of %2$d",
+		MAX_UPLOAD_SIZE_EXCEEDED(
+				"Request rejected because its size (%1$d) exceeds the maximum configured size of %2$d",
 				Category.USER_INPUT, 5),
-		/**		
+		/**
 		 * Missing parameter %1$s
 		 */
 		MISSING_PARAM("Missing parameter %1$s", Category.CODE_ERROR, 6),
@@ -109,9 +109,11 @@ public final class UploadException extends AbstractOXException {
 		 */
 		FILE_NOT_FOUND("Upload file with id %1$s could not be found", Category.CODE_ERROR, 10),
 		/**
-		 * Upload file's content type "%1$s" does not fit to given file filter "%2$s"
+		 * Upload file's content type "%1$s" does not fit to given file filter
+		 * "%2$s"
 		 */
-		INVALID_FILE_TYPE("Upload file's content type \"%1$s\" does not fit to given file filter \"%2$s\"", Category.CODE_ERROR, 11);
+		INVALID_FILE_TYPE("Upload file's content type \"%1$s\" does not fit to given file filter \"%2$s\"",
+				Category.CODE_ERROR, 11);
 
 		private final String message;
 
@@ -137,7 +139,7 @@ public final class UploadException extends AbstractOXException {
 			return message;
 		}
 	}
-	
+
 	public UploadException(final AbstractOXException cause, final String action) {
 		super(cause);
 		this.action = action;
@@ -148,19 +150,19 @@ public final class UploadException extends AbstractOXException {
 		super.setMessageArgs(cause.getMessage());
 		this.action = action;
 	}
-	
+
 	public UploadException(final UploadCode uploadCode, final String action, final Object... messageArgs) {
 		super(EnumComponent.UPLOAD, uploadCode.category, uploadCode.detailNumber, uploadCode.message, null);
 		super.setMessageArgs(messageArgs);
 		this.action = action;
 	}
-	
+
 	public UploadException(final UploadCode uploadCode, final String action) {
 		super(EnumComponent.UPLOAD, uploadCode.category, uploadCode.detailNumber, uploadCode.message, null);
 		super.setMessageArgs(new Object[0]);
 		this.action = action;
 	}
-	
+
 	public String getAction() {
 		return action;
 	}
