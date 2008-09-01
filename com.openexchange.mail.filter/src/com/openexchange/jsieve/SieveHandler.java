@@ -356,7 +356,7 @@ public class SieveHandler {
         boolean firstread = true;
         while (true) {
             final String temp = bis_sieve.readLine();
-            if (temp.endsWith(SIEVE_OK)) {
+            if (temp.startsWith(SIEVE_OK)) {
                 // We have to strip off the last trailing CRLF...
                 final String returnstring = sb.substring(0, sb.length() - 2);
                 script = new byte[returnstring.length()];
@@ -396,7 +396,7 @@ public class SieveHandler {
         final ArrayList<String> list = new ArrayList<String>();
         while (true) {
             final String temp = bis_sieve.readLine();
-            if (temp.endsWith(SIEVE_OK)) {
+            if (temp.startsWith(SIEVE_OK)) {
                 return list;
             }
             if (temp.startsWith(SIEVE_NO)) {
@@ -430,7 +430,7 @@ public class SieveHandler {
         String scriptname = null;
         while (true) {
             final String temp = bis_sieve.readLine();
-            if (temp.endsWith(SIEVE_OK)) {
+            if (temp.startsWith(SIEVE_OK)) {
                 return scriptname;
             }
             if (temp.startsWith(SIEVE_NO)) {
@@ -498,7 +498,7 @@ public class SieveHandler {
 
         while (true) {
             final String test = bis_sieve.readLine();
-            if (test.endsWith(SIEVE_OK)) {
+            if (test.startsWith(SIEVE_OK)) {
                 return true;
             } else if (test.startsWith(SIEVE_NO)) {
                 AUTH = false;
@@ -524,7 +524,7 @@ public class SieveHandler {
         while (true) {
             final String temp = bis_sieve.readLine();
             if (null != temp) {
-                if (temp.endsWith(SIEVE_OK)) {
+                if (temp.startsWith(SIEVE_OK)) {
                     AUTH = true;
                     return true;
                 } else if (temp.startsWith(SIEVE_NO)) {
