@@ -876,7 +876,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 	
 	public static abstract class LinkableState implements State {
 		
-		protected static Template object_link_template;
+		protected static volatile Template object_link_template;
 		private static String hostname;
 		private static UnknownHostException warnSpam;
 		static {
