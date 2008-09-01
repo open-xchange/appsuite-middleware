@@ -58,8 +58,8 @@ import com.openexchange.caching.Statistics;
 import com.openexchange.caching.internal.jcs2cache.JCSStatsDelegator;
 
 /**
- * {@link CacheStatistics2JCS} - The {@link CacheStatistics} implementation backed by
- * a {@link ICacheStats} object.
+ * {@link CacheStatistics2JCS} - The {@link CacheStatistics} implementation
+ * backed by a {@link ICacheStats} object.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -106,6 +106,11 @@ public final class CacheStatistics2JCS extends Statistics2JCS implements CacheSt
 
 	public void setRegionName(final String name) {
 		((ICacheStats) super.stats).setRegionName(name);
+	}
+
+	@Override
+	public String toString() {
+		return stats.toString();
 	}
 
 }
