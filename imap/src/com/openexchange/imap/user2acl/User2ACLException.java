@@ -65,29 +65,34 @@ public final class User2ACLException extends AbstractOXException {
 		/**
 		 * Implementing class could not be found
 		 */
-		CLASS_NOT_FOUND("Implementing class could not be found", Category.CODE_ERROR, 2),
+		CLASS_NOT_FOUND("Implementing class could not be found", Category.CODE_ERROR, 1),
 		/**
 		 * An I/O error occurred while creating the socket connection to IMAP
 		 * server (%1$s): %2$s
 		 */
-		CREATING_SOCKET_FAILED("An I/O error occurred while creating the socket connection to IMAP server (%1$s): %2$s",
-				Category.SUBSYSTEM_OR_SERVICE_DOWN, 5),
+		CREATING_SOCKET_FAILED(
+				"An I/O error occurred while creating the socket connection to IMAP server (%1$s): %2$s",
+				Category.SUBSYSTEM_OR_SERVICE_DOWN, 2),
 		/**
 		 * Instantiating the class failed.
 		 */
-		INSTANTIATION_FAILED("Instantiating the class failed.", Category.CODE_ERROR, 1),
+		INSTANTIATION_FAILED("Instantiating the class failed.", Category.CODE_ERROR, 3),
 		/**
 		 * An I/O error occurred: %1$s
 		 */
-		IO_ERROR("An I/O error occurred: %1$s", Category.SUBSYSTEM_OR_SERVICE_DOWN, 6),
+		IO_ERROR("An I/O error occurred: %1$s", Category.SUBSYSTEM_OR_SERVICE_DOWN, 4),
 		/**
 		 * Missing property %1$s in system.properties.
 		 */
-		MISSING_SETTING("Missing property %1$s in imap.properties.", Category.SETUP_ERROR, 3),
+		MISSING_SETTING("Missing property %1$s in imap.properties.", Category.SETUP_ERROR, 5),
 		/**
 		 * Unknown IMAP server: %1$s
 		 */
-		UNKNOWN_IMAP_SERVER("Unknown IMAP server: %1$s", Category.CODE_ERROR, 4);
+		UNKNOWN_IMAP_SERVER("Unknown IMAP server: %1$s", Category.CODE_ERROR, 6),
+		/**
+		 * Missing IMAP server arguments to resolve IMAP login to a user
+		 */
+		MISSING_ARG("Missing IMAP server arguments to resolve IMAP login to a user", Category.CODE_ERROR, 7);
 
 		/**
 		 * Category of the exception.
