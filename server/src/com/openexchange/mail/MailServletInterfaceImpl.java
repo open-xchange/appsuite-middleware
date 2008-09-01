@@ -418,21 +418,23 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		}
 		final String fullname = prepareMailFolderParam(folder);
 		final MailMessage mail = mailAccess.getMessageStorage().getMessage(fullname, msgUID, true);
-		/*
-		 * Update cache since \Seen flag is possibly changed
-		 */
-		try {
-			if (MailMessageCache.getInstance().containsFolderMessages(fullname, session.getUserId(), ctx)) {
-				/*
-				 * Update cache entry
-				 */
-				MailMessageCache.getInstance().updateCachedMessages(new long[] { mail.getMailId() }, fullname,
-						session.getUserId(), ctx, FIELDS_FLAGS,
-						mail.isSeen() ? ARGS_FLAG_SEEN_SET : ARGS_FLAG_SEEN_UNSET);
+		if (mail != null) {
+			/*
+			 * Update cache since \Seen flag is possibly changed
+			 */
+			try {
+				if (MailMessageCache.getInstance().containsFolderMessages(fullname, session.getUserId(), ctx)) {
+					/*
+					 * Update cache entry
+					 */
+					MailMessageCache.getInstance().updateCachedMessages(new long[] { mail.getMailId() }, fullname,
+							session.getUserId(), ctx, FIELDS_FLAGS,
+							mail.isSeen() ? ARGS_FLAG_SEEN_SET : ARGS_FLAG_SEEN_UNSET);
 
+				}
+			} catch (final OXCachingException e) {
+				LOG.error(e.getLocalizedMessage(), e);
 			}
-		} catch (final OXCachingException e) {
-			LOG.error(e.getLocalizedMessage(), e);
 		}
 		return mail;
 	}
