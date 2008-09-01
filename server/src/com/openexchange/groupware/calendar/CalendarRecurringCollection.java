@@ -382,8 +382,7 @@ public final class CalendarRecurringCollection {
 	 * @return The normalized <code>long</code> value
 	 */
 	public static long normalizeLong(final long l) {
-		final long mod = l % MILLI_DAY;
-		return mod == 0 ? l : l - mod;
+		return l - (l % MILLI_DAY);
 	}
 
 	/**
