@@ -89,6 +89,7 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailMessageStorage;
+import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -236,6 +237,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		}
 	}
 
+	private static final String[] ARGS_ALL = { "1:*" };
+
 	@Override
 	public MailMessage[] searchMessages(final String fullname, final IndexRange indexRange,
 			final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm,
@@ -256,6 +259,31 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				if ((filter == null) || (filter.length == 0)) {
 					return EMPTY_RETVAL;
 				}
+			}
+			if (filter == null && MailSortField.RECEIVED_DATE.equals(sortField) && onlyFolderAndID(fields)) {
+				/*
+				 * Perform simple fetch
+				 */
+				final long start = System.currentTimeMillis();
+				final long[] uids = IMAPCommandsCollection.seqNums2UID(imapFolder, ARGS_ALL, imapFolder
+						.getMessageCount());
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder(128).append("IMAP all fetch >>>FETCH 1:* (UID)<<< took ").append(
+							(System.currentTimeMillis() - start)).append("msec").toString());
+				}
+				final MailMessage[] retval = new MailMessage[uids.length];
+				if (OrderDirection.ASC.equals(order)) {
+					int index = 0;
+					for (int i = uids.length - 1; i >= 0; i--) {
+						retval[index++] = new IDMailMessage(uids[i], fullname);
+					}
+				} else {
+					for (int i = 0; i < uids.length; i++) {
+						retval[i] = new IDMailMessage(uids[i], fullname);
+					}
+				}
+				return retval;
 			}
 			final MailFields usedFields = new MailFields();
 			Message[] msgs = IMAPSort.sortMessages(imapFolder, filter, fields, sortField, order, UserStorage
@@ -1022,6 +1050,21 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 	/*
 	 * +++++++++++++++++ Helper methods +++++++++++++++++++
 	 */
+
+	private static boolean onlyFolderAndID(final MailField[] fields) {
+		if (fields.length != 2) {
+			return false;
+		}
+		int stat = 0;
+		for (final MailField mailField : fields) {
+			if (MailField.ID.equals(mailField)) {
+				stat |= 1;
+			} else if (MailField.FOLDER_ID.equals(mailField)) {
+				stat |= 2;
+			}
+		}
+		return (stat == 3);
+	}
 
 	private static int createThreadSortMessages(final List<TreeNode> threadList, final int level, final Message[] msgs,
 			final int indexArg) {
