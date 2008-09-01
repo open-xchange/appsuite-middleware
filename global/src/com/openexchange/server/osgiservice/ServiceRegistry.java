@@ -144,7 +144,8 @@ public class ServiceRegistry {
 	 * @param errorOnAbsence
 	 *            <code>true</code> to throw an error on service absence;
 	 *            otherwise <code>false</code>
-	 * @return The service if found; otherwise <code>null</code>
+	 * @return The service if found; otherwise <code>null</code> if
+	 *         <code>errorOnAbsence</code> is <code>false</code>
 	 * @throws ServiceException
 	 *             If <code>errorOnAbsence</code> is <code>true</code> and
 	 *             service could not be found
