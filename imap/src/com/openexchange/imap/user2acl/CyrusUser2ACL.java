@@ -49,17 +49,18 @@
 
 package com.openexchange.imap.user2acl;
 
+import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
 import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
 
 import java.net.InetSocketAddress;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailConfig.CredSrc;
 import com.openexchange.mail.api.MailConfig.LoginType;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.user.UserService;
 
 /**
  * {@link CyrusUser2ACL} - Handles the ACL entities used by Cyrus IMAP server.
@@ -93,10 +94,11 @@ public final class CyrusUser2ACL extends User2ACL {
 		if (userId == OCLPermission.ALL_GROUPS_AND_USERS) {
 			return AUTH_ID_ANYONE;
 		}
+		final UserService userService = getServiceRegistry().getService(UserService.class, true);
 		if (LoginType.USER.equals(MailConfig.getLoginType()) && CredSrc.USER_IMAPLOGIN.equals(MailConfig.getCredSrc())) {
-			return UserStorage.getInstance().getUser(userId, ctx).getImapLogin();
+			return userService.getUser(userId, ctx).getImapLogin();
 		}
-		return UserStorage.getInstance().getUser(userId, ctx).getLoginInfo();
+		return userService.getUser(userId, ctx).getLoginInfo();
 	}
 
 	@Override
@@ -105,12 +107,12 @@ public final class CyrusUser2ACL extends User2ACL {
 		if (AUTH_ID_ANYONE.equalsIgnoreCase(pattern)) {
 			return OCLPermission.ALL_GROUPS_AND_USERS;
 		}
+		final UserService userService = getServiceRegistry().getService(UserService.class, true);
 		if (LoginType.USER.equals(MailConfig.getLoginType()) && CredSrc.USER_IMAPLOGIN.equals(MailConfig.getCredSrc())) {
 			/*
 			 * Find user name by user's imap login
 			 */
-			final UserStorage us = UserStorage.getInstance();
-			final int[] ids = us.resolveIMAPLogin(pattern, ctx);
+			final int[] ids = userService.resolveIMAPLogin(pattern, ctx);
 			if (ids.length == 1) {
 				return ids[0];
 			}
@@ -125,7 +127,7 @@ public final class CyrusUser2ACL extends User2ACL {
 				throw new User2ACLException(User2ACLException.Code.MISSING_ARG, e, new Object[0]);
 			}
 			for (final int id : ids) {
-				if (imapAddr.equals(toSocketAddr(MailConfig.getMailServerURL(us.getUser(id, ctx)), 143))) {
+				if (imapAddr.equals(toSocketAddr(MailConfig.getMailServerURL(userService.getUser(id, ctx)), 143))) {
 					return id;
 				}
 			}
@@ -134,7 +136,7 @@ public final class CyrusUser2ACL extends User2ACL {
 		/*
 		 * Find by name
 		 */
-		return UserStorage.getInstance().getUserId(pattern, ctx);
+		return userService.getUserId(pattern, ctx);
 	}
 
 }

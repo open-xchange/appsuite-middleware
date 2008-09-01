@@ -63,6 +63,7 @@ import com.openexchange.imap.IMAPProvider;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.user.UserService;
 
 /**
  * {@link IMAPActivator}
@@ -91,7 +92,8 @@ public final class IMAPActivator extends DeferredActivator {
 		dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
 	}
 
-	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, CacheService.class };
+	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, CacheService.class,
+			UserService.class };
 
 	@Override
 	protected Class<?>[] getNeededServices() {

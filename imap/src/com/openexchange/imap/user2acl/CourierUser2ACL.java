@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.user2acl;
 
+import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
 import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
 
 import java.net.InetSocketAddress;
@@ -57,11 +58,11 @@ import java.util.regex.Pattern;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailConfig.CredSrc;
 import com.openexchange.mail.api.MailConfig.LoginType;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.user.UserService;
 
 /**
  * {@link CourierUser2ACL} - Handles the ACL entities used by Courier IMAP
@@ -156,10 +157,11 @@ public class CourierUser2ACL extends User2ACL {
 	}
 
 	private final String getACLNameInternal(final int userId, final Context ctx) throws AbstractOXException {
+		final UserService userService = getServiceRegistry().getService(UserService.class, true);
 		if (LoginType.USER.equals(MailConfig.getLoginType()) && CredSrc.USER_IMAPLOGIN.equals(MailConfig.getCredSrc())) {
-			return UserStorage.getInstance().getUser(userId, ctx).getImapLogin();
+			return userService.getUser(userId, ctx).getImapLogin();
 		}
-		return UserStorage.getInstance().getUser(userId, ctx).getLoginInfo();
+		return userService.getUser(userId, ctx).getLoginInfo();
 	}
 
 	@Override
@@ -203,17 +205,17 @@ public class CourierUser2ACL extends User2ACL {
 			throws AbstractOXException {
 		// TODO: Handle the possibility of multiple user IDs since multiple IMAP
 		// servers are supported
+		final UserService userService = getServiceRegistry().getService(UserService.class, true);
 		if (LoginType.USER.equals(MailConfig.getLoginType()) && CredSrc.USER_IMAPLOGIN.equals(MailConfig.getCredSrc())) {
 			/*
 			 * Find user name by user's imap login
 			 */
-			final UserStorage us = UserStorage.getInstance();
-			final int[] ids = us.resolveIMAPLogin(pattern, ctx);
+			final int[] ids = userService.resolveIMAPLogin(pattern, ctx);
 			if (ids.length == 1) {
 				return ids[0];
 			}
 			for (final int id : ids) {
-				if (imapAddr.equals(toSocketAddr(MailConfig.getMailServerURL(us.getUser(id, ctx)), 143))) {
+				if (imapAddr.equals(toSocketAddr(MailConfig.getMailServerURL(userService.getUser(id, ctx)), 143))) {
 					return id;
 				}
 			}
@@ -222,6 +224,6 @@ public class CourierUser2ACL extends User2ACL {
 		/*
 		 * Find by name
 		 */
-		return UserStorage.getInstance().getUserId(pattern, ctx);
+		return userService.getUserId(pattern, ctx);
 	}
 }
