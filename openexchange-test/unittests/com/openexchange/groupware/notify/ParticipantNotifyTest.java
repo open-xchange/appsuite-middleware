@@ -6,7 +6,17 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.text.DateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
@@ -73,7 +83,7 @@ public class ParticipantNotifyTest extends TestCase{
 
     // Bug 7507
 	public void testGenerateLink() {
-		final EmailableParticipant p = new EmailableParticipant(0, 0, null, "", "", null, null, 0, 23); //FolderId: 23
+		final EmailableParticipant p = new EmailableParticipant(0, 0, 0, null, "", "", null, null, 0, 23); //FolderId: 23
 		final Task task = new Task();
 		task.setObjectID(42);
 		final AppointmentObject appointment = new AppointmentObject();
@@ -348,22 +358,22 @@ public class ParticipantNotifyTest extends TestCase{
     // Bug 9950
 
     public void testShouldNotifyOldAndNewParticipants() throws Exception{
-        Participant[] oldParticipants = getParticipants(U(2,4,10),G(),S(), R());
-		Task oldTask = getTask(oldParticipants);
+        final Participant[] oldParticipants = getParticipants(U(2,4,10),G(),S(), R());
+		final Task oldTask = getTask(oldParticipants);
 
-        Participant[] newParticipants = getParticipants(U(4, 8, 10), G(), S(), R());
-        Task newTask = getTask(newParticipants);
+        final Participant[] newParticipants = getParticipants(U(4, 8, 10), G(), S(), R());
+        final Task newTask = getTask(newParticipants);
 
         notify.taskModified(oldTask, newTask, session);
 
-        List<Message> messages = notify.getMessages();
+        final List<Message> messages = notify.getMessages();
 
-        List<String> mailAddresses = new LinkedList<String>();
-        for(Message message : messages) { mailAddresses.addAll(message.addresses); }
+        final List<String> mailAddresses = new LinkedList<String>();
+        for(final Message message : messages) { mailAddresses.addAll(message.addresses); }
 
-        Message msg = messages.get(0);
+        final Message msg = messages.get(0);
 
-        String[] participantNames = parseParticipants( msg );
+        final String[] participantNames = parseParticipants( msg );
 
 		assertNames( mailAddresses, "user1@test.invalid", "user3@test.invalid", "user7@test.invalid", "user9@test.invalid" );
 		assertLanguage( EN , msg );
