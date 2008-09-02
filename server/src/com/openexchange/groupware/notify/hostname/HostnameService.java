@@ -63,19 +63,27 @@ package com.openexchange.groupware.notify.hostname;
 public interface HostnameService {
 
 	/**
-	 * Returns the host name part used in generated links to internal objects:
+	 * Returns the host name part used in generated links to internal objects;
+	 * meaning the replacement for &quot;[hostname]&quot; in URL template
+	 * defined by property &quot;object_link&quot; in properties file
+	 * &quot;notification.properties&quot;.
+	 * <p>
+	 * By default the template looks like:
 	 * 
 	 * <pre>
 	 * http://[hostname]/#m=[module]&amp;i=[object]&amp;f=[folder]
 	 * </pre>
 	 * 
 	 * @param userId
-	 *            The user ID or <code>-1</code> if not available
+	 *            The user ID or a value less than/equal to zero if not
+	 *            available
 	 * @param contextId
-	 *            The context ID or <code>-1</code> if not available
+	 *            The context ID or a value less than/equal to zero if not
+	 *            available
 	 * 
 	 * @return The host name part used in generated links to internal objects or
-	 *         <code>null</code>.
+	 *         <code>null</code> (if user ID and/or context ID could not be
+	 *         resolved or any error occurred).
 	 */
 	public String getHostname(final int userId, final int contextId);
 
