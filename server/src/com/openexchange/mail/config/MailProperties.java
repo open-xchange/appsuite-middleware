@@ -163,6 +163,7 @@ public final class MailProperties {
 				if (!loaded.get()) {
 					loadProperties0();
 					loaded.set(true);
+					loaded.notifyAll();
 				}
 			}
 		}
@@ -177,6 +178,24 @@ public final class MailProperties {
 				if (loaded.get()) {
 					resetFields();
 					loaded.set(false);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Waits for loading this properties.
+	 * 
+	 * @throws InterruptedException
+	 *             If another thread interrupted the current thread before or
+	 *             while the current thread was waiting for loading the
+	 *             properties.
+	 */
+	public void waitForLoading() throws InterruptedException {
+		if (!loaded.get()) {
+			synchronized (loaded) {
+				while (!loaded.get()) {
+					loaded.wait();
 				}
 			}
 		}
