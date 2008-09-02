@@ -389,7 +389,7 @@ public final class CalendarRecurringCollection {
 	}
 
 	/**
-	 * Checks if specified date in increases day in month if adding given time
+	 * Checks if specified UTC date increases day in month if adding given time
 	 * zone's offset.
 	 * 
 	 * @param millis
@@ -404,7 +404,7 @@ public final class CalendarRecurringCollection {
 	}
 
 	/**
-	 * Checks if specified date in increases day in month if adding given time
+	 * Checks if specified UTC date increases day in month if adding given time
 	 * zone's offset.
 	 * 
 	 * @param millis
