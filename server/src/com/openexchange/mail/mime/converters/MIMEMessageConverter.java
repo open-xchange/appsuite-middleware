@@ -1112,10 +1112,10 @@ public final class MIMEMessageConverter {
 						 */
 						{
 							final String[] xPriority = msg.getHeader(MessageHeaders.HDR_X_PRIORITY);
-							if (null != xPriority) {
-								parsePriority(xPriority[0], mailMessage);
-							} else {
+							if (null == xPriority) {
 								mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
+							} else {
+								parsePriority(xPriority[0], mailMessage);
 							}
 						}
 						/*
@@ -1485,20 +1485,20 @@ public final class MIMEMessageConverter {
 			}
 			{
 				final String dispNot = msg.getHeader(MessageHeaders.HDR_DISP_NOT_TO, null);
-				if (dispNot != null) {
-					mail.setDispositionNotification(InternetAddress.parse(dispNot, true)[0]);
-				} else {
+				if (dispNot == null) {
 					mail.setDispositionNotification(null);
+				} else {
+					mail.setDispositionNotification(InternetAddress.parse(dispNot, true)[0]);
 				}
 			}
 			{
 				final String msgrefStr = msg.getHeader(MessageHeaders.HDR_X_OXMSGREF, null);
-				if (msgrefStr != null) {
+				if (msgrefStr == null) {
+					mail.setMsgref(null);
+				} else {
 					mail.setMsgref(new MailPath(msgrefStr));
 					msg.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
 					mail.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
-				} else {
-					mail.setMsgref(null);
 				}
 			}
 			String filename = decodeMultiEncodedHeader(msg.getFileName());
@@ -1510,9 +1510,7 @@ public final class MIMEMessageConverter {
 			}
 			mail.setFileName(filename);
 			parsePriority(mail.getFirstHeader(MessageHeaders.HDR_X_PRIORITY), mail);
-			if (msg.getReceivedDate() != null) {
-				mail.setReceivedDate(msg.getReceivedDate());
-			} else {
+			if (msg.getReceivedDate() == null) {
 				/*
 				 * Check for "Received" header
 				 */
@@ -1544,11 +1542,13 @@ public final class MIMEMessageConverter {
 				 * </pre>
 				 */
 				mail.setReceivedDate(null);
-			}
-			if (msg.getSentDate() != null) {
-				mail.setSentDate(msg.getSentDate());
 			} else {
+				mail.setReceivedDate(msg.getReceivedDate());
+			}
+			if (msg.getSentDate() == null) {
 				mail.setSentDate(null);
+			} else {
+				mail.setSentDate(msg.getSentDate());
 			}
 			mail.setSize(msg.getSize());
 			mail.setSubject(msg.getSubject());
