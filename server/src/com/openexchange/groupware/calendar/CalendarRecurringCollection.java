@@ -471,6 +471,7 @@ public final class CalendarRecurringCollection {
     
     public static String createDSString(final CalendarDataObject cdao) throws OXException {
         if (cdao.containsStartDate()) {
+            checkRecurring(cdao);
             final StringBuilder sb = new StringBuilder(64);
             final int t = cdao.getRecurrenceType();
             int i = cdao.getInterval(); // i

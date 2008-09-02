@@ -196,7 +196,6 @@ public class Appointment extends DataServlet {
 			} else {
 				LOG.error(e.getMessage(), e);
 			}
-
 			response.setException(e);
 		} catch (final SearchIteratorException e) {
 			LOG.error(e.getMessage(), e);

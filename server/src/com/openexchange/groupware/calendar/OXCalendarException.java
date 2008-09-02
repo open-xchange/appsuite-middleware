@@ -92,6 +92,9 @@ public class OXCalendarException extends OXException {
          * Unexpected SQL Error!
          */
         CALENDAR_SQL_ERROR("Unexpected SQL Error!", 5, AbstractOXException.Category.SUBSYSTEM_OR_SERVICE_DOWN),
+        /**
+         * TODO remove this exception. The AJAX interface should already check for a missing last modified.
+         */
         LAST_MODIFIED_IS_NULL("clientLastModified IS NULL. Abort action!", 6, AbstractOXException.Category.CODE_ERROR),
         /**
          * Unexpected exception %d!

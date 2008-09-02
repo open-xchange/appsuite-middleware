@@ -1,3 +1,8 @@
+* 2008-09-02 - marcus.klein@open-xchange.com
+
+ - Bugfix #10859: Added a recurring pattern check before starting a recurring
+   calculation.
+
 * 2008-09-01 - dennis.sieben@open-xchange.com
 
  - Bugfix #12086: Changed endWith checks in SieveHandler to startWith
