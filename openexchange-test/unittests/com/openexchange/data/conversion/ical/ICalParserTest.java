@@ -1052,11 +1052,6 @@ public class ICalParserTest extends TestCase {
         assertErrorWhenParsingAppointment(icalText, "Missing DTSTART");
     }
 
-    public void testAppShouldIncludeErrorOnMissingEndDateAndMissingDuration() throws ConversionError {
-        String icalText = fixtures.veventWithStart(D("24/02/1981 10:00"));
-        assertErrorWhenParsingAppointment(icalText, "DTEND or Duration required");
-    }
-
     public void testAppShouldIncludeErrorOnConfidentialAppointments() throws ConversionError {
         String icalText = fixtures.veventWithSimpleProperties(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "CLASS", "CONFIDENTIAL");
         assertErrorWhenParsingAppointment(icalText, "Cowardly refusing to convert confidential classified objects.");
