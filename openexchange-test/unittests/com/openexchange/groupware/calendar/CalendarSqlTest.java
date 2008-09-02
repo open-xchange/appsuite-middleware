@@ -898,6 +898,35 @@ public class CalendarSqlTest extends TestCase {
 		assertTrue("", conflicts == null || conflicts.length == 0);
 	}
 
+	/**
+	 * Test for <a href=
+	 * "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=11695">bug
+	 * #11695</a>
+	 * 
+	 * @throws OXException
+	 *             If an OX error occurs
+	 */
+	public void testShouldCalculateProperWeeklyRecurrence() throws OXException {
+		final Date start = D("04/09/2008 22:00");
+		final Date end = D("04/09/2008 23:00");
+		// Create Weekly recurrence
+		final CalendarDataObject appointment = appointments.buildBasicAppointment(start, end);
+		appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+		appointment.setDays(CalendarDataObject.MONDAY + CalendarDataObject.FRIDAY);
+		appointment.setTitle("testShouldCalculateProperWeeklyRecurrence");
+		appointment.setInterval(1);
+		appointment.setOccurrence(2);
+		appointments.save(appointment);
+		clean.add(appointment);
+		// Check for 2 occurrences
+		final RecurringResults results = CalendarRecurringCollection.calculateRecurring(appointment, 0, 0, 0);
+		assertEquals("Unexpected size in recurring results of weekly recurrence appointment", 2, results.size());
+		final RecurringResult firstResult = results.getRecurringResult(0);
+		assertEquals("Unexpected first occurrence", D("04/09/2008 22:00").getTime(), firstResult.getStart());
+		final RecurringResult secondResult = results.getRecurringResult(1);
+		assertEquals("Unexpected second occurrence", D("07/09/2008 22:00").getTime(), secondResult.getStart());
+	}
+
     private static int convertCalendarDAY_OF_WEEK2CalendarDataObjectDAY_OF_WEEK(final int calendarDAY_OF_WEEK) {
     	switch (calendarDAY_OF_WEEK) {
     	case Calendar.SUNDAY:
