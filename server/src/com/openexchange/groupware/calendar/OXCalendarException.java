@@ -127,6 +127,9 @@ public class OXCalendarException extends OXException {
         CONTEXT_NOT_SET("Calendar operation: Context not set.", 35, AbstractOXException.Category.CODE_ERROR),
         NO_PERMISSIONS_TO_ATTACH_DETACH("Insufficient rights to attach/detach an attachment to this folder!", 36, AbstractOXException.Category.PERMISSION),
         NO_PERMISSIONS_TO_READ("Insufficient read rights for this folder!", 37, AbstractOXException.Category.PERMISSION),
+        /**
+         * FATAL:: Can not resolve recurrence position because we got neither the recurring position nor a recurring date position
+         */
         UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT("FATAL:: Can not resolve recurrence position because we got neither the recurring position nor a recurring date position", 38, AbstractOXException.Category.INTERNAL_ERROR),
         RECURRING_MISSING_START_DATE("Missing start date, unable to calculate recurring!", 39, AbstractOXException.Category.CODE_ERROR),
         RECURRING_MISSING_DAILY_INTERVAL("Fatal error. (DAILY) Missing or wrong Interval value: %d", 40, AbstractOXException.Category.USER_INPUT),
