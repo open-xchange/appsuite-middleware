@@ -60,7 +60,6 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.cache.SessionCache;
 
 /**
  * {@link SessionImpl} - Implements interface {@link Session}
@@ -83,6 +82,8 @@ public final class SessionImpl implements Session {
 	private final String sessionId;
 
 	private final String secret;
+
+	private final String login;
 
 	private String randomToken;
 
@@ -113,7 +114,8 @@ public final class SessionImpl implements Session {
 	 *            The local IP
 	 */
 	public SessionImpl(final int userId, final String loginName, final String password, final int contextId,
-			final String sessionId, final String secret, final String randomToken, final String localIp) {
+			final String sessionId, final String secret, final String randomToken, final String localIp,
+			final String login) {
 		this.userId = userId;
 		this.loginName = loginName;
 		this.password = password;
@@ -122,6 +124,7 @@ public final class SessionImpl implements Session {
 		this.randomToken = randomToken;
 		this.localIp = localIp;
 		this.contextId = contextId;
+		this.login = login;
 		parameters = new ConcurrentHashMap<String, Object>();
 		managedUploadFiles = new ConcurrentHashMap<String, ManagedUploadFile>();
 	}
@@ -143,6 +146,7 @@ public final class SessionImpl implements Session {
 		this.sessionId = cachedSession.getSessionId();
 		this.secret = cachedSession.getSecret();
 		this.randomToken = cachedSession.getRandomToken();
+		this.login = cachedSession.getLogin();
 		this.localIp = localIP;
 		final Map<String, Serializable> params = cachedSession.getParameters();
 		parameters = new ConcurrentHashMap<String, Object>(params.size());
@@ -155,13 +159,13 @@ public final class SessionImpl implements Session {
 
 	/**
 	 * Creates a new instance of {@link CachedSession} holding this session's
-	 * state and informations ready for being put into {@link SessionCache}.
+	 * state and informations ready for being put into session cache.
 	 * 
 	 * @return An appropriate instance of {@link CachedSession}
 	 */
 	public CachedSession createCachedSession() {
 		return new CachedSession(userId, loginName, password, contextId, sessionId, secret, randomToken, localIp,
-				parameters);
+				login, parameters);
 	}
 
 	public int getContextId() {
@@ -268,6 +272,10 @@ public final class SessionImpl implements Session {
 
 	public String getUserlogin() {
 		return loginName;
+	}
+
+	public String getLogin() {
+		return login;
 	}
 
 	public String getPassword() {

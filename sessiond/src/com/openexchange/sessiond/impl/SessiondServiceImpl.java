@@ -66,8 +66,8 @@ public class SessiondServiceImpl implements SessiondService {
 	}
 
 	public String addSession(final int userId, final String loginName, final String password, final Context context,
-			final String clientHost) throws SessiondException {
-		return SessionHandler.addSession(userId, loginName, password, context, clientHost);
+			final String clientHost, final String login) throws SessiondException {
+		return SessionHandler.addSession(userId, loginName, password, context, clientHost, login);
 	}
 
 	public void changeSessionPassword(final String sessionId, final String newPassword) throws SessiondException {

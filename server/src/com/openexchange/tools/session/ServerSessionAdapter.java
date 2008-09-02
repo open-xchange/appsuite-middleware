@@ -92,4 +92,8 @@ public class ServerSessionAdapter implements ServerSession{
     public Context getContext() {
        return ctx;
     }
+
+	public String getLogin() {
+		return session.getLogin();
+	}
 }

@@ -101,6 +101,8 @@ public class SessionObject implements com.openexchange.session.Session {
 
 	private Session mailSession;
 
+	private String login;
+
 	private final transient Map<String, ManagedUploadFile> ajaxUploadFiles;
 
 	private final Map<String, Object> parameters;
@@ -297,6 +299,14 @@ public class SessionObject implements com.openexchange.session.Session {
 
 	public void removeRandomToken() {
 		randomToken = null;
+	}
+
+	public String getLogin() {
+		return login;
+	}
+
+	public void setLogin(final String login) {
+		this.login = login;
 	}
 
 }

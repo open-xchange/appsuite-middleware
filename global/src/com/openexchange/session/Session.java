@@ -49,8 +49,6 @@
 
 package com.openexchange.session;
 
-import java.io.Serializable;
-
 import com.openexchange.groupware.upload.ManagedUploadFile;
 
 /**
@@ -144,6 +142,13 @@ public interface Session {
 	public String getUserlogin();
 
 	/**
+	 * Gets the full login incl. context information; e.g <code>test@foo</code>
+	 * 
+	 * @return The full login
+	 */
+	public String getLogin();
+
+	/**
 	 * Puts the uploaded file with ID as key and starts timer
 	 * 
 	 * @param id
@@ -176,7 +181,7 @@ public interface Session {
 	 * replaced with given value.
 	 * <p>
 	 * <code>Note</code>: To ensure set parameter will reside in session on
-	 * remote distribution the {@link Serializable} interface should be
+	 * remote distribution the <code>Serializable</code> interface should be
 	 * implemented for specified value.
 	 * 
 	 * @param name

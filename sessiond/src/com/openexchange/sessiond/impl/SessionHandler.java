@@ -167,7 +167,7 @@ public final class SessionHandler {
 	}
 
 	protected static String addSession(final int userId, final String loginName, final String password,
-			final Context context, final String clientHost) throws SessiondException {
+			final Context context, final String clientHost, final String login) throws SessiondException {
 		final int maxSessPerUser = config.getMaxSessionsPerUser();
 		if (maxSessPerUser > 0) {
 			final int size = sessionList.size();
@@ -186,7 +186,7 @@ public final class SessionHandler {
 		final String randomToken = sessionIdGenerator.createRandomId();
 
 		final Session session = new SessionImpl(userId, loginName, password, context.getContextId(), sessionId, secret,
-				randomToken, clientHost);
+				randomToken, clientHost, login);
 
 		LOG.info("Session created. ID: " + sessionId + ", Context: " + context.getContextId() + ", User: " + userId);
 

@@ -321,8 +321,13 @@ public abstract class MailConfig {
 			}
 			return login;
 		}
-		return (session.getUserlogin() != null) && (session.getUserlogin().length() > 0) ? session.getUserlogin()
-				: String.valueOf(session.getUserId());
+		if ((session.getLogin() != null) && (session.getLogin().length() > 0)) {
+			return session.getLogin();
+		}
+		if ((session.getUserlogin() != null) && (session.getUserlogin().length() > 0)) {
+			return session.getUserlogin();
+		}
+		return String.valueOf(session.getUserId());
 	}
 
 	/**

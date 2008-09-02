@@ -399,7 +399,7 @@ public abstract class OXServlet extends WebDavServlet {
 
 			final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
 					SessiondService.class);
-			final String sessionId = sessiondCon.addSession(userId, login, pass, context, ipAddress);
+			final String sessionId = sessiondCon.addSession(userId, username, pass, context, ipAddress, login);
 			session = sessiondCon.getSession(sessionId);
 		} catch (final LoginException e) {
 			if (LoginException.Source.USER == e.getSource()) {

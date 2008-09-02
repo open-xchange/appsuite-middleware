@@ -84,6 +84,8 @@ public final class CachedSession implements Serializable {
 
 	private final String localIp;
 
+	private final String login;
+
 	private final Map<String, Serializable> parameters;
 
 	/**
@@ -105,12 +107,14 @@ public final class CachedSession implements Serializable {
 	 *            The random token
 	 * @param localIp
 	 *            The local IP
+	 * @param login
+	 *            The full login; e.g. <code>test@foo</code>
 	 * @param parameters
 	 *            The session's parameters
 	 */
 	public CachedSession(final int userId, final String loginName, final String password, final int contextId,
 			final String sessionId, final String secret, final String randomToken, final String localIp,
-			final Map<String, Object> parameters) {
+			final String login, final Map<String, Object> parameters) {
 		super();
 		this.userId = userId;
 		this.loginName = loginName;
@@ -120,6 +124,7 @@ public final class CachedSession implements Serializable {
 		this.randomToken = randomToken;
 		this.localIp = localIp;
 		this.contextId = contextId;
+		this.login = login;
 		final Map<String, Serializable> tmpparameters = new HashMap<String, Serializable>(parameters.size());
 		/*
 		 * Only fill with serializable objects
@@ -140,6 +145,15 @@ public final class CachedSession implements Serializable {
 	 */
 	public String getLoginName() {
 		return loginName;
+	}
+
+	/**
+	 * Gets the full login incl. context information; e.g <code>test@foo</code>
+	 * 
+	 * @return The full login
+	 */
+	public String getLogin() {
+		return login;
 	}
 
 	/**

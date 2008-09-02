@@ -189,7 +189,7 @@ public class Login extends AJAXServlet {
 				}
 
 				final String sessionId = sessiondService.addSession(userId, username, password, context, req
-						.getRemoteAddr());
+						.getRemoteAddr(), name);
 				session = sessiondService.getSession(sessionId);
 
 				try {
