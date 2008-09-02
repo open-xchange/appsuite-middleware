@@ -354,13 +354,12 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
-		
 		Date modified = loadAppointment.getLastModified();
+        appointmentObj.setObjectID(objectId);
+        appointmentObj.setUntil(until);
+        compareObject(appointmentObj, loadAppointment);
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, modified, recurrenceDatePosition, getHostName(), getLogin(), getPassword());
-		
-		appointmentObj.setObjectID(objectId);
-		appointmentObj.setUntil(until);
 		appointmentObj.setDeleteExceptions(new Date[] { recurrenceDatePosition } );
 		
 		// prevent master/slave problem
