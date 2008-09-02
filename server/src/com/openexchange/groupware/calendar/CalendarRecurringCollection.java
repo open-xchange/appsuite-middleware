@@ -54,6 +54,8 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
@@ -135,7 +137,7 @@ public final class CalendarRecurringCollection {
         NO_END_YEARS = MAX_END_YEARS;
     }
     
-    private static void convertDSString(final CalendarDataObject cdao) throws Exception {
+    private static void convertDSString(final CalendarDataObject cdao) throws OXCalendarException {
         char name;
         String value;
         final String ds = cdao.getRecurrence();
@@ -164,14 +166,18 @@ public final class CalendarRecurringCollection {
 			final OXCalendarException exc = new OXCalendarException(
 					OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao.getInterval()), Integer
 							.valueOf(CalendarRecurringCollection.MAXTC));
-			LOG.warn(exc.getMessage() + " Auto-corrected to " + CalendarRecurringCollection.MAXTC, exc);
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(exc.getMessage() + " Auto-corrected to " + CalendarRecurringCollection.MAXTC, exc);
+			}
 			cdao.setInterval(CalendarRecurringCollection.MAXTC);
 		}
 		if (cdao.getOccurrence() > CalendarRecurringCollection.MAXTC) {
 			final OXCalendarException exc = new OXCalendarException(
 					OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao.getOccurrence()), Integer
 							.valueOf(CalendarRecurringCollection.MAXTC));
-			LOG.warn(exc.getMessage() + " Auto-corrected to " + CalendarRecurringCollection.MAXTC, exc);
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(exc.getMessage() + " Auto-corrected to " + CalendarRecurringCollection.MAXTC, exc);
+			}
 			cdao.setOccurrence(CalendarRecurringCollection.MAXTC);
 		}
     	if (cdao.getRecurrenceType() == CalendarDataObject.DAILY) {
@@ -227,31 +233,48 @@ public final class CalendarRecurringCollection {
         }
     }
     
-    private static void encodeNameValuePair(final char name, final String value, final CalendarDataObject cdao) throws Exception {
-        if (name == 't') {
-            int t = Integer.parseInt(value);
-            if (t == 5) { t = 3;
-            } else if (t == 6) { t = 4; }
-            cdao.setRecurrenceType(t);
-        } else if (name == 'i') {
-            cdao.setInterval(Integer.parseInt(value));
-        } else if (name == 'a') {
-            cdao.setDays(Integer.parseInt(value));
-        } else if (name == 'b') {
-            cdao.setDayInMonth(Integer.parseInt(value));
-        } else if (name == 'c') {
-            cdao.setMonth(Integer.parseInt(value));
-        } else if (name == 'e') {
-            final long u = Long.parseLong(value);
-            cdao.setUntil(new java.util.Date(u));
-        } else if (name == 's') {
-            final long s = Long.parseLong(value);
-            cdao.setRecurringStart(s);
-        } else if (name == 'o') {
-            cdao.setOccurrence(Integer.parseInt(value));
-        } else {
-            throw new Exception("encodeNameValuePair : unknown type : "+name + " : "+value);
-        }
+    /**
+	 * Applies the given name-value-pair to specified calendar object
+	 * 
+	 * @param name
+	 *            The name identifier
+	 * @param value
+	 *            The value
+	 * @param cdao
+	 *            The calendar object
+	 * @throws OXCalendarException
+	 *             If an unknown name-value-pair occurs
+	 */
+	private static void encodeNameValuePair(final char name, final String value, final CalendarDataObject cdao)
+			throws OXCalendarException {
+		if (name == 't') {
+			int t = Integer.parseInt(value);
+			if (t == 5) {
+				t = 3;
+			} else if (t == 6) {
+				t = 4;
+			}
+			cdao.setRecurrenceType(t);
+		} else if (name == 'i') {
+			cdao.setInterval(Integer.parseInt(value));
+		} else if (name == 'a') {
+			cdao.setDays(Integer.parseInt(value));
+		} else if (name == 'b') {
+			cdao.setDayInMonth(Integer.parseInt(value));
+		} else if (name == 'c') {
+			cdao.setMonth(Integer.parseInt(value));
+		} else if (name == 'e') {
+			final long u = Long.parseLong(value);
+			cdao.setUntil(new java.util.Date(u));
+		} else if (name == 's') {
+			final long s = Long.parseLong(value);
+			cdao.setRecurringStart(s);
+		} else if (name == 'o') {
+			cdao.setOccurrence(Integer.parseInt(value));
+		} else {
+			throw new OXCalendarException(OXCalendarException.Code.UNKNOWN_NVP_IN_REC_STR, Character.valueOf(name),
+					value);
+		}
     }
     
     /**
@@ -429,21 +452,19 @@ public final class CalendarRecurringCollection {
      */
     public static boolean fillDAO(final CalendarDataObject cdao) throws OXException {
         if (cdao.getRecurrence() == null || cdao.getRecurrence().indexOf(DELIMITER_PIPE) == -1) {
-            if (cdao.getRecurrenceType() != 0) {
-                if ((cdao.getInterval() != 0 || cdao.getMonth() != 0) && cdao.getStartDate() != null && cdao.getEndDate() != null) {
-                    cdao.setRecurrence(createDSString(cdao));
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
+			if (cdao.getRecurrenceType() == 0) {
+				return false;
+			} else if ((cdao.getInterval() == 0 && cdao.getMonth() == 0) || cdao.getStartDate() == null
+					|| cdao.getEndDate() == null) {
+				return false;
+			}
+			cdao.setRecurrence(createDSString(cdao));
+		}
         try {
             convertDSString(cdao);
             return true;
-        } catch(final Exception e) {
-            LOG.error("fillDAO:convertDSString error :", e);
+        } catch(final OXCalendarException e) {
+            LOG.error("fillDAO:convertDSString error: " + e.getMessage(), e);
         }
         return false;
     }
@@ -768,45 +789,38 @@ public final class CalendarRecurringCollection {
             }
         }
     }
-    
-    private static int getDay(final int cd) {
-        int ret = -1;
-        switch (cd) {
-            case CalendarObject.SATURDAY:
-                ret = Calendar.SATURDAY;
-                break;
-            case CalendarObject.FRIDAY:
-                ret = Calendar.FRIDAY;
-                break;
-            case CalendarObject.THURSDAY:
-                ret = Calendar.THURSDAY;
-                break;
-            case CalendarObject.WEDNESDAY:
-                ret = Calendar.WEDNESDAY;
-                break;
-            case CalendarObject.TUESDAY:
-                ret = Calendar.TUESDAY;
-                break;
-            case CalendarObject.MONDAY:
-                ret = Calendar.MONDAY;
-                break;
-            case CalendarObject.SUNDAY:
-                ret = Calendar.SUNDAY;
-                break;
-            case CalendarObject.DAY:
-                ret = CalendarObject.DAY;
-                break;
-            case CalendarObject.WEEKDAY:
-                ret = CalendarObject.WEEKDAY;
-                break;
-            case CalendarObject.WEEKENDDAY:
-                ret = CalendarObject.WEEKENDDAY;
-                break;
-            default:
-                LOG.warn("Unusable getDay parameter (days) :"+cd);
-        }
-        return ret;
+
+    private static Map<Integer, Integer> DAY_MAP = new HashMap<Integer, Integer>(10);
+
+    static {
+    	DAY_MAP.put(Integer.valueOf(CalendarObject.SATURDAY), Integer.valueOf(Calendar.SATURDAY));
+    	DAY_MAP.put(Integer.valueOf(CalendarObject.FRIDAY), Integer.valueOf(Calendar.FRIDAY));
+    	DAY_MAP.put(Integer.valueOf(CalendarObject.THURSDAY), Integer.valueOf(Calendar.THURSDAY));
+    	DAY_MAP.put(Integer.valueOf(CalendarObject.WEDNESDAY), Integer.valueOf(Calendar.WEDNESDAY));
+    	DAY_MAP.put(Integer.valueOf(CalendarObject.TUESDAY), Integer.valueOf(Calendar.TUESDAY));
+    	DAY_MAP.put(Integer.valueOf(CalendarObject.MONDAY), Integer.valueOf(Calendar.MONDAY));
+    	DAY_MAP.put(Integer.valueOf(CalendarObject.SUNDAY), Integer.valueOf(Calendar.SUNDAY));
+    	DAY_MAP.put(Integer.valueOf(CalendarObject.DAY), Integer.valueOf(CalendarObject.DAY));
+    	DAY_MAP.put(Integer.valueOf(CalendarObject.WEEKDAY), Integer.valueOf(CalendarObject.WEEKDAY));
+    	DAY_MAP.put(Integer.valueOf(CalendarObject.WEEKENDDAY), Integer.valueOf(CalendarObject.WEEKENDDAY));
     }
+
+	/**
+	 * Maps given day constant from {@link CalendarObject} to the corresponding
+	 * day from {@link Calendar}.
+	 * 
+	 * @param cd
+	 *            The day constant from {@link CalendarObject}
+	 * @return The corresponding day from {@link Calendar} or <code>-1</code>.
+	 */
+	private static int getDay(final int cd) {
+		final Integer retval = DAY_MAP.get(Integer.valueOf(cd));
+		if (retval == null) {
+			LOG.error("Unusable getDay parameter (days) :" + cd, new Throwable());
+			return -1;
+		}
+		return retval.intValue();
+	}
     
     
     public static void fillMap(final RecurringResults rss, final long s, final long diff, final int d, final int counter) {
