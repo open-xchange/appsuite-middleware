@@ -47,47 +47,59 @@
  *
  */
 
-package com.openexchange.webdav.xml.appointment;
+package com.openexchange.ajax.appointment.recurrence;
 
 import java.util.Calendar;
 import java.util.TimeZone;
 
+import com.openexchange.ajax.appointment.action.InsertRequest;
+import com.openexchange.ajax.appointment.action.InsertResponse;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.webdav.xml.AppointmentTest;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Bug10859Test extends AppointmentTest {
+public final class Bug10859Test extends AbstractAJAXSession {
 
     /**
      * Default constructor.
-     * @param name test name
+     * @param name test name.
      */
-    public Bug10859Test(final String name) {
+    public Bug10859Test(String name) {
         super(name);
     }
 
-    public void testYearly() throws Throwable {
-        final TimeZone tz = TimeZone.getTimeZone("UTC");
-        final Calendar calendar = Calendar.getInstance(tz);
-        calendar.set(Calendar.HOUR, 12);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
+    public void testInvalidMonthInRecurringPattern() throws Throwable {
+        final AJAXClient client = getClient();
+        final int folder = client.getValues().getPrivateAppointmentFolder();
+        final TimeZone tz = client.getValues().getTimeZone();
         final AppointmentObject appointment = new AppointmentObject();
-        appointment.setTitle("Test appointment for bug 10859");
-        appointment.setParentFolderID(appointmentFolderId);
-        appointment.setStartDate(calendar.getTime());
-        calendar.add(Calendar.HOUR, -1);
-        appointment.setEndDate(calendar.getTime());
-        appointment.setRecurrenceType(AppointmentObject.YEARLY);
-        appointment.setInterval(1);
-        appointment.setMonth(calendar.get(Calendar.MONTH));
-        appointment.setDayInMonth(calendar.get(Calendar.DAY_OF_MONTH));
-        appointment.setIgnoreConflicts(true);
-        final int objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword());
-//        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+        {
+            final Calendar calendar = Calendar.getInstance(tz);
+            calendar.set(Calendar.HOUR, 12);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            appointment.setTitle("Test appointment for bug 10859");
+            appointment.setParentFolderID(folder);
+            appointment.setStartDate(calendar.getTime());
+            calendar.add(Calendar.HOUR, 1);
+            appointment.setEndDate(calendar.getTime());
+            appointment.setRecurrenceType(AppointmentObject.YEARLY);
+            appointment.setInterval(1);
+            appointment.setMonth(-1); // this was the cause for the endless loop.
+            appointment.setDayInMonth(calendar.get(Calendar.DAY_OF_MONTH));
+            appointment.setOccurrence(25);
+            appointment.setIgnoreConflicts(true);
+        }
+        {
+            final InsertRequest request = new InsertRequest(appointment, tz, false);
+            final InsertResponse response = Executor.execute(client, request);
+            assertTrue(response.hasError());
+        }
     }
 }
