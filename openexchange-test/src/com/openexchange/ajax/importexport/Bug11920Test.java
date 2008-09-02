@@ -49,28 +49,56 @@
 
 package com.openexchange.ajax.importexport;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.appointment.action.DeleteRequest;
+import com.openexchange.ajax.appointment.action.GetRequest;
+import com.openexchange.ajax.appointment.action.GetResponse;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.importexport.actions.ICalImportRequest;
+import com.openexchange.ajax.importexport.actions.ICalImportResponse;
+import com.openexchange.groupware.importexport.ImportResult;
 
 /**
- * Test suite for iCal tests.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ICalTestSuite {
+public final class Bug11920Test extends AbstractAJAXSession {
 
-	/**
-	 * @return the suite.
-	 */
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(ICalImportTest.class);
-		tests.addTestSuite(ICalExportTest.class);
-		tests.addTestSuite(Bug10382Test.class);
-		tests.addTestSuite(Bug11724Test.class);
-		tests.addTestSuite(Bug11868Test.class);
-		tests.addTestSuite(Bug11871Test.class);
-		tests.addTestSuite(Bug11920Test.class);
-		tests.addTestSuite(Bug11996Test.class);
-		return tests;
-	}
+    /**
+     * Default constructor.
+     * @param name test name.
+     */
+    public Bug11920Test(String name) {
+        super(name);
+    }
+
+    public void testVEventWithOnlyDTSTART() throws Throwable {
+        final AJAXClient client = getClient();
+        final int folderId = client.getValues().getPrivateAppointmentFolder();
+        final ICalImportResponse iResponse = Executor.execute(client,
+            new ICalImportRequest(folderId, ICAL));
+        final ImportResult result = iResponse.getImports()[0];
+        final int objectId = Integer.parseInt(result.getObjectId());
+        try {
+            final GetResponse gResponse = Executor.execute(client,
+                new GetRequest(folderId, objectId));
+            assertFalse(gResponse.hasError());
+        } finally {
+            Executor.execute(client, new DeleteRequest(objectId, folderId,
+                result.getDate()));
+        }
+    }
+
+    private static final String ICAL =
+        "BEGIN:VCALENDAR\n" +
+        "BEGIN:VEVENT\n" +
+        "UID:19970901T130000Z-123403@host.com\n" +
+        "DTSTAMP:19970901T130000Z\n" +
+        "DTSTART:19971102T000000\n" +
+        "SUMMARY:Our Blissful Anniversary\n" +
+        "CATEGORIES:ANNIVERSARY,PERSONAL,SPECIAL OCCASION\n" +
+        "RRULE:FREQ=YEARLY\n" +
+        "END:VEVENT\n" +
+        "END:VCALENDAR\n";
 }
