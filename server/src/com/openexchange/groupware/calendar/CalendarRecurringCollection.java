@@ -373,16 +373,19 @@ public final class CalendarRecurringCollection {
         }
         throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT);
     }
-    
-    /**
-	 * <code>normalizeLong</code> removed hours and minutes for the given long
+
+	/**
+	 * Removes hours and minutes for the given long
 	 * 
-	 * @param l
-	 *            a <code>long</code>
+	 * @param millis
+	 *            milliseconds since January 1, 1970, 00:00:00 GMT not to exceed
+	 *            the milliseconds representation for the year 8099. A negative
+	 *            number indicates the number of milliseconds before January 1,
+	 *            1970, 00:00:00 GMT.
 	 * @return The normalized <code>long</code> value
 	 */
-	public static long normalizeLong(final long l) {
-		return l - (l % MILLI_DAY);
+	public static long normalizeLong(final long millis) {
+		return millis - (millis % MILLI_DAY);
 	}
 
 	/**
