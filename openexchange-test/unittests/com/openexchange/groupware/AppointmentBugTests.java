@@ -92,7 +92,7 @@ public class AppointmentBugTests extends TestCase {
         final String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");        
         return resolveUser(user);
     }
-    
+
     public static Context getContext() {
         return new ContextImpl(contextid);
     }
@@ -1967,9 +1967,9 @@ public class AppointmentBugTests extends TestCase {
         cdao.setParentFolderID(fid);
         cdao.setTitle("testBug7064");
         
-        final long startdate = 1175421600000L; // 01.04.2007 12:00
-        final long enddate = 1175425200000L; // 01.04.2007 13:00
-        final long until = 1272664800000L; // 01.05.2010 00:00
+        final long startdate = 1175421600000L; // 01.04.2007 10:00 UTC
+        final long enddate = 1175425200000L; // 01.04.2007 11:00 UTC
+        final long until = 1272664800000L; // 01.05.2010 00:00 GMT+2
         
         final long testmatrix[] = { 1176804000000L, 1208253600000L, 1240308000000L, 1271757600000L };
         
@@ -3474,7 +3474,22 @@ public class AppointmentBugTests extends TestCase {
 		try {
 			final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(),
 					"myTestSearch");
+
+//			final int userid2 = resolveUser(AbstractConfigWrapper.parseProperty(getAJAXProperties(),
+//					"user_participant3", ""));
+
 			final int fid = AppointmentBugTests.getPrivateFolder(userid);
+			
+			final long start;
+			final long end;
+			{
+				long l = System.currentTimeMillis();
+				l = (l - (l % CalendarRecurringCollection.MILLI_HOUR)) + CalendarRecurringCollection.MILLI_HOUR;
+				start = l;
+				end = start + CalendarRecurringCollection.MILLI_HOUR;
+			}
+
+			
 			final CalendarSql csql = new CalendarSql(so);
 			{
 				/*
@@ -3486,8 +3501,8 @@ public class AppointmentBugTests extends TestCase {
 				cdao.setTitle("testBug12045");
 				cdao.setIgnoreConflicts(true);
 
-				cdao.setStartDate(new Date(1219748400000l));
-				cdao.setEndDate(new Date(1219752000000l));
+				cdao.setStartDate(new Date(start));
+				cdao.setEndDate(new Date(end));
 				cdao.setFullTime(false);
 
 				cdao.setShownAs(1);
@@ -3498,6 +3513,18 @@ public class AppointmentBugTests extends TestCase {
 				cdao.setRecurrenceType(1);
 				cdao.setInterval(1);
 				cdao.setOccurrence(3);
+
+//				{
+//					final Participants participants = new Participants();
+//
+//					final Participant p1 = new UserParticipant(userid);
+//					participants.add(p1);
+//
+//					final Participant p2 = new UserParticipant(userid2);
+//					participants.add(p2);
+//
+//					cdao.setParticipants(participants.getList());
+//				}
 
 				csql.insertAppointmentObject(cdao);
 				object_id = cdao.getObjectID();
@@ -3544,8 +3571,8 @@ public class AppointmentBugTests extends TestCase {
 				update.setObjectID(object_id);
 				update.setTitle("testBug12045 - step 2");
 
-				update.setStartDate(new Date(1219748400000l));
-				update.setEndDate(new Date(1219752000000l));
+				update.setStartDate(new Date(start));
+				update.setEndDate(new Date(end));
 
 				update.setNotification(true);
 
