@@ -2645,10 +2645,8 @@ public class AppointmentBugTests extends TestCase {
         csql.insertAppointmentObject(cdao);
         final int object_id = cdao.getObjectID();
         assertTrue("Got object_id", object_id > 0);
-        
-        
-        
-        final ReminderHandler rh = new ReminderHandler(getContext());        
+
+        final ReminderHandler rh = new ReminderHandler(getContext());
         ReminderObject ro = rh.loadReminder(object_id, userid, Types.APPOINTMENT);
         final Date check_date = ro.getDate();
         assertEquals("Check correct Alarm", check_alarm, check_date);
@@ -3472,7 +3470,6 @@ public class AppointmentBugTests extends TestCase {
 	 *             If an error occurs
 	 */
 	public void testBug12045() throws Exception {
-		final Context context = new ContextImpl(contextid);
 		int object_id = -1;
 		try {
 			final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(),
@@ -3512,7 +3509,7 @@ public class AppointmentBugTests extends TestCase {
 			 */
 			final int reminderId;
 			{
-				final ReminderObject ro = new ReminderHandler(context).loadReminder(object_id, userid,
+				final ReminderObject ro = new ReminderHandler(getContext()).loadReminder(object_id, userid,
 						Types.APPOINTMENT);
 				assertTrue("Folder ID mismatch in reminder", ro.getFolder() == fid);
 				reminderId = ro.getObjectId();
@@ -3556,11 +3553,11 @@ public class AppointmentBugTests extends TestCase {
 
 				csql.updateAppointmentObject(update, fid, new Date());
 
-				final ReminderObject ro = new ReminderHandler(context).loadReminder(reminderId);
+				final ReminderObject ro = new ReminderHandler(getContext()).loadReminder(reminderId);
 				assertTrue("Reminder's folder ID not updated properly", ro.getFolder() == fo.getObjectID());
 			} finally {
 				try {
-					new ReminderHandler(context).deleteReminder(object_id, userid, Types.APPOINTMENT);
+					new ReminderHandler(getContext()).deleteReminder(object_id, userid, Types.APPOINTMENT);
 				} catch (final Exception e) {
 					e.printStackTrace();
 				}
@@ -3572,7 +3569,7 @@ public class AppointmentBugTests extends TestCase {
 			}
 		} finally {
 			if (object_id != -1) {
-				hardDelete(object_id, context);
+				hardDelete(object_id, getContext());
 			}
 		}
 	}
