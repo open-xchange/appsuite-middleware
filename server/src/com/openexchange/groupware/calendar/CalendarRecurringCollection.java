@@ -375,7 +375,7 @@ public final class CalendarRecurringCollection {
     }
 
 	/**
-	 * Removes hours and minutes for the given long
+	 * Removes hours and minutes for the given date.
 	 * 
 	 * @param millis
 	 *            milliseconds since January 1, 1970, 00:00:00 GMT not to exceed
