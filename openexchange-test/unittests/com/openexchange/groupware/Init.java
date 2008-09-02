@@ -18,6 +18,19 @@ import com.openexchange.caching.internal.JCSCacheServiceInit;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.internal.ConfigurationImpl;
+import com.openexchange.context.ContextService;
+import com.openexchange.context.internal.ContextServiceImpl;
+import com.openexchange.data.conversion.ical.ICalEmitter;
+import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
+import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
+import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
+import com.openexchange.data.conversion.ical.ical4j.internal.OXUserResolver;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
+import com.openexchange.event.impl.AppointmentEventInterface;
+import com.openexchange.event.impl.EventDispatcher;
+import com.openexchange.event.impl.EventQueue;
+import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.group.internal.GroupInit;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
@@ -42,17 +55,8 @@ import com.openexchange.test.TestInit;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 import com.openexchange.tools.servlet.http.HttpManagersInit;
-import com.openexchange.event.impl.EventQueue;
-import com.openexchange.event.impl.EventDispatcher;
-import com.openexchange.event.impl.AppointmentEventInterface;
-import com.openexchange.event.impl.TaskEventInterface;
-import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
-import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
-import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
-import com.openexchange.data.conversion.ical.ical4j.internal.OXUserResolver;
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
-import com.openexchange.data.conversion.ical.ICalParser;
-import com.openexchange.data.conversion.ical.ICalEmitter;
+import com.openexchange.user.UserService;
+import com.openexchange.user.internal.UserServiceImpl;
 
 /**
  * This class contains methods for initialising tests.
@@ -197,6 +201,8 @@ public final class Init {
 		startAndInjectMonitoringBundle();
 		startAndInjectSessiondBundle();
 		startAndInjectEventBundle();
+		startAndInjectContextService();
+		startAndInjectUserService();
 		startAndInjectResourceService();
         startAndInjectICalServices();
     }
@@ -234,6 +240,7 @@ public final class Init {
 		
 		IMAPServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, services.get(ConfigurationService.class));
 		IMAPServiceRegistry.getServiceRegistry().addService(CacheService.class, services.get(CacheService.class));
+		IMAPServiceRegistry.getServiceRegistry().addService(UserService.class, services.get(UserService.class));
 		
 		/*
 		 * Register IMAP bundle         
@@ -254,6 +261,18 @@ public final class Init {
 		ServerServiceRegistry.getInstance().addService(ResourceService.class, resources);
 	}
 
+	private static void startAndInjectUserService() {
+	    final UserService us = new UserServiceImpl();
+	    services.put(UserService.class, us);
+		ServerServiceRegistry.getInstance().addService(UserService.class, us);
+	}
+
+	private static void startAndInjectContextService() {
+	    final ContextService cs = new ContextServiceImpl();
+	    services.put(ContextService.class, cs);
+		ServerServiceRegistry.getInstance().addService(ContextService.class, cs);
+	}
+
 	private static void startAndInjectSessiondBundle() throws Exception {
 		// ConfigurationService.getInstance().setService((Configuration)services.get(Configuration.class));
 		// SessiondService.getInstance().setService(new
@@ -266,11 +285,11 @@ public final class Init {
 	private static void startAndInjectEventBundle() throws Exception {
         EventQueue.setNewEventDispatcher(new EventDispatcher() {
 
-            public void addListener(AppointmentEventInterface listener) {
+            public void addListener(final AppointmentEventInterface listener) {
 
             }
 
-            public void addListener(TaskEventInterface listener) {
+            public void addListener(final TaskEventInterface listener) {
 
             }
         });
@@ -289,8 +308,8 @@ public final class Init {
 	}
 
     public static void startAndInjectICalServices() {
-        ICal4JParser parser = new ICal4JParser();
-        ICal4JEmitter emitter = new ICal4JEmitter();
+        final ICal4JParser parser = new ICal4JParser();
+        final ICal4JEmitter emitter = new ICal4JEmitter();
 
         Participants.userResolver = new OXUserResolver();
         final OXResourceResolver resourceResolver = new OXResourceResolver();
