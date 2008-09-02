@@ -73,10 +73,10 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderObjectIterator} - A {@link SearchIterator} especially for
@@ -421,56 +421,11 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 		return fo;
 	}
 
-	private final void closeResources() throws SearchIteratorException {
-		SearchIteratorException error = null;
-		/*
-		 * Close ResultSet
-		 */
-		if (rs != null) {
-			try {
-				rs.close();
-			} catch (final SQLException e) {
-				if (LOG.isErrorEnabled()) {
-					LOG.error(e.getMessage(), e);
-				}
-				error = new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e
-						.getLocalizedMessage());
-			}
-			rs = null;
-		}
-		/*
-		 * Close Statement
-		 */
-		if (stmt != null) {
-			try {
-				stmt.close();
-			} catch (final SQLException e) {
-				if (LOG.isErrorEnabled()) {
-					LOG.error(e.getMessage(), e);
-				}
-				if (error == null) {
-					error = new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e
-							.getLocalizedMessage());
-				}
-			}
-			stmt = null;
-		}
-		/*
-		 * Close connection
-		 */
-		if (closeCon && (readCon != null)) {
-			try {
-				DBPool.push(ctx, readCon);
-			} catch (final DBPoolingException e) {
-				if (error == null) {
-					error = new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e
-							.getLocalizedMessage());
-				}
-			}
-			readCon = null;
-		}
-		if (error != null) {
-			throw error;
+	private final void closeResources() {
+		if (closeCon) {
+			DBUtils.closeResources(rs, stmt, readCon, true, ctx.getContextId());
+		} else {
+			DBUtils.closeSQLStuff(rs, stmt);
 		}
 	}
 
@@ -640,11 +595,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 					.getLocalizedMessage());
 		} finally {
 			next = null;
-			try {
-				closeResources();
-			} catch (final SearchIteratorException e) {
-				LOG.error(e.getMessage(), e);
-			}
+			closeResources();
 			isClosed = true;
 		}
 	}

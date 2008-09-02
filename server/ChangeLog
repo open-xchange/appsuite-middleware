@@ -4,6 +4,7 @@
  - Bugfix #11695: Again fixed weekly recurrence calculation
  - Bugfix #12092: Fixed routine to determine recurring action on
    appointment update
+ - Bugfix #12096: Closing resources quietly in FolderObjectIterator
 
 * 2008-09-02 - marcus.klein@open-xchange.com
 
