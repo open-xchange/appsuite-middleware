@@ -322,9 +322,9 @@ public final class CalendarRecurringCollection {
             /*
              * Check if edao denotes a change exception of a recurring appointment
              */
-        	if (cdao.containsRecurrencePosition()) {
+        	if (cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0) {
                 rada = RECURRING_CREATE_EXCEPTION;
-            } else if (cdao.containsRecurrenceDatePosition()) {
+            } else if (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null) {
                 rada = RECURRING_CREATE_EXCEPTION;
             }
             if (cdao.containsDeleteExceptions() && edao.containsChangeExceptions()) {

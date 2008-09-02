@@ -2,6 +2,8 @@
 
  - Bugfix #11266: Using full user login on credSrc=session
  - Bugfix #11695: Again fixed weekly recurrence calculation
+ - Bugfix #12092: Fixed routine to determine recurring action on
+   appointment update
 
 * 2008-09-02 - marcus.klein@open-xchange.com
 

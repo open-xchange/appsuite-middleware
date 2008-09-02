@@ -1193,7 +1193,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             return ret;
         } else if (edao.containsRecurrenceType() && edao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE && cdao.getRecurrenceType() != edao.getRecurrenceType()) {
             // Recurring Pattern changed! TODO: Remove all exceptions
-            if (cdao.containsRecurrencePosition() || cdao.containsRecurrenceDatePosition()) {
+            if ((cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0) || (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null)) {
                 return CalendarRecurringCollection.RECURRING_CREATE_EXCEPTION;
             }
             cdao.setRecurrenceID(edao.getObjectID());
