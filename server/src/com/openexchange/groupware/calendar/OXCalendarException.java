@@ -199,10 +199,17 @@ public class OXCalendarException extends OXException {
          */
         RECURRING_VALUE_CONSTRAINT("Value %1$d exceeds max. supported value of %2$d.", 78, Category.USER_INPUT),
         /**
-         * Unable to calculate first occurence.
+         * Unable to calculate first occurrence.
          */
-        UNABLE_TO_CALCULATE_FIRST_RECURRING("Unable to calculate first occurence.", 79, Category.CODE_ERROR),
-        RECURRENCE_PATTERN_TOO_COMPLEX("The recurrence pattern is too complex. Giving up.", 80, Category.INTERNAL_ERROR);
+        UNABLE_TO_CALCULATE_FIRST_RECURRING("Unable to calculate first occurrence.", 79, Category.CODE_ERROR),
+        /**
+         * The recurrence pattern is too complex. Giving up.
+         */
+        RECURRENCE_PATTERN_TOO_COMPLEX("The recurrence pattern is too complex. Giving up.", 80, Category.INTERNAL_ERROR),
+        /**
+         * Unknown name-value-pair in recurrence string: %1$s=%2$s
+         */
+        UNKNOWN_NVP_IN_REC_STR("Unknown name-value-pair in recurrence string: %1$s=%2$s", 81, Category.CODE_ERROR);
         
         /**
          * Message of the exception.
