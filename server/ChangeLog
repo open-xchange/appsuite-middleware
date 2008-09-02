@@ -1,3 +1,8 @@
+* 2008-09-02 - thorben.betten@open-xchange.com
+
+ - Bugfix #11266: Using full user login on credSrc=session
+ - Bugfix #11695: Again fixed weekly recurrence calculation
+
 * 2008-09-02 - marcus.klein@open-xchange.com
 
  - Bugfix #10859: Added a recurring pattern check before starting a recurring

@@ -499,6 +499,7 @@ public class RecurringCalculation {
                 e = (e+(CalendarRecurringCollection.MILLI_DAY*(sd-hi)));
             }
         }
+        final boolean exceeds = CalendarRecurringCollection.exceedsHourOfDay(e, calc_timezone);
         loop: while (sr <= e) {
             increaseCalculationCounter();
             for (int a = 0; a < c; a++) {
@@ -510,9 +511,10 @@ public class RecurringCalculation {
                     if (((range_start == 0 && range_end == 0 && pos == 0) || (range >= range_start && range <= range_end) || pos == ds_count)
                     && (!CalendarRecurringCollection.isException(range, change_exceptions, delete_exceptions))) {
                         //if (!isException(range, change_exceptions, delete_exceptions)) {
-                    	if (CalendarRecurringCollection.normalizeLong(range) > e) {
-                    		break loop;
-                    	}
+						if (exceeds ? ((CalendarRecurringCollection.normalizeLong(range) + CalendarRecurringCollection.MILLI_DAY) > e)
+								: (CalendarRecurringCollection.normalizeLong(range) > e)) {
+							break loop;
+						}
                         if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
                             CalendarRecurringCollection.fillMap(rs, range, diff, recurrence_calculator, ds_count);
                         }
@@ -526,8 +528,12 @@ public class RecurringCalculation {
             }
             calc_weekly.add(Calendar.WEEK_OF_YEAR, recurring_interval);
             s = calc_weekly.getTimeInMillis();
-            sr += (CalendarRecurringCollection.MILLI_WEEK*recurring_interval);
-            calc.add(Calendar.WEEK_OF_YEAR, recurring_interval);
+
+            sr = s;
+            //sr += (CalendarRecurringCollection.MILLI_WEEK*recurring_interval);
+            
+            // ???
+            //calc.add(Calendar.WEEK_OF_YEAR, recurring_interval);
         }
         
         return rs;
