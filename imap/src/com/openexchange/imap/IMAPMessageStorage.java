@@ -88,7 +88,6 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailConfig;
-import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -248,6 +247,16 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			 */
 			final int[] filter;
 			if (null == searchTerm) {
+				/*
+				 * Check if an all-fetch can be performed to only obtain UIDs of
+				 * all folder's messages: FETCH 1: (UID)
+				 */
+				if (MailSortField.RECEIVED_DATE.equals(sortField) && onlyFolderAndID(fields)) {
+					return performAllFetch(fullname, order, indexRange);
+				}
+				/*
+				 * Proceed with common handling
+				 */
 				filter = null;
 			} else {
 				/*
@@ -257,9 +266,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				if ((filter == null) || (filter.length == 0)) {
 					return EMPTY_RETVAL;
 				}
-			}
-			if (filter == null && MailSortField.RECEIVED_DATE.equals(sortField) && onlyFolderAndID(fields)) {
-				return performAllFetch(fullname, order, indexRange);
 			}
 			final MailFields usedFields = new MailFields();
 			Message[] msgs = IMAPSort.sortMessages(imapFolder, filter, fields, sortField, order, UserStorage
@@ -1045,25 +1051,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		 * Perform simple fetch
 		 */
 		final long start = System.currentTimeMillis();
-		final long[] uids = IMAPCommandsCollection.seqNums2UID(imapFolder, ARGS_ALL, imapFolder.getMessageCount());
+		MailMessage[] retval = IMAPCommandsCollection.fetchAll(imapFolder, OrderDirection.ASC.equals(order));
 		mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 		if (LOG.isDebugEnabled()) {
-			LOG.debug(new StringBuilder(128).append("IMAP all fetch >>>FETCH 1:* (UID)<<< took ").append(
+			LOG.debug(new StringBuilder(128).append("IMAP all fetch >>>FETCH 1:* (UID INTERNALDATE)<<< took ").append(
 					(System.currentTimeMillis() - start)).append("msec").toString());
 		}
-		if (uids == null || uids.length == 0) {
+		if (retval == null || retval.length == 0) {
 			return EMPTY_RETVAL;
-		}
-		MailMessage[] retval = new MailMessage[uids.length];
-		if (OrderDirection.ASC.equals(order)) {
-			int index = 0;
-			for (int i = uids.length - 1; i >= 0; i--) {
-				retval[index++] = new IDMailMessage(uids[i], fullname);
-			}
-		} else {
-			for (int i = 0; i < uids.length; i++) {
-				retval[i] = new IDMailMessage(uids[i], fullname);
-			}
 		}
 		if (indexRange != null) {
 			final int fromIndex = indexRange.start;

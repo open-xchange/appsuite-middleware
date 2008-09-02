@@ -56,6 +56,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -86,6 +88,8 @@ import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.dataobjects.IDMailMessage;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.sun.mail.iap.Argument;
@@ -101,6 +105,7 @@ import com.sun.mail.imap.protocol.ENVELOPE;
 import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
+import com.sun.mail.imap.protocol.INTERNALDATE;
 import com.sun.mail.imap.protocol.Item;
 import com.sun.mail.imap.protocol.ListInfo;
 import com.sun.mail.imap.protocol.RFC822DATA;
@@ -1238,6 +1243,104 @@ public final class IMAPCommandsCollection {
 			}
 
 		}));
+	}
+
+	private static final String COMMAND_FETCH = "FETCH 1:* (UID INTERNALDATE)";
+
+	/**
+	 * Fetches all messages from given IMAP folder and pre-fills instances with
+	 * UID, folder fullname and received date
+	 * 
+	 * @param imapFolder
+	 *            The IMAP folder
+	 * @param ascending
+	 *            <code>true</code> to order messages by received date in
+	 *            ascending order; otherwise descending
+	 * @return All messages from given IMAP folder
+	 * @throws MessagingException
+	 *             If an error occurs in underlying protocol
+	 */
+	public static MailMessage[] fetchAll(final IMAPFolder imapFolder, final boolean ascending)
+			throws MessagingException {
+		return (MailMessage[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				final Response[] r = p.command(COMMAND_FETCH, null);
+				final int len = r.length - 1;
+				final Response response = r[len];
+				final List<MailMessage> l = new ArrayList<MailMessage>(len);
+				try {
+					if (response.isOK()) {
+						final String fullname = imapFolder.getFullName();
+						for (int j = 0; j < len; j++) {
+							long uid = -1;
+							boolean cce = false;
+							try {
+								uid = ((UID) ((FetchResponse) r[j]).getItem(0)).uid;
+							} catch (final ClassCastException e) {
+								uid = ((UID) ((FetchResponse) r[j]).getItem(1)).uid;
+								cce = true;
+							}
+							final MailMessage m = new IDMailMessage(uid, fullname);
+							m.setReceivedDate(((INTERNALDATE) ((FetchResponse) r[j]).getItem(cce ? 0 : 1)).getDate());
+							l.add(m);
+							r[j] = null;
+						}
+					}
+				} finally {
+					p.notifyResponseHandlers(r);
+					try {
+						p.handleResult(response);
+					} catch (final CommandFailedException cfe) {
+						if (cfe.getMessage().indexOf(ERR_01) != -1) {
+							/*
+							 * Obviously this folder is empty
+							 */
+							return new long[0];
+						}
+						throw cfe;
+					}
+				}
+				Collections.sort(l, ascending ? ASC_COMP : DESC_COMP);
+				return l.toArray(new MailMessage[l.size()]);
+			}
+
+		}));
+	}
+
+	private static final Comparator<MailMessage> ASC_COMP = new ReceivedDateComparator(true);
+
+	private static final Comparator<MailMessage> DESC_COMP = new ReceivedDateComparator(false);
+
+	private static final class ReceivedDateComparator implements Comparator<MailMessage> {
+
+		private final boolean ascending;
+
+		public ReceivedDateComparator(final boolean ascending) {
+			super();
+			this.ascending = ascending;
+		}
+
+		public int compare(final MailMessage o1, final MailMessage o2) {
+			final Date d1 = o1.getReceivedDate();
+			final Date d2 = o2.getReceivedDate();
+			final Integer refComp = compareReferences(d1, d2);
+			return (refComp == null ? d1.compareTo(d2) : refComp.intValue()) * (ascending ? 1 : -1);
+		}
+
+		private static Integer compareReferences(final Object o1, final Object o2) {
+			if ((o1 == null) && (o2 != null)) {
+				return Integer.valueOf(-1);
+			} else if ((o1 != null) && (o2 == null)) {
+				return Integer.valueOf(1);
+			} else if ((o1 == null) && (o2 == null)) {
+				return Integer.valueOf(0);
+			}
+			/*
+			 * Both references are not null
+			 */
+			return null;
+		}
 	}
 
 	private static final String TEMPL_UID_EXPUNGE = "UID EXPUNGE %s";
