@@ -649,7 +649,7 @@ public class CalendarSqlTest extends TestCase {
             appointments.save( update );
         } catch (final OXCalendarException x) {
             x.printStackTrace();
-            assertEquals(x.getMessage(), 42, x.getDetailNumber());
+            assertEquals(x.getMessage(), 45, x.getDetailNumber());
         } catch (final Throwable t) {
             t.printStackTrace();
             fail(t.getMessage());
