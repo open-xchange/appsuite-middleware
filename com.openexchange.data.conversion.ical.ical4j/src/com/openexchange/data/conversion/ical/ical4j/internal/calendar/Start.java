@@ -61,7 +61,6 @@ import java.util.Calendar;
 
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DtStart;
-import net.fortuna.ical4j.model.DateTime;
 
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ConversionWarning;
@@ -70,7 +69,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 
 /**
- *
+ * Converts the start date.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Start<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
@@ -118,24 +117,34 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
         final Date start = parseDate(component, dtStart, timeZone);
         calendar.setStartDate(start);
         if (!isDateTime(component, dtStart)) {
-            calendar.setEndDate(new Date(start.getTime() + 24 * 60 * 60 * 1000));
             if (calendar instanceof AppointmentObject) {
-                setFullTime((AppointmentObject)calendar, start);
+                setFullTime((AppointmentObject)calendar, start, timeZone);
+            } else {
+                calendar.setEndDate(new Date(start.getTime() + 24 * 60 * 60 * 1000));
             }
+        } else {
+            /* RFC 2445 4.6.1:
+             * For cases where a "VEVENT" calendar component specifies a "DTSTART"
+             * property with a DATE-TIME data type but no "DTEND" property, the
+             * event ends on the same calendar date and time of day specified by
+             * the "DTSTART" property.
+             */
+            calendar.setEndDate(start);
         }
     }
 
-    private void setFullTime(AppointmentObject appointment, Date start) {
+    private void setFullTime(final AppointmentObject appointment,
+        final Date start, final TimeZone tz) {
         appointment.setFullTime(true);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(start);
-        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+        calendar.setTimeZone(tz);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND,0);
         calendar.set(Calendar.MILLISECOND, 0);
         appointment.setStartDate(calendar.getTime());
-        appointment.setEndDate(new Date(calendar.getTime().getTime() + 24 * 60 * 60 * 1000));
-
+        calendar.add(Calendar.DATE, 1);
+        appointment.setEndDate(calendar.getTime());
     }
 }

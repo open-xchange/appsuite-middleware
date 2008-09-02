@@ -2,6 +2,8 @@
 
  - Bugfix #10859: Added a recurring pattern check before starting a recurring
    calculation.
+ - Bugfix #11920: Setting end date of an imported appointment same as start date
+   if DTEND and DURATION are missing.
 
 * 2008-09-01 - dennis.sieben@open-xchange.com
 
