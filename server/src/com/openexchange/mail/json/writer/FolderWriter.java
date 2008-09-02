@@ -63,6 +63,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
@@ -344,10 +345,14 @@ public final class FolderWriter {
 						try {
 							int permissionBits = 0;
 							if (folder.isRootFolder()) {
-								permissionBits = createPermissionBits(folder.getOwnPermission());
-								/*permissionBits = createPermissionBits(OCLPermission.CREATE_SUB_FOLDERS,
-										OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
-										OCLPermission.NO_PERMISSIONS, false);*/
+								final MailPermission rootPermission = folder.getOwnPermission();
+								if (rootPermission == null) {
+									permissionBits = createPermissionBits(OCLPermission.CREATE_SUB_FOLDERS,
+											OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
+											OCLPermission.NO_PERMISSIONS, false);
+								} else {
+									permissionBits = createPermissionBits(folder.getOwnPermission());
+								}
 							} else {
 								permissionBits = createPermissionBits(folder.getOwnPermission());
 								if (folder.isSupportsUserFlags()) {
