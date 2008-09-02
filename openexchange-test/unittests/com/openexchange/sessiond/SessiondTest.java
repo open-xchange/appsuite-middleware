@@ -98,7 +98,7 @@ public class SessiondTest extends TestCase {
     	final int userId = UserStorage.getInstance().getUserId(testUser1, context);
 		final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
 				SessiondService.class);
-		sessiondCon.addSession(userId, testUser1, "secret", context, "localhost");
+		sessiondCon.addSession(userId, testUser1, "secret", context, "localhost", testUser1 + '@' + context.getContextId());
 	}
 	
 	public void testRefreshSession() throws Exception {
@@ -107,7 +107,7 @@ public class SessiondTest extends TestCase {
     	final int userId = UserStorage.getInstance().getUserId(testUser1, context);
 		final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
 				SessiondService.class);
-		final String sessionId = sessiondCon.addSession(userId, testUser1, "secret", context, "localhost");
+		final String sessionId = sessiondCon.addSession(userId, testUser1, "secret", context, "localhost", testUser1 + '@' + context.getContextId());
 		sessiondCon.refreshSession(sessionId);
 	}
 	
@@ -117,7 +117,7 @@ public class SessiondTest extends TestCase {
     	final int userId = UserStorage.getInstance().getUserId(testUser1, context);
 		final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
 				SessiondService.class);
-		final String sessionId = sessiondCon.addSession(userId, testUser1, "secret", context, "localhost");
+		final String sessionId = sessiondCon.addSession(userId, testUser1, "secret", context, "localhost", testUser1 + '@' + context.getContextId());
 		sessiondCon.removeSession(sessionId);
 	}
 	
@@ -127,7 +127,7 @@ public class SessiondTest extends TestCase {
     	final int userId = UserStorage.getInstance().getUserId(testUser1, context);
 		final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
 				SessiondService.class);
-		final String sessionId = sessiondCon.addSession(userId, testUser1, "secret", context, "localhost");
+		final String sessionId = sessiondCon.addSession(userId, testUser1, "secret", context, "localhost", testUser1 + '@' + context.getContextId());
 		sessiondCon.refreshSession(sessionId);
 		final Session session = sessiondCon.getSession(sessionId);
 	}
