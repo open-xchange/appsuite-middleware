@@ -327,12 +327,12 @@ public final class ConfigDB extends AbstractConfig implements Initialization {
         /**
          * Test threads if they use connections correctly.
          */
-        TEST_THREADS("testThreads");
+        TEST_THREADS("testThreads"),
 
         /**
          * Forces the use of the write db on all requests
          */
-        //WRITE_ONLY("writeOnly");
+        WRITE_ONLY("writeOnly");
 
         /**
          * Name of the property in the server.properties file.

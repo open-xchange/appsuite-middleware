@@ -92,7 +92,7 @@ public final class DatabaseInit implements Initialization {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Resolved server name \"" + Server.getServerName() + "\" to identifier " + Server.getServerId());
 		}
-        //Database.setForceWrite(ConnectionPool.DEFAULT_CONFIG.forceWriteOnly); // FIXME: This is most certainly not correct.
+        Database.setForceWrite(ConnectionPool.DEFAULT_CONFIG.forceWriteOnly); // FIXME: This is most certainly not correct.
 	}
 
 	/**
