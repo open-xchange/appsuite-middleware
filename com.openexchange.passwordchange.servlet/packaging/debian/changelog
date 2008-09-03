@@ -1,3 +1,9 @@
+open-xchange-passwordchange-servlet (6.6.0-4) unstable; urgency=low
+
+  * first build for RC8
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  3 Sep 2008 16:53:50 +0200
+
 open-xchange-passwordchange-servlet (6.6.0-3) unstable; urgency=low
 
   * first build for RC7

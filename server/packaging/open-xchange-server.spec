@@ -139,6 +139,61 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Sep 03 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11865: Checking for invalid changing of recurrence information
+   on a change exception update
+* Wed Sep 03 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #11595: Reintroduced parameter for forcing use of write connections in DBPool.
+ - Partial Fix #11399: Return ids and folders in an array of objects if entries can't be deleted.
+ - Bugfix #12105: Send 'alarm' and 'notification' if so requested in response to list / updates and all requests.
+* Tue Sep 02 2008 - marcus.klein@open-xchange.com
+ - Bugfix #10859: Added a recurring pattern check before starting a recurring
+   calculation.
+ - Bugfix #11920: Setting end date of an imported appointment same as start date
+   if DTEND and DURATION are missing.
+* Tue Sep 02 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11266: Using full user login on credSrc=session
+ - Bugfix #11695: Again fixed weekly recurrence calculation
+ - Bugfix #12092: Fixed routine to determine recurring action on
+   appointment update
+ - Bugfix #12096: Closing resources quietly in FolderObjectIterator
+* Mon Sep 01 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11302: Resolving an IMAP login to an user ID may return multiple
+   IDs since multiple IMAP servers are allowed in one context.
+ - Bugfix #4199: Checking for possible null reference prior to updating
+   message cache
+ - Bugfix #9607: Setting proper end date in notification mail to participant
+* Mon Sep 01 2008 - dennis.sieben@open-xchange.com
+ - Bugfix #12086: Changed endWith checks in SieveHandler to startWith
+* Sun Aug 31 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12080: Fixed ordering of parameters in error message and bytes
+   are converted to a human readable string
+* Fri Aug 29 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12036: Logging a debug message only if a reminder could not be
+   found for deletion on an appointment's participants update
+ - Bugfix #11826: Writing proper value for "day_in_month" in JSON response
+ - Bugfix #11702: Added possibility to define used host name part in
+   generated links in a separate bundle
+* Thu Aug 28 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11849: Applying new local IP on redirect to pass future IP
+   checks
+ - Bugfix #12072: Proper calculation of possible conflicting resource(s) on
+   inserting/updating a recurring appointment
+ - Bugfix #11903: Allowing a context admin to login to mail system if
+   permitted by property "com.openexchange.mail.adminMailLoginEnabled"
+   located in file "mail.properties"
+* Wed Aug 27 2008 - thorben.betten@open-xchange.com
+ - Bugfix #11229: Proper handling of possible NaN error while parsing
+   Outlook XML
+ - Bugfix #10213: Setting "notify participants" flag to false in
+   appointment objects on user deletion
+* Tue Aug 26 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12045: Updating reminder's folder reference on appointment move
+ - Bugfix #11181: Links now got deleted on folder deletion, too
+ - Bugfix #11617: Handling a possible null reference on mail retrieval
+* Mon Aug 25 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12049: Applying proper login-info to newly created session on
+   user login
 * Wed Aug 20 2008 - thorben.betten@open-xchange.com
  - Bugfix #12011: Implemented a commit-mechanism that modifications sent by
    outlook will only be applied if XML could be completely parsed
@@ -148,9 +203,6 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
    appointment
  - Bugfix #11984: Avoiding display of a-tag's href content in brackets if
    a-tag's content already represents a valid link
-* Wed Aug 20 2008 - thorben.betten@open-xchange.com
- - Bugfix #12049: Applying proper login-info to newly created session on
-   user login
 * Tue Aug 19 2008 - thorben.betten@open-xchange.com
  - Bugfix #12023: Properly handling empty Content-Id value
 * Mon Aug 18 2008 - thorben.betten@open-xchange.com
