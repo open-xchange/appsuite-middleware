@@ -404,6 +404,22 @@ public class HeaderCollection implements Serializable {
 	}
 
 	/**
+	 * Checks if this header collection contains a header entry for specified
+	 * header
+	 * 
+	 * @param name
+	 *            The header name
+	 * @return <code>true</code> if this header collection contains a header
+	 *         entry for specified header; otherwise <code>false</code>
+	 */
+	public boolean containsHeader(final String name) {
+		if (isInvalid(name, true)) {
+			throw new IllegalArgumentException(ERR_HEADER_NAME_IS_INVALID);
+		}
+		return map.containsKey(HeaderName.valueOf(name));
+	}
+
+	/**
 	 * Return all the values for the specified header. Returns <code>null</code>
 	 * if no headers with the specified name exist.
 	 * 
@@ -417,8 +433,7 @@ public class HeaderCollection implements Serializable {
 		if (isInvalid(name, true)) {
 			throw new IllegalArgumentException(ERR_HEADER_NAME_IS_INVALID);
 		}
-		final HeaderName headerName = HeaderName.valueOf(name);
-		final List<String> values = map.get(headerName);
+		final List<String> values = map.get(HeaderName.valueOf(name));
 		if (values == null) {
 			return null;
 		}
@@ -711,7 +726,7 @@ public class HeaderCollection implements Serializable {
 		}
 		for (int i = 0; i < chars.length; i++) {
 			if (!Character.isWhitespace(chars[i])) {
-				return false/*!isAscii(str)*/;
+				return false/* !isAscii(str) */;
 			}
 		}
 		return true;
