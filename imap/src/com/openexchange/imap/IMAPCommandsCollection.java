@@ -53,7 +53,6 @@ import static com.openexchange.imap.sort.IMAPSort.getMessageComparator;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1321,41 +1320,58 @@ public final class IMAPCommandsCollection {
 		}));
 	}
 
-	private static final Comparator<MailMessage> ASC_COMP = new ReceivedDateComparator(true);
-
-	private static final Comparator<MailMessage> DESC_COMP = new ReceivedDateComparator(false);
-
-	private static final class ReceivedDateComparator implements Comparator<MailMessage>, Serializable {
-
-		private static final long serialVersionUID = 6227939496676791671L;
-
-		private final boolean ascending;
-
-		public ReceivedDateComparator(final boolean ascending) {
-			super();
-			this.ascending = ascending;
-		}
-
+	/**
+	 * A {@link Comparator} comparing instances of {@link MailMessage} by their
+	 * received date in ascending order.
+	 */
+	static final Comparator<MailMessage> ASC_COMP = new Comparator<MailMessage>() {
 		public int compare(final MailMessage m1, final MailMessage m2) {
 			final Date d1 = m1.getReceivedDate();
 			final Date d2 = m2.getReceivedDate();
 			final Integer refComp = compareReferences(d1, d2);
-			return (refComp == null ? d1.compareTo(d2) : refComp.intValue()) * (ascending ? 1 : -1);
+			return (refComp == null ? d1.compareTo(d2) : refComp.intValue());
 		}
+	};
 
-		private static Integer compareReferences(final Object o1, final Object o2) {
-			if ((o1 == null) && (o2 != null)) {
-				return Integer.valueOf(-1);
-			} else if ((o1 != null) && (o2 == null)) {
-				return Integer.valueOf(1);
-			} else if ((o1 == null) && (o2 == null)) {
-				return Integer.valueOf(0);
-			}
-			/*
-			 * Both references are not null
-			 */
-			return null;
+	/**
+	 * A {@link Comparator} comparing instances of {@link MailMessage} by their
+	 * received date in descending order.
+	 */
+	static final Comparator<MailMessage> DESC_COMP = new Comparator<MailMessage>() {
+		public int compare(final MailMessage m1, final MailMessage m2) {
+			final Date d1 = m1.getReceivedDate();
+			final Date d2 = m2.getReceivedDate();
+			final Integer refComp = compareReferences(d1, d2);
+			return (refComp == null ? d1.compareTo(d2) : refComp.intValue()) * (-1);
 		}
+	};
+
+	/**
+	 * Compares given object references being <code>null</code>.
+	 * 
+	 * @param o1
+	 *            The first object reference
+	 * @param o2
+	 *            The second object reference
+	 * @return An {@link Integer} of <code>-1</code> if first reference is
+	 *         <code>null</code> but the second is not, an {@link Integer} of
+	 *         <code>1</code> if first reference is not <code>null</code> but
+	 *         the second is, an {@link Integer} of <code>0</code> if both
+	 *         references are <code>null</code>, or returns <code>null</code> if
+	 *         both references are not <code>null</code>
+	 */
+	static Integer compareReferences(final Object o1, final Object o2) {
+		if ((o1 == null) && (o2 != null)) {
+			return Integer.valueOf(-1);
+		} else if ((o1 != null) && (o2 == null)) {
+			return Integer.valueOf(1);
+		} else if ((o1 == null) && (o2 == null)) {
+			return Integer.valueOf(0);
+		}
+		/*
+		 * Both references are not null
+		 */
+		return null;
 	}
 
 	private static final String TEMPL_UID_EXPUNGE = "UID EXPUNGE %s";
