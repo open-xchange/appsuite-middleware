@@ -1675,11 +1675,21 @@ class CalendarMySQL implements CalendarSqlImp {
 			if (edao.containsPrivateFlag() && cdao.containsPrivateFlag() && edao.getPrivateflag() != cdao.getPrivateflag()) {
 				throw new OXCalendarException(OXCalendarException.Code.RECURRING_EXCEPTION_PRIVATE_FLAG);
 			}
+			if (cdao.containsRecurrencePosition()) {
+				if (edao.getRecurrencePosition() != cdao.getRecurrencePosition()) {
+					throw new OXCalendarException(OXCalendarException.Code.INVALID_RECURRENCE_POSITION_CHANGE);
+				}
+			} else {
+				cdao.setRecurrencePosition(edao.getRecurrencePosition());
+			}
 		}
 
 		CalendarDataObject clone = null;
 
 		if (rec_action == CalendarRecurringCollection.CHANGE_RECURRING_TYPE) {
+			if (edao.getRecurrenceID() > 0 && edao.getObjectID() != edao.getRecurrenceID()) {
+				throw new OXCalendarException(OXCalendarException.Code.INVALID_RECURRENCE_TYPE_CHANGE, new Object[0]);
+			}
 			final List<Integer> exceptions = getExceptionList(null, ctx, edao.getRecurrenceID());
 			if (exceptions != null && !exceptions.isEmpty()) {
 				final Integer oids[] = exceptions.toArray(new Integer[exceptions.size()]);

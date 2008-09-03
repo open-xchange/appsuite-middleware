@@ -1,3 +1,8 @@
+* 2008-09-03 - thorben.betten@open-xchange.com
+
+ - Bugfix #11865: Checking for invalid changing of recurrence information
+   on a change exception update
+
 * 2008-09-02 - thorben.betten@open-xchange.com
 
  - Bugfix #11266: Using full user login on credSrc=session
