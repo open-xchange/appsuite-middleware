@@ -57,6 +57,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 
 import com.openexchange.groupware.AbstractOXException;
@@ -95,6 +96,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 	private static final String CHARENC_ISO8859 = "ISO-8859-1";
 
 	private static final Map<HostAndPort, Long> timedOutServers = new ConcurrentHashMap<HostAndPort, Long>();
+
+	private static final Map<LoginAndPass, Long> failedAuths = new ConcurrentHashMap<LoginAndPass, Long>();
 
 	private IMAPFolderStorage folderStorage;
 
@@ -229,6 +232,22 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 				 */
 				checkTemporaryDown();
 			}
+			String tmpPass = getMailConfig().getPassword();
+			if (tmpPass != null) {
+				try {
+					tmpPass = new String(tmpPass.getBytes(IMAPConfig.getImapAuthEnc()), CHARENC_ISO8859);
+				} catch (final UnsupportedEncodingException e) {
+					LOG.error(e.getMessage(), e);
+				}
+			}
+			/*
+			 * Check for already failed authentication
+			 */
+			final String login = getMailConfig().getLogin();
+			checkFailedAuths(login, tmpPass);
+			/*
+			 * Get properties
+			 */
 			final Properties imapProps = IMAPSessionProperties.getDefaultSessionProperties();
 			if ((null != getMailProperties()) && !getMailProperties().isEmpty()) {
 				imapProps.putAll(getMailProperties());
@@ -262,17 +281,18 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 			 * Get store
 			 */
 			imapStore = (IMAPStore) imapSession.getStore(IMAPProvider.PROTOCOL_IMAP.getName());
-			String tmpPass = getMailConfig().getPassword();
-			if (tmpPass != null) {
-				try {
-					tmpPass = new String(tmpPass.getBytes(IMAPConfig.getImapAuthEnc()), CHARENC_ISO8859);
-				} catch (final UnsupportedEncodingException e) {
-					LOG.error(e.getMessage(), e);
-				}
-			}
+			/*
+			 * ... and connect
+			 */
 			try {
-				imapStore.connect(getMailConfig().getServer(), getMailConfig().getPort(), getMailConfig().getLogin(),
-						tmpPass);
+				imapStore.connect(getMailConfig().getServer(), getMailConfig().getPort(), login, tmpPass);
+			} catch (final AuthenticationFailedException e) {
+				/*
+				 * Remember failed authentication's credentials (for a short
+				 * amount of time) to fasten subsequent connect trials
+				 */
+				failedAuths.put(new LoginAndPass(login, tmpPass), Long.valueOf(System.currentTimeMillis()));
+				throw e;
 			} catch (final MessagingException e) {
 				/*
 				 * TODO: Re-think if exception's message should be part of
@@ -308,6 +328,18 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 			decrement = true;
 		} catch (final MessagingException e) {
 			throw MIMEMailException.handleMessagingException(e, getMailConfig());
+		}
+	}
+
+	private static void checkFailedAuths(final String login, final String pass) throws AuthenticationFailedException {
+		final LoginAndPass key = new LoginAndPass(login, pass);
+		final Long range = failedAuths.get(key);
+		if (range != null) {
+			// TODO: Put time-out to imap.properties
+			if (System.currentTimeMillis() - range.longValue() <= 10000) {
+				throw new AuthenticationFailedException("Login failed: authentication failure");
+			}
+			failedAuths.remove(key);
 		}
 	}
 
@@ -414,6 +446,57 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 	@Override
 	protected boolean checkMailServerPort() {
 		return true;
+	}
+
+	private static final class LoginAndPass {
+
+		private final String login;
+
+		private final String pass;
+
+		private final int hashCode;
+
+		public LoginAndPass(final String login, final String pass) {
+			super();
+			this.login = login;
+			this.pass = pass;
+			hashCode = (login.hashCode()) ^ (pass.hashCode());
+		}
+
+		@Override
+		public int hashCode() {
+			return hashCode;
+		}
+
+		@Override
+		public boolean equals(final Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			final LoginAndPass other = (LoginAndPass) obj;
+			if (login == null) {
+				if (other.login != null) {
+					return false;
+				}
+			} else if (!login.equals(other.login)) {
+				return false;
+			}
+			if (pass == null) {
+				if (other.pass != null) {
+					return false;
+				}
+			} else if (!pass.equals(other.pass)) {
+				return false;
+			}
+			return true;
+		}
+
 	}
 
 	private static final class HostAndPort {
