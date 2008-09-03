@@ -1669,6 +1669,9 @@ class CalendarMySQL implements CalendarSqlImp {
 
 		final int rec_action = co.checkUpdateRecurring(cdao, edao);
 		if (edao.containsRecurrencePosition() && edao.getRecurrencePosition() > 0) {
+			/*
+			 * edao denotes a change exception
+			 */
 			if (cdao.getFolderMove()) {
 				throw new OXCalendarException(OXCalendarException.Code.RECURRING_EXCEPTION_MOVE_EXCEPTION);
 			}
