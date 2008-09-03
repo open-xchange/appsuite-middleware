@@ -744,7 +744,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             if (cdao.isSequence()) {
                 CalendarRecurringCollection.fillDAO(cdao);
                 if (cdao.getObjectID() != cdao.getRecurrenceID()) {
-                    CalendarCommonCollection.removeRecurringType(cdao);
+                    //CalendarCommonCollection.removeRecurringType(cdao);
                     if (cdao.getExceptions() != null) {
                         try {
                             final long exc = new Long(cdao.getExceptions()).longValue();
