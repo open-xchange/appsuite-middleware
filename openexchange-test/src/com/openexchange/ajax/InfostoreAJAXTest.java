@@ -367,13 +367,23 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 	}
 
 	public int[] delete(final WebConversation webConv, final String hostname, final String sessionId, final long timestamp, final int[][] ids) throws MalformedURLException, JSONException, IOException, SAXException {
-		final StringBuffer url = getUrl(sessionId,"delete", hostname);
+		int[][] notDeletedTuple = deleteFromFolders(webConv, hostname, sessionId, timestamp, ids);
+        int[] retval = new int[notDeletedTuple.length];
+        int i = 0;
+        for(int[] tuple : notDeletedTuple) {
+            retval[i++] = tuple[0];
+        }
+        return retval;
+    }
+
+    public int[][] deleteFromFolders(final WebConversation webConv, final String hostname, final String sessionId, final long timestamp, final int[][] ids) throws JSONException, IOException, SAXException {
+        final StringBuffer url = getUrl(sessionId,"delete", hostname);
 		url.append("&timestamp=");
 		url.append(timestamp);
-		
-		
+
+
 		final StringBuffer data = new StringBuffer("[");
-		
+
 		if(ids.length > 0) {
 			for(final int[] tuple : ids) {
 				data.append("{folder : ");
@@ -384,42 +394,23 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 			}
 			data.deleteCharAt(data.length()-1);
 		}
-		
+
 		data.append("]");
-		
-		final JSONArray arr = put(webConv, url.toString(), data.toString()).getJSONArray("data");
-		final int[] notDeleted = new int[arr.length()];
-		
+
+        JSONObject response = put(webConv, url.toString(), data.toString());
+        final JSONArray arr = response.getJSONArray("data");
+		final int[][] notDeleted = new int[arr.length()][2];
+
 		for(int i = 0; i < arr.length(); i++) {
-			notDeleted[i] = arr.getInt(i);
-		}
-		
+			notDeleted[i][0] = arr.getJSONObject(i).getInt("id");
+            notDeleted[i][1] = arr.getJSONObject(i).getInt("folder");
+  }
+
 		return notDeleted;
-	}
+    }
 
     public int[] deleteSingle(final WebConversation webConv, final String hostname, final String sessionId, final long timestamp, final int folder, final int id) throws JSONException, IOException, SAXException {
-        final StringBuffer url = getUrl(sessionId,"delete", hostname);
-		url.append("&timestamp=");
-		url.append(timestamp);
-
-
-        final StringBuffer data = new StringBuffer();
-
-        data.append("{folder : ");
-        data.append(folder);
-        data.append(", id : ");
-        data.append(id);
-        data.append("}");
-
-
-		final JSONArray arr = put(webConv, url.toString(), data.toString()).getJSONArray("data");
-		final int[] notDeleted = new int[arr.length()];
-
-		for(int i = 0; i < arr.length(); i++) {
-			notDeleted[i] = arr.getInt(i);
-		}
-
-		return notDeleted;
+        return delete(webConv, hostname, sessionId, timestamp, new int[][] {{folder, id}});
     }
 
     public int[] detach(final WebConversation webConv, final String hostname, final String sessionId, final long timestamp, final int objectId, final int[] versions) throws MalformedURLException, JSONException, IOException, SAXException {
