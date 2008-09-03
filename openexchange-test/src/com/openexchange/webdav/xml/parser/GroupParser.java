@@ -64,7 +64,7 @@ public class GroupParser extends DataParser {
 		
 	}
 	
-	public void parse(final Group groupObj, final Element eProp) throws Exception {
+	public void parse(final Group groupObj, final Element eProp) {
 		groupObj.setIdentifier(getValueAsInt(eProp.getChild("uid", XmlServlet.NS)));
 		groupObj.setLastModified(getValueAsDate(eProp.getChild(DataFields.LAST_MODIFIED, XmlServlet.NS)));
 		groupObj.setDisplayName(getValue(eProp.getChild("displayname", XmlServlet.NS)));
@@ -72,7 +72,7 @@ public class GroupParser extends DataParser {
 		parseMembers(groupObj, eProp.getChild("members", XmlServlet.NS));
 	}
 	
-	public void parseMembers(final Group groupObj, final Element eMembers) throws Exception {
+	public void parseMembers(final Group groupObj, final Element eMembers) {
 		final List memberList = eMembers.getChildren("memberuid", XmlServlet.NS);
 		
 		final int[] member = new int[memberList.size()];

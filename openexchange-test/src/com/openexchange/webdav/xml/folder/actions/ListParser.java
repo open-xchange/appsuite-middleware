@@ -47,52 +47,47 @@
  *
  */
 
-package com.openexchange.webdav;
+package com.openexchange.webdav.xml.folder.actions;
 
-import com.openexchange.webdav.xml.framework.WebDAVClient;
-import com.openexchange.webdav.xml.framework.WebDAVClient.User;
+import org.jdom.Document;
 
-import junit.framework.TestCase;
+import com.openexchange.api.OXConflictException;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.TestException;
+import com.openexchange.webdav.xml.framework.AbstractWebDAVParser;
+import com.openexchange.webdav.xml.parser.ResponseParser;
+import com.openexchange.webdav.xml.types.Response;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractWebDAVSession extends TestCase {
-
-    private WebDAVClient client;
+public final class ListParser extends AbstractWebDAVParser<ListResponse> {
 
     /**
      * Default constructor.
-     * @param name test name.
      */
-    public AbstractWebDAVSession(final String name) {
-        super(name);
+    ListParser() {
+        super();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = new WebDAVClient(User.User1);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void tearDown() throws Exception {
-        client.logout();
-        client = null;
-        super.tearDown();
-    }
-
-    /**
-     * @return the client
-     */
-    protected final WebDAVClient getClient() {
-        return client;
+    protected ListResponse createResponse(final Document document) throws OXConflictException, TestException {
+        final ListResponse retval = new ListResponse(document);
+        final Response[] responses = ResponseParser.parse(document, Types.FOLDER);
+        retval.setResponses(responses);
+        final FolderObject[] folders = new FolderObject[responses.length];
+        for (int a = 0; a < folders.length; a++) {
+            if (responses[a].hasError()) {
+                fail(responses[a].getErrorMessage());
+            }
+            folders[a] = (FolderObject) responses[a].getDataObject();
+        }
+        retval.setFolders(folders);
+        return retval;
     }
 }

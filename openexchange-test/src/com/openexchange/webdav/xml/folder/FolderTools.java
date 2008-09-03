@@ -47,52 +47,49 @@
  *
  */
 
-package com.openexchange.webdav;
+package com.openexchange.webdav.xml.folder;
 
+import java.io.IOException;
+import java.util.Date;
+
+import org.jdom.JDOMException;
+
+import com.openexchange.api.OXConflictException;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.TestException;
+import com.openexchange.webdav.xml.folder.actions.ListRequest;
+import com.openexchange.webdav.xml.folder.actions.ListResponse;
 import com.openexchange.webdav.xml.framework.WebDAVClient;
-import com.openexchange.webdav.xml.framework.WebDAVClient.User;
-
-import junit.framework.TestCase;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractWebDAVSession extends TestCase {
+public final class FolderTools {
 
-    private WebDAVClient client;
+    private final WebDAVClient client;
+
+    private FolderObject defaultAppointmentFolder;
 
     /**
      * Default constructor.
-     * @param name test name.
      */
-    public AbstractWebDAVSession(final String name) {
-        super(name);
+    public FolderTools(final WebDAVClient client) {
+        super();
+        this.client = client;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = new WebDAVClient(User.User1);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void tearDown() throws Exception {
-        client.logout();
-        client = null;
-        super.tearDown();
-    }
-
-    /**
-     * @return the client
-     */
-    protected final WebDAVClient getClient() {
-        return client;
+    public FolderObject getDefaultAppointmentFolder() throws IOException, JDOMException, OXConflictException, TestException {
+        if (null == defaultAppointmentFolder) {
+            final ListRequest request = new ListRequest(new Date(0));
+            final ListResponse response = client.execute(request);
+            for (final FolderObject folder : response) {
+                if (folder.isDefaultFolder() && folder.getModule() == FolderObject.CALENDAR) {
+                    defaultAppointmentFolder = folder;
+                    break;
+                }
+            }
+        }
+        return defaultAppointmentFolder;
     }
 }

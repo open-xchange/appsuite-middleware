@@ -47,52 +47,61 @@
  *
  */
 
-package com.openexchange.webdav;
+package com.openexchange.webdav.xml.folder.actions;
 
-import com.openexchange.webdav.xml.framework.WebDAVClient;
-import com.openexchange.webdav.xml.framework.WebDAVClient.User;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Date;
 
-import junit.framework.TestCase;
+import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
+import org.apache.commons.httpclient.methods.RequestEntity;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.Namespace;
+import org.jdom.output.XMLOutputter;
+
+import com.openexchange.webdav.xml.XmlServlet;
 
 /**
- *
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractWebDAVSession extends TestCase {
+public final class ListRequest extends AbstractFolderRequest<ListResponse> {
 
-    private WebDAVClient client;
+    private final Date lastModified;
 
     /**
      * Default constructor.
-     * @param name test name.
      */
-    public AbstractWebDAVSession(final String name) {
-        super(name);
+    public ListRequest(final Date lastModified) {
+        super();
+        this.lastModified = lastModified;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = new WebDAVClient(User.User1);
+    public RequestEntity getEntity() throws IOException {
+        final Namespace webdav = Namespace.getNamespace("D", "DAV:");
+        final Element propfind = new Element("propfind", webdav);
+        final Element prop = new Element("prop", webdav);
+        propfind.addContent(prop);
+
+        final Element lastSync = new Element("lastsync", XmlServlet.NS);
+        prop.addContent(lastSync);
+        lastSync.addContent(String.valueOf(lastModified.getTime()));
+
+        final Element objectmode = new Element("objectmode", XmlServlet.NS);
+        prop.addContent(objectmode);
+        objectmode.addContent("NEW_AND_MODIFIED,DELETED");
+
+        final Document doc = new Document(propfind);
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final XMLOutputter xo = new XMLOutputter();
+        xo.output(doc, baos);
+
+        return new ByteArrayRequestEntity(baos.toByteArray());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void tearDown() throws Exception {
-        client.logout();
-        client = null;
-        super.tearDown();
+    public ListParser getParser() {
+        return new ListParser();
     }
 
-    /**
-     * @return the client
-     */
-    protected final WebDAVClient getClient() {
-        return client;
-    }
 }

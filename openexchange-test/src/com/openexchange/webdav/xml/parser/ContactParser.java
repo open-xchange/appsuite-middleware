@@ -67,7 +67,7 @@ public class ContactParser extends CommonParser {
 		
 	}
 	
-	protected void parse(final ContactObject contactObj, final Element eProp) throws Exception {
+	protected void parse(final ContactObject contactObj, final Element eProp) {
 		if (hasElement(eProp.getChild("uid", XmlServlet.NS))) {
 			contactObj.setInternalUserId(getValueAsInt(eProp.getChild("uid", XmlServlet.NS)));
 		}
@@ -463,7 +463,7 @@ public class ContactParser extends CommonParser {
 	}
 	
 	
-	protected void parseElementDistributionlists(final ContactObject contactObj, final Element eDistributionList) throws Exception {
+	protected void parseElementDistributionlists(final ContactObject contactObj, final Element eDistributionList) {
 		final ArrayList distributionlist = new ArrayList();
 		
 		final List elementEntries = eDistributionList.getChildren("email", XmlServlet.NS);
@@ -481,7 +481,7 @@ public class ContactParser extends CommonParser {
 		contactObj.setDistributionList((DistributionListEntryObject[])distributionlist.toArray(new DistributionListEntryObject[distributionlist.size()]));
 	}
 	
-	protected void parseElementEntry(final Element e, final DistributionListEntryObject entry) throws Exception {
+	protected void parseElementEntry(final Element e, final DistributionListEntryObject entry) {
 		String s = null;
 		
 		if ((s = e.getAttributeValue(ContactFields.ID, XmlServlet.NS)) != null) {
@@ -494,7 +494,7 @@ public class ContactParser extends CommonParser {
 		entry.setEmailaddress(getValue(e));
 	}
 	
-	protected void parseElementLinks(final ContactObject contactObj, final Element eLinks) throws Exception {
+	protected void parseElementLinks(final ContactObject contactObj, final Element eLinks) {
 		final ArrayList links = new ArrayList();
 		
 		final List elementEntries = eLinks.getChildren("link", XmlServlet.NS);
@@ -512,7 +512,7 @@ public class ContactParser extends CommonParser {
 		contactObj.setLinks((LinkEntryObject[])links.toArray(new LinkEntryObject[links.size()]));
 	}
 	
-	protected void parseElementLink(final Element e, final LinkEntryObject link) throws Exception {
+	protected void parseElementLink(final Element e, final LinkEntryObject link) {
 		link.setLinkDisplayname(e.getAttributeValue(ContactFields.DISPLAY_NAME, XmlServlet.NS));
 		link.setLinkID(getValueAsInt(e));
 	}

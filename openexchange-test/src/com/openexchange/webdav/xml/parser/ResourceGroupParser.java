@@ -63,13 +63,13 @@ public class ResourceGroupParser extends DataParser {
 		
 	}
 	
-	public void parse(final ResourceGroup resourcegroupObj, final Element eProp) throws Exception {
+	public void parse(final ResourceGroup resourcegroupObj, final Element eProp) {
 		resourcegroupObj.setId(getValueAsInt(eProp.getChild("uid", XmlServlet.NS)));
 		
 		parseMembers(resourcegroupObj, eProp.getChild("members", XmlServlet.NS));
 	}
 	
-	public void parseMembers(final ResourceGroup resourcegroupObj, final Element eMembers) throws Exception {
+	public void parseMembers(final ResourceGroup resourcegroupObj, final Element eMembers) {
 		final List memberList = eMembers.getChildren("memberuid", XmlServlet.NS);
 		
 		final int[] member = new int[memberList.size()];

@@ -69,7 +69,8 @@ import com.openexchange.webdav.xml.fields.CalendarFields;
 
 public abstract class CalendarParser extends CommonParser {
 	
-	protected void parseElementCalendar(final CalendarObject calendarobject, final Element eProp) throws Exception {		if (hasElement(eProp.getChild(CalendarFields.RECURRENCE_ID, XmlServlet.NS))) {
+	protected void parseElementCalendar(final CalendarObject calendarobject, final Element eProp) throws OXConflictException {
+    if (hasElement(eProp.getChild(CalendarFields.RECURRENCE_ID, XmlServlet.NS))) {
 		calendarobject.setRecurrenceID(getValueAsInt(eProp.getChild(CalendarFields.RECURRENCE_ID, XmlServlet.NS)));
 	}
 	
@@ -132,7 +133,7 @@ public abstract class CalendarParser extends CommonParser {
 	parseElementCommon(calendarobject, eProp);
 	}
 	
-	protected int parseRecurrenceType(final String value) throws Exception {
+	protected int parseRecurrenceType(final String value) throws OXConflictException {
 		if (value.equals("none")) {
 			return CalendarObject.NONE;
 		} else if (value.equals("daily")) {
@@ -148,7 +149,7 @@ public abstract class CalendarParser extends CommonParser {
 		}
 	}
 	
-	protected void parseElementParticipants(final CalendarObject calendarObj, final Element eParticipant) throws Exception {
+	protected void parseElementParticipants(final CalendarObject calendarObj, final Element eParticipant) throws OXConflictException {
 		if (eParticipant == null) {
 			return ;
 		}
@@ -189,7 +190,7 @@ public abstract class CalendarParser extends CommonParser {
 	}
 	
 	
-	private void parseElementUser(final Element e, final Participants participants) throws Exception {
+	private void parseElementUser(final Element e, final Participants participants) throws OXConflictException {
 		Participant participant = null;
 		
 		final String external = e.getAttributeValue("external", XmlServlet.NS);
@@ -221,7 +222,7 @@ public abstract class CalendarParser extends CommonParser {
 		participants.add(participant);
 	}
 	
-	private void parseElementGroup(final Element e, final Participants participants) throws Exception {
+	private void parseElementGroup(final Element e, final Participants participants) {
 		Participant participant = null;
 		
 		final String external = e.getAttributeValue("external", XmlServlet.NS);
@@ -236,7 +237,7 @@ public abstract class CalendarParser extends CommonParser {
 		participants.add(participant);
 	}
 	
-	private void parseElementResource(final Element e, final Participants participants) throws Exception {
+	private void parseElementResource(final Element e, final Participants participants) {
 		final int resourceId = getValueAsInt(e);
 		final Participant p = new ResourceParticipant(resourceId);
 		participants.add(p);

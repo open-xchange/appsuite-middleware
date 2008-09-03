@@ -45,6 +45,7 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
 
+import com.openexchange.api.OXConflictException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -67,11 +68,11 @@ public class ResponseParser {
 	
 	public static final Namespace webdav = Namespace.getNamespace("D", "DAV:");
 	
-	public static Response[] parse(final Document doc, final int module) throws Exception {
+	public static Response[] parse(final Document doc, final int module) throws OXConflictException, TestException {
 		return parse(doc, module, false);
 	}
 	
-	public static Response[] parse(final Document doc, final int module, final boolean bList) throws Exception {
+	public static Response[] parse(final Document doc, final int module, final boolean bList) throws OXConflictException, TestException {
 		final Element rootElement = doc.getRootElement();
 		final List responseElements = rootElement.getChildren("response", webdav);
 		
@@ -94,7 +95,7 @@ public class ResponseParser {
 		return response;
 	}
 	
-	protected static Response parseResponse(final Element eResponse, final int module, final boolean bList) throws Exception {
+	protected static Response parseResponse(final Element eResponse, final int module, final boolean bList) throws OXConflictException, TestException {
 		final Response response = new Response();
 		
 		final Element ePropstat = eResponse.getChild("propstat", webdav);
@@ -136,7 +137,7 @@ public class ResponseParser {
 		return response;
 	}
 	
-	protected static int[] parseList(final Element eProp) throws Exception {
+	protected static int[] parseList(final Element eProp) {
 		final Element eIdList = eProp.getChild("object_list", XmlServlet.NS);
 		final List idList = eIdList.getChildren(DataFields.ID, XmlServlet.NS);
 		final int[] idArray = new int[idList.size()];
@@ -147,7 +148,7 @@ public class ResponseParser {
 		return idArray;
 	}
 	
-	protected static Response[] parseGroupUserResponse(final Element eResponse) throws Exception {
+	protected static Response[] parseGroupUserResponse(final Element eResponse) {
 		final Element ePropstat = eResponse.getChild("propstat", webdav);
 		final Element eProp = ePropstat.getChild("prop", webdav);
 		final Element eUsers = eProp.getChild("users", XmlServlet.NS);
@@ -227,35 +228,35 @@ public class ResponseParser {
 		return response;
 	}
 	
-	protected static AppointmentObject parseAppointmentResponse(final Element eProp) throws Exception {
+	protected static AppointmentObject parseAppointmentResponse(final Element eProp) throws OXConflictException {
 		final AppointmentObject appointmentObj = new AppointmentObject();
 		final AppointmentParser appointmentParser = new AppointmentParser();
 		appointmentParser.parse(appointmentObj, eProp);
 		return appointmentObj;
 	}
 	
-	protected static ContactObject parseContactResponse(final Element eProp) throws Exception {
+	protected static ContactObject parseContactResponse(final Element eProp) {
 		final ContactObject contactObj = new ContactObject();
 		final ContactParser contactParser = new ContactParser();
 		contactParser.parse(contactObj, eProp);
 		return contactObj;
 	}
 	
-	protected static FolderObject parseFolderResponse(final Element eProp) throws Exception {
+	protected static FolderObject parseFolderResponse(final Element eProp) throws OXConflictException, TestException {
 		final FolderObject folderObj = new FolderObject();
 		final FolderParser folderParser = new FolderParser();
 		folderParser.parse(folderObj, eProp);
 		return folderObj;
 	}
 	
-	protected static Task parseTaskResponse(final Element eProp) throws Exception {
+	protected static Task parseTaskResponse(final Element eProp) throws OXConflictException {
 		final Task taskObj = new Task();
 		final TaskParser taskParser = new TaskParser();
 		taskParser.parse(taskObj, eProp);
 		return taskObj;
 	}
 	
-	protected static ContactObject parseUserResponse(final Element eProp) throws Exception {
+	protected static ContactObject parseUserResponse(final Element eProp) {
 		final ContactObject contactObj = new ContactObject();
 		final ContactParser contactParser = new ContactParser();
 		contactParser.parse(contactObj, eProp);
@@ -275,21 +276,21 @@ public class ResponseParser {
 		return contactObj;
 	}
 	
-	protected static Group parseGroupResponse(final Element eProp) throws Exception {
+	protected static Group parseGroupResponse(final Element eProp) {
 		final Group groupObj = new Group();
 		final GroupParser groupParser = new GroupParser();
 		groupParser.parse(groupObj, eProp);
 		return groupObj;
 	}
 	
-	protected static Resource parseResourceResponse(final Element eProp) throws Exception {
+	protected static Resource parseResourceResponse(final Element eProp) {
 		final Resource resourceObj = new Resource();
 		final ResourceParser resourceParser = new ResourceParser();
 		resourceParser.parse(resourceObj, eProp);
 		return resourceObj;
 	}
 	
-	protected static ResourceGroup parseResourceGroupResponse(final Element eProp) throws Exception {
+	protected static ResourceGroup parseResourceGroupResponse(final Element eProp) {
 		final ResourceGroup resourcegroupObj = new ResourceGroup();
 		final ResourceGroupParser resourcegroupParser = new ResourceGroupParser();
 		resourcegroupParser.parse(resourcegroupObj, eProp);

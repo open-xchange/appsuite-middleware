@@ -47,32 +47,24 @@
  *
  */
 
-package com.openexchange.webdav.framework;
+package com.openexchange.webdav.xml.framework;
 
-import com.meterware.httpunit.WebConversation;
+import org.jdom.Document;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class WebDAVSession {
+public abstract class AbstractWebDAVResponse {
 
-    private final WebConversation conversation;
-
-    public WebDAVSession() {
-        this(new WebConversation());
-    }
-
-    public WebDAVSession(final WebConversation conversation) {
-        super();
-        this.conversation = conversation;
-        conversation.getClientProperties().setAcceptGzip(false);
-    }
+    private final Document document;
 
     /**
-     * @return the conversation
+     * Default constructor.
      */
-    public WebConversation getConversation() {
-        return conversation;
+    protected AbstractWebDAVResponse(final Document document) {
+        super();
+        this.document = document;
     }
+
 }

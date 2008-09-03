@@ -63,7 +63,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
 
 public abstract class DataParser {
 	
-	protected void parseElement(final DataObject dataobject, final Element eProp) throws Exception {
+	protected void parseElement(final DataObject dataobject, final Element eProp) {
 		if (hasElement(eProp.getChild(DataFields.OBJECT_ID, XmlServlet.NS))) {
 			dataobject.setObjectID(getValueAsInt(eProp.getChild(DataFields.OBJECT_ID, XmlServlet.NS)));
 		} 
@@ -81,7 +81,7 @@ public abstract class DataParser {
 		} 
 	}
 	
-	public static int getValueAsInt(final Element e) throws XmlPullParserException, IOException {
+	public static int getValueAsInt(final Element e) {
 		if (e == null) {
 			return 0;
 		}
@@ -95,7 +95,7 @@ public abstract class DataParser {
 		}
 	}
 	
-	public static float getValueAsFloat(final Element e) throws Exception {
+	public static float getValueAsFloat(final Element e) {
 		if (e == null) {
 			return 0;
 		}
@@ -109,7 +109,7 @@ public abstract class DataParser {
 		}
 	}
 	
-	public static long getValueAsLong(final Element e) throws Exception {
+	public static long getValueAsLong(final Element e) {
 		if (e == null) {
 			return 0;
 		}
@@ -123,7 +123,7 @@ public abstract class DataParser {
 		}
 	}
 	
-	public static Date getValueAsDate(final Element e) throws Exception {
+	public static Date getValueAsDate(final Element e) {
 		if (e == null) {
 			return null;
 		}
@@ -137,7 +137,7 @@ public abstract class DataParser {
 		}
 	}
 	
-	public static boolean getValueAsBoolean(final Element e) throws Exception {
+	public static boolean getValueAsBoolean(final Element e) {
 		if (e == null) {
 			return false;
 		}
@@ -150,7 +150,7 @@ public abstract class DataParser {
 		return false;
 	}
 	
-	public static String getValue(final Element e) throws Exception {
+	public static String getValue(final Element e) {
 		if (e == null) {
 			return null;
 		}
@@ -163,7 +163,7 @@ public abstract class DataParser {
 		return s;
 	}
 	
-	public static boolean hasElement(final Element e) throws Exception {
+	public static boolean hasElement(final Element e) {
 		return (e != null);
 	}
 }

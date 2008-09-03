@@ -47,52 +47,43 @@
  *
  */
 
-package com.openexchange.webdav;
+package com.openexchange.webdav.xml.framework;
 
-import com.openexchange.webdav.xml.framework.WebDAVClient;
-import com.openexchange.webdav.xml.framework.WebDAVClient.User;
+import java.io.IOException;
 
-import junit.framework.TestCase;
+import org.jdom.JDOMException;
+
+import com.openexchange.api.OXConflictException;
+import com.openexchange.configuration.WebDAVConfig;
+import com.openexchange.configuration.WebDAVConfig.Property;
+import com.openexchange.test.TestException;
+import com.openexchange.webdav.xml.request.PropFindMethod;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractWebDAVSession extends TestCase {
-
-    private WebDAVClient client;
+public final class Executor {
 
     /**
-     * Default constructor.
-     * @param name test name.
+     * Prevent instantation.
      */
-    public AbstractWebDAVSession(final String name) {
-        super(name);
+    private Executor() {
+        super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = new WebDAVClient(User.User1);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void tearDown() throws Exception {
-        client.logout();
-        client = null;
-        super.tearDown();
-    }
-
-    /**
-     * @return the client
-     */
-    protected final WebDAVClient getClient() {
-        return client;
+    public static <T extends AbstractWebDAVResponse> T execute(final WebDAVClient client,
+        final WebDAVRequest<T> request) throws IOException, JDOMException, OXConflictException, TestException {
+        final String urlString = WebDAVConfig.getProperty(Property.PROTOCOL)
+            + "://" + WebDAVConfig.getProperty(Property.HOSTNAME)
+            + request.getServletPath();
+        final PropFindMethod method = new PropFindMethod(urlString);
+        method.setDoAuthentication(true);
+        method.setRequestEntity(request.getEntity());
+        final int status = client.getSession().getClient().executeMethod(method);
+        final AbstractWebDAVParser<T> parser = request.getParser();
+        parser.checkResponse(status);
+        final T retval = parser.parse(method);
+        return retval;
     }
 }

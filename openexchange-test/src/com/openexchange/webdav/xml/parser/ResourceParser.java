@@ -62,7 +62,7 @@ public class ResourceParser extends DataParser {
 		
 	}
 	
-	public void parse(final Resource resourceObj, final Element eProp) throws Exception {
+	public void parse(final Resource resourceObj, final Element eProp) {
 		resourceObj.setIdentifier(getValueAsInt(eProp.getChild("uid", XmlServlet.NS)));
 		resourceObj.setLastModified(getValueAsDate(eProp.getChild(DataFields.LAST_MODIFIED, XmlServlet.NS)));
 		resourceObj.setDisplayName(getValue(eProp.getChild("displayname", XmlServlet.NS)));

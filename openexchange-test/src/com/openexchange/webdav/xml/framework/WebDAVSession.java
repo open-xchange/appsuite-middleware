@@ -47,77 +47,31 @@
  *
  */
 
-package com.openexchange.webdav.framework;
+package com.openexchange.webdav.xml.framework;
 
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.WebDAVConfig;
-import com.openexchange.configuration.WebDAVConfig.Property;
+import org.apache.commons.httpclient.HttpClient;
 
 /**
- * This class implements the temporary memory of a WebDAV client and provides
- * some convenience methods to determine user specific values for running some
- * tests more easily.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class WebDAVClient {
+public class WebDAVSession {
 
-    private final WebDAVSession session;
+    private final HttpClient client;
 
-    /**
-     * Default constructor.
-     */
-    public WebDAVClient(final WebDAVSession session) {
-        this.session = session;
+    public WebDAVSession() {
+        this(new HttpClient());
     }
 
-    public WebDAVClient(final User user) throws ConfigurationException {
-        WebDAVConfig.init();
-//        final String login = WebDAVConfig.getProperty(user.login);
-//        final String password = WebDAVConfig.getProperty(user.password);
-        session = new WebDAVSession();
-//        session.setId(LoginTools.login(session, new LoginRequest(login,
-//            password)).getSessionId());
-    }
-
-    public enum User {
-        User1(Property.LOGIN, Property.PASSWORD),
-        User2(Property.SECONDUSER, Property.PASSWORD);
-        private Property login;
-        private Property password;
-        private User(final Property login, final Property password) {
-            this.login = login;
-            this.password = password;
-        }
-        
-        public Property getLogin() {
-        	return login;
-        }
-        
-        public Property getPassword() {
-        	return password;
-        }
+    public WebDAVSession(final HttpClient client) {
+        super();
+        this.client = client;
     }
 
     /**
-     * @return the session
+     * @return the conversation
      */
-    public WebDAVSession getSession() {
-        return session;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            logout();
-        } finally {  
-            super.finalize();
-        }
-    }
-
-    public void logout() {
-        session.getConversation().clearContents();
+    public HttpClient getClient() {
+        return client;
     }
 }

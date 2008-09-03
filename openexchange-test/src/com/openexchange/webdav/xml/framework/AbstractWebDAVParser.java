@@ -47,52 +47,45 @@
  *
  */
 
-package com.openexchange.webdav;
+package com.openexchange.webdav.xml.framework;
 
-import com.openexchange.webdav.xml.framework.WebDAVClient;
-import com.openexchange.webdav.xml.framework.WebDAVClient.User;
+import java.io.IOException;
 
-import junit.framework.TestCase;
+import org.jdom.Document;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
+
+import com.openexchange.api.OXConflictException;
+import com.openexchange.test.TestException;
+import com.openexchange.webdav.xml.parser.ResponseParser;
+import com.openexchange.webdav.xml.request.PropFindMethod;
+import com.openexchange.webdav.xml.types.Response;
+
+import junit.framework.Assert;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractWebDAVSession extends TestCase {
+public abstract class AbstractWebDAVParser<T extends AbstractWebDAVResponse> extends Assert {
 
-    private WebDAVClient client;
+    private final SAXBuilder builder = new SAXBuilder();
 
     /**
      * Default constructor.
-     * @param name test name.
      */
-    public AbstractWebDAVSession(final String name) {
-        super(name);
+    public AbstractWebDAVParser() {
+        super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = new WebDAVClient(User.User1);
+    public void checkResponse(final int status) {
+        assertEquals("Response code is not okay.", 207, status);        
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void tearDown() throws Exception {
-        client.logout();
-        client = null;
-        super.tearDown();
+    public T parse(final PropFindMethod method) throws JDOMException, IOException, OXConflictException, TestException {
+        final Document document = builder.build(method.getResponseBodyAsStream());
+        return createResponse(document);
     }
 
-    /**
-     * @return the client
-     */
-    protected final WebDAVClient getClient() {
-        return client;
-    }
+    protected abstract T createResponse(final Document document) throws OXConflictException, TestException;
 }

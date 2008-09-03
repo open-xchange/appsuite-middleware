@@ -60,7 +60,7 @@ import com.openexchange.webdav.xml.fields.CommonFields;
 
 public abstract class CommonParser extends FolderChildParser {
 		
-	protected void parseElementCommon(final CommonObject commonobject, final Element eProp) throws Exception {
+	protected void parseElementCommon(final CommonObject commonobject, final Element eProp) {
 		if (hasElement(eProp.getChild(CommonFields.CATEGORIES, XmlServlet.NS))) {
 			commonobject.setCategories(getValue(eProp.getChild(CommonFields.CATEGORIES, XmlServlet.NS)));
 		} 
@@ -80,7 +80,7 @@ public abstract class CommonParser extends FolderChildParser {
 		parseElementFolderChildObject(commonobject, eProp);
 	}
 	
-	protected void parseElementAttachments(final CommonObject commonobject, final Element eAttachments) throws Exception {
+	protected void parseElementAttachments(final CommonObject commonobject, final Element eAttachments) {
 		final List elementEntries = eAttachments.getChildren("attachment", XmlServlet.NS);
 		
 		if (elementEntries == null) {

@@ -47,52 +47,30 @@
  *
  */
 
-package com.openexchange.webdav;
+package com.openexchange.webdav.xml.folder.actions;
 
-import com.openexchange.webdav.xml.framework.WebDAVClient;
-import com.openexchange.webdav.xml.framework.WebDAVClient.User;
-
-import junit.framework.TestCase;
+import com.openexchange.webdav.xml.framework.AbstractWebDAVResponse;
+import com.openexchange.webdav.xml.framework.WebDAVRequest;
+import com.openexchange.webdav.xml.FolderTest;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractWebDAVSession extends TestCase {
-
-    private WebDAVClient client;
+public abstract class AbstractFolderRequest<T extends AbstractWebDAVResponse> implements WebDAVRequest<T> {
 
     /**
      * Default constructor.
-     * @param name test name.
      */
-    public AbstractWebDAVSession(final String name) {
-        super(name);
+    protected AbstractFolderRequest() {
+        super();
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = new WebDAVClient(User.User1);
+    public String getServletPath() {
+        return FolderTest.FOLDER_URL;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void tearDown() throws Exception {
-        client.logout();
-        client = null;
-        super.tearDown();
-    }
-
-    /**
-     * @return the client
-     */
-    protected final WebDAVClient getClient() {
-        return client;
-    }
 }

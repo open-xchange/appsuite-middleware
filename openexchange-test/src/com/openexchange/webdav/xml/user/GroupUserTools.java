@@ -47,52 +47,19 @@
  *
  */
 
-package com.openexchange.webdav;
-
-import com.openexchange.webdav.xml.framework.WebDAVClient;
-import com.openexchange.webdav.xml.framework.WebDAVClient.User;
-
-import junit.framework.TestCase;
+package com.openexchange.webdav.xml.user;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractWebDAVSession extends TestCase {
-
-    private WebDAVClient client;
+public final class GroupUserTools {
 
     /**
-     * Default constructor.
-     * @param name test name.
+     * Prevent instantiation.
      */
-    public AbstractWebDAVSession(final String name) {
-        super(name);
+    private GroupUserTools() {
+        super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = new WebDAVClient(User.User1);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void tearDown() throws Exception {
-        client.logout();
-        client = null;
-        super.tearDown();
-    }
-
-    /**
-     * @return the client
-     */
-    protected final WebDAVClient getClient() {
-        return client;
-    }
 }

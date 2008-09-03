@@ -47,52 +47,52 @@
  *
  */
 
-package com.openexchange.webdav;
+package com.openexchange.webdav.xml.appointment.recurrence;
 
+import java.util.Calendar;
+import java.util.TimeZone;
+
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.webdav.AbstractWebDAVSession;
 import com.openexchange.webdav.xml.framework.WebDAVClient;
-import com.openexchange.webdav.xml.framework.WebDAVClient.User;
-
-import junit.framework.TestCase;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractWebDAVSession extends TestCase {
-
-    private WebDAVClient client;
+public final class Bug10859Test2 extends AbstractWebDAVSession {
 
     /**
      * Default constructor.
-     * @param name test name.
+     * @param name test name
      */
-    public AbstractWebDAVSession(final String name) {
+    public Bug10859Test2(final String name) {
         super(name);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = new WebDAVClient(User.User1);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void tearDown() throws Exception {
-        client.logout();
-        client = null;
-        super.tearDown();
-    }
-
-    /**
-     * @return the client
-     */
-    protected final WebDAVClient getClient() {
-        return client;
+    public void testYearly() throws Throwable {
+        final WebDAVClient client = getClient();
+        final FolderObject folder = client.getFolderTools().getDefaultAppointmentFolder();
+        System.out.println(folder);
+        final TimeZone tz = TimeZone.getTimeZone("Europe/Berlin");
+        final Calendar calendar = Calendar.getInstance(tz);
+        calendar.set(Calendar.HOUR, 12);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        final AppointmentObject appointment = new AppointmentObject();
+        appointment.setTitle("Test appointment for bug 10859");
+//        appointment.setParentFolderID(appointmentFolderId);
+//        appointment.setStartDate(calendar.getTime());
+//        calendar.add(Calendar.HOUR, -1);
+//        appointment.setEndDate(calendar.getTime());
+//        appointment.setRecurrenceType(AppointmentObject.YEARLY);
+//        appointment.setInterval(1);
+//        appointment.setMonth(calendar.get(Calendar.MONTH));
+//        appointment.setDayInMonth(calendar.get(Calendar.DAY_OF_MONTH));
+//        appointment.setIgnoreConflicts(true);
+//        final int objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword());
+//        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
     }
 }

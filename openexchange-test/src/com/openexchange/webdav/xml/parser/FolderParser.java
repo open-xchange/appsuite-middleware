@@ -69,7 +69,7 @@ public class FolderParser extends FolderChildParser {
 		
 	}
 	
-	public void parse(final FolderObject folderObj, final Element eProp) throws Exception {
+	public void parse(final FolderObject folderObj, final Element eProp) throws OXConflictException, TestException {
 		if (hasElement(eProp.getChild(FolderFields.TITLE, XmlServlet.NS))) {
 			folderObj.setFolderName(getValue(eProp.getChild(FolderFields.TITLE, XmlServlet.NS)));
 		}
@@ -111,7 +111,7 @@ public class FolderParser extends FolderChildParser {
 		parseElementFolderChildObject(folderObj, eProp);
 	}
 	
-	protected void parseElementPermissions(final FolderObject folderObj, final Element ePermissions) throws Exception {
+	protected void parseElementPermissions(final FolderObject folderObj, final Element ePermissions) throws TestException {
 		final ArrayList permissions = new ArrayList();
 		
 		try {
@@ -140,18 +140,18 @@ public class FolderParser extends FolderChildParser {
 				
 				permissions.add(oclp);
 			}
-		} catch (final Exception exc) {
-			throw new TestException(exc);
-		}
+		} catch (final OXConflictException e) {
+            throw new TestException(e);
+        }
 		
 		folderObj.setPermissions(permissions);
 	}
 	
-	protected void parseEntity(final OCLPermission oclp, final Element e) throws Exception {
+	protected void parseEntity(final OCLPermission oclp, final Element e) {
 		oclp.setEntity( getValueAsInt(e));
 	}
 	
-	protected void parseElementPermissionAttributes(final OCLPermission oclp, final Element e) throws Exception {
+	protected void parseElementPermissionAttributes(final OCLPermission oclp, final Element e) {
 		final int fp = getPermissionAttributeValue(e, "folderpermission");
 		final int orp = getPermissionAttributeValue(e, "objectreadpermission");
 		final int owp = getPermissionAttributeValue(e, "objectwritepermission");
@@ -161,11 +161,11 @@ public class FolderParser extends FolderChildParser {
 		oclp.setFolderAdmin(getPermissionAdminFlag(e));
 	}
 	
-	protected int getPermissionAttributeValue(final Element e, final String name) throws Exception {
+	protected int getPermissionAttributeValue(final Element e, final String name) {
 		return Integer.parseInt(e.getAttributeValue(name, XmlServlet.NS));
 	}
 
-	protected boolean getPermissionAdminFlag(final Element e) throws Exception {
+	protected boolean getPermissionAdminFlag(final Element e) {
 		return Boolean.parseBoolean(e.getAttributeValue("admin_flag", XmlServlet.NS));
 	}
 }

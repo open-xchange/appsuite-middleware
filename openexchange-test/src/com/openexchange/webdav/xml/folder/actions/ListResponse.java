@@ -47,52 +47,63 @@
  *
  */
 
-package com.openexchange.webdav;
+package com.openexchange.webdav.xml.folder.actions;
 
-import com.openexchange.webdav.xml.framework.WebDAVClient;
-import com.openexchange.webdav.xml.framework.WebDAVClient.User;
+import java.util.Arrays;
+import java.util.Iterator;
 
-import junit.framework.TestCase;
+import org.jdom.Document;
+
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.webdav.xml.framework.AbstractWebDAVResponse;
+import com.openexchange.webdav.xml.types.Response;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractWebDAVSession extends TestCase {
+public final class ListResponse extends AbstractWebDAVResponse implements Iterable<FolderObject> {
 
-    private WebDAVClient client;
+    private Response[] responses;
+
+    private FolderObject[] folders;
 
     /**
-     * Default constructor.
-     * @param name test name.
+     * @param document
      */
-    public AbstractWebDAVSession(final String name) {
-        super(name);
+    public ListResponse(final Document document) {
+        super(document);
     }
 
     /**
-     * {@inheritDoc}
+     * @return the responses
      */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = new WebDAVClient(User.User1);
+    public final Response[] getResponses() {
+        return responses;
     }
 
     /**
-     * {@inheritDoc}
+     * @param responses the responses to set
      */
-    @Override
-    protected void tearDown() throws Exception {
-        client.logout();
-        client = null;
-        super.tearDown();
+    final void setResponses(final Response[] responses) {
+        this.responses = responses;
     }
 
     /**
-     * @return the client
+     * @return the folders
      */
-    protected final WebDAVClient getClient() {
-        return client;
+    public final FolderObject[] getFolders() {
+        return folders;
+    }
+
+    /**
+     * @param folders the folders to set
+     */
+    final void setFolders(FolderObject[] folders) {
+        this.folders = folders;
+    }
+
+    public Iterator<FolderObject> iterator() {
+        return Arrays.asList(folders).iterator();
     }
 }
