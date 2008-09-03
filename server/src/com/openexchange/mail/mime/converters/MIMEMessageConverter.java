@@ -58,6 +58,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.Enumeration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -650,6 +651,302 @@ public final class MIMEMessageConverter {
 		}
 	}
 
+	private static final EnumMap<MailField, MailMessageFieldFiller> FILLER_MAP_EXT = new EnumMap<MailField, MailMessageFieldFiller>(
+			MailField.class);
+
+	static {
+		FILLER_MAP_EXT.put(MailField.HEADERS, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
+				/*
+				 * From
+				 */
+				try {
+					mailMessage.addFrom((InternetAddress[]) extMimeMessage.getFrom());
+				} catch (final AddressException e) {
+					final String addrStr = extMimeMessage.getHeader(MessageHeaders.HDR_FROM, null);
+					if (LOG1.isDebugEnabled()) {
+						LOG1.debug("Unparseable internet address" + addrStr);
+					}
+					mailMessage.addFrom(new PlainTextAddress(addrStr));
+				}
+				/*
+				 * To, Cc, and Bcc
+				 */
+				try {
+					mailMessage.addTo((InternetAddress[]) extMimeMessage.getRecipients(Message.RecipientType.TO));
+				} catch (final AddressException e) {
+					final String[] addrs = extMimeMessage.getHeader(MessageHeaders.HDR_TO);
+					if (LOG1.isDebugEnabled()) {
+						LOG1.debug("Unparseable internet addresses" + addrs);
+					}
+					mailMessage.addTo(PlainTextAddress.getAddresses(addrs));
+				}
+				try {
+					mailMessage.addCc((InternetAddress[]) extMimeMessage.getRecipients(Message.RecipientType.CC));
+				} catch (final AddressException e) {
+					final String[] addrs = extMimeMessage.getHeader(MessageHeaders.HDR_CC);
+					if (LOG1.isDebugEnabled()) {
+						LOG1.debug("Unparseable internet addresses" + addrs);
+					}
+					mailMessage.addCc(PlainTextAddress.getAddresses(addrs));
+				}
+				try {
+					mailMessage.addBcc((InternetAddress[]) extMimeMessage.getRecipients(Message.RecipientType.BCC));
+				} catch (final AddressException e) {
+					final String[] addrs = extMimeMessage.getHeader(MessageHeaders.HDR_BCC);
+					if (LOG1.isDebugEnabled()) {
+						LOG1.debug("Unparseable internet addresses" + addrs);
+					}
+					mailMessage.addBcc(PlainTextAddress.getAddresses(addrs));
+				}
+				/*
+				 * Disposition-Notification-To
+				 */
+				{
+					InternetAddress[] dispNotTo = null;
+					final String addrStr = extMimeMessage.getHeader(MessageHeaders.HDR_DISP_NOT_TO, null);
+					if (null != addrStr) {
+						try {
+							dispNotTo = InternetAddress.parse(addrStr, true);
+						} catch (final AddressException e) {
+							dispNotTo = new InternetAddress[] { new PlainTextAddress(addrStr) };
+						}
+					}
+					if (null != dispNotTo && dispNotTo.length > 0) {
+						mailMessage.setDispositionNotification(dispNotTo[0]);
+					} else {
+						mailMessage.setDispositionNotification(null);
+					}
+				}
+				/*
+				 * Reply-To
+				 */
+				final StringBuilder sb = new StringBuilder(128);
+				{
+					InternetAddress[] replyTo = null;
+					try {
+						replyTo = (InternetAddress[]) extMimeMessage.getReplyTo();
+					} catch (final AddressException e) {
+						final String addrStr = extMimeMessage.getHeader(MessageHeaders.HDR_REPLY_TO, null);
+						if (null != addrStr) {
+							replyTo = new InternetAddress[] { new PlainTextAddress(addrStr) };
+						}
+					}
+					if (null != replyTo) {
+						sb.append(replyTo[0].toString());
+						for (int j = 1; j < replyTo.length; j++) {
+							sb.append(", ").append(replyTo[j].toString());
+						}
+						mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
+						sb.setLength(0);
+					}
+				}
+				/*
+				 * Subject
+				 */
+				mailMessage.setSubject(extMimeMessage.getSubject());
+				/*
+				 * Date
+				 */
+				mailMessage.setSentDate(extMimeMessage.getSentDate());
+				/*
+				 * X-Priority
+				 */
+				mailMessage.setPriority(extMimeMessage.getPriority());
+				/*
+				 * Message-Id
+				 */
+				{
+					final String messageId = extMimeMessage.getHeader(MessageHeaders.HDR_MESSAGE_ID, null);
+					if (null != messageId) {
+						mailMessage.addHeader(MessageHeaders.HDR_MESSAGE_ID, messageId);
+					}
+				}
+				/*
+				 * In-Reply-To
+				 */
+				{
+					final String[] inReplyTo = extMimeMessage.getHeader(MessageHeaders.HDR_IN_REPLY_TO);
+					if (null != inReplyTo) {
+						sb.append(inReplyTo[0]);
+						for (int j = 1; j < inReplyTo.length; j++) {
+							sb.append(", ").append(inReplyTo[j]);
+						}
+						mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
+						sb.setLength(0);
+					}
+				}
+				/*
+				 * References
+				 */
+				{
+					final String[] references = extMimeMessage.getHeader(MessageHeaders.HDR_REFERENCES);
+					if (null != references) {
+						sb.append(references[0]);
+						for (int j = 1; j < references.length; j++) {
+							sb.append(", ").append(references[j]);
+						}
+						mailMessage.addHeader(MessageHeaders.HDR_REFERENCES, sb.toString());
+						sb.setLength(0);
+					}
+				}
+				/*
+				 * All other
+				 */
+				for (final Enumeration<?> e = extMimeMessage.getNonMatchingHeaders(NON_MATCHING_HEADERS); e
+						.hasMoreElements();) {
+					final Header h = (Header) e.nextElement();
+					mailMessage.addHeader(h.getName(), h.getValue());
+				}
+			}
+		});
+		FILLER_MAP_EXT.put(MailField.ID, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				mailMessage.setMailId(((ExtendedMimeMessage) msg).getUid());
+			}
+		});
+		FILLER_MAP_EXT.put(MailField.FOLDER_ID, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				mailMessage.setFolder(((ExtendedMimeMessage) msg).getFullname());
+			}
+		});
+
+		FILLER_MAP_EXT.put(MailField.CONTENT_TYPE, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MailException,
+					MessagingException {
+				try {
+					mailMessage.setContentType(((ExtendedMimeMessage) msg).getContentType());
+				} catch (final MailException e) {
+					/*
+					 * Cannot occur
+					 */
+					LOG1.error(e.getLocalizedMessage(), e);
+				}
+				mailMessage.setHasAttachment(((ExtendedMimeMessage) msg).hasAttachment());
+			}
+		});
+
+		FILLER_MAP_EXT.put(MailField.FROM, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
+				try {
+					mailMessage.addFrom((InternetAddress[]) extMimeMessage.getFrom());
+				} catch (final AddressException e) {
+					final String addrStr = extMimeMessage.getHeader(MessageHeaders.HDR_FROM, null);
+					if (LOG1.isDebugEnabled()) {
+						LOG1.debug(new StringBuilder(128).append("Internet address could not be properly parsed, ")
+								.append("using plain address' string representation instead: ").append(addrStr)
+								.toString(), e);
+					}
+					mailMessage.addFrom(new PlainTextAddress(addrStr));
+				}
+			}
+		});
+		FILLER_MAP_EXT.put(MailField.TO, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
+				try {
+					mailMessage.addTo((InternetAddress[]) extMimeMessage.getRecipients(RecipientType.TO));
+				} catch (final AddressException e) {
+					if (LOG1.isDebugEnabled()) {
+						LOG1.debug(new StringBuilder(128).append("Internet addresses could not be properly parsed, ")
+								.append("using plain addresses' string representation instead.").toString(), e);
+					}
+					mailMessage.addTo(PlainTextAddress.getAddresses(extMimeMessage.getHeader(MessageHeaders.HDR_TO)));
+				}
+			}
+		});
+		FILLER_MAP_EXT.put(MailField.CC, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
+				try {
+					mailMessage.addCc((InternetAddress[]) extMimeMessage.getRecipients(RecipientType.CC));
+				} catch (final AddressException e) {
+					if (LOG1.isDebugEnabled()) {
+						LOG1.debug(new StringBuilder(128).append("Internet addresses could not be properly parsed, ")
+								.append("using plain addresses' string representation instead.").toString(), e);
+					}
+					mailMessage.addCc(PlainTextAddress.getAddresses(extMimeMessage.getHeader(MessageHeaders.HDR_CC)));
+				}
+			}
+		});
+		FILLER_MAP_EXT.put(MailField.BCC, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
+				try {
+					mailMessage.addBcc((InternetAddress[]) extMimeMessage.getRecipients(RecipientType.BCC));
+				} catch (final AddressException e) {
+					if (LOG1.isDebugEnabled()) {
+						LOG1.debug(new StringBuilder(128).append("Internet addresses could not be properly parsed, ")
+								.append("using plain addresses' string representation instead.").toString(), e);
+					}
+					mailMessage.addCc(PlainTextAddress.getAddresses(extMimeMessage.getHeader(MessageHeaders.HDR_BCC)));
+				}
+			}
+		});
+		FILLER_MAP_EXT.put(MailField.SUBJECT, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				mailMessage.setSubject(((ExtendedMimeMessage) msg).getSubject());
+			}
+		});
+		FILLER_MAP_EXT.put(MailField.SIZE, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				mailMessage.setSize(((ExtendedMimeMessage) msg).getSize());
+			}
+		});
+		FILLER_MAP_EXT.put(MailField.SENT_DATE, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				mailMessage.setSentDate(((ExtendedMimeMessage) msg).getSentDate());
+			}
+		});
+		FILLER_MAP_EXT.put(MailField.RECEIVED_DATE, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				mailMessage.setReceivedDate(((ExtendedMimeMessage) msg).getReceivedDate());
+			}
+		});
+		FILLER_MAP_EXT.put(MailField.FLAGS, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
+					MailException {
+				parseFlags(((ExtendedMimeMessage) msg).getFlags(), mailMessage);
+			}
+		});
+		FILLER_MAP_EXT.put(MailField.THREAD_LEVEL, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				mailMessage.setThreadLevel(((ExtendedMimeMessage) msg).getThreadLevel());
+			}
+		});
+		FILLER_MAP_EXT.put(MailField.DISPOSITION_NOTIFICATION_TO, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				final String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_DISP_NOT_TO);
+				if ((val != null) && (val.length > 0)) {
+					mailMessage.setDispositionNotification(InternetAddress.parse(val[0], true)[0]);
+				} else {
+					mailMessage.setDispositionNotification(null);
+				}
+			}
+		});
+		FILLER_MAP_EXT.put(MailField.PRIORITY, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				final String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_X_PRIORITY);
+				if ((val != null) && (val.length > 0)) {
+					parsePriority(val[0], mailMessage);
+				} else {
+					mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
+				}
+			}
+		});
+		FILLER_MAP_EXT.put(MailField.COLOR_LABEL, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
+					MailException {
+				parseFlags(((ExtendedMimeMessage) msg).getFlags(), mailMessage);
+				if (!mailMessage.containsColorLabel()) {
+					mailMessage.setColorLabel(MailMessage.COLOR_LABEL_NONE);
+				}
+			}
+		});
+	}
+
 	/**
 	 * Creates the field fillers and expects the messages to be instances of
 	 * {@link ExtendedMimeMessage}
@@ -664,350 +961,312 @@ public final class MIMEMessageConverter {
 	private static MailMessageFieldFiller[] createFieldFillers(final MailField[] fields) throws MailException {
 		final MailMessageFieldFiller[] fillers = new MailMessageFieldFiller[fields.length];
 		for (int i = 0; i < fields.length; i++) {
-			switch (fields[i]) {
-			case HEADERS:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
-						/*
-						 * From
-						 */
-						try {
-							mailMessage.addFrom((InternetAddress[]) extMimeMessage.getFrom());
-						} catch (final AddressException e) {
-							final String addrStr = extMimeMessage.getHeader(MessageHeaders.HDR_FROM, null);
-							if (LOG1.isDebugEnabled()) {
-								LOG1.debug("Unparseable internet address" + addrStr);
-							}
-							mailMessage.addFrom(new PlainTextAddress(addrStr));
-						}
-						/*
-						 * To, Cc, and Bcc
-						 */
-						try {
-							mailMessage.addTo((InternetAddress[]) extMimeMessage
-									.getRecipients(Message.RecipientType.TO));
-						} catch (final AddressException e) {
-							final String[] addrs = extMimeMessage.getHeader(MessageHeaders.HDR_TO);
-							if (LOG1.isDebugEnabled()) {
-								LOG1.debug("Unparseable internet addresses" + addrs);
-							}
-							mailMessage.addTo(PlainTextAddress.getAddresses(addrs));
-						}
-						try {
-							mailMessage.addCc((InternetAddress[]) extMimeMessage
-									.getRecipients(Message.RecipientType.CC));
-						} catch (final AddressException e) {
-							final String[] addrs = extMimeMessage.getHeader(MessageHeaders.HDR_CC);
-							if (LOG1.isDebugEnabled()) {
-								LOG1.debug("Unparseable internet addresses" + addrs);
-							}
-							mailMessage.addCc(PlainTextAddress.getAddresses(addrs));
-						}
-						try {
-							mailMessage.addBcc((InternetAddress[]) extMimeMessage
-									.getRecipients(Message.RecipientType.BCC));
-						} catch (final AddressException e) {
-							final String[] addrs = extMimeMessage.getHeader(MessageHeaders.HDR_BCC);
-							if (LOG1.isDebugEnabled()) {
-								LOG1.debug("Unparseable internet addresses" + addrs);
-							}
-							mailMessage.addBcc(PlainTextAddress.getAddresses(addrs));
-						}
-						/*
-						 * Disposition-Notification-To
-						 */
-						{
-							InternetAddress[] dispNotTo = null;
-							final String addrStr = extMimeMessage.getHeader(MessageHeaders.HDR_DISP_NOT_TO, null);
-							if (null != addrStr) {
-								try {
-									dispNotTo = InternetAddress.parse(addrStr, true);
-								} catch (final AddressException e) {
-									dispNotTo = new InternetAddress[] { new PlainTextAddress(addrStr) };
-								}
-							}
-							if (null != dispNotTo && dispNotTo.length > 0) {
-								mailMessage.setDispositionNotification(dispNotTo[0]);
-							} else {
-								mailMessage.setDispositionNotification(null);
-							}
-						}
-						/*
-						 * Reply-To
-						 */
-						final StringBuilder sb = new StringBuilder(128);
-						{
-							InternetAddress[] replyTo = null;
-							try {
-								replyTo = (InternetAddress[]) extMimeMessage.getReplyTo();
-							} catch (final AddressException e) {
-								final String addrStr = extMimeMessage.getHeader(MessageHeaders.HDR_REPLY_TO, null);
-								if (null != addrStr) {
-									replyTo = new InternetAddress[] { new PlainTextAddress(addrStr) };
-								}
-							}
-							if (null != replyTo) {
-								sb.append(replyTo[0].toString());
-								for (int j = 1; j < replyTo.length; j++) {
-									sb.append(", ").append(replyTo[j].toString());
-								}
-								mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
-								sb.setLength(0);
-							}
-						}
-						/*
-						 * Subject
-						 */
-						mailMessage.setSubject(extMimeMessage.getSubject());
-						/*
-						 * Date
-						 */
-						mailMessage.setSentDate(extMimeMessage.getSentDate());
-						/*
-						 * X-Priority
-						 */
-						mailMessage.setPriority(extMimeMessage.getPriority());
-						/*
-						 * Message-Id
-						 */
-						{
-							final String messageId = extMimeMessage.getHeader(MessageHeaders.HDR_MESSAGE_ID, null);
-							if (null != messageId) {
-								mailMessage.addHeader(MessageHeaders.HDR_MESSAGE_ID, messageId);
-							}
-						}
-						/*
-						 * In-Reply-To
-						 */
-						{
-							final String[] inReplyTo = extMimeMessage.getHeader(MessageHeaders.HDR_IN_REPLY_TO);
-							if (null != inReplyTo) {
-								sb.append(inReplyTo[0]);
-								for (int j = 1; j < inReplyTo.length; j++) {
-									sb.append(", ").append(inReplyTo[j]);
-								}
-								mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
-								sb.setLength(0);
-							}
-						}
-						/*
-						 * References
-						 */
-						{
-							final String[] references = extMimeMessage.getHeader(MessageHeaders.HDR_REFERENCES);
-							if (null != references) {
-								sb.append(references[0]);
-								for (int j = 1; j < references.length; j++) {
-									sb.append(", ").append(references[j]);
-								}
-								mailMessage.addHeader(MessageHeaders.HDR_REFERENCES, sb.toString());
-								sb.setLength(0);
-							}
-						}
-						/*
-						 * All other
-						 */
-						for (final Enumeration<?> e = extMimeMessage.getNonMatchingHeaders(NON_MATCHING_HEADERS); e
-								.hasMoreElements();) {
-							final Header h = (Header) e.nextElement();
-							mailMessage.addHeader(h.getName(), h.getValue());
-						}
+			final MailMessageFieldFiller filler = FILLER_MAP_EXT.get(fields[i]);
+			if (filler == null) {
+				if (MailField.BODY.equals(fields[i]) || MailField.FULL.equals(fields[i])) {
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("Ignoring mail field " + fields[i]);
 					}
-				};
-				break;
-			case ID:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setMailId(((ExtendedMimeMessage) msg).getUid());
-					}
-				};
-				break;
-			case FOLDER_ID:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setFolder(((ExtendedMimeMessage) msg).getFullname());
-					}
-				};
-				break;
-			case CONTENT_TYPE:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MailException,
-							MessagingException {
-						try {
-							mailMessage.setContentType(((ExtendedMimeMessage) msg).getContentType());
-						} catch (final MailException e) {
-							/*
-							 * Cannot occur
-							 */
-							LOG1.error(e.getLocalizedMessage(), e);
-						}
-						mailMessage.setHasAttachment(((ExtendedMimeMessage) msg).hasAttachment());
-					}
-				};
-				break;
-			case FROM:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
-						try {
-							mailMessage.addFrom((InternetAddress[]) extMimeMessage.getFrom());
-						} catch (final AddressException e) {
-							final String addrStr = extMimeMessage.getHeader(MessageHeaders.HDR_FROM, null);
-							if (LOG1.isDebugEnabled()) {
-								LOG1.debug(new StringBuilder(128).append(
-										"Internet address could not be properly parsed, ").append(
-										"using plain address' string representation instead: ").append(addrStr)
-										.toString(), e);
-							}
-							mailMessage.addFrom(new PlainTextAddress(addrStr));
-						}
-					}
-				};
-				break;
-			case TO:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
-						try {
-							mailMessage.addTo((InternetAddress[]) extMimeMessage.getRecipients(RecipientType.TO));
-						} catch (final AddressException e) {
-							if (LOG1.isDebugEnabled()) {
-								LOG1.debug(new StringBuilder(128).append(
-										"Internet addresses could not be properly parsed, ").append(
-										"using plain addresses' string representation instead.").toString(), e);
-							}
-							mailMessage.addTo(PlainTextAddress.getAddresses(extMimeMessage
-									.getHeader(MessageHeaders.HDR_TO)));
-						}
-					}
-				};
-				break;
-			case CC:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
-						try {
-							mailMessage.addCc((InternetAddress[]) extMimeMessage.getRecipients(RecipientType.CC));
-						} catch (final AddressException e) {
-							if (LOG1.isDebugEnabled()) {
-								LOG1.debug(new StringBuilder(128).append(
-										"Internet addresses could not be properly parsed, ").append(
-										"using plain addresses' string representation instead.").toString(), e);
-							}
-							mailMessage.addCc(PlainTextAddress.getAddresses(extMimeMessage
-									.getHeader(MessageHeaders.HDR_CC)));
-						}
-					}
-				};
-				break;
-			case BCC:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
-						try {
-							mailMessage.addBcc((InternetAddress[]) extMimeMessage.getRecipients(RecipientType.BCC));
-						} catch (final AddressException e) {
-							if (LOG1.isDebugEnabled()) {
-								LOG1.debug(new StringBuilder(128).append(
-										"Internet addresses could not be properly parsed, ").append(
-										"using plain addresses' string representation instead.").toString(), e);
-							}
-							mailMessage.addCc(PlainTextAddress.getAddresses(extMimeMessage
-									.getHeader(MessageHeaders.HDR_BCC)));
-						}
-					}
-				};
-				break;
-			case SUBJECT:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setSubject(((ExtendedMimeMessage) msg).getSubject());
-					}
-				};
-				break;
-			case SIZE:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setSize(((ExtendedMimeMessage) msg).getSize());
-					}
-				};
-				break;
-			case SENT_DATE:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setSentDate(((ExtendedMimeMessage) msg).getSentDate());
-					}
-				};
-				break;
-			case RECEIVED_DATE:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setReceivedDate(((ExtendedMimeMessage) msg).getReceivedDate());
-					}
-				};
-				break;
-			case FLAGS:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
-							MailException {
-						parseFlags(((ExtendedMimeMessage) msg).getFlags(), mailMessage);
-					}
-				};
-				break;
-			case THREAD_LEVEL:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setThreadLevel(((ExtendedMimeMessage) msg).getThreadLevel());
-					}
-				};
-				break;
-			case DISPOSITION_NOTIFICATION_TO:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						final String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_DISP_NOT_TO);
-						if ((val != null) && (val.length > 0)) {
-							mailMessage.setDispositionNotification(InternetAddress.parse(val[0], true)[0]);
-						} else {
-							mailMessage.setDispositionNotification(null);
-						}
-					}
-				};
-				break;
-			case PRIORITY:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						final String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_X_PRIORITY);
-						if ((val != null) && (val.length > 0)) {
-							parsePriority(val[0], mailMessage);
-						} else {
-							mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
-						}
-					}
-				};
-				break;
-			case COLOR_LABEL:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
-							MailException {
-						parseFlags(((ExtendedMimeMessage) msg).getFlags(), mailMessage);
-						if (!mailMessage.containsColorLabel()) {
-							mailMessage.setColorLabel(MailMessage.COLOR_LABEL_NONE);
-						}
-					}
-				};
-				break;
-			case BODY:
-			case FULL:
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("Ignoring mail field " + fields[i]);
+					fillers[i] = null;
+				} else {
+					throw new MailException(MailException.Code.INVALID_FIELD, fields[i].toString());
 				}
-				break;
-			default:
-				throw new MailException(MailException.Code.INVALID_FIELD, fields[i].toString());
+			} else {
+				fillers[i] = filler;
 			}
 		}
 		return fillers;
+	}
+
+	private static final EnumMap<MailField, MailMessageFieldFiller> FILLER_MAP = new EnumMap<MailField, MailMessageFieldFiller>(
+			MailField.class);
+
+	static {
+		FILLER_MAP.put(MailField.HEADERS, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				/*
+				 * From
+				 */
+				try {
+					mailMessage.addFrom((InternetAddress[]) msg.getFrom());
+				} catch (final AddressException e) {
+					mailMessage.addFrom(PlainTextAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_FROM)));
+				}
+				/*
+				 * To, Cc, and Bcc
+				 */
+				try {
+					mailMessage.addTo((InternetAddress[]) msg.getRecipients(Message.RecipientType.TO));
+				} catch (final AddressException e) {
+					mailMessage.addTo(PlainTextAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_TO)));
+				}
+				try {
+					mailMessage.addCc((InternetAddress[]) msg.getRecipients(Message.RecipientType.CC));
+				} catch (final AddressException e) {
+					mailMessage.addCc(PlainTextAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_CC)));
+				}
+				try {
+					mailMessage.addBcc((InternetAddress[]) msg.getRecipients(Message.RecipientType.BCC));
+				} catch (final AddressException e) {
+					mailMessage.addBcc(PlainTextAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_BCC)));
+				}
+				/*
+				 * Disposition-Notification-To
+				 */
+				{
+					InternetAddress[] dispNotTo = null;
+					final String[] addrStr = msg.getHeader(MessageHeaders.HDR_DISP_NOT_TO);
+					if (null != addrStr) {
+						try {
+							dispNotTo = InternetAddress.parse(addrStr[0], true);
+						} catch (final AddressException e) {
+							dispNotTo = new InternetAddress[] { new PlainTextAddress(addrStr[0]) };
+						}
+					}
+					if (null != dispNotTo && dispNotTo.length > 0) {
+						mailMessage.setDispositionNotification(dispNotTo[0]);
+					} else {
+						mailMessage.setDispositionNotification(null);
+					}
+				}
+				/*
+				 * Reply-To
+				 */
+				final StringBuilder sb = new StringBuilder(128);
+				{
+					InternetAddress[] replyTo = null;
+					try {
+						replyTo = (InternetAddress[]) msg.getReplyTo();
+					} catch (final AddressException e) {
+						final String[] addrStr = msg.getHeader(MessageHeaders.HDR_REPLY_TO);
+						if (null != addrStr) {
+							replyTo = new InternetAddress[] { new PlainTextAddress(addrStr[0]) };
+						}
+					}
+					if (null != replyTo) {
+						sb.append(replyTo[0].toString());
+						for (int j = 1; j < replyTo.length; j++) {
+							sb.append(", ").append(replyTo[j].toString());
+						}
+						mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
+						sb.setLength(0);
+					}
+				}
+				/*
+				 * Subject
+				 */
+				mailMessage.setSubject(msg.getSubject());
+				/*
+				 * Date
+				 */
+				mailMessage.setSentDate(msg.getSentDate());
+				/*
+				 * X-Priority
+				 */
+				{
+					final String[] xPriority = msg.getHeader(MessageHeaders.HDR_X_PRIORITY);
+					if (null == xPriority) {
+						mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
+					} else {
+						parsePriority(xPriority[0], mailMessage);
+					}
+				}
+				/*
+				 * Message-Id
+				 */
+				{
+					final String[] messageId = msg.getHeader(MessageHeaders.HDR_MESSAGE_ID);
+					if (null != messageId) {
+						mailMessage.addHeader(MessageHeaders.HDR_MESSAGE_ID, messageId[0]);
+					}
+				}
+				/*
+				 * In-Reply-To
+				 */
+				{
+					final String[] inReplyTo = msg.getHeader(MessageHeaders.HDR_IN_REPLY_TO);
+					if (null != inReplyTo) {
+						sb.append(inReplyTo[0]);
+						for (int j = 1; j < inReplyTo.length; j++) {
+							sb.append(", ").append(inReplyTo[j]);
+						}
+						mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
+						sb.setLength(0);
+					}
+				}
+				/*
+				 * References
+				 */
+				{
+					final String[] references = msg.getHeader(MessageHeaders.HDR_REFERENCES);
+					if (null != references) {
+						sb.append(references[0]);
+						for (int j = 1; j < references.length; j++) {
+							sb.append(", ").append(references[j]);
+						}
+						mailMessage.addHeader(MessageHeaders.HDR_REFERENCES, sb.toString());
+						sb.setLength(0);
+					}
+				}
+				/*
+				 * All other
+				 */
+				for (final Enumeration<?> e = msg.getNonMatchingHeaders(NON_MATCHING_HEADERS); e.hasMoreElements();) {
+					final Header h = (Header) e.nextElement();
+					mailMessage.addHeader(h.getName(), h.getValue());
+				}
+			}
+		});
+		FILLER_MAP.put(MailField.CONTENT_TYPE, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
+					MailException {
+				ContentType ct = null;
+				try {
+					ct = new ContentType(msg.getContentType());
+				} catch (final MailException e) {
+					/*
+					 * Cannot occur
+					 */
+					LOG1.error("Invalid content type: " + msg.getContentType(), e);
+					try {
+						ct = new ContentType(MIMETypes.MIME_DEFAULT);
+					} catch (final MailException e1) {
+						/*
+						 * Cannot occur
+						 */
+						LOG1.error(e1.getLocalizedMessage(), e1);
+						return;
+					}
+				}
+				mailMessage.setContentType(ct);
+				if (msg instanceof ExtendedMimeMessage) {
+					mailMessage.setHasAttachment(((ExtendedMimeMessage) msg).hasAttachment());
+				} else {
+					try {
+						mailMessage.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)
+								&& (ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED) || hasAttachments((Multipart) msg
+										.getContent(), ct.getSubType())));
+					} catch (final IOException e) {
+						throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+					}
+				}
+			}
+		});
+		FILLER_MAP.put(MailField.FROM, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				try {
+					mailMessage.addFrom((InternetAddress[]) msg.getFrom());
+				} catch (final AddressException e) {
+					final String[] fromHdr = msg.getHeader(MessageHeaders.HDR_FROM);
+					if (LOG1.isDebugEnabled()) {
+						LOG1.debug("Unparseable addresse(s): " + Arrays.toString(fromHdr), e);
+					}
+					mailMessage.addFrom(new PlainTextAddress(fromHdr[0]));
+				}
+			}
+		});
+		FILLER_MAP.put(MailField.TO, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				try {
+					mailMessage.addTo((InternetAddress[]) msg.getRecipients(RecipientType.TO));
+				} catch (final AddressException e) {
+					final String[] hdr = msg.getHeader(MessageHeaders.HDR_TO);
+					if (LOG1.isDebugEnabled()) {
+						LOG1.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
+					}
+					mailMessage.addTo(new PlainTextAddress(hdr[0]));
+				}
+			}
+		});
+		FILLER_MAP.put(MailField.CC, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				try {
+					mailMessage.addCc((InternetAddress[]) msg.getRecipients(RecipientType.CC));
+				} catch (final AddressException e) {
+					final String[] hdr = msg.getHeader(MessageHeaders.HDR_CC);
+					if (LOG1.isDebugEnabled()) {
+						LOG1.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
+					}
+					mailMessage.addCc(new PlainTextAddress(hdr[0]));
+				}
+			}
+		});
+		FILLER_MAP.put(MailField.BCC, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				try {
+					mailMessage.addBcc((InternetAddress[]) msg.getRecipients(RecipientType.BCC));
+				} catch (final AddressException e) {
+					final String[] hdr = msg.getHeader(MessageHeaders.HDR_BCC);
+					if (LOG1.isDebugEnabled()) {
+						LOG1.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
+					}
+					mailMessage.addBcc(new PlainTextAddress(hdr[0]));
+				}
+			}
+		});
+		FILLER_MAP.put(MailField.SUBJECT, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				mailMessage.setSubject(decodeMultiEncodedHeader(msg.getSubject()));
+			}
+		});
+		FILLER_MAP.put(MailField.SIZE, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				mailMessage.setSize(msg.getSize());
+			}
+		});
+		FILLER_MAP.put(MailField.SENT_DATE, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				mailMessage.setSentDate(msg.getSentDate());
+			}
+		});
+		FILLER_MAP.put(MailField.RECEIVED_DATE, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				mailMessage.setReceivedDate(msg.getReceivedDate());
+			}
+		});
+		FILLER_MAP.put(MailField.FLAGS, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
+					MailException {
+				parseFlags(msg.getFlags(), mailMessage);
+			}
+		});
+		FILLER_MAP.put(MailField.THREAD_LEVEL, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				/*
+				 * TODO: Thread level
+				 */
+				mailMessage.setThreadLevel(0);
+			}
+		});
+		FILLER_MAP.put(MailField.DISPOSITION_NOTIFICATION_TO, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				final String[] val = msg.getHeader(MessageHeaders.HDR_DISP_NOT_TO);
+				if ((val != null) && (val.length > 0)) {
+					mailMessage.setDispositionNotification(InternetAddress.parse(val[0], true)[0]);
+				} else {
+					mailMessage.setDispositionNotification(null);
+				}
+			}
+		});
+		FILLER_MAP.put(MailField.PRIORITY, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+				final String[] val = msg.getHeader(MessageHeaders.HDR_X_PRIORITY);
+				if ((val != null) && (val.length > 0)) {
+					parsePriority(val[0], mailMessage);
+				} else {
+					mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
+				}
+			}
+		});
+		FILLER_MAP.put(MailField.COLOR_LABEL, new MailMessageFieldFiller() {
+			public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
+					MailException {
+				parseFlags(msg.getFlags(), mailMessage);
+				if (!mailMessage.containsColorLabel()) {
+					mailMessage.setColorLabel(MailMessage.COLOR_LABEL_NONE);
+				}
+			}
+		});
 	}
 
 	/**
@@ -1027,346 +1286,32 @@ public final class MIMEMessageConverter {
 			throws MailException {
 		final MailMessageFieldFiller[] fillers = new MailMessageFieldFiller[fields.length];
 		for (int i = 0; i < fields.length; i++) {
-			switch (fields[i]) {
-			case HEADERS:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						/*
-						 * From
-						 */
-						try {
-							mailMessage.addFrom((InternetAddress[]) msg.getFrom());
-						} catch (final AddressException e) {
-							mailMessage.addFrom(PlainTextAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_FROM)));
+			final MailMessageFieldFiller filler = FILLER_MAP_EXT.get(fields[i]);
+			if (filler == null) {
+				if (MailField.ID.equals(fields[i])) {
+					fillers[i] = new ExtendedMailMessageFieldFiller(folder) {
+						public void fillField(final MailMessage mailMessage, final Message msg)
+								throws MessagingException {
+							mailMessage.setMailId(((UIDFolder) folder).getUID(msg));
 						}
-						/*
-						 * To, Cc, and Bcc
-						 */
-						try {
-							mailMessage.addTo((InternetAddress[]) msg.getRecipients(Message.RecipientType.TO));
-						} catch (final AddressException e) {
-							mailMessage.addTo(PlainTextAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_TO)));
+					};
+				} else if (MailField.FOLDER_ID.equals(fields[i])) {
+					fillers[i] = new ExtendedMailMessageFieldFiller(folder) {
+						public void fillField(final MailMessage mailMessage, final Message msg)
+								throws MessagingException {
+							mailMessage.setFolder(folder.getFullName());
 						}
-						try {
-							mailMessage.addCc((InternetAddress[]) msg.getRecipients(Message.RecipientType.CC));
-						} catch (final AddressException e) {
-							mailMessage.addCc(PlainTextAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_CC)));
-						}
-						try {
-							mailMessage.addBcc((InternetAddress[]) msg.getRecipients(Message.RecipientType.BCC));
-						} catch (final AddressException e) {
-							mailMessage.addBcc(PlainTextAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_BCC)));
-						}
-						/*
-						 * Disposition-Notification-To
-						 */
-						{
-							InternetAddress[] dispNotTo = null;
-							final String[] addrStr = msg.getHeader(MessageHeaders.HDR_DISP_NOT_TO);
-							if (null != addrStr) {
-								try {
-									dispNotTo = InternetAddress.parse(addrStr[0], true);
-								} catch (final AddressException e) {
-									dispNotTo = new InternetAddress[] { new PlainTextAddress(addrStr[0]) };
-								}
-							}
-							if (null != dispNotTo && dispNotTo.length > 0) {
-								mailMessage.setDispositionNotification(dispNotTo[0]);
-							} else {
-								mailMessage.setDispositionNotification(null);
-							}
-						}
-						/*
-						 * Reply-To
-						 */
-						final StringBuilder sb = new StringBuilder(128);
-						{
-							InternetAddress[] replyTo = null;
-							try {
-								replyTo = (InternetAddress[]) msg.getReplyTo();
-							} catch (final AddressException e) {
-								final String[] addrStr = msg.getHeader(MessageHeaders.HDR_REPLY_TO);
-								if (null != addrStr) {
-									replyTo = new InternetAddress[] { new PlainTextAddress(addrStr[0]) };
-								}
-							}
-							if (null != replyTo) {
-								sb.append(replyTo[0].toString());
-								for (int j = 1; j < replyTo.length; j++) {
-									sb.append(", ").append(replyTo[j].toString());
-								}
-								mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
-								sb.setLength(0);
-							}
-						}
-						/*
-						 * Subject
-						 */
-						mailMessage.setSubject(msg.getSubject());
-						/*
-						 * Date
-						 */
-						mailMessage.setSentDate(msg.getSentDate());
-						/*
-						 * X-Priority
-						 */
-						{
-							final String[] xPriority = msg.getHeader(MessageHeaders.HDR_X_PRIORITY);
-							if (null == xPriority) {
-								mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
-							} else {
-								parsePriority(xPriority[0], mailMessage);
-							}
-						}
-						/*
-						 * Message-Id
-						 */
-						{
-							final String[] messageId = msg.getHeader(MessageHeaders.HDR_MESSAGE_ID);
-							if (null != messageId) {
-								mailMessage.addHeader(MessageHeaders.HDR_MESSAGE_ID, messageId[0]);
-							}
-						}
-						/*
-						 * In-Reply-To
-						 */
-						{
-							final String[] inReplyTo = msg.getHeader(MessageHeaders.HDR_IN_REPLY_TO);
-							if (null != inReplyTo) {
-								sb.append(inReplyTo[0]);
-								for (int j = 1; j < inReplyTo.length; j++) {
-									sb.append(", ").append(inReplyTo[j]);
-								}
-								mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
-								sb.setLength(0);
-							}
-						}
-						/*
-						 * References
-						 */
-						{
-							final String[] references = msg.getHeader(MessageHeaders.HDR_REFERENCES);
-							if (null != references) {
-								sb.append(references[0]);
-								for (int j = 1; j < references.length; j++) {
-									sb.append(", ").append(references[j]);
-								}
-								mailMessage.addHeader(MessageHeaders.HDR_REFERENCES, sb.toString());
-								sb.setLength(0);
-							}
-						}
-						/*
-						 * All other
-						 */
-						for (final Enumeration<?> e = msg.getNonMatchingHeaders(NON_MATCHING_HEADERS); e
-								.hasMoreElements();) {
-							final Header h = (Header) e.nextElement();
-							mailMessage.addHeader(h.getName(), h.getValue());
-						}
+					};
+				} else if (MailField.BODY.equals(fields[i]) || MailField.FULL.equals(fields[i])) {
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("Ignoring mail field " + fields[i]);
 					}
-				};
-				break;
-			case ID:
-				fillers[i] = new ExtendedMailMessageFieldFiller(folder) {
-
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setMailId(((UIDFolder) folder).getUID(msg));
-					}
-				};
-				break;
-			case FOLDER_ID:
-				fillers[i] = new ExtendedMailMessageFieldFiller(folder) {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setFolder(folder.getFullName());
-					}
-				};
-				break;
-			case CONTENT_TYPE:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
-							MailException {
-						ContentType ct = null;
-						try {
-							ct = new ContentType(msg.getContentType());
-						} catch (final MailException e) {
-							/*
-							 * Cannot occur
-							 */
-							LOG1.error("Invalid content type: " + msg.getContentType(), e);
-							try {
-								ct = new ContentType(MIMETypes.MIME_DEFAULT);
-							} catch (final MailException e1) {
-								/*
-								 * Cannot occur
-								 */
-								LOG1.error(e1.getLocalizedMessage(), e1);
-								return;
-							}
-						}
-						mailMessage.setContentType(ct);
-						if (msg instanceof ExtendedMimeMessage) {
-							mailMessage.setHasAttachment(((ExtendedMimeMessage) msg).hasAttachment());
-						} else {
-							try {
-								mailMessage.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)
-										&& (ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED) || hasAttachments(
-												(Multipart) msg.getContent(), ct.getSubType())));
-							} catch (final IOException e) {
-								throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-							}
-						}
-					}
-				};
-				break;
-			case FROM:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						try {
-							mailMessage.addFrom((InternetAddress[]) msg.getFrom());
-						} catch (final AddressException e) {
-							final String[] fromHdr = msg.getHeader(MessageHeaders.HDR_FROM);
-							if (LOG1.isDebugEnabled()) {
-								LOG1.debug("Unparseable addresse(s): " + Arrays.toString(fromHdr), e);
-							}
-							mailMessage.addFrom(new PlainTextAddress(fromHdr[0]));
-						}
-					}
-				};
-				break;
-			case TO:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						try {
-							mailMessage.addTo((InternetAddress[]) msg.getRecipients(RecipientType.TO));
-						} catch (final AddressException e) {
-							final String[] hdr = msg.getHeader(MessageHeaders.HDR_TO);
-							if (LOG1.isDebugEnabled()) {
-								LOG1.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
-							}
-							mailMessage.addTo(new PlainTextAddress(hdr[0]));
-						}
-					}
-				};
-				break;
-			case CC:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						try {
-							mailMessage.addCc((InternetAddress[]) msg.getRecipients(RecipientType.CC));
-						} catch (final AddressException e) {
-							final String[] hdr = msg.getHeader(MessageHeaders.HDR_CC);
-							if (LOG1.isDebugEnabled()) {
-								LOG1.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
-							}
-							mailMessage.addCc(new PlainTextAddress(hdr[0]));
-						}
-					}
-				};
-				break;
-			case BCC:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						try {
-							mailMessage.addBcc((InternetAddress[]) msg.getRecipients(RecipientType.BCC));
-						} catch (final AddressException e) {
-							final String[] hdr = msg.getHeader(MessageHeaders.HDR_BCC);
-							if (LOG1.isDebugEnabled()) {
-								LOG1.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
-							}
-							mailMessage.addBcc(new PlainTextAddress(hdr[0]));
-						}
-					}
-				};
-				break;
-			case SUBJECT:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setSubject(decodeMultiEncodedHeader(msg.getSubject()));
-					}
-				};
-				break;
-			case SIZE:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setSize(msg.getSize());
-					}
-				};
-				break;
-			case SENT_DATE:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setSentDate(msg.getSentDate());
-					}
-				};
-				break;
-			case RECEIVED_DATE:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setReceivedDate(msg.getReceivedDate());
-					}
-				};
-				break;
-			case FLAGS:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
-							MailException {
-						parseFlags(msg.getFlags(), mailMessage);
-					}
-				};
-				break;
-			case THREAD_LEVEL:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						/*
-						 * TODO: Thread level
-						 */
-						mailMessage.setThreadLevel(0);
-					}
-				};
-				break;
-			case DISPOSITION_NOTIFICATION_TO:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						final String[] val = msg.getHeader(MessageHeaders.HDR_DISP_NOT_TO);
-						if ((val != null) && (val.length > 0)) {
-							mailMessage.setDispositionNotification(InternetAddress.parse(val[0], true)[0]);
-						} else {
-							mailMessage.setDispositionNotification(null);
-						}
-					}
-				};
-				break;
-			case PRIORITY:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						final String[] val = msg.getHeader(MessageHeaders.HDR_X_PRIORITY);
-						if ((val != null) && (val.length > 0)) {
-							parsePriority(val[0], mailMessage);
-						} else {
-							mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
-						}
-					}
-				};
-				break;
-			case COLOR_LABEL:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
-							MailException {
-						parseFlags(msg.getFlags(), mailMessage);
-						if (!mailMessage.containsColorLabel()) {
-							mailMessage.setColorLabel(MailMessage.COLOR_LABEL_NONE);
-						}
-					}
-				};
-				break;
-			case BODY:
-			case FULL:
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("Ignoring mail field " + fields[i]);
+					fillers[i] = null;
+				} else {
+					throw new MailException(MailException.Code.INVALID_FIELD, fields[i].toString());
 				}
-				break;
-			default:
-				throw new MailException(MailException.Code.INVALID_FIELD, fields[i].toString());
+			} else {
+				fillers[i] = filler;
 			}
 		}
 		return fillers;
