@@ -234,8 +234,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		}
 	}
 
-	private static final String[] ARGS_ALL = { "1:*" };
-
 	@Override
 	public MailMessage[] searchMessages(final String fullname, final IndexRange indexRange,
 			final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm,
