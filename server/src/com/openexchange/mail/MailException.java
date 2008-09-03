@@ -204,7 +204,7 @@ public class MailException extends AbstractOXException {
 		/**
 		 * Missing parameter %1$s
 		 */
-		MISSING_PARAM("Missing parameter %1$s", Category.CODE_ERROR, 30),
+		MISSING_PARAM(MISSING_PARAMETER),
 		/**
 		 * Invalid integer value %1$s
 		 */
@@ -331,6 +331,12 @@ public class MailException extends AbstractOXException {
 			this.message = message;
 			this.detailNumber = detailNumber;
 			this.category = category;
+		}
+
+		private Code(final Code source) {
+			this.message = source.message;
+			this.detailNumber = source.detailNumber;
+			this.category = source.category;
 		}
 
 		public Category getCategory() {
