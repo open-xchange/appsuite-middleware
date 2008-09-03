@@ -150,6 +150,12 @@ ln -sf ../etc/init.d/open-xchange-admin %{buildroot}/sbin/rcopen-xchange-admin
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Wed Sep 03 2008 - choeger@open-xchange.com
+ - added new option writeOnly to configdb to be able to
+   eleminate any connections to database slave within server api calls
+   (see Bug #11595)
+* Mon Aug 25 2008 - choeger@open-xchange.com
+ - Bugfix ID#12052 listuser on non existent context returns SQL error
 * Tue Aug 12 2008 - choeger@open-xchange.com
  - 11722 update from SP3, wrong cache.ccf file for admin in system.properties
  - Bugfix ID#11855 default for access-edit-group access-edit-resource access-edit-password
