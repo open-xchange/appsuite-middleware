@@ -212,7 +212,11 @@ public class OXCalendarException extends OXException {
         /**
          * Unknown name-value-pair in recurrence string: %1$s=%2$s
          */
-        UNKNOWN_NVP_IN_REC_STR("Unknown name-value-pair in recurrence string: %1$s=%2$s", 81, Category.CODE_ERROR);
+        UNKNOWN_NVP_IN_REC_STR("Unknown name-value-pair in recurrence string: %1$s=%2$s", 81, Category.CODE_ERROR),
+        /**
+         * Changing recurrence type of a change exception denied
+         */
+        INVALID_RECURRENCE_TYPE_CHANGE("Changing recurrence type of a change exception denied", 82, Category.USER_INPUT);
         
         /**
          * Message of the exception.
