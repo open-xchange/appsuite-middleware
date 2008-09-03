@@ -840,7 +840,12 @@ public class CalendarSqlTest extends TestCase {
         update.setRecurrencePosition(0);
         update.setTitle("Exception");
 
-        appointments.save( update );
+        try {
+			appointments.save( update );
+			fail("Could change recurrence position for change exception");
+		} catch (final OXCalendarException e) {
+			assertEquals("Unexpected error code: " + e.getDetailNumber(), OXCalendarException.Code.INVALID_RECURRENCE_POSITION_CHANGE.getDetailNumber(), e.getDetailNumber());
+		}
  
     }
 
