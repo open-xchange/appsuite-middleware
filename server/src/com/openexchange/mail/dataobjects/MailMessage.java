@@ -425,7 +425,7 @@ public abstract class MailMessage extends MailPart {
 	 *         <code>false</code>
 	 */
 	public boolean containsFrom() {
-		return b_from;
+		return b_from || containsHeader(MessageHeaders.HDR_FROM);
 	}
 
 	/**
@@ -433,6 +433,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public void removeFrom() {
 		from = null;
+		removeHeader(MessageHeaders.HDR_FROM);
 		b_from = false;
 	}
 
@@ -494,7 +495,7 @@ public abstract class MailMessage extends MailPart {
 	 *         <code>false</code>
 	 */
 	public boolean containsTo() {
-		return b_to;
+		return b_to || containsHeader(MessageHeaders.HDR_TO);
 	}
 
 	/**
@@ -502,6 +503,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public void removeTo() {
 		to = null;
+		removeHeader(MessageHeaders.HDR_TO);
 		b_to = false;
 	}
 
@@ -563,7 +565,7 @@ public abstract class MailMessage extends MailPart {
 	 *         <code>false</code>
 	 */
 	public boolean containsCc() {
-		return b_cc;
+		return b_cc || containsHeader(MessageHeaders.HDR_CC);
 	}
 
 	/**
@@ -571,6 +573,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public void removeCc() {
 		cc = null;
+		removeHeader(MessageHeaders.HDR_CC);
 		b_cc = false;
 	}
 
@@ -632,7 +635,7 @@ public abstract class MailMessage extends MailPart {
 	 *         <code>false</code>
 	 */
 	public boolean containsBcc() {
-		return b_bcc;
+		return b_bcc || containsHeader(MessageHeaders.HDR_BCC);
 	}
 
 	/**
@@ -640,6 +643,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public void removeBcc() {
 		bcc = null;
+		removeHeader(MessageHeaders.HDR_BCC);
 		b_bcc = false;
 	}
 
@@ -648,7 +652,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public InternetAddress[] getBcc() {
 		if (!b_bcc) {
-			final String bccStr = getFirstHeader(MessageHeaders.HDR_TO);
+			final String bccStr = getFirstHeader(MessageHeaders.HDR_BCC);
 			if (bccStr == null) {
 				return EMPTY_ADDRS;
 			}
@@ -890,11 +894,10 @@ public abstract class MailMessage extends MailPart {
 	}
 
 	/**
-	 * @return <code>true</code> if subject is set; otherwise
-	 *         <code>false</code>
+	 * @return <code>true</code> if subject is set; otherwise <code>false</code>
 	 */
 	public boolean containsSubject() {
-		return b_subject;
+		return b_subject || containsHeader(MessageHeaders.HDR_SUBJECT);
 	}
 
 	/**
@@ -902,6 +905,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public void removeSubject() {
 		subject = null;
+		removeHeader(MessageHeaders.HDR_SUBJECT);
 		b_subject = false;
 	}
 
@@ -936,7 +940,7 @@ public abstract class MailMessage extends MailPart {
 	 *         <code>false</code>
 	 */
 	public boolean containsSentDate() {
-		return b_sentDate;
+		return b_sentDate || containsHeader(MessageHeaders.HDR_DATE);
 	}
 
 	/**
@@ -944,6 +948,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public void removeSentDate() {
 		sentDate = null;
+		removeHeader(MessageHeaders.HDR_DATE);
 		b_sentDate = false;
 	}
 
@@ -1121,7 +1126,7 @@ public abstract class MailMessage extends MailPart {
 	 *         <code>false</code>
 	 */
 	public boolean containsPriority() {
-		return b_priority;
+		return b_priority || containsHeader(MessageHeaders.HDR_X_PRIORITY);
 	}
 
 	/**
@@ -1129,6 +1134,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public void removePriority() {
 		priority = PRIORITY_NORMAL;
+		removeHeader(MessageHeaders.HDR_X_PRIORITY);
 		b_priority = false;
 	}
 
@@ -1167,7 +1173,7 @@ public abstract class MailMessage extends MailPart {
 	 *         <code>false</code>
 	 */
 	public boolean containsDispositionNotification() {
-		return b_dispositionNotification;
+		return b_dispositionNotification || containsHeader(MessageHeaders.HDR_DISP_NOT_TO);
 	}
 
 	/**
@@ -1175,6 +1181,7 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public void removeDispositionNotification() {
 		dispositionNotification = null;
+		removeHeader(MessageHeaders.HDR_DISP_NOT_TO);
 		b_dispositionNotification = false;
 	}
 
@@ -1199,8 +1206,7 @@ public abstract class MailMessage extends MailPart {
 	}
 
 	/**
-	 * @return <code>true</code> if folder is set; otherwise
-	 *         <code>false</code>
+	 * @return <code>true</code> if folder is set; otherwise <code>false</code>
 	 */
 	public boolean containsFolder() {
 		return b_folder;

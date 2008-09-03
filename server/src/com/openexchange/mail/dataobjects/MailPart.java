@@ -217,7 +217,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 *         <code>false</code>
 	 */
 	public boolean containsContentType() {
-		return b_contentType;
+		return b_contentType || containsHeader(MessageHeaders.HDR_CONTENT_TYPE);
 	}
 
 	/**
@@ -226,6 +226,9 @@ public abstract class MailPart implements Serializable, Cloneable {
 	public void removeContentType() {
 		try {
 			contentType = new ContentType("text/plain; charset=us-ascii");
+			if (headers != null) {
+				headers.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "text/plain; charset=us-ascii");
+			}
 		} catch (final MailException e) {
 			/*
 			 * Cannot occur
@@ -283,7 +286,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 *         <code>false</code>
 	 */
 	public boolean containsContentDisposition() {
-		return b_disposition;
+		return b_disposition || containsHeader(MessageHeaders.HDR_DISPOSITION);
 	}
 
 	/**
@@ -291,6 +294,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 */
 	public void removeContentDisposition() {
 		contentDisposition = null;
+		removeHeader(MessageHeaders.HDR_DISPOSITION);
 		b_disposition = false;
 	}
 
@@ -438,6 +442,21 @@ public abstract class MailPart implements Serializable, Cloneable {
 			return EMPTY_ITER;
 		}
 		return headers.getAllHeaders();
+	}
+
+	/**
+	 * Checks for a header entry for specified header
+	 * 
+	 * @param name
+	 *            The header name
+	 * @return <code>true</code> if a header entry exists for specified header;
+	 *         otherwise <code>false</code>
+	 */
+	public boolean containsHeader(final String name) {
+		if (null == headers) {
+			return false;
+		}
+		return headers.containsHeader(name);
 	}
 
 	/**
@@ -597,7 +616,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 *         <code>false</code>
 	 */
 	public boolean containsContentId() {
-		return b_contentId;
+		return b_contentId || containsHeader(MessageHeaders.HDR_CONTENT_ID);
 	}
 
 	/**
@@ -605,6 +624,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 */
 	public void removeContentId() {
 		contentId = null;
+		removeHeader(MessageHeaders.HDR_CONTENT_ID);
 		b_contentId = false;
 	}
 
