@@ -338,7 +338,13 @@ public class AppointmentWriter extends CalendarWriter {
 		case AppointmentObject.NUMBER_OF_LINKS:
 			writeValue(appointmentObject.getNumberOfLinks(), jsonArray, appointmentObject.containsNumberOfLinks());
 			break;
-		default:
+        case AppointmentObject.ALARM:
+            writeValue(appointmentObject.getAlarm(), jsonArray, appointmentObject.containsAlarm());
+            break;
+        case AppointmentObject.NOTIFICATION:
+            writeValue(appointmentObject.getNotification(), jsonArray, appointmentObject.getNotification());
+            break;
+        default:
 			LOG.warn("missing field in mapping: " + field);
 		}
 	}

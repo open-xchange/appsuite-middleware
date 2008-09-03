@@ -2,6 +2,7 @@
 
  - Bugfix #11595: Reintroduced parameter for forcing use of write connections in DBPool.
  - Partial Fix #11399: Return ids and folders in an array of objects if entries can't be deleted.
+ - Bugfix #12105: Send 'alarm' and 'notification' if so requested in response to list / updates and all requests.
 
 * 2008-09-03 - thorben.betten@open-xchange.com
 
