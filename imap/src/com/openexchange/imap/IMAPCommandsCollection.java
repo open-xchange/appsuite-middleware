@@ -53,6 +53,7 @@ import static com.openexchange.imap.sort.IMAPSort.getMessageComparator;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -305,7 +306,7 @@ public final class IMAPCommandsCollection {
 				 */
 				final Map<String, Quota> tab = new HashMap<String, Quota>(2);
 				if (response.isOK()) {
-					for (int i = 0, len = r.length; i < len; i++) {
+					for (int i = 0; i < r.length; i++) {
 						if (!(r[i] instanceof IMAPResponse)) {
 							continue;
 						}
@@ -363,7 +364,7 @@ public final class IMAPCommandsCollection {
 	 * @throws ParsingException
 	 *             If parsing QUOTA response fails
 	 */
-	private static Quota parseQuota(final IMAPResponse r) throws ParsingException {
+	static Quota parseQuota(final IMAPResponse r) throws ParsingException {
 		final String quotaRoot = r.readAtomString();
 		final Quota q = new Quota(quotaRoot);
 		r.skipSpaces();
@@ -475,17 +476,10 @@ public final class IMAPCommandsCollection {
 						prepareStringArgument(lfolder)).toString(), null);
 				final Response response = r[r.length - 1];
 				if (response.isOK()) {
+					int res = -1;
 					for (int i = 0, len = r.length - 1; i < len; i++) {
-						if (!(r[i] instanceof IMAPResponse)) {
-							r[i] = null;
-							continue;
-						}
-						final IMAPResponse ir = (IMAPResponse) r[i];
-						if (ir.keyEquals(COMMAND_LSUB)) {
-							final ListInfo li = new ListInfo(ir);
-							if (li.name.equals(fullname)) {
-								return Boolean.valueOf(li.canOpen);
-							}
+						if ((r[i] instanceof IMAPResponse) && (res = parseIMAPResponse((IMAPResponse) r[i])) != -1) {
+							return res == 0 ? Boolean.FALSE : Boolean.TRUE;
 						}
 						r[i] = null;
 					}
@@ -497,6 +491,16 @@ public final class IMAPCommandsCollection {
 				p.notifyResponseHandlers(r);
 				p.handleResult(response);
 				return Boolean.FALSE;
+			}
+
+			private int parseIMAPResponse(final IMAPResponse ir) throws ParsingException {
+				if (ir.keyEquals(COMMAND_LSUB)) {
+					final ListInfo li = new ListInfo(ir);
+					if (li.name.equals(fullname)) {
+						return li.canOpen ? 1 : 0;
+					}
+				}
+				return -1;
 			}
 		}))).booleanValue();
 	}
@@ -607,13 +611,12 @@ public final class IMAPCommandsCollection {
 						try {
 							p.handleResult(response);
 						} catch (final CommandFailedException cfe) {
-							if (cfe.getMessage().indexOf(ERR_01) != -1) {
+							if (cfe.getMessage().indexOf(ERR_01) == -1) {
 								/*
-								 * Obviously this folder is empty
+								 * Non-empty folder
 								 */
-								return Boolean.TRUE;
+								throw cfe;
 							}
-							throw cfe;
 						}
 					}
 				}
@@ -871,7 +874,9 @@ public final class IMAPCommandsCollection {
 							.toField(sortField.getListField()), IMAPConfig.isFastFetch()), false, false, body)
 							.doCommand();
 				} catch (final MessagingException e) {
-					throw new ProtocolException(e.getLocalizedMessage());
+					final ProtocolException pe = new ProtocolException(e.getLocalizedMessage());
+					pe.initCause(e);
+					throw pe;
 				}
 				final List<Message> msgList = Arrays.asList(newMsgs);
 				Collections.sort(msgList, getMessageComparator(sortField, orderDir, locale));
@@ -905,9 +910,10 @@ public final class IMAPCommandsCollection {
 			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
 				final Response[] r = p.command(COMMAND_EXPUNGE, null);
 				final Response response = r[r.length - 1];
+				Boolean retval = Boolean.FALSE;
 				try {
 					if (response.isOK()) {
-						return Boolean.TRUE;
+						retval = Boolean.TRUE;
 					} else if (response.isBAD() && (response.getRest() != null)
 							&& (response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1)) {
 						throw new ProtocolException(IMAPException.getFormattedMessage(
@@ -925,15 +931,16 @@ public final class IMAPCommandsCollection {
 					try {
 						p.handleResult(response);
 					} catch (final CommandFailedException cfe) {
-						if (cfe.getMessage().indexOf(ERR_01) != -1) {
-							/*
-							 * Obviously this folder is empty
-							 */
-							return Boolean.TRUE;
+						if (cfe.getMessage().indexOf(ERR_01) == -1) {
+							throw cfe;
 						}
-						throw cfe;
+						/*
+						 * Obviously this folder is empty
+						 */
+						retval = Boolean.TRUE;
 					}
 				}
+				return retval;
 			}
 		}))).booleanValue();
 	}
@@ -1075,6 +1082,7 @@ public final class IMAPCommandsCollection {
 			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
 				final Response[] r = p.command(FETCH_FLAGS, null);
 				final Response response = r[r.length - 1];
+				long[] retval = null;
 				try {
 					if (response.isOK()) {
 						final Set<Long> set = new TreeSet<Long>();
@@ -1100,15 +1108,15 @@ public final class IMAPCommandsCollection {
 								set.remove(Long.valueOf(filter[i]));
 							}
 						}
-						final long[] retval = new long[set.size()];
+						retval = new long[set.size()];
 						int i = 0;
 						for (final Long l : set) {
 							retval[i++] = l.longValue();
 						}
-						return retval;
+					} else {
+						throw new ProtocolException(new StringBuilder("FETCH command failed: ").append(
+								getResponseType(response)).append(' ').append(response.getRest()).toString());
 					}
-					throw new ProtocolException(new StringBuilder("FETCH command failed: ").append(
-							getResponseType(response)).append(' ').append(response.getRest()).toString());
 				} finally {
 					/*
 					 * No invocation of notifyResponseHandlers() to avoid
@@ -1118,20 +1126,21 @@ public final class IMAPCommandsCollection {
 					try {
 						p.handleResult(response);
 					} catch (final CommandFailedException cfe) {
-						if (cfe.getMessage().indexOf(ERR_01) != -1) {
-							/*
-							 * Obviously this folder is empty
-							 */
-							return new long[0];
+						if (cfe.getMessage().indexOf(ERR_01) == -1) {
+							throw cfe;
 						}
-						throw cfe;
+						/*
+						 * Obviously this folder is empty
+						 */
+						retval = new long[0];
 					}
 				}
+				return retval;
 			}
 		}));
 	}
 
-	private static String getResponseType(final Response response) {
+	static String getResponseType(final Response response) {
 		if (response.isBAD()) {
 			return "BAD";
 		}
@@ -1269,6 +1278,7 @@ public final class IMAPCommandsCollection {
 				final int len = r.length - 1;
 				final Response response = r[len];
 				final List<MailMessage> l = new ArrayList<MailMessage>(len);
+				boolean isEmpty = false;
 				try {
 					if (response.isOK()) {
 						final String fullname = imapFolder.getFullName();
@@ -1292,14 +1302,17 @@ public final class IMAPCommandsCollection {
 					try {
 						p.handleResult(response);
 					} catch (final CommandFailedException cfe) {
-						if (cfe.getMessage().indexOf(ERR_01) != -1) {
-							/*
-							 * Obviously this folder is empty
-							 */
-							return new long[0];
+						if (cfe.getMessage().indexOf(ERR_01) == -1) {
+							throw cfe;
 						}
-						throw cfe;
+						/*
+						 * Obviously this folder is empty
+						 */
+						isEmpty = true;
 					}
+				}
+				if (isEmpty) {
+					return new MailMessage[0];
 				}
 				Collections.sort(l, ascending ? ASC_COMP : DESC_COMP);
 				return l.toArray(new MailMessage[l.size()]);
@@ -1312,7 +1325,9 @@ public final class IMAPCommandsCollection {
 
 	private static final Comparator<MailMessage> DESC_COMP = new ReceivedDateComparator(false);
 
-	private static final class ReceivedDateComparator implements Comparator<MailMessage> {
+	private static final class ReceivedDateComparator implements Comparator<MailMessage>, Serializable {
+
+		private static final long serialVersionUID = 6227939496676791671L;
 
 		private final boolean ascending;
 
@@ -1321,9 +1336,9 @@ public final class IMAPCommandsCollection {
 			this.ascending = ascending;
 		}
 
-		public int compare(final MailMessage o1, final MailMessage o2) {
-			final Date d1 = o1.getReceivedDate();
-			final Date d2 = o2.getReceivedDate();
+		public int compare(final MailMessage m1, final MailMessage m2) {
+			final Date d1 = m1.getReceivedDate();
+			final Date d2 = m2.getReceivedDate();
 			final Integer refComp = compareReferences(d1, d2);
 			return (refComp == null ? d1.compareTo(d2) : refComp.intValue()) * (ascending ? 1 : -1);
 		}
@@ -1392,13 +1407,12 @@ public final class IMAPCommandsCollection {
 						try {
 							p.handleResult(response);
 						} catch (final CommandFailedException cfe) {
-							if (cfe.getMessage().indexOf(ERR_01) != -1) {
+							if (cfe.getMessage().indexOf(ERR_01) == -1) {
 								/*
-								 * Obviously this folder is empty
+								 * Non-empty folder
 								 */
-								return Boolean.TRUE;
+								throw cfe;
 							}
-							throw cfe;
 						}
 					}
 				}
@@ -1498,7 +1512,7 @@ public final class IMAPCommandsCollection {
 		}
 	};
 
-	private static HeaderStream getHeaderStream(final boolean isREV1) {
+	static HeaderStream getHeaderStream(final boolean isREV1) {
 		if (isREV1) {
 			return REV1HeaderStream;
 		}
@@ -1579,7 +1593,7 @@ public final class IMAPCommandsCollection {
 					}
 				} catch (final MessagingException e) {
 					final ProtocolException pex = new ProtocolException(e.getLocalizedMessage());
-					pex.setStackTrace(e.getStackTrace());
+					pex.initCause(e);
 					throw pex;
 				} finally {
 					// p.notifyResponseHandlers(r);
