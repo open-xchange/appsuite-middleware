@@ -216,7 +216,11 @@ public class OXCalendarException extends OXException {
         /**
          * Changing recurrence type of a change exception denied
          */
-        INVALID_RECURRENCE_TYPE_CHANGE("Changing recurrence type of a change exception denied", 82, Category.USER_INPUT);
+        INVALID_RECURRENCE_TYPE_CHANGE("Changing recurrence type of a change exception denied", 82, Category.USER_INPUT),
+        /**
+         * Changing recurrence position of a change exception denied
+         */
+        INVALID_RECURRENCE_POSITION_CHANGE("Changing recurrence position of a change exception denied", 83, Category.USER_INPUT);
         
         /**
          * Message of the exception.
