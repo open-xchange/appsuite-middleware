@@ -195,15 +195,15 @@ public final class Init {
 
 		startAndInjectConfigBundle();
 		startAndInjectCache();
-		startAndInjectMailBundle();
-		startAndInjectSpamHandler();
 		startAndInjectI18NBundle();
 		startAndInjectMonitoringBundle();
 		startAndInjectSessiondBundle();
 		startAndInjectEventBundle();
 		startAndInjectContextService();
 		startAndInjectUserService();
-		startAndInjectResourceService();
+        startAndInjectResourceService();
+        startAndInjectMailBundle();
+        startAndInjectSpamHandler();
         startAndInjectICalServices();
     }
 

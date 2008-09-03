@@ -54,7 +54,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -63,7 +62,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.session.ServerSessionFactory;
 
-public class AbstractICalImportTest extends AbstractContactTest {
+public abstract class AbstractICalImportTest extends AbstractContactTest {
 
 	public final Format format = Format.ICAL;
     protected static Context ctx;
@@ -80,7 +79,7 @@ public class AbstractICalImportTest extends AbstractContactTest {
 	}
 
     @AfterClass
-    public static void shutdown() throws AbstractOXException {
+    public static void shutdown() {
         Init.stopServer();
     }
 
