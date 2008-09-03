@@ -1,3 +1,9 @@
+* 2008-09-03 - choeger@open-xchange.com
+
+ - added new option writeOnly to configdb to be able to
+   eleminate any connections to database slave within server api calls
+   (see Bug #11595)
+
 * 2008-08-25 - choeger@open-xchange.com
 
  - Bugfix ID#12052 listuser on non existent context returns SQL error
