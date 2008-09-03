@@ -349,6 +349,11 @@ public final class MIMEMailPart extends MailPart {
 	public void loadContent() throws MailException {
 		if (null == part) {
 			throw new IllegalStateException(ERR_NULL_PART);
+		} else if (contentLoaded) {
+			/*
+			 * Already loaded...
+			 */
+			return;
 		}
 		try {
 			if (part instanceof MimeBodyPart) {
