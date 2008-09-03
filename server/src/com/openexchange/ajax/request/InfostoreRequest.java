@@ -51,12 +51,7 @@ package com.openexchange.ajax.request;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -195,7 +190,7 @@ public class InfostoreRequest extends CommonRequest {
 					return true;
 				}
 				final JSONArray array = (JSONArray) req.getBody();
-				final int[] ids = parseIDList(array);
+				final int[] ids = parseIDList(array, null);
 
 				Metadata[] cols = null;
 
@@ -214,9 +209,10 @@ public class InfostoreRequest extends CommonRequest {
 					return true;
 				}
 				final Object toDelete = req.getBody();
-				final int[] ids = parseIDList(toDelete);
+                Map<Integer, Integer> folderMapping = new HashMap<Integer, Integer>();
+                final int[] ids = parseIDList(toDelete, folderMapping);
 				final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
-				delete(ids, timestamp);
+				delete(ids, folderMapping, timestamp);
 				return true;
 			} else if (action.equals(AJAXServlet.ACTION_DETACH)) {
 				if (!checkRequired(req, AJAXServlet.PARAMETER_TIMESTAMP, AJAXServlet.PARAMETER_ID)) {
@@ -333,7 +329,7 @@ public class InfostoreRequest extends CommonRequest {
 		}
 	}
 
-	protected int[] parseIDList(final Object toDelete) throws JSONException {
+	protected int[] parseIDList(final Object toDelete, Map<Integer, Integer> folderMapping) throws JSONException {
         if(JSONArray.class.isAssignableFrom(toDelete.getClass())) {
             final JSONArray array = (JSONArray) toDelete;
             final int[] ids = new int[array.length()];
@@ -345,7 +341,18 @@ public class InfostoreRequest extends CommonRequest {
                 } catch (final JSONException x) {
                     ids[i] = Integer.parseInt(tuple.getString(AJAXServlet.PARAMETER_ID));
                 }
+                if(folderMapping != null) {
+
+                    int folder = -1;
+                    try {
+                        folder = tuple.getInt("folder");
+                    } catch (final JSONException x) {
+                        folder = Integer.parseInt("folder");
+                    }
+                    folderMapping.put(ids[i], folder);
+                }
             }
+
             return ids;
         } else {
             final int[] ids = new int[1];
@@ -685,7 +692,7 @@ public class InfostoreRequest extends CommonRequest {
 		}
 	}
 
-	protected void delete(final int[] ids, final long timestamp) {
+	protected void delete(final int[] ids, Map<Integer, Integer> folderMapping, final long timestamp) {
 		final InfostoreFacade infostore = getInfostore();
 		final SearchEngine searchEngine = getSearchEngine();
 
@@ -739,9 +746,14 @@ public class InfostoreRequest extends CommonRequest {
 
             w.array();
 			for (int i = 0; i < notDeleted.length; i++) {
-				final int nd = notDeleted[i];
+                w.object();
+                w.key(AJAXServlet.PARAMETER_ID);
+                final int nd = notDeleted[i];
 				w.value(nd);
-			}
+                w.key("folder");
+                w.value(folderMapping.get(nd));
+                w.endObject();
+            }
 			w.endArray();
             w.endObject();
 

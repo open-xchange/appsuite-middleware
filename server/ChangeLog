@@ -1,6 +1,7 @@
 * 2008-09-03 - francisco.laguna@open-xchange.com
 
  - Bugfix #11595: Reintroduced parameter for forcing use of write connections in DBPool.
+ - Partial Fix #11399: Return ids and folders in an array of objects if entries can't be deleted.
 
 * 2008-09-03 - thorben.betten@open-xchange.com
 
