@@ -126,15 +126,15 @@ public abstract class ParamContainer {
 		}
 
 		public Category getMissingParamCategory() {
-			return com.openexchange.mail.MailException.Code.MISSING_PARAM.getCategory();
+			return com.openexchange.mail.MailException.Code.MISSING_PARAMETER.getCategory();
 		}
 
 		public String getMissingParamMsg() {
-			return com.openexchange.mail.MailException.Code.MISSING_PARAM.getMessage();
+			return com.openexchange.mail.MailException.Code.MISSING_PARAMETER.getMessage();
 		}
 
 		public int getMissingParamNum() {
-			return com.openexchange.mail.MailException.Code.MISSING_PARAM.getNumber();
+			return com.openexchange.mail.MailException.Code.MISSING_PARAMETER.getNumber();
 		}
 	};
 
