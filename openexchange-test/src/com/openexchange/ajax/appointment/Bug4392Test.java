@@ -65,7 +65,7 @@ public class Bug4392Test extends AppointmentTest {
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.MILLISECOND, 0);
 		
-		calendar.add(Calendar.DAY_OF_MONTH, occurrences);
+		calendar.add(Calendar.DAY_OF_MONTH, occurrences-1);
 		final Date until = calendar.getTime();
 		
 		final AppointmentObject appointmentObj = createAppointmentObject("testBug4392");
