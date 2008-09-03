@@ -131,14 +131,7 @@ public abstract class CalendarWriter extends CommonWriter {
 		}
 		
 		if (calendarobject.containsUntil()) {
-			if (calendarobject.containsOccurrence()) {
-				final Calendar c = Calendar.getInstance();
-				c.setTime(calendarobject.getUntil());
-				c.add(Calendar.DAY_OF_YEAR, -1);
-				addElement(CalendarFields.UNTIL, c.getTime(), e_prop);
-			} else {
-				addElement(CalendarFields.UNTIL, calendarobject.getUntil(), e_prop);
-			}
+			addElement(CalendarFields.UNTIL, calendarobject.getUntil(), e_prop);
 		}
 		
 		if (calendarobject.containsOccurrence()) {
