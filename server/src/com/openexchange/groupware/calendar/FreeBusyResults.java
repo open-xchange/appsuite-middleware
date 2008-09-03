@@ -205,6 +205,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 if (!rs.wasNull() && recid == oid) {
                     cdao.setRecurrenceCalculator(rs.getInt(11));
                     cdao.setRecurrence(rs.getString(12));
+                    CalendarRecurringCollection.fillDAO(cdao);
                     cdao.setDelExceptions(rs.getString(13));
                     cdao.setExceptions(rs.getString(14));
                     cdao.setTimezone(rs.getString(15));

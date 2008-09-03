@@ -458,7 +458,8 @@ class CalendarMySQL implements CalendarSqlImp {
 					cdao.setEndDate(e);
 					cdao.setRecurrenceCalculator(rs.getInt(5));
 					cdao.setRecurrence(rs.getString(6));
-					cdao.setDelExceptions(rs.getString(7));
+                    CalendarRecurringCollection.fillDAO(cdao);
+                    cdao.setDelExceptions(rs.getString(7));
 					cdao.setExceptions(rs.getString(8));
 					cdao.setTimezone(rs.getString(9));
 					if (CalendarRecurringCollection.fillDAO(cdao)) {
