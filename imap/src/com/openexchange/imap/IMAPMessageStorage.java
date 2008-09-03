@@ -242,6 +242,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			final MailField[] fields) throws MailException {
 		try {
 			imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_ONLY);
+			if (imapFolder.getMessageCount() == 0) {
+				return EMPTY_RETVAL;
+			}
 			/*
 			 * Shall a search be performed?
 			 */

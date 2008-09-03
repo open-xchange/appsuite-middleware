@@ -1270,6 +1270,12 @@ public final class IMAPCommandsCollection {
 	 */
 	public static MailMessage[] fetchAll(final IMAPFolder imapFolder, final boolean ascending)
 			throws MessagingException {
+		if (imapFolder.getMessageCount() == 0) {
+			/*
+			 * Empty folder...
+			 */
+			return new MailMessage[0];
+		}
 		return (MailMessage[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
 			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
