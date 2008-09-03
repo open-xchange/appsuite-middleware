@@ -177,7 +177,14 @@ public class UpdateTest extends AppointmentTest {
 		assertFalse("object id of the update is equals with the old object id", newObjectId == objectId);
 		
 		loadAppointment = loadAppointment(getWebConversation(), newObjectId, appointmentFolderId, PROTOCOL + getHostName(), login, password);
-		compareObject(appointmentObj, loadAppointment);
+		// Loaded exception will contain masters recurrence information
+
+        appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+        appointmentObj.setInterval(1);
+        appointmentObj.setUntil(until);
+		
+
+        compareObject(appointmentObj, loadAppointment);
 		
 		deleteAppointment(getWebConversation(), new int[][] { { objectId, appointmentFolderId } }, PROTOCOL + getHostName(), login, password);
 	}

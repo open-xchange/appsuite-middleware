@@ -148,7 +148,14 @@ public class UpdateTest extends AppointmentTest {
 		appointmentObj.setObjectID(newObjectId);
 		
 		loadAppointment = loadAppointment(getWebConversation(), newObjectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
-		compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
+
+        // Loaded change exception will contain the masters recurrence information
+        appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+        appointmentObj.setInterval(1);
+        appointmentObj.setUntil(until);
+
+
+        compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
