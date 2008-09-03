@@ -1,6 +1,6 @@
 * 2008-09-03 - francisco.laguna@open-xchange.com
 
- - Bugfix #9845: Reintroduced parameter for forcing use of write connections in DBPool.
+ - Bugfix #11595: Reintroduced parameter for forcing use of write connections in DBPool.
 
 * 2008-09-03 - thorben.betten@open-xchange.com
 
