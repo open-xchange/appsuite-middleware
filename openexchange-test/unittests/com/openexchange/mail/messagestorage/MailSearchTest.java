@@ -184,6 +184,7 @@ public final class MailSearchTest extends AbstractMailTest {
 					start = System.currentTimeMillis();
 					final MailMessage[] searchedMails = mailAccess.getMessageStorage().searchMessages("INBOX",
 							IndexRange.NULL, null, null, term, FIELDS_ID_AND_HEADER);
+					System.out.println("Message-Id search took: " + (System.currentTimeMillis() - start) + "msec");
 					assertTrue("Search failed: No result", null != searchedMails);
 					assertTrue("Search failed: Non-matching result size", searchedMails.length >= 1);
 					boolean found = false;
