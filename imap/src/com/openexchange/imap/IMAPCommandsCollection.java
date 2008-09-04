@@ -1252,6 +1252,57 @@ public final class IMAPCommandsCollection {
 		}));
 	}
 
+	private static final String TEMPL_UID_FETCH_UID = "UID FETCH %s (UID)";
+
+	/**
+	 * Maps specified UIDs to current corresponding sequence numbers
+	 * 
+	 * @param imapFolder
+	 *            The IMAP folder
+	 * @param uids
+	 *            The UIDs
+	 * @return The current corresponding sequence numbers
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 */
+	public static int[] uids2SeqNums(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
+		if (imapFolder.getMessageCount() == 0) {
+			/*
+			 * Empty folder...
+			 */
+			return new int[0];
+		}
+		return (int[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				final Map<Long, Integer> m = new HashMap<Long, Integer>(uids.length);
+				final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true);
+				Response[] r = null;
+				Response response = null;
+				for (int k = 0; k < args.length; k++) {
+					r = p.command(String.format(TEMPL_UID_FETCH_UID, args[k]), null);
+					final int len = r.length - 1;
+					response = r[len];
+					try {
+						if (response.isOK()) {
+							for (int j = 0; j < len; j++) {
+								final FetchResponse fr = (FetchResponse) r[j];
+								m.put(Long.valueOf(((UID) fr.getItem(0)).uid), Integer.valueOf(fr.getNumber()));
+							}
+						}
+					} finally {
+						p.notifyResponseHandlers(r);
+						p.handleResult(response);
+					}
+				}
+				final int[] retval = new int[uids.length];
+				for (int i = 0; i < retval.length; i++) {
+					retval[i] = m.get(Long.valueOf(uids[i])).intValue();
+				}
+				return retval;
+			}
+		}));
+	}
+
 	private static final String COMMAND_FETCH = "FETCH 1:* (UID INTERNALDATE)";
 
 	/**
