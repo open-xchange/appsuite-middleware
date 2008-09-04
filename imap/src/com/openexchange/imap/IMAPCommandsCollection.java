@@ -1296,7 +1296,8 @@ public final class IMAPCommandsCollection {
 				}
 				final int[] retval = new int[uids.length];
 				for (int i = 0; i < retval.length; i++) {
-					retval[i] = m.get(Long.valueOf(uids[i])).intValue();
+					final Long key = Long.valueOf(uids[i]);
+					retval[i] = m.containsKey(key) ? m.get(key).intValue() : -1;
 				}
 				return retval;
 			}
