@@ -169,9 +169,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		}
 		try {
 			imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_ONLY);
+			/*
+			 * Fetch desired messages by given UIDs. Turn UIDs to corresponding
+			 * sequence numbers to maintain order cause some IMAP servers ignore
+			 * the order of UIDs provided in a "UID FETCH" command.
+			 */
 			final long start = System.currentTimeMillis();
 			final Message[] msgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(),
-					mailIds, getFetchProfile(fields, IMAPConfig.isFastFetch()), false, true, body).doCommand();
+					IMAPCommandsCollection.uids2SeqNums(imapFolder, mailIds), getFetchProfile(fields, IMAPConfig
+							.isFastFetch()), false, true, body).doCommand();
 			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(mailIds.length).append(

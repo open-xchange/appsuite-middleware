@@ -71,6 +71,7 @@ import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeUtility;
 
+import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailListField;
@@ -288,12 +289,26 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 					seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(seqNums, keepOrder);
 			seqNumFetcher = keepOrder ? new IntSeqNumFetcher(seqNums) : null;
 		} else if (arr instanceof long[]) {
-			final long[] uids = (long[]) arr;
-			uid = true;
-			length = uids.length;
-			args = isSequential ? new String[] { new StringBuilder(64).append(uids[0]).append(':').append(
-					uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(uids, true);
-			seqNumFetcher = null;
+			if (keepOrder) {
+				/*
+				 * Turn UIDs to corresponding sequence number to initialize
+				 * seqNumFetcher which keeps track or proper order
+				 */
+				final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, (long[]) arr);
+				uid = false;
+				length = seqNums.length;
+				args = isSequential ? new String[] { new StringBuilder(64).append(seqNums[0]).append(':').append(
+						seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(seqNums,
+						keepOrder);
+				seqNumFetcher = keepOrder ? new IntSeqNumFetcher(seqNums) : null;
+			} else {
+				final long[] uids = (long[]) arr;
+				uid = true;
+				length = uids.length;
+				args = isSequential ? new String[] { new StringBuilder(64).append(uids[0]).append(':').append(
+						uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(uids, true);
+				seqNumFetcher = null;
+			}
 		} else if (arr instanceof Message[]) {
 			final Message[] msgs = (Message[]) arr;
 			uid = false;
