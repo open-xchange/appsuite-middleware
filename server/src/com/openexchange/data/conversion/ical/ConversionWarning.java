@@ -149,7 +149,11 @@ public class ConversionWarning extends AbstractOXException {
         /**
          * Can not resolve resource: %d
          */
-        CANT_RESOLVE_RESOURCE("Can not resolve resource: %1$s", Category.CODE_ERROR, 13)
+        CANT_RESOLVE_RESOURCE("Can not resolve resource: %1$s", Category.CODE_ERROR, 13),
+        /**
+         *
+         */
+         PRIVATE_APPOINTMENTS_HAVE_NO_PARTICIPANTS("Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.",Category.USER_INPUT, 14)
         ;
 
         /**

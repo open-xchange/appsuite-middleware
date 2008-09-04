@@ -46,66 +46,23 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.data.conversion.ical.ical4j.internal;
+package com.openexchange.data.conversion.ical.ical4j.internal.appointment;
 
-import net.fortuna.ical4j.model.component.VEvent;
 import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.*;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.*;
+import com.openexchange.data.conversion.ical.ical4j.internal.ObjectVerifier;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ConversionError;
 
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class AppointmentConverters {
-    public static final AttributeConverter<VEvent, AppointmentObject>[] ALL;
-
-    /**
-     * Prevent instantiation.
-     */
-    private AppointmentConverters() {
-        super();
-    }
-
-    static {
-        final List<AttributeConverter<VEvent, AppointmentObject>> tmp = new ArrayList<AttributeConverter<VEvent, AppointmentObject>>();
-        tmp.add(new Title<VEvent, AppointmentObject>());
-        tmp.add(new Note<VEvent, AppointmentObject>());
-
-        Start<VEvent, AppointmentObject> start = new Start<VEvent, AppointmentObject>();
-        start.setVerifier(new RequireStartDate());
-        tmp.add(start);
-
-        tmp.add(new End<VEvent, AppointmentObject>());
-
-        Duration<VEvent, AppointmentObject> duration = new Duration<VEvent, AppointmentObject>();
-        duration.setVerifier(new RequireEndDate());
-        tmp.add(duration);
-
-        tmp.add(new Klass<VEvent, AppointmentObject>());
-
-        tmp.add(new Location());
-        tmp.add(new Transparency());
-
-        Participants<VEvent, AppointmentObject> participants = new Participants<VEvent, AppointmentObject>();
-        participants.setVerifier(new PrivateAppointmentsHaveNoParticipants());
-        tmp.add(participants);
-
-        tmp.add(new Categories<VEvent, AppointmentObject>());
-
-        tmp.add(new Recurrence<VEvent, AppointmentObject>());
-
-        tmp.add(new DeleteExceptions<VEvent, AppointmentObject>());
-
-        tmp.add(new Alarm<VEvent, AppointmentObject>());
-        tmp.add(new IgnoreConflicts());
-        tmp.add(new Uid<VEvent, AppointmentObject>());
-
-        tmp.add(new CreatedAndDTStamp<VEvent, AppointmentObject>());
-        tmp.add(new LastModified<VEvent, AppointmentObject>());
-        
-        ALL = (AttributeConverter<VEvent, AppointmentObject>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
+public class PrivateAppointmentsHaveNoParticipants implements ObjectVerifier<AppointmentObject> {
+    public void verify(int index, AppointmentObject object, List<ConversionWarning> warnings) throws ConversionError {
+        if(object.getParticipants() != null && object.getParticipants().length > 0 && object.getPrivateFlag()) {
+            object.removeParticipants();
+            warnings.add(new ConversionWarning(index,ConversionWarning.Code.PRIVATE_APPOINTMENTS_HAVE_NO_PARTICIPANTS));
+        }
     }
 }
