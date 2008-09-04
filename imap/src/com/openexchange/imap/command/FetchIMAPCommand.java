@@ -307,6 +307,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
 	/**
 	 * Constructor to fetch all messages of given folder
+	 * <p>
+	 * <b>Note</b>: Ensure that denoted folder is empty
 	 * 
 	 * @param imapFolder
 	 *            - the IMAP folder
