@@ -1108,6 +1108,21 @@ public class ICalParserTest extends TestCase {
         assertEquals(2, appointments.size());
     }
 
+    // Bug 11869
+    public void testAppShouldCorrectParticipantsInPrivateAppoitment() throws ConversionError {
+        Date start = D("24/02/1981 10:00");
+        Date end =   D("24/02/1981 12:00");
+        String icalText = fixtures.veventWithSimpleProperties(start, end,
+        "CLASS"    ,    "PRIVATE",
+        "ATTENDEE" ,     "MAILTO:mickey@disney.invalid");
+
+        assertWarningWhenParsingAppointment(icalText, "Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.");
+
+        AppointmentObject appointment = parseAppointment(icalText);
+
+        assertNull(appointment.getParticipants());
+    }
+
     @Override
     protected void setUp() throws Exception {
         fixtures = new ICALFixtures();
