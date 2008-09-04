@@ -148,6 +148,8 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 
 	/**
 	 * Constructor to set flags in all messages
+	 * <p>
+	 * <b>Note</b>: Ensure that denoted folder is not empty.
 	 * 
 	 * @param imapFolder
 	 *            - the imap folder

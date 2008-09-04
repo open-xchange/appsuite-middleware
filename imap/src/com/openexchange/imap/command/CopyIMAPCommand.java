@@ -185,7 +185,9 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 
 	/**
 	 * Constructor to copy all messages of given folder to given destination
-	 * folder by performing a <code>COPY 1:*</code> command
+	 * folder by performing a <code>COPY 1:*</code> command.
+	 * <p>
+	 * <b>Note</b>: Ensure that denoted folder is not empty.
 	 * 
 	 * @param imapFolder
 	 *            - the IMAP folder
