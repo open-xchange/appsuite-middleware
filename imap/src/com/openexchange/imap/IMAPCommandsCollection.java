@@ -1082,16 +1082,26 @@ public final class IMAPCommandsCollection {
 							if (!(r[i] instanceof FetchResponse)) {
 								continue;
 							}
-							final Long uid;
+							final FetchResponse fr = (FetchResponse) r[i];
+							final boolean deleted;
 							{
-								final FetchResponse fr = (FetchResponse) r[i];
-								Item item = fr.getItem(1);
-								if (!(item instanceof UID)) {
-									item = fr.getItem(0);
+								Item item = fr.getItem(0);
+								if (!(item instanceof Flags)) {
+									item = fr.getItem(1);
 								}
-								uid = Long.valueOf(((UID) item).uid);
+								deleted = ((Flags) item).contains(Flags.Flag.DELETED);
 							}
-							set.add(uid);
+							if (deleted) {
+								final Long uid;
+								{
+									Item item = fr.getItem(1);
+									if (!(item instanceof UID)) {
+										item = fr.getItem(0);
+									}
+									uid = Long.valueOf(((UID) item).uid);
+								}
+								set.add(uid);
+							}
 							r[i] = null;
 						}
 						if ((filter != null) && (filter.length > 0)) {
