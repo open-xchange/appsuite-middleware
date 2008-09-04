@@ -3,6 +3,8 @@
  - Bugfix #12108: Proper sequence range in FETCH command if folder is empty
  - Bugfix #12111: Indicating support of UIDPLUS prior to performing
    "UID EXPUNGE" command
+ - Bugfix #12104: Fixed calculating wrong until date when syncing to
+   Outlook
 
 * 2008-09-03 - francisco.laguna@open-xchange.com
 
