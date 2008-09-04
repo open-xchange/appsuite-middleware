@@ -534,7 +534,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		 * ... and perform EXPUNGE
 		 */
 		try {
-			IMAPCommandsCollection.uidExpungeWithFallback(imapFolder, uids);
+			IMAPCommandsCollection.uidExpungeWithFallback(imapFolder, uids, imapConfig.getImapCapabilities()
+					.hasUIDPlus());
 		} catch (final FolderClosedException e) {
 			/*
 			 * Not possible to retry since connection is broken
@@ -720,7 +721,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 						(System.currentTimeMillis() - start)).append(STR_MSEC).toString());
 			}
 			try {
-				IMAPCommandsCollection.uidExpungeWithFallback(imapFolder, tmp);
+				IMAPCommandsCollection.uidExpungeWithFallback(imapFolder, tmp, imapConfig.getImapCapabilities()
+						.hasUIDPlus());
 			} catch (final FolderClosedException e) {
 				/*
 				 * Not possible to retry since connection is broken

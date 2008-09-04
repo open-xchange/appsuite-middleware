@@ -951,35 +951,46 @@ public final class IMAPCommandsCollection {
 	 *            The IMAP folder
 	 * @param uids
 	 *            The UIDs
+	 * @param supportsUIDPLUS
+	 *            <code>true</code> if IMAP server's capabilities indicate
+	 *            support of UIDPLUS extension; otherwise <code>false</code>
 	 * @throws MessagingException
 	 *             If a messaging error occurs
 	 */
-	public static void uidExpungeWithFallback(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
-		try {
-			final long start = System.currentTimeMillis();
-			IMAPCommandsCollection.uidExpunge(imapFolder, uids);
-			MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(new StringBuilder(128).append(uids.length).append(" messages expunged in ").append(
-						(System.currentTimeMillis() - start)).append("msec").toString());
+	public static void uidExpungeWithFallback(final IMAPFolder imapFolder, final long[] uids,
+			final boolean supportsUIDPLUS) throws MessagingException {
+		boolean performFallback = !supportsUIDPLUS;
+		if (supportsUIDPLUS) {
+			try {
+				final long start = System.currentTimeMillis();
+				IMAPCommandsCollection.uidExpunge(imapFolder, uids);
+				MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder(128).append(uids.length).append(" messages expunged in ").append(
+							(System.currentTimeMillis() - start)).append("msec").toString());
+				}
+			} catch (final FolderClosedException e) {
+				/*
+				 * Not possible to retry since connection is broken
+				 */
+				throw e;
+			} catch (final StoreClosedException e) {
+				/*
+				 * Not possible to retry since connection is broken
+				 */
+				throw e;
+			} catch (final MessagingException e) {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn(new StringBuilder(64).append("UID EXPUNGE failed: ").append(e.getLocalizedMessage())
+							.append(".\nPerforming fallback actions.").toString(), e);
+				}
+				performFallback = true;
 			}
-		} catch (final FolderClosedException e) {
+		}
+		if (performFallback) {
 			/*
-			 * Not possible to retry since connection is broken
-			 */
-			throw e;
-		} catch (final StoreClosedException e) {
-			/*
-			 * Not possible to retry since connection is broken
-			 */
-			throw e;
-		} catch (final MessagingException e) {
-			if (LOG.isWarnEnabled()) {
-				LOG.warn(new StringBuilder(64).append("UID EXPUNGE failed: ").append(e.getLocalizedMessage()).append(
-						".\nPerforming fallback actions.").toString(), e);
-			}
-			/*
-			 * UID EXPUNGE did not work; perform fallback actions
+			 * UID EXPUNGE did not work or not supported; perform fallback
+			 * actions
 			 */
 			final long[] excUIDs = IMAPCommandsCollection.getDeletedMessages(imapFolder, uids);
 			if (excUIDs.length > 0) {
