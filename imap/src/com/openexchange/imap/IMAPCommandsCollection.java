@@ -1084,7 +1084,7 @@ public final class IMAPCommandsCollection {
 							}
 							final Long uid;
 							{
-								final FetchResponse fr = (FetchResponse) r[0];
+								final FetchResponse fr = (FetchResponse) r[i];
 								Item item = fr.getItem(1);
 								if (!(item instanceof UID)) {
 									item = fr.getItem(0);
