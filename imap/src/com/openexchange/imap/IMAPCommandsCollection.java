@@ -93,7 +93,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.sun.mail.iap.Argument;
-import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ParsingException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
@@ -132,8 +131,6 @@ public final class IMAPCommandsCollection {
 	 * Server does not support %s command
 	 */
 	private static final String PROTOCOL_ERROR_TEMPL = "Server does not support %s command";
-
-	private static final String ERR_01 = "No matching messages";
 
 	/**
 	 * Prevent instantiation
@@ -527,6 +524,12 @@ public final class IMAPCommandsCollection {
 	 */
 	public static boolean clearAllColorLabels(final IMAPFolder imapFolder, final long[] msgUIDs)
 			throws MessagingException {
+		if (imapFolder.getMessageCount() == 0) {
+			/*
+			 * Empty folder...
+			 */
+			return true;
+		}
 		return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
 			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
@@ -549,17 +552,7 @@ public final class IMAPCommandsCollection {
 						}
 					} finally {
 						p.notifyResponseHandlers(r);
-						try {
-							p.handleResult(response);
-						} catch (final CommandFailedException cfe) {
-							if (cfe.getMessage().indexOf(ERR_01) != -1) {
-								/*
-								 * Obviously this folder is empty
-								 */
-								return Boolean.TRUE;
-							}
-							throw cfe;
-						}
+						p.handleResult(response);
 					}
 				}
 				return Boolean.TRUE;
@@ -585,6 +578,12 @@ public final class IMAPCommandsCollection {
 	 */
 	public static boolean setColorLabel(final IMAPFolder imapFolder, final long[] msgUIDs, final String colorLabelFlag)
 			throws MessagingException {
+		if (imapFolder.getMessageCount() == 0) {
+			/*
+			 * Empty folder...
+			 */
+			return true;
+		}
 		return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
 			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
@@ -607,16 +606,7 @@ public final class IMAPCommandsCollection {
 						}
 					} finally {
 						p.notifyResponseHandlers(r);
-						try {
-							p.handleResult(response);
-						} catch (final CommandFailedException cfe) {
-							if (cfe.getMessage().indexOf(ERR_01) == -1) {
-								/*
-								 * Non-empty folder
-								 */
-								throw cfe;
-							}
-						}
+						p.handleResult(response);
 					}
 				}
 				return Boolean.TRUE;
@@ -905,6 +895,12 @@ public final class IMAPCommandsCollection {
 	 *             - if an error occurs in underlying protocol
 	 */
 	public static boolean fastExpunge(final IMAPFolder imapFolder) throws MessagingException {
+		if (imapFolder.getMessageCount() == 0) {
+			/*
+			 * Empty folder...
+			 */
+			return true;
+		}
 		return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
 				final Response[] r = p.command(COMMAND_EXPUNGE, null);
@@ -927,17 +923,7 @@ public final class IMAPCommandsCollection {
 					 * sequential (by message) folder cache update
 					 */
 					/* p.notifyResponseHandlers(r); */
-					try {
-						p.handleResult(response);
-					} catch (final CommandFailedException cfe) {
-						if (cfe.getMessage().indexOf(ERR_01) == -1) {
-							throw cfe;
-						}
-						/*
-						 * Obviously this folder is empty
-						 */
-						retval = Boolean.TRUE;
-					}
+					p.handleResult(response);
 				}
 				return retval;
 			}
@@ -1077,6 +1063,12 @@ public final class IMAPCommandsCollection {
 	 */
 	private static long[] getDeletedMessages(final IMAPFolder imapFolder, final long[] filter)
 			throws MessagingException {
+		if (imapFolder.getMessageCount() == 0) {
+			/*
+			 * Empty folder...
+			 */
+			return new long[0];
+		}
 		return (long[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
 				final Response[] r = p.command(FETCH_FLAGS, null);
@@ -1122,17 +1114,7 @@ public final class IMAPCommandsCollection {
 					 * sequential (by message) folder cache update
 					 */
 					/* p.notifyResponseHandlers(r); */
-					try {
-						p.handleResult(response);
-					} catch (final CommandFailedException cfe) {
-						if (cfe.getMessage().indexOf(ERR_01) == -1) {
-							throw cfe;
-						}
-						/*
-						 * Obviously this folder is empty
-						 */
-						retval = new long[0];
-					}
+					p.handleResult(response);
 				}
 				return retval;
 			}
@@ -1209,6 +1191,12 @@ public final class IMAPCommandsCollection {
 	 */
 	public static long[] seqNums2UID(final IMAPFolder imapFolder, final String[] args, final int size)
 			throws MessagingException {
+		if (imapFolder.getMessageCount() == 0) {
+			/*
+			 * Empty folder...
+			 */
+			return new long[0];
+		}
 		return (long[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
 			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
@@ -1229,17 +1217,7 @@ public final class IMAPCommandsCollection {
 						}
 					} finally {
 						p.notifyResponseHandlers(r);
-						try {
-							p.handleResult(response);
-						} catch (final CommandFailedException cfe) {
-							if (cfe.getMessage().indexOf(ERR_01) != -1) {
-								/*
-								 * Obviously this folder is empty
-								 */
-								return new long[0];
-							}
-							throw cfe;
-						}
+						p.handleResult(response);
 					}
 				}
 				if (index < size) {
@@ -1277,13 +1255,11 @@ public final class IMAPCommandsCollection {
 			return new MailMessage[0];
 		}
 		return (MailMessage[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-
 			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
 				final Response[] r = p.command(COMMAND_FETCH, null);
 				final int len = r.length - 1;
 				final Response response = r[len];
 				final List<MailMessage> l = new ArrayList<MailMessage>(len);
-				boolean isEmpty = false;
 				try {
 					if (response.isOK()) {
 						final String fullname = imapFolder.getFullName();
@@ -1304,20 +1280,7 @@ public final class IMAPCommandsCollection {
 					}
 				} finally {
 					p.notifyResponseHandlers(r);
-					try {
-						p.handleResult(response);
-					} catch (final CommandFailedException cfe) {
-						if (cfe.getMessage().indexOf(ERR_01) == -1) {
-							throw cfe;
-						}
-						/*
-						 * Obviously this folder is empty
-						 */
-						isEmpty = true;
-					}
-				}
-				if (isEmpty) {
-					return new MailMessage[0];
+					p.handleResult(response);
 				}
 				Collections.sort(l, ascending ? ASC_COMP : DESC_COMP);
 				return l.toArray(new MailMessage[l.size()]);
@@ -1401,6 +1364,12 @@ public final class IMAPCommandsCollection {
 	 *             - if an error occurs in underlying protocol
 	 */
 	public static boolean uidExpunge(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
+		if (imapFolder.getMessageCount() == 0) {
+			/*
+			 * Empty folder...
+			 */
+			return true;
+		}
 		return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
 				final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, false);
@@ -1426,16 +1395,7 @@ public final class IMAPCommandsCollection {
 						 * sequential (by message) folder cache update
 						 */
 						/* p.notifyResponseHandlers(r); */
-						try {
-							p.handleResult(response);
-						} catch (final CommandFailedException cfe) {
-							if (cfe.getMessage().indexOf(ERR_01) == -1) {
-								/*
-								 * Non-empty folder
-								 */
-								throw cfe;
-							}
-						}
+						p.handleResult(response);
 					}
 				}
 				return Boolean.TRUE;

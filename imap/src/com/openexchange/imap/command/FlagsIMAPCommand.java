@@ -76,8 +76,6 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 
 	private final boolean silent;
 
-	private final Boolean retval = Boolean.TRUE;
-
 	/**
 	 * Constructor to set flags in messages identified through given UIDs.
 	 * 
@@ -100,6 +98,9 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	public FlagsIMAPCommand(final IMAPFolder imapFolder, final long[] uids, final Flags flags, final boolean enable,
 			final boolean silent, final boolean isSequential) throws MessagingException {
 		super(imapFolder);
+		if (imapFolder.getMessageCount() == 0) {
+			returnDefaultValue = true;
+		}
 		if ((uids == null) || (uids.length == 0)) {
 			returnDefaultValue = true;
 			args = ARGS_EMPTY;
@@ -166,6 +167,9 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	public FlagsIMAPCommand(final IMAPFolder imapFolder, final Flags flags, final boolean enable, final boolean silent)
 			throws MessagingException {
 		super(imapFolder);
+		if (imapFolder.getMessageCount() == 0) {
+			returnDefaultValue = true;
+		}
 		args = ARGS_ALL;
 		if (flags == null) {
 			returnDefaultValue = true;
@@ -210,6 +214,9 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	public FlagsIMAPCommand(final IMAPFolder imapFolder, final int startSeqNum, final int endSeqNum, final Flags flags,
 			final boolean enable, final boolean silent) throws MessagingException {
 		super(imapFolder);
+		if (imapFolder.getMessageCount() == 0) {
+			returnDefaultValue = true;
+		}
 		args = new String[] { new StringBuilder(16).append(startSeqNum).append(':').append(endSeqNum).toString() };
 		if (flags == null) {
 			returnDefaultValue = true;
@@ -324,7 +331,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	 */
 	@Override
 	protected Boolean getReturnVal() {
-		return retval;
+		return Boolean.TRUE;
 	}
 
 	/*

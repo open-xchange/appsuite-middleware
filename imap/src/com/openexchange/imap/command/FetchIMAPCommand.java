@@ -244,6 +244,9 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	public FetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final Object arr, final FetchProfile fp,
 			final boolean isSequential, final boolean keepOrder, final boolean loadBody) throws MessagingException {
 		super(imapFolder);
+		if (imapFolder.getMessageCount() == 0) {
+			returnDefaultValue = true;
+		}
 		this.loadBody = loadBody;
 		this.separator = imapFolder.getSeparator();
 		command = getFetchCommand(isRev1, fp, loadBody);
@@ -348,6 +351,9 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	public FetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final FetchProfile fp,
 			final int fetchLen, final boolean loadBody) throws MessagingException {
 		super(imapFolder);
+		if (imapFolder.getMessageCount() == 0) {
+			returnDefaultValue = true;
+		}
 		this.loadBody = loadBody;
 		this.separator = imapFolder.getSeparator();
 		if (0 == fetchLen) {

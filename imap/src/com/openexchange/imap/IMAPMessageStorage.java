@@ -658,13 +658,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				 */
 				final IMAPFolder destFolder = setAndOpenFolder(destFullname, Folder.READ_WRITE);
 				try {
-					final long start = System.currentTimeMillis();
-					new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, true, true).doCommand();
-					if (LOG.isDebugEnabled()) {
-						LOG.debug(new StringBuilder(128).append(
-								"A copy/move to default drafts folder => All messages' \\Draft flag in ").append(
-								destFullname).append(" set in ").append((System.currentTimeMillis() - start)).append(
-								STR_MSEC).toString());
+					if (destFolder.getMessageCount() > 0) {
+						final long start = System.currentTimeMillis();
+						new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, true, true).doCommand();
+						if (LOG.isDebugEnabled()) {
+							LOG.debug(new StringBuilder(128).append(
+									"A copy/move to default drafts folder => All messages' \\Draft flag in ").append(
+									destFullname).append(" set in ").append((System.currentTimeMillis() - start))
+									.append(STR_MSEC).toString());
+						}
 					}
 				} finally {
 					destFolder.close(false);

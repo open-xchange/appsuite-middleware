@@ -105,17 +105,12 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 *            copied
 	 * @param destFolderName
 	 *            - the destination folder fullname
+	 * @throws MessagingException
+	 *             If a messaging error occurs
 	 */
 	public CopyIMAPCommand(final IMAPFolder imapFolder, final int startSeqNum, final int endSeqNum,
-			final String destFolderName) {
+			final String destFolderName) throws MessagingException {
 		this(imapFolder, startend2long(startSeqNum, endSeqNum), destFolderName, true, true, false);
-	}
-
-	private static long[] startend2long(final int start, final int end) {
-		final long[] longArr = new long[2];
-		longArr[0] = start;
-		longArr[1] = end;
-		return longArr;
 	}
 
 	/**
@@ -130,16 +125,12 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 *            - the destination folder fullname
 	 * @param isSequential
 	 *            - whether sequence numbers are sequential or not
+	 * @throws MessagingException
+	 *             If a messaging error occurs
 	 */
 	public CopyIMAPCommand(final IMAPFolder imapFolder, final int[] seqNums, final String destFolderName,
-			final boolean isSequential) {
+			final boolean isSequential) throws MessagingException {
 		this(imapFolder, int2long(seqNums), destFolderName, isSequential, true, false);
-	}
-
-	private static long[] int2long(final int[] intArr) {
-		final long[] longArr = new long[intArr.length];
-		System.arraycopy(intArr, 0, longArr, 0, intArr.length);
-		return longArr;
 	}
 
 	/**
@@ -157,18 +148,24 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 * @param fast
 	 *            - <code>true</code> to ignore corresponding UIDs of copied
 	 *            messages and return value is empty (array of length zero)
+	 * @throws MessagingException
+	 *             If a messaging error occurs
 	 */
 	public CopyIMAPCommand(final IMAPFolder imapFolder, final long[] uids, final String destFolderName,
-			final boolean isSequential, final boolean fast) {
+			final boolean isSequential, final boolean fast) throws MessagingException {
 		this(imapFolder, uids, destFolderName, isSequential, fast, true);
 	}
 
 	private CopyIMAPCommand(final IMAPFolder imapFolder, final long[] nums, final String destFolderName,
-			final boolean isSequential, final boolean fast, final boolean uid) {
+			final boolean isSequential, final boolean fast, final boolean uid) throws MessagingException {
 		super(imapFolder);
 		this.uids = nums == null ? DEFAULT_RETVAL : nums;
 		this.uid = uid;
-		returnDefaultValue = (this.uids.length == 0);
+		if (imapFolder.getMessageCount() == 0) {
+			returnDefaultValue = true;
+		} else {
+			returnDefaultValue = (this.uids.length == 0);
+		}
 		this.fast = fast;
 		this.destFolderName = prepareStringArgument(destFolderName);
 		length = this.uids.length;
@@ -193,9 +190,14 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 *            - the IMAP folder
 	 * @param destFolderName
 	 *            - the destination folder
+	 * @throws MessagingException
+	 *             If a messaging error occurs
 	 */
-	public CopyIMAPCommand(final IMAPFolder imapFolder, final String destFolderName) {
+	public CopyIMAPCommand(final IMAPFolder imapFolder, final String destFolderName) throws MessagingException {
 		super(imapFolder);
+		if (imapFolder.getMessageCount() == 0) {
+			returnDefaultValue = true;
+		}
 		fast = true;
 		uid = false;
 		this.uids = DEFAULT_RETVAL;
@@ -391,4 +393,16 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 		}
 	}
 
+	private static long[] startend2long(final int start, final int end) {
+		final long[] longArr = new long[2];
+		longArr[0] = start;
+		longArr[1] = end;
+		return longArr;
+	}
+
+	private static long[] int2long(final int[] intArr) {
+		final long[] longArr = new long[intArr.length];
+		System.arraycopy(intArr, 0, longArr, 0, intArr.length);
+		return longArr;
+	}
 }

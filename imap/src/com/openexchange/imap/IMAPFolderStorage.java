@@ -1108,6 +1108,13 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 			}
 			f.open(Folder.READ_WRITE);
 			try {
+				int msgCount = f.getMessageCount();
+				if (msgCount == 0) {
+					/*
+					 * Empty folder
+					 */
+					return;
+				}
 				String trashFullname = null;
 				final boolean backup = (!hardDelete
 						&& !UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx)
@@ -1127,7 +1134,6 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 					/*
 					 * Block-wise deletion
 					 */
-					int msgCount = f.getMessageCount();
 					while (msgCount > blockSize) {
 						/*
 						 * Don't adapt sequence number since folder expunge
@@ -1135,13 +1141,13 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 						 */
 						if (backup) {
 							try {
-								final long start = System.currentTimeMillis();
+								final long startCopy = System.currentTimeMillis();
 								new CopyIMAPCommand(f, INT_1, blockSize, trashFullname).doCommand();
 								if (LOG.isDebugEnabled()) {
 									debug.setLength(0);
 									LOG.debug(debug.append("\"Soft Clear\": ").append(
 											"Messages copied to default trash folder \"").append(trashFullname).append(
-											"\" in ").append((System.currentTimeMillis() - start)).append(STR_MSEC)
+											"\" in ").append((System.currentTimeMillis() - startCopy)).append(STR_MSEC)
 											.toString());
 								}
 							} catch (final MessagingException e) {
@@ -1203,15 +1209,22 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 						msgCount -= blockSize;
 					}
 				}
+				if (msgCount == 0) {
+					/*
+					 * All messages already cleared through previous block-wise
+					 * deletion
+					 */
+					return;
+				}
 				if (backup) {
 					try {
-						final long start = System.currentTimeMillis();
+						final long startCopy = System.currentTimeMillis();
 						new CopyIMAPCommand(f, trashFullname).doCommand();
 						if (LOG.isDebugEnabled()) {
 							debug.setLength(0);
 							LOG.debug(debug.append("\"Soft Clear\": ").append(
 									"Messages copied to default trash folder \"").append(trashFullname)
-									.append("\" in ").append((System.currentTimeMillis() - start)).append(STR_MSEC)
+									.append("\" in ").append((System.currentTimeMillis() - startCopy)).append(STR_MSEC)
 									.toString());
 						}
 					} catch (final MessagingException e) {
