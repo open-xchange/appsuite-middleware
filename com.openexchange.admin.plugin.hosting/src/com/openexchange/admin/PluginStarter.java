@@ -91,10 +91,12 @@ public class PluginStarter {
 
             if (null == System.getSecurityManager()) {
                 System.setSecurityManager(new SecurityManager() {
-                    public void checkPermission(Permission perm) {
+                    @Override
+					public void checkPermission(final Permission perm) {
                     }
 
-                    public void checkPermission(Permission perm, Object context) {
+                    @Override
+					public void checkPermission(final Permission perm, final Object context) {
                     }
                 });
             }
@@ -102,11 +104,11 @@ public class PluginStarter {
             registry = AdminDaemon.getRegistry();
 
             // Create all OLD Objects and bind export them
-            oxctx_v2 = new com.openexchange.admin.rmi.impl.OXContext();
-            OXContextInterface oxctx_stub_v2 = (OXContextInterface) UnicastRemoteObject.exportObject(oxctx_v2, 0);
+            oxctx_v2 = new com.openexchange.admin.rmi.impl.OXContext(context);
+            final OXContextInterface oxctx_stub_v2 = (OXContextInterface) UnicastRemoteObject.exportObject(oxctx_v2, 0);
 
             oxutil_v2 = new com.openexchange.admin.rmi.impl.OXUtil();
-            OXUtilInterface oxutil_stub_v2 = (OXUtilInterface) UnicastRemoteObject.exportObject(oxutil_v2, 0);
+            final OXUtilInterface oxutil_stub_v2 = (OXUtilInterface) UnicastRemoteObject.exportObject(oxutil_v2, 0);
 
             // bind all NEW Objects to registry
             registry.bind(OXContextInterface.RMI_NAME, oxctx_stub_v2);
@@ -151,8 +153,8 @@ public class PluginStarter {
     }
     
     private void startJMX() {
-        int jmx_port = Integer.parseInt(prop.getProp("JMX_PORT", "9998"));
-        String addr = prop.getProp("JMX_BIND_ADDRESS","localhost");
+        final int jmx_port = Integer.parseInt(prop.getProp("JMX_PORT", "9998"));
+        final String addr = prop.getProp("JMX_BIND_ADDRESS","localhost");
         InetAddress iaddr = null;
         
         // bind only on specified interfaces
@@ -165,7 +167,7 @@ public class PluginStarter {
             log.error("Could NOT start start JMX monitor ",e);
         }
         
-        String servername = prop.getProp(AdminProperties.Prop.SERVER_NAME, "local");
+        final String servername = prop.getProp(AdminProperties.Prop.SERVER_NAME, "local");
         log.info("Admindaemon Name: " + servername);
     }
     
@@ -174,7 +176,7 @@ public class PluginStarter {
     }
     
     private void initCache() {
-        AdminCacheExtended cache = new AdminCacheExtended();
+        final AdminCacheExtended cache = new AdminCacheExtended();
         cache.initCache();
         ClientAdminThreadExtended.cache = cache;
         prop = cache.getProperties();        
