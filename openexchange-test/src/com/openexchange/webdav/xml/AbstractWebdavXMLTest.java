@@ -274,13 +274,6 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		}
 	}
 	
-	public static String appendPrefix(final String host) {
-		if (host.startsWith("http://")) {
-			return host;
-		}
-		return "http://" + host;
-	}
-	
 	/**
 	 * @deprecated XML now uses AJAX server error codes.
 	 */

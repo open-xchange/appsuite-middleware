@@ -47,51 +47,47 @@
  *
  */
 
-package com.openexchange.webdav.xml.folder.actions;
+package com.openexchange.webdav.xml.user.actions;
 
-import static com.openexchange.webdav.xml.framework.RequestTools.addElement2PropFind;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Date;
-
-import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
-import org.apache.commons.httpclient.methods.RequestEntity;
 import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.output.XMLOutputter;
 
-import com.openexchange.webdav.xml.XmlServlet;
+import com.openexchange.api.OXConflictException;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.test.TestException;
+import com.openexchange.webdav.xml.framework.AbstractWebDAVParser;
+import com.openexchange.webdav.xml.parser.ResponseParser;
+import com.openexchange.webdav.xml.types.Response;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ListRequest extends AbstractFolderRequest<ListResponse> {
-
-    private final Date lastModified;
+public final class SearchParser extends AbstractWebDAVParser<SearchResponse> {
 
     /**
      * Default constructor.
      */
-    public ListRequest(final Date lastModified) {
+    SearchParser() {
         super();
-        this.lastModified = lastModified;
     }
 
-    public RequestEntity getEntity() throws IOException {
-        final Element objectmode = new Element("objectmode", XmlServlet.NS);
-        objectmode.addContent("NEW_AND_MODIFIED,DELETED");
-
-        final Document doc = addElement2PropFind(objectmode, lastModified);
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        final XMLOutputter xo = new XMLOutputter();
-        xo.output(doc, baos);
-
-        return new ByteArrayRequestEntity(baos.toByteArray());
-    }
-
-    public ListParser getParser() {
-        return new ListParser();
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected SearchResponse createResponse(final Document document)
+        throws OXConflictException, TestException {
+        final SearchResponse retval = new SearchResponse(document);
+        final Response[] responses = ResponseParser.parse(document, Types.GROUPUSER);
+        final ContactObject[] contacts = new ContactObject[responses.length];
+        for (int a = 0; a < contacts.length; a++) {
+            if (responses[a].hasError()) {
+                fail(responses[a].getErrorMessage());
+            }
+            contacts[a] = (ContactObject) responses[a].getDataObject();
+        }
+        retval.setContacts(contacts);
+        return retval;
     }
 }

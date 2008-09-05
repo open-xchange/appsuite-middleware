@@ -49,17 +49,57 @@
 
 package com.openexchange.webdav.xml.user;
 
+import java.io.IOException;
+import java.util.Map;
+
+import org.jdom.JDOMException;
+
+import com.openexchange.api.OXConflictException;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.test.TestException;
+import com.openexchange.webdav.xml.framework.WebDAVClient;
+import com.openexchange.webdav.xml.user.actions.SearchRequest;
+import com.openexchange.webdav.xml.user.actions.SearchResponse;
+
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class GroupUserTools {
 
+    private final WebDAVClient client;
+
+    private int userId;
+
     /**
      * Prevent instantiation.
      */
-    private GroupUserTools() {
+    public GroupUserTools(final WebDAVClient client) {
         super();
+        this.client = client;
     }
 
+    public final int getUserId() throws OXConflictException, IOException,
+        JDOMException, TestException {
+        return getUserId(null);
+    }
+
+    public final int getUserId(final String host) throws OXConflictException,
+        IOException, JDOMException, TestException {
+        if (0 == userId) {
+            final SearchRequest request = new SearchRequest();
+            final SearchResponse response = client.execute(host, request);
+            for (final ContactObject contact : response) {
+                final Map<?, ?> map = contact.getMap();
+                if (map != null && map.containsKey("myidentity")) {
+                    userId = contact.getInternalUserId();
+                    break;
+                }
+            }
+            if (0 == userId) {
+                throw new TestException("Unable to find identifier of user.");
+            }
+        }
+        return userId;
+    }
 }

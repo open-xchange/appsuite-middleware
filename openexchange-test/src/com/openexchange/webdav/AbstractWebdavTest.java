@@ -13,6 +13,7 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.test.WebdavInit;
 import com.openexchange.webdav.xml.GroupUserTest;
+import com.openexchange.webdav.xml.framework.Constants;
 
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
@@ -26,7 +27,7 @@ public abstract class AbstractWebdavTest extends TestCase {
 	
 	protected static final String propertyHost = "hostname";
 	
-	protected static final Namespace webdav = Namespace.getNamespace("D", "DAV:");
+	protected static final Namespace webdav = Constants.NS_DAV;
 	
 	protected String hostName = "localhost";
 	

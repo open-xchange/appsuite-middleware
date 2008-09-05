@@ -26,6 +26,9 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.fields.FolderFields;
+import com.openexchange.webdav.xml.folder.FolderTools;
+import com.openexchange.webdav.xml.framework.Executor;
+import com.openexchange.webdav.xml.framework.WebDAVClient;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 import com.openexchange.webdav.xml.types.Response;
@@ -115,7 +118,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int insertFolder(final WebConversation webCon, FolderObject folderObj, String host, final String login, final String password) throws Exception, OXException {
-		host = appendPrefix(host);
+		host = Executor.appendPrefix(host);
 		
 		int objectId = 0;
 		
@@ -166,7 +169,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static void updateFolder(final WebConversation webCon, final FolderObject folderObj, String host, final String login, final String password) throws Exception, OXException {
-		host = appendPrefix(host);
+		host = Executor.appendPrefix(host);
 		
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
@@ -214,7 +217,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int[] deleteFolder(final WebConversation webCon, final int[] id, final Date lastModified, String host, final String login, final String password) throws Exception, OXException {
-		host = appendPrefix(host);
+		host = Executor.appendPrefix(host);
 		
 		final Element rootElement = new Element("multistatus", webdav);
 		rootElement.addNamespaceDeclaration(XmlServlet.NS);
@@ -271,7 +274,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int[] listFolder(final WebConversation webCon, String host, final String login, final String password) throws Exception {
-		host = appendPrefix(host);
+		host = Executor.appendPrefix(host);
 		
 		final Element ePropfind = new Element("propfind", webdav);
 		final Element eProp = new Element("prop", webdav);
@@ -317,7 +320,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static FolderObject[] listFolder(final WebConversation webCon, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password) throws Exception {
-		host = appendPrefix(host);
+		host = Executor.appendPrefix(host);
 		
 		if (!changed && !deleted) {
 			return new FolderObject[] { };
@@ -389,7 +392,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static FolderObject loadFolder(final WebConversation webCon, final int objectId, String host, final String login, final String password) throws Exception, OXException {
-		host = appendPrefix(host);
+		host = Executor.appendPrefix(host);
 		
 		final Element ePropfind = new Element("propfind", webdav);
 		final Element eProp = new Element("prop", webdav);
@@ -442,28 +445,14 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		
 		return folderArray[0];
 	}
-	
-	
-	public static FolderObject getAppointmentDefaultFolder(final WebConversation webCon, String host, final String login, final String password) throws Exception {
-		host = appendPrefix(host);
-		
-		final FolderObject[] folderArray = listFolder(webCon, new Date(0), true, false, host, login, password);
-		
-		final int userId = GroupUserTest.getUserId(webCon, host, login, password);
-		assertTrue("user not found", userId != -1);
-		
-		for (int a = 0; a < folderArray.length; a++) {
-			final FolderObject folderObj = folderArray[a];
-			if (folderObj.isDefaultFolder() && folderObj.getModule() == FolderObject.CALENDAR && folderObj.getCreatedBy() == userId) {
-				return folderObj;
-			}
-		}
-		
-		throw new OXConflictException("no appointment default folder found!");
-	}
-	
+
+    public static FolderObject getAppointmentDefaultFolder(final WebConversation webCon, String host, final String login, final String password) throws Exception {
+        final WebDAVClient client = new WebDAVClient(login, password);
+        return new FolderTools(client).getDefaultAppointmentFolder(host);
+    }
+
 	public static FolderObject getContactDefaultFolder(final WebConversation webCon, String host, final String login, final String password) throws Exception {
-		host = appendPrefix(host);
+		host = Executor.appendPrefix(host);
 		
 		final FolderObject[] folderArray = listFolder(webCon, new Date(0), true, false, host, login, password);
 		
@@ -481,7 +470,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static FolderObject getTaskDefaultFolder(final WebConversation webCon, String host, final String login, final String password) throws Exception {
-		host = appendPrefix(host);
+		host = Executor.appendPrefix(host);
 		
 		final FolderObject[] folderArray = listFolder(webCon, new Date(0), true, false, host, login, password);
 		

@@ -79,15 +79,27 @@ public final class FolderTools {
         this.client = client;
     }
 
-    public FolderObject getDefaultAppointmentFolder() throws IOException, JDOMException, OXConflictException, TestException {
+    public FolderObject getDefaultAppointmentFolder() throws IOException,
+        JDOMException, OXConflictException, TestException {
+        return getDefaultAppointmentFolder(null);
+    }
+
+    public FolderObject getDefaultAppointmentFolder(final String host) throws IOException,
+        JDOMException, OXConflictException, TestException {
         if (null == defaultAppointmentFolder) {
             final ListRequest request = new ListRequest(new Date(0));
-            final ListResponse response = client.execute(request);
+            final ListResponse response = client.execute(host, request);
+            final int userId = client.getGroupUserTools().getUserId(host);
             for (final FolderObject folder : response) {
-                if (folder.isDefaultFolder() && folder.getModule() == FolderObject.CALENDAR) {
+                if (folder.isDefaultFolder()
+                    && folder.getModule() == FolderObject.CALENDAR
+                    && folder.getCreatedBy() == userId) {
                     defaultAppointmentFolder = folder;
                     break;
                 }
+            }
+            if (null == defaultAppointmentFolder) {
+                throw new TestException("Unable to find default appointment folder.");
             }
         }
         return defaultAppointmentFolder;

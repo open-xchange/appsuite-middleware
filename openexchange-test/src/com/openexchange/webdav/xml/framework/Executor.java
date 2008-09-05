@@ -72,11 +72,22 @@ public final class Executor {
         super();
     }
 
+    public static <T extends AbstractWebDAVResponse> T execute(final String host,
+        final String login, final String password, final WebDAVRequest<T> request)
+        throws OXConflictException, IOException, JDOMException, TestException {
+        final WebDAVClient client = new WebDAVClient(login, password);
+        return execute(client, appendPrefix(host), request);
+    }
+
     public static <T extends AbstractWebDAVResponse> T execute(final WebDAVClient client,
         final WebDAVRequest<T> request) throws IOException, JDOMException, OXConflictException, TestException {
-        final String urlString = WebDAVConfig.getProperty(Property.PROTOCOL)
-            + "://" + WebDAVConfig.getProperty(Property.HOSTNAME)
-            + request.getServletPath();
+        return execute(client, WebDAVConfig.getProperty(Property.PROTOCOL)
+            + "://" + WebDAVConfig.getProperty(Property.HOSTNAME), request);
+    }
+
+    static <T extends AbstractWebDAVResponse> T execute(final WebDAVClient client, final String host,
+        final WebDAVRequest<T> request) throws IOException, JDOMException, OXConflictException, TestException {
+        final String urlString = host + request.getServletPath();
         final PropFindMethod method = new PropFindMethod(urlString);
         method.setDoAuthentication(true);
         method.setRequestEntity(request.getEntity());
@@ -85,5 +96,12 @@ public final class Executor {
         parser.checkResponse(status);
         final T retval = parser.parse(method);
         return retval;
+    }
+
+    public static final String appendPrefix(final String host) {
+    	if (host.startsWith("http://")) {
+    		return host;
+    	}
+    	return "http://" + host;
     }
 }

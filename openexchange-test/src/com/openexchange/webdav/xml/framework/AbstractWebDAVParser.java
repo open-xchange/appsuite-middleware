@@ -57,9 +57,7 @@ import org.jdom.input.SAXBuilder;
 
 import com.openexchange.api.OXConflictException;
 import com.openexchange.test.TestException;
-import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
-import com.openexchange.webdav.xml.types.Response;
 
 import junit.framework.Assert;
 
@@ -74,7 +72,7 @@ public abstract class AbstractWebDAVParser<T extends AbstractWebDAVResponse> ext
     /**
      * Default constructor.
      */
-    public AbstractWebDAVParser() {
+    protected AbstractWebDAVParser() {
         super();
     }
 

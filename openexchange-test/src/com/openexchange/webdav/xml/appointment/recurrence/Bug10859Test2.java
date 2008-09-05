@@ -83,15 +83,15 @@ public final class Bug10859Test2 extends AbstractWebDAVSession {
         calendar.set(Calendar.MILLISECOND, 0);
         final AppointmentObject appointment = new AppointmentObject();
         appointment.setTitle("Test appointment for bug 10859");
-//        appointment.setParentFolderID(appointmentFolderId);
-//        appointment.setStartDate(calendar.getTime());
-//        calendar.add(Calendar.HOUR, -1);
-//        appointment.setEndDate(calendar.getTime());
-//        appointment.setRecurrenceType(AppointmentObject.YEARLY);
-//        appointment.setInterval(1);
-//        appointment.setMonth(calendar.get(Calendar.MONTH));
-//        appointment.setDayInMonth(calendar.get(Calendar.DAY_OF_MONTH));
-//        appointment.setIgnoreConflicts(true);
+        appointment.setParentFolderID(folder.getObjectID());
+        appointment.setStartDate(calendar.getTime());
+        calendar.add(Calendar.HOUR, 1);
+        appointment.setEndDate(calendar.getTime());
+        appointment.setRecurrenceType(AppointmentObject.YEARLY);
+        appointment.setInterval(1);
+        appointment.setMonth(-1);
+        appointment.setDayInMonth(calendar.get(Calendar.DAY_OF_MONTH));
+        appointment.setIgnoreConflicts(true);
 //        final int objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword());
 //        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
     }

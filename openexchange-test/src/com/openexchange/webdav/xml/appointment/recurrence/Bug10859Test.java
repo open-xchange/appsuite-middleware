@@ -53,6 +53,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
 
 /**
@@ -80,14 +81,19 @@ public final class Bug10859Test extends AppointmentTest {
         appointment.setTitle("Test appointment for bug 10859");
         appointment.setParentFolderID(appointmentFolderId);
         appointment.setStartDate(calendar.getTime());
-        calendar.add(Calendar.HOUR, -1);
+        calendar.add(Calendar.HOUR, 1);
         appointment.setEndDate(calendar.getTime());
         appointment.setRecurrenceType(AppointmentObject.YEARLY);
         appointment.setInterval(1);
-        appointment.setMonth(calendar.get(Calendar.MONTH));
+        appointment.setMonth(-1);
         appointment.setDayInMonth(calendar.get(Calendar.DAY_OF_MONTH));
         appointment.setIgnoreConflicts(true);
-        final int objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword());
-//        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+        final int objectId;
+        try {
+            objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword());
+            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+            fail("Invalid month value not detected.");
+        } catch (final TestException e) {
+        }
     }
 }

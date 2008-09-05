@@ -62,6 +62,7 @@ import com.openexchange.configuration.WebDAVConfig;
 import com.openexchange.configuration.WebDAVConfig.Property;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.folder.FolderTools;
+import com.openexchange.webdav.xml.user.GroupUserTools;
 
 /**
  * This class implements the temporary memory of a WebDAV client and provides
@@ -71,9 +72,11 @@ import com.openexchange.webdav.xml.folder.FolderTools;
  */
 public class WebDAVClient {
 
-    private final WebDAVSession session;
+    private WebDAVSession session;
 
     private FolderTools folderTools;
+
+    private GroupUserTools groupUserTools;
 
     /**
      * Default constructor.
@@ -88,11 +91,20 @@ public class WebDAVClient {
         WebDAVConfig.init();
         final String login = WebDAVConfig.getProperty(user.login);
         final String password = WebDAVConfig.getProperty(user.password);
+        setAuth(login, password);
+    }
+
+    public WebDAVClient(final String login, final String password) {
+        this(new WebDAVSession());
+        setAuth(login, password);
+    }
+
+    public final void setAuth(final String login, final String password) {
         final HttpClient client = session.getClient();
         client.getState().setCredentials(AuthScope.ANY,
             new UsernamePasswordCredentials(login, password));
     }
-
+    
     public enum User {
         User1(Property.LOGIN, Property.PASSWORD),
         User2(Property.SECONDUSER, Property.PASSWORD);
@@ -132,17 +144,31 @@ public class WebDAVClient {
     }
 
     public void logout() {
-        // HttpClient can not be resetted.
+        session = new WebDAVSession();
     }
 
     public <T extends AbstractWebDAVResponse> T execute(final WebDAVRequest<T> request) throws IOException, JDOMException, OXConflictException, TestException {
          return Executor.execute(this, request);
     }
 
+    public <T extends AbstractWebDAVResponse> T execute(final String host, final WebDAVRequest<T> request) throws IOException, JDOMException, OXConflictException, TestException {
+        if (null == host) {
+            return execute(request);
+        }
+        return Executor.execute(this, host, request);
+   }
+
     public FolderTools getFolderTools() {
         if (null == folderTools) {
             folderTools = new FolderTools(this);
         }
         return folderTools;
+    }
+
+    public GroupUserTools getGroupUserTools() {
+        if (null == groupUserTools) {
+            groupUserTools = new GroupUserTools(this);
+        }
+        return groupUserTools;
     }
 }

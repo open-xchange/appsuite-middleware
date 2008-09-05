@@ -47,51 +47,47 @@
  *
  */
 
-package com.openexchange.webdav.xml.folder.actions;
+package com.openexchange.webdav.xml.framework;
 
-import static com.openexchange.webdav.xml.framework.RequestTools.addElement2PropFind;
+import static com.openexchange.webdav.xml.XmlServlet.NS;
+import static com.openexchange.webdav.xml.framework.Constants.NS_DAV;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.Date;
 
-import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
-import org.apache.commons.httpclient.methods.RequestEntity;
 import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.output.XMLOutputter;
-
-import com.openexchange.webdav.xml.XmlServlet;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ListRequest extends AbstractFolderRequest<ListResponse> {
+public final class RequestTools {
 
-    private final Date lastModified;
+    public static final String PROPFIND = "propfind";
+
+    public static final String PROP = "prop";
+
+    public static final String LASTSYNC = "lastsync";
 
     /**
-     * Default constructor.
+     * Prevent instantiation.
      */
-    public ListRequest(final Date lastModified) {
+    private RequestTools() {
         super();
-        this.lastModified = lastModified;
     }
 
-    public RequestEntity getEntity() throws IOException {
-        final Element objectmode = new Element("objectmode", XmlServlet.NS);
-        objectmode.addContent("NEW_AND_MODIFIED,DELETED");
-
-        final Document doc = addElement2PropFind(objectmode, lastModified);
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        final XMLOutputter xo = new XMLOutputter();
-        xo.output(doc, baos);
-
-        return new ByteArrayRequestEntity(baos.toByteArray());
-    }
-
-    public ListParser getParser() {
-        return new ListParser();
+    public static Document addElement2PropFind(final Element e,
+        final Date modified) {
+        final Element ePropfind = new Element(PROPFIND, NS_DAV);
+        final Element eProp = new Element(PROP, NS_DAV);
+        ePropfind.addContent(eProp);
+        
+        final Element eLastSync = new Element(LASTSYNC, NS);
+        eProp.addContent(eLastSync);
+        eLastSync.addContent(String.valueOf(modified.getTime()));
+        
+        eProp.addContent(e);
+        
+        return new Document(ePropfind);
     }
 }

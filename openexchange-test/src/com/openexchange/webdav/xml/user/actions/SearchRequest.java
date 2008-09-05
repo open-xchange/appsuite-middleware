@@ -47,8 +47,9 @@
  *
  */
 
-package com.openexchange.webdav.xml.folder.actions;
+package com.openexchange.webdav.xml.user.actions;
 
+import static com.openexchange.webdav.xml.XmlServlet.NS;
 import static com.openexchange.webdav.xml.framework.RequestTools.addElement2PropFind;
 
 import java.io.ByteArrayOutputStream;
@@ -61,29 +62,24 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
 
-import com.openexchange.webdav.xml.XmlServlet;
-
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ListRequest extends AbstractFolderRequest<ListResponse> {
-
-    private final Date lastModified;
+public final class SearchRequest extends AbstractGroupUserRequest<SearchResponse> {
 
     /**
      * Default constructor.
      */
-    public ListRequest(final Date lastModified) {
+    public SearchRequest() {
         super();
-        this.lastModified = lastModified;
     }
 
     public RequestEntity getEntity() throws IOException {
-        final Element objectmode = new Element("objectmode", XmlServlet.NS);
-        objectmode.addContent("NEW_AND_MODIFIED,DELETED");
+        final Element users = new Element("user", NS);
+        users.addContent("*");
 
-        final Document doc = addElement2PropFind(objectmode, lastModified);
+        final Document doc = addElement2PropFind(users, new Date(0));
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         final XMLOutputter xo = new XMLOutputter();
         xo.output(doc, baos);
@@ -91,7 +87,7 @@ public final class ListRequest extends AbstractFolderRequest<ListResponse> {
         return new ByteArrayRequestEntity(baos.toByteArray());
     }
 
-    public ListParser getParser() {
-        return new ListParser();
+    public SearchParser getParser() {
+        return new SearchParser();
     }
 }
