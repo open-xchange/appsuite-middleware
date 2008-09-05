@@ -34,6 +34,7 @@
 	<property name="serverbundle"         value="com.openexchange.server.jar"/>
 	<property name="monitoringbundle"     value="com.openexchange.monitoring.jar"/>
 	<property name="sessiondbundle"       value="com.openexchange.sessiond.jar"/>
+	<property name="cachebundle"          value="com.openexchange.caching.jar"/>
 
 	<!-- non-osgi jars -->
 	<property name="commons-io"         value="commons-io-1.4.jar"/>
@@ -48,6 +49,7 @@
 		<pathelement location="${bundlesdir}/${commonsloggingbundle}" />
 		<pathelement location="${bundlesdir}/${serverbundle}"/>
 		<pathelement location="${bundlesdir}/${globalbundle}"/>
+		<pathelement location="${bundlesdir}/${cachebundle}"/>
         <pathelement location="${admin.classpath}"/>
     </path>
 
