@@ -146,6 +146,11 @@ public final class MIMETypes {
 	public static final String MIME_APPL_OCTET = "application/octet-stream";
 
 	/**
+	 * application/*
+	 */
+	public static final String MIME_APPL_ALL = "application/*";
+
+	/**
 	 * text/enriched
 	 */
 	public static final String MIME_TEXT_ENRICHED = "text/enriched";
