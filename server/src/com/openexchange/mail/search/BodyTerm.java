@@ -194,12 +194,13 @@ public final class BodyTerm extends SearchTerm<String> {
 		/*
 		 * Try to extract textual content out of current part's body
 		 */
-		String charset = mailPart.getContentType().getCharsetParameter();
+		final ContentType contentType = mailPart.getContentType();
+		String charset = contentType.getCharsetParameter();
 		if (null == charset) {
 			charset = CharsetDetector.detectCharset(mailPart.getInputStream());
 		}
 		try {
-			if (mailPart.getContentType().isMimeType("text/htm*")) {
+			if (contentType.isMimeType("text/htm*")) {
 				final HTML2TextHandler h = new HTML2TextHandler((int) mailPart.getSize(), false);
 				HTMLParser.parse(
 						HTMLProcessing.getConformHTML(MessageUtility.readMailPart(mailPart, charset), charset), h);
