@@ -9,6 +9,7 @@
    operation especially on disable/enable context.
  - Bugfix #12117: Checking if referenced draft message still exists on
    auto-safe draft operation
+ - Bugfix #12118: Handling possible unavailable message text body on forward
 
 * 2008-09-04 - francisco.laguna@open-xchange.com
 

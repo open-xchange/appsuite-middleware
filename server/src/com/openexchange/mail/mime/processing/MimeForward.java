@@ -250,7 +250,7 @@ public final class MimeForward {
 				 * Add appropriate text part prefixed with forward text
 				 */
 				final MimeBodyPart textPart = new MimeBodyPart();
-				textPart.setText(generateForwardText(firstSeenText, UserStorage
+				textPart.setText(generateForwardText(firstSeenText == null ? "" : firstSeenText, UserStorage
 						.getStorageUser(session.getUserId(), ctx).getLocale(), originalMsg, contentType
 						.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)), contentType.getCharsetParameter(), contentType
 						.getSubType());
@@ -281,9 +281,10 @@ public final class MimeForward {
 			if (originalContentType.getCharsetParameter() == null) {
 				originalContentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
 			}
-			forwardMsg.setText(generateForwardText(MessageUtility.readMimePart(originalMsg, originalContentType),
-					UserStorage.getStorageUser(session.getUserId(), ctx).getLocale(), originalMsg, originalContentType
-							.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)), originalContentType.getCharsetParameter(),
+			final String content = MessageUtility.readMimePart(originalMsg, originalContentType);
+			forwardMsg.setText(generateForwardText(content == null ? "" : content, UserStorage.getStorageUser(
+					session.getUserId(), ctx).getLocale(), originalMsg, originalContentType
+					.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)), originalContentType.getCharsetParameter(),
 					originalContentType.getSubType());
 			forwardMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
 			forwardMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, originalContentType.toString());
