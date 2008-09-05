@@ -258,11 +258,11 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         } catch (final OXSieveHandlerException e) {
             throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, getUserPrefix(credentials) + e.getMessage());
         } catch (final OXSieveHandlerInvalidCredentialsException e) {
-            throw new OXMailfilterException(Code.INVALID_CREDENTIALS, getUserPrefix(credentials), e.getMessage());
+            throw new OXMailfilterException(Code.INVALID_CREDENTIALS, e, getUserPrefix(credentials), e.getMessage());
         } catch (final ParseException e) {
-            throw new OXMailfilterException(Code.SIEVE_ERROR, getUserPrefix(credentials) + e.getMessage());
+            throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
         } catch (final SieveException e) {
-            throw new OXMailfilterException(Code.SIEVE_ERROR, getUserPrefix(credentials) + e.getMessage());
+            throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
         } catch (final JSONException e) {
             throw new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e, getUserPrefix(credentials) + e.getMessage());
         } finally {
