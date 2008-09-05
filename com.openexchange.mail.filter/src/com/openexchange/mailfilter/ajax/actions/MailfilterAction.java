@@ -256,7 +256,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         } catch (final IOException e) {
             throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, getUserPrefix(credentials) + e.getMessage());
         } catch (final OXSieveHandlerException e) {
-            throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, getUserPrefix(credentials) + e.getMessage());
+            throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, getUserPrefix(credentials) + e.getMessage());
         } catch (final OXSieveHandlerInvalidCredentialsException e) {
             throw new OXMailfilterException(Code.INVALID_CREDENTIALS, getUserPrefix(credentials), e.getMessage());
         } catch (final ParseException e) {
