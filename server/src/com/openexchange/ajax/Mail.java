@@ -95,6 +95,7 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
+import com.openexchange.cache.OXCachingException;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -104,6 +105,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -123,7 +125,9 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -134,9 +138,12 @@ import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Helper;
@@ -244,6 +251,10 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public static final String PARAMETER_VIEW = "view";
 
+	public static final String PARAMETER_SRC = "src";
+
+	public static final String PARAMETER_FLAGS = "flags";
+
 	private static final String VIEW_TEXT = "text";
 
 	private static final String VIEW_HTML = "html";
@@ -341,6 +352,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 			actionPutReply(req, resp, (actionStr.equalsIgnoreCase(ACTION_REPLYALL)));
 		} else if (actionStr.equalsIgnoreCase(ACTION_GET)) {
 			actionPutGet(req, resp);
+		} else if (actionStr.equalsIgnoreCase(ACTION_NEW)) {
+			actionPutNewMail(req, resp);
 		} else {
 			throw new Exception("Unknown value in parameter " + PARAMETER_ACTION + " through PUT command");
 		}
@@ -2333,6 +2346,170 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 */
 		jsonWriter.endObject();
 		response.setData(jsonWriter.getObject());
+		response.setTimestamp(null);
+		return response;
+	}
+
+	public void actionPutNewMail(final Session session, final JSONWriter writer, final JSONObject jsonObj)
+			throws JSONException {
+		ResponseWriter.write(actionPutNewMail(session, jsonObj.getString(ResponseFields.DATA), ParamContainer
+				.getInstance(jsonObj, EnumComponent.MAIL)), writer);
+	}
+
+	private final void actionPutNewMail(final HttpServletRequest req, final HttpServletResponse resp)
+			throws IOException {
+		try {
+			ResponseWriter.write(actionPutNewMail(getSessionObject(req), getBody(req), ParamContainer.getInstance(req,
+					EnumComponent.MAIL, resp)), resp.getWriter());
+		} catch (final JSONException e) {
+			final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			LOG.error(oxe.getMessage(), oxe);
+			final Response response = new Response();
+			response.setException(oxe);
+			try {
+				ResponseWriter.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
+		}
+	}
+
+	private final Response actionPutNewMail(final Session session, final String body,
+			final ParamContainer paramContainer) {
+		/*
+		 * Some variables
+		 */
+		final Response response = new Response();
+		/*
+		 * Start response
+		 */
+		JSONObject responseData = null;
+		try {
+			final String src = paramContainer.checkStringParam(PARAMETER_SRC);
+			if (!(STR_1.equals(src) || Boolean.parseBoolean(src))) {
+				throw new MailException(MailException.Code.MISSING_PARAMETER, PARAMETER_SRC);
+			}
+			final String folder = paramContainer.getStringParam(PARAMETER_FOLDERID);
+			if (body == null || body.length() == 0) {
+				throw new MailException(MailException.Code.MISSING_PARAMETER, PARAMETER_DATA);
+			}
+			final int flags = paramContainer.getIntParam(PARAMETER_FLAGS);
+			/*
+			 * Convert PUT body to RFC822 data
+			 */
+			final byte[] rfc822Bytes = body.getBytes("US-ASCII");
+			/*
+			 * Check if "folder" element is present which indicates to save
+			 * given message as a draft or append to denoted folder
+			 */
+			if (folder == null) {
+				/*
+				 * Missing "folder" element indicates to send given message
+				 */
+				final MailTransport transport = MailTransport.getInstance(session);
+				try {
+					/*
+					 * Send raw message source
+					 */
+					final MailMessage sentMail = transport.sendRawMessage(rfc822Bytes);
+					if (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
+							session.getContextId()).isNoCopyIntoStandardSentFolder()) {
+						/*
+						 * Copy in sent folder allowed
+						 */
+						final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+						mailAccess.connect();
+						try {
+							final String sentFullname = MailFolderUtility.prepareMailFolderParam(mailAccess
+									.getFolderStorage().getSentFolder());
+							final long[] uidArr;
+							try {
+								/*
+								 * Append to default "sent" folder
+								 */
+								if (flags != ParamContainer.NOT_FOUND) {
+									sentMail.setFlags(flags);
+								}
+								uidArr = mailAccess.getMessageStorage().appendMessages(sentFullname,
+										new MailMessage[] { sentMail });
+								try {
+									/*
+									 * Update cache
+									 */
+									MailMessageCache.getInstance().removeFolderMessages(sentFullname,
+											session.getUserId(), ContextStorage.getStorageContext(session));
+								} catch (final OXCachingException e) {
+									LOG.error(e.getMessage(), e);
+								} catch (final ContextException e) {
+									LOG.error(e.getMessage(), e);
+								}
+							} catch (final MailException e) {
+								if (e.getMessage().indexOf("quota") != -1) {
+									throw new MailException(MailException.Code.COPY_TO_SENT_FOLDER_FAILED_QUOTA, e,
+											new Object[0]);
+								}
+								throw new MailException(MailException.Code.COPY_TO_SENT_FOLDER_FAILED, e, new Object[0]);
+							}
+							if ((uidArr != null) && (uidArr[0] != -1)) {
+								/*
+								 * Mark appended sent mail as seen
+								 */
+								mailAccess.getMessageStorage().updateMessageFlags(sentFullname, uidArr,
+										MailMessage.FLAG_SEEN, true);
+							}
+							/*
+							 * Compose JSON object
+							 */
+							responseData = new JSONObject();
+							responseData.put(FolderChildFields.FOLDER_ID, MailFolderUtility
+									.prepareFullname(sentFullname));
+							responseData.put(DataFields.ID, uidArr[0]);
+						} finally {
+							mailAccess.close(true);
+						}
+					}
+				} finally {
+					transport.close();
+				}
+			} else {
+				/*
+				 * Append message to denoted folder
+				 */
+				final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+				mailAccess.connect();
+				try {
+					final MailMessage m = MIMEMessageConverter.convertMessage(rfc822Bytes);
+					if (flags != ParamContainer.NOT_FOUND) {
+						m.setFlags(flags);
+					}
+					if (mailAccess.getFolderStorage().getDraftsFolder().equals(folder)) {
+						m.setFlag(MailMessage.FLAG_DRAFT, true);
+					}
+					final long id = mailAccess.getMessageStorage().appendMessages(
+							MailFolderUtility.prepareMailFolderParam(folder), new MailMessage[] { m })[0];
+					responseData = new JSONObject();
+					responseData.put(FolderChildFields.FOLDER_ID, folder);
+					responseData.put(DataFields.ID, id);
+				} finally {
+					mailAccess.close(true);
+				}
+			}
+		} catch (final MailException e) {
+			LOG.error(e.getMessage(), e);
+			response.setException(e);
+		} catch (final AbstractOXException e) {
+			LOG.error(e.getMessage(), e);
+			response.setException(e);
+		} catch (final Exception e) {
+			final AbstractOXException wrapper = getWrappingOXException(e);
+			LOG.error(wrapper.getMessage(), wrapper);
+			response.setException(wrapper);
+		}
+		/*
+		 * Close response and flush print writer
+		 */
+		response.setData(responseData == null ? JSONObject.NULL : responseData);
 		response.setTimestamp(null);
 		return response;
 	}
