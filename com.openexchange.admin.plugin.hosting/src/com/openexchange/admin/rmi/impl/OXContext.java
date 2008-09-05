@@ -296,9 +296,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.disable(ctx, reason);
+            log.info("Context " + ctx.getId() + " successfully disabled");
             
             try {
                 ContextStorage.getInstance().invalidateContext(ctx.getId().intValue());
+                log.info("Context " + ctx.getId() + " successfully invalidated");
             } catch (final ContextException e) {
                 log.error("Error invalidating context "+ctx.getId()+" in ox context storage",e);
             }
