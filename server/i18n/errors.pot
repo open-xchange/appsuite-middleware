@@ -45,8 +45,14 @@ msgstr ""
 msgid "A SQL Error occurred while resolving folder name conflicts: %s"
 msgstr ""
 
+msgid "A SQL error occurred while creating table 'version': %1$s."
+msgstr ""
+
 msgid ""
 "A SQL error occurred while performing task SpellCheckUserDictTableTask: %1$s."
+msgstr ""
+
+msgid "A SQL error occurred while reading schema version information: %1$s."
 msgstr ""
 
 msgid "A SQL error occurred: %1$s"
@@ -157,9 +163,6 @@ msgstr ""
 msgid "An SQL error occurred in context %1$s"
 msgstr ""
 
-msgid "An SQL error occurred while creating table 'version': %1$s."
-msgstr ""
-
 msgid ""
 "An SQL error occurred while performing task "
 "ClearLeftoverAttachmentsUpdateTask: %1$s."
@@ -197,9 +200,6 @@ msgid ""
 msgstr ""
 
 msgid "An SQL error occurred while performing task SpamUpdateTask: %1$s."
-msgstr ""
-
-msgid "An SQL error occurred while reading schema version information: %1$s."
 msgstr ""
 
 msgid "An SQL error occurred: %1$s"
@@ -317,6 +317,18 @@ msgid "Calendar operation: Context not set."
 msgstr ""
 
 msgid "Caller does not allow to fetch a connection from pool in context %1$s"
+msgstr ""
+
+msgid "Can not create RRule: %s"
+msgstr ""
+
+msgid "Can not generate uid."
+msgstr ""
+
+msgid "Can not resolve resource: %1$s"
+msgstr ""
+
+msgid "Can not resolve user: %d"
 msgstr ""
 
 msgid "Can only handle one file, not %s"
@@ -511,6 +523,12 @@ msgid ""
 "Your database is probably inconsistent, run the consistency tool."
 msgstr ""
 
+msgid "Changing recurrence position of a change exception denied"
+msgstr ""
+
+msgid "Changing recurrence type of a change exception denied"
+msgstr ""
+
 msgid "Class %1$s can not be found."
 msgstr ""
 
@@ -599,9 +617,16 @@ msgid ""
 "not running. Please try again."
 msgstr ""
 
+msgid "Could not find ICalEmitter service. Has the service been exported?"
+msgstr ""
+
 msgid ""
 "Could not find an attachment with the file_id %s. Either the file is "
 "orphaned or belongs to another module."
+msgstr ""
+
+msgid ""
+"Could not find suitable ICalParser. Is an ICalParser exported as a service?"
 msgstr ""
 
 msgid "Could not find the following fields %s"
@@ -678,6 +703,9 @@ msgid "Couldn't reach the filestore: %s"
 msgstr ""
 
 msgid "Counting tasks did not return a result."
+msgstr ""
+
+msgid "Cowardly refusing to convert confidential classified objects."
 msgstr ""
 
 msgid "Cowardly refusing to import an entry flagged as confidential."
@@ -823,6 +851,9 @@ msgstr ""
 msgid ""
 "FATAL:: Can not resolve recurrence position because we got neither the "
 "recurring position nor a recurring date position"
+msgstr ""
+
+msgid "Failed importing appointment due to hard conflicting resource."
 msgstr ""
 
 msgid "Fatal error. (DAILY) Missing or wrong Interval value: %d"
@@ -1027,6 +1058,12 @@ msgid ""
 "permissions to modify this object."
 msgstr ""
 
+msgid "Group %1$s can not be changed."
+msgstr ""
+
+msgid "Group %1$s can not be deleted."
+msgstr ""
+
 msgid "Group contains a not existing member %1$d."
 msgstr ""
 
@@ -1049,6 +1086,9 @@ msgid "IMAP default folder %1$s could not be created"
 msgstr ""
 
 msgid "IMAP folder read-only check failed"
+msgstr ""
+
+msgid "IMAP login %1$s could not be resolved to a user"
 msgstr ""
 
 msgid ""
@@ -1213,6 +1253,9 @@ msgstr ""
 msgid "Invalid search expression: %1$s"
 msgstr ""
 
+msgid "Invalid session given to implementation \"%1$s\"."
+msgstr ""
+
 msgid "Invalid task state %d."
 msgstr ""
 
@@ -1319,6 +1362,12 @@ msgstr ""
 msgid "Missing AJAX request handler for module %s"
 msgstr ""
 
+msgid "Missing DTSTART"
+msgstr ""
+
+msgid "Missing IMAP server arguments to resolve IMAP login to a user"
+msgstr ""
+
 msgid "Missing ability to encode or decode UTF-8 on server, cannot read file."
 msgstr ""
 
@@ -1362,6 +1411,9 @@ msgid "Missing parameter in user's mail config: %1$s"
 msgstr ""
 
 msgid "Missing payload data in client's body chunk package"
+msgstr ""
+
+msgid "Missing personal namespace"
 msgstr ""
 
 msgid "Missing property %1$s in imap.properties."
@@ -1623,6 +1675,9 @@ msgid ""
 "Parent folder %1$s does not allow folder's type setting %2$s in context %3$s"
 msgstr ""
 
+msgid "Parsing error parsing ical: %s"
+msgstr ""
+
 msgid "Participant %d for task %d is not found."
 msgstr ""
 
@@ -1638,6 +1693,11 @@ msgstr ""
 msgid ""
 "Primary email address in system contact must not be edited: Context %1$d "
 "Object %2$d User %3$d"
+msgstr ""
+
+msgid ""
+"Private Appointments can not have attendees. Removing attendees and "
+"accepting appointment anyway."
 msgstr ""
 
 msgid "Private flagged tasks cannot be delegated."
@@ -1674,6 +1734,9 @@ msgstr ""
 msgid "Problem with executing SQL: %s"
 msgstr ""
 
+msgid "Problem writing to stream."
+msgstr ""
+
 msgid ""
 "Process was interrupted while waiting for a free mail connection. Please try "
 "again."
@@ -1707,8 +1770,8 @@ msgid "Remove on cache failed"
 msgstr ""
 
 msgid ""
-"Request rejected because its size (%d) exceeds the maximum configured size "
-"of %1$d"
+"Request rejected because its size (%1$s) exceeds the maximum configured size "
+"of %2$s"
 msgstr ""
 
 msgid "Required  value \"Start Date\" was not supplied."
@@ -1884,6 +1947,9 @@ msgid ""
 "the folder has been created."
 msgstr ""
 
+msgid "The contact %1$d is not located in folder %2$s (%3$d)"
+msgstr ""
+
 msgid "The contact you requested is not valid."
 msgstr ""
 
@@ -1969,6 +2035,9 @@ msgid ""
 "The raw content's input stream of message %1$s in folder %2$s cannot be read"
 msgstr ""
 
+msgid "The recurrence pattern is too complex. Giving up."
+msgstr ""
+
 msgid "The requested item does not exist."
 msgstr ""
 
@@ -1992,6 +2061,11 @@ msgid "The simple name contains this not allowed characters: \"%1$s\"."
 msgstr ""
 
 msgid "The task %1$d is not stored in folder %2$s (%3$d)."
+msgstr ""
+
+msgid ""
+"The task could not be saved. Please shorten the %1$s and try again. Current "
+"length %3$d is more than allowed length of %2$d characters."
 msgstr ""
 
 msgid ""
@@ -2058,9 +2132,18 @@ msgid ""
 "User %3$d"
 msgstr ""
 
+msgid "Unable to calculate first occurrence."
+msgstr ""
+
 msgid ""
 "Unable to compare contacts for update. Make sure you have entered a valid "
 "display name. Context %1$d Object %2$d"
+msgstr ""
+
+msgid "Unable to convert task priority %d."
+msgstr ""
+
+msgid "Unable to convert task status \"%1$s\"."
 msgstr ""
 
 msgid ""
@@ -2090,6 +2173,9 @@ msgid "Unable to delete Contact: Context %1$d Contact %2$d"
 msgstr ""
 
 msgid "Unable to delete Contacts from this user. Context %1$d User %2$d"
+msgstr ""
+
+msgid "Unable to delete all links from folder. Folder %1$d Context %2$d"
 msgstr ""
 
 msgid "Unable to delete all links from this objects. Object %1$d Context %2$d"
@@ -2267,6 +2353,9 @@ msgstr ""
 msgid "Unknown AJAX action: %s."
 msgstr ""
 
+msgid "Unknown Class: %1$s"
+msgstr ""
+
 msgid "Unknown IMAP server: %1$s"
 msgstr ""
 
@@ -2300,10 +2389,19 @@ msgstr ""
 msgid "Unknown module: %1$d"
 msgstr ""
 
+msgid "Unknown module: %s."
+msgstr ""
+
+msgid "Unknown name-value-pair in recurrence string: %1$s=%2$s"
+msgstr ""
+
 msgid "Unknown or unsupported action: %1$s"
 msgstr ""
 
 msgid "Unknown parameter container type: %1$s"
+msgstr ""
+
+msgid "Unknown participant type %1$d."
 msgstr ""
 
 msgid "Unknown problem: \"%s\"."
@@ -2450,7 +2548,13 @@ msgstr ""
 msgid "Validation failed: %s"
 msgstr ""
 
+msgid "Validation of calendar failed."
+msgstr ""
+
 msgid "Value \"%1$s\" of attribute %2$s contains non digit characters."
+msgstr ""
+
+msgid "Value %1$d exceeds max. supported value of %2$d."
 msgstr ""
 
 msgid "Value for the recurrence is missing: %d."
@@ -2464,6 +2568,9 @@ msgid "Versit error: %1$s"
 msgstr ""
 
 msgid "Versit object could not be saved"
+msgstr ""
+
+msgid "Warning importing file: %s"
 msgstr ""
 
 msgid "Writing the setting %1$s is not permitted."
