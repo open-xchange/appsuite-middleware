@@ -7,6 +7,8 @@
 
  - Bugfix #12102: Invalidating context cache on every modifying context
    operation especially on disable/enable context.
+ - Bugfix #12117: Checking if referenced draft message still exists on
+   auto-safe draft operation
 
 * 2008-09-04 - francisco.laguna@open-xchange.com
 
