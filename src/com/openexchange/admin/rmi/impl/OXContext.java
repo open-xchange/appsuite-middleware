@@ -58,7 +58,9 @@ import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
 
+import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.OXContextInterface;
@@ -85,17 +87,25 @@ import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.downgrade.DowngradeEvent;
-import com.openexchange.groupware.downgrade.DowngradeRegistry;
 
 public class OXContext extends OXContextCommonImpl implements OXContextInterface {
 
-    private final Log log = LogFactory.getLog(this.getClass());
+    private static final String NAME_OXCACHE = "oxcache";
 
-    public OXContext() throws StorageException {
+	private static final String SYMBOLIC_NAME_CACHE = "com.openexchange.caching";
+
+	private final Log log = LogFactory.getLog(this.getClass());
+
+    private final BundleContext context;
+
+    public OXContext(final BundleContext context) throws StorageException {
         super();
+        this.context = context;
         if (log.isDebugEnabled()) {
             log.debug("Class loaded: " + this.getClass().getName());
         }        
@@ -148,15 +158,15 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }   
         
         try {
-            ContextStorage cs =ContextStorage.getInstance(); 
-            cs.invalidateContext(ctx.getId());
+            final ContextStorage cs =ContextStorage.getInstance(); 
+            cs.invalidateContext(ctx.getId().intValue());
             if(backup_ctx.getLoginMappings()!=null && backup_ctx.getLoginMappings().size()>0){
-                Iterator<String> itr = backup_ctx.getLoginMappings().iterator();
+                final Iterator<String> itr = backup_ctx.getLoginMappings().iterator();
                 while(itr.hasNext()){                    
                     cs.invalidateLoginInfo(itr.next());
                 }
             }
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             log.error("Error invalidating cached infos of context "+ctx.getId()+" in context storage",e);
         }
     }
@@ -165,7 +175,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return createcommon(ctx, admin_user, null, null, auth);
     }
     
-    public Context create(Context ctx, User admin_user,String access_combination_name, Credentials auth)
+    public Context create(final Context ctx, final User admin_user,final String access_combination_name, final Credentials auth)
 		throws RemoteException, StorageException,InvalidCredentialsException, InvalidDataException,	ContextExistsException {
     	
     	// Resolve access rights by name    	
@@ -188,7 +198,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 		basicAuthenticator.doAuthentication(auth);
 
 		
-        UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim());
+        final UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim());
         if(access==null){
         	// no such access combination name defined in configuration
         	// throw error!
@@ -198,7 +208,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     	return createcommon(ctx, admin_user, null, access, auth);
     }
 
-    public Context create(Context ctx, User admin_user,UserModuleAccess access, Credentials auth) 
+    public Context create(final Context ctx, final User admin_user,final UserModuleAccess access, final Credentials auth) 
     	throws RemoteException,StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException {
     	
     	try {
@@ -250,14 +260,14 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
         
         try {
-            ContextStorage.getInstance().invalidateContext(ctx.getId());
-        } catch (ContextException e) {
+            ContextStorage.getInstance().invalidateContext(ctx.getId().intValue());
+        } catch (final ContextException e) {
             log.error("Error invalidating context "+ctx.getId()+" in ox context storage",e);
         }
     }
 
     public void disable(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchReasonException, OXContextException {
-        MaintenanceReason reason = new MaintenanceReason(42);
+        final MaintenanceReason reason = new MaintenanceReason(42);
         disable(ctx, reason, auth);
     }
 
@@ -286,6 +296,13 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.disable(ctx, reason);
+            
+            try {
+                ContextStorage.getInstance().invalidateContext(ctx.getId().intValue());
+            } catch (final ContextException e) {
+                log.error("Error invalidating context "+ctx.getId()+" in ox context storage",e);
+            }
+            
         } catch (final NoSuchContextException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -302,7 +319,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     public void disableAll(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchReasonException {
-        MaintenanceReason reason = new MaintenanceReason(42);
+        final MaintenanceReason reason = new MaintenanceReason(42);
         disableAll(reason, auth);
     }
 
@@ -331,6 +348,22 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 //            log.error(e.getMessage(), e);
 //            throw e;
         }
+        
+        // Clear context cache
+        // CACHE
+        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
+				CacheService.class);
+		if (null != cacheService) {
+	        try {
+	        	final Cache cache = cacheService.getCache("Context");
+	        	cache.clear();
+	        } catch (final CacheException e) {
+	            log.error(e.getMessage(), e);
+	        } finally {
+	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+	        }
+        }
+        // END OF CACHE
     }
 
     public void enable(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
@@ -359,6 +392,12 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             log.error(e.getMessage(), e);
             throw e;
         }
+
+        try {
+            ContextStorage.getInstance().invalidateContext(ctx.getId().intValue());
+        } catch (final ContextException e) {
+            log.error("Error invalidating context "+ctx.getId()+" in ox context storage",e);
+        }
     }
 
     public void enableAll(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException {
@@ -370,7 +409,23 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
-        }        
+        }
+
+        // Clear context cache
+        // CACHE
+        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
+				CacheService.class);
+		if (null != cacheService) {
+	        try {
+	        	final Cache cache = cacheService.getCache("Context");
+	        	cache.clear();
+	        } catch (final CacheException e) {
+	            log.error(e.getMessage(), e);
+	        } finally {
+	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+	        }
+        }
+        // END OF CACHE
     }
 
     // this method will remove getSetup
@@ -483,7 +538,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
      * @see com.openexchange.admin.rmi.OXContextInterface#moveContextDatabase(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Database, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public int moveContextDatabase(final Context ctx, final Database db, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
-        MaintenanceReason reason = new MaintenanceReason(42);
+        final MaintenanceReason reason = new MaintenanceReason(42);
         return moveContextDatabase(ctx, db, reason, auth);
     }
 
@@ -538,7 +593,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     public int moveContextFilestore(final Context ctx, final Filestore dst_filestore, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
-        MaintenanceReason reason = new MaintenanceReason(42);
+        final MaintenanceReason reason = new MaintenanceReason(42);
         return moveContextFilestore(ctx, dst_filestore, reason, auth);
     }
 
@@ -632,7 +687,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
-    protected Context createmaincall(final Context ctx, final User admin_user, Database db, UserModuleAccess access) throws StorageException, InvalidDataException {
+    @Override
+	protected Context createmaincall(final Context ctx, final User admin_user, final Database db, final UserModuleAccess access) throws StorageException, InvalidDataException {
         validateloginmapping(ctx);
         final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
         
@@ -670,7 +726,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return src;
     }
 
-	public void changeModuleAccess(Context ctx, UserModuleAccess access,Credentials auth) 
+	public void changeModuleAccess(final Context ctx, final UserModuleAccess access,final Credentials auth) 
 		throws RemoteException,InvalidCredentialsException, NoSuchContextException,	StorageException, InvalidDataException {
 				
 		try {
@@ -691,7 +747,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }            
             
-            OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+            final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
             
             // change rights for all users in context to specified one in access
             oxu.changeModuleAccess(ctx, oxu.getAll(ctx), access);
@@ -703,7 +759,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 		
 	}
 
-	public void changeModuleAccess(Context ctx, String access_combination_name,Credentials auth)
+	public void changeModuleAccess(final Context ctx, final String access_combination_name,final Credentials auth)
 		throws RemoteException,InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
 			
 		
@@ -729,14 +785,14 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
             
-            UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim());
+            final UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim());
             if(access==null){
             	// no such access combination name defined in configuration
             	// throw error!
             	throw new InvalidDataException("No such access combination name \""+access_combination_name.trim()+"\"");
             }
             
-            OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+            final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
             
             // change rights for all users in context to specified one in access combination name
             oxu.changeModuleAccess(ctx, oxu.getAll(ctx), access);
@@ -779,9 +835,15 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             log.error(e.getMessage(), e);
             throw e;
         }
+
+        try {
+            ContextStorage.getInstance().invalidateContext(ctx.getId().intValue());
+        } catch (final ContextException e) {
+            log.error("Error invalidating context "+ctx.getId()+" in ox context storage",e);
+        }
     }
 
-	public String getAccessCombinationName(Context ctx, Credentials auth)
+	public String getAccessCombinationName(final Context ctx, final Credentials auth)
 		throws RemoteException, InvalidCredentialsException,NoSuchContextException, StorageException, InvalidDataException {
 		
 		// Resolve admin user and get the module access from db and query cache for access combination name
@@ -805,7 +867,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
             
             // Get admin id and fetch current access object and query cache for its name!
-            OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+            final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
                         
             return ClientAdminThread.cache.getNameForAccessCombination(oxu.getModuleAccess(ctx, tool.getAdminForContext(ctx)));            
         } catch (final StorageException e) {
@@ -814,7 +876,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } 
 	}
 
-	public UserModuleAccess getModuleAccess(Context ctx, Credentials auth)
+	public UserModuleAccess getModuleAccess(final Context ctx, final Credentials auth)
 		throws RemoteException, InvalidCredentialsException,NoSuchContextException, StorageException, InvalidDataException {
 		
 		try {
@@ -837,7 +899,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
             
             // Get admin id and fetch current access object and return it to the client!
-            OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+            final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
             return oxu.getModuleAccess(ctx, tool.getAdminForContext(ctx));            
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);

@@ -5,6 +5,7 @@ Bundle-SymbolicName: open_xchange_admin_plugin_hosting
 Bundle-Version: 6.6.0
 Bundle-Activator: com.openexchange.admin.Activator
 Import-Package: com.openexchange.api2,
+ com.openexchange.caching,
  com.openexchange.configuration,
  com.openexchange.database,
  com.openexchange.groupware,
