@@ -29,7 +29,6 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.test.TestException;
-import com.openexchange.webdav.xml.framework.Executor;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 import com.openexchange.webdav.xml.types.Response;
@@ -311,7 +310,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int insertContact(final WebConversation webCon, ContactObject contactObj, String host, final String login, final String password) throws OXException, Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		contactObj.removeObjectID();
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		final Element eProp = new Element("prop", webdav);
@@ -345,7 +344,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static void updateContact(final WebConversation webCon, ContactObject contactObj, int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password) throws OXException, Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		contactObj.setObjectID(objectId);
 		contactObj.setLastModified(lastModified);
@@ -410,7 +409,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static void deleteContact(final WebConversation webCon, final int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password) throws OXException, Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		final Element rootElement = new Element("multistatus", webdav);
 		rootElement.addNamespaceDeclaration(XmlServlet.NS);
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -443,7 +442,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int[] listContact(final WebConversation webCon, final int inFolder, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final Element ePropfind = new Element("propfind", webdav);
 		final Element eProp = new Element("prop", webdav);
@@ -492,7 +491,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static ContactObject[] listContact(final WebConversation webCon, final int inFolder, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		if (!changed && !deleted) {
 			return new ContactObject[] { };
 		}
@@ -544,7 +543,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static ContactObject loadContact(final WebConversation webCon, final int objectId, final int inFolder, String host, final String login, final String password) throws OXException, Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		final Element ePropfind = new Element("propfind", webdav);
 		final Element eProp = new Element("prop", webdav);
         ePropfind.addContent(eProp);

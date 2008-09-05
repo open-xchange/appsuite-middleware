@@ -18,7 +18,6 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.webdav.attachments;
 import com.openexchange.webdav.xml.fields.DataFields;
-import com.openexchange.webdav.xml.framework.Executor;
 
 public class AttachmentTest extends AbstractWebdavXMLTest {
 	
@@ -45,7 +44,7 @@ public class AttachmentTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int insertAttachment(final WebConversation webCon, final AttachmentMetadata attachmentObj, final InputStream is, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		final WebRequest webRequest = new PutMethodWebRequest(host + ATTACHMENT_URL, is, attachmentObj.getFileMIMEType());
 		webRequest.setHeaderField("Authorization", "Basic " + getAuthData(login, password));
 		webRequest.setHeaderField(attachments.FILENAME, attachmentObj.getFilename());
@@ -67,7 +66,7 @@ public class AttachmentTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static InputStream loadAttachment(final WebConversation webCon, final AttachmentMetadata attachmentObj, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		final WebRequest webRequest = new GetMethodWebRequest(host + ATTACHMENT_URL);
 		webRequest.setHeaderField("Authorization", "Basic " + getAuthData(login, password));
 		webRequest.setHeaderField(attachments.MODULE, String.valueOf(attachmentObj.getModuleId()));
@@ -83,7 +82,7 @@ public class AttachmentTest extends AbstractWebdavXMLTest {
 	}
 	
 	protected void deleteAttachment(final WebConversation webCon, final AttachmentMetadata attachmentObj, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		final HttpClient httpclient = new HttpClient();
 		
 		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));

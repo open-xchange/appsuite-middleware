@@ -104,7 +104,7 @@ public class WebDAVClient {
         client.getState().setCredentials(AuthScope.ANY,
             new UsernamePasswordCredentials(login, password));
     }
-    
+
     public enum User {
         User1(Property.LOGIN, Property.PASSWORD),
         User2(Property.SECONDUSER, Property.PASSWORD);

@@ -30,7 +30,6 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.fields.DataFields;
-import com.openexchange.webdav.xml.framework.Executor;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 import com.openexchange.webdav.xml.types.Response;
@@ -132,7 +131,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int insertAppointment(final WebConversation webCon, AppointmentObject appointmentObj, String host, final String login, final String password) throws OXException, Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		int objectId = 0;
 		
@@ -185,7 +184,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	}
 
 	public static int updateAppointment(final WebConversation webCon, AppointmentObject appointmentObj, int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password) throws OXException, Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		appointmentObj.setObjectID(objectId);
 		appointmentObj.setLastModified(lastModified);
@@ -231,9 +230,9 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static void deleteAppointment(final WebConversation webCon, final int objectId, final int inFolder, final Date lastModified, final Date recurrenceDatePosition, String host, final String login, final String password) throws OXException, Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final Element rootElement = new Element("multistatus", webdav);
 		rootElement.addNamespaceDeclaration(XmlServlet.NS);
@@ -293,7 +292,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static void deleteAppointment(final WebConversation webCon, final int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password) throws OXException, Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final Element rootElement = new Element("multistatus", webdav);
 		rootElement.addNamespaceDeclaration(XmlServlet.NS);
@@ -338,7 +337,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static void confirmAppointment(final WebConversation webCon, final int objectId, final int confirm, final String confirmMessage, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
@@ -396,7 +395,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int[] listAppointment(final WebConversation webCon, final int inFolder, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final Element ePropfind = new Element("propfind", webdav);
 		final Element eProp = new Element("prop", webdav);
@@ -445,7 +444,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static AppointmentObject[] listAppointment(final WebConversation webCon, final int inFolder, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		if (!changed && !deleted) {
 			return new AppointmentObject[] { };
@@ -533,7 +532,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static AppointmentObject loadAppointment(final WebConversation webCon, final int objectId, final int inFolder, String host, final String login, final String password) throws OXException, Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final Element ePropfind = new Element("propfind", webdav);
 		final Element eProp = new Element("prop", webdav);

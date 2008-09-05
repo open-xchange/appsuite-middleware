@@ -240,7 +240,14 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		return "no/url";
 	}
 	
-	public static void assertEqualsAndNotNull(final String message, final Date expect, final Date value) throws Exception {
+	public static final String appendPrefix(final String host) {
+    	if (host.startsWith("http://")) {
+    		return host;
+    	}
+    	return "http://" + host;
+    }
+
+    public static void assertEqualsAndNotNull(final String message, final Date expect, final Date value) throws Exception {
 		if (expect != null) {
 			assertNotNull(message + " is null", value);
 			assertEquals(message, expect.getTime(), value.getTime());

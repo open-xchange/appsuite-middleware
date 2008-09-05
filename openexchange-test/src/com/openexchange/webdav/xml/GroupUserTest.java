@@ -23,7 +23,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceGroup;
-import com.openexchange.webdav.xml.framework.Executor;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 import com.openexchange.webdav.xml.types.Response;
@@ -146,7 +145,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static ContactObject[] searchUser(final WebConversation webCon, final String searchpattern, final Date modified, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final Element eUsers = new Element("user", XmlServlet.NS);
 		eUsers.addContent(searchpattern);
@@ -194,7 +193,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static Group[] searchGroup(final WebConversation webCon, final String searchpattern, final Date modified, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final Element eGroups = new Element("group", XmlServlet.NS);
 		eGroups.addContent(searchpattern);
@@ -238,7 +237,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static Resource[] searchResource(final WebConversation webCon, final String searchpattern, final Date modified, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final Element eResources = new Element("resource", XmlServlet.NS);
 		eResources.addContent(searchpattern);
@@ -282,7 +281,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static ResourceGroup[] searchResourcegroup(final WebConversation webCon, final String searchpattern, final Date modified, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final Element eResourceGroups = new Element("resourcegroup", XmlServlet.NS);
 		eResourceGroups.addContent(searchpattern);
@@ -326,7 +325,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int getUserId(final WebConversation webCon, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final ContactObject[] contactArray = searchUser(webCon, "*", new Date(0), host, login, password);
 		for (int a = 0; a < contactArray.length; a++) {
@@ -340,7 +339,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int getContextId(final WebConversation webCon, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final ContactObject[] contactArray = searchUser(webCon, "*", new Date(0), host, login, password);
 		for (int a = 0; a < contactArray.length; a++) {

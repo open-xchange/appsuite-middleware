@@ -30,7 +30,6 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.fields.DataFields;
-import com.openexchange.webdav.xml.framework.Executor;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 import com.openexchange.webdav.xml.types.Response;
@@ -125,7 +124,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int insertTask(final WebConversation webCon, Task taskObj, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		int objectId = 0;
 		
@@ -174,7 +173,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	}
 
     public static int[] insertTasks(final WebConversation webCon, String host, final String login, final String password, final Task... tasks) throws Exception{
-        host = Executor.appendPrefix(host);
+        host = AbstractWebdavXMLTest.appendPrefix(host);
         int[] objectIds = new int[tasks.length];
 
         final TaskWriter taskWriter = new TaskWriter();
@@ -231,7 +230,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static void updateTask(final WebConversation webCon, Task taskObj, int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		taskObj.setObjectID(objectId);
 		taskObj.setLastModified(lastModified);
@@ -289,7 +288,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static void deleteTask(final WebConversation webCon, final int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final Element rootElement = new Element("multistatus", webdav);
 		rootElement.addNamespaceDeclaration(XmlServlet.NS);
@@ -337,7 +336,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static void confirmTask(final WebConversation webCon, final int objectId, final int confirm, final String confirmMessage, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
@@ -395,7 +394,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int[] listTask(final WebConversation webCon, final int inFolder, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final Element ePropfind = new Element("propfind", webdav);
 		final Element eProp = new Element("prop", webdav);
@@ -444,7 +443,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static Task[] listTask(final WebConversation webCon, final int inFolder, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password) throws Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		if (!changed && !deleted) {
 			return new Task[] { };
@@ -520,7 +519,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static Task loadTask(final WebConversation webCon, final int objectId, final int inFolder, String host, final String login, final String password) throws OXException, Exception {
-		host = Executor.appendPrefix(host);
+		host = AbstractWebdavXMLTest.appendPrefix(host);
 		
 		final Element ePropfind = new Element("propfind", webdav);
 		final Element eProp = new Element("prop", webdav);
