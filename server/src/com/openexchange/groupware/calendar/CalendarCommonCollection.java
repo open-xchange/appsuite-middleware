@@ -1117,7 +1117,7 @@ public final class CalendarCommonCollection {
         }
     }
     
-    static CalendarDataObject fillFieldsForConflictQuery(final CalendarDataObject cdao, final CalendarDataObject edao, final boolean action) {
+    static CalendarDataObject fillFieldsForConflictQuery(final CalendarDataObject cdao, final CalendarDataObject edao, final boolean action) throws OXException {
         if (!action && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType()) {
             return cdao;
         }
@@ -1172,8 +1172,11 @@ public final class CalendarCommonCollection {
                 clone.setRecurrenceDatePosition(cdao.getRecurrenceDatePosition());
             } else if (cdao.containsRecurrencePosition()) {
                 clone.setRecurrencePosition(cdao.getRecurrencePosition());
+            } else if (!cdao.containsRecurrenceType()) {
+                clone.setRecurrence(edao.getRecurrence());
             } else {
-                clone.setRecurrenceType(edao.getRecurrenceType());
+                CalendarRecurringCollection.fillDAO(cdao);
+                clone.setRecurrence(cdao.getRecurrence());
             }
         }
         

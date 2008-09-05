@@ -1,3 +1,8 @@
+* 2008-09-05 - marcus.klein@open-xchange.com
+
+ - Bugfix #12114: Adding recurrence pattern to conflict checks for series
+   appointments if a resource is added as participant.
+
 * 2008-09-05 - thorben.betten@open-xchange.com
 
  - Bugfix #12102: Invalidating context cache on every modifying context
