@@ -303,8 +303,17 @@ public final class IMAPNumArgSplitter {
 
 	private static String[] split(final String numArg, final int maxLen) {
 		final int len = numArg.length();
-		final int initCap = (len / maxLen);
-		final List<String> tmp = new ArrayList<String>(initCap == 0 ? 2 : initCap);
+		if (len <= maxLen) {
+			return new String[] { numArg };
+		}
+		/*
+		 * Split into maxLen chunks
+		 */
+		final List<String> tmp;
+		{
+			final int initCap = (len / maxLen);
+			tmp = new ArrayList<String>(initCap == 0 ? 2 : initCap);
+		}
 		int offset = 0;
 		while (offset < len) {
 			int endPos = offset + maxLen;
