@@ -1276,17 +1276,18 @@ public final class IMAPCommandsCollection {
 			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
 				final Map<Long, Integer> m = new HashMap<Long, Integer>(uids.length);
 				final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true);
-				Response[] r = null;
-				Response response = null;
+				final long start = System.currentTimeMillis();
 				for (int k = 0; k < args.length; k++) {
-					r = p.command(String.format(TEMPL_UID_FETCH_UID, args[k]), null);
+					final Response[] r = p.command(String.format(TEMPL_UID_FETCH_UID, args[k]), null);
 					final int len = r.length - 1;
-					response = r[len];
+					final Response response = r[len];
+					r[len] = null;
 					try {
 						if (response.isOK()) {
 							for (int j = 0; j < len; j++) {
 								final FetchResponse fr = (FetchResponse) r[j];
 								m.put(Long.valueOf(((UID) fr.getItem(0)).uid), Integer.valueOf(fr.getNumber()));
+								r[j] = null;
 							}
 						}
 					} finally {
@@ -1294,12 +1295,120 @@ public final class IMAPCommandsCollection {
 						p.handleResult(response);
 					}
 				}
-				final int[] retval = new int[uids.length];
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder(128).append(imapFolder.getFullName()).append(
+							": IMAP resolve fetch >>>UID FETCH ... (UID)<<< for ").append(uids.length).append(
+							" messages took ").append((System.currentTimeMillis() - start)).append("msec").toString());
+				}
+				final int[] retval = new int[m.size()];
 				for (int i = 0; i < retval.length; i++) {
 					final Long key = Long.valueOf(uids[i]);
 					retval[i] = m.containsKey(key) ? m.get(key).intValue() : -1;
 				}
 				return retval;
+			}
+		}));
+	}
+
+	/**
+	 * Generates a map resolving specified UIDs to current corresponding
+	 * sequence numbers
+	 * 
+	 * @param imapFolder
+	 *            The IMAP folder
+	 * @param uids
+	 *            The UIDs
+	 * @return A map resolving specified UIDs to current corresponding sequence
+	 *         numbers
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 */
+	@SuppressWarnings("unchecked")
+	public static Map<Long, Integer> uids2SeqNumsMap(final IMAPFolder imapFolder, final long[] uids)
+			throws MessagingException {
+		if (imapFolder.getMessageCount() == 0) {
+			/*
+			 * Empty folder...
+			 */
+			return Collections.emptyMap();
+		}
+		return (Map<Long, Integer>) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				final Map<Long, Integer> m = new HashMap<Long, Integer>(uids.length);
+				final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true);
+				final long start = System.currentTimeMillis();
+				for (int k = 0; k < args.length; k++) {
+					final Response[] r = p.command(String.format(TEMPL_UID_FETCH_UID, args[k]), null);
+					final int len = r.length - 1;
+					final Response response = r[len];
+					r[len] = null;
+					try {
+						if (response.isOK()) {
+							for (int j = 0; j < len; j++) {
+								final FetchResponse fr = (FetchResponse) r[j];
+								m.put(Long.valueOf(((UID) fr.getItem(0)).uid), Integer.valueOf(fr.getNumber()));
+								r[j] = null;
+							}
+						}
+					} finally {
+						p.notifyResponseHandlers(r);
+						p.handleResult(response);
+					}
+				}
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder(128).append(imapFolder.getFullName()).append(
+							": IMAP resolve fetch >>>UID FETCH ... (UID)<<< for ").append(uids.length).append(
+							" messages took ").append((System.currentTimeMillis() - start)).append("msec").toString());
+				}
+				return m;
+			}
+		}));
+	}
+
+	/**
+	 * Generates a map resolving corresponding sequence numbers to specified
+	 * UIDs
+	 * 
+	 * @param imapFolder
+	 *            The IMAP folder
+	 * @param uids
+	 *            The UIDs
+	 * @return A map resolving corresponding sequence numbers to specified UIDs
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 */
+	@SuppressWarnings("unchecked")
+	public static Map<Integer, Long> seqNums2uidsMap(final IMAPFolder imapFolder, final long[] uids)
+			throws MessagingException {
+		if (imapFolder.getMessageCount() == 0) {
+			/*
+			 * Empty folder...
+			 */
+			return Collections.emptyMap();
+		}
+		return (Map<Integer, Long>) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				final Map<Integer, Long> m = new HashMap<Integer, Long>(uids.length);
+				final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true);
+				for (int k = 0; k < args.length; k++) {
+					final Response[] r = p.command(String.format(TEMPL_UID_FETCH_UID, args[k]), null);
+					final int len = r.length - 1;
+					final Response response = r[len];
+					r[len] = null;
+					try {
+						if (response.isOK()) {
+							for (int j = 0; j < len; j++) {
+								final FetchResponse fr = (FetchResponse) r[j];
+								m.put(Integer.valueOf(fr.getNumber()), Long.valueOf(((UID) fr.getItem(0)).uid));
+								r[j] = null;
+							}
+						}
+					} finally {
+						p.notifyResponseHandlers(r);
+						p.handleResult(response);
+					}
+				}
+				return m;
 			}
 		}));
 	}

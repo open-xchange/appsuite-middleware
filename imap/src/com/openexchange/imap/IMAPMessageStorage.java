@@ -1065,8 +1065,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		MailMessage[] retval = IMAPCommandsCollection.fetchAll(imapFolder, OrderDirection.ASC.equals(order));
 		mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 		if (LOG.isDebugEnabled()) {
-			LOG.debug(new StringBuilder(128).append("IMAP all fetch >>>FETCH 1:* (UID INTERNALDATE)<<< took ").append(
-					(System.currentTimeMillis() - start)).append("msec").toString());
+			LOG.debug(new StringBuilder(128).append(fullname).append(
+					": IMAP all fetch >>>FETCH 1:* (UID INTERNALDATE)<<< took ").append(
+					(System.currentTimeMillis() - start)).append(STR_MSEC).toString());
 		}
 		if (retval == null || retval.length == 0) {
 			return EMPTY_RETVAL;
