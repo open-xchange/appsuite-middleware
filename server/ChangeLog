@@ -10,6 +10,8 @@
  - Bugfix #12117: Checking if referenced draft message still exists on
    auto-safe draft operation
  - Bugfix #12118: Handling possible unavailable message text body on forward
+ - Bugfix #12123: Restoring order if IMAP server always sorts fetch
+   responses by sequence number in ascending order
 
 * 2008-09-04 - francisco.laguna@open-xchange.com
 
