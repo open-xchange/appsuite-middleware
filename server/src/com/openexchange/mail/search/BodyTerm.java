@@ -181,6 +181,9 @@ public final class BodyTerm extends SearchTerm<String> {
 	private static String getTextContent(final MailPart mailPart) throws MailException {
 		final int count = mailPart.getEnclosedCount();
 		if (count != MailPart.NO_ENCLOSED_PARTS) {
+			/*
+			 * No textual content
+			 */
 			for (int i = 0; i < count; i++) {
 				final String text = getTextContent(mailPart.getEnclosedMailPart(i));
 				if (text != null) {
@@ -188,7 +191,24 @@ public final class BodyTerm extends SearchTerm<String> {
 				}
 			}
 		}
-		return getPartTextContent(mailPart);
+		/*
+		 * Try to extract textual content out of current part's body
+		 */
+		String charset = mailPart.getContentType().getCharsetParameter();
+		if (null == charset) {
+			charset = CharsetDetector.detectCharset(mailPart.getInputStream());
+		}
+		try {
+			if (mailPart.getContentType().isMimeType("text/htm*")) {
+				final HTML2TextHandler h = new HTML2TextHandler((int) mailPart.getSize(), false);
+				HTMLParser.parse(
+						HTMLProcessing.getConformHTML(MessageUtility.readMailPart(mailPart, charset), charset), h);
+				return h.getText();
+			}
+			return MessageUtility.readMailPart(mailPart, charset);
+		} catch (final IOException e) {
+			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+		}
 	}
 
 	/**
@@ -226,36 +246,4 @@ public final class BodyTerm extends SearchTerm<String> {
 		}
 	}
 
-	/**
-	 * Extracts textual content out of given part's body
-	 * 
-	 * @param mailPart
-	 *            The part
-	 * @return The textual content or <code>null</code> if none found
-	 * @throws MailException
-	 *             If text extraction fails
-	 */
-	private static String getPartTextContent(final MailPart mailPart) throws MailException {
-		if (mailPart.getEnclosedCount() != MailPart.NO_ENCLOSED_PARTS) {
-			/*
-			 * No textual content
-			 */
-			return null;
-		}
-		String charset = mailPart.getContentType().getCharsetParameter();
-		if (null == charset) {
-			charset = CharsetDetector.detectCharset(mailPart.getInputStream());
-		}
-		try {
-			if (mailPart.getContentType().isMimeType("text/htm*")) {
-				final HTML2TextHandler h = new HTML2TextHandler((int) mailPart.getSize(), false);
-				HTMLParser.parse(
-						HTMLProcessing.getConformHTML(MessageUtility.readMailPart(mailPart, charset), charset), h);
-				return h.getText();
-			}
-			return MessageUtility.readMailPart(mailPart, charset);
-		} catch (final IOException e) {
-			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		}
-	}
 }
