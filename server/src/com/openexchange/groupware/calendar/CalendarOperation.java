@@ -907,7 +907,33 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
         return p.getList();
     }
-    
+
+    /**
+	 * Gets the new and modified user participants
+	 * 
+	 * @param np
+	 *            The current user participants
+	 * @param op
+	 *            The old user participants
+	 * @param owner
+	 *            The appointment's owner
+	 * @param uid
+	 *            Current working session user
+	 * @param sharedFolderOwner
+	 *            The shared folder owner
+	 * @param time_change
+	 *            <code>true</code> if appointment's start date, end date and/or
+	 *            recurrence pattern changed; otherwise <code>false</code>
+	 * @param cdao
+	 *            The object denoting the changed appointment
+	 * @return An array of {@link Participants} with length <code>2</code>. If
+	 *         present index <code>0</code> will contain the new user
+	 *         participants otherwise <code>null</code>. If present index
+	 *         <code>1</code> will contain the modified user participants
+	 *         otherwise <code>null</code>.
+	 * @throws OXPermissionException
+	 *             If a permission error occurs
+	 */
     static final Participants[] getModifiedUserParticipants(final UserParticipant np[], final UserParticipant op[], final int owner, final int uid, final int sharedFolderOwner, final boolean time_change, final CalendarDataObject cdao) throws OXPermissionException {
         final Participants p[] = new Participants[2];
         for (int a = 0; a < np.length; a++ ) {
