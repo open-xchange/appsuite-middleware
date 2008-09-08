@@ -57,7 +57,7 @@ package com.openexchange.sessiond;
  */
 public interface SessiondMBean {
 
-	public static final String CACHE_DOMAIN = "com.openexchange.sessiond";
+	public static final String SESSIOND_DOMAIN = "com.openexchange.sessiond";
 
 	/**
 	 * Clears all sessions belonging to the user identified by given user ID in
