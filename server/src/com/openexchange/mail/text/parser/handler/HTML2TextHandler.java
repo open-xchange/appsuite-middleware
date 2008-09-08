@@ -395,12 +395,25 @@ public final class HTML2TextHandler implements HTMLHandler {
 					 * Remove starting blanks: \t or " "
 					 */
 					{
+						final int len = preparedText.length();
+						if (len == 0) {
+							/*
+							 * A zero length string can be ignored
+							 */
+							return;
+						}
 						int i = 0;
 						char c = '\0';
-						while ((c = preparedText.charAt(i)) == ' ' || c == '\t') {
+						while ((i < len) && ((c = preparedText.charAt(i)) == ' ' || c == '\t')) {
 							i++;
 						}
 						if (i > 0) {
+							if (i >= len) {
+								/*
+								 * Abort since length is exceeded
+								 */
+								return;
+							}
 							preparedText = preparedText.substring(i);
 						}
 					}
