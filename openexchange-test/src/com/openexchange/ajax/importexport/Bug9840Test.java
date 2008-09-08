@@ -49,29 +49,56 @@
 
 package com.openexchange.ajax.importexport;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.importexport.actions.ICalImportRequest;
+import com.openexchange.ajax.importexport.actions.ICalImportResponse;
+import com.openexchange.data.conversion.ical.ConversionWarning.Code;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.importexport.ImportResult;
 
 /**
- * Test suite for iCal tests.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ICalTestSuite {
+public final class Bug9840Test extends AbstractAJAXSession {
 
-	/**
-	 * @return the suite.
-	 */
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(ICalImportTest.class);
-		tests.addTestSuite(ICalExportTest.class);
-		tests.addTestSuite(Bug9840Test.class);
-		tests.addTestSuite(Bug10382Test.class);
-		tests.addTestSuite(Bug11724Test.class);
-		tests.addTestSuite(Bug11868Test.class);
-		tests.addTestSuite(Bug11871Test.class);
-		tests.addTestSuite(Bug11920Test.class);
-		tests.addTestSuite(Bug11996Test.class);
-		return tests;
-	}
+    /**
+     * Default constructor.
+     * @param name test name
+     */
+    public Bug9840Test(final String name) {
+        super(name);
+    }
+
+    public void testConversionErrorOnBYMONTH() throws Throwable {
+        final AJAXClient client = getClient();
+        final int folderId = client.getValues().getPrivateAppointmentFolder();
+        final ICalImportResponse iResponse = Executor.execute(client,
+            new ICalImportRequest(folderId, ICAL, false));
+        final ImportResult result = iResponse.getImports()[0];
+        assertTrue("BYMONTH recurrence pattern not detected as error.",
+            result.hasError());
+        final AbstractOXException exception = result.getException();
+        assertEquals(EnumComponent.ICAL, exception.getComponent());
+        final Code code = Code.BYMONTH_NOT_SUPPORTED;
+        assertEquals(code.getNumber(), exception.getDetailNumber());
+        assertEquals(code.getCategory(), exception.getCategory());
+    }
+
+    private static final String ICAL = 
+        "BEGIN:VCALENDAR\n" +
+        "VERSION:2.0\n" +
+        "BEGIN:VEVENT\n" +
+        "SUMMARY:Everyday in January, for 3 years\n" +
+        "DTSTART:20070101T090000\n" +
+        "DURATION:PT30M\n" +
+        "RRULE:FREQ=DAILY;UNTIL=20100131T090000Z;BYMONTH=1\n" +
+        "DESCRIPTION:==> (2007 9:00 AM)January 1-31\n" +
+        " (2008 9:00 AM)January 1-31\n" +
+        "  (2009 9:00 AM)January 1-31\n" +
+        "END:VEVENT\n" +
+        "END:VCALENDAR\n";
 }

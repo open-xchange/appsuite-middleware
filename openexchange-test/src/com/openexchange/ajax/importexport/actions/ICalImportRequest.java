@@ -81,6 +81,11 @@ public final class ICalImportRequest extends AbstractImportRequest<ICalImportRes
         this(folderId, new ByteArrayInputStream(getBytes(iCal, UTF_8)), true);
     }
 
+    public ICalImportRequest(final int folderId, final String iCal,
+        final boolean failOnError) {
+        this(folderId, new ByteArrayInputStream(getBytes(iCal, UTF_8)), failOnError);
+    }
+
     /**
      * {@inheritDoc}
      */
