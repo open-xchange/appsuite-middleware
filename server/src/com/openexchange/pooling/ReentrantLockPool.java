@@ -315,17 +315,17 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     final Thread thread = Thread.currentThread();
                     other = data.getByThread(thread);
                     if (other != null && thread.equals(other.getThread())) {
-                        if (LOG.isWarnEnabled()) {
+                        if (LOG.isDebugEnabled()) {
 	                        PoolingException e = new PoolingException(
 	                            "Found thread using two objects. First get.");
 	                        if (null != other.getTrace()) {
 	                            e.setStackTrace(other.getTrace());
 	                        }
-	                        LOG.warn(e.getMessage(), e);
+	                        LOG.debug(e.getMessage(), e);
 	                        e = new PoolingException(
                                 "Found thread using two objects. Second get.");
 	                        e.fillInStackTrace();
-	                        LOG.warn(e.getMessage(), e);
+	                        LOG.debug(e.getMessage(), e);
                         }
                     }
                 }
