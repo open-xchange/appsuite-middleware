@@ -206,30 +206,6 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 
-    public void modify(final Task taskObj) throws EventException, OXException, ContextException {
-		final Context ctx = ContextStorage.getInstance().getContext(contextId);
-
-		
-		final int folderId = taskObj.getParentFolderID();
-		if (folderId > 0) {
-			final FolderObject folderObj = getFolder(folderId, ctx);
-			modify(taskObj, folderObj);
-		}
-	}
-    
-	public void modify(final Task taskObj, final FolderObject folderObj) throws EventException {
-		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.TASK, taskObj, null, folderObj, null, session);
-
-		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
-		ht.put(CommonEvent.EVENT_KEY, genericEvent);
-		
-		final Event event = new Event("com/openexchange/groupware/task/update", ht);
-		triggerEvent(event);
-		
-		final EventObject eventObject = new EventObject(taskObj, CHANGED, session);
-		EventQueue.add(eventObject);
-	}
-
     public void modify(final Task oldTask, final Task newTask, final FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.TASK, newTask, oldTask, folderObj, null, session);
 

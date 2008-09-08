@@ -1,3 +1,7 @@
+* 2008-09-08 - marcus.klein@open-xchange.com
+
+ - Bugfix #11667: Using new event method for changed tasks and removed old ones.
+
 * 2008-09-05 - marcus.klein@open-xchange.com
 
  - Bugfix #12114: Adding recurrence pattern to conflict checks for series

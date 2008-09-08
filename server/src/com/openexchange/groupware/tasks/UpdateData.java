@@ -251,6 +251,7 @@ class UpdateData {
         if (null == origTask) {
             origTask = storage.selectTask(ctx, getTaskId(), type);
             origTask.setParentFolderID(getFolderId());
+            origTask.setUsers(TaskLogic.createUserParticipants(getOrigParticipants()));
         }
         return origTask;
     }
@@ -719,17 +720,15 @@ class UpdateData {
         }
     }
 
-    void sentEvent(final Session session) throws OXException, TaskException {
-        sentEvent(session, getUpdated());
+    void sentEvent(final Session session) throws TaskException {
+        sentEvent(session, getUpdated(), getOrigTask(), getDestFolder());
     }
 
-    static void sentEvent(final Session session, final Task updated)
-        throws TaskException, OXException {
+    static void sentEvent(final Session session, final Task updated,
+        final Task orig, final FolderObject dest) throws TaskException {
         try {
-            new EventClient(session).modify(updated);
+            new EventClient(session).modify(orig, updated, dest);
         } catch (final EventException e) {
-            throw new TaskException(Code.EVENT, e);
-        } catch (final ContextException e) {
             throw new TaskException(Code.EVENT, e);
         }
     }

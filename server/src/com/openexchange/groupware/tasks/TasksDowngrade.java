@@ -314,12 +314,7 @@ public class TasksDowngrade extends DowngradeListener {
                 update.prepareWithoutChecks();
                 update.doUpdate();
                 if (StorageType.ACTIVE == type) {
-                    try {
-                        update.sentEvent(session);
-                    } catch (final OXException e) {
-                        LOG.error("Problem triggering event for updated task.",
-                            e);
-                    }
+                    update.sentEvent(session);
                     try {
                         update.updateReminder();
                     } catch (final OXException e) {
