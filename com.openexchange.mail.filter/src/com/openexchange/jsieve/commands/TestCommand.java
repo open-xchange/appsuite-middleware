@@ -339,22 +339,23 @@ public class TestCommand extends Command {
             }
             final Hashtable<String, String> comparator = this.command.getComparator();
             if (null != comparator) {
-                final boolean comparatorrule = tagarray.remove(":comparator");
-                if (comparatorrule) {
-                    // The argument of the comparator is located one after the
-                    // comparator tag itself
-                    indexOfComparator = searchcomparator() + 1;
-                    final Object object = this.arguments.get(indexOfComparator);
-                    if (object instanceof ArrayList) {
-                        final ArrayList<String> new_name = (ArrayList<String>) object;
-                        final String comparatorarg = new_name.get(0);
-                        if (!comparator.containsKey(comparatorarg)) {
-                            throw new SieveException(comparatorarg + " is no valid comparator for " + this.command.getCommandname());
-                        }
-                    } else {
-                        throw new SieveException(object + " is no valid comparator for " + this.command.getCommandname());
-                    }
-                }
+                throw new SieveException("Sieve comparators aren't supported by this implementation");
+//                final boolean comparatorrule = tagarray.remove(":comparator");
+//                if (comparatorrule) {
+//                    // The argument of the comparator is located one after the
+//                    // comparator tag itself
+//                    indexOfComparator = searchcomparator() + 1;
+//                    final Object object = this.arguments.get(indexOfComparator);
+//                    if (object instanceof ArrayList) {
+//                        final ArrayList<String> new_name = (ArrayList<String>) object;
+//                        final String comparatorarg = new_name.get(0);
+//                        if (!comparator.containsKey(comparatorarg)) {
+//                            throw new SieveException(comparatorarg + " is no valid comparator for " + this.command.getCommandname());
+//                        }
+//                    } else {
+//                        throw new SieveException(object + " is no valid comparator for " + this.command.getCommandname());
+//                    }
+//                }
             }
             if (!tagarray.isEmpty()) {
                 throw new SieveException("One of the tagarguments: " + tagarray + " is not valid for " + this.command.getCommandname());
