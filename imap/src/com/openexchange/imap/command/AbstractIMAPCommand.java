@@ -147,6 +147,7 @@ public abstract class AbstractIMAPCommand<T> {
 					for (int index = 0; (index < r.length) && abstractIMAPCommand.addLoopCondition(); index++) {
 						try {
 							abstractIMAPCommand.handleResponse(r[index]);
+							r[index] = null;
 						} catch (final MessagingException e) {
 							final ProtocolException pe = new ProtocolException(e.getMessage());
 							pe.initCause(e);
