@@ -49,7 +49,7 @@ my $result = $soclt->registerServer(
 			    $masterCreds
 			    );
 
-#die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+die "Error: ".$result->faultstring()."\n $@" if $result->fault();
 
 ##
 ## Registering a Database
@@ -73,7 +73,7 @@ $result = $soclt->registerDatabase(
     	      $masterCreds
     	      );
 
-#die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+die "Error: ".$result->faultstring()."\n $@" if $result->fault();
 
 ##
 ## Registering a filestore
@@ -97,7 +97,7 @@ $result = $soclt->registerFilestore(
     	      $masterCreds
     	      );
 
-#die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+die "Error: ".$result->faultstring()."\n $@" if $result->fault();
 
 ##
 ## creating a context
@@ -142,7 +142,7 @@ $result = $soclt->create($context,
 		  $masterCreds
 		 );
 
-#die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+die "Error: ".$result->faultstring()."\n $@" if $result->fault();
 
 ##
 ## creating a SOAP clients for OXUser,OXGroup and OXResource services
@@ -183,7 +183,7 @@ $result =
 		  $ctxCreds
 		 );
 
-#die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+die "Error: ".$result->faultstring()."\n $@" if $result->fault();
 
 ##
 ## creating a group
@@ -214,12 +214,32 @@ $result =
 die "Error: ".$result->faultstring()."\n $@" if $result->fault();
 
 ##
+## creating a resource
+##
+my $rname    = "testresource";
+$displayname = "a testresource";
+$email       = "testresource\@example.com";
+
+$result =
+      $soresourceclt->create($context,
+    	      SOAP::Data->value("Resource")->value(\SOAP::Data->value(
+    	           SOAP::Data->name("name" => $rname),
+    	           SOAP::Data->name("displayname" => $displayname),
+    	           SOAP::Data->name("email" => $email)
+   	           )),
+    	      $ctxCreds
+    	     );
+
+die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+
+##
 ## changing userdata
 ##
 
 # new display name and password
+$uname       = "john";
 $displayname = "Dr. John Doe";
-$password = "verysecret";
+$password    = "verysecret";
 
 $result =
     $souserclt->change($context,
@@ -231,4 +251,4 @@ $result =
 		  $ctxCreds
 		 );
 
-#die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+die "Error: ".$result->faultstring()."\n $@" if $result->fault();

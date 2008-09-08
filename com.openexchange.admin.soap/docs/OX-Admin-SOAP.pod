@@ -41,7 +41,8 @@ point your browser to the URL
 http://localhost/servlet/axis2/services/OXContextService?wsdl
 
 It should display the WSDL (Web Services Description Language) file of
-the OXContextService.
+the OXContextService. This file can also be used to find out what kind
+of SOAP calls exist for each of the modules.
 
 If that does not work, check the logfile of the Open-Xchange Server.
 
@@ -334,7 +335,109 @@ to be set as documented above.
 
 =head4 creating a group
 
+
+=over
+
+=item defining variables
+
+ $gname       = "testgroup";
+ $displayname = "a testgroup";
+ $email       = "testgroup\@example.com";
+
+Already add some members (can also be done later with a change or
+addMember call) we already know/assume, that context admin has id 2
+and John Doe has id 3.
+
+ my @members;
+ push(@members, SOAP::Data->name( members => 2 ));
+ push(@members, SOAP::Data->name( members => 3 ));
+
+=item executing SOAP operation and error handling
+
+ $result =
+      $sogroupclt->create($context,
+    	      SOAP::Data->value("Group")->value(\SOAP::Data->value(
+    	           SOAP::Data->name("name" => $gname),
+    	           SOAP::Data->name("displayname" => $displayname),
+    	           SOAP::Data->name("email" => $email),
+    	           SOAP::Data->name("members" => @members )
+    	           )),
+    	      $ctxCreds
+    	     );
+
+ die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+
+=back
+
 =head4 creating a resource
 
+=over
+
+=item defining variables
+
+ my $rname    = "testresource";
+ $displayname = "a testresource";
+ $email       = "testresource\@example.com";
+
+=item executing SOAP operation and error handling
+
+ $result =
+      $soresourceclt->create($context,
+    	      SOAP::Data->value("Resource")->value(\SOAP::Data->value(
+    	           SOAP::Data->name("name" => $rname),
+    	           SOAP::Data->name("displayname" => $displayname),
+    	           SOAP::Data->name("email" => $email)
+   	           )),
+    	      $ctxCreds
+    	     );
+
+ die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+
+=back
+
+=head3 changing data
+
+To change data B<only> the data to be changed must be send to the
+server. The reference to the entry is either it's numerical ID or it's
+name.
+
+=head4 changing user data
+
+Changing display name and password of the user with name "john".
+
+ $ /opt/open-xchange/sbin/listuser -A oxadmin -P secret -c 424242
+ Id Name    Displayname   Email
+  2 oxadmin Context Admin oxadmin@example.com
+  3 john    Dr. John Doe  john@example.com
+
+
+ # new display name and password
+ $uname       = "john";
+ $displayname = "Dr. John Doe";
+ $password    = "verysecret";
+
+ $result =
+    $souserclt->change($context,
+		  SOAP::Data->value("User")->value(\SOAP::Data->value(
+			SOAP::Data->name("name" => $uname),
+			SOAP::Data->name("password" => $password),
+			SOAP::Data->name("display_name" => $displayname)
+   	          )),
+		  $ctxCreds
+		 );
+
+ die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+
+We could also use the ID of the user to reference it:
+
+ $result =
+    $souserclt->change($context,
+		  SOAP::Data->value("User")->value(\SOAP::Data->value(
+			SOAP::Data->name("id" => 3),
+			SOAP::Data->name("password" => $password),
+			SOAP::Data->name("display_name" => $displayname)
+   	          )),
+		  $ctxCreds
+		 );
 
 =cut
