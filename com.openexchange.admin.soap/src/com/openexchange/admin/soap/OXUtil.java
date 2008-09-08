@@ -73,6 +73,9 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         super(OXUtilInterface.class);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.OXUtilInterface#changeDatabase(com.openexchange.admin.rmi.dataobjects.Database, com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
     public void changeDatabase(Database db, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
@@ -84,6 +87,9 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.OXUtilInterface#changeFilestore(com.openexchange.admin.rmi.dataobjects.Filestore, com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
     public void changeFilestore(Filestore fstore, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
@@ -95,6 +101,9 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.OXUtilInterface#createMaintenanceReason(com.openexchange.admin.rmi.dataobjects.MaintenanceReason, com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
     public MaintenanceReason createMaintenanceReason(MaintenanceReason reason, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
@@ -105,6 +114,9 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.OXUtilInterface#deleteMaintenanceReason(com.openexchange.admin.rmi.dataobjects.MaintenanceReason[], com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
     public void deleteMaintenanceReason(MaintenanceReason[] reasons, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
@@ -116,6 +128,9 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.OXUtilInterface#listAllDatabase(com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
     public Database[] listAllDatabase(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
@@ -126,6 +141,9 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.OXUtilInterface#listAllFilestore(com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
     public Filestore[] listAllFilestore(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
@@ -136,6 +154,9 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.OXUtilInterface#listAllMaintenanceReason(com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
     public MaintenanceReason[] listAllMaintenanceReason(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
@@ -146,6 +167,9 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.OXUtilInterface#listAllServer(com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
     public Server[] listAllServer(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
@@ -156,6 +180,9 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.OXUtilInterface#listDatabase(java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
     public Database[] listDatabase(String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
@@ -166,6 +193,9 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.OXUtilInterface#listFilestore(java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
     public Filestore[] listFilestore(String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
@@ -176,6 +206,9 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.OXUtilInterface#listMaintenanceReason(java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
     public MaintenanceReason[] listMaintenanceReason(String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
@@ -186,6 +219,9 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.OXUtilInterface#listServer(java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
     public Server[] listServer(String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
@@ -196,6 +232,9 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.OXUtilInterface#registerDatabase(com.openexchange.admin.rmi.dataobjects.Database, com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
     public Database registerDatabase(Database db, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
@@ -206,6 +245,9 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.OXUtilInterface#registerFilestore(com.openexchange.admin.rmi.dataobjects.Filestore, com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
     public Filestore registerFilestore(Filestore fstore, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
@@ -216,6 +258,9 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.OXUtilInterface#registerServer(com.openexchange.admin.rmi.dataobjects.Server, com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
     public Server registerServer(Server srv, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
@@ -226,6 +271,9 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.OXUtilInterface#unregisterDatabase(com.openexchange.admin.rmi.dataobjects.Database, com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
     public void unregisterDatabase(Database dbhandle, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
@@ -237,6 +285,9 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.OXUtilInterface#unregisterFilestore(com.openexchange.admin.rmi.dataobjects.Filestore, com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
     public void unregisterFilestore(Filestore store, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
@@ -248,6 +299,9 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.OXUtilInterface#unregisterServer(com.openexchange.admin.rmi.dataobjects.Server, com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
     public void unregisterServer(Server serv, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {

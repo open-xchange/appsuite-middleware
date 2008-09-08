@@ -64,7 +64,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
- * SOAP Service implementing RMI Interface OXResourceInterface
+ * SOAP Service implementing RMI Interface OXUserInterface
  * 
  * @author choeger
  *
@@ -79,6 +79,20 @@ public class OXUser extends OXSOAPRMIMapper {
         super(OXUserInterface.class);
     }
 
+    /**
+     * Same as {@link OXUserInterface#change(Context, User, Credentials)}
+     * 
+     * @param ctx
+     * @param usrdata
+     * @param auth
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchUserException
+     */
     public void change(Context ctx, User usrdata, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         reconnect();
         try {
@@ -90,6 +104,21 @@ public class OXUser extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXUserInterface#changeModuleAccess(Context, User, UserModuleAccess, Credentials)}
+     * 
+     * @param ctx
+     * @param user
+     * @param moduleAccess
+     * @param auth
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchUserException
+     */
     public void changeByModuleAccess(Context ctx, User user, UserModuleAccess moduleAccess, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         reconnect();
         try {
@@ -101,6 +130,21 @@ public class OXUser extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXUserInterface#changeModuleAccess(Context, User, String, Credentials)}
+     * 
+     * @param ctx
+     * @param user
+     * @param access_combination_name
+     * @param auth
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchUserException
+     */
     public void changeByModuleAccessName(Context ctx, User user, String access_combination_name, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         reconnect();
         try {
@@ -112,6 +156,21 @@ public class OXUser extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXUserInterface#create(Context, User, UserModuleAccess, Credentials)}
+     * 
+     * @param ctx
+     * @param usrdata
+     * @param access
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
     public User createByModuleAccess(Context ctx, User usrdata, UserModuleAccess access, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
@@ -122,6 +181,21 @@ public class OXUser extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXUserInterface#create(Context, User, String, Credentials)}
+     * 
+     * @param ctx
+     * @param usrdata
+     * @param access_combination_name
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
     public User createByModuleAccessName(Context ctx, User usrdata, String access_combination_name, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
@@ -132,6 +206,20 @@ public class OXUser extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXUserInterface#create(Context, User, Credentials)}
+     * 
+     * @param ctx
+     * @param usrdata
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
     public User create(Context ctx, User usrdata, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
@@ -142,6 +230,20 @@ public class OXUser extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXUserInterface#delete(Context, User[], Credentials)}
+     * 
+     * @param ctx
+     * @param users
+     * @param auth
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchUserException
+     */
     public void deleteMultiple(Context ctx, User[] users, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         reconnect();
         try {
@@ -153,6 +255,20 @@ public class OXUser extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXUserInterface#delete(Context, User, Credentials)}
+     * 
+     * @param ctx
+     * @param user
+     * @param auth
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchUserException
+     */
     public void delete(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         reconnect();
         try {
@@ -164,6 +280,21 @@ public class OXUser extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXUserInterface#getAccessCombinationName(Context, User, Credentials)}
+     * 
+     * @param ctx
+     * @param user
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchUserException
+     */
     public String getAccessCombinationName(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         reconnect();
         try {
@@ -174,6 +305,21 @@ public class OXUser extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXUserInterface#getData(Context, User[], Credentials)}
+     * 
+     * @param ctx
+     * @param users
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws NoSuchUserException
+     * @throws DatabaseUpdateException
+     */
     public User[] getMultipleData(Context ctx, User[] users, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
         reconnect();
         try {
@@ -184,6 +330,21 @@ public class OXUser extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXUserInterface#getData(Context, User, Credentials)}
+     * 
+     * @param ctx
+     * @param user
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws NoSuchUserException
+     * @throws DatabaseUpdateException
+     */
     public User getData(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
         reconnect();
         try {
@@ -194,6 +355,21 @@ public class OXUser extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXUserInterface#getModuleAccess(Context, User, Credentials)}
+     * 
+     * @param ctx
+     * @param user
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchUserException
+     */
     public UserModuleAccess getModuleAccess(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         reconnect();
         try {
@@ -204,6 +380,20 @@ public class OXUser extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXUserInterface#list(Context, String, Credentials)}
+     * 
+     * @param ctx
+     * @param search_pattern
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
     public User[] list(Context ctx, String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
@@ -214,6 +404,19 @@ public class OXUser extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXUserInterface#listAll(Context, Credentials)}
+     * 
+     * @param ctx
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
     public User[] listAll(Context ctx, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {

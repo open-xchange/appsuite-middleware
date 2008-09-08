@@ -54,7 +54,10 @@ Authors:
 
 
 %install
-ant -Ddestdir=%{buildroot} install doc
+ant -Ddestdir=%{buildroot} \
+	-Ddoccorelink=/usr/share/doc/packages/open-xchange-admin-doc/javadoc/doc \
+	-Ddochostinglink=/usr/share/doc/packages/open-xchange-admin-plugin-hosting-doc/javadoc/doc \
+	install doc
 
 
 %clean

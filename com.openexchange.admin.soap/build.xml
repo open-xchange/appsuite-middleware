@@ -26,6 +26,9 @@
 	<property name="adminRMI"        value="ox_admin_rmiclient.jar"/>
 	<property name="adminHostingRMI" value="ox_admin_hosting_rmiclient.jar"/>
 	
+	<!-- doc defaults work for Debian -->
+	<property name="doccorelink"     value="/usr/share/doc/open-xchange-admin-doc/javadoc/doc"/>
+	<property name="dochostinglink"  value="/usr/share/doc/open-xchange-admin-plugin-hosting-doc/javadoc/doc"/>
 	
 	<path id="project.classpath">
 		<pathelement location="${libdir}/${adminRMI}"/>
@@ -65,12 +68,36 @@
 			<arg value="--infile=docs/OX-Admin-SOAP.pod"/>
 			<arg value="--outfile=docs/OX-Admin-SOAP.html"/>
 		</exec>
+        <javadoc
+            failonerror="true"
+			sourcepath="src"
+        	destdir="docs/javadoc"
+            author="true"
+            public="true"
+            Windowtitle="SOAP service interface">
+        	<Header><![CDATA[<img src="{@docRoot}/../OX_Logo.jpg">]]></Header>
+            <fileset dir="src/com/openexchange/admin/soap" defaultexcludes="yes">
+            	<exclude name="OXSOAPRMIMapper.java"/>
+            </fileset>
+        	<classpath>
+                <path refid="project.classpath"/>
+        	</classpath>
+        	<link href="http://java.sun.com/j2se/1.5.0/docs/api/"/>
+        	<link href="${doccorelink}"/>
+        	<link href="${dochostinglink}"/>
+        </javadoc>
+		<!-- javadoc cannot handle package-list to contain same package multiple times -->
+		<replace dir="docs/javadoc" token="${doccorelink}" value="${dochostinglink}">
+		    <include name="**/OXContext.html"/>
+		    <include name="**/OXUtil.html"/>
+	    </replace>
 	</target>
 
-		<target name="clean">
+    <target name="clean">
 		<delete file="META-INF/MANIFEST.MF"/>
     	<delete dir="classes"/>
         <delete dir="jar"/>
+    	<delete dir="docs/javadoc"/>
     	<delete>
     		<fileset dir="." includes="*.tmp,docs/*.html"/>
         </delete>

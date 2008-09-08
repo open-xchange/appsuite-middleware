@@ -80,6 +80,22 @@ public class OXGroup extends OXSOAPRMIMapper {
         super(OXGroupInterface.class);
     }
 
+    /**
+     * Same as {@link OXGroupInterface#addMember(Context, Group, User[], Credentials)}
+     * 
+     * @param ctx
+     * @param grp
+     * @param members
+     * @param auth
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchUserException
+     * @throws NoSuchGroupException
+     */
     public void addMember(Context ctx, Group grp, User[] members, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, NoSuchGroupException {
         reconnect();
         try {
@@ -91,6 +107,21 @@ public class OXGroup extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXGroupInterface#change(Context, Group, Credentials)}
+     * 
+     * @param ctx
+     * @param grp
+     * @param auth
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws NoSuchUserException
+     * @throws StorageException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchGroupException
+     */
     public void change(Context ctx, Group grp, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, NoSuchUserException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
         reconnect();
         try {
@@ -102,6 +133,21 @@ public class OXGroup extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXGroupInterface#create(Context, Group, Credentials)}
+     * 
+     * @param ctx
+     * @param grp
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws NoSuchUserException
+     * @throws StorageException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
     public Group create(Context ctx, Group grp, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, NoSuchUserException, StorageException, InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
@@ -112,6 +158,20 @@ public class OXGroup extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXGroupInterface#delete(Context, Group, Credentials)}
+     * 
+     * @param ctx
+     * @param grp
+     * @param auth
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchGroupException
+     */
     public void delete(Context ctx, Group grp, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
         reconnect();
         try {
@@ -123,6 +183,20 @@ public class OXGroup extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXGroupInterface#delete(Context, Group[], Credentials)}
+     * 
+     * @param ctx
+     * @param grps
+     * @param auth
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchGroupException
+     */
     public void deleteMultiple(Context ctx, Group[] grps, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
         reconnect();
         try {
@@ -134,6 +208,21 @@ public class OXGroup extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXGroupInterface#getData(Context, Group, Credentials)}
+     * 
+     * @param ctx
+     * @param grp
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchGroupException
+     */
     public Group getData(Context ctx, Group grp, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
         reconnect();
         try {
@@ -144,6 +233,21 @@ public class OXGroup extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXGroupInterface#getData(Context, Group[], Credentials)}
+     * 
+     * @param ctx
+     * @param grps
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws NoSuchGroupException
+     * @throws DatabaseUpdateException
+     */
     public Group[] getMultipleData(Context ctx, Group[] grps, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchGroupException, DatabaseUpdateException {
         reconnect();
         try {
@@ -154,6 +258,19 @@ public class OXGroup extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXGroupInterface#getDefaultGroup(Context, Credentials)}
+     * 
+     * @param ctx
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
     public Group getDefaultGroup(Context ctx, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
@@ -164,6 +281,21 @@ public class OXGroup extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXGroupInterface#getMembers(Context, Group, Credentials)}
+     * 
+     * @param ctx
+     * @param grp
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchGroupException
+     */
     public User[] getMembers(Context ctx, Group grp, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
         reconnect();
         try {
@@ -174,6 +306,20 @@ public class OXGroup extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXGroupInterface#list(Context, String, Credentials)}
+     * 
+     * @param ctx
+     * @param pattern
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
     public Group[] list(Context ctx, String pattern, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
@@ -184,6 +330,19 @@ public class OXGroup extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXGroupInterface#listAll(Context, Credentials)}
+     * 
+     * @param ctx
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
     public Group[] listAll(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
@@ -194,6 +353,21 @@ public class OXGroup extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXGroupInterface#listGroupsForUser(Context, User, Credentials)}
+     * 
+     * @param ctx
+     * @param usr
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchUserException
+     */
     public Group[] listGroupsForUser(Context ctx, User usr, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         reconnect();
         try {
@@ -204,6 +378,22 @@ public class OXGroup extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXGroupInterface#removeMember(Context, Group, User[], Credentials)}
+     * 
+     * @param ctx
+     * @param grp
+     * @param members
+     * @param auth
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchGroupException
+     * @throws NoSuchUserException
+     */
     public void removeMember(Context ctx, Group grp, User[] members, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException, NoSuchUserException {
         reconnect();
         try {

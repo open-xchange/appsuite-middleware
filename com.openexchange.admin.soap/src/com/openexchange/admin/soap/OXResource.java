@@ -78,6 +78,20 @@ public class OXResource extends OXSOAPRMIMapper {
         super(OXResourceInterface.class);
     }
 
+    /**
+     * Same as {@link OXResourceInterface#change(Context, Resource, Credentials)}
+     * 
+     * @param ctx
+     * @param res
+     * @param auth
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchResourceException
+     */
     public void change(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         reconnect();
         try {
@@ -89,6 +103,20 @@ public class OXResource extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXResourceInterface#create(Context, Resource, Credentials)}
+     * 
+     * @param ctx
+     * @param res
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
     public Resource create(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
         reconnect();
         try {
@@ -99,6 +127,20 @@ public class OXResource extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXResourceInterface#delete(Context, Resource, Credentials)}
+     * 
+     * @param ctx
+     * @param res
+     * @param auth
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchResourceException
+     */
     public void delete(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         reconnect();
         try {
@@ -110,6 +152,21 @@ public class OXResource extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXResourceInterface#getData(Context, Resource, Credentials)}
+     * 
+     * @param ctx
+     * @param res
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchResourceException
+     */
     public Resource getData(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         reconnect();
         try {
@@ -120,6 +177,21 @@ public class OXResource extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXResourceInterface#getData(Context, Resource[], Credentials)}
+     * 
+     * @param ctx
+     * @param resources
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws NoSuchResourceException
+     * @throws DatabaseUpdateException
+     */
     public Resource[] getMultipleData(final Context ctx, final Resource[] resources, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
         reconnect();
         try {
@@ -130,6 +202,20 @@ public class OXResource extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXResourceInterface#list(Context, String, Credentials)}
+     * 
+     * @param ctx
+     * @param pattern
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
     public Resource[] list(final Context ctx, final String pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
@@ -140,20 +226,23 @@ public class OXResource extends OXSOAPRMIMapper {
         throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
+    /**
+     * Same as {@link OXResourceInterface#listAll(Context, Credentials)}
+     * 
+     * @param ctx
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
     public Resource[] listAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
             return list(ctx, "*", auth);
-        } catch( ConnectException e) {
-            reconnect(true);
-        }
-        throw new RemoteException(RMI_CONNECT_ERROR);
-    }
-
-    public Resource get(Context ctx, Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        reconnect();
-        try {
-            return ((OXResourceInterface)rmistub).getData(ctx, res, auth);
         } catch( ConnectException e) {
             reconnect(true);
         }
