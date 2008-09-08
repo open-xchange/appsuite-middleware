@@ -1584,6 +1584,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 		return moveFolder(toMove, destFolder, newFolder, checkForDuplicate);
 	}
 
+	private static final String[] ARGS_ALL = { "1:*" };
+
 	private IMAPFolder moveFolder(final IMAPFolder toMove, final IMAPFolder destFolder, final IMAPFolder newFolder,
 			final boolean checkForDuplicate) throws MessagingException, MailException {
 		if ((destFolder.getType() & Folder.HOLDS_FOLDERS) == 0) {
@@ -1650,13 +1652,13 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 			if (!toMove.isOpen()) {
 				toMove.open(Folder.READ_ONLY);
 			}
+			final long[] uids;
 			try {
-				final long start = System.currentTimeMillis();
-				toMove.copyMessages(toMove.getMessages(), newFolder);
-				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				uids = IMAPCommandsCollection.seqNums2UID(toMove, ARGS_ALL, toMove.getMessageCount());
 			} finally {
 				toMove.close(false);
 			}
+			imapAccess.getMessageStorage().copyMessages(toMove.getFullName(), newFolder.getFullName(), uids, true);
 		}
 		/*
 		 * Iterate subfolders
@@ -1673,6 +1675,10 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 			final IMAPException e = new IMAPException(IMAPException.Code.DELETE_FAILED, toMove.getFullName());
 			LOG.warn(e.getMessage(), e);
 		}
+		/*
+		 * Notify message storage
+		 */
+		imapAccess.getMessageStorage().notifyIMAPFolderModification(toMove.getFullName());
 		/*
 		 * Remove cache entries
 		 */
