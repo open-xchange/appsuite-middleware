@@ -2268,13 +2268,8 @@ class CalendarMySQL implements CalendarSqlImp {
 								}
 							} else {
 								try {
-									int pfid = cdao.getGlobalFolderID();
-									if (pfid == 0) {
-										pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
-									}
-									// final int pfid =
-									// Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(new_userparticipants[a].getIdentifier(),
-									// cdao.getContext()));
+								    // always set the folder to the private folder of the user participant in private calendar folders.
+									int pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
 									pi.setInt(5, pfid);
 									new_userparticipants[a].setPersonalFolderId(pfid);
 								} catch (final Exception fe) {
@@ -2304,20 +2299,13 @@ class CalendarMySQL implements CalendarSqlImp {
 									new_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
 								}
 							} else {
-								if (cdao.getGlobalFolderID() == 0) {
-									try {
-										final int pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
-										// final int pfid =
-										// Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(new_userparticipants[a].getIdentifier(),
-										// cdao.getContext()));
-										pi.setInt(5, pfid);
-										new_userparticipants[a].setPersonalFolderId(pfid);
-									} catch (final Exception fe) {
-										throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(3));
-									}
-								} else {
-									pi.setInt(5, cdao.getGlobalFolderID());
-									new_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
+								try {
+                                    // always set the folder to the private folder of the user participant in private calendar folders.
+									final int pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+									pi.setInt(5, pfid);
+									new_userparticipants[a].setPersonalFolderId(pfid);
+								} catch (final Exception fe) {
+									throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(3));
 								}
 							}
 						} else {
