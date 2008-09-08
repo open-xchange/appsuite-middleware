@@ -1,6 +1,8 @@
 * 2008-09-08 - marcus.klein@open-xchange.com
 
  - Bugfix #11667: Using new event method for changed tasks and removed old ones.
+ - Bugfix #9840: Throwing an exception if a daily recurring appointment with
+   BYMONTH pattern is imported via iCal.
 
 * 2008-09-05 - marcus.klein@open-xchange.com
 

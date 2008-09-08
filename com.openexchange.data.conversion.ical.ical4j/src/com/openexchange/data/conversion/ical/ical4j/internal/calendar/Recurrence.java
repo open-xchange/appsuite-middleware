@@ -54,6 +54,7 @@ import net.fortuna.ical4j.model.*;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.data.conversion.ical.ConversionWarning.Code;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
@@ -76,13 +77,13 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
     private static final Map<Integer, String> reverseDays = new HashMap<Integer, String>();
     private static final List<Integer> allDays = new LinkedList<Integer>();
     static {
-        weekdays.put("MO", AppointmentObject.MONDAY);
-        weekdays.put("TU", AppointmentObject.TUESDAY);
-        weekdays.put("WE", AppointmentObject.WEDNESDAY);
-        weekdays.put("TH", AppointmentObject.THURSDAY);
-        weekdays.put("FR", AppointmentObject.FRIDAY);
-        weekdays.put("SA", AppointmentObject.SATURDAY);
-        weekdays.put("SU", AppointmentObject.SUNDAY);
+        weekdays.put("MO", Integer.valueOf(AppointmentObject.MONDAY));
+        weekdays.put("TU", Integer.valueOf(AppointmentObject.TUESDAY));
+        weekdays.put("WE", Integer.valueOf(AppointmentObject.WEDNESDAY));
+        weekdays.put("TH", Integer.valueOf(AppointmentObject.THURSDAY));
+        weekdays.put("FR", Integer.valueOf(AppointmentObject.FRIDAY));
+        weekdays.put("SA", Integer.valueOf(AppointmentObject.SATURDAY));
+        weekdays.put("SU", Integer.valueOf(AppointmentObject.SUNDAY));
 
         for(Map.Entry<String, Integer> entry : weekdays.entrySet()) {
             allDays.add(entry.getValue());
@@ -226,9 +227,12 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
             warnings.add(new ConversionWarning(index, "Only converting first recurrence rule, additional recurrence rules will be ignored."));
         }
         Recur rrule = ((RRule) list.get(0)).getRecur();
-
+        
         if("DAILY".equalsIgnoreCase(rrule.getFrequency())) {
             cObj.setRecurrenceType(AppointmentObject.DAILY);
+            if (!rrule.getMonthList().isEmpty()) {
+                throw new ConversionError(index, Code.BYMONTH_NOT_SUPPORTED);
+            }
         } else if ("WEEKLY".equalsIgnoreCase(rrule.getFrequency())) {
             cObj.setRecurrenceType(AppointmentObject.WEEKLY);
             setDays(index, cObj, rrule, startDate);

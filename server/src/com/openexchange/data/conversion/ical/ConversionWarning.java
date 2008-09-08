@@ -153,7 +153,11 @@ public class ConversionWarning extends AbstractOXException {
         /**
          *
          */
-         PRIVATE_APPOINTMENTS_HAVE_NO_PARTICIPANTS("Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.",Category.USER_INPUT, 14)
+        PRIVATE_APPOINTMENTS_HAVE_NO_PARTICIPANTS("Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.",Category.USER_INPUT, 14),
+        /**
+         * Not supported recurrence pattern: BYMONTH
+         */
+        BYMONTH_NOT_SUPPORTED("Not supported recurrence pattern: BYMONTH", Category.USER_INPUT, 15)
         ;
 
         /**
