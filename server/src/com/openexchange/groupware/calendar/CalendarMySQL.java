@@ -873,7 +873,7 @@ class CalendarMySQL implements CalendarSqlImp {
 	}
 
 	private static final void getConflictRange(final StringBuilder sb) {
-		sb.append(" pd.timestampfield01 < ? AND pd.timestampfield02 > ?");
+		sb.append(" intfield07 = 0 AND pd.timestampfield01 < ? AND pd.timestampfield02 > ?");
 	}
 
 	private static final void getConflictRangeFullTime(final StringBuilder sb) {
