@@ -5,6 +5,8 @@
  - Bugfix #12125: Fixed removing starting whitespace characters during
    html2text conversion
  - Added enhancement as specified in bug #11702
+ - Bugfix #12116: Fixed calculation of recurring appointments without an
+   until date set
 
 * 2008-09-08 - marcus.klein@open-xchange.com
 

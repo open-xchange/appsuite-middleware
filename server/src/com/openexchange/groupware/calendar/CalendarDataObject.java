@@ -240,7 +240,7 @@ public class CalendarDataObject extends AppointmentObject {
              * Determine max. end date
              */
             final long maxEnd = getRecurrenceType() == CalendarObject.YEARLY ? (CalendarRecurringCollection
-                    .normalizeLong(new Date().getTime() + (CalendarRecurringCollection.MILLI_YEAR * 99)))
+                    .normalizeLong(getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * 99)))
                     : (CalendarRecurringCollection
                             .normalizeLong(getStartDate().getTime()
                                     + (CalendarRecurringCollection.MILLI_YEAR * CalendarRecurringCollection
