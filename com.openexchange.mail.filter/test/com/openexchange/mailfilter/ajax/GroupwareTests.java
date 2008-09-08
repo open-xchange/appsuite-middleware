@@ -31,7 +31,7 @@ public class GroupwareTests extends AJAXTest {
     
     private static final String LOGIN_URL = "/ajax/login";
 
-    public WebConversation login() throws MalformedURLException, IOException, SAXException, JSONException {
+    public WebconversationAndSessionID login() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebConversation conversation = new WebConversation();
         final String login = AUTHNAME;
         final String password = AUTHPASSWORD;
@@ -55,7 +55,7 @@ public class GroupwareTests extends AJAXTest {
         assertTrue("Session ID is missing: " + body, json.has(Login.PARAMETER_SESSION));
         assertTrue("Random is missing: " + body, json.has(Login._random));
         System.out.println(json);
-        return conversation;
+        return new WebconversationAndSessionID(conversation, (String)json.get(Login.PARAMETER_SESSION));
     }
 
     @Override

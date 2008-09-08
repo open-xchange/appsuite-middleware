@@ -40,7 +40,7 @@ public class AdminTests extends AJAXTest {
     }
 
     @Override
-    protected WebConversation login() throws MalformedURLException, IOException, SAXException, JSONException {
+    protected WebconversationAndSessionID login() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebConversation conversation = new WebConversation();
         final String login = AUTHNAME;
         final String password = AUTHPASSWORD;
@@ -74,7 +74,7 @@ public class AdminTests extends AJAXTest {
         }
         System.out.println(json);
         
-        return conversation;
+        return new WebconversationAndSessionID(conversation, null);
     }
 
 }
