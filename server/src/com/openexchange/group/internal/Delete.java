@@ -67,10 +67,12 @@ import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -152,7 +154,18 @@ public final class Delete {
     private void allowed() throws GroupException {
         try {
             if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditGroup()) {
-                throw new GroupException(Code.NO_CREATE_PERMISSION);
+                throw new GroupException(Code.NO_DELETE_PERMISSION);
+            }
+            if (groupId == GroupTools.GROUP_ZERO.getIdentifier()) {
+            	try {
+					throw new GroupException(Code.NO_GROUP_DELETE, GroupTools.getGroupZero(ctx).getDisplayName());
+				} catch (final UserException e) {
+					LOG.error(e.getMessage(), e);
+					throw new GroupException(Code.NO_GROUP_DELETE, Integer.valueOf(OCLPermission.ALL_GROUPS_AND_USERS));
+				} catch (final LdapException e) {
+					LOG.error(e.getMessage(), e);
+					throw new GroupException(Code.NO_GROUP_DELETE, Integer.valueOf(OCLPermission.ALL_GROUPS_AND_USERS));
+				}
             }
         } catch (final UserConfigurationException e) {
             throw new GroupException(e);

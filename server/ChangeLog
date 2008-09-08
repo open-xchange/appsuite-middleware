@@ -7,6 +7,8 @@
  - Added enhancement as specified in bug #11702
  - Bugfix #12116: Fixed calculation of recurring appointments without an
    until date set
+ - Bugfix #12054: Checking for special group identifier "0" prior to
+   performing update/delete operations
 
 * 2008-09-08 - marcus.klein@open-xchange.com
 
