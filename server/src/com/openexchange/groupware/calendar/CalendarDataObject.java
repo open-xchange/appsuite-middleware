@@ -400,6 +400,9 @@ public class CalendarDataObject extends AppointmentObject {
         if (containsRecurrenceType()) {
             clone.setRecurrenceType(getRecurrenceType());
         }
+        if (containsRecurringStart()) {
+        	clone.setRecurringStart(getRecurringStart());
+        }
         if (containsInterval()) {
             clone.setInterval(getInterval());
         }
