@@ -2268,8 +2268,13 @@ class CalendarMySQL implements CalendarSqlImp {
 								}
 							} else {
 								try {
-								    // always set the folder to the private folder of the user participant in private calendar folders.
-									int pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+								    final int pfid;
+								    if (cdao.getFolderMove() && new_userparticipants[a].getIdentifier() == uid) {
+								        pfid = cdao.getGlobalFolderID();
+								    } else {
+	                                    // always set the folder to the private folder of the user participant in private calendar folders.
+								        pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+								    }
 									pi.setInt(5, pfid);
 									new_userparticipants[a].setPersonalFolderId(pfid);
 								} catch (final Exception fe) {
@@ -2300,8 +2305,13 @@ class CalendarMySQL implements CalendarSqlImp {
 								}
 							} else {
 								try {
-                                    // always set the folder to the private folder of the user participant in private calendar folders.
-									final int pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                    final int pfid;
+                                    if (cdao.getFolderMove() && new_userparticipants[a].getIdentifier() == uid) {
+                                        pfid = cdao.getGlobalFolderID();
+                                    } else {
+                                        // always set the folder to the private folder of the user participant in private calendar folders.
+                                        pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                    }
 									pi.setInt(5, pfid);
 									new_userparticipants[a].setPersonalFolderId(pfid);
 								} catch (final Exception fe) {
