@@ -16,7 +16,7 @@
 * 2008-09-04 - francisco.laguna@open-xchange.com
 
  - Send import warnings to the GUI.
- - Bigfix #11869 : Remove Attendees from private appointments and send a warning.
+ - Bugfix #11869 : Remove Attendees from private appointments and send a warning.
 
 * 2008-09-04 - thorben.betten@open-xchange.com
 
