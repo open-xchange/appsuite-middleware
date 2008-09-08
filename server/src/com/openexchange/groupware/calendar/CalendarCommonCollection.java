@@ -1397,12 +1397,20 @@ public final class CalendarCommonCollection {
         }
     }
 
-    static long getUserTimeUTCDate(final Date date, final String timezone) {
-		final int offset = Tools.getTimeZone(timezone).getOffset(date.getTime());
-		long ndl = date.getTime() + offset;
-		ndl -= (ndl % CalendarRecurringCollection.MILLI_DAY);
+    /**
+	 * Adds the time zone offset to given date's time millis and determines
+	 * corresponding date based on resulting time millis
+	 * 
+	 * @param date
+	 *            The date whose UTC-based date shall be calculated
+	 * @param timezone
+	 *            The time zone identifier
+	 * @return The UTC-based date
+	 */
+	static long getUserTimeUTCDate(final Date date, final String timezone) {
+		final long ndl = date.getTime() + (Tools.getTimeZone(timezone).getOffset(date.getTime()));
+		return ndl - (ndl % CalendarRecurringCollection.MILLI_DAY);
 		// System.out.println(" GOT "+date+" and return "+new Date(ndl));
-		return ndl;
 	}
 
 	public static boolean checkIfArrayKeyExistInArray(final Object a[], final Object b[]) {
