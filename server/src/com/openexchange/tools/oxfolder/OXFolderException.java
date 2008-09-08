@@ -377,11 +377,6 @@ public class OXFolderException extends OXException {
 		 */
 		DBPOOLING_ERROR("An SQL error occurred in context %1$s", Category.CODE_ERROR, 39),
 		/**
-		 * Caller does not allow to fetch a connection from pool in context %1$s
-		 */
-		NO_CONNECTION_FETCH("Caller does not allow to fetch a connection from pool in context %1$s",
-				Category.CODE_ERROR, 40),
-		/**
 		 * Delivered sequence id %1$s from database is less than allowed min.
 		 * folder id of %2$s in context %3$s
 		 */
