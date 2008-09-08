@@ -101,7 +101,7 @@ public class DatabaseAuthentication implements AuthenticationService {
                     .INVALID_CREDENTIALS, e);
             }
             final User user = userStor.getUser(userId, ctx);
-            if (!userStor.authenticate(user, password)) {
+            if (!UserStorage.authenticate(user, password)) {
                 throw new LoginException(LoginException.Code
                     .INVALID_CREDENTIALS);
             }
