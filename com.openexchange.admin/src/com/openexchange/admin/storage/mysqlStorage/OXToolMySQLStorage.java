@@ -90,14 +90,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         Connection con = null;
         try {
             con = cache.getConnectionForContext(ctx.getId().intValue());
-            Resource[] res =  getDomainUsedbyResource(ctx, domain, con);
-            Group[] grp =  getDomainUsedbyGroup(ctx, domain, con);
-            User[] usr =  getDomainUsedbyUser(ctx, domain, con);
+            final Resource[] res =  getDomainUsedbyResource(ctx, domain, con);
+            final Group[] grp =  getDomainUsedbyGroup(ctx, domain, con);
+            final User[] usr =  getDomainUsedbyUser(ctx, domain, con);
             return (res!=null || grp!=null || usr!=null);             
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             log.error("SQL Error",e);
             throw new StorageException(e.toString());
-        } catch (PoolException e) {
+        } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
         }finally{
@@ -110,21 +110,21 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public Group[] domainInUseByGroup(Context ctx, String domain) throws StorageException {
+    public Group[] domainInUseByGroup(final Context ctx, final String domain) throws StorageException {
         // currently mailaddresse not used  in core for groups
         return null;
     }
 
     @Override
-    public Resource[] domainInUseByResource(Context ctx, String domain) throws StorageException {
+    public Resource[] domainInUseByResource(final Context ctx, final String domain) throws StorageException {
         Connection con = null;
         try {
             con = cache.getConnectionForContext(ctx.getId().intValue());
             return getDomainUsedbyResource(ctx, domain, con);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             log.error("SQL Error",e);
             throw new StorageException(e.toString());
-        } catch (PoolException e) {
+        } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
         }finally{
@@ -137,15 +137,15 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public User[] domainInUseByUser(Context ctx, String domain) throws StorageException {
+    public User[] domainInUseByUser(final Context ctx, final String domain) throws StorageException {
         Connection con = null;
         try {
             con = cache.getConnectionForContext(ctx.getId().intValue());
             return getDomainUsedbyUser(ctx, domain, con);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             log.error("SQL Error",e);
             throw new StorageException(e.toString());
-        } catch (PoolException e) {
+        } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
         }finally{
@@ -371,7 +371,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         PreparedStatement prep = null;
         try {
             final StringBuffer sb = new StringBuffer();
-            for (int element : user_ids) {
+            for (final int element : user_ids) {
                 sb.append(element + ",");
             }
             sb.delete(sb.length() - 1, sb.length());
@@ -406,8 +406,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public boolean existsGroupMember(Context ctx, int group_ID, User[] users) throws StorageException {
-        int []ids = new int[users.length];
+    public boolean existsGroupMember(final Context ctx, final int group_ID, final User[] users) throws StorageException {
+        final int []ids = new int[users.length];
         for(int i=0; i<ids.length; i++) {
             ids[i] = users[i].getId();
         }
@@ -472,7 +472,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      * @see com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage#existsResourceAddress(com.openexchange.admin.rmi.dataobjects.Context, java.lang.String)
      */
     @Override
-    public boolean existsResourceAddress(Context ctx, String address) throws StorageException {
+    public boolean existsResourceAddress(final Context ctx, final String address) throws StorageException {
         
         final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
@@ -508,7 +508,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public boolean existsResourceAddress(Context ctx, String address,Integer resource_id) throws StorageException {
+    public boolean existsResourceAddress(final Context ctx, final String address,final Integer resource_id) throws StorageException {
         final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         PreparedStatement prep_check = null;
@@ -754,7 +754,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#getAdminForContext(int,
      *      java.sql.Connection)
      */
-    public int getAdminForContext(final Context ctx, final Connection con) throws StorageException {
+    @Override
+	public int getAdminForContext(final Context ctx, final Connection con) throws StorageException {
         int admin_id = 1;
 
         PreparedStatement stmt = null;
@@ -784,7 +785,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         return admin_id;
     }
    
-    public int getAdminForContext(final Context ctx) throws StorageException {    	
+    @Override
+	public int getAdminForContext(final Context ctx) throws StorageException {    	
     	Connection con = null;
     	
     	try{
@@ -806,7 +808,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public int getContextIDByContextname(String ctxname) throws StorageException {
+    public int getContextIDByContextname(final String ctxname) throws StorageException {
         return getByNameForConfigDB(ctxname, "context", "SELECT cid FROM context WHERE name=?");
     }
 
@@ -819,7 +821,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#getDefaultGroupForContext(int,
      *      java.sql.Connection)
      */
-    public int getDefaultGroupForContext(final Context ctx, final Connection con) throws StorageException {
+    @Override
+	public int getDefaultGroupForContext(final Context ctx, final Connection con) throws StorageException {
         int group_id = 0;
 
         PreparedStatement stmt = null;
@@ -945,7 +948,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public int getGroupIDByGroupname(Context ctx, String groupname) throws StorageException {
+    public int getGroupIDByGroupname(final Context ctx, final String groupname) throws StorageException {
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -980,7 +983,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public String getGroupnameByGroupID(Context ctx, int group_id) throws StorageException {
+    public String getGroupnameByGroupID(final Context ctx, final int group_id) throws StorageException {
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -1016,7 +1019,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public int getResourceIDByResourcename(Context ctx, String resourcename) throws StorageException {
+    public int getResourceIDByResourcename(final Context ctx, final String resourcename) throws StorageException {
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -1051,7 +1054,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public String getResourcenameByResourceID(Context ctx, int resource_id) throws StorageException {
+    public String getResourcenameByResourceID(final Context ctx, final int resource_id) throws StorageException {
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -1269,7 +1272,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public boolean isContextAdmin(final Context ctx, User user) throws StorageException {
+    public boolean isContextAdmin(final Context ctx, final User user) throws StorageException {
         final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         PreparedStatement stmt = null;
@@ -1314,7 +1317,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             log.error("SQL Error",e);
             throw new StorageException(e.toString());
         } finally {
@@ -1333,7 +1336,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#isContextEnabled(int)
      */
-    public boolean isContextEnabled(final Context ctx) throws StorageException {
+    @Override
+	public boolean isContextEnabled(final Context ctx) throws StorageException {
         boolean retBool = false;
         final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
@@ -1465,8 +1469,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             schema = rs.getString("db_schema");
             writePoolId = rs.getInt("write_db_pool_id");
-
-            return condCheckAndUpdateSchemaIfRequired(writePoolId, schema, true, ctx);
         } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
@@ -1483,6 +1485,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 log.error("Error pushing ox db read connection to pool!", e);
             }
         }
+        return condCheckAndUpdateSchemaIfRequired(writePoolId, schema, true, ctx);
     }
 
     private boolean condCheckAndUpdateSchemaIfRequired(final int writePoolId, final String schema, final boolean doupdate, final Context ctx) throws StorageException {
@@ -1501,11 +1504,11 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             // we only reach this point, if we need an update
             if( doupdate ) {
                 if( ctx == null ) {
-                    StorageException e = new StorageException("context must not be null when schema update should be done");
+                    final StorageException e = new StorageException("context must not be null when schema update should be done");
                     log.error(e.getMessage(), e);
                     throw e;
                 }
-                com.openexchange.groupware.contexts.Context ctxas = new ContextImpl(ctx.getId().intValue());
+                final com.openexchange.groupware.contexts.Context ctxas = new ContextImpl(ctx.getId().intValue());
                 updater.startUpdate(ctxas);
             }
             // either with or without starting an update task, when we reach this point, we
@@ -1605,7 +1608,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void closePreparedStatement(PreparedStatement ps) {
+    private void closePreparedStatement(final PreparedStatement ps) {
         try {
             if (null != ps) {
                 ps.close();
@@ -1615,7 +1618,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void closeRecordSet(ResultSet rs) {
+    private void closeRecordSet(final ResultSet rs) {
         if (null != rs) {
             try {
                 rs.close();
@@ -1656,7 +1659,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
-    private Group[] getDomainUsedbyGroup(Context ctx,String domain,Connection oxcon) throws SQLException{
+    private Group[] getDomainUsedbyGroup(final Context ctx,final String domain,final Connection oxcon) throws SQLException{
         // groups are currently not used with mail addresses in the core
         return null;
 //        ArrayList<Group> data = new ArrayList<Group>();
@@ -1669,7 +1672,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     
-    private Resource[] getDomainUsedbyResource(Context ctx,String domain,Connection oxcon) throws SQLException{
+    private Resource[] getDomainUsedbyResource(final Context ctx,final String domain,final Connection oxcon) throws SQLException{
         final ArrayList<Resource> data = new ArrayList<Resource>();
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -1696,12 +1699,12 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }        
     }
     
-    private User[] getDomainUsedbyUser(Context ctx,String domain,Connection oxcon) throws SQLException{
+    private User[] getDomainUsedbyUser(final Context ctx,final String domain,final Connection oxcon) throws SQLException{
         final ArrayList<User> data = new ArrayList<User>();
         PreparedStatement prep_check = null;
         ResultSet rs = null;
         try {
-            HashSet<Integer> usr_ids = new HashSet<Integer>();
+            final HashSet<Integer> usr_ids = new HashSet<Integer>();
             // fetch from alias table
             prep_check = oxcon.prepareStatement("SELECT id FROM user_attribute WHERE cid = ? AND name = 'alias' AND VALUE like ?");
             prep_check.setInt(1, ctx.getId());
@@ -1724,9 +1727,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep_check.close();
             
             // if we had time we could resolv the complete user object in db but at the moment we only need the ids of the user            
-            Iterator<Integer> ids_itr =  usr_ids.iterator();
+            final Iterator<Integer> ids_itr =  usr_ids.iterator();
             while (ids_itr.hasNext()) {
-                Integer id  = (Integer) ids_itr.next();
+                final Integer id  = ids_itr.next();
                 data.add(new User(id.intValue()));
             }            
         } finally {
@@ -1741,7 +1744,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }        
     }
     
-    private void returnConnection(final int ctxid, Connection con) {
+    private void returnConnection(final int ctxid, final Connection con) {
         try {
             if (con != null) {
                 cache.pushConnectionForContext(ctxid, con);
@@ -1776,7 +1779,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             prep_check = con.prepareStatement(sql_select_string);
             int sql_counter = 1;
-            for (int element : ins_numbers) {
+            for (final int element : ins_numbers) {
                 prep_check.setInt(sql_counter, element);
                 sql_counter++;
             }
@@ -1830,7 +1833,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             prep_check = con.prepareStatement(sql_select_string);
             int sql_counter = 1;
-            for (String element : ins_strings) {
+            for (final String element : ins_strings) {
                 prep_check.setString(sql_counter, element);
                 sql_counter++;
             }
@@ -1863,7 +1866,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public boolean existsContextName(Context ctx) throws StorageException {
+    public boolean existsContextName(final Context ctx) throws StorageException {
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -1896,13 +1899,13 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
     
     @Override
-    public boolean existsContextName(String contextName) throws StorageException {
-        Context ctx = new Context(-1,contextName);
+    public boolean existsContextName(final String contextName) throws StorageException {
+        final Context ctx = new Context(-1,contextName);
         return existsContextName(ctx);
     }
 
     @Override
-    public boolean existsDatabaseName(Database db) throws StorageException {
+    public boolean existsDatabaseName(final Database db) throws StorageException {
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -1937,13 +1940,13 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     
     @Override
     public boolean existsDatabaseName(final String db_name) throws StorageException {
-        Database db = new Database(-1);
+        final Database db = new Database(-1);
         db.setName(db_name);
         return existsDatabaseName(db);
     }
 
     @Override
-    public boolean existsGroupName(Context ctx, Group grp) throws StorageException {
+    public boolean existsGroupName(final Context ctx, final Group grp) throws StorageException {
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -1977,13 +1980,13 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     
     @Override
     public boolean existsGroupName(final Context ctx, final String identifier) throws StorageException {
-        Group grp = new Group(-1);
+        final Group grp = new Group(-1);
         grp.setName(identifier);
         return existsGroupName(ctx, grp);
     }
 
     @Override
-    public boolean existsResourceName(Context ctx, Resource res) throws StorageException {
+    public boolean existsResourceName(final Context ctx, final Resource res) throws StorageException {
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -2018,13 +2021,13 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     
     @Override
     public boolean existsResourceName(final Context ctx, final String identifier) throws StorageException {
-        Resource res = new Resource(-1);
+        final Resource res = new Resource(-1);
         res.setName(identifier);
         return existsResourceName(ctx, res);
     }
 
     @Override
-    public boolean existsServerName(Server srv) throws StorageException {
+    public boolean existsServerName(final Server srv) throws StorageException {
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -2060,14 +2063,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     
     @Override
     public boolean existsServerName(final String server_name) throws StorageException {
-        Server srv = new Server();
+        final Server srv = new Server();
         srv.setId(-1);
         srv.setName(server_name);
         return existsServerName(srv);
     }
     
     @Override
-    public boolean existsUserName(Context ctx, User usr) throws StorageException {
+    public boolean existsUserName(final Context ctx, final User usr) throws StorageException {
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -2102,7 +2105,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     
     @Override
     public boolean existsUserName(final Context ctx, final String username) throws StorageException {
-        User tmp = new User(-1);
+        final User tmp = new User(-1);
         tmp.setName(username);
         return existsUserName(ctx,tmp);
     }
