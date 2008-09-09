@@ -56,7 +56,7 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.webdav.xml.fields.CalendarFields;
 
 /**
  * Stores parameters for the delete request.
@@ -75,16 +75,22 @@ public class DeleteRequest extends AbstractAppointmentRequest<DeleteResponse> {
 	private boolean failOnError = true;
 
     /**
-     * Default constructor.
+     * Default constructor. Deletes the complete appointment and even a series.
      */
     public DeleteRequest(final int objectId, final int inFolder, final Date lastModified) {
     	this(objectId, inFolder, 0, lastModified, true);
 	}
 
+    /**
+     * Deletes an occurrence of a series appointment.
+     */
     public DeleteRequest(final int objectId, final int inFolder, final int recurrencePosition, final Date lastModified) {
     	this(objectId, inFolder, recurrencePosition, lastModified, true);
     }
 
+    /**
+     * Deletes an occurrence of a series appointment.
+     */
     public DeleteRequest(final int objectId, final int inFolder, final int recurrencePosition, final Date lastModified, final boolean failOnError) {
         	super();
         this.objectId = objectId;
@@ -105,7 +111,9 @@ public class DeleteRequest extends AbstractAppointmentRequest<DeleteResponse> {
         final JSONObject json = new JSONObject();
         json.put(DataFields.ID, objectId);
         json.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
-		
+		if (0 != recurrencePosition) {
+		    json.put(CalendarFields.RECURRENCE_POSITION, recurrencePosition);
+		}
         return json;
     }
 
@@ -131,7 +139,7 @@ public class DeleteRequest extends AbstractAppointmentRequest<DeleteResponse> {
     /**
      * {@inheritDoc}
      */
-    public AbstractAJAXParser getParser() {
+    public DeleteParser getParser() {
         return new DeleteParser(failOnError);
     }
 }

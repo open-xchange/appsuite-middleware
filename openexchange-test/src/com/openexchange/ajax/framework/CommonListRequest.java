@@ -60,7 +60,7 @@ import com.openexchange.ajax.fields.DataFields;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonListRequest implements AJAXRequest {
+public class CommonListRequest implements AJAXRequest<CommonListResponse> {
 
     private final String servletPath;
 

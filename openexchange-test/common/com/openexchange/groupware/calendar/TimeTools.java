@@ -49,6 +49,10 @@
 
 package com.openexchange.groupware.calendar;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -62,8 +66,20 @@ public final class TimeTools {
         super();
     }
 
+    /**
+     * @deprecated use {@link #getHour(int, TimeZone)}
+     */
+    @Deprecated
     public static long getHour(final int diff) {
         return (System.currentTimeMillis() / 3600000 + diff) * 3600000;
     }
 
+    public static long getHour(final int diff, final TimeZone tz) {
+        final Calendar calendar = new GregorianCalendar(tz);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.add(Calendar.HOUR, diff);
+        return calendar.getTimeInMillis();
+    }
 }

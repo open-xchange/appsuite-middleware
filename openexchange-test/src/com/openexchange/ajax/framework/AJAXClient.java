@@ -144,4 +144,9 @@ public class AJAXClient {
     public UserValues getValues() {
         return values;
     }
+
+    public <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request)
+        throws AjaxException, IOException, SAXException, JSONException {
+        return Executor.execute(this, request);
+    }
 }

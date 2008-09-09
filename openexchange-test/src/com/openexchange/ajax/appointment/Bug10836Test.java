@@ -62,7 +62,6 @@ import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonListResponse;
-import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.ListIDInt;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -99,16 +98,14 @@ public final class Bug10836Test extends AbstractAJAXSession {
 		final AppointmentObject app = new AppointmentObject();
 		app.setParentFolderID(folderA);
 		app.setTitle("Bug10836Test");
-		app.setStartDate(new Date(TimeTools.getHour(0)));
-		app.setEndDate(new Date(TimeTools.getHour(1)));
+		app.setStartDate(new Date(TimeTools.getHour(0, tz)));
+		app.setEndDate(new Date(TimeTools.getHour(1, tz)));
 		app.setIgnoreConflicts(true);
-		final InsertResponse insertR = (InsertResponse) Executor.execute(
-				clientA, new InsertRequest(app, tz));
+		final InsertResponse insertR = clientA.execute(new InsertRequest(app, tz));
 		try {
 		    final ListIDs list = new ListIDs();
 		    list.add(new ListIDInt(folderB, insertR.getId()));
-			final CommonListResponse listR = (CommonListResponse) Executor
-			    .execute(clientB, new ListRequest(list,
+			final CommonListResponse listR = clientB.execute(new ListRequest(list,
 		        new int[] { AppointmentObject.TITLE }, false));
 
 			assertTrue(listR.hasError());
@@ -120,7 +117,8 @@ public final class Bug10836Test extends AbstractAJAXSession {
 			}
 			*/
 		} finally {
-			Executor.execute(clientA, new DeleteRequest(insertR.getId(), folderA, new Date(System.currentTimeMillis()+1000000)));
+			clientA.execute(new DeleteRequest(insertR.getId(), folderA,
+			    insertR.getTimestamp()));
 		}
 	}
 }

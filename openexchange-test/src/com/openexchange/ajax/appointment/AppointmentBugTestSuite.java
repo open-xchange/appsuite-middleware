@@ -52,15 +52,16 @@ package com.openexchange.ajax.appointment;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import com.openexchange.ajax.appointment.recurrence.Bug10760Test;
-import com.openexchange.ajax.appointment.recurrence.Bug10859Test;
-
 /**
  * Suite for appointment bug tests.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AppointmentBugTestSuite extends TestSuite{
-	
+
+    private AppointmentBugTestSuite() {
+        super();
+    }
+
 	/**
 	 * @return the suite.
 	 */
@@ -70,13 +71,13 @@ public class AppointmentBugTestSuite extends TestSuite{
 		tests.addTestSuite(Bug4541Test.class);
 		tests.addTestSuite(Bug6055Test.class);
 		tests.addTestSuite(Bug8317Test.class);
+        tests.addTestSuite(Bug8724Test.class);
 		tests.addTestSuite(Bug8836Test.class);
-		tests.addTestSuite(Bug8724Test.class);
 		tests.addTestSuite(Bug9089Test.class);
 		tests.addTestSuite(Bug10733Test.class);
-		tests.addTestSuite(Bug10760Test.class);
+        tests.addTestSuite(Bug10836Test.class);
 		tests.addTestSuite(Bug11250Test.class);
-		tests.addTestSuite(Bug10859Test.class);
+		tests.addTestSuite(Bug12099Test.class);
 		return tests;
 	}
 }
