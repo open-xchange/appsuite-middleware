@@ -1,3 +1,7 @@
+* 2008-09-09 - thorben.betten@open-xchange.com
+
+ - Bugfix ID#11526: Using javax.mail.InternetAddress class to parse address strings
+
 * 2008-09-09 - choeger@open-xchange.com
 
  - Setting writeOnly to true per default on new and updated installations (postinst)
