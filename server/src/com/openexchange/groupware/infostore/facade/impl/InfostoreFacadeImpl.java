@@ -86,7 +86,21 @@ import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.database.impl.*;
+import com.openexchange.groupware.infostore.database.impl.CheckSizeSwitch;
+import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
+import com.openexchange.groupware.infostore.database.impl.CreateVersionAction;
+import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
+import com.openexchange.groupware.infostore.database.impl.DeleteDocumentAction;
+import com.openexchange.groupware.infostore.database.impl.DeleteVersionAction;
+import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
+import com.openexchange.groupware.infostore.database.impl.GetSwitch;
+import com.openexchange.groupware.infostore.database.impl.InfostoreIterator;
+import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
+import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
+import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
+import com.openexchange.groupware.infostore.database.impl.SetSwitch;
+import com.openexchange.groupware.infostore.database.impl.UpdateDocumentAction;
+import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.validation.InvalidCharactersValidator;
 import com.openexchange.groupware.infostore.validation.ValidationChain;
@@ -374,8 +388,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		final List<DocumentMetadata> list = new ArrayList<DocumentMetadata>();
 		while (iter.hasNext()) {
 			final DocumentMetadata m = (DocumentMetadata) iter.next();
-			addLocked(m, ctx, user, userConfig);
+			// addLocked(m, ctx, user, userConfig);
 			list.add(m);
+		}
+		/*
+		 * Moving addLock() outside of iterator's loop to avoid a duplicate
+		 * connection fetch from DB pool since first invocation of hasNext()
+		 * already obtains a pooled connection which is only released on final
+		 * call to next().
+		 */
+		for (final DocumentMetadata m : list) {
+			addLocked(m, ctx, user, userConfig);
 		}
 		return new SearchIteratorAdapter(list.iterator());
 	}
