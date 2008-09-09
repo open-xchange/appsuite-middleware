@@ -34,6 +34,20 @@ postFix() {
   local version=${1%-*}
   version=${version//[-.]/}
 
+  if [ $version -le 660 ]; then
+      # -----------------------------------------------------------------------
+      # force setting of last minute option
+      local pfile=/opt/open-xchange/etc/admindaemon/configdb.properties
+      if ox_exists_property writeOnly $pfile; then
+	  local wonly=$(ox_read_property writeOnly $pfile)
+	  if [ "$wonly" != "true" ]; then
+		v_setprop writeOnly true $pfile
+	  fi
+      else
+	  v_setprop writeOnly true $pfile
+      fi
+  fi
+
   # we're updating from pre sp4
   if [ $version -lt 650 ]; then
       # -----------------------------------------------------------------------

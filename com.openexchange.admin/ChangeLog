@@ -1,3 +1,8 @@
+* 2008-09-09 - choeger@open-xchange.com
+
+ - Setting writeOnly to true per default on new and updated installations (postinst)
+   (see Bug #11595)
+   
 * 2008-09-03 - choeger@open-xchange.com
 
  - added new option writeOnly to configdb to be able to
