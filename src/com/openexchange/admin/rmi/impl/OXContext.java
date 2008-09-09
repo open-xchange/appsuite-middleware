@@ -579,6 +579,16 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             if (!tool.isMasterDatabase(dbid)) {
                 throw new OXContextException("Database with id " + dbid + " is NOT a master!");
             }
+	        {
+	            // Check if target database is already source database
+	            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+	            final Context[] results = oxcox.searchContextByDatabase(db);
+	            for (final Context context : results) {
+					if (context.getId().intValue() == ctx.getId().intValue()) {
+						throw new OXContextException("Context with id " + ctx.getId() + " already exists in database with id " + dbid);
+					}
+				}
+	        }
             final DatabaseDataMover ddm = new DatabaseDataMover(ctx, db, reason);
 
             return TaskManager.getInstance().addJob(ddm, "movedatabase", "move context " + ctx.getIdAsString() + " to database " + dbid);

@@ -1,3 +1,7 @@
+* 2008-09-09 - choeger@open-xchange.com
+
+ - Bugfix ID#9972: Checking if context already exists in target database on context move operation
+
 * 2008-08-22 - choeger@open-xchange.com
 
  - Bugfix ID#12040 Context-related command line tools do not honor the
