@@ -60,21 +60,15 @@ public enum DisplayMode {
 	/**
 	 * Generate a version as-is.
 	 */
-	NONE(0),
+	NONE,
 	/**
 	 * Generate a version for a message forward/reply/draft-edit in front-end
 	 */
-	MODIFYABLE(1),
+	MODIFYABLE,
 	/**
 	 * Generate a version for being displayed in front-end
 	 */
-	DISPLAY(2);
-
-	private final int mode;
-
-	private DisplayMode(final int mode) {
-		this.mode = mode;
-	}
+	DISPLAY;
 
 	/**
 	 * Gets the mode's integer value
@@ -82,7 +76,7 @@ public enum DisplayMode {
 	 * @return The mode's integer value
 	 */
 	public int getMode() {
-		return mode;
+		return ordinal();
 	}
 
 	/**
@@ -94,7 +88,7 @@ public enum DisplayMode {
 	 *         otherwise <code>false</code>
 	 */
 	public boolean isIncluded(final DisplayMode other) {
-		return mode <= other.mode;
+		return ordinal() <= other.ordinal();
 	}
 
 }
