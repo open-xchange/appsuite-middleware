@@ -2269,13 +2269,32 @@ class CalendarMySQL implements CalendarSqlImp {
 							} else {
 								try {
 								    final int pfid;
-								    if (cdao.getFolderMove() && new_userparticipants[a].getIdentifier() == uid) {
-								        pfid = cdao.getGlobalFolderID();
+								    if (cdao.getFolderMove()) {
+								    	if (cdao.getFolderType() == FolderObject.PUBLIC) {
+								        	// A move into a public folder: Set folder ID to zero since folder ID is then kept in calendar object itself
+								        	pfid = 0;
+								        } else if (cdao.getFolderType() == FolderObject.SHARED) {
+								        	// A move into shared folder
+								        	if (new_userparticipants[a].getIdentifier() == cdao.getSharedFolderOwner()) {
+									        	// A move into a shared folder and current participant denotes the shared folder's owner: Set folder ID to action folder
+									        	pfid = cdao.getActionFolder();
+								        	} else {
+								        		// Non-folder-owner
+								        		pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+								        	}
+								        } else {
+								        	// A move into another private folder: Set to default folder ID for non-folder-owner
+								        	pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+								        }
 								    } else {
 	                                    // always set the folder to the private folder of the user participant in private calendar folders.
 								        pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
 								    }
-									pi.setInt(5, pfid);
+								    if (pfid == 0) {
+								    	pi.setNull(5, java.sql.Types.INTEGER);
+								    } else {
+								    	pi.setInt(5, pfid);
+								    }
 									new_userparticipants[a].setPersonalFolderId(pfid);
 								} catch (final Exception fe) {
 									throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(4));
@@ -2306,13 +2325,32 @@ class CalendarMySQL implements CalendarSqlImp {
 							} else {
 								try {
                                     final int pfid;
-                                    if (cdao.getFolderMove() && new_userparticipants[a].getIdentifier() == uid) {
-                                        pfid = cdao.getGlobalFolderID();
+                                    if (cdao.getFolderMove()) {
+                                    	if (cdao.getFolderType() == FolderObject.PUBLIC) {
+								        	// A move into a public folder: Set folder ID to zero since folder ID is then kept in calendar object itself
+								        	pfid = 0;
+								        } else if (cdao.getFolderType() == FolderObject.SHARED) {
+								        	// A move into shared folder
+								        	if (new_userparticipants[a].getIdentifier() == cdao.getSharedFolderOwner()) {
+									        	// A move into a shared folder and current participant denotes the shared folder's owner: Set folder ID to action folder
+									        	pfid = cdao.getActionFolder();
+								        	} else {
+								        		// Non-folder-owner
+								        		pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+								        	}
+								        } else {
+								        	// A move into another private folder: Set to default folder ID for non-folder-owner
+								        	pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+								        }
                                     } else {
                                         // always set the folder to the private folder of the user participant in private calendar folders.
                                         pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
                                     }
-									pi.setInt(5, pfid);
+                                    if (pfid == 0) {
+								    	pi.setNull(5, java.sql.Types.INTEGER);
+								    } else {
+								    	pi.setInt(5, pfid);
+								    }
 									new_userparticipants[a].setPersonalFolderId(pfid);
 								} catch (final Exception fe) {
 									throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, Integer.valueOf(3));
