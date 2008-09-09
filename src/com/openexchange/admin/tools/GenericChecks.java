@@ -49,6 +49,9 @@
 
 package com.openexchange.admin.tools;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
@@ -75,21 +78,26 @@ public class GenericChecks {
     /**
      * This method checks if an address contains invalid characters
      * 
-     * @param address
+     * @param address The address string to check
      */
     public final static boolean isValidMailAddress(final String address)  {
         if (null != address) {
-            return address.matches("[$%\\.+a-zA-Z0-9_#$&'/=!?^`{|}~*-]+@[\\.a-zA-Z0-9_-]+");
-        } else {
-            return false;
+        	try {
+				new InternetAddress(address);
+				return true;
+			} catch (final AddressException e) {
+				return false;
+			}
+            //return address.matches("[$%\\.+a-zA-Z0-9_#$&'/=!?^`{|}~*-]+@[\\.a-zA-Z0-9_-]+");
         }
+		return false;
     }
 
     /**
      * This method throws an exception if the address is != null and contains invalid characters
      * 
-     * @param address
-     * @throws InvalidDataException
+     * @param address The address string to check
+     * @throws InvalidDataException If given address string is not a valid email address
      */
     public final static void checkValidMailAddress(final String address) throws InvalidDataException {
         if (null != address && !isValidMailAddress(address)) {
