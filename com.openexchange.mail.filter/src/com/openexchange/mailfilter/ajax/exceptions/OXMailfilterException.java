@@ -122,7 +122,7 @@ public class OXMailfilterException extends AbstractOXException {
         /**
          * Error while communicating with the sieve server
          */
-        SIEVE_COMMUNICATION_ERROR("Error while communicating with the sieve server", Category.CODE_ERROR, 15)
+        SIEVE_COMMUNICATION_ERROR("Error while communicating with the sieve server: %s", Category.CODE_ERROR, 15)
         ;
 
         private final String message;
