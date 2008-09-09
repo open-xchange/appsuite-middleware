@@ -51,18 +51,29 @@ package com.openexchange.sessiond.osgi;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.management.ManagementException;
+import com.openexchange.management.ManagementService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.sessiond.SessiondMBean;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.sessiond.cache.SessionCacheConfiguration;
@@ -70,6 +81,7 @@ import com.openexchange.sessiond.impl.SessionControl;
 import com.openexchange.sessiond.impl.SessionHandler;
 import com.openexchange.sessiond.impl.SessionImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
+import com.openexchange.sessiond.impl.SessiondMBeanImpl;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
 
 /**
@@ -86,11 +98,16 @@ public final class SessiondActivator extends DeferredActivator {
 
 	private ServiceRegistration sessiondServiceRegistration;
 
+	private ObjectName objectName;
+
+	private final List<ServiceTracker> trackers;
+
 	/**
 	 * Initializes a new {@link SessiondActivator}
 	 */
 	public SessiondActivator() {
 		super();
+		trackers = new ArrayList<ServiceTracker>(2);
 		started = new AtomicBoolean();
 	}
 
@@ -168,6 +185,26 @@ public final class SessiondActivator extends DeferredActivator {
 			SessiondInit.getInstance().start();
 			sessiondServiceRegistration = context.registerService(SessiondService.class.getName(),
 					new SessiondServiceImpl(), null);
+			trackers.add(new ServiceTracker(context, ManagementService.class.getName(), new ServiceTrackerCustomizer() {
+				public Object addingService(final ServiceReference reference) {
+					final ManagementService management = (ManagementService) context.getService(reference);
+					registerSessiondMBean(management);
+					return management;
+				}
+
+				public void modifiedService(final ServiceReference reference, final Object service) {
+					// Nothing to do.
+				}
+
+				public void removedService(final ServiceReference reference, final Object service) {
+					final ManagementService management = (ManagementService) service;
+					unregisterSessiondMBean(management);
+					context.ungetService(reference);
+				}
+			}));
+			for (final ServiceTracker tracker : trackers) {
+				tracker.open();
+			}
 		} catch (final Exception e) {
 			LOG.error("SessiondActivator: start: ", e);
 			// Try to stop what already has been started.
@@ -186,6 +223,10 @@ public final class SessiondActivator extends DeferredActivator {
 				sessiondServiceRegistration.unregister();
 				sessiondServiceRegistration = null;
 			}
+			for (final ServiceTracker tracker : trackers) {
+				tracker.close();
+			}
+			trackers.clear();
 			/*
 			 * Put remaining sessions into cache for remote distribution
 			 */
@@ -221,4 +262,48 @@ public final class SessiondActivator extends DeferredActivator {
 		}
 	}
 
+	private void registerSessiondMBean(final ManagementService management) {
+		if (objectName == null) {
+			try {
+				objectName = getObjectName(SessiondMBeanImpl.class.getName(), SessiondMBean.SESSIOND_DOMAIN);
+				management.registerMBean(objectName, new SessiondMBeanImpl());
+			} catch (final MalformedObjectNameException e) {
+				LOG.error(e.getMessage(), e);
+			} catch (final NotCompliantMBeanException e) {
+				LOG.error(e.getMessage(), e);
+			} catch (final ManagementException e) {
+				LOG.error(e.getMessage(), e);
+			}
+		}
+	}
+
+	private void unregisterSessiondMBean(final ManagementService management) {
+		if (objectName != null) {
+			try {
+				management.unregisterMBean(objectName);
+			} catch (final ManagementException e) {
+				LOG.error(e.getMessage(), e);
+			} finally {
+				objectName = null;
+			}
+		}
+	}
+
+	/**
+	 * Creates an appropriate instance of {@link ObjectName} from specified
+	 * class name and domain name.
+	 * 
+	 * @param className
+	 *            The class name to use as object name
+	 * @param domain
+	 *            The domain name
+	 * @return An appropriate instance of {@link ObjectName}
+	 * @throws MalformedObjectNameException
+	 *             If instantiation of {@link ObjectName} fails
+	 */
+	private static ObjectName getObjectName(final String className, final String domain)
+			throws MalformedObjectNameException {
+		final int pos = className.lastIndexOf('.');
+		return new ObjectName(domain, "name", pos == -1 ? className : className.substring(pos + 1));
+	}
 }

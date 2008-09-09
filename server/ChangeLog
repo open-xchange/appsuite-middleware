@@ -1,3 +1,7 @@
+* 2008-09-09 - thorben.betten@open-xchange.com
+
+ - Bugfix #12027: Added JMX call to clear the sessions for a specific user
+
 * 2008-09-08 - thorben.betten@open-xchange.com
 
  - Bugfix #10070: Proper conflict check for whole-day and non-whole-day

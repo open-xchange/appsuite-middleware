@@ -52,6 +52,7 @@ package com.openexchange.sessiond.impl;
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -164,6 +165,15 @@ public final class SessionHandler {
 			active |= sessionList.get(i).containsUser(userId, context.getContextId());
 		}
 		return active;
+	}
+
+	protected static SessionControl[] removeUserSessions(final int userId, final int contextId) {
+		final int size = sessionList.size();
+		final List<SessionControl> retval = new ArrayList<SessionControl>(config.getMaxSessionsPerUser());
+		for (int i = 0; i < size; i++) {
+			retval.addAll(Arrays.asList(sessionList.get(i).removeSessionsByUser(userId, contextId)));
+		}
+		return retval.toArray(new SessionControl[retval.size()]);
 	}
 
 	protected static String addSession(final int userId, final String loginName, final String password,
