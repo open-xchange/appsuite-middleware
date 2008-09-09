@@ -55,7 +55,6 @@ import java.util.List;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * 
@@ -114,22 +113,20 @@ public class GetRequest extends AbstractAppointmentRequest<GetResponse> {
      * {@inheritDoc}
      */
     public Parameter[] getParameters() {
-		final List parameterList = new ArrayList();
+		final List<Parameter> parameterList = new ArrayList<Parameter>();
 		parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folderId)));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(objectId)));
-			
 		if (recurrencePosition > 0) {
 			parameterList.add(new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(recurrencePosition)));
 		}
-		
-		return (Parameter[])parameterList.toArray(new Parameter[parameterList.size()]);
+		return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 
     /**
      * {@inheritDoc}
      */
-    public AbstractAJAXParser getParser() {
+    public GetParser getParser() {
         return new GetParser();
     }
 }

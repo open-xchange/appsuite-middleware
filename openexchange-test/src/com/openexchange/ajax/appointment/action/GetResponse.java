@@ -55,10 +55,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.AppointmentParser;
-import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
 
@@ -87,15 +85,7 @@ public class GetResponse extends AbstractAJAXResponse {
         if (null == appointmentObj) {
             this.appointmentObj = new AppointmentObject();
             final JSONObject json = (JSONObject) getResponse().getData();
-            new AppointmentParser(timeZone).parse(appointmentObj, json);
-            if (json.has(AppointmentFields.CREATION_DATE)) {
-                appointmentObj.setCreationDate(DataParser.parseTime(json,
-                    AppointmentFields.CREATION_DATE, timeZone));
-            }
-            if (json.has(AppointmentFields.LAST_MODIFIED)) {
-                appointmentObj.setLastModified(DataParser.parseTime(json,
-                    AppointmentFields.LAST_MODIFIED, timeZone));
-            }
+            new AppointmentParser(true, timeZone).parse(appointmentObj, json);
         }
         return appointmentObj;
     }
