@@ -71,7 +71,9 @@ Authors:
 %define oxprefix	/opt/open-xchange
 
 ant -Dadmin.classpath=%{oxprefix}/bundles/%{adminbundle} \
-    -Ddestdir=%{buildroot} -Dprefix=%{oxprefix} doc install install-client
+    -Ddestdir=%{buildroot} -Dprefix=%{oxprefix} \
+    -Ddoccorelink=/usr/share/doc/packages/open-xchange-admin-doc/javadoc/doc \
+    doc install install-client
 mv doc javadoc
 
 

@@ -25,7 +25,10 @@
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="etcdir" value="etc"/>
 
-	<!-- required osgi bundles -->
+	<!-- doc defaults work for Debian -->
+	<property name="doccorelink"     value="/usr/share/doc/open-xchange-admin-doc/javadoc/doc"/>
+
+    <!-- required osgi bundles -->
     <property name="osgibundle"           value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
     <property name="osgiservicesbundle"   value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
 	<property name="commonsloggingbundle" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
@@ -132,6 +135,7 @@
             <fileset dir="src/com/openexchange/admin/rmi/exceptions" defaultexcludes="yes">
             </fileset>
         	<link href="http://java.sun.com/j2se/1.5.0/docs/api/"/>
+        	<link href="${doccorelink}"/>
         </javadoc>
     </target>
 
