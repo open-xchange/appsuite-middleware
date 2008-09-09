@@ -178,16 +178,9 @@ public final class MIMEMessageConverter {
 					: size);
 			mailPart.writeTo(out);
 			return new MimeBodyPart(new UnsynchronizedByteArrayInputStream(out.toByteArray()));
-			// final MimeBodyPart mbp = new MimeBodyPart();
-			// addPart(mbp, mailPart);
-			// return mbp;
 		} catch (final MessagingException e) {
 			throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
 		}
-		// catch (final IOException e) {
-		// throw new MailException(MailException.Code.IO_ERROR, e,
-		// e.getLocalizedMessage());
-		// }
 	}
 
 	/**
@@ -258,81 +251,6 @@ public final class MIMEMessageConverter {
 		} catch (final MessagingException e) {
 			throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
 		}
-		// try {
-		// final MimeMessage mimeMsg = new
-		// MimeMessage(MIMEDefaultSession.getDefaultSession());
-		// final String charset =
-		// mail.getContentType().containsCharsetParameter() ?
-		// mail.getContentType()
-		// .getCharsetParameter() : MailConfig.getDefaultMimeCharset();
-		// /*
-		// * Set headers
-		// */
-		// final int size = mail.getHeadersSize();
-		// if (size > 0) {
-		// final Iterator<Map.Entry<String, String>> iter =
-		// mail.getHeadersIterator();
-		// for (int i = 0; i < size; i++) {
-		// final Map.Entry<String, String> e = iter.next();
-		// mimeMsg.setHeader(e.getKey(), e.getValue());
-		// }
-		// }
-		// {
-		// final InternetAddress[] from = mail.getFrom();
-		// mimeMsg.setFrom(from.length == 0 ? null : from[0]);
-		// }
-		// mimeMsg.setRecipients(Message.RecipientType.TO, mail.getTo());
-		// mimeMsg.setRecipients(Message.RecipientType.CC, mail.getCc());
-		// mimeMsg.setRecipients(Message.RecipientType.BCC, mail.getBcc());
-		//mimeMsg.setDisposition(mail.getContentDisposition().getDisposition());
-		// if (mail.containsFileName() && (mail.getFileName() != null)) {
-		// mimeMsg.setFileName(mail.getFileName());
-		// } else if (mail.getContentDisposition().containsFilenameParameter())
-		// {
-		//mimeMsg.setFileName(mail.getContentDisposition().getFilenameParameter(
-		// ));
-		// }
-		// if (mail.containsFlags()) {
-		// parseMimeFlags(mail.getFlags(), mimeMsg);
-		// }
-		// if (mail.containsColorLabel()) {
-		// final Flags flags = new Flags();
-		// flags.add(new
-		// StringBuilder(MailMessage.COLOR_LABEL_PREFIX).append(mail
-		// .getColorLabel()).toString());
-		// mimeMsg.setFlags(flags, true);
-		// }
-		// if (mail.containsUserFlags()) {
-		// final Flags flags = new Flags();
-		// final String[] userFlags = mail.getUserFlags();
-		// for (final String userFlag : userFlags) {
-		// flags.add(userFlag);
-		// }
-		// mimeMsg.setFlags(flags, true);
-		// }
-		// if (mail.getSentDate() != null) {
-		// mimeMsg.setSentDate(mail.getSentDate());
-		// }
-		// if (mimeMsg.getHeader(MessageHeaders.HDR_SUBJECT, null) != null) {
-		// mimeMsg.setSubject(mail.getSubject(), charset);
-		// }
-		// /*
-		// * Set content
-		// */
-		// addPart(mimeMsg, mail);
-		// mimeMsg.saveChanges();
-		// return mimeMsg;
-		// } catch (final MessagingException e) {
-		// throw new MailException(MailException.Code.MESSAGING_ERROR, e,
-		// e.getLocalizedMessage());
-		// } catch (final MailConfigException e) {
-		// throw new MailException(e);
-		// } catch (final MailException e) {
-		// throw new MailException(e);
-		// } catch (final IOException e) {
-		// throw new MailException(MailException.Code.IO_ERROR, e,
-		// e.getLocalizedMessage());
-		// }
 	}
 
 	/**
@@ -412,98 +330,6 @@ public final class MIMEMessageConverter {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}
 	}
-
-	// private static void addPart(final Part part, final MailPart mailPart)
-	// throws MailException, IOException,
-	// MailConfigException, MessagingException {
-	// final ContentType contentType = mailPart.getContentType();
-	// if (contentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
-	// /*
-	// * Multipart content
-	// */
-	// final Multipart multipart = new MimeMultipart(contentType.getSubType());
-	// final int count = mailPart.getEnclosedCount();
-	// for (int i = 0; i < count; i++) {
-	// final BodyPart bodyPart = new MimeBodyPart();
-	// addPart(bodyPart, mailPart.getEnclosedMailPart(i));
-	// multipart.addBodyPart(bodyPart);
-	// }
-	// part.setContent(multipart);
-	// } else if (contentType.isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
-	// /*
-	// * Message content
-	// */
-	// final Message nestedMsg = convertMailMessage((MailMessage)
-	// mailPart.getContent());
-	// part.setContent(nestedMsg, contentType.toString());
-	// addPartHeaders(part, mailPart);
-	// } else if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
-	// /*
-	// * Text content
-	// */
-	// addPartHeaders(part, mailPart);
-	// if (!contentType.containsCharsetParameter()) {
-	// contentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
-	// }
-	// part.setDataHandler(new DataHandler(
-	// new MessageDataSource(mailPart.getInputStream(),
-	// contentType.toString())));
-	// part.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-	// part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType.toString());
-	// } else {
-	// /*
-	// * Other content
-	// */
-	// /*
-	// * if (!contentType.containsCharsetParameter()) {
-	// * contentType.setCharsetParameter
-	// * (MailConfig.getDefaultMimeCharset()); }
-	// */
-	// addPartHeaders(part, mailPart);
-	// part.setDataHandler(new DataHandler(
-	// new MessageDataSource(mailPart.getInputStream(),
-	// contentType.toString())));
-	// }
-	// }
-	//
-	// private static void addPartHeaders(final Part part, final MailPart
-	// mailPart) throws MailException {
-	// try {
-	// /*
-	// * Set headers
-	// */
-	// final int size = mailPart.getHeadersSize();
-	// if (size > 0) {
-	// final Iterator<Map.Entry<String, String>> iter =
-	// mailPart.getHeadersIterator();
-	// for (int i = 0; i < size; i++) {
-	// final Map.Entry<String, String> e = iter.next();
-	// part.setHeader(e.getKey(), e.getValue());
-	// }
-	// }
-	// /*
-	// * Set disposition & filename
-	// */
-	// part.setDisposition(mailPart.getContentDisposition().getDisposition());
-	// if (mailPart.containsContentId()) {
-	// part.setHeader(MessageHeaders.HDR_CONTENT_ID, mailPart.getContentId());
-	// }
-	// if (mailPart.containsFileName() && (mailPart.getFileName() != null)) {
-	// part.setFileName(mailPart.getFileName());
-	// } else if (mailPart.getContentDisposition().containsFilenameParameter())
-	// {
-	//part.setFileName(mailPart.getContentDisposition().getFilenameParameter());
-	// }
-	// /*
-	// * Set content type
-	// */
-	// part.setHeader(MessageHeaders.CONTENT_TYPE.toString(),
-	// mailPart.getContentType().toString());
-	// } catch (final MessagingException e) {
-	// throw new MailException(MailException.Code.MESSAGING_ERROR, e,
-	// e.getLocalizedMessage());
-	// }
-	// }
 
 	private static void parseMimeFlags(final int flags, final MimeMessage msg) throws MessagingException {
 		final Flags flagsObj = new Flags();
