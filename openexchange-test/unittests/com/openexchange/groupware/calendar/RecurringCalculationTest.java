@@ -95,18 +95,18 @@ public class RecurringCalculationTest extends TestCase {
     // Bug 10497
 
     public void testWorkweekRelativeRecurrence() throws RecurringException {
-        Date start = D("05/12/2007 10:00");
-        Date end = D("05/12/2007 12:00");
+        final Date start = D("05/12/2007 10:00");
+        final Date end = D("05/12/2007 12:00");
 
-        RecurringCalculation calc = new RecurringCalculation(AppointmentObject.MONTHLY,1,0);
+        final RecurringCalculation calc = new RecurringCalculation(AppointmentObject.MONTHLY,1,0);
         calc.setStartAndEndTime(start.getTime(), end.getTime());
         calc.setDays(AppointmentObject.WEEKDAY);
         calc.setDayInMonth(3);
         calc.setOccurrence(5);
 
-        RecurringResults results = calc.calculateRecurrence();
+        final RecurringResults results = calc.calculateRecurrence();
 
-        Date[] days = {
+        final Date[] days = {
                 D("05/12/2007 10:00"),
                 D("03/01/2008 10:00"),
                 D("05/02/2008 10:00"),
@@ -115,8 +115,8 @@ public class RecurringCalculationTest extends TestCase {
         };
         
         for(int i = 0; i < 5; i++) {
-            long expected = days[i].getTime();
-            long actual = results.getRecurringResult(i).getStart();
+            final long expected = days[i].getTime();
+            final long actual = results.getRecurringResult(i).getStart();
             assertEquals(new Date(expected)+" expected. Was: "+new Date(actual), expected, actual);
         }
     }
@@ -124,18 +124,18 @@ public class RecurringCalculationTest extends TestCase {
     // Bug 11655
 
     public void testWeekendRelativeRecurrence() throws RecurringException {
-        Date start = D("02/12/2007 10:00");
-        Date end = D("02/12/2007 12:00");
+        final Date start = D("02/12/2007 10:00");
+        final Date end = D("02/12/2007 12:00");
 
-        RecurringCalculation calc = new RecurringCalculation(AppointmentObject.MONTHLY,1,0);
+        final RecurringCalculation calc = new RecurringCalculation(AppointmentObject.MONTHLY,1,0);
         calc.setStartAndEndTime(start.getTime(), end.getTime());
         calc.setDays(AppointmentObject.WEEKENDDAY);
         calc.setDayInMonth(2);
         calc.setOccurrence(5);
 
-        RecurringResults results = calc.calculateRecurrence();
+        final RecurringResults results = calc.calculateRecurrence();
 
-        Date[] days = {
+        final Date[] days = {
                 D("02/12/2007 10:00"),
                 D("06/01/2008 10:00"),
                 D("03/02/2008 10:00"),
@@ -144,22 +144,23 @@ public class RecurringCalculationTest extends TestCase {
         };
 
         for(int i = 0; i < 5; i++) {
-            long expected = days[i].getTime();
-            long actual = results.getRecurringResult(i).getStart();
+            final long expected = days[i].getTime();
+            final long actual = results.getRecurringResult(i).getStart();
             assertEquals(new Date(expected)+" expected. Was: "+new Date(actual), expected, actual);
         }
     }
 
     // Bug 11730
     public void testRecurrencesGoOnUntil99YearsInTheFuture() throws RecurringException {
-        RecurringCalculation calc = new RecurringCalculation(AppointmentObject.YEARLY,1,0);
-        calc.setStartAndEndTime(D("05/11/1900 10:00").getTime(), D("05/11/1900 12:00").getTime());
+        final RecurringCalculation calc = new RecurringCalculation(AppointmentObject.YEARLY,1,0);
+        final Date start = D("05/11/1900 10:00");
+        calc.setStartAndEndTime(start.getTime(), D("05/11/1900 12:00").getTime());
         calc.setDayInMonth(11);
         calc.setMonth(4);
 
-        RecurringResults results = calc.calculateRecurrence();
+        final RecurringResults results = calc.calculateRecurrence();
 
-        long threshold = new Date().getTime() + 40 * CalendarRecurringCollection.MILLI_DAY;
+        final long threshold = start.getTime() + 40 * CalendarRecurringCollection.MILLI_DAY;
         for(int i = 0, size = results.size(); i < size; i++) {
             if(threshold < results.getRecurringResult(i).getStart()) {
                 return;
