@@ -202,11 +202,40 @@ public final class MailPath implements Cloneable, Serializable {
 		str = new StringBuilder(folder).append(SEPERATOR).append(uid).toString();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#clone()
-	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((folder == null) ? 0 : folder.hashCode());
+		result = prime * result + (int) (uid ^ (uid >>> 32));
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final MailPath other = (MailPath) obj;
+		if (folder == null) {
+			if (other.folder != null) {
+				return false;
+			}
+		} else if (!folder.equals(other.folder)) {
+			return false;
+		}
+		if (uid != other.uid) {
+			return false;
+		}
+		return true;
+	}
+
 	@Override
 	public Object clone() {
 		try {
