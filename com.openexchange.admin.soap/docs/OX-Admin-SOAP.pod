@@ -52,21 +52,61 @@ If that does not work, check the logfile of the Open-Xchange Server.
 
 =item OXContextService
 
+=begin html
+
+<p>
+See <A HREF=javadoc/com/openexchange/admin/soap/OXContext.html>Javadoc</A>
+</p>
+
+=end html
+
 Context related service.
 
 =item OXUtilService
+
+=begin html
+
+<p>
+See <A HREF=javadoc/com/openexchange/admin/soap/OXUtil.html>Javadoc</A>
+</p>
+
+=end html
 
 Util related service.
 
 =item OXUserService
 
+=begin html
+
+<p>
+See <A HREF=javadoc/com/openexchange/admin/soap/OXUser.html>Javadoc</A>
+</p>
+
+=end html
+
 User related service.
 
 =item OXGroupService
 
+=begin html
+
+<p>
+See <A HREF=javadoc/com/openexchange/admin/soap/OXGroup.html>Javadoc</A>
+</p>
+
+=end html
+
 Group related service.
 
 =item OXResourceService
+
+=begin html
+
+<p>
+See <A HREF=javadoc/com/openexchange/admin/soap/OXResource.html>Javadoc</A>
+</p>
+
+=end html
 
 Resource related service.
 

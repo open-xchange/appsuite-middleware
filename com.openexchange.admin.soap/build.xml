@@ -68,6 +68,9 @@
 			<arg value="--infile=docs/OX-Admin-SOAP.pod"/>
 			<arg value="--outfile=docs/OX-Admin-SOAP.html"/>
 		</exec>
+		<replace dir="docs" token="@doccorelink@" value="${doccorelink}">
+		    <include name="OX-Admin-SOAP.html"/>
+	    </replace>
         <javadoc
             failonerror="true"
 			sourcepath="src"
@@ -86,7 +89,7 @@
         	<link href="${doccorelink}"/>
         	<link href="${dochostinglink}"/>
         </javadoc>
-		<!-- javadoc cannot handle package-list to contain same package multiple times -->
+		<!-- javadoc cannot handle multiple package-list containing same java package -->
 		<replace dir="docs/javadoc" token="${doccorelink}" value="${dochostinglink}">
 		    <include name="**/OXContext.html"/>
 		    <include name="**/OXUtil.html"/>
