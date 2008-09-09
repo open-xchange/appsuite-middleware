@@ -67,10 +67,10 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXGroupSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
 /**
@@ -378,7 +378,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             // check for members and add them
             if (grp.getMembers() != null && grp.getMembers().length > 0) {
                 final Integer[] as = grp.getMembers();
-                for (Integer member_id : as) {
+                for (final Integer member_id : as) {
                     prep_insert = con.prepareStatement("INSERT INTO groups_member (cid,id,member) VALUES (?,?,?)");
                     prep_insert.setInt(1, context_id);
                     prep_insert.setInt(2, groupID);
@@ -413,7 +413,8 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         return retval;
     }
 
-    public void delete(final Context ctx, final Group[] grps) throws StorageException {
+    @Override
+	public void delete(final Context ctx, final Group[] grps) throws StorageException {
         Connection con = null;
         PreparedStatement prep_del_members = null;
         PreparedStatement prep_del_group = null;
@@ -430,7 +431,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
 //              let the groupware api know that the group will be deleted
                 OXFolderAdminHelper.propagateGroupModification(grp_id, con, con, context_id); 
                 
-                final DeleteEvent delev = new DeleteEvent(this, grp_id, DeleteEvent.TYPE_GROUP, context_id);
+                final DeleteEvent delev = new DeleteEvent(this, grp_id, DeleteEvent.TYPE_GROUP, context_id, con);
                 AdminCache.delreg.fireDeleteEvent(delev, con, con);
 
                 prep_del_members = con.prepareStatement("DELETE FROM groups_member WHERE cid=? AND id=?");
@@ -602,14 +603,14 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 final String ident = rs.getString("identifier");
                 final String disp = rs.getString("displayName");
                 // data.put(I_OXGroup.CID,cid);
-                Group retgrp = new Group(id, ident, disp);
+                final Group retgrp = new Group(id, ident, disp);
                 final Integer []members = getMembers(ctx, id, con);
                 if (members != null) {
                     retgrp.setMembers(members);
                 }
                 list.add(retgrp);
             }
-            return (Group[])list.toArray(new Group[list.size()]);
+            return list.toArray(new Group[list.size()]);
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);            
             throw new StorageException(sql.toString());
@@ -644,7 +645,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             // set last modified
             changeLastModifiedOnGroup(context_id, grp_id, con);
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-            OXUserMySQLStorage oxu = new OXUserMySQLStorage();
+            final OXUserMySQLStorage oxu = new OXUserMySQLStorage();
             for (final User member : members) {
                 if (tool.existsUser(ctx, member.getId())) {
                     // update last modified on user
