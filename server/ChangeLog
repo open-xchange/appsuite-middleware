@@ -1,3 +1,8 @@
+* 2008-09-09 - marcus.klein@open-xchange.com
+
+ - Bugfix #12099: Prevented 0 in modifiedBy of series that gets a delete
+   exception.
+
 * 2008-09-09 - thorben.betten@open-xchange.com
 
  - Bugfix #12027: Added JMX call to clear the sessions for a specific user

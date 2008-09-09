@@ -3571,6 +3571,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		final CalendarDataObject udao = new CalendarDataObject();
 		udao.setObjectID(oid);
 		udao.setContext(ctx);
+		udao.setModifiedBy(uid);
 		java.util.Date de = null;
 		if (cdao.containsRecurrenceDatePosition()) {
 			de = cdao.getRecurrenceDatePosition();
