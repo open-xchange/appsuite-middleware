@@ -138,8 +138,6 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
         if (timezone != null) {
             return timezone;
         }
-        final OXCalendarException e = new OXCalendarException(Code.TIMEZONE_MISSING);
-        LOG.warn(e.getMessage(), e);
         return "UTC";
 	}
 	

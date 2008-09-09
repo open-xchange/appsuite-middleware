@@ -64,6 +64,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.calendar.OXCalendarException.Code;
 import com.openexchange.groupware.calendar.recurrence.RecurringCalculation;
 import com.openexchange.groupware.calendar.recurrence.RecurringException;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -724,7 +725,11 @@ public final class CalendarRecurringCollection {
             }
             if (!calDataObject.getFullTime()) {
                 calc_timezone = calDataObject.getTimezone();
-            } 
+                if ("UTC".equals(calc_timezone)) {
+                    final OXCalendarException e = new OXCalendarException(Code.TIMEZONE_MISSING);
+                    LOG.warn(e.getMessage(), e);
+                }
+            }
         }
         
         final RecurringCalculation rc = new RecurringCalculation(cdao.getRecurrenceType(), cdao.getInterval(), cdao.getRecurrenceCalculator());
