@@ -62,9 +62,10 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException.Code;
 
 /**
- * This class implements a storage for contexts in a relational database.
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * This class implements a storage for contexts in a relational database using
+ * only one dedicated connection.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SingleConRdbContextStorage extends ContextStorage {
 
