@@ -355,7 +355,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // distinguish four types
                 final Method method = methodandname.getMethod();
                 final Method methodbool = getMethodforbooleanparameter(method);
-                boolean test = (Boolean) methodbool.invoke(usrdata, (Object[]) null);
+                final boolean test = (Boolean) methodbool.invoke(usrdata, (Object[]) null);
                 final String methodname = methodandname.getName();
                 final String returntype = method.getReturnType().getName();
                 if (returntype.equalsIgnoreCase("java.lang.String")) {
@@ -543,7 +543,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             if (usrdata.getDisplay_name() != null) {
                 // update folder name via ox api if displayname was changed
-                int[] changedfields = new int[] { ContactObject.DISPLAY_NAME };
+                final int[] changedfields = new int[] { ContactObject.DISPLAY_NAME };
 
                 OXFolderAdminHelper.propagateUserModification(usrdata.getId(), changedfields, System.currentTimeMillis(), write_ox_con, write_ox_con, ctx.getId().intValue());
             }
@@ -648,7 +648,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 log.error("Error doing rollback", e2);
             }
             throw new StorageException(e);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             log.error("Error", e);
             try {
                 write_ox_con.rollback();
@@ -664,7 +664,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 log.error("Error doing rollback", e2);
             }
             throw e;
-        } catch (OXException e) {
+        } catch (final OXException e) {
             log.error("Error", e);
             try {
                 write_ox_con.rollback();
@@ -1125,7 +1125,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // exception is thrown
             // no database activity has happened
             throw new StorageException(e);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             // Here we throw without rollback, because at the point this
             // exception is thrown
             // no database activity has happened
@@ -1167,7 +1167,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 write_ox_con.commit();
             }
 
-            int retval = create(ctx, usrdata, moduleAccess, write_ox_con, internal_user_id, contact_id, uid_number);
+            final int retval = create(ctx, usrdata, moduleAccess, write_ox_con, internal_user_id, contact_id, uid_number);
 
             write_ox_con.commit();
 
@@ -1354,13 +1354,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final SettingStorage settStor = SettingStorage.getInstance(ctx.getId().intValue(), id);
 
         for( final String p : new String[]{ "/gui", "/fastgui" }) {
-            Setting s = ConfigTree.getSettingByPath(p);
+            final Setting s = ConfigTree.getSettingByPath(p);
             if( s != null ) {
                 settStor.readValues(con, s);
                 if( ret == null ) {
                     ret = new HashMap<String, String>();
                 }
-                String value = (String)s.getSingleValue(); 
+                final String value = (String)s.getSingleValue(); 
                 if( value != null ) {
                     ret.put(p,value);
                 }
@@ -1369,14 +1369,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         
         final Setting[] modules = ConfigTree.getSettingByPath("modules").getElements();
         for (int i = 0; i < modules.length; i++) {
-            Setting guiSetting = modules[i].getElement("gui");
+            final Setting guiSetting = modules[i].getElement("gui");
             if( guiSetting != null ) {
-                String path = modules[i].getPath() + "/gui";
+                final String path = modules[i].getPath() + "/gui";
                 settStor.readValues(con, guiSetting);
                 if( ret == null ) {
                     ret = new HashMap<String, String>();
                 }
-                String value = (String)guiSetting.getSingleValue();
+                final String value = (String)guiSetting.getSingleValue();
                 if( value != null ) {
                     ret.put(path, value);
                 }
@@ -1451,7 +1451,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 final User newuser = (User) user.clone();
                 String username = user.getName();
 
-                Map<String, String> guiPrefs = readGUISettings(ctx, newuser, read_ox_con);
+                final Map<String, String> guiPrefs = readGUISettings(ctx, newuser, read_ox_con);
 
                 if( guiPrefs != null ) {
                     if( log.isDebugEnabled() ) {
@@ -1580,7 +1580,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final RuntimeException e) {
             log.error(e.getMessage(), e);
             throw e;
-        } catch (SettingException e) {
+        } catch (final SettingException e) {
             log.error("GUI setting Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -1599,7 +1599,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void closePreparedStatement(PreparedStatement stmt) {
+    private void closePreparedStatement(final PreparedStatement stmt) {
         try {
             if (stmt != null) {
                 stmt.close();
@@ -1620,7 +1620,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     log.debug("Start delete user " + user_id + " in context " + ctx.getId());
                     log.debug("Delete user " + user_id + "(" + ctx.getId() + ") via OX API...");
                 }
-                final DeleteEvent delev = new DeleteEvent(this, user_id, DeleteEvent.TYPE_USER, ctx.getId());
+                final DeleteEvent delev = new DeleteEvent(this, user_id, DeleteEvent.TYPE_USER, ctx.getId(), write_ox_con);
                 AdminCache.delreg.fireDeleteEvent(delev, write_ox_con, write_ox_con);
                 if (log.isDebugEnabled()) {
                     log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from login2user...");
@@ -1704,7 +1704,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final SQLException sqle) {
             log.error("SQL Error", sqle);
             throw new StorageException(sqle.toString());
-        } catch (OXException e) {
+        } catch (final OXException e) {
             log.error("Delete contact via groupware API error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -1718,7 +1718,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private int getContactIdByUserId(int ctx, int user_id, Connection write_con) throws StorageException {
+    private int getContactIdByUserId(final int ctx, final int user_id, final Connection write_con) throws StorageException {
         int retval = -1;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -1733,7 +1733,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 retval = rs.getInt("intfield01");
             }
             rs.close();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -1822,7 +1822,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             // LOOP through the int[] and change the module access rights for
             // each user
-            for (int user_id : user_ids) {
+            for (final int user_id : user_ids) {
                 // first get all groups the user is in
                 final int[] all_groups = getGroupsForUser(ctx, user_id, read_ox_con);
                 // update last modified column
@@ -1874,7 +1874,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     @Override
     public void changeModuleAccess(final Context ctx, final int user_id, final UserModuleAccess moduleAccess) throws StorageException {
-        int[] ids = { user_id };
+        final int[] ids = { user_id };
         changeModuleAccess(ctx, ids, moduleAccess);
     }
 
@@ -1932,7 +1932,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     }
 
-    public void changeLastModified(final int user_id, final Context ctx, final Connection write_ox_con) throws StorageException {
+    @Override
+	public void changeLastModified(final int user_id, final Context ctx, final Connection write_ox_con) throws StorageException {
         PreparedStatement prep_edit_user = null;
         try {
             prep_edit_user = write_ox_con.prepareStatement("UPDATE prg_contacts SET changing_date=? WHERE cid=? AND userid=?;");
@@ -1955,7 +1956,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    public void createRecoveryData(final Context ctx, final int user_id, final Connection write_ox_con) throws StorageException {
+    @Override
+	public void createRecoveryData(final Context ctx, final int user_id, final Connection write_ox_con) throws StorageException {
         // move user to del_user table if table is ready
         PreparedStatement del_st = null;
         ResultSet rs = null;
@@ -2103,7 +2105,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    public void deleteAllRecoveryData(final Context ctx, final Connection con) throws StorageException {
+    @Override
+	public void deleteAllRecoveryData(final Context ctx, final Connection con) throws StorageException {
         // delete from del_user table
         PreparedStatement del_st = null;
         try {
@@ -2124,7 +2127,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    public void deleteRecoveryData(final Context ctx, final int user_id, final Connection con) throws StorageException {
+    @Override
+	public void deleteRecoveryData(final Context ctx, final int user_id, final Connection con) throws StorageException {
         // delete from del_user table
         PreparedStatement del_st = null;
         try {
@@ -2222,7 +2226,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             RdbUserConfigurationStorage.saveUserConfiguration(user, insert_or_update, write_ox_con);
             
             if( ! insert_or_update ) {
-                com.openexchange.groupware.contexts.Context tmp = ContextStorage.getInstance().getContext(ctx.getId());
+                final com.openexchange.groupware.contexts.Context tmp = ContextStorage.getInstance().getContext(ctx.getId());
                 final UserConfigurationStorage uConfStor = UserConfigurationStorage.getInstance();
                 uConfStor.removeUserConfiguration(user.getUserId(), tmp);
             }
@@ -2232,10 +2236,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final SQLException sqle) {
             log.error("SQL Error", sqle);
             throw new StorageException(sqle.toString());
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             log.error("Context Error", e);
             throw new StorageException(e.toString());
-        } catch (UserConfigurationException e) {
+        } catch (final UserConfigurationException e) {
             log.error("UserConfiguration Error", e);
             throw new StorageException(e.toString());
         }

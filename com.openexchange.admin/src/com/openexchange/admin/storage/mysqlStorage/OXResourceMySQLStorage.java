@@ -65,10 +65,10 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXResourceSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.groupware.impl.IDGenerator;
 
 /**
  * @author d7
@@ -304,7 +304,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             con = cache.getConnectionForContext(context_id);
             con.setAutoCommit(false);
 
-            final DeleteEvent delev = new DeleteEvent(this, resource_id, DeleteEvent.TYPE_RESOURCE, context_id);
+            final DeleteEvent delev = new DeleteEvent(this, resource_id, DeleteEvent.TYPE_RESOURCE, context_id, con);
             AdminCache.delreg.fireDeleteEvent(delev, con, con);
 
             createRecoveryData(resource_id, ctx, con);
@@ -359,7 +359,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             con = cache.getConnectionForContext(context_id);
             con.setAutoCommit(false);
             
-            final DeleteEvent delev = new DeleteEvent(this, resource_id, DeleteEvent.TYPE_RESOURCE, context_id);
+            final DeleteEvent delev = new DeleteEvent(this, resource_id, DeleteEvent.TYPE_RESOURCE, context_id, con);
             AdminCache.delreg.fireDeleteEvent(delev, con, con);
             
             createRecoveryData(resource_id, ctx, con);
@@ -698,7 +698,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         }
     }
 
-    private void dorollback(Connection con) {
+    private void dorollback(final Connection con) {
         try {
             con.rollback();
         } catch (final SQLException e) {
