@@ -95,7 +95,7 @@ mkdir -p %{buildroot}/sbin
 /usr/sbin/groupadd -r open-xchange 2> /dev/null || :
 /usr/sbin/useradd -r -g open-xchange -r -s /bin/false -c "open-xchange system user" -d /opt/open-xchange open-xchange 2> /dev/null || :
 
-%if %{?suse_version} == 1030
+%if 0%{?suse_version} == 1030
 # without setting this option, build fails on openSUSE10.3 in obs
 export ANT_OPTS=-Xmx80m
 %endif
