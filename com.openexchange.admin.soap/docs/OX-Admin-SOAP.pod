@@ -110,6 +110,18 @@ See <A HREF=javadoc/com/openexchange/admin/soap/OXResource.html>Javadoc</A>
 
 Resource related service.
 
+=item OXTaskMgmtService
+
+=begin html
+
+<p>
+See <A HREF=javadoc/com/openexchange/admin/soap/OXTaskMgmt.html>Javadoc</A>
+</p>
+
+=end html
+
+TaskMgmt related service.
+
 =back
 
 For an explanation of these services, refer to the RMI javadoc
