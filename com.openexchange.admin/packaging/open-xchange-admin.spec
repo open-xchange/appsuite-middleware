@@ -139,7 +139,6 @@ fi
 %dir /opt/open-xchange/etc/admindaemon
 %dir /opt/open-xchange/etc/admindaemon/osgi
 %dir /opt/open-xchange/etc/admindaemon/osgi/bundle.d
-%dir /opt/open-xchange/etc/admindaemon/log4j
 /opt/open-xchange/sbin/*
 /etc/init.d/*
 /opt/open-xchange/bundles/*
@@ -147,7 +146,6 @@ fi
 %config(noreplace) /opt/open-xchange/etc/admindaemon/*.properties
 %config(noreplace) /opt/open-xchange/etc/admindaemon/*.ccf
 %config(noreplace) /opt/open-xchange/etc/admindaemon/mpasswd
-%config(noreplace) /opt/open-xchange/etc/admindaemon/log4j/*
 %config(noreplace) /opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
 /opt/open-xchange/etc/admindaemon/mysql
 /opt/open-xchange/etc/admindaemon/osgi/config.ini.template

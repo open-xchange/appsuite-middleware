@@ -12,5 +12,4 @@
 /opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
 /opt/open-xchange/etc/admindaemon/mpasswd
 /opt/open-xchange/etc/admindaemon/ModuleAccessDefinitions.properties
-/opt/open-xchange/etc/admindaemon/log4j/log4j.xml
 /etc/default/open-xchange-admin
