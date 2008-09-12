@@ -1112,7 +1112,7 @@ public final class MIMEMessageConverter {
 			throws MailException {
 		final MailMessageFieldFiller[] fillers = new MailMessageFieldFiller[fields.length];
 		for (int i = 0; i < fields.length; i++) {
-			final MailMessageFieldFiller filler = FILLER_MAP_EXT.get(fields[i]);
+			final MailMessageFieldFiller filler = FILLER_MAP.get(fields[i]);
 			if (filler == null) {
 				if (MailField.ID.equals(fields[i])) {
 					fillers[i] = new ExtendedMailMessageFieldFiller(folder) {
