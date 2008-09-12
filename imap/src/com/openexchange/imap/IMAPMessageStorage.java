@@ -1302,10 +1302,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 	}
 
 	/**
-	 * Generates a UUID using {@link UUID#randomUUID()} and removes all dashes;
-	 * e.g.:<br>
-	 * <i>a5aa65cb-6c7e-4089-9ce2-b107d21b9d15</i> would be
-	 * <i>a5aa65cb6c7e40899ce2b107d21b9d15</i>
+	 * Generates a UUID using {@link UUID#randomUUID()}; e.g.:<br>
+	 * <i>a5aa65cb-6c7e-4089-9ce2-b107d21b9d15</i>
 	 * 
 	 * @return A UUID string
 	 */
