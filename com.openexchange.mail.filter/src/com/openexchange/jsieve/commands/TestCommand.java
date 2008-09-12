@@ -325,7 +325,6 @@ public class TestCommand extends Command {
         checkCommand();
     }
 
-    @SuppressWarnings("unchecked")
     private void checkCommand() throws SieveException {
         if (null != this.tagarguments) {
             final ArrayList<String> tagarray = new ArrayList<String>(this.tagarguments);
