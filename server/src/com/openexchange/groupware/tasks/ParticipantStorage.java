@@ -458,7 +458,9 @@ abstract class ParticipantStorage {
      * @param ctx Context.
      * @param tasks unique identifier of the tasks.
      * @param type type of participant that should be selected.
-     * @return a set of participants.
+     * @return a map with the task identifier as the key and a set of
+     * participants as values. If for a task no participants are found no entry
+     * exists in this map.
      * @throws TaskException if an exception occurs.
      */
     final Map<Integer, Set<TaskParticipant>> selectParticipants(

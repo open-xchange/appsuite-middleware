@@ -54,14 +54,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -234,11 +232,8 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
     public Task next() throws SearchIteratorException, OXException {
         if (ready.isEmpty()) {
             try {
-                final Map<Integer, Task> tasks = new HashMap<Integer, Task>();
-                for (final Task task : preread.take(
-                    additionalAttributes.length > 0)) {
-                    tasks.put(Integer.valueOf(task.getObjectID()), task);
-                }
+                final List<Task> tasks = new ArrayList<Task>();
+                tasks.addAll(preread.take(additionalAttributes.length > 0));
                 for (final int attribute : additionalAttributes) {
                     switch (attribute) {
                     case Task.PARTICIPANTS:
@@ -250,7 +245,7 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
                         break;
                     case Task.ALARM:
                         try {
-                            Reminder.loadReminder(ctx, userId, tasks.values());
+                            Reminder.loadReminder(ctx, userId, tasks);
                         } catch (final TaskException e) {
                             throw new SearchIteratorException(e);
                         }
@@ -261,7 +256,7 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
                             .valueOf(attribute)));
                     }
                 }
-                ready.addAll(tasks.values());
+                ready.addAll(tasks);
             } catch (final InterruptedException e) {
                 throw new SearchIteratorException(new TaskException(
                     TaskException.Code.THREAD_ISSUE, e));
@@ -296,15 +291,20 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
      * @param tasks Tasks that should be filled with participants.
      * @throws TaskException if reading the participants fails.
      */
-    private void readParticipants(final Map<Integer, Task> tasks)
-        throws TaskException {
+    private void readParticipants(final List<Task> tasks) throws TaskException {
+        final int[] ids = new int[tasks.size()];
+        for (int i = 0; i < tasks.size(); i++) {
+            ids[i] = tasks.get(i).getObjectID();
+        }
         final Map<Integer, Set<TaskParticipant>> parts = partStor
-            .selectParticipants(ctx, Collections.toArray(tasks.keySet()), type);
-        for (final Entry<Integer, Set<TaskParticipant>> entry : parts.entrySet()) {
-            final Task task = tasks.get(entry.getKey());
-            final Set<TaskParticipant> participants = entry.getValue();
-            task.setParticipants(TaskLogic.createParticipants(participants));
-            task.setUsers(TaskLogic.createUserParticipants(participants));
+            .selectParticipants(ctx, ids, type);
+        for (final Task task : tasks) {
+            final Set<TaskParticipant> participants = parts.get(Integer
+                .valueOf(task.getObjectID()));
+            if (null != participants) {
+                task.setParticipants(TaskLogic.createParticipants(participants));
+                task.setUsers(TaskLogic.createUserParticipants(participants));
+            }
         }
     }
 
@@ -410,7 +410,7 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
                 preReaderFinished = true;
                 waitForPreReader.signal();
                 waitForMinimum.signal();
-                LOG.debug("Finished.");
+                LOG.trace("Finished.");
             } finally {
                 lock.unlock();
             }
@@ -424,7 +424,7 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
                 if (elements.size() >= MINIMUM_PREREAD) {
                     waitForMinimum.signal();
                 }
-                LOG.debug("Offered. " + elements.size());
+                LOG.trace("Offered. " + elements.size());
             } finally {
                 lock.unlock();
             }
@@ -446,7 +446,7 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
                 retval = new ArrayList<T>(elements.size());
                 retval.addAll(elements);
                 elements.clear();
-                LOG.debug("Taken.");
+                LOG.trace("Taken.");
             } finally {
                 lock.unlock();
             }
@@ -457,12 +457,12 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
             lock.lock();
             try {
                 while (!preReaderFinished && elements.isEmpty()) {
-                    LOG.debug("Waiting for state.");
+                    LOG.trace("Waiting for state.");
                     try {
                         waitForPreReader.await();
                     } catch (final InterruptedException e) {
                         // Nothing to do. Continue with normal work.
-                        LOG.debug(e.getMessage(), e);
+                        LOG.trace(e.getMessage(), e);
                     }
                 }
                 return !elements.isEmpty();

@@ -1,3 +1,7 @@
+* 2008-09-12 - marcus.klein@open-xchange.com
+
+ - Bugfix #11848: Using correct collections in TaskIterator to not break ordering.
+
 * 2008-09-12 - thorben.betten@open-xchange.com
 
  - Bugfix #12137: Using new session ID generator based on "java.util.UUID"
