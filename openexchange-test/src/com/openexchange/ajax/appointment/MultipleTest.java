@@ -39,7 +39,7 @@ public class MultipleTest extends AppointmentTest {
 		final InsertRequest insertRequest2 = new InsertRequest(appointmentObj, timeZone, true);
 		final InsertRequest insertRequest3 = new InsertRequest(appointmentObj, timeZone, true);
 		
-		final MultipleRequest multipleInsertRequest = new MultipleRequest(new AJAXRequest[] { insertRequest1, insertRequest2, insertRequest3 });
+		final MultipleRequest multipleInsertRequest = MultipleRequest.create(new AJAXRequest[] { insertRequest1, insertRequest2, insertRequest3 });
 		final MultipleResponse multipleInsertResponse = (MultipleResponse) Executor.execute(ajaxSession, multipleInsertRequest);
 		
 		assertFalse("first insert request has errors: ", multipleInsertResponse.getResponse(0).hasError()); 
@@ -57,7 +57,7 @@ public class MultipleTest extends AppointmentTest {
 		final DeleteRequest deleteRequest2 = new DeleteRequest(objectId2, appointmentFolderId, modified);
 		final DeleteRequest deleteRequest3 = new DeleteRequest(objectId3, appointmentFolderId, modified);
 
-		final MultipleRequest multipleDeleteInsertRequest = new MultipleRequest(new AJAXRequest[] { deleteRequest1, deleteRequest2, deleteRequest3 });
+		final MultipleRequest multipleDeleteInsertRequest = MultipleRequest.create(new AJAXRequest[] { deleteRequest1, deleteRequest2, deleteRequest3 });
 		final MultipleResponse multipleDeleteResponse = (MultipleResponse) Executor.execute(ajaxSession, multipleInsertRequest);
 		
 		assertFalse("first delete request has errors: ", multipleDeleteResponse.getResponse(0).hasError()); 
@@ -76,6 +76,6 @@ public class MultipleTest extends AppointmentTest {
             appointmentObj.setIgnoreConflicts(true);
             inserts[i] = new InsertRequest(appointmentObj, client.getValues().getTimeZone(), true);
         }
-        Executor.execute(client, new MultipleRequest(inserts));
+        Executor.execute(client, MultipleRequest.create(inserts));
 	}
 }

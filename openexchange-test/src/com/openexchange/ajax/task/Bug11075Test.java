@@ -92,7 +92,7 @@ public final class Bug11075Test extends AbstractTaskTest {
                 client.getValues().getUserId()));
         }
         final MultipleResponse mInsert = Executor.execute(client,
-            new MultipleRequest(inserts));
+            MultipleRequest.create(inserts));
         final int[] folderIds = new int[inserts.length];
         Date timestamp = new Date(0);
         for (int i = 0; i < folderIds.length; i++) {

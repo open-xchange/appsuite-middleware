@@ -50,14 +50,14 @@
 package com.openexchange.ajax.task.actions;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.ajax.framework.AbstractAllResponse;
 import com.openexchange.ajax.framework.ListIDs;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class AllResponse extends CommonAllResponse {
+public final class AllResponse extends AbstractAllResponse {
 
     private ListIDs list;
 

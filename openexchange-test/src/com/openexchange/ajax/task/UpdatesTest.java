@@ -59,6 +59,7 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.ajax.task.actions.AllRequest;
+import com.openexchange.ajax.task.actions.AllResponse;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
@@ -101,9 +102,9 @@ public class UpdatesTest extends AbstractTaskTest {
             inserts[i] = new InsertRequest(task, timeZone);
         }
         final MultipleResponse mInsert =  Executor.execute(client,
-            new MultipleRequest(inserts));
+            MultipleRequest.create(inserts));
         int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.FOLDER_ID };
-        final CommonAllResponse allR = TaskTools.all(client, new AllRequest(
+        final AllResponse allR = TaskTools.all(client, new AllRequest(
             folderId, columns, Task.TITLE, Order.ASCENDING));
         assertTrue("Can't find " + total + " inserted tasks.",
             allR.getArray().length >= total);
@@ -120,7 +121,7 @@ public class UpdatesTest extends AbstractTaskTest {
             updates[i] = new UpdateRequest(task, timeZone);
         }
         final MultipleResponse mUpdate = Executor.execute(client,
-            new MultipleRequest(updates));
+            MultipleRequest.create(updates));
         // And delete 2
         final DeleteRequest[] deletes = new DeleteRequest[DELETES];
         for (int i = 0; i < deletes.length; i++) {
@@ -129,7 +130,7 @@ public class UpdatesTest extends AbstractTaskTest {
             deletes[i] = new DeleteRequest(folderId, insertR.getId(), insertR
                 .getTimestamp());
         }
-        Executor.execute(client, new MultipleRequest(deletes));
+        Executor.execute(client, MultipleRequest.create(deletes));
         // Now request updates for the list
         columns = new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.TITLE,
             Task.START_DATE, Task.END_DATE, Task.PERCENT_COMPLETED,
@@ -155,6 +156,6 @@ public class UpdatesTest extends AbstractTaskTest {
             deletes2[i] = new DeleteRequest(folderId, insertR.getId(),
                 lastModified);
         }
-        Executor.execute(client, new MultipleRequest(deletes2));
+        Executor.execute(client, MultipleRequest.create(deletes2));
     }
 }

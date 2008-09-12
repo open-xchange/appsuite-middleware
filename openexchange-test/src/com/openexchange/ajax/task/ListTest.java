@@ -104,7 +104,7 @@ public class ListTest extends AbstractTaskTest {
             inserts[i] = new InsertRequest(task, getTimeZone());
         }
         final MultipleResponse mInsert = (MultipleResponse) Executor.execute(
-            getClient(), new MultipleRequest(inserts));
+            getClient(), MultipleRequest.create(inserts));
         
         final int[][] tasks = new int[NUMBER][2];
         for (int i = 0; i < tasks.length; i++) {
@@ -136,7 +136,7 @@ public class ListTest extends AbstractTaskTest {
             deletes[i] = new DeleteRequest(tasks[i][0], tasks[i][1], listR
                 .getTimestamp());
         }
-        Executor.execute(getClient(), new MultipleRequest(deletes)); 
+        Executor.execute(getClient(), MultipleRequest.create(deletes)); 
     }
 
     public void oldRemovedObjectHandling() throws Throwable {
@@ -171,7 +171,7 @@ public class ListTest extends AbstractTaskTest {
             inserts[i] = new InsertRequest(task, getTimeZone());
         }
         final MultipleResponse mInsert = (MultipleResponse) Executor.execute(
-            getClient(), new MultipleRequest(inserts));
+            getClient(), MultipleRequest.create(inserts));
         final List<InsertResponse> toDelete = new ArrayList<InsertResponse>(NUMBER);
         final Iterator<AbstractAJAXResponse> iter = mInsert.iterator();
         while (iter.hasNext()) {
@@ -190,7 +190,7 @@ public class ListTest extends AbstractTaskTest {
             deletes1[i] = new DeleteRequest(folderB, insertR.getId(), insertR
                 .getTimestamp());
         }
-        Executor.execute(clientB, new MultipleRequest(deletes1));
+        Executor.execute(clientB, MultipleRequest.create(deletes1));
 
         // List request of A must now not contain the deleted objects and give
         // no error.
@@ -203,6 +203,6 @@ public class ListTest extends AbstractTaskTest {
             deletes2[i] = new DeleteRequest(insertR.getFolderId(),
                 insertR.getId(), listR.getTimestamp());
         }
-        Executor.execute(getClient(), new MultipleRequest(deletes2)); 
+        Executor.execute(getClient(), MultipleRequest.create(deletes2)); 
     }
 }

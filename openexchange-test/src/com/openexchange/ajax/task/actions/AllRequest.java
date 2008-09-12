@@ -49,8 +49,7 @@
 
 package com.openexchange.ajax.task.actions;
 
-
-import com.openexchange.ajax.framework.CommonAllRequest;
+import com.openexchange.ajax.framework.AbstractAllRequest;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Task;
 
@@ -58,7 +57,7 @@ import com.openexchange.groupware.tasks.Task;
  * Contains the data for an task all request.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class AllRequest extends CommonAllRequest {
+public class AllRequest extends AbstractAllRequest<AllResponse> {
 
     public static final int GUI_SORT = Task.END_DATE;
 

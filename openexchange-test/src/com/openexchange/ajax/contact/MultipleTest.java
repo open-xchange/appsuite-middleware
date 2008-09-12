@@ -39,7 +39,7 @@ public class MultipleTest extends ContactTest {
 		final InsertRequest insertRequest2 = new InsertRequest(contactObj, true);
 		final InsertRequest insertRequest3 = new InsertRequest(contactObj, true);
 		
-		final MultipleRequest multipleInsertRequest = new MultipleRequest(new AJAXRequest[] { insertRequest1, insertRequest2, insertRequest3 });
+		final MultipleRequest<InsertResponse> multipleInsertRequest = MultipleRequest.create(new InsertRequest[] { insertRequest1, insertRequest2, insertRequest3 });
 		final MultipleResponse multipleInsertResponse = Executor.execute(new AJAXClient(ajaxSession), multipleInsertRequest);
 		
 		assertFalse("first insert request has errors: ", multipleInsertResponse.getResponse(0).hasError()); 
@@ -57,7 +57,7 @@ public class MultipleTest extends ContactTest {
 		final DeleteRequest deleteRequest2 = new DeleteRequest(contactFolderId, objectId2, modified);
 		final DeleteRequest deleteRequest3 = new DeleteRequest(contactFolderId, objectId3, modified);
 
-		final MultipleRequest multipleDeleteInsertRequest = new MultipleRequest(new AJAXRequest[] { deleteRequest1, deleteRequest2, deleteRequest3 });
+		final MultipleRequest multipleDeleteInsertRequest = MultipleRequest.create(new AJAXRequest[] { deleteRequest1, deleteRequest2, deleteRequest3 });
 		final MultipleResponse multipleDeleteResponse = (MultipleResponse) Executor.execute(ajaxSession, multipleInsertRequest);
 		
 		assertFalse("first delete request has errors: ", multipleDeleteResponse.getResponse(0).hasError()); 

@@ -49,36 +49,13 @@
 
 package com.openexchange.ajax.framework;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.json.JSONException;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.groupware.search.Order;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonAllRequest implements AJAXRequest {
-
-    private final String servletPath;
-
-    private final String folderId;
-
-    private final int[] columns;
-
-    private final int sort;
-
-    private final Order order;
-
-    private final boolean failOnError;
-
-    private int leftHandLimit = -1;
-
-    private int rightHandLimit = -1;
+public class CommonAllRequest extends AbstractAllRequest<CommonAllResponse> {
 
     /**
      * Default constructor.
@@ -86,13 +63,7 @@ public class CommonAllRequest implements AJAXRequest {
     public CommonAllRequest(final String servletPath, final int folderId,
         final int[] columns, final int sort, final Order order,
         final boolean failOnError) {
-        super();
-        this.servletPath = servletPath;
-        this.folderId = String.valueOf(folderId);
-        this.columns = columns;
-        this.sort = sort;
-        this.order = order;
-        this.failOnError = failOnError;
+        super(servletPath, folderId, columns, sort, order, failOnError);
     }
 
     /**
@@ -101,104 +72,14 @@ public class CommonAllRequest implements AJAXRequest {
     public CommonAllRequest(final String servletPath, final String folderPath,
         final int[] columns, final int sort, final Order order,
         final boolean failOnError) {
-        super();
-        this.servletPath = servletPath;
-        this.folderId = folderPath;
-        this.columns = columns;
-        this.sort = sort;
-        this.order = order;
-        this.failOnError = failOnError;
+        super(servletPath, folderPath, columns, sort, order, failOnError);
     }
 
     /**
      * {@inheritDoc}
      */
-    public String getServletPath() {
-        return servletPath;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.GET;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        final List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-            .ACTION_ALL));
-        params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
-        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
-        if (null != order) {
-            params.add(new Parameter(AJAXServlet.PARAMETER_SORT, sort));
-            params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields
-                .write(order)));
-        }
-        if (validateLimit()) {
-	        params.add(new Parameter(AJAXServlet.LEFT_HAND_LIMIT, leftHandLimit));
-	        params.add(new Parameter(AJAXServlet.RIGHT_HAND_LIMIT, rightHandLimit));
-        }
-        return params.toArray(new Parameter[params.size()]);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public CommonAllParser getParser() {
-        return new CommonAllParser(failOnError, columns);
+        return new CommonAllParser(isFailOnError(), getColumns());
     }
-
-    /**
-     * @return the columns
-     */
-    protected int[] getColumns() {
-        return columns;
-    }
-
-    /**
-     * @return the failOnError
-     */
-    protected boolean isFailOnError() {
-        return failOnError;
-    }
-
-	/**
-	 * Sets the leftHandLimit
-	 *
-	 * @param leftHandLimit the leftHandLimit to set
-	 */
-	public void setLeftHandLimit(final int leftHandLimit) {
-		this.leftHandLimit = leftHandLimit;
-	}
-
-	/**
-	 * Sets the rightHandLimit
-	 *
-	 * @param rightHandLimit the rightHandLimit to set
-	 */
-	public void setRightHandLimit(final int rightHandLimit) {
-		this.rightHandLimit = rightHandLimit;
-	}
-
-	private boolean validateLimit() {
-		if ((rightHandLimit != -1 || leftHandLimit != -1)) {
-			if (rightHandLimit < leftHandLimit) {
-				throw new IllegalArgumentException("right-hand index is less than left-hand index");
-			}
-			return true;
-		}
-		return false;
-	}
-
 }

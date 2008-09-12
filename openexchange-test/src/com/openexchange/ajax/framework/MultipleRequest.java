@@ -59,12 +59,16 @@ import com.openexchange.ajax.AJAXServlet;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class MultipleRequest implements AJAXRequest<MultipleResponse> {
+public class MultipleRequest<T extends AbstractAJAXResponse> implements AJAXRequest<MultipleResponse<T>> {
 
-    private final AJAXRequest<?>[] requests;
+    private final AJAXRequest<T>[] requests;
     
-    public MultipleRequest(final AJAXRequest<?>[] requests) {
+    private MultipleRequest(final AJAXRequest<T>[] requests) {
         this.requests = requests.clone();
+    }
+
+    public static <T extends AbstractAJAXResponse> MultipleRequest<T> create(final AJAXRequest<T>[] requests) {
+        return new MultipleRequest<T>(requests);
     }
 
     /**
@@ -110,7 +114,7 @@ public class MultipleRequest implements AJAXRequest<MultipleResponse> {
     /**
      * {@inheritDoc}
      */
-    public MultipleParser getParser() {
-        return new MultipleParser(requests);
+    public MultipleParser<T> getParser() {
+        return new MultipleParser<T>(requests);
     }
 }

@@ -49,73 +49,90 @@
 
 package com.openexchange.ajax.task;
 
-import java.util.Date;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.ListID;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.ajax.task.actions.AllRequest;
+import com.openexchange.ajax.task.actions.AllResponse;
 import com.openexchange.ajax.task.actions.DeleteRequest;
-import com.openexchange.ajax.task.actions.GetRequest;
-import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class AllTest extends AbstractTaskTest {
+public final class Bug11848Test extends AbstractAJAXSession {
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(AllTest.class);
+    private static final int NUMBER = 100;
 
-    private static final int NUMBER = 10;
-    
     /**
      * Default constructor.
-     * @param name Name of this test.
      */
-    public AllTest(final String name) {
+    public Bug11848Test(final String name) {
         super(name);
     }
 
-    public void testAll() throws Throwable {
-        final InsertRequest[] inserts = new InsertRequest[NUMBER];
-        for (int i = 0; i < inserts.length; i++) {
-            final Task task = new Task();
-            task.setTitle("Task " + (i + 1));
-            task.setParentFolderID(getPrivateFolder());
-            task.setAlarm(new Date());
-            // TODO add participants
-            inserts[i] = new InsertRequest(task, getTimeZone());
+    public void testSorting() throws Throwable {
+        final AJAXClient client = getClient();
+        final int folder = client.getValues().getPrivateTaskFolder();
+        final TimeZone tz = client.getValues().getTimeZone();
+        final Task[] tasks = new Task[NUMBER];
+        {
+            final Calendar calendar = new GregorianCalendar(tz);
+            calendar.set(Calendar.HOUR, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            for (int i = 0; i < NUMBER; i++) {
+                final Task task = new Task();
+                task.setTitle("test for bug 11848 " + i);
+                task.setParentFolderID(folder);
+                task.setStartDate(calendar.getTime());
+                task.setEndDate(calendar.getTime());
+                calendar.add(Calendar.DATE, 1);
+                tasks[i] = task;
+            }
         }
-        final MultipleResponse mInsert = (MultipleResponse) Executor.execute(
-            getSession(), MultipleRequest.create(inserts));
-        final GetRequest[] gets = new GetRequest[NUMBER];
-        for (int i = 0; i < gets.length; i++) {
-            final InsertResponse ins = (InsertResponse) mInsert.getResponse(i);
-            LOG.info(Integer.valueOf(ins.getId()));
-            gets[i] = new GetRequest(ins);
+        final MultipleResponse<InsertResponse> mInsert;
+        {
+            final InsertRequest[] requests = new InsertRequest[NUMBER];
+            for (int i = 0; i < NUMBER; i++) {
+                requests[i] = new InsertRequest(tasks[i], tz);
+            }
+            mInsert = client.execute(MultipleRequest.create(requests));
+            for (int i = 0; i < NUMBER; i++) {
+                mInsert.getResponse(i).fillTask(tasks[i]);
+            }
         }
-        final MultipleResponse mGet = (MultipleResponse) Executor.execute(
-            getSession(), MultipleRequest.create(gets));
-        // TODO Read Task.ALARM
-        final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
-            Task.LAST_MODIFIED, Task.FOLDER_ID, Task.PARTICIPANTS };
-        TaskTools.all(getSession(),
-            new AllRequest(getPrivateFolder(), columns, 0, null));
-        final DeleteRequest[] deletes = new DeleteRequest[inserts.length];
-        for (int i = 0; i < inserts.length; i++) {
-            final GetResponse get = (GetResponse) mGet.getResponse(i);
-            deletes[i] = new DeleteRequest(get.getTask(getTimeZone()));
+        try {
+            final AllRequest request = new AllRequest(folder, new int[] { Task.OBJECT_ID }, Task.END_DATE, Order.ASCENDING);
+            final AllResponse response = client.execute(request);
+            int pos = 0;
+            for (final ListID identifier : response.getListIDs()) {
+                final Task task = tasks[pos];
+                if (identifier.getObject().equals(String.valueOf(task.getObjectID()))) {
+                    pos++;
+                    if (pos >= NUMBER) {
+                        break;
+                    }
+                }
+            }
+            System.out.println(pos);
+        } finally {
+            final DeleteRequest[] requests = new DeleteRequest[NUMBER];
+            for (int i = 0; i < NUMBER; i++) {
+                requests[i] = new DeleteRequest(mInsert.getResponse(i));
+            }
+            client.execute(MultipleRequest.create(requests));
         }
-        Executor.execute(getSession(), MultipleRequest.create(deletes)); 
     }
 }

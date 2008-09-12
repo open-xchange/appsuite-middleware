@@ -49,38 +49,49 @@
 
 package com.openexchange.ajax.framework;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import com.openexchange.ajax.container.Response;
 
 /**
- *
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ListIDs implements Iterable<ListID> {
+public abstract class AbstractAllParser<T extends AbstractAllResponse> extends AbstractAJAXParser<T> {
 
-    private final List<ListID> identifiers = new ArrayList<ListID>();
+    private final int[] columns;
 
     /**
      * Default constructor.
      */
-    public ListIDs() {
-        super();
+    protected AbstractAllParser(final boolean failOnError, final int[] columns) {
+        super(failOnError);
+        this.columns = columns;
     }
 
-    public void add(final ListID listID) {
-        identifiers.add(listID);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected T createResponse(final Response response)
+        throws JSONException {
+        final T retval = instanciateResponse(response);
+        retval.setColumns(columns);
+        if (isFailOnError()) {
+            final JSONArray array = (JSONArray) retval.getData();
+            final Object[][] values = new Object[array.length()][];
+            for (int i = 0; i < array.length(); i++) {
+                final JSONArray inner = array.getJSONArray(i);
+                values[i] = new Object[inner.length()];
+                for (int j = 0; j < inner.length(); j++) {
+                    values[i][j] = inner.get(j);
+                }
+            }
+            retval.setArray(values);
+        }
+        return retval;
     }
 
-    public int size() {
-        return identifiers.size();
-    }
-
-    public ListID get(final int i) {
-        return identifiers.get(i);
-    }
-
-    public Iterator<ListID> iterator() {
-        return identifiers.iterator();
-    }
+    protected abstract T instanciateResponse(final Response response);
 }
