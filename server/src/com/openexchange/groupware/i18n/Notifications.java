@@ -198,6 +198,26 @@ public class Notifications {
 		"[resources]\n"+
 		"\n"+
 		"==========================================";
+
+	public static final String APPOINTMENT_REMOVED_PARTICIPANT = 
+		"An appointment has been changed by [changed_by].\n"+
+		"\n"+
+		"You have been removed from the list of participants.\n"+
+		"\n"+
+		"Appointment\n"+
+		"===========\n"+
+		"Created by:  [created_by]\n"+
+		"Title:       [title]\n"+
+		"Location:    [location]\n"+
+		"\n"+
+		"Start date:  [start]\n"+
+		"End date:    [end]\n"+
+		"\n"+
+		"Description:\n"+
+		"[description]\n"+
+		"\n"+
+		"\n"+
+		"==========================================";
 	
 	public static final String APPOINTMENT_CREATE_TITLE = "A new appointment has been created";
 	public static final String APPOINTMENT_UPDATE_TITLE = "An appointment has been changed";

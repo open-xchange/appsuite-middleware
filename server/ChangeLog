@@ -7,6 +7,9 @@
  - Bugfix #12137: Using new session ID generator based on "java.util.UUID"
    to also compute an unique ID for random token in a very fast way
  - Bugfix #12133: Sending notification to removed (external) participant(s)
+ - Bugfix #12135: Sending an appropriate message to removed participants
+   through an update operation on an appointment instead of the common
+   "the appointment has been modified" message
 
 * 2008-09-09 - marcus.klein@open-xchange.com
 
