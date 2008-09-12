@@ -2,6 +2,7 @@ package com.openexchange.ajax.appointment;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,10 +24,6 @@ public class Bug8317Test extends AppointmentTest {
 		super.setUp();
 	}
 	
-	public void testDummy() {
-		
-	}
-
     /**
      * INFO: This test case must be done at least today + 1 days because otherwise
      * no conflict resolution is made because past appointments do not conflict!
@@ -36,7 +33,8 @@ public class Bug8317Test extends AppointmentTest {
      * TODO: Create a dynamic date/time in the future for testing.
      */
     public void testBug8317() throws Exception {
-        final Calendar calendar = Calendar.getInstance(timeZone);
+        final TimeZone utc = TimeZone.getTimeZone("UTC");
+        final Calendar calendar = Calendar.getInstance(utc);
         calendar.setTimeInMillis(startTime);
         calendar.add(Calendar.DATE, 5);
 
@@ -59,8 +57,7 @@ public class Bug8317Test extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 
-        // Next appointment must be on the same day as the first one.
-        calendar.add(Calendar.DATE, -1);
+        calendar.setTimeZone(timeZone);
         calendar.set(year, month, day, 0, 30, 0);
         startDate = calendar.getTime();
 
@@ -77,12 +74,13 @@ public class Bug8317Test extends AppointmentTest {
 
         try {
             final int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+            deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, getHostName(), getSessionId());
             fail("conflict exception expected!");
         } catch (final OXConflictException exc) {
             // Perfect. The insertAppointment throws a OXConflictException
             // And this is what we expect here !!!
+        } finally {
+            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
         }
-
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
     }
 }
