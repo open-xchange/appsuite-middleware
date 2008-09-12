@@ -131,6 +131,7 @@
     </target>
 
 	<target name="clean">
+	    <delete dir="src/org/apache/jsieve/parser/generated"/>
         <delete dir="classes"/>
         <delete dir="jar"/>
     </target>
