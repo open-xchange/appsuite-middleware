@@ -182,6 +182,12 @@ public enum Tree {
     /** [inside GUI] "1" - "8" */
     CalendarWorkWeekNumberOfAppointments("/gui/calendar/workweek/numberofappointments"),
     
+    /** [inside GUI] Effects: Fading. If you set this, please also set EffectsGlobal to the same value. */
+    EffectsFading("/gui/effects/fading"),
+    
+    /** [inside GUI] Effects: Global. If you set this, please also set EffectsFading to the same value. */
+    EffectsGlobal("/gui/effects/global"),
+    
     //TODO: more gui settings
     
     /** A string containing GUI-specific settings. This is a JSON object that must be kept small for performance. */
