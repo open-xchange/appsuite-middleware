@@ -61,6 +61,13 @@ import com.openexchange.sessiond.exception.SessiondException;
  */
 public final class UUIDSessionIdGenerator extends SessionIdGenerator {
 
+	/**
+	 * Initializes a new {@link UUIDSessionIdGenerator}
+	 */
+	public UUIDSessionIdGenerator() {
+		super();
+	}
+
 	@Override
 	public String createSessionId(final String userId, final String data) throws SessiondException {
 		return randomUUID();
