@@ -53,12 +53,10 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
@@ -787,7 +785,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			/*
 			 * Mark first message for later lookup
 			 */
-			final String hash = plainStringToMD5(String.valueOf(System.currentTimeMillis()));
+			final String hash = randomUUID();
 			msgs[0].setHeader(MessageHeaders.HDR_X_OX_MARKER, hash);
 			/*
 			 * ... and append them to folder
@@ -1303,44 +1301,16 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		}
 	}
 
-	private static final String ALG_MD5 = "MD5";
-
-	private static String plainStringToMD5(final String input) {
-		final MessageDigest md;
-		try {
-			/*
-			 * Choose MD5 (SHA1 is also possible)
-			 */
-			md = MessageDigest.getInstance(ALG_MD5);
-		} catch (final NoSuchAlgorithmException e) {
-			LOG.error("Unable to generate OX marker", e);
-			return input;
-		}
-		/*
-		 * Reset
-		 */
-		md.reset();
-		/*
-		 * Update the digest
-		 */
-		try {
-			md.update(input.getBytes("UTF-8"));
-		} catch (final UnsupportedEncodingException e) {
-			/*
-			 * Should not occur since utf-8 is a known encoding
-			 */
-			LOG.error("Unable to generate OX marker", e);
-			return input;
-		}
-		/*
-		 * Here comes the hash
-		 */
-		final byte[] byteHash = md.digest();
-		final StringBuilder resultString = new StringBuilder(16);
-		for (int i = 0; i < byteHash.length; i++) {
-			resultString.append(Integer.toHexString(0xF0 & byteHash[i]).charAt(0));
-		}
-		return resultString.toString();
+	/**
+	 * Generates a UUID using {@link UUID#randomUUID()} and removes all dashes;
+	 * e.g.:<br>
+	 * <i>a5aa65cb-6c7e-4089-9ce2-b107d21b9d15</i> would be
+	 * <i>a5aa65cb6c7e40899ce2b107d21b9d15</i>
+	 * 
+	 * @return A UUID string
+	 */
+	private static String randomUUID() {
+		return UUID.randomUUID().toString();
 	}
 
 }

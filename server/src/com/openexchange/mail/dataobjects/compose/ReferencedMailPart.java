@@ -62,10 +62,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -184,7 +183,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 			copy2File(new UnsynchronizedByteArrayInputStream(out.toByteArray()), session);
 			setContentType(MIMETypes.MIME_MESSAGE_RFC822);
 			setContentDisposition(Part.INLINE);
-			
+
 		} else {
 			copy2File(referencedPart.getInputStream(), session);
 			setHeaders(referencedPart);
@@ -227,7 +226,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 			file = tmpFile;
 		}
 		final AJAXUploadFile uploadFile = new AJAXUploadFile(file, System.currentTimeMillis());
-		fileId = plainStringToMD5(file.getName());
+		fileId = randomUUID();
 		session.putUploadedFile(fileId, uploadFile);
 		return totalBytes;
 	}
@@ -417,44 +416,14 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 		return isMail;
 	}
 
-	private static final String ALG_MD5 = "MD5";
-
-	private static String plainStringToMD5(final String input) {
-		final MessageDigest md;
-		try {
-			/*
-			 * Choose MD5 (SHA1 is also possible)
-			 */
-			md = MessageDigest.getInstance(ALG_MD5);
-		} catch (final NoSuchAlgorithmException e) {
-			LOG.error("Unable to generate file ID", e);
-			return input;
-		}
-		/*
-		 * Reset
-		 */
-		md.reset();
-		/*
-		 * Update the digest
-		 */
-		try {
-			md.update(input.getBytes("UTF-8"));
-		} catch (final UnsupportedEncodingException e) {
-			/*
-			 * Should not occur since utf-8 is a known encoding in jsdk
-			 */
-			LOG.error("Unable to generate file ID", e);
-			return input;
-		}
-		/*
-		 * Here comes the hash
-		 */
-		final byte[] byteHash = md.digest();
-		final StringBuilder resultString = new StringBuilder();
-		for (int i = 0; i < byteHash.length; i++) {
-			resultString.append(Integer.toHexString(0xF0 & byteHash[i]).charAt(0));
-		}
-		return resultString.toString();
+	/**
+	 * Generates a UUID using {@link UUID#randomUUID()}; e.g.:<br>
+	 * <i>a5aa65cb-6c7e-4089-9ce2-b107d21b9d15</i>
+	 * 
+	 * @return A UUID string
+	 */
+	private static String randomUUID() {
+		return UUID.randomUUID().toString();
 	}
 
 	public ComposedPartType getType() {

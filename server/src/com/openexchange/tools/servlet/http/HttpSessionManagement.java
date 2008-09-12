@@ -49,12 +49,10 @@
 
 package com.openexchange.tools.servlet.http;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TimerTask;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -148,15 +146,16 @@ public final class HttpSessionManagement {
 	 * @param sessionId
 	 *            The session ID
 	 * @return <code>true</code> if this management contains a HTTP session
-	 *         whose unique ID matches given <code>sessionId</code>,
-	 *         otherwise <code>false</code>.
+	 *         whose unique ID matches given <code>sessionId</code>, otherwise
+	 *         <code>false</code>.
 	 */
 	public static boolean containsHttpSession(final String sessionId) {
 		return sessions.containsKey(sessionId);
 	}
 
 	/**
-	 * Removes HTTP session whose unique ID matches given <code>sessionId</code>.
+	 * Removes HTTP session whose unique ID matches given <code>sessionId</code>
+	 * .
 	 * 
 	 * @param sessionId
 	 *            The session ID
@@ -231,32 +230,18 @@ public final class HttpSessionManagement {
 		return ((httpSession == null) || (!isHttpSessionExpired(httpSession)));
 	}
 
-	private static final char[] digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
-			'f' };
-
 	/**
 	 * Creates a unique ID
 	 * 
 	 * @return The unique ID
 	 */
 	public static String getNewUniqueId() {
-		String retval = null;
-		try {
-			final SecureRandom secRandom = SecureRandom.getInstance("SHA1PRNG");
-			final String rndNumber = Integer.valueOf(secRandom.nextInt()).toString();
-			final MessageDigest sha = MessageDigest.getInstance("SHA-1");
-			final byte[] inputBytes = sha.digest(rndNumber.getBytes());
-			final StringBuilder result = new StringBuilder(inputBytes.length * 2);
-			for (int i = 0; i < inputBytes.length; i++) {
-				final byte b = inputBytes[i];
-				result.append(digits[(b & 0xf0) >> 4]);
-				result.append(digits[(b & 0x0f)]);
-			}
-			retval = result.toString();
-		} catch (final NoSuchAlgorithmException e) {
-			LOG.error(e.getMessage(), e);
-		}
-		return retval;
+		final StringBuilder s = new StringBuilder(36).append(UUID.randomUUID());
+		s.deleteCharAt(23);
+		s.deleteCharAt(18);
+		s.deleteCharAt(13);
+		s.deleteCharAt(8);
+		return s.toString();
 	}
 
 	private static final class SessionRemover extends TimerTask {
