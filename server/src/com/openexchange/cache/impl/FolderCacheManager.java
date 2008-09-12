@@ -606,6 +606,31 @@ public final class FolderCacheManager {
 		}
 	}
 
+	/**
+	 * Gets the attributes that are supposed to be used for putting a folder
+	 * object bound to specified cache key.
+	 * <p>
+	 * On initial insertion of the folder object, the attributes should indicate
+	 * that the put action shall not be propagated to other auxiliary caches.
+	 * Therefore the attribute <i>isLateral</i> is going to be set to
+	 * <code>false</code>. If specified <code>givenAttribs</code> are not
+	 * <code>null</code>, the setting <i>isLateral=false</i> is applied to this
+	 * reference. Otherwise a copy of the default element attributes is returned
+	 * with <i>isLateral=false</i> set.
+	 * <p>
+	 * On a non-initial insertion <code>null</code> is returned to indicate
+	 * using the default element attributes.
+	 * 
+	 * @param key
+	 *            The cache key to which the folder object is bound in cache
+	 * @param givenAttribs
+	 *            The current valid element attributes for the folder object or
+	 *            <code>null</code>
+	 * @return The attributes that are supposed to be used for putting a folder
+	 *         object bound to specified cache key or <code>null</code>
+	 * @throws CacheException
+	 *             If a cache error occurs
+	 */
 	private ElementAttributes getAppliedAttributes(final CacheKey key, final ElementAttributes givenAttribs)
 			throws CacheException {
 		if (folderCache.get(key) != null) {
