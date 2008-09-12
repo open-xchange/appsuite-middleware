@@ -336,9 +336,11 @@ public class TestCommand extends Command {
             if (null != address) {
                 tagarray.removeAll(address.keySet());
             }
-            final Hashtable<String, String> comparator = this.command.getComparator();
-            if (null != comparator) {
+            if (tagarray.contains(":comparator")) {
                 throw new SieveException("Sieve comparators aren't supported by this implementation");
+            }
+//            final Hashtable<String, String> comparator = this.command.getComparator();
+//            if (null != comparator) {
 //                final boolean comparatorrule = tagarray.remove(":comparator");
 //                if (comparatorrule) {
 //                    // The argument of the comparator is located one after the
@@ -355,7 +357,7 @@ public class TestCommand extends Command {
 //                        throw new SieveException(object + " is no valid comparator for " + this.command.getCommandname());
 //                    }
 //                }
-            }
+//            }
             if (!tagarray.isEmpty()) {
                 throw new SieveException("One of the tagarguments: " + tagarray + " is not valid for " + this.command.getCommandname());
             }
