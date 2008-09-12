@@ -1,3 +1,9 @@
+open-xchange-resource-managerequest (6.6.0-7) unstable; urgency=low
+
+  * build for PTF 20080911
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 12 Sep 2008 12:30:45 +0200
+
 open-xchange-resource-managerequest (6.6.0-6) unstable; urgency=low
 
   * first build for RC8

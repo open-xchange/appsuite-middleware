@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.6.0
-Release:        6
+Release:	7
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -144,6 +144,50 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Sep 12 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12137: Using new session ID generator based on "java.util.UUID"
+   to also compute an unique ID for random token in a very fast way
+* Tue Sep 09 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12027: Added JMX call to clear the sessions for a specific user
+* Tue Sep 09 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12099: Prevented 0 in modifiedBy of series that gets a delete
+   exception.
+* Mon Sep 08 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11667: Using new event method for changed tasks and removed old ones.
+ - Bugfix #9840: Throwing an exception if a daily recurring appointment with
+   BYMONTH pattern is imported via iCal.
+ - Bugfix #12124: Setting folder identifier of participant always on its private
+   folder if the appointment is located in private or shared folder.
+* Mon Sep 08 2008 - thorben.betten@open-xchange.com
+ - Bugfix #10070: Proper conflict check for whole-day and non-whole-day
+   appointments
+ - Bugfix #12125: Fixed removing starting whitespace characters during
+   html2text conversion
+ - Added enhancement as specified in bug #11702
+ - Bugfix #12116: Fixed calculation of recurring appointments without an
+   until date set
+ - Bugfix #12054: Checking for special group identifier "0" prior to
+   performing update/delete operations
+* Fri Sep 05 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12102: Invalidating context cache on every modifying context
+   operation especially on disable/enable context.
+ - Bugfix #12117: Checking if referenced draft message still exists on
+   auto-safe draft operation
+ - Bugfix #12118: Handling possible unavailable message text body on forward
+ - Bugfix #12123: Restoring order if IMAP server always sorts fetch
+   responses by sequence number in ascending order
+* Fri Sep 05 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12114: Adding recurrence pattern to conflict checks for series
+   appointments if a resource is added as participant.
+* Thu Sep 04 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12108: Proper sequence range in FETCH command if folder is empty
+ - Bugfix #12111: Indicating support of UIDPLUS prior to performing
+   "UID EXPUNGE" command
+ - Bugfix #12104: Fixed calculating wrong until date when syncing to
+   Outlook
+* Thu Sep 04 2008 - francisco.laguna@open-xchange.com
+ - Send import warnings to the GUI.
+ - Bugfix #11869 : Remove Attendees from private appointments and send a warning.
 * Wed Sep 03 2008 - thorben.betten@open-xchange.com
  - Bugfix #11865: Checking for invalid changing of recurrence information
    on a change exception update
