@@ -2,6 +2,7 @@
 
  - Bugfix #12137: Using new session ID generator based on "java.util.UUID"
    to also compute an unique ID for random token in a very fast way
+ - Bugfix #12133: Sending notification to removed (external) participant(s)
 
 * 2008-09-09 - marcus.klein@open-xchange.com
 

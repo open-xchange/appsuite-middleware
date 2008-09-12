@@ -397,7 +397,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 	
 	private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<String> participantSet, final Set<String> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession sessionObj,final Map<String,EmailableParticipant> all) {
 		sortNewExternalParticipantsAndResources(newParticipants, participantSet, resourceSet, receivers, sessionObj, all);
-        sortOldExternalParticipantsAndResources(newParticipants, receivers, all, sessionObj);
+        sortOldExternalParticipantsAndResources(oldParticipants, receivers, all, sessionObj);
     }
 
     private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants,  final Map<Locale, List<EmailableParticipant>> receivers, final Map<String,EmailableParticipant> all, final ServerSession sessionObj) {
