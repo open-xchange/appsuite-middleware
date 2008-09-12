@@ -59,7 +59,14 @@ import com.openexchange.sessiond.exception.SessiondException;
 
 public abstract class SessionIdGenerator {
 
-	private static String implementingClassName = null;
+	/**
+	 * Initializes a new {@link SessionIdGenerator}
+	 */
+	protected SessionIdGenerator() {
+		super();
+	}
+
+	private static String implementingClassName;
 
 	/**
 	 * Proxy attribute for the class implementing this interface.
@@ -93,7 +100,7 @@ public abstract class SessionIdGenerator {
 	private synchronized static Class<? extends SessionIdGenerator> getImplementingClass()
 			throws ClassNotFoundException {
 		if (implementingClassName == null) {
-			implementingClass = DefaultSessionIdGenerator.class;
+			implementingClass = UUIDSessionIdGenerator.class;
 		}
 
 		if (null == implementingClass) {
