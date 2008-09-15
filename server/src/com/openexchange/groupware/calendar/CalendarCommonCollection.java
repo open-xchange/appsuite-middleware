@@ -1030,12 +1030,24 @@ public final class CalendarCommonCollection {
     public static boolean isInThePast(final java.util.Date check) {
         return checkMillisInThePast(check.getTime());
     }
-    
-    static boolean checkMillisInThePast(final long check) {
-        final long today = CalendarRecurringCollection.normalizeLong(System.currentTimeMillis());
-        return check < today;
-    }
-    
+
+    /**
+	 * Checks if given time millis are less than today (normalized current time
+	 * millis):
+	 * 
+	 * <pre>
+	 * return check &lt; (CalendarRecurringCollection.normalizeLong(System.currentTimeMillis()));
+	 * </pre>
+	 * 
+	 * @param check
+	 *            The time millis to check against today's millis
+	 * @return <code>true</code> if given time millis are less than normalized
+	 *         current time millis; otherwise <code>false</code>
+	 */
+	static boolean checkMillisInThePast(final long check) {
+		return check < (CalendarRecurringCollection.normalizeLong(System.currentTimeMillis()));
+	}
+
     static CalendarDataObject[] copyAndExpandCalendarDataObjectArray(final CalendarDataObject source[], final CalendarDataObject dest[]) {
         if (source != null && dest != null && source.length > 0) {
             final CalendarDataObject ret[] = new CalendarDataObject[dest.length+source.length];
