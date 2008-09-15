@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.6.0
-Release:	7
+Release:	8
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -144,9 +144,24 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Sep 15 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12035: Copying not changed recurring values for recurring check on a
+   task update.
+ - Bugfix #12146: Iteration of occurrences of a series appointment is done after
+   fetching all possible conflicts in the complete series time frame.
+* Mon Sep 15 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12135: Sending an appropriate message to removed and added
+   participants through an update operation on an appointment instead of
+   the common "the appointment has been modified" message.
 * Fri Sep 12 2008 - thorben.betten@open-xchange.com
  - Bugfix #12137: Using new session ID generator based on "java.util.UUID"
    to also compute an unique ID for random token in a very fast way
+ - Bugfix #12133: Sending notification to removed (external) participant(s)
+ - Bugfix #12135: Sending an appropriate message to removed participants
+   through an update operation on an appointment instead of the common
+   "the appointment has been modified" message
+* Fri Sep 12 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11848: Using correct collections in TaskIterator to not break ordering.
 * Tue Sep 09 2008 - thorben.betten@open-xchange.com
  - Bugfix #12027: Added JMX call to clear the sessions for a specific user
 * Tue Sep 09 2008 - marcus.klein@open-xchange.com
