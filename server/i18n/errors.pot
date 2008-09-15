@@ -316,9 +316,6 @@ msgstr ""
 msgid "Calendar operation: Context not set."
 msgstr ""
 
-msgid "Caller does not allow to fetch a connection from pool in context %1$s"
-msgstr ""
-
 msgid "Can not create RRule: %s"
 msgstr ""
 
@@ -1614,6 +1611,9 @@ msgid "Not allowed to move default folder %1$s in context %2$s"
 msgstr ""
 
 msgid "Not allowed to open folder %1$s due to missing read access"
+msgstr ""
+
+msgid "Not supported recurrence pattern: BYMONTH"
 msgstr ""
 
 msgid "Not yet supported!"
