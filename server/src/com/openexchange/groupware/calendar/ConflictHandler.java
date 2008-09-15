@@ -146,26 +146,35 @@ public class ConflictHandler {
             return NO_CONFLICTS;
         }
 		/*
-		 * Check for each occurrence
+		 * Check for each occurrence. TODO: Insert time range here to not check
+		 * against all occurrences according to bug #12146:
+		 * 
+		 * CalendarRecurringCollection.calculateRecurring(cdao,
+		 * cdao.getStart().getTime(), cdao.getStart().getTime() +
+		 * MAX_CALC_RANGE, 0);
 		 */
 		final RecurringResults results = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
 		final int size = results.size();
 		final List<CalendarDataObject> conflicts = new ArrayList<CalendarDataObject>(size);
+		final Date resultStart = new Date();
+		final Date resultEnd = new Date();
 		for (int i = 0; i < size && conflicts.size() < MAX_CONFLICT_RESULTS; i++) {
 			final RecurringResult result = results.getRecurringResult(i);
-			CalendarDataObject[] resultConflicts = resolveResourceConflicts(new Date(result.getStart()), new Date(
-					result.getEnd()));
-			if (resultConflicts.length + conflicts.size() > MAX_CONFLICT_RESULTS) {
-				/*
-				 * Inserting all conflicts would exceed MAX_CONFLICT_RESULTS.
-				 * Cut off exceeding elements.
-				 */
-				final int space = MAX_CONFLICT_RESULTS - conflicts.size();
-				final CalendarDataObject[] tmp = new CalendarDataObject[space];
-				System.arraycopy(resultConflicts, 0, tmp, 0, space);
-				resultConflicts = tmp;
+			resultStart.setTime(result.getStart());
+			resultEnd.setTime(result.getEnd());
+			final CalendarDataObject[] resultConflicts = resolveResourceConflicts(resultStart, resultEnd);
+			if (resultConflicts.length > 0) {
+				if (resultConflicts.length + conflicts.size() > MAX_CONFLICT_RESULTS) {
+					/*
+					 * Inserting all conflicts would exceed
+					 * MAX_CONFLICT_RESULTS. Cut off exceeding elements.
+					 */
+					conflicts.addAll(Arrays
+							.asList(subarray(resultConflicts, 0, MAX_CONFLICT_RESULTS - conflicts.size())));
+				} else {
+					conflicts.addAll(Arrays.asList(resultConflicts));
+				}
 			}
-			conflicts.addAll(Arrays.asList(resultConflicts));
 		}
 		return conflicts.toArray(new CalendarDataObject[conflicts.size()]);
 	}
@@ -355,5 +364,23 @@ public class ConflictHandler {
     private final boolean containsResources() {
         return cdao.containsResources();
     }
-    
+
+	/**
+	 * Creates a newly allocated array of {@link CalendarDataObject} holding a
+	 * subsequence of specified source array of {@link CalendarDataObject}
+	 * 
+	 * @param src
+	 *            The source array of {@link CalendarDataObject}
+	 * @param fromIndex
+	 *            The starting index from which elements are collected
+	 * @param len
+	 *            The desired subarray's length
+	 * @return A newly allocated array of {@link CalendarDataObject} holding a
+	 *         subsequence
+	 */
+	private static CalendarDataObject[] subarray(final CalendarDataObject[] src, final int fromIndex, final int len) {
+		final CalendarDataObject[] retval = new CalendarDataObject[len];
+		System.arraycopy(src, fromIndex, retval, 0, len);
+		return retval;
+	}
 }
