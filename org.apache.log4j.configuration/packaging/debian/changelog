@@ -1,0 +1,5 @@
+open-xchange-log4j (6.6.0-0) unstable; urgency=low
+
+  * initial packaging
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Sep 2008 14:58:27 +0200

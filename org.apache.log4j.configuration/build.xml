@@ -13,16 +13,21 @@
 
     <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}"/>
-    <property name="composite.name" value="open-xchange-log4j-configuration-${version}" />
+    <property name="composite.name" value="open-xchange-log4j-${version}" />
 
     <fileset dir="." id="metainf">
         <include name="META-INF/**"/>
         <exclude name="CVS"/>
     </fileset>
 
+    <fileset dir="jars" id="log4jFiles">
+        <include name="org.apache.log4j*"/>
+    </fileset>
+
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
-    <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+    <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+    <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
 
     <!-- Install -->
     <target name="install">
@@ -31,14 +36,26 @@
     </target>
 
     <target name="installConfig">
-        <mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
+        <mkdir dir="${destdir}/${gwbundle.d}"/>
+        <mkdir dir="${destdir}/${adbundle.d}"/>
+        <echo file="${destdir}/${gwbundle.d}/org.apache.log4j.ini"
+            message="${bundlesdir}/org.apache.log4j_1.2.13.v200806030600.jar"/>
+        <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini"
+            message="${bundlesdir}/${bundle.name}${line.separator}"/>
+        <echo file="${destdir}/${adbundle.d}/org.apache.log4j.ini"
+            message="${bundlesdir}/org.apache.log4j_1.2.13.v200806030600.jar"/>
+        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${bundle.name}${line.separator}"/>
     </target>
 
     <target name="installJar">
         <property name="bundlesdestdir" value="${destdir}${bundlesdir}"/>
         <mkdir dir="${bundlesdestdir}"/>
+        <!-- log4j bundle -->
+        <copy todir="${bundlesdestdir}">
+            <fileset refid="log4jFiles"/>
+        </copy>
+        <!-- conf bundle -->
         <property name="log4jconfigurationdir" value="${bundlesdestdir}/${bundle.name}"/>
         <mkdir dir="${log4jconfigurationdir}"/>
         <copy todir="${log4jconfigurationdir}">
