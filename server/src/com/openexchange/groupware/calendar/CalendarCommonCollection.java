@@ -59,7 +59,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -718,47 +717,82 @@ public final class CalendarCommonCollection {
         return sb.toString();
     }
     
-    public static boolean inBetween(final long check_start, final long check_end, final long range_start, final long range_end) {
-        if (check_start <= range_start  && check_start >= range_start) { return true; } else if (check_start >= range_start && check_end <= range_end) { return true; } else if (check_start > range_start && check_end > range_end && check_start < range_end) { return true; } else if (check_start < range_start && check_end > range_start && check_start < range_end) { return true; }
-        return false;
-    }
-    
-    public static Date[] convertString2Dates(final String s) {
-        Date d[] = null;
-        final StringTokenizer stok = new StringTokenizer(s, ", ");
-        d = new Date[stok.countTokens()];
-        int c = 0;
-        while (stok.hasMoreTokens()) {
-            d[c++] = new Date(Long.valueOf(stok.nextToken()).longValue());
-        }
-        return d;
-    }
-    
-    public static String convertDates2String(final Date[] d) {
-        if (d != null && d.length > 0) {
-            final StringBuilder sb = new StringBuilder(32);
-            Arrays.sort(d);
-            long last = 0;
-            for (int a = 0; a < d.length; a++) {
-                if (d[a] != null) {
-                    final long l = d[a].getTime();
-                    if (l != last) {
-                        if (last == 0) {
-                            sb.append(l);
-                        } else {
-                            sb.append(',');
-                            sb.append(l);
-                        }
-                        last = l;
-                    }
-                }
-            }
-            if (sb.length() > 0) {
-                return sb.toString();
-            }
-        }
-        return null;
-    }
+    /**
+	 * Checks if range specified by <code>check_start</code> and
+	 * <code>check_end</code> intersects/overlaps the range specified by
+	 * <code>range_start</code> and <code>range_end</code>.
+	 * 
+	 * @param check_start
+	 *            The check start
+	 * @param check_end
+	 *            The check end
+	 * @param range_start
+	 *            The range start
+	 * @param range_end
+	 *            The range end
+	 * @return <code>true</code> if range specified by <code>check_start</code>
+	 *         and <code>check_end</code> intersects/overlaps the range
+	 *         specified by <code>range_start</code> and <code>range_end</code>;
+	 *         otherwise <code>false</code>
+	 */
+	public static boolean inBetween(final long check_start, final long check_end, final long range_start,
+			final long range_end) {
+		return (check_start <= range_end) && (check_end >= range_start);
+		
+		/*if (check_start <= range_start && check_start >= range_start) {
+			return true;
+		} else if (check_start >= range_start && check_end <= range_end) {
+			return true;
+		} else if (check_start > range_start && check_end > range_end && check_start < range_end) {
+			return true;
+		} else if (check_start < range_start && check_end > range_start && check_start < range_end) {
+			return true;
+		}
+		return false;*/
+	}
+
+    /**
+	 * Converts given string of comma-separated <i>long</i>s to an array of
+	 * {@link Date} objects
+	 * 
+	 * @param s
+	 *            The string of comma-separated <i>long</i>s
+	 * @return An array of {@link Date} objects
+	 */
+	public static Date[] convertString2Dates(final String s) {
+		if (s == null) {
+			return null;
+		} else if (s.length() == 0) {
+			return new Date[0];
+		}
+		final String[] sa = s.split(" *, *");
+		final Date dates[] = new Date[sa.length];
+		for (int i = 0; i < dates.length; i++) {
+			dates[i] = new Date(Long.parseLong(sa[i]));
+		}
+		return dates;
+	}
+
+    /**
+	 * Converts given array of {@link Date} objects to a string of
+	 * comma-separated <i>long</i>s
+	 * 
+	 * @param d
+	 *            The array of {@link Date} objects
+	 * @return A string of comma-separated <i>long</i>s
+	 */
+	public static String convertDates2String(final Date[] d) {
+		if (d == null || d.length == 0) {
+			return null;
+		}
+		final StringBuilder sb = new StringBuilder(d.length * 16);
+		Arrays.sort(d);
+		sb.append(d[0].getTime());
+		for (int i = 1; i < d.length; i++) {
+			sb.append(',').append(d[i].getTime());
+		}
+		return sb.toString();
+	}
     
     public static boolean check(final Object a, final Object b) {
         if (a == b) {
