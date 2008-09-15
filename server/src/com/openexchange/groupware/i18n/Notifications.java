@@ -218,6 +218,107 @@ public class Notifications {
 		"\n"+
 		"\n"+
 		"==========================================";
+
+	public static final String TASK_REMOVED_PARTICIPANT = 
+		"A task has been changed by [changed_by].\n"+
+		"\n"+
+		"You have been removed from the list of participants.\n"+
+		"\n"+
+		"Task\n"+
+		"====\n"+
+		"Created by:  [created_by]\n"+
+		"Title:       [title]\n"+
+		"\n"+
+		"Start date:  [start]\n"+
+		"End date:    [end]\n"+
+		"\n"+
+		"Description:\n"+
+		"[description]\n"+
+		"\n"+
+		"\n"+
+		"==========================================";
+
+	public static final String APPOINTMENT_ADDED_PARTICIPANT = 
+		"An appointment has been changed by [changed_by].\n"+
+		"\n"+
+		"You have been added to the list of participants.\n"+
+		"\n"+
+		"Direct Link: [link]\n"+
+		"\n"+
+		"Appointment\n"+
+		"===========\n"+
+		"Created by:  [created_by]\n"+
+		"Title:       [title]\n"+
+		"Location:    [location]\n"+
+		"\n"+
+		"Start date:  [start]\n"+
+		"End date:    [end]\n"+
+		"\n"+
+		"Description:\n"+
+		"[description]\n"+
+		"\n"+
+		"\n"+
+		"==========================================";
+
+	public static final String TASK_ADDED_PARTICIPANT = 
+		"A task has been changed by [changed_by].\n"+
+		"\n"+
+		"You have been added to the list of participants.\n"+
+		"\n"+
+		"Direct Link: [link]\n"+
+		"\n"+
+		"Task\n"+
+		"====\n"+
+		"Created by:  [created_by]\n"+
+		"Title:       [title]\n"+
+		"\n"+
+		"Start date:  [start]\n"+
+		"End date:    [end]\n"+
+		"\n"+
+		"Description:\n"+
+		"[description]\n"+
+		"\n"+
+		"\n"+
+		"==========================================";
+
+	public static final String APPOINTMENT_ADDED_PARTICIPANT_EXT = 
+		"An appointment has been changed by [changed_by].\n"+
+		"\n"+
+		"You have been added to the list of participants.\n"+
+		"\n"+
+		"Appointment\n"+
+		"===========\n"+
+		"Created by:  [created_by]\n"+
+		"Title:       [title]\n"+
+		"Location:    [location]\n"+
+		"\n"+
+		"Start date:  [start]\n"+
+		"End date:    [end]\n"+
+		"\n"+
+		"Description:\n"+
+		"[description]\n"+
+		"\n"+
+		"\n"+
+		"==========================================";
+
+	public static final String TASK_ADDED_PARTICIPANT_EXT = 
+		"A task has been changed by [changed_by].\n"+
+		"\n"+
+		"You have been added to the list of participants.\n"+
+		"\n"+
+		"Task\n"+
+		"====\n"+
+		"Created by:  [created_by]\n"+
+		"Title:       [title]\n"+
+		"\n"+
+		"Start date:  [start]\n"+
+		"End date:    [end]\n"+
+		"\n"+
+		"Description:\n"+
+		"[description]\n"+
+		"\n"+
+		"\n"+
+		"==========================================";
 	
 	public static final String APPOINTMENT_CREATE_TITLE = "A new appointment has been created";
 	public static final String APPOINTMENT_UPDATE_TITLE = "An appointment has been changed";

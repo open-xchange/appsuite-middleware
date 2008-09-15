@@ -342,28 +342,54 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 							
 					
 					final MailMessage msg = new MailMessage();
+					msg.title = strings.getString(titleKey) + ": " + m.get("title");
 					if (isUpdate) {
 						if (EmailableParticipant.STATE_REMOVED == p.state) {
+							/*
+							 * Current participant is removed by caught update
+							 * event
+							 */
 							if (Types.APPOINTMENT == state.getModule()) {
-								msg.message = new StringTemplate(strings.getString(Notifications.APPOINTMENT_REMOVED_PARTICIPANT)).render(m);
+								msg.message = new StringTemplate(strings
+										.getString(Notifications.APPOINTMENT_REMOVED_PARTICIPANT)).render(m);
 							} else {
-								// TODO: Participant removed message for tasks
-								msg.message = createTemplate.render(m);
+								msg.message = new StringTemplate(strings
+										.getString(Notifications.TASK_REMOVED_PARTICIPANT)).render(m);
 							}
 						} else if (EmailableParticipant.STATE_NEW == p.state) {
-							// TODO: Notification for newly added participant
-							msg.message = createTemplate.render(m);
+							/*
+							 * Current participant is added by caught update
+							 * event
+							 */
+							if (Types.APPOINTMENT == state.getModule()) {
+								if (p.type == Participant.EXTERNAL_USER) {
+									// Without [link] replacement
+									msg.message = new StringTemplate(strings
+											.getString(Notifications.APPOINTMENT_ADDED_PARTICIPANT_EXT)).render(m);
+								} else {
+									msg.message = new StringTemplate(strings
+											.getString(Notifications.APPOINTMENT_ADDED_PARTICIPANT)).render(m);
+								}
+							} else {
+								if (p.type == Participant.EXTERNAL_USER) {
+									// Without [link] replacement
+									msg.message = new StringTemplate(strings
+											.getString(Notifications.TASK_ADDED_PARTICIPANT_EXT)).render(m);
+								} else {
+									msg.message = new StringTemplate(strings
+											.getString(Notifications.TASK_ADDED_PARTICIPANT)).render(m);
+								}
+							}
 						} else {
 							msg.message = createTemplate.render(m);
 						}
 					} else {
 						msg.message = createTemplate.render(m);
 					}
-					msg.title = strings.getString(titleKey)+": "+m.get("title");
 					msg.addresses.add(p.email);
 					msg.folderId = p.folderId;
-                    msg.internal = p.type != Participant.EXTERNAL_USER;
-                    messages.add(msg);
+					msg.internal = p.type != Participant.EXTERNAL_USER;
+					messages.add(msg);
 				}
 			}
 		}
