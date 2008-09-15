@@ -29,7 +29,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.6.0
-Release:        6
+Release:	7
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -161,6 +161,11 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Tue Sep 09 2008 - choeger@open-xchange.com
+ - Setting writeOnly to true per default on new and updated installations (postinst)
+   (see Bug #11595)
+* Tue Sep 09 2008 - thorben.betten@open-xchange.com
+ - Bugfix ID#11526: Using javax.mail.InternetAddress class to parse address strings
 * Wed Sep 03 2008 - choeger@open-xchange.com
  - added new option writeOnly to configdb to be able to
    eleminate any connections to database slave within server api calls
