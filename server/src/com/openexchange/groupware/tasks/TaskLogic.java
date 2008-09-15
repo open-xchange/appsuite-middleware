@@ -130,7 +130,7 @@ public final class TaskLogic {
         // TODO Check if creator is participant in private or shared folder
         // Maybe the owner of the shared folder is the delegator of the task.
         checkPrivateFlag(task.getPrivateFlag(), false, participants, null);
-        checkParticipants(participants, task.getCreatedBy());
+        checkParticipants(participants);
         checkRecurrence(task, null);
     }
 
@@ -171,7 +171,7 @@ public final class TaskLogic {
         // TODO Check if creator is participant in private or shared folder
         final Set<TaskParticipant> destParts = changedParts ? newParts
             : oldParts;
-        checkParticipants(destParts, oldTask.getCreatedBy());
+        checkParticipants(destParts);
         checkRecurrence(task, oldTask);
     }
 
@@ -251,12 +251,12 @@ public final class TaskLogic {
         }
         final int progress = task.getPercentComplete();
         if (progress < 0 || progress > Task.PERCENT_MAXVALUE) {
-            throw new TaskException(Code.INVALID_PERCENTAGE, progress);
+            throw new TaskException(Code.INVALID_PERCENTAGE, Integer.valueOf(progress));
         }
         switch (task.getStatus()) {
         case Task.NOT_STARTED:
             if (0 != progress) {
-                throw new TaskException(Code.PERCENTAGE_NOT_ZERO, progress);
+                throw new TaskException(Code.PERCENTAGE_NOT_ZERO, Integer.valueOf(progress));
             }
             break;
         case Task.IN_PROGRESS:
@@ -268,11 +268,11 @@ public final class TaskLogic {
         case Task.DONE:
             // TODO Disabled because GUI has problems with this.
             if (false && Task.PERCENT_MAXVALUE != progress) {
-                throw new TaskException(Code.PERCENTAGE_NOT_FULL, progress);
+                throw new TaskException(Code.PERCENTAGE_NOT_FULL, Integer.valueOf(progress));
             }
             break;
         default:
-            throw new TaskException(Code.INVALID_TASK_STATE, task.getStatus());
+            throw new TaskException(Code.INVALID_TASK_STATE, Integer.valueOf(task.getStatus()));
         }
     }
 
@@ -305,11 +305,10 @@ public final class TaskLogic {
      * Checks that the creator can't be participant if the according global
      * option isn't set.
      * @param participants Participants of the task.
-     * @param creator unique identifier of the user that created the task.
      * @throws TaskException if the check fails.
      */
     private static void checkParticipants(
-        final Set<TaskParticipant> participants, final int creator)
+        final Set<TaskParticipant> participants)
         throws TaskException {
         if (null == participants) {
             return;
@@ -347,27 +346,66 @@ public final class TaskLogic {
             if (null == oldTask) {
                 if (!task.containsStartDate()) {
                     throw new TaskException(Code.MISSING_RECURRENCE_VALUE,
-                        Task.START_DATE);
+                        Integer.valueOf(Task.START_DATE));
                 }
                 if (!task.containsEndDate()) {
                     throw new TaskException(Code.MISSING_RECURRENCE_VALUE,
-                        Task.END_DATE);
+                        Integer.valueOf(Task.END_DATE));
                 }
             } else {
                 if (task.containsStartDate() && null == task.getStartDate()) {
                     throw new TaskException(Code.MISSING_RECURRENCE_VALUE,
-                        Task.START_DATE);
+                        Integer.valueOf(Task.START_DATE));
                 }
                 if (task.containsEndDate() && null == task.getEndDate()) {
                     throw new TaskException(Code.MISSING_RECURRENCE_VALUE,
-                        Task.START_DATE);
+                        Integer.valueOf(Task.START_DATE));
                 }
             }
         }
+        copyRecurringValues(task, oldTask);
         try {
             CalendarRecurringCollection.checkRecurring(task);
         } catch (final OXException e) {
             throw new TaskException(e);
+        }
+    }
+
+    /**
+     * If a task is updated, it only contains the changed values. If the
+     * recurrence type is changed but not the interval it must be copied from
+     * the original task to be able to perform the recurrence check.
+     * @param task updated task.
+     * @param oldTask original task.
+     */
+    private static void copyRecurringValues(final Task task, final Task oldTask) {
+        if (null == oldTask) {
+            return;
+        }
+        if (task.containsRecurrenceType() && Task.NO_RECURRENCE != task.getRecurrenceType()) {
+            if (Task.DAILY == task.getRecurrenceType()
+                || Task.WEEKLY == task.getRecurrenceType()
+                || Task.MONTHLY == task.getRecurrenceType()) {
+                if (!task.containsInterval() && oldTask.containsInterval()) {
+                    task.setInterval(oldTask.getInterval());
+                }
+            }
+            if (Task.WEEKLY == task.getRecurrenceType()) {
+                if (!task.containsDays() && oldTask.containsDays()) {
+                    task.setDays(oldTask.getDays());
+                }
+            }
+            if (Task.MONTHLY == task.getRecurrenceType()
+                || Task.YEARLY == task.getRecurrenceType()) {
+                if (!task.containsDayInMonth() && oldTask.containsDayInMonth()) {
+                    task.setDayInMonth(oldTask.getDayInMonth());
+                }
+            }
+            if (Task.YEARLY == task.getRecurrenceType()) {
+                if (!task.containsMonth() && oldTask.containsMonth()) {
+                    task.setMonth(oldTask.getMonth());
+                }
+            }
         }
     }
 
@@ -447,7 +485,7 @@ public final class TaskLogic {
                 if (null == groupId) {
                     retval.add(internal.getUser());
                 } else {
-                    final GroupParticipant group = new GroupParticipant(groupId);
+                    final GroupParticipant group = new GroupParticipant(groupId.intValue());
                     if (!groups.containsKey(groupId)) {
                         groups.put(groupId, group);
                     }
@@ -504,15 +542,15 @@ public final class TaskLogic {
 
     static int[] findModifiedFields(final Task oldTask, final Task task) {
         final List<Integer> fields = new ArrayList<Integer>();
-        for (final Mapper mapper : Mapping.MAPPERS) {
+        for (final Mapper<?> mapper : Mapping.MAPPERS) {
             if (mapper.isSet(task)
                 && (!mapper.isSet(oldTask) || !mapper.equals(task, oldTask))) {
-                fields.add(mapper.getId());
+                fields.add(Integer.valueOf(mapper.getId()));
             }
         }
         final int[] retval = new int[fields.size()];
         for (int i = 0; i < fields.size(); i++) {
-            retval[i] = fields.get(i);
+            retval[i] = fields.get(i).intValue();
         }
         return retval;
     }
@@ -582,7 +620,7 @@ public final class TaskLogic {
             new HashSet<InternalParticipant>();
         for (final InternalParticipant participant : participants) {
             if (null != participant.getGroupId()
-                && groupId == participant.getGroupId()) {
+                && groupId == participant.getGroupId().intValue()) {
                 retval.add(participant);
             }
         }
