@@ -8,6 +8,8 @@
 
  - Bugfix #12035: Copying not changed recurring values for recurring check on a
    task update.
+ - Bugfix #12146: Iteration of occurrences of a series appointment is done after
+   fetching all possible conflicts in the complete series time frame.
 
 * 2008-09-12 - marcus.klein@open-xchange.com
 

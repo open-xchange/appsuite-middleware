@@ -55,8 +55,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -130,6 +130,10 @@ public class ConflictHandler {
     }
     
     private CalendarDataObject[] prepareResolving(final boolean request_participants) throws OXException {
+        /*
+         * Using original method {@link #resolveResourceConflicts(Date, Date)}
+         * for non series appointments.
+         */
         if (cdao.getRecurrenceType() == 0) {
             if (action) {
                 if (request_participants) {
@@ -145,38 +149,24 @@ public class ConflictHandler {
         if (request_participants) {
             return NO_CONFLICTS;
         }
-		/*
-		 * Check for each occurrence. TODO: Insert time range here to not check
-		 * against all occurrences according to bug #12146:
-		 * 
-		 * CalendarRecurringCollection.calculateRecurring(cdao,
-		 * cdao.getStart().getTime(), cdao.getStart().getTime() +
-		 * MAX_CALC_RANGE, 0);
-		 */
+        /*
+         * Using optimized method {@link #resolveResourceConflicts(Date, Date, RecurringResults)}
+         * for series appointments.
+         */
 		final RecurringResults results = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
-		final int size = results.size();
-		final List<CalendarDataObject> conflicts = new ArrayList<CalendarDataObject>(size);
-		final Date resultStart = new Date();
-		final Date resultEnd = new Date();
-		for (int i = 0; i < size && conflicts.size() < MAX_CONFLICT_RESULTS; i++) {
-			final RecurringResult result = results.getRecurringResult(i);
-			resultStart.setTime(result.getStart());
-			resultEnd.setTime(result.getEnd());
-			final CalendarDataObject[] resultConflicts = resolveResourceConflicts(resultStart, resultEnd);
-			if (resultConflicts.length > 0) {
-				if (resultConflicts.length + conflicts.size() > MAX_CONFLICT_RESULTS) {
-					/*
-					 * Inserting all conflicts would exceed
-					 * MAX_CONFLICT_RESULTS. Cut off exceeding elements.
-					 */
-					conflicts.addAll(Arrays
-							.asList(subarray(resultConflicts, 0, MAX_CONFLICT_RESULTS - conflicts.size())));
-				} else {
-					conflicts.addAll(Arrays.asList(resultConflicts));
-				}
-			}
-		}
-		return conflicts.size() == 0 ? NO_CONFLICTS : conflicts.toArray(new CalendarDataObject[conflicts.size()]);
+		final Date resultStart = new Date(results.getRecurringResult(0).getStart());
+		final Date resultEnd = new Date(results.getRecurringResult(results.size() - 1).getEnd());
+	    final CalendarDataObject[] resultConflicts = resolveResourceConflicts(resultStart, resultEnd, results);
+	    // Results must be sorted afterwards because already existing series
+	    // appointments are returned in time reverse order by FreeBusyResults.
+	    // Because of 999 maximum number of conflicts the returned array may
+	    // contain a lot of appointments far in the future.
+	    Arrays.sort(resultConflicts, new Comparator<CalendarDataObject>() {
+            public int compare(final CalendarDataObject cdao1, final CalendarDataObject cdao2) {
+                return cdao1.getStartDate().compareTo(cdao2.getStartDate());
+            }
+	    });
+        return resultConflicts;
 	}
     
     private CalendarDataObject[] resolveParticipantConflicts(final Date start, final Date end) throws OXException {
@@ -239,7 +229,7 @@ public class ConflictHandler {
             }
             return NO_CONFLICTS;
         } catch (final SearchIteratorException sie) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sie, 12);
+            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sie, Integer.valueOf(12));
         } catch (final SQLException sqle) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
         } catch (final DBPoolingException dbpe) {
@@ -335,7 +325,110 @@ public class ConflictHandler {
             }
             return NO_CONFLICTS;
         } catch (final SearchIteratorException sie) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sie, 13);
+            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sie, Integer.valueOf(13));
+        } catch (final SQLException sqle) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+        } catch (final DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } finally {
+            if (close_connection && si != null) {
+                try {
+                    si.close();
+                } catch (final SearchIteratorException sie) {
+                    LOG.error("Error closing SearchIterator" ,sie);
+                }
+                CalendarCommonCollection.closeResultSet(rs);
+                CalendarCommonCollection.closePreparedStatement(prep);
+                CalendarCommonCollection.closePreparedStatement(private_folder_information);
+            }
+            if (close_connection && readcon != null) {
+                try {
+                    DBPool.push(ctx, readcon);
+                } catch (final DBPoolingException dbpe) {
+                    LOG.error("error pushing readable connection" ,dbpe);
+                }
+            }
+        }
+    }
+
+    /**
+     * This method searches for booking conflicts if a series appointment contains
+     * a resource. Start and end date must be the start and the end of the series.
+     * This method then fetches all appointments in that time frame that also book
+     * the resource. The occurrences of the series appointment are then iterated
+     * using the given RecurringResults for every possible conflict selected from
+     * the database. All recurring dates of the series are then checked against
+     * every possible conflict from the database and only conflicting time frames
+     * are returned as resource booking conflicts. This method is a lot faster
+     * that {@link #resolveResourceConflicts(Date, Date)}.
+     * @param start Start date of the first occurrence of the series appointment.
+     * @param end End date of the last occurence of the series apppointment.
+     * @param results Recurring results of the series appointment.
+     * @return Conflicting appointments that booked the resource in the same
+     * time frame.
+     * @throws OXException if some problem occurs.
+     */
+    private CalendarDataObject[] resolveResourceConflicts(final Date start, final Date end, final RecurringResults results) throws OXException {
+        final String sql_in = CalendarCommonCollection.getSQLInStringForResources(cdao.getParticipants());
+        if (sql_in == null) {
+            return NO_CONFLICTS;
+        }
+        final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
+        Connection readcon = null;
+        SearchIterator<CalendarDataObject> si = null;
+        ResultSet rs = null;
+        PreparedStatement prep  = null;
+        PreparedStatement private_folder_information = null;
+        boolean close_connection = true;
+        final Context ctx = Tools.getContext(so);
+        final User user = Tools.getUser(so, ctx);
+        try {
+            readcon = DBPool.pickup(ctx);
+            final long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, user.getTimeZone());
+            long whole_day_end = CalendarCommonCollection.getUserTimeUTCDate(end, user.getTimeZone());
+            if (whole_day_end <= whole_day_start) {
+                whole_day_end = whole_day_start+CalendarRecurringCollection.MILLI_DAY;
+            }
+            prep = calendarsqlimp.getResourceConflicts(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
+            private_folder_information = calendarsqlimp.getResourceConflictsPrivateFolderInformation(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
+            rs = calendarsqlimp.getResultSet(prep);
+            si = new FreeBusyResults(rs, prep, ctx, user.getId(), user.getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx), readcon, true, cdao.getParticipants(), private_folder_information, calendarsqlimp);
+            final ArrayList<CalendarDataObject> li = new ArrayList<CalendarDataObject>();
+            while (si.hasNext()) {
+                final CalendarDataObject conflict_dao = si.next();
+                if (conflict_dao == null || !conflict_dao.containsStartDate() || !conflict_dao.containsEndDate()) {
+                    continue;
+                }
+                if (CalendarCommonCollection.checkMillisInThePast(conflict_dao.getEndDate().getTime())) {
+                    continue;
+                }
+                if (!action && cdao.getObjectID() == conflict_dao.getObjectID()) { // Same id should never conflict if we are running an update
+                    continue;
+                }
+                for (int i = 0; i < results.size() && current_results < MAX_CONFLICT_RESULTS; i++) {
+                    final RecurringResult result = results.getRecurringResult(i);
+                    final long rStart = result.getStart();
+                    final long rEnd = result.getEnd();
+                    if (CalendarCommonCollection.inBetween(rStart, rEnd, conflict_dao.getStartDate().getTime(), conflict_dao.getEndDate().getTime())) {
+                        conflict_dao.setHardConflict();
+                        li.add(conflict_dao);
+                        current_results++;
+                    }
+                }
+                if (current_results >= MAX_CONFLICT_RESULTS) {
+                    break;
+                }
+            }
+            si.close();
+            close_connection = false;
+            if (0 != li.size()) {
+                final CalendarDataObject[] ret = new CalendarDataObject[li.size()];
+                li.toArray(ret);
+                return ret;
+            }
+            return NO_CONFLICTS;
+        } catch (final SearchIteratorException sie) {
+            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sie, Integer.valueOf(13));
         } catch (final SQLException sqle) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
         } catch (final DBPoolingException dbpe) {
@@ -364,23 +457,4 @@ public class ConflictHandler {
     private final boolean containsResources() {
         return cdao.containsResources();
     }
-
-	/**
-	 * Creates a newly allocated array of {@link CalendarDataObject} holding a
-	 * subsequence of specified source array of {@link CalendarDataObject}
-	 * 
-	 * @param src
-	 *            The source array of {@link CalendarDataObject}
-	 * @param fromIndex
-	 *            The starting index from which elements are collected
-	 * @param len
-	 *            The desired subarray's length
-	 * @return A newly allocated array of {@link CalendarDataObject} holding a
-	 *         subsequence
-	 */
-	private static CalendarDataObject[] subarray(final CalendarDataObject[] src, final int fromIndex, final int len) {
-		final CalendarDataObject[] retval = new CalendarDataObject[len];
-		System.arraycopy(src, fromIndex, retval, 0, len);
-		return retval;
-	}
 }
