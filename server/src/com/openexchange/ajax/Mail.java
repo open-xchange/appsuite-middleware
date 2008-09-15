@@ -2396,10 +2396,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			}
 			final int flags = paramContainer.getIntParam(PARAMETER_FLAGS);
 			/*
-			 * Convert PUT body to RFC822 data
-			 */
-			final byte[] rfc822Bytes = body.getBytes("US-ASCII");
-			/*
 			 * Check if "folder" element is present which indicates to save
 			 * given message as a draft or append to denoted folder
 			 */
@@ -2412,7 +2408,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					/*
 					 * Send raw message source
 					 */
-					final MailMessage sentMail = transport.sendRawMessage(rfc822Bytes);
+					final MailMessage sentMail = transport.sendRawMessage(body.getBytes("US-ASCII"));
 					if (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
 							session.getContextId()).isNoCopyIntoStandardSentFolder()) {
 						/*
@@ -2479,7 +2475,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 				mailAccess.connect();
 				try {
-					final MailMessage m = MIMEMessageConverter.convertMessage(rfc822Bytes);
+					final MailMessage m = MIMEMessageConverter.convertMessage(body.getBytes("US-ASCII"));
 					if (flags != ParamContainer.NOT_FOUND) {
 						m.setFlags(flags);
 					}
