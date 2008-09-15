@@ -176,7 +176,7 @@ public class ConflictHandler {
 				}
 			}
 		}
-		return conflicts.toArray(new CalendarDataObject[conflicts.size()]);
+		return conflicts.size() == 0 ? NO_CONFLICTS : conflicts.toArray(new CalendarDataObject[conflicts.size()]);
 	}
     
     private CalendarDataObject[] resolveParticipantConflicts(final Date start, final Date end) throws OXException {
