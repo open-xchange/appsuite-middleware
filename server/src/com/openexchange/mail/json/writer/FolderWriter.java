@@ -51,6 +51,9 @@ package com.openexchange.mail.json.writer;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -76,6 +79,9 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  */
 public final class FolderWriter {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(FolderWriter.class);
+
 	public static abstract class MailFolderFieldWriter {
 		public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey)
 				throws MailException {
@@ -89,6 +95,447 @@ public final class FolderWriter {
 
 		public abstract void writeField(Object jsonContainer, MailFolder folder, boolean withKey, String name,
 				int hasSubfolders, String fullName, int module, boolean all) throws MailException;
+	}
+
+	private static abstract class ExtendedMailFolderFieldWriter extends MailFolderFieldWriter {
+
+		public final MailConfig mailConfig;
+
+		public ExtendedMailFolderFieldWriter(final MailConfig mailConfig) {
+			super();
+			this.mailConfig = mailConfig;
+		}
+
+	}
+
+	/**
+	 * Maps folder field constants to corresponding instance of
+	 * {@link MailFolderFieldWriter}
+	 */
+	private static final Map<Integer, MailFolderFieldWriter> WRITERS_MAP = new HashMap<Integer, MailFolderFieldWriter>(
+			20);
+
+	static {
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.OBJECT_ID), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.ID, prepareFullname(fullName == null ? folder
+								.getFullname() : fullName));
+					} else {
+						((JSONArray) jsonContainer).put(prepareFullname(fullName == null ? folder.getFullname()
+								: fullName));
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				}
+			}
+		});
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.CREATED_BY), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.CREATED_BY, -1);
+					} else {
+						((JSONArray) jsonContainer).put(-1);
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				}
+			}
+		});
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.MODIFIED_BY), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.MODIFIED_BY, -1);
+					} else {
+						((JSONArray) jsonContainer).put(-1);
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				}
+			}
+		});
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.CREATION_DATE), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.CREATION_DATE, 0);
+					} else {
+						((JSONArray) jsonContainer).put(0);
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				}
+			}
+		});
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.LAST_MODIFIED), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.LAST_MODIFIED, 0);
+					} else {
+						((JSONArray) jsonContainer).put(0);
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				}
+			}
+		});
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.FOLDER_ID), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					final Object parent;
+					if (null == folder.getParentFullname()) {
+						parent = JSONObject.NULL;
+					} else {
+						parent = prepareFullname(folder.getParentFullname());
+					}
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.FOLDER_ID, parent);
+					} else {
+						((JSONArray) jsonContainer).put(parent);
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				}
+			}
+		});
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.FOLDER_NAME), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.TITLE, name == null ? folder.getName() : name);
+					} else {
+						((JSONArray) jsonContainer).put(name == null ? folder.getName() : name);
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				}
+			}
+		});
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.MODULE), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.MODULE, AJAXServlet.getModuleString(
+								module == -1 ? FolderObject.MAIL : module, -1));
+					} else {
+						((JSONArray) jsonContainer).put(AJAXServlet.getModuleString(module == -1 ? FolderObject.MAIL
+								: module, -1));
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				}
+			}
+		});
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.TYPE), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.TYPE, FolderObject.MAIL);
+					} else {
+						((JSONArray) jsonContainer).put(FolderObject.MAIL);
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				}
+			}
+		});
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.SUBFOLDERS), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					final boolean boolVal;
+					if (hasSubfolders == -1) {
+						boolVal = all ? folder.hasSubfolders() : folder.hasSubscribedSubfolders();
+					} else {
+						boolVal = hasSubfolders > 0;
+					}
+					/*
+					 * Put value
+					 */
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.SUBFOLDERS, boolVal);
+					} else {
+						((JSONArray) jsonContainer).put(boolVal);
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				}
+			}
+		});
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.OWN_RIGHTS), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					int permissionBits = 0;
+					if (folder.isRootFolder()) {
+						final MailPermission rootPermission = folder.getOwnPermission();
+						if (rootPermission == null) {
+							permissionBits = createPermissionBits(OCLPermission.CREATE_SUB_FOLDERS,
+									OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
+									OCLPermission.NO_PERMISSIONS, false);
+						} else {
+							permissionBits = createPermissionBits(folder.getOwnPermission());
+						}
+					} else {
+						permissionBits = createPermissionBits(folder.getOwnPermission());
+						if (folder.isSupportsUserFlags()) {
+							permissionBits |= BIT_USER_FLAG;
+						}
+					}
+					/*
+					 * Put value
+					 */
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.OWN_RIGHTS, permissionBits);
+					} else {
+						((JSONArray) jsonContainer).put(permissionBits);
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				} catch (final OXException e) {
+					throw new MailException(e);
+				}
+			}
+		});
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.PERMISSIONS_BITS), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					final JSONArray ja = new JSONArray();
+					final OCLPermission[] perms = folder.getPermissions();
+					for (int j = 0; j < perms.length; j++) {
+						final JSONObject jo = new JSONObject();
+						jo.put(FolderFields.BITS, createPermissionBits(perms[j]));
+						jo.put(FolderFields.ENTITY, perms[j].getEntity());
+						jo.put(FolderFields.GROUP, perms[j].isGroupPermission());
+						ja.put(jo);
+					}
+					/*
+					 * Put value
+					 */
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.PERMISSIONS, ja);
+					} else {
+						((JSONArray) jsonContainer).put(ja);
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				} catch (final OXException e) {
+					throw new MailException(e);
+				}
+			}
+		});
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.SUMMARY), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					/*
+					 * Put value
+					 */
+					final String value = folder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(
+							folder.getMessageCount()).append('/').append(folder.getUnreadMessageCount()).append(')')
+							.toString();
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.SUMMARY, value);
+					} else {
+						((JSONArray) jsonContainer).put(value);
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				}
+			}
+		});
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.STANDARD_FOLDER), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					/*
+					 * Put value
+					 */
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.STANDARD_FOLDER,
+								folder.containsDefaultFolder() ? folder.isDefaultFolder() : false);
+					} else {
+						((JSONArray) jsonContainer).put(folder.containsDefaultFolder() ? folder.isDefaultFolder()
+								: false);
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				}
+			}
+		});
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.TOTAL), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					/*
+					 * Put value
+					 */
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.TOTAL, folder.getMessageCount());
+					} else {
+						((JSONArray) jsonContainer).put(folder.getMessageCount());
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				}
+			}
+		});
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.NEW), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					/*
+					 * Put value
+					 */
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.NEW, folder.getNewMessageCount());
+					} else {
+						((JSONArray) jsonContainer).put(folder.getNewMessageCount());
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				}
+			}
+		});
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.UNREAD), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					/*
+					 * Put value
+					 */
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.UNREAD, folder.getUnreadMessageCount());
+					} else {
+						((JSONArray) jsonContainer).put(folder.getUnreadMessageCount());
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				}
+			}
+		});
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.DELETED), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					/*
+					 * Put value
+					 */
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.DELETED, folder.getDeletedMessageCount());
+					} else {
+						((JSONArray) jsonContainer).put(folder.getDeletedMessageCount());
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				}
+			}
+		});
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.SUBSCRIBED), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					final Object boolVal;
+					if (MailConfig.isIgnoreSubscription()) {
+						boolVal = Boolean.FALSE;
+					} else {
+						boolVal = folder.containsSubscribed() ? Boolean.valueOf(folder.isSubscribed())
+								: JSONObject.NULL;
+					}
+					/*
+					 * Put value
+					 */
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.SUBSCRIBED, boolVal);
+					} else {
+						((JSONArray) jsonContainer).put(boolVal);
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				}
+			}
+		});
+		WRITERS_MAP.put(Integer.valueOf(FolderObject.SUBSCR_SUBFLDS), new MailFolderFieldWriter() {
+			@Override
+			public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
+					final String name, final int hasSubfolders, final String fullName, final int module,
+					final boolean all) throws MailException {
+				try {
+					final Object boolVal;
+					if (MailConfig.isIgnoreSubscription()) {
+						boolVal = hasSubfolders == -1 ? Boolean.valueOf(folder.hasSubfolders()) : Boolean
+								.valueOf(hasSubfolders > 0);
+					} else if (hasSubfolders == -1) {
+						boolVal = folder.hasSubfolders() ? Boolean.valueOf(folder.hasSubscribedSubfolders())
+								: Boolean.FALSE;
+					} else {
+						boolVal = Boolean.valueOf(hasSubfolders > 0);
+					}
+					/*
+					 * Put value
+					 */
+					if (withKey) {
+						((JSONObject) jsonContainer).put(FolderFields.SUBSCR_SUBFLDS, boolVal);
+					} else {
+						((JSONArray) jsonContainer).put(boolVal);
+					}
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				}
+			}
+		});
 	}
 
 	/**
@@ -134,510 +581,51 @@ public final class FolderWriter {
 	public static MailFolderFieldWriter[] getMailFolderFieldWriter(final int[] fields, final MailConfig mailConfig) {
 		final MailFolderFieldWriter[] retval = new MailFolderFieldWriter[fields.length];
 		for (int i = 0; i < retval.length; i++) {
-			Fields: switch (fields[i]) {
-			case FolderObject.OBJECT_ID:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							if (withKey) {
-
-								((JSONObject) jsonContainer).put(FolderFields.ID,
-										prepareFullname(fullName == null ? folder.getFullname() : fullName));
-							} else {
-								((JSONArray) jsonContainer).put(prepareFullname(fullName == null ? folder.getFullname()
-										: fullName));
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.CREATED_BY:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.CREATED_BY, -1);
-							} else {
-								((JSONArray) jsonContainer).put(-1);
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.MODIFIED_BY:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.MODIFIED_BY, -1);
-							} else {
-								((JSONArray) jsonContainer).put(-1);
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.CREATION_DATE:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.CREATION_DATE, 0);
-							} else {
-								((JSONArray) jsonContainer).put(0);
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.LAST_MODIFIED:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.LAST_MODIFIED, 0);
-							} else {
-								((JSONArray) jsonContainer).put(0);
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.FOLDER_ID:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							final Object parent;
-							if (null == folder.getParentFullname()) {
-								parent = JSONObject.NULL;
-							} else {
-								parent = prepareFullname(folder.getParentFullname());
-							}
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.FOLDER_ID, parent);
-							} else {
-								((JSONArray) jsonContainer).put(parent);
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.FOLDER_NAME:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.TITLE, name == null ? folder.getName()
-										: name);
-							} else {
-								((JSONArray) jsonContainer).put(name == null ? folder.getName() : name);
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.MODULE:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.MODULE, AJAXServlet.getModuleString(
-										module == -1 ? FolderObject.MAIL : module, -1));
-							} else {
-								((JSONArray) jsonContainer).put(AJAXServlet.getModuleString(
-										module == -1 ? FolderObject.MAIL : module, -1));
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.TYPE:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.TYPE, FolderObject.MAIL);
-							} else {
-								((JSONArray) jsonContainer).put(FolderObject.MAIL);
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.SUBFOLDERS:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							final boolean boolVal;
-							if (hasSubfolders == -1) {
-								boolVal = all ? folder.hasSubfolders() : folder.hasSubscribedSubfolders();
-							} else {
-								boolVal = hasSubfolders > 0;
-							}
-							/*
-							 * Put value
-							 */
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.SUBFOLDERS, boolVal);
-							} else {
-								((JSONArray) jsonContainer).put(boolVal);
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.OWN_RIGHTS:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							int permissionBits = 0;
-							if (folder.isRootFolder()) {
-								final MailPermission rootPermission = folder.getOwnPermission();
-								if (rootPermission == null) {
-									permissionBits = createPermissionBits(OCLPermission.CREATE_SUB_FOLDERS,
-											OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
-											OCLPermission.NO_PERMISSIONS, false);
+			final MailFolderFieldWriter mffw = WRITERS_MAP.get(Integer.valueOf(fields[i]));
+			if (mffw == null) {
+				if (FolderObject.CAPABILITIES == fields[i]) {
+					retval[i] = new ExtendedMailFolderFieldWriter(mailConfig) {
+						@Override
+						public void writeField(final Object jsonContainer, final MailFolder folder,
+								final boolean withKey, final String name, final int hasSubfolders,
+								final String fullName, final int module, final boolean all) throws MailException {
+							try {
+								/*
+								 * Put value
+								 */
+								if (withKey) {
+									((JSONObject) jsonContainer).put(FolderFields.CAPABILITIES, Integer
+											.valueOf(this.mailConfig.getCapabilities().getCapabilities()));
 								} else {
-									permissionBits = createPermissionBits(folder.getOwnPermission());
+									((JSONArray) jsonContainer).put(Integer.valueOf(this.mailConfig.getCapabilities()
+											.getCapabilities()));
 								}
-							} else {
-								permissionBits = createPermissionBits(folder.getOwnPermission());
-								if (folder.isSupportsUserFlags()) {
-									permissionBits |= BIT_USER_FLAG;
+							} catch (final JSONException e) {
+								throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+							}
+						}
+					};
+				} else {
+					LOG.error("Unknown column: " + fields[i]);
+					retval[i] = new MailFolderFieldWriter() {
+						@Override
+						public void writeField(final Object jsonContainer, final MailFolder folder,
+								final boolean withKey, final String name, final int hasSubfolders,
+								final String fullName, final int module, final boolean all) throws MailException {
+							try {
+								if (withKey) {
+									((JSONObject) jsonContainer).put(STR_UNKNOWN_COLUMN, JSONObject.NULL);
+								} else {
+									((JSONArray) jsonContainer).put(JSONObject.NULL);
 								}
+							} catch (final JSONException e) {
+								throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
 							}
-							/*
-							 * Put value
-							 */
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.OWN_RIGHTS, permissionBits);
-							} else {
-								((JSONArray) jsonContainer).put(permissionBits);
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						} catch (final OXException e) {
-							throw new MailException(e);
 						}
-					}
-				};
-				break Fields;
-			case FolderObject.PERMISSIONS_BITS:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							final JSONArray ja = new JSONArray();
-							final OCLPermission[] perms = folder.getPermissions();
-							for (int j = 0; j < perms.length; j++) {
-								final JSONObject jo = new JSONObject();
-								jo.put(FolderFields.BITS, createPermissionBits(perms[j]));
-								jo.put(FolderFields.ENTITY, perms[j].getEntity());
-								jo.put(FolderFields.GROUP, perms[j].isGroupPermission());
-								ja.put(jo);
-							}
-							/*
-							 * Put value
-							 */
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.PERMISSIONS, ja);
-							} else {
-								((JSONArray) jsonContainer).put(ja);
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						} catch (final OXException e) {
-							throw new MailException(e);
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.SUMMARY:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							/*
-							 * Put value
-							 */
-							final String value = folder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(
-									folder.getMessageCount()).append('/').append(folder.getUnreadMessageCount())
-									.append(')').toString();
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.SUMMARY, value);
-							} else {
-								((JSONArray) jsonContainer).put(value);
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.STANDARD_FOLDER:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							/*
-							 * Put value
-							 */
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.STANDARD_FOLDER, folder
-										.containsDefaultFolder() ? folder.isDefaultFolder() : false);
-							} else {
-								((JSONArray) jsonContainer).put(folder.containsDefaultFolder() ? folder
-										.isDefaultFolder() : false);
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.TOTAL:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							/*
-							 * Put value
-							 */
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.TOTAL, folder.getMessageCount());
-							} else {
-								((JSONArray) jsonContainer).put(folder.getMessageCount());
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.NEW:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							/*
-							 * Put value
-							 */
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.NEW, folder.getNewMessageCount());
-							} else {
-								((JSONArray) jsonContainer).put(folder.getNewMessageCount());
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.UNREAD:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							/*
-							 * Put value
-							 */
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.UNREAD, folder.getUnreadMessageCount());
-							} else {
-								((JSONArray) jsonContainer).put(folder.getUnreadMessageCount());
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.DELETED:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							/*
-							 * Put value
-							 */
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.DELETED, folder.getDeletedMessageCount());
-							} else {
-								((JSONArray) jsonContainer).put(folder.getDeletedMessageCount());
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.CAPABILITIES:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							/*
-							 * Put value
-							 */
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.CAPABILITIES, Integer.valueOf(mailConfig
-										.getCapabilities().getCapabilities()));
-							} else {
-								((JSONArray) jsonContainer).put(Integer.valueOf(mailConfig.getCapabilities()
-										.getCapabilities()));
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.SUBSCRIBED:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							final Object boolVal;
-							if (MailConfig.isIgnoreSubscription()) {
-								boolVal = Boolean.FALSE;
-							} else {
-								boolVal = folder.containsSubscribed() ? Boolean.valueOf(folder.isSubscribed())
-										: JSONObject.NULL;
-							}
-							/*
-							 * Put value
-							 */
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.SUBSCRIBED, boolVal);
-							} else {
-								((JSONArray) jsonContainer).put(boolVal);
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.SUBSCR_SUBFLDS:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							final Object boolVal;
-							if (MailConfig.isIgnoreSubscription()) {
-								boolVal = hasSubfolders == -1 ? Boolean.valueOf(folder.hasSubfolders()) : Boolean
-										.valueOf(hasSubfolders > 0);
-							} else if (hasSubfolders == -1) {
-								boolVal = folder.hasSubfolders() ? Boolean.valueOf(folder.hasSubscribedSubfolders())
-										: Boolean.FALSE;
-							} else {
-								boolVal = Boolean.valueOf(hasSubfolders > 0);
-							}
-							/*
-							 * Put value
-							 */
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.SUBSCR_SUBFLDS, boolVal);
-							} else {
-								((JSONArray) jsonContainer).put(boolVal);
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-				break Fields;
-			default:
-				retval[i] = new MailFolderFieldWriter() {
-					@Override
-					public void writeField(final Object jsonContainer, final MailFolder folder, final boolean withKey,
-							final String name, final int hasSubfolders, final String fullName, final int module,
-							final boolean all) throws MailException {
-						try {
-							if (withKey) {
-								((JSONObject) jsonContainer).put(STR_UNKNOWN_COLUMN, JSONObject.NULL);
-							} else {
-								((JSONArray) jsonContainer).put(JSONObject.NULL);
-							}
-						} catch (final JSONException e) {
-							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-						}
-					}
-				};
-
+					};
+				}
+			} else {
+				retval[i] = mffw;
 			}
 		}
 		return retval;
