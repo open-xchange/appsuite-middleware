@@ -167,11 +167,35 @@ public final class SessionHandler {
 		return active;
 	}
 
-	protected static SessionControl[] removeUserSessions(final int userId, final int contextId) {
+	/**
+	 * Removes all sessions associated with given user in specified context
+	 * 
+	 * @param userId
+	 *            The user ID
+	 * @param contextId
+	 *            The context ID
+	 * @param propagate
+	 *            <code>true</code> for remote removal; otherwise
+	 *            <code>false</code>
+	 * @return The wrapper objects for removed sessions
+	 */
+	public static SessionControl[] removeUserSessions(final int userId, final int contextId, final boolean propagate) {
 		final int size = sessionList.size();
 		final List<SessionControl> retval = new ArrayList<SessionControl>(config.getMaxSessionsPerUser());
 		for (int i = 0; i < size; i++) {
 			retval.addAll(Arrays.asList(sessionList.get(i).removeSessionsByUser(userId, contextId)));
+		}
+		if (propagate) {
+			for (final SessionControl sessionControl : retval) {
+				try {
+					SessionCache.getInstance().putCachedSessionForRemoteRemoval(
+							((SessionImpl) sessionControl.getSession()).createCachedSession());
+				} catch (final CacheException e) {
+					LOG.error("Remote removal failed for session " + sessionControl.getSession().getSecret(), e);
+				} catch (final ServiceException e) {
+					LOG.error("Remote removal failed for session " + sessionControl.getSession().getSecret(), e);
+				}
+			}
 		}
 		return retval.toArray(new SessionControl[retval.size()]);
 	}
@@ -396,10 +420,20 @@ public final class SessionHandler {
 		try {
 			final CachedSession cachedSession = SessionCache.getInstance().removeCachedSession(secret);
 			if (null != cachedSession) {
-				/*
-				 * A cache hit! Add to local session containers
-				 */
-				return addSessionInternal(new SessionImpl(cachedSession, localIP));
+				if (cachedSession.isMarkedAsRemoved()) {
+					if (LOG.isInfoEnabled()) {
+						LOG.info(new StringBuilder(64).append(
+								"Local removing user sessions by session cache retrieval: User=").append(
+								cachedSession.getUserId()).append(", Context=").append(cachedSession.getContextId())
+								.toString());
+					}
+					removeUserSessions(cachedSession.getUserId(), cachedSession.getContextId(), false);
+				} else {
+					/*
+					 * A cache hit! Add to local session containers
+					 */
+					return addSessionInternal(new SessionImpl(cachedSession, localIP));
+				}
 			}
 		} catch (final CacheException e) {
 			LOG.error(e.getMessage(), e);
@@ -473,7 +507,7 @@ public final class SessionHandler {
 	}
 
 	protected static void decrementNumberOfActiveSessions(final int amount) {
-	    numberOfActiveSessions.addAndGet(-amount);
+		numberOfActiveSessions.addAndGet(-amount);
 	}
 
 	private static void postSessionRemoval(final Session session) {

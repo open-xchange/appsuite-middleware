@@ -62,6 +62,9 @@ import com.openexchange.sessiond.SessiondMBean;
  */
 public final class SessiondMBeanImpl extends StandardMBean implements SessiondMBean {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(SessiondMBeanImpl.class);
+
 	/**
 	 * Initializes a new {@link SessiondMBeanImpl}
 	 * 
@@ -75,7 +78,13 @@ public final class SessiondMBeanImpl extends StandardMBean implements SessiondMB
 	}
 
 	public int clearUserSessions(final int userId, final int contextId) {
-		return SessionHandler.removeUserSessions(userId, contextId).length;
+		if (LOG.isInfoEnabled()) {
+			LOG.info(new StringBuilder(64).append("Remote removing user sessions by sessiond MBean: User=").append(
+					userId).append(", Context=").append(contextId).toString());
+		}
+		// TODO: Invoke with true when solution available how to remotely remove
+		// sessions
+		return SessionHandler.removeUserSessions(userId, contextId, false).length;
 	}
 
 }
