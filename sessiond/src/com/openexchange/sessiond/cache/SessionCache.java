@@ -269,7 +269,11 @@ public final class SessionCache {
 
 	/**
 	 * Puts given cache-able session into cache to distribute a remove for
-	 * associated session among auxiliary caches
+	 * associated session among auxiliary caches.
+	 * <p>
+	 * <b>Note that this routine does not work properly since underlying caching
+	 * system does not support to transmit specified event handlers to auxiliary
+	 * caches.</b>
 	 * 
 	 * @param cachedSession
 	 *            The cached session which shall be removed in auxiliary caches
