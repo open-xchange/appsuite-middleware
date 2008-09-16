@@ -66,7 +66,7 @@ import java.io.Serializable;
 public interface CacheElement extends Serializable {
 
 	/**
-	 * Gets the cacheName attribute of the cache element object. The cacheName
+	 * Gets the cache name attribute of the cache element object. The cache name
 	 * is also known as the region name.
 	 * 
 	 * @return The cacheName value
