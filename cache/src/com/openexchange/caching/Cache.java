@@ -88,6 +88,25 @@ public interface Cache {
 	public Object get(Serializable key);
 
 	/**
+	 * This method returns the cache element wrapper which provides access to
+	 * element info and other attributes.
+	 * <p>
+	 * This returns a reference to the wrapper. Any modifications will be
+	 * reflected in the cache. No defensive copy is made.
+	 * <p>
+	 * This method is most useful if you want to determine things such as how
+	 * long the element has been in the cache.
+	 * <p>
+	 * The last access time in the element attributes should be current.
+	 * 
+	 * @param key
+	 *            The key
+	 * @return A reference to cache element wrapper if found or
+	 *         <code>null</code>
+	 */
+	public CacheElement getCacheElement(Serializable key);
+
+	/**
 	 * Retrieves a <b>copy</b> of the default element attributes used by this
 	 * cache. This does not provide a reference to the element attributes.
 	 * <p>

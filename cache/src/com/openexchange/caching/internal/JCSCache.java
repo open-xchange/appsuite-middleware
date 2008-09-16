@@ -53,12 +53,15 @@ import java.io.Serializable;
 
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.ObjectExistsException;
+import org.apache.jcs.engine.behavior.ICacheElement;
 
 import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheStatistics;
 import com.openexchange.caching.ElementAttributes;
+import com.openexchange.caching.internal.cache2jcs.CacheElement2JCS;
 import com.openexchange.caching.internal.cache2jcs.CacheStatistics2JCS;
 import com.openexchange.caching.internal.cache2jcs.ElementAttributes2JCS;
 import com.openexchange.caching.internal.jcs2cache.JCSElementAttributesDelegator;
@@ -96,6 +99,14 @@ public final class JCSCache implements Cache {
 
 	public Object get(final Serializable key) {
 		return cache.get(key);
+	}
+
+	public CacheElement getCacheElement(final Serializable key) {
+		final ICacheElement cacheElement = cache.getCacheElement(key);
+		if (cacheElement == null) {
+			return null;
+		}
+		return new CacheElement2JCS(cacheElement);
 	}
 
 	public ElementAttributes getDefaultElementAttributes() throws CacheException {
