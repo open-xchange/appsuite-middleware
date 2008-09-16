@@ -95,7 +95,7 @@ public class TestServlet extends HttpServlet {
         page.append("<li>Sublist<ul><li>Foo</li><li>Bar</li></ul></li>");
         page.append("<li>Third list entry</li></ol>\n");
         page.append("<p><b>Parameters</b><br>");
-        Enumeration paramEnum = req.getParameterNames();
+        Enumeration<?> paramEnum = req.getParameterNames();
 		while (paramEnum.hasMoreElements()) {
 			final String parameterName = (String) paramEnum.nextElement();
             page.append(parameterName);
@@ -109,7 +109,7 @@ public class TestServlet extends HttpServlet {
 			final String headerName = (String) paramEnum.nextElement();
             page.append(headerName);
             page.append(": ");
-            final Enumeration valueEnum = req.getHeaders(headerName);
+            final Enumeration<?> valueEnum = req.getHeaders(headerName);
 			while (valueEnum.hasMoreElements()) {
                 page.append(valueEnum.nextElement());
                 page.append(valueEnum.hasMoreElements() ? ", " : "");
@@ -143,7 +143,7 @@ public class TestServlet extends HttpServlet {
         page.append("<li>Sublist<ul><li>Foo</li><li>Bar</li></ul></li>");
         page.append("<li>Third list entry</li></ol>\n");
         page.append("<p><b>Parameters</b><br>");
-        Enumeration paramEnum = req.getParameterNames();
+        Enumeration<?> paramEnum = req.getParameterNames();
 		while (paramEnum.hasMoreElements()) {
 			final String parameterName = (String) paramEnum.nextElement();
             page.append(parameterName);
@@ -157,7 +157,7 @@ public class TestServlet extends HttpServlet {
 			final String headerName = (String) paramEnum.nextElement();
             page.append(headerName);
             page.append(": ");
-            final Enumeration valueEnum = req.getHeaders(headerName);
+            final Enumeration<?> valueEnum = req.getHeaders(headerName);
 			while (valueEnum.hasMoreElements()) {
                 page.append(valueEnum.nextElement());
                 page.append(valueEnum.hasMoreElements() ? ", " : "");
