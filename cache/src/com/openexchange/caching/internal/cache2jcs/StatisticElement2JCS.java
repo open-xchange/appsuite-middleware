@@ -49,6 +49,8 @@
 
 package com.openexchange.caching.internal.cache2jcs;
 
+import java.io.Serializable;
+
 import org.apache.jcs.engine.stats.behavior.IStatElement;
 
 import com.openexchange.caching.StatisticElement;
@@ -61,7 +63,9 @@ import com.openexchange.caching.StatisticElement;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class StatisticElement2JCS implements StatisticElement {
+public final class StatisticElement2JCS implements StatisticElement, Serializable {
+
+	private static final long serialVersionUID = -6503006024903685218L;
 
 	private final IStatElement statElement;
 

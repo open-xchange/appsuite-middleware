@@ -66,6 +66,8 @@ import com.openexchange.caching.internal.jcs2cache.JCSStatsDelegator;
  */
 public final class CacheStatistics2JCS extends Statistics2JCS implements CacheStatistics {
 
+	private static final long serialVersionUID = 8335990894723060160L;
+
 	/**
 	 * Initializes a new {@link CacheStatistics2JCS}
 	 * 
