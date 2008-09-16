@@ -52,7 +52,13 @@ package com.openexchange.caching;
 import java.io.Serializable;
 
 /**
- * {@link CacheElement}
+ * {@link CacheElement} - Every item in the cache is wrapped in a cache element.
+ * This contains information about the element: the region name, the key, the
+ * value, and the element attributes.
+ * <p>
+ * The element attributes have lots of useful information about each element,
+ * such as when they were created, how long they have to live, and if they are
+ * allowed to be spooled, etc.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
