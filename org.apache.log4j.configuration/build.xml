@@ -61,11 +61,12 @@
         <copy todir="${log4jconfigurationdir}">
             <fileset refid="metainf"/>
         </copy>
-        <copy todir="${log4jconfigurationdir}">
+        <copy todir="${destdir}${prefix}/etc/groupware">
             <fileset dir="${basedir}">
                 <include name="log4j.xml"/>
             </fileset>
         </copy>
+    	<symlink link="${log4jconfigurationdir}/log4j.xml" resource="../../etc/groupware/log4j.xml"/>
     </target>
 
     <!-- Dist -->
