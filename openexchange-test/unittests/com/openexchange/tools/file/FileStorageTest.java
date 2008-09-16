@@ -109,7 +109,7 @@ public class FileStorageTest extends TestCase {
         tempFile.delete();
         assertNotNull("Can't create new file in file storage.", identifier);
     }
-    
+
     // Bug 3978
     public final void testExceptionOnUnavailableFilestore() throws Throwable {
     	final File tempFile = File.createTempFile("filestorage", ".tmp");

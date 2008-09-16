@@ -75,7 +75,7 @@ public class UnitTests {
 		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
         tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
         tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
-	   // tests.addTestSuite(com.openexchange.tools.file.FileStorageTest.class);
+	    tests.addTestSuite(com.openexchange.tools.file.FileStorageTest.class);
 
         tests.addTestSuite(com.openexchange.groupware.calendar.CalendarSqlTest.class);
         tests.addTestSuite(com.openexchange.groupware.calendar.ConflictHandlerTest.class);
