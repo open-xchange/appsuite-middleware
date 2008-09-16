@@ -57,6 +57,7 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -257,6 +258,10 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		}
 		if(newObj.getParticipants() == null) {
 			return;
+		}
+		// Do not send notification mails for tasks and appointments in the past. Bug #12063
+		if (newObj.getEndDate().before(new Date())) {
+		    return;
 		}
 
         final SortedSet<String> participantSet = new TreeSet<String>();

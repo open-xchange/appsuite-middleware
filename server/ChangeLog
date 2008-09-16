@@ -1,3 +1,8 @@
+* 2008-09-16 - marcus.klein@open-xchange.com
+
+ - Bugfix #12063: Not sending email notification for appointments and tasks
+   ending in the past.
+
 * 2008-09-15 - thorben.betten@open-xchange.com
 
  - Bugfix #12135: Sending an appropriate message to removed and added
