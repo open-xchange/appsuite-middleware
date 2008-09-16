@@ -248,6 +248,9 @@ public interface ElementAttributes extends Serializable {
 	/**
 	 * Adds a element event handler. Handler's can be registered for multiple
 	 * events. A registered handler will be called at every recognized event.
+	 * <p>
+	 * <b>Note</b> that element event handlers are not transmitted to other
+	 * caches via lateral or remote auxiliaries, nor are they spooled to disk.
 	 * 
 	 * @param eventHandler
 	 *            The feature to be added to the element event handler
@@ -258,7 +261,8 @@ public interface ElementAttributes extends Serializable {
 	 * Gets the element event handlers.
 	 * <p>
 	 * Event handlers are transient. The only events defined are in memory
-	 * events. All handlers are lost if the item goes to disk.
+	 * events. All handlers are lost if the item goes to disk or to any lateral
+	 * or remote auxiliary caches.
 	 * 
 	 * @return The element event handlers value, null if there are none
 	 */
