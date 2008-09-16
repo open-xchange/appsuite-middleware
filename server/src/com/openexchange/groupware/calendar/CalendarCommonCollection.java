@@ -737,10 +737,9 @@ public final class CalendarCommonCollection {
 	 */
 	public static boolean inBetween(final long check_start, final long check_end, final long range_start,
 			final long range_end) {
-//	    return (check_start >= range_start && check_start <= range_end) || (check_end >= range_start && check_end <= range_end);
-//		return (check_start <= range_end) && (check_end >= range_start);
-
-		if (check_start <= range_start && check_start >= range_start) { // check_start == range_start
+		return (check_start < range_end) && (check_end > range_start);
+		
+		/*if (check_start <= range_start && check_start >= range_start) {
 			return true;
 		} else if (check_start >= range_start && check_end <= range_end) {
 			return true;
@@ -749,7 +748,7 @@ public final class CalendarCommonCollection {
 		} else if (check_start < range_start && check_end > range_start && check_start < range_end) {
 			return true;
 		}
-		return false;
+		return false;*/
 	}
 
     /**
