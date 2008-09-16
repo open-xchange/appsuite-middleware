@@ -50,7 +50,9 @@
 package com.openexchange.ajax.writer;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 import org.json.JSONArray;
@@ -161,6 +163,201 @@ public final class FolderWriter extends DataWriter {
 		 */
 		public abstract void writeField(JSONWriter jsonwriter, FolderObject fo, boolean withKey, String name,
 				int hasSubfolders) throws JSONException, SQLException, AbstractOXException;
+	}
+
+	private static final Map<Integer, FolderFieldWriter> STATIC_WRITERS_MAP = new HashMap<Integer, FolderFieldWriter>(
+			15);
+
+	static {
+		STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.OBJECT_ID), new FolderFieldWriter() {
+			@Override
+			public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
+					final String name, final int hasSubfolders) throws JSONException {
+				if (!fo.containsObjectID()) {
+					if (withKey) {
+						if (fo.containsFullName()) {
+							jsonwriter.key(FolderFields.ID);
+							jsonwriter.value(fo.getFullName());
+						}
+					} else {
+						jsonwriter.value(fo.containsFullName() ? fo.getFullName() : JSONObject.NULL);
+					}
+					return;
+				}
+				if (withKey) {
+					jsonwriter.key(FolderFields.ID);
+				}
+				jsonwriter.value(fo.getObjectID());
+			}
+		});
+		STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.CREATED_BY), new FolderFieldWriter() {
+			@Override
+			public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
+					final String name, final int hasSubfolders) throws JSONException {
+				if (withKey) {
+					if (fo.containsCreatedBy()) {
+						jsonwriter.key(FolderFields.CREATED_BY);
+						jsonwriter.value(fo.getCreatedBy());
+					}
+				} else {
+					jsonwriter.value(fo.containsCreatedBy() ? Integer.valueOf(fo.getCreatedBy()) : JSONObject.NULL);
+				}
+			}
+		});
+		STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.MODIFIED_BY), new FolderFieldWriter() {
+			@Override
+			public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
+					final String name, final int hasSubfolders) throws JSONException {
+				if (withKey) {
+					if (fo.containsModifiedBy()) {
+						jsonwriter.key(FolderFields.MODIFIED_BY);
+						jsonwriter.value(fo.getModifiedBy());
+					}
+				} else {
+					jsonwriter.value(fo.containsModifiedBy() ? Integer.valueOf(fo.getModifiedBy()) : JSONObject.NULL);
+				}
+			}
+		});
+		STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.FOLDER_ID), new FolderFieldWriter() {
+			@Override
+			public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
+					final String name, final int hasSubfolders) throws JSONException {
+				if (withKey) {
+					if (fo.containsParentFolderID()) {
+						jsonwriter.key(FolderFields.FOLDER_ID);
+						jsonwriter.value(fo.getParentFolderID());
+					}
+				} else {
+					jsonwriter.value(fo.containsParentFolderID() ? Integer.valueOf(fo.getParentFolderID())
+							: JSONObject.NULL);
+				}
+			}
+		});
+		STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.FOLDER_NAME), new FolderFieldWriter() {
+			@Override
+			public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
+					final String name, final int hasSubfolders) throws JSONException {
+				if (withKey) {
+					if (name != null || fo.containsFolderName()) {
+						jsonwriter.key(FolderFields.TITLE);
+						jsonwriter.value(name == null ? fo.getFolderName() : name);
+					}
+				} else {
+					jsonwriter.value(name == null ? (fo.containsFolderName() ? fo.getFolderName() : JSONObject.NULL)
+							: name);
+				}
+			}
+		});
+		STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.MODULE), new FolderFieldWriter() {
+			@Override
+			public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
+					final String name, final int hasSubfolders) throws JSONException {
+				if (withKey) {
+					if (fo.containsModule()) {
+						jsonwriter.key(FolderFields.MODULE);
+						jsonwriter.value(AJAXServlet.getModuleString(fo.getModule(), fo.getObjectID()));
+					}
+				} else {
+					jsonwriter.value(fo.containsModule() ? AJAXServlet
+							.getModuleString(fo.getModule(), fo.getObjectID()) : JSONObject.NULL);
+				}
+			}
+		});
+		STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.SUMMARY), new FolderFieldWriter() {
+			@Override
+			public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
+					final String name, final int hasSubfolders) throws JSONException {
+				if (withKey) {
+					jsonwriter.key(FolderFields.SUMMARY);
+				}
+				jsonwriter.value("");
+			}
+		});
+		STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.STANDARD_FOLDER), new FolderFieldWriter() {
+			@Override
+			public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
+					final String name, final int hasSubfolders) throws JSONException {
+				if (withKey) {
+					if (fo.containsDefaultFolder()) {
+						jsonwriter.key(FolderFields.STANDARD_FOLDER);
+						jsonwriter.value(fo.isDefaultFolder());
+					}
+				} else {
+					jsonwriter.value(fo.containsDefaultFolder() ? Boolean.valueOf(fo.isDefaultFolder())
+							: JSONObject.NULL);
+				}
+			}
+		});
+		STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.TOTAL), new FolderFieldWriter() {
+			@Override
+			public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
+					final String name, final int hasSubfolders) throws JSONException {
+				if (withKey) {
+					return;
+				}
+				jsonwriter.value(JSONObject.NULL);
+			}
+		});
+		STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.NEW), new FolderFieldWriter() {
+			@Override
+			public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
+					final String name, final int hasSubfolders) throws JSONException {
+				if (withKey) {
+					return;
+				}
+				jsonwriter.value(JSONObject.NULL);
+			}
+		});
+		STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.UNREAD), new FolderFieldWriter() {
+			@Override
+			public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
+					final String name, final int hasSubfolders) throws JSONException {
+				if (withKey) {
+					return;
+				}
+				jsonwriter.value(JSONObject.NULL);
+			}
+		});
+		STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.DELETED), new FolderFieldWriter() {
+			@Override
+			public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
+					final String name, final int hasSubfolders) throws JSONException {
+				if (withKey) {
+					return;
+				}
+				jsonwriter.value(JSONObject.NULL);
+			}
+		});
+		STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.CAPABILITIES), new FolderFieldWriter() {
+			@Override
+			public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
+					final String name, final int hasSubfolders) throws JSONException {
+				if (withKey) {
+					return;
+				}
+				jsonwriter.value(JSONObject.NULL);
+			}
+		});
+		STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.SUBSCRIBED), new FolderFieldWriter() {
+			@Override
+			public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
+					final String name, final int hasSubfolders) throws JSONException {
+				if (withKey) {
+					return;
+				}
+				jsonwriter.value(JSONObject.NULL);
+			}
+		});
+		STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.SUBSCR_SUBFLDS), new FolderFieldWriter() {
+			@Override
+			public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
+					final String name, final int hasSubfolders) throws JSONException {
+				if (withKey) {
+					return;
+				}
+				jsonwriter.value(JSONObject.NULL);
+			}
+		});
 	}
 
 	/**
@@ -317,398 +514,193 @@ public final class FolderWriter extends DataWriter {
 		final FolderFieldWriter[] retval = new FolderFieldWriter[fields.length];
 		for (int i = 0; i < retval.length; i++) {
 			final int field = fields[i];
-			Fields: switch (field) {
-			case FolderObject.OBJECT_ID:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException {
-						if (!fo.containsObjectID()) {
+			/*
+			 * Check if current field can be handled by a static writer
+			 * implementation
+			 */
+			final FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(field));
+			if (ffw == null) {
+				/*
+				 * No static writer available, generate a new one
+				 */
+				Fields: switch (field) {
+				case FolderObject.CREATION_DATE:
+					retval[i] = new FolderFieldWriter() {
+						@Override
+						public void writeField(final JSONWriter jsonwriter, final FolderObject fo,
+								final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
 							if (withKey) {
-								if (fo.containsFullName()) {
-									jsonwriter.key(FolderFields.ID);
-									jsonwriter.value(fo.getFullName());
+								if (fo.containsCreationDate()) {
+									jsonwriter.key(FolderFields.CREATION_DATE);
+									jsonwriter.value(addTimeZoneOffset(fo.getCreationDate().getTime()));
 								}
 							} else {
-								jsonwriter.value(fo.containsFullName() ? fo.getFullName() : JSONObject.NULL);
+								jsonwriter.value(fo.containsCreationDate() ? Long.valueOf(addTimeZoneOffset(fo
+										.getCreationDate().getTime())) : JSONObject.NULL);
 							}
-							return;
 						}
-						if (withKey) {
-							jsonwriter.key(FolderFields.ID);
-						}
-						jsonwriter.value(fo.getObjectID());
-					}
-				};
-				break Fields;
-			case FolderObject.CREATED_BY:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException {
-						if (withKey) {
-							if (fo.containsCreatedBy()) {
-								jsonwriter.key(FolderFields.CREATED_BY);
-								jsonwriter.value(fo.getCreatedBy());
+					};
+					break Fields;
+				case FolderObject.LAST_MODIFIED:
+					retval[i] = new FolderFieldWriter() {
+						@Override
+						public void writeField(final JSONWriter jsonwriter, final FolderObject fo,
+								final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
+							if (withKey) {
+								if (fo.containsLastModified()) {
+									jsonwriter.key(FolderFields.LAST_MODIFIED);
+									jsonwriter.value(addTimeZoneOffset(fo.getLastModified().getTime()));
+								}
+							} else {
+								jsonwriter.value(fo.containsLastModified() ? Long.valueOf(addTimeZoneOffset(fo
+										.getLastModified().getTime())) : JSONObject.NULL);
 							}
-						} else {
-							jsonwriter.value(fo.containsCreatedBy() ? Integer.valueOf(fo.getCreatedBy())
-									: JSONObject.NULL);
 						}
-					}
-				};
-				break Fields;
-			case FolderObject.MODIFIED_BY:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException {
-						if (withKey) {
-							if (fo.containsModifiedBy()) {
-								jsonwriter.key(FolderFields.MODIFIED_BY);
-								jsonwriter.value(fo.getModifiedBy());
+					};
+					break Fields;
+				case FolderObject.TYPE:
+					retval[i] = new FolderFieldWriter() {
+						@Override
+						public void writeField(final JSONWriter jsonwriter, final FolderObject fo,
+								final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
+							if (withKey) {
+								if (fo.containsType()) {
+									jsonwriter.key(FolderFields.TYPE);
+									jsonwriter.value(fo.getType(user.getId()));
+								}
+							} else {
+								jsonwriter.value(fo.containsType() ? Integer.valueOf(fo.getType(user.getId()))
+										: JSONObject.NULL);
 							}
-						} else {
-							jsonwriter.value(fo.containsModifiedBy() ? Integer.valueOf(fo.getModifiedBy())
-									: JSONObject.NULL);
 						}
-					}
-				};
-				break Fields;
-			case FolderObject.CREATION_DATE:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException {
-						if (withKey) {
-							if (fo.containsCreationDate()) {
-								jsonwriter.key(FolderFields.CREATION_DATE);
-								jsonwriter.value(addTimeZoneOffset(fo.getCreationDate().getTime()));
+					};
+					break Fields;
+				case FolderObject.SUBFOLDERS:
+					retval[i] = new FolderFieldWriter() {
+						@Override
+						public void writeField(final JSONWriter jsonwriter, final FolderObject fo,
+								final boolean withKey, final String name, final int hasSubfolders)
+								throws JSONException, DBPoolingException, OXException, SearchIteratorException,
+								SQLException {
+							final boolean shared = fo.containsCreatedBy() && fo.containsType()
+									&& fo.isShared(user.getId());
+							if (withKey) {
+								if (hasSubfolders != -1 || shared || fo.containsSubfolderFlag()) {
+									jsonwriter.key(FolderFields.SUBFOLDERS);
+									jsonwriter.value(hasSubfolders == -1 ? (shared ? Boolean.FALSE : (Boolean
+											.valueOf(fo.hasVisibleSubfolders(user, userConfig, ctx)))) : Boolean
+											.valueOf(hasSubfolders > 0));
+								}
+							} else {
+								jsonwriter.value(hasSubfolders == -1 ? (shared ? Boolean.FALSE : (fo
+										.containsSubfolderFlag() ? Boolean.valueOf(fo.hasVisibleSubfolders(user,
+										userConfig, ctx)) : JSONObject.NULL)) : Boolean.valueOf(hasSubfolders > 0));
 							}
-						} else {
-							jsonwriter.value(fo.containsCreationDate() ? Long.valueOf(addTimeZoneOffset(fo
-									.getCreationDate().getTime())) : JSONObject.NULL);
 						}
-					}
-				};
-				break Fields;
-			case FolderObject.LAST_MODIFIED:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException {
-						if (withKey) {
-							if (fo.containsLastModified()) {
-								jsonwriter.key(FolderFields.LAST_MODIFIED);
-								jsonwriter.value(addTimeZoneOffset(fo.getLastModified().getTime()));
+					};
+					break Fields;
+				case FolderObject.OWN_RIGHTS:
+					retval[i] = new FolderFieldWriter() {
+						@Override
+						public void writeField(final JSONWriter jsonwriter, final FolderObject fo,
+								final boolean withKey, final String name, final int hasSubfolders)
+								throws JSONException, OXException, DBPoolingException, SQLException {
+							if (!fo.containsPermissions()) {
+								try {
+									fo.setPermissionsAsArray(FolderObject.getFolderPermissions(fo.getObjectID(), ctx,
+											null));
+									if (FolderCacheManager.isEnabled()) {
+										FolderCacheManager.getInstance().putFolderObject(fo, ctx);
+									}
+								} catch (final SQLException e) {
+									throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, e,
+											FolderFields.OWN_RIGHTS, Integer.valueOf(fo.getObjectID()), Integer
+													.valueOf(ctx.getContextId()));
+								} catch (final DBPoolingException e) {
+									throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, e,
+											FolderFields.OWN_RIGHTS, Integer.valueOf(fo.getObjectID()), Integer
+													.valueOf(ctx.getContextId()));
+								}
 							}
-						} else {
-							jsonwriter.value(fo.containsLastModified() ? Long.valueOf(addTimeZoneOffset(fo
-									.getLastModified().getTime())) : JSONObject.NULL);
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.FOLDER_ID:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException {
-						if (withKey) {
-							if (fo.containsParentFolderID()) {
-								jsonwriter.key(FolderFields.FOLDER_ID);
-								jsonwriter.value(fo.getParentFolderID());
+							if (withKey) {
+								jsonwriter.key(FolderFields.OWN_RIGHTS);
 							}
-						} else {
-							jsonwriter.value(fo.containsParentFolderID() ? Integer.valueOf(fo.getParentFolderID())
-									: JSONObject.NULL);
+							final OCLPermission effectivePerm = fo.getEffectiveUserPermission(user.getId(), userConfig);
+							jsonwriter.value(createPermissionBits(effectivePerm.getFolderPermission(), effectivePerm
+									.getReadPermission(), effectivePerm.getWritePermission(), effectivePerm
+									.getDeletePermission(), effectivePerm.isFolderAdmin()));
 						}
-					}
-				};
-				break Fields;
-			case FolderObject.FOLDER_NAME:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException {
-						if (withKey) {
-							if (name != null || fo.containsFolderName()) {
-								jsonwriter.key(FolderFields.TITLE);
-								jsonwriter.value(name == null ? fo.getFolderName() : name);
+					};
+					break Fields;
+				case FolderObject.PERMISSIONS_BITS:
+					retval[i] = new FolderFieldWriter() {
+						@Override
+						public void writeField(final JSONWriter jsonwriter, final FolderObject fo,
+								final boolean withKey, final String name, final int hasSubfolders)
+								throws JSONException, OXException {
+							if (!fo.containsPermissions()) {
+								try {
+									fo.setPermissionsAsArray(FolderObject.getFolderPermissions(fo.getObjectID(), ctx,
+											null));
+									if (FolderCacheManager.isEnabled()) {
+										FolderCacheManager.getInstance().putFolderObject(fo, ctx);
+									}
+								} catch (final SQLException e) {
+									throw new OXFolderException(FolderCode.MISSING_PARAMETER, e,
+											FolderFields.PERMISSIONS);
+								} catch (final DBPoolingException e) {
+									throw new OXFolderException(FolderCode.MISSING_PARAMETER, e,
+											FolderFields.PERMISSIONS);
+								}
 							}
-						} else {
-							jsonwriter.value(name == null ? (fo.containsFolderName() ? fo.getFolderName()
-									: JSONObject.NULL) : name);
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.MODULE:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException {
-						if (withKey) {
-							if (fo.containsModule()) {
-								jsonwriter.key(FolderFields.MODULE);
-								jsonwriter.value(AJAXServlet.getModuleString(fo.getModule(), fo.getObjectID()));
+							if (withKey) {
+								jsonwriter.key(FolderFields.PERMISSIONS);
 							}
-						} else {
-							jsonwriter.value(fo.containsModule() ? AJAXServlet.getModuleString(fo.getModule(), fo
-									.getObjectID()) : JSONObject.NULL);
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.TYPE:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException {
-						if (withKey) {
-							if (fo.containsType()) {
-								jsonwriter.key(FolderFields.TYPE);
-								jsonwriter.value(fo.getType(user.getId()));
-							}
-						} else {
-							jsonwriter.value(fo.containsType() ? Integer.valueOf(fo.getType(user.getId()))
-									: JSONObject.NULL);
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.SUBFOLDERS:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException, DBPoolingException,
-							OXException, SearchIteratorException, SQLException {
-						final boolean shared = fo.containsCreatedBy() && fo.containsType() && fo.isShared(user.getId());
-						if (withKey) {
-							if (hasSubfolders != -1 || shared || fo.containsSubfolderFlag()) {
-								jsonwriter.key(FolderFields.SUBFOLDERS);
-								jsonwriter.value(hasSubfolders == -1 ? (shared ? Boolean.FALSE : (Boolean.valueOf(fo
-										.hasVisibleSubfolders(user, userConfig, ctx)))) : Boolean
-										.valueOf(hasSubfolders > 0));
-							}
-						} else {
-							jsonwriter.value(hasSubfolders == -1 ? (shared ? Boolean.FALSE : (fo
-									.containsSubfolderFlag() ? Boolean.valueOf(fo.hasVisibleSubfolders(user,
-									userConfig, ctx)) : JSONObject.NULL)) : Boolean.valueOf(hasSubfolders > 0));
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.OWN_RIGHTS:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException, OXException,
-							DBPoolingException, SQLException {
-						if (!fo.containsPermissions()) {
+							final JSONArray ja = new JSONArray();
+							final OCLPermission[] perms = fo.getPermissionsAsArray();
+							final UserConfigurationStorage userConfStorage = UserConfigurationStorage.getInstance();
 							try {
-								fo
-										.setPermissionsAsArray(FolderObject.getFolderPermissions(fo.getObjectID(), ctx,
-												null));
-								if (FolderCacheManager.isEnabled()) {
-									FolderCacheManager.getInstance().putFolderObject(fo, ctx);
+								for (int k = 0; k < perms.length; k++) {
+									final OCLPermission perm;
+									if (perms[k].isGroupPermission()) {
+										perm = perms[k];
+									} else {
+										perm = fo.getEffectiveUserPermission(perms[k].getEntity(), userConfStorage
+												.getUserConfiguration(perms[k].getEntity(), ctx));
+									}
+									final JSONObject jo = new JSONObject();
+									jo.put(FolderFields.BITS, createPermissionBits(perm));
+									jo.put(FolderFields.ENTITY, perm.getEntity());
+									jo.put(FolderFields.GROUP, perm.isGroupPermission());
+									ja.put(jo);
 								}
-							} catch (final SQLException e) {
-								throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE,
-										FolderFields.OWN_RIGHTS, Integer.valueOf(fo.getObjectID()), Integer.valueOf(ctx
-												.getContextId()));
 							} catch (final DBPoolingException e) {
-								throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE,
-										FolderFields.OWN_RIGHTS, Integer.valueOf(fo.getObjectID()), Integer.valueOf(ctx
-												.getContextId()));
-							}
-						}
-						if (withKey) {
-							jsonwriter.key(FolderFields.OWN_RIGHTS);
-						}
-						final OCLPermission effectivePerm = fo.getEffectiveUserPermission(user.getId(), userConfig);
-						jsonwriter.value(createPermissionBits(effectivePerm.getFolderPermission(), effectivePerm
-								.getReadPermission(), effectivePerm.getWritePermission(), effectivePerm
-								.getDeletePermission(), effectivePerm.isFolderAdmin()));
-					}
-				};
-				break Fields;
-			case FolderObject.PERMISSIONS_BITS:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException, OXException {
-						if (!fo.containsPermissions()) {
-							try {
-								fo
-										.setPermissionsAsArray(FolderObject.getFolderPermissions(fo.getObjectID(), ctx,
-												null));
-								if (FolderCacheManager.isEnabled()) {
-									FolderCacheManager.getInstance().putFolderObject(fo, ctx);
-								}
+								throw new OXException(e);
 							} catch (final SQLException e) {
-								throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.PERMISSIONS);
-							} catch (final DBPoolingException e) {
-								throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.PERMISSIONS);
+								throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer
+										.valueOf(ctx.getContextId()));
 							}
+							jsonwriter.value(ja);
 						}
-						if (withKey) {
-							jsonwriter.key(FolderFields.PERMISSIONS);
-						}
-						final JSONArray ja = new JSONArray();
-						final OCLPermission[] perms = fo.getPermissionsAsArray();
-						final UserConfigurationStorage userConfStorage = UserConfigurationStorage.getInstance();
-						try {
-							for (int k = 0; k < perms.length; k++) {
-								final OCLPermission perm;
-								if (perms[k].isGroupPermission()) {
-									perm = perms[k];
-								} else {
-									perm = fo.getEffectiveUserPermission(perms[k].getEntity(), userConfStorage
-											.getUserConfiguration(perms[k].getEntity(), ctx));
-								}
-								final JSONObject jo = new JSONObject();
-								jo.put(FolderFields.BITS, createPermissionBits(perm));
-								jo.put(FolderFields.ENTITY, perm.getEntity());
-								jo.put(FolderFields.GROUP, perm.isGroupPermission());
-								ja.put(jo);
+					};
+					break Fields;
+				default:
+					if (LOG.isWarnEnabled()) {
+						LOG.warn("Unknown folder field: " + field);
+					}
+					retval[i] = new FolderFieldWriter() {
+						@Override
+						public void writeField(final JSONWriter jsonwriter, final FolderObject fo,
+								final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
+							if (withKey) {
+								return;
 							}
-						} catch (final DBPoolingException e) {
-							throw new OXException(e);
-						} catch (final SQLException e) {
-							throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+							jsonwriter.value(JSONObject.NULL);
 						}
-						jsonwriter.value(ja);
-					}
-				};
-				break Fields;
-			case FolderObject.SUMMARY:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException {
-						if (withKey) {
-							jsonwriter.key(FolderFields.SUMMARY);
-						}
-						jsonwriter.value("");
-					}
-				};
-				break Fields;
-			case FolderObject.STANDARD_FOLDER:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException {
-						if (withKey) {
-							if (fo.containsDefaultFolder()) {
-								jsonwriter.key(FolderFields.STANDARD_FOLDER);
-								jsonwriter.value(fo.isDefaultFolder());
-							}
-						} else {
-							jsonwriter.value(fo.containsDefaultFolder() ? Boolean.valueOf(fo.isDefaultFolder())
-									: JSONObject.NULL);
-						}
-					}
-				};
-				break Fields;
-			case FolderObject.TOTAL:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException {
-						if (withKey) {
-							return;
-						}
-						jsonwriter.value(JSONObject.NULL);
-					}
-				};
-				break Fields;
-			case FolderObject.NEW:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException {
-						if (withKey) {
-							return;
-						}
-						jsonwriter.value(JSONObject.NULL);
-					}
-				};
-				break Fields;
-			case FolderObject.UNREAD:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException {
-						if (withKey) {
-							return;
-						}
-						jsonwriter.value(JSONObject.NULL);
-					}
-				};
-				break;
-			case FolderObject.DELETED:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException {
-						if (withKey) {
-							return;
-						}
-						jsonwriter.value(JSONObject.NULL);
-					}
-				};
-				break Fields;
-			case FolderObject.CAPABILITIES:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException {
-						if (withKey) {
-							return;
-						}
-						jsonwriter.value(JSONObject.NULL);
-					}
-				};
-				break Fields;
-			case FolderObject.SUBSCRIBED:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException {
-						if (withKey) {
-							return;
-						}
-						jsonwriter.value(JSONObject.NULL);
-					}
-				};
-				break Fields;
-			case FolderObject.SUBSCR_SUBFLDS:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException {
-						if (withKey) {
-							return;
-						}
-						jsonwriter.value(JSONObject.NULL);
-					}
-				};
-				break Fields;
-			default:
-				retval[i] = new FolderFieldWriter() {
-					@Override
-					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException {
-						if (LOG.isWarnEnabled()) {
-							LOG.warn("Unknown folder field: " + field);
-						}
-						if (withKey) {
-							return;
-						}
-						jsonwriter.value(JSONObject.NULL);
-					}
-				};
+					};
+				}
+			} else {
+				retval[i] = ffw;
 			}
 		}
 		return retval;
