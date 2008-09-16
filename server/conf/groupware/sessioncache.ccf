@@ -11,7 +11,7 @@ jcs.region.SessionCache.elementattributes=org.apache.jcs.engine.ElementAttribute
 jcs.region.SessionCache.elementattributes.IsEternal=false
 jcs.region.SessionCache.elementattributes.MaxLifeSeconds=3600
 jcs.region.SessionCache.elementattributes.IdleTime=300
-# NOT APPLICABLE TO ANY AUXILIARY (NEITHER DISK, REMOTE NOR TCP)
+# AUXILIARY SUPPORT (DISK, REMOTE, OR TCP)
 jcs.region.SessionCache.elementattributes.IsSpool=false
 jcs.region.SessionCache.elementattributes.IsRemote=true
 jcs.region.SessionCache.elementattributes.IsLateral=true
