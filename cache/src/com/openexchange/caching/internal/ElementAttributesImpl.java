@@ -52,7 +52,6 @@ package com.openexchange.caching.internal;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 
 import com.openexchange.caching.ElementAttributes;
@@ -64,7 +63,7 @@ import com.openexchange.caching.ElementEventHandler;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ElementAttributesImpl implements ElementAttributes, Serializable, Cloneable {
+public final class ElementAttributesImpl implements ElementAttributes, Cloneable {
 
 	/**
 	 * Serial version UID
