@@ -102,7 +102,6 @@ public class QuotaFileStorageException extends FileStorageException {
         TOO_LARGE("The file cannot be added to filestore. File size: %s Quota: %s Used: %s", Category.USER_INPUT, 3),
         UNDERLYING_EXCEPTION("Got a FileStorageException for FileStorage with id %s in context %s. Underlying message is: %s. Check the StackTrace.", Category.INTERNAL_ERROR, 4);
 
-
         /**
          * Message of the exception.
          */

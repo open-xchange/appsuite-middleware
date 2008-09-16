@@ -99,7 +99,7 @@ public class LocalFileStorage extends FileStorage {
      */
     private final File storage;
 
-    private static final Set<String> SPECIAL_FILENAMES = new HashSet(){/**
+    private static final Set<String> SPECIAL_FILENAMES = new HashSet<String>(){/**
 		 * 
 		 */
 		private static final long serialVersionUID = -1052533462069386445L;
