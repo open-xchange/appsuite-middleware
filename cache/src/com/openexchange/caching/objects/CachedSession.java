@@ -88,6 +88,8 @@ public final class CachedSession implements Serializable {
 
 	private final Map<String, Serializable> parameters;
 
+	private boolean markedAsRemoved;
+
 	/**
 	 * Initializes a new {@link CachedSession}
 	 * 
@@ -241,6 +243,27 @@ public final class CachedSession implements Serializable {
 		sb.append(" contextId=").append(contextId);
 		sb.append("\nparameters=").append(parameters.toString());
 		return sb.toString();
+	}
+
+	/**
+	 * Checks if this cached session has been marked as removed
+	 * 
+	 * @return <code>true</code> if this cached session has been marked as
+	 *         removed; otherwise <code>false</code>
+	 */
+	public boolean isMarkedAsRemoved() {
+		return markedAsRemoved;
+	}
+
+	/**
+	 * Sets this cached session's marked-as-removed flag
+	 * 
+	 * @param markedAsRemoved
+	 *            <code>true</code> to mark this cached session as removed;
+	 *            otherwise <code>false</code>
+	 */
+	public void setMarkedAsRemoved(final boolean markedAsRemoved) {
+		this.markedAsRemoved = markedAsRemoved;
 	}
 
 }
