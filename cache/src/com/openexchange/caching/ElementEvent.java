@@ -49,13 +49,15 @@
 
 package com.openexchange.caching;
 
+import java.io.Serializable;
+
 /**
  * {@link ElementEvent}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public interface ElementEvent {
+public interface ElementEvent extends Serializable {
 
 	/**
 	 * Gets the element event attribute of the element event object.

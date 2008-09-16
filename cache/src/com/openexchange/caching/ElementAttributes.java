@@ -49,6 +49,7 @@
 
 package com.openexchange.caching;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -57,7 +58,7 @@ import java.util.ArrayList;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public interface ElementAttributes {
+public interface ElementAttributes extends Serializable {
 
 	/**
 	 * Sets the version attribute of the attributes object
@@ -89,8 +90,8 @@ public interface ElementAttributes {
 	public long getMaxLifeSeconds();
 
 	/**
-	 * Sets the idleTime attribute of the attributes object. This is the
-	 * maximum time the item can be idle in the cache, that is not accessed.
+	 * Sets the idleTime attribute of the attributes object. This is the maximum
+	 * time the item can be idle in the cache, that is not accessed.
 	 * <p>
 	 * If this is exceeded the element will not be returned, instead it will be
 	 * removed. It will be removed on retrieval, or removed actively if the

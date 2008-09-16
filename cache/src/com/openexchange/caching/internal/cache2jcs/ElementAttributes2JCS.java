@@ -49,7 +49,6 @@
 
 package com.openexchange.caching.internal.cache2jcs;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.apache.jcs.engine.behavior.IElementAttributes;
@@ -66,7 +65,7 @@ import com.openexchange.caching.internal.jcs2cache.JCSElementEventHandlerDelegat
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ElementAttributes2JCS implements ElementAttributes, Serializable {
+public final class ElementAttributes2JCS implements ElementAttributes {
 
 	private static final long serialVersionUID = 8536168955346943272L;
 

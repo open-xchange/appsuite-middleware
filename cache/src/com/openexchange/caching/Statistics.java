@@ -49,13 +49,15 @@
 
 package com.openexchange.caching;
 
+import java.io.Serializable;
+
 /**
  * {@link Statistics} - The common behavior for a statistics holder
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public interface Statistics {
+public interface Statistics extends Serializable {
 
 	/**
 	 * Return generic statistical or historical data.
