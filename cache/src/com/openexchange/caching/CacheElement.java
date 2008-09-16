@@ -81,9 +81,9 @@ public interface CacheElement extends Serializable {
 	public Serializable getKey();
 
 	/**
-	 * Gets the val attribute of the cache element object
+	 * Gets the value attribute of the cache element object
 	 * 
-	 * @return The val value
+	 * @return The value
 	 */
 	public Serializable getVal();
 
