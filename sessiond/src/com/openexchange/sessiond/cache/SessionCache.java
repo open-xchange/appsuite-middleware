@@ -51,6 +51,7 @@ package com.openexchange.sessiond.cache;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -58,8 +59,11 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.ElementAttributes;
+import com.openexchange.caching.ElementEventHandler;
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.server.ServiceException;
+import com.openexchange.sessiond.cache.eventhandler.SessionCacheEventHandler;
 
 /**
  * {@link SessionCache} - A cache for instances of {@link CachedSession}.
@@ -72,13 +76,18 @@ import com.openexchange.server.ServiceException;
  */
 public final class SessionCache {
 
+	/**
+	 * Version for element attributes indicating a remove
+	 */
+	public static final long VERSION_REMOTE_REMOVAL = 1l;
+
 	static final String LATERAL_REGION_NAME = "SessionLTCP";
 
 	static final String REGION_NAME = "SessionCache";
 
-	private static final ReadWriteLock READ_WRITE_LOCK = new ReentrantReadWriteLock();
-
 	private static volatile SessionCache singleton;
+
+	private final ReadWriteLock readWriteLock;
 
 	/**
 	 * Initializes a new {@link SessionCache}
@@ -88,9 +97,16 @@ public final class SessionCache {
 	 */
 	private SessionCache() throws CacheException {
 		super();
-		// /*
-		// * Add element event handler to default element attributes
-		// */
+		readWriteLock = new ReentrantReadWriteLock();
+		/*
+		 * Add element event handler to default element attributes
+		 */
+		final Cache cache;
+		try {
+			cache = getCache();
+		} catch (final ServiceException e) {
+			throw new CacheException(e);
+		}
 		// final ElementEventHandler eventHandler = new
 		// SessionCacheEventHandler();
 		// final ElementAttributes attributes =
@@ -154,7 +170,7 @@ public final class SessionCache {
 	 */
 	public CachedSession removeCachedSession(final String secret) throws CacheException, ServiceException {
 		final Cache cache = getCache();
-		READ_WRITE_LOCK.readLock().lock();
+		readWriteLock.readLock().lock();
 		try {
 			final CacheKey key = createKey(secret, cache);
 			if (cache.get(key) == null) {
@@ -166,8 +182,8 @@ public final class SessionCache {
 			/*
 			 * Upgrade lock: unlock first to acquire write lock
 			 */
-			READ_WRITE_LOCK.readLock().unlock();
-			READ_WRITE_LOCK.writeLock().lock();
+			readWriteLock.readLock().unlock();
+			readWriteLock.writeLock().lock();
 			try {
 				final CachedSession cachedSession = (CachedSession) cache.get(key);
 				/*
@@ -183,14 +199,14 @@ public final class SessionCache {
 				 * Downgrade lock: reacquire read without giving up write lock
 				 * and...
 				 */
-				READ_WRITE_LOCK.readLock().lock();
+				readWriteLock.readLock().lock();
 				/*
 				 * ... unlock write.
 				 */
-				READ_WRITE_LOCK.writeLock().unlock();
+				readWriteLock.writeLock().unlock();
 			}
 		} finally {
-			READ_WRITE_LOCK.readLock().unlock();
+			readWriteLock.readLock().unlock();
 		}
 	}
 
@@ -212,7 +228,7 @@ public final class SessionCache {
 	 */
 	public boolean putCachedSession(final CachedSession cachedSession) throws CacheException, ServiceException {
 		final Cache cache = getCache();
-		READ_WRITE_LOCK.readLock().lock();
+		readWriteLock.readLock().lock();
 		try {
 			final CacheKey key = createKey(cachedSession.getSecret(), cache);
 			if (cache.get(key) != null) {
@@ -224,8 +240,8 @@ public final class SessionCache {
 			/*
 			 * Upgrade lock: unlock first to acquire write lock
 			 */
-			READ_WRITE_LOCK.readLock().unlock();
-			READ_WRITE_LOCK.writeLock().lock();
+			readWriteLock.readLock().unlock();
+			readWriteLock.writeLock().lock();
 			try {
 				/*
 				 * Still not present?
@@ -240,14 +256,59 @@ public final class SessionCache {
 				 * Downgrade lock: reacquire read without giving up write lock
 				 * and...
 				 */
-				READ_WRITE_LOCK.readLock().lock();
+				readWriteLock.readLock().lock();
 				/*
 				 * ... unlock write.
 				 */
-				READ_WRITE_LOCK.writeLock().unlock();
+				readWriteLock.writeLock().unlock();
 			}
 		} finally {
-			READ_WRITE_LOCK.readLock().unlock();
+			readWriteLock.readLock().unlock();
+		}
+	}
+
+	/**
+	 * Puts given cache-able session into cache to distribute a remove for
+	 * associated session among auxiliary caches
+	 * 
+	 * @param cachedSession
+	 *            The cached session which shall be removed in auxiliary caches
+	 * @throws CacheException
+	 *             If put into cache fails
+	 * @throws ServiceException
+	 *             If caching service is not available
+	 */
+	public void putCachedSessionForRemoteRemoval(final CachedSession cachedSession) throws CacheException,
+			ServiceException {
+		final Cache cache = getCache();
+		final Lock writeLock = readWriteLock.writeLock();
+		writeLock.lock();
+		try {
+			final CacheKey key = createKey(cachedSession.getSecret(), cache);
+			final ElementAttributes elementAttributes = cache.getDefaultElementAttributes();
+			/*
+			 * Set attributes' version to indicate remote removal
+			 */
+			elementAttributes.setVersion(VERSION_REMOTE_REMOVAL);
+			cachedSession.setMarkedAsRemoved(true);
+			/*
+			 * Apply proper idle time to cause an exceeded idle time event
+			 */
+			elementAttributes.setIdleTime(5); // 5 sec
+			elementAttributes.setMaxLifeSeconds(5); // 5 sec
+			elementAttributes.setIsEternal(false);
+			elementAttributes.setIsLateral(true);
+			/*
+			 * Apply event handler
+			 */
+			final ElementEventHandler eventHandler = new SessionCacheEventHandler();
+			elementAttributes.addElementEventHandler(eventHandler);
+			/*
+			 * Put to cache
+			 */
+			cache.put(key, cachedSession, elementAttributes);
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -265,12 +326,12 @@ public final class SessionCache {
 	 *             If caching service is not available
 	 */
 	public boolean containsCachedSession(final String secret) throws ServiceException, CacheException {
-		READ_WRITE_LOCK.readLock().lock();
+		readWriteLock.readLock().lock();
 		try {
 			final Cache cache = getCache();
 			return (cache.get(createKey(secret, cache)) != null);
 		} finally {
-			READ_WRITE_LOCK.readLock().unlock();
+			readWriteLock.readLock().unlock();
 		}
 	}
 
