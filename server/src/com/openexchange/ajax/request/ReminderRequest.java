@@ -196,7 +196,7 @@ public class ReminderRequest {
         SearchIterator it = null;
        
         try {
-        	final Context ctx = ContextStorage.getInstance().getContext(sessionObj);
+        	final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
             final ReminderSQLInterface reminderSql = new ReminderHandler(ctx);
             it = reminderSql.listModifiedReminder(userObj.getId(), timestamp);
 

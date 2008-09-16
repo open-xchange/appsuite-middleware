@@ -101,7 +101,7 @@ public class Group extends DataServlet {
 	            writeResponse(response, httpServletResponse);
 	            return;
 			}
-			final Context ctx = ContextStorage.getInstance().getContext(session);
+			final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
 			final GroupRequest groupRequest = new GroupRequest(session, ctx);
 			final Object responseObj = groupRequest.action(action, jsonObj);
 			response.setTimestamp(groupRequest.getTimestamp());
@@ -138,7 +138,7 @@ public class Group extends DataServlet {
 	            writeResponse(response, httpServletResponse);
 	            return;
 			}
-			final Context ctx = ContextStorage.getInstance().getContext(session);
+			final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
 			final GroupRequest groupRequest = new GroupRequest(session, ctx);
 			
 			if (data.charAt(0) == '[') {
