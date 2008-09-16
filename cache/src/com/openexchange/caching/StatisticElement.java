@@ -49,7 +49,6 @@
 
 package com.openexchange.caching;
 
-import java.io.Serializable;
 
 /**
  * {@link StatisticElement}
@@ -57,7 +56,7 @@ import java.io.Serializable;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public interface StatisticElement extends Serializable {
+public interface StatisticElement {
 
 	/**
 	 * Gets the name of the statistic element, e.g. "HitCount"
