@@ -10,7 +10,7 @@ jcs.region.SessionCache.cacheattributes.MaxSpoolPerRun=500
 jcs.region.SessionCache.elementattributes=org.apache.jcs.engine.ElementAttributes
 jcs.region.SessionCache.elementattributes.IsEternal=false
 jcs.region.SessionCache.elementattributes.MaxLifeSeconds=3600
-jcs.region.SessionCache.elementattributes.IdleTime=60
+jcs.region.SessionCache.elementattributes.IdleTime=300
 # NOT APPLICABLE TO ANY AUXILIARY (NEITHER DISK, REMOTE NOR TCP)
 jcs.region.SessionCache.elementattributes.IsSpool=false
 jcs.region.SessionCache.elementattributes.IsRemote=true
