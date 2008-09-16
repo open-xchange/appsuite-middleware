@@ -49,6 +49,8 @@
 
 package com.openexchange.caching.internal.jcs2cache;
 
+import java.io.Serializable;
+
 import org.apache.jcs.engine.control.event.ElementEvent;
 import org.apache.jcs.engine.control.event.behavior.IElementEvent;
 import org.apache.jcs.engine.control.event.behavior.IElementEventConstants;
@@ -64,7 +66,9 @@ import com.openexchange.caching.internal.cache2jcs.ElementEvent2JCS;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class JCSElementEventHandlerDelegator implements IElementEventHandler {
+public final class JCSElementEventHandlerDelegator implements IElementEventHandler, Serializable {
+
+	private static final long serialVersionUID = 4363921266600402439L;
 
 	private final ElementEventHandler handler;
 
