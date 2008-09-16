@@ -133,7 +133,8 @@ public final class CachedSession implements Serializable {
 		 */
 		for (final Iterator<Map.Entry<String, Object>> iterator = parameters.entrySet().iterator(); iterator.hasNext();) {
 			final Map.Entry<String, Object> entry = iterator.next();
-			if (Serializable.class.isInstance(entry.getValue())) {
+			final Object value = entry.getValue();
+			if (Serializable.class.isInstance(value) && value.getClass().getName().startsWith("java.")) {
 				tmpparameters.put(entry.getKey(), (Serializable) entry.getValue());
 			}
 		}
