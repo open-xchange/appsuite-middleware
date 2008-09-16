@@ -74,49 +74,37 @@ public class AllTest extends AppointmentTest {
 		Date end = new Date(start.getTime()+dayInMillis);
 		
 		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, false, getHostName(), getSessionId());
-		
 		boolean found = false;
-		
 		for (int a = 0; a < appointmentArray.length; a++) {
 			if (appointmentArray[a].getObjectID() == objectId) {
 				found = true;
 			}
 		}
-		
-		// one day less
 		assertTrue("appointment not found in day view", found);
 		
+        // one day less
 		start = new Date(calendar.getTimeInMillis()-dayInMillis);
 		end = new Date(start.getTime()+dayInMillis);
-		
 		appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, false, getHostName(), getSessionId());
-		
 		found = false;
-		
 		for (int a = 0; a < appointmentArray.length; a++) {
 			if (appointmentArray[a].getObjectID() == objectId) {
 				found = true;
 			}
 		}
-		
 		assertFalse("appointment found one day before start date in day view", found);
 		
 		// one day more
 		start = new Date(calendar.getTimeInMillis()+dayInMillis);
 		end = new Date(start.getTime()+dayInMillis);
-		
 		appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, false, getHostName(), getSessionId());
-		
 		found = false;
-		
 		for (int a = 0; a < appointmentArray.length; a++) {
 			if (appointmentArray[a].getObjectID() == objectId) {
 				found = true;
 			}
 		}
-		
 		assertFalse("appointment found one day after start date in day view", found);
-				
 
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
 	}
