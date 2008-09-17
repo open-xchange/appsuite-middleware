@@ -282,7 +282,7 @@ public class AppointmentWriter extends CalendarWriter {
 		case AppointmentObject.UNTIL:
 			writeValue(appointmentObject.getUntil(), jsonArray);
 			break;
-		case AppointmentObject.RECURRING_OCCURRENCE:
+		case AppointmentObject.RECURRING_OCCURRENCE: case AppointmentObject.RECURRENCE_COUNT:
 			writeValue(appointmentObject.getOccurrence(), jsonArray, appointmentObject.containsOccurrence());
 			break;
 		case AppointmentObject.RECURRENCE_DATE_POSITION:

@@ -1,3 +1,6 @@
+* 2008-09-17 - francisco.laguna@open-xchange.com
+ - Bugfix #12171: Send ocurrences in list style requests when they are requested.
+
 * 2008-09-16 - marcus.klein@open-xchange.com
 
  - Bugfix #12063: Not sending email notification for appointments and tasks
