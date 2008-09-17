@@ -442,7 +442,10 @@ public class AppointmentRequest {
 		
 		if (jData.has(CalendarFields.RECURRENCE_POSITION)) {
 			appointmentObj.setRecurrencePosition(DataParser.checkInt(jData, CalendarFields.RECURRENCE_POSITION));
-		}
+		} else if (jData.has(CalendarFields.RECURRENCE_DATE_POSITION)) {
+            appointmentObj.setRecurrenceDatePosition(DataParser.checkDate(jData, CalendarFields.RECURRENCE_DATE_POSITION));
+
+        }
 		
 		appointmentObj.setContext(ctx);
 		

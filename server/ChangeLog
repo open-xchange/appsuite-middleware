@@ -6,6 +6,7 @@
 * 2008-09-17 - francisco.laguna@open-xchange.com
 
  - Bugfix #12171: Send ocurrences in list style requests when they are requested.
+ - Bugfix #12173: Allow creating delete exceptions in a series by recurrence_date_position.
 
 * 2008-09-16 - marcus.klein@open-xchange.com
 
