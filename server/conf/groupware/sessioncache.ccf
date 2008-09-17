@@ -1,5 +1,6 @@
 # SessionD cache
 jcs.region.SessionCache=SessionLTCP
+# ============ Cache attributes ==============
 jcs.region.SessionCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
 jcs.region.SessionCache.cacheattributes.MaxObjects=10000000
 jcs.region.SessionCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
@@ -7,6 +8,8 @@ jcs.region.SessionCache.cacheattributes.UseMemoryShrinker=true
 jcs.region.SessionCache.cacheattributes.MaxMemoryIdleTimeSeconds=300
 jcs.region.SessionCache.cacheattributes.ShrinkerIntervalSeconds=60
 jcs.region.SessionCache.cacheattributes.MaxSpoolPerRun=500
+# ============ End of cache attributes =======
+# ============ Element attributes ============
 jcs.region.SessionCache.elementattributes=org.apache.jcs.engine.ElementAttributes
 jcs.region.SessionCache.elementattributes.IsEternal=false
 jcs.region.SessionCache.elementattributes.MaxLifeSeconds=3600
@@ -15,6 +18,7 @@ jcs.region.SessionCache.elementattributes.IdleTime=300
 jcs.region.SessionCache.elementattributes.IsSpool=false
 jcs.region.SessionCache.elementattributes.IsRemote=true
 jcs.region.SessionCache.elementattributes.IsLateral=true
+# ============ End of element attributes =====
 
 # Auxiliary cache configuration for synchronizing SessionD caches in a cluster.
 # The lateral cache broadcasts PUTS and REMOVALS (and possibly GETS) to other local caches.
