@@ -144,10 +144,6 @@ public final class SessionCacheEventHandler implements ElementEventHandler {
 	}
 
 	private void removedUserSessions(final CachedSession cachedSession) {
-		if (LOG.isInfoEnabled()) {
-			LOG.info(new StringBuilder(64).append("Local removing user sessions by event handler: User=").append(
-					cachedSession.getUserId()).append(", Context=").append(cachedSession.getContextId()).toString());
-		}
 		SessionHandler.removeUserSessions(cachedSession.getUserId(), cachedSession.getContextId(), false);
 	}
 }
