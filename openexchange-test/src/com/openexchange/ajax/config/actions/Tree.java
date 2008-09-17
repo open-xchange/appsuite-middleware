@@ -73,8 +73,8 @@ public enum Tree {
     /** [inside GUI] "true" or "false" */
     MailNewMailOptionsOptionsEnabled("/gui/mail/newmail_options/options"),
     
-    /** [inside GUI] "true" or "false" */
-    MailAllowHtmlMails("/gui/mail/htmlmessage"),
+    /** activate inlining of HTML attachments (added 2008-02-25) setting is called like the enum value in the gui "true" or "false" */
+    MailAllowHtmlMails("/modules/mail/inlineattachments"),
     
     /** [inside GUI] json array */
     //TODO: [{"position":"below","signature_text":"wefwefwe","signature_name":"efwefwef","signature_default":true}],
@@ -245,7 +245,7 @@ public enum Tree {
     ShowParticipantDialog("/participants/showDialog"),
 
     /** all email addresses of the user including the primary address (read-only, added 2008-02-25) */
-    MailAddresses("/modules//mail/addresses"),
+    MailAddresses("/modules/mail/addresses"),
 
     /** (added 2008-02-25) */
     AppendMailText("/modules/mail/appendmailtext"),
