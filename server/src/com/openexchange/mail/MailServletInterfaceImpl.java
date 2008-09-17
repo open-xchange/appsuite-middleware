@@ -932,12 +932,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	public String sendMessage(final ComposedMailMessage composedMail, final ComposeType type) throws MailException {
 		initConnection();
 		final MailTransport transport = MailTransport.getInstance(session);
-		final MailMessage sentMail;
 		try {
 			/*
 			 * Send mail
 			 */
-			sentMail = transport.sendMailMessage(composedMail, type);
+			final MailMessage sentMail = transport.sendMailMessage(composedMail, type);
 			/*
 			 * Check for a reply/forward
 			 */
