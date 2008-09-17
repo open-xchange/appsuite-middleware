@@ -87,4 +87,4 @@ exec $JAVA_BIN $JAVA_XTRAOPTS \
 	-Duser.timezone=GMT \
 	-Dlibdir=$BUNDLELIBPATH \
 	-jar $OSGIBUNDLE \
-	-configuration file:$OSGIPATH/ > $CONSOLELOG 2>&1
+	-configuration file:$OSGIPATH/ >> $CONSOLELOG 2>&1
