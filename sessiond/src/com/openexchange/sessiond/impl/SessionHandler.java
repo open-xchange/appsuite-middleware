@@ -108,7 +108,7 @@ public final class SessionHandler {
 	private static final AtomicInteger numberOfActiveSessions = new AtomicInteger();
 
 	/**
-	 * Initializes a new {@link SessionHandler session-handler}
+	 * Initializes a new {@link SessionHandler session handler}
 	 */
 	private SessionHandler() {
 		super();
@@ -158,6 +158,17 @@ public final class SessionHandler {
 		postContainerRemoval(sessions);
 	}
 
+	/**
+	 * Checks if given user in specified context has an active session kept in
+	 * session container(s)
+	 * 
+	 * @param userId
+	 *            The user ID
+	 * @param context
+	 *            The user's context
+	 * @return <code>true</code> if given user in specified context has an
+	 *         active session; otherwise <code>false</code>
+	 */
 	protected static boolean isUserActive(final int userId, final Context context) {
 		final int size = sessionList.size();
 		boolean active = false;
@@ -197,9 +208,32 @@ public final class SessionHandler {
 				}
 			}
 		}
+		if (LOG.isInfoEnabled()) {
+			LOG.info(new StringBuilder(64).append(propagate ? "Remote" : "Local").append(
+					" removing user sessions: User=").append(userId).append(", Context=").append(contextId).toString());
+		}
 		return retval.toArray(new SessionControl[retval.size()]);
 	}
 
+	/**
+	 * Adds a new session containing given attributes to session container(s)
+	 * 
+	 * @param userId
+	 *            The user ID
+	 * @param loginName
+	 *            The user's login name
+	 * @param password
+	 *            The user's password
+	 * @param context
+	 *            The context
+	 * @param clientHost
+	 *            The client host name or IP address
+	 * @param login
+	 *            The full user's login; e.g. <i>test@foo.bar</i>
+	 * @return The session ID associated with newly created session
+	 * @throws SessiondException
+	 *             If creating a new session fails
+	 */
 	protected static String addSession(final int userId, final String loginName, final String password,
 			final Context context, final String clientHost, final String login) throws SessiondException {
 		final int maxSessPerUser = config.getMaxSessionsPerUser();
@@ -252,9 +286,17 @@ public final class SessionHandler {
 		return sessionControlObject;
 	}
 
+	/**
+	 * Refreshes the session's last-accessed time stamp
+	 * 
+	 * @param sessionid
+	 *            The session ID denoting the session
+	 * @return <code>true</code> if a refreshing last-accessed time stamp was
+	 *         successful; otherwise <code>false</code>
+	 */
 	protected static boolean refreshSession(final String sessionid) {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("refreshSession <" + sessionid + '>');
+			LOG.debug(new StringBuilder("refreshSession <").append(sessionid).append('>').toString());
 		}
 
 		for (int a = 0; a < numberOfSessionContainers; a++) {
@@ -285,6 +327,14 @@ public final class SessionHandler {
 		return false;
 	}
 
+	/**
+	 * Clears the session denoted by given session ID from session container(s)
+	 * 
+	 * @param sessionid
+	 *            The session ID
+	 * @return <code>true</code> if a session could be removed; otherwise
+	 *         <code>false</code>
+	 */
 	protected static boolean clearSession(final String sessionid) {
 		for (int a = 0; a < numberOfSessionContainers; a++) {
 			final SessionContainer sessionContainer = sessionList.get(a);
@@ -305,10 +355,20 @@ public final class SessionHandler {
 		return false;
 	}
 
+	/**
+	 * Changes the password stored in session denoted by given session ID
+	 * 
+	 * @param sessionid
+	 *            The session ID
+	 * @param newPassword
+	 *            The new password
+	 * @throws SessiondException
+	 *             If changing the password fails
+	 */
 	protected static void changeSessionPassword(final String sessionid, final String newPassword)
 			throws SessiondException {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("changeSessionPassword <" + sessionid + '>');
+			LOG.debug(new StringBuilder("changeSessionPassword <").append(sessionid).append('>').toString());
 		}
 
 		// TODO: Check permission via security service
@@ -351,7 +411,7 @@ public final class SessionHandler {
 
 			if (random.containsKey(randomToken)) {
 				final String sessionId = random.get(randomToken);
-				final SessionControl sessionControlObject = getSession(sessionId, true);
+				final SessionControl sessionControlObject = getSession(sessionId);
 
 				final long now = System.currentTimeMillis();
 
@@ -370,9 +430,17 @@ public final class SessionHandler {
 		return null;
 	}
 
-	protected static SessionControl getSession(final String sessionid, final boolean refresh) {
+	/**
+	 * Gets the session associated with given session ID
+	 * 
+	 * @param sessionid
+	 *            The session ID
+	 * @return The session associated with given session ID; otherwise
+	 *         <code>null</code> if expired or none found
+	 */
+	protected static SessionControl getSession(final String sessionid) {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("getSession <" + sessionid + '>');
+			LOG.debug(new StringBuilder("getSession <").append(sessionid).append('>').toString());
 		}
 
 		for (int a = 0; a < numberOfSessionContainers; a++) {
@@ -390,6 +458,25 @@ public final class SessionHandler {
 						 */
 						sessionList.get(0).putSessionControl(sessionControl);
 						sessionContainer.removeSessionById(sessionid);
+					}
+
+					/*
+					 * Look-up cache if current session wrapped by
+					 * session-control is marked for removal
+					 */
+					try {
+						final CachedSession cachedSession = SessionCache.getInstance().removeCachedSession(
+								sessionControl.getSession().getSecret());
+						if (null != cachedSession) {
+							if (cachedSession.isMarkedAsRemoved()) {
+								removeUserSessions(cachedSession.getUserId(), cachedSession.getContextId(), false);
+								return null;
+							}
+						}
+					} catch (final CacheException e) {
+						LOG.error("Unable to look-up session cache", e);
+					} catch (final ServiceException e) {
+						LOG.error("Unable to look-up session cache", e);
 					}
 
 					return sessionControl;
@@ -415,18 +502,12 @@ public final class SessionHandler {
 	 */
 	public static SessionControl getCachedSession(final String secret, final String localIP) {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("getCachedSession <" + secret + '>');
+			LOG.debug(new StringBuilder("getCachedSession <").append(secret).append('>').toString());
 		}
 		try {
 			final CachedSession cachedSession = SessionCache.getInstance().removeCachedSession(secret);
 			if (null != cachedSession) {
 				if (cachedSession.isMarkedAsRemoved()) {
-					if (LOG.isInfoEnabled()) {
-						LOG.info(new StringBuilder(64).append(
-								"Local removing user sessions by session cache retrieval: User=").append(
-								cachedSession.getUserId()).append(", Context=").append(cachedSession.getContextId())
-								.toString());
-					}
 					removeUserSessions(cachedSession.getUserId(), cachedSession.getContextId(), false);
 				} else {
 					/*

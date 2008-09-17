@@ -114,10 +114,21 @@ public interface SessiondService {
 	 * 
 	 * @param sessionId
 	 *            - The Session ID
-	 * @return True if the session was removed or false if the session ID
-	 *         doesn't exist
+	 * @return <code>true</code> if the session was removed or
+	 *         <code>false</code> if the session ID doesn't exist
 	 */
 	public boolean removeSession(final String sessionId);
+
+	/**
+	 * Removes all sessions belonging to given user in specified context
+	 * 
+	 * @param userId
+	 *            The user ID
+	 * @param ctx
+	 *            The context
+	 * @return The number of removed session or zero if no session was removed
+	 */
+	public int removeUserSessions(final int userId, final Context ctx);
 
 	/**
 	 * Get the session object related to the given session ID

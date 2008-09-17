@@ -78,13 +78,7 @@ public final class SessiondMBeanImpl extends StandardMBean implements SessiondMB
 	}
 
 	public int clearUserSessions(final int userId, final int contextId) {
-		if (LOG.isInfoEnabled()) {
-			LOG.info(new StringBuilder(64).append("Remote removing user sessions by sessiond MBean: User=").append(
-					userId).append(", Context=").append(contextId).toString());
-		}
-		// TODO: Invoke with true when solution available how to remotely remove
-		// sessions
-		return SessionHandler.removeUserSessions(userId, contextId, false).length;
+		return SessionHandler.removeUserSessions(userId, contextId, true).length;
 	}
 
 }

@@ -57,10 +57,17 @@ import com.openexchange.sessiond.exception.SessiondException;
 /**
  * {@link SessiondServiceImpl} - Implementation of {@link SessiondService}
  * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SessiondServiceImpl implements SessiondService {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(SessiondServiceImpl.class);
+
+	/**
+	 * Initializes a new {@link SessiondServiceImpl}
+	 */
 	public SessiondServiceImpl() {
 		super();
 	}
@@ -82,8 +89,12 @@ public class SessiondServiceImpl implements SessiondService {
 		return SessionHandler.clearSession(sessionId);
 	}
 
+	public int removeUserSessions(final int userId, final Context ctx) {
+		return SessionHandler.removeUserSessions(userId, ctx.getContextId(), true).length;
+	}
+
 	public Session getSession(final String sessionId) {
-		final SessionControl sessionControl = SessionHandler.getSession(sessionId, true);
+		final SessionControl sessionControl = SessionHandler.getSession(sessionId);
 		if (sessionControl != null) {
 			return sessionControl.getSession();
 		}
