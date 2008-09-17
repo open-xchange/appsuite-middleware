@@ -88,7 +88,7 @@ public class FileStorageTest extends TestCase {
         final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
         LOG.trace(tempFile.getAbsolutePath());
-        final FileStorage storage = FileStorage.getInstance(tempFile);
+        final FileStorage storage = FileStorage.getInstance(tempFile.toURI());
         tempFile.delete();
         assertNotNull("Can't create file storage.", storage);
     }
@@ -104,20 +104,22 @@ public class FileStorageTest extends TestCase {
         final String fileContent = RandomString.generateLetter(100);
         final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent
             .getBytes("UTF-8"));
-        final FileStorage storage = FileStorage.getInstance(tempFile);
+        final FileStorage storage = FileStorage.getInstance(tempFile.toURI());
         final String identifier = storage.saveNewFile(baos);
         tempFile.delete();
         assertNotNull("Can't create new file in file storage.", identifier);
     }
 
-    // Bug 3978
+    /**
+     * Test for bug 3978.
+     */
     public final void testExceptionOnUnavailableFilestore() throws Throwable {
     	final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
         final String fileContent = RandomString.generateLetter(100);
         final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent
             .getBytes("UTF-8"));
-        final FileStorage storage = FileStorage.getInstance(tempFile);
+        final FileStorage storage = FileStorage.getInstance(tempFile.toURI());
         final String identifier = storage.saveNewFile(baos);
         rmdir(tempFile);
         assertFalse(tempFile.exists());
@@ -136,11 +138,13 @@ public class FileStorageTest extends TestCase {
         }
     }
     
-//  Bug 3978
+    /**
+     * Test for bug 3978.
+     */
     public final void testExceptionOnUnknown() throws Throwable {
     	final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
-        final FileStorage storage = FileStorage.getInstance(tempFile);
+        final FileStorage storage = FileStorage.getInstance(tempFile.toURI());
         try {
         	storage.getFile("00/00/01");
         	fail("Expected IOException");
