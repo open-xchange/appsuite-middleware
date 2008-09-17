@@ -189,6 +189,7 @@ public final class SessionCache {
 					return null;
 				}
 				cache.remove(key);
+				cache.remove(createUserKey(cachedSession, cache));
 				return cachedSession;
 			} finally {
 				/*
@@ -249,6 +250,7 @@ public final class SessionCache {
 				}
 				cachedSession.setMarkedAsRemoved(false);
 				cache.put(key, cachedSession);
+				cache.put(createUserKey(cachedSession, cache), cachedSession.getSecret());
 				return true;
 			} finally {
 				/*
@@ -291,6 +293,7 @@ public final class SessionCache {
 			 * Put to cache
 			 */
 			cache.put(createKey(cachedSession.getSecret(), cache), cachedSession);
+			cache.put(createUserKey(cachedSession, cache), cachedSession.getSecret());
 		} finally {
 			writeLock.unlock();
 		}
@@ -320,10 +323,49 @@ public final class SessionCache {
 		}
 	}
 
+	/**
+	 * Gets the first encountered cached session for given user in specified
+	 * context
+	 * 
+	 * @param userId
+	 *            The user ID
+	 * @param contextId
+	 *            The context ID
+	 * @return The first encountered cached session for given user in specified
+	 *         context or <code>null</code> if none found
+	 * @throws ServiceException
+	 *             If caching service is not available
+	 * @throws CacheException
+	 *             If a caching error occurs
+	 */
+	public CachedSession getCachedSessionByUser(final int userId, final int contextId) throws ServiceException,
+			CacheException {
+		final Cache cache = getCache();
+		final Lock readLock = readWriteLock.readLock();
+		readLock.lock();
+		try {
+			final String secret = (String) cache.get(createUserKey(userId, contextId, cache));
+			if (secret == null) {
+				return null;
+			}
+			return (CachedSession) cache.get(createKey(secret, cache));
+		} finally {
+			readLock.unlock();
+		}
+	}
+
 	private static final int DUMMY = 1;
 
-	private CacheKey createKey(final String sessionId, final Cache cache) {
+	private static CacheKey createKey(final String sessionId, final Cache cache) {
 		return cache.newCacheKey(DUMMY, sessionId);
+	}
+
+	private static CacheKey createUserKey(final CachedSession cs, final Cache cache) {
+		return cache.newCacheKey(cs.getContextId(), cs.getUserId());
+	}
+
+	private static CacheKey createUserKey(final int userId, final int contextId, final Cache cache) {
+		return cache.newCacheKey(contextId, userId);
 	}
 
 }

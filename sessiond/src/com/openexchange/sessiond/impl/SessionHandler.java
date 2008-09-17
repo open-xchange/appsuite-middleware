@@ -210,7 +210,8 @@ public final class SessionHandler {
 		}
 		if (LOG.isInfoEnabled()) {
 			LOG.info(new StringBuilder(64).append(propagate ? "Remote" : "Local").append(
-					" removing user sessions: User=").append(userId).append(", Context=").append(contextId).toString());
+					" removal of user sessions: User=").append(userId).append(", Context=").append(contextId)
+					.toString());
 		}
 		return retval.toArray(new SessionControl[retval.size()]);
 	}
@@ -465,10 +466,12 @@ public final class SessionHandler {
 					 * session-control is marked for removal
 					 */
 					try {
-						final CachedSession cachedSession = SessionCache.getInstance().removeCachedSession(
-								sessionControl.getSession().getSecret());
+						final Session s = sessionControl.getSession();
+						final CachedSession cachedSession = SessionCache.getInstance().getCachedSessionByUser(
+								s.getUserId(), s.getContextId());
 						if (null != cachedSession) {
 							if (cachedSession.isMarkedAsRemoved()) {
+								SessionCache.getInstance().removeCachedSession(cachedSession.getSecret());
 								removeUserSessions(cachedSession.getUserId(), cachedSession.getContextId(), false);
 								return null;
 							}
