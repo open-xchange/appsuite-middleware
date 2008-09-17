@@ -1,3 +1,8 @@
+* 2008-09-17 - thorben.betten@open-xchange.com
+
+ - Bugfix #12169: Checking specified from address if covered by allowed
+   user aliases
+
 * 2008-09-17 - marcus.klein@open-xchange.com
 
  - Bugfix #11515: Disabling mail module if IMAP login fails.

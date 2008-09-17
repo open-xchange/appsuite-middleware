@@ -52,12 +52,20 @@ package com.openexchange.mail;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -70,6 +78,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
@@ -930,6 +939,31 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
 	@Override
 	public String sendMessage(final ComposedMailMessage composedMail, final ComposeType type) throws MailException {
+		/*
+		 * Check for valid from address
+		 */
+		try {
+			final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
+			if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
+				validAddrs.add(new InternetAddress(usm.getSendAddr()));
+			}
+			final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+			validAddrs.add(new InternetAddress(user.getMail()));
+			final String[] aliases = user.getAliases();
+			for (final String alias : aliases) {
+				validAddrs.add(new InternetAddress(alias));
+			}
+			final List<InternetAddress> from = Arrays.asList(composedMail.getFrom());
+			if (!validAddrs.containsAll(from)) {
+				throw new MailException(MailException.Code.INVALID_SENDER, from.size() == 1 ? from.get(0).toString()
+						: Arrays.toString(composedMail.getFrom()));
+			}
+		} catch (final AddressException e) {
+			throw MIMEMailException.handleMessagingException(e, mailConfig);
+		}
+		/*
+		 * Initialize
+		 */
 		initConnection();
 		final MailTransport transport = MailTransport.getInstance(session);
 		try {
@@ -1023,6 +1057,29 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
 	@Override
 	public void sendReceiptAck(final String folder, final long msgUID, final String fromAddr) throws MailException {
+		/*
+		 * Check for valid from address
+		 */
+		try {
+			final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
+			if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
+				validAddrs.add(new InternetAddress(usm.getSendAddr()));
+			}
+			final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+			validAddrs.add(new InternetAddress(user.getMail()));
+			final String[] aliases = user.getAliases();
+			for (final String alias : aliases) {
+				validAddrs.add(new InternetAddress(alias));
+			}
+			if (!validAddrs.contains(new InternetAddress(fromAddr))) {
+				throw new MailException(MailException.Code.INVALID_SENDER, fromAddr);
+			}
+		} catch (final AddressException e) {
+			throw MIMEMailException.handleMessagingException(e);
+		}
+		/*
+		 * Initialize
+		 */
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
 		final MailTransport transport = MailTransport.getInstance(session);

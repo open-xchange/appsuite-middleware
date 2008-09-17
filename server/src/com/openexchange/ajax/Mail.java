@@ -74,6 +74,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -110,6 +112,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
@@ -136,6 +139,7 @@ import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
@@ -2396,6 +2400,35 @@ public class Mail extends PermissionServlet implements UploadListener {
 			}
 			final int flags = paramContainer.getIntParam(PARAMETER_FLAGS);
 			/*
+			 * Get rfc822 bytes and create corresponding mail message
+			 */
+			final byte[] rfc822 = body.getBytes("US-ASCII");
+			final MailMessage m = MIMEMessageConverter.convertMessage(rfc822);
+			/*
+			 * Check for valid from address
+			 */
+			try {
+				final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
+				final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(
+						session.getUserId(), session.getContextId());
+				if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
+					validAddrs.add(new InternetAddress(usm.getSendAddr()));
+				}
+				final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+				validAddrs.add(new InternetAddress(user.getMail()));
+				final String[] aliases = user.getAliases();
+				for (final String alias : aliases) {
+					validAddrs.add(new InternetAddress(alias));
+				}
+				final List<InternetAddress> from = Arrays.asList(m.getFrom());
+				if (!validAddrs.containsAll(from)) {
+					throw new MailException(MailException.Code.INVALID_SENDER, from.size() == 1 ? from.get(0)
+							.toString() : Arrays.toString(m.getFrom()));
+				}
+			} catch (final AddressException e) {
+				throw MIMEMailException.handleMessagingException(e);
+			}
+			/*
 			 * Check if "folder" element is present which indicates to save
 			 * given message as a draft or append to denoted folder
 			 */
@@ -2408,7 +2441,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					/*
 					 * Send raw message source
 					 */
-					final MailMessage sentMail = transport.sendRawMessage(body.getBytes("US-ASCII"));
+					final MailMessage sentMail = transport.sendRawMessage(rfc822);
 					if (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
 							session.getContextId()).isNoCopyIntoStandardSentFolder()) {
 						/*
@@ -2475,7 +2508,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 				final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 				mailAccess.connect();
 				try {
-					final MailMessage m = MIMEMessageConverter.convertMessage(body.getBytes("US-ASCII"));
 					if (flags != ParamContainer.NOT_FOUND) {
 						m.setFlags(flags);
 					}

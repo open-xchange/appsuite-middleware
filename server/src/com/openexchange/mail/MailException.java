@@ -319,7 +319,13 @@ public class MailException extends AbstractOXException {
 		 */
 		IMAGE_ATTACHMENT_NOT_FOUND(
 				"Image attachment with Content-Id \"%1$s\" not found inside mail %2$s of mail folder %3$s",
-				Category.CODE_ERROR, 49);
+				Category.CODE_ERROR, 55),
+		/**
+		 * The specified email address %1$s is not covered by allowed email
+		 * address aliases
+		 */
+		INVALID_SENDER("The specified email address %1$s is not covered by allowed email address aliases",
+				Category.USER_INPUT, 56);
 
 		private final String message;
 
