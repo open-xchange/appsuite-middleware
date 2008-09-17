@@ -95,7 +95,7 @@ public class AttachmentTest extends AbstractWebdavXMLTest {
 		
 		httpclient.executeMethod(deleteMethod);
 		
-		assertEquals(200, deleteMethod.getStatusCode());
+		assertEquals(deleteMethod.getResponseBodyAsString(), 200, deleteMethod.getStatusCode());
 	}
 	
 	public void compareAttachments(final AttachmentMetadata attachmentObj1, final AttachmentMetadata attachmentObj2) throws Exception {
