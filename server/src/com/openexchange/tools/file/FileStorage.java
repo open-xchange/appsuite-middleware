@@ -206,8 +206,7 @@ public abstract class FileStorage {
         }
     }
 
-    public static Class<? extends FileStorage> getImpl()
-        throws FileStorageException {
+    public static Class<? extends FileStorage> getImpl() {
         if (null == impl) {
             impl = QuotaFileStorage.class;
         }
