@@ -108,4 +108,26 @@ public class AllTest extends AppointmentTest {
 
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
 	}
+
+    // Bug 12171
+    public void testShowOcurrences() throws Exception {
+        final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.RECURRENCE_COUNT};
+
+        final AppointmentObject appointmentObj = createAppointmentObject("testShowOcurrences");
+        appointmentObj.setStartDate(new Date());
+        appointmentObj.setEndDate(new Date(System.currentTimeMillis() + 60*60*1000));
+        appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+        appointmentObj.setInterval(1);
+        appointmentObj.setOccurrence(3);
+        appointmentObj.setIgnoreConflicts(true);
+        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+
+        AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, new Date(0), new Date(Long.MAX_VALUE), timeZone, false, getHostName(), getSessionId());
+
+        for(AppointmentObject loaded : appointmentArray) {
+            if(loaded.getObjectID() == objectId) {
+                assertEquals(appointmentObj.getOccurrence(), loaded.getOccurrence());
+            }
+        }
+    }
 }
