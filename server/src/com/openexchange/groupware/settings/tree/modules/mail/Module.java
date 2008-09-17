@@ -49,14 +49,28 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail;
 
-import com.openexchange.groupware.settings.tree.AbstractModules;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.session.Session;
 
 /**
  * Contains initialization for the modules configuration tree setting webmail.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Module extends AbstractModules {
+public class Module implements PreferencesItemService {
+
+    private static final Log LOG = LogFactory.getLog(Module.class);
 
     /**
      * Default constructor.
@@ -75,8 +89,36 @@ public class Module extends AbstractModules {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected boolean getModule(final UserConfiguration userConfig) {
-		return userConfig.hasWebMail();
-	}
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+            /**
+             * {@inheritDoc}
+             */
+            public void getValue(final Session session, final Context ctx,
+                final User user, final UserConfiguration userConfig,
+                final Setting setting) throws SettingException {
+                final MailAccess<?,?> mail;
+                try {
+                    mail = MailAccess.getInstance(session);
+                } catch (final MailException e) {
+                    throw new SettingException(e);
+                }
+                try {
+                    mail.connect();
+                    setting.setSingleValue(Boolean.TRUE);
+                } catch (final MailException e) {
+                    setting.setSingleValue(Boolean.FALSE);
+                    LOG.error(e.getMessage(), e);
+                } finally {
+                    mail.close(true);
+                }
+            }
+            /**
+             * {@inheritDoc}
+             */
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return true;
+            }
+        };
+    }
 }
