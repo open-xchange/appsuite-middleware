@@ -24,6 +24,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -76,7 +77,8 @@ public class ParticipantNotifyTest extends TestCase{
 	private final TestParticipantNotify notify = new TestParticipantNotify();
 	
 	private final Date start = new Date();
-	private final Date end = new Date();
+	// end date must be in the future for creating notifications. See bug 12063.
+	private final Date end = new Date(System.currentTimeMillis() + Constants.MILLI_DAY);
 	private ServerSession session = null;
 
 
@@ -463,7 +465,7 @@ public class ParticipantNotifyTest extends TestCase{
 		return strings;
 	}
 	
-	public static final Resource[] R(final int...ids) throws LdapException {
+	public static final Resource[] R(final int...ids) {
 		final Resource[] resources = new Resource[ids.length];
 		int i = 0;
 		for(final int id : ids) {
@@ -600,7 +602,6 @@ public class ParticipantNotifyTest extends TestCase{
 	private static final class TestParticipantNotify extends ParticipantNotify {
 
 		private final List<Message> messageCollector = new ArrayList<Message>();
-		private EmailableParticipant p;
 		
 		@Override
 		protected Group[] resolveGroups(final Context ctx, final int... ids) throws LdapException {
