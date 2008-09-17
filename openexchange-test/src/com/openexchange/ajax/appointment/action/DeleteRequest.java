@@ -65,14 +65,15 @@ import com.openexchange.webdav.xml.fields.CalendarFields;
 public class DeleteRequest extends AbstractAppointmentRequest<DeleteResponse> {
 
     private final int objectId;
-    
+
     private final int inFolder;
-    
+
     private final int recurrencePosition;
-    
+
     private final Date lastModified;
-	
+
 	private boolean failOnError = true;
+    private Date recurrenceDatePosition;
 
     /**
      * Default constructor. Deletes the complete appointment and even a series.
@@ -82,14 +83,14 @@ public class DeleteRequest extends AbstractAppointmentRequest<DeleteResponse> {
 	}
 
     /**
-     * Deletes an occurrence of a series appointment.
+     * Deletes an occurrence of a series appointment by position.
      */
     public DeleteRequest(final int objectId, final int inFolder, final int recurrencePosition, final Date lastModified) {
     	this(objectId, inFolder, recurrencePosition, lastModified, true);
     }
 
     /**
-     * Deletes an occurrence of a series appointment.
+     * Deletes an occurrence of a series appointment by position.
      */
     public DeleteRequest(final int objectId, final int inFolder, final int recurrencePosition, final Date lastModified, final boolean failOnError) {
         	super();
@@ -99,8 +100,28 @@ public class DeleteRequest extends AbstractAppointmentRequest<DeleteResponse> {
         this.lastModified = lastModified;
         this.failOnError = failOnError;
 	}
-		
-	public void setFailOnError(final boolean failOnError) {
+
+    /**
+     * Deletes an occurrence of a series appointment by date.
+     */
+    public DeleteRequest(final int objectId, final int inFolder, final Date recurrenceDatePosition, final Date lastModified) {
+        this(objectId, inFolder, recurrenceDatePosition, lastModified, true);
+	}
+
+    /**
+     * Deletes an occurrence of a series appointment by date.
+     */
+    public DeleteRequest(final int objectId, final int inFolder, final Date recurrenceDatePosition, final Date lastModified, final boolean failOnError) {
+        	super();
+        this.objectId = objectId;
+        this.inFolder = inFolder;
+        this.recurrencePosition = -1;
+        this.recurrenceDatePosition = recurrenceDatePosition;
+        this.lastModified = lastModified;
+        this.failOnError = failOnError;
+	}
+
+    public void setFailOnError(final boolean failOnError) {
 		this.failOnError = failOnError;
 	}
 
@@ -111,9 +132,11 @@ public class DeleteRequest extends AbstractAppointmentRequest<DeleteResponse> {
         final JSONObject json = new JSONObject();
         json.put(DataFields.ID, objectId);
         json.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
-		if (0 != recurrencePosition) {
-		    json.put(CalendarFields.RECURRENCE_POSITION, recurrencePosition);
-		}
+		if(recurrencePosition > 0) {
+            json.put(CalendarFields.RECURRENCE_POSITION, recurrencePosition);
+        } else if (recurrenceDatePosition != null) {
+            json.put(CalendarFields.RECURRENCE_DATE_POSITION, recurrenceDatePosition.getTime());
+        }
         return json;
     }
 

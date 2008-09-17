@@ -102,6 +102,7 @@ import com.openexchange.test.OXTestToolkit;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.URLParameter;
+import com.openexchange.tools.servlet.AjaxException;
 
 public class AppointmentTest extends AbstractAJAXTest {
 	
@@ -385,8 +386,21 @@ public class AppointmentTest extends AbstractAJAXTest {
 			throw new Exception("json error: " + response.getResponse().getErrorMessage());
 		}
 	}
-	
-	public static void confirmAppointment(final WebConversation webCon, final int objectId,
+
+    public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final Date recurrenceDatePosition, final Date modified, String host, final String session) throws Exception, AjaxException, IOException, SAXException {
+        host = appendPrefix(host);
+
+		final AJAXSession ajaxSession = new AJAXSession(webCon, session);
+		final DeleteRequest deleteRequest = new DeleteRequest(id, inFolder, recurrenceDatePosition, modified);
+		deleteRequest.setFailOnError(false);
+		final AbstractAJAXResponse response = Executor.execute(ajaxSession, deleteRequest);
+
+		if (response.hasError()) {
+			throw new Exception("json error: " + response.getResponse().getErrorMessage());
+		}
+    }
+
+    public static void confirmAppointment(final WebConversation webCon, final int objectId,
 			final int confirm, final String confirmMessage, String host, final String session)
 			throws Exception {
 		host = appendPrefix(host);
