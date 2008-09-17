@@ -79,6 +79,12 @@ msgstr ""
 msgid "A duplicate folder exists in parent folder %1$s in context %2$s"
 msgstr ""
 
+msgid ""
+"A file storage error occurred on the server. Please try again later. "
+"Additional information: file storage id: %1$s, context id: %2$s, message "
+"from the low-level file storage class: %3$s"
+msgstr ""
+
 msgid "A folder named %1$s already exists"
 msgstr ""
 
@@ -1038,11 +1044,6 @@ msgid "Got SQL Exception"
 msgstr ""
 
 msgid "Got a -1 ID from IDGenerator"
-msgstr ""
-
-msgid ""
-"Got a FileStorageException for FileStorage with id %s in context %s. "
-"Underlying message is: %s. Check the StackTrace."
 msgstr ""
 
 msgid ""
@@ -2058,6 +2059,11 @@ msgid "The session parameter is missing."
 msgstr ""
 
 msgid "The simple name contains this not allowed characters: \"%1$s\"."
+msgstr ""
+
+msgid ""
+"The specified email address %1$s is not covered by allowed email address "
+"aliases"
 msgstr ""
 
 msgid "The task %1$d is not stored in folder %2$s (%3$d)."
