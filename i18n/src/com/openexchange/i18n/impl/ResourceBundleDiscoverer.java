@@ -22,8 +22,10 @@ public class ResourceBundleDiscoverer {
     private final File dir;
 
     public ResourceBundleDiscoverer(final File dir) throws FileNotFoundException {
-        if (dir.isFile()){
-            throw new FileNotFoundException("Unable to load language files."+ dir +" is not a directory");
+        if (dir.exists()){
+            throw new FileNotFoundException("Unable to load language files. Directory does not exist: "+ dir);
+        } else if (dir.isFile())  {
+        	throw new FileNotFoundException("Unable to load language files."+ dir +" is not a directory");
         }
         this.dir = dir;
     }
