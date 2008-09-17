@@ -138,13 +138,8 @@ public abstract class SessionServlet extends AJAXServlet {
 				throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
 						SessiondService.class.getName()));
 			}
-			final Session session;
-			final String sessionId;
-			{
-				final String[] sessionIdHolder = new String[1];
-				session = getSession(req, resp, getCookieId(req), sessionIdHolder, sessiondService);
-				sessionId = sessionIdHolder[0];
-			}
+			final Session session = getSession(req, resp, getCookieId(req), sessiondService);;
+			final String sessionId = session.getSessionID();
 			checkIP(session.getLocalIp(), req.getRemoteAddr());
 			rememberSession(req, session);
 			final Context ctx = ContextStorage.getStorageContext(session.getContextId());
@@ -160,7 +155,6 @@ public abstract class SessionServlet extends AJAXServlet {
 			final Response response = new Response();
 			response.setException(e);
 			resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-			Tools.deleteCookies(req, resp);
 			final PrintWriter writer = resp.getWriter();
 			try {
 				ResponseWriter.write(response, writer);
@@ -174,7 +168,6 @@ public abstract class SessionServlet extends AJAXServlet {
 			final Response response = new Response();
 			response.setException(e);
 			resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-			Tools.deleteCookies(req, resp);
 			final PrintWriter writer = resp.getWriter();
 			try {
 				ResponseWriter.write(response, writer);
@@ -238,6 +231,28 @@ public abstract class SessionServlet extends AJAXServlet {
 	}
 
 	/**
+	 * Gets the session identifier from the cookies.
+	 * @param req HTTP servlet request.
+	 * @param cookieId cookie identifier from the session parameter.
+	 * @return a found session identifier or <code>null</code> if the session
+	 * identifier can not be found.
+	 */
+	private static String getSessionId(final HttpServletRequest req, final String cookieId) {
+	    final Cookie[] cookies = req.getCookies();
+	    String sessionId = null;
+        if (cookies != null) {
+            final String cookieName = new StringBuilder(Login.cookiePrefix).append(cookieId).toString();
+            for (final Cookie cookie : cookies) {
+                if (cookieName.equals(cookie.getName())) {
+                    sessionId = cookie.getValue();
+                    break;
+                }
+            }
+        }
+	    return sessionId;
+	}
+
+	/**
 	 * Gets the session identifier from the request.
 	 * 
 	 * @param req
@@ -246,9 +261,6 @@ public abstract class SessionServlet extends AJAXServlet {
 	 *            HTTP servlet response
 	 * @param cookieId
 	 *            Identifier of the cookie.
-	 * @param sessionIdHolder
-	 *            An array of {@link String} with length <code>1</code> for
-	 *            storing the session identifier
 	 * @param sessiondService
 	 *            The SessionD service
 	 * @return The appropriate session.
@@ -259,22 +271,16 @@ public abstract class SessionServlet extends AJAXServlet {
 	@OXThrows(category = Category.CODE_ERROR, desc = "Your browser does not send the cookie for identifying your "
 			+ "session.", exceptionId = 2, msg = "The cookie with the session identifier is missing.")
 	private static Session getSession(final HttpServletRequest req, final HttpServletResponse resp,
-			final String cookieId, final String[] sessionIdHolder, final SessiondService sessiondService)
+			final String cookieId, final SessiondService sessiondService)
 			throws SessiondException {
 		/*
 		 * Look for a local session
 		 */
-		final Cookie[] cookies = req.getCookies();
 		try {
-			if (cookies != null) {
-				final String cookieName = new StringBuilder(Login.cookiePrefix).append(cookieId).toString();
-				for (final Cookie cookie : cookies) {
-					if (cookieName.equals(cookie.getName())) {
-						sessionIdHolder[0] = cookie.getValue();
-						return getLocalSession(sessionIdHolder[0], sessiondService);
-					}
-				}
-			}
+		    final String sessionId = getSessionId(req, cookieId);
+	        if (null != sessionId) {
+	            return getLocalSession(sessionId, sessiondService);
+	        }
 		} catch (final SessiondException e) {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("No appropriate local session found");
@@ -282,7 +288,7 @@ public abstract class SessionServlet extends AJAXServlet {
 			/*
 			 * Look for a cached session on second try
 			 */
-			final Session session = getCachedSession(req, resp, cookieId, sessionIdHolder, sessiondService);
+			final Session session = getCachedSession(req, resp, cookieId, sessiondService);
 			if (null != session) {
 				return session;
 			}
@@ -294,13 +300,14 @@ public abstract class SessionServlet extends AJAXServlet {
 		/*
 		 * No appropriate cookie found: check session cache
 		 */
-		final Session session = getCachedSession(req, resp, cookieId, sessionIdHolder, sessiondService);
+		final Session session = getCachedSession(req, resp, cookieId, sessiondService);
 		if (null != session) {
 			return session;
 		}
 		/*
 		 * A cache miss: throw error
 		 */
+        final Cookie[] cookies = req.getCookies();
 		if (LOG.isDebugEnabled() && cookies != null) {
 			final StringBuilder debug = new StringBuilder(256);
 			debug.append("No cookie for ID: ");
@@ -325,20 +332,16 @@ public abstract class SessionServlet extends AJAXServlet {
 	 *            HTTP servlet response
 	 * @param cookieId
 	 *            Identifier of the cookie
-	 * @param sessionIdHolder
-	 *            An array of {@link String} with length <code>1</code> for
-	 *            storing the session identifier
 	 * @param sessiondService
 	 *            The SessionD service
 	 * @return The session if fetched from cache; otherwise <code>null</code>.
 	 */
 	private static Session getCachedSession(final HttpServletRequest req, final HttpServletResponse resp,
-			final String cookieId, final String[] sessionIdHolder, final SessiondService sessiondService) {
+			final String cookieId, final SessiondService sessiondService) {
 		final Session session = sessiondService.getCachedSession(cookieId, req.getRemoteAddr());
 		if (null != session) {
-			sessionIdHolder[0] = session.getSessionID();
 			/*
-			 * Adapt cookie and local IP
+			 * Adapt cookie
 			 */
 			Login.writeCookie(resp, session);
 			return session;

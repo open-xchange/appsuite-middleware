@@ -376,6 +376,7 @@ public class Login extends AJAXServlet {
 							response.setData(writeLogin(session));
 							break;
 						}
+						// Not found session. Delete old OX cookie.
 						final Cookie respCookie = new Cookie(cookie.getName(), cookie.getValue());
 						respCookie.setPath("/");
 						respCookie.setMaxAge(0); // delete
