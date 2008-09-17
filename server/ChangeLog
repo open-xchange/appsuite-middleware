@@ -1,6 +1,7 @@
 * 2008-09-17 - marcus.klein@open-xchange.com
 
  - Bugfix #11515: Disabling mail module if IMAP login fails.
+ - Bugfix #12043: Improved exception message.
 
 * 2008-09-17 - francisco.laguna@open-xchange.com
 
