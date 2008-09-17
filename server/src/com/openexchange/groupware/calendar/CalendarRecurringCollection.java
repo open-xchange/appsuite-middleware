@@ -82,11 +82,26 @@ public final class CalendarRecurringCollection {
 
     public static final String NO_DS = null;
     
-    public static final long MILLI_HOUR = 3600000L;
-    public static final long MILLI_DAY = 86400000L;
-    public static final long MILLI_WEEK = 604800000L;
-    public static final long MILLI_MONTH = 2678400000L;
-    public static final long MILLI_YEAR = 31536000000L;
+    /**
+     * @deprecated use {@link Constants#MILLI_HOUR}.
+     */
+    public static final long MILLI_HOUR = Constants.MILLI_HOUR;
+    /**
+     * @deprecated use {@link Constants#MILLI_DAY}.
+     */
+    public static final long MILLI_DAY = Constants.MILLI_DAY;
+    /**
+     * @deprecated use {@link Constants#MILLI_WEEK}.
+     */
+    public static final long MILLI_WEEK = Constants.MILLI_WEEK;
+    /**
+     * @deprecated use {@link Constants#MILLI_MONTH}.
+     */
+    public static final long MILLI_MONTH = Constants.MILLI_MONTH;
+    /**
+     * @deprecated use {@link Constants#MILLI_YEAR}.
+     */
+    public static final long MILLI_YEAR = Constants.MILLI_YEAR;
     
     public static final int RECURRING_NO_ACTION = 0;
     public static final int RECURRING_VIRTUAL_ACTION = 1;
