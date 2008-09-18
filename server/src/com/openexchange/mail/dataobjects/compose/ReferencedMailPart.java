@@ -136,9 +136,33 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 	 *             If a mail error occurs
 	 */
 	public ReferencedMailPart(final MailPart referencedPart, final Session session) throws MailException {
-		isMail = MailMessage.class.isInstance(referencedPart);
+		isMail = referencedPart.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822);
 		try {
 			handleReferencedPart(referencedPart, session);
+		} catch (final IOException e) {
+			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+		}
+	}
+
+	/**
+	 * Initializes a new {@link ReferencedMailPart}.
+	 * <p>
+	 * The referenced mail's content is loaded dependent on its size. If size
+	 * exceeds defined {@link TransportConfig#getReferencedPartLimit() limit}
+	 * its content is temporary written to disc; otherwise its content is kept
+	 * inside an array of <code>byte</code>.
+	 * 
+	 * @param referencedMail
+	 *            The referenced mail
+	 * @param session
+	 *            The session used to store a possible temporary disc file
+	 * @throws MailException
+	 *             If a mail error occurs
+	 */
+	public ReferencedMailPart(final MailMessage referencedMail, final Session session) throws MailException {
+		isMail = true;
+		try {
+			handleReferencedPart(referencedMail, session);
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}

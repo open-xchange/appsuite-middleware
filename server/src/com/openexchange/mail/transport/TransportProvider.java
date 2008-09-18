@@ -54,6 +54,7 @@ import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.AbstractProtocolProperties;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
@@ -255,5 +256,20 @@ public abstract class TransportProvider {
 	 *             created
 	 */
 	public abstract ReferencedMailPart getNewReferencedPart(MailPart referencedPart, Session session)
+			throws MailException;
+
+	/**
+	 * Gets a new instance of {@link ReferencedMailPart}
+	 * 
+	 * @param referencedMail
+	 *            The referenced mail
+	 * @param session
+	 *            The session providing user data
+	 * @return A new instance of {@link ReferencedMailPart}
+	 * @throws MailException
+	 *             If a new instance of {@link ReferencedMailPart} cannot be
+	 *             created
+	 */
+	public abstract ReferencedMailPart getNewReferencedMail(MailMessage referencedMail, Session session)
 			throws MailException;
 }

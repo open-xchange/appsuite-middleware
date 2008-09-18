@@ -54,6 +54,7 @@ import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.AbstractProtocolProperties;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
@@ -126,6 +127,12 @@ public final class SMTPProvider extends TransportProvider {
 	public ReferencedMailPart getNewReferencedPart(final MailPart referencedPart, final Session session)
 			throws MailException {
 		return new SMTPReferencedPart(referencedPart, session);
+	}
+
+	@Override
+	public ReferencedMailPart getNewReferencedMail(final MailMessage referencedMail, final Session session)
+			throws MailException {
+		return new SMTPReferencedPart(referencedMail, session);
 	}
 
 	@Override

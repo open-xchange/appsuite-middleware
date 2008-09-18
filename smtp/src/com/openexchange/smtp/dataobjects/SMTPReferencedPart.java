@@ -50,6 +50,7 @@
 package com.openexchange.smtp.dataobjects;
 
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.session.Session;
@@ -76,6 +77,20 @@ public final class SMTPReferencedPart extends ReferencedMailPart {
 	 */
 	public SMTPReferencedPart(final MailPart referencedPart, final Session session) throws MailException {
 		super(referencedPart, session);
+	}
+
+	/**
+	 * Initializes a new {@link SMTPReferencedPart}
+	 * 
+	 * @param referencedMail
+	 *            The referenced {@link MailMessage mail}
+	 * @param session
+	 *            The {@link Session session} providing needed user data
+	 * @throws MailException
+	 *             If instantiation fails
+	 */
+	public SMTPReferencedPart(final MailMessage referencedMail, final Session session) throws MailException {
+		super(referencedMail, session);
 	}
 
 }

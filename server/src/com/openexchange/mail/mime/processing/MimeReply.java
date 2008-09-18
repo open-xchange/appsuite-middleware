@@ -376,6 +376,9 @@ public final class MimeReply {
 				for (int i = list.size() - 1; i >= 0; i--) {
 					replyTextBuilder.append(list.get(i));
 				}
+				if (retvalContentType.getPrimaryType() == null) {
+					retvalContentType.setContentType(MIMETypes.MIME_TEXT_PLAIN);
+				}
 				if (retvalContentType.getCharsetParameter() == null) {
 					retvalContentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
 				}

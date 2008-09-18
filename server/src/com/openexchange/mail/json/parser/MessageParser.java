@@ -476,7 +476,7 @@ public final class MessageParser {
 						/*
 						 * The mail itself
 						 */
-						referencedMailPart = provider.getNewReferencedPart(referencedMail, session);
+						referencedMailPart = provider.getNewReferencedMail(referencedMail, session);
 					} else {
 						/*
 						 * A part of the mail
