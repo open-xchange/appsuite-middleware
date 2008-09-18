@@ -53,18 +53,37 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.openexchange.webdav.protocol.WebdavException;
 
+import java.io.IOException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class WebdavExistsAction extends AbstractAction {
     private boolean tolerateLockNull = false;
 
+    private static final Log LOG = LogFactory.getLog(WebdavExistsAction.class);
+
+    private static final String NOT_FOUND = "There is nothing here, sorry.";
+
     public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavException {
 		if(!req.getResource().exists()) {
-			throw new WebdavException(req.getUrl(), HttpServletResponse.SC_NOT_FOUND);
-		}
+		    notFound(req, res);
+        }
         if(req.getResource().isLockNull() && !tolerateLockNull) {
-            throw new WebdavException(req.getUrl(), HttpServletResponse.SC_NOT_FOUND);            
+            notFound(req, res);
         }
         yield(req,res);
 	}
+
+    private void notFound(WebdavRequest req, WebdavResponse res) throws WebdavException {
+        try {
+            res.sendString(NOT_FOUND);
+        } catch (IOException e) {
+            LOG.debug("Client gone?", e);
+        }
+        throw new WebdavException(req.getUrl(), HttpServletResponse.SC_NOT_FOUND);
+
+    }
 
     public void setTolerateLockNull(final boolean b) {
         tolerateLockNull = b;

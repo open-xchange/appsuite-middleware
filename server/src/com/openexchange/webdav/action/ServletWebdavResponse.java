@@ -84,4 +84,10 @@ public class ServletWebdavResponse implements WebdavResponse {
 		res.setContentType(s);
 	}
 
+    public void sendString(String notFound) throws IOException {
+        byte[] bytes = notFound.getBytes("UTF-8");
+        setHeader("Content-Length", String.valueOf(bytes.length));
+        getOutputStream().write(bytes);
+    }
+
 }

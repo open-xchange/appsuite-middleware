@@ -1,3 +1,6 @@
+* 2008-09.18 - francisco.laguna@open-xchange.com
+ - Bugfix #9845: Include payload data in 404 response to coax konqueror into sending data.
+
 * 2008-09-17 - thorben.betten@open-xchange.com
 
  - Bugfix #12169: Checking specified from address if covered by allowed

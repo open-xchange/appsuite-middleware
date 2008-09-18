@@ -154,4 +154,10 @@ public class CapturingWebdavResponse implements WebdavResponse {
 	public void setContentType(final String s) {
 		delegate.setContentType(s);
 	}
+
+    public void sendString(String notFound) throws IOException {
+        byte[] bytes = notFound.getBytes("UTF-8");
+        setHeader("Content-Length", String.valueOf(bytes.length));
+        getOutputStream().write(bytes);
+    }
 }
