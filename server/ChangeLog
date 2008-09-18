@@ -1,6 +1,8 @@
 * 2008-09-18 - thorben.betten@open-xchange.com
 
  - Bugfix #12179: Fixed forwarding of messages without a text body
+ - Bugfix #12181: Proper handling of message-removed exceptions and
+   checking for possible null reference on put into message cache
 
 * 2008-09.18 - francisco.laguna@open-xchange.com
  - Bugfix #9845: Include payload data in 404 response to coax konqueror into sending data.

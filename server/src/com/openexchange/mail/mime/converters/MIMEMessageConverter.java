@@ -1337,7 +1337,7 @@ public final class MIMEMessageConverter {
 			mail.setThreadLevel(0);
 			return mail;
 		} catch (final MessagingException e) {
-			throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+			throw MIMEMailException.handleMessagingException(e);
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}

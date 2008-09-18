@@ -314,8 +314,8 @@ public final class MailMessageCache {
 		 * 
 		 * @param k1
 		 *            The first key
-		 * @return <code>true</code> if no values are bound to given first
-		 *         key; otherwise <code>false</code>
+		 * @return <code>true</code> if no values are bound to given first key;
+		 *         otherwise <code>false</code>
 		 */
 		public boolean isEmpty(final K1 k1) {
 			final Map<K2, V> innerMap = map.get(k1);
@@ -579,8 +579,8 @@ public final class MailMessageCache {
 	 *            The user ID
 	 * @param ctx
 	 *            The context
-	 * @return <code>true</code> if cache holds messages belonging to a
-	 *         certain folder; otherwise <code>false</code>
+	 * @return <code>true</code> if cache holds messages belonging to a certain
+	 *         folder; otherwise <code>false</code>
 	 */
 	@SuppressWarnings(ANNOT_UNCHECKED)
 	public boolean containsFolderMessages(final String fullname, final int userId, final Context ctx) {
@@ -764,11 +764,13 @@ public final class MailMessageCache {
 					cache.put(mapKey, map);
 				}
 				for (final MailMessage mail : mails) {
-					mail.prepareForCaching();
-					/*
-					 * TODO: Put cloned version into cache ???
-					 */
-					map.putValue(mail.getFolder(), Long.valueOf(mail.getMailId()), mail);
+					if (mail != null) {
+						mail.prepareForCaching();
+						/*
+						 * TODO: Put cloned version into cache ???
+						 */
+						map.putValue(mail.getFolder(), Long.valueOf(mail.getMailId()), mail);
+					}
 				}
 			} finally {
 				writeLock.unlock();
