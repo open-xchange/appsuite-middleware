@@ -123,7 +123,11 @@ public class Starter implements Initialization {
 	 * Mail initialization
 	 */
 	com.openexchange.mail.MailInitialization.getInstance(),
-	/**
+    /**
+     * Webdav Whitelist
+     */
+    new com.openexchange.webdav.tools.WebdavWhitelistInit(),
+    /**
 	 * Transport initialization
 	 */
 	com.openexchange.mail.transport.TransportInitialization.getInstance(),

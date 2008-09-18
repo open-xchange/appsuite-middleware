@@ -54,6 +54,7 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Cookie;
 
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -62,11 +63,18 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.OXServlet;
 import com.openexchange.webdav.InfostorePerformer.Action;
+import com.openexchange.webdav.tools.WebdavWhiteList;
+import com.openexchange.ajp13.AJPv13RequestHandler;
+import com.openexchange.ajax.Login;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.server.services.ServerServiceRegistry;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class Infostore extends OXServlet {
 
 	private static final long serialVersionUID = -2064098724675986123L;
-
+    private static final Log LOG = LogFactory.getLog(Infostore.class);
 	
 	public Infostore(){
 		// Force Loading of InfostorePerformer
@@ -146,12 +154,40 @@ public class Infostore extends OXServlet {
 			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}
-		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext());
-		if(!(uc.hasWebDAV() && uc.hasInfostore())){
-			resp.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
-		} else {
-			InfostorePerformer.getInstance().doIt(req, resp, action, session);
-		}
+		try {
+            final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext());
+            if(!(uc.hasWebDAV() && uc.hasInfostore())){
+                resp.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
+            } else {
+                InfostorePerformer.getInstance().doIt(req, resp, action, session);
+            }
+        } finally {
+            if(session != null && mustLogOut(req)) {
+                logout(session,req, resp);
+            }
+        }
+
 	}
-	
+
+    private void logout(ServerSession session, HttpServletRequest req, HttpServletResponse resp) {
+        removeCookie(req, resp);
+        removeSession(session);
+    }
+
+    private void removeSession(ServerSession session) {
+        LOG.debug("Removing Session "+session.getSessionID());
+        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
+                                SessiondService.class);
+        sessiondService.removeSession(session.getSessionID());
+            
+    }
+
+    private void removeCookie(HttpServletRequest req, HttpServletResponse resp) {
+        // FIXME: Kleini hilf!
+    }
+
+    private boolean mustLogOut(HttpServletRequest req) {
+        return !WebdavWhiteList.getInstance().acceptClient(req);
+    }
+
 }
