@@ -142,7 +142,8 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
                 if(component.equals("")){
                     continue;
                 }
-                path.append(URLDecoder.decode(component,encoding));
+
+                path.append(decode(component,encoding));
             }
             return path;
 		} catch (final UnsupportedEncodingException e) {
@@ -150,7 +151,21 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 		}
 	}
 
-	public String getCharset() {
+    private String decode(String component, String encoding) throws UnsupportedEncodingException {
+        List<Integer> plusPositions = new ArrayList<Integer>();
+        for(int i = 0, size = component.length(); i < size; i++) {
+            if(component.charAt(i) == '+') {
+                plusPositions.add(i);
+            }
+        }
+        StringBuilder decoded = new StringBuilder(URLDecoder.decode(component, encoding));
+        for(Integer i : plusPositions) {
+            decoded.setCharAt(i, '+');
+        }
+        return decoded.toString();
+    }
+
+    public String getCharset() {
 		return req.getCharacterEncoding() == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
 	}
 
