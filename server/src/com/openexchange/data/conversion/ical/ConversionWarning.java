@@ -112,7 +112,7 @@ public class ConversionWarning extends AbstractOXException {
          * Unable to convert task priority %1$d.
          */
         INVALID_PRIORITY("Unable to convert task priority %d.", Category.USER_INPUT, 2),
-        CANT_CREATE_RRULE("Can not create RRule: %s", Category.CODE_ERROR, 3),
+        CANT_CREATE_RRULE("Can not create recurrence rule: %s", Category.CODE_ERROR, 3),
         /**
          * Invalid session given to implementation "%1$s".
          */

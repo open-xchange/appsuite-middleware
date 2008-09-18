@@ -322,7 +322,7 @@ msgstr ""
 msgid "Calendar operation: Context not set."
 msgstr ""
 
-msgid "Can not create RRule: %s"
+msgid "Can not create recurrence rule: %s"
 msgstr ""
 
 msgid "Can not generate uid."
@@ -526,7 +526,7 @@ msgid ""
 "Your database is probably inconsistent, run the consistency tool."
 msgstr ""
 
-msgid "Changing recurrence position of a change exception denied"
+msgid "Changing recurrence position of a change exception denied."
 msgstr ""
 
 msgid "Changing recurrence type of a change exception denied"

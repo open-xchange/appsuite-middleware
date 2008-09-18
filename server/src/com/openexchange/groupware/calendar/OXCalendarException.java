@@ -220,7 +220,7 @@ public class OXCalendarException extends OXException {
         /**
          * Changing recurrence position of a change exception denied
          */
-        INVALID_RECURRENCE_POSITION_CHANGE("Changing recurrence position of a change exception denied", 83, Category.USER_INPUT);
+        INVALID_RECURRENCE_POSITION_CHANGE("Changing recurrence position of a change exception denied.", 83, Category.USER_INPUT);
         
         /**
          * Message of the exception.
