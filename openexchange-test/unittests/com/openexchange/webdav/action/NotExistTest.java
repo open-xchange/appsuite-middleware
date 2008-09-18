@@ -78,7 +78,27 @@ public class NotExistTest extends ActionTestCase {
             assertEquals(HttpServletResponse.SC_NOT_FOUND, x.getStatus());
             assertFalse(mockAction.wasActivated());
         }
+    }
 
+    // Bug 9845
+    public void testNotFoundShouldIncludePayload() {
+        final WebdavPath NOT_EXIST_URL = new WebdavPath("notExists.txt");
+
+		final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+		final MockWebdavResponse res = new MockWebdavResponse();
+
+		req.setUrl(NOT_EXIST_URL);
+
+		final AbstractAction action = new WebdavExistsAction();
+		action.setNext(mockAction);
+
+		try {
+			action.perform(req,res);
+			fail("Expected 404 Not Found");
+		} catch (final WebdavException x) {
+	        assertNotNull(res.getResponseBytes());
+            assertFalse(0 == res.getResponseBytes().length);        
+        }
     }
 
     @Override
