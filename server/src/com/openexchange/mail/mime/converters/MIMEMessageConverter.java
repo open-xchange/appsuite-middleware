@@ -1322,7 +1322,18 @@ public final class MIMEMessageConverter {
 				mail.setSentDate(msg.getSentDate());
 			}
 			mail.setSize(msg.getSize());
-			mail.setSubject(msg.getSubject());
+			/**
+			 * Fetch subject from mail headers since JavaMail fails to return a
+			 * possibly empty subject and then returns the next header line as
+			 * subject:<br>
+			 * 
+			 * <pre>
+			 * To: someone@somewhere.com
+			 * Subject: 
+			 * Date: Thu, 18 Sep 1997 10:49:08 +0200
+			 * </pre>
+			 */
+			mail.setSubject(decodeMultiEncodedHeader(mail.getFirstHeader(MessageHeaders.HDR_SUBJECT)));
 			mail.setThreadLevel(0);
 			return mail;
 		} catch (final MessagingException e) {
