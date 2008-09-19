@@ -13,7 +13,7 @@
 
     <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name.gw" value="${Bundle-SymbolicName}-groupware"/>
-    <property name="bundle.name.ad" value="${Bundle-SymbolicName}-groupware"/>
+    <property name="bundle.name.ad" value="${Bundle-SymbolicName}-admindaemon"/>
     <property name="composite.name" value="open-xchange-log4j-${version}" />
 
     <fileset dir="." id="metainf">
@@ -45,7 +45,7 @@
             message="${bundlesdir}/${bundle.name.gw}${line.separator}"/>
         <echo file="${destdir}/${adbundle.d}/org.apache.log4j.ini"
             message="${bundlesdir}/org.apache.log4j_1.2.13.v200806030600.jar"/>
-        <echo file="${destdir}/${adbundle.d}/${bundle.name.gw}.ini"
+        <echo file="${destdir}/${adbundle.d}/${bundle.name.ad}.ini"
             message="${bundlesdir}/${bundle.name.ad}${line.separator}"/>
     </target>
 
