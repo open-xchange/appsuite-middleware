@@ -1,3 +1,7 @@
+* 2008-09-19 - dennis.sieben@open-xchange.com
+
+ - Bugfix #12183: Fixed JSON creation and reading for sieve body rule.
+
 * 2008-09-18 - thorben.betten@open-xchange.com
 
  - Bugfix #12179: Fixed forwarding of messages without a text body

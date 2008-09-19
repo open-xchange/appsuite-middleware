@@ -414,9 +414,22 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 } else if (TestCommand.Commands.BODY.getCommandname().equals(id)) {
                     final List<Object> argList = new ArrayList<Object>();
                     argList.add(createTagArg(getString(jobj, BodyTestFields.COMPARISON, id)));
-                    // TODO: get the extensions from the right object parts
-                    argList.add(getString(jobj, BodyTestFields.EXTENSIONSKEY, id));
-                    argList.add(getString(jobj, BodyTestFields.EXTENSIONSVALUE, id));
+                    final String extensionkey = getString(jobj, BodyTestFields.EXTENSIONSKEY, id);
+                    if (null != extensionkey) {
+                        if (extensionkey.equals("text")) {
+                            argList.add(createTagArg("text"));
+                        } else if (extensionkey.equals("content")) {
+                            argList.add(createTagArg("content"));
+                            final String extensionvalue = getString(jobj, BodyTestFields.EXTENSIONSVALUE, id);
+                            if (null != extensionkey) {
+                                argList.add(extensionvalue);
+                            } else {
+                                throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, "Body rule: The extensionkey content needs a mime value but none given");
+                            }
+                        } else {
+                            throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, "Body rule: The extensionskey " + extensionkey + " is not a valid extensionkey");
+                        }
+                    }
                     argList.add(JSONArrayToStringList(getJSONArray(jobj, AddressEnvelopeAndHeaderTestFields.VALUES, id)));
                     return new TestCommand(TestCommand.Commands.BODY, argList, new ArrayList<TestCommand>());
                 } else if (TestCommand.Commands.ALLOF.getCommandname().equals(id)) {
@@ -477,10 +490,15 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                     } else if (TestCommand.Commands.BODY.equals(testCommand.getCommand())) {
                         tmp.put(GeneralFields.ID, TestCommand.Commands.BODY.getCommandname());
                         tmp.put(BodyTestFields.COMPARISON, testCommand.getMatchtype().substring(1));
-                        // TODO: get the extensions from the right object parts
-                        tmp.put(BodyTestFields.EXTENSIONSKEY, testCommand.getArguments().get(0));
-                        tmp.put(BodyTestFields.EXTENSIONSVALUE, testCommand.getArguments().get(0));
-                        tmp.put(BodyTestFields.VALUES, testCommand.getArguments().get(1));
+                        final String extensionkey = testCommand.getTagarguments().get(1).substring(1);
+                        tmp.put(BodyTestFields.EXTENSIONSKEY, extensionkey);
+                        if ("content".equals(extensionkey)) {
+                            tmp.put(BodyTestFields.EXTENSIONSVALUE, testCommand.getArguments().get(2));
+                            tmp.put(BodyTestFields.VALUES, new JSONArray((List)testCommand.getArguments().get(3)));
+                        } else {
+                            tmp.put(BodyTestFields.EXTENSIONSVALUE, JSONObject.NULL);
+                            tmp.put(BodyTestFields.VALUES, new JSONArray((List)testCommand.getArguments().get(2)));
+                        }
                     } else if (TestCommand.Commands.ALLOF.equals(testCommand.getCommand())) {
                         createAllofOrAnyofObjects(tmp, testCommand, TestCommand.Commands.ALLOF);
                     } else if (TestCommand.Commands.ANYOF.equals(testCommand.getCommand())) {

@@ -146,7 +146,7 @@ public class TestCommand extends Command {
         HEADER("header", 2, standard_address_part(), standard_comparators(), standard_match_types(), null),
         ALLOF("allof", 0, null, null, null, null),
         ANYOF("anyof", 0, null, null, null, null),
-        BODY("body", 1, null, standard_body_part(), standard_match_types(), "body");
+        BODY("body", 1, standard_body_part(), null, standard_match_types(), "body");
 
         private static Hashtable<String, String> match_type_size() {
             final Hashtable<String, String> match_type_size = new Hashtable<String, String>(2);
@@ -166,7 +166,7 @@ public class TestCommand extends Command {
 
         private static Hashtable<String, String> standard_body_part() {
             final Hashtable<String, String> standard_address_part = new Hashtable<String, String>(3);
-            standard_address_part.put(":raw", "");
+            //standard_address_part.put(":raw", "");
             standard_address_part.put(":content", "");
             standard_address_part.put(":text", "");
             // Add further extensions here...
