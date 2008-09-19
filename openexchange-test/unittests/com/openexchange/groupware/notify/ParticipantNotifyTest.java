@@ -518,7 +518,7 @@ public class ParticipantNotifyTest extends TestCase{
 
         final Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
         final SessionObject sessObj = new SessionObject("bla");
-        sessObj.setUsername("1");
+        sessObj.setUsername("2");
         sessObj.setContextId(ctx.getContextId());
 
         session = new ServerSessionAdapter(sessObj,ctx);
