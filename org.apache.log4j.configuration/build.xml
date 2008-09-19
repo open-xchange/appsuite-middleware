@@ -12,7 +12,8 @@
     <property file="build.properties"/>
 
     <property name="version" value="${Bundle-Version}"/>
-    <property name="bundle.name" value="${Bundle-SymbolicName}"/>
+    <property name="bundle.name.gw" value="${Bundle-SymbolicName}-groupware"/>
+    <property name="bundle.name.ad" value="${Bundle-SymbolicName}-groupware"/>
     <property name="composite.name" value="open-xchange-log4j-${version}" />
 
     <fileset dir="." id="metainf">
@@ -40,12 +41,12 @@
         <mkdir dir="${destdir}/${adbundle.d}"/>
         <echo file="${destdir}/${gwbundle.d}/org.apache.log4j.ini"
             message="${bundlesdir}/org.apache.log4j_1.2.13.v200806030600.jar"/>
-        <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}${line.separator}"/>
+        <echo file="${destdir}/${gwbundle.d}/${bundle.name.gw}.ini"
+            message="${bundlesdir}/${bundle.name.gw}${line.separator}"/>
         <echo file="${destdir}/${adbundle.d}/org.apache.log4j.ini"
             message="${bundlesdir}/org.apache.log4j_1.2.13.v200806030600.jar"/>
-        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}${line.separator}"/>
+        <echo file="${destdir}/${adbundle.d}/${bundle.name.gw}.ini"
+            message="${bundlesdir}/${bundle.name.ad}${line.separator}"/>
     </target>
 
     <target name="installJar">
@@ -56,17 +57,30 @@
             <fileset refid="log4jFiles"/>
         </copy>
         <!-- conf bundle -->
-        <property name="log4jconfigurationdir" value="${bundlesdestdir}/${bundle.name}"/>
-        <mkdir dir="${log4jconfigurationdir}"/>
-        <copy todir="${log4jconfigurationdir}">
+        <antcall target="installConfigBundleGW"/>
+        <antcall target="installConfigBundleAD"/>
+    </target>
+
+    <target name="installConfigBundleGW">
+        <!-- conf bundle -->
+        <property name="log4jconfigurationdirgw" value="${bundlesdestdir}/${bundle.name.gw}"/>
+        <mkdir dir="${log4jconfigurationdirgw}"/>
+        <copy todir="${log4jconfigurationdirgw}">
             <fileset refid="metainf"/>
         </copy>
-        <copy todir="${destdir}${prefix}/etc/groupware">
-            <fileset dir="${basedir}">
-                <include name="log4j.xml"/>
-            </fileset>
+        <copy tofile="${destdir}${prefix}/etc/groupware/log4j.xml" file="log4j.xml"/>
+        <symlink link="${log4jconfigurationdirgw}/log4j.xml" resource="${prefix}/etc/groupware/log4j.xml"/>
+    </target>
+
+    <target name="installConfigBundleAD">
+        <!-- conf bundle -->
+        <property name="log4jconfigurationdirad" value="${bundlesdestdir}/${bundle.name.ad}"/>
+        <mkdir dir="${log4jconfigurationdirad}"/>
+        <copy todir="${log4jconfigurationdirad}">
+            <fileset refid="metainf"/>
         </copy>
-    	<symlink link="${log4jconfigurationdir}/log4j.xml" resource="../../etc/groupware/log4j.xml"/>
+        <copy tofile="${destdir}${prefix}/etc/admindaemon/log4j.xml" file="log4j-admin.xml"/>
+        <symlink link="${log4jconfigurationdirad}/log4j.xml" resource="${prefix}/etc/groupware/log4j.xml"/>
     </target>
 
     <!-- Dist -->
