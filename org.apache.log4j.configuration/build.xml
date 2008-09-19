@@ -80,7 +80,7 @@
             <fileset refid="metainf"/>
         </copy>
         <copy tofile="${destdir}${prefix}/etc/admindaemon/log4j.xml" file="log4j-admin.xml"/>
-        <symlink link="${log4jconfigurationdirad}/log4j.xml" resource="${prefix}/etc/groupware/log4j.xml"/>
+        <symlink link="${log4jconfigurationdirad}/log4j.xml" resource="${prefix}/etc/admindaemon/log4j.xml"/>
     </target>
 
     <!-- Dist -->
