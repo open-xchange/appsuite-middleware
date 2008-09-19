@@ -3,9 +3,9 @@
 <log4j:configuration debug="false" threshold="null">
     <appender name="SERVER_LOG" class="org.apache.log4j.net.SyslogAppender">
         <param name="SyslogHost" value="localhost"/>
-        <param name="Facility" value="local2"/>
+        <param name="Facility" value="local5"/>
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d openxchange-admin %-5p [%c][%t]: %C,%M %m%n"/>
+            <param name="ConversionPattern" value="%d open-xchange-admindaemon %-5p [%c][%t]: %C,%M %m%n"/>
         </layout>
     </appender>
     <root>

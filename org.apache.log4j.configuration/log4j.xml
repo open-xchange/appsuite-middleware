@@ -5,11 +5,15 @@
         <param name="SyslogHost" value="localhost"/>
         <param name="Facility" value="local2"/>
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d openxchange-groupware %-5p [%c][%t]: %C,%M %m%n"/>
+            <param name="ConversionPattern" value="%d open-xchange-groupware %-5p [%c][%t]: %C,%M %m%n"/>
         </layout>
     </appender>
     <root>
         <level value="INFO"/>
         <appender-ref ref="SERVER_LOG"/>
     </root>
+    <category name="org.apache.jcs">
+        <appender-ref ref="SERVER_LOG"/>
+        <priority value="WARN"/>
+    </category>
 </log4j:configuration>
