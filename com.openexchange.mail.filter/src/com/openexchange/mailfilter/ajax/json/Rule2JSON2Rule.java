@@ -419,6 +419,8 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                         if (extensionkey.equals("text")) {
                             argList.add(createTagArg("text"));
                         } else if (extensionkey.equals("content")) {
+                            // TODO: This part should be tested for correct operation, our GUI doesn't use this, but this is
+                            // allowed according to our specification
                             argList.add(createTagArg("content"));
                             final String extensionvalue = getString(jobj, BodyTestFields.EXTENSIONSVALUE, id);
                             if (null != extensionkey) {
@@ -493,6 +495,8 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                         final String extensionkey = testCommand.getTagarguments().get(1).substring(1);
                         tmp.put(BodyTestFields.EXTENSIONSKEY, extensionkey);
                         if ("content".equals(extensionkey)) {
+                            // TODO: This part should be tested for correct operation, our GUI doesn't use this, but this is
+                            // allowed according to our specification
                             tmp.put(BodyTestFields.EXTENSIONSVALUE, testCommand.getArguments().get(2));
                             tmp.put(BodyTestFields.VALUES, new JSONArray((List)testCommand.getArguments().get(3)));
                         } else {
