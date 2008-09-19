@@ -468,12 +468,17 @@ public class ContactParser extends CommonParser {
 		
 		final List elementEntries = eDistributionList.getChildren("email", XmlServlet.NS);
 		
-		for (int a = 0; a < elementEntries.size(); a++) {
+		Next: for (int a = 0; a < elementEntries.size(); a++) {
 			final Element eEntry = (Element)elementEntries.get(a);
 			
 			final DistributionListEntryObject entry = new DistributionListEntryObject();
 			
-			parseElementEntry(eEntry, entry);
+			try {
+				parseElementEntry(eEntry, entry);
+			} catch (final Exception e) {
+				e.printStackTrace();
+				continue Next;
+			}
 			
 			distributionlist.add(entry);
 		}
@@ -481,7 +486,7 @@ public class ContactParser extends CommonParser {
 		contactObj.setDistributionList((DistributionListEntryObject[])distributionlist.toArray(new DistributionListEntryObject[distributionlist.size()]));
 	}
 	
-	protected void parseElementEntry(final Element e, final DistributionListEntryObject entry) {
+	protected void parseElementEntry(final Element e, final DistributionListEntryObject entry) throws Exception {
 		String s = null;
 		
 		if ((s = e.getAttributeValue(ContactFields.ID, XmlServlet.NS)) != null) {
