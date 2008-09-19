@@ -77,6 +77,7 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
@@ -126,6 +127,9 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 	private final static Log LOG = LogFactory.getLog(ParticipantNotify.class);
 	private final static LoggingLogic LL = LoggingLogic.getLoggingLogic(ParticipantNotify.class);
 	
+	/**
+	 * Initializes a new {@link ParticipantNotify}
+	 */
 	public ParticipantNotify() {
 		super();
 	}
@@ -327,6 +331,9 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 					}
 				} else {
 					sendMail = newObj.getNotification() || (newObj.getModifiedBy() != p.id && forceNotifyOthers);
+					if (p.timeZone != null) {
+						tz = p.timeZone;
+					}
 				}
 				
 				if(sendMail) {
@@ -454,7 +461,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 case Participant.USER:
                     break;
                 case Participant.EXTERNAL_USER :
-                    EmailableParticipant p = getExternalParticipant(participant);
+                    EmailableParticipant p = getExternalParticipant(participant, sessionObj);
                     if(p != null) {
                     	p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
                         addReceiver(p, receivers, all);
@@ -491,7 +498,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			case Participant.USER:
 				break;
 			case Participant.EXTERNAL_USER :
-				EmailableParticipant p = getExternalParticipant(participant);
+				EmailableParticipant p = getExternalParticipant(participant, sessionObj);
 				if(p != null) {
 					p.state = contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
 					addSingleParticipant(p, participantSet, sessionObj, receivers,all,false);
@@ -539,7 +546,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 				}
 				break;
 			case Participant.EXTERNAL_USER :
-				p = getExternalParticipant(participant);
+				p = getExternalParticipant(participant, sessionObj);
 				if(p != null) {
 					p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
 					addReceiver(p, receivers, all);
@@ -609,7 +616,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 				}
 				break;
 			case Participant.EXTERNAL_USER :
-				p = getExternalParticipant(participant);
+				p = getExternalParticipant(participant, sessionObj);
 				if(p != null) {
 					p.state = contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
 					addSingleParticipant(p, participantSet, sessionObj, receivers,all,false);
@@ -666,10 +673,17 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     }
 
         
-    private EmailableParticipant getExternalParticipant(final Participant participant) {
+    private EmailableParticipant getExternalParticipant(final Participant participant, final ServerSession sessionObj) {
         if(null == participant.getEmailAddress()) {
 			return null;
 		}
+        /*
+		 * Store session user's locale and time zone which are used for external
+		 * participants
+		 */
+		final User user = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
+		final Locale l = user.getLocale();
+		final TimeZone tz = Tools.getTimeZone(user.getTimeZone());
 		return new EmailableParticipant(
 				-1,
 				participant.getType(),
@@ -677,8 +691,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 				new int[0],
 				participant.getEmailAddress(),
 				participant.getDisplayName(),
-				Locale.getDefault(),
-				TimeZone.getDefault(),
+				l,
+				tz,
 				0,
 				-1
 			);

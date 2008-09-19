@@ -1,3 +1,8 @@
+* 2008-09-19 - thorben.betten@open-xchange.com
+
+ - Bugfix #12194: Using current user time zone and language for notification to
+   external participants instead of system settings.
+
 * 2008-09-19 - dennis.sieben@open-xchange.com
 
  - Bugfix #12183: Fixed JSON creation and reading for sieve body rule.
