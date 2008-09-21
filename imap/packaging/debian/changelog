@@ -1,3 +1,9 @@
+open-xchange-imap (6.6.0-9) unstable; urgency=low
+
+  * build for PTF 20080918
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Sun, 21 Sep 2008 19:04:11 +0200
+
 open-xchange-imap (6.6.0-8) unstable; urgency=low
 
   * first build for RC9
