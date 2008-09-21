@@ -1,9 +1,3 @@
-open-xchange-passwordchange-database (6.6.0-7) unstable; urgency=low
-
-  * build for PTF 20080918
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Sun, 21 Sep 2008 19:04:43 +0200
-
 open-xchange-passwordchange-database (6.6.0-6) unstable; urgency=low
 
   * first build for RC9
