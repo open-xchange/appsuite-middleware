@@ -25,7 +25,6 @@
 
 * 2008-09-17 - marcus.klein@open-xchange.com
 
- - Bugfix #11515: Disabling mail module if IMAP login fails.
  - Bugfix #12043: Improved exception message.
  - Bugfix #10759: Not deleting of session cookies on illegal requests.
 

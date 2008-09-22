@@ -97,7 +97,7 @@ public class Module implements PreferencesItemService {
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
-            	setting.setSingleValue(userConfig.hasWebMail());
+            	setting.setSingleValue(Boolean.valueOf(userConfig.hasWebMail()));
 //                final MailAccess<?,?> mail;
 //                try {
 //                    mail = MailAccess.getInstance(session);
