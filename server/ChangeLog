@@ -13,7 +13,7 @@
  - Bugfix #12181: Proper handling of message-removed exceptions and
    checking for possible null reference on put into message cache
 
-* 2008-09.18 - francisco.laguna@open-xchange.com
+* 2008-09-18 - francisco.laguna@open-xchange.com
 
  - Bugfix #9845: Include payload data in 404 response to coax konqueror into sending data.
  - Bugfix #12167: Don't double decode '+' in webdav urls. The apache already decodes them once.
