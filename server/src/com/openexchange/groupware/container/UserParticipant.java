@@ -65,23 +65,23 @@ public class UserParticipant implements Participant, Comparable<Participant> {
 
     private int alarmMinutes = -1;
 
-    private Date alarmDate = null;
+    private Date alarmDate;
 
     private int confirm = CalendarObject.NONE;
 
-    private String confirmMessage = null;
+    private String confirmMessage;
 
-    private String displayName = null;
+    private String displayName;
 
-    private String emailaddress = null;
+    private String emailaddress;
 
-    private boolean isModified = false;
+    private boolean isModified;
 
-    private boolean bAlarmMinutes = false;
+    private boolean bAlarmMinutes;
 
-    private boolean b_confirm = false;
+    private boolean b_confirm;
 
-    private boolean b_confirmMessage = false;
+    private boolean b_confirmMessage;
 
     /**
      * @deprecated User {@link #UserParticipant(int)}.
