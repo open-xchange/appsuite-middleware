@@ -117,18 +117,16 @@ public class DeleteEvent extends EventObject {
 	 *            <code>{@value #TYPE_CONTEXT}</code>
 	 * @param cid
 	 *            the context ID
-	 * @param con
-	 *            The connection used to initialize context
 	 * @throws ContextException
 	 *             if context object could not be fetched from
 	 *             <code>{@link ContextStorage}</code>
 	 */
-	public DeleteEvent(final Object source, final int id, final int type, final int cid, final Connection con)
+	public DeleteEvent(final Object source, final int id, final int type, final int cid)
 			throws ContextException {
 		super(source);
 		this.id = id;
 		this.type = type;
-		this.ctx = ContextStorage.getInstance(con).getContext(cid);
+		this.ctx = ContextStorage.getInstance().getContext(cid);
 	}
 
 	/**
