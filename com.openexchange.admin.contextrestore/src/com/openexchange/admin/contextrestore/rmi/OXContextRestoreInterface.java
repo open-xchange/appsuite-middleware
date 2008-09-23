@@ -54,6 +54,9 @@ import java.rmi.RemoteException;
 
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 
 
 /**
@@ -80,7 +83,11 @@ public interface OXContextRestoreInterface extends Remote {
      *                  daemon is running.
      * @param auth Credentials for authenticating against server.
      * @throws RemoteException General RMI Exception
+     * @throws InvalidDataException 
+     * @throws StorageException 
+     * @throws InvalidCredentialsException 
+     * @throws  
      */
-    public void restore(final Context ctx, final String[] filenames, final Credentials auth) throws RemoteException;
+    public void restore(final Context ctx, final String[] filenames, final Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException;
     
 }
