@@ -1,3 +1,7 @@
+* 2008-09-23 - marcus.klein@open-xchange.com
+
+ - Bugfix #12207: Removed OX connection given to context storage.
+
 * 2008-09-09 - thorben.betten@open-xchange.com
 
  - Bugfix ID#11526: Using javax.mail.InternetAddress class to parse address strings

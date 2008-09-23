@@ -1620,7 +1620,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     log.debug("Start delete user " + user_id + " in context " + ctx.getId());
                     log.debug("Delete user " + user_id + "(" + ctx.getId() + ") via OX API...");
                 }
-                final DeleteEvent delev = new DeleteEvent(this, user_id, DeleteEvent.TYPE_USER, ctx.getId(), write_ox_con);
+                final DeleteEvent delev = new DeleteEvent(this, user_id, DeleteEvent.TYPE_USER, ctx.getId());
                 AdminCache.delreg.fireDeleteEvent(delev, write_ox_con, write_ox_con);
                 if (log.isDebugEnabled()) {
                     log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from login2user...");
