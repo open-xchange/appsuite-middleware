@@ -431,7 +431,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
 //              let the groupware api know that the group will be deleted
                 OXFolderAdminHelper.propagateGroupModification(grp_id, con, con, context_id); 
                 
-                final DeleteEvent delev = new DeleteEvent(this, grp_id, DeleteEvent.TYPE_GROUP, context_id, con);
+                final DeleteEvent delev = new DeleteEvent(this, grp_id, DeleteEvent.TYPE_GROUP, context_id);
                 AdminCache.delreg.fireDeleteEvent(delev, con, con);
 
                 prep_del_members = con.prepareStatement("DELETE FROM groups_member WHERE cid=? AND id=?");

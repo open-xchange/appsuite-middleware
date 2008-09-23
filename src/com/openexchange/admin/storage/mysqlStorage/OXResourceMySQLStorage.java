@@ -304,7 +304,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             con = cache.getConnectionForContext(context_id);
             con.setAutoCommit(false);
 
-            final DeleteEvent delev = new DeleteEvent(this, resource_id, DeleteEvent.TYPE_RESOURCE, context_id, con);
+            final DeleteEvent delev = new DeleteEvent(this, resource_id, DeleteEvent.TYPE_RESOURCE, context_id);
             AdminCache.delreg.fireDeleteEvent(delev, con, con);
 
             createRecoveryData(resource_id, ctx, con);
@@ -359,7 +359,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             con = cache.getConnectionForContext(context_id);
             con.setAutoCommit(false);
             
-            final DeleteEvent delev = new DeleteEvent(this, resource_id, DeleteEvent.TYPE_RESOURCE, context_id, con);
+            final DeleteEvent delev = new DeleteEvent(this, resource_id, DeleteEvent.TYPE_RESOURCE, context_id);
             AdminCache.delreg.fireDeleteEvent(delev, con, con);
             
             createRecoveryData(resource_id, ctx, con);
