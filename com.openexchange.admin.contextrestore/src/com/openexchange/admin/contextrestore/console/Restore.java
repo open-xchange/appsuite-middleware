@@ -60,6 +60,7 @@ import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
+import com.openexchange.admin.contextrestore.exceptions.OXContextRestoreException;
 import com.openexchange.admin.contextrestore.rmi.OXContextRestoreInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -138,6 +139,9 @@ public class Restore extends BasicCommandlineOptions {
         } catch (final StorageException e) {
             printServerException(e, parser);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
+        } catch (final OXContextRestoreException e) {
+            printServerException(e, parser);
+            sysexit(1);
         }
     }
 

@@ -47,49 +47,50 @@
  *
  */
 
-package com.openexchange.admin.contextrestore.rmi;
+package com.openexchange.admin.contextrestore.exceptions;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-
-import com.openexchange.admin.contextrestore.exceptions.OXContextRestoreException;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.plugins.PluginException;
 
 
 /**
- * This class defines the Open-Xchange API for restoring OX Contexts.<br><br>
- * 
- * At the moment this API defines only one call
- *
- * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
+ * OXContextRestore exception class
  *
  */
-public interface OXContextRestoreInterface extends Remote {
+public class OXContextRestoreException extends PluginException {
+    
+    /**
+     * For serialization
+     */
+    private static final long serialVersionUID = 2597458638173191174L;
+
+    public enum Code {
+        VERSION_TABLES_INCOMPATIBLE("The version tables are incompatible"),
+        NO_VERSION_INFORMATION_FOUND("No version information found in dump"),
+        COULD_NOT_CONVERT_POOL_VALUE("Couldn't convert pool value"),
+        NO_ENTRIES_IN_VERSION_TABLE("No entries in version table");
+        
+        private final String text;
+
+        /**
+         * @param text
+         */
+        private Code(String text) {
+            this.text = text;
+        }
+
+        public final String getText() {
+            return text;
+        }
+    }
 
     /**
-     * RMI name to be used in the naming lookup.
+     * OX exceptions for OXUtil
+     *
      */
-    public static final String RMI_NAME = "OXContextRestore";
-
-    /**
-     * This method is used to restore one single context
-     * 
-     * @param ctx Context object
-     * @param filenames The filenames of the mysqldump files which contain the backup of the context. Note that these files
-     *                  have to be available to the admin daemon, so they must reside on the machine on which the admin
-     *                  daemon is running.
-     * @param auth Credentials for authenticating against server.
-     * @throws RemoteException General RMI Exception
-     * @throws InvalidDataException 
-     * @throws StorageException 
-     * @throws InvalidCredentialsException 
-     * @throws OXContextRestoreException 
-     * @throws  
-     */
-    public void restore(final Context ctx, final String[] filenames, final Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXContextRestoreException;
+    public OXContextRestoreException(final Code code) {
+        super(code.getText());
+    }
     
 }
+
+
