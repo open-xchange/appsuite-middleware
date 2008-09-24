@@ -309,6 +309,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		}
 
         final List<MailMessage> messages = new ArrayList<MailMessage>();
+        final String participantList = list(participantSet);
 		for(final Locale locale : receivers.keySet()) {
 			
 			final StringHelper strings = new StringHelper(locale);
@@ -344,7 +345,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 						"start" 	,	(null == newObj.getStartDate()) ? "" : df.format(newObj.getStartDate()),
 						"end"		,	(null == endDate) ? "" : df.format(endDate),
 						"title"		,	(null == newObj.getTitle()) ? "" : newObj.getTitle(),
-						"participants",		list(participantSet),
+						"participants",		participantList,
 						"resources"	,	(resourceSet.size() > 0) ? list(resourceSet) : strings.getString(Notifications.NO_RESOURCES),
 						"created_by",		createdByDisplayName,
 						"changed_by",		modifiedByDisplayName,
