@@ -370,6 +370,11 @@ public final class AJPv13Config implements Initialization {
 		return instance.serverThreadSize;
 	}
 
+	/**
+	 * Gets the capacity for listener pool
+	 * 
+	 * @return The capacity for listener pool
+	 */
 	public static int getAJPListenerPoolSize() {
 		return instance.listenerPoolSize;
 	}
