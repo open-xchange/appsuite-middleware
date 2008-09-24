@@ -71,6 +71,7 @@ import com.openexchange.event.impl.EventClient;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
+import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -590,7 +591,7 @@ public final class TaskLogic {
         throws OXException {
         final Date origStart = task.getStartDate();
         task.setRecurrenceCalculator((int) ((task.getEndDate().getTime()
-            - origStart.getTime()) / (CalendarRecurringCollection.MILLI_DAY)));
+            - origStart.getTime()) / (Constants.MILLI_DAY)));
         // Setting until date to Long.MAX_VALUE is not a good idea.
         // Recurring calculation sets until date itself and may add some time
         // in some conditions cause an overflow if MAX_VALUE is set and no
@@ -848,46 +849,6 @@ public final class TaskLogic {
         storage.delete(ctx, con, taskId, task.getLastModified(), type);
         if (StorageType.ACTIVE == type) {
             informDelete(session, ctx, task);
-        }
-    }
-
-    static void setConfirmation(final Context ctx, final int taskId,
-        final int userId, final int confirm, final String message)
-        throws TaskException {
-        final InternalParticipant participant = partStor.selectInternal(ctx,
-            taskId, userId, StorageType.ACTIVE);
-        participant.setConfirm(confirm);
-        participant.setConfirmMessage(message);
-        final Task task = new Task();
-        task.setObjectID(taskId);
-        task.setModifiedBy(userId);
-        Connection con;
-        try {
-            con = DBPool.pickupWriteable(ctx);
-        } catch (final DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
-        try {
-            con.setAutoCommit(false);
-            partStor.updateInternal(ctx, con, taskId, participant, StorageType
-                .ACTIVE);
-            final Task load = storage.selectTask(ctx, con, taskId, StorageType
-                .ACTIVE);
-            task.setLastModified(new Date());
-            UpdateData.updateTask(ctx, con, task, load.getLastModified(),
-                new int[] { Task.LAST_MODIFIED, Task.MODIFIED_BY }, null, null,
-                null, null);
-            con.commit();
-        } catch (final SQLException e) {
-            rollback(con);
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
-        } finally {
-            try {
-                con.setAutoCommit(true);
-            } catch (final SQLException e) {
-                LOG.error("Problem setting auto commit to true.", e);
-            }
-            DBPool.closeWriterSilent(ctx, con);
         }
     }
 }

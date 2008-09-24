@@ -71,7 +71,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -390,13 +389,21 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
 
     /**
      * {@inheritDoc}
-     * @throws DBPoolingException 
      */
     public void setUserConfirmation(final int taskId, final int userId,
         final int confirm, final String message) throws OXException {
+        final Context ctx;
         try {
-            final Context ctx = Tools.getContext(session.getContextId());
-            TaskLogic.setConfirmation(ctx, taskId, userId, confirm, message);
+            ctx = Tools.getContext(session.getContextId());
+        } catch (final TaskException e) {
+            throw Tools.convert(e);
+        }
+        try {
+            final ConfirmTask confirmT = new ConfirmTask(ctx, taskId, userId,
+                confirm, message);
+            confirmT.prepare();
+            confirmT.doConfirmation();
+            confirmT.sentEvent();
         } catch (final TaskException e) {
             throw Tools.convert(e);
         }

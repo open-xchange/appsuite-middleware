@@ -187,15 +187,11 @@ public interface TasksSQLInterface {
 
 	/**
 	 * set the confirmation of the user
-	 * @param objectId
-	 * The object ID
-	 * @param userId
-	 * The user ID
-	 * @param confirm
-	 * The confirm status
-	 * @param confirmMessage
-	 * The confirm message
-	 * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
+	 * @param objectId The object ID
+	 * @param userId The user ID
+	 * @param confirm The confirm status
+	 * @param confirmMessage The confirm message
+	 * @throws OXException if setting the confirmation fails.
 	 */
 	public void setUserConfirmation(int objectId, int userId, int confirm, String confirmMessage) throws OXException;
 }
