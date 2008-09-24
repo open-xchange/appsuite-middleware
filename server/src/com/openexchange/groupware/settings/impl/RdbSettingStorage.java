@@ -49,7 +49,9 @@
 
 package com.openexchange.groupware.settings.impl;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -180,8 +182,14 @@ public class RdbSettingStorage extends SettingStorage {
             throw new SettingException(Code.NO_CONNECTION, e);
         }
         try {
+            con.setAutoCommit(false);
             save(con, setting);
+            con.commit();
+        } catch (final SQLException e) {
+            rollback(con);
+            throw new SettingException(Code.SQL_ERROR, e);
         } finally {
+            autocommit(con);
             DBPool.closeWriterSilent(ctx, con);
         }
     }

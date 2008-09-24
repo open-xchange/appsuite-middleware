@@ -49,14 +49,12 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.TaskException.Code;
@@ -68,8 +66,6 @@ import com.openexchange.server.impl.DBPoolingException;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ConfirmTask {
-
-    private static final Log LOG = LogFactory.getLog(ConfirmTask.class);
 
     private static final TaskStorage storage = TaskStorage.getInstance();
 
@@ -151,11 +147,7 @@ public final class ConfirmTask {
             rollback(con);
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
-            try {
-                con.setAutoCommit(true);
-            } catch (final SQLException e) {
-                LOG.error("Problem setting auto commit to true.", e);
-            }
+            autocommit(con);
             DBPool.closeWriterSilent(ctx, con);
         }
     }
