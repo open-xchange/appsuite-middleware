@@ -47,15 +47,11 @@
  *
  */
 
-
-
 package com.openexchange.groupware.i18n;
 
 /**
  * FolderStrings contains english translations for string constants related to folder module
- * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
 public class FolderStrings {
 
