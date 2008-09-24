@@ -54,11 +54,15 @@ import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.tasks.Task;
 
+import java.util.Dictionary;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
 import com.openexchange.session.Session;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.EventHandler;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
@@ -75,6 +79,8 @@ import org.osgi.framework.BundleContext;
  */
 
 public class OSGiEventDispatcher implements EventHandler, EventDispatcher {
+
+    private static final Log LOG = LogFactory.getLog(OSGiEventDispatcher.class);
 
     private List<AppointmentEventInterface> appointmentListeners = new ArrayList<AppointmentEventInterface>();
     private List<TaskEventInterface> taskListeners = new ArrayList<TaskEventInterface>();
@@ -136,6 +142,7 @@ public class OSGiEventDispatcher implements EventHandler, EventDispatcher {
     }
 
     public void handleEvent(Event event) {
+        try {
         CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
 
         Object actionObj = commonEvent.getActionObj();
@@ -170,10 +177,14 @@ public class OSGiEventDispatcher implements EventHandler, EventDispatcher {
                 }
                 break;
         }
+        } catch (final Exception e) {
+            // Catch all exceptions to get them into the normal logging mechanism.
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     public void registerService(BundleContext context) {
-        Hashtable serviceProperties = new Hashtable();
+        final Dictionary<Object,Object> serviceProperties = new Hashtable<Object,Object>();
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[]{"com/openexchange/groupware/*"});
         context.registerService(EventHandler.class.getName(), this, serviceProperties);
     }
