@@ -94,8 +94,9 @@ public final class AJPv13ListenerPool {
 		if (!initialized.get()) {
 			synchronized (initialized) {
 				if (!initialized.get()) {
-					AJPv13Server.ajpv13ListenerMonitor.setPoolSize(AJPv13Config.getAJPListenerPoolSize());
-					AJPv13Server.ajpv13ListenerMonitor.setNumIdle(AJPv13Config.getAJPListenerPoolSize());
+					final int poolSize = AJPv13Config.getAJPListenerPoolSize();
+					AJPv13Server.ajpv13ListenerMonitor.setPoolSize(poolSize);
+					AJPv13Server.ajpv13ListenerMonitor.setNumIdle(poolSize);
 					for (int i = 0; i < AJPv13Config.getAJPListenerPoolSize(); i++) {
 						final AJPv13Listener l = new AJPv13Listener(listenerNum.incrementAndGet(), true);
 						AJPv13Watcher.addListener(l);
@@ -103,8 +104,8 @@ public final class AJPv13ListenerPool {
 					}
 					initialized.set(true);
 					if (LOG.isInfoEnabled()) {
-						LOG.info(new StringBuilder(100).append(AJPv13Config.getAJPListenerPoolSize()).append(
-								" AJPv13-Listeners created!").toString());
+						LOG.info(new StringBuilder(32).append(poolSize).append(" AJPv13-Listeners created!")
+										.toString());
 					}
 				}
 			}
@@ -217,14 +218,14 @@ public final class AJPv13ListenerPool {
 
 	/**
 	 * Puts back the given listener into pool if pool is not full, yet. If
-	 * <code>enforcedPut</code> is <code>true</code> the listener is going
-	 * to be put in any case.
+	 * <code>enforcedPut</code> is <code>true</code> the listener is going to be
+	 * put in any case.
 	 * 
 	 * @param listener
 	 *            The AJP listener which shall be put back into pool
 	 * @param enforcedPut
-	 *            <code>true</code> to enforce a put even though pool's size
-	 *            is exceeded; otherwise <code>false</code>
+	 *            <code>true</code> to enforce a put even though pool's size is
+	 *            exceeded; otherwise <code>false</code>
 	 * @return <code>true</code> if given listener can be put into pool,
 	 *         <code>false</code> otherwise
 	 */
@@ -232,9 +233,12 @@ public final class AJPv13ListenerPool {
 		RW_LOCK.acquireWrite();
 		try {
 			if (enforcedPut || (LISTENER_QUEUE.size() < AJPv13Config.getAJPListenerPoolSize())) {
-				AJPv13Server.ajpv13ListenerMonitor.incrementPoolSize();
-				AJPv13Server.ajpv13ListenerMonitor.incrementNumIdle();
-				return LISTENER_QUEUE.offer(listener);
+				final boolean added2Pool = LISTENER_QUEUE.offer(listener);
+				if (added2Pool) {
+					AJPv13Server.ajpv13ListenerMonitor.incrementPoolSize();
+					AJPv13Server.ajpv13ListenerMonitor.incrementNumIdle();
+				}
+				return added2Pool;
 			}
 			return false;
 		} finally {
