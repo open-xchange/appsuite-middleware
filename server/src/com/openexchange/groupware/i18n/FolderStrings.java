@@ -59,9 +59,7 @@ package com.openexchange.groupware.i18n;
  */
 public class FolderStrings {
 
-	/**
-	 * Name of the parent folder for the private user folders.
-	 */
+	// Name of the parent folder for the private user folders.
 	public static final String SYSTEM_PRIVATE_FOLDER_NAME = "Private folders";
 	
 	public static final String SYSTEM_PUBLIC_FOLDER_NAME = "Public folders";
