@@ -124,8 +124,7 @@ public final class AJPv13ConnectionPool {
 		if (ajpCon == null) {
 			return new AJPv13Connection(l);
 		}
-		ajpCon.setListener(l);
-		return ajpCon;
+		return ajpCon.setListener(l);
 	}
 
 	/**

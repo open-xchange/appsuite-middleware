@@ -103,8 +103,8 @@ public final class AJPv13Connection {
 	/**
 	 * Resets this connection instance and prepares it for next upcoming AJP
 	 * cycle. That is associated request handler will be set to
-	 * <code>null</code>, its state is set to <code>IDLE</code> and the
-	 * output stream is going to be flushed.
+	 * <code>null</code>, its state is set to <code>IDLE</code> and the output
+	 * stream is going to be flushed.
 	 * 
 	 * @param releaseRequestHandler
 	 */
@@ -150,8 +150,8 @@ public final class AJPv13Connection {
 	 * Waits for and processes incoming AJP package through delegating to
 	 * associated request handler.
 	 * <p>
-	 * Moreover this connection's state is switched to <tt>ASSIGNED</tt> if
-	 * it's still <tt>IDLE</tt>.
+	 * Moreover this connection's state is switched to <tt>ASSIGNED</tt> if it's
+	 * still <tt>IDLE</tt>.
 	 * 
 	 * @throws IOException
 	 *             If AJP socket is closed
@@ -345,9 +345,11 @@ public final class AJPv13Connection {
 	 * 
 	 * @param listener
 	 *            The AJP listener
+	 * @return This AJP connection with specified listener applied
 	 */
-	public void setListener(final AJPv13Listener listener) {
+	public AJPv13Connection setListener(final AJPv13Listener listener) {
 		setAndApplyListener(listener);
+		return this;
 	}
 
 	private void setAndApplyListener(final AJPv13Listener listener) {
