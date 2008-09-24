@@ -47,29 +47,77 @@
  *
  */
 
-package com.openexchange.i18n.tools;
+package com.openexchange.i18n.tools.replacement;
 
-import com.openexchange.i18n.tools.replacement.StringReplacement;
+import java.util.Locale;
+import java.util.TimeZone;
 
-public abstract class AbstractTemplate implements Template {
+import com.openexchange.i18n.tools.TemplateReplacement;
+import com.openexchange.i18n.tools.TemplateToken;
+
+/**
+ * {@link ModuleReplacement}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
+public final class ModuleReplacement implements TemplateReplacement {
+
+	private final static String[] MODULES = { "calendar", "task" };
+
+	public static final int MODULE_UNKNOWN = -1;
+
+	public static final int MODULE_CALENDAR = 0;
+
+	public static final int MODULE_TASK = 1;
+
+	private final String repl;
+
+	private boolean changed;
 
 	/**
-	 * Initializes a new {@link AbstractTemplate}
+	 * Initializes a new {@link ModuleReplacement}
+	 * 
+	 * @param module
+	 *            The module; supposed to be either {@link #MODULE_CALENDAR} or
+	 *            {@link #MODULE_TASK}
 	 */
-	protected AbstractTemplate() {
+	public ModuleReplacement(final int module) {
 		super();
+		repl = module < 0 || module >= MODULES.length ? "unknown" : MODULES[module];
 	}
 
-	public String render(final String... substitutions) {
-		if(substitutions.length % 2 != 0) {
-			throw new IllegalArgumentException("Must provide matching key value pairs");
-		}
-		
-		final RenderMap m = new RenderMap();
-		for(int i = 0; i < substitutions.length; i++) {
-			m.put(new StringReplacement(TemplateToken.getByString(substitutions[i++]), substitutions[i]));
-		}
-		return render(m);
+	public String getReplacement() {
+		return repl;
 	}
 
+	public TemplateToken getToken() {
+		return TemplateToken.MODULE;
+	}
+
+	public boolean changed() {
+		return changed;
+	}
+
+	public TemplateReplacement setChanged(final boolean changed) {
+		this.changed = changed;
+		return this;
+	}
+
+	public TemplateReplacement setLocale(final Locale locale) {
+		return this;
+	}
+
+	public TemplateReplacement setTimeZone(final TimeZone timeZone) {
+		return this;
+	}
+
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		return super.clone();
+	}
+
+	public TemplateReplacement getClone() throws CloneNotSupportedException {
+		return (TemplateReplacement) clone();
+	}
 }

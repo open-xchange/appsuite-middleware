@@ -47,29 +47,49 @@
  *
  */
 
-package com.openexchange.i18n.tools;
+package com.openexchange.i18n.tools.replacement;
 
-import com.openexchange.i18n.tools.replacement.StringReplacement;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
-public abstract class AbstractTemplate implements Template {
+import com.openexchange.groupware.i18n.Notifications;
+import com.openexchange.i18n.tools.TemplateToken;
+
+/**
+ * {@link EndDateReplacement} - End date replacement
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
+public final class EndDateReplacement extends AbstractFormatDateReplacement {
 
 	/**
-	 * Initializes a new {@link AbstractTemplate}
+	 * Initializes a new {@link EndDateReplacement}
+	 * 
+	 * @param endDate
+	 *            The end date
 	 */
-	protected AbstractTemplate() {
-		super();
+	public EndDateReplacement(final Date endDate) {
+		this(endDate, null, null);
 	}
 
-	public String render(final String... substitutions) {
-		if(substitutions.length % 2 != 0) {
-			throw new IllegalArgumentException("Must provide matching key value pairs");
-		}
-		
-		final RenderMap m = new RenderMap();
-		for(int i = 0; i < substitutions.length; i++) {
-			m.put(new StringReplacement(TemplateToken.getByString(substitutions[i++]), substitutions[i]));
-		}
-		return render(m);
+	/**
+	 * Initializes a new {@link EndDateReplacement}
+	 * 
+	 * @param endDate
+	 *            The end date
+	 * @param locale
+	 *            The locale
+	 * @param timeZone
+	 *            The time zone
+	 */
+	public EndDateReplacement(final Date endDate, final Locale locale, final TimeZone timeZone) {
+		super(endDate, Notifications.FORMAT_END_DATE, locale, timeZone);
+	}
+
+	public TemplateToken getToken() {
+		return TemplateToken.END;
 	}
 
 }

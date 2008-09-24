@@ -49,31 +49,133 @@
 
 package com.openexchange.i18n.tools;
 
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * {@link Template} - A template
+ * {@link TemplateToken} - An enumeration of possible occurring tokens in a
+ * template which are supposed to be replaced with user/object informations.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
- *         Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Template {
+public enum TemplateToken {
 
 	/**
-	 * Renders this template with given render map
-	 * 
-	 * @param renderMap
-	 *            The render map
-	 * @return The rendered template
+	 * Display name of the owner
 	 */
-	public String render(RenderMap renderMap);
+	CREATED_BY("created_by"),
+	/**
+	 * Display name of the changing user
+	 */
+	CHANGED_BY("changed_by"),
+	/**
+	 * Creation date and time in standard date and time format
+	 */
+	CREATION_DATETIME("creation_datetime"),
+	/**
+	 * The tile
+	 */
+	TITLE("title"),
+	/**
+	 * The location
+	 */
+	LOCATION("location"),
+	/**
+	 * The ID of the folder where object is created
+	 */
+	FOLDER_ID("folder"),
+	/**
+	 * The name of the folder where object is created
+	 */
+	FOLDER_NAME("folder_name"),
+	/**
+	 * The object ID
+	 */
+	OBJECT_ID("object"),
+	/**
+	 * The module name; e.g. <i>Calendar</i>
+	 */
+	MODULE("module"),
+	/**
+	 * The host name for generating links to an object
+	 */
+	HOSTNAME("hostname"),
+	/**
+	 * The link to an object
+	 */
+	LINK("link"),
+	/**
+	 * The start date
+	 */
+	START("start"),
+	/**
+	 * The end date
+	 */
+	END("end"),
+	/**
+	 * The recurring information; e.g. <i>Daily, starting 15.02.2007, ending
+	 * 17.02.2007</i>.
+	 */
+	SERIES("series"),
+	/**
+	 * The comment/description
+	 */
+	DESCRIPTION("description"),
+	/**
+	 * The participant list
+	 */
+	PARTICIPANTS("participants"),
+	/**
+	 * The resource list
+	 */
+	RESOURCES("resources"),
+	/**
+	 * The confirmation status
+	 */
+	STATUS("status"),
+	/**
+	 * The action
+	 */
+	ACTION("action"),
+	/**
+	 * The confirmation action
+	 */
+	CONFIRMATION_ACTIN("action2");
+
+	private final String token;
+
+	private TemplateToken(final String token) {
+		this.token = token;
+	}
 
 	/**
-	 * Renders this template with given string array
+	 * Gets the tokens
 	 * 
-	 * @param substitutions
-	 *            The string array
-	 * @return The rendered template
+	 * @return The token
 	 */
-	public String render(String... substitutions);
+	public String getToken() {
+		return token;
+	}
+
+	private static final transient Map<String, TemplateToken> MAP;
+
+	static {
+		final TemplateToken[] tokens = TemplateToken.values();
+		MAP = new HashMap<String, TemplateToken>(tokens.length);
+		for (final TemplateToken token : tokens) {
+			MAP.put(token.token, token);
+		}
+	}
+
+	/**
+	 * Gets the template token for specified string or <code>null</code> if
+	 * there's no corresponding template token.
+	 * 
+	 * @param tokenString
+	 *            The token string
+	 * @return
+	 */
+	public static TemplateToken getByString(final String tokenString) {
+		return MAP.get(tokenString);
+	}
 }

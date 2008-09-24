@@ -47,29 +47,45 @@
  *
  */
 
-package com.openexchange.i18n.tools;
+package com.openexchange.i18n.tools.replacement;
 
-import com.openexchange.i18n.tools.replacement.StringReplacement;
+import com.openexchange.groupware.i18n.Notifications;
+import com.openexchange.i18n.tools.TemplateToken;
 
-public abstract class AbstractTemplate implements Template {
+/**
+ * {@link TaskActionReplacement} - Replacement for an action.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
+public final class TaskActionReplacement extends LocalizedStringReplacement {
+
+	private static String[] ACTIONS = { Notifications.TASK_CREATE_TITLE, Notifications.TASK_UPDATE_TITLE,
+			Notifications.TASK_DELETE_TITLE, "Task (accepted)", "Task (declined)", "Task (tentative)" };
+
+	public static final int ACTION_NEW = 0;
+
+	public static final int ACTION_CHANGED = 1;
+
+	public static final int ACTION_DELETED = 2;
+
+	public static final int ACTION_ACCEPTED = 3;
+
+	public static final int ACTION_DECLINED = 4;
+
+	public static final int ACTION_TENTATIVE = 5;
 
 	/**
-	 * Initializes a new {@link AbstractTemplate}
+	 * Initializes a new {@link TaskActionReplacement}
+	 * 
+	 * @param appointmentAction
+	 *            The appointment action; supposed to be either
+	 *            {@link #ACTION_NEW}, {@link #ACTION_CHANGED},
+	 *            {@link #ACTION_DELETED}, {@link #ACTION_ACCEPTED},
+	 *            {@link #ACTION_DECLINED}, or {@link #ACTION_TENTATIVE}
 	 */
-	protected AbstractTemplate() {
-		super();
-	}
-
-	public String render(final String... substitutions) {
-		if(substitutions.length % 2 != 0) {
-			throw new IllegalArgumentException("Must provide matching key value pairs");
-		}
-		
-		final RenderMap m = new RenderMap();
-		for(int i = 0; i < substitutions.length; i++) {
-			m.put(new StringReplacement(TemplateToken.getByString(substitutions[i++]), substitutions[i]));
-		}
-		return render(m);
+	public TaskActionReplacement(final int appointmentAction) {
+		super(TemplateToken.ACTION, ACTIONS[appointmentAction]);
 	}
 
 }

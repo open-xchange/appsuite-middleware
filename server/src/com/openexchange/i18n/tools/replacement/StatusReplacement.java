@@ -47,29 +47,38 @@
  *
  */
 
-package com.openexchange.i18n.tools;
+package com.openexchange.i18n.tools.replacement;
 
-import com.openexchange.i18n.tools.replacement.StringReplacement;
+import com.openexchange.i18n.tools.TemplateToken;
 
-public abstract class AbstractTemplate implements Template {
+/**
+ * {@link StatusReplacement} - Replacement for a confirmation status.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
+public final class StatusReplacement extends LocalizedStringReplacement {
+
+	private static String[] STATUSES = { "accepted", "declined", "tentative", "waiting" };
+
+	public static final int STATUS_ACCEPTED = 0;
+
+	public static final int STATUS_DECLINED = 1;
+
+	public static final int STATUS_TENTATIVE = 2;
+
+	public static final int STATUS_WAITING = 3;
 
 	/**
-	 * Initializes a new {@link AbstractTemplate}
+	 * Initializes a new {@link StatusReplacement}
+	 * 
+	 * @param status
+	 *            The status; supposed to be either {@link #STATUS_ACCEPTED},
+	 *            {@link #STATUS_DECLINED}, {@link #STATUS_TENTATIVE}, or
+	 *            {@link #STATUS_WAITING}
 	 */
-	protected AbstractTemplate() {
-		super();
-	}
-
-	public String render(final String... substitutions) {
-		if(substitutions.length % 2 != 0) {
-			throw new IllegalArgumentException("Must provide matching key value pairs");
-		}
-		
-		final RenderMap m = new RenderMap();
-		for(int i = 0; i < substitutions.length; i++) {
-			m.put(new StringReplacement(TemplateToken.getByString(substitutions[i++]), substitutions[i]));
-		}
-		return render(m);
+	public StatusReplacement(final int status) {
+		super(TemplateToken.STATUS, STATUSES[status]);
 	}
 
 }

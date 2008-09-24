@@ -47,29 +47,94 @@
  *
  */
 
-package com.openexchange.i18n.tools;
+package com.openexchange.i18n.tools.replacement;
 
-import com.openexchange.i18n.tools.replacement.StringReplacement;
+import java.util.Locale;
+import java.util.TimeZone;
 
-public abstract class AbstractTemplate implements Template {
+import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.i18n.tools.TemplateReplacement;
+import com.openexchange.i18n.tools.TemplateToken;
+
+/**
+ * {@link LocalizedStringReplacement}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
+public abstract class LocalizedStringReplacement implements TemplateReplacement {
+
+	private StringHelper stringHelper;
+
+	private final TemplateToken token;
+
+	private final String replacement;
+
+	protected Locale locale;
+
+	protected boolean changed;
 
 	/**
-	 * Initializes a new {@link AbstractTemplate}
+	 * Initializes a new {@link LocalizedStringReplacement}
 	 */
-	protected AbstractTemplate() {
+	public LocalizedStringReplacement(final TemplateToken token, final String replacement) {
 		super();
+		this.token = token;
+		this.replacement = replacement;
 	}
 
-	public String render(final String... substitutions) {
-		if(substitutions.length % 2 != 0) {
-			throw new IllegalArgumentException("Must provide matching key value pairs");
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		final LocalizedStringReplacement clone = (LocalizedStringReplacement) super.clone();
+		clone.stringHelper = null;
+		clone.locale = (Locale) (this.locale == null ? null : this.locale.clone());
+		return clone;
+	}
+
+	public TemplateReplacement getClone() throws CloneNotSupportedException {
+		return (TemplateReplacement) clone();
+	}
+
+	protected final StringHelper getStringHelper() {
+		if (stringHelper == null) {
+			if (locale == null) {
+				stringHelper = new StringHelper(Locale.ENGLISH);
+			} else {
+				stringHelper = new StringHelper(locale);
+			}
 		}
-		
-		final RenderMap m = new RenderMap();
-		for(int i = 0; i < substitutions.length; i++) {
-			m.put(new StringReplacement(TemplateToken.getByString(substitutions[i++]), substitutions[i]));
+		return stringHelper;
+	}
+
+	public boolean changed() {
+		return changed;
+	}
+
+	public String getReplacement() {
+		return getStringHelper().getString(replacement);
+	}
+
+	public TemplateToken getToken() {
+		return token;
+	}
+
+	public TemplateReplacement setChanged(final boolean changed) {
+		this.changed = changed;
+		return this;
+	}
+
+	public final TemplateReplacement setLocale(final Locale locale) {
+		if (locale == null || locale.equals(this.locale)) {
+			return this;
 		}
-		return render(m);
+		this.locale = locale;
+		stringHelper = null;
+		return this;
+	}
+
+	public TemplateReplacement setTimeZone(final TimeZone timeZone) {
+		// Not applicable
+		return this;
 	}
 
 }

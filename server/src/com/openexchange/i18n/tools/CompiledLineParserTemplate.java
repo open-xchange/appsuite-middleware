@@ -51,126 +51,129 @@ package com.openexchange.i18n.tools;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-// Compiles a template as per LineParserUtility syntax, with a simple substitution of [variables]. Allows escaping via \ 
+/**
+ * {@link CompiledLineParserTemplate} - Compiles a template as per
+ * LineParserUtility syntax, with a simple substitution of [variables]. Allows
+ * escaping via \
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
+ *         Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
 public abstract class CompiledLineParserTemplate extends AbstractTemplate {
 
-	
-	
-	private String[] chunks;
-	
-	
-	public String render(final Map<String, String> substitutions) {
-		if(chunks == null) {
-			load();
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(CompiledLineParserTemplate.class);
+
+	private static final String STR_EMPTY = "";
+
+	private static final String STR_CHANGED = "> ";
+
+	/**
+	 * Initializes a new {@link CompiledLineParserTemplate}
+	 */
+	protected CompiledLineParserTemplate() {
+		super();
+	}
+
+	private int[][] positions;
+
+	public String render(final RenderMap renderMap) {
+		final char[] content = getContent();
+		if (null == content) {
+			return STR_EMPTY;
 		}
-		final StringBuilder result = new StringBuilder();
-		
-		boolean substitute = false;
-		
-		for(final String chunk : chunks) {
-			
-			String substitution = chunk;
-			if(substitute) {
-				substitution = substitutions.get(chunk);
-				if (null == substitution) {
-					substitution = "";
-				}
+
+		if (positions == null) {
+			positions = load(content);
+		}
+
+		final StringBuilder result = new StringBuilder(content.length + 1024);
+		int off = 0;
+		for (int i = 0; i < positions.length; i++) {
+			final int bracketS = positions[i][0];
+			final int bracketE = positions[i][1];
+			result.append(content, off, bracketS - off);
+			final String toReplace = new String(content, bracketS + 1, bracketE - bracketS - 1);
+			final TemplateReplacement repl = renderMap.get(toReplace);
+			if (repl == null) {
+				result.append(STR_EMPTY);
+			} else {
+				result.append(repl.getReplacement());
 			}
-			result.append(
-				substitution
-			);
-			substitute = !substitute;
+			off = bracketE + 1;
 		}
-		
+		if (off < content.length) {
+			result.append(content, off, content.length - off);
+		}
 		return result.toString();
 	}
 
-	private final void load() {
-			if(chunks != null) {
-				return;
-			}
-			final char[] content = getContent();
-			if(null == content) {
-				return;
-			}
-			
-			final List<String> chunkCollector = new ArrayList<String>();
-			
-			// Lexer for the poor
-			// LABSKAUSS!!!!! ;-)
-			final StringBuilder currentChunk = new StringBuilder();
-			boolean escaped = false;
-			int lineCount = 1;
-			int columnCount = 1;
-			int[] open = null; 
-			
-			for(int i = 0; i < content.length; i++) {
-				final char c = content[i];
-				switch(c) {
-				case '[' :
-						if(escaped) {
-							currentChunk.append(c);
-							escaped = false;
-						} else {
-							chunkCollector.add(currentChunk.toString());
-							currentChunk.setLength(0);
-							open = new int[]{lineCount, columnCount};
-						}
-						columnCount++;
-					break;
-				case ']' :
-					if(escaped) {
-						currentChunk.append(c);
-						escaped = false;
-					} else {
-						chunkCollector.add(currentChunk.toString());
-						currentChunk.setLength(0);
-						open = null;
-					}
-					columnCount++;
-					break;
-				case '\\' :
-					if(escaped) {
-						currentChunk.append(c);
-						escaped = false;
-					} else {
-						escaped = true;
-					}
-					columnCount++;
-					break;
-				case '\n' :
-					lineCount++;
-					columnCount=0;
-					currentChunk.append(c);
-					break;
-				default :
-					if(escaped) {
-						escaped = false;
-					} else {
-						currentChunk.append(c);
-					}
+	private static final int[][] load(final char[] content) {
+		final List<int[]> positions = new ArrayList<int[]>();
+		// Lexer for the poor
+		// LABSKAUSS!!!!! ;-)
+		boolean escaped = false;
+		int lineCount = 1;
+		int columnCount = 1;
+		int[] open = null;
+		int firstPos = -1;
+
+		for (int i = 0; i < content.length; i++) {
+			final char c = content[i];
+			switch (c) {
+			case '[':
+				if (escaped) {
+					escaped = false;
+				} else {
+					firstPos = i;
+					open = new int[] { lineCount, columnCount };
+				}
 				columnCount++;
+				break;
+			case ']':
+				if (escaped) {
+					escaped = false;
+				} else {
+					positions.add(new int[] { firstPos, i });
+					firstPos = -1;
+					open = null;
 				}
-			}
-			
-			if(currentChunk.length() > 0) {
-				chunkCollector.add(currentChunk.toString());
-			}
-			
-			synchronized(this) {
-				
-				if(open != null) {
-					chunks = new String[]{"Parser Error: Seems that the bracket opened on line "+open[0]+" column "+open[1]+" is never closed."};
-					return;
+				columnCount++;
+				break;
+			case '\\':
+				if (escaped) {
+					escaped = false;
+				} else {
+					escaped = true;
 				}
-				
-				chunks = chunkCollector.toArray(new String[chunkCollector.size()]);
-				
+				columnCount++;
+				break;
+			case '\n':
+				lineCount++;
+				columnCount = 0;
+				break;
+			default:
+				if (escaped) {
+					escaped = false;
+				}
+				columnCount++;
 			}
-		
-		
+		}
+
+		if (open != null) {
+			LOG.error("Parser Error: Seems that the bracket opened on line " + open[0] + " column " + open[1]
+					+ " is never closed.", new Throwable());
+			return new int[0][];
+		}
+
+		final int[][] positionsArr = new int[positions.size()][];
+		for (int i = 0; i < positionsArr.length; i++) {
+			positionsArr[i] = positions.get(i);
+		}
+		return positionsArr;
 	}
 
 	protected abstract char[] getContent();

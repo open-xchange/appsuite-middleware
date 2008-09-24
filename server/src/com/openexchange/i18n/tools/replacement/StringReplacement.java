@@ -47,29 +47,91 @@
  *
  */
 
-package com.openexchange.i18n.tools;
+package com.openexchange.i18n.tools.replacement;
 
-import com.openexchange.i18n.tools.replacement.StringReplacement;
+import java.util.Locale;
+import java.util.TimeZone;
 
-public abstract class AbstractTemplate implements Template {
+import com.openexchange.i18n.tools.TemplateReplacement;
+import com.openexchange.i18n.tools.TemplateToken;
+
+/**
+ * {@link StringReplacement} - An implementation of a
+ * {@link TemplateReplacement template replacement} with a fixed string.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
+public class StringReplacement implements TemplateReplacement {
+
+	private final TemplateToken token;
+
+	private final String replacement;
+
+	private boolean changed;
 
 	/**
-	 * Initializes a new {@link AbstractTemplate}
+	 * Initializes a new {@link StringReplacement}
+	 * 
+	 * @param token
+	 *            The token
+	 * @param replacement
+	 *            The replacement
 	 */
-	protected AbstractTemplate() {
-		super();
+	public StringReplacement(final TemplateToken token, final String replacement) {
+		this(token, replacement, false);
 	}
 
-	public String render(final String... substitutions) {
-		if(substitutions.length % 2 != 0) {
-			throw new IllegalArgumentException("Must provide matching key value pairs");
-		}
-		
-		final RenderMap m = new RenderMap();
-		for(int i = 0; i < substitutions.length; i++) {
-			m.put(new StringReplacement(TemplateToken.getByString(substitutions[i++]), substitutions[i]));
-		}
-		return render(m);
+	/**
+	 * Initializes a new {@link StringReplacement}
+	 * 
+	 * @param token
+	 *            The token
+	 * @param replacement
+	 *            The replacement
+	 * @param changed
+	 *            <code>true</code> to prepend <i>modified</i> marker
+	 *            <code>"> "</code>; otherwise <code>false</code>
+	 */
+	public StringReplacement(final TemplateToken token, final String replacement, final boolean changed) {
+		super();
+		this.token = token;
+		this.replacement = replacement;
+		this.changed = changed;
+	}
+
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		return super.clone();
+	}
+
+	public TemplateReplacement getClone() throws CloneNotSupportedException {
+		return (TemplateReplacement) clone();
+	}
+
+	public String getReplacement() {
+		return replacement;
+	}
+
+	public TemplateToken getToken() {
+		return token;
+	}
+
+	public boolean changed() {
+		return changed;
+	}
+
+	public TemplateReplacement setChanged(final boolean changed) {
+		this.changed = changed;
+		return this;
+	}
+
+	public TemplateReplacement setLocale(final Locale locale) {
+		return this;
+	}
+
+	public TemplateReplacement setTimeZone(final TimeZone timeZone) {
+		return this;
 	}
 
 }

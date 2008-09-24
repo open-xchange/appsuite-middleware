@@ -47,29 +47,45 @@
  *
  */
 
-package com.openexchange.i18n.tools;
+package com.openexchange.i18n.tools.replacement;
 
-import com.openexchange.i18n.tools.replacement.StringReplacement;
+import java.util.Collection;
 
-public abstract class AbstractTemplate implements Template {
+import com.openexchange.i18n.tools.TemplateToken;
+
+/**
+ * {@link StringCollectionReplacement} - A string collection replacement.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
+public final class StringCollectionReplacement extends StringReplacement {
 
 	/**
-	 * Initializes a new {@link AbstractTemplate}
+	 * Initializes a new {@link StringCollectionReplacement}
+	 * 
+	 * @param token
+	 *            The token
+	 * @param replacementCollection
+	 *            The collection of string replacements
 	 */
-	protected AbstractTemplate() {
-		super();
+	public StringCollectionReplacement(final TemplateToken token, final Collection<String> replacementCollection) {
+		super(token, col2String(replacementCollection));
 	}
 
-	public String render(final String... substitutions) {
-		if(substitutions.length % 2 != 0) {
-			throw new IllegalArgumentException("Must provide matching key value pairs");
+	/**
+	 * Converts given string collection to a CRLF-separated string
+	 * 
+	 * @param replacementCollection
+	 *            The collection of strings
+	 * @return The resulting string
+	 */
+	private static String col2String(final Collection<String> replacementCollection) {
+		final StringBuilder b = new StringBuilder(replacementCollection.size() * 16);
+		for (final String replacement : replacementCollection) {
+			b.append(replacement).append('\r').append('\n');
 		}
-		
-		final RenderMap m = new RenderMap();
-		for(int i = 0; i < substitutions.length; i++) {
-			m.put(new StringReplacement(TemplateToken.getByString(substitutions[i++]), substitutions[i]));
-		}
-		return render(m);
+		return b.toString();
 	}
 
 }

@@ -50,34 +50,67 @@
 package com.openexchange.groupware.i18n;
 
 public class Notifications {
+
 	public static final String APPOINTMENT_CREATE_MAIL = 
-		"A new appointment has been created by [created_by].\n"+
-		"\n"+
-		"Direct Link: [link]\n"+
-		"\n"+
-		"Appointment\n"+
-		"===========\n"+
-		"Created by:  [created_by]\n"+
-		"Title:       [title]\n"+
-		"Location:    [location]\n"+
-		"\n"+
-		"Start date:  [start]\n"+
-		"End date:    [end]\n"+
-		"\n"+
-		"Description:\n"+
-		"[description]\n"+
-		"\n"+
-		"\n"+
-		"Participants\n"+
-		"============\n"+
-		"[participants]"+
-		"\n"+
-		"\n"+
-		"Resources\n"+
-		"=========\n"+
-		"[resources]\n"+
-		"\n"+
-		"==========================================";
+			"A new appointment was created by [created_by].\n" +
+			"You can check this appointment in your calendar:\n" +
+			"[link]\n" + 
+			"\n" + 
+			"Appointment\n" + 
+			"===========\n" + 
+			"Created by: [created_by]\n" + 
+			"Created at: [creation_datetime]\n" + 
+			"[title]\n" + 
+			"[location]\n" + 
+			"[folder_name]\n" + 
+			"\n" + 
+			"[start]\n" + 
+			"[end]\n" + 
+			"[series]\n" + 
+			"\n" + 
+			"[description]\n" + 
+			"\n" + 
+			"\n" + 
+			"Participants\n" + 
+			"============\n" + 
+			"[participants]" + 
+			"\n" + 
+			"\n" + 
+			"Resources\n" +
+			"=========\n" +
+			"[resources]" +
+			"\n" + 
+			"\n" + 
+			"========================================== ";
+
+	public static final String APPOINTMENT_CREATE_MAIL_EXT = 
+		"A new appointment was created by [created_by].\n" +
+		"\n" + 
+		"Appointment\n" + 
+		"===========\n" + 
+		"Created by: [created_by]\n" + 
+		"Created at: [creation_datetime]\n" + 
+		"[title]\n" + 
+		"[location]\n" + 
+		"\n" + 
+		"[start]\n" + 
+		"[end]\n" + 
+		"[series]\n" + 
+		"\n" + 
+		"[description]\n" + 
+		"\n" + 
+		"\n" + 
+		"Participants\n" + 
+		"============\n" + 
+		"[participants]" + 
+		"\n" + 
+		"\n" + 
+		"Resources\n" +
+		"=========\n" +
+		"[resources]" +
+		"\n" + 
+		"\n" + 
+		"========================================== ";
 	
 	public static final String TASK_CREATE_MAIL = 
 		"A new task has been created by [created_by].\n"+
@@ -106,24 +139,35 @@ public class Notifications {
 		"[resources]\n"+
 		"\n"+
 		"==========================================";	
-	
+
 	public static final String APPOINTMENT_DELETE_MAIL = 
-		"This appointment has been deleted by [changed_by].\n"+
-		"\n"+
-		"\n"+
-		"Appointment\n"+
-		"===========\n"+
-		"Created by:  [created_by]\n"+
-		"Title:       [title]\n"+
-		"Location:    [location]\n"+
-		"\n"+
-		"Start date:  [start]\n"+
-		"End date:    [end]\n"+
-		"\n"+
-		"Description:\n"+
-		"[description]\n"+
-		"\n"+
-		"\n"+
+		"This appointment has been deleted by [changed_by].\n" + 
+		"\n" + 
+		"Appointment\n" + 
+		"===========\n" + 
+		"Created by:  [created_by]\n" + 
+		"Created at:  [creation_datetime]\n" + 
+		"[title]\n" + 
+		"[location]\n" + 
+		"[folder_name]\n" + 
+		"\n" + 
+		"[start]\n" + 
+		"[end]\n" + 
+		"[series]\n" + 
+		"\n" + 
+		"[description]\n" + 
+		"\n" + 
+		"\n" + 
+		"Participants\n" + 
+		"============\n" + 
+		"[participants]" + 
+		"\n" + 
+		"\n" + 
+		"Resources\n" + 
+		"=========\n" + 
+		"[resources]" +
+		"\n" + 
+		"\n" + 
 		"==========================================";
 	
 	public static final String TASK_DELETE_MAIL = 
@@ -142,33 +186,65 @@ public class Notifications {
 		"[description]\n"+
 		"==========================================";
 	
-	public static final String APPOINTMENT_UPDATE_MAIL = 
-		"This appointment has been changed by [changed_by].\n"+
-		"\n"+
-		"Direct Link: [link]\n"+
-		"\n"+
-		"Appointment\n"+
-		"===========\n"+
-		"Created by:  [created_by]\n"+
-		"Title:       [title]\n"+
-		"Location:    [location]\n"+
-		"\n"+
-		"Start date:  [start]\n"+
-		"End date:    [end]\n"+
-		"\n"+
-		"Description:\n"+
-		"[description]\n"+
-		"\n"+
-		"\n"+
-		"Participants\n"+
-		"============\n"+
-		"[participants]"+
-		"\n"+
-		"\n"+
-		"Resources\n"+
-		"=========\n"+
-		"[resources]\n"+
-		"\n"+
+//	public static final String APPOINTMENT_UPDATE_MAIL = 
+//		"This appointment has been changed by [changed_by].\n"+
+//		"\n"+
+//		"Direct Link: [link]\n"+
+//		"\n"+
+//		"Appointment\n"+
+//		"===========\n"+
+//		"Created by:  [created_by]\n"+
+//		"Title:       [title]\n"+
+//		"Location:    [location]\n"+
+//		"\n"+
+//		"Start date:  [start]\n"+
+//		"End date:    [end]\n"+
+//		"\n"+
+//		"Description:\n"+
+//		"[description]\n"+
+//		"\n"+
+//		"\n"+
+//		"Participants\n"+
+//		"============\n"+
+//		"[participants]"+
+//		"\n"+
+//		"\n"+
+//		"Resources\n"+
+//		"=========\n"+
+//		"[resources]\n"+
+//		"\n"+
+//		"==========================================";
+
+	public static final String APPOINTMENT_UPDATE_MAIL =
+		"This appointment was changed by [changed_by].\n" +
+		"You can check this appointment in your calendar:\n" +
+		"[link]\n" + 
+		"\n" + 
+		"Appointment\n" + 
+		"===========\n" + 
+		"Created by:  [created_by]\n" + 
+		"Created at:  [creation_datetime]\n" + 
+		"[title]\n" + 
+		"[location]\n" + 
+		"[folder_name]\n" + 
+		"\n" + 
+		"[start]\n" + 
+		"[end]\n" + 
+		"[series]\n" + 
+		"\n" + 
+		"[description]\n" + 
+		"\n" + 
+		"\n" + 
+		"Participants\n" + 
+		"============\n" + 
+		"[participants]" +
+		"\n" + 
+		"\n" + 
+		"Resources\n" + 
+		"=========\n" + 
+		"[resources]" +
+		"\n" + 
+		"\n" + 
 		"==========================================";
 
 	public static final String TASK_UPDATE_MAIL = 
@@ -207,13 +283,13 @@ public class Notifications {
 		"Appointment\n"+
 		"===========\n"+
 		"Created by:  [created_by]\n"+
-		"Title:       [title]\n"+
-		"Location:    [location]\n"+
+		"[title]\n"+
+		"[location]\n"+
 		"\n"+
-		"Start date:  [start]\n"+
-		"End date:    [end]\n"+
+		"[start]\n"+
+		"[end]\n"+
+		"[series]\n" + 
 		"\n"+
-		"Description:\n"+
 		"[description]\n"+
 		"\n"+
 		"\n"+
@@ -248,13 +324,13 @@ public class Notifications {
 		"Appointment\n"+
 		"===========\n"+
 		"Created by:  [created_by]\n"+
-		"Title:       [title]\n"+
-		"Location:    [location]\n"+
+		"[title]\n"+
+		"[location]\n"+
 		"\n"+
-		"Start date:  [start]\n"+
-		"End date:    [end]\n"+
+		"[start]\n"+
+		"[end]\n"+
+		"[series]\n" +
 		"\n"+
-		"Description:\n"+
 		"[description]\n"+
 		"\n"+
 		"\n"+
@@ -289,13 +365,13 @@ public class Notifications {
 		"Appointment\n"+
 		"===========\n"+
 		"Created by:  [created_by]\n"+
-		"Title:       [title]\n"+
-		"Location:    [location]\n"+
+		"[title]\n"+
+		"[location]\n"+
 		"\n"+
-		"Start date:  [start]\n"+
-		"End date:    [end]\n"+
+		"[start]\n"+
+		"[end]\n"+
+		"[series]\n" +
 		"\n"+
-		"Description:\n"+
 		"[description]\n"+
 		"\n"+
 		"\n"+
@@ -320,11 +396,277 @@ public class Notifications {
 		"\n"+
 		"==========================================";
 	
-	public static final String APPOINTMENT_CREATE_TITLE = "A new appointment has been created";
-	public static final String APPOINTMENT_UPDATE_TITLE = "An appointment has been changed";
-	public static final String APPOINTMENT_DELETE_TITLE = "An appointment has been removed";
-	public static final String TASK_CREATE_TITLE = "A new task has been created";
-	public static final String TASK_UPDATE_TITLE = "A task has been changed";
-	public static final String TASK_DELETE_TITLE = "A task has been removed";
+	public static final String APPOINTMENT_CREATE_TITLE = "New Appointment";
+
+	public static final String APPOINTMENT_UPDATE_TITLE = "Appointment changed";
+
+	public static final String APPOINTMENT_DELETE_TITLE = "Appointment deleted";
+
+	public static final String TASK_CREATE_TITLE = "New task";
+
+	public static final String TASK_UPDATE_TITLE = "Task changed";
+
+	public static final String TASK_DELETE_TITLE = "Task deleted";
+
 	public static final String NO_RESOURCES = "No resources have been scheduled.";
+
+	/**
+	 * No series
+	 */
+	public static final String NO_SERIES = "No series";
+
+	/*
+	 * Line patterns
+	 */
+
+	/**
+	 * Location: %1$s
+	 */
+	public static final String FORMAT_LOCATION = "Location: %1$s";
+
+	/**
+	 * Description: %1$s
+	 */
+	public static final String FORMAT_DESCRIPTION = "Description: %1$s";
+
+	/**
+	 * Folder: %1$s
+	 */
+	public static final String FORMAT_FOLDER = "Folder: %1$s";
+
+	/**
+	 * Start date: %1$s
+	 */
+	public static final String FORMAT_START_DATE = "Start date: %1$s";
+
+	/**
+	 * End date: %1$s
+	 */
+	public static final String FORMAT_END_DATE = "End date: %1$s";
+
+	/**
+	 * Series: %1$s
+	 */
+	public static final String FORMAT_SERIES = "Series: %1$s";
+
+	/**
+	 * Comments:<br>
+	 * %1$s
+	 */
+	public static final String FORMAT_COMMENTS = "Comments:\n%1$s";
+
+	/*
+	 * Added/Removed participant
+	 */
+	
+	public static final String ADDED = "Added";
+
+	public static final String REMOVED = "Removed";
+	
+	/*
+	 * Recurrence templates
+	 */
+
+	/**
+	 * and
+	 */
+	public static final String REC_AND = "and";
+
+	/**
+	 * Each day
+	 */
+	public static final String REC_DAILY1 = "Each day";
+
+	/**
+	 * Each %1$s days
+	 */
+	public static final String REC_DAILY2 = "Each %1$s days";
+
+	/**
+	 * Each week on %1$s
+	 */
+	public static final String REC_WEEKLY1 = "Each week on %1$s";
+
+	/**
+	 * Each %1$s weeks on %2$s
+	 */
+	public static final String REC_WEEKLY2 = "Each %1$s weeks on %2$s";
+
+	/**
+	 * On %1$s. day every month
+	 */
+	public static final String REC_MONTHLY1_1 = "On %1$s. day every month";
+
+	/**
+	 * On %1$s. day every %2$s. month
+	 */
+	public static final String REC_MONTHLY1_2 = "On %1$s. day every %2$s. month";
+
+	/**
+	 * On %1$s %2$s each month
+	 */
+	public static final String REC_MONTHLY2_1 = "On %1$s %2$s each month";
+
+	/**
+	 * On %1$s %2$s each %3$s. month
+	 */
+	public static final String REC_MONTHLY2_2 = "On %1$s %2$s each %3$s. month";
+
+	/**
+	 * Each %1$s. %2$s
+	 */
+	public static final String REC_YEARLY1 = "Each %1$s. %2$s";
+
+	/**
+	 * On %1$s %2$s in %3$s
+	 */
+	public static final String REC_YEARLY2 = "On %1$s %2$s in %3$s";
+
+	/*
+	 * Months
+	 */
+
+	/**
+	 * January
+	 */
+	public static final String REC_JAN = "January";
+
+	/**
+	 * February
+	 */
+	public static final String REC_FEB = "February";
+
+	/**
+	 * March
+	 */
+	public static final String REC_MARCH = "March";
+
+	/**
+	 * April
+	 */
+	public static final String REC_APRIL = "April";
+
+	/**
+	 * May
+	 */
+	public static final String REC_MAY = "May";
+
+	/**
+	 * June
+	 */
+	public static final String REC_JUNE = "June";
+
+	/**
+	 * July
+	 */
+	public static final String REC_JULY = "July";
+
+	/**
+	 * August
+	 */
+	public static final String REC_AUG = "August";
+
+	/**
+	 * September
+	 * 
+	 */
+	public static final String REC_SEP = "September";
+
+	/**
+	 * October
+	 */
+	public static final String REC_OCT = "October";
+
+	/**
+	 * November
+	 */
+	public static final String REC_NOV = "November";
+
+	/**
+	 * December
+	 */
+	public static final String REC_DEC = "December";
+
+	/*
+	 * Weekdays
+	 */
+
+	/**
+	 * Monday
+	 */
+	public static final String REC_MONDAY = "Monday";
+
+	/**
+	 * Tuesday
+	 */
+	public static final String REC_TUESDAY = "Tuesday";
+
+	/**
+	 * Wednesday
+	 */
+	public static final String REC_WEDNESDAY = "Wednesday";
+
+	/**
+	 * Thursday
+	 */
+	public static final String REC_THURSDAY = "Thursday";
+
+	/**
+	 * Friday
+	 */
+	public static final String REC_FRIDAY = "Friday";
+
+	/**
+	 * Saturday
+	 */
+	public static final String REC_SATURDAY = "Saturday";
+
+	/**
+	 * Sunday
+	 */
+	public static final String REC_SUNDAY = "Sunday";
+
+	/**
+	 * Sunday
+	 */
+	public static final String REC_DAY = "Sunday";
+
+	/**
+	 * Weekday
+	 */
+	public static final String REC_WEEKDAY = "Weekday";
+
+	/**
+	 * Weekend day
+	 */
+	public static final String REC_WEEKENDDAY = "Weekend day";
+
+	/*
+	 * Monthly1 constants
+	 */
+
+	/**
+	 * first
+	 */
+	public static final String REC_FIRST = "first";
+
+	/**
+	 * second
+	 */
+	public static final String REC_SECOND = "second";
+
+	/**
+	 * third
+	 */
+	public static final String REC_THIRD = "third";
+
+	/**
+	 * fourth
+	 */
+	public static final String REC_FOURTH = "fourth";
+
+	/**
+	 * last
+	 */
+	public static final String REC_LAST = "last";
 }

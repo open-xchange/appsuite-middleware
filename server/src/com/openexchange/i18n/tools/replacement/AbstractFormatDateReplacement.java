@@ -47,29 +47,74 @@
  *
  */
 
-package com.openexchange.i18n.tools;
+package com.openexchange.i18n.tools.replacement;
 
-import com.openexchange.i18n.tools.replacement.StringReplacement;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
-public abstract class AbstractTemplate implements Template {
+import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.i18n.tools.TemplateReplacement;
+
+/**
+ * {@link AbstractFormatDateReplacement}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
+public abstract class AbstractFormatDateReplacement extends AbstractDateReplacement {
+
+	protected String format;
 
 	/**
-	 * Initializes a new {@link AbstractTemplate}
+	 * Initializes a new AbstractFormatDateReplacement
+	 * 
+	 * @param date
+	 *            The date
+	 * @param format
+	 *            The format string
 	 */
-	protected AbstractTemplate() {
-		super();
+	protected AbstractFormatDateReplacement(final Date date, final String format) {
+		super(date);
+		this.format = format;
 	}
 
-	public String render(final String... substitutions) {
-		if(substitutions.length % 2 != 0) {
-			throw new IllegalArgumentException("Must provide matching key value pairs");
-		}
-		
-		final RenderMap m = new RenderMap();
-		for(int i = 0; i < substitutions.length; i++) {
-			m.put(new StringReplacement(TemplateToken.getByString(substitutions[i++]), substitutions[i]));
-		}
-		return render(m);
+	/**
+	 * Initializes a new AbstractFormatDateReplacement
+	 * 
+	 * @param date
+	 *            The date
+	 * @param format
+	 *            The format string
+	 * @param locale
+	 *            The locale
+	 * @param timeZone
+	 *            The time zone
+	 */
+	public AbstractFormatDateReplacement(final Date date, final String format, final Locale locale,
+			final TimeZone timeZone) {
+		super(date, locale, timeZone);
+		this.format = format;
 	}
 
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		return super.clone();
+	}
+
+	@Override
+	public TemplateReplacement getClone() throws CloneNotSupportedException {
+		return (TemplateReplacement) clone();
+	}
+
+	@Override
+	public String getReplacement() {
+		final String result = String.format(new StringHelper(locale == null ? Locale.ENGLISH : locale)
+				.getString(format), super.getReplacement());
+		if (changed) {
+			return new StringBuilder(PREFIX_MODIFIED.length() + result.length()).append(PREFIX_MODIFIED).append(result)
+					.toString();
+		}
+		return result;
+	}
 }

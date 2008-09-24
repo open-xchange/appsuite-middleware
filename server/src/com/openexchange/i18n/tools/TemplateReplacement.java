@@ -49,31 +49,86 @@
 
 package com.openexchange.i18n.tools;
 
+import java.util.Locale;
+import java.util.TimeZone;
 
 /**
- * {@link Template} - A template
+ * {@link TemplateReplacement} - Defines how a {@link TemplateToken token} is
+ * supposed to be replaced by a replacement string.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
- *         Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Template {
+public interface TemplateReplacement extends Cloneable {
+
+	public static final String PREFIX_MODIFIED = "> ";
 
 	/**
-	 * Renders this template with given render map
+	 * Gets the token occurring in a template which is supposed to be replaced
 	 * 
-	 * @param renderMap
-	 *            The render map
-	 * @return The rendered template
+	 * @return The token occurring in a template which is supposed to be
+	 *         replaced
 	 */
-	public String render(RenderMap renderMap);
+	public TemplateToken getToken();
 
 	/**
-	 * Renders this template with given string array
+	 * Gets the replacement string for the token occurring in a template
 	 * 
-	 * @param substitutions
-	 *            The string array
-	 * @return The rendered template
+	 * @return The replacement string for the token occurring in a template
 	 */
-	public String render(String... substitutions);
+	public String getReplacement();
+
+	/**
+	 * Indicates if this replacement reflects a changed value; default is
+	 * <code>false</code>
+	 * 
+	 * @return <code>true</code> if this replacement reflects a changed value;
+	 *         otherwise <code>false</code>
+	 */
+	public boolean changed();
+
+	/**
+	 * Sets whether this replacement is marked as being changed or not.
+	 * 
+	 * <code>true</code> to mark this replacement as being changed; otherwise
+	 * <code>false</code>
+	 * 
+	 * @return This replacement with new changed status applied
+	 */
+	public TemplateReplacement setChanged(boolean changed);
+
+	/**
+	 * Sets specified locale.
+	 * <p>
+	 * If not applicable, given locale is <code>null</code> or equal to already
+	 * applied locale, this method is a no-op and this replacement is returned
+	 * unchanged.
+	 * 
+	 * @param locale
+	 *            The locale to set
+	 * @return This replacement with specified locale applied
+	 */
+	public TemplateReplacement setLocale(Locale locale);
+
+	/**
+	 * Sets specified time zone.
+	 * <p>
+	 * If not applicable, given time zone is <code>null</code> or equal to
+	 * already applied time zone, this method is a no-op and this replacement is
+	 * returned unchanged.
+	 * 
+	 * @param timeZone
+	 *            The time zone to set
+	 * @return This replacement with specified time zone applied
+	 */
+	public TemplateReplacement setTimeZone(TimeZone timeZone);
+
+	/**
+	 * Should delegate to {@link java.lang.Object#clone()}
+	 * 
+	 * @return The clone
+	 * @throws CloneNotSupportedException
+	 *             If {@link Cloneable} interface is not implemented
+	 */
+	public TemplateReplacement getClone() throws CloneNotSupportedException;
+
 }

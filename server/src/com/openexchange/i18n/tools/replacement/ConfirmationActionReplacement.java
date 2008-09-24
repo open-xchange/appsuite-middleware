@@ -47,29 +47,57 @@
  *
  */
 
-package com.openexchange.i18n.tools;
+package com.openexchange.i18n.tools.replacement;
 
-import com.openexchange.i18n.tools.replacement.StringReplacement;
+import java.util.Locale;
 
-public abstract class AbstractTemplate implements Template {
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.i18n.tools.TemplateToken;
+
+/**
+ * {@link ConfirmationActionReplacement} - Replacement for a confirmation
+ * status.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
+public final class ConfirmationActionReplacement extends LocalizedStringReplacement {
+
+	private static String[] ACTIONS = { "none", "accepted", "declined", "tentatively accepted" };
+
+	public static final int ACTION_NONE = CalendarObject.NONE;
+
+	public static final int ACTION_ACCEPTED = CalendarObject.ACCEPT;
+
+	public static final int ACTION_DECLINED = CalendarObject.DECLINE;
+
+	public static final int ACTION_TENTATIVELY_ACCEPTED = CalendarObject.TENTATIVE;
 
 	/**
-	 * Initializes a new {@link AbstractTemplate}
+	 * Initializes a new {@link ConfirmationActionReplacement}
+	 * 
+	 * @param confirmationAction
+	 *            The confirmation action; supposed to be either
+	 *            {@link #ACTION_ACCEPTED}, {@link #ACTION_DECLINED}, or
+	 *            {@link #ACTION_TENTATIVELY_ACCEPTED}
 	 */
-	protected AbstractTemplate() {
-		super();
+	public ConfirmationActionReplacement(final int confirmationAction) {
+		this(confirmationAction, null);
 	}
 
-	public String render(final String... substitutions) {
-		if(substitutions.length % 2 != 0) {
-			throw new IllegalArgumentException("Must provide matching key value pairs");
-		}
-		
-		final RenderMap m = new RenderMap();
-		for(int i = 0; i < substitutions.length; i++) {
-			m.put(new StringReplacement(TemplateToken.getByString(substitutions[i++]), substitutions[i]));
-		}
-		return render(m);
+	/**
+	 * Initializes a new {@link ConfirmationActionReplacement}
+	 * 
+	 * @param confirmationAction
+	 *            The confirmation action; supposed to be either
+	 *            {@link #ACTION_ACCEPTED}, {@link #ACTION_DECLINED}, or
+	 *            {@link #ACTION_TENTATIVELY_ACCEPTED}
+	 * @param locale
+	 *            The locale
+	 */
+	public ConfirmationActionReplacement(final int confirmationAction, final Locale locale) {
+		super(TemplateToken.CONFIRMATION_ACTIN, ACTIONS[confirmationAction]);
+		setLocale(locale);
 	}
 
 }

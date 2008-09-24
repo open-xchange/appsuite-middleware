@@ -47,29 +47,50 @@
  *
  */
 
-package com.openexchange.i18n.tools;
+package com.openexchange.i18n.tools.replacement;
 
-import com.openexchange.i18n.tools.replacement.StringReplacement;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
-public abstract class AbstractTemplate implements Template {
+import com.openexchange.i18n.tools.TemplateToken;
+
+/**
+ * {@link CreationDateReplacement} - Creation date replacement.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
+public final class CreationDateReplacement extends AbstractDateReplacement {
 
 	/**
-	 * Initializes a new {@link AbstractTemplate}
+	 * Initializes a new {@link CreationDateReplacement}
+	 * 
+	 * @param creationDate
+	 *            The creation date
+	 * @param locale
+	 *            The locale
 	 */
-	protected AbstractTemplate() {
-		super();
+	public CreationDateReplacement(final Date creationDate, final Locale locale) {
+		this(creationDate, locale, null);
 	}
 
-	public String render(final String... substitutions) {
-		if(substitutions.length % 2 != 0) {
-			throw new IllegalArgumentException("Must provide matching key value pairs");
-		}
-		
-		final RenderMap m = new RenderMap();
-		for(int i = 0; i < substitutions.length; i++) {
-			m.put(new StringReplacement(TemplateToken.getByString(substitutions[i++]), substitutions[i]));
-		}
-		return render(m);
+	/**
+	 * Initializes a new {@link CreationDateReplacement}
+	 * 
+	 * @param creationDate
+	 *            The creation date
+	 * @param locale
+	 *            The locale
+	 * @param timeZone
+	 *            The time zone
+	 */
+	public CreationDateReplacement(final Date creationDate, final Locale locale, final TimeZone timeZone) {
+		super(creationDate, locale, timeZone);
+	}
+
+	public TemplateToken getToken() {
+		return TemplateToken.CREATION_DATETIME;
 	}
 
 }
