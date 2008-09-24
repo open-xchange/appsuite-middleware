@@ -50,8 +50,8 @@
 package com.openexchange.ajp13;
 
 import java.util.Iterator;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -68,12 +68,9 @@ public final class AJPv13ListenerPool {
 			.getLog(AJPv13ListenerPool.class);
 
 	/**
-	 * ...<br>
-	 * A ConcurrentLinkedQueue is an appropriate choice when many threads will
-	 * share access to a common collection.<br>
-	 * ...
+	 * A capacity-bonded queue
 	 */
-	private static final Queue<AJPv13Listener> LISTENER_QUEUE = new ConcurrentLinkedQueue<AJPv13Listener>();
+	private static BlockingQueue<AJPv13Listener> LISTENER_QUEUE;
 
 	private static final AtomicBoolean initialized = new AtomicBoolean();
 
@@ -87,14 +84,15 @@ public final class AJPv13ListenerPool {
 
 	/**
 	 * Initializes the pool by putting as many listeners as specified through
-	 * init-parameter <code>LISTENER_POOL_SIZE</code>
-	 * 
+	 * AJP configuration's {@link AJPv13Config#getAJPListenerPoolSize() listener
+	 * pool size}.
 	 */
 	public static void initPool() {
 		if (!initialized.get()) {
 			synchronized (initialized) {
 				if (!initialized.get()) {
 					final int poolSize = AJPv13Config.getAJPListenerPoolSize();
+					LISTENER_QUEUE = new ArrayBlockingQueue<AJPv13Listener>(poolSize);
 					AJPv13Server.ajpv13ListenerMonitor.setPoolSize(poolSize);
 					AJPv13Server.ajpv13ListenerMonitor.setNumIdle(poolSize);
 					for (int i = 0; i < AJPv13Config.getAJPListenerPoolSize(); i++) {
@@ -104,7 +102,8 @@ public final class AJPv13ListenerPool {
 					}
 					initialized.set(true);
 					if (LOG.isInfoEnabled()) {
-						LOG.info(new StringBuilder(32).append(poolSize).append(" AJPv13-Listeners created!")
+						LOG
+								.info(new StringBuilder(32).append(poolSize).append(" AJPv13-Listeners created!")
 										.toString());
 					}
 				}
@@ -118,19 +117,22 @@ public final class AJPv13ListenerPool {
 	public static void resetPool() {
 		RW_LOCK.acquireWrite();
 		try {
-			/*
-			 * Clear queue one-by-one
-			 */
-			while (!LISTENER_QUEUE.isEmpty()) {
-				try {
-					final AJPv13Listener l = LISTENER_QUEUE.poll();
-					if (!l.stopListener()) {
-						LOG.error(new StringBuilder(128).append("Listener ").append(l.getListenerName()).append(
-								" could NOT be properly stopped."));
+			if (LISTENER_QUEUE != null) {
+				/*
+				 * Clear queue one-by-one
+				 */
+				while (!LISTENER_QUEUE.isEmpty()) {
+					try {
+						final AJPv13Listener l = LISTENER_QUEUE.poll();
+						if (!l.stopListener()) {
+							LOG.error(new StringBuilder(128).append("Listener ").append(l.getListenerName()).append(
+									" could NOT be properly stopped."));
+						}
+					} catch (final Exception e) {
+						LOG.error(e.getMessage(), e);
 					}
-				} catch (final Exception e) {
-					LOG.error(e.getMessage(), e);
 				}
+				LISTENER_QUEUE = null;
 			}
 			initialized.set(false);
 		} finally {
@@ -158,6 +160,12 @@ public final class AJPv13ListenerPool {
 		}
 	}
 
+	/**
+	 * Checks if listener pool has been initialized
+	 * 
+	 * @return <code>true</code> if listener pool has been initialized;
+	 *         otherwise <code>false</code>
+	 */
 	public static boolean isInitialized() {
 		return initialized.get();
 	}
@@ -178,12 +186,12 @@ public final class AJPv13ListenerPool {
 			if (retval == null) {
 				/*
 				 * All pre-created listeners are running. Create & return a new
-				 * listener.
+				 * non-pooled listener.
 				 */
-				retval = createListener();
+				retval = new AJPv13Listener(listenerNum.incrementAndGet());
+				AJPv13Watcher.addListener(retval);
 				decrement = false;
 			}
-
 		} while (!RW_LOCK.releaseRead(state));
 		if (decrement) {
 			AJPv13Server.ajpv13ListenerMonitor.decrementPoolSize();
@@ -193,19 +201,9 @@ public final class AJPv13ListenerPool {
 	}
 
 	/**
-	 * Gets a newly created AJP listener
-	 * 
-	 * @return a new <code>AJPv13Listener</code> instance created in a
-	 *         thread-safe manner
-	 */
-	private static AJPv13Listener createListener() {
-		final AJPv13Listener retval = new AJPv13Listener(listenerNum.incrementAndGet());
-		AJPv13Watcher.addListener(retval);
-		return retval;
-	}
-
-	/**
-	 * Puts back the given listener into pool if pool is not full, yet.
+	 * Puts back the given listener into pool if pool is not full, yet. If
+	 * <code>enforcedPut</code> is <code>true</code> the listener is going to be
+	 * put in any case.
 	 * 
 	 * @param listener
 	 *            The AJP listener which shall be put back into pool
@@ -213,34 +211,14 @@ public final class AJPv13ListenerPool {
 	 *         <code>false</code> otherwise
 	 */
 	public static boolean putBack(final AJPv13Listener listener) {
-		return putBack(listener, false);
-	}
-
-	/**
-	 * Puts back the given listener into pool if pool is not full, yet. If
-	 * <code>enforcedPut</code> is <code>true</code> the listener is going to be
-	 * put in any case.
-	 * 
-	 * @param listener
-	 *            The AJP listener which shall be put back into pool
-	 * @param enforcedPut
-	 *            <code>true</code> to enforce a put even though pool's size is
-	 *            exceeded; otherwise <code>false</code>
-	 * @return <code>true</code> if given listener can be put into pool,
-	 *         <code>false</code> otherwise
-	 */
-	public static boolean putBack(final AJPv13Listener listener, final boolean enforcedPut) {
 		RW_LOCK.acquireWrite();
 		try {
-			if (enforcedPut || (LISTENER_QUEUE.size() < AJPv13Config.getAJPListenerPoolSize())) {
-				final boolean added2Pool = LISTENER_QUEUE.offer(listener);
-				if (added2Pool) {
-					AJPv13Server.ajpv13ListenerMonitor.incrementPoolSize();
-					AJPv13Server.ajpv13ListenerMonitor.incrementNumIdle();
-				}
-				return added2Pool;
+			final boolean added2Pool = LISTENER_QUEUE.offer(listener);
+			if (added2Pool) {
+				AJPv13Server.ajpv13ListenerMonitor.incrementPoolSize();
+				AJPv13Server.ajpv13ListenerMonitor.incrementNumIdle();
 			}
-			return false;
+			return added2Pool;
 		} finally {
 			RW_LOCK.releaseWrite();
 		}

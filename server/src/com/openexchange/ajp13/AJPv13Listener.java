@@ -111,7 +111,7 @@ public final class AJPv13Listener implements Runnable {
 	 * @param num
 	 *            The listener's number
 	 */
-	public AJPv13Listener(final int num) {
+	AJPv13Listener(final int num) {
 		this(num, false);
 	}
 
@@ -124,7 +124,7 @@ public final class AJPv13Listener implements Runnable {
 	 *            <code>true</code> to mark this listener as pooled (initially
 	 *            put into pool); otherwise <code>false</code>
 	 */
-	public AJPv13Listener(final int num, final boolean pooled) {
+	AJPv13Listener(final int num, final boolean pooled) {
 		this.num = num;
 		listenerLock = new ReentrantLock();
 		resumeRunning = listenerLock.newCondition();
@@ -241,19 +241,11 @@ public final class AJPv13Listener implements Runnable {
 			AJPv13Server.ajpv13ListenerMonitor.incrementNumActive();
 			final long start = System.currentTimeMillis();
 			/*
-			 * Assign a connection to this listener
+			 * Assign a connection to this listener which is either fetched from
+			 * connection pool (if configured) or newly created
 			 */
-			if (AJPv13Config.useAJPConnectionPool()) {
-				/*
-				 * If Connection Pool should be used
-				 */
-				ajpCon = AJPv13ConnectionPool.getAJPv13Connection(this);
-			} else {
-				/*
-				 * Otherwise
-				 */
-				ajpCon = new AJPv13Connection(this);
-			}
+			ajpCon = AJPv13Config.useAJPConnectionPool() ? AJPv13ConnectionPool.getAJPv13Connection(this)
+					: new AJPv13Connection(this);
 			try {
 				client.setKeepAlive(true);
 				waitingOnAJPSocket = true;
@@ -352,7 +344,7 @@ public final class AJPv13Listener implements Runnable {
 			 * Put back listener into pool if listener was initially put into
 			 * pool. Use an enforced put if mod_jk is enabled.
 			 */
-			if (pooled && AJPv13ListenerPool.putBack(this, false/* AJPv13Config.isAJPModJK() */)) {
+			if (pooled && AJPv13ListenerPool.putBack(this)) {
 				/*
 				 * Listener could be successfully put into pool, so put him
 				 * asleep

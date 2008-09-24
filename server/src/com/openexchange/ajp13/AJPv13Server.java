@@ -72,6 +72,10 @@ public final class AJPv13Server implements Runnable {
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13Server.class);
 
+	public static final AJPv13ServerThreadsMonitor ajpv13ServerThreadsMonitor = new AJPv13ServerThreadsMonitor();
+
+	public static final AJPv13ListenerMonitor ajpv13ListenerMonitor = new AJPv13ListenerMonitor();
+
 	/**
 	 * <p>
 	 * The value 0 used in constructor
@@ -84,23 +88,23 @@ public final class AJPv13Server implements Runnable {
 	 */
 	private static final int DEFAULT_BACKLOG = 0;
 
-	public static final int AJP13_PORT = AJPv13Config.getAJPPort();
+	private static final DecimalFormat DF = new DecimalFormat("0000");
 
 	// member fields
 	private ServerSocket serverSocket;
 
 	private Thread[] threadArr;
 
-	private final AtomicBoolean running = new AtomicBoolean();
+	private final AtomicBoolean running;
 
 	private static AJPv13Server instance;
 
-	private static final DecimalFormat DF = new DecimalFormat("0000");
-
-	public static final AJPv13ServerThreadsMonitor ajpv13ServerThreadsMonitor = new AJPv13ServerThreadsMonitor();
-
-	public static final AJPv13ListenerMonitor ajpv13ListenerMonitor = new AJPv13ListenerMonitor();
-
+	/**
+	 * Starts the AJP server
+	 * 
+	 * @throws AJPv13Exception
+	 *             If starting the AJP server fails
+	 */
 	public static void startAJPServer() throws AJPv13Exception {
 		synchronized (AJPv13Server.class) {
 			if (instance == null) {
@@ -110,11 +114,20 @@ public final class AJPv13Server implements Runnable {
 		instance.startServer();
 	}
 
+	/**
+	 * Re-Starts the AJP server
+	 * 
+	 * @throws AJPv13Exception
+	 *             If re-starting the AJP server fails
+	 */
 	public static void restartAJPServer() throws AJPv13Exception {
 		stopAJPServer();
 		startAJPServer();
 	}
 
+	/**
+	 * Stops the AJP server
+	 */
 	public static void stopAJPServer() {
 		if (instance == null) {
 			return;
@@ -122,16 +135,27 @@ public final class AJPv13Server implements Runnable {
 		instance.stopServer();
 	}
 
+	/**
+	 * Initializes a new {@link AJPv13Server}
+	 */
 	private AJPv13Server() {
 		super();
+		running = new AtomicBoolean();
 	}
 
+	/**
+	 * Starts this AJP server instance
+	 * 
+	 * @throws AJPv13Exception
+	 *             If starting this instance fails
+	 */
 	private void startServer() throws AJPv13Exception {
 		if (running.compareAndSet(false, true)) {
 			try {
-				serverSocket = new ServerSocket(AJP13_PORT, DEFAULT_BACKLOG, AJPv13Config.getAJPBindAddress());
+				serverSocket = new ServerSocket(AJPv13Config.getAJPPort(), DEFAULT_BACKLOG, AJPv13Config
+						.getAJPBindAddress());
 			} catch (final IOException ex) {
-				throw new AJPv13Exception(AJPCode.STARTUP_ERROR, false, ex, Integer.valueOf(AJP13_PORT));
+				throw new AJPv13Exception(AJPCode.STARTUP_ERROR, false, ex, Integer.valueOf(AJPv13Config.getAJPPort()));
 			}
 			ServletConfigLoader.initDefaultInstance(AJPv13Config.getServletConfigs());
 			initializePools();
@@ -149,6 +173,9 @@ public final class AJPv13Server implements Runnable {
 		}
 	}
 
+	/**
+	 * Stops this AJP server instance
+	 */
 	private void stopServer() {
 		if (running.compareAndSet(true, false)) {
 			/*
@@ -185,7 +212,7 @@ public final class AJPv13Server implements Runnable {
 				try {
 					serverSocket.close();
 				} catch (final IOException e) {
-					LOG.error(sb.append("AJP server socket bound to port ").append(AJP13_PORT).append(
+					LOG.error(sb.append("AJP server socket bound to port ").append(AJPv13Config.getAJPPort()).append(
 							" cannot be closed").toString(), e);
 					sb.setLength(0);
 				}
@@ -199,6 +226,10 @@ public final class AJPv13Server implements Runnable {
 		}
 	}
 
+	/**
+	 * Initializes associated pools: listener pool, connection pool, and request
+	 * handler pool.
+	 */
 	private void initializePools() {
 		resetPools();
 		AJPv13ListenerPool.initPool();
@@ -223,6 +254,10 @@ public final class AJPv13Server implements Runnable {
 		}
 	}
 
+	/**
+	 * Resets associated pools: listener pool, connection pool, and request
+	 * handler pool.
+	 */
 	private void resetPools() {
 		if (running.get()) {
 			AJPv13ListenerPool.resetPool();
@@ -235,15 +270,16 @@ public final class AJPv13Server implements Runnable {
 		}
 	}
 
+	/**
+	 * Checks if this AJP server instance is running
+	 * 
+	 * @return <code>true</code> if this AJP server instance is running;
+	 *         otherwise <code>false</code>
+	 */
 	public boolean isRunning() {
 		return running.get();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Runnable#run()
-	 */
 	public void run() {
 		boolean keepOnRunning = true;
 		AcceptSocket: while (keepOnRunning && running.get()) {
@@ -264,12 +300,14 @@ public final class AJPv13Server implements Runnable {
 					 */
 					l = AJPv13ListenerPool.getListener();
 				}
-				final long useTime = System.currentTimeMillis() - start;
-				ajpv13ServerThreadsMonitor.addUseTime(useTime);
+				ajpv13ServerThreadsMonitor.addUseTime(System.currentTimeMillis() - start);
 			} catch (final java.net.SocketException e) {
 				/*
 				 * Socket closed while being blocked in accept
 				 */
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("AJP socket closed", e);
+				}
 				LOG.info("AJPv13Server down");
 				keepOnRunning = false;
 			} catch (final IOException ex) {
@@ -279,6 +317,12 @@ public final class AJPv13Server implements Runnable {
 		}
 	}
 
+	/**
+	 * Main method to start an AJP server
+	 * 
+	 * @param args
+	 *            The command-line arguments
+	 */
 	public static void main(final String args[]) {
 		try {
 			new AJPv13Server().startServer();
