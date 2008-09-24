@@ -213,9 +213,9 @@ public final class Pools implements Runnable {
                 final Map.Entry<Integer, ConnectionPool> entry = iter.next();
                 final ConnectionPool pool = entry.getValue();
                 if (pool.isEmpty()) {
+                    iter.remove();
                     unregisterMBean(createMBeanName(entry.getKey().intValue()));
                     pool.destroy();
-                    iter.remove();
                 }
             }
         } finally {
