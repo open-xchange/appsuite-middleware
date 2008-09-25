@@ -403,7 +403,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
                 confirm, message);
             confirmT.prepare();
             confirmT.doConfirmation();
-            confirmT.sentEvent();
+            confirmT.sentEvent(session);
         } catch (final TaskException e) {
             throw Tools.convert(e);
         }

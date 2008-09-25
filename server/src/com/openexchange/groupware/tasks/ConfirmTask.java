@@ -56,10 +56,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
 
+import com.openexchange.event.EventException;
+import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.session.Session;
 
 /**
  *
@@ -152,8 +155,12 @@ public final class ConfirmTask {
         }
     }
 
-    void sentEvent() {
-        // TODO sent event for a confirmed task
+    void sentEvent(final Session session) throws TaskException {
+//        try {
+//            
+//        } catch (final EventException e) {
+//            throw new TaskException(Code.EVENT, e);
+//        }
     }
 
     // =========================== internal helper methods =====================
