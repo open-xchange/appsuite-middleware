@@ -48,25 +48,28 @@
  */
 package com.openexchange.event.impl.osgi;
 
-import com.openexchange.event.impl.*;
-import com.openexchange.event.CommonEvent;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.tasks.Task;
-
-import java.util.Dictionary;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.Hashtable;
-
-import com.openexchange.session.Session;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.service.event.EventHandler;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
-import org.osgi.framework.BundleContext;
+import org.osgi.service.event.EventHandler;
+
+import com.openexchange.event.CommonEvent;
+import com.openexchange.event.impl.AppointmentEventInterface;
+import com.openexchange.event.impl.AppointmentEventInterface2;
+import com.openexchange.event.impl.EventDispatcher;
+import com.openexchange.event.impl.TaskEventInterface;
+import com.openexchange.event.impl.TaskEventInterface2;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.session.Session;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -82,21 +85,21 @@ public class OSGiEventDispatcher implements EventHandler, EventDispatcher {
 
     private static final Log LOG = LogFactory.getLog(OSGiEventDispatcher.class);
 
-    private List<AppointmentEventInterface> appointmentListeners = new ArrayList<AppointmentEventInterface>();
-    private List<TaskEventInterface> taskListeners = new ArrayList<TaskEventInterface>();
+    private final List<AppointmentEventInterface> appointmentListeners = new ArrayList<AppointmentEventInterface>();
+    private final List<TaskEventInterface> taskListeners = new ArrayList<TaskEventInterface>();
 
-    public void addListener(AppointmentEventInterface listener) {
+    public void addListener(final AppointmentEventInterface listener) {
         this.appointmentListeners.add(listener);
     }
 
-    public void created(AppointmentObject appointment, Session session) {
-        for(AppointmentEventInterface listener : appointmentListeners) {
+    public void created(final AppointmentObject appointment, final Session session) {
+        for(final AppointmentEventInterface listener : appointmentListeners) {
             listener.appointmentCreated(appointment, session);
         }
     }
 
-    public void modified(AppointmentObject oldAppointment, AppointmentObject newAppointment, Session session) {
-        for(AppointmentEventInterface listener : appointmentListeners) {
+    public void modified(final AppointmentObject oldAppointment, final AppointmentObject newAppointment, final Session session) {
+        for(final AppointmentEventInterface listener : appointmentListeners) {
             if(oldAppointment != null && AppointmentEventInterface2.class.isAssignableFrom(listener.getClass())) {
                 ((AppointmentEventInterface2)listener).appointmentModified(oldAppointment, newAppointment, session);   
             } else {
@@ -105,24 +108,42 @@ public class OSGiEventDispatcher implements EventHandler, EventDispatcher {
         }
     }
 
-    public void deleted(AppointmentObject appointment, Session session) {
-        for(AppointmentEventInterface listener : appointmentListeners) {
+    public void accepted(final AppointmentObject appointment, final Session session) {
+        for(final AppointmentEventInterface listener : appointmentListeners) {
+            listener.appointmentAccepted(appointment, session);
+        }
+    }
+
+    public void declined(final AppointmentObject appointment, final Session session) {
+        for(final AppointmentEventInterface listener : appointmentListeners) {
+            listener.appointmentDeclined(appointment, session);
+        }
+    }
+
+    public void tentativelyAccepted(final AppointmentObject appointment, final Session session) {
+        for(final AppointmentEventInterface listener : appointmentListeners) {
+            listener.appointmentTentativelyAccepted(appointment, session);
+        }
+    }
+
+    public void deleted(final AppointmentObject appointment, final Session session) {
+        for(final AppointmentEventInterface listener : appointmentListeners) {
             listener.appointmentDeleted(appointment, session);
         }
     }
 
-    public void addListener(TaskEventInterface listener) {
+    public void addListener(final TaskEventInterface listener) {
         this.taskListeners.add(listener);
     }
 
-    public void created(Task task, Session session) {
-        for(TaskEventInterface listener : taskListeners) {
+    public void created(final Task task, final Session session) {
+        for(final TaskEventInterface listener : taskListeners) {
             listener.taskCreated(task, session);
         }
     }
 
-    public void modified(Task oldTask, Task newTask, Session session) {
-        for(TaskEventInterface listener : taskListeners) {
+    public void modified(final Task oldTask, final Task newTask, final Session session) {
+        for(final TaskEventInterface listener : taskListeners) {
             if(oldTask != null && TaskEventInterface2.class.isAssignableFrom(listener.getClass())) {
                 ((TaskEventInterface2)listener).taskModified(oldTask, newTask, session);
             } else {
@@ -131,59 +152,79 @@ public class OSGiEventDispatcher implements EventHandler, EventDispatcher {
         }
     }
 
-    public void modified(Task task, Session session) {
+    public void accepted(final Task task, final Session session) {
+        for (final TaskEventInterface listener : taskListeners) {
+            listener.taskAccepted(task, session);
+        }
+    }
+
+    public void declined(final Task task, final Session session) {
+        for (final TaskEventInterface listener : taskListeners) {
+            listener.taskDeclined(task, session);
+        }
+    }
+
+    public void tentativelyAccepted(final Task task, final Session session) {
+        for (final TaskEventInterface listener : taskListeners) {
+            listener.taskTentativelyAccepted(task, session);
+        }
+    }
+
+    public void modified(final Task task, final Session session) {
         modified(null, task, session);    
     }
 
-    public void deleted(Task task, Session session) {
-        for(TaskEventInterface listener : taskListeners) {
+    public void deleted(final Task task, final Session session) {
+        for(final TaskEventInterface listener : taskListeners) {
             listener.taskDeleted(task, session);
         }    
     }
 
-    public void handleEvent(Event event) {
-        try {
-        CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
+    public void handleEvent(final Event event) {
+		try {
+			final CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
 
-        Object actionObj = commonEvent.getActionObj();
-        Object oldObj = commonEvent.getOldObj();
-        Session session = commonEvent.getSession();                
+			final Object actionObj = commonEvent.getActionObj();
+			final Object oldObj = commonEvent.getOldObj();
+			final Session session = commonEvent.getSession();
 
-        switch(commonEvent.getModule()) {
-            case Types.APPOINTMENT:
-                switch( commonEvent.getAction() ) {
-                    case CommonEvent.INSERT:
-                        created((AppointmentObject) actionObj, session);
-                        break;
-                    case CommonEvent.UPDATE: case CommonEvent.MOVE:
-                        modified((AppointmentObject) oldObj, (AppointmentObject) actionObj, session);
-                        break;
-                    case CommonEvent.DELETE:
-                        deleted((AppointmentObject) actionObj, session);
-                        break;
-                }
-                break;
-            case Types.TASK:
-                switch( commonEvent.getAction() ) {
-                    case CommonEvent.INSERT:
-                        created((Task) actionObj, session);
-                        break;
-                    case CommonEvent.UPDATE: case CommonEvent.MOVE:
-                        modified((Task) oldObj, (Task) actionObj, session);
-                        break;
-                    case CommonEvent.DELETE:
-                        deleted((Task) actionObj, session);
-                        break;
-                }
-                break;
-        }
-        } catch (final Exception e) {
-            // Catch all exceptions to get them into the normal logging mechanism.
-            LOG.error(e.getMessage(), e);
-        }
-    }
+			if (commonEvent.getModule() == Types.APPOINTMENT) {
+				if (commonEvent.getAction() == CommonEvent.INSERT) {
+					created((AppointmentObject) actionObj, session);
+				} else if (commonEvent.getAction() == CommonEvent.UPDATE || commonEvent.getAction() == CommonEvent.MOVE) {
+					modified((AppointmentObject) oldObj, (AppointmentObject) actionObj, session);
+				} else if (commonEvent.getAction() == CommonEvent.DELETE) {
+					deleted((AppointmentObject) actionObj, session);
+				} else if (commonEvent.getAction() == CommonEvent.CONFIRM_ACCEPTED) {
+					accepted((AppointmentObject) actionObj, session);
+				} else if (commonEvent.getAction() == CommonEvent.CONFIRM_DECLINED) {
+					declined((AppointmentObject) actionObj, session);
+				} else if (commonEvent.getAction() == CommonEvent.CONFIRM_TENTATIVE) {
+					tentativelyAccepted((AppointmentObject) actionObj, session);
+				}
+			} else if (commonEvent.getModule() == Types.TASK) {
+				if (commonEvent.getAction() == CommonEvent.INSERT) {
+					created((Task) actionObj, session);
+				} else if (commonEvent.getAction() == CommonEvent.UPDATE || commonEvent.getAction() == CommonEvent.MOVE) {
+					modified((Task) oldObj, (Task) actionObj, session);
+				} else if (commonEvent.getAction() == CommonEvent.DELETE) {
+					deleted((Task) actionObj, session);
+				} else if (commonEvent.getAction() == CommonEvent.CONFIRM_ACCEPTED) {
+					accepted((Task) actionObj, session);
+				} else if (commonEvent.getAction() == CommonEvent.CONFIRM_DECLINED) {
+					declined((Task) actionObj, session);
+				} else if (commonEvent.getAction() == CommonEvent.CONFIRM_TENTATIVE) {
+					tentativelyAccepted((Task) actionObj, session);
+				}
+			}
+		} catch (final Exception e) {
+			// Catch all exceptions to get them into the normal logging
+			// mechanism.
+			LOG.error(e.getMessage(), e);
+		}
+	}
 
-    public void registerService(BundleContext context) {
+    public void registerService(final BundleContext context) {
         final Dictionary<Object,Object> serviceProperties = new Hashtable<Object,Object>();
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[]{"com/openexchange/groupware/*"});
         context.registerService(EventHandler.class.getName(), this, serviceProperties);

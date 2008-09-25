@@ -123,7 +123,7 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
 	@Override
 	public Object clone() throws CloneNotSupportedException {
 		final AbstractDateReplacement clone = (AbstractDateReplacement) super.clone();
-		clone.date = (Date) this.date.clone();
+		clone.date = (Date) (this.date == null ? null : this.date.clone());
 		clone.dateFormat = (DateFormat) (this.dateFormat == null ? null : dateFormat.clone());
 		clone.locale = (Locale) (this.locale == null ? null : this.locale.clone());
 		clone.timeZone = (TimeZone) (this.timeZone == null ? null : timeZone.clone());

@@ -49,54 +49,65 @@
 
 package com.openexchange.i18n.tools.replacement;
 
-import java.util.Locale;
-
 import com.openexchange.groupware.i18n.Notifications;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.i18n.tools.TemplateToken;
 
 /**
- * {@link ConfirmationActionReplacement} - Replacement for a confirmation
- * status.
+ * {@link TaskStatusReplacement} - Replacement for task status.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ConfirmationActionReplacement extends LocalizedStringReplacement {
+public final class TaskStatusReplacement extends FormatLocalizedStringReplacement {
 
-	private static String[] ACTIONS = { Notifications.CA_ACCEPTED, Notifications.CA_DECLINED,
-			Notifications.CA_TENTATIVELY_ACCEPTED };
+	private static final String[] STATUSES = { Notifications.TASK_STATUS_NOT_STARTED,
+			Notifications.TASK_STATUS_IN_PROGRESS, Notifications.TASK_STATUS_DONE, Notifications.TASK_STATUS_WAITING,
+			Notifications.TASK_STATUS_DEFERRED };
 
-	public static final int ACTION_ACCEPTED = 0;
+	public static final int STATUS_NOT_STARTED = Task.NOT_STARTED;
 
-	public static final int ACTION_DECLINED = 1;
+	public static final int STATUS_IN_PROGRESS = Task.IN_PROGRESS;
 
-	public static final int ACTION_TENTATIVELY_ACCEPTED = 2;
+	public static final int STATUS_DONE = Task.DONE;
 
-	/**
-	 * Initializes a new {@link ConfirmationActionReplacement}
-	 * 
-	 * @param confirmationAction
-	 *            The confirmation action; supposed to be either
-	 *            {@link #ACTION_ACCEPTED}, {@link #ACTION_DECLINED}, or
-	 *            {@link #ACTION_TENTATIVELY_ACCEPTED}
-	 */
-	public ConfirmationActionReplacement(final int confirmationAction) {
-		this(confirmationAction, null);
-	}
+	public static final int STATUS_WAITING = Task.WAITING;
+
+	public static final int STATUS_DEFERRED = Task.DEFERRED;
+
+	private final int taskStatus;
+
+	private final int percentComplete;
 
 	/**
-	 * Initializes a new {@link ConfirmationActionReplacement}
+	 * Initializes a new {@link TaskStatusReplacement}
 	 * 
-	 * @param confirmationAction
-	 *            The confirmation action; supposed to be either
-	 *            {@link #ACTION_ACCEPTED}, {@link #ACTION_DECLINED}, or
-	 *            {@link #ACTION_TENTATIVELY_ACCEPTED}
-	 * @param locale
-	 *            The locale
+	 * @param taskStatus
+	 *            The task status; is supposed to be either
+	 *            {@link #STATUS_NOT_STARTED}, {@link #STATUS_IN_PROGRESS},
+	 *            {@link #STATUS_DONE}, {@link #STATUS_WAITING}, or
+	 *            {@link #STATUS_DEFERRED}
+	 * @param percentComplete
+	 *            The percent complete
 	 */
-	public ConfirmationActionReplacement(final int confirmationAction, final Locale locale) {
-		super(TemplateToken.CONFIRMATION_ACTIN, ACTIONS[confirmationAction]);
-		setLocale(locale);
+	public TaskStatusReplacement(final int taskStatus, final int percentComplete) {
+		super(TemplateToken.TASK_STATUS, Notifications.FORMAT_STATUS, STATUSES[taskStatus - 1]);
+		this.taskStatus = taskStatus;
+		this.percentComplete = percentComplete;
 	}
 
+	@Override
+	public String getReplacement() {
+		final StringHelper sh = getStringHelper();
+		final String result = String.format(sh.getString(Notifications.FORMAT_STATUS), sh
+				.getString(STATUSES[taskStatus - 1]));
+		final StringBuilder b = new StringBuilder(result.length() + 16);
+		if (changed()) {
+			b.append(PREFIX_MODIFIED);
+		}
+		b.append(result);
+		b.append(" (").append(percentComplete).append("%)");
+		return b.toString();
+	}
 }

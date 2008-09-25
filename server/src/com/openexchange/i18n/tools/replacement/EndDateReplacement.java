@@ -69,23 +69,29 @@ public final class EndDateReplacement extends AbstractFormatDateReplacement {
 	 * 
 	 * @param endDate
 	 *            The end date
+	 * @param isTask
+	 *            <code>true</code> if this end date denotes a task's end date;
+	 *            otherwise <code>false</code>
 	 */
-	public EndDateReplacement(final Date endDate) {
-		this(endDate, null, null);
+	public EndDateReplacement(final Date endDate, final boolean isTask) {
+		this(endDate, isTask, null, null);
 	}
 
 	/**
 	 * Initializes a new {@link EndDateReplacement}
 	 * 
 	 * @param endDate
-	 *            The end date
+	 *            The end date The end date
+	 * @param isTask
+	 *            <code>true</code> if this end date denotes a task's end date;
+	 *            otherwise <code>false</code>
 	 * @param locale
 	 *            The locale
 	 * @param timeZone
 	 *            The time zone
 	 */
-	public EndDateReplacement(final Date endDate, final Locale locale, final TimeZone timeZone) {
-		super(endDate, Notifications.FORMAT_END_DATE, locale, timeZone);
+	public EndDateReplacement(final Date endDate, final boolean isTask, final Locale locale, final TimeZone timeZone) {
+		super(endDate, isTask ? Notifications.FORMAT_DUE_DATE : Notifications.FORMAT_END_DATE, locale, timeZone);
 	}
 
 	public TemplateToken getToken() {

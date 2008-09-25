@@ -47,56 +47,52 @@
  *
  */
 
-package com.openexchange.i18n.tools.replacement;
+package com.openexchange.groupware.notify;
 
+import java.text.DateFormat;
 import java.util.Locale;
 
-import com.openexchange.groupware.i18n.Notifications;
-import com.openexchange.i18n.tools.TemplateToken;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.mail.MailObject;
+import com.openexchange.i18n.tools.RenderMap;
+import com.openexchange.i18n.tools.Template;
+import com.openexchange.i18n.tools.TemplateReplacement;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.tools.session.ServerSession;
 
-/**
- * {@link ConfirmationActionReplacement} - Replacement for a confirmation
- * status.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
- */
-public final class ConfirmationActionReplacement extends LocalizedStringReplacement {
+public interface State {
 
-	private static String[] ACTIONS = { Notifications.CA_ACCEPTED, Notifications.CA_DECLINED,
-			Notifications.CA_TENTATIVELY_ACCEPTED };
+	public boolean sendMail(UserSettingMail userSettingMail);
 
-	public static final int ACTION_ACCEPTED = 0;
+	public DateFormat getDateFormat(Locale locale);
 
-	public static final int ACTION_DECLINED = 1;
+	public void addSpecial(CalendarObject obj, CalendarObject oldObj, RenderMap renderMap, EmailableParticipant p);
 
-	public static final int ACTION_TENTATIVELY_ACCEPTED = 2;
+	public int getModule();
 
-	/**
-	 * Initializes a new {@link ConfirmationActionReplacement}
-	 * 
-	 * @param confirmationAction
-	 *            The confirmation action; supposed to be either
-	 *            {@link #ACTION_ACCEPTED}, {@link #ACTION_DECLINED}, or
-	 *            {@link #ACTION_TENTATIVELY_ACCEPTED}
-	 */
-	public ConfirmationActionReplacement(final int confirmationAction) {
-		this(confirmationAction, null);
-	}
+	public void modifyInternal(MailObject mail, CalendarObject obj, ServerSession sessObj);
+
+	public void modifyExternal(MailObject mail, CalendarObject obj, ServerSession sessObj);
 
 	/**
-	 * Initializes a new {@link ConfirmationActionReplacement}
+	 * Gets the notification template appropriate for this state
 	 * 
-	 * @param confirmationAction
-	 *            The confirmation action; supposed to be either
-	 *            {@link #ACTION_ACCEPTED}, {@link #ACTION_DECLINED}, or
-	 *            {@link #ACTION_TENTATIVELY_ACCEPTED}
-	 * @param locale
-	 *            The locale
+	 * @return The notification template appropriate for this state
 	 */
-	public ConfirmationActionReplacement(final int confirmationAction, final Locale locale) {
-		super(TemplateToken.CONFIRMATION_ACTIN, ACTIONS[confirmationAction]);
-		setLocale(locale);
-	}
+	public Template getTemplate();
 
+	/**
+	 * Gets the action replacement
+	 * 
+	 * @return The action replacement
+	 */
+	public TemplateReplacement getAction();
+
+	/**
+	 * Gets the confirmation action replacement
+	 * 
+	 * @return The confirmation action replacement or <code>null</code> if
+	 *         not applicable to this state
+	 */
+	public TemplateReplacement getConfirmationAction();
 }

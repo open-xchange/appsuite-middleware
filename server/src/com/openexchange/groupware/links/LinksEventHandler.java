@@ -288,4 +288,28 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
 		}
 	}
 
+	public void appointmentAccepted(final AppointmentObject appointmentObj, final Session sessionObj) {
+		// nothing to do
+	}
+
+	public void appointmentDeclined(final AppointmentObject appointmentObj, final Session sessionObj) {
+		// nothing to do
+	}
+
+	public void appointmentTentativelyAccepted(final AppointmentObject appointmentObj, final Session sessionObj) {
+		// nothing to do
+	}
+
+	public void taskAccepted(final Task taskObj, final Session sessionObj) {
+		// nothing to do
+	}
+
+	public void taskDeclined(final Task taskObj, final Session sessionObj) {
+		// nothing to do
+	}
+
+	public void taskTentativelyAccepted(final Task taskObj, final Session sessionObj) {
+		// nothing to do
+	}
+
 }

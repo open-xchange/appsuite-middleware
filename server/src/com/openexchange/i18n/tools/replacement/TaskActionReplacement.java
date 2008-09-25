@@ -49,6 +49,8 @@
 
 package com.openexchange.i18n.tools.replacement;
 
+import java.util.Locale;
+
 import com.openexchange.groupware.i18n.Notifications;
 import com.openexchange.i18n.tools.TemplateToken;
 
@@ -61,7 +63,8 @@ import com.openexchange.i18n.tools.TemplateToken;
 public final class TaskActionReplacement extends LocalizedStringReplacement {
 
 	private static String[] ACTIONS = { Notifications.TASK_CREATE_TITLE, Notifications.TASK_UPDATE_TITLE,
-			Notifications.TASK_DELETE_TITLE, "Task (accepted)", "Task (declined)", "Task (tentative)" };
+			Notifications.TASK_DELETE_TITLE, Notifications.TASK_ACCEPTED_TITLE, Notifications.TASK_DECLINED_TITLE,
+			Notifications.TASK_TENTATIVE_TITLE };
 
 	public static final int ACTION_NEW = 0;
 
@@ -78,14 +81,28 @@ public final class TaskActionReplacement extends LocalizedStringReplacement {
 	/**
 	 * Initializes a new {@link TaskActionReplacement}
 	 * 
-	 * @param appointmentAction
-	 *            The appointment action; supposed to be either
+	 * @param taskAction
+	 *            The task action; supposed to be either
 	 *            {@link #ACTION_NEW}, {@link #ACTION_CHANGED},
 	 *            {@link #ACTION_DELETED}, {@link #ACTION_ACCEPTED},
 	 *            {@link #ACTION_DECLINED}, or {@link #ACTION_TENTATIVE}
 	 */
-	public TaskActionReplacement(final int appointmentAction) {
-		super(TemplateToken.ACTION, ACTIONS[appointmentAction]);
+	public TaskActionReplacement(final int taskAction) {
+		this(taskAction, null);
 	}
 
+	/**
+	 * Initializes a new {@link TaskActionReplacement}
+	 * 
+	 * @param taskAction
+	 *            The task action; supposed to be either
+	 *            {@link #ACTION_NEW}, {@link #ACTION_CHANGED},
+	 *            {@link #ACTION_DELETED}, {@link #ACTION_ACCEPTED},
+	 *            {@link #ACTION_DECLINED}, or {@link #ACTION_TENTATIVE}
+	 *            @param locale The locale
+	 */
+	public TaskActionReplacement(final int taskAction, final Locale locale) {
+		super(TemplateToken.ACTION, ACTIONS[taskAction]);
+		setLocale(locale);
+	}
 }

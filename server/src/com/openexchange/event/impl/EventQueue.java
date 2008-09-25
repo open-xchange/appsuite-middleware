@@ -207,7 +207,7 @@ public final class EventQueue {
 		super();
 	}
 
-    public static void setNewEventDispatcher(EventDispatcher eventDispatcher) {
+    public static void setNewEventDispatcher(final EventDispatcher eventDispatcher) {
         newEventDispatcher = eventDispatcher;
     }
 
@@ -361,6 +361,36 @@ public final class EventQueue {
 				}
 			}
 			break;
+		case EventClient.CONFIRM_ACCEPTED:
+			for (int a = 0; a < appointmentEventList.size(); a++) {
+				try {
+					appointmentEventList.get(a).appointmentAccepted((AppointmentObject) eventObj.getObject(),
+							eventObj.getSessionObject());
+				} catch (final Throwable t) {
+					LOG.error(t.getMessage(), t);
+				}
+			}
+			break;
+		case EventClient.CONFIRM_DECLINED:
+			for (int a = 0; a < appointmentEventList.size(); a++) {
+				try {
+					appointmentEventList.get(a).appointmentDeclined((AppointmentObject) eventObj.getObject(),
+							eventObj.getSessionObject());
+				} catch (final Throwable t) {
+					LOG.error(t.getMessage(), t);
+				}
+			}
+			break;
+		case EventClient.CONFIRM_TENTATIVE:
+			for (int a = 0; a < appointmentEventList.size(); a++) {
+				try {
+					appointmentEventList.get(a).appointmentTentativelyAccepted((AppointmentObject) eventObj.getObject(),
+							eventObj.getSessionObject());
+				} catch (final Throwable t) {
+					LOG.error(t.getMessage(), t);
+				}
+			}
+			break;
 		default:
 			LOG.error("invalid action for appointment: " + action);
 		}
@@ -435,6 +465,33 @@ public final class EventQueue {
 			for (int a = 0; a < taskEventList.size(); a++) {
 				try {
 					taskEventList.get(a).taskDeleted((Task) eventObj.getObject(), eventObj.getSessionObject());
+				} catch (final Throwable t) {
+					LOG.error(t.getMessage(), t);
+				}
+			}
+			break;
+		case EventClient.CONFIRM_ACCEPTED:
+			for (int a = 0; a < taskEventList.size(); a++) {
+				try {
+					taskEventList.get(a).taskAccepted((Task) eventObj.getObject(), eventObj.getSessionObject());
+				} catch (final Throwable t) {
+					LOG.error(t.getMessage(), t);
+				}
+			}
+			break;
+		case EventClient.CONFIRM_DECLINED:
+			for (int a = 0; a < taskEventList.size(); a++) {
+				try {
+					taskEventList.get(a).taskDeclined((Task) eventObj.getObject(), eventObj.getSessionObject());
+				} catch (final Throwable t) {
+					LOG.error(t.getMessage(), t);
+				}
+			}
+			break;
+		case EventClient.CONFIRM_TENTATIVE:
+			for (int a = 0; a < taskEventList.size(); a++) {
+				try {
+					taskEventList.get(a).taskTentativelyAccepted((Task) eventObj.getObject(), eventObj.getSessionObject());
 				} catch (final Throwable t) {
 					LOG.error(t.getMessage(), t);
 				}
@@ -607,12 +664,12 @@ public final class EventQueue {
 		}
 	}
 
-    public static void addModernListener(AppointmentEventInterface listener) {
+    public static void addModernListener(final AppointmentEventInterface listener) {
         checkEventDispatcher();
         newEventDispatcher.addListener(listener);
     }
 
-    public static void addModernListener(TaskEventInterface listener) {
+    public static void addModernListener(final TaskEventInterface listener) {
         checkEventDispatcher();
         newEventDispatcher.addListener(listener);
     }

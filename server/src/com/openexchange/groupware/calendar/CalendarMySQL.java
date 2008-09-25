@@ -78,6 +78,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalGroupParticipant;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
@@ -2712,16 +2713,19 @@ class CalendarMySQL implements CalendarSqlImp {
 		return retval;
 	}
 
-	public final void setUserConfirmation(final int oid, final int uid, final int confirm, final String confirm_message, final Session so, final Context ctx) throws OXException {
+	private static final String SQL_CONFIRM = "UPDATE prg_dates_members SET confirm = ?, reason = ? WHERE object_id = ? AND cid = ? and member_uid = ?";
+
+	private static final String SQL_CONFIRM2 = "UPDATE prg_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?";
+
+	public final void setUserConfirmation(final int oid, final int uid, final int confirm,
+			final String confirm_message, final Session so, final Context ctx) throws OXException {
 		Connection writecon = null;
-		int changes[];
 		PreparedStatement pu = null;
 		PreparedStatement mo = null;
 		try {
-			final int fid = CalendarCommonCollection.resolveFolderIDForUser(oid, uid, ctx);
 			writecon = DBPool.pickupWriteable(ctx);
 			writecon.setAutoCommit(false);
-			pu = writecon.prepareStatement("update prg_dates_members SET confirm = ?, reason = ? WHERE object_id = ? AND cid = ? and member_uid = ?");
+			pu = writecon.prepareStatement(SQL_CONFIRM);
 			pu.setInt(1, confirm);
 			if (confirm_message == null) {
 				pu.setNull(2, java.sql.Types.VARCHAR);
@@ -2731,29 +2735,25 @@ class CalendarMySQL implements CalendarSqlImp {
 			pu.setInt(3, oid);
 			pu.setInt(4, so.getContextId());
 			pu.setInt(5, uid);
-			pu.addBatch();
-			changes = pu.executeBatch();
-			if (changes[0] == 1) {
-				mo = writecon.prepareStatement("update prg_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?");
+			final int changes = pu.executeUpdate();
+			if (changes == 1) {
+				mo = writecon.prepareStatement(SQL_CONFIRM2);
 				mo.setLong(1, System.currentTimeMillis());
 				mo.setInt(2, uid);
 				mo.setInt(3, oid);
 				mo.setInt(4, so.getContextId());
-				mo.addBatch();
-				mo.executeBatch();
-				final AppointmentObject ao = new AppointmentObject();
-				ao.setObjectID(oid);
-				if (fid == -1) {
-					LOG.warn(StringCollection.convertArraytoString(new Object[] { "Unable to resolve folder id for user:oid:context", Integer.valueOf(uid), Integer.valueOf(oid), Integer.valueOf(so.getContextId()) }));
-				} else {
-					ao.setParentFolderID(fid);
-					CalendarCommonCollection.triggerEvent(so, CalendarOperation.UPDATE, ao);
-				}
-			} else if (changes[0] == 0) {
-				LOG.error(StringCollection.convertArraytoString(new Object[] { "Object not found: setUserConfirmation: prg_dates_members object_id = ", Integer.valueOf(oid), " cid = ", Integer.valueOf(so.getContextId()), " uid = ", Integer.valueOf(uid) }), new Throwable());
-				throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
+				mo.executeUpdate();
+			} else if (changes == 0) {
+				LOG.error(StringCollection.convertArraytoString(new Object[] {
+						"Object not found: setUserConfirmation: prg_dates_members object_id = ", Integer.valueOf(oid),
+						" cid = ", Integer.valueOf(so.getContextId()), " uid = ", Integer.valueOf(uid) }),
+						new Throwable());
+				throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND,
+						com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
 			} else {
-				LOG.warn(StringCollection.convertArraytoString(new Object[] { "Result of setUserConfirmation was ", Integer.valueOf(changes[0]), ". Check prg_dates_members object_id = ", Integer.valueOf(oid), " cid = ", Integer.valueOf(so.getContextId()), " uid = ", Integer.valueOf(uid) }));
+				LOG.warn(StringCollection.convertArraytoString(new Object[] { "Result of setUserConfirmation was ",
+						Integer.valueOf(changes), ". Check prg_dates_members object_id = ", Integer.valueOf(oid),
+						" cid = ", Integer.valueOf(so.getContextId()), " uid = ", Integer.valueOf(uid) }));
 			}
 		} catch (final DBPoolingException dbpe) {
 			throw new OXException(dbpe);
@@ -2778,6 +2778,42 @@ class CalendarMySQL implements CalendarSqlImp {
 				DBPool.closeWriterSilent(ctx, writecon);
 			}
 		}
+		// TODO: Dependent on user configuration
+		//if (true) {
+			/*
+			 * Trigger event after changes are committed
+			 */
+			final int fid = CalendarCommonCollection.resolveFolderIDForUser(oid, uid, ctx);
+			if (fid == -1) {
+				LOG.warn(StringCollection.convertArraytoString(new Object[] {
+						"Confirmation event could not be triggered: Unable to resolve folder id for user:oid:context",
+						Integer.valueOf(uid), Integer.valueOf(oid), Integer.valueOf(so.getContextId()) }));
+				return;
+			}
+			final CalendarDataObject cdao;
+			try {
+				cdao = new CalendarSql(so).getObjectById(oid, fid);
+			} catch (final SQLException e) {
+				LOG.warn("Confirmation event could not be triggered", new OXCalendarException(
+						OXCalendarException.Code.CALENDAR_SQL_ERROR, e));
+				return;
+			}
+			cdao.setParentFolderID(fid);
+			CalendarCommonCollection.triggerEvent(so, getConfirmAction(confirm), cdao);
+		//}
+	}
+
+	private static final int getConfirmAction(final int confirm) {
+		if (CalendarObject.ACCEPT == confirm) {
+			return CalendarOperation.CONFIRM_ACCEPTED;
+		}
+		if (CalendarObject.DECLINE == confirm) {
+			return CalendarOperation.CONFIRM_DELINED;
+		}
+		if (CalendarObject.TENTATIVE == confirm) {
+			return CalendarOperation.CONFIRM_TENTATIVELY_ACCEPTED;
+		}
+		return CalendarObject.NONE;
 	}
 
 	public final long attachmentAction(final int oid, final int uid, final Context c, final boolean action) throws OXException {

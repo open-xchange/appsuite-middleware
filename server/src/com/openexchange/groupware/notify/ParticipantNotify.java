@@ -49,13 +49,7 @@
 
 package com.openexchange.groupware.notify;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -91,7 +85,6 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
-import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -102,37 +95,28 @@ import com.openexchange.i18n.tools.Template;
 import com.openexchange.i18n.tools.TemplateReplacement;
 import com.openexchange.i18n.tools.TemplateToken;
 import com.openexchange.i18n.tools.replacement.AppointmentActionReplacement;
+import com.openexchange.i18n.tools.replacement.ConfirmationActionReplacement;
 import com.openexchange.i18n.tools.replacement.CreationDateReplacement;
 import com.openexchange.i18n.tools.replacement.EndDateReplacement;
 import com.openexchange.i18n.tools.replacement.FormatLocalizedStringReplacement;
-import com.openexchange.i18n.tools.replacement.LocalizedStringReplacement;
-import com.openexchange.i18n.tools.replacement.ModuleReplacement;
 import com.openexchange.i18n.tools.replacement.ParticipantsReplacement;
 import com.openexchange.i18n.tools.replacement.ResourcesReplacement;
 import com.openexchange.i18n.tools.replacement.SeriesReplacement;
 import com.openexchange.i18n.tools.replacement.StartDateReplacement;
 import com.openexchange.i18n.tools.replacement.StringReplacement;
 import com.openexchange.i18n.tools.replacement.TaskActionReplacement;
+import com.openexchange.i18n.tools.replacement.TaskStatusReplacement;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
-import com.openexchange.tools.versit.Versit;
-import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 public class ParticipantNotify implements AppointmentEventInterface2, TaskEventInterface2 {
 
@@ -192,7 +176,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
 	// Override for testing
 
-	protected static User[] resolveUsers(final Context ctx, final int... ids) throws LdapException {
+	protected User[] resolveUsers(final Context ctx, final int... ids) throws LdapException {
 		final User[] r = new User[ids.length];
 		int i = 0;
 		for (final int id : ids) {
@@ -201,7 +185,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		return r;
 	}
 
-	protected static Group[] resolveGroups(final Context ctx, final int... ids) throws LdapException {
+	protected Group[] resolveGroups(final Context ctx, final int... ids) throws LdapException {
 		final GroupStorage groups = GroupStorage.getInstance();
 		final Group[] r = new Group[ids.length];
 		int i = 0;
@@ -248,6 +232,27 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 				Notifications.APPOINTMENT_UPDATE_MAIL), false, false, true);
 	}
 
+	public void appointmentAccepted(final AppointmentObject appointmentObj, final Session sessionObj) {
+		sendNotification(null, appointmentObj, sessionObj, new AppointmentState(new AppointmentActionReplacement(
+				AppointmentActionReplacement.ACTION_ACCEPTED), new ConfirmationActionReplacement(
+				ConfirmationActionReplacement.ACTION_ACCEPTED), Notifications.APPOINTMENT_CONFIRMATION_MAIL), false,
+				false, false);
+	}
+
+	public void appointmentDeclined(final AppointmentObject appointmentObj, final Session sessionObj) {
+		sendNotification(null, appointmentObj, sessionObj, new AppointmentState(new AppointmentActionReplacement(
+				AppointmentActionReplacement.ACTION_DECLINED), new ConfirmationActionReplacement(
+				ConfirmationActionReplacement.ACTION_DECLINED), Notifications.APPOINTMENT_CONFIRMATION_MAIL), false,
+				false, false);
+	}
+
+	public void appointmentTentativelyAccepted(final AppointmentObject appointmentObj, final Session sessionObj) {
+		sendNotification(null, appointmentObj, sessionObj,
+				new AppointmentState(new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_TENTATIVE),
+						new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_TENTATIVELY_ACCEPTED),
+						Notifications.APPOINTMENT_CONFIRMATION_MAIL), false, false, false);
+	}
+
 	public void appointmentDeleted(final AppointmentObject appointmentObj, final Session sessionObj) {
 		sendNotification(null, appointmentObj, sessionObj, new AppointmentState(new AppointmentActionReplacement(
 				AppointmentActionReplacement.ACTION_DELETED), Notifications.APPOINTMENT_DELETE_MAIL),
@@ -268,6 +273,27 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 	public void taskModified(final Task oldTask, final Task newTask, final Session sessionObj) {
 		sendNotification(oldTask, newTask, sessionObj, new TaskState(new TaskActionReplacement(
 				TaskActionReplacement.ACTION_CHANGED), Notifications.TASK_UPDATE_MAIL), false, false, true);
+	}
+
+	public void taskAccepted(final Task taskObj, final Session sessionObj) {
+		sendNotification(null, taskObj, sessionObj, new TaskState(new TaskActionReplacement(
+				TaskActionReplacement.ACTION_ACCEPTED), new ConfirmationActionReplacement(
+				ConfirmationActionReplacement.ACTION_ACCEPTED), Notifications.TASK_CONFIRMATION_MAIL), false, false,
+				false);
+	}
+
+	public void taskDeclined(final Task taskObj, final Session sessionObj) {
+		sendNotification(null, taskObj, sessionObj, new TaskState(new TaskActionReplacement(
+				TaskActionReplacement.ACTION_DECLINED), new ConfirmationActionReplacement(
+				ConfirmationActionReplacement.ACTION_DECLINED), Notifications.TASK_CONFIRMATION_MAIL), false, false,
+				false);
+	}
+
+	public void taskTentativelyAccepted(final Task taskObj, final Session sessionObj) {
+		sendNotification(null, taskObj, sessionObj, new TaskState(new TaskActionReplacement(
+				TaskActionReplacement.ACTION_TENTATIVE), new ConfirmationActionReplacement(
+				ConfirmationActionReplacement.ACTION_TENTATIVELY_ACCEPTED), Notifications.TASK_CONFIRMATION_MAIL),
+				false, false, false);
 	}
 
 	public void taskDeleted(final Task taskObj, final Session sessionObj) {
@@ -350,30 +376,34 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		 */
 		final String title = null == newObj.getTitle() ? "" : newObj.getTitle();
 		final RenderMap renderMap = createRenderMap(newObj, oldObj, isUpdate, participantSet, resourceSet,
-				createdByDisplayName, modifiedByDisplayName, title);
+				createdByDisplayName, modifiedByDisplayName, title, state.getModule());
 		/*
-		 * The message title
+		 * The action replacement used to compose message title
 		 */
-		final TemplateReplacement messageSubjectRepl = state.getTitle();
+		final TemplateReplacement actionRepl = state.getAction();
+		/*
+		 * Add confirmation action replacement to render map if non-null
+		 */
+		{
+			final TemplateReplacement confirmActionRepl = state.getConfirmationAction();
+			if (confirmActionRepl != null) {
+				renderMap.put(confirmActionRepl);
+			}
+		}
 
 		final OXFolderAccess access = new OXFolderAccess(sessionObj.getContext());
 
 		final List<MailMessage> messages = new ArrayList<MailMessage>();
 		for (final Locale locale : receivers.keySet()) {
-
-			final StringHelper strings = new StringHelper(locale);
-			final Template createTemplate = state.getMessageTemplate();
-
-			final List<EmailableParticipant> participants = receivers.get(locale);
-
 			/*
 			 * Apply new locale to replacements
 			 */
-			messageSubjectRepl.setLocale(locale);
+			actionRepl.setLocale(locale);
 			renderMap.applyLocale(locale);
 			/*
 			 * Iterate over locale's participants
 			 */
+			final List<EmailableParticipant> participants = receivers.get(locale);
 			for (final EmailableParticipant p : participants) {
 				TimeZone tz = TimeZone.getDefault();
 				boolean sendMail = true;
@@ -432,79 +462,10 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 					 */
 					state.addSpecial(newObj, oldObj, renderMap, p);
 
-					final MailMessage msg = new MailMessage();
-					msg.title = new StringBuilder(messageSubjectRepl.getReplacement()).append(": ").append(title)
-							.toString();
-					if (isUpdate) {
-						if (EmailableParticipant.STATE_REMOVED == p.state) {
-							/*
-							 * Current participant is removed by caught update
-							 * event
-							 */
-							if (Types.APPOINTMENT == state.getModule()) {
-								msg.title = new StringBuilder(new AppointmentActionReplacement(
-										AppointmentActionReplacement.ACTION_DELETED, locale).getReplacement()).append(
-										": ").append(title).toString();
-								/*
-								 * Get cloned version of render map to apply
-								 * changed status
-								 */
-								final RenderMap clone = clonedRenderMap(renderMap);
-								/*
-								 * Render proper message for removed participant
-								 */
-								msg.message = new StringTemplate(strings
-										.getString(Notifications.APPOINTMENT_DELETE_MAIL)).render(clone);
-							} else {
-								// TODO: Change title for task notification here
-								msg.message = new StringTemplate(strings
-										.getString(Notifications.TASK_REMOVED_PARTICIPANT))
-										.render(((RenderMap) renderMap.clone()).applyChangedStatus(false));
-							}
-						} else if (EmailableParticipant.STATE_NEW == p.state) {
-							/*
-							 * Current participant is added by caught update
-							 * event
-							 */
-							if (Types.APPOINTMENT == state.getModule()) {
-								msg.title = new StringBuilder(new AppointmentActionReplacement(
-										AppointmentActionReplacement.ACTION_NEW, locale).getReplacement()).append(": ")
-										.append(title).toString();
-								final RenderMap clone = clonedRenderMap(renderMap);
-								/*
-								 * Render proper message for removed participant
-								 */
-								if (p.type == Participant.EXTERNAL_USER) {
-									// Without [link] replacement
-									msg.message = new StringTemplate(strings
-											.getString(Notifications.APPOINTMENT_CREATE_MAIL_EXT)).render(clone);
-								} else {
-									msg.message = new StringTemplate(strings
-											.getString(Notifications.APPOINTMENT_CREATE_MAIL)).render(clone);
-								}
-							} else {
-								// TODO: Change title for task notification here
-								if (p.type == Participant.EXTERNAL_USER) {
-									// Without [link] replacement
-									msg.message = new StringTemplate(strings
-											.getString(Notifications.TASK_ADDED_PARTICIPANT_EXT))
-											.render(((RenderMap) renderMap.clone()).applyChangedStatus(false));
-								} else {
-									msg.message = new StringTemplate(strings
-											.getString(Notifications.TASK_ADDED_PARTICIPANT))
-											.render(((RenderMap) renderMap.clone()).applyChangedStatus(false));
-								}
-							}
-						} else {
-							msg.message = createTemplate.render(renderMap);
-						}
-					} else {
-						msg.message = createTemplate.render(renderMap);
-					}
-					msg.addresses.add(p.email);
-					msg.folderId = p.folderId;
-					msg.internal = p.type != Participant.EXTERNAL_USER;
-					messages.add(msg);
+					/*
+					 * Compose message
+					 */
+					messages.add(createParticipantMessage(p, title, actionRepl, state, locale, renderMap, isUpdate));
 				}
 			}
 		}
@@ -515,9 +476,127 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		}
 	}
 
+	private MailMessage createParticipantMessage(final EmailableParticipant p, final String title,
+			final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap,
+			final boolean isUpdate) {
+		final MailMessage msg = new MailMessage();
+		final Template createTemplate = state.getTemplate();
+		final StringHelper strings = new StringHelper(locale);
+		final StringBuilder b = new StringBuilder(2048);
+		msg.title = b.append(actionRepl.getReplacement()).append(": ").append(title).toString();
+		b.setLength(0);
+		if (isUpdate) {
+			if (EmailableParticipant.STATE_REMOVED == p.state) {
+				/*
+				 * Current participant is removed by caught update event
+				 */
+				/*
+				 * Get cloned version of render map to apply changed status
+				 */
+				final RenderMap clone = clonedRenderMap(renderMap);
+				if (Types.APPOINTMENT == state.getModule()) {
+					msg.title = b.append(
+							new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_DELETED, locale)
+									.getReplacement()).append(": ").append(title).toString();
+					b.setLength(0);
+					/*
+					 * Render proper message for removed participant
+					 */
+					msg.message = new StringTemplate(strings.getString(Notifications.APPOINTMENT_DELETE_MAIL))
+							.render(clone);
+				} else {
+					msg.title = b.append(
+							new TaskActionReplacement(TaskActionReplacement.ACTION_DELETED, locale).getReplacement())
+							.append(": ").append(title).toString();
+					b.setLength(0);
+					/*
+					 * Render proper message for removed participant
+					 */
+					msg.message = new StringTemplate(strings.getString(Notifications.APPOINTMENT_DELETE_MAIL))
+							.render(clone);
+
+				}
+				if (Participant.RESOURCE == p.type) {
+					/*
+					 * Special prefixes for resource participant receivers
+					 */
+					msg.message = b.append(
+							String.format(strings.getString(Notifications.RESOURCE_PREFIX), p.displayName))
+							.append(": ").append(msg.message).toString();
+					b.setLength(0);
+					msg.title = b.append('[').append(strings.getString(Notifications.RESOURCE_TITLE_PREFIX)).append(
+							"] ").append(msg.title).toString();
+					b.setLength(0);
+				}
+			} else if (EmailableParticipant.STATE_NEW == p.state) {
+				/*
+				 * Current participant is added by caught update event
+				 */
+				/*
+				 * Get cloned version of render map to apply changed status
+				 */
+				final RenderMap clone = clonedRenderMap(renderMap);
+				if (Types.APPOINTMENT == state.getModule()) {
+					msg.title = b.append(
+							new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_NEW, locale)
+									.getReplacement()).append(": ").append(title).toString();
+					b.setLength(0);
+					/*
+					 * Render proper message for removed participant
+					 */
+					final String message = p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE ? Notifications.APPOINTMENT_CREATE_MAIL_EXT
+							: Notifications.APPOINTMENT_CREATE_MAIL;
+					msg.message = new StringTemplate(strings.getString(message)).render(clone);
+				} else {
+					msg.title = b.append(
+							new TaskActionReplacement(TaskActionReplacement.ACTION_NEW, locale).getReplacement())
+							.append(": ").append(title).toString();
+					b.setLength(0);
+					/*
+					 * Render proper message for removed participant
+					 */
+					final String message = p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE ? Notifications.TASK_CREATE_MAIL_EXT
+							: Notifications.TASK_CREATE_MAIL;
+					msg.message = new StringTemplate(strings.getString(message)).render(clone);
+				}
+				if (Participant.RESOURCE == p.type) {
+					/*
+					 * Special prefixes for resource participant receivers
+					 */
+					msg.message = b.append(
+							String.format(strings.getString(Notifications.RESOURCE_PREFIX), p.displayName))
+							.append(": ").append(msg.message).toString();
+					b.setLength(0);
+					msg.title = b.append('[').append(strings.getString(Notifications.RESOURCE_TITLE_PREFIX)).append(
+							"] ").append(msg.title).toString();
+					b.setLength(0);
+				}
+			} else {
+				msg.message = createTemplate.render(renderMap);
+			}
+		} else {
+			msg.message = createTemplate.render(renderMap);
+		}
+		if (Participant.RESOURCE == p.type) {
+			/*
+			 * Special prefixes for resource participant receivers
+			 */
+			msg.message = b.append(String.format(strings.getString(Notifications.RESOURCE_PREFIX), p.displayName))
+					.append(": ").append(msg.message).toString();
+			b.setLength(0);
+			msg.title = b.append('[').append(strings.getString(Notifications.RESOURCE_TITLE_PREFIX)).append("] ")
+					.append(msg.title).toString();
+			b.setLength(0);
+		}
+		msg.addresses.add(p.email);
+		msg.folderId = p.folderId;
+		msg.internal = p.type != Participant.EXTERNAL_USER;
+		return msg;
+	}
+
 	private RenderMap createRenderMap(final CalendarObject newObj, final CalendarObject oldObj, final boolean isUpdate,
 			final SortedSet<EmailableParticipant> participantSet, final SortedSet<EmailableParticipant> resourceSet,
-			final String createdByDisplayName, final String modifiedByDisplayName, final String title) {
+			final String createdByDisplayName, final String modifiedByDisplayName, final String title, final int module) {
 		/*
 		 * Generate a render map filled with object-specific information
 		 */
@@ -537,6 +616,29 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 					: !compareObjects(note, oldObj.getNote())) : false));
 		}
 		/*
+		 * Add task-specific replacements
+		 */
+		if (Types.TASK == module) {
+			final Task task = (Task) newObj;
+			final Task oldTask = (Task) oldObj;
+			{
+				final Integer priority = Integer.valueOf(task.getPriority());
+				renderMap.put(new FormatLocalizedStringReplacement(TemplateToken.TASK_PRIORITY,
+						Notifications.FORMAT_PRIORITY, priority.toString()).setChanged(oldTask == null ? false
+						: !compareObjects(priority, Integer.valueOf(oldTask.getPriority()))));
+			}
+			{
+				final int status = task.getStatus();
+				final int percentComplete = task.getPercentComplete();
+				boolean changed = false;
+				if (oldTask != null) {
+					changed |= (status != oldTask.getStatus());
+					changed |= (percentComplete != oldTask.getPercentComplete());
+				}
+				renderMap.put(new TaskStatusReplacement(status, percentComplete).setChanged(changed));
+			}
+		}
+		/*
 		 * Generate replacements which got modified by participant data
 		 */
 		{
@@ -546,8 +648,10 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		}
 		{
 			final Date end = newObj.getEndDate();
-			renderMap.put(new EndDateReplacement(end).setChanged(isUpdate ? (oldObj == null ? false : !compareObjects(
-					end, oldObj.getEndDate())) : false));
+			renderMap
+					.put(new EndDateReplacement(end, Types.TASK == module)
+							.setChanged(isUpdate ? (oldObj == null ? false : !compareObjects(end, oldObj.getEndDate()))
+									: false));
 		}
 		renderMap.put(new CreationDateReplacement(newObj.containsCreationDate() ? newObj.getCreationDate()
 				: (oldObj == null ? null : oldObj.getCreationDate()), null));
@@ -918,7 +1022,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 				displayName = participant.getDisplayName();
 			}
 			groups = user.getGroups();
-			tz = TimeZone.getTimeZone(user.getTimeZone());
+			tz = Tools.getTimeZone(user.getTimeZone());
 			if (participant instanceof UserParticipant) {
 				final UserParticipant userParticipant = (UserParticipant) participant;
 				folderId = userParticipant.getPersonalFolderId();
@@ -1041,122 +1145,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		participantSet.add(participant);
 	}
 
-	public static final class EmailableParticipant implements Comparable<EmailableParticipant>, Cloneable {
-
-		/**
-		 * Indicating no change compared to object's participants
-		 */
-		public static final int STATE_NONE = 0;
-
-		/**
-		 * Marks a participant as being newly added to object's participants
-		 */
-		public static final int STATE_NEW = 1;
-
-		/**
-		 * Marks a participant as being removed from object's participants
-		 */
-		public static final int STATE_REMOVED = -1;
-
-		private final int hc;
-
-		public String email;
-
-		public String displayName;
-
-		public Locale locale;
-
-		public int type;
-
-		public int id;
-
-		public int[] groups;
-
-		public TimeZone timeZone;
-
-		public int reliability;
-
-		public int folderId;
-
-		public int cid;
-
-		public int confirm = CalendarObject.NONE;
-
-		public String confirmMessage;
-
-		/**
-		 * The current participant's state: {@link #STATE_NONE} ,
-		 * {@link #STATE_REMOVED}, or {@link #STATE_NEW}
-		 */
-		public int state = STATE_NONE;
-
-		public EmailableParticipant(final int cid, final int type, final int id, final int[] groups,
-				final String email, final String displayName, final Locale locale, final TimeZone timeZone,
-				final int reliability, final int folderId, final int confirm, final String confirmMessage) {
-			this.cid = cid;
-			this.type = type;
-			this.email = email;
-			this.displayName = displayName;
-			this.locale = locale;
-			this.id = id;
-			this.groups = groups;
-			this.timeZone = timeZone;
-			this.reliability = reliability;
-			this.folderId = folderId;
-			this.hc = getHashCode();
-			this.confirm = confirm;
-			this.confirmMessage = confirmMessage;
-		}
-
-		private int getHashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((email == null) ? 0 : email.toLowerCase(Locale.ENGLISH).hashCode());
-			return result;
-		}
-
-		public void copy(final EmailableParticipant participant) {
-			this.cid = participant.cid;
-			this.type = participant.type;
-			this.email = participant.email;
-			this.displayName = participant.displayName;
-			this.locale = participant.locale;
-			this.id = participant.id;
-			this.groups = participant.groups;
-			this.timeZone = participant.timeZone;
-			this.reliability = participant.reliability;
-			this.state = participant.state;
-			this.confirm = participant.confirm;
-			this.confirmMessage = participant.confirmMessage;
-		}
-
-		@Override
-		public int hashCode() {
-			return hc;
-		}
-
-		@Override
-		public boolean equals(final Object o) {
-			if (o instanceof EmailableParticipant) {
-				final EmailableParticipant other = (EmailableParticipant) o;
-				return other.email.equalsIgnoreCase(email);
-			}
-			return false;
-		}
-
-		public int compareTo(final EmailableParticipant other) {
-			return this.displayName.compareTo(other.displayName);
-		}
-
-		@Override
-		public Object clone() throws CloneNotSupportedException {
-			final EmailableParticipant clone = (EmailableParticipant) super.clone();
-			clone.locale = (Locale) (locale == null ? null : locale.clone());
-			clone.timeZone = (TimeZone) (timeZone == null ? null : timeZone.clone());
-			return clone;
-		}
-	}
-
 	private static class MailMessage {
 
 		/**
@@ -1175,247 +1163,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		public int folderId;
 
 		public boolean internal;
-	}
-
-	// Special handling for Appointments or Tasks goes here
-	public static interface State {
-		public boolean sendMail(UserSettingMail userSettingMail);
-
-		public DateFormat getDateFormat(Locale locale);
-
-		public void addSpecial(CalendarObject obj, CalendarObject oldObj, RenderMap renderMap, EmailableParticipant p);
-
-		public int getModule();
-
-		public void modifyInternal(MailObject mail, CalendarObject obj, ServerSession sessObj);
-
-		public void modifyExternal(MailObject mail, CalendarObject obj, ServerSession sessObj);
-
-		public Template getMessageTemplate();
-
-		public LocalizedStringReplacement getTitle();
-
-	}
-
-	public static abstract class LinkableState implements State {
-
-		protected static volatile Template object_link_template;
-
-		private static String hostname;
-
-		private static UnknownHostException warnSpam;
-		static {
-			try {
-				hostname = InetAddress.getLocalHost().getCanonicalHostName();
-			} catch (final UnknownHostException e) {
-				hostname = "localhost";
-				warnSpam = e;
-			}
-		}
-
-		public void addSpecial(final CalendarObject obj, final CalendarObject oldObj, final RenderMap renderMap,
-				final EmailableParticipant p) {
-			renderMap.put(new StringReplacement(TemplateToken.LINK, generateLink(obj, p)));
-		}
-
-		public String generateLink(final CalendarObject obj, final EmailableParticipant p) {
-			if (object_link_template == null) {
-				loadTemplate();
-			}
-
-			final RenderMap subst = new RenderMap();
-			switch (getModule()) {
-			case Types.APPOINTMENT:
-				subst.put(new ModuleReplacement(ModuleReplacement.MODULE_CALENDAR));
-				break;
-			case Types.TASK:
-				subst.put(new ModuleReplacement(ModuleReplacement.MODULE_TASK));
-				break;
-			default:
-				subst.put(new ModuleReplacement(ModuleReplacement.MODULE_UNKNOWN));
-				break;
-			}
-
-			int folder = p.folderId;
-			if (folder == -1) {
-				folder = obj.getParentFolderID();
-			}
-
-			subst.put(new StringReplacement(TemplateToken.FOLDER_ID, String.valueOf(folder)));
-			subst.put(new StringReplacement(TemplateToken.OBJECT_ID, String.valueOf(obj.getObjectID())));
-			final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(
-					HostnameService.class);
-			final String hostnameStr;
-			if (hostnameService == null || (hostnameStr = hostnameService.getHostname(p.id, p.cid)) == null) {
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("No host name available; using local host name as fallback");
-				}
-				if (warnSpam != null) {
-					LOG
-							.error(
-									"Can't resolve my own hostname, using 'localhost' instead, which is certainly not what you want.!",
-									warnSpam);
-				}
-				subst.put(new StringReplacement(TemplateToken.HOSTNAME, hostname));
-			} else {
-				subst.put(new StringReplacement(TemplateToken.HOSTNAME, hostnameStr));
-			}
-
-			return object_link_template.render(subst);
-		}
-
-		public void loadTemplate() {
-			synchronized (LinkableState.class) {
-				object_link_template = new StringTemplate(NotificationConfig.getProperty(
-						NotificationProperty.OBJECT_LINK, ""));
-			}
-		}
-
-	}
-
-	public static class AppointmentState extends LinkableState {
-
-		private final LocalizedStringReplacement titleReplacement;
-
-		private final String messageTemplate;
-
-		public AppointmentState(final LocalizedStringReplacement titleReplacement, final String messageTemplate) {
-			super();
-			this.titleReplacement = titleReplacement;
-			this.messageTemplate = messageTemplate;
-		}
-
-		public boolean sendMail(final UserSettingMail userSettingMail) {
-			return userSettingMail.isNotifyAppointments();
-		}
-
-		@Override
-		public void addSpecial(final CalendarObject obj, final CalendarObject oldObj, final RenderMap renderMap,
-				final EmailableParticipant p) {
-			super.addSpecial(obj, oldObj, renderMap, p);
-			String location = ((AppointmentObject) obj).getLocation();
-			if (location == null) {
-				location = "";
-			}
-			final TemplateReplacement tr = new FormatLocalizedStringReplacement(TemplateToken.LOCATION,
-					Notifications.FORMAT_LOCATION, location);
-			tr.setLocale(p.locale);
-			tr.setChanged(oldObj == null ? false
-					: !compareObjects(location, ((AppointmentObject) oldObj).getLocation()));
-			renderMap.put(tr);
-		}
-
-		public int getModule() {
-			return Types.APPOINTMENT;
-		}
-
-		public DateFormat getDateFormat(final Locale locale) {
-			return tryAppendingTimeZone(DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, locale));
-		}
-
-		private DateFormat tryAppendingTimeZone(final DateFormat df) {
-			if (df instanceof SimpleDateFormat) {
-				final SimpleDateFormat sdf = (SimpleDateFormat) df;
-				final String format = sdf.toPattern();
-				return new SimpleDateFormat(format + ", z");
-			}
-			return df;
-		}
-
-		public void modifyInternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
-
-		}
-
-		public void modifyExternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
-			addICALAttachment(mail, (AppointmentObject) obj, sessObj);
-		}
-
-		private void addICALAttachment(final MailObject mail, final AppointmentObject obj, final ServerSession sessObj) {
-			try {
-				final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");
-				final UnsynchronizedByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
-				final VersitDefinition.Writer versitWriter = versitDefinition.getWriter(byteArrayOutputStream, "UTF-8");
-				final VersitObject versitObjectContainer = OXContainerConverter.newCalendar("2.0");
-				versitDefinition.writeProperties(versitWriter, versitObjectContainer);
-				final OXContainerConverter oxContainerConverter = new OXContainerConverter(sessObj.getContext(),
-						TimeZone.getDefault());
-				final VersitDefinition eventDef = versitDefinition.getChildDef("VEVENT");
-
-				final VersitObject versitObject = oxContainerConverter.convertAppointment(obj);
-				eventDef.write(versitWriter, versitObject);
-				versitDefinition.writeEnd(versitWriter, versitObjectContainer);
-				versitWriter.flush();
-
-				final InputStream icalFile = new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray());
-
-				final ContentType ct = new ContentType();
-				ct.setPrimaryType("text");
-				ct.setSubType("calendar");
-				ct.setCharsetParameter("utf-8");
-
-				final String filename = "appointment.ics";
-
-				mail.addFileAttachment(ct, filename, icalFile);
-
-			} catch (final IOException e) {
-				LOG.error("Can't convert appointment for notification mail.", e);
-			} catch (final ConverterException e) {
-				LOG.error("Can't convert appointment for notification mail.", e);
-			} catch (final MailException e) {
-				LOG.error("Can't add attachment", e);
-			}
-		}
-
-		public Template getMessageTemplate() {
-			return new StringTemplate(messageTemplate);
-		}
-
-		public LocalizedStringReplacement getTitle() {
-			return titleReplacement;
-		}
-
-	}
-
-	public static class TaskState extends LinkableState {
-
-		private final LocalizedStringReplacement titleReplacement;
-
-		private final String messageTemplate;
-
-		public TaskState(final LocalizedStringReplacement titleReplacement, final String messageTemplate) {
-			super();
-			this.titleReplacement = titleReplacement;
-			this.messageTemplate = messageTemplate;
-		}
-
-		public boolean sendMail(final UserSettingMail userSettingMail) {
-			return userSettingMail.isNotifyTasks();
-		}
-
-		public int getModule() {
-			return Types.TASK;
-		}
-
-		public void modifyInternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
-
-		}
-
-		public void modifyExternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
-
-		}
-
-		public DateFormat getDateFormat(final Locale locale) {
-			return DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
-		}
-
-		public Template getMessageTemplate() {
-			return new StringTemplate(messageTemplate);
-		}
-
-		public LocalizedStringReplacement getTitle() {
-			return titleReplacement;
-		}
-
 	}
 
 	private static final boolean containsUser(final UserParticipant toSearch, final UserParticipant[] userParticipants) {

@@ -55,7 +55,7 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 
 import com.openexchange.groupware.i18n.Notifications;
-import com.openexchange.groupware.notify.ParticipantNotify.EmailableParticipant;
+import com.openexchange.groupware.notify.EmailableParticipant;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.i18n.tools.TemplateReplacement;
 import com.openexchange.i18n.tools.TemplateToken;

@@ -47,56 +47,70 @@
  *
  */
 
-package com.openexchange.i18n.tools.replacement;
+package com.openexchange.groupware.notify;
 
+import java.text.DateFormat;
 import java.util.Locale;
 
-import com.openexchange.groupware.i18n.Notifications;
-import com.openexchange.i18n.tools.TemplateToken;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.mail.MailObject;
+import com.openexchange.i18n.tools.StringTemplate;
+import com.openexchange.i18n.tools.Template;
+import com.openexchange.i18n.tools.TemplateReplacement;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.tools.session.ServerSession;
 
-/**
- * {@link ConfirmationActionReplacement} - Replacement for a confirmation
- * status.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
- */
-public final class ConfirmationActionReplacement extends LocalizedStringReplacement {
+public class TaskState extends LinkableState {
 
-	private static String[] ACTIONS = { Notifications.CA_ACCEPTED, Notifications.CA_DECLINED,
-			Notifications.CA_TENTATIVELY_ACCEPTED };
+	private final TemplateReplacement actionRepl;
 
-	public static final int ACTION_ACCEPTED = 0;
+	private final TemplateReplacement confirmationActionRepl;
 
-	public static final int ACTION_DECLINED = 1;
+	private final String messageTemplate;
 
-	public static final int ACTION_TENTATIVELY_ACCEPTED = 2;
-
-	/**
-	 * Initializes a new {@link ConfirmationActionReplacement}
-	 * 
-	 * @param confirmationAction
-	 *            The confirmation action; supposed to be either
-	 *            {@link #ACTION_ACCEPTED}, {@link #ACTION_DECLINED}, or
-	 *            {@link #ACTION_TENTATIVELY_ACCEPTED}
-	 */
-	public ConfirmationActionReplacement(final int confirmationAction) {
-		this(confirmationAction, null);
+	public TaskState(final TemplateReplacement actionRepl, final String messageTemplate) {
+		this(actionRepl, null, messageTemplate);
 	}
 
-	/**
-	 * Initializes a new {@link ConfirmationActionReplacement}
-	 * 
-	 * @param confirmationAction
-	 *            The confirmation action; supposed to be either
-	 *            {@link #ACTION_ACCEPTED}, {@link #ACTION_DECLINED}, or
-	 *            {@link #ACTION_TENTATIVELY_ACCEPTED}
-	 * @param locale
-	 *            The locale
-	 */
-	public ConfirmationActionReplacement(final int confirmationAction, final Locale locale) {
-		super(TemplateToken.CONFIRMATION_ACTIN, ACTIONS[confirmationAction]);
-		setLocale(locale);
+	public TaskState(final TemplateReplacement actionRepl, final TemplateReplacement confirmationActionRepl,
+			final String messageTemplate) {
+		super();
+		this.actionRepl = actionRepl;
+		this.confirmationActionRepl = confirmationActionRepl;
+		this.messageTemplate = messageTemplate;
+	}
+
+	public boolean sendMail(final UserSettingMail userSettingMail) {
+		return userSettingMail.isNotifyTasks();
+	}
+
+	public int getModule() {
+		return Types.TASK;
+	}
+
+	public void modifyInternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
+
+	}
+
+	public void modifyExternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
+
+	}
+
+	public DateFormat getDateFormat(final Locale locale) {
+		return DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
+	}
+
+	public Template getTemplate() {
+		return new StringTemplate(messageTemplate);
+	}
+
+	public TemplateReplacement getAction() {
+		return actionRepl;
+	}
+
+	public TemplateReplacement getConfirmationAction() {
+		return confirmationActionRepl;
 	}
 
 }

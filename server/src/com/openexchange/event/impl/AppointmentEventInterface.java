@@ -55,16 +55,48 @@ import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.session.Session;
 
 /**
- * AppointmentEvent
+ * {@link AppointmentEventInterface}
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-
 public interface AppointmentEventInterface {
 	
     public void appointmentCreated(AppointmentObject appointmentObj, Session sessionObj);
 	
     public void appointmentModified(AppointmentObject appointmentObj, Session sessionObj);
+
+    /**
+	 * Invoked if one of appointment's participants changed his confirmation
+	 * status to accepted.
+	 * 
+	 * @param appointmentObj
+	 *            The appointment
+	 * @param sessionObj
+	 *            The user session
+	 */
+	public void appointmentAccepted(AppointmentObject appointmentObj, Session sessionObj);
+
+	/**
+	 * Invoked if one of appointment's participants changed his confirmation
+	 * status to declined.
+	 * 
+	 * @param appointmentObj
+	 *            The appointment
+	 * @param sessionObj
+	 *            The user session
+	 */
+	public void appointmentDeclined(AppointmentObject appointmentObj, Session sessionObj);
+
+	/**
+	 * Invoked if one of appointment's participants changed his confirmation
+	 * status to tentatively accepted.
+	 * 
+	 * @param appointmentObj
+	 *            The appointment
+	 * @param sessionObj
+	 *            The user session
+	 */
+	public void appointmentTentativelyAccepted(AppointmentObject appointmentObj, Session sessionObj);
 		
     public void appointmentDeleted(AppointmentObject appointmentObj, Session sessionObj);
 	

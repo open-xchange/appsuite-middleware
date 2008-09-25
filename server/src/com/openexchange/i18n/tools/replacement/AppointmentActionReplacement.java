@@ -63,8 +63,8 @@ import com.openexchange.i18n.tools.TemplateToken;
 public final class AppointmentActionReplacement extends LocalizedStringReplacement {
 
 	private static String[] ACTIONS = { Notifications.APPOINTMENT_CREATE_TITLE, Notifications.APPOINTMENT_UPDATE_TITLE,
-			Notifications.APPOINTMENT_DELETE_TITLE, "Appointment (accepted)", "Appointment (declined)",
-			"Appointment (tentative)" };
+			Notifications.APPOINTMENT_DELETE_TITLE, Notifications.APPOINTMENT_ACCEPTED_TITLE, Notifications.APPOINTMENT_DECLINED_TITLE,
+			Notifications.APPOINTMENT_TENTATIVE_TITLE };
 
 	public static final int ACTION_NEW = 0;
 

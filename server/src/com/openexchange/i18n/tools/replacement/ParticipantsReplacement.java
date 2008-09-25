@@ -56,16 +56,17 @@ import java.util.TreeSet;
 
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.i18n.Notifications;
-import com.openexchange.groupware.notify.ParticipantNotify.EmailableParticipant;
+import com.openexchange.groupware.notify.EmailableParticipant;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.i18n.tools.TemplateReplacement;
 import com.openexchange.i18n.tools.TemplateToken;
 
 /**
- * {@link ParticipantsReplacement} - Replacement for {@link TemplateToken#PARTICIPANTS participants}
- *
+ * {@link ParticipantsReplacement} - Replacement for
+ * {@link TemplateToken#PARTICIPANTS participants}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
 public final class ParticipantsReplacement implements TemplateReplacement {
 
@@ -127,12 +128,12 @@ public final class ParticipantsReplacement implements TemplateReplacement {
 					/*
 					 * Participant was newly added
 					 */
-					b.append(TemplateReplacement.PREFIX_MODIFIED)
-							.append(stringHelper.getString(Notifications.ADDED)).append(": ");
+					b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.ADDED))
+							.append(": ");
 					b.append(name);
 					if (participant.type == Participant.USER) {
 						b.append(" (");
-						b.append(new ConfirmationActionReplacement(participant.confirm, l).getReplacement());
+						b.append(new StatusReplacement(participant.confirm, l).getReplacement());
 						if (participant.confirmMessage != null) {
 							b.append(": ").append(participant.confirmMessage);
 						}
@@ -142,8 +143,8 @@ public final class ParticipantsReplacement implements TemplateReplacement {
 					/*
 					 * Participant was removed
 					 */
-					b.append(TemplateReplacement.PREFIX_MODIFIED).append(
-							stringHelper.getString(Notifications.REMOVED)).append(": ");
+					b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.REMOVED))
+							.append(": ");
 					b.append(name);
 				} else {
 					/*
@@ -152,7 +153,7 @@ public final class ParticipantsReplacement implements TemplateReplacement {
 					b.append(name);
 					if (participant.type == Participant.USER) {
 						b.append(" (");
-						b.append(new ConfirmationActionReplacement(participant.confirm, l).getReplacement());
+						b.append(new StatusReplacement(participant.confirm, l).getReplacement());
 						if (participant.confirmMessage != null) {
 							b.append(": ").append(participant.confirmMessage);
 						}
@@ -168,7 +169,7 @@ public final class ParticipantsReplacement implements TemplateReplacement {
 					b.append(name);
 					if (participant.type == Participant.USER) {
 						b.append(" (");
-						b.append(new ConfirmationActionReplacement(participant.confirm, l).getReplacement());
+						b.append(new StatusReplacement(participant.confirm, l).getReplacement());
 						if (participant.confirmMessage != null) {
 							b.append(": ").append(participant.confirmMessage);
 						}

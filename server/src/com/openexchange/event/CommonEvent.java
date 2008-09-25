@@ -70,6 +70,12 @@ public interface CommonEvent {
 
 	public static final int MOVE = 4;
 
+	public static final int CONFIRM_ACCEPTED = 5;
+
+	public static final int CONFIRM_DECLINED = 6;
+
+	public static final int CONFIRM_TENTATIVE = 7;
+
 	public int getContextId();
 
 	public int getUserId();

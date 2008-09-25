@@ -95,6 +95,18 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     public static final int INSERT = 1;
     public static final int UPDATE = 2;
     public static final int DELETE = -1;
+    /**
+     * Indicates accepted event
+     */
+    public static final int CONFIRM_ACCEPTED = 3;
+    /**
+     * Indicates declined event
+     */
+    public static final int CONFIRM_DELINED = 4;
+    /**
+     * Indicates tentatively accepted event
+     */
+    public static final int CONFIRM_TENTATIVELY_ACCEPTED = 5;
     
     public static final int MAX_RESULT_LIMIT = -1;
     private int result_counter;

@@ -49,6 +49,10 @@
 
 package com.openexchange.i18n.tools.replacement;
 
+import java.util.Locale;
+
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.i18n.Notifications;
 import com.openexchange.i18n.tools.TemplateToken;
 
 /**
@@ -59,15 +63,22 @@ import com.openexchange.i18n.tools.TemplateToken;
  */
 public final class StatusReplacement extends LocalizedStringReplacement {
 
-	private static String[] STATUSES = { "accepted", "declined", "tentative", "waiting" };
+	public static final int STATUS_ACCEPTED = CalendarObject.ACCEPT;
 
-	public static final int STATUS_ACCEPTED = 0;
+	public static final int STATUS_DECLINED = CalendarObject.DECLINE;
 
-	public static final int STATUS_DECLINED = 1;
+	public static final int STATUS_TENTATIVE = CalendarObject.TENTATIVE;
 
-	public static final int STATUS_TENTATIVE = 2;
+	public static final int STATUS_WAITING = CalendarObject.NONE;
 
-	public static final int STATUS_WAITING = 3;
+	private static String[] STATUSES = new String[4];
+
+	static {
+		STATUSES[STATUS_WAITING] = Notifications.STATUS_WAITING;
+		STATUSES[STATUS_ACCEPTED] = Notifications.STATUS_ACCEPTED;
+		STATUSES[STATUS_DECLINED] = Notifications.STATUS_DECLINED;
+		STATUSES[STATUS_TENTATIVE] = Notifications.STATUS_TENTATIVE;
+	}
 
 	/**
 	 * Initializes a new {@link StatusReplacement}
@@ -78,7 +89,22 @@ public final class StatusReplacement extends LocalizedStringReplacement {
 	 *            {@link #STATUS_WAITING}
 	 */
 	public StatusReplacement(final int status) {
+		this(status, null);
+	}
+
+	/**
+	 * Initializes a new {@link StatusReplacement}
+	 * 
+	 * @param status
+	 *            The status; supposed to be either {@link #STATUS_ACCEPTED},
+	 *            {@link #STATUS_DECLINED}, {@link #STATUS_TENTATIVE}, or
+	 *            {@link #STATUS_WAITING}
+	 * @param locale
+	 *            The locale
+	 */
+	public StatusReplacement(final int status, final Locale locale) {
 		super(TemplateToken.STATUS, STATUSES[status]);
+		setLocale(locale);
 	}
 
 }

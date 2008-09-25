@@ -140,7 +140,15 @@ public enum TemplateToken {
 	/**
 	 * The confirmation action
 	 */
-	CONFIRMATION_ACTIN("action2");
+	CONFIRMATION_ACTIN("confirmation_action"),
+	/**
+	 * Task's priority
+	 */
+	TASK_PRIORITY("priority"),
+	/**
+	 * Task's status
+	 */
+	TASK_STATUS("task_status");
 
 	private final String token;
 

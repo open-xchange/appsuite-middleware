@@ -619,6 +619,27 @@ public final class CalendarCommonCollection {
                     throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(18));
                 }
                 break;
+            case CalendarOperation.CONFIRM_ACCEPTED:
+            	try {
+                    eventclient.accepted(appointmentobject); // TODO
+                } catch (final Exception e) {
+                    throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(18));
+                }
+                break;
+            case CalendarOperation.CONFIRM_DELINED:
+            	try {
+                    eventclient.declined(appointmentobject); // TODO
+                } catch (final Exception e) {
+                    throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(18));
+                }
+                break;
+            case CalendarOperation.CONFIRM_TENTATIVELY_ACCEPTED:
+            	try {
+                    eventclient.tentative(appointmentobject); // TODO
+                } catch (final Exception e) {
+                    throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(18));
+                }
+                break;
             default:
                 throw new OXCalendarException(OXCalendarException.Code.UNSUPPORTED_ACTION_TYPE, Integer.valueOf(action));
         }
@@ -1274,51 +1295,73 @@ public final class CalendarCommonCollection {
         }
         return false;
     }
+   
+    private static final String SQL_SELECT_FID = "SELECT fid FROM prg_dates WHERE intfield01 = ? AND cid = ?";
+
+    private static final String SQL_SELECT_FID2 = "SELECT pfid FROM prg_dates_members WHERE object_id = ? AND cid = ? AND member_uid = ?";
     
-    static int resolveFolderIDForUser(final int oid, final int uid, final Context c) throws OXException {
-        int ret = -1;
-        final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
-        Connection readcon = null;
-        ResultSet rs = null;
-        PreparedStatement prep = null;
-        try {
-            readcon = DBPool.pickup(c);
-            prep = calendarsqlimp.getPreparedStatement(readcon, "SELECT fid FROM prg_dates WHERE intfield01 = "+ oid + " AND cid = "+ c.getContextId());
-            rs = calendarsqlimp.getResultSet(prep);
-            if (rs.next()) {
-                final int tmp = rs.getInt(1);
-                if (!rs.wasNull()) {
-                    return tmp;
-                }
-            }
-            closePreparedStatement(prep);
-            closeResultSet(rs);
-            prep = calendarsqlimp.getPreparedStatement(readcon, "SELECT pfid FROM prg_dates_members WHERE object_id = "+ oid + " AND cid = "+ c.getContextId() + " AND member_uid = "+uid);
-            rs = calendarsqlimp.getResultSet(prep);
-            if (rs.next()) {
-                ret = rs.getInt(1);
-                if (rs.wasNull() || ret == 0) {
-                    ret = -1;
-                }
-            }
-        } catch (final DBPoolingException dbpe) {
-            throw new OXException(dbpe);
-        } catch(final SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sqle, Integer.valueOf(37));
-        } finally {
-            closePreparedStatement(prep);
-            closeResultSet(rs);
-            if (readcon != null) {
-                try {
-                    DBPool.push(c, readcon);
-                } catch (final DBPoolingException dbpe) {
-                    LOG.error("error pushing readable connection" ,dbpe);
-                }
-            }
-            //return ret;
-        }
-        return ret;
-    }
+    /**
+	 * Determines appointment's valid folder ID for specified user
+	 * 
+	 * @param oid
+	 *            The appointment ID
+	 * @param uid
+	 *            The suer ID
+	 * @param c
+	 *            The context
+	 * @return The appointment's valid folder ID for specified user
+	 * @throws OXException
+	 *             If appointment's valid folder ID for specified user cannot be
+	 *             determined
+	 */
+	static int resolveFolderIDForUser(final int oid, final int uid, final Context c) throws OXException {
+		int ret = -1;
+		final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
+		Connection readcon = null;
+		ResultSet rs = null;
+		PreparedStatement prep = null;
+		try {
+			readcon = DBPool.pickup(c);
+			prep = calendarsqlimp.getPreparedStatement(readcon, SQL_SELECT_FID);
+			prep.setInt(1, oid);
+			prep.setInt(2, c.getContextId());
+			rs = calendarsqlimp.getResultSet(prep);
+			if (rs.next()) {
+				final int tmp = rs.getInt(1);
+				if (!rs.wasNull() && tmp > 0) {
+					return tmp;
+				}
+			}
+			closeResultSet(rs);
+			closePreparedStatement(prep);
+			prep = calendarsqlimp.getPreparedStatement(readcon, SQL_SELECT_FID2);
+			prep.setInt(1, oid);
+			prep.setInt(2, c.getContextId());
+			prep.setInt(3, uid);
+			rs = calendarsqlimp.getResultSet(prep);
+			if (rs.next()) {
+				ret = rs.getInt(1);
+				if (rs.wasNull() || ret == 0) {
+					ret = -1;
+				}
+			}
+		} catch (final DBPoolingException dbpe) {
+			throw new OXException(dbpe);
+		} catch (final SQLException sqle) {
+			throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle, new Object[0]);
+		} finally {
+			closePreparedStatement(prep);
+			closeResultSet(rs);
+			if (readcon != null) {
+				try {
+					DBPool.push(c, readcon);
+				} catch (final DBPoolingException dbpe) {
+					LOG.error("error pushing readable connection", dbpe);
+				}
+			}
+		}
+		return ret;
+	}
     
     static void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final UserParticipant[] new_userparticipants, final UserParticipant[] deleted_userparticipants, Participant p_event[], final Participant new_participants[], final Participant deleted_participants[]) {
         final Participants pu = new Participants();

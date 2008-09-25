@@ -86,16 +86,18 @@ public class EventClient {
 	public static final int CHANGED = 6;
 	public static final int DELETED = 7;
 	public static final int MOVED = 8;
+	public static final int CONFIRM_ACCEPTED = 9;
+	public static final int CONFIRM_DECLINED = 10;
+	public static final int CONFIRM_TENTATIVE = 11;
 	
-	protected Session session;
+	private final Session session;
 	
-	protected int userId;
+	private final int userId;
 	
-	protected int contextId;
+	private final int contextId;
 	
 	public EventClient(final Session session) {
 		this.session = session;
-		
 		userId = session.getUserId();
 		contextId = session.getContextId();
 	}
@@ -143,6 +145,75 @@ public class EventClient {
 		triggerEvent(event);
 
 		final EventObject eventObject = new EventObject(newAppointmentObj, CHANGED, session);
+		EventQueue.add(eventObject);
+	}
+
+	public void accepted(final AppointmentObject appointmentObj) throws EventException, OXException, ContextException {
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
+
+        final int folderId = appointmentObj.getParentFolderID();
+		if (folderId > 0) {
+			final FolderObject folderObj = getFolder(folderId, ctx);
+			accepted(null, appointmentObj, folderObj);
+		}
+	}
+
+	public void accepted(final AppointmentObject oldAppointmentObj, final AppointmentObject newAppointmentObj, final FolderObject folderObj) throws EventException {
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.CONFIRM_ACCEPTED, Types.APPOINTMENT, newAppointmentObj, oldAppointmentObj, folderObj, null, session);
+
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
+		ht.put(CommonEvent.EVENT_KEY, genericEvent);
+
+		final Event event = new Event("com/openexchange/groupware/appointment/accepted", ht);
+		triggerEvent(event);
+
+		final EventObject eventObject = new EventObject(newAppointmentObj, CONFIRM_ACCEPTED, session);
+		EventQueue.add(eventObject);
+	}
+
+	public void declined(final AppointmentObject appointmentObj) throws EventException, OXException, ContextException {
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
+
+        final int folderId = appointmentObj.getParentFolderID();
+		if (folderId > 0) {
+			final FolderObject folderObj = getFolder(folderId, ctx);
+			declined(null, appointmentObj, folderObj);
+		}
+	}
+
+	public void declined(final AppointmentObject oldAppointmentObj, final AppointmentObject newAppointmentObj, final FolderObject folderObj) throws EventException {
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.CONFIRM_DECLINED, Types.APPOINTMENT, newAppointmentObj, oldAppointmentObj, folderObj, null, session);
+
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
+		ht.put(CommonEvent.EVENT_KEY, genericEvent);
+
+		final Event event = new Event("com/openexchange/groupware/appointment/declined", ht);
+		triggerEvent(event);
+
+		final EventObject eventObject = new EventObject(newAppointmentObj, CONFIRM_DECLINED, session);
+		EventQueue.add(eventObject);
+	}
+
+	public void tentative(final AppointmentObject appointmentObj) throws EventException, OXException, ContextException {
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
+
+        final int folderId = appointmentObj.getParentFolderID();
+		if (folderId > 0) {
+			final FolderObject folderObj = getFolder(folderId, ctx);
+			tentative(null, appointmentObj, folderObj);
+		}
+	}
+
+	public void tentative(final AppointmentObject oldAppointmentObj, final AppointmentObject newAppointmentObj, final FolderObject folderObj) throws EventException {
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.CONFIRM_TENTATIVE, Types.APPOINTMENT, newAppointmentObj, oldAppointmentObj, folderObj, null, session);
+
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
+		ht.put(CommonEvent.EVENT_KEY, genericEvent);
+
+		final Event event = new Event("com/openexchange/groupware/appointment/tentative", ht);
+		triggerEvent(event);
+
+		final EventObject eventObject = new EventObject(newAppointmentObj, CONFIRM_TENTATIVE, session);
 		EventQueue.add(eventObject);
 	}
 
@@ -216,6 +287,75 @@ public class EventClient {
 		triggerEvent(event);
 
 		final EventObject eventObject = new EventObject(oldTask, CHANGED, session);
+		EventQueue.add(eventObject);
+	}
+    
+    public void accept(final Task task) throws EventException, OXException, ContextException {
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
+
+        final int folderId = task.getParentFolderID();
+		if (folderId > 0) {
+			final FolderObject folderObj = getFolder(folderId, ctx);
+			accept(null, task, folderObj);
+		}
+	}
+
+    public void accept(final Task oldTask, final Task newTask, final FolderObject folderObj) throws EventException {
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.CONFIRM_ACCEPTED, Types.TASK, newTask, oldTask, folderObj, null, session);
+
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
+		ht.put(CommonEvent.EVENT_KEY, genericEvent);
+
+		final Event event = new Event("com/openexchange/groupware/task/accepted", ht);
+		triggerEvent(event);
+
+		final EventObject eventObject = new EventObject(oldTask, CONFIRM_ACCEPTED, session);
+		EventQueue.add(eventObject);
+	}
+
+    public void declined(final Task task) throws EventException, OXException, ContextException {
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
+
+        final int folderId = task.getParentFolderID();
+		if (folderId > 0) {
+			final FolderObject folderObj = getFolder(folderId, ctx);
+			declined(null, task, folderObj);
+		}
+	}
+
+    public void declined(final Task oldTask, final Task newTask, final FolderObject folderObj) throws EventException {
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.CONFIRM_DECLINED, Types.TASK, newTask, oldTask, folderObj, null, session);
+
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
+		ht.put(CommonEvent.EVENT_KEY, genericEvent);
+
+		final Event event = new Event("com/openexchange/groupware/task/declined", ht);
+		triggerEvent(event);
+
+		final EventObject eventObject = new EventObject(oldTask, CONFIRM_DECLINED, session);
+		EventQueue.add(eventObject);
+	}
+
+    public void tentative(final Task task) throws EventException, OXException, ContextException {
+		final Context ctx = ContextStorage.getInstance().getContext(contextId);
+
+        final int folderId = task.getParentFolderID();
+		if (folderId > 0) {
+			final FolderObject folderObj = getFolder(folderId, ctx);
+			declined(null, task, folderObj);
+		}
+	}
+
+    public void tentative(final Task oldTask, final Task newTask, final FolderObject folderObj) throws EventException {
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.CONFIRM_TENTATIVE, Types.TASK, newTask, oldTask, folderObj, null, session);
+
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
+		ht.put(CommonEvent.EVENT_KEY, genericEvent);
+
+		final Event event = new Event("com/openexchange/groupware/task/tentative", ht);
+		triggerEvent(event);
+
+		final EventObject eventObject = new EventObject(oldTask, CONFIRM_TENTATIVE, session);
 		EventQueue.add(eventObject);
 	}
 

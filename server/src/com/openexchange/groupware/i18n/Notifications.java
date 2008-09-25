@@ -51,6 +51,10 @@ package com.openexchange.groupware.i18n;
 
 public class Notifications {
 
+	/*
+	 * CREATE
+	 */
+
 	public static final String APPOINTMENT_CREATE_MAIL = 
 			"A new appointment was created by [created_by].\n" +
 			"You can check this appointment in your calendar:\n" +
@@ -113,49 +117,24 @@ public class Notifications {
 		"========================================== ";
 	
 	public static final String TASK_CREATE_MAIL = 
-		"A new task has been created by [created_by].\n"+
-		"\n"+
-		"Direct Link: [link]\n"+
-		"\n"+
-		"Task\n"+
-		"====\n"+
-		"Created by:  [created_by]\n"+
-		"Title:       [title]\n"+
-		"\n"+
-		"Start date:  [start]\n"+
-		"End date:    [end]\n"+
-		"\n"+
-		"Description:\n"+
-		"[description]\n"+
-		"\n"+
-		"\n"+
-		"Participants\n"+
-		"============\n"+
-		"[participants]"+
-		"\n"+
-		"\n"+
-		"Resources\n"+
-		"=========\n"+
-		"[resources]\n"+
-		"\n"+
-		"==========================================";	
-
-	public static final String APPOINTMENT_DELETE_MAIL = 
-		"This appointment has been deleted by [changed_by].\n" + 
+		"A new task was created by [created_by].\n" +
+		"You can check this task in your tasks:\n" +
+		"[link]\n" + 
 		"\n" + 
-		"Appointment\n" + 
-		"===========\n" + 
-		"Created by:  [created_by]\n" + 
-		"Created at:  [creation_datetime]\n" + 
+		"Task\n" + 
+		"====\n" + 
+		"Created by: [created_by]\n" + 
+		"Created at: [creation_datetime]\n" + 
 		"[title]\n" + 
-		"[location]\n" + 
 		"[folder_name]\n" + 
+		"[priority]\n" + 
+		"[task_status]\n" + 
 		"\n" + 
-		"[start]\n" + 
-		"[end]\n" + 
+		"[start]\n" +
+		"[end]\n" +
 		"[series]\n" + 
 		"\n" + 
-		"[description]\n" + 
+		"[description]" + 
 		"\n" + 
 		"\n" + 
 		"Participants\n" + 
@@ -166,59 +145,47 @@ public class Notifications {
 		"Resources\n" + 
 		"=========\n" + 
 		"[resources]" +
+		"\n" +
 		"\n" + 
-		"\n" + 
-		"==========================================";
-	
-	public static final String TASK_DELETE_MAIL = 
-		"This task has been deleted by [changed_by].\n"+
-		"\n"+
-		"\n"+
-		"Task\n"+
-		"====\n"+
-		"Created by:  [created_by]\n"+
-		"Title:       [title]\n"+
-		"\n"+
-		"Start date:  [start]\n"+
-		"End date:    [end]\n"+
-		"\n"+
-		"Description:\n"+
-		"[description]\n"+
-		"==========================================";
-	
-//	public static final String APPOINTMENT_UPDATE_MAIL = 
-//		"This appointment has been changed by [changed_by].\n"+
-//		"\n"+
-//		"Direct Link: [link]\n"+
-//		"\n"+
-//		"Appointment\n"+
-//		"===========\n"+
-//		"Created by:  [created_by]\n"+
-//		"Title:       [title]\n"+
-//		"Location:    [location]\n"+
-//		"\n"+
-//		"Start date:  [start]\n"+
-//		"End date:    [end]\n"+
-//		"\n"+
-//		"Description:\n"+
-//		"[description]\n"+
-//		"\n"+
-//		"\n"+
-//		"Participants\n"+
-//		"============\n"+
-//		"[participants]"+
-//		"\n"+
-//		"\n"+
-//		"Resources\n"+
-//		"=========\n"+
-//		"[resources]\n"+
-//		"\n"+
-//		"==========================================";
+		"========================================== ";
 
-	public static final String APPOINTMENT_UPDATE_MAIL =
-		"This appointment was changed by [changed_by].\n" +
-		"You can check this appointment in your calendar:\n" +
-		"[link]\n" + 
+	public static final String TASK_CREATE_MAIL_EXT = 
+		"A new task was created by [created_by].\n" +
+		"\n" + 
+		"Task\n" + 
+		"====\n" + 
+		"Created by: [created_by]\n" + 
+		"Created at: [creation_datetime]\n" + 
+		"[title]\n" + 
+		"[folder_name]\n" + 
+		"[priority]\n" + 
+		"[task_status]\n" + 
+		"\n" + 
+		"[start]\n" +
+		"[end]\n" + 
+		"[series]\n" + 
+		"\n" + 
+		"[description]" + 
+		"\n" + 
+		"\n" + 
+		"Participants\n" + 
+		"============\n" + 
+		"[participants]" + 
+		"\n" + 
+		"\n" + 
+		"Resources\n" + 
+		"=========\n" + 
+		"[resources]" +
+		"\n" +
+		"\n" + 
+		"========================================== ";
+
+	/*
+	 * DELETE
+	 */
+
+	public static final String APPOINTMENT_DELETE_MAIL = 
+		"This appointment has been deleted by [changed_by].\n" + 
 		"\n" + 
 		"Appointment\n" + 
 		"===========\n" + 
@@ -246,155 +213,177 @@ public class Notifications {
 		"\n" + 
 		"\n" + 
 		"==========================================";
+	
+	public static final String TASK_DELETE_MAIL = 
+		"This task has been deleted by [changed_by].\n" + 
+		"\n" + 
+		"Task\n" + 
+		"====\n" + 
+		"Created by:  [created_by]\n" + 
+		"Created at:  [creation_datetime]\n" + 
+		"[title]\n" + 
+		"[folder_name]\n" + 
+		"[priority]\n" + 
+		"[task_status]\n" + 
+		"\n" + 
+		"[start]\n" + 
+		"[end]\n" + 
+		"[series]\n" + 
+		"\n" + 
+		"[description]\n" + 
+		"\n" + 
+		"\n" + 
+		"Participants\n" + 
+		"============\n" + 
+		"[participants]" +
+		"\n" + 
+		"\n" + 
+		"Resources\n" + 
+		"=========\n" + 
+		"[resources]" +
+		"\n" + 
+		"\n" + 
+		"========================================== ";
+
+	/*
+	 * UPDATE
+	 */
+
+	public static final String APPOINTMENT_UPDATE_MAIL =
+		"This appointment was changed by [changed_by].\n" +
+		"You can check this appointment in your calendar:\n" +
+		"[link]\n" + 
+		"\n" + 
+		"Appointment\n" + 
+		"===========\n" + 
+		"Created by: [created_by]\n" + 
+		"Created at: [creation_datetime]\n" + 
+		"[title]\n" + 
+		"[location]\n" + 
+		"[folder_name]\n" + 
+		"\n" + 
+		"[start]\n" + 
+		"[end]\n" + 
+		"[series]\n" + 
+		"\n" + 
+		"[description]\n" + 
+		"\n" + 
+		"\n" + 
+		"Participants\n" + 
+		"============\n" + 
+		"[participants]" +
+		"\n" + 
+		"\n" + 
+		"Resources\n" + 
+		"=========\n" + 
+		"[resources]" +
+		"\n" + 
+		"\n" + 
+		"==========================================";
 
 	public static final String TASK_UPDATE_MAIL = 
-		"This task has been changed by [changed_by].\n"+
-		"\n"+
-		"Direct Link: [link]\n"+
-		"\n"+
-		"Task\n"+
-		"====\n"+
-		"Created by:  [created_by]\n"+
-		"Title:       [title]\n"+
-		"\n"+
-		"Start date:  [start]\n"+
-		"End date:    [end]\n"+
-		"\n"+
-		"Description:\n"+
-		"[description]\n"+
-		"\n"+
-		"\n"+
-		"Participants\n"+
-		"============\n"+
-		"[participants]"+
-		"\n"+
-		"\n"+
-		"Resources\n"+
-		"=========\n"+
-		"[resources]\n"+
-		"\n"+
-		"==========================================";
-
-	public static final String APPOINTMENT_REMOVED_PARTICIPANT = 
-		"An appointment has been changed by [changed_by].\n"+
-		"\n"+
-		"You have been removed from the list of participants.\n"+
-		"\n"+
-		"Appointment\n"+
-		"===========\n"+
-		"Created by:  [created_by]\n"+
-		"[title]\n"+
-		"[location]\n"+
-		"\n"+
-		"[start]\n"+
-		"[end]\n"+
+		"This task was changed by [changed_by].\n" +
+		"You can check this task in your tasks:\n" +
+		"[link]\n" +
+		"\n" +
+		"Task\n" +
+		"====\n" +
+		"Created by: [created_by]\n" +
+		"Created at: [creation_datetime]\n" +
+		"[title]\n" +
+		"[folder_name]\n" + 
+		"[priority]\n" +
+		"[task_status]\n" +
+		"\n" + 
+		"[start]\n" + 
+		"[end]\n" + 
 		"[series]\n" + 
-		"\n"+
-		"[description]\n"+
-		"\n"+
-		"\n"+
+		"\n" + 
+		"[description]\n" + 
+		"\n" + 
+		"\n" + 
+		"Participants\n" + 
+		"============\n" + 
+		"[participants]" +
+		"\n" + 
+		"\n" + 
+		"Resources\n" + 
+		"=========\n" + 
+		"[resources]" +
+		"\n" + 
+		"\n" + 
+		"==========================================";;
+	
+	/*
+	 * CONFIRMATION
+	 */
+
+	public static final String APPOINTMENT_CONFIRMATION_MAIL = 
+		"[changed_by] has [confirmation_action] this appointment.\n" +
+		"You can check this appointment in your calendar:\n" +
+		"[link]\n" + 
+		"\n" + 
+		"Appointment\n" + 
+		"===========\n" + 
+		"Created by: [created_by]\n" + 
+		"Created at: [creation_datetime]\n" + 
+		"[title]\n" + 
+		"[location]\n" + 
+		"[folder_name]\n" + 
+		"\n" + 
+		"[start]\n" + 
+		"[end]\n" + 
+		"[series]\n" + 
+		"\n" + 
+		"[description]" + 
+		"\n" + 
+		"\n" + 
+		"Participants\n" + 
+		"============\n" + 
+		"[participants]" +
+		"\n" + 
+		"\n" + 
+		"Resources\n" + 
+		"=========\n" + 
+		"[resources]" +
+		"\n" + 
+		"\n" + 
 		"==========================================";
 
-	public static final String TASK_REMOVED_PARTICIPANT = 
-		"A task has been changed by [changed_by].\n"+
-		"\n"+
-		"You have been removed from the list of participants.\n"+
-		"\n"+
-		"Task\n"+
-		"====\n"+
-		"Created by:  [created_by]\n"+
-		"Title:       [title]\n"+
-		"\n"+
-		"Start date:  [start]\n"+
-		"End date:    [end]\n"+
-		"\n"+
-		"Description:\n"+
-		"[description]\n"+
-		"\n"+
-		"\n"+
+	public static final String TASK_CONFIRMATION_MAIL = 
+		"[changed_by] has [confirmation_action] this task.\n" +
+		"You can check this task in your tasks:\n" +
+		"[link]\n" + 
+		"\n" + 
+		"Task\n" + 
+		"====\n" + 
+		"Created by: [created_by]\n" + 
+		"Created at: [creation_datetime]\n" + 
+		"[title]\n" + 
+		"[folder_name]\n" + 
+		"\n" + 
+		"[start]\n" + 
+		"[end]\n" + 
+		"[series]\n" + 
+		"\n" + 
+		"[description]" + 
+		"\n" + 
+		"\n" + 
+		"Participants\n" + 
+		"============\n" + 
+		"[participants]" +
+		"\n" + 
+		"\n" + 
+		"Resources\n" + 
+		"=========\n" + 
+		"[resources]" +
+		"\n" + 
+		"\n" + 
 		"==========================================";
 
-	public static final String APPOINTMENT_ADDED_PARTICIPANT = 
-		"An appointment has been changed by [changed_by].\n"+
-		"\n"+
-		"You have been added to the list of participants.\n"+
-		"\n"+
-		"Direct Link: [link]\n"+
-		"\n"+
-		"Appointment\n"+
-		"===========\n"+
-		"Created by:  [created_by]\n"+
-		"[title]\n"+
-		"[location]\n"+
-		"\n"+
-		"[start]\n"+
-		"[end]\n"+
-		"[series]\n" +
-		"\n"+
-		"[description]\n"+
-		"\n"+
-		"\n"+
-		"==========================================";
-
-	public static final String TASK_ADDED_PARTICIPANT = 
-		"A task has been changed by [changed_by].\n"+
-		"\n"+
-		"You have been added to the list of participants.\n"+
-		"\n"+
-		"Direct Link: [link]\n"+
-		"\n"+
-		"Task\n"+
-		"====\n"+
-		"Created by:  [created_by]\n"+
-		"Title:       [title]\n"+
-		"\n"+
-		"Start date:  [start]\n"+
-		"End date:    [end]\n"+
-		"\n"+
-		"Description:\n"+
-		"[description]\n"+
-		"\n"+
-		"\n"+
-		"==========================================";
-
-	public static final String APPOINTMENT_ADDED_PARTICIPANT_EXT = 
-		"An appointment has been changed by [changed_by].\n"+
-		"\n"+
-		"You have been added to the list of participants.\n"+
-		"\n"+
-		"Appointment\n"+
-		"===========\n"+
-		"Created by:  [created_by]\n"+
-		"[title]\n"+
-		"[location]\n"+
-		"\n"+
-		"[start]\n"+
-		"[end]\n"+
-		"[series]\n" +
-		"\n"+
-		"[description]\n"+
-		"\n"+
-		"\n"+
-		"==========================================";
-
-	public static final String TASK_ADDED_PARTICIPANT_EXT = 
-		"A task has been changed by [changed_by].\n"+
-		"\n"+
-		"You have been added to the list of participants.\n"+
-		"\n"+
-		"Task\n"+
-		"====\n"+
-		"Created by:  [created_by]\n"+
-		"Title:       [title]\n"+
-		"\n"+
-		"Start date:  [start]\n"+
-		"End date:    [end]\n"+
-		"\n"+
-		"Description:\n"+
-		"[description]\n"+
-		"\n"+
-		"\n"+
-		"==========================================";
+	/*
+	 * MESSAGE SUBJECT PREFIXES
+	 */
 	
 	public static final String APPOINTMENT_CREATE_TITLE = "New Appointment";
 
@@ -402,18 +391,81 @@ public class Notifications {
 
 	public static final String APPOINTMENT_DELETE_TITLE = "Appointment deleted";
 
+	public static final String APPOINTMENT_ACCEPTED_TITLE = "Appointment (accepted)";
+
+	public static final String APPOINTMENT_DECLINED_TITLE = "Appointment (declined)";
+
+	public static final String APPOINTMENT_TENTATIVE_TITLE = "Appointment (tentative)";
+
 	public static final String TASK_CREATE_TITLE = "New task";
 
 	public static final String TASK_UPDATE_TITLE = "Task changed";
 
 	public static final String TASK_DELETE_TITLE = "Task deleted";
 
+	public static final String TASK_ACCEPTED_TITLE = "Task (accepted)";
+
+	public static final String TASK_DECLINED_TITLE = "Task (declined)";
+
+	public static final String TASK_TENTATIVE_TITLE = "Task (tentative)";
+
+	/*
+	 * MISC
+	 */
+
+	/**
+	 * No resources have been scheduled.
+	 */
 	public static final String NO_RESOURCES = "No resources have been scheduled.";
 
 	/**
 	 * No series
 	 */
 	public static final String NO_SERIES = "No series";
+
+	/**
+	 * Mail to resource %1$s
+	 */
+	public static final String RESOURCE_PREFIX = "Mail to resource %1$s";
+
+	/**
+	 * Resource
+	 */
+	public static final String RESOURCE_TITLE_PREFIX = "Resource";
+
+	/*
+	 * Confirmation actions
+	 */
+
+	public static final String CA_ACCEPTED = "accepted";
+
+	public static final String CA_DECLINED = "declined";
+
+	public static final String CA_TENTATIVELY_ACCEPTED = "tentatively accepted";
+
+	/*
+	 * Confirmation statuses
+	 */
+
+	/**
+	 * waiting
+	 */
+	public static final String STATUS_WAITING = "waiting";
+
+	/**
+	 * accepted
+	 */
+	public static final String STATUS_ACCEPTED = "accepted";
+
+	/**
+	 * declined
+	 */
+	public static final String STATUS_DECLINED = "declined";
+
+	/**
+	 * tentative
+	 */
+	public static final String STATUS_TENTATIVE = "tentative";
 
 	/*
 	 * Line patterns
@@ -445,6 +497,11 @@ public class Notifications {
 	public static final String FORMAT_END_DATE = "End date: %1$s";
 
 	/**
+	 * Due date: %1$s
+	 */
+	public static final String FORMAT_DUE_DATE = "Due date: %1$s";
+
+	/**
 	 * Series: %1$s
 	 */
 	public static final String FORMAT_SERIES = "Series: %1$s";
@@ -454,6 +511,45 @@ public class Notifications {
 	 * %1$s
 	 */
 	public static final String FORMAT_COMMENTS = "Comments:\n%1$s";
+
+	/**
+	 * Priority: %1$s
+	 */
+	public static final String FORMAT_PRIORITY = "Priority: %1$s";
+
+	/**
+	 * Status: %1$s
+	 */
+	public static final String FORMAT_STATUS = "Status: %1$s";
+
+	/*
+	 * Task statuses
+	 */
+
+	/**
+	 * Not started
+	 */
+	public static final String TASK_STATUS_NOT_STARTED = "Not started";
+
+	/**
+	 * In progress
+	 */
+	public static final String TASK_STATUS_IN_PROGRESS = "In progress";
+
+	/**
+	 * Done
+	 */
+	public static final String TASK_STATUS_DONE = "Done";
+
+	/**
+	 * Waiting
+	 */
+	public static final String TASK_STATUS_WAITING = "Waiting";
+
+	/**
+	 * Deferred
+	 */
+	public static final String TASK_STATUS_DEFERRED = "Deferred";
 
 	/*
 	 * Added/Removed participant
