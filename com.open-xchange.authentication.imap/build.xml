@@ -1,4 +1,4 @@
-<project name="com.openexchange.authentication.ldap" default="install" basedir=".">
+<project name="com.openexchange.authentication.imap" default="install" basedir=".">
 
     <!-- Customizable values -->
     <property name="destdir" value=""/>
@@ -13,7 +13,7 @@
 
 	<property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
-	<property name="composite.name" value="open-xchange-authentication-ldap-${version}" />
+	<property name="composite.name" value="open-xchange-authentication-imap-${version}" />
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
@@ -28,6 +28,7 @@
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
     <property name="commonjar" value="com.openexchange.common/common.jar"/>
 	<property name="globaljar" value="com.openexchange.global.jar" />
+	<property name="serverjar" value="com.openexchange.server.jar" />
 	<property name="configreadjar" value="com.openexchange.configread.jar" />
 
     <!-- Classpath -->
@@ -36,6 +37,7 @@
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesdir}/${commonjar}"/>
 		<pathelement location="${bundlesdir}/${globaljar}"/>
+		<pathelement location="${bundlesdir}/${serverjar}"/>
 		<pathelement location="${bundlesdir}/${configreadjar}"/>
     </path>
 
