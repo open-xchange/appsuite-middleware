@@ -1410,6 +1410,23 @@ public final class MIMEMessageConverter {
 	}
 
 	/**
+	 * Creates a MIME mail part object from given raw bytes
+	 * 
+	 * @param asciiBytes
+	 *            The raw bytes
+	 * @return A MIME mail part object
+	 * @throws MailException
+	 *             If creating MIME mail part object fails
+	 */
+	public static MailPart convertPart(final byte[] asciiBytes) throws MailException {
+		try {
+			return convertPart(new MimeBodyPart(new UnsynchronizedByteArrayInputStream(asciiBytes)));
+		} catch (final MessagingException e) {
+			throw MIMEMailException.handleMessagingException(e);
+		}
+	}
+
+	/**
 	 * "base64"
 	 */
 	private static final String ENC_BASE64 = "base64";
