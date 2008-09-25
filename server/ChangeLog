@@ -1,3 +1,8 @@
+* 2008-09-25 - thorben.betten@open-xchange.com
+
+ - Bugfix #12166: Fixed max. end date calculation for yearly recurring
+   appointment
+
 * 2008-09-24 - marcus.klein@open-xchange.com
 
  - Bugfix #12224: First remove pool from pools data structure and then destroy it.
