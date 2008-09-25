@@ -185,10 +185,9 @@ public final class MessageWriter {
 					final boolean withKey, final int user, final int cid) throws MailException {
 				try {
 					if (withKey) {
-						((JSONObject) jsonContainer)
-								.put(FolderChildFields.FOLDER_ID, prepareFullname(mail.getFolder()));
+						((JSONObject) jsonContainer).put(MailJSONField.HAS_ATTACHMENTS.getKey(), mail.hasAttachment());
 					} else {
-						((JSONArray) jsonContainer).put(prepareFullname(mail.getFolder()));
+						((JSONArray) jsonContainer).put(mail.hasAttachment());
 					}
 				} catch (final JSONException e) {
 					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
