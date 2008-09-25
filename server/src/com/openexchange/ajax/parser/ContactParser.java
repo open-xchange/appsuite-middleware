@@ -82,6 +82,8 @@ public class ContactParser extends CommonParser {
 	public void parse(final ContactObject contactobject, final JSONObject jsonobject) throws OXException {
 		try {
 			parseElementContact(contactobject, jsonobject);
+		} catch (final OXException exc) {
+			throw exc;
 		} catch (final Exception exc) {
 			throw new OXException(exc);
 		}

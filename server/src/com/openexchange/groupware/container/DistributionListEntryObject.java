@@ -54,7 +54,9 @@ package com.openexchange.groupware.container;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.ContactConfig;
+import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.tools.StringCollection;
 
 /**
@@ -89,13 +91,28 @@ public class DistributionListEntryObject {
 	private boolean b_emailfield;
 	private boolean b_folderid;
 	
-	public DistributionListEntryObject()
-	{
-
+	/**
+	 * Initializes a new {@link DistributionListEntryObject}
+	 */
+	public DistributionListEntryObject() {
+		super();
 	}
-	
+
+	/**
+	 * Initializes a new {@link DistributionListEntryObject}
+	 * 
+	 * @param displayname
+	 *            The display name
+	 * @param emailaddress
+	 *            The email address
+	 * @param emailfield
+	 *            The email field
+	 * @throws ContactException
+	 *             If specified email address is invalid
+	 */
 	public DistributionListEntryObject(final String displayname, final String emailaddress, final int emailfield)
-	{
+			throws ContactException {
+		this();
 		setDisplayname(displayname);
 		setEmailaddress(emailaddress);
 		setEmailfield(emailfield);
@@ -154,9 +171,26 @@ public class DistributionListEntryObject {
 	public void setFirstname( final String firstname ) {
 		this.firstname = firstname;
 		b_firstname = true;
-	}	
+	}
 
-	public void setEmailaddress( final String emailaddress ) {
+	/**
+	 * Sets the distribution list entry's email address
+	 * 
+	 * @param emailaddress
+	 *            The email address to set
+	 * @throws ContactException
+	 *             If specified email address is invalid
+	 */
+	public void setEmailaddress(final String emailaddress) throws ContactException {
+		/*
+		 * Verify email address with JavaMail's InternetAddress class
+		 */
+		try {
+			new InternetAddress(emailaddress);
+		} catch (final AddressException e) {
+			throw new ContactException(Category.USER_INPUT, ContactException.INVALID_ADDRESS, 99,
+					emailaddress);
+		}
 		this.emailaddress = emailaddress;
 		b_emailaddress = true;
 	}
