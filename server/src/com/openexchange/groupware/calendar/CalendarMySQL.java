@@ -2778,29 +2778,26 @@ class CalendarMySQL implements CalendarSqlImp {
 				DBPool.closeWriterSilent(ctx, writecon);
 			}
 		}
-		// TODO: Dependent on user configuration
-		//if (true) {
-			/*
-			 * Trigger event after changes are committed
-			 */
-			final int fid = CalendarCommonCollection.resolveFolderIDForUser(oid, uid, ctx);
-			if (fid == -1) {
-				LOG.warn(StringCollection.convertArraytoString(new Object[] {
-						"Confirmation event could not be triggered: Unable to resolve folder id for user:oid:context",
-						Integer.valueOf(uid), Integer.valueOf(oid), Integer.valueOf(so.getContextId()) }));
-				return;
-			}
-			final CalendarDataObject cdao;
-			try {
-				cdao = new CalendarSql(so).getObjectById(oid, fid);
-			} catch (final SQLException e) {
-				LOG.warn("Confirmation event could not be triggered", new OXCalendarException(
-						OXCalendarException.Code.CALENDAR_SQL_ERROR, e));
-				return;
-			}
-			cdao.setParentFolderID(fid);
-			CalendarCommonCollection.triggerEvent(so, getConfirmAction(confirm), cdao);
-		//}
+		/*
+		 * Trigger event after changes are committed
+		 */
+		final int fid = CalendarCommonCollection.resolveFolderIDForUser(oid, uid, ctx);
+		if (fid == -1) {
+			LOG.warn(StringCollection.convertArraytoString(new Object[] {
+					"Confirmation event could not be triggered: Unable to resolve folder id for user:oid:context",
+					Integer.valueOf(uid), Integer.valueOf(oid), Integer.valueOf(so.getContextId()) }));
+			return;
+		}
+		final CalendarDataObject cdao;
+		try {
+			cdao = new CalendarSql(so).getObjectById(oid, fid);
+		} catch (final SQLException e) {
+			LOG.warn("Confirmation event could not be triggered", new OXCalendarException(
+					OXCalendarException.Code.CALENDAR_SQL_ERROR, e));
+			return;
+		}
+		cdao.setParentFolderID(fid);
+		CalendarCommonCollection.triggerEvent(so, getConfirmAction(confirm), cdao);
 	}
 
 	private static final int getConfirmAction(final int confirm) {
