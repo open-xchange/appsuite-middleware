@@ -3582,7 +3582,7 @@ class CalendarMySQL implements CalendarSqlImp {
 	}
 
 	private final void triggerDeleteEvent(final int oid, final int fid, final Session so, final Context ctx, final CalendarDataObject edao) throws OXException {
-		CalendarDataObject ao = null;
+		final CalendarDataObject ao;
 		if (edao == null) {
 			ao = new CalendarDataObject();
 		} else {
