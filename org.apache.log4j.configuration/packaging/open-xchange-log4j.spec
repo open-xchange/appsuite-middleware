@@ -62,9 +62,13 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
+%dir /opt/open-xchange/etc/groupware/
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d/
+%dir /opt/open-xchange/etc/admindaemon/
 %dir /opt/open-xchange/etc/admindaemon/osgi/bundle.d/
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 /opt/open-xchange/etc/admindaemon/osgi/bundle.d/*
+%config(noreplace) /opt/open-xchange/etc/admindaemon/log4j.xml
+%config(noreplace) /opt/open-xchange/etc/groupware/log4j.xml
 
