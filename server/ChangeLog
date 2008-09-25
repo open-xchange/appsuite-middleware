@@ -2,6 +2,8 @@
 
  - Bugfix #12166: Fixed max. end date calculation for yearly recurring
    appointment
+ - Bugfix #12170: Applying possibly conflicting start/end to calculation of
+   free-busy-results
 
 * 2008-09-24 - marcus.klein@open-xchange.com
 
