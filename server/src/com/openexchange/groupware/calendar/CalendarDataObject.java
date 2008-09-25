@@ -344,7 +344,7 @@ public class CalendarDataObject extends AppointmentObject {
 
     @Override
     public Object clone() {
-        final CalendarDataObject clone = new CalendarDataObject();
+        final CalendarDataObject clone = (CalendarDataObject) super.clone();
         clone.setContext(getContext());
         if (containsObjectID()) {
             clone.setObjectID(getObjectID());
@@ -363,6 +363,9 @@ public class CalendarDataObject extends AppointmentObject {
         }
         if (containsCreatedBy()) {
             clone.setCreatedBy(getCreatedBy());
+        }
+        if (containsCreationDate()) {
+        	clone.setCreationDate((Date) getCreationDate().clone());
         }
         if (containsLastModified()) {
             clone.setLastModified(getLastModified());
@@ -421,6 +424,12 @@ public class CalendarDataObject extends AppointmentObject {
         if (containsOccurrence()) {
             clone.setOccurrence(getOccurrence());
         }
+        if (containsChangeExceptions()) {
+        	clone.setChangeExceptions(copy(getChangeException()));
+        }
+        if (containsDeleteExceptions()) {
+        	clone.setDeleteExceptions(copy(getDeleteException()));
+        }
         clone.setIgnoreConflicts(ignoreConflicts);
         clone.setUsers(getUsers());
         clone.setParticipants(getParticipants());
@@ -441,6 +450,18 @@ public class CalendarDataObject extends AppointmentObject {
 
 
         return clone;
+    }
+
+    private static final Date[] copy(final Date[] copyMe) {
+    	if (copyMe == null) {
+    		return null;
+    	}
+    	final Date[] clone = new Date[copyMe.length];
+    	for (int i = 0; i < clone.length; i++) {
+    		final Date cur = copyMe[i];
+    		clone[i] = (Date) (cur == null ? null : cur.clone());
+		}
+    	return clone;
     }
 
     private static final String STR_DELIM = " - ";
