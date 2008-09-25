@@ -8,7 +8,6 @@
 * 2008-09-24 - marcus.klein@open-xchange.com
 
  - Bugfix #12224: First remove pool from pools data structure and then destroy it.
- - Bugfix #12223: Check empty end date before doing end date in past check.
  - Bugfix #12211: Enclosed checking existing entry and following insert or
    update operation in a transaction.
 
