@@ -325,58 +325,19 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		if (newObj.getEndDate().getTime() < System.currentTimeMillis()) {
 			return;
 		}
-
-		final SortedSet<EmailableParticipant> participantSet = new TreeSet<EmailableParticipant>();
-		final SortedSet<EmailableParticipant> resourceSet = new TreeSet<EmailableParticipant>();
-
+		/*
+		 * A map to remember receivers
+		 */
 		final Map<Locale, List<EmailableParticipant>> receivers = new HashMap<Locale, List<EmailableParticipant>>();
-
-		final Map<String, EmailableParticipant> all = new HashMap<String, EmailableParticipant>();
-		final UserParticipant[] users = newObj.getUsers();
-		if (null == users) {
-			Participant[] oldParticipants = new Participant[0];
-			if (oldObj != null) {
-				oldParticipants = oldObj.getParticipants();
-			}
-			sortParticipants(oldParticipants, newObj.getParticipants(), participantSet, resourceSet, receivers,
-					sessionObj, all);
-		} else {
-			UserParticipant[] oldUsers = new UserParticipant[0];
-			if (oldObj != null) {
-				oldUsers = oldObj.getUsers();
-			}
-			Participant[] oldParticipants = new Participant[0];
-			if (oldObj != null) {
-				oldParticipants = oldObj.getParticipants();
-			}
-
-			sortUserParticipants(oldUsers, newObj.getUsers(), participantSet, isUpdate, receivers, sessionObj, all);
-			sortExternalParticipantsAndResources(oldParticipants, newObj.getParticipants(), participantSet,
-					resourceSet, receivers, sessionObj, all);
-		}
-
-		String createdByDisplayName = "UNKNOWN";
-		String modifiedByDisplayName = "UNKNOWN";
-		try {
-			final Context ctx = sessionObj.getContext();
-			if (0 != newObj.getCreatedBy()) {
-				createdByDisplayName = resolveUsers(ctx, newObj.getCreatedBy())[0].getDisplayName();
-			}
-			if (0 != newObj.getModifiedBy()) {
-				modifiedByDisplayName = resolveUsers(ctx, newObj.getModifiedBy())[0].getDisplayName();
-			}
-		} catch (final LdapException e) {
-			createdByDisplayName = e.toString();
-			modifiedByDisplayName = e.toString();
-			LL.log(e);
-		}
-
+		/*
+		 * Remember object's title
+		 */
+		final String title = null == newObj.getTitle() ? "" : newObj.getTitle();
 		/*
 		 * Generate a render map filled with object-specific information
 		 */
-		final String title = null == newObj.getTitle() ? "" : newObj.getTitle();
-		final RenderMap renderMap = createRenderMap(newObj, oldObj, isUpdate, participantSet, resourceSet,
-				createdByDisplayName, modifiedByDisplayName, title, state.getModule());
+		final RenderMap renderMap = createRenderMap(newObj, oldObj, isUpdate, title, state.getModule(), receivers,
+				sessionObj);
 		/*
 		 * The action replacement used to compose message title
 		 */
@@ -595,10 +556,41 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 	}
 
 	private RenderMap createRenderMap(final CalendarObject newObj, final CalendarObject oldObj, final boolean isUpdate,
-			final SortedSet<EmailableParticipant> participantSet, final SortedSet<EmailableParticipant> resourceSet,
-			final String createdByDisplayName, final String modifiedByDisplayName, final String title, final int module) {
+			final String title, final int module, final Map<Locale, List<EmailableParticipant>> receivers,
+			final ServerSession session) {
 		/*
-		 * Generate a render map filled with object-specific information
+		 * Containers for traversed participants
+		 */
+		final SortedSet<EmailableParticipant> participantSet = new TreeSet<EmailableParticipant>();
+		final SortedSet<EmailableParticipant> resourceSet = new TreeSet<EmailableParticipant>();
+		final Map<String, EmailableParticipant> all = new HashMap<String, EmailableParticipant>();
+		/*
+		 * Traverse participants and fill containers
+		 */
+		final UserParticipant[] users = newObj.getUsers();
+		if (null == users) {
+			Participant[] oldParticipants = new Participant[0];
+			if (oldObj != null) {
+				oldParticipants = oldObj.getParticipants();
+			}
+			sortParticipants(oldParticipants, newObj.getParticipants(), participantSet, resourceSet, receivers,
+					session, all);
+		} else {
+			UserParticipant[] oldUsers = new UserParticipant[0];
+			if (oldObj != null) {
+				oldUsers = oldObj.getUsers();
+			}
+			Participant[] oldParticipants = new Participant[0];
+			if (oldObj != null) {
+				oldParticipants = oldObj.getParticipants();
+			}
+
+			sortUserParticipants(oldUsers, newObj.getUsers(), participantSet, isUpdate, receivers, session, all);
+			sortExternalParticipantsAndResources(oldParticipants, newObj.getParticipants(), participantSet,
+					resourceSet, receivers, session, all);
+		}
+		/*
+		 * Generate a render map
 		 */
 		final RenderMap renderMap = new RenderMap();
 		renderMap
@@ -607,8 +599,25 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 								: false));
 		renderMap.put(new ParticipantsReplacement(participantSet).setChanged(isUpdate));
 		renderMap.put(new ResourcesReplacement(resourceSet).setChanged(isUpdate));
-		renderMap.put(new StringReplacement(TemplateToken.CREATED_BY, createdByDisplayName));
-		renderMap.put(new StringReplacement(TemplateToken.CHANGED_BY, modifiedByDisplayName));
+		{
+			String createdByDisplayName = "UNKNOWN";
+			String modifiedByDisplayName = "UNKNOWN";
+			try {
+				final Context ctx = session.getContext();
+				if (0 != newObj.getCreatedBy()) {
+					createdByDisplayName = resolveUsers(ctx, newObj.getCreatedBy())[0].getDisplayName();
+				}
+				if (0 != newObj.getModifiedBy()) {
+					modifiedByDisplayName = resolveUsers(ctx, newObj.getModifiedBy())[0].getDisplayName();
+				}
+			} catch (final LdapException e) {
+				createdByDisplayName = e.toString();
+				modifiedByDisplayName = e.toString();
+				LL.log(e);
+			}
+			renderMap.put(new StringReplacement(TemplateToken.CREATED_BY, createdByDisplayName));
+			renderMap.put(new StringReplacement(TemplateToken.CHANGED_BY, modifiedByDisplayName));
+		}
 		{
 			final String note = null == newObj.getNote() ? "" : newObj.getNote();
 			renderMap.put(new FormatLocalizedStringReplacement(TemplateToken.DESCRIPTION,
