@@ -72,6 +72,10 @@ public class ContactException extends OXException {
 	 * The contact %1$d is not located in folder %2$s (%3$d)
 	 */
 	public static final String NOT_IN_FOLDER = "The contact %1$d is not located in folder %2$s (%3$d)";
+	/**
+	 * Invalid email address: %1$s
+	 */
+	public static final String INVALID_ADDRESS = "Invalid email address: %1$s";
 	
 	public ContactException(final Category category, final int id, final String message, final Throwable cause, final Object...msgParams){
 		super(EnumComponent.CONTACT, category, id,message,cause,msgParams);
