@@ -56,9 +56,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
 
+import com.openexchange.api2.OXException;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
@@ -156,11 +159,26 @@ public final class ConfirmTask {
     }
 
     void sentEvent(final Session session) throws TaskException {
-//        try {
-//            
-//        } catch (final EventException e) {
-//            throw new TaskException(Code.EVENT, e);
-//        }
+        // TODO: Trigger only if user configuration says so
+    	//if (true) {
+			try {
+				final EventClient eventClient = new EventClient(session);
+				final int confirm = changedParticipant.getConfirm();
+				if (CalendarObject.ACCEPT == confirm) {
+					eventClient.accept(changedTask);
+				} else if (CalendarObject.DECLINE == confirm) {
+					eventClient.declined(changedTask);
+				} else if (CalendarObject.TENTATIVE == confirm) {
+					eventClient.tentative(changedTask);
+				}
+			} catch (final EventException e) {
+				throw new TaskException(Code.EVENT, e);
+			} catch (final OXException e) {
+				throw new TaskException(e);
+			} catch (final ContextException e) {
+				throw new TaskException(e);
+			}
+		//}
     }
 
     // =========================== internal helper methods =====================
