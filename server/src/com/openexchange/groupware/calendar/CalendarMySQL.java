@@ -1763,11 +1763,14 @@ class CalendarMySQL implements CalendarSqlImp {
 			try {
 				cdao.setRecurrenceCalculator(edao.getRecurrenceCalculator());
 				if (cdao.containsAlarm()) {
+					final UserParticipant[] users;
 					if (cdao.containsUserParticipants() && cdao.getUsers() != null) {
-						CalendarCommonCollection.checkAndModifyAlarm(cdao, cdao.getUsers(), so.getUserId(), edao.getUsers());
+						users = CalendarCommonCollection.checkAndModifyAlarm(cdao, cdao.getUsers(), so.getUserId(), edao.getUsers());
 					} else {
-						CalendarCommonCollection.checkAndModifyAlarm(cdao, edao.getUsers(), so.getUserId(), edao.getUsers());
+						users = CalendarCommonCollection.checkAndModifyAlarm(cdao, edao.getUsers(), so.getUserId(), edao.getUsers());
 					}
+					clone.setUsers(users);
+					clone.setAlarm(cdao.getAlarm());
 					cdao.removeAlarm();
 				}
 				final long lastModified = System.currentTimeMillis();
