@@ -53,8 +53,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
-import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.groupware.calendar.OXCalendarException.Code;
 
 /**
  * {@link AppointmentObject} - The appointment object
@@ -173,6 +171,7 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
 	
 	public void setTimezone(final String timezone) {
 		this.timezone = timezone;
+		b_timezone = true;
 	}
 	
 	// REMOVE METHODS
