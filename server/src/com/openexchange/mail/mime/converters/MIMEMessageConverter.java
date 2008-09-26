@@ -152,6 +152,8 @@ public final class MIMEMessageConverter {
 
 	}
 
+	private static final String STR_US_ASCII = "US-ASCII";
+
 	private static final String STR_EMPTY = "";
 
 	/**
@@ -1656,7 +1658,7 @@ public final class MIMEMessageConverter {
 			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
 			try {
 				part.writeTo(out);
-				headers = loadHeaders(new String(out.toByteArray(), "US-ASCII"));
+				headers = loadHeaders(new String(out.toByteArray(), STR_US_ASCII));
 			} catch (final IOException e2) {
 				LOG.error("Unable to parse headers", e2);
 				headers = new HeaderCollection(0);
@@ -1674,7 +1676,7 @@ public final class MIMEMessageConverter {
 			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
 			try {
 				part.writeTo(out);
-				headers = loadHeaders(new String(out.toByteArray(), "US-ASCII"));
+				headers = loadHeaders(new String(out.toByteArray(), STR_US_ASCII));
 			} catch (final IOException e2) {
 				LOG.error("Unable to parse headers", e2);
 				headers = new HeaderCollection(0);
@@ -1727,7 +1729,7 @@ public final class MIMEMessageConverter {
 	 */
 	public static HeaderCollection loadHeaders(final byte[] bytes) {
 		try {
-			return loadHeaders(new String(bytes, "US-ASCII"));
+			return loadHeaders(new String(bytes, STR_US_ASCII));
 		} catch (final UnsupportedEncodingException e) {
 			/*
 			 * Cannot occur
