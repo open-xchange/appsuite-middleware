@@ -1341,7 +1341,6 @@ public class AppointmentBugTests extends TestCase {
             shared_folder_id = fo.getObjectID();       
             
             final CalendarSql csql = new CalendarSql(so);
-            final CalendarSql csql2 = new CalendarSql(so2);
             
             final CalendarDataObject cdao = new CalendarDataObject();
             cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
@@ -1367,6 +1366,7 @@ public class AppointmentBugTests extends TestCase {
             
             csql.updateAppointmentObject(update, fid, cdao.getLastModified());
  
+            final CalendarSql csql2 = new CalendarSql(so2);
             testobject = csql2.getObjectById(object_id, shared_folder_id);
             final UserParticipant user_test[] = testobject.getUsers();
             
@@ -3208,7 +3208,7 @@ public class AppointmentBugTests extends TestCase {
 		assertTrue("Object was created", object_id > 0);
 		
 		final RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
-		assertEquals("Unexpected number of occurrences: " + rss.size() + ". Should be: " + 3, 3, rss.size());
+		assertEquals("Unexpected number of occurrences: " + rss.size() + ". Should be: " + 4, 4, rss.size());
 	}
 
 	/**

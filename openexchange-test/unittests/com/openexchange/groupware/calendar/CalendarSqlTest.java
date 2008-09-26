@@ -168,9 +168,12 @@ public class CalendarSqlTest extends TestCase {
         clean.add( cdao );
 
         final CalendarDataObject modified = new CalendarDataObject();
+        modified.setStartDate(cdao.getStartDate());
+        modified.setEndDate(cdao.getEndDate());
         modified.setObjectID(cdao.getObjectID());
         modified.setParentFolderID(cdao.getParentFolderID());
         modified.setRecurrenceType(CalendarDataObject.MONTHLY);
+        modified.setInterval(1);
         modified.setDays(CalendarObject.TUESDAY);
         modified.setDayInMonth(666); // Must be between 1 and 5, usually, so 666 is invalid
         modified.setContext(cdao.getContext());
@@ -837,16 +840,19 @@ public class CalendarSqlTest extends TestCase {
         appointments.save( update );
 
         update = appointments.createIdentifyingCopy(update);
-        update.setRecurrencePosition(0);
+        update.setRecurrencePosition(1);
         update.setTitle("Exception");
 
         try {
 			appointments.save( update );
 			fail("Could change recurrence position for change exception");
 		} catch (final OXCalendarException e) {
-			assertEquals("Unexpected error code: " + e.getDetailNumber(), OXCalendarException.Code.INVALID_RECURRENCE_POSITION_CHANGE.getDetailNumber(), e.getDetailNumber());
+			if ((OXCalendarException.Code.INVALID_RECURRENCE_POSITION_CHANGE.getDetailNumber() != e.getDetailNumber()) &&
+					(OXCalendarException.Code.INVALID_RECURRENCE_TYPE_CHANGE.getDetailNumber() != e.getDetailNumber())) {
+				fail("Unexpected error code: " + e.getDetailNumber());
+			}
 		}
- 
+
     }
 
 	/**
@@ -927,9 +933,9 @@ public class CalendarSqlTest extends TestCase {
 		final RecurringResults results = CalendarRecurringCollection.calculateRecurring(appointment, 0, 0, 0);
 		assertEquals("Unexpected size in recurring results of weekly recurrence appointment", 2, results.size());
 		final RecurringResult firstResult = results.getRecurringResult(0);
-		assertEquals("Unexpected first occurrence", D("04/09/2008 22:00").getTime(), firstResult.getStart());
+		assertEquals("Unexpected first occurrence", D("05/09/2008 22:00"), new Date(firstResult.getStart()));
 		final RecurringResult secondResult = results.getRecurringResult(1);
-		assertEquals("Unexpected second occurrence", D("07/09/2008 22:00").getTime(), secondResult.getStart());
+		assertEquals("Unexpected second occurrence", D("08/09/2008 22:00"), new Date(secondResult.getStart()));
 	}
 
 	/**
@@ -953,15 +959,15 @@ public class CalendarSqlTest extends TestCase {
 		appointments.save(appointment);
 		clean.add(appointment);
 		// Check for 6 occurrences
-		final long[] expectedLongs = new long[] { D("14/09/2008 22:00").getTime(), D("15/09/2008 22:00").getTime(),
-				D("16/09/2008 22:00").getTime(), D("17/09/2008 22:00").getTime(), D("18/09/2008 22:00").getTime(),
-				D("21/09/2008 22:00").getTime() };
+		final long[] expectedLongs = new long[] { D("15/09/2008 22:00").getTime(), D("16/09/2008 22:00").getTime(),
+				D("17/09/2008 22:00").getTime(), D("18/09/2008 22:00").getTime(), D("19/09/2008 22:00").getTime(),
+				D("22/09/2008 22:00").getTime() };
 		final RecurringResults results = CalendarRecurringCollection.calculateRecurring(appointment, 0, 0, 0);
 		assertEquals("Unexpected size in recurring results of weekly recurrence appointment", expectedLongs.length,
 				results.size());
 		for (int i = 0; i < expectedLongs.length; i++) {
-			assertEquals("Unexpected " + (i + 1) + " occurrence", expectedLongs[i], results.getRecurringResult(i)
-					.getStart());
+			assertEquals("Unexpected " + (i + 1) + " occurrence", new Date(expectedLongs[i]), new Date(results.getRecurringResult(i)
+					.getStart()));
 		}
 	}
 
