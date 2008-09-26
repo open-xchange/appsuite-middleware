@@ -2,15 +2,11 @@ package com.openexchange.admin.contextrestore.rmi.impl;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,11 +16,13 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.admin.contextrestore.dataobjects.VersionInformation;
 import com.openexchange.admin.contextrestore.exceptions.OXContextRestoreException;
 import com.openexchange.admin.contextrestore.exceptions.OXContextRestoreException.Code;
 import com.openexchange.admin.contextrestore.osgi.Activator;
 import com.openexchange.admin.contextrestore.rmi.OXContextRestoreInterface;
-import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore.Parser.PoolIdSchemaAndFilenames;
+import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore.Parser.PoolIdAndSchema;
+import com.openexchange.admin.contextrestore.storage.interfaces.OXContextRestoreStorageInterface;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -36,8 +34,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.BasicAuthenticator;
 import com.openexchange.admin.rmi.impl.OXCommonImpl;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
-import com.openexchange.database.Database;
-import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * This class contains the implementation of the API defined in {@link OXContextRestoreInterface}
@@ -47,23 +43,20 @@ import com.openexchange.server.impl.DBPoolingException;
  */
 public class OXContextRestore extends OXCommonImpl implements OXContextRestoreInterface {
 
-    protected static class Parser {
+    public static class Parser {
         
-        protected class PoolIdSchemaAndFilenames {
+        public class PoolIdAndSchema {
             private final int pool_id;
             
             private final String schema;
-            
-            private final String[] filenames;
             
             /**
              * @param pool_id
              * @param schema
              */
-            private PoolIdSchemaAndFilenames(int pool_id, String schema, String[] filenames) {
+            private PoolIdAndSchema(int pool_id, String schema) {
                 this.pool_id = pool_id;
                 this.schema = schema;
-                this.filenames = filenames;
             }
             
             public final int getPool_id() {
@@ -72,94 +65,6 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             
             public final String getSchema() {
                 return schema;
-            }
-
-            public final String[] getFilenames() {
-                return filenames;
-            }
-        }
-        
-        public class VersionInformation {
-            private final int version;
-            
-            private final int locked;
-            
-            private final int gw_compatible;
-            
-            private final int admin_compatible;
-            
-            private final String server;
-            
-            /**
-             * @param admin_compatible
-             * @param gw_compatible
-             * @param locked
-             * @param server
-             * @param version
-             */
-            public VersionInformation(final int admin_compatible, final int gw_compatible, final int locked, final String server, final int version) {
-                this.admin_compatible = admin_compatible;
-                this.gw_compatible = gw_compatible;
-                this.locked = locked;
-                this.server = server;
-                this.version = version;
-            }
-
-            public final int getVersion() {
-                return version;
-            }
-
-            public final int getLocked() {
-                return locked;
-            }
-
-            public final int getGw_compatible() {
-                return gw_compatible;
-            }
-
-            public final int getAdmin_compatible() {
-                return admin_compatible;
-            }
-
-            public final String getServer() {
-                return server;
-            }
-
-            @Override
-            public int hashCode() {
-                final int prime = 31;
-                int result = 1;
-                result = prime * result + admin_compatible;
-                result = prime * result + gw_compatible;
-                result = prime * result + locked;
-                result = prime * result + ((server == null) ? 0 : server.hashCode());
-                result = prime * result + version;
-                return result;
-            }
-
-            @Override
-            public boolean equals(Object obj) {
-                if (this == obj)
-                    return true;
-                if (obj == null)
-                    return false;
-                if (getClass() != obj.getClass())
-                    return false;
-                VersionInformation other = (VersionInformation) obj;
-                if (admin_compatible != other.admin_compatible)
-                    return false;
-                if (gw_compatible != other.gw_compatible)
-                    return false;
-                if (locked != other.locked)
-                    return false;
-                if (server == null) {
-                    if (other.server != null)
-                        return false;
-                } else if (!server.equals(other.server))
-                    return false;
-                if (version != other.version)
-                    return false;
-                return true;
             }
 
         }
@@ -178,7 +83,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         
         private final static Pattern insertIntoVersion = Pattern.compile("^INSERT INTO `version` VALUES \\((?:([^\\),]*),)(?:([^\\),]*),)(?:([^\\),]*),)(?:([^\\),]*),)([^\\),]*)\\).*$");
 
-        public PoolIdSchemaAndFilenames start(final int cid, final String filename) throws FileNotFoundException, IOException, DBPoolingException, SQLException, OXContextRestoreException {
+        public PoolIdAndSchema start(final int cid, final String filename) throws FileNotFoundException, IOException, SQLException, OXContextRestoreException, StorageException {
             final BufferedReader in = new BufferedReader(new FileReader(filename));
             BufferedWriter bufferedWriter = null;
             int c;
@@ -317,36 +222,10 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                 }
             }
             bufferedWriter.close();
-            checkVersion(versionInformation, pool_id, schema);
-            return new PoolIdSchemaAndFilenames(pool_id, schema, filenames.toArray(new String[filenames.size()]));
-        }
-
-        private void checkVersion(final VersionInformation versionInformation, final int pool_id, final String schema) throws SQLException, DBPoolingException, OXContextRestoreException {
-            Connection connection = null;
-            PreparedStatement prepareStatement = null;
-            try {
-                connection = Database.get(pool_id, schema);
-                prepareStatement = connection.prepareStatement("SELECT `version`, `locked`, `gw_compatible`, `admin_compatible`, `server` FROM `version`");
-                
-                final ResultSet result = prepareStatement.executeQuery();
-                if (result.next()) {
-                    final VersionInformation versionInformation2 = new VersionInformation(result.getInt(4), result.getInt(3), result.getInt(2), result.getString(5), result.getInt(1));
-                    if (!versionInformation.equals(versionInformation2)) {
-                        throw new OXContextRestoreException(Code.VERSION_TABLES_INCOMPATIBLE);
-                    }
-                } else {
-                    // Error there must be at least one row
-                    throw new OXContextRestoreException(Code.NO_ENTRIES_IN_VERSION_TABLE);
-                }
-                
-            } finally {
-                if (null != prepareStatement) {
-                    prepareStatement.close();
-                }
-                if (null != connection) {
-                    Database.back(pool_id, connection);
-                }
-            }
+            final PoolIdAndSchema poolIdAndSchema = new PoolIdAndSchema(pool_id, schema);
+            final OXContextRestoreStorageInterface instance = OXContextRestoreStorageInterface.getInstance();
+            instance.checkVersion(versionInformation, poolIdAndSchema);
+            return poolIdAndSchema;
         }
 
         /**
@@ -499,7 +378,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             }
         }
         
-        private List<String> searchingForeignKey(BufferedReader in) throws IOException {
+        private List<String> searchingForeignKey(final BufferedReader in) throws IOException {
             String readLine;
             readLine = in.readLine();
             List<String> foreign_keys = null;
@@ -560,7 +439,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         System.out.println("Creds:" + auth);
         
         try {
-            final PoolIdSchemaAndFilenames start = parser.start(ctx.getId(), filenames[0]);
+            final PoolIdAndSchema start = parser.start(ctx.getId(), filenames[0]);
             
             final OXContextInterface contextInterface = Activator.getContextInterface();
             
@@ -574,17 +453,17 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                 }
             }
             // We have to do the exists check beforehand otherwise you'll find a stack trace in the logs
-            return restorectx(ctx, start);
+            final OXContextRestoreStorageInterface instance = OXContextRestoreStorageInterface.getInstance();
+            return instance.restorectx(ctx, start);
+        } catch (final StorageException e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
         } catch (final FileNotFoundException e) {
             LOG.error("File not found");
             // TODO: Throw right exception here
             throw new OXContextRestoreException(Code.COULD_NOT_CONVERT_POOL_VALUE);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
-            // TODO: Throw right exception here
-            throw new OXContextRestoreException(Code.COULD_NOT_CONVERT_POOL_VALUE);
-        } catch (final DBPoolingException e) {
-            LOG.error(e);
             // TODO: Throw right exception here
             throw new OXContextRestoreException(Code.COULD_NOT_CONVERT_POOL_VALUE);
         } catch (final SQLException e) {
@@ -602,100 +481,4 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         }
     }
     
-    private String restorectx(final Context ctx, final PoolIdSchemaAndFilenames poolidandschema) throws DBPoolingException, SQLException, FileNotFoundException, IOException, OXContextRestoreException {
-        Connection connection = null;
-        Connection connection2 = null;
-        PreparedStatement prepareStatement = null;
-        PreparedStatement prepareStatement2 = null;
-        PreparedStatement prepareStatement3 = null;
-        final int pool_id = poolidandschema.getPool_id();
-        try {
-            File file = new File("/tmp/" + poolidandschema.getSchema()  + ".txt");
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            String in = null;
-            connection = Database.get(pool_id, poolidandschema.getSchema());
-            connection.setAutoCommit(false);
-            while ((in = reader.readLine()) != null) {
-                prepareStatement = connection.prepareStatement(in);
-                prepareStatement.execute();
-                prepareStatement.close();
-            }
-            file = new File("/tmp/configdb.txt");
-            reader = new BufferedReader(new FileReader(file));
-            in = null;
-            connection2 = Database.get(true);
-            connection2.setAutoCommit(false);
-            while ((in = reader.readLine()) != null) {
-                prepareStatement2 = connection2.prepareStatement(in);
-                prepareStatement2.execute();
-                prepareStatement2.close();
-            }
-            connection.commit();
-            connection.setAutoCommit(true);
-            connection2.commit();
-            connection2.setAutoCommit(true);
-            
-            prepareStatement3 = connection2.prepareStatement("SELECT `filestore_name`, `uri` FROM `context` INNER JOIN `filestore` ON context.filestore_id = filestore.id WHERE cid=?");
-            prepareStatement3.setInt(1, ctx.getId());
-            final ResultSet executeQuery = prepareStatement3.executeQuery();
-            if (executeQuery.next()) {
-                final String filestore_name = executeQuery.getString(1);
-                final String uri = executeQuery.getString(2);
-                return uri + File.separatorChar + filestore_name;
-            } else {
-                // TODO: Throw right exception here
-                throw new OXContextRestoreException(Code.COULD_NOT_CONVERT_POOL_VALUE);
-            }
-        } catch (final SQLException e) {
-            dorollback(connection, connection2, e);
-            throw e;
-        } catch (final FileNotFoundException e) {
-            dorollback(connection, connection2, e);
-            throw e;
-        } catch (final DBPoolingException e) {
-            dorollback(connection, connection2, e);
-            throw e;
-        } catch (final IOException e) {
-            dorollback(connection, connection2, e);
-            throw e;
-        } finally {
-            closePreparedStatement(prepareStatement);
-            closePreparedStatement(prepareStatement2);
-            closePreparedStatement(prepareStatement3);
-            if (null != connection) {
-                Database.back(pool_id, connection);
-            }
-        }
-    }
-
-    private void dorollback(Connection conn, Connection conn2, Exception e2) throws OXContextRestoreException {
-        if (null != conn) {
-            try {
-                conn.rollback();
-            } catch (SQLException e) {
-                LOG.error(e2.getMessage(), e2);
-                throw new OXContextRestoreException(Code.ROLLBACK_ERROR, e.getMessage());
-            }
-        }
-        if (null != conn2) {
-            try {
-                conn2.rollback();
-            } catch (SQLException e) {
-                LOG.error(e2.getMessage(), e2);
-                throw new OXContextRestoreException(Code.ROLLBACK_ERROR, e.getMessage());
-            }
-        }
-    }
-
-    private void closePreparedStatement(final PreparedStatement ps) {
-        try {
-            if (null != ps) {
-                ps.close();
-            }
-        } catch (final SQLException e) {
-            LOG.error("Error closing prepared statement!", e);
-        }
-    }
-
-
 }

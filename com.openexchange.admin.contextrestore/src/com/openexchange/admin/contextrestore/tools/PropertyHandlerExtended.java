@@ -46,57 +46,45 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.admin.contextrestore.tools;
 
-package com.openexchange.admin.contextrestore.rmi;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.admin.contextrestore.exceptions.OXContextRestoreException;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.PoolException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.tools.PropertyHandler;
 
-
-/**
- * This class defines the Open-Xchange API for restoring OX Contexts.<br><br>
- * 
- * At the moment this API defines only one call
- *
- * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
- *
- */
-public interface OXContextRestoreInterface extends Remote {
-
-    /**
-     * RMI name to be used in the naming lookup.
-     */
-    public static final String RMI_NAME = "OXContextRestore";
-
-    /**
-     * This method is used to restore one single context
-     * 
-     * @param ctx Context object
-     * @param filenames The filenames of the mysqldump files which contain the backup of the context. Note that these files
-     *                  have to be available to the admin daemon, so they must reside on the machine on which the admin
-     *                  daemon is running.
-     * @param auth Credentials for authenticating against server.
-     * @return TODO
-     * @throws RemoteException General RMI Exception
-     * @throws InvalidDataException 
-     * @throws StorageException 
-     * @throws InvalidCredentialsException 
-     * @throws OXContextRestoreException 
-     * @throws DatabaseUpdateException 
-     * @throws PoolException 
-     * @throws NoSuchContextException 
-     * @throws  
-     */
-    public String restore(final Context ctx, final String[] filenames, final Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXContextRestoreException, DatabaseUpdateException;
+public class PropertyHandlerExtended extends PropertyHandler {
     
+    private final static Log log = LogFactory.getLog(PropertyHandlerExtended.class);
+    
+    // The following lines define the property values for the database implementations
+    public static final String CONTEXT_RESTORE_STORAGE = "CONTEXT_RESTORE_STORAGE";
+
+    @SuppressWarnings("unused")
+    private PropertyHandlerExtended() {
+        super(null);
+    }
+    
+    public PropertyHandlerExtended(final Properties sysprops) {
+        super(sysprops);
+        final StringBuilder configfile = new StringBuilder(); 
+        configfile.append(sysprops.getProperty("configdir"));
+        configfile.append(File.separatorChar);
+        configfile.append("plugin");
+        configfile.append(File.separatorChar);
+        configfile.append("context_restore.properties");
+        try {
+            addpropsfromfile(configfile.toString());
+        } catch (final FileNotFoundException e) {
+            log.error("Unable to read file: " + configfile);
+        } catch (final IOException e) {
+            log.error("Problems reading file: " + configfile);
+        }
+    }
+   
 }

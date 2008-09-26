@@ -70,12 +70,40 @@ public class OXContextRestoreException extends PluginException {
     private final static Log LOG = LogFactory.getLog(OXContextRestoreException.class);
 
     public enum Code {
+        /**
+         * The version tables are incompatible
+         */
         VERSION_TABLES_INCOMPATIBLE("The version tables are incompatible"),
+        
+        /**
+         * No version information found in dump
+         */
         NO_VERSION_INFORMATION_FOUND("No version information found in dump"),
+        
+        /**
+         * Couldn't convert pool value
+         */
         COULD_NOT_CONVERT_POOL_VALUE("Couldn't convert pool value"),
+        
+        /**
+         * No entries in version table
+         */
         NO_ENTRIES_IN_VERSION_TABLE("No entries in version table"),
+        
+        /**
+         * Error during database operation: %s
+         */
         DATABASE_OPERATION_ERROR("Error during database operation: %s"),
-        ROLLBACK_ERROR("Error during rollback: %s");
+        
+        /**
+         * Error during rollback: %s
+         */
+        ROLLBACK_ERROR("Error during rollback: %s"),
+        
+        /**
+         * No values found for the filestore in the database
+         */
+        NO_FILESTORE_VALUE("No values found for the filestore in the database");
 
         private final String text;
 
