@@ -335,8 +335,20 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         return uc;
     }
     
+    /**
+     * Performs some preparations on specified calendar data object
+     * 
+     * @param cdao The calendar data object to check
+     * @param edao The storage's version of calendar data object to check; may be <code>null</code> on an insert
+     * @param uid The user ID
+     * @param inFolder The folder ID
+     * @param timezone The time zone
+     * @return <code>true</code> if an insert shall be performed; otherwise <code>false</code> for an update
+     * @throws OXException If an OX error occurs
+     * @throws Exception Of an error occurs
+     */
     public boolean prepareUpdateAction(final CalendarDataObject cdao, final CalendarDataObject edao, final int uid, final int inFolder, final String timezone) throws OXException, Exception {
-        boolean action = true;
+        boolean isInsert = true;
         if (cdao.getContext() == null) {
             throw new OXCalendarException(OXCalendarException.Code.CONTEXT_NOT_SET);
         }
@@ -345,16 +357,57 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 		    throw new OXCalendarException(OXCalendarException.Code.NON_CALENDAR_FOLDER);
 		}
 		if (cdao.containsObjectID()) {
-		    action = false;
+		    isInsert = false;
 		    if (!cdao.containsModifiedBy()) {
 		        cdao.setModifiedBy(uid);
 		    }
+		    /*if (!cdao.containsStartDate() || cdao.getStartDate() == null) {
+		    	cdao.setStartDate((Date) edao.getStartDate().clone());
+		    }
+		    if (!cdao.containsEndDate() || cdao.getEndDate() == null) {
+		    	cdao.setEndDate((Date) edao.getEndDate().clone());
+		    }*/
 		    handleFullTime(cdao);
 		    if (cdao.isSequence()) {
 		        if (!cdao.containsTimezone()) {
 		            cdao.setTimezone(timezone);
 		        }                        
 		        CalendarRecurringCollection.fillDAO(cdao);
+		    } else if (edao.isSequence() && edao.getObjectID() != edao.getRecurrenceID()) {
+		    	if (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null && !cdao.getRecurrenceDatePosition().equals(edao.getRecurrenceDatePosition())) {
+		    		/*
+			    	 * Deny change of recurring position in a change exception
+			    	 */
+			    	throw new OXCalendarException(OXCalendarException.Code.INVALID_RECURRENCE_POSITION_CHANGE);
+		    	} else if (cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0 && cdao.getRecurrencePosition() != edao.getRecurrencePosition()) {
+		    		/*
+			    	 * Deny change of recurring position in a change exception
+			    	 */
+			    	throw new OXCalendarException(OXCalendarException.Code.INVALID_RECURRENCE_POSITION_CHANGE);
+		    	} else if (cdao.containsInterval() && cdao.getInterval() > 0 && cdao.getInterval() != edao.getInterval()) {
+		    		/*
+			    	 * Deny change of recurring type/pattern in a change exception
+			    	 */
+			    	throw new OXCalendarException(OXCalendarException.Code.INVALID_RECURRENCE_TYPE_CHANGE);
+		    	} else if (cdao.containsDays() && cdao.getDays() > 0 && cdao.getDays() != edao.getDays()) {
+		    		/*
+			    	 * Deny change of recurring type/pattern in a change exception
+			    	 */
+			    	throw new OXCalendarException(OXCalendarException.Code.INVALID_RECURRENCE_TYPE_CHANGE);
+		    	} else if (cdao.containsDayInMonth() && cdao.getDayInMonth() > 0 && cdao.getDayInMonth() != edao.getDayInMonth()) {
+		    		/*
+			    	 * Deny change of recurring type/pattern in a change exception
+			    	 */
+			    	throw new OXCalendarException(OXCalendarException.Code.INVALID_RECURRENCE_TYPE_CHANGE);
+		    	} else if (cdao.containsMonth() && cdao.getMonth() > 0 && cdao.getMonth() != edao.getMonth()) {
+		    		/*
+			    	 * Deny change of recurring type/pattern in a change exception
+			    	 */
+			    	throw new OXCalendarException(OXCalendarException.Code.INVALID_RECURRENCE_TYPE_CHANGE);
+		    	}
+		    	if (edao.containsRecurrencePosition() && edao.getRecurrencePosition() > 0) {
+		    		cdao.setRecurrencePosition(edao.getRecurrencePosition());
+		    	}
 		    }
 		    prepareUpdate(cdao, inFolder);
 		} else {
@@ -369,7 +422,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 		    prepareInsert(cdao);
 		}
 		
-		if (action) {
+		if (isInsert) {
 		    cdao.setCreatedBy(uid);
 		    cdao.setCreationDate(new Date());
 		    cdao.setModifiedBy(uid);
@@ -390,7 +443,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 		}
 		
 		if (cdao.getFolderType() == FolderObject.PRIVATE) {
-		    if (action || cdao.containsParticipants()) {
+		    if (isInsert || cdao.containsParticipants()) {
 		        final UserParticipant up = new UserParticipant(uid);
 		        up.setConfirm(CalendarDataObject.ACCEPT);
 		        CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
@@ -401,7 +454,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 		    } else {
 		        cdao.setSharedFolderOwner(ofa.getFolderOwner(inFolder));
 		    }
-		    if (!action && !cdao.containsUserParticipants()) {
+		    if (!isInsert && !cdao.containsUserParticipants()) {
 		        cdao.setParticipants(edao.getParticipants());
 		        cdao.setUsers(edao.getUsers());
 		    }
@@ -428,7 +481,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 		    p = new UserParticipant(uid);
 		}
 		p.setConfirm(CalendarDataObject.ACCEPT);
-		if ((action || cdao.containsUserParticipants()) && cdao.getFolderType() != FolderObject.PUBLIC) {
+		if ((isInsert || cdao.containsUserParticipants()) && cdao.getFolderType() != FolderObject.PUBLIC) {
 		    CalendarCommonCollection.checkAndFillIfUserIsUser(cdao, p);
 		}
 		
@@ -437,14 +490,14 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 		}
         
         simpleDataCheck(cdao, edao, uid);
-        if (action && cdao.getParticipants() == null && cdao.getFolderType() == FolderObject.PUBLIC) {
+        if (isInsert && cdao.getParticipants() == null && cdao.getFolderType() == FolderObject.PUBLIC) {
             final Participant np[] = new Participant[1];
             final Participant up = new UserParticipant(uid);
             np[0] = up;
             cdao.setParticipants(np);
         }
         fillUserParticipants(cdao);
-        return action;
+        return isInsert;
     }
     
     private final void prepareInsert(final CalendarDataObject cdao) throws OXException {
@@ -1160,7 +1213,14 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     final int checkUpdateRecurring(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
         if (!edao.containsRecurrenceType() && !cdao.containsRecurrenceType()) {
             return CalendarRecurringCollection.RECURRING_NO_ACTION;
-        } else if (edao.containsRecurrenceType() && edao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE && (!cdao.containsRecurrenceType() || cdao.getRecurrenceType() == edao.getRecurrenceType())) {
+        }
+        if (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0 && edao.getRecurrenceID() != edao.getObjectID()) {
+        	/*
+        	 * An update of a change exception
+        	 */
+        	return CalendarRecurringCollection.RECURRING_NO_ACTION;
+        }
+        if (edao.containsRecurrenceType() && edao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE && (!cdao.containsRecurrenceType() || cdao.getRecurrenceType() == edao.getRecurrenceType())) {
             final int ret = CalendarRecurringCollection.getRecurringAppoiontmentUpdateAction(cdao, edao);
             if (ret == CalendarRecurringCollection.RECURRING_NO_ACTION) {
                 // We have to check if something has been changed in the meantime!
