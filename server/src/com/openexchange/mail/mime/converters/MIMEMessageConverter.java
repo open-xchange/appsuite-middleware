@@ -1651,7 +1651,7 @@ public final class MIMEMessageConverter {
 			}
 		} catch (final MessagingException e) {
 			if (LOG.isWarnEnabled()) {
-				LOG.warn("JavaMail API failed to load part's headers", e);
+				LOG.warn("JavaMail API failed to load part's headers. Using own routine.", e);
 			}
 			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
 			try {
@@ -1663,8 +1663,28 @@ public final class MIMEMessageConverter {
 			} catch (final MessagingException e2) {
 				LOG.error("Unable to parse headers", e2);
 				headers = new HeaderCollection(0);
+			} catch (final IllegalArgumentException e2) {
+				LOG.error("Unable to parse headers", e2);
+				headers = new HeaderCollection(0);
 			}
-
+		} catch (final IllegalArgumentException e) {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn("JavaMail API failed to load part's headers. Using own routine.", e);
+			}
+			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
+			try {
+				part.writeTo(out);
+				headers = loadHeaders(new String(out.toByteArray(), "US-ASCII"));
+			} catch (final IOException e2) {
+				LOG.error("Unable to parse headers", e2);
+				headers = new HeaderCollection(0);
+			} catch (final MessagingException e2) {
+				LOG.error("Unable to parse headers", e2);
+				headers = new HeaderCollection(0);
+			} catch (final IllegalArgumentException e2) {
+				LOG.error("Unable to parse headers", e2);
+				headers = new HeaderCollection(0);
+			}
 		}
 		mailPart.addHeaders(headers);
 	}
