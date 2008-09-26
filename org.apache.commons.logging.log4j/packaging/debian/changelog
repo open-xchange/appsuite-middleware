@@ -1,3 +1,9 @@
+open-xchange-commons-logging-log4j (6.6.0-3) unstable; urgency=low
+
+  * first build for RC10
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 26 Sep 2008 11:24:33 +0200
+
 open-xchange-commons-logging-log4j (6.6.0-2) unstable; urgency=low
 
   * build for PTF 20080919

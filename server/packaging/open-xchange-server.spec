@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.6.0
-Release:	9
+Release:	10
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -155,7 +155,6 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
  - Bugfix #12171: Send ocurrences in list style requests when they are requested.
  - Bugfix #12173: Allow creating delete exceptions in a series by recurrence_date_position.
 * Wed Sep 17 2008 - marcus.klein@open-xchange.com
- - Bugfix #11515: Disabling mail module if IMAP login fails.
  - Bugfix #12043: Improved exception message.
  - Bugfix #10759: Not deleting of session cookies on illegal requests.
 * Wed Sep 17 2008 - thorben.betten@open-xchange.com
