@@ -1,3 +1,8 @@
+* 2008-09-26 - thorben.betten@open-xchange.com
+
+ - Bugfix #12231: Using default separator character from 'mail.properties'
+   to configure folder path prefix equal to mailing system's separator
+
 * 2008-09-25 - thorben.betten@open-xchange.com
 
  - Bugfix #12166: Fixed max. end date calculation for yearly recurring

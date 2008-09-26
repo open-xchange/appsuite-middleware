@@ -49,10 +49,11 @@
 
 package com.openexchange.mail.utils;
 
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
- * {@link MailFolderUtility}
+ * {@link MailFolderUtility} - Provides utility methods for mail folders
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -67,14 +68,14 @@ public final class MailFolderUtility {
 	}
 
 	/**
-	 * Cuts off starting {@link MailFolder#DEFAULT_FOLDER_ID} plus "." from
-	 * specified folder fullname argument only if fullname argument is not
-	 * <code>null</code> and is not equal to
+	 * Cuts off starting {@link MailFolder#DEFAULT_FOLDER_ID} plus the default
+	 * separator from specified folder fullname argument only if fullname
+	 * argument is not <code>null</code> and is not equal to
 	 * {@link MailFolder#DEFAULT_FOLDER_ID}. <br>
 	 * Example:
 	 * 
 	 * <pre>
-	 * &quot;default.INBOX&quot; -&gt; &quot;INBOX&quot;
+	 * &quot;default/INBOX&quot; -&gt; &quot;INBOX&quot;
 	 * </pre>
 	 * 
 	 * @param folderStringArg
@@ -96,12 +97,13 @@ public final class MailFolderUtility {
 	}
 
 	/**
-	 * Prepends {@link MailFolder#DEFAULT_FOLDER_ID} plus "." to given folder
+	 * Prepends {@link MailFolder#DEFAULT_FOLDER_ID} plus the default separator
+	 * (obtained by {@link MailConfig#getDefaultSeparator()}) to given folder
 	 * fullname. <br>
 	 * Example:
 	 * 
 	 * <pre>
-	 * &quot;INBOX&quot; -&gt; &quot;default.INBOX&quot;
+	 * &quot;INBOX&quot; -&gt; &quot;default/INBOX&quot;
 	 * </pre>
 	 * 
 	 * @param fullname
@@ -114,6 +116,7 @@ public final class MailFolderUtility {
 		} else if (fullname.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
 			return fullname;
 		}
-		return new StringBuilder(32).append(MailFolder.DEFAULT_FOLDER_ID).append('.').append(fullname).toString();
+		return new StringBuilder(32).append(MailFolder.DEFAULT_FOLDER_ID).append(MailConfig.getDefaultSeparator())
+				.append(fullname).toString();
 	}
 }
