@@ -1,10 +1,8 @@
 package com.openexchange.admin.contextrestore.rmi.impl;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -24,14 +22,20 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.contextrestore.exceptions.OXContextRestoreException;
 import com.openexchange.admin.contextrestore.exceptions.OXContextRestoreException.Code;
+import com.openexchange.admin.contextrestore.osgi.Activator;
 import com.openexchange.admin.contextrestore.rmi.OXContextRestoreInterface;
+import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore.Parser.PoolIdSchemaAndFilenames;
+import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.BasicAuthenticator;
 import com.openexchange.admin.rmi.impl.OXCommonImpl;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.database.Database;
 import com.openexchange.server.impl.DBPoolingException;
 
@@ -43,7 +47,37 @@ import com.openexchange.server.impl.DBPoolingException;
  */
 public class OXContextRestore extends OXCommonImpl implements OXContextRestoreInterface {
 
-    private static class Parser {
+    protected static class Parser {
+        
+        protected class PoolIdSchemaAndFilenames {
+            private final int pool_id;
+            
+            private final String schema;
+            
+            private final String[] filenames;
+            
+            /**
+             * @param pool_id
+             * @param schema
+             */
+            private PoolIdSchemaAndFilenames(int pool_id, String schema, String[] filenames) {
+                this.pool_id = pool_id;
+                this.schema = schema;
+                this.filenames = filenames;
+            }
+            
+            public final int getPool_id() {
+                return pool_id;
+            }
+            
+            public final String getSchema() {
+                return schema;
+            }
+
+            public final String[] getFilenames() {
+                return filenames;
+            }
+        }
         
         public class VersionInformation {
             private final int version;
@@ -144,13 +178,14 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         
         private final static Pattern insertIntoVersion = Pattern.compile("^INSERT INTO `version` VALUES \\((?:([^\\),]*),)(?:([^\\),]*),)(?:([^\\),]*),)(?:([^\\),]*),)([^\\),]*)\\).*$");
 
-        public void start(final int cid, final String filename) throws FileNotFoundException, IOException, DBPoolingException, SQLException, OXContextRestoreException {
+        public PoolIdSchemaAndFilenames start(final int cid, final String filename) throws FileNotFoundException, IOException, DBPoolingException, SQLException, OXContextRestoreException {
             final BufferedReader in = new BufferedReader(new FileReader(filename));
-            final BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("/tmp/test.txt"));
+            BufferedWriter bufferedWriter = null;
             int c;
             int state = 0;
             int oldstate = 0;
             int cidpos = -1;
+            final List<String> filenames = new ArrayList<String>();
             String table_name = null;
             // Set if a database is found in which the search for cid should be done
             boolean furthersearch = true;
@@ -187,6 +222,15 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                                 furthersearch = true;
                             }
                             System.out.println("Database: " + databasename);
+                            if (null != bufferedWriter) {
+                                bufferedWriter.append("/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;" + '\n');
+                                bufferedWriter.close();
+                            }
+                            
+                            final String file = "/tmp/" + databasename + ".txt";
+                            filenames.add(file);
+                            bufferedWriter = new BufferedWriter(new FileWriter(file));
+                            bufferedWriter.append("/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;" + '\n');
                             // Reset values
                             cidpos = -1;
                             state = 0;
@@ -274,27 +318,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             }
             bufferedWriter.close();
             checkVersion(versionInformation, pool_id, schema);
-//            restorectx(pool_id, schema);
-        }
-
-        private void restorectx(int pool_id, String schema) throws DBPoolingException, SQLException, FileNotFoundException {
-            Connection connection = null;
-            PreparedStatement prepareStatement = null;
-            try {
-                connection = Database.get(pool_id, schema);
-                prepareStatement = connection.prepareStatement("?");
-                final File file = new File("/tmp/test.txt");
-                com.mysql.jdbc.PreparedStatement test = ((com.mysql.jdbc.PreparedStatement) prepareStatement);
-                prepareStatement.setAsciiStream(1, new BufferedInputStream(new FileInputStream(file)), 3);
-                prepareStatement.execute();
-            } finally {
-                if (null != prepareStatement) {
-                    prepareStatement.close();
-                }
-                if (null != connection) {
-                    Database.back(pool_id, connection);
-                }
-            }
+            return new PoolIdSchemaAndFilenames(pool_id, schema, filenames.toArray(new String[filenames.size()]));
         }
 
         private void checkVersion(final VersionInformation versionInformation, final int pool_id, final String schema) throws SQLException, DBPoolingException, OXContextRestoreException {
@@ -515,7 +539,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         basicauth = new BasicAuthenticator();
     }
 
-    public void restore(final Context ctx, final String[] filenames, final Credentials auth) throws InvalidDataException, InvalidCredentialsException, StorageException, OXContextRestoreException {
+    public String restore(final Context ctx, final String[] filenames, final Credentials auth) throws InvalidDataException, InvalidCredentialsException, StorageException, OXContextRestoreException, DatabaseUpdateException {
         try {
             doNullCheck(ctx, filenames);
         } catch (final InvalidDataException e) {
@@ -524,8 +548,8 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         }
         
         try {
-            basicauth.doAuthentication(auth, ctx);
-        } catch (final InvalidDataException e) {
+            basicauth.doAuthentication(auth);
+        } catch (final InvalidCredentialsException e) {
             LOG.error(e.getMessage(), e);
             throw e;
         }
@@ -536,24 +560,142 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         System.out.println("Creds:" + auth);
         
         try {
-            parser.start(ctx.getId(), filenames[0]);
+            final PoolIdSchemaAndFilenames start = parser.start(ctx.getId(), filenames[0]);
+            
+            final OXContextInterface contextInterface = Activator.getContextInterface();
+            
+            final OXToolStorageInterface storage = OXToolStorageInterface.getInstance();
+            if (storage.existsContext(ctx)) {
+                try {
+                    contextInterface.delete(ctx, auth);
+                } catch (final NoSuchContextException e) {
+                    // As we check for the existence beforehand this exception should never occur. Nevertheless we will log this
+                    LOG.fatal("FATAL:" + e.getMessage(), e);
+                }
+            }
+            // We have to do the exists check beforehand otherwise you'll find a stack trace in the logs
+            return restorectx(ctx, start);
         } catch (final FileNotFoundException e) {
             LOG.error("File not found");
+            // TODO: Throw right exception here
+            throw new OXContextRestoreException(Code.COULD_NOT_CONVERT_POOL_VALUE);
         } catch (final IOException e) {
-            // TODO: Decide what to do with this exception
             LOG.error(e.getMessage(), e);
+            // TODO: Throw right exception here
+            throw new OXContextRestoreException(Code.COULD_NOT_CONVERT_POOL_VALUE);
         } catch (final DBPoolingException e) {
-            // TODO Auto-generated catch block
             LOG.error(e);
+            // TODO: Throw right exception here
+            throw new OXContextRestoreException(Code.COULD_NOT_CONVERT_POOL_VALUE);
         } catch (final SQLException e) {
-            // TODO Auto-generated catch block
             LOG.error(e.getMessage(), e);
+            throw new OXContextRestoreException(Code.DATABASE_OPERATION_ERROR, e.getMessage());
         } catch (final OXContextRestoreException e) {
             LOG.error(e.getMessage(), e);
             throw e;
         } catch (final RuntimeException e) {
             LOG.error(e.getMessage(), e);
+            throw e;
+        } catch (final DatabaseUpdateException e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
         }
     }
+    
+    private String restorectx(final Context ctx, final PoolIdSchemaAndFilenames poolidandschema) throws DBPoolingException, SQLException, FileNotFoundException, IOException, OXContextRestoreException {
+        Connection connection = null;
+        Connection connection2 = null;
+        PreparedStatement prepareStatement = null;
+        PreparedStatement prepareStatement2 = null;
+        PreparedStatement prepareStatement3 = null;
+        final int pool_id = poolidandschema.getPool_id();
+        try {
+            File file = new File("/tmp/" + poolidandschema.getSchema()  + ".txt");
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            String in = null;
+            connection = Database.get(pool_id, poolidandschema.getSchema());
+            connection.setAutoCommit(false);
+            while ((in = reader.readLine()) != null) {
+                prepareStatement = connection.prepareStatement(in);
+                prepareStatement.execute();
+                prepareStatement.close();
+            }
+            file = new File("/tmp/configdb.txt");
+            reader = new BufferedReader(new FileReader(file));
+            in = null;
+            connection2 = Database.get(true);
+            connection2.setAutoCommit(false);
+            while ((in = reader.readLine()) != null) {
+                prepareStatement2 = connection2.prepareStatement(in);
+                prepareStatement2.execute();
+                prepareStatement2.close();
+            }
+            connection.commit();
+            connection.setAutoCommit(true);
+            connection2.commit();
+            connection2.setAutoCommit(true);
+            
+            prepareStatement3 = connection2.prepareStatement("SELECT `filestore_name`, `uri` FROM `context` INNER JOIN `filestore` ON context.filestore_id = filestore.id WHERE cid=?");
+            prepareStatement3.setInt(1, ctx.getId());
+            final ResultSet executeQuery = prepareStatement3.executeQuery();
+            if (executeQuery.next()) {
+                final String filestore_name = executeQuery.getString(1);
+                final String uri = executeQuery.getString(2);
+                return uri + File.separatorChar + filestore_name;
+            } else {
+                // TODO: Throw right exception here
+                throw new OXContextRestoreException(Code.COULD_NOT_CONVERT_POOL_VALUE);
+            }
+        } catch (final SQLException e) {
+            dorollback(connection, connection2, e);
+            throw e;
+        } catch (final FileNotFoundException e) {
+            dorollback(connection, connection2, e);
+            throw e;
+        } catch (final DBPoolingException e) {
+            dorollback(connection, connection2, e);
+            throw e;
+        } catch (final IOException e) {
+            dorollback(connection, connection2, e);
+            throw e;
+        } finally {
+            closePreparedStatement(prepareStatement);
+            closePreparedStatement(prepareStatement2);
+            closePreparedStatement(prepareStatement3);
+            if (null != connection) {
+                Database.back(pool_id, connection);
+            }
+        }
+    }
+
+    private void dorollback(Connection conn, Connection conn2, Exception e2) throws OXContextRestoreException {
+        if (null != conn) {
+            try {
+                conn.rollback();
+            } catch (SQLException e) {
+                LOG.error(e2.getMessage(), e2);
+                throw new OXContextRestoreException(Code.ROLLBACK_ERROR, e.getMessage());
+            }
+        }
+        if (null != conn2) {
+            try {
+                conn2.rollback();
+            } catch (SQLException e) {
+                LOG.error(e2.getMessage(), e2);
+                throw new OXContextRestoreException(Code.ROLLBACK_ERROR, e.getMessage());
+            }
+        }
+    }
+
+    private void closePreparedStatement(final PreparedStatement ps) {
+        try {
+            if (null != ps) {
+                ps.close();
+            }
+        } catch (final SQLException e) {
+            LOG.error("Error closing prepared statement!", e);
+        }
+    }
+
 
 }

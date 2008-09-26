@@ -64,6 +64,7 @@ import com.openexchange.admin.contextrestore.exceptions.OXContextRestoreExceptio
 import com.openexchange.admin.contextrestore.rmi.OXContextRestoreInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
@@ -106,7 +107,7 @@ public class Restore extends BasicCommandlineOptions {
             final String filenames = (String) parser.getOptionValue(filenameOption);
 
             final String[] filenamearray = filenames.split(",");
-            oxrestore.restore(ctx, filenamearray, auth);
+            System.out.println(oxrestore.restore(ctx, filenamearray, auth));
             
             sysexit(0);
         } catch (final IllegalOptionValueException e) {
@@ -140,6 +141,9 @@ public class Restore extends BasicCommandlineOptions {
             printServerException(e, parser);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final OXContextRestoreException e) {
+            printServerException(e, parser);
+            sysexit(1);
+        } catch (final DatabaseUpdateException e) {
             printServerException(e, parser);
             sysexit(1);
         }

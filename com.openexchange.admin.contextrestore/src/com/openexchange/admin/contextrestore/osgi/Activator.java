@@ -15,7 +15,9 @@ import org.osgi.framework.BundleContext;
 import com.openexchange.admin.contextrestore.rmi.OXContextRestoreInterface;
 import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore;
 import com.openexchange.admin.daemons.AdminDaemon;
+import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.impl.OXContext;
 
 public class Activator implements BundleActivator {
 
@@ -24,6 +26,8 @@ public class Activator implements BundleActivator {
     private static Log log = LogFactory.getLog(Activator.class);
     
     private static OXContextRestore contextRestore = null;
+    
+    private static OXContextInterface ox_ctx = null;
     
     /*
      * (non-Javadoc)
@@ -34,9 +38,9 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext context) throws Exception {
         try {
-
             registry = AdminDaemon.getRegistry();
 
+            ox_ctx = new OXContext(context);
             contextRestore = new OXContextRestore();
             final OXContextRestoreInterface oxctxrest_stub = (OXContextRestoreInterface) UnicastRemoteObject.exportObject(contextRestore, 0);
 
@@ -79,4 +83,8 @@ public class Activator implements BundleActivator {
 
     }
 
+    public static final OXContextInterface getContextInterface() {
+        return ox_ctx;
+    }
+    
 }

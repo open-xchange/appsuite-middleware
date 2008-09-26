@@ -49,26 +49,34 @@
 
 package com.openexchange.admin.contextrestore.exceptions;
 
-import com.openexchange.admin.plugins.PluginException;
+import java.util.IllegalFormatException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.admin.plugins.PluginException;
 
 /**
  * OXContextRestore exception class
- *
+ * 
  */
 public class OXContextRestoreException extends PluginException {
-    
+
     /**
      * For serialization
      */
     private static final long serialVersionUID = 2597458638173191174L;
+    
+    private final static Log LOG = LogFactory.getLog(OXContextRestoreException.class);
 
     public enum Code {
         VERSION_TABLES_INCOMPATIBLE("The version tables are incompatible"),
         NO_VERSION_INFORMATION_FOUND("No version information found in dump"),
         COULD_NOT_CONVERT_POOL_VALUE("Couldn't convert pool value"),
-        NO_ENTRIES_IN_VERSION_TABLE("No entries in version table");
-        
+        NO_ENTRIES_IN_VERSION_TABLE("No entries in version table"),
+        DATABASE_OPERATION_ERROR("Error during database operation: %s"),
+        ROLLBACK_ERROR("Error during rollback: %s");
+
         private final String text;
 
         /**
@@ -83,14 +91,58 @@ public class OXContextRestoreException extends PluginException {
         }
     }
 
+    private String[] msgArgs;
+    
     /**
-     * OX exceptions for OXUtil
-     *
+     * Default constructor
+     * 
      */
     public OXContextRestoreException(final Code code) {
         super(code.getText());
     }
+
+    /**
+     * Constructor with parameters
+     * 
+     */
+    public OXContextRestoreException(final Code code, final String... msgArgs) {
+        super(code.getText());
+        this.msgArgs = msgArgs;
+    }
+
+    @Override
+    public String toString() {
+        if (null != this.msgArgs) {
+            final String message = super.getMessage();
+            if (null != message) {
+                try {
+                    return String.format(message, (Object[]) this.msgArgs);
+                } catch (final IllegalFormatException e) {
+                    LOG.error("Illegal message format:" + e.getMessage(), e);
+                }
+            }
+            return super.toString();
+        } else {
+            return super.toString();
+        }
+    }
+
+    @Override
+    public String getMessage() {
+        if (null != this.msgArgs) {
+            final String message = super.getMessage();
+            if (null != message) {
+                try {
+                    return String.format(message, (Object[]) this.msgArgs);
+                } catch (final IllegalFormatException e) {
+                    LOG.error("Illegal message format:" + e.getMessage(), e);
+                }
+            }
+            return super.getMessage();
+        } else {
+            return super.getMessage();
+        }
+
+    }
     
 }
-
-
