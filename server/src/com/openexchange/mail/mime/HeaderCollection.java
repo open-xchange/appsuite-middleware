@@ -380,7 +380,8 @@ public class HeaderCollection implements Serializable {
 
 	private final void putHeader(final String name, final String value, final boolean clear) {
 		if (isInvalid(name, true)) {
-			throw new IllegalArgumentException(ERR_HEADER_NAME_IS_INVALID);
+			throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name)
+					.toString());
 		} else if (isInvalid(value, false)) {
 			throw new IllegalArgumentException(new StringBuilder(26 + value.length()).append(
 					"Header value is invalid: ").append(value).toString());
