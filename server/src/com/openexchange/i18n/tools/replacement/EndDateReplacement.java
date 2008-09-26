@@ -92,6 +92,7 @@ public final class EndDateReplacement extends AbstractFormatDateReplacement {
 	 */
 	public EndDateReplacement(final Date endDate, final boolean isTask, final Locale locale, final TimeZone timeZone) {
 		super(endDate, isTask ? Notifications.FORMAT_DUE_DATE : Notifications.FORMAT_END_DATE, locale, timeZone);
+		fallback = isTask ? Notifications.NO_DUE_DATE : Notifications.NO_END_DATE;
 	}
 
 	public TemplateToken getToken() {

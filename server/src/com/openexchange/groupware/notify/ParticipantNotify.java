@@ -105,6 +105,7 @@ import com.openexchange.i18n.tools.replacement.SeriesReplacement;
 import com.openexchange.i18n.tools.replacement.StartDateReplacement;
 import com.openexchange.i18n.tools.replacement.StringReplacement;
 import com.openexchange.i18n.tools.replacement.TaskActionReplacement;
+import com.openexchange.i18n.tools.replacement.TaskPriorityReplacement;
 import com.openexchange.i18n.tools.replacement.TaskStatusReplacement;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -322,7 +323,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		}
 		// Do not send notification mails for tasks and appointments in the
 		// past. Bug #12063
-		if (newObj.getEndDate().getTime() < System.currentTimeMillis()) {
+		if (newObj.getEndDate() != null && newObj.getEndDate().getTime() < System.currentTimeMillis()) {
 			return;
 		}
 		/*
@@ -631,10 +632,9 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			final Task task = (Task) newObj;
 			final Task oldTask = (Task) oldObj;
 			{
-				final Integer priority = Integer.valueOf(task.getPriority());
-				renderMap.put(new FormatLocalizedStringReplacement(TemplateToken.TASK_PRIORITY,
-						Notifications.FORMAT_PRIORITY, priority.toString()).setChanged(oldTask == null ? false
-						: !compareObjects(priority, Integer.valueOf(oldTask.getPriority()))));
+				final int priority = task.getPriority();
+				renderMap.put(new TaskPriorityReplacement(priority).setChanged(oldTask == null ? false
+						: priority != oldTask.getPriority()));
 			}
 			{
 				final int status = task.getStatus();

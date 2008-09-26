@@ -312,7 +312,7 @@ public class Notifications {
 		"[resources]" +
 		"\n" + 
 		"\n" + 
-		"==========================================";;
+		"==========================================";
 	
 	/*
 	 * CONFIRMATION
@@ -361,6 +361,8 @@ public class Notifications {
 		"Created at: [creation_datetime]\n" + 
 		"[title]\n" + 
 		"[folder_name]\n" + 
+		"[priority]\n" +
+		"[task_status]\n" +
 		"\n" + 
 		"[start]\n" + 
 		"[end]\n" + 
@@ -424,6 +426,21 @@ public class Notifications {
 	public static final String NO_SERIES = "No series";
 
 	/**
+	 * No start date
+	 */
+	public static final String NO_START_DATE = "No start date";
+
+	/**
+	 * No end date
+	 */
+	public static final String NO_END_DATE = "No end date";
+
+	/**
+	 * No due date
+	 */
+	public static final String NO_DUE_DATE = "No due date";
+
+	/**
 	 * Mail to resource %1$s
 	 */
 	public static final String RESOURCE_PREFIX = "Mail to resource %1$s";
@@ -443,6 +460,25 @@ public class Notifications {
 
 	public static final String CA_TENTATIVELY_ACCEPTED = "tentatively accepted";
 
+	/*
+	 * TASK PRIORITIES
+	 */
+
+	/**
+	 * low
+	 */
+	public static final String PRIORITY_LOW = "Low";
+
+	/**
+	 * normal
+	 */
+	public static final String PRIORITY_NORMAL = "Normal";
+
+	/**
+	 * high
+	 */
+	public static final String PRIORITY_HIGH = "High";
+	
 	/*
 	 * Confirmation statuses
 	 */

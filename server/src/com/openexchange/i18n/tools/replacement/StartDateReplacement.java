@@ -86,6 +86,7 @@ public final class StartDateReplacement extends AbstractFormatDateReplacement {
 	 */
 	public StartDateReplacement(final Date startDate, final Locale locale, final TimeZone timeZone) {
 		super(startDate, Notifications.FORMAT_START_DATE, locale, timeZone);
+		fallback = Notifications.NO_START_DATE;
 	}
 
 	public TemplateToken getToken() {

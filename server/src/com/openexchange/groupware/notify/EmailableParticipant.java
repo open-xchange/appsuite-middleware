@@ -56,10 +56,11 @@ import com.openexchange.groupware.container.CalendarObject;
 
 /**
  * {@link EmailableParticipant}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
+ *         Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
 public final class EmailableParticipant implements Comparable<EmailableParticipant>, Cloneable {
 
@@ -110,9 +111,9 @@ public final class EmailableParticipant implements Comparable<EmailableParticipa
 	 */
 	public int state = STATE_NONE;
 
-	public EmailableParticipant(final int cid, final int type, final int id, final int[] groups,
-			final String email, final String displayName, final Locale locale, final TimeZone timeZone,
-			final int reliability, final int folderId, final int confirm, final String confirmMessage) {
+	public EmailableParticipant(final int cid, final int type, final int id, final int[] groups, final String email,
+			final String displayName, final Locale locale, final TimeZone timeZone, final int reliability,
+			final int folderId, final int confirm, final String confirmMessage) {
 		this.cid = cid;
 		this.type = type;
 		this.email = email;
@@ -174,5 +175,11 @@ public final class EmailableParticipant implements Comparable<EmailableParticipa
 		clone.locale = (Locale) (locale == null ? null : locale.clone());
 		clone.timeZone = (TimeZone) (timeZone == null ? null : timeZone.clone());
 		return clone;
+	}
+
+	@Override
+	public String toString() {
+		return new StringBuilder(super.toString()).append(" displayName=").append(displayName).append(" email=")
+				.append(email).append(" locale=").append(locale).append(" timeZone=").append(timeZone).toString();
 	}
 }

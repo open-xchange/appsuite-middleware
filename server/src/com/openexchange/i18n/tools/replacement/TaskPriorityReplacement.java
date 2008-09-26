@@ -49,88 +49,36 @@
 
 package com.openexchange.i18n.tools.replacement;
 
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
-
-import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.i18n.tools.TemplateReplacement;
+import com.openexchange.groupware.i18n.Notifications;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.i18n.tools.TemplateToken;
 
 /**
- * {@link AbstractFormatDateReplacement}
+ * {@link TaskPriorityReplacement}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class AbstractFormatDateReplacement extends AbstractDateReplacement {
+public final class TaskPriorityReplacement extends FormatLocalizedStringReplacement {
+
+	private static final String[] PRIOS = new String[4];
+
+	static {
+		PRIOS[0] = "";
+		PRIOS[Task.LOW] = Notifications.PRIORITY_LOW;
+		PRIOS[Task.NORMAL] = Notifications.PRIORITY_NORMAL;
+		PRIOS[Task.HIGH] = Notifications.PRIORITY_HIGH;
+	}
 
 	/**
-	 * The format string
-	 */
-	protected String format;
-
-	/**
-	 * The fallback string if replacement used in string format is empty or
-	 * <code>null</code>
-	 */
-	protected String fallback;
-
-	/**
-	 * Initializes a new AbstractFormatDateReplacement
+	 * Initializes a new {@link TaskPriorityReplacement}
 	 * 
-	 * @param date
-	 *            The date
-	 * @param format
-	 *            The format string
+	 * @param taskPriority
+	 *            The task priority; supposed to be either {@link Task#LOW},
+	 *            {@link Task#NORMAL}, or {@link Task#HIGH},
 	 */
-	protected AbstractFormatDateReplacement(final Date date, final String format) {
-		super(date);
-		this.format = format;
+	public TaskPriorityReplacement(final int taskPriority) {
+		super(TemplateToken.TASK_PRIORITY, Notifications.FORMAT_PRIORITY, PRIOS[taskPriority]);
 	}
 
-	/**
-	 * Initializes a new AbstractFormatDateReplacement
-	 * 
-	 * @param date
-	 *            The date
-	 * @param format
-	 *            The format string
-	 * @param locale
-	 *            The locale
-	 * @param timeZone
-	 *            The time zone
-	 */
-	public AbstractFormatDateReplacement(final Date date, final String format, final Locale locale,
-			final TimeZone timeZone) {
-		super(date, locale, timeZone);
-		this.format = format;
-	}
-
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-		return super.clone();
-	}
-
-	@Override
-	public TemplateReplacement getClone() throws CloneNotSupportedException {
-		return (TemplateReplacement) clone();
-	}
-
-	@Override
-	public String getReplacement() {
-		final String dateRepl = super.getReplacement();
-		final String result;
-		if ((date == null || dateRepl.length() == 0) && fallback != null) {
-			final StringHelper sh = new StringHelper(locale == null ? Locale.ENGLISH : locale);
-			result = String.format(sh.getString(format), sh.getString(fallback));
-		} else {
-			result = String.format(new StringHelper(locale == null ? Locale.ENGLISH : locale).getString(format), super
-					.getReplacement());
-		}
-		if (changed) {
-			return new StringBuilder(PREFIX_MODIFIED.length() + result.length()).append(PREFIX_MODIFIED).append(result)
-					.toString();
-		}
-		return result;
-	}
 }
