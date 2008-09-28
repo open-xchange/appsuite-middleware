@@ -321,10 +321,13 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		if (newObj.getParticipants() == null) {
 			return;
 		}
-		// Do not send notification mails for tasks and appointments in the
-		// past. Bug #12063
-		if (newObj.getEndDate() != null && newObj.getEndDate().getTime() < System.currentTimeMillis()) {
-			return;
+		{
+			// Do not send notification mails for tasks and appointments in the
+			// past. Bug #12063
+			final Date endDate = newObj.getEndDate();
+			if (endDate != null && endDate.getTime() < System.currentTimeMillis()) {
+				return;
+			}
 		}
 		/*
 		 * A map to remember receivers
@@ -354,6 +357,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		}
 
 		final OXFolderAccess access = new OXFolderAccess(sessionObj.getContext());
+		final StringBuilder b = new StringBuilder(2048);
 
 		final List<MailMessage> messages = new ArrayList<MailMessage>();
 		for (final Locale locale : receivers.keySet()) {
@@ -427,7 +431,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 					/*
 					 * Compose message
 					 */
-					messages.add(createParticipantMessage(p, title, actionRepl, state, locale, renderMap, isUpdate));
+					messages.add(createParticipantMessage(p, title, actionRepl, state, locale, renderMap, isUpdate, b));
 				}
 			}
 		}
@@ -440,11 +444,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
 	private MailMessage createParticipantMessage(final EmailableParticipant p, final String title,
 			final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap,
-			final boolean isUpdate) {
+			final boolean isUpdate, final StringBuilder b) {
 		final MailMessage msg = new MailMessage();
 		final Template createTemplate = state.getTemplate();
 		final StringHelper strings = new StringHelper(locale);
-		final StringBuilder b = new StringBuilder(2048);
+		b.setLength(0);
 		msg.title = b.append(actionRepl.getReplacement()).append(": ").append(title).toString();
 		b.setLength(0);
 		if (isUpdate) {
