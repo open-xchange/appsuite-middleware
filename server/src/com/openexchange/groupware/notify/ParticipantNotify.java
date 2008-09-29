@@ -264,7 +264,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			return;
 		}
 		// Do not send notification mails for tasks and appointments in the past. Bug #12063
-		if (newObj.getEndDate().before(new Date())) {
+		final Date endDate = newObj.getEndDate();
+		if (endDate != null && endDate.before(new Date())) {
 		    return;
 		}
 
@@ -341,7 +342,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
 					final Map<String,String> m = m(
 						"start" 	,	(null == newObj.getStartDate()) ? "" : df.format(newObj.getStartDate()),
-						"end"		,	(null == newObj.getEndDate()) ? "" : df.format(newObj.getEndDate()),
+						"end"		,	(null == endDate) ? "" : df.format(endDate),
 						"title"		,	(null == newObj.getTitle()) ? "" : newObj.getTitle(),
 						"participants",		list(participantSet),
 						"resources"	,	(resourceSet.size() > 0) ? list(resourceSet) : strings.getString(Notifications.NO_RESOURCES),

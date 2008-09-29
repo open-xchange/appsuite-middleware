@@ -7,6 +7,8 @@
    through property 'com.openexchange.mail.defaultSeparator'.
  - Bugfix #12184: Killing a formerly newly created thread, when
    corresponding socket gets closed
+ - Bugfix #12223: Fixed NPE when notifying a task's participant(s) if its
+   due is not set
 
 * 2008-09-19 - thorben.betten@open-xchange.com
 
