@@ -1092,12 +1092,6 @@ public class OXFolderTools {
 		final boolean publicParent;
 		final FolderObject specialFolder;
 		switch (folderId) {
-		case FolderObject.SYSTEM_INFOSTORE_FOLDER_ID:
-			specialFolder = FolderObject.createVirtualFolderObject(FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID,
-					FolderObject.getFolderString(FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID, locale),
-					FolderObject.INFOSTORE, true, FolderObject.SYSTEM_TYPE);
-			publicParent = false;
-			break;
 		case FolderObject.SYSTEM_LDAP_FOLDER_ID:
 			specialFolder = new OXFolderAccess(ctx).getFolderObject(folderId);
 			specialFolder.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_LDAP_FOLDER_ID, locale));

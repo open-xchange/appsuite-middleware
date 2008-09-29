@@ -133,7 +133,7 @@ public class FolderParser {
 			}
 		}
 		if (jsonObj.has(FolderFields.FOLDER_ID)) {
-			fo.setParentFolderID(FolderObject.mapVirtualID2SystemID(jsonObj.getInt(FolderFields.FOLDER_ID)));
+			fo.setParentFolderID(jsonObj.getInt(FolderFields.FOLDER_ID));
 		}
 		if (jsonObj.has(FolderFields.TITLE)) {
 			fo.setFolderName(jsonObj.getString(FolderFields.TITLE));

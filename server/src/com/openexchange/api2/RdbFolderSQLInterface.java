@@ -218,8 +218,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.api2.FolderSQLInterface#saveFolderObject(com.openexchange.groupware.container.FolderObject,
-	 *      java.util.Date)
+	 * @see
+	 * com.openexchange.api2.FolderSQLInterface#saveFolderObject(com.openexchange
+	 * .groupware.container.FolderObject, java.util.Date)
 	 */
 	public FolderObject saveFolderObject(final FolderObject folderobjectArg, final Date clientLastModified)
 			throws OXException {
@@ -245,9 +246,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 								(folderobjectArg.containsObjectID() && folderobjectArg.getObjectID() > 0 ? getFolderName(folderobjectArg)
 										: ""), Integer.valueOf(ctx.getContextId()));
 					}
-					final int[] virtualIDs = new int[] { FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID,
-							FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
-							FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
+					final int[] virtualIDs = new int[] { FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID,
+							FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID,
+							FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
 					if (Arrays.binarySearch(virtualIDs, folderobject.getParentFolderID()) > -1) {
 						throw new OXFolderPermissionException(FolderCode.NO_CREATE_SUBFOLDER_PERMISSION, getUserName(
 								sessionObj, user), getFolderName(folderobject.getParentFolderID(), ctx), Integer
@@ -336,8 +337,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.api2.FolderSQLInterface#deleteFolderObject(com.openexchange.groupware.container.FolderObject,
-	 *      java.util.Date)
+	 * @see
+	 * com.openexchange.api2.FolderSQLInterface#deleteFolderObject(com.openexchange
+	 * .groupware.container.FolderObject, java.util.Date)
 	 */
 	public int deleteFolderObject(final FolderObject folderobject, final Date clientLastModified) throws OXException {
 		try {
@@ -444,7 +446,8 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.api2.FolderSQLInterface#getNonTreeVisiblePublicCalendarFolders()
+	 * @seecom.openexchange.api2.FolderSQLInterface#
+	 * getNonTreeVisiblePublicCalendarFolders()
 	 */
 	public SearchIterator<FolderObject> getNonTreeVisiblePublicCalendarFolders() throws OXException {
 		try {
@@ -470,7 +473,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.api2.FolderSQLInterface#getNonTreeVisiblePublicTaskFolders()
+	 * @see
+	 * com.openexchange.api2.FolderSQLInterface#getNonTreeVisiblePublicTaskFolders
+	 * ()
 	 */
 	public SearchIterator<FolderObject> getNonTreeVisiblePublicTaskFolders() throws OXException {
 		try {
@@ -494,7 +499,8 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.api2.FolderSQLInterface#getNonTreeVisiblePublicContactFolders()
+	 * @seecom.openexchange.api2.FolderSQLInterface#
+	 * getNonTreeVisiblePublicContactFolders()
 	 */
 	public SearchIterator<FolderObject> getNonTreeVisiblePublicContactFolders() throws OXException {
 		try {
@@ -518,7 +524,8 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.api2.FolderSQLInterface#getNonTreeVisiblePublicInfostoreFolders()
+	 * @seecom.openexchange.api2.FolderSQLInterface#
+	 * getNonTreeVisiblePublicInfostoreFolders()
 	 */
 	public SearchIterator<FolderObject> getNonTreeVisiblePublicInfostoreFolders() throws OXException {
 		try {
@@ -582,7 +589,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.api2.FolderSQLInterface#getSubfolders(int,
-	 *      java.sql.Timestamp)
+	 * java.sql.Timestamp)
 	 */
 	public SearchIterator<FolderObject> getSubfolders(final int parentId, final Timestamp since) throws OXException {
 		try {
@@ -609,7 +616,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.api2.FolderSQLInterface#getSharedFoldersFrom(int,
-	 *      java.sql.Timestamp)
+	 * java.sql.Timestamp)
 	 */
 	public SearchIterator<FolderObject> getSharedFoldersFrom(final int owner, final Timestamp since) throws OXException {
 		try {
@@ -643,7 +650,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.api2.FolderSQLInterface#getDeletedFolders(java.util.Date)
+	 * @see
+	 * com.openexchange.api2.FolderSQLInterface#getDeletedFolders(java.util.
+	 * Date)
 	 */
 	public SearchIterator<FolderObject> getDeletedFolders(final Date since) throws OXException {
 		try {
@@ -657,7 +666,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.api2.FolderSQLInterface#getModifiedUserFolders(java.util.Date)
+	 * @see
+	 * com.openexchange.api2.FolderSQLInterface#getModifiedUserFolders(java.
+	 * util.Date)
 	 */
 	public SearchIterator<FolderObject> getModifiedUserFolders(final Date since) throws OXException {
 		try {
@@ -671,7 +682,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.api2.FolderSQLInterface#getAllModifiedFolders(java.util.Date)
+	 * @see
+	 * com.openexchange.api2.FolderSQLInterface#getAllModifiedFolders(java.util
+	 * .Date)
 	 */
 	public SearchIterator<FolderObject> getAllModifiedFolders(final Date since) throws OXException {
 		try {

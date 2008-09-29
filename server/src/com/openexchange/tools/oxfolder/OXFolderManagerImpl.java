@@ -689,18 +689,17 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			 * Use writable connection to ensure to fetch from master database
 			 */
 			Connection wc = writeCon;
-			final boolean create = (wc == null);
-			try {
-				if (create) {
+			if (wc == null) {
+				try {
 					wc = DBPool.pickupWriteable(ctx);
-				}
-				return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
-			} finally {
-				if (create && wc != null) {
-					DBPool.closeWriterSilent(ctx, wc);
-					wc = null;
+					return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
+				} finally {
+					if (wc != null) {
+						DBPool.closeWriterSilent(ctx, wc);
+					}
 				}
 			}
+			return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
 		} catch (final OXFolderNotFoundException e) {
 			throw e;
 		} catch (final DBPoolingException e) {

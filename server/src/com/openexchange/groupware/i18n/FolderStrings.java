@@ -74,7 +74,9 @@ public class FolderStrings {
 	
 	public static final String SYSTEM_INFOSTORE_FOLDER_NAME = "Infostore";
 	
-	public static final String VIRTUAL_USER_INFOSTORE_FOLDER_NAME = "Userstore";
+	public static final String SYSTEM_USER_INFOSTORE_FOLDER_NAME = "Userstore";
+
+	public static final String SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME = "Public infostore";
 	
 	public static final String VIRTUAL_LIST_TASK_FOLDER_NAME = "Other task folders";
 	

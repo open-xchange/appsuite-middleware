@@ -50,7 +50,6 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.ajax.Folder.getUnsignedInteger;
-import static com.openexchange.groupware.container.FolderObject.mapVirtualID2SystemID;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -232,7 +231,6 @@ public class SyncServlet extends PermissionServlet {
 							jsonWriter.value(deleteIdentifier);
 						}
 					} else {
-						delFolderId = mapVirtualID2SystemID(delFolderId);
 						if (timestamp == null) {
 							timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
 						}

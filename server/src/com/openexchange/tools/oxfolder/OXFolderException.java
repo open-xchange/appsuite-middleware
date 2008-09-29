@@ -488,10 +488,10 @@ public class OXFolderException extends OXException {
 		NO_SHARED_FOLDER_UPDATE("Shared folder %1$s MUST NOT be updated in context %2$s", Category.PERMISSION, 63),
 		/**
 		 * The attribute %1$s contains too much characters. Current length %3$s
-         * is more than allowed length of %2$s characters.
+		 * is more than allowed length of %2$s characters.
 		 */
 		TRUNCATED("The attribute %1$s contains too much characters. Current "
-	            + "length %3$d is more than allowed length of %2$d characters.", Category.TRUNCATED, 64),
+				+ "length %3$d is more than allowed length of %2$d characters.", Category.TRUNCATED, 64),
 		/**
 		 * Unable to map OCL permission value %1$s to a JSON permission value
 		 */
@@ -575,7 +575,48 @@ public class OXFolderException extends OXException {
 		/**
 		 * Folder module cannot be updated since folder is not empty
 		 */
-		NO_FOLDER_MODULE_UPDATE("Folder module cannot be updated since folder is not empty", Category.USER_INPUT, 78);
+		NO_FOLDER_MODULE_UPDATE("Folder module cannot be updated since folder is not empty", Category.USER_INPUT, 78),
+		/**
+		 * One or more parent folders are not visible to user %1$s and %2$s is
+		 * not allowed to add necessary permission to affected folder(s).
+		 */
+		PATH_NOT_VISIBLE_USER(
+				"One or more parent folders are not visible to user %1$s and %2$s is not allowed to add necessary permission to affected folder(s).",
+				Category.USER_INPUT, 79),
+		/**
+		 * One or more parent folders are not visible to user %1$s member of
+		 * group %2$s and %3$s is not allowed to add necessary permission to
+		 * affected folder(s).
+		 */
+		PATH_NOT_VISIBLE_GROUP(
+				"One or more parent folders are not visible to user %1$s member of group %2$s and %3$s is not allowed to add necessary permission to affected folder(s).",
+				Category.USER_INPUT, 80),
+		/**
+		 * One or more subfolders' visibility cannot be took away for removed
+		 * user %1$s.
+		 */
+		SUBFOLDER_STILL_VISIBLE_USER("One or more subfolders' visibility cannot be took away for removed user %1$s.",
+				Category.WARNING, 81),
+		/**
+		 * One or more subfolders' visibility cannot be took away for removed
+		 * user %1$s member of group %2$s.
+		 */
+		SUBFOLDER_STILL_VISIBLE_GROUP(
+				"One or more subfolders' visibility cannot be took away for removed user %1$s member of group %2$s.",
+				Category.WARNING, 82),
+		/**
+		 * One or more parents' visibility cannot be took away for removed user
+		 * %1$s.
+		 */
+		PARENT_STILL_VISIBLE_USER("One or more parent' visibility cannot be took away for removed user %1$s.",
+				Category.WARNING, 83),
+		/**
+		 * One or more parents' visibility cannot be took away for removed user
+		 * %1$s member of group %2$s.
+		 */
+		PARENT_STILL_VISIBLE_GROUP(
+				"One or more parent' visibility cannot be took away for removed user %1$s member of group %2$s.",
+				Category.WARNING, 84);
 
 		/**
 		 * Message of the exception.

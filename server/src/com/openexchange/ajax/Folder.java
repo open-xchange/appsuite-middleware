@@ -291,7 +291,6 @@ public class Folder extends SessionServlet {
 			final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getRootFolderForUser()).asQueue();
 			final int size = q.size();
 			final Iterator<FolderObject> iter = q.iterator();
-			final OCLPermission perm = new OCLPermission();
 			NextRootFolder: for (int i = 0; i < size; i++) {
 				final FolderObject rootFolder = iter.next();
 				int hasSubfolder = -1;
@@ -301,18 +300,6 @@ public class Folder extends SessionServlet {
 					 * Ignore 'system' and 'ox folder' folder
 					 */
 					continue NextRootFolder;
-				} else if (rootFolder.getObjectID() == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
-					/*
-					 * Reset infostore's permission to read-only, cause virtual
-					 * folder 'UserStore' is going to be used instead
-					 */
-					perm.reset();
-					perm.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
-					perm.setFolderAdmin(false);
-					perm.setGroupPermission(true);
-					perm.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS,
-							OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
-					rootFolder.setPermissionsAsArray(new OCLPermission[] { (OCLPermission) perm.clone() });
 				} else if (rootFolder.getObjectID() == FolderObject.SYSTEM_SHARED_FOLDER_ID
 						&& !UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)
 								.hasFullSharedFolderAccess()) {
@@ -416,28 +403,7 @@ public class Folder extends SessionServlet {
 				/*
 				 * Write requested child folders
 				 */
-				if (parentId == FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID) {
-					/*
-					 * Special treatment for virtual user infostore folder
-					 */
-					final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getSubfolders(
-							FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, null)).asQueue();
-					final int size = q.size();
-					final Iterator<FolderObject> iter = q.iterator();
-					for (int i = 0; i < size; i++) {
-						final FolderObject fo = iter.next();
-						lastModified = fo.getLastModified() == null ? lastModified : Math.max(lastModified, fo
-								.getLastModified().getTime());
-						jsonWriter.array();
-						try {
-							for (final FolderFieldWriter ffw : writers) {
-								ffw.writeField(jsonWriter, fo, false);
-							}
-						} finally {
-							jsonWriter.endArray();
-						}
-					}
-				} else if (parentId == FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID) {
+				if (parentId == FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID) {
 					/*
 					 * Append non-tree visible task folders
 					 */
@@ -529,7 +495,7 @@ public class Folder extends SessionServlet {
 								folderModule2String(FolderObject.INFOSTORE), Integer.valueOf(ctx.getContextId()));
 					}
 					/*
-					 * Append virtual folder 'Userstore'
+					 * Get subfolders' iterator
 					 */
 					if (FolderCacheManager.isEnabled()) {
 						lastModified = FolderCacheManager.getInstance().getFolderObject(parentId, true, ctx, null)
@@ -537,19 +503,42 @@ public class Folder extends SessionServlet {
 					} else {
 						lastModified = FolderObject.loadFolderObjectFromDB(parentId, ctx).getLastModified().getTime();
 					}
-					final OCLPermission virtualPerm = new OCLPermission();
-					virtualPerm.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
-					virtualPerm.setFolderAdmin(false);
-					virtualPerm.setGroupPermission(true);
-					virtualPerm.setAllPermission(OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.NO_PERMISSIONS,
-							OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
-					final FolderObject virtualUserstoreFolder = FolderObject.createVirtualFolderObject(
-							FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID, FolderObject.getFolderString(
-									FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID, UserStorage.getStorageUser(
-											session.getUserId(), ctx).getLocale()), FolderObject.INFOSTORE, true,
-							FolderObject.SYSTEM_TYPE, virtualPerm);
-					folderWriter.writeOXFolderFieldsAsArray(columns, virtualUserstoreFolder, UserStorage
-							.getStorageUser(session.getUserId(), ctx).getLocale());
+					final List<FolderObject> l;
+					final int size;
+					{
+						final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getSubfolders(
+								parentId, null)).asQueue();
+						size = q.size();
+						/*
+						 * Write UserStore first
+						 */
+						final Iterator<FolderObject> iter = q.iterator();
+						l = new ArrayList<FolderObject>(size);
+						for (int j = 0; j < size; j++) {
+							final FolderObject fo = iter.next();
+							if (fo.getObjectID() == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
+								l.add(0, fo);
+							} else {
+								l.add(fo);
+							}
+						}
+					}
+					final Iterator<FolderObject> iter = l.iterator();
+					for (int i = 0; i < size; i++) {
+						final FolderObject fo = iter.next();
+						lastModified = fo.getLastModified() == null ? lastModified : Math.max(lastModified, fo
+								.getLastModified().getTime());
+						jsonWriter.array();
+						try {
+							for (int j = 0; j < writers.length; j++) {
+								writers[j].writeField(jsonWriter, fo, false, FolderObject.getFolderString(fo
+										.getObjectID(), UserStorage.getStorageUser(session.getUserId(), ctx)
+										.getLocale()), -1);
+							}
+						} finally {
+							jsonWriter.endArray();
+						}
+					}
 					/*
 					 * Append virtual root folder for non-tree visible infostore
 					 * folders
@@ -963,7 +952,6 @@ public class Folder extends SessionServlet {
 			final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx);
 			int folderId = -1;
 			if ((folderId = getUnsignedInteger(folderIdentifier)) != -1) {
-				folderId = FolderObject.mapVirtualID2SystemID(folderId);
 				final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
 				/*
 				 * Pre-Select field writers
@@ -1372,7 +1360,6 @@ public class Folder extends SessionServlet {
 			final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
 			int folderId = -1;
 			if ((folderId = getUnsignedInteger(folderIdentifier)) != -1) {
-				folderId = FolderObject.mapVirtualID2SystemID(folderId);
 				final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
 				final FolderObject fo = foldersqlinterface.getFolderById(folderId);
 				lastModifiedDate = fo.getLastModified();
@@ -1473,7 +1460,6 @@ public class Folder extends SessionServlet {
 					}
 				}
 			} else {
-				updateFolderId = FolderObject.mapVirtualID2SystemID(updateFolderId);
 				timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
 				final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
 				FolderObject fo = new FolderObject(updateFolderId);
@@ -1552,7 +1538,6 @@ public class Folder extends SessionServlet {
 					}
 				}
 			} else {
-				parentFolderId = FolderObject.mapVirtualID2SystemID(parentFolderId);
 				final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
 				FolderObject fo = new FolderObject();
 				fo.setParentFolderID(parentFolderId);
@@ -1633,7 +1618,6 @@ public class Folder extends SessionServlet {
 							jsonWriter.value(deleteIdentifier);
 						}
 					} else {
-						delFolderId = FolderObject.mapVirtualID2SystemID(delFolderId);
 						if (timestamp == null) {
 							timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
 						}

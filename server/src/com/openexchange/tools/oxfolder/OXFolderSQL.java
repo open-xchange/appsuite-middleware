@@ -453,7 +453,8 @@ public final class OXFolderSQL {
 		}
 	}
 
-	private static final String SQL_UPDATE_PERMS = "UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ?, odp = ? WHERE cid = ? AND fuid = ? AND permission_id = ?";
+	private static final String SQL_UPDATE_PERMS = "UPDATE oxfolder_permissions SET"
+			+ " fp = ?, orp = ?, owp = ?, odp = ?" + " WHERE cid = ? AND fuid = ? AND permission_id = ?";
 
 	/**
 	 * Updates a single folder permission and updates folder's last-modified
@@ -514,6 +515,114 @@ public final class OXFolderSQL {
 			 */
 			updateLastModified(folderId, System.currentTimeMillis(), wc, ctx);
 			return true;
+		} finally {
+			closeResources(null, stmt, closeWriteCon ? wc : null, false, ctx);
+		}
+	}
+
+	private static final String SQL_ADD_PERMS = "INSERT INTO oxfolder_permissions"
+			+ " (cid, fuid, permission_id, group_flag, fp, orp, owp, odp, admin_flag)"
+			+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+	/**
+	 * Inserts a single folder permission.
+	 * 
+	 * @param folderId
+	 *            The folder ID
+	 * @param permissionId
+	 *            The entity ID; either user or group ID
+	 * @param isGroup
+	 *            <code>true</code> if permission ID denotes a group; otherwise
+	 *            <code>false</code>
+	 * @param folderPermission
+	 *            The folder permission to set
+	 * @param objectReadPermission
+	 *            The object read permission to set
+	 * @param objectWritePermission
+	 *            The object write permission to set
+	 * @param objectDeletePermission
+	 *            The object delete permission to set
+	 * @param isAdmin
+	 *            <code>true</code> if permission ID is a folder administrator;
+	 *            otherwise <code>false</code>
+	 * @param writeCon
+	 *            A connection with write capability; may be <code>null</code>
+	 *            to fetch from pool
+	 * @param ctx
+	 *            The context
+	 * @return <code>true</code> if corresponding entry was successfully
+	 *         inserted; otherwise <code>false</code>
+	 * @throws DBPoolingException
+	 *             If a pooling error occurred
+	 * @throws SQLException
+	 *             If a SQL error occurred
+	 */
+	public static boolean addSinglePermission(final int folderId, final int permissionId, final boolean isGroup,
+			final int folderPermission, final int objectReadPermission, final int objectWritePermission,
+			final int objectDeletePermission, final boolean isAdmin, final Connection writeCon, final Context ctx)
+			throws DBPoolingException, SQLException {
+		Connection wc = writeCon;
+		boolean closeWriteCon = false;
+		PreparedStatement stmt = null;
+		try {
+			if (wc == null) {
+				wc = DBPool.pickupWriteable(ctx);
+				closeWriteCon = true;
+			}
+			stmt = wc.prepareStatement(SQL_ADD_PERMS);
+			int pos = 1;
+			stmt.setInt(pos++, ctx.getContextId());
+			stmt.setInt(pos++, folderId);
+			stmt.setInt(pos++, permissionId);
+			stmt.setInt(pos++, isGroup ? 1 : 0);
+			stmt.setInt(pos++, folderPermission);
+			stmt.setInt(pos++, objectReadPermission);
+			stmt.setInt(pos++, objectWritePermission);
+			stmt.setInt(pos++, objectDeletePermission);
+			stmt.setInt(pos++, isAdmin ? 1 : 0);
+			return (stmt.executeUpdate() == 1);
+		} finally {
+			closeResources(null, stmt, closeWriteCon ? wc : null, false, ctx);
+		}
+	}
+
+	private static final String SQL_REMOVE_PERM = "DELETE FROM oxfolder_permissions"
+			+ " WHERE cid = ? AND fuid = ? AND permission_id = ?";
+
+	/**
+	 * Removes a single permission.
+	 * 
+	 * @param folderId
+	 *            The folder ID
+	 * @param permissionId
+	 *            The permission/entity ID (either a user or a group ID)
+	 * @param writeCon
+	 *            A connection with write capability/access
+	 * @param ctx
+	 *            The context
+	 * @return <code>true</code> if corresponding entry was successfully
+	 *         deleted; otherwise <code>false</code>
+	 * @throws DBPoolingException
+	 *             If a pooling error occurred
+	 * @throws SQLException
+	 *             If a SQL error occurred
+	 */
+	public static boolean removeSinglePermission(final int folderId, final int permissionId, final Connection writeCon,
+			final Context ctx) throws DBPoolingException, SQLException {
+		Connection wc = writeCon;
+		boolean closeWriteCon = false;
+		PreparedStatement stmt = null;
+		try {
+			if (wc == null) {
+				wc = DBPool.pickupWriteable(ctx);
+				closeWriteCon = true;
+			}
+			stmt = wc.prepareStatement(SQL_REMOVE_PERM);
+			int pos = 1;
+			stmt.setInt(pos++, ctx.getContextId());
+			stmt.setInt(pos++, folderId);
+			stmt.setInt(pos++, permissionId);
+			return (stmt.executeUpdate() == 1);
 		} finally {
 			closeResources(null, stmt, closeWriteCon ? wc : null, false, ctx);
 		}

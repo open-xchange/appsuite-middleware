@@ -234,7 +234,7 @@ public final class OXFolderAdminHelper {
 		/*
 		 * Insert system infostore folder
 		 */
-		systemPermission.setAllPermission(OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.NO_PERMISSIONS,
+		systemPermission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS,
 				OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
 		systemPermission.setFolderAdmin(false);
 		createSystemFolder(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_INFOSTORE_FOLDER_NAME,
@@ -282,6 +282,24 @@ public final class OXFolderAdminHelper {
 		createSystemFolder(FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID, FolderObject.SYSTEM_OX_PROJECT_FOLDER_NAME,
 				systemPermission, FolderObject.SYSTEM_OX_FOLDER_ID, FolderObject.SYSTEM_MODULE, true, creatingTime,
 				mailAdmin, cid, writeCon);
+		/*
+		 * Insert system userstore infostore folder
+		 */
+		systemPermission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS,
+				OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+		systemPermission.setFolderAdmin(false);
+		createSystemFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_NAME,
+				systemPermission, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.INFOSTORE, true, creatingTime, mailAdmin,
+				cid, writeCon);
+		/*
+		 * Insert system public infostore folder
+		 */
+		systemPermission.setAllPermission(OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.NO_PERMISSIONS,
+				OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+		systemPermission.setFolderAdmin(false);
+		createSystemFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME,
+				systemPermission, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.INFOSTORE, true, creatingTime, mailAdmin,
+				cid, writeCon);
 		if (LOG.isInfoEnabled()) {
 			LOG.info(new StringBuilder("All System folders successfully created for context ").append(cid).toString());
 		}

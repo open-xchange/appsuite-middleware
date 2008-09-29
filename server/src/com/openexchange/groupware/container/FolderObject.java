@@ -126,8 +126,10 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 			return strHelper.getString(FolderStrings.SYSTEM_OX_PROJECT_FOLDER_NAME);
 		case SYSTEM_INFOSTORE_FOLDER_ID:
 			return strHelper.getString(FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME);
-		case VIRTUAL_USER_INFOSTORE_FOLDER_ID:
-			return strHelper.getString(FolderStrings.VIRTUAL_USER_INFOSTORE_FOLDER_NAME);
+		case SYSTEM_USER_INFOSTORE_FOLDER_ID:
+			return strHelper.getString(FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME);
+		case SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID:
+			return strHelper.getString(FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME);
 		case VIRTUAL_LIST_TASK_FOLDER_ID:
 			return strHelper.getString(FolderStrings.VIRTUAL_LIST_TASK_FOLDER_NAME);
 		case VIRTUAL_LIST_CALENDAR_FOLDER_ID:
@@ -162,7 +164,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
 	public static final int SYSTEM_INFOSTORE_FOLDER_ID = 9;
 
-	public static final int VIRTUAL_USER_INFOSTORE_FOLDER_ID = 10;
+	public static final int SYSTEM_USER_INFOSTORE_FOLDER_ID = 10;
+
+	public static final int SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID = 15;
 
 	public static final int VIRTUAL_LIST_TASK_FOLDER_ID = 11;
 
@@ -192,6 +196,10 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	public static final String SYSTEM_OX_PROJECT_FOLDER_NAME = "projects";
 
 	public static final String SYSTEM_INFOSTORE_FOLDER_NAME = "infostore";
+
+	public static final String SYSTEM_USER_INFOSTORE_FOLDER_NAME = "userstore";
+
+	public static final String SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME = "public_infostore";
 
 	/**
 	 * The UID prefix of a virtual shared folder
@@ -463,6 +471,22 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 		return perms;
 	}
 
+	/**
+	 * Gets the permission granted to this folder for specified entity
+	 * 
+	 * @param entity
+	 *            The entity ID (either a user or a group ID)
+	 * @return The corresponding permission or <code>null</code>
+	 */
+	public OCLPermission getPermission(final int entity) {
+		for (final OCLPermission cur : permissions) {
+			if (cur.getEntity() == entity) {
+				return cur.deepClone();
+			}
+		}
+		return null;
+	}
+
 	public boolean containsPermissions() {
 		return b_permissions;
 	}
@@ -583,15 +607,16 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 				return (iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(userId, groups, userConfig
 						.getAccessibleModules(), FolderObject.PUBLIC, modules, SYSTEM_PUBLIC_FOLDER_ID, ctx)).hasNext();
 			} else if (objectId == SYSTEM_INFOSTORE_FOLDER_ID) {
-				return (iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(userId, groups, userConfig
-						.getAccessibleModules(), FolderObject.PUBLIC, new int[] { INFOSTORE },
-						SYSTEM_INFOSTORE_FOLDER_ID, ctx)).hasNext();
+				return userConfig.hasInfostore();
+//				return (iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(userId, groups, userConfig
+//						.getAccessibleModules(), FolderObject.PUBLIC, new int[] { INFOSTORE },
+//						SYSTEM_INFOSTORE_FOLDER_ID, ctx)).hasNext();
 			} else if (!subfolderFlag) {
 				/*
 				 * Folder has no subfolder(s)
 				 */
 				return false;
-			} else if (objectId == VIRTUAL_USER_INFOSTORE_FOLDER_ID || objectId == SYSTEM_PRIVATE_FOLDER_ID
+			} else if (objectId == SYSTEM_USER_INFOSTORE_FOLDER_ID || objectId == SYSTEM_PRIVATE_FOLDER_ID
 					|| objectId == VIRTUAL_LIST_CALENDAR_FOLDER_ID || objectId == VIRTUAL_LIST_CONTACT_FOLDER_ID
 					|| objectId == VIRTUAL_LIST_TASK_FOLDER_ID || objectId == VIRTUAL_LIST_INFOSTORE_FOLDER_ID) {
 				return subfolderFlag;
@@ -635,10 +660,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	public final List<FolderObject> getVisibleSubfolders(final int userId, final int[] groups,
 			final UserConfiguration userConfig, final Context ctx) throws DBPoolingException, OXException,
 			SQLException, SearchIteratorException {
-		if (objectId == VIRTUAL_USER_INFOSTORE_FOLDER_ID) {
-			throw new OXFolderException(FolderCode.UNSUPPORTED_OPERATION, String.valueOf(objectId), String.valueOf(ctx
-					.getContextId()));
-		} else if (b_subfolderFlag && !subfolderFlag) {
+		if (b_subfolderFlag && !subfolderFlag) {
 			return new ArrayList<FolderObject>(0);
 		}
 		final List<FolderObject> retval;
@@ -1419,20 +1441,6 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	public static final FolderObject createVirtualFolderObject(final int objectID, final String name, final int module,
 			final boolean hasSubfolders, final int type) {
 		return createVirtualFolderObject(objectID, name, module, hasSubfolders, type, null);
-	}
-
-	public static final int mapVirtualID2SystemID(final int virtualID) {
-		if (virtualID == VIRTUAL_USER_INFOSTORE_FOLDER_ID) {
-			return SYSTEM_INFOSTORE_FOLDER_ID;
-		}
-		return virtualID;
-	}
-
-	public static final int mapSystemID2VirtualID(final int systemID) {
-		if (systemID == SYSTEM_INFOSTORE_FOLDER_ID) {
-			return VIRTUAL_USER_INFOSTORE_FOLDER_ID;
-		}
-		return systemID;
 	}
 
 	public static final FolderObject createVirtualFolderObject(final int objectID, final String name, final int module,

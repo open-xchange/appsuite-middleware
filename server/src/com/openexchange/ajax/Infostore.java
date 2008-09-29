@@ -751,9 +751,15 @@ public class Infostore extends PermissionServlet {
 		return FACADE;
 	}
 
+	// TODO: Ask Cisco
+
 	public static InfostoreFacade getInfostore(final long folderId) {
+//		if (folderId == FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID
+//				|| folderId == FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID
+//				|| folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
+//			return VIRTUAL_FACADE;
+//		}
 		if (folderId == FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID
-				|| folderId == FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID
 				|| folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
 			return VIRTUAL_FACADE;
 		}
