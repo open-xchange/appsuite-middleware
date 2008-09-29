@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.6.0
-Release:	10
+Release:	11
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -139,6 +139,16 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Sep 29 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12212: Fixed moving a change exception of a recurring appointment
+ - Bugfix #12231: Applying configurable separator character to a mail
+   folder's path prefix instead of using '.'
+   The separator character can be configured in file 'mail.properties'
+   through property 'com.openexchange.mail.defaultSeparator'.
+ - Bugfix #12184: Killing a formerly newly created thread, when
+   corresponding socket gets closed
+ - Bugfix #12223: Fixed NPE when notifying a task's participant(s) if its
+   due is not set
 * Fri Sep 19 2008 - dennis.sieben@open-xchange.com
  - Bugfix #12183: Fixed JSON creation and reading for sieve body rule.
 * Fri Sep 19 2008 - thorben.betten@open-xchange.com
