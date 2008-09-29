@@ -1148,7 +1148,14 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     final int checkUpdateRecurring(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
         if (!edao.containsRecurrenceType() && !cdao.containsRecurrenceType()) {
             return CalendarRecurringCollection.RECURRING_NO_ACTION;
-        } else if (edao.containsRecurrenceType() && edao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE && (!cdao.containsRecurrenceType() || cdao.getRecurrenceType() == edao.getRecurrenceType())) {
+        }
+        if (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0 && edao.getRecurrenceID() != edao.getObjectID()) {
+        	/*
+        	 * An update of a change exception
+        	 */
+        	return CalendarRecurringCollection.RECURRING_NO_ACTION;
+        }
+        if (edao.containsRecurrenceType() && edao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE && (!cdao.containsRecurrenceType() || cdao.getRecurrenceType() == edao.getRecurrenceType())) {
             final int ret = CalendarRecurringCollection.getRecurringAppoiontmentUpdateAction(cdao, edao);
             if (ret == CalendarRecurringCollection.RECURRING_NO_ACTION) {
                 // We have to check if something has been changed in the meantime!

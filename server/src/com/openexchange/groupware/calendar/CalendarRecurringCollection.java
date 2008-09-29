@@ -85,23 +85,28 @@ public final class CalendarRecurringCollection {
     /**
      * @deprecated use {@link Constants#MILLI_HOUR}.
      */
-    public static final long MILLI_HOUR = Constants.MILLI_HOUR;
+    @Deprecated
+	public static final long MILLI_HOUR = Constants.MILLI_HOUR;
     /**
      * @deprecated use {@link Constants#MILLI_DAY}.
      */
-    public static final long MILLI_DAY = Constants.MILLI_DAY;
+    @Deprecated
+	public static final long MILLI_DAY = Constants.MILLI_DAY;
     /**
      * @deprecated use {@link Constants#MILLI_WEEK}.
      */
-    public static final long MILLI_WEEK = Constants.MILLI_WEEK;
+    @Deprecated
+	public static final long MILLI_WEEK = Constants.MILLI_WEEK;
     /**
      * @deprecated use {@link Constants#MILLI_MONTH}.
      */
-    public static final long MILLI_MONTH = Constants.MILLI_MONTH;
+    @Deprecated
+	public static final long MILLI_MONTH = Constants.MILLI_MONTH;
     /**
      * @deprecated use {@link Constants#MILLI_YEAR}.
      */
-    public static final long MILLI_YEAR = Constants.MILLI_YEAR;
+    @Deprecated
+	public static final long MILLI_YEAR = Constants.MILLI_YEAR;
     
     public static final int RECURRING_NO_ACTION = 0;
     public static final int RECURRING_VIRTUAL_ACTION = 1;
@@ -330,25 +335,26 @@ public final class CalendarRecurringCollection {
      * @return a <code>int</code> value
      */
     public static int getRecurringAppoiontmentUpdateAction(final CalendarDataObject cdao, final CalendarDataObject edao) {
-        int rada = RECURRING_NO_ACTION;
+    	int rada = RECURRING_NO_ACTION;
         /*
-         * Check for edao denotes a recurring appointment
+         * Check if edao denotes the main recurring appointment
          */
-        if (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0) {
-            /*
-             * Check if edao denotes a change exception of a recurring appointment
-             */
-        	if (cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0) {
-                rada = RECURRING_CREATE_EXCEPTION;
-            } else if (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null) {
-                rada = RECURRING_CREATE_EXCEPTION;
-            }
-            if (cdao.containsDeleteExceptions() && edao.containsChangeExceptions()) {
-            		if (CalendarCommonCollection.checkIfArrayKeyExistInArray(cdao.getDeleteException(), edao.getChangeException())) {
-            			rada = RECURRING_EXCEPTION_DELETE_EXISTING;
-            		}
-            }
-        }
+        if (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0 && edao.getRecurrenceID() == edao.getObjectID()) {
+			/*
+			 * Check if cdao denotes a change exception of a recurring appointment
+			 */
+			if (cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0) {
+				rada = RECURRING_CREATE_EXCEPTION;
+			} else if (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null) {
+				rada = RECURRING_CREATE_EXCEPTION;
+			}
+			if (cdao.containsDeleteExceptions() && edao.containsChangeExceptions()) {
+				if (CalendarCommonCollection.checkIfArrayKeyExistInArray(cdao.getDeleteException(), edao
+						.getChangeException())) {
+					rada = RECURRING_EXCEPTION_DELETE_EXISTING;
+				}
+			}
+		}
         return rada;
     }
     

@@ -1,3 +1,7 @@
+* 2008-09-29 - thorben.betten@open-xchange.com
+
+ - Bugfix #12212: Fixed moving a change exception of a recurring appointment
+
 * 2008-09-19 - thorben.betten@open-xchange.com
 
  - Bugfix #12194: Using current user time zone and language for notification to
