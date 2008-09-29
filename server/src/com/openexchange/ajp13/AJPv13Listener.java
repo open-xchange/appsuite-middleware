@@ -76,10 +76,12 @@ import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
  */
 public final class AJPv13Listener implements Runnable {
 
-	// private final String excPrefix;
-
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13Listener.class);
+
+	private static final AtomicInteger numRunning = new AtomicInteger();
+
+	private static final DecimalFormat DF = new DecimalFormat("00000");
 
 	private Socket client;
 
@@ -95,35 +97,37 @@ public final class AJPv13Listener implements Runnable {
 
 	private boolean waitingOnAJPSocket;
 
-	private boolean pooled;
+	private final boolean pooled;
 
 	private final int num;
 
-	private final Lock listenerLock = new ReentrantLock();
+	private final Lock listenerLock;
 
-	private final transient Condition resumeRunning = listenerLock.newCondition();
-
-	private static final AtomicInteger numRunning = new AtomicInteger();
-
-	private static final DecimalFormat DF = new DecimalFormat("00000");
+	private final Condition resumeRunning;
 
 	/**
-	 * Constructs a new <code>AJPv13Listener</code> instance with given
-	 * <code>num</code> argument
+	 * Initializes a new {@link AJPv13Listener}
 	 * 
 	 * @param num
+	 *            The listener's number
 	 */
 	public AJPv13Listener(final int num) {
 		this(num, false);
 	}
 
 	/**
-	 * Constructs a new <code>AJPv13Listener</code> instance with given
-	 * <code>num</code> argument. <code>pooled</code> determines whether this
-	 * listener is initially put into pool
+	 * Initializes a new {@link AJPv13Listener}
+	 * 
+	 * @param num
+	 *            The listener's number
+	 * @param pooled
+	 *            <code>true</code> to mark this listener as pooled (initially
+	 *            put into pool); otherwise <code>false</code>
 	 */
 	public AJPv13Listener(final int num, final boolean pooled) {
 		this.num = num;
+		listenerLock = new ReentrantLock();
+		resumeRunning = listenerLock.newCondition();
 		processing = false;
 		waitingOnAJPSocket = false;
 		this.pooled = pooled;
@@ -132,7 +136,12 @@ public final class AJPv13Listener implements Runnable {
 	}
 
 	/**
-	 * Starts the listener
+	 * Starts this listener
+	 * 
+	 * @param client
+	 *            The client socket to listen on
+	 * @return <code>true</code> if this listener could be successfully started;
+	 *         otherwise <code>false</code>
 	 */
 	public boolean startListener(final Socket client) {
 		if (waitingOnAJPSocket || processing) {
@@ -340,15 +349,14 @@ public final class AJPv13Listener implements Runnable {
 				AJPv13Server.ajpv13ListenerMonitor.decrementNumActive();
 			}
 			/*
-			 * Put back listener into pool. Use an enforced put if mod_jk is
-			 * enabled.
+			 * Put back listener into pool if listener was initially put into
+			 * pool. Use an enforced put if mod_jk is enabled.
 			 */
-			if (AJPv13ListenerPool.putBack(this, false/* AJPv13Config.isAJPModJK() */)) {
+			if (pooled && AJPv13ListenerPool.putBack(this, false/* AJPv13Config.isAJPModJK() */)) {
 				/*
 				 * Listener could be successfully put into pool, so put him
 				 * asleep
 				 */
-				pooled = true;
 				listenerLock.lock();
 				try {
 					final long duration = System.currentTimeMillis() - start;
@@ -368,13 +376,12 @@ public final class AJPv13Listener implements Runnable {
 					keepOnRunning = false;
 				} finally {
 					listenerLock.unlock();
-					pooled = false;
 				}
 			} else {
 				/*
-				 * Listener could NOT be put back. Leave run() method and let
-				 * this listener die since he finished working and socket is
-				 * closed.
+				 * Listener could NOT be put back or was newly created to
+				 * process an opened socket. Leave run() method and let this
+				 * listener die since he finished working and socket is closed.
 				 */
 				final long duration = System.currentTimeMillis() - start;
 				AJPv13Server.ajpv13ListenerMonitor.addUseTime(duration);
