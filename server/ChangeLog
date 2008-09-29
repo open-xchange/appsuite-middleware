@@ -1,6 +1,10 @@
 * 2008-09-29 - thorben.betten@open-xchange.com
 
  - Bugfix #12212: Fixed moving a change exception of a recurring appointment
+ - Bugfix #12231: Applying configurable separator character to a mail
+   folder's path prefix instead of using '.'
+   The separator character can be configured in file 'mail.properties'
+   through property 'com.openexchange.mail.defaultSeparator'.
 
 * 2008-09-19 - thorben.betten@open-xchange.com
 
