@@ -610,7 +610,7 @@ public class FolderTest extends AbstractAJAXTest {
 		l = getSubfolders(conversation, hostname, sessionId, "" + infostore.getObjectID(), false);
 		for (final Iterator iter = l.iterator(); iter.hasNext();) {
 			final FolderObject f = (FolderObject) iter.next();
-			if (f.getObjectID() == FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID) {
+			if (f.getObjectID() == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
 				userStore = f;
 				break;
 			}
