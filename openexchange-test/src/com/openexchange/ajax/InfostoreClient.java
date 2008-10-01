@@ -26,6 +26,10 @@ public class InfostoreClient {
 	public static Response all(final WebConversation webConv, final String hostname, final String sessionId, final int folderId, final int[] columns) throws MalformedURLException, JSONException, IOException, SAXException {
 		return test.all(webConv, hostname, sessionId, folderId, columns);
 	}
+	
+	public static Response all(final WebConversation webConv, final String protocol, final String hostname, final String sessionId, final int folderId, final int[] columns) throws MalformedURLException, JSONException, IOException, SAXException {
+		return test.all(webConv, protocol, hostname, sessionId, folderId, columns, -1, null);
+	}
 
 	public static int copy(final WebConversation webConv, final String hostname, final String sessionId, final int id, final long timestamp, final Map<String, String> modified, final File upload, final String contentType) throws JSONException, IOException {
 		return test.copy(webConv, hostname, sessionId, id, timestamp, modified, upload, contentType);
@@ -42,9 +46,17 @@ public class InfostoreClient {
 	public static int createNew(final WebConversation webConv, final String hostname, final String sessionId, final Map<String, String> fields) throws MalformedURLException, IOException, SAXException, JSONException {
 		return test.createNew(webConv, hostname, sessionId, fields);
 	}
-
+	
+	public static int createNew(final WebConversation webConv, final String protocol, final String hostname, final String sessionId, final Map<String, String> fields) throws MalformedURLException, IOException, SAXException, JSONException {
+		return test.createNew(webConv, protocol, hostname, sessionId, fields);
+	}
+		
 	public static int[] delete(final WebConversation webConv, final String hostname, final String sessionId, final long timestamp, final int[][] ids) throws MalformedURLException, JSONException, IOException, SAXException {
 		return test.delete(webConv, hostname, sessionId, timestamp, ids);
+	}
+	
+	public static int[] delete(final WebConversation webConv, final String protocol, final String hostname, final String sessionId, final long timestamp, final int[][] ids) throws MalformedURLException, JSONException, IOException, SAXException {
+		return test.delete(webConv, protocol, hostname, sessionId, timestamp, ids);
 	}
 
 	public static int[] detach(final WebConversation webConv, final String hostname, final String sessionId, final long timestamp, final int objectId, final int[] versions) throws MalformedURLException, JSONException, IOException, SAXException {

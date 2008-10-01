@@ -115,8 +115,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return all(webConv,hostname,sessionId,folderId,columns, -1, null);
 	}
 	
-	public Response all(final WebConversation webConv, final String hostname, final String sessionId, final int folderId, final int[] columns, final int sort, final String order) throws MalformedURLException, JSONException, IOException, SAXException {
-		final StringBuffer url = getUrl(sessionId,"all", hostname);
+	public Response all(final WebConversation webConv, final String protocol, final String hostname, final String sessionId, final int folderId, final int[] columns, final int sort, final String order) throws MalformedURLException, JSONException, IOException, SAXException {
+		final StringBuffer url = getUrl(sessionId,"all", hostname, protocol);
 		url.append("&folder=");
 		url.append(folderId);
 		url.append("&columns=");
@@ -137,6 +137,10 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		}
 		
 		return gT(webConv, url.toString());
+	}
+	
+	public Response all(final WebConversation webConv, final String hostname, final String sessionId, final int folderId, final int[] columns, final int sort, final String order) throws MalformedURLException, JSONException, IOException, SAXException {
+		return all(webConv, null, hostname, sessionId, folderId, columns, sort, order);
 	}
 	
 	public Response list(final WebConversation webConv, final String hostname, final String sessionId, final int[] columns, final int[][] ids) throws MalformedURLException, JSONException, IOException, SAXException {
@@ -296,8 +300,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return Response.parse(res.toString());
 	}
 	
-	public int createNew(final WebConversation webConv, final String hostname, final String sessionId, final Map<String,String> fields) throws MalformedURLException, IOException, SAXException, JSONException  {
-		final StringBuffer url = getUrl(sessionId,"new", hostname);
+	public int createNew(final WebConversation webConv, final String protocol, final String hostname, final String sessionId, final Map<String,String> fields) throws MalformedURLException, IOException, SAXException, JSONException  {
+		final StringBuffer url = getUrl(sessionId,"new", hostname, protocol);
 		final JSONObject obj = toJSONArgs(fields);
 		
 		final PutMethodWebRequest m = new PutMethodWebRequest(url.toString(), new ByteArrayInputStream(obj.toString().getBytes("UTF-8")),"text/javascript");
@@ -308,6 +312,10 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		} catch (final JSONException x) {
 			throw new JSONException("Got unexpected answer: "+resp.getText());
 		}
+	}
+	
+	public int createNew(final WebConversation webConv, final String hostname, final String sessionId, final Map<String,String> fields) throws MalformedURLException, IOException, SAXException, JSONException  {
+		return createNew(webConv, null, hostname, sessionId, fields);
 	}
 	
 	public int createNew(final WebConversation webConv, final String hostname, final String sessionId, final Map<String, String> fields, final File upload, final String contentType) throws MalformedURLException, IOException, SAXException, JSONException {
@@ -365,19 +373,23 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		}
 		return (Integer) res.getData();
 	}
-
-	public int[] delete(final WebConversation webConv, final String hostname, final String sessionId, final long timestamp, final int[][] ids) throws MalformedURLException, JSONException, IOException, SAXException {
-		int[][] notDeletedTuple = deleteFromFolders(webConv, hostname, sessionId, timestamp, ids);
+	
+	public int[] delete(final WebConversation webConv, final String protocol, final String hostname, final String sessionId, final long timestamp, final int[][] ids) throws MalformedURLException, JSONException, IOException, SAXException {
+		int[][] notDeletedTuple = deleteFromFolders(webConv, protocol, hostname, sessionId, timestamp, ids);
         int[] retval = new int[notDeletedTuple.length];
         int i = 0;
         for(int[] tuple : notDeletedTuple) {
             retval[i++] = tuple[0];
         }
         return retval;
-    }
+	}
 
-    public int[][] deleteFromFolders(final WebConversation webConv, final String hostname, final String sessionId, final long timestamp, final int[][] ids) throws JSONException, IOException, SAXException {
-        final StringBuffer url = getUrl(sessionId,"delete", hostname);
+	public int[] delete(final WebConversation webConv, final String hostname, final String sessionId, final long timestamp, final int[][] ids) throws MalformedURLException, JSONException, IOException, SAXException {
+		return delete(webConv, null, hostname, sessionId, timestamp, ids);
+    }
+	
+	public int[][] deleteFromFolders(final WebConversation webConv, final String protocol, final String hostname, final String sessionId, final long timestamp, final int[][] ids) throws JSONException, IOException, SAXException {
+        final StringBuffer url = getUrl(sessionId,"delete", hostname, protocol);
 		url.append("&timestamp=");
 		url.append(timestamp);
 
@@ -407,6 +419,10 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
   }
 
 		return notDeleted;
+	}
+
+    public int[][] deleteFromFolders(final WebConversation webConv, final String hostname, final String sessionId, final long timestamp, final int[][] ids) throws JSONException, IOException, SAXException {
+    	return deleteFromFolders(webConv, null, hostname, sessionId, timestamp, ids);
     }
 
     public int[] deleteSingle(final WebConversation webConv, final String hostname, final String sessionId, final long timestamp, final int folder, final int id) throws JSONException, IOException, SAXException {
@@ -640,7 +656,12 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 	}
 	
 	protected StringBuffer getUrl(final String sessionId, final String action, final String hostname) {
-		final StringBuffer url = new StringBuffer("http://");
+		return getUrl(sessionId, action, hostname, null);
+	}
+	
+	protected StringBuffer getUrl(final String sessionId, final String action, final String hostname, final String protocol) {
+		final StringBuffer url = new StringBuffer((protocol != null) ? protocol : "http");
+		url.append("://");
 		url.append((hostname == null) ? getHostName() : hostname );
 		url.append("/ajax/infostore?session=");
 		url.append(sessionId);

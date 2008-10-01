@@ -360,7 +360,7 @@ public abstract class AbstractAJAXTest extends TestCase {
     }
 
     public static String appendPrefix(final String host) {
-        if (host.startsWith("http://")) {
+        if (host.startsWith("http://") || host.startsWith("https://")) {
             return host;
         }
         return "http://" + host;

@@ -191,7 +191,12 @@ public class MailTest extends AbstractAJAXTest {
 	
 	public static JSONObject getAllMails(final WebConversation conversation, final String hostname,
 			final String sessionId, final String folder, final int[] cols, final boolean setCookie) throws IOException, SAXException, JSONException {
-		final GetMethodWebRequest getReq = new GetMethodWebRequest(PROTOCOL + hostname + MAIL_URL);
+		return getAllMails(conversation, null, hostname, sessionId, folder, cols, setCookie);
+	}
+	
+	public static JSONObject getAllMails(final WebConversation conversation, final String protocol, final String hostname,
+			final String sessionId, final String folder, final int[] cols, final boolean setCookie) throws IOException, SAXException, JSONException {
+		final GetMethodWebRequest getReq = new GetMethodWebRequest(((null == protocol) ? PROTOCOL : protocol) + hostname + MAIL_URL);
 		if (setCookie) {
 			/*
 			 * Set cookie cause a request has already been fired before with the same session id.
@@ -223,9 +228,15 @@ public class MailTest extends AbstractAJAXTest {
 	}
 
     public static Response getMail(final WebConversation conversation,
-        final String hostName, final String sessionId, final String mailId)
+            final String hostName, final String sessionId, final String mailId)
+            throws IOException, SAXException, JSONException {
+    	return getMail(conversation, null, hostName, sessionId, mailId);
+    }
+    
+    public static Response getMail(final WebConversation conversation,
+        final String protocol, final String hostName, final String sessionId, final String mailId)
         throws IOException, SAXException, JSONException {
-        final GetMethodWebRequest getReq = new GetMethodWebRequest(PROTOCOL
+        final GetMethodWebRequest getReq = new GetMethodWebRequest(((null == protocol) ? PROTOCOL : protocol)
             + hostName + MAIL_URL);
         getReq.setParameter(Mail.PARAMETER_SESSION, sessionId);
         getReq.setParameter(Mail.PARAMETER_ACTION, Mail.ACTION_GET);
