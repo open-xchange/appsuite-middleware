@@ -65,7 +65,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Locale;
 import java.util.TimeZone;
 
 import junit.framework.JUnit4TestAdapter;
@@ -91,7 +90,7 @@ import com.openexchange.admin.rmi.extensions.OXCommonExtension;
  */
 public class UserTest extends AbstractTest {
     
-    public final static String NAMED_ACCESS_COMBINATION_BASIC = "basic";
+    public final static String NAMED_ACCESS_COMBINATION_BASIC = "all";
     // list of chars that must be valid
 //    protected static final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
     protected static final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -743,6 +742,9 @@ public class UserTest extends AbstractTest {
         notallowed.add("setGUI_Spam_filter_capabilities_enabled");
         notallowed.add("setPassword_expired");
         notallowed.add("setMailenabled");
+        notallowed.add("setLanguage");
+        notallowed.add("setTimezone");
+        notallowed.add("setPasswordMech");
         return notallowed;
     }
     
@@ -781,6 +783,7 @@ public class UserTest extends AbstractTest {
         
         notallowed.add("setId"); // we cannot change the id of a user, is a mandatory field for a change
         notallowed.add("setPassword"); // server password is always different(crypted)
+        notallowed.add("setPasswordMech"); // server password is always different(crypted)
         notallowed.add("setName"); // server does not support username change
         
         // loop through methods and change each attribute per single call and load and compare
@@ -795,7 +798,11 @@ public class UserTest extends AbstractTest {
                 if(map_obj.getMethodParameterType().equalsIgnoreCase("java.lang.String")){
                     
                     String oldvalue = (String)map_obj.getGetter().invoke(srv_loaded); 
-                    map_obj.getSetter().invoke(tmp_usr, oldvalue+"_singlechange");
+                    if( map_obj.getMethodName().equals("setLanguage") ) {
+                        map_obj.getSetter().invoke(tmp_usr, "fr_FR");
+                    } else {
+                        map_obj.getSetter().invoke(tmp_usr, oldvalue+"_singlechange");
+                    }
                     //System.out.println("Setting String via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
                     
                 }
@@ -1170,7 +1177,9 @@ public class UserTest extends AbstractTest {
         // The admin has no company set by default, so we can test here, how a change work on field's which
         // aren't set by default
         final User usr = oxl.login2User(ctx, cred);
-        
+        // passwordmech is set by login2user so we need to null it here for the change test
+        // not to fail
+        usr.setPasswordMech(null);
         final OXUserInterface user = (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
         usr.setNickname("test");
 
