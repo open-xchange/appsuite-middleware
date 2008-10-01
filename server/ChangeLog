@@ -1,3 +1,7 @@
+* 2008-10-01 - francisco.laguna@open-xchange.com
+  - Bugfix #12258 : Do not crash with NPE when requesting full time 
+    appointment with recurrences via updates without date boundaries
+
 * 2008-09-29 - thorben.betten@open-xchange.com
 
  - Bugfix #12212: Fixed moving a change exception of a recurring appointment

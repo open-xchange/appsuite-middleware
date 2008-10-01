@@ -85,7 +85,7 @@ public class AppointmentWriter extends CalendarWriter {
 
 	public void writeArray(final AppointmentObject appointmentObj, final int cols[], final Date betweenStart,
 			final Date betweenEnd, final JSONArray jsonArray) throws JSONException {
-		if (appointmentObj.getFullTime()) {
+		if (betweenStart != null && betweenEnd != null && appointmentObj.getFullTime()) {
 			if (CalendarCommonCollection.inBetween(appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate()
 					.getTime(), betweenStart.getTime(), betweenEnd.getTime())) {
 				writeArray(appointmentObj, cols, jsonArray);
