@@ -196,7 +196,7 @@ public class MailTest extends AbstractAJAXTest {
 	
 	public static JSONObject getAllMails(final WebConversation conversation, final String protocol, final String hostname,
 			final String sessionId, final String folder, final int[] cols, final boolean setCookie) throws IOException, SAXException, JSONException {
-		final GetMethodWebRequest getReq = new GetMethodWebRequest(((null == protocol) ? PROTOCOL : protocol) + hostname + MAIL_URL);
+		final GetMethodWebRequest getReq = new GetMethodWebRequest(((null == protocol) ? PROTOCOL : protocol + "://") + hostname + MAIL_URL);
 		if (setCookie) {
 			/*
 			 * Set cookie cause a request has already been fired before with the same session id.
@@ -236,7 +236,7 @@ public class MailTest extends AbstractAJAXTest {
     public static Response getMail(final WebConversation conversation,
         final String protocol, final String hostName, final String sessionId, final String mailId)
         throws IOException, SAXException, JSONException {
-        final GetMethodWebRequest getReq = new GetMethodWebRequest(((null == protocol) ? PROTOCOL : protocol)
+        final GetMethodWebRequest getReq = new GetMethodWebRequest(((null == protocol) ? PROTOCOL : protocol + "://")
             + hostName + MAIL_URL);
         getReq.setParameter(Mail.PARAMETER_SESSION, sessionId);
         getReq.setParameter(Mail.PARAMETER_ACTION, Mail.ACTION_GET);
