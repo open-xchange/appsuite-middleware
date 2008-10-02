@@ -90,7 +90,7 @@ public class FolderTest extends AbstractAJAXTest {
 	public static List<FolderObject> getRootFolders(final WebConversation conversation, final String protocol, final String hostname,
 			final String sessionId, final boolean printOutput) throws MalformedURLException, IOException, SAXException,
 			JSONException, OXException {
-		final WebRequest req = new GetMethodWebRequest(((null == protocol) ? PROTOCOL : protocol + "://") + hostname + FOLDER_URL);
+		final WebRequest req = new GetMethodWebRequest(((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL);
 		req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
 		req.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ROOT);
 		final String columns = FolderObject.OBJECT_ID + "," + FolderObject.MODULE + "," + FolderObject.FOLDER_NAME + ","
@@ -136,7 +136,7 @@ public class FolderTest extends AbstractAJAXTest {
 	public static List<FolderObject> getSubfolders(final WebConversation conversation, final String protocol, final String hostname,
 			final String sessionId, final String parentIdentifier, final boolean printOutput, final boolean ignoreMailfolder)
 			throws MalformedURLException, IOException, SAXException, JSONException, OXException {
-		final WebRequest req = new GetMethodWebRequest(((null == protocol) ? PROTOCOL : protocol + "://") + hostname + FOLDER_URL);
+		final WebRequest req = new GetMethodWebRequest(((null == protocol) ? PROTOCOL : ((protocol + "://"))) + hostname + FOLDER_URL);
 		req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
 		req.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
 		req.setParameter("parent", parentIdentifier);
@@ -194,7 +194,7 @@ public class FolderTest extends AbstractAJAXTest {
 	public static FolderObject getFolder(final WebConversation conversation, final String protocol, final String hostname,
 			final String sessionId, final String folderIdentifier, final Calendar timestamp, final boolean printOutput)
 			throws MalformedURLException, IOException, SAXException, JSONException, OXException {
-		final WebRequest req = new GetMethodWebRequest(((null == protocol) ? PROTOCOL : protocol + "://") + hostname + FOLDER_URL);
+		final WebRequest req = new GetMethodWebRequest(((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL);
 		req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
 		req.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET);
 		req.setParameter(AJAXServlet.PARAMETER_ID, folderIdentifier);
@@ -304,7 +304,7 @@ public class FolderTest extends AbstractAJAXTest {
 		urlParam.setParameter(FolderFields.FOLDER_ID, String.valueOf(parentFolderId));
 		final byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
 		final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-		final WebRequest req = new PutMethodWebRequest(((null == protocol) ? PROTOCOL : protocol + "://") + hostname + FOLDER_URL + urlParam.getURLParameters(),
+		final WebRequest req = new PutMethodWebRequest(((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
 				bais, "text/javascript; charset=UTF-8");
 		final WebResponse resp = conversation.getResponse(req);
 		final JSONObject respObj = new JSONObject(resp.getText());
@@ -354,7 +354,7 @@ public class FolderTest extends AbstractAJAXTest {
 		urlParam.setParameter(FolderFields.FOLDER_ID, String.valueOf(parentFolderId));
 		final byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
 		final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-		final WebRequest req = new PutMethodWebRequest(((null == protocol) ? PROTOCOL : protocol + "://") + hostname + FOLDER_URL + urlParam.getURLParameters(),
+		final WebRequest req = new PutMethodWebRequest(((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
 				bais, "text/javascript; charset=UTF-8");
 		final WebResponse resp = conversation.getResponse(req);
 		final JSONObject respObj = new JSONObject(resp.getText());
@@ -392,7 +392,7 @@ public class FolderTest extends AbstractAJAXTest {
 		urlParam.setParameter("timestamp", String.valueOf(timestamp));
 		final byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
 		final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-		final WebRequest req = new PutMethodWebRequest(((null == protocol) ? PROTOCOL : protocol + "://") + hostname + FOLDER_URL + urlParam.getURLParameters(),
+		final WebRequest req = new PutMethodWebRequest(((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
 				bais, "text/javascript; charset=UTF-8");
 		final WebResponse resp = conversation.getResponse(req);
 		final JSONObject respObj = new JSONObject(resp.getText());
@@ -445,7 +445,7 @@ public class FolderTest extends AbstractAJAXTest {
 		urlParam.setParameter("timestamp", String.valueOf(timestamp));
 		final byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
 		final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-		final WebRequest req = new PutMethodWebRequest(((null == protocol) ? PROTOCOL : protocol + "://") + hostname + FOLDER_URL + urlParam.getURLParameters(),
+		final WebRequest req = new PutMethodWebRequest(((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
 				bais, "text/javascript; charset=UTF-8");
 		final WebResponse resp = conversation.getResponse(req);
 		final JSONObject respObj = new JSONObject(resp.getText());
@@ -477,7 +477,7 @@ public class FolderTest extends AbstractAJAXTest {
 		urlParam.setParameter("timestamp", String.valueOf(timestamp));
 		final byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
 		final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-		final WebRequest req = new PutMethodWebRequest(((null == protocol) ? PROTOCOL : protocol + "://") + hostname + FOLDER_URL + urlParam.getURLParameters(),
+		final WebRequest req = new PutMethodWebRequest(((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
 				bais, "text/javascript; charset=UTF-8");
 		final WebResponse resp = conversation.getResponse(req);
 		final JSONObject respObj = new JSONObject(resp.getText());
@@ -506,7 +506,7 @@ public class FolderTest extends AbstractAJAXTest {
 		urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE);
 		urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
 		urlParam.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(timestamp));
-		final WebRequest req = new PutMethodWebRequest(((null == protocol) ? PROTOCOL : protocol + "://") + hostname + FOLDER_URL + urlParam.getURLParameters(),
+		final WebRequest req = new PutMethodWebRequest(((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
 				bais, "text/javascript; charset=UTF-8");
 		final WebResponse resp = conversation.getResponse(req);
 		final JSONObject respObj = new JSONObject(resp.getText());
