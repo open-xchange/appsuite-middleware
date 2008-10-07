@@ -48,11 +48,19 @@
  */
 package com.openexchange.admin.rmi.impl;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
+import com.openexchange.admin.daemons.AdminDaemon;
+import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -68,6 +76,8 @@ import com.openexchange.admin.tools.GenericChecks;
 
 
 public abstract class OXContextCommonImpl extends OXCommonImpl {
+
+    protected BundleContext context;
 
     public OXContextCommonImpl() throws StorageException {
         super();
@@ -103,7 +113,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         GenericChecks.checkValidMailAddress(admin_user.getPrimaryEmail());
     }
 
-    protected abstract Context createmaincall(final Context ctx, final User admin_user, Database db, UserModuleAccess access) throws StorageException, InvalidDataException;
+    protected abstract Context createmaincall(final Context ctx, final User admin_user, Database db, UserModuleAccess access, final Credentials auth) throws StorageException, InvalidDataException;
 
     protected Context createcommon(final Context ctx, final User admin_user, final Database db, UserModuleAccess access, final Credentials auth) throws InvalidCredentialsException, ContextExistsException, InvalidDataException, StorageException {
         try{
@@ -114,7 +124,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             throw invalidDataException;
         }
 
-        new BasicAuthenticator().doAuthentication(auth);
+        new BasicAuthenticator(context).doAuthentication(auth);
         
         if (log.isDebugEnabled()) {
             log.debug(ctx + " - " + admin_user);
@@ -132,7 +142,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                 // Add the name of the context to the login mappings and the id
                 ctx.addLoginMapping(name);
             }
-            return createmaincall(ctx, admin_user, db, access);
+            return createmaincall(ctx, admin_user, db, access,auth);
         } catch (final ContextExistsException e) {
             log.error(e.getMessage(),e);
             throw e;
@@ -143,5 +153,70 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             log.error(e.getMessage(), e);
             throw e;
         }
+    }
+    
+    protected boolean isBundleRegistered() {
+        return true;
+    }
+    
+    /**
+     * Call method <code>method</code> of all bundles registered to the OXContext Service 
+     * <b>Important:</b> No argument of any args here must be null!
+     * Arguments, that are null will cause a {@link StorageException}
+     * 
+     * @param method Name of the method to call
+     * @param args All required args of that method
+     * @throws StorageException
+     */
+    @SuppressWarnings("unchecked")
+    protected Object callPluginMethod(final String method, final Object... args) throws StorageException {
+        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        for (final Bundle bundle : bundles) {
+            final String bundlename = bundle.getSymbolicName();
+            if (Bundle.ACTIVE == bundle.getState()) {
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                if (null != servicereferences) {
+                    for (final ServiceReference servicereference : servicereferences) {
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxcontext")) {
+                            final OXContextPluginInterface oxctx = (OXContextPluginInterface) this.context.getService(servicereference);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Calling " + method + " for plugin: " + bundlename);
+                            }
+                            try {
+                                Class[] classes = new Class[args.length];
+                                for(int i=0; i<args.length; i++) {
+                                    if( args[i] == null ) {
+                                        final String errtxt = "Error calling method " + method + "() for plugin: " + bundlename + ": argument " + (i+1) + " is null"; 
+                                        final StorageException e = new StorageException(errtxt);
+                                        log.error(errtxt);
+                                        throw e;
+                                    }
+                                    classes[i] = args[i].getClass();
+                                }
+                                final Method pmethod = OXContextPluginInterface.class.getDeclaredMethod(method, classes);
+                                return pmethod.invoke(oxctx, args);
+                            } catch (SecurityException e) {
+                                log.error("Error while calling method " + method + " of plugin " + bundlename,e);
+                                throw new StorageException(e.getCause());
+                            } catch (NoSuchMethodException e) {
+                                log.error("Error while calling method " + method + " of plugin " + bundlename,e);
+                                throw new StorageException(e.getCause());
+                            } catch (IllegalArgumentException e) {
+                                log.error("Error while calling method " + method + " of plugin " + bundlename,e);
+                                throw new StorageException(e.getCause());
+                            } catch (IllegalAccessException e) {
+                                log.error("Error while calling method " + method + " of plugin " + bundlename,e);
+                                throw new StorageException(e.getCause());
+                            } catch (InvocationTargetException e) {
+                                log.error("Error while calling method " + method + " of plugin " + bundlename,e);
+                                throw new StorageException(e.getCause());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
