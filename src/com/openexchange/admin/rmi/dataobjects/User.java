@@ -70,7 +70,7 @@ import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
-public class User extends ExtendableDataObject implements NameAndIdObject {
+public class User extends ExtendableDataObject implements NameAndIdObject, PasswordMechObject {
     /**
      * For serialization
      */
@@ -1582,10 +1582,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.name = username;
     }
 
-    /**
-     * Return the password of this user object.
-     * 
-     * @return A {@link String} containing the password
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#getPassword()
      */
     final public String getPassword() {
         return password;
@@ -4210,23 +4208,15 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         }
     }
 
-    final public static String CRYPT_MECH = "{CRYPT}";
-    final public static String SHA_MECH = "{SHA}";
-    
-    /**
-     * @return the passwordMech
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#getPasswordMech()
      */
     final public String getPasswordMech() {
         return passwordMech;
     }
 
-    /**
-     * Represents the password encryption mechanism, value is a password
-     * mechanism. Currently supported mechanisms are "{CRYPT}" and "{SHA}",
-     * see {@link User.CRYPT_MECH} and {@link User.SHA_MECH}.  
-     * 
-     * @param passwordMech
-     *                the passwordMech to set
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#setPasswordMech(java.lang.String)
      */
     final public void setPasswordMech(final String passwordMech) {
         if (null == passwordMech) {

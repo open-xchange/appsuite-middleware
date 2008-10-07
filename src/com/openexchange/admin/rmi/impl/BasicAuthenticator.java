@@ -49,10 +49,17 @@
 
 package com.openexchange.admin.rmi.impl;
 
+import java.util.ArrayList;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
+import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -74,6 +81,20 @@ public class BasicAuthenticator extends OXCommonImpl {
     private OXAuthStorageInterface fileAuth = null;
     private AdminCache cache = null;
 
+    private BundleContext context = null;
+
+    /**
+     * Use this constructor when additional bundles should be able to
+     * override login
+     * @throws StorageException  */
+    public BasicAuthenticator(final BundleContext context) throws StorageException {
+        super();
+        this.context = context;
+        sqlAuth  = OXAuthStorageInterface.getInstanceSQL();
+        fileAuth = OXAuthStorageInterface.getInstanceFile();
+        cache = ClientAdminThread.cache;
+    }
+
     /**
      * @throws StorageException  */
     public BasicAuthenticator() throws StorageException {
@@ -84,13 +105,50 @@ public class BasicAuthenticator extends OXCommonImpl {
     }
 
     /**
-     * Authenticates the master admin!
+     * Authenticates the master admin. Other bundles can register an OSGi
+     * service here and take care about authentication themself
+     * 
      * @param authdata
      * @throws InvalidCredentialsException
      */
     public void doAuthentication(final Credentials authdata) throws InvalidCredentialsException{        
+        final Credentials master = ClientAdminThread.cache.getMasterCredentials();
+
+        boolean doPluginAuth = false;
+        if(cache.masterAuthenticationDisabled() || 
+                ( authdata != null && !master.getLogin().equals(authdata.getLogin()) ) ) {
+            doPluginAuth = true;
+        }
+        // only let other plugins authenticate, when we have the BundleContext
+        // AND when 
+        if( this.context != null && doPluginAuth) {
+            final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+            for (final Bundle bundle : bundles) {
+                final String bundlename = bundle.getSymbolicName();
+                if (Bundle.ACTIVE == bundle.getState()) {
+                    final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                    if (null != servicereferences) {
+                        for (final ServiceReference servicereference : servicereferences) {
+                            final Object property = servicereference.getProperty("name");
+                            if (null != property && property.toString().equalsIgnoreCase("BasicAuthenticator")) {
+                                final BasicAuthenticatorPluginInterface authplug = (BasicAuthenticatorPluginInterface) this.context.getService(servicereference);
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Calling doAuthentication for plugin: " + bundlename);
+                                }
+                                authplug.doAuthentication(authdata);
+                                // leave
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         // first check if whole authentication mech is disabled
         if(!cache.masterAuthenticationDisabled()){
+            if( authdata == null ) {
+                throw new InvalidCredentialsException("credential object is null");
+            }
             if(!fileAuth.authenticate(authdata)){
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed");
                 log.error("Master authentication for user: " + authdata.getLogin(), invalidCredentialsException);
