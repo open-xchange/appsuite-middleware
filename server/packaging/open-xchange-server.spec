@@ -44,7 +44,7 @@ Requires:       open-xchange-global open-xchange-configread open-xchange-global 
 Requires:  java-1_5_0-ibm update-alternatives
 %endif
 %if %{?suse_version} >= 1100
-BuildRequires:  java-openjdk
+Requires:  java-openjdk
 %endif
 %if %{?suse_version} > 1010 && %{?suse_version} < 1100
 Requires:  java-1_5_0-sun
