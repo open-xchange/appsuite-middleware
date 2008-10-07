@@ -66,8 +66,7 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
-import com.openexchange.admin.tools.SHACrypt;
-import com.openexchange.admin.tools.UnixCrypt;
+import com.openexchange.admin.tools.GenericChecks;
 
 /**
  * Default mysql implementation for admin auth.
@@ -86,23 +85,6 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
         return false;
     }
 
-    /**
-     * @param crypted
-     * @param clear
-     * @param mech
-     * @return
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
-     */
-    private boolean authByMech(final String crypted, final String clear, final String mech) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        if("{CRYPT}".equals(mech)) {
-            return UnixCrypt.matches(crypted, clear);
-        } else if("{SHA}".equals(mech)) {
-            return SHACrypt.makeSHAPasswd(clear).equals(crypted);
-        } else {
-            return false;
-        }
-    }
     /**
      * 
      * Authenticates the admin user of the system within context.
@@ -138,7 +120,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                         } else {
                             String pwcrypt = rs.getString("userPassword");
                             String pwmech = rs.getString("passwordMech");
-                            if (authByMech(pwcrypt, authdata.getPassword(), pwmech)) {
+                            if (GenericChecks.authByMech(pwcrypt, authdata.getPassword(), pwmech)) {
                                 Credentials cauth = new Credentials(authdata.getLogin(), pwcrypt);
                                 ClientAdminThread.cache.setAdminCredentials(ctx, pwmech, cauth);
                                 return true;
@@ -186,7 +168,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
             } else {
                 try {
                     if ( authdata.getLogin().equals(cachedAdminCredentials.getLogin())) {
-                        if ( authByMech(cachedAdminCredentials.getPassword(),
+                        if ( GenericChecks.authByMech(cachedAdminCredentials.getPassword(),
                                 authdata.getPassword(), ClientAdminThread.cache.getAdminAuthMech(ctx) ) ) {
                             return true;
                         } else {
@@ -237,7 +219,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                     String pwcrypt = rs.getString("userPassword");
                     String pwmech  = rs.getString("passwordMech");
                     // now check via our crypt mech the password
-                    if ( authByMech(pwcrypt, authdata.getPassword(), pwmech) ) {
+                    if ( GenericChecks.authByMech(pwcrypt, authdata.getPassword(), pwmech) ) {
                         return true;
                     } else {
                         if (log.isDebugEnabled()) {

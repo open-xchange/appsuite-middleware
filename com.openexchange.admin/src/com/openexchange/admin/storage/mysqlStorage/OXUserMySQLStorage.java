@@ -279,7 +279,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             if (usrdata.getPassword() != null) {
                 stmt = write_ox_con.prepareStatement("UPDATE user SET  userPassword = ? WHERE cid = ? AND id = ?");
-                stmt.setString(1, password2crypt(usrdata));
+                stmt.setString(1, cache.encryptPassword(usrdata));
                 stmt.setInt(2, context_id);
                 stmt.setInt(3, user_id);
                 stmt.executeUpdate();
@@ -698,38 +698,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    /**
-     * @param user
-     * @return
-     * @throws StorageException
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
-     */
-    private String password2crypt(final User user) throws StorageException, NoSuchAlgorithmException, UnsupportedEncodingException {
-        String passwd = null;
-        if (user.getPasswordMech() == null) {
-            String pwmech = this.cache.getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
-            pwmech = "{" + pwmech + "}";
-            if (pwmech.equalsIgnoreCase(User.CRYPT_MECH)) {
-                user.setPasswordMech(User.CRYPT_MECH);
-            } else if (pwmech.equalsIgnoreCase(User.SHA_MECH)) {
-                user.setPasswordMech(User.SHA_MECH);
-            } else {
-                log.warn("WARNING: unknown password mechanism " + pwmech + " using SHA");
-                user.setPasswordMech(User.SHA_MECH);
-            }
-        }
-        if (user.getPasswordMech().equals(User.CRYPT_MECH)) {
-            passwd = UnixCrypt.crypt(user.getPassword());
-        } else if (user.getPasswordMech().equals(User.SHA_MECH)) {
-            passwd = SHACrypt.makeSHAPasswd(user.getPassword());
-        } else {
-            log.error("unsupported password mechanism: " + user.getPasswordMech());
-            throw new StorageException("unsupported password mechanism: " + user.getPasswordMech());
-        }
-        return passwd;
-    }
-
     @Override
     public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection write_ox_con, final int internal_user_id, final int contact_id, final int uid_number) throws StorageException {
         PreparedStatement ps = null;
@@ -750,7 +718,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             rs.close();
 
-            final String passwd = password2crypt(usrdata);
+            final String passwd = cache.encryptPassword(usrdata);
 
             PreparedStatement stmt = null;
             try {

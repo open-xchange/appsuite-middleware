@@ -49,9 +49,13 @@
 
 package com.openexchange.admin.tools;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
+import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
@@ -102,6 +106,65 @@ public class GenericChecks {
     public final static void checkValidMailAddress(final String address) throws InvalidDataException {
         if (null != address && !isValidMailAddress(address)) {
             throw new InvalidDataException("Invalid email address");
+        }
+    }
+
+    /**
+     * Checks whether supplied password mech is a valid password mech
+     * as specified in {@link PasswordMechObject}.
+     *
+     * Checks whether password is not an empty string.
+     * 
+     * Checks checks whether mech has changed without supplying new
+     * password string
+     * 
+     * @param user
+     * @throws InvalidDataException
+     */
+    public final static void checkChangeValidPasswordMech(final PasswordMechObject user) throws InvalidDataException {
+        checkCreateValidPasswordMech(user);        
+        if( user.getPasswordMech() != null && user.getPassword() == null ) {
+            throw new InvalidDataException("When changing password mechanism, the password string must also be supplied");
+        }
+    }
+
+    /**
+     * Checks whether supplied password mech is a valid password mech
+     * as specified in {@link PasswordMechObject}.
+     *
+     * Checks whether password is not an empty string.
+     * 
+     * @param user
+     * @throws InvalidDataException
+     */
+    public final static void checkCreateValidPasswordMech(final PasswordMechObject user) throws InvalidDataException {
+        final String mech = user.getPasswordMech();
+        if( mech != null ) {
+            if( ! mech.equalsIgnoreCase(PasswordMechObject.CRYPT_MECH) && ! mech.equalsIgnoreCase(PasswordMechObject.SHA_MECH) ) {
+                throw new InvalidDataException("Invalid PasswordMech: " + mech + ", Valid Mechs: " + PasswordMechObject.CRYPT_MECH +
+                        ":" + PasswordMechObject.SHA_MECH);
+            }
+        }
+    }
+
+    /**
+     * Authenticate the cleartext password against the crypted string using the
+     * specified authmech
+     * 
+     * @param crypted
+     * @param clear
+     * @param mech
+     * @return true if authentication succeeds and false if it fails
+     * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
+     */
+    public final static boolean authByMech(final String crypted, final String clear, final String mech) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        if("{CRYPT}".equals(mech)) {
+            return UnixCrypt.matches(crypted, clear);
+        } else if("{SHA}".equals(mech)) {
+            return SHACrypt.makeSHAPasswd(clear).equals(crypted);
+        } else {
+            return false;
         }
     }
 }

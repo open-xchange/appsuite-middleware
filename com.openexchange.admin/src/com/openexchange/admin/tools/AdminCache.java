@@ -54,8 +54,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.DriverManager;
@@ -75,8 +77,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.exceptions.OXGenericException;
+import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.DatabaseLockedException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
@@ -532,6 +537,43 @@ public class AdminCache {
         final StorageException st = new StorageException(sFields.toString());
         st.setStackTrace(dt.getStackTrace());
         return st;
+    }
+
+    /**
+     * Encrypts password of a {@link PasswordMechObject} using the mechanism given
+     * in <code>passwordMech</code>.
+     * If <code>passwordMech</code> is <code>null</code>, the default mechanism as configured
+     * in <code>User.properties</code> is used and set in the {@link PasswordMechObject} instance.
+     *  
+     * @param user
+     * @return the encrypted password
+     * @throws StorageException
+     * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
+     */
+    public String encryptPassword(final PasswordMechObject user) throws StorageException, NoSuchAlgorithmException, UnsupportedEncodingException {
+        String passwd = null;
+        if (user.getPasswordMech() == null) {
+            String pwmech = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
+            pwmech = "{" + pwmech + "}";
+            if (pwmech.equalsIgnoreCase(User.CRYPT_MECH)) {
+                user.setPasswordMech(User.CRYPT_MECH);
+            } else if (pwmech.equalsIgnoreCase(User.SHA_MECH)) {
+                user.setPasswordMech(User.SHA_MECH);
+            } else {
+                log.warn("WARNING: unknown password mechanism " + pwmech + " using SHA");
+                user.setPasswordMech(User.SHA_MECH);
+            }
+        }
+        if (user.getPasswordMech().equals(User.CRYPT_MECH)) {
+            passwd = UnixCrypt.crypt(user.getPassword());
+        } else if (user.getPasswordMech().equals(User.SHA_MECH)) {
+            passwd = SHACrypt.makeSHAPasswd(user.getPassword());
+        } else {
+            log.error("unsupported password mechanism: " + user.getPasswordMech());
+            throw new StorageException("unsupported password mechanism: " + user.getPasswordMech());
+        }
+        return passwd;
     }
 
     private String[] getInitialOXDBOrder() {
