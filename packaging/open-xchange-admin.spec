@@ -44,7 +44,7 @@ Requires:  mysql-client >= 5.0.0
 Requires:  java-1_5_0-ibm update-alternatives
 %endif
 %if %{?suse_version} >= 1100
-BuildRequires:  java-openjdk
+Requires:  java-openjdk
 %endif
 %if %{?suse_version} > 1010 && %{?suse_version} < 1100
 Requires:  java-1_5_0-sun
