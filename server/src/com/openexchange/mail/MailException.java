@@ -325,7 +325,11 @@ public class MailException extends AbstractOXException {
 		 * address aliases
 		 */
 		INVALID_SENDER("The specified email address %1$s is not covered by allowed email address aliases",
-				Category.USER_INPUT, 56);
+				Category.USER_INPUT, 56),
+		/**
+		 * Checking default folders on connect failed: %1$s
+		 */
+		DEFAULT_FOLDER_CHECK_FAILED("Checking default folders on connect failed: %1$s", Category.CODE_ERROR, 57);
 
 		private final String message;
 
