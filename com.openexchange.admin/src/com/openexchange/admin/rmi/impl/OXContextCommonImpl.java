@@ -61,6 +61,7 @@ import org.osgi.framework.ServiceReference;
 
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
+import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -153,10 +154,6 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             log.error(e.getMessage(), e);
             throw e;
         }
-    }
-    
-    protected boolean isBundleRegistered() {
-        return true;
     }
     
     /**
