@@ -96,7 +96,6 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -690,19 +689,8 @@ public class Folder extends SessionServlet {
 							jsonWriter.endArray();
 						}
 					}
-					if (isSystemPrivateFolder) {
-						if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)
-								.hasInfostore()) {
-							/*
-							 * Append linked 'MyInfostore'
-							 */
-							final FolderObject myInfostore = foldersqlinterface.getUsersInfostoreFolder();
-							lastModified = myInfostore.getLastModified() == null ? lastModified : Math.max(
-									lastModified, myInfostore.getLastModified().getTime());
-							folderWriter.writeOXFolderFieldsAsArray(columns, myInfostore, strHelper
-									.getString(FolderStrings.MY_INFOSTORE_FOLDER_NAME), -1);
-						}
-					} else if (isSystemPublicFolder) {
+					// MyInfostore link was removed.
+					if (isSystemPublicFolder) {
 						/*
 						 * Append virtual root folder for non-tree visible
 						 * infostore folders
