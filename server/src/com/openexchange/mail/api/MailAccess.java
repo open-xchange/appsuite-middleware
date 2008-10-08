@@ -314,8 +314,11 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 		try {
 			getFolderStorage().checkDefaultFolders();
 		} catch (final Exception e) {
-			LOG.error("Checking default folders on connect failed: " + e.getMessage(), e);
+			final MailException mailExc = new MailException(MailException.Code.DEFAULT_FOLDER_CHECK_FAILED, e, e
+					.getMessage());
+			LOG.error(mailExc.getMessage(), mailExc);
 			closeInternal();
+			throw mailExc;
 		}
 		MailAccessWatcher.addMailAccess(this);
 	}
