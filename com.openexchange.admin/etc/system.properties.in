@@ -24,8 +24,6 @@ UserConfigurationStorage=Caching
 # true or the database will get a lot more load.
 Cache=true
 
-InitWorker:com.openexchange.groupware.InitWorker
-
 # Location of the server.properties configuration file. This file configures
 # essential server settings.
 Server=@serverconfdir@/server.properties
@@ -66,7 +64,6 @@ EVENTPROPERTIES:@serverconfdir@/event.properties
 PUSHPROPERTIES:@serverconfdir@/push.properties
 configDB=@oxconfdir@/configdb.properties
 FOLDERCACHEPROPERTIES=@serverconfdir@/foldercache.properties
-SPELLCHECKCFG=@serverconfdir@/spellcheck.cfg
 
 UPDATETASKSCFG=@serverconfdir@/updatetasks.cfg
 
