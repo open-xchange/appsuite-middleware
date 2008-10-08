@@ -54,12 +54,16 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
+import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
+import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
+import com.openexchange.admin.tools.AdminCache;
 
 /**
  * @author choeger
@@ -69,6 +73,8 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
 
     private final Log log = LogFactory.getLog(this.getClass());
     
+    private static AdminCache cache = null;
+
     private OXResellerStorageInterface oxresell = null;
 
     /**
@@ -76,6 +82,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * 
      */
     public OXResellerContextImpl() throws StorageException {
+        cache = ClientAdminThreadExtended.cache;
         oxresell = OXResellerStorageInterface.getInstance();
     }
 
@@ -83,6 +90,9 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#change(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public void change(Context ctx, Credentials auth) throws PluginException {
+        if( cache.isMasterAdmin(auth) ) {
+            return;
+        }
         // TODO Auto-generated method stub
 
     }
@@ -91,6 +101,9 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#changeModuleAccess(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.UserModuleAccess, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public void changeModuleAccess(Context ctx, UserModuleAccess access, Credentials auth) throws PluginException {
+        if( cache.isMasterAdmin(auth) ) {
+            return;
+        }
         // TODO Auto-generated method stub
 
     }
@@ -99,6 +112,9 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#changeModuleAccess(com.openexchange.admin.rmi.dataobjects.Context, java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public void changeModuleAccess(Context ctx, String access_combination_name, Credentials auth) throws PluginException {
+        if( cache.isMasterAdmin(auth) ) {
+            return;
+        }
         // TODO Auto-generated method stub
 
     }
@@ -114,6 +130,9 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#create(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.User, java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public Context create(Context ctx, User admin_user, String access_combination_name, Credentials auth) throws PluginException {
+        if( cache.isMasterAdmin(auth) ) {
+            return null;
+        }
         try {
             oxresell.ownContextToAdmin(ctx, auth);
         } catch (StorageException e) {
@@ -127,11 +146,21 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#delete(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public void delete(Context ctx, Credentials auth) throws PluginException {
+        final boolean ismasteradmin = cache.isMasterAdmin(auth);
         try {
-            if( oxresell.ownsContext(ctx, auth) ) {
-                oxresell.unownContextFromAdmin(ctx, auth);
+            final ResellerAdmin owner = oxresell.getContextOwner(ctx);
+            if( ismasteradmin && owner == null) {
+                // context does not belong to anybody, so it is save to be removed
+                return;
+            } else if( ismasteradmin && owner != null ) {
+                // context belongs to somebody, so we must remove the ownership
+                oxresell.unownContextFromAdmin(ctx, owner);
             } else {
-                throw new PluginException("ContextID " + ctx.getId() + " does not belong to " + auth.getLogin());
+                if( oxresell.ownsContext(ctx, auth) ) {
+                    oxresell.unownContextFromAdmin(ctx, auth);
+                } else {
+                    throw new PluginException("ContextID " + ctx.getId() + " does not belong to " + auth.getLogin());
+                }
             }
         } catch (StorageException e) {
             log.error(e.getMessage(),e);
@@ -143,6 +172,9 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#disable(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public void disable(Context ctx, Credentials auth) throws PluginException {
+        if( cache.isMasterAdmin(auth) ) {
+            return;
+        }
         // TODO Auto-generated method stub
 
     }
@@ -151,6 +183,9 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#disableAll(com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public void disableAll(Credentials auth) throws PluginException {
+        if( cache.isMasterAdmin(auth) ) {
+            return;
+        }
         // TODO Auto-generated method stub
 
     }
@@ -159,6 +194,9 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#downgrade(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public void downgrade(Context ctx, Credentials auth) throws PluginException {
+        if( cache.isMasterAdmin(auth) ) {
+            return;
+        }
         // TODO Auto-generated method stub
 
     }
@@ -167,6 +205,9 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#enable(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public void enable(Context ctx, Credentials auth) throws PluginException {
+        if( cache.isMasterAdmin(auth) ) {
+            return;
+        }
         // TODO Auto-generated method stub
 
     }
@@ -175,6 +216,9 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#enableAll(com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public void enableAll(Credentials auth) throws PluginException {
+        if( cache.isMasterAdmin(auth) ) {
+            return;
+        }
         // TODO Auto-generated method stub
 
     }
@@ -183,6 +227,9 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#getAccessCombinationName(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public String getAccessCombinationName(Context ctx, Credentials auth) throws PluginException {
+        if( cache.isMasterAdmin(auth) ) {
+            return null;
+        }
         // TODO Auto-generated method stub
         return null;
     }
@@ -191,6 +238,9 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#getData(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public Context getData(Context ctx, Credentials auth) throws PluginException {
+        if( cache.isMasterAdmin(auth) ) {
+            return null;
+        }
         // TODO Auto-generated method stub
         return null;
     }
@@ -199,15 +249,25 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#getModuleAccess(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public UserModuleAccess getModuleAccess(Context ctx, Credentials auth) throws PluginException {
+        if( cache.isMasterAdmin(auth) ) {
+            return null;
+        }
         // TODO Auto-generated method stub
         return null;
     }
-
+    
     /* (non-Javadoc)
      * @see com.openexchange.admin.plugins.OXContextPluginInterface#list(java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public Context[] list(String search_pattern, Credentials auth) throws PluginException {
-        return new Context[]{new Context(1)};
+        try {
+            ResellerAdmin adm = oxresell.getData(new ResellerAdmin[]{new ResellerAdmin(auth.getLogin(),auth.getPassword())})[0];
+            OXContextStorageInterface oxctx = OXContextStorageInterface.getInstance();
+            return oxctx.listContext(search_pattern, "context2subadmin", "AND ( context2subadmin.cid=context.cid AND context2subadmin.sid=" + adm.getId() + ")");
+        } catch (StorageException e) {
+            log.error(e.getMessage(),e);
+            throw new PluginException(e);
+        }
     }
 
 }

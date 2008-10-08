@@ -184,7 +184,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            closeSqlStuff(oxcon,prep);
+            cache.closeSqlStuff(oxcon,prep);
         }
     }
 
@@ -238,7 +238,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            closeSqlStuff(oxcon,prep);
+            cache.closeSqlStuff(oxcon,prep);
         }
     }
 
@@ -292,7 +292,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            closeSqlStuff(oxcon,prep);
+            cache.closeSqlStuff(oxcon,prep);
         }
     }
 
@@ -355,7 +355,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage());
         } finally {
-            closeSqlStuff(con, prep, rs);
+            cache.closeSqlStuff(con, prep, rs);
         }
     }
 
@@ -414,7 +414,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage());
         } finally {
-            closeSqlStuff(con, prep, rs);
+            cache.closeSqlStuff(con, prep, rs);
         }
     }
 
@@ -456,16 +456,29 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            closeSqlStuff(oxcon,prep);
+            cache.closeSqlStuff(oxcon,prep);
         }
     }
 
     @Override
     public void unownContextFromAdmin(final Context ctx, final Credentials creds) throws StorageException {
+        try {
+            ResellerAdmin adm = getData(new ResellerAdmin[]{new ResellerAdmin(creds.getLogin(),creds.getPassword())})[0];
+            unownContextFromAdmin(ctx, adm);
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    @Override
+    public void unownContextFromAdmin(final Context ctx, final ResellerAdmin adm) throws StorageException {
         Connection oxcon = null;
         PreparedStatement prep = null;
         try {
-            ResellerAdmin adm = getData(new ResellerAdmin[]{new ResellerAdmin(creds.getLogin(),creds.getPassword())})[0];
+            if( adm.getId() == null ) {
+                throw new InvalidDataException("ResellerAdminID must not be null");
+            }
             if( ctx.getId() == null ) {
                 throw new InvalidDataException("ContextID must not be null");
             }
@@ -498,7 +511,44 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            closeSqlStuff(oxcon,prep);
+            cache.closeSqlStuff(oxcon,prep);
+        }
+    }
+
+    @Override
+    public ResellerAdmin getContextOwner(final Context ctx) throws StorageException {
+        Connection oxcon = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            if( ctx.getId() == null ) {
+                throw new InvalidDataException("ContextID must not be null");
+            }
+            oxcon = cache.getConnectionForConfigDB();
+            prep = oxcon.prepareStatement("SELECT sid FROM context2subadmin WHERE cid=?");
+            prep.setInt(1, ctx.getId());
+            rs = prep.executeQuery();
+            if( ! rs.next() ) {
+                return null;
+            }
+            return getData(new ResellerAdmin[]{new ResellerAdmin(rs.getInt("sid"))})[0];
+        } catch (final DataTruncation dt) {
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            throw AdminCache.parseDataTruncation(dt);
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (PoolException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } catch (InvalidDataException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } finally {
+            cache.closeSqlStuff(oxcon,prep,rs);
         }
     }
 
@@ -539,7 +589,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage());
         } finally {
-            closeSqlStuff(oxcon,prep,rs);
+            cache.closeSqlStuff(oxcon,prep,rs);
         }
     }
 
@@ -550,35 +600,5 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("Error doing rollback", e2);
         }
     }
-    
-    private void closeSqlStuff(final Connection con, final PreparedStatement stmt, final ResultSet rs) {
-        if (null != rs) {
-            try {
-                rs.close();
-            } catch (final SQLException e) {
-                log.error("Error closing resultset", e);
-            }
-        }
-        closeSqlStuff(con, stmt);
-    }
-
-    private void closeSqlStuff(final Connection con, final PreparedStatement stmt) {
-        try {
-            if (con != null) {
-                cache.pushConnectionForConfigDB(con);
-            }
-        } catch (final PoolException exp) {
-            log.error("Pool Error pushing ox write connection to pool!", exp);
-        }
-        try {
-            if (stmt != null) {
-                stmt.close();
-            }
-        } catch (final SQLException e) {
-            log.error("Error closing statement", e);
-        }
-    }
-
-
 
 }

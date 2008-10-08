@@ -201,9 +201,23 @@ public abstract class OXResellerStorageInterface {
     
     /**
      * @param ctx
+     * @param adm
+     * @throws StorageException
+     */
+    public abstract void unownContextFromAdmin(final Context ctx, final ResellerAdmin adm) throws StorageException;
+
+    /**
+     * @param ctx
      * @param creds
      * @return
      * @throws StorageException
      */
     public abstract boolean ownsContext(final Context ctx, final Credentials creds) throws StorageException;
+    
+    /**
+     * @param ctx
+     * @return
+     * @throws StorageException
+     */
+    public abstract ResellerAdmin getContextOwner(final Context ctx) throws StorageException;
 }

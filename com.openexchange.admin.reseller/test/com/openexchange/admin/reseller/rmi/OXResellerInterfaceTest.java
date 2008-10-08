@@ -135,18 +135,19 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
     }
     
     @Test
+    public void testList() {
+        fail("Not yet implemented");
+    }
+
+    @Test
     public void testDelete() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, OXResellerException, InvalidCredentialsException {
         final Credentials creds = DummyMasterCredentials();
 
         final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
 
-        //oxresell.delete(TestAdminUser(), creds);
+        oxresell.delete(TestAdminUser(), creds);
         oxresell.delete(new ResellerAdmin(CHANGEDNAME), creds);
     }
 
-    @Test
-    public void testList() {
-        fail("Not yet implemented");
-    }
 
 }
