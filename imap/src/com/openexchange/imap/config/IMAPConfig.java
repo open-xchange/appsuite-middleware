@@ -67,6 +67,9 @@ import com.sun.mail.imap.IMAPStore;
  */
 public final class IMAPConfig extends MailConfig {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(IMAPConfig.class);
+
 	private static final String PROTOCOL_IMAP_SECURE = "imaps";
 
 	/**
@@ -325,7 +328,7 @@ public final class IMAPConfig extends MailConfig {
 	}
 
 	/**
-	 * Gets the imapSort
+	 * Gets the imapSort imapPort = 143;
 	 * 
 	 * @return the imapSort
 	 */
@@ -373,7 +376,12 @@ public final class IMAPConfig extends MailConfig {
 			}
 			final int pos = imapServer.indexOf(':');
 			if (pos > -1) {
-				imapPort = Integer.parseInt(imapServer.substring(pos + 1));
+				try {
+					imapPort = Integer.parseInt(imapServer.substring(pos + 1));
+				} catch (final NumberFormatException e) {
+					LOG.error("IMAP port could not be parsed to an integer value. Using fallback value 143", e);
+					imapPort = 143;
+				}
 				imapServer = imapServer.substring(0, pos);
 			}
 		}
