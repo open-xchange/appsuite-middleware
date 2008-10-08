@@ -28,8 +28,8 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
-Version:	6.6.0
-Release:	8
+Version:	6.7.0
+Release:	0
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -161,6 +161,8 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Tue Sep 23 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12207: Removed OX connection given to context storage.
 * Tue Sep 09 2008 - choeger@open-xchange.com
  - Setting writeOnly to true per default on new and updated installations (postinst)
    (see Bug #11595)
