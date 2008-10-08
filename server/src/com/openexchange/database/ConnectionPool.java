@@ -256,7 +256,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
                     retval = false;
                 } else if (!con.getAutoCommit()) {
                     final DBPoolingException dbe = new DBPoolingException(
-                        DBPoolingException.Code.IN_TRANSACTION);
+                        DBPoolingException.Code.NO_AUTOCOMMIT);
                     addTrace(dbe, data);
                     LOG.error(dbe.getMessage(), dbe);
                     con.rollback();

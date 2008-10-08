@@ -194,9 +194,9 @@ public class DBPoolingException extends AbstractOXException {
         ACTIVE_STATEMENTS("%1$d statements aren't closed.", Category
             .CODE_ERROR, 13),
         /**
-         * Found not committed transaction.
+         * Connection not reset to auto commit.
          */
-        IN_TRANSACTION("Found not committed transaction.", Category
+        NO_AUTOCOMMIT("Connection not reset to auto commit.", Category
             .CODE_ERROR, 14);
 
         /**
