@@ -67,6 +67,7 @@ import com.openexchange.groupware.importexport.ContactTestData;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.webdav.xml.FolderTest;
 
 
@@ -104,7 +105,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
         super.tearDown();
 	}
 	
-	protected int getUserId_FIXME() throws MalformedURLException, OXException, IOException, SAXException, JSONException {
+	protected int getUserId_FIXME() throws MalformedURLException, OXException, IOException, SAXException, JSONException, AjaxException {
 		final FolderObject folderObj = com.openexchange.ajax.FolderTest
 		.getStandardCalendarFolder(getWebConversation(),
 		getHostName(), getSessionId());

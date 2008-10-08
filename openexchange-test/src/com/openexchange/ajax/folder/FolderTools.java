@@ -50,6 +50,9 @@
 package com.openexchange.ajax.folder;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -59,9 +62,12 @@ import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -80,18 +86,51 @@ public final class FolderTools {
     public static CommonInsertResponse insert(final AJAXClient client,
         final InsertRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (CommonInsertResponse) Executor.execute(client, request);
+        return Executor.execute(client, request);
     }
 
     public static CommonDeleteResponse delete(final AJAXClient client,
         final DeleteRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (CommonDeleteResponse) Executor.execute(client, request);
+        return Executor.execute(client, request);
     }
 
     public static ListResponse list(final AJAXClient client,
         final ListRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (ListResponse) Executor.execute(client, request);
+        return Executor.execute(client, request);
+    }
+
+    /**
+     * @deprecated use {@link #getSubFolders(AJAXClient, String, boolean)}.
+     */
+    @Deprecated
+    public static List<FolderObject> getSubFolders(final AJAXSession session,
+        final String protocol, final String hostname, final String parent,
+        final boolean ignoreMailFolder) throws AjaxException, IOException,
+        SAXException, JSONException, OXException {
+        final ListRequest request = new ListRequest(parent, ignoreMailFolder);
+        final ListResponse response = Executor.execute(session, request,
+            protocol, hostname);
+        final List<FolderObject> retval = new ArrayList<FolderObject>();
+        final Iterator<FolderObject> iter = response.getFolder();
+        while (iter.hasNext()) {
+            retval.add(iter.next());
+        }
+        return retval;
+    }
+    
+    public static List<FolderObject> getSubFolders(final AJAXClient client,
+        final String parent, final boolean ignoreMailFolder)
+        throws AjaxException, IOException, SAXException, JSONException,
+        OXException {
+        final ListRequest request = new ListRequest(parent, ignoreMailFolder);
+        final ListResponse response = client.execute(request);
+        final List<FolderObject> retval = new ArrayList<FolderObject>();
+        final Iterator<FolderObject> iter = response.getFolder();
+        while (iter.hasNext()) {
+            retval.add(iter.next());
+        }
+        return retval;
     }
 }

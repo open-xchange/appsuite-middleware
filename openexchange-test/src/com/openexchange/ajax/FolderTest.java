@@ -1,3 +1,52 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
 package com.openexchange.ajax;
 
 import java.io.ByteArrayInputStream;
@@ -24,12 +73,15 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.fields.FolderFields;
+import com.openexchange.ajax.folder.FolderTools;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -117,72 +169,27 @@ public class FolderTest extends AbstractAJAXTest {
 
 	public static List<FolderObject> getSubfolders(final WebConversation conversation, final String hostname,
 			final String sessionId, final String parentIdentifier, final boolean printOutput)
-			throws MalformedURLException, IOException, SAXException, JSONException, OXException {
+			throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
 		return getSubfolders(conversation, null, hostname, sessionId, parentIdentifier, printOutput);
 	}
 	
 	public static List<FolderObject> getSubfolders(final WebConversation conversation, final String protocol, final String hostname,
 			final String sessionId, final String parentIdentifier, final boolean printOutput)
-			throws MalformedURLException, IOException, SAXException, JSONException, OXException {
+			throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
 		return getSubfolders(conversation, protocol, hostname, sessionId, parentIdentifier, false, false);
 	}
 	
 	public static List<FolderObject> getSubfolders(final WebConversation conversation, final String hostname,
 			final String sessionId, final String parentIdentifier, final boolean printOutput, final boolean ignoreMailfolder)
-			throws MalformedURLException, IOException, SAXException, JSONException, OXException {
+			throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
 		return getSubfolders(conversation, null, hostname, sessionId, parentIdentifier, printOutput, ignoreMailfolder);
 	}
 
 	public static List<FolderObject> getSubfolders(final WebConversation conversation, final String protocol, final String hostname,
 			final String sessionId, final String parentIdentifier, final boolean printOutput, final boolean ignoreMailfolder)
-			throws MalformedURLException, IOException, SAXException, JSONException, OXException {
-		final WebRequest req = new GetMethodWebRequest(((null == protocol) ? PROTOCOL : ((protocol + "://"))) + hostname + FOLDER_URL);
-		req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-		req.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
-		req.setParameter("parent", parentIdentifier);
-		final String columns = FolderObject.OBJECT_ID + "," + FolderObject.MODULE + "," + FolderObject.FOLDER_NAME + ","
-				+ FolderObject.SUBFOLDERS + "," + FolderObject.STANDARD_FOLDER + "," + FolderObject.CREATED_BY;
-		req.setParameter(AJAXServlet.PARAMETER_COLUMNS, columns);
-
-		if (ignoreMailfolder) {
-			req.setParameter(AJAXServlet.PARAMETER_IGNORE, "mailfolder");
-		}
-
-		final WebResponse resp = conversation.getResponse(req);
-		final JSONObject respObj = new JSONObject(resp.getText());
-		if (printOutput) {
-			System.out.println(respObj.toString());
-		}
-		if (respObj.has("error") && !respObj.isNull("error")) {
-			throw new OXException("Error occured: " + respObj.getString("error"));
-		}
-		if (!respObj.has("data") || respObj.isNull("data")) {
-			throw new OXException("Error occured: Missing key \"data\"");
-		}
-		final JSONArray data = respObj.getJSONArray("data");
-		final List<FolderObject> folders = new ArrayList<FolderObject>();
-		for (int i = 0; i < data.length(); i++) {
-			final JSONArray arr = data.getJSONArray(i);
-			final FolderObject subfolder = new FolderObject();
-			try {
-				subfolder.setObjectID(arr.getInt(0));
-			} catch (final JSONException exc) {
-				subfolder.removeObjectID();
-				subfolder.setFullName(arr.getString(0));
-			}
-			subfolder.setModule(FolderParser.getModuleFromString(arr.getString(1),
-					subfolder.containsObjectID() ? subfolder.getObjectID() : -1));
-			subfolder.setFolderName(arr.getString(2));
-			subfolder.setSubfolderFlag(arr.getBoolean(3));
-			if(!arr.isNull(4)) {
-				subfolder.setDefaultFolder(arr.getBoolean(4));
-			}
-			if (!arr.isNull(5)) {
-				subfolder.setCreatedBy(arr.getInt(5));
-			}
-			folders.add(subfolder);
-		}
-		return folders;
+			throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
+	    final AJAXSession session = new AJAXSession(conversation, sessionId);
+	    return FolderTools.getSubFolders(session, protocol, hostname, parentIdentifier, ignoreMailfolder);
 	}
 
 	public static FolderObject getFolder(final WebConversation conversation, final String hostname,
@@ -589,7 +596,7 @@ public class FolderTest extends AbstractAJAXTest {
 	}
 
 	public static FolderObject getStandardTaskFolder(final WebConversation conversation, final String hostname,
-			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
+			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
 		final List<FolderObject> subfolders = getSubfolders(conversation, hostname, sessionId, ""
 				+ FolderObject.SYSTEM_PRIVATE_FOLDER_ID, false, true);
 		for (final Iterator iter = subfolders.iterator(); iter.hasNext();) {
@@ -602,7 +609,7 @@ public class FolderTest extends AbstractAJAXTest {
 	}
 
 	public static FolderObject getStandardCalendarFolder(final WebConversation conversation, final String hostname,
-			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
+			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
 		final List<FolderObject> subfolders = getSubfolders(conversation, hostname, sessionId, ""
 				+ FolderObject.SYSTEM_PRIVATE_FOLDER_ID, false, true);
 		for (final Iterator iter = subfolders.iterator(); iter.hasNext();) {
@@ -615,7 +622,7 @@ public class FolderTest extends AbstractAJAXTest {
 	}
 
 	public static FolderObject getStandardContactFolder(final WebConversation conversation, final String hostname,
-			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
+			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
 		final List<FolderObject> subfolders = getSubfolders(conversation, hostname, sessionId, ""
 				+ FolderObject.SYSTEM_PRIVATE_FOLDER_ID, false, true);
 		for (final Iterator iter = subfolders.iterator(); iter.hasNext();) {
@@ -628,7 +635,7 @@ public class FolderTest extends AbstractAJAXTest {
 	}
 
 	public static FolderObject getStandardInfostoreFolder(final WebConversation conversation, final String hostname,
-			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
+			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
 		final List<FolderObject> subfolders = getSubfolders(conversation, hostname, sessionId, ""
 				+ FolderObject.SYSTEM_PRIVATE_FOLDER_ID, false, true);
 		for (final Iterator iter = subfolders.iterator(); iter.hasNext();) {
@@ -640,58 +647,29 @@ public class FolderTest extends AbstractAJAXTest {
 		throw new OXException("No Standard Infostore Folder found!");
 	}
 
-	/*
-	 * public static void testGetMailInboxStatic(final WebConversation
-	 * conversation, final String hostname, final String sessionId) { try {
-	 * printTestStart("testGetMailInbox"); List<FolderObject> l =
-	 * getSubfolders(conversation, hostname, sessionId, "" +
-	 * FolderObject.SYSTEM_PRIVATE_FOLDER_ID, true); FolderObject
-	 * defaultIMAPFolder = null; for (int i = 0; i < l.size(); i++) {
-	 * FolderObject fo = l.get(i); if (fo.containsFullName() &&
-	 * fo.getFullName().equals(MailFolderObject.DEFAULT_IMAP_FOLDER_ID)) {
-	 * defaultIMAPFolder = fo; break; } } assertTrue(defaultIMAPFolder != null &&
-	 * defaultIMAPFolder.hasSubfolders()); l = getSubfolders(conversation,
-	 * hostname, sessionId, defaultIMAPFolder.getFullName(), true); assertTrue(l !=
-	 * null && l.size() > 0); FolderObject inboxFolder = null; for (int i = 0; i <
-	 * l.size() && (inboxFolder == null); i++) { FolderObject fo = l.get(i); if
-	 * (fo.getFullName().endsWith("INBOX")) { inboxFolder = fo; } }
-	 * assertTrue(inboxFolder != null); Calendar cal =
-	 * GregorianCalendar.getInstance(); getFolder(conversation, hostname,
-	 * sessionId, inboxFolder.getFullName(), cal, true);
-	 * printTestEnd("testGetMailInbox"); } catch (Exception e) {
-	 * e.printStackTrace(); fail(e.getMessage()); } }
-	 */
-
 	public static FolderObject getMyInfostoreFolder(final WebConversation conversation, final String hostname,
 			final String sessionId, final int loginId) throws MalformedURLException, IOException, SAXException,
-			JSONException, OXException {
+			JSONException, OXException, TestException, AjaxException {
 		FolderObject infostore = null;
 		List<FolderObject> l = getRootFolders(conversation, hostname, sessionId, false);
-		for (final Iterator iter = l.iterator(); iter.hasNext();) {
-			final FolderObject rf = (FolderObject) iter.next();
+		for (final Iterator<FolderObject> iter = l.iterator(); iter.hasNext();) {
+			final FolderObject rf = iter.next();
 			if (rf.getObjectID() == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
 				infostore = rf;
 				break;
 			}
 		}
-		FolderObject userStore = null;
-		l = getSubfolders(conversation, hostname, sessionId, "" + infostore.getObjectID(), false);
-		for (final Iterator iter = l.iterator(); iter.hasNext();) {
-			final FolderObject f = (FolderObject) iter.next();
-			if (f.getObjectID() == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
-				userStore = f;
-				break;
-			}
+		if (null == infostore) {
+		    throw new TestException("Private infostore folder not found!");
 		}
-		// System.out.println("MyInfostore");
-		l = getSubfolders(conversation, hostname, sessionId, "" + userStore.getObjectID(), false);
-		for (final Iterator iter = l.iterator(); iter.hasNext();) {
-			final FolderObject f = (FolderObject) iter.next();
+		l = getSubfolders(conversation, hostname, sessionId, String.valueOf(infostore.getObjectID()), false);
+		for (final Iterator<FolderObject> iter = l.iterator(); iter.hasNext();) {
+			final FolderObject f = iter.next();
 			if (f.containsDefaultFolder() && f.isDefaultFolder() && f.getCreator() == loginId) {
 				return f;
 			}
 		}
-		throw new OXException("MyInfostore folder not found!");
+		throw new TestException("Private infostore folder not found!");
 	}
 
 	public static void printTestStart(final String testName) {

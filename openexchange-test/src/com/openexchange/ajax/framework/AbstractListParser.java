@@ -47,63 +47,51 @@
  *
  */
 
-package com.openexchange.ajax.folder.actions;
+package com.openexchange.ajax.framework;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
 
-import com.openexchange.ajax.parser.FolderParser;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.ajax.container.Response;
 
 /**
- * 
+ * Super class for list parsers.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Parser {
+public abstract class AbstractListParser<T extends CommonListResponse> extends AbstractAJAXParser<T> {
 
     /**
-     * Logger.
+     * @param failOnError
      */
-    private static final Log LOG = LogFactory.getLog(Parser.class);
-
-    /**
-     * Prevent instanciation.
-     */
-    private Parser() {
-        super();
+    public AbstractListParser(final boolean failOnError) {
+        super(failOnError);
     }
 
-    public static void parse(final Object value, final int column,
-        final FolderObject folder) throws OXException {
-        switch (column) {
-        case FolderObject.OBJECT_ID:
-            if (value instanceof Integer) {
-                folder.setObjectID(((Integer) value).intValue());
-            } else if (value instanceof String) {
-                folder.setFullName((String) value);
-            }
-            break;
-        case FolderObject.MODULE:
-            folder.setModule(FolderParser.getModuleFromString((String) value,
-                folder.containsObjectID() ? folder.getObjectID() : -1));
-            break;
-        case FolderObject.FOLDER_NAME:
-            folder.setFolderName((String) value);
-            break;
-        case FolderObject.SUBFOLDERS:
-            folder.setSubfolderFlag(((Boolean) value).booleanValue());
-            break;
-        case FolderObject.STANDARD_FOLDER:
-            folder.setDefaultFolder(((Boolean) value).booleanValue());
-            break;
-        case FolderObject.CREATED_BY:
-            if (null != value) {
-                folder.setCreatedBy(((Integer) value).intValue());
-            }
-            break;
-        default:
-            LOG.error("Can't parse column: " + column);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected T createResponse(final Response response)
+        throws JSONException {
+        final T retval = instanciateReponse(response);
+        if (isFailOnError()) {
+            retval.setArray(parseData((JSONArray) retval.getData()));
         }
+        return retval;
     }
+
+    public static Object[][] parseData(final JSONArray array)
+        throws JSONException {
+        final Object[][] values = new Object[array.length()][];
+        for (int i = 0; i < array.length(); i++) {
+            final JSONArray inner = array.getJSONArray(i);
+            values[i] = new Object[inner.length()];
+            for (int j = 0; j < inner.length(); j++) {
+                values[i][j] = inner.get(j);
+            }
+        }
+        return values;
+    }
+    
+    protected abstract T instanciateReponse(final Response response);
 }

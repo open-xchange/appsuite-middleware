@@ -56,14 +56,13 @@ import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
-import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ListRequest extends AbstractFolderRequest implements AJAXRequest {
+public class ListRequest extends AbstractFolderRequest<ListResponse> {
 
     private static final int[] DEFAULT_COLUMNS = new int[] {
         FolderObject.OBJECT_ID,
@@ -90,6 +89,10 @@ public class ListRequest extends AbstractFolderRequest implements AJAXRequest {
 
     public ListRequest(final String parentFolder) {
         this(parentFolder, DEFAULT_COLUMNS, false);
+    }
+
+    public ListRequest(final String parentFolder, final boolean ignoreMail) {
+        this(parentFolder, DEFAULT_COLUMNS, ignoreMail);
     }
 
     /**
