@@ -615,7 +615,7 @@ public class OXFolderException extends OXException {
 		 * %1$s member of group %2$s.
 		 */
 		PARENT_STILL_VISIBLE_GROUP(
-				"One or more parent' visibility cannot be took away for removed user %1$s member of group %2$s.",
+				"One or more parents' visibility cannot be took away for removed user %1$s member of group %2$s.",
 				Category.WARNING, 84);
 
 		/**
