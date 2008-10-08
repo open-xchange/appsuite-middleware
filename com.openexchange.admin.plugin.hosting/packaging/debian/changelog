@@ -1,3 +1,9 @@
+open-xchange-admin-plugin-hosting (6.7.0-0) unstable; urgency=low
+
+  * new unstable cycle
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 08 Oct 2008 09:20:35 +0200
+
 open-xchange-admin-plugin-hosting (6.6.0-8) unstable; urgency=low
 
   * build for PTF 20080919

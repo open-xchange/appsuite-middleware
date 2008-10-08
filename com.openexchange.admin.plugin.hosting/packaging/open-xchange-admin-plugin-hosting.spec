@@ -28,16 +28,16 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
-Version:	6.6.0
-Release:	8
+Version:	6.7.0
+Release:	0
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open Xchange Admin Hosting Plugin
-Requires:       open-xchange-admin >= 6.6.0
-Requires:       open-xchange-admin-client >= 6.6.0
+Requires:       open-xchange-admin >= 6.7.0
+Requires:       open-xchange-admin-client >= 6.7.0
 Conflicts:	open-xchange-admin-plugin-context-light
 #
 
