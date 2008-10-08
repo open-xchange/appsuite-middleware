@@ -61,6 +61,8 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -652,6 +654,38 @@ public class AdminCache {
         } catch (final Exception ecp) {
             this.log.fatal("Error while init OX Process!", ecp);
         }
+    }
+
+    public void closeSqlStuff(final Connection con, final PreparedStatement stmt, final ResultSet rs) {
+        if (null != rs) {
+            try {
+                rs.close();
+            } catch (final SQLException e) {
+                log.error("Error closing resultset", e);
+            }
+        }
+        closeSqlStuff(con, stmt);
+    }
+
+    public void closeSqlStuff(final Connection con, final PreparedStatement stmt) {
+        try {
+            if (con != null) {
+                pushConnectionForConfigDB(con);
+            }
+        } catch (final PoolException exp) {
+            log.error("Pool Error pushing ox write connection to pool!", exp);
+        }
+        try {
+            if (stmt != null) {
+                stmt.close();
+            }
+        } catch (final SQLException e) {
+            log.error("Error closing statement", e);
+        }
+    }
+
+    public boolean isMasterAdmin(final Credentials auth) {
+        return getMasterCredentials().getLogin().equals(auth.getLogin());
     }
 
 }
