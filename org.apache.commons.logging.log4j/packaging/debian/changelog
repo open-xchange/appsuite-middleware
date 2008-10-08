@@ -1,3 +1,9 @@
+open-xchange-commons-logging-log4j (6.7.0-0) unstable; urgency=low
+
+  * new unstable cycle
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 08 Oct 2008 09:24:26 +0200
+
 open-xchange-commons-logging-log4j (6.6.0-2) unstable; urgency=low
 
   * build for PTF 20080919

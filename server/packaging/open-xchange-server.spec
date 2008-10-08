@@ -29,8 +29,8 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
-Version:	6.6.0
-Release:	9
+Version:	6.7.0
+Release:	0
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -139,6 +139,19 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Sep 26 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12231: Using default separator character from 'mail.properties'
+   to configure folder path prefix equal to mailing system's separator
+ - Bugfix #12212: Fixed moving a chamge exception of a recurring appointment
+* Thu Sep 25 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12166: Fixed max. end date calculation for yearly recurring
+   appointment
+ - Bugfix #12170: Applying possibly conflicting start/end to calculation of
+   free-busy-results
+* Wed Sep 24 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12224: First remove pool from pools data structure and then destroy it.
+ - Bugfix #12211: Enclosed checking existing entry and following insert or
+   update operation in a transaction.
 * Fri Sep 19 2008 - dennis.sieben@open-xchange.com
  - Bugfix #12183: Fixed JSON creation and reading for sieve body rule.
 * Fri Sep 19 2008 - thorben.betten@open-xchange.com
