@@ -470,13 +470,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         
         try {
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            Context[] ret = null;
-            if( isBundleRegistered() ) {
-                ret = (Context[]) callPluginMethod("list", search_pattern, auth);
+            if( ClientAdminThreadExtended.cache.isMasterAdmin(auth) ) {
+                return oxcox.listContext(search_pattern);
             } else {
-                ret = oxcox.listContext(search_pattern);
+                return (Context[]) callPluginMethod("list", search_pattern, auth);
             }
-            return ret;
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;

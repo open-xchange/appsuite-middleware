@@ -211,6 +211,15 @@ public abstract class OXContextStorageInterface {
     public abstract Context[] listContext(final String search_pattern) throws StorageException;
 
     /**
+     * @param search_pattern
+     * @param additionaltable
+     * @param sqlconjunction
+     * @return
+     * @throws StorageException
+     */
+    public abstract Context[] listContext(final String search_pattern, final String additionaltable, final String sqlconjunction) throws StorageException;
+
+    /**
      * @param ctx
      * @param reason
      * @throws StorageException
@@ -254,5 +263,6 @@ public abstract class OXContextStorageInterface {
      * @throws StorageException if some problem occurs.
      */
     public abstract void downgrade(final Context ctx) throws StorageException;
+
 
 }
