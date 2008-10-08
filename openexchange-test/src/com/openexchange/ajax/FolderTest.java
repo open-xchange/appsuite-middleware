@@ -597,7 +597,22 @@ public class FolderTest extends AbstractAJAXTest {
 		}
 		return retval;
 	}
-
+	
+	public static FolderObject getStandardFolder(final int module, final String protocol, 
+			final WebConversation conversation, final String hostname, final String sessionId) 
+			throws MalformedURLException, OXException, AjaxException, IOException, SAXException, JSONException {
+		final List<FolderObject> subfolders = getSubfolders(conversation, protocol, hostname, 
+				sessionId, Integer.toString(FolderObject.SYSTEM_PRIVATE_FOLDER_ID), false, true);
+		if (null != subfolders && 0 < subfolders.size()) {
+			for (final FolderObject subfolder : subfolders) {
+				if (module == subfolder.getModule() && subfolder.isDefaultFolder()) {
+					return subfolder;
+				}
+			}
+		}
+		throw new OXException(String.format("No standard folder for module '%d' found", module));
+	}
+			                         
 	public static FolderObject getStandardTaskFolder(final WebConversation conversation, final String hostname,
 			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
 		final List<FolderObject> subfolders = getSubfolders(conversation, hostname, sessionId, ""
