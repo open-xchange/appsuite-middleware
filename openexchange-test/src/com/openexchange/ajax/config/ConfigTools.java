@@ -163,24 +163,20 @@ public final class ConfigTools extends Assert {
     }
 
     /**
-     * Reads the unique identifier of the user.
-     * @param conversation web conversation.
-     * @param hostName host name of the server.
-     * @param sessionId session identifier of the user.
-     * @return the unique identifier of the user.
-     * @throws SAXException if parsing of the response fails.
-     * @throws IOException if getting the response fails.
-     * @throws JSONException if parsing the response fails.
-     * @throws AjaxException if method is wrong.
-     * @throws ConfigurationException 
+     * @deprecated use {@link #getUserId(AJAXClient)}.
      */
+    @Deprecated
     public static int getUserId(final WebConversation conversation,
         final String hostName, final String sessionId) throws IOException,
         SAXException, JSONException, AjaxException, ConfigurationException {
         AJAXConfig.init();
         final AJAXSession session = new AJAXSession(conversation, sessionId);
-        return ConfigTools.get(session, new GetRequest(Tree.Identifier))
-            .getInteger();
+        return Executor.execute(session, new GetRequest(Tree.Identifier), hostName).getInteger();
+    }
+
+    public static int getUserId(final AJAXClient client) throws AjaxException,
+        IOException, SAXException, JSONException {
+        return client.getValues().getUserId();
     }
 
     /**
@@ -235,7 +231,7 @@ public final class ConfigTools extends Assert {
     public static GetResponse get(final AJAXSession session,
         final GetRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (GetResponse) Executor.execute(session, request);
+        return Executor.execute(session, request);
     }
 
     public static SetResponse set(final AJAXClient client,

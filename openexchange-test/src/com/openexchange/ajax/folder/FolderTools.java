@@ -110,8 +110,12 @@ public final class FolderTools {
         final boolean ignoreMailFolder) throws AjaxException, IOException,
         SAXException, JSONException, OXException {
         final ListRequest request = new ListRequest(parent, ignoreMailFolder);
-        final ListResponse response = Executor.execute(session, request,
-            protocol, hostname);
+        final ListResponse response;
+        if (null == protocol) {
+            response = Executor.execute(session, request, hostname);
+        } else {
+            response = Executor.execute(session, request, protocol, hostname);
+        }
         final List<FolderObject> retval = new ArrayList<FolderObject>();
         final Iterator<FolderObject> iter = response.getFolder();
         while (iter.hasNext()) {

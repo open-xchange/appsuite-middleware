@@ -126,6 +126,9 @@ public class FolderTest extends AbstractAJAXTest {
 
 	private static final int[] mapping_01 = { 0, 2, 4, -1, 8 };
 
+	/**
+	 * @deprecated use {@link ConfigTools#getUserId(WebConversation, String, String)}.
+	 */
 	public static final int getUserId(final WebConversation conversation, final String hostname,
 			final String entityArg, final String password) throws IOException, SAXException, JSONException,
 			AjaxException, ConfigurationException {

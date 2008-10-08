@@ -69,6 +69,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.InfostoreAJAXTest;
+import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -89,11 +90,13 @@ public class LockTest extends InfostoreAJAXTest {
 		testFile = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		sessionId = getSessionId();
 		// Copied-without-thinking from FolderTest
-		final int userId = FolderTest.getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
+		final int userId = ConfigTools.getUserId(getWebConversation(), getHostName(), getSessionId());
+		final int secondUserId = ConfigTools.getUserId(getSecondWebConversation(), getHostName(), getSecondSessionId());
 		final FolderObject myInfostore = FolderTest.getMyInfostoreFolder(getWebConversation(), getHostName(), getSessionId(), userId);
+		// TODO create folder in one step with correct permissions.
 		folderId = FolderTest.insertFolder(getWebConversation(), getHostName(), getSessionId(), userId, false,
 		    myInfostore.getObjectID(), "NewInfostoreFolder"+Long.MAX_VALUE, "infostore", FolderObject.PUBLIC, -1, true);
-		updateFolder(getWebConversation(),getHostName(),sessionId,getLogin(),getSeconduser(),folderId,Long.MAX_VALUE,false);
+		updateFolder(getWebConversation(),getHostName(),sessionId,userId,secondUserId,folderId,Long.MAX_VALUE,false);
 		
 		//folderId=228;
 		final Map<String,String> create = m(
@@ -261,7 +264,7 @@ public class LockTest extends InfostoreAJAXTest {
 	
 	
 	public static boolean updateFolder(final WebConversation conversation, final String hostname, final String sessionId,
-			final String entity, final String secondEntity, final int folderId, final long timestamp, final boolean printOutput) throws JSONException, MalformedURLException, IOException, SAXException {
+			final int entity, final int secondEntity, final int folderId, final long timestamp, final boolean printOutput) throws JSONException, MalformedURLException, IOException, SAXException {
 			final JSONObject jsonFolder = new JSONObject();
 			jsonFolder.put("id", folderId);
 			final JSONArray perms = new JSONArray();
