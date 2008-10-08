@@ -28,7 +28,7 @@ jcs.auxiliary.SessionLTCP.attributes=org.apache.jcs.auxiliary.lateral.socket.tcp
 jcs.auxiliary.SessionLTCP.attributes.TcpListenerPort=58849
 # Define UDP discovery here, but ensure you do not specify static TCP server via 'jcs.auxiliary.SessionLTCP.attributes.TcpServers'
 # jcs.auxiliary.SessionLTCP.attributes.UdpDiscoveryAddr=224.0.0.1
-# jcs.auxiliary.SessionLTCP.attributes.UdpDiscoveryPort=6780
+# jcs.auxiliary.SessionLTCP.attributes.UdpDiscoveryPort=6790
 jcs.auxiliary.SessionLTCP.attributes.UdpDiscoveryEnabled=false
 # Setting Receive equal to false means the cache operates in send-only mode
 jcs.auxiliary.SessionLTCP.attributes.Receive=true
