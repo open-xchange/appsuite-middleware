@@ -768,6 +768,15 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      */
     @Override
     public Context[] listContext(final String search_pattern) throws StorageException {
+        return listContext(search_pattern, null, null);
+    }
+
+    /**
+     * 
+     * @see com.openexchange.admin.storage.OXContextSQLStorage#listContext(java.lang.String)
+     */
+    @Override
+    public Context[] listContext(final String search_pattern, final String additionaltable, final String sqlconjunction) throws StorageException {
         Connection configdb_read = null;
         PreparedStatement stmt = null;
         PreparedStatement stmt2 = null;
@@ -778,7 +787,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             configdb_read = cache.getConnectionForConfigDB();
 
             final String search_patterntmp = search_pattern.replace('*', '%');
-            stmt = configdb_read.prepareStatement("SELECT DISTINCT context.cid, context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema FROM context, context_server2db_pool, server, login2context WHERE ( context.cid = context_server2db_pool.cid AND context.cid = login2context.cid AND context_server2db_pool.server_id = server.server_id AND server.name = ? ) AND (context.name LIKE ? OR context.cid LIKE ? OR login2context.login_info LIKE ?)");
+            String query = "SELECT DISTINCT context.cid, context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema " +
+            "FROM context, context_server2db_pool, server, login2context" + (additionaltable != null ? "," + additionaltable : "" ) + 
+            " WHERE ( context.cid = context_server2db_pool.cid AND context.cid = login2context.cid AND context_server2db_pool.server_id = server.server_id AND server.name = ? ) AND (context.name LIKE ? OR context.cid LIKE ? OR login2context.login_info LIKE ?) " +
+            (sqlconjunction != null ? sqlconjunction : ""); 
+            stmt = configdb_read.prepareStatement(query);
             mapping = configdb_read.prepareStatement("SELECT login_info FROM login2context WHERE cid=?");
             stmt.setString(1, prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
             stmt.setString(2, search_patterntmp);
@@ -823,13 +836,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 mapping.setInt(1, context_id);
                 rs2 = mapping.executeQuery();
                 while (rs2.next()) {
-                	String login_mapping = rs2.getString(1);                	
-                	// DO NOT RETURN THE CONTEXT ID AS A MAPPING!!
-                	// THIS CAN CAUSE ERRORS IF CHANGING LOGINMAPPINGS AFTERWARDS!
-                	// SEE #11094 FOR DETAILS!
-                	if(!cs.getIdAsString().equals(login_mapping)){
-                		cs.addLoginMapping(login_mapping);
-                	}
+                        String login_mapping = rs2.getString(1);                        
+                        // DO NOT RETURN THE CONTEXT ID AS A MAPPING!!
+                        // THIS CAN CAUSE ERRORS IF CHANGING LOGINMAPPINGS AFTERWARDS!
+                        // SEE #11094 FOR DETAILS!
+                        if(!cs.getIdAsString().equals(login_mapping)){
+                                cs.addLoginMapping(login_mapping);
+                        }
                 }
                 rs2.close();
 
