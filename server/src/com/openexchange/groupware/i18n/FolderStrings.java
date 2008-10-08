@@ -86,8 +86,6 @@ public class FolderStrings {
 	
 	public static final String VIRTUAL_LIST_INFOSTORE_FOLDER_NAME = "Other infostore folders";
 	
-	public static final String MY_INFOSTORE_FOLDER_NAME = "My infostore folder";
-	
 	public static final String DEFAULT_TASK_FOLDER_NAME = "Tasks";
 	
 	public static final String DEFAULT_CALENDAR_FOLDER_NAME = "Calendar";
