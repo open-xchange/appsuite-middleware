@@ -1,3 +1,7 @@
+* 2008-10-09 - marcus.klein@open-xchange.com
+
+ - Bugfix #12200: Corrected german translation.
+
 * 2008-09-26 - thorben.betten@open-xchange.com
 
  - Bugfix #12231: Using default separator character from 'mail.properties'

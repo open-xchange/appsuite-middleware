@@ -136,7 +136,7 @@ msgstr ""
 "---------- Ursprüngliche Nachricht ----------\n"
 "Von: #FROM#\n"
 "An: #TO#\n"
-"Datum: #DATE# at #TIME#\n"
+"Datum: #DATE# um #TIME#\n"
 "Betreff: #SUBJECT#"
 
 #: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:72
