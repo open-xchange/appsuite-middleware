@@ -215,10 +215,6 @@ public final class SystemConfig extends AbstractConfig implements Initialization
 		 */
 		NOTIFICATION("Notification"),
 		/**
-		 * participant.properties.
-		 */
-		PARTICIPANT("Participant"),
-		/**
 		 * UserConfigurationStorage.
 		 */
 		USER_CONF_STORAGE("UserConfigurationStorage"),

@@ -47,57 +47,56 @@
  *
  */
 
-package com.openexchange.groupware.settings.tree.participants;
+package com.openexchange.server.osgi;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.configuration.ParticipantConfig;
-import com.openexchange.groupware.configuration.ParticipantConfig.Property;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.session.Session;
 
 /**
- * Setup for the config tree node determining if external participants without
- * email addresses should be shown in grey color or not.
+ * Configuration service is dynamically pushed into configuration keeping
+ * classes.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ShowWithoutEmail implements PreferencesItemService {
+final class ConfigurationCustomizer implements ServiceTrackerCustomizer {
 
-    public static final String NAME = "showWithoutEmail";
+    private final BundleContext context;
 
     /**
      * Default constructor.
      */
-    public ShowWithoutEmail() {
+    public ConfigurationCustomizer(final BundleContext context) {
         super();
+        this.context = context;
     }
 
     /**
      * {@inheritDoc}
      */
-    public String[] getPath() {
-        return new String[] { "participants", NAME };
+    public Object addingService(final ServiceReference reference) {
+        final ConfigurationService configuration = (ConfigurationService)
+            context.getService(reference);
+        ParticipantConfig.getInstance().initialize(configuration);
+        return configuration;
     }
 
     /**
      * {@inheritDoc}
      */
-    public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasCalendar() || userConfig.hasTask();
-            }
-            public void getValue(final Session session, final Context ctx,
-                final User user, final UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
-                setting.setSingleValue(ParticipantConfig.getInstance()
-                    .getProperty(Property.SHOW_WITHOUT_EMAIL));
-            }
-        };
+    public void modifiedService(final ServiceReference reference,
+        final Object service) {
+        // Nothing to do.
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void removedService(final ServiceReference reference,
+        final Object service) {
+        // ConfigurationService is not referenced in ParticipantConfig.
+        context.ungetService(reference);
     }
 }

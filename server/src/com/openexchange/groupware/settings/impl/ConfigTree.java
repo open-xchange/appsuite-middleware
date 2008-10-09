@@ -271,6 +271,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.tasks.GUI.class,
             com.openexchange.groupware.settings.tree.modules.tasks.Module.class,
             com.openexchange.groupware.settings.tree.modules.tasks.DelegateTasks.class,
+            com.openexchange.groupware.settings.tree.participants.AutoSearch.class,
             com.openexchange.groupware.settings.tree.participants.ShowDialog.class,
             com.openexchange.groupware.settings.tree.participants.ShowWithoutEmail.class,
             com.openexchange.groupware.settings.tree.ReloadTimes.class,

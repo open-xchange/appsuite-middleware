@@ -62,18 +62,19 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
 /**
- * Setup for the config tree node determining if external participants without
- * email addresses should be shown in grey color or not.
+ * Setup for the config tree node determining if an automatic search for all
+ * users, groups and resources is triggered if the participant selection dialog
+ * is opened.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ShowWithoutEmail implements PreferencesItemService {
+public class AutoSearch implements PreferencesItemService {
 
-    public static final String NAME = "showWithoutEmail";
+    public static final String NAME = "autoSearch";
 
     /**
      * Default constructor.
      */
-    public ShowWithoutEmail() {
+    public AutoSearch() {
         super();
     }
 
@@ -96,7 +97,7 @@ public class ShowWithoutEmail implements PreferencesItemService {
                 final User user, final UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
                 setting.setSingleValue(ParticipantConfig.getInstance()
-                    .getProperty(Property.SHOW_WITHOUT_EMAIL));
+                    .getProperty(Property.AUTO_SEARCH));
             }
         };
     }

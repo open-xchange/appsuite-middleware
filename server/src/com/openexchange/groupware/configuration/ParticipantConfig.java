@@ -49,11 +49,12 @@
 
 package com.openexchange.groupware.configuration;
 
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.configuration.ConfigurationException.Code;
-import com.openexchange.server.Initialization;
-import com.openexchange.tools.conf.AbstractConfig;
+import java.util.Properties;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.config.ConfigurationService;
 
 /**
  * This class handles the configuration parameters read from the configuration
@@ -61,18 +62,27 @@ import com.openexchange.tools.conf.AbstractConfig;
  * participants.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ParticipantConfig extends AbstractConfig implements Initialization {
+public final class ParticipantConfig {
 
     /**
-     * Property key in the system.properties file.
+     * Logger.
      */
-    private static final SystemConfig.Property KEY = SystemConfig.Property
-        .PARTICIPANT;
+    private static final Log LOG = LogFactory.getLog(ParticipantConfig.class);
 
     /**
      * Singleton instance.
      */
     private static final ParticipantConfig SINGLETON = new ParticipantConfig();
+
+    /**
+     * Name of the properties file.
+     */
+    private static final String FILENAME = "participant.properties";
+
+    /**
+     * Field to store properties.
+     */
+    private final Properties props = new Properties();
 
     /**
      * Prevent instantiation.
@@ -82,25 +92,13 @@ public final class ParticipantConfig extends AbstractConfig implements Initializ
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String getPropertyFileName() throws ConfigurationException {
-        final String filename = SystemConfig.getProperty(KEY);
-        if (null == filename) {
-            throw new ConfigurationException(Code.PROPERTY_MISSING,
-                KEY.getPropertyName());
-        }
-        return filename;
-    }
-    
-    /**
      * Gets the value of a property from the file.
      * @param key name of the property.
      * @return the value of the property.
      */
-    public static boolean getProperty(final Property key) {
-        return SINGLETON.getBooleanInternal(key.propertyName, key.defaultValue);
+    public Boolean getProperty(final Property key) {
+        logNotInitialized();
+        return new Boolean(props.getProperty(key.propertyName, key.defaultValue));
     }
 
     /**
@@ -110,7 +108,14 @@ public final class ParticipantConfig extends AbstractConfig implements Initializ
         /**
          * Determines if external participants without email address are shown.
          */
-        SHOW_WITHOUT_EMAIL("ShowWithoutEmail", Boolean.TRUE.toString());
+        SHOW_WITHOUT_EMAIL("com.openexchange.participant.ShowWithoutEmail",
+            Boolean.TRUE.toString()),
+        /**
+         * Determines if a search for all users, groups and resources is
+         * triggered on opened participant dialog.
+         */
+        AUTO_SEARCH("com.openexchange.participant.autoSearch",
+            Boolean.TRUE.toString());
 
         /**
          * Name of the property in the participant.properties file.
@@ -140,18 +145,24 @@ public final class ParticipantConfig extends AbstractConfig implements Initializ
     public static ParticipantConfig getInstance() {
         return SINGLETON;
     }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public void start() throws ConfigurationException {
-        loadPropertiesInternal();
-    }
 
     /**
-     * {@inheritDoc}
+     * @param configuration the configuration service.
      */
-    public void stop() {
-        clearProperties();
+    public void initialize(final ConfigurationService configuration) {
+        final Properties props = configuration.getFile(FILENAME);
+        if (null == props) {
+            LOG.info("Configuration file " + FILENAME + " is missing. Using defaults.");
+        } else {
+            this.props.clear();
+            this.props.putAll(props);
+            LOG.info("Read configuration file " + FILENAME + ".");
+        }
+    }
+
+    private void logNotInitialized() {
+        if (props.isEmpty()) {
+            LOG.info("Configuration file " + FILENAME + " not read. Using defaults.");
+        }
     }
 }

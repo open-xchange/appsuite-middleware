@@ -96,10 +96,6 @@ public class Starter implements Initialization {
 	 */
 	com.openexchange.groupware.calendar.CalendarConfig.getInstance(),
 	/**
-	 * Reads the participant.properties.
-	 */
-	com.openexchange.groupware.configuration.ParticipantConfig.getInstance(),
-	/**
 	 * Connection pools for ConfigDB and database assignments for contexts.
 	 */
 	com.openexchange.database.DatabaseInit.getInstance(),

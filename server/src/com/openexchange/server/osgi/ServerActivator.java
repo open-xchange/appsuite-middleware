@@ -230,6 +230,9 @@ public final class ServerActivator extends DeferredActivator {
 		/*
 		 * Add service trackers
 		 */
+		// Configuration service load
+		serviceTrackerList.add(new ServiceTracker(context, ConfigurationService
+		    .class.getName(), new ConfigurationCustomizer(context)));
 		// I18n service load
 		serviceTrackerList
 				.add(new ServiceTracker(context, I18nTools.class.getName(), new I18nServiceListener(context)));
@@ -256,13 +259,11 @@ public final class ServerActivator extends DeferredActivator {
 		// Add cache dynamically to database pooling. it works without, too.
 		serviceTrackerList.add(new ServiceTracker(context, CacheService.class.getName(), new CacheCustomizer(context)));
 
-
         // ICal Parser
         serviceTrackerList.add(new ServiceTracker(context, ICalParser.class.getName(), new RegistryCustomizer<ICalParser>(context, ICalParser.class)));
 
         // ICal Emitter
         serviceTrackerList.add(new ServiceTracker(context, ICalEmitter.class.getName(), new RegistryCustomizer<ICalEmitter>(context, ICalEmitter.class)));
-
 
         /*
          * Register Services
