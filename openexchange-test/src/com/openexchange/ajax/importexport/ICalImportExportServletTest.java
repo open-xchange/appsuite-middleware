@@ -80,8 +80,7 @@ public class ICalImportExportServletTest extends AbstractImportExportServletTest
 		final int folderId = createFolder("ical-empty-file-" + System.currentTimeMillis(),FolderObject.CONTACT);
 		try {
 			final WebRequest req = new PostMethodWebRequest(
-					getCSVColumnUrl(IMPORT_SERVLET, folderId, format));
-			((PostMethodWebRequest)req).setMimeEncoded(true);
+					getCSVColumnUrl(IMPORT_SERVLET, folderId, format), true);
 			req.selectFile("file", "empty.ics", is, format.getMimeType());
 			final WebResponse webRes = webconv.getResource(req);
 			final JSONObject response = extractFromCallback( webRes.getText() );

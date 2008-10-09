@@ -500,8 +500,7 @@ public class ContactTest extends AbstractAJAXTest {
 		JSONObject jResponse = null;
 		
 		if (contactObj.containsImage1()) {
-			final PostMethodWebRequest postReq = new PostMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
-			postReq.setMimeEncoded(true);
+			final PostMethodWebRequest postReq = new PostMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), true);
 			
 			postReq.setParameter("json", stringWriter.toString());
 			
@@ -565,8 +564,7 @@ public class ContactTest extends AbstractAJAXTest {
 		JSONObject jResponse = null;
 		
 		if (contactObj.containsImage1()) {
-			final PostMethodWebRequest postReq = new PostMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
-			postReq.setMimeEncoded(true);
+			final PostMethodWebRequest postReq = new PostMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), true);
 			postReq.setParameter("json", stringWriter.toString());
 			
 			final File f = File.createTempFile("open-xchange_image", ".jpg");

@@ -176,8 +176,7 @@ public final class BundleTestSMTP extends AbstractBundleTest {
 		}
 
 		final PostMethodWebRequest postReq = new PostMethodWebRequest(PROTOCOL + hostname + MAIL_URL
-				+ parameter.getURLParameters());
-		postReq.setMimeEncoded(true);
+				+ parameter.getURLParameters(), true);
 		postReq.setParameter("json_0", mailObjStr);
 
 		JSONObject jResponse = null;

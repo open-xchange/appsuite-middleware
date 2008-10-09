@@ -126,8 +126,7 @@ public class Executor extends Assert {
 			addParameter(req, session, request);
 			break;
 		case UPLOAD:
-			final PostMethodWebRequest post = new PostMethodWebRequest(urlString + getPUTParameter(session, request));
-			post.setMimeEncoded(true);
+			final PostMethodWebRequest post = new PostMethodWebRequest(urlString + getPUTParameter(session, request), true);
 			req = post;
 			addFieldParameter(post, request);
 			addFileParameter(post, request);

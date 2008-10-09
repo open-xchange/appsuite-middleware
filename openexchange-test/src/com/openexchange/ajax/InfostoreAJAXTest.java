@@ -287,8 +287,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		url.append("&timestamp=");
 		url.append(timestamp);
 		
-		final PostMethodWebRequest req = new PostMethodWebRequest(url.toString());
-		req.setMimeEncoded(true);
+		final PostMethodWebRequest req = new PostMethodWebRequest(url.toString(), true);
 		
 		final JSONObject obj = toJSONArgs(modified);
 		
@@ -322,8 +321,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 	
 	public int createNew(final WebConversation webConv, final String hostname, final String sessionId, final Map<String, String> fields, final File upload, final String contentType) throws MalformedURLException, IOException, SAXException, JSONException {
 		final StringBuffer url = getUrl(sessionId,"new", hostname);
-		final PostMethodWebRequest req = new PostMethodWebRequest(url.toString());
-		req.setMimeEncoded(true);
+		final PostMethodWebRequest req = new PostMethodWebRequest(url.toString(), true);
 		
 		final JSONObject obj = toJSONArgs(fields);
 		
@@ -525,8 +523,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		url.append("&timestamp=");
 		url.append(timestamp);
 		
-		final PostMethodWebRequest req = new PostMethodWebRequest(url.toString());
-		req.setMimeEncoded(true);
+		final PostMethodWebRequest req = new PostMethodWebRequest(url.toString(), true);
 		
 		final JSONObject obj = new JSONObject();
 		for(final String attr : modified.keySet()) {

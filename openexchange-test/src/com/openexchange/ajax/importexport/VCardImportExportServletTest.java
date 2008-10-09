@@ -86,9 +86,8 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
 			InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
 			WebConversation webconv = getWebConversation();
 			WebRequest req = new PostMethodWebRequest(
-					getUrl(IMPORT_SERVLET, folderId, format)
-					);
-			((PostMethodWebRequest)req).setMimeEncoded(true);
+					getUrl(IMPORT_SERVLET, folderId, format),
+					true);
 			req.selectFile("file", "contact.vcf", is, format.getMimeType());
 			WebResponse webRes = webconv.getResource(req);
 			

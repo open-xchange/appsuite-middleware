@@ -154,8 +154,7 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
 			cookieJar.putCookie(Login.cookiePrefix + sessionId, sessionId);
 		}
 
-		final PostMethodWebRequest postReq = new PostMethodWebRequest(hostname + URL + parameter.getURLParameters());
-		postReq.setMimeEncoded(true);
+		final PostMethodWebRequest postReq = new PostMethodWebRequest(hostname + URL + parameter.getURLParameters(), true);
 
 		for (int i = 0; i < files.length; i++) {
 			final File f = files[i];

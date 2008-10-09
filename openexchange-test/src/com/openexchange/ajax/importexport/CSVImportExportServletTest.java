@@ -88,9 +88,8 @@ public class CSVImportExportServletTest extends AbstractImportExportServletTest 
 			InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
 			WebConversation webconv = getWebConversation();
 			WebRequest req = new PostMethodWebRequest(
-					getCSVColumnUrl(IMPORT_SERVLET, folderId, format)
-					);
-			((PostMethodWebRequest)req).setMimeEncoded(true);
+					getCSVColumnUrl(IMPORT_SERVLET, folderId, format),
+					true);
 			req.selectFile("file", "contacts.csv", is, format.getMimeType());
 			WebResponse webRes = webconv.getResource(req);
 			
@@ -124,9 +123,8 @@ public class CSVImportExportServletTest extends AbstractImportExportServletTest 
 			final InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
 			final WebConversation webconv = getWebConversation();
 			final WebRequest req = new PostMethodWebRequest(
-					getCSVColumnUrl(IMPORT_SERVLET, folderId, format)
-					);
-			((PostMethodWebRequest)req).setMimeEncoded(true);
+					getCSVColumnUrl(IMPORT_SERVLET, folderId, format),
+					true);
 			req.selectFile("file", "contacts.csv", is, format.getMimeType());
 			final WebResponse webRes = webconv.getResource(req);
 			final JSONObject response = extractFromCallback( webRes.getText() );
@@ -147,9 +145,8 @@ public class CSVImportExportServletTest extends AbstractImportExportServletTest 
 			final InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
 			final WebConversation webconv = getWebConversation();
 			final WebRequest req = new PostMethodWebRequest(
-					getCSVColumnUrl(IMPORT_SERVLET, folderId, format)
-					);
-			((PostMethodWebRequest)req).setMimeEncoded(true);
+					getCSVColumnUrl(IMPORT_SERVLET, folderId, format),
+					true);
 			req.selectFile("file", "contacts.csv", is, format.getMimeType());
 			final WebResponse webRes = webconv.getResource(req);
 			final JSONObject response = extractFromCallback( webRes.getText() );
@@ -166,9 +163,8 @@ public class CSVImportExportServletTest extends AbstractImportExportServletTest 
 		final int folderId = createFolder("csv-empty-file-" + System.currentTimeMillis(),FolderObject.CONTACT);
 		try {
 			final WebRequest req = new PostMethodWebRequest(
-					getCSVColumnUrl(IMPORT_SERVLET, folderId, format)
-					);
-			((PostMethodWebRequest)req).setMimeEncoded(true);
+					getCSVColumnUrl(IMPORT_SERVLET, folderId, format),
+					true);
 			req.selectFile("file", "empty.vcs", is, format.getMimeType());
 			final WebResponse webRes = webconv.getResource(req);
 			final JSONObject response = extractFromCallback( webRes.getText() );

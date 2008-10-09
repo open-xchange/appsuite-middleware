@@ -107,9 +107,8 @@ public class AbstractVCardTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, Format.VCARD.getConstantName());
 		parameter.setParameter("folder", folderId);
 		
-		final WebRequest req = new PostMethodWebRequest(host + "/ajax/import" + parameter.getURLParameters());
+		final WebRequest req = new PostMethodWebRequest(host + "/ajax/import" + parameter.getURLParameters(), true);
 		
-		((PostMethodWebRequest)req).setMimeEncoded(true);
 		req.selectFile("file", "vcard-test.vcf", byteArrayInputStream, Format.VCARD.getMimeType());
 		
 		final WebResponse resp = webCon.getResource(req);

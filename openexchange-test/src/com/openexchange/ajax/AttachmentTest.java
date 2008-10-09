@@ -61,8 +61,7 @@ public class AttachmentTest extends AbstractAJAXTest {
 	public Response attach(final WebConversation webConv, final String sessionId, final int folderId, final int attachedId, final int moduleId, final List<File> uploads, final Map<File, String> filenames, final Map<File, String> mimetypes) throws JSONException, IOException {
 		final StringBuffer url = getUrl(sessionId,"attach");
 		
-		final PostMethodWebRequest req = new PostMethodWebRequest(url.toString());
-		req.setMimeEncoded(true);
+		final PostMethodWebRequest req = new PostMethodWebRequest(url.toString(), true);
 		
 		int index = 0;
 		

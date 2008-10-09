@@ -117,8 +117,7 @@ public class MailTest extends AbstractAJAXTest {
 			cookieJar.putCookie(Login.cookiePrefix + sessionId, sessionId);
 		}
 		
-		final PostMethodWebRequest postReq = new PostMethodWebRequest(hostname + MAIL_URL + parameter.getURLParameters());
-		postReq.setMimeEncoded(true);
+		final PostMethodWebRequest postReq = new PostMethodWebRequest(hostname + MAIL_URL + parameter.getURLParameters(), true);
 		postReq.setParameter("json_0", mailObjStr);
 		
 		JSONObject jResponse = null;
