@@ -199,4 +199,26 @@ public class FunctionTests extends AbstractAJAXSession {
             .ShowParticipantDialog));
         LOG.info("Should participant dialog be displayed: " + get.getBoolean());
     }
+
+    /**
+     * Checks if the search for all users, groups and resources is triggered
+     * when the participant selection dialog is opened.
+     */
+    public void testAutoSearchFlag() throws Throwable {
+        final AJAXClient client = getClient();
+        final GetResponse get = ConfigTools.get(client, new GetRequest(Tree
+            .ParticipantAutoSearch));
+        LOG.info("Is search triggered on opened participant dialog: " + get.getBoolean());
+    }
+
+    /**
+     * Checks if the flag works that determines if external participants without
+     * an email address are shown in the participant selection dialog.
+     */
+    public void testShowWithoutEmailFlag() throws Throwable {
+        final AJAXClient client = getClient();
+        final GetResponse get = ConfigTools.get(client, new GetRequest(Tree
+            .ShowWithoutEmail));
+        LOG.info("Are external participants without email address shown in participant dialog: " + get.getBoolean());
+    }
 }

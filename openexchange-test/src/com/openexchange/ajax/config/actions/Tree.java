@@ -237,7 +237,10 @@ public enum Tree {
     
     /** the private infostore folder (read-only) */
     PrivateInfostoreFolder("/folder/infostore"),
-    
+
+    /** If a search for all users, groups and resources when participant selection dialog is opened. (read-only, added 2008-10-09/SP5) */
+    ParticipantAutoSearch("/participants/autoSearch"),
+
     /** If external participants without email should be shown. */
     ShowWithoutEmail("/participants/showWithoutEmail"),
     

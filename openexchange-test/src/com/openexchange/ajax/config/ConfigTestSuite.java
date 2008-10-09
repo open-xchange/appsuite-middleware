@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.config;
 
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 

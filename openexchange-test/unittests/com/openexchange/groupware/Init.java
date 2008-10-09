@@ -32,6 +32,7 @@ import com.openexchange.event.impl.EventDispatcher;
 import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.group.internal.GroupInit;
+import com.openexchange.groupware.configuration.ParticipantConfig;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
 import com.openexchange.i18n.tools.I18nServices;
@@ -90,10 +91,6 @@ public final class Init {
 	 * Reads the calendar.properties.
 	 */
 	com.openexchange.groupware.calendar.CalendarConfig.getInstance(),
-	/**
-	 * Reads the participant.properties.
-	 */
-	com.openexchange.groupware.configuration.ParticipantConfig.getInstance(),
 	/**
 	 * Sets the caching system JCS up.
 	 */
@@ -192,8 +189,8 @@ public final class Init {
 		// we'll have to do the service wiring differently.
 		// This method duplicates statically what the OSGi container
 		// handles dynamically
-
 		startAndInjectConfigBundle();
+		startAndInjectConfiguration();
 		startAndInjectCache();
 		startAndInjectI18NBundle();
 		startAndInjectMonitoringBundle();
@@ -225,6 +222,11 @@ public final class Init {
 		final ConfigurationService config = new ConfigurationImpl();
 		services.put(ConfigurationService.class, config);
 		ServerServiceRegistry.getInstance().addService(ConfigurationService.class, config);
+	}
+
+	public static void startAndInjectConfiguration() {
+	    final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
+	    ParticipantConfig.getInstance().initialize(config);
 	}
 
 	private static void startAndInjectMonitoringBundle() throws Exception {
@@ -322,7 +324,6 @@ public final class Init {
         ServerServiceRegistry.getInstance().addService(ICalParser.class, parser) ;
         ServerServiceRegistry.getInstance().addService(ICalEmitter.class, emitter);
     }
-
 
     public static void stopServer() {
 		// for(Initialization init: started) { init.stop(); }
