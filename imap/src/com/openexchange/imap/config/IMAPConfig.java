@@ -351,15 +351,17 @@ public final class IMAPConfig extends MailConfig {
 	}
 
 	/**
-	 * Gets the supportsACLs
+	 * Checks if ACLs are supported
 	 * 
-	 * @return the supportsACLs
+	 * @return <code>true</code> if ACLs are supported; otherwise
+	 *         <code>false</code>
 	 */
 	public boolean isSupportsACLs() {
-		if (capabilitiesLoaded.get() && BoolCapVal.AUTO.equals(IMAPProperties.getInstance().getSupportsACLs())) {
+		final BoolCapVal supportsACLs = IMAPProperties.getInstance().getSupportsACLs();
+		if (capabilitiesLoaded.get() && BoolCapVal.AUTO.equals(supportsACLs)) {
 			return imapCapabilities.hasPermissions();
 		}
-		return BoolCapVal.TRUE.equals(IMAPProperties.getInstance().getSupportsACLs()) ? true : false;
+		return BoolCapVal.TRUE.equals(supportsACLs) ? true : false;
 	}
 
 	@Override
