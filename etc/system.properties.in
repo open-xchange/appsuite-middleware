@@ -48,10 +48,6 @@ Attachment=@serverconfdir@/attachment.properties
 # configures certain assumptions about sending notifications
 Notification=@serverconfdir@/notification.properties
 
-# Location of the participant.properties configuration file. This file
-# configures certain options about participants.
-Participant=@serverconfdir@/participant.properties
-
 # Directory in which all property files for servlet mapping are kept
 ServletMappingDir=@serverconfdir@/servletmappings
 
