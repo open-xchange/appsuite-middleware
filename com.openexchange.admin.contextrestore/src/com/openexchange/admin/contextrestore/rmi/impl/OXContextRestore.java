@@ -93,6 +93,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             String table_name = null;
             // Set if a database is found in which the search for cid should be done
             boolean furthersearch = true;
+            boolean configdbfound = false;
             boolean searchcontext = false;
 //            boolean searchdbpool = false;
             int pool_id = -1;
@@ -122,6 +123,9 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                             final String databasename = dbmatcher.group(1);
                             if ("mysql".equals(databasename) || "information_schema".equals(databasename)) {
                                 furthersearch = false;
+                            } else if ("configdb".equals(databasename)) {
+                                configdbfound = true;
+                                furthersearch = true;
                             } else {
                                 furthersearch = true;
                             }
@@ -220,10 +224,14 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                 }
             }
             bufferedWriter.close();
-            final PoolIdAndSchema poolIdAndSchema = new PoolIdAndSchema(pool_id, schema);
-            final OXContextRestoreStorageInterface instance = OXContextRestoreStorageInterface.getInstance();
-            instance.checkVersion(versionInformation, poolIdAndSchema);
-            return poolIdAndSchema;
+            if (configdbfound) {
+                final PoolIdAndSchema poolIdAndSchema = new PoolIdAndSchema(pool_id, schema);
+                final OXContextRestoreStorageInterface instance = OXContextRestoreStorageInterface.getInstance();
+                instance.checkVersion(versionInformation, poolIdAndSchema);
+                return poolIdAndSchema;
+            } else {
+                return null;
+            }
         }
 
         /**
@@ -439,7 +447,17 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         LOG.info("Filenames: " + filenames);
         
         try {
-            final PoolIdAndSchema start = parser.start(ctx.getId(), filenames[0]);
+            PoolIdAndSchema start = null; 
+            for (final String filename : filenames) {
+                if (null != start) {
+                    parser.start(ctx.getId(), filename);
+                } else {
+                    start = parser.start(ctx.getId(), filename);
+                }
+            }
+            if (null == start) {
+                throw new OXContextRestoreException(Code.NO_CONFIGDB_FOUND);
+            }
             
             final OXContextInterface contextInterface = Activator.getContextInterface();
             
