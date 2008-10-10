@@ -144,6 +144,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 }
             }
             
+            callPluginMethod("change", ctx, auth);
+            
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             backup_ctx = oxcox.getData(ctx);
             oxcox.change(ctx);
