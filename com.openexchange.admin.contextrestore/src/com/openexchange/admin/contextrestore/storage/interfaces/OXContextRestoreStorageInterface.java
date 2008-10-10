@@ -35,7 +35,7 @@ public abstract class OXContextRestoreStorageInterface {
 
     private static final Log log = LogFactory.getLog(OXContextRestoreStorageInterface.class);
 
-    protected static PropertyHandlerExtended prop = null;
+    protected static PropertyHandlerExtended prop = new PropertyHandlerExtended(System.getProperties());
     
     /**
      * Creates a new instance implementing the group storage interface.
