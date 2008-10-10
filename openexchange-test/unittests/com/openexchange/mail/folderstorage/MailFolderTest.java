@@ -301,8 +301,8 @@ public final class MailFolderTest extends AbstractMailTest {
 					assertTrue("Missing message count", mf.containsMessageCount());
 					assertTrue("Missing name", mf.containsName());
 					assertTrue("Missing new message count", mf.containsNewMessageCount());
-					if (f instanceof IMAPMailFolder) {
-						assertTrue("Missing non-existent flag", ((IMAPMailFolder) f).containsNonExistent());
+					if (mf instanceof IMAPMailFolder) {
+						assertTrue("Missing non-existent flag", ((IMAPMailFolder) mf).containsNonExistent());
 					}
 					assertTrue("Missing own permission", mf.containsOwnPermission());
 					assertTrue("Missing parent fullname", mf.containsParentFullname());
