@@ -62,6 +62,9 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * This ssl socket factory creates a ssl context that trusts all certificates
  * and uses then this context to create a ssl socket factory that will trust all
@@ -71,8 +74,7 @@ import javax.net.ssl.TrustManager;
  */
 public class TrustAllSSLSocketFactory extends SSLSocketFactory {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(TrustAllSSLSocketFactory.class);
+	private static final Log LOG = LogFactory.getLog(TrustAllSSLSocketFactory.class);
 
 	/**
 	 * This factory will trust all certificates.
