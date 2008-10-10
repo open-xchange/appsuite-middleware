@@ -50,6 +50,7 @@
 package com.openexchange.admin.reseller.rmi.dataobjects;
 
 import java.lang.reflect.Field;
+import java.util.HashSet;
 
 import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
 import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
@@ -89,6 +90,10 @@ public class ResellerAdmin extends ExtendableDataObject implements PasswordMechO
 
     private boolean displaynameset = false;
 
+    private HashSet<Restriction> restrictions;
+    
+    private boolean restrictionsset = false;
+    
     public ResellerAdmin() {
         super();
         init();
@@ -173,6 +178,7 @@ public class ResellerAdmin extends ExtendableDataObject implements PasswordMechO
         this.password = null;
         this.displayname = null;
         this.passwordMech = null;
+        this.restrictions = null;
     }
 
     /**
@@ -265,6 +271,25 @@ public class ResellerAdmin extends ExtendableDataObject implements PasswordMechO
         this.parentId = pid;
     }
 
+    /**
+     * @return the restrictions
+     */
+    public final HashSet<Restriction> getRestrictions() {
+        return restrictions;
+    }
+
+    /**
+     * @param restrictions the restrictions to set
+     */
+    public final void setRestrictions(final HashSet<Restriction> restrictions) {
+        this.restrictionsset = true;
+        this.restrictions = restrictions;
+    }
+    
+    public final boolean isRestrictionsset() {
+        return restrictionsset;
+    }
+
     public final String toString() {
         StringBuilder ret = new StringBuilder();
         ret.append("[ \n");
@@ -328,6 +353,8 @@ public class ResellerAdmin extends ExtendableDataObject implements PasswordMechO
         result = prime * result + ((passwordMech == null) ? 0 : passwordMech.hashCode());
         result = prime * result + (passwordMechset ? 1231 : 1237);
         result = prime * result + (passwordset ? 1231 : 1237);
+        result = prime * result + ((restrictions == null) ? 0 : restrictions.hashCode());
+        result = prime * result + (restrictionsset ? 1231 : 1237);
         return result;
     }
 
@@ -385,6 +412,13 @@ public class ResellerAdmin extends ExtendableDataObject implements PasswordMechO
             return false;
         if (passwordset != other.passwordset)
             return false;
+        if (restrictions == null) {
+            if (other.restrictions != null)
+                return false;
+        } else if (!restrictions.equals(other.restrictions))
+            return false;
+        if (restrictionsset != other.restrictionsset)
+            return false;
         return true;
     }
 
@@ -395,4 +429,5 @@ public class ResellerAdmin extends ExtendableDataObject implements PasswordMechO
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
+
 }

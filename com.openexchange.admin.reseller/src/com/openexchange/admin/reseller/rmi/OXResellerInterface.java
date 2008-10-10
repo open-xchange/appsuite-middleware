@@ -109,8 +109,11 @@ public interface OXResellerInterface extends Remote {
      * @param creds
      * @return
      * @throws RemoteException
+     * @throws InvalidDataException 
+     * @throws StorageException 
+     * @throws InvalidCredentialsException 
      */
-    public ResellerAdmin[] list(final String search_pattern, final Credentials creds) throws RemoteException;
+    public ResellerAdmin[] list(final String search_pattern, final Credentials creds) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException;
     
     /**
      * @param admins

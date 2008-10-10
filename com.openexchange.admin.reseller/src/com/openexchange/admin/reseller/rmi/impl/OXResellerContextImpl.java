@@ -93,6 +93,14 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if( cache.isMasterAdmin(auth) ) {
             return;
         }
+        try {
+            if( ! oxresell.ownsContext(ctx, auth) ) {
+                throw new PluginException("ContextID " + ctx.getId() + " does not belong to " + auth.getLogin());
+            }
+        } catch (StorageException e) {
+            log.error(e.getMessage(),e);
+            throw new PluginException(e);
+        }
         // TODO Auto-generated method stub
 
     }

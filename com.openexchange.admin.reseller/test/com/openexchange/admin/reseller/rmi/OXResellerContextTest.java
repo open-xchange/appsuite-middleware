@@ -53,13 +53,22 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.rmi.OXContextInterface;
+import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class OXResellerContextTest extends OXResellerAbstractTest {
@@ -94,5 +103,38 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
         
         oxctx.listAll(creds);
         oxresell.delete(FooAdminUser(), DummyMasterCredentials());
+    }
+
+    @Test
+    public void testListAndDeleteContextOwnedByReseller() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException{
+        final Credentials creds = DummyMasterCredentials();
+
+        final OXContextInterface oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
+        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+
+        oxresell.create(FooAdminUser(), creds);
+        oxresell.create(BarAdminUser(), creds);
+
+        User oxadmin = new User();
+        oxadmin.setName("oxadmin");
+        oxadmin.setDisplay_name("oxadmin");
+        oxadmin.setGiven_name("oxadmin");
+        oxadmin.setSur_name("oxadmin");
+        oxadmin.setPrimaryEmail("oxadmin@example.com");
+        oxadmin.setPassword("secret");
+        Context ctx = new Context(1337);
+        ctx.setMaxQuota(100000L);
+        oxctx.create(ctx, oxadmin, ResellerFooCredentials());
+        
+        Context[] ret = oxctx.listAll(ResellerFooCredentials());
+        assertEquals(1, ret.length);
+        
+        ret = oxctx.listAll(ResellerBarCredentials());
+        assertEquals(0, ret.length);
+
+        oxctx.delete(ctx, ResellerFooCredentials());
+        
+        oxresell.delete(FooAdminUser(), DummyMasterCredentials());
+        oxresell.delete(BarAdminUser(), DummyMasterCredentials());
     }
 }

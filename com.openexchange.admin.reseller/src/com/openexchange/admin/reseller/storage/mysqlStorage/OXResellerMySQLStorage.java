@@ -57,12 +57,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
+import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.storage.sqlStorage.OXResellerSQLStorage;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -208,6 +212,21 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep.setString(6,adm.getPasswordMech());
             
             prep.executeUpdate();
+            prep.close();
+            
+            final HashSet<Restriction> res = adm.getRestrictions();
+            if( res != null ) {
+                Iterator<Restriction> i = res.iterator();
+                while( i.hasNext() ) {
+                    Restriction r = i.next();
+                    prep = oxcon.prepareStatement("INSERT INTO subadmin_restrictions (sid,rid,value) VALUES (?,?,?)");
+                    prep.setInt(1,adm_id);
+                    prep.setInt(2,r.getId());
+                    prep.setString(3, r.getValue());
+                    prep.executeUpdate();
+                    prep.close();
+                }
+            }
             
             oxcon.commit();
             
@@ -248,28 +267,21 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         PreparedStatement prep = null;
         
         try {
+
+            ResellerAdmin tmp = getData(new ResellerAdmin[]{adm})[0];
+
             oxcon = cache.getConnectionForConfigDB();
             oxcon.setAutoCommit(false);
             
-            String query = "DELETE FROM subadmin WHERE ";
-            boolean hasId = false;
-            if( adm.getId() != null ) {
-                query += "sid=?";
-                hasId = true;
-            } else if( adm.getName() != null ) {
-                query += "name=?";
-            } else {
-                throw new InvalidDataException("either ID or name must be specified");
-            }
-            
-            prep = oxcon.prepareStatement(query);
-            if( hasId ) {
-                prep.setInt(1, adm.getId());
-            } else {
-                prep.setString(1, adm.getName());
-            }
+            prep = oxcon.prepareStatement("DELETE FROM subadmin_restrictions WHERE sid=?");
+            prep.setInt(1, tmp.getId());
             prep.executeUpdate();
+            prep.close();
             
+            prep = oxcon.prepareStatement("DELETE FROM subadmin WHERE sid=?");
+            prep.setInt(1, tmp.getId());
+            prep.executeUpdate();
+
             oxcon.commit();
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
@@ -287,10 +299,6 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
-        } catch (InvalidDataException e) {
-            log.error(e.getMessage(), e);
-            doRollback(oxcon);
-            throw new StorageException(e.getMessage());
         } finally {
             cache.closeSqlStuff(oxcon,prep);
         }
@@ -298,8 +306,38 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     @Override
     public ResellerAdmin[] list(final String search_pattern) throws StorageException {
-        // TODO Auto-generated method stub
-        return null;
+        Connection con = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            final String search_patterntmp = search_pattern.replace('*', '%');
+            prep = con.prepareStatement("SELECT * FROM subadmin WHERE sid LIKE ? OR name LIKE ?");
+            prep.setString(1, search_patterntmp);
+            prep.setString(2, search_patterntmp);
+            rs = prep.executeQuery();
+
+            final ArrayList<ResellerAdmin> ret = new ArrayList<ResellerAdmin>();
+            while( rs.next() ) {
+                ResellerAdmin adm = new ResellerAdmin();
+                adm.setId(rs.getInt("sid"));
+                adm.setName(rs.getString("name"));
+                adm.setDisplayname(rs.getString("displayName"));
+                adm.setPassword(rs.getString("password"));
+                adm.setPasswordMech(rs.getString("passwordMech"));
+                adm.setParentId(rs.getInt("pid"));
+                ret.add(adm);
+            }
+            return ret.toArray(new ResellerAdmin[ret.size()]);
+        } catch (PoolException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } finally {
+            cache.closeSqlStuff(con, prep, rs);
+        }
     }
 
     @Override
@@ -339,6 +377,25 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 newadm.setDisplayname(rs.getString("displayName"));
                 newadm.setPassword(rs.getString("password"));
                 newadm.setPasswordMech(rs.getString("passwordMech"));
+
+                rs.close();
+                prep.close();
+
+                prep = con.prepareStatement("SELECT subadmin_restrictions.rid,sid,name,value FROM subadmin_restrictions INNER JOIN restrictions ON subadmin_restrictions.rid=restrictions.rid WHERE sid=?");
+                prep.setInt(1, newadm.getId());
+                rs = prep.executeQuery();
+                
+                HashSet<Restriction> res = new HashSet<Restriction>();
+                while( rs.next() ) {
+                    Restriction r = new Restriction();
+                    r.setId(rs.getInt("rid"));
+                    r.setName(rs.getString("name"));
+                    r.setValue(rs.getString("value"));
+                    res.add(r);
+                }
+                if(res.size() > 0) {
+                    newadm.setRestrictions(res);
+                }
                 ret.add(newadm);
             }
             return ret.toArray(new ResellerAdmin[ret.size()]);
@@ -590,6 +647,38 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw new StorageException(e.getMessage());
         } finally {
             cache.closeSqlStuff(oxcon,prep,rs);
+        }
+    }
+
+    @Override
+    public HashMap<String, Restriction> listRestrictions(final String search_pattern) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            final String search_patterntmp = search_pattern.replace('*', '%');
+            prep = con.prepareStatement("SELECT * FROM restrictions WHERE rid LIKE ? OR name LIKE ?");
+            prep.setString(1, search_patterntmp);
+            prep.setString(2, search_patterntmp);
+            rs = prep.executeQuery();
+
+            final HashMap<String, Restriction> ret = new HashMap<String, Restriction>();
+            while( rs.next() ) {
+                Restriction res = new Restriction();
+                res.setId(rs.getInt("rid"));
+                res.setName(rs.getString("name"));
+                ret.put(res.getName(), res);
+            }
+            return ret;
+        } catch (PoolException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } finally {
+            cache.closeSqlStuff(con, prep, rs);
         }
     }
 

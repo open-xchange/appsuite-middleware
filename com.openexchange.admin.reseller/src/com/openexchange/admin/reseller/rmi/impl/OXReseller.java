@@ -50,12 +50,15 @@
 package com.openexchange.admin.reseller.rmi.impl;
 
 import java.rmi.RemoteException;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
+import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -78,6 +81,8 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
     
     private final OXResellerStorageInterface oxresell;
 
+    private HashMap<String, Restriction> restrictions = null;
+    
     public OXReseller() throws StorageException {
         super();
         if (log.isDebugEnabled()) {
@@ -103,6 +108,42 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         }
     }
 
+    /**
+     * Check whether creator supplied any {@link Restriction} and check if those exist
+     * within the database. If, add the corresponding Restriction id.
+     * If not, throw {@link InvalidDataException} or {@link StorageException} if there
+     * are no Restrictions defined within the database.
+     * 
+     * @throws StorageException
+     * @throws InvalidDataException 
+     */
+    private void checkRestrictions(ResellerAdmin adm) throws StorageException, InvalidDataException {
+        if( this.restrictions == null ) {
+            restrictions = oxresell.listRestrictions("*");
+            if( restrictions == null ) {
+                throw new StorageException("unable to load available restrictions from database");
+            }
+        }
+        HashSet<Restriction> res = adm.getRestrictions();
+        if( res != null ) {
+            Restriction[] rarr = res.toArray(new Restriction[res.size()]);
+            for(int i=0; i<res.size(); i++) {
+                final String rname = rarr[i].getName();
+                final String rval  = rarr[i].getValue();
+                if( rname == null ) {
+                    throw new InvalidDataException("Restriction name must be set");
+                }
+                if( rval == null ) {
+                    throw new InvalidDataException("Restriction value must be set");
+                }
+                if( !restrictions.containsKey(rname) ) {
+                    throw new InvalidDataException("No restriction named " + rname + " found in database");
+                }
+                rarr[i].setId(restrictions.get(rname).getId());
+            }
+        }
+    }
+    
     /* (non-Javadoc)
      * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#change(com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
@@ -183,6 +224,8 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             //TODO: parent id must be the ID of the creator
             adm.setParentId(0);
+
+            checkRestrictions(adm);
             
             return oxresell.create(adm);
         } catch(final StorageException e) {
@@ -236,9 +279,25 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
     /* (non-Javadoc)
      * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#list(java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
-    public ResellerAdmin[] list(String search_pattern, Credentials creds) throws RemoteException {
-        // TODO Auto-generated method stub
-        return null;
+    public ResellerAdmin[] list(String search_pattern, Credentials creds) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException {
+        try {
+            doNullCheck(search_pattern);
+        } catch (final InvalidDataException e) {            
+            log.error("Invalid data sent by client!", e);
+            throw e;
+        }
+        
+        try {
+            basicauth.doAuthentication(creds);
+
+            return oxresell.list(search_pattern);
+        } catch (StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**

@@ -54,11 +54,8 @@ public class AdminCacheExtended extends AdminCache {
     
     private PropertyHandlerExtended prop = null;
     
-    // sql filenames order and directory
-
     public void initCacheExtended() {
         prop = new PropertyHandlerExtended(System.getProperties());
-        initPool();
     }
     
     @Override
@@ -68,4 +65,5 @@ public class AdminCacheExtended extends AdminCache {
         }
         return prop;
     }
+    
 }

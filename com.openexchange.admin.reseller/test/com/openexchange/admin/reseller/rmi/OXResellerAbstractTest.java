@@ -50,6 +50,7 @@
 package com.openexchange.admin.reseller.rmi;
 
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
+import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.rmi.AbstractTest;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 
@@ -61,6 +62,7 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
     protected static final String TESTUSER = "testuser";
     protected static final String TESTCHANGEUSER = "testchange";
     protected static final String CHANGEDNAME = "changedchangedagain";
+    protected static final String TESTRESTRICTIONUSER = "testwithrestriction";
     
     protected static Credentials DummyMasterCredentials(){
         return new Credentials("oxadminmaster","secret");
@@ -80,6 +82,12 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
         return adm;
     }
 
+    protected static ResellerAdmin BarAdminUser() {
+        ResellerAdmin adm = TestAdminUser("bar", "Bar Admin");
+        adm.setPassword("secret");
+        return adm;
+    }
+
     protected static ResellerAdmin TestAdminUser() {
         return TestAdminUser(TESTUSER, "Test Reseller Admin");
     }
@@ -89,5 +97,13 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
         adm.setDisplayname(displayname);
         adm.setPassword("secret");
         return adm;
+    }
+
+    protected static Restriction MaxContextRestriction() {
+        return new Restriction(Restriction.MAX_CONTEXT,"10");
+    }
+
+    protected static Restriction MaxContextQuotaRestriction() {
+        return new Restriction(Restriction.MAX_CONTEXT_QUOTA,"1000");
     }
 }

@@ -51,12 +51,14 @@ package com.openexchange.admin.reseller.storage.interfaces;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
+import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.tools.AdminCacheExtended;
 import com.openexchange.admin.reseller.tools.PropertyHandlerExtended;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -94,6 +96,8 @@ public abstract class OXResellerStorageInterface {
     public static OXResellerStorageInterface getInstance() throws StorageException {
         synchronized (OXResellerStorageInterface.class) {
             if (null == implementingClass) {
+                cache = ClientAdminThreadExtended.cache;
+                prop = cache.getProperties();
                 final String className = prop.getProp(PropertyHandlerExtended.RESELLER_STORAGE, null);
                 if (null != className) {
                     try {
@@ -220,4 +224,12 @@ public abstract class OXResellerStorageInterface {
      * @throws StorageException
      */
     public abstract ResellerAdmin getContextOwner(final Context ctx) throws StorageException;
+    
+    /**
+     * @param search_pattern
+     * @return
+     * @throws StorageException
+     */
+    public abstract HashMap<String, Restriction> listRestrictions(final String search_pattern) throws StorageException;
+    
 }

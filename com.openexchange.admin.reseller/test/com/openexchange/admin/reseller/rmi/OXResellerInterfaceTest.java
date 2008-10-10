@@ -50,18 +50,20 @@ package com.openexchange.admin.reseller.rmi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
+import java.util.HashSet;
 
 import org.junit.Test;
 
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
+import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -86,6 +88,25 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
         assertNotNull(admch);
         assertTrue(adm.getId() > 0);
         assertTrue(admch.getId() > 0);
+    }
+
+    @Test
+    public void testCreateWithRestrictions() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException {
+        final Credentials creds = DummyMasterCredentials();
+
+        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+
+        ResellerAdmin adm = TestAdminUser(TESTRESTRICTIONUSER,"Test Restriction User");
+        HashSet<Restriction> res = new HashSet<Restriction>();
+        res.add(MaxContextRestriction());
+        res.add(MaxContextQuotaRestriction());
+        adm.setRestrictions(res);
+        adm = oxresell.create(adm, creds);
+
+        System.out.println(adm);
+        
+        assertNotNull(adm);
+        assertTrue(adm.getId() > 0);
     }
 
     @Test
@@ -135,8 +156,31 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
     }
     
     @Test
-    public void testList() {
-        fail("Not yet implemented");
+    public void testGetDataWithRestrictions() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, InvalidCredentialsException, StorageException, PoolException, SQLException, OXResellerException {
+        final Credentials creds = DummyMasterCredentials();
+        final ResellerAdmin adm = TestAdminUser(TESTRESTRICTIONUSER,"Test Restriction User");
+        
+        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+        
+        final ResellerAdmin dbadm = oxresell.getData(adm, creds);
+        
+        HashSet<Restriction> res = dbadm.getRestrictions();
+        assertNotNull(res);
+        assertTrue(res.contains(MaxContextRestriction()));
+        assertEquals(adm.getName(), dbadm.getName());
+        assertEquals(adm.getDisplayname(), dbadm.getDisplayname());
+    }
+
+    @Test
+    public void testList() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException {
+        final Credentials creds = DummyMasterCredentials();
+        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+        
+        ResellerAdmin[] res = oxresell.list("*", creds);
+        for(final ResellerAdmin adm : res) {
+            System.out.println(adm);
+        }
+        assertEquals(3, res.length);
     }
 
     @Test
@@ -147,6 +191,7 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
 
         oxresell.delete(TestAdminUser(), creds);
         oxresell.delete(new ResellerAdmin(CHANGEDNAME), creds);
+        oxresell.delete(TestAdminUser(TESTRESTRICTIONUSER,"Test Restriction User"), creds);
     }
 
 
