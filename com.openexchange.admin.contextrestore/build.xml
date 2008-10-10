@@ -1,4 +1,4 @@
-<project name="open-xchange-admin-plugin-hosting" default="jar" basedir=".">
+<project name="open-xchange-admin-plugin-contextrestore" default="jar" basedir=".">
 
     <!-- Customizable values -->
 	<property name="destdir" value=""/>
@@ -9,13 +9,12 @@
     <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
 	<!-- Dots are not allowed so we cannot use Bundle-SymbolicName here as it may contain some -->
-	<property name="composite.name" value="open-xchange-admin-plugin-hosting-${version}"/>
-    <property name="project.name" value="open-xchange-admin-plugin-hosting" />
+	<property name="composite.name" value="open-xchange-admin-plugin-contextrestore-${version}"/>
+    <property name="project.name" value="open-xchange-admin-plugin-contextrestore" />
     <property name="test.xml.dir" value="test-results" />
 	<property name="oxconfdir" value="etc/admindaemon"/>
 	<property name="serverconfdir" value="etc/groupware"/>
-    <property name="admin.classpath" value="../open-xchange-admin/classes"/>
-	<property name="client.jar" value="ox_admin_hosting_rmiclient.jar"/>
+	<property name="client.jar" value="ox_admin_contextrestore_rmiclient.jar"/>
     <property name="bundle.d" value="${prefix}/${oxconfdir}/osgi/bundle.d"/>
 
     <!-- Bundle dependencies -->
@@ -54,15 +53,14 @@
 		<pathelement location="${bundlesdir}/${globalbundle}"/>
 		<pathelement location="${bundlesdir}/${cachebundle}"/>
         <pathelement location="${admin.classpath}"/>
+        <pathelement location="${adminhosting.classpath}"/>
     </path>
 
-	<filterset id="pathsubst">		
-		<filter token="oxgwscriptconf"    value="${prefix}/${etcdir}/groupware/ox-scriptconf.sh"/>
+	<filterset id="pathsubst">
 		<filter token="prefix"  		  value="${prefix}"/>
         <filter token="oxfunctions"       value="${prefix}/${etcdir}/oxfunctions.sh"/>
         <filter token="oxscriptconf"      value="${prefix}/${oxconfdir}/ox-admin-scriptconf.sh"/>
         <filter token="absoxconfdir"      value="${prefix}/${oxconfdir}"/>
-        <filter token="absserverconfdir"  value="${prefix}/${serverconfdir}"/>
     </filterset>
 
     <!--                    TARGETS                      -->
@@ -103,8 +101,8 @@
     <target name="client" depends="compile">
         <mkdir dir="jar"/>
         <jar jarfile="jar/${client.jar}"
-         includes="com/openexchange/admin/rmi/,com/openexchange/admin/console/"
-         excludes="com/openexchange/admin/rmi/impl/"
+         includes="com/openexchange/admin/contextrestore/rmi/,com/openexchange/admin/contextrestore/console/"
+         excludes="com/openexchange/admin/contextrestore/rmi/impl/"
          basedir="classes"/>
     </target>
 
@@ -127,12 +125,11 @@
             <classpath>
                 <path refid="project.classpath"/>
             </classpath>
-            <fileset dir="src/com/openexchange/admin/rmi" defaultexcludes="yes">
+            <fileset dir="src/com/openexchange/admin/contextrestore/rmi" defaultexcludes="yes">
 				<include name="*Interface*"/>
 				<include name="dataobjects/*"/>
-            	<exclude name="*ResourceGroup*"/>
             </fileset>
-            <fileset dir="src/com/openexchange/admin/rmi/exceptions" defaultexcludes="yes">
+            <fileset dir="src/com/openexchange/admin/contextrestore/rmi/exceptions" defaultexcludes="yes">
             </fileset>
         	<link href="http://java.sun.com/j2se/1.5.0/docs/api/"/>
         	<link href="${doccorelink}"/>
@@ -164,8 +161,8 @@
     </target>
 
 	<target name="install-doc" depends="doc">
-        <mkdir dir="${destdir}/${prefix}/doc/oxadmin-hosting"/>
-        <copy todir="${destdir}/${prefix}/doc/oxadmin-hosting">
+        <mkdir dir="${destdir}/${prefix}/doc/oxadmin-contextrestore"/>
+        <copy todir="${destdir}/${prefix}/doc/oxadmin-contextrestore">
             <fileset dir="doc"/>
         </copy>
     </target>
@@ -179,12 +176,8 @@
             <fileset dir="etc" excludes="**/*.in"/>
         </copy>
         <copy todir="${destdir}/${prefix}/sbin" overwrite="true">
-            <fileset dir="sbin" excludes="*.in,linkhelper,contextcltlist,usercltlist" followsymlinks="true"/>
+            <fileset dir="sbin" excludes="*.in" followsymlinks="true"/>
         </copy>
-    	<chmod perm="755" file="${basedir}/sbin/linkhelper"/>
-    	<exec executable="${basedir}/sbin/linkhelper" dir="${basedir}/sbin">
-			<arg value="${destdir}/${prefix}/sbin"/>
-		</exec>
     	<chmod perm="755">
             <fileset dir="${destdir}/${prefix}/sbin" includes="*"/>
         </chmod>

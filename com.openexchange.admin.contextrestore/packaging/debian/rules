@@ -9,10 +9,11 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-pkgname=open-xchange-admin-plugin-hosting
+pkgname=open-xchange-admin-plugin-contextrestore
 pkgroot=$(CURDIR)/debian/$(pkgname)
 oxprefix=/opt/open-xchange
 adminbundle=open_xchange_admin.jar
+adminhostingbundle=open_xchange_admin_plugin_hosting.jar
 
 CFLAGS = -Wall -g
 
@@ -57,6 +58,7 @@ install: build
 
 	# Add here commands to install the package into debian/open-xchange-admin.
 	ant 	-Dadmin.classpath=$(oxprefix)/bundles/$(adminbundle) \
+	 	-Dadminhosting.classpath=$(oxprefix)/bundles/$(adminhostingbundle) \
 		-Dprefix=$(oxprefix) \
 		-Ddestdir=$(pkgroot) doc install install-client
 	mv doc javadoc
