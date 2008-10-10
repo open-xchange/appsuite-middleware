@@ -52,7 +52,7 @@ package com.openexchange.admin.contextrestore.rmi;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-import com.openexchange.admin.contextrestore.exceptions.OXContextRestoreException;
+import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;

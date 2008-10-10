@@ -17,10 +17,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.contextrestore.dataobjects.VersionInformation;
-import com.openexchange.admin.contextrestore.exceptions.OXContextRestoreException;
-import com.openexchange.admin.contextrestore.exceptions.OXContextRestoreException.Code;
 import com.openexchange.admin.contextrestore.osgi.Activator;
 import com.openexchange.admin.contextrestore.rmi.OXContextRestoreInterface;
+import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException;
+import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException.Code;
 import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore.Parser.PoolIdAndSchema;
 import com.openexchange.admin.contextrestore.storage.interfaces.OXContextRestoreStorageInterface;
 import com.openexchange.admin.rmi.OXContextInterface;

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.admin.contextrestore.exceptions;
+package com.openexchange.admin.contextrestore.rmi.exceptions;
 
 import java.util.IllegalFormatException;
 
