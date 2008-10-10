@@ -646,9 +646,6 @@ public class AdminCache {
         try {
             this.log.info("OX init starting...");
     
-            /* this.oxrunner = new OXRunner();
-            this.oxrunner.init(); */
-            
             delreg = DeleteRegistry.getInstance();
             this.log.info("...OX init done!");
         } catch (final Exception ecp) {
