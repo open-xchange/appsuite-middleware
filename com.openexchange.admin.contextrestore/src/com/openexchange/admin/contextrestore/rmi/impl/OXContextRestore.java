@@ -90,7 +90,6 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             int state = 0;
             int oldstate = 0;
             int cidpos = -1;
-            final List<String> filenames = new ArrayList<String>();
             String table_name = null;
             // Set if a database is found in which the search for cid should be done
             boolean furthersearch = true;
@@ -126,14 +125,13 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                             } else {
                                 furthersearch = true;
                             }
-                            System.out.println("Database: " + databasename);
+                            LOG.info("Database: " + databasename);
                             if (null != bufferedWriter) {
                                 bufferedWriter.append("/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;" + '\n');
                                 bufferedWriter.close();
                             }
                             
                             final String file = "/tmp/" + databasename + ".txt";
-                            filenames.add(file);
                             bufferedWriter = new BufferedWriter(new FileWriter(file));
                             bufferedWriter.append("/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;" + '\n');
                             // Reset values
@@ -143,13 +141,13 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                         } else if (furthersearch && tablematcher.matches()) {
                             // Table found
                             table_name = tablematcher.group(1);
-                            System.out.println("Table: " + table_name);
+                            LOG.info("Table: " + table_name);
                             cidpos = -1;
                             oldstate = 0;
                             state = 3;
                         } else if (furthersearch && datadumpmatcher.matches()) {
                             // Content found
-                            System.out.println("Dump found");
+                            LOG.info("Dump found");
                             if ("version".equals(table_name)) {
                                 // The version table is quite small so it is safe to read the whole line here:
                                 if ((versionInformation = searchAndCheckVersion(in)) == null) {
@@ -184,7 +182,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                     continue;
                 } else if (4 == state && c == '(') {
                     cidpos = cidsearch(in);
-                    System.out.println("Cid pos: " + cidpos);
+                    LOG.info("Cid pos: " + cidpos);
                     state = 0;
                     continue;
                 } else if (5 == state && c == 'I') {
@@ -194,7 +192,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                     oldstate = 5;
                     state = 1;
                 } else if (6 == state && c == '(') {
-                    System.out.println("Insert found and cid=" + cidpos);
+                    LOG.info("Insert found and cid=" + cidpos);
                     // Now we search for matching cids and write them to the tmp file
                     if (searchcontext) {
                         final String value[] = searchAndWriteMatchingCidValues(in, bufferedWriter, cidpos, Integer.toString(cid), table_name, true, true);
@@ -362,7 +360,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                 // Now searching for cid text...
                 if (cidmatcher.matches()) {
                     final List<String> searchingForeignKey = searchingForeignKey(in);
-                    System.out.println("Foreign Keys: " + searchingForeignKey);
+                    LOG.info("Foreign Keys: " + searchingForeignKey);
                     found = true;
                     break;
                 } else if (enginematcher.matches()) {
@@ -421,6 +419,9 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
     public String restore(final Context ctx, final String[] filenames, final Credentials auth) throws InvalidDataException, InvalidCredentialsException, StorageException, OXContextRestoreException, DatabaseUpdateException {
         try {
             doNullCheck(ctx, filenames);
+            for (final String filename : filenames) {
+                doNullCheck(filename);
+            }
         } catch (final InvalidDataException e) {
             LOG.error("One of the arguments for restore is null", e);
             throw e;
@@ -434,9 +435,8 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         }
 
         final Parser parser = new Parser();
-        System.out.println("Context: " + ctx);
-        System.out.println("Filenames: " + filenames);
-        System.out.println("Creds:" + auth);
+        LOG.info("Context: " + ctx);
+        LOG.info("Filenames: " + filenames);
         
         try {
             final PoolIdAndSchema start = parser.start(ctx.getId(), filenames[0]);
