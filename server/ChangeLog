@@ -6,7 +6,7 @@
 
  - Bugfix #12231: Using default separator character from 'mail.properties'
    to configure folder path prefix equal to mailing system's separator
- - Bugfix #12212: Fixed moving a chamge exception of a recurring appointment
+ - Bugfix #12212: Fixed moving a change exception of a recurring appointment
 
 * 2008-09-25 - thorben.betten@open-xchange.com
 

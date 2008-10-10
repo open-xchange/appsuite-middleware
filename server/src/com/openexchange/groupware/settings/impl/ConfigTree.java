@@ -246,6 +246,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.mail.Addresses.class,
             com.openexchange.groupware.settings.tree.modules.mail.AllowHTMLImages.class,
             com.openexchange.groupware.settings.tree.modules.mail.AppendMailText.class,
+            com.openexchange.groupware.settings.tree.modules.mail.AutoSearch.class,
             com.openexchange.groupware.settings.tree.modules.mail.Colorquoted.class,
             com.openexchange.groupware.settings.tree.modules.mail.DefaultAddress.class,
             com.openexchange.groupware.settings.tree.modules.mail.DeleteMail.class,
