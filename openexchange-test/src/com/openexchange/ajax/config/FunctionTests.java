@@ -221,4 +221,11 @@ public class FunctionTests extends AbstractAJAXSession {
             .ShowWithoutEmail));
         LOG.info("Are external participants without email address shown in participant dialog: " + get.getBoolean());
     }
+
+    public void testRecipientAutoSearchFlag() throws Throwable {
+        final AJAXClient client = getClient();
+        final GetResponse get = ConfigTools.get(client, new GetRequest(Tree
+            .RecipientAutoSearch));
+        LOG.info("Is search triggered on opened recipient dialog: " + get.getBoolean());
+    }
 }

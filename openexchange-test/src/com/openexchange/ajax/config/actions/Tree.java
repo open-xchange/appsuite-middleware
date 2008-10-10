@@ -50,7 +50,8 @@
 package com.openexchange.ajax.config.actions;
 
 /**
- * 
+ * Enumeration containing path of GUI preferences tree. Entries should be sorted
+ * by path except all GUI stuff that comes first.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public enum Tree {
@@ -60,169 +61,168 @@ public enum Tree {
 
     /** [inside GUI] "infostore/split" or "infostore/list" */
     InfostoreView("/gui/infostore/view"),
-    
+
     /** [inside GUI] "true" or "false" */
     MailNewMailOptionsBccEnabled("/gui/mail/newmail_options/bcc"),
-    
+
     /** [inside GUI] "true" or "false" */
     MailNewMailOptionsFromEnabled("/gui/mail/newmail_options/from"),
-    
+
     /** [inside GUI] "true" or "false" */
     MailNewMailOptionsCcEnabled("/gui/mail/newmail_options/cc"),
-    
+
     /** [inside GUI] "true" or "false" */
     MailNewMailOptionsOptionsEnabled("/gui/mail/newmail_options/options"),
-    
-    /** activate inlining of HTML attachments (added 2008-02-25) setting is called like the enum value in the gui "true" or "false" */
-    MailAllowHtmlMails("/modules/mail/inlineattachments"),
-    
+
     /** [inside GUI] json array */
     //TODO: [{"position":"below","signature_text":"wefwefwe","signature_name":"efwefwef","signature_default":true}],
     //MailSignatures("/gui/mail/signatures"),
-    
+
     /** [inside GUI] "mail/list/unthreaded" or ? */
     MailViewSpam("/gui/mail/view_spam"),
-    
+
     /** [inside GUI] "mail/hsplit/unthreaded" or ? */
     MailView("/gui/mail/view"),
-    
+
     /** [inside GUI] "true" or "false" */
     MailAutoComplete("/gui/mail/autocomplete"),
-    
+
     /** [inside GUI] "TEXT/PLAIN" or "TEXT/HTML" or "ALTERNATIVE" */
     MailFormatMessages("/gui/mail/formatmessage"),
-    
+
     /** [inside GUI] "true" or "false" */
     MailFullHeader("/gui/mail/fullmailheader"),
 
     /** [inside GUI] "true" or "false" */
     MailNotifyOnReadAcknowledgment("/gui/mail/notifyacknoledge"),
-    
+
     //TODO: Portal settings
-    
+
     /** [inside GUI] string array */
     PrivateCategories("/gui/private_categories"),
-    
+
     /** [inside GUI] "1" (means "Yes") or "0" (means "No") */
-	TimePredefined("/gui/global/region/time/predefined"),
-    		
+    TimePredefined("/gui/global/region/time/predefined"),
+
     /** [inside GUI] format string for displaying times */
-	TimeFormat("/gui/global/region/time/format"),
-    		
+    TimeFormat("/gui/global/region/time/format"),
+
     /** [inside GUI] "1" (means "Yes") or "0" (means "No") */
-	DatePredefined("/gui/global/region/date/predefined"),
-    		
+    DatePredefined("/gui/global/region/date/predefined"),
+
     /** [inside GUI] format string for displaying dates */
-	DateFormat("/gui/global/region/date/format"),
-    		
+    DateFormat("/gui/global/region/date/format"),
+
     /** [inside GUI] "true" or "false" */
     EnableConfirmationPopup("/gui/global/confirmpopup"),
-    
+
     /** [inside GUI] "1" (means "Yes") or "0" (means "No") or "2" (means "Ask") */
     SaveConfigOnLogout("/gui/global/save"),
-    
+
     /** [inside GUI] */
     AutoRefresh("/gui/global/autorefresh"),
-    
+
     /** [inside GUI] */
     PanelRows("/gui/menu/menuiteration"),
-    
+
     /** [inside GUI] */
     ThemeID("/gui/theme/id"),
-    
+
     /** [inside GUI] */
     ThemeName("/gui/theme/name"),
-    
+
     /** [inside GUI] */
     ThemePath("/gui/theme/path"),
-    
+
     //TODO: effects
-    
+
     /** [inside GUI] */
     TasksReminderInterval("/gui/tasks/interval"),
-    
+
     /** [inside GUI] "asc" or ? */
     TasksGridSort("/gui/tasks/gridsort"),
-    
+
     /** [inside GUI] "tasks/split" or "tasks/list" */
     TasksView("/gui/tasks/view"),
-    
+
     //TODO: FolderTreeState
-    
+
     /** [inside GUI] "asc" or ? */
     ContactsGridSort("/gui/contacts/gridsort"),
-    
+
     /** [inside GUI] "auto" or ? */
     ContactsCardsPerColumn("/gui/contacts/cardsToViewPerColumn"),
-    
+
     /** [inside GUI] "contacts/cards" or ? */
     ContactsView("/gui/contacts/view"),
-    
+
     /** [inside GUI] */
     CalendarEndWorkingTime("/gui/calendar/endtime"),
-    
+
     /** [inside GUI] "true" or "false" */
     CalendarShowAppointmetsOfAllFolders("/gui/calendar/allfolders"),
-    
+
     /** [inside GUI] */
     CalendarStartWorkingTime("/gui/calendar/starttime"),
-    
+
     /** [inside GUI] */
     CalendarInterval("/gui/calendar/interval"),
-    
+
     /** [inside GUI] "calendar/calendar/day" or ? */
     CalendarView("/gui/calendar/view"),
-    
+
     /** [inside GUI] "1" - "7" */
     CalendarWorkWeekCountDays("/gui/calendar/workweek/countdays"),
-    
+
     /** [inside GUI] "0" (=Sunday) - "6" (=Saturday) */
     CalendarWorkWeekStartDay("/gui/calendar/workweek/startday"),
-    
+
     /** [inside GUI] "1" - "8" */
     CalendarWorkWeekNumberOfAppointments("/gui/calendar/workweek/numberofappointments"),
-    
+
     /** [inside GUI] Effects: Fading. If you set this, please also set EffectsGlobal to the same value. */
     EffectsFading("/gui/effects/fading"),
-    
+
     /** [inside GUI] Effects: Global. If you set this, please also set EffectsFading to the same value. */
     EffectsGlobal("/gui/effects/global"),
-    
+
     //TODO: more gui settings
-    
-    /** A string containing GUI-specific settings. This is a JSON object that must be kept small for performance. */
-    FastGUI("/fastgui"),
-    
+
+    // Now the non GUI stuff
+
+    /** send a mail notification for appointments */
+    CalendarNotification("/calendarnotification"),
+
+    /** the unique identifier of the contact data of the user (read-only). */
+    ContactID("/contact_id"),
+
     /** the unique identifier of the context (read-only, added 2008-01-28). */
     ContextID("/context_id"),
 
+    /** User timezone specific long of the current server time. */
+    CurrentTime("/currentTime"),
+
+    /** A string containing GUI-specific settings. This is a JSON object that must be kept small for performance. */
+    FastGUI("/fastgui"),
+
     /** the unique identifier of the user (read-only). */
     Identifier("/identifier"),
-    
-    /** the unique identifier of the contact data of the user (read-only). */
-    ContactID("/contact_id"),
-    
+
     /** the configured language of the user. */
     Language("/language"),
+
+    /** Selectable times for GUI reload */
+    ReloadTimes("/reloadTimes"),
+
+    /** Version string of the server. */
+    ServerVersion("/serverVersion"),
+
+    /** send a mail notification for tasks */
+    TaskNotification("/tasknotification"),
 
     /** the configured timezone of the user. */
     TimeZone("/timezone"),
 
-    /** send a mail notification for appointments */
-    CalendarNotification("/calendarnotification"),
-    
-    /** send a mail notification for tasks */
-    TaskNotification("/tasknotification"),
-    
-    /** Selectable times for GUI reload */
-    ReloadTimes("/reloadTimes"),
-    
-    /** Version string of the server. */
-    ServerVersion("/serverVersion"),
-    
-    /** User timezone specific long of the current server time. */
-    CurrentTime("/currentTime"),
-    
     /** Timeout after that idle uploads are deleted. */
     MaxUploadIdleTimeout("/maxUploadIdleTimeout"),
 
@@ -231,10 +231,10 @@ public enum Tree {
 
     /** the standard calendar folder (read-only) */
     PrivateAppointmentFolder("/folder/calendar"),
-    
+
     /** the standard contacts folder (read-only) */
     PrivateContactFolder("/folder/contacts"),
-    
+
     /** the private infostore folder (read-only) */
     PrivateInfostoreFolder("/folder/infostore"),
 
@@ -243,7 +243,7 @@ public enum Tree {
 
     /** If external participants without email should be shown. */
     ShowWithoutEmail("/participants/showWithoutEmail"),
-    
+
     /** Enables participant selection dialog for appointments and tasks. (read-only, added 2008-04-30/SP4) */
     ShowParticipantDialog("/participants/showDialog"),
 
@@ -252,103 +252,109 @@ public enum Tree {
 
     /** (added 2008-02-25) */
     AppendMailText("/modules/mail/appendmailtext"),
-    
+
     /** Alters default setting whether external images contained in HTML content are allowed or not (added 2008-05-27) */
     AllowHtmlImages("/modules/mail/allowhtmlimages"),
+
+    /** Define if a search is triggered when the recipient selection dialog is opened or the folder is changed. (read-only, added 2008-10-10/SP5) */
+    RecipientAutoSearch("/modules/mail/autoSearch"),
     
     /** color quoted lines (added 2008-02-25) */
     ColorQuoted("/modules/mail/colorquoted"),
-    
+
     /** primary email address of the user (read-only, added 2008-02-25) */
     DefaultAddress("/modules/mail/defaultaddress"),
-    
+
     /** delete emails or move to trash (added 2008-02-25) */
     DeleteMail("/modules/mail/deletemail"),
-    
+
     /** display emoticons as graphics (added 2008-02-25) */
     Emoticons("/modules/mail/emoticons"),
-    
+
     /** identifier of the folder with the mail drafts (read-only, added 2008-02-25) */
     DraftsFolder("/modules/mail/defaultFolder/drafts"),
-    
+
     /** identifier of the folder that gets all incoming mails (read-only, added 2008-02-25) */
     InboxFolder("/modules/mail/defaultFolder/inbox"),
-    
+
     /** identifier of the folder with the sent mails (read-only, added 2008-02-25) */
     SentFolder("/modules/mail/defaultFolder/sent"),
-    
+
     /** identifier of the folder with the spam mails (read-only, added 2008-02-25) */
     SpamFolder("/modules/mail/defaultFolder/spam"),
-    
+
     /** identifier of the folder with the deleted mails (read-only, added 2008-02-25) */
     TrashFolder("/modules/mail/defaultFolder/trash"),
-    
+
     /** forward messages as inline or attachment (added 2008-02-25) */
     ForwardMessage("/modules/mail/forwardmessage"),
-    
+
     /** activate inlining of HTML attachments (added 2008-02-25) */
     InlineAttachments("/modules/mail/forwardmessage/inlineattachments"),
-    
+
+    /** activate inlining of HTML attachments (added 2008-02-25) setting is called like the enum value in the gui "true" or "false" */
+    MailAllowHtmlMails("/modules/mail/inlineattachments"),
+
     /** (added 2008-02-25) */
     LineWrap("/modules/mail/linewrap"),
-    
+
     /** if mail module is enabled or not (added 2008-02-25) */
     MailEnabled("/modules/mail/module"),
-    
+
     /** one email address out of the addresses list that are email sent with (added 2008-02-25) */
     SendAddress("/modules//mail/sendaddress"),
-    
+
     /** Spam Button should be displayed in GUI or not (added 2008-02-25) */
     SpamButton("/modules/mail/spambutton"),
-    
+
     /** attach vcard when sending mails (added 2008-02-25) */
     AppendVcard("/modules/mail/vcard"),
-    
+
     /** header(s) identifying phishing headers (added 2008-05-27) */
     PhishingHeaders("/modules/mail/phishingheaders"),
-    
+
     /** */
     CalendarEnabled("/modules/calendar/module"),
-    
+
     /** */
     CalendarConflict("/modules/calendar/calendar_conflict"),
-    
+
     /** */
     CalendarFreeBusy("/modules/calendar/calendar_freebusy"),
 
     /** */
     CalendarTeamview("/modules/calendar/calendar_teamview"),
-    
+
     /** */
     ContactsEnabled("/modules/contacts/module"),
-    
+
     /** */
     TasksEnabled("/modules/tasks/module"),
-    
+
     /** */
     DelegateTasks("/modules/tasks/delegate_tasks"),
-    
+
     /** */
     InfostoreEnabled("/modules/infostore/module"),
-    
+
     /** */
     ICal("/modules/interfaces/ical"),
-    
+
     /** */
     VCard("/modules/interfaces/vcard"),
-    
+
     /** */
     SyncML("/modules/interfaces/syncml"),
-    
+
     /** */
     PublicFolders("/modules/folder/public_folders"),
-    
+
     /** */
     ReadCreateSharedFolders("/modules/folder/read_create_shared_folders"),
-    
+
     /** Extras link in the configuration (read only, added 2008-04-29) */
     Extras("/modules/com.openexchange.extras/module"),
-    
+
     AvailableModules("/availableModules"),
 
     MailFilter("/modules/mailfilter"),
