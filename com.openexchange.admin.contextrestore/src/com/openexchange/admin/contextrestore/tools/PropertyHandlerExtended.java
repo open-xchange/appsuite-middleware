@@ -77,7 +77,7 @@ public class PropertyHandlerExtended extends PropertyHandler {
         configfile.append(File.separatorChar);
         configfile.append("plugin");
         configfile.append(File.separatorChar);
-        configfile.append("context_restore.properties");
+        configfile.append("contextrestore.properties");
         try {
             addpropsfromfile(configfile.toString());
         } catch (final FileNotFoundException e) {
