@@ -131,8 +131,6 @@ public class GenericChecks {
     /**
      * Checks whether supplied password mech is a valid password mech
      * as specified in {@link PasswordMechObject}.
-     *
-     * Checks whether password is not an empty string.
      * 
      * @param user
      * @throws InvalidDataException
