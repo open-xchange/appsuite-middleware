@@ -229,24 +229,8 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 			this.next = null;
 			prefetchQueue = null;
 		} else {
-			if (col instanceof List) {
-				final List<FolderObject> list = (List<FolderObject>) col;
-				this.next = list.remove(0);
-				prefetchQueue = new LinkedList<FolderObject>();
-				if (!list.isEmpty()) {
-					prefetchQueue.addAll(list);
-				}
-			} else if (col instanceof Queue) {
-				final Queue<FolderObject> queue = (Queue<FolderObject>) col;
-				this.next = queue.poll();
-				prefetchQueue = new LinkedList<FolderObject>();
-				if (!queue.isEmpty()) {
-					prefetchQueue.addAll(queue);
-				}
-			} else {
-				throw new SearchIteratorException(SearchIteratorCode.INVALID_CONSTRUCTOR_ARG, EnumComponent.FOLDER, col
-						.getClass().getName());
-			}
+			prefetchQueue = new LinkedList<FolderObject>(col);
+			this.next = prefetchQueue.poll();
 		}
 	}
 
