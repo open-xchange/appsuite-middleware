@@ -1,4 +1,10 @@
+* 2008-10-13 - marcus.klein@open-xchange.com
+
+ - Bugfix #12099: Setting modified by when updating series if a virtual
+   exception is created.
+
 * 2008-10-01 - francisco.laguna@open-xchange.com
+
   - Bugfix #12258 : Do not crash with NPE when requesting full time 
     appointment with recurrences via updates without date boundaries
 
