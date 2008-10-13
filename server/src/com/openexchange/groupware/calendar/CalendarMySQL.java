@@ -3367,6 +3367,7 @@ class CalendarMySQL implements CalendarSqlImp {
 						update.setObjectID(edao.getRecurrenceID());
 						update.setDeleteExceptions(CalendarCommonCollection.removeException(deleted_exceptions, calculated_exception));
 						//update.setChangeExceptions(new java.util.Date[] { calculated_exception });
+						update.setModifiedBy(uid);
 						try {
 							final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid);
 							update.setChangeExceptions(CalendarCommonCollection.addException(ldao.getChangeException(), calculated_exception));
