@@ -1,0 +1,48 @@
+CREATE TABLE subadmin ( /* HADM */
+    sid INT4 UNSIGNED NOT NULL,
+    pid INT4 UNSIGNED NOT NULL, /* parent ID */
+    name VARCHAR(128) NOT NULL,
+    displayName VARCHAR(128) NOT NULL,
+    password VARCHAR(128) NOT NULL,
+    passwordMech VARCHAR(32) NOT NULL,
+    CONSTRAINT name_unique UNIQUE (name),
+    PRIMARY KEY (sid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
+CREATE TABLE restrictions (
+    rid INT4 UNSIGNED NOT NULL,
+    name VARCHAR(128) NOT NULL,
+    CONSTRAINT name_unique UNIQUE (name),
+    PRIMARY KEY (rid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+INSERT INTO restrictions VALUES (1,"com.openexchange.Context");
+INSERT INTO restrictions VALUES (2,"com.openexchange.User");
+INSERT INTO restrictions VALUES (3,"com.openexchange.Context.Quota");
+INSERT INTO restrictions VALUES (4,"com.openexchange.Subadmin.Enabled");
+
+CREATE TABLE subadmin_restrictions (
+    sid INT4 UNSIGNED NOT NULL,
+    rid INT4 UNSIGNED NOT NULL,
+    value VARCHAR(128) NOT NULL,
+    FOREIGN KEY(sid) REFERENCES subadmin(sid),
+    FOREIGN KEY(rid) REFERENCES restrictions(rid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE context_restrictions (
+    cid INT4 UNSIGNED NOT NULL,
+    rid INT4 UNSIGNED NOT NULL,
+    value VARCHAR(128) NOT NULL,
+    FOREIGN KEY(cid) REFERENCES context(cid),
+    FOREIGN KEY(rid) REFERENCES restrictions(rid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE context2subadmin (
+    sid INT4 UNSIGNED NOT NULL,
+    cid INT4 UNSIGNED NOT NULL,
+    FOREIGN KEY(sid) REFERENCES subadmin(sid),
+    FOREIGN KEY(cid) REFERENCES context(cid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
