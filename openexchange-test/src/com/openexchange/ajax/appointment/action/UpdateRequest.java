@@ -62,7 +62,7 @@ import com.openexchange.groupware.container.AppointmentObject;
  * object identifier and the last modification timestamp.
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class UpdateRequest extends AbstractAppointmentRequest {
+public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
 
     private final AppointmentObject appointmentObj;
 
