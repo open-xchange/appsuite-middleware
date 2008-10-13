@@ -154,11 +154,11 @@ public final class AJPv13RequestHandler {
 
 	private AJPv13Connection ajpCon;
 
-	private int contentLength;
+	private long contentLength;
 
 	private boolean bContentLength;
 
-	private int totalRequestedContentLength;
+	private long totalRequestedContentLength;
 
 	private boolean headersSent;
 
@@ -716,7 +716,7 @@ public final class AJPv13RequestHandler {
 	 * 
 	 * @return The content length
 	 */
-	public int getContentLength() {
+	public long getContentLength() {
 		return contentLength;
 	}
 
@@ -734,7 +734,7 @@ public final class AJPv13RequestHandler {
 	 * @param contentLength
 	 *            The content length
 	 */
-	public void setContentLength(final int contentLength) {
+	public void setContentLength(final long contentLength) {
 		this.contentLength = contentLength;
 		this.bContentLength = true;
 	}
@@ -744,7 +744,7 @@ public final class AJPv13RequestHandler {
 	 * 
 	 * @return The total requested content length
 	 */
-	public int getTotalRequestedContentLength() {
+	public long getTotalRequestedContentLength() {
 		return totalRequestedContentLength;
 	}
 
@@ -755,7 +755,7 @@ public final class AJPv13RequestHandler {
 	 *            The value by which the total requested content length is
 	 *            increased
 	 */
-	public void increaseTotalRequestedContentLength(final int increaseBy) {
+	public void increaseTotalRequestedContentLength(final long increaseBy) {
 		this.totalRequestedContentLength += increaseBy;
 	}
 
@@ -765,7 +765,7 @@ public final class AJPv13RequestHandler {
 	 * @param totalRequestedContentLength
 	 *            The total requested content length
 	 */
-	public void setTotalRequestedContentLength(final int totalRequestedContentLength) {
+	public void setTotalRequestedContentLength(final long totalRequestedContentLength) {
 		this.totalRequestedContentLength = totalRequestedContentLength;
 	}
 
@@ -874,11 +874,11 @@ public final class AJPv13RequestHandler {
 	 * @return The number of bytes that are left for being requested
 	 */
 	public int getNumOfBytesToRequestFor() {
-		int retval = contentLength - totalRequestedContentLength;
+		final long retval = contentLength - totalRequestedContentLength;
 		if (retval > AJPv13Response.MAX_INT_VALUE || retval < 0) {
-			retval = AJPv13Response.MAX_INT_VALUE;
+			return AJPv13Response.MAX_INT_VALUE;
 		}
-		return retval;
+		return (int) retval;
 	}
 
 	public void setEmptyDataPackageReceived(final boolean emptyDataPackageReceived) {
@@ -887,7 +887,10 @@ public final class AJPv13RequestHandler {
 
 	/**
 	 * Checks if amount of received data is equal to value of header
-	 * 'Content-Length'
+	 * 'Content-Length'.
+	 * <p>
+	 * This method will always return false if content-length is not set unless
+	 * method {@link #makeEqual()} is invoked
 	 * 
 	 * @return <code>true</code> if amount of received data is equal to value of
 	 *         header 'Content-Length'; otherwise <code>false</code>
@@ -902,7 +905,10 @@ public final class AJPv13RequestHandler {
 
 	/**
 	 * Indicates if servlet container still expects data from web server that is
-	 * amount of received data is less than value of header 'Content-Length'
+	 * amount of received data is less than value of header 'Content-Length'.
+	 * <p>
+	 * No empty data package received AND requested data length is still less
+	 * than header 'Content-Length'.
 	 * 
 	 * @return <code>true</code> if servlet container still expects data from
 	 *         web server; otherwise <code>false</code>

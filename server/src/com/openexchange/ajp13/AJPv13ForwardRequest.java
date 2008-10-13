@@ -164,7 +164,9 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.tools.ajp13.AJPv13Request#processRequest(com.openexchange.tools.ajp13.AJPv13RequestHandler)
+	 * @see
+	 * com.openexchange.tools.ajp13.AJPv13Request#processRequest(com.openexchange
+	 * .tools.ajp13.AJPv13RequestHandler)
 	 */
 	@Override
 	public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
@@ -262,18 +264,28 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		 * Determine Request Headers
 		 */
 		parseRequestHeaders(servletRequest, numHeaders);
-		/*
-		 * Set important header CONTENT_LENGTH which decides whether to further
-		 * process an upcoming body request from web server or to terminate
-		 * communication after this forward request. If this header is missing
-		 * the getIntHeader() method returns -1 which represents a missing
-		 * content length in request handler, too.
-		 */
-		final int contentLength = servletRequest.getIntHeader(HDR_CONTENT_LENGTH);
-		if (contentLength == -1) {
-			ajpRequestHandler.setContentLength(AJPv13RequestHandler.NOT_SET);
-		} else {
-			ajpRequestHandler.setContentLength(contentLength);
+		{
+			/*
+			 * Set important header CONTENT_LENGTH which decides whether to
+			 * further process an upcoming body request from web server or to
+			 * terminate communication after this forward request. If this
+			 * header is missing the getIntHeader() method returns -1 which
+			 * represents a missing content length in request handler, too.
+			 */
+			long contentLength = -1;
+			if (servletRequest.containsHeader(HDR_CONTENT_LENGTH)) {
+				try {
+					contentLength = Long.parseLong(servletRequest.getHeader(HDR_CONTENT_LENGTH));
+				} catch (final NumberFormatException e) {
+					LOG.error("Content-Length header cannot parsed as a number", e);
+					contentLength = -1;
+				}
+			}
+			if (contentLength == -1) {
+				ajpRequestHandler.setContentLength(AJPv13RequestHandler.NOT_SET);
+			} else {
+				ajpRequestHandler.setContentLength(contentLength);
+			}
 		}
 		/*
 		 * Determine if content type indicates form data

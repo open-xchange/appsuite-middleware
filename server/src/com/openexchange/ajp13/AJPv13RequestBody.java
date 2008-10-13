@@ -75,7 +75,9 @@ public final class AJPv13RequestBody extends AJPv13Request {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.tools.ajp13.AJPv13Request#processRequest(com.openexchange.tools.ajp13.AJPv13RequestHandler)
+	 * @see
+	 * com.openexchange.tools.ajp13.AJPv13Request#processRequest(com.openexchange
+	 * .tools.ajp13.AJPv13RequestHandler)
 	 */
 	@Override
 	public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
@@ -93,7 +95,7 @@ public final class AJPv13RequestBody extends AJPv13Request {
 				 */
 				if (LOG.isWarnEnabled()) {
 					final AJPv13Exception ajpExc = new AJPv13Exception(AJPCode.UNEXPECTED_EMPTY_DATA_PACKAGE, true,
-							Integer.valueOf(ajpRequestHandler.getTotalRequestedContentLength()), Integer
+							Long.valueOf(ajpRequestHandler.getTotalRequestedContentLength()), Long
 									.valueOf(ajpRequestHandler.getContentLength()), ajpRequestHandler
 									.getForwardRequest());
 					ajpExc.fillInStackTrace();

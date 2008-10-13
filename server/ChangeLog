@@ -1,3 +1,8 @@
+* 2008-10-13 - thorben.betten@open-xchange.com
+
+ - Bugfix #12205: Parsing header Content-Length into a long instead of an
+   integer
+
 * 2008-10-13 - marcus.klein@open-xchange.com
 
  - Bugfix #12099: Setting modified by when updating series if a virtual
