@@ -303,7 +303,9 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		 */
 		checkFolderPermissions(folderObj, user.getId(), ctx);
 		checkPermissionsAgainstUserConfigs(folderObj, ctx);
-		checkParentPermissions(parentFolder.getObjectID(), folderObj.getPermissionsAsArray(), user.getId());
+		if (FolderObject.PUBLIC == folderObj.getType()) {
+			checkParentPermissions(parentFolder.getObjectID(), folderObj.getPermissionsAsArray(), user.getId());
+		}
 		/*
 		 * Check if duplicate folder exists
 		 */
@@ -481,7 +483,9 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			 * Check for parent folder permission consistency
 			 */
 			final FolderObject storageObj = getFolderFromMaster(fo.getObjectID());
-			checkParentPermissions(storageObj.getParentFolderID(), storageObj.getPermissionsAsArray(), user.getId());
+			if (FolderObject.PUBLIC == storageObj.getType()) {
+				checkParentPermissions(storageObj.getParentFolderID(), storageObj.getPermissionsAsArray(), user.getId());
+			}
 		}
 		/*
 		 * Finally update cache
@@ -595,14 +599,16 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		checkPermissionsAgainstSessionUserConfig(folderObj, userConfig, ctx);
 		checkFolderPermissions(folderObj, user.getId(), ctx);
 		checkPermissionsAgainstUserConfigs(folderObj, ctx);
-		checkParentPermissions(storageObj.getParentFolderID(), folderObj.getPermissionsAsArray(), user.getId());
-		{
-			final OCLPermission[] removedPerms = getRemovedPermissions(folderObj.getPermissionsAsArray(), storageObj
-					.getPermissionsAsArray());
-			if (removedPerms.length > 0) {
-				checkSubfolderPermissionsOnRemove(folderObj.getObjectID(), removedPerms, user.getId());
-				checkParentPermissionsOnRemove(storageObj.getParentFolderID(), folderObj.getObjectID(), removedPerms,
-						user.getId());
+		if (FolderObject.PUBLIC == folderObj.getType()) {
+			checkParentPermissions(storageObj.getParentFolderID(), folderObj.getPermissionsAsArray(), user.getId());
+			{
+				final OCLPermission[] removedPerms = getRemovedPermissions(folderObj.getPermissionsAsArray(),
+						storageObj.getPermissionsAsArray());
+				if (removedPerms.length > 0) {
+					checkSubfolderPermissionsOnRemove(folderObj.getObjectID(), removedPerms, user.getId());
+					checkParentPermissionsOnRemove(storageObj.getParentFolderID(), folderObj.getObjectID(),
+							removedPerms, user.getId());
+				}
 			}
 		}
 		boolean rename = false;
