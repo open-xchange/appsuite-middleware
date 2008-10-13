@@ -53,9 +53,9 @@ import java.util.Calendar;
 import java.util.TimeZone;
 
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.appointment.action.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.container.AppointmentObject;
 
@@ -98,7 +98,7 @@ public final class Bug10859Test extends AbstractAJAXSession {
         }
         {
             final InsertRequest request = new InsertRequest(appointment, tz, false);
-            final InsertResponse response = Executor.execute(client, request);
+            final CommonInsertResponse response = Executor.execute(client, request);
             assertTrue(response.hasError());
         }
     }

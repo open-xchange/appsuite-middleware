@@ -55,6 +55,7 @@ import java.util.List;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.CommonInsertResponse;
 
 /**
  * 
@@ -91,7 +92,7 @@ public class GetRequest extends AbstractAppointmentRequest<GetResponse> {
 		this.recurrencePosition = recurrencePosition;
     }
 
-    public GetRequest(final int folderId, final InsertResponse insert) {
+    public GetRequest(final int folderId, final CommonInsertResponse insert) {
         this(folderId, insert.getId());
     }
 

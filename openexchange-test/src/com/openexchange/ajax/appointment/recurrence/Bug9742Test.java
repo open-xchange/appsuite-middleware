@@ -12,10 +12,10 @@ import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.DeleteResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.appointment.action.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -100,7 +100,7 @@ public class Bug9742Test extends AbstractAJAXSession {
 
 		final InsertRequest insertRequest = new InsertRequest(appointmentObj, timeZone, true);
 
-		final InsertResponse insertResponse = (InsertResponse) Executor.execute(ajaxSession,
+		final CommonInsertResponse insertResponse = Executor.execute(ajaxSession,
 				insertRequest);
 		final int objectId = insertResponse.getId();
 

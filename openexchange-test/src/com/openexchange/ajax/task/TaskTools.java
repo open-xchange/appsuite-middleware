@@ -417,7 +417,7 @@ public final class TaskTools extends Assert {
     public static AllResponse all(final AJAXSession session,
         final AllRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (AllResponse) Executor.execute(session, request);
+        return Executor.execute(session, request);
     }
 
     public static AllResponse all(final AJAXClient client,
@@ -430,7 +430,7 @@ public final class TaskTools extends Assert {
 		final String hostName, final String sessionId, final String protocol, 
         final AllRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-    	return (AllResponse) Executor.execute(new AJAXSession(conversation, 
+    	return Executor.execute(new AJAXSession(conversation, 
     		sessionId), request, protocol, hostName);
 	}
 

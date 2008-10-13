@@ -59,9 +59,9 @@ import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.appointment.action.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -98,7 +98,7 @@ public final class FunambolTest extends AbstractAJAXSession {
         app.setIgnoreConflicts(true);
         final Date serverTime = client.getValues().getServerTime();
         System.out.println("ServerTime: " + serverTime);
-        final InsertResponse insertR = (InsertResponse) Executor.execute(
+        final CommonInsertResponse insertR = Executor.execute(
             client, new InsertRequest(app, tz));
         final GetResponse getR = (GetResponse) Executor.execute(client,
             new GetRequest(folder, insertR));

@@ -57,9 +57,9 @@ import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.appointment.action.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -100,7 +100,7 @@ public class RangeTest extends AbstractAJAXSession {
         appointmentObj.setParentFolderID(folderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final InsertResponse aInsertR = Executor.execute(client, new InsertRequest(appointmentObj, timeZone));
+        final CommonInsertResponse aInsertR = Executor.execute(client, new InsertRequest(appointmentObj, timeZone));
         final int targetId = aInsertR.getId();
         final ReminderObject[] reminderObj = Executor.execute(client, new RangeRequest(c.getTime())).getReminder(timeZone);
 

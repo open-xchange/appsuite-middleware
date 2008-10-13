@@ -115,6 +115,10 @@ public class AJAXConfig extends AbstractConfig {
          */
         SECONDUSER("seconduser"),
         /**
+         * Third user login.
+         */
+        THIRDLOGIN("thirdlogin"),
+        /**
          * Whether SP3 or SP4 data
          */
         IS_SP3("isSP3"),

@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.appointment;
 
+import static com.openexchange.ajax.folder.Create.ocl;
+
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
@@ -58,10 +61,17 @@ import com.openexchange.ajax.appointment.action.DeleteResponse;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.appointment.action.InsertResponse;
+import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonInsertResponse;
+import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.participant.ParticipantTools;
+import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.impl.OCLPermission;
 
 /**
  * Checks if series gets changed_from set to 0.
@@ -81,7 +91,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
      * Creates a series appointment. Deletes one occurrence and checks if series
      * then has the changed_from set to 0.
      */
-    public void testSeriesChangedFromIsZero() throws Throwable {
+    public void _testSeriesChangedFromIsZero() throws Throwable {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = client.getValues().getTimeZone();
@@ -106,7 +116,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
         }
         {
             final InsertRequest request = new InsertRequest(series, tz);
-            final InsertResponse response = client.execute(request);
+            final CommonInsertResponse response = client.execute(request);
             series.setObjectID(response.getId());
             series.setLastModified(response.getTimestamp());
         }
@@ -128,6 +138,80 @@ public final class Bug12099Test extends AbstractAJAXSession {
         } finally {
             client.execute(new DeleteRequest(series.getObjectID(), folderId,
                 series.getLastModified()));
+        }
+    }
+
+    /**
+     * A shares his calendar to B with create rights. B creates a series
+     * appointment there with C as participant. C deletes an occurrence of that
+     * series appointment. A verifies that changed_from of the series is not
+     * zero.
+     */
+    public void testSeriesChangedFromIsZero2() throws Throwable {
+        final AJAXClient clientA = getClient();
+        final int userIdA = clientA.getValues().getUserId();
+        final AJAXClient clientB = new AJAXClient(User.User2);
+        final FolderObject folder = Create.folder(
+            FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
+            "Folder to test bug 12099",
+            FolderObject.CALENDAR,
+            FolderObject.PRIVATE,
+            ocl(userIdA, false, true,
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION),
+            ocl(clientB.getValues().getUserId(), false, false,
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION));
+        {
+            final CommonInsertResponse response = clientA.execute(
+                new com.openexchange.ajax.folder.actions.InsertRequest(folder));
+            response.fillObject(folder);
+        }
+        final AppointmentObject appointment = new AppointmentObject();
+        try {
+            final AJAXClient clientC = new AJAXClient(User.User3);
+            final int userIdC = clientC.getValues().getUserId();
+            final TimeZone tzB = clientB.getValues().getTimeZone();
+            {
+                appointment.setTitle("Test for bug 12099");
+                appointment.setParentFolderID(folder.getObjectID());
+                appointment.setStartDate(new Date(TimeTools.getHour(0, tzB)));
+                appointment.setEndDate(new Date(TimeTools.getHour(1, tzB)));
+                appointment.setRecurrenceType(CalendarObject.DAILY);
+                appointment.setInterval(1);
+                appointment.setOccurrence(3);
+                appointment.setParticipants(ParticipantTools.createParticipants(
+                    userIdA, userIdC));
+                final InsertRequest request = new InsertRequest(appointment, tzB);
+                final CommonInsertResponse response = clientB.execute(request);
+                response.fillObject(appointment);
+            }
+            {
+                final int calendarFolderC = clientC.getValues().getPrivateAppointmentFolder();
+                final DeleteRequest request = new DeleteRequest(
+                    appointment.getObjectID(), calendarFolderC,
+                    2, appointment.getLastModified());
+                final DeleteResponse response = clientC.execute(request);
+                appointment.setLastModified(response.getTimestamp());
+            }
+            {
+                final GetRequest request = new GetRequest(folder.getObjectID(),
+                    appointment.getObjectID());
+                final GetResponse response = clientB.execute(request);
+                final AppointmentObject test = response.getAppointment(tzB);
+                assertEquals("Appointment modified badly updated.", userIdC, test.getModifiedBy());
+            }
+        } finally {
+//            if (null != appointment.getLastModified()) {
+//                clientB.execute(new DeleteRequest(appointment.getObjectID(),
+//                    folder.getObjectID(), appointment.getLastModified()));
+//            }
+            clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(
+                folder.getObjectID(), folder.getLastModified()));
         }
     }
 }

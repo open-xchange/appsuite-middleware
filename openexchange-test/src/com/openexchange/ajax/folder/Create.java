@@ -127,4 +127,23 @@ public final class Create {
         folder.setPermissionsAsArray(new OCLPermission[] { perm });
         return folder;
     }
+
+    public static OCLPermission ocl(final int entity, final boolean isGroup, final boolean isAdmin, final int fp, final int opr, final int opw, final int opd) {
+        final OCLPermission retval = new OCLPermission();
+        retval.setEntity(entity);
+        retval.setGroupPermission(isGroup);
+        retval.setFolderAdmin(isAdmin);
+        retval.setAllPermission(fp, opr, opw, opd);
+        return retval;
+    }
+
+    public static FolderObject folder(final int parent, final String name, final int module, final int type, final OCLPermission... permissions) {
+        final FolderObject retval = new FolderObject();
+        retval.setParentFolderID(parent);
+        retval.setFolderName(name);
+        retval.setModule(module);
+        retval.setType(type);
+        retval.setPermissionsAsArray(permissions);
+        return retval;
+    }
 }

@@ -93,7 +93,8 @@ public class AJAXClient {
 
     public enum User {
         User1(Property.LOGIN, Property.PASSWORD),
-        User2(Property.SECONDUSER, Property.PASSWORD);
+        User2(Property.SECONDUSER, Property.PASSWORD),
+        User3(Property.THIRDLOGIN, Property.PASSWORD);
         private Property login;
         private Property password;
         private User(final Property login, final Property password) {

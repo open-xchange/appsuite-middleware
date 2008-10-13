@@ -8,8 +8,8 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.appointment.action.InsertResponse;
 import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.container.AppointmentObject;
 
@@ -51,7 +51,7 @@ public class Bug10733Test extends AppointmentTest {
 		final AJAXSession ajaxSession = new AJAXSession(getWebConversation(), getSessionId());
 		final InsertRequest insertRequest = new InsertRequest(appointmentObj, timeZone, false);
 
-		final InsertResponse insertResponse = (InsertResponse) Executor.execute(ajaxSession, insertRequest);
+		final CommonInsertResponse insertResponse = Executor.execute(ajaxSession, insertRequest);
 		final boolean hasError = insertResponse.hasError();
 		assertTrue("error message expected", hasError);
 		

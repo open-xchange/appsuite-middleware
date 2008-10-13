@@ -57,10 +57,10 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.appointment.action.InsertResponse;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDInt;
 import com.openexchange.ajax.framework.ListIDs;
@@ -101,7 +101,7 @@ public final class Bug10836Test extends AbstractAJAXSession {
 		app.setStartDate(new Date(TimeTools.getHour(0, tz)));
 		app.setEndDate(new Date(TimeTools.getHour(1, tz)));
 		app.setIgnoreConflicts(true);
-		final InsertResponse insertR = clientA.execute(new InsertRequest(app, tz));
+		final CommonInsertResponse insertR = clientA.execute(new InsertRequest(app, tz));
 		try {
 		    final ListIDs list = new ListIDs();
 		    list.add(new ListIDInt(folderB, insertR.getId()));

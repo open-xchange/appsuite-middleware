@@ -123,8 +123,7 @@ public final class FunctionTests extends AbstractAJAXSession {
             ao.setIgnoreConflicts(true);
 
             final TimeZone tz = client.getValues().getTimeZone();
-            final com.openexchange.ajax.appointment.action.InsertResponse response =
-                (com.openexchange.ajax.appointment.action.InsertResponse) Executor.execute(client,
+            final CommonInsertResponse response = Executor.execute(client,
             new com.openexchange.ajax.appointment.action.InsertRequest(ao, tz));
             oid2 = response.getId();
         }

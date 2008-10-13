@@ -55,7 +55,6 @@ import java.util.TimeZone;
 
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.appointment.action.InsertResponse;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -124,7 +123,7 @@ public final class Bug11871Test extends AbstractAJAXSession {
             calendar.set(Calendar.DAY_OF_MONTH, 1);
             appointment.setUntil(calendar.getTime());
             final InsertRequest request = new InsertRequest(appointment, tz);
-            final InsertResponse response = Executor.execute(client, request);
+            final CommonInsertResponse response = Executor.execute(client, request);
             appointment.setObjectID(response.getId());
             appointment.setLastModified(response.getTimestamp());
         }
