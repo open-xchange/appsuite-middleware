@@ -76,6 +76,8 @@ public class AbstractOXException extends Exception {
 
     private final int counter = instanceCounter.incrementAndGet();
 
+    private Map<String, String> details = new HashMap<String, String>();
+
     /**
      * Logger.
      */
@@ -449,6 +451,15 @@ public class AbstractOXException extends Exception {
             exceptionID = builder.toString();
         }
         return exceptionID;
+    }
+
+    /**
+     * Adds additional diagnostic information usually relevant for developers.
+     * @param detail
+     * @param value
+     */
+    public void setDetail(String detail, String value) {
+        this.details.put(detail, value);
     }
 
     /**

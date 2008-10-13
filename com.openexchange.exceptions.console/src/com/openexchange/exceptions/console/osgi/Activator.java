@@ -46,65 +46,29 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-
-package com.openexchange.server;
+package com.openexchange.exceptions.console.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import com.openexchange.exceptions.ComponentRegistry;
-import com.openexchange.exceptions.impl.ComponentRegistryImpl;
+import org.eclipse.osgi.framework.console.CommandProvider;
+import com.openexchange.exceptions.osgi.OSGiComponentRegistry;
+import com.openexchange.exceptions.console.Commands;
 
 /**
- * {@link GlobalActivator} - Activator for global (aka kernel) bundle
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public final class GlobalActivator implements BundleActivator {
+public class Activator implements BundleActivator {
+    private OSGiComponentRegistry componentRegistry;
+    private ServiceRegistration serviceRegistration;
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(GlobalActivator.class);
-    private ServiceRegistration componentRegistryRegistration;
+    public void start(BundleContext bundleContext) throws Exception {
+        this.componentRegistry = new OSGiComponentRegistry(bundleContext);
+        this.serviceRegistration = bundleContext.registerService(CommandProvider.class.getName(), new Commands(componentRegistry), null);
+    }
 
-    /**
-	 * Initializes a new {@link GlobalActivator}
-	 */
-	public GlobalActivator() {
-		super();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
-	public void start(final BundleContext context) throws Exception {
-		try {
-			ServiceHolderInit.getInstance().start();
-            componentRegistryRegistration  = context.registerService(ComponentRegistry.class.getName(), new ComponentRegistryImpl(), null);
-            LOG.info("Global bundle successfully started");
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
-		}
-	}
-
-
-    /*
-      * (non-Javadoc)
-      *
-      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-      */
-	public void stop(final BundleContext context) throws Exception {
-		try {
-            componentRegistryRegistration.unregister();
-            ServiceHolderInit.getInstance().stop();
-			LOG.info("Global bundle successfully stopped");
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
-		}
-	}
-
+    public void stop(BundleContext bundleContext) throws Exception {
+        componentRegistry.close();
+        this.serviceRegistration.unregister();
+    }
 }
