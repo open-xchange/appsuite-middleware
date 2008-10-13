@@ -172,8 +172,13 @@ public final class OXFolderIteratorSQL {
 	private final static String STR_GROUP_BY = "GROUP BY ";
 
 	private static String getGroupBy(final String tableAlias) {
-		return new StringBuilder(STR_GROUP_BY).append(tableAlias == null ? STR_EMPTY : tableAlias).append('.').append(
-				STR_FUID).toString();
+		final String alias;
+		if (tableAlias == null) {
+			alias = STR_EMPTY;
+		} else {
+			alias = new StringBuilder(tableAlias.length() + 1).append(tableAlias).append('.').toString();
+		}
+		return new StringBuilder(STR_GROUP_BY).append(alias).append(STR_FUID).toString();
 	}
 
 	/**
@@ -548,6 +553,94 @@ public final class OXFolderIteratorSQL {
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(ctx.getContextId()));
 		} finally {
 			closeResources(rs, stmt, readCon, true, ctx);
+		}
+	}
+
+	/**
+	 * Returns all visible public folders that are not visible in hierarchic
+	 * tree-view (because any ancestor folder is not visible)
+	 */
+	public static SearchIterator<FolderObject> getAllVisibleFoldersNotSeenInTreeView(final int userId,
+			final int[] groups, final UserConfiguration userConfig, final Context ctx, final Connection readConArg)
+			throws OXException {
+		Connection readCon = readConArg;
+		boolean closeReadCon = false;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		try {
+			if (readConArg == null) {
+				readCon = DBPool.pickup(ctx);
+				closeReadCon = true;
+			}
+			/*
+			 * 1.) Select all user-visible public folders
+			 */
+			StringBuilder condBuilder = new StringBuilder(32).append("AND ot.type = ").append(FolderObject.PUBLIC);
+			String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT),
+					StringCollection.getSqlInString(userId, groups), StringCollection.getSqlInString(userConfig
+							.getAccessibleModules()), condBuilder.toString(),
+					OXFolderProperties.isEnableDBGrouping() ? getGroupBy(STR_OT) : null, getOrderBy(STR_OT, "module",
+							"fname"));
+			condBuilder = null;
+			stmt = readCon.prepareStatement(sqlSelectStr);
+			sqlSelectStr = null;
+			stmt.setInt(1, ctx.getContextId());
+			stmt.setInt(2, ctx.getContextId());
+			stmt.setInt(3, userId);
+			stmt.setInt(4, userId);
+			rs = stmt.executeQuery();
+			/*
+			 * asQueue() already closes all resources
+			 */
+			final Queue<FolderObject> q = new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeReadCon)
+					.asQueue();
+			final int size = q.size();
+			if (size == 0) {
+				/*
+				 * Set resources to null since they were already closed by
+				 * asQueue() method
+				 */
+				rs = null;
+				stmt = null;
+				readCon = null;
+				return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
+			}
+			/*
+			 * 2.) All non-user-visible public folders
+			 */
+			if (readConArg == null) {
+				readCon = DBPool.pickup(ctx);
+			}
+			stmt = readCon.prepareStatement(SQL_SEL_ALL_PUB);
+			stmt.setInt(1, ctx.getContextId());
+			stmt.setInt(2, FolderObject.PUBLIC);
+			rs = stmt.executeQuery();
+			final Set<Integer> nonVisibleSet = new HashSet<Integer>(1024);
+			while (rs.next()) {
+				nonVisibleSet.add(Integer.valueOf(rs.getInt(1)));
+			}
+			rs.close();
+			rs = null;
+			stmt.close();
+			stmt = null;
+			nonVisibleSet.removeAll(queue2IDSet(q, size));
+			/*
+			 * 3.) Filter all visible public folders with a non-visible parent
+			 */
+			for (final Iterator<FolderObject> iter = q.iterator(); iter.hasNext();) {
+				if (!nonVisibleSet.contains(Integer.valueOf(iter.next().getParentFolderID()))) {
+					iter.remove();
+				}
+			}
+			return new FolderObjectIterator(q, false);
+		} catch (final SQLException e) {
+			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+		} catch (final DBPoolingException e) {
+			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+		} catch (final Throwable t) {
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(ctx.getContextId()));
+		} finally {
+			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
 		}
 	}
 
