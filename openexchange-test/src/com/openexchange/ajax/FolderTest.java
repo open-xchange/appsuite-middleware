@@ -129,6 +129,7 @@ public class FolderTest extends AbstractAJAXTest {
 	/**
 	 * @deprecated use {@link ConfigTools#getUserId(WebConversation, String, String)}.
 	 */
+	@Deprecated
 	public static final int getUserId(final WebConversation conversation, final String hostname,
 			final String entityArg, final String password) throws IOException, SAXException, JSONException,
 			AjaxException, ConfigurationException {
@@ -678,9 +679,21 @@ public class FolderTest extends AbstractAJAXTest {
 			}
 		}
 		if (null == infostore) {
-		    throw new TestException("Private infostore folder not found!");
+		    throw new TestException("System infostore folder not found!");
 		}
+		FolderObject userStore = null;
 		l = getSubfolders(conversation, hostname, sessionId, String.valueOf(infostore.getObjectID()), false);
+		for (final Iterator<FolderObject> iter = l.iterator(); iter.hasNext();) {
+			final FolderObject f = iter.next();
+			if (f.getObjectID() == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
+				userStore = f;
+				break;
+			}
+		}
+		if (null == userStore) {
+		    throw new TestException("System user store folder not found!");
+		}
+		l = getSubfolders(conversation, hostname, sessionId, String.valueOf(userStore.getObjectID()), false);
 		for (final Iterator<FolderObject> iter = l.iterator(); iter.hasNext();) {
 			final FolderObject f = iter.next();
 			if (f.containsDefaultFolder() && f.isDefaultFolder() && f.getCreator() == loginId) {
