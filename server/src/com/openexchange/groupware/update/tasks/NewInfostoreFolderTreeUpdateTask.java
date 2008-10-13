@@ -72,6 +72,7 @@ import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
+import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
@@ -132,85 +133,90 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
 		if (LOG.isInfoEnabled()) {
 			LOG.info(STR_INFO);
 		}
+		final SortedSet<Integer> contextIds = new TreeSet<Integer>();
+		/*
+		 * Gather all available context IDs
+		 */
+		gatherContextIDs(cid, contextIds);
+		/*
+		 * Iterate over context IDs
+		 */
+		final long creatingTime = System.currentTimeMillis();
+		for (final Integer contextId : contextIds) {
+			processContext(contextId.intValue(), creatingTime);
+		}
+	}
+
+	private void gatherContextIDs(final int cid, final SortedSet<Integer> contextIds) throws DBPoolingException,
+			UpdateException {
 		Connection writeCon = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
 			writeCon = Database.get(cid, true);
 			try {
-				/*
-				 * Gather all available context IDs
-				 */
 				stmt = writeCon.prepareStatement(SQL_01);
 				rs = stmt.executeQuery();
-				final SortedSet<Integer> contextIds = new TreeSet<Integer>();
 				while (rs.next()) {
 					contextIds.add(Integer.valueOf(rs.getInt(1)));
 				}
-				rs.close();
-				rs = null;
-				stmt.close();
-				stmt = null;
-				/*
-				 * Iterate over context IDs
-				 */
-				final long creatingTime = System.currentTimeMillis();
-				writeCon.setAutoCommit(false);
-				for (final Integer contextId : contextIds) {
-					final int cur = contextId.intValue();
-					int admin = -1;
-					boolean updateInfostore = false;
-					if (!checkExists(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, cur, writeCon)) {
-						/*
-						 * Create user store folder in this context
-						 */
-						if (admin == -1) {
-							admin = getContextAdmin(cur, writeCon);
-						}
-						createUserStoreFolder(cid, writeCon, creatingTime, admin);
-						/*
-						 * Move affected folder below newly created user store
-						 * folder
-						 */
-						move2UserStore(cur, writeCon);
-						updateInfostore = true;
-					}
-					if (!checkExists(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, cur, writeCon)) {
-						/*
-						 * Create public infostore folder in this context
-						 */
-						if (admin == -1) {
-							admin = getContextAdmin(cur, writeCon);
-						}
-						createPublicInfostoreFolder(cid, writeCon, creatingTime, admin);
-						/*
-						 * Move affected folder below newly created public
-						 * infostore folder
-						 */
-						move2PublicInfoStore(cur, writeCon);
-						updateInfostore = true;
-					}
-					if (updateInfostore) {
-						/*
-						 * Change permissions on infostore folder
-						 */
-						updateInfostorePermissions(cur, writeCon, creatingTime, admin);
-					}
-				}
-				writeCon.commit();
 			} catch (final SQLException e) {
-				rollback(writeCon);
 				throw err(e);
-			} catch (final UpdateException e) {
-				rollback(writeCon);
-				throw e;
 			}
 		} finally {
 			closeSQLStuff(rs, stmt);
-			autocommit(writeCon);
 			if (writeCon != null) {
 				Database.back(cid, true, writeCon);
 			}
+		}
+	}
+
+	private void processContext(final int cid, final long creatingTime) throws UpdateException {
+		final Connection writeCon;
+		try {
+			writeCon = Database.get(cid, true);
+		} catch (final DBPoolingException e) {
+			throw new UpdateException(e);
+		}
+		try {
+			final int admin = getContextAdmin(cid, writeCon);
+			writeCon.setAutoCommit(false); // BEGIN
+			if (!checkExists(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, cid, writeCon)) {
+				/*
+				 * Create user store folder in this context
+				 */
+				createUserStoreFolder(cid, writeCon, creatingTime, admin);
+			}
+			/*
+			 * Move affected folder below user store folder
+			 */
+			move2UserStore(cid, writeCon);
+			if (!checkExists(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, cid, writeCon)) {
+				/*
+				 * Create public infostore folder in this context
+				 */
+				createPublicInfostoreFolder(cid, writeCon, creatingTime, admin);
+			}
+			/*
+			 * Move affected folder below public infostore folder
+			 */
+			move2PublicInfoStore(cid, writeCon);
+			/*
+			 * Change permissions on infostore folder
+			 */
+			updateInfostorePermissions(cid, writeCon, creatingTime, admin);
+			writeCon.commit(); // COMMIT
+		} catch (final SQLException e) {
+			rollback(writeCon);
+			LOG.info("Roll-back done in update task 'NewInfostoreFolderTreeUpdateTask' for context " + cid);
+			throw err(e);
+		} catch (final UpdateException e) {
+			rollback(writeCon);
+			LOG.info("Roll-back done in update task 'NewInfostoreFolderTreeUpdateTask' for context " + cid);
+			throw e;
+		} finally {
+			autocommit(writeCon);
+			Database.back(cid, true, writeCon);
 		}
 	}
 
