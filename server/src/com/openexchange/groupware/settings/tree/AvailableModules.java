@@ -102,7 +102,7 @@ public final class AvailableModules implements PreferencesItemService {
                         final Object tmp = enabled.getSingleValue();
                         // The following expression deals with string "true"
                         // and with Boolean.TRUE.
-                        if (Boolean.parseBoolean(tmp.toString())) {
+                        if (tmp != null && Boolean.parseBoolean(tmp.toString())) {
                             setting.addMultiValue(module.getName());
                         }
                     } else if (!module.isLeaf()) {
