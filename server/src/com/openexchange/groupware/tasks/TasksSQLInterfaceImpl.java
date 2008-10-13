@@ -390,7 +390,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
     /**
      * {@inheritDoc}
      */
-    public void setUserConfirmation(final int taskId, final int userId,
+    public Date setUserConfirmation(final int taskId, final int userId,
         final int confirm, final String message) throws OXException {
         final Context ctx;
         try {
@@ -398,15 +398,18 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         } catch (final TaskException e) {
             throw Tools.convert(e);
         }
+        final Date lastModified;
         try {
             final ConfirmTask confirmT = new ConfirmTask(ctx, taskId, userId,
                 confirm, message);
             confirmT.prepare();
             confirmT.doConfirmation();
+            lastModified = confirmT.getLastModified();
             confirmT.sentEvent(session);
         } catch (final TaskException e) {
             throw Tools.convert(e);
         }
+        return lastModified;
     }
 
     /**

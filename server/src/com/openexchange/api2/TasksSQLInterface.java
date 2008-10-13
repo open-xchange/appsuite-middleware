@@ -193,5 +193,5 @@ public interface TasksSQLInterface {
 	 * @param confirmMessage The confirm message
 	 * @throws OXException if setting the confirmation fails.
 	 */
-	public void setUserConfirmation(int objectId, int userId, int confirm, String confirmMessage) throws OXException;
+	public Date setUserConfirmation(int objectId, int userId, int confirm, String confirmMessage) throws OXException;
 }

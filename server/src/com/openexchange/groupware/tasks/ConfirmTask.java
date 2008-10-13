@@ -178,6 +178,15 @@ public final class ConfirmTask {
 		}
     }
 
+    /**
+     * Gives the new last modified attribute of the changed task. This can be
+     * only requested after {@link #prepare()} has been called.
+     * @return the new last modified of the changed task.
+     */
+    Date getLastModified() {
+        return changedTask.getLastModified();
+    }
+
     // =========================== internal helper methods =====================
 
     /**

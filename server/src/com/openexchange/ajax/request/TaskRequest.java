@@ -430,7 +430,7 @@ public class TaskRequest {
 		taskParser.parse(taskObj, jData);
 		
 		final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(sessionObj);
-		taskSql.setUserConfirmation(taskObj.getObjectID(), userObj.getId(), taskObj.getConfirm(), taskObj.getConfirmMessage());
+		timestamp = taskSql.setUserConfirmation(taskObj.getObjectID(), userObj.getId(), taskObj.getConfirm(), taskObj.getConfirmMessage());
 
 		return new JSONObject();
 	}
