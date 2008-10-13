@@ -288,18 +288,20 @@ public final class OXFolderAdminHelper {
 		systemPermission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS,
 				OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
 		systemPermission.setFolderAdmin(false);
-		createSystemFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_NAME,
-				systemPermission, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.INFOSTORE, true, creatingTime, mailAdmin,
-				cid, writeCon);
+		createSystemFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
+				FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_NAME, systemPermission,
+				FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.INFOSTORE, true, creatingTime, mailAdmin, cid,
+				writeCon);
 		/*
 		 * Insert system public infostore folder
 		 */
 		systemPermission.setAllPermission(OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.NO_PERMISSIONS,
 				OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
 		systemPermission.setFolderAdmin(false);
-		createSystemFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME,
-				systemPermission, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.INFOSTORE, true, creatingTime, mailAdmin,
-				cid, writeCon);
+		createSystemFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID,
+				FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME, systemPermission,
+				FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.INFOSTORE, true, creatingTime, mailAdmin, cid,
+				writeCon);
 		if (LOG.isInfoEnabled()) {
 			LOG.info(new StringBuilder("All System folders successfully created for context ").append(cid).toString());
 		}
@@ -751,11 +753,12 @@ public final class OXFolderAdminHelper {
 			/*
 			 * Check infostore sibling
 			 */
-			if (OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, displayName, FolderObject.INFOSTORE,
-					writeCon, ctx) != -1) {
+			if (OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, displayName,
+					FolderObject.INFOSTORE, writeCon, ctx) != -1) {
 				throw new OXFolderException(FolderCode.NO_DEFAULT_INFOSTORE_CREATE, displayName,
-						FolderObject.SYSTEM_INFOSTORE_FOLDER_NAME, Integer
-								.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID), Integer.valueOf(ctx.getContextId()));
+						FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_NAME, Integer
+								.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID), Integer.valueOf(ctx
+								.getContextId()));
 			}
 			/*
 			 * Proceed
@@ -839,7 +842,7 @@ public final class OXFolderAdminHelper {
 			fo.reset();
 			fo.setPermissionsAsArray(new OCLPermission[] { defaultPerm });
 			fo.setDefaultFolder(true);
-			fo.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+			fo.setParentFolderID(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
 			fo.setType(FolderObject.PUBLIC);
 			fo.setFolderName(displayName);
 			fo.setModule(FolderObject.INFOSTORE);
