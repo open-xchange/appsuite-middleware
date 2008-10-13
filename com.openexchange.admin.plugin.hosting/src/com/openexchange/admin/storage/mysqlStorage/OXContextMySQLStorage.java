@@ -779,7 +779,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     public Context[] listContext(final String search_pattern, final String additionaltable, final String sqlconjunction) throws StorageException {
         Connection configdb_read = null;
         PreparedStatement stmt = null;
-        PreparedStatement stmt2 = null;
         PreparedStatement mapping = null;
         ResultSet rs = null;
         ResultSet rs2 = null;
@@ -846,6 +845,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
                 rs2.close();
 
+                PreparedStatement stmt2 = null;
                 Connection oxdb_read = null;
                 try {
                     oxdb_read = cache.getConnectionForContext(context_id);
@@ -860,6 +860,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     // set used quota in context setup
                     cs.setUsedQuota(quota_used);
                 } finally {
+                    closePreparedStatement(stmt2);
                     if (null != oxdb_read) {
                         cache.pushConnectionForContext(context_id, oxdb_read);
                     }
@@ -879,7 +880,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw new StorageException(e);
         } finally {
             closePreparedStatement(stmt);
-            closePreparedStatement(stmt2);
+            closePreparedStatement(mapping);
             closeRecordset(rs);
             closeRecordset(rs2);
             try {

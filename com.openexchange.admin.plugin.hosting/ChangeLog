@@ -1,3 +1,7 @@
+* 2008-10-13 - marcus.klein@open-xchange.com
+
+ - Bugfix #12234: Closing statements correctly.
+
 * 2008-09-09 - choeger@open-xchange.com
 
  - Bugfix ID#9972: Checking if context already exists in target database on context move operation
