@@ -200,7 +200,7 @@ public abstract class MailMessageStorage {
 	 *            The mail ID
 	 * @param sequenceId
 	 *            The attachment sequence ID
-	 * @return The attachment wrapped by an {@link MailPart} instance
+	 * @return The attachment wrapped by a {@link MailPart} instance
 	 * @throws MailException
 	 *             If no attachment can be found whose sequence ID matches given
 	 *             <code>sequenceId</code>.
