@@ -147,27 +147,26 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
 		}
 	}
 
-	private void gatherContextIDs(final int cid, final SortedSet<Integer> contextIds) throws DBPoolingException,
-			UpdateException {
-		Connection writeCon = null;
+	private void gatherContextIDs(final int cid, final SortedSet<Integer> contextIds) throws UpdateException {
+		final Connection writeCon;
+		try {
+			writeCon = Database.get(cid, true);
+		} catch (final DBPoolingException e) {
+			throw new UpdateException(e);
+		}
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			writeCon = Database.get(cid, true);
-			try {
-				stmt = writeCon.prepareStatement(SQL_01);
-				rs = stmt.executeQuery();
-				while (rs.next()) {
-					contextIds.add(Integer.valueOf(rs.getInt(1)));
-				}
-			} catch (final SQLException e) {
-				throw err(e);
+			stmt = writeCon.prepareStatement(SQL_01);
+			rs = stmt.executeQuery();
+			while (rs.next()) {
+				contextIds.add(Integer.valueOf(rs.getInt(1)));
 			}
+		} catch (final SQLException e) {
+			throw err(e);
 		} finally {
 			closeSQLStuff(rs, stmt);
-			if (writeCon != null) {
-				Database.back(cid, true, writeCon);
-			}
+			Database.back(cid, true, writeCon);
 		}
 	}
 
