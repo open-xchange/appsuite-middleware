@@ -104,6 +104,10 @@ public final class MailAPITestSuite extends TestSuite {
 		 */
 		mailSuite.addTestSuite(com.openexchange.mail.utilitytests.MailCharsetDetectorTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.utilitytests.MailMessageSerializationTest.class);
+		/*
+		 * Unique ID tests
+		 */
+		mailSuite.addTestSuite(com.openexchange.mail.MailIDTest.class);
 		return mailSuite;
 	}
 }
