@@ -250,7 +250,7 @@ public final class OXServletOutputStream extends ServletOutputStream {
 			byteBuffer.reset();
 		} catch (final SocketException e) {
 			if (e.getMessage().indexOf(ERR_BROKEN_PIPE) != -1) {
-				LOG.warn(new StringBuilder("Underlying (TCP) protocol communication aborted:").append(e.getMessage())
+				LOG.warn(new StringBuilder("Underlying (TCP) protocol communication aborted: ").append(e.getMessage())
 						.toString(), e);
 			} else {
 				LOG.error(e.getMessage(), e);
