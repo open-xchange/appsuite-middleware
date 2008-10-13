@@ -273,8 +273,7 @@ public final class OXServletOutputStream extends ServletOutputStream {
 	 */
 	public void write(final char[] chars) throws IOException {
 		try {
-			final String s = new String(chars);
-			write(s.getBytes(ajpCon.getAjpRequestHandler().getServletResponse().getCharacterEncoding()));
+			write(new String(chars).getBytes(ajpCon.getAjpRequestHandler().getServletResponse().getCharacterEncoding()));
 		} catch (final UnsupportedEncodingException e) {
 			LOG.error(e.getMessage(), e);
 			throw new IOException(e.getMessage());
