@@ -256,6 +256,15 @@ public class Login extends AJAXServlet {
 					login.write(resp.getWriter());
 				}
 			} catch (final JSONException e) {
+				if (e.getCause() instanceof IOException) {
+					/*
+					 * Throw proper I/O error since a serious socket error could
+					 * been occurred which prevents further communication. Just
+					 * throwing a JSON error possibly hides this fact by trying to
+					 * write to/read from a broken socket connection.
+					 */
+					throw (IOException) e.getCause();
+				}
 				log(RESPONSE_ERROR, e);
 				sendError(resp);
 			}
@@ -464,6 +473,15 @@ public class Login extends AJAXServlet {
 			resp.setContentType(CONTENTTYPE_JAVASCRIPT);
 			retval.write(resp.getWriter());
 		} catch (final JSONException exc) {
+			if (exc.getCause() instanceof IOException) {
+				/*
+				 * Throw proper I/O error since a serious socket error could
+				 * been occurred which prevents further communication. Just
+				 * throwing a JSON error possibly hides this fact by trying to
+				 * write to/read from a broken socket connection.
+				 */
+				throw (IOException) exc.getCause();
+			}
 			log(exc.getMessage(), exc);
 		}
 	}

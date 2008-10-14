@@ -1082,7 +1082,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	public void actionGetSaveVersit(final Session session, final Writer writer, final JSONObject requestObj,
-			final MailServletInterface mi) throws JSONException {
+			final MailServletInterface mi) throws JSONException, IOException {
 		actionGetSaveVersit(session, writer, ParamContainer.getInstance(requestObj, EnumComponent.MAIL), mi);
 	}
 
@@ -1106,7 +1106,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	private final void actionGetSaveVersit(final Session session, final Writer writer,
-			final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) throws JSONException {
+			final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) throws JSONException,
+			IOException {
 		/*
 		 * Some variables
 		 */

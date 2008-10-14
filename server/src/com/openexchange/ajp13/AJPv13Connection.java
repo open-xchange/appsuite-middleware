@@ -58,6 +58,9 @@ import java.net.SocketException;
 
 import javax.servlet.ServletException;
 
+import com.openexchange.ajp13.exception.AJPv13Exception;
+import com.openexchange.ajp13.exception.AJPv13InvalidConnectionStateException;
+
 /**
  * {@link AJPv13Connection} - Represents an AJP connection which mainly
  * delegates processing of incoming AJP data packages to an assigned AJP request

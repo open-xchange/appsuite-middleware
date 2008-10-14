@@ -47,13 +47,20 @@
  *
  */
 
-package com.openexchange.ajp13.monitoring;
+package com.openexchange.ajp13.exception;
 
-import com.openexchange.ajp13.exception.AJPv13Exception;
-import com.openexchange.monitoring.MonitorMBean;
 
-public interface AJPv13ServerThreadsMonitorMBean extends MonitorMBean {
+
+public class AJPv13InvalidByteSequenceException extends AJPv13Exception {
+
+	private static final long serialVersionUID = 7742237204124391724L;
 	
-	void stopAndRestartAJPServer() throws AJPv13Exception;
+	public AJPv13InvalidByteSequenceException(final Object... messageArgs) {
+		super(AJPCode.INVALID_BYTE_SEQUENCE, true, messageArgs);
+	}
+	
+	public AJPv13InvalidByteSequenceException(final Exception cause, final Object... messageArgs) {
+		super(AJPCode.INVALID_BYTE_SEQUENCE, true, cause, messageArgs);
+	}
 
 }

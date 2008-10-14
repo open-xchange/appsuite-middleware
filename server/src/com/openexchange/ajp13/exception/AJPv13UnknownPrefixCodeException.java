@@ -47,31 +47,16 @@
  *
  */
 
-package com.openexchange.ajp13;
+package com.openexchange.ajp13.exception;
 
-/**
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com>Thorben Betten</a>
- * 
- */
-public class AJPv13SocketClosedException extends AJPv13Exception {
 
-	/**
-	 * Serial Version UID
-	 */
-	private static final long serialVersionUID = 3627750166902286241L;
 
-	public AJPv13SocketClosedException(final AJPCode code) {
-		this(code, null, EMPTY_ARGS);
-	}
+public class AJPv13UnknownPrefixCodeException extends AJPv13Exception {
 
-	public AJPv13SocketClosedException(final AJPCode code, final Exception cause) {
-		super(code, false, cause, EMPTY_ARGS);
-	}
+	private static final long serialVersionUID = -11763074640120576L;
 
-	public AJPv13SocketClosedException(final AJPCode code, final Exception cause,
-			final Object... messageArgs) {
-		super(code, false, cause, messageArgs);
+	public AJPv13UnknownPrefixCodeException(final int unknownPrefixCode) {
+		super(AJPCode.UNKNOWN_PREFIX_CODE, true, Integer.valueOf(unknownPrefixCode));
 	}
 
 }

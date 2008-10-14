@@ -52,8 +52,9 @@ package com.openexchange.ajp13;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+
+import com.openexchange.ajp13.exception.AJPv13Exception;
 
 /**
  * {@link AJPv13Request} - Abstract super class for AJP requests
@@ -75,6 +76,12 @@ public abstract class AJPv13Request {
 
 	private int payloadDataIndex;
 
+	/**
+	 * Initializes a new {@link AJPv13Request}
+	 * 
+	 * @param payloadData
+	 *            The payload data
+	 */
 	protected AJPv13Request(final byte[] payloadData) {
 		this.payloadData = new byte[payloadData.length];
 		System.arraycopy(payloadData, 0, this.payloadData, 0, payloadData.length);
@@ -96,47 +103,36 @@ public abstract class AJPv13Request {
 	/**
 	 * Writes AJP response package
 	 * 
-	 * @param out
-	 *            The output stream to which data is written
 	 * @param ajpRequestHandler
 	 *            The AJP request handler providing session data
 	 * @throws AJPv13Exception
 	 *             If an AJP error occurs
 	 * @throws ServletException
-	 *             If an I/O error occurs
+	 *             If a servlet occurs
 	 * @throws IOException
-	 *             If invocation of
-	 *             {@link Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)}
-	 *             fails
+	 *             If an I/O error occurs
 	 */
-	public void response(final OutputStream out, final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception,
-			ServletException, IOException {
+	public void response(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, ServletException,
+			IOException {
 		if (!ajpRequestHandler.isServiceMethodCalled()
 				&& !(ajpRequestHandler.isFormData() && !ajpRequestHandler.isAllDataRead())) {
 			/*
 			 * Call servlet's service() method which will then request all
 			 * receivable data chunks from client through OXServletInputStream
 			 */
-			ajpRequestHandler.getServlet().service(ajpRequestHandler.getServletRequest(),
-					ajpRequestHandler.getServletResponse());
-			if (ajpRequestHandler.getServletResponse() != null) {
-				ajpRequestHandler.getServletResponse().flushBuffer();
-				ajpRequestHandler.getServletResponse().getOXOutputStream().flushByteBuffer();
-			}
-			ajpRequestHandler.setServiceMethodCalled(true);
+			ajpRequestHandler.doServletService();
 		}
+		final OutputStream out = ajpRequestHandler.getAJPConnection().getOutputStream();
 		/*
 		 * Send response headers first.
 		 */
-		if (!ajpRequestHandler.isHeadersSent()) {
-			writeResponse(AJPv13Response.getSendHeadersBytes(ajpRequestHandler.getServletResponse()), out, true);
-			ajpRequestHandler.setHeadersSent(true);
-			ajpRequestHandler.getServletResponse().setCommitted(true);
-		}
+		ajpRequestHandler.doWriteHeaders(out);
+		/*
+		 * Get remaining data
+		 */
 		byte[] remainingData = null;
 		try {
-			remainingData = ajpRequestHandler.getServletResponse().getOXOutputStream().getData();
-			ajpRequestHandler.getServletResponse().getOXOutputStream().clearByteBuffer();
+			remainingData = ajpRequestHandler.getAndClearResponseData();
 		} catch (final IOException e) {
 			remainingData = new byte[0];
 		}
@@ -165,7 +161,7 @@ public abstract class AJPv13Request {
 		 * Write END_RESPONSE package
 		 */
 		writeResponse(AJPv13Response.getEndResponseBytes(), out, true);
-		ajpRequestHandler.setEndResponseSent(true);
+		ajpRequestHandler.setEndResponseSent();
 	}
 
 	/**

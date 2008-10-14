@@ -50,9 +50,10 @@
 package com.openexchange.ajp13;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 import javax.servlet.ServletException;
+
+import com.openexchange.ajp13.exception.AJPv13Exception;
 
 /**
  * AJPv13CPingRequest - Respond quickly with a CPong reply
@@ -67,15 +68,16 @@ public final class AJPv13CPingRequest extends AJPv13Request {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13CPingRequest.class);
 
+	/**
+	 * Initializes a new {@link AJPv13CPingRequest}
+	 * 
+	 * @param payloadData
+	 *            The payload data
+	 */
 	protected AJPv13CPingRequest(final byte[] payloadData) {
 		super(payloadData);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.tools.ajp13.AJPv13Request#processRequest(com.openexchange.tools.ajp13.AJPv13RequestHandler)
-	 */
 	@Override
 	public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
 		if (LOG.isInfoEnabled()) {
@@ -83,16 +85,10 @@ public final class AJPv13CPingRequest extends AJPv13Request {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.tools.ajp13.AJPv13Request#response(java.io.OutputStream,
-	 *      com.openexchange.tools.ajp13.AJPv13RequestHandler)
-	 */
 	@Override
-	public void response(final OutputStream out, final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception,
-			ServletException, IOException {
-		writeResponse(AJPv13Response.getCPongBytes(), out, true);
+	public void response(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, ServletException,
+			IOException {
+		writeResponse(AJPv13Response.getCPongBytes(), ajpRequestHandler.getAJPConnection().getOutputStream(), true);
 	}
 
 }

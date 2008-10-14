@@ -55,11 +55,16 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import com.openexchange.ajp13.AJPv13Exception.AJPCode;
+import com.openexchange.ajp13.exception.AJPv13Exception;
+import com.openexchange.ajp13.exception.AJPv13MaxPackgeSizeException;
+import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
+ * {@link AJPv13Response} - Constructs AJP response packages for
+ * <code>END_RESPONSE</code>, <code>SEND_BODY_CHUNK</code>,
+ * <code>SEND_HEADERS</code>, <code>GET_BODY_CHUNK</code>, etc.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -141,10 +146,6 @@ public class AJPv13Response {
 
 	private final int prefixCode;
 
-	private int dataLength = -1;
-
-	private ByteArrayOutputStream byteArray;
-
 	private int contentLength = -1;
 
 	private byte[] responseDataChunk;
@@ -153,6 +154,12 @@ public class AJPv13Response {
 
 	private boolean closeConnection;
 
+	/**
+	 * Initializes a new {@link AJPv13Response}
+	 * 
+	 * @param prefixCode
+	 *            The prefix code determining kind of response package
+	 */
 	public AJPv13Response(final int prefixCode) {
 		super();
 		this.prefixCode = prefixCode;
@@ -217,6 +224,8 @@ public class AJPv13Response {
 	}
 
 	public final byte[] getResponseBytes() throws AJPv13Exception {
+		final int dataLength;
+		final ByteArrayOutputStream byteArray;
 		switch (prefixCode) {
 		case SEND_BODY_CHUNK_PREFIX_CODE:
 			final int length = responseDataChunk.length;

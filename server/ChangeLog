@@ -1,3 +1,8 @@
+* 2008-10-14 - thorben.betten@open-xchange.com
+
+ - Bugfix #12303: Throwing an I/O error if socket connection is broken on
+   write/read attempt
+
 * 2008-10-13 - thorben.betten@open-xchange.com
 
  - Bugfix #12205: Parsing header Content-Length into a long instead of an

@@ -50,8 +50,9 @@
 /**
  * 
  */
-package com.openexchange.ajp13;
+package com.openexchange.ajp13.exception;
 
+import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 

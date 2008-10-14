@@ -53,8 +53,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.openexchange.ajp13.AJPv13Exception;
 import com.openexchange.ajp13.AJPv13Server;
+import com.openexchange.ajp13.exception.AJPv13Exception;
 
 
 

@@ -57,6 +57,7 @@ import java.net.InetAddress;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;

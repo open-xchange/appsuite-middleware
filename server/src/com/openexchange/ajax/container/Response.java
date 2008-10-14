@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.container;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -228,10 +229,11 @@ public final class Response {
 	 *            the serialized object will be written to this writer.
 	 * @throws JSONException
 	 *             if writing fails.
+	 * @throws IOException If an I/O error occurs
 	 * @deprecated use {@link ResponseWriter#write(Response, Writer)}.
 	 */
 	@Deprecated
-	public static void write(final Response response, final Writer writer) throws JSONException {
+	public static void write(final Response response, final Writer writer) throws JSONException, IOException {
 	    ResponseWriter.write(response, writer);
 	}
 

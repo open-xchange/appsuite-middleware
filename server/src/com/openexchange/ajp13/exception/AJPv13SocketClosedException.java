@@ -47,19 +47,32 @@
  *
  */
 
-package com.openexchange.ajp13;
+package com.openexchange.ajp13.exception;
 
 
-public class AJPv13InvalidByteSequenceException extends AJPv13Exception {
+/**
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com>Thorben Betten</a>
+ * 
+ */
+public class AJPv13SocketClosedException extends AJPv13Exception {
 
-	private static final long serialVersionUID = 7742237204124391724L;
-	
-	public AJPv13InvalidByteSequenceException(final Object... messageArgs) {
-		super(AJPCode.INVALID_BYTE_SEQUENCE, true, messageArgs);
+	/**
+	 * Serial Version UID
+	 */
+	private static final long serialVersionUID = 3627750166902286241L;
+
+	public AJPv13SocketClosedException(final AJPCode code) {
+		this(code, null, EMPTY_ARGS);
 	}
-	
-	public AJPv13InvalidByteSequenceException(final Exception cause, final Object... messageArgs) {
-		super(AJPCode.INVALID_BYTE_SEQUENCE, true, cause, messageArgs);
+
+	public AJPv13SocketClosedException(final AJPCode code, final Exception cause) {
+		super(code, false, cause, EMPTY_ARGS);
+	}
+
+	public AJPv13SocketClosedException(final AJPCode code, final Exception cause,
+			final Object... messageArgs) {
+		super(code, false, cause, messageArgs);
 	}
 
 }

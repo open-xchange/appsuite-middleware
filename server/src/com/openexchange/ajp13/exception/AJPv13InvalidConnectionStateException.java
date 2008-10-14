@@ -47,15 +47,23 @@
  *
  */
 
-package com.openexchange.ajp13;
 
 
-public class AJPv13UnknownPrefixCodeException extends AJPv13Exception {
+package com.openexchange.ajp13.exception;
 
-	private static final long serialVersionUID = -11763074640120576L;
 
-	public AJPv13UnknownPrefixCodeException(final int unknownPrefixCode) {
-		super(AJPCode.UNKNOWN_PREFIX_CODE, true, Integer.valueOf(unknownPrefixCode));
+
+/**
+ * AJPv13InvalidConnectionStateException
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class AJPv13InvalidConnectionStateException extends AJPv13Exception {
+
+	private static final long serialVersionUID = -7972551880925412663L;
+	
+	public AJPv13InvalidConnectionStateException() {
+		super(AJPCode.INVALID_CONNECTION_STATE, true);
 	}
 
 }

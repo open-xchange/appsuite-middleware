@@ -47,26 +47,25 @@
  *
  */
 
-package com.openexchange.tools.servlet;
+package com.openexchange.ajp13;
 
 import java.io.IOException;
+import java.io.OutputStream;
 
 import javax.servlet.ServletInputStream;
 
-import com.openexchange.ajp13.AJPv13Connection;
-import com.openexchange.ajp13.AJPv13Exception;
-import com.openexchange.ajp13.AJPv13Response;
+import com.openexchange.ajp13.exception.AJPv13Exception;
 
 /**
- * OXServletInputStream
+ * {@link AJPv13ServletInputStream} - The AJP's servlet input stream
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class OXServletInputStream extends ServletInputStream {
+public final class AJPv13ServletInputStream extends ServletInputStream {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(OXServletInputStream.class);
+			.getLog(AJPv13ServletInputStream.class);
 
 	private final AJPv13Connection ajpCon;
 
@@ -82,23 +81,21 @@ public final class OXServletInputStream extends ServletInputStream {
 
 	private static final String EXC_MSG = "No data found in servlet's input stream!";
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Initializes a new {@link AJPv13ServletInputStream}
 	 * 
-	 * @see java.io.Closeable#close()
+	 * @param ajpCon
+	 *            The associated AJP connection
 	 */
+	AJPv13ServletInputStream(final AJPv13Connection ajpCon) {
+		super();
+		this.ajpCon = ajpCon;
+		ajpListenerThread = Thread.currentThread();
+	}
+
 	@Override
 	public void close() throws IOException {
 		isClosed = true;
-	}
-
-	/**
-	 * @param ajpCon
-	 *            - associated AJP connection
-	 */
-	public OXServletInputStream(final AJPv13Connection ajpCon) {
-		this.ajpCon = ajpCon;
-		ajpListenerThread = Thread.currentThread();
 	}
 
 	private void ensureAccess() throws IOException {
@@ -157,21 +154,16 @@ public final class OXServletInputStream extends ServletInputStream {
 		dataSet = true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.io.InputStream#read()
-	 */
 	@Override
 	public int read() throws IOException {
 		ensureAccess();
 		if (isClosed) {
-			throw new IOException("OXServletInputStream.read(): InputStream is closed");
+			throw new IOException("AJPv13ServletInputStream.read(): InputStream is closed");
 		} else if (!dataSet) {
 			if (data == null || pos >= data.length) {
 				return -1;
 			}
-			throw new IOException(new StringBuilder("OXServletInputStream.read(): ").append(EXC_MSG).toString());
+			throw new IOException(new StringBuilder("AJPv13ServletInputStream.read(): ").append(EXC_MSG).toString());
 		}
 		if (pos >= data.length) {
 			dataSet = false;
@@ -186,36 +178,26 @@ public final class OXServletInputStream extends ServletInputStream {
 		return (data[pos++] & 0xff);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.io.InputStream#read(byte[])
-	 */
 	@Override
 	public int read(final byte[] b) throws IOException {
 		return read(b, 0, b.length);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.io.InputStream#read(byte[], int, int)
-	 */
 	@Override
 	public int read(final byte[] b, final int off, final int len) throws IOException {
 		ensureAccess();
 		if (isClosed) {
-			throw new IOException("OXServletInputStream.read(byte[], int, int): InputStream is closed");
+			throw new IOException("AJPv13ServletInputStream.read(byte[], int, int): InputStream is closed");
 		} else if (!dataSet) {
 			if (data == null || pos >= data.length) {
 				return -1;
 			}
-			throw new IOException(new StringBuilder("OXServletInputStream.read(byte[], int, int): ").append(EXC_MSG)
+			throw new IOException(new StringBuilder("AJPv13ServletInputStream.read(byte[], int, int): ").append(EXC_MSG)
 					.toString());
 		} else if (b == null) {
-			throw new NullPointerException("OXServletInputStream.read(byte[], int, int): Byte array is null");
+			throw new NullPointerException("AJPv13ServletInputStream.read(byte[], int, int): Byte array is null");
 		} else if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) > b.length) || ((off + len) < 0)) {
-			throw new IndexOutOfBoundsException("OXServletInputStream.read(byte[], int, int): Invalid arguments");
+			throw new IndexOutOfBoundsException("AJPv13ServletInputStream.read(byte[], int, int): Invalid arguments");
 		} else if (len == 0) {
 			return 0;
 		}
@@ -261,11 +243,6 @@ public final class OXServletInputStream extends ServletInputStream {
 		return numOfFilledBytes == 0 ? -1 : numOfFilledBytes;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.io.InputStream#skip(long)
-	 */
 	@Override
 	public long skip(final long n) throws IOException {
 		ensureAccess();
@@ -273,21 +250,16 @@ public final class OXServletInputStream extends ServletInputStream {
 			if (data == null || pos >= data.length) {
 				return 0;
 			}
-			throw new IOException("OXServletInputStream.skip(long): No data found");
+			throw new IOException("AJPv13ServletInputStream.skip(long): No data found");
 		} else if (isClosed) {
-			throw new IOException("OXServletInputStream.skip(long): InputStream is closed");
+			throw new IOException("AJPv13ServletInputStream.skip(long): InputStream is closed");
 		} else if (n > Integer.MAX_VALUE) {
-			throw new IOException("OXServletInputStream.skip(long): Too many bytes to skip: " + n);
+			throw new IOException("AJPv13ServletInputStream.skip(long): Too many bytes to skip: " + n);
 		}
 		final byte[] tmp = new byte[(int) n];
 		return (read(tmp, 0, tmp.length));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.io.InputStream#available()
-	 */
 	@Override
 	public int available() throws IOException {
 		ensureAccess();
@@ -295,18 +267,13 @@ public final class OXServletInputStream extends ServletInputStream {
 			if (data == null || pos >= data.length) {
 				return 0;
 			}
-			throw new IOException("OXServletInputStream.available(): No data found");
+			throw new IOException("AJPv13ServletInputStream.available(): No data found");
 		} else if (isClosed) {
-			throw new IOException("OXServletInputStream.available(): InputStream is closed");
+			throw new IOException("AJPv13ServletInputStream.available(): InputStream is closed");
 		}
 		return (data.length - pos);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.io.InputStream#markSupported()
-	 */
 	@Override
 	public boolean markSupported() {
 		return false;
@@ -323,20 +290,23 @@ public final class OXServletInputStream extends ServletInputStream {
 	 */
 	private boolean requestMoreDataFromWebServer() throws IOException {
 		try {
-			if (ajpCon.getAjpRequestHandler().isAllDataRead()) {
+			final AJPv13RequestHandler ajpRequestHandler = ajpCon.getAjpRequestHandler();
+			if (ajpRequestHandler.isAllDataRead()) {
 				/*
 				 * No more data expected
 				 */
 				return false;
 			}
-			ajpCon.getOutputStream().write(
-					AJPv13Response.getGetBodyChunkBytes(ajpCon.getAjpRequestHandler().getNumOfBytesToRequestFor()));
-			ajpCon.getOutputStream().flush();
+			{
+				final OutputStream ajpOut = ajpCon.getOutputStream();
+				ajpOut.write(AJPv13Response.getGetBodyChunkBytes(ajpRequestHandler.getNumOfBytesToRequestFor()));
+				ajpOut.flush();
+			}
 			/*
 			 * Trigger request handler to process expected incoming data package
 			 * which in turn calls the setData() method.
 			 */
-			ajpCon.getAjpRequestHandler().processPackage();
+			ajpRequestHandler.processPackage();
 			return (data != null);
 		} catch (final AJPv13Exception e) {
 			LOG.error(e.getMessage(), e);

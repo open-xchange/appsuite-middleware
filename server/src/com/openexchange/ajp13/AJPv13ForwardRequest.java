@@ -66,13 +66,12 @@ import java.util.regex.Matcher;
 import javax.mail.MessagingException;
 import javax.servlet.http.Cookie;
 
-import com.openexchange.ajp13.AJPv13Exception.AJPCode;
+import com.openexchange.ajp13.exception.AJPv13Exception;
+import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.tools.codec.QuotedPrintable;
 import com.openexchange.tools.regex.RFC2616Regex;
-import com.openexchange.tools.servlet.OXServletInputStream;
-import com.openexchange.tools.servlet.OXServletOutputStream;
 import com.openexchange.tools.servlet.http.HttpServletRequestWrapper;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.tools.servlet.http.HttpSessionManagement;
@@ -182,12 +181,12 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		 * Create Servlet Request with its InputStream
 		 */
 		final HttpServletRequestWrapper servletRequest = new HttpServletRequestWrapper(ajpRequestHandler);
-		servletRequest.setOXInputStream(new OXServletInputStream(ajpRequestHandler.getAJPConnection()));
+		servletRequest.setInputStream(new AJPv13ServletInputStream(ajpRequestHandler.getAJPConnection()));
 		/*
 		 * Create Servlet Response with its OutputStream
 		 */
 		final HttpServletResponseWrapper servletResponse = new HttpServletResponseWrapper(servletRequest);
-		servletResponse.setOXOutputStream(new OXServletOutputStream(ajpRequestHandler.getAJPConnection()));
+		servletResponse.setServletOutputStream(new AJPv13ServletOutputStream(ajpRequestHandler.getAJPConnection()));
 		/*
 		 * Determine method: If next byte is equal to 0xff then the method is
 		 * given by "stored_method" attribute

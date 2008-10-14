@@ -52,17 +52,21 @@ package com.openexchange.ajp13;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
 import java.util.Arrays;
 
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
-import com.openexchange.ajp13.AJPv13Exception.AJPCode;
+import com.openexchange.ajp13.exception.AJPv13Exception;
+import com.openexchange.ajp13.exception.AJPv13InvalidByteSequenceException;
+import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
+import com.openexchange.ajp13.exception.AJPv13UnknownPrefixCodeException;
+import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.monitoring.MonitoringInfo;
-import com.openexchange.tools.servlet.OXServletInputStream;
-import com.openexchange.tools.servlet.OXServletOutputStream;
 import com.openexchange.tools.servlet.http.HttpErrorServlet;
 import com.openexchange.tools.servlet.http.HttpServletManager;
 import com.openexchange.tools.servlet.http.HttpServletRequestWrapper;
@@ -78,11 +82,11 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * processed and control is returned to AJP connection.
  * <p>
  * Sub-sequential AJP communication may be initiated through
- * {@link OXServletInputStream} and {@link OXServletOutputStream} during
+ * {@link AJPv13ServletInputStream} and {@link AJPv13ServletOutputStream} during
  * servlets' processing.
  * 
- * @see OXServletInputStream
- * @see OXServletOutputStream
+ * @see AJPv13ServletInputStream
+ * @see AJPv13ServletOutputStream
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
@@ -180,6 +184,9 @@ public final class AJPv13RequestHandler {
 
 	private byte[] clonedForwardPackage;
 
+	/**
+	 * Initializes a new {@link AJPv13RequestHandler}
+	 */
 	public AJPv13RequestHandler() {
 		super();
 		state = State.IDLE;
@@ -202,6 +209,7 @@ public final class AJPv13RequestHandler {
 		 */
 		AJPv13Server.ajpv13ListenerMonitor.incrementNumWaiting();
 		try {
+			final InputStream ajpInputStream = ajpCon.getInputStream();
 			long start = 0L;
 			final int[] magic;
 			try {
@@ -210,14 +218,14 @@ public final class AJPv13RequestHandler {
 				 */
 				ajpCon.markListenerNonProcessing();
 				start = System.currentTimeMillis();
-				magic = new int[] { ajpCon.getInputStream().read(), ajpCon.getInputStream().read() };
+				magic = new int[] { ajpInputStream.read(), ajpInputStream.read() };
 			} catch (final SocketException e) {
 				throw new AJPv13SocketClosedException(AJPCode.SOCKET_CLOSED_BY_WEB_SERVER, e, Integer
 						.valueOf(ajpCon == null ? 1 : ajpCon.getPackageNumber()), Long.valueOf((System
 						.currentTimeMillis() - start)));
 			}
 			if (checkMagicBytes(magic)) {
-				dataLength = (ajpCon.getInputStream().read() << 8) + ajpCon.getInputStream().read();
+				dataLength = (ajpInputStream.read() << 8) + ajpInputStream.read();
 			} else if (magic[0] == -1 || magic[1] == -1) {
 				throw new AJPv13SocketClosedException(AJPCode.EMPTY_INPUT_STREAM, null, Integer
 						.valueOf(ajpCon == null ? 1 : ajpCon.getPackageNumber()), Long.valueOf(System
@@ -225,8 +233,8 @@ public final class AJPv13RequestHandler {
 						- start));
 			} else {
 				throw new AJPv13InvalidByteSequenceException(Integer.valueOf(ajpCon.getPackageNumber()),
-						toHexString(magic[0]), toHexString(magic[1]), dumpBytes((byte) magic[0], (byte) magic[1],
-								getPayloadData(-1, ajpCon.getInputStream(), false)));
+						toHexString(magic[0]), toHexString(magic[1]), AJPv13Utility.dumpBytes((byte) magic[0],
+								(byte) magic[1], getPayloadData(-1, ajpInputStream, false)));
 			}
 			if (enableTimeout) {
 				/*
@@ -251,72 +259,6 @@ public final class AJPv13RequestHandler {
 		return (magic[0] == PACKAGE_FROM_SERVER_TO_CONTAINER[0] || magic[1] == PACKAGE_FROM_SERVER_TO_CONTAINER[1]);
 	}
 
-	private static String dumpBytes(final byte[] bytes) {
-		if (bytes == null || bytes.length == 0) {
-			return "";
-		}
-		final String space = "    ";
-		final StringBuilder sb = new StringBuilder(1024);
-		int c = 0;
-		int l = 0;
-		for (int k = 0; k < bytes.length; k++) {
-			if (c % 16 == 0) {
-				sb.append('\r').append('\n');
-				c = 0;
-				final String hex = Integer.toHexString(l).toUpperCase();
-				l += 16;
-				final int nOZ = 4 - hex.length();
-				for (int i = 0; i < nOZ; i++) {
-					sb.append('0');
-				}
-				sb.append(hex).append(space);
-			} else {
-				sb.append(' ');
-			}
-			final String s = Integer.toHexString(bytes[k] & 0xff).toUpperCase();
-			if (s.length() == 1) {
-				sb.append('0');
-			}
-			sb.append(s);
-			c++;
-		}
-		return sb.toString();
-	}
-
-	private static String dumpBytes(final byte magic1, final byte magic2, final byte[] bytes) {
-		if (bytes == null) {
-			return "";
-		}
-		final String space = "    ";
-		final StringBuilder sb = new StringBuilder(1024);
-		sb.append("0000").append(space).append(Integer.toHexString(magic1).toUpperCase()).append(' ').append(
-				Integer.toHexString(magic2).toUpperCase());
-		int c = 2;
-		int l = 0;
-		for (final byte b : bytes) {
-			if (c == 16) {
-				sb.append('\r').append('\n');
-				c = 0;
-				l += 16;
-				final String hex = Integer.toHexString(l).toUpperCase();
-				final int nOZ = 4 - hex.length();
-				for (int i = 0; i < nOZ; i++) {
-					sb.append('0');
-				}
-				sb.append(hex).append(space);
-			} else {
-				sb.append(' ');
-			}
-			final String s = Integer.toHexString(b & 0xff).toUpperCase();
-			if (s.length() == 1) {
-				sb.append('0');
-			}
-			sb.append(s);
-			c++;
-		}
-		return sb.toString();
-	}
-
 	/**
 	 * Processes an incoming AJP package from web server. If first package of an
 	 * AJP cycle is processed its prefix code determines further handling. Any
@@ -327,7 +269,7 @@ public final class AJPv13RequestHandler {
 	 */
 	public void processPackage() throws AJPv13Exception {
 		try {
-			if (state.equals(State.IDLE)) {
+			if (State.IDLE.equals(state)) {
 				state = State.ASSIGNED;
 			}
 			ajpCon.incrementPackageNumber();
@@ -390,7 +332,7 @@ public final class AJPv13RequestHandler {
 						clonedPackage[3] = (byte) (dataLength & (255));
 						clonedPackage[4] = (byte) prefixCode;
 						System.arraycopy(payload, 0, clonedPackage, 5, payload.length);
-						LOG.warn("Corresponding AJP package:\n" + dumpBytes(clonedPackage));
+						LOG.warn("Corresponding AJP package:\n" + AJPv13Utility.dumpBytes(clonedPackage));
 					}
 					return;
 				}
@@ -417,13 +359,13 @@ public final class AJPv13RequestHandler {
 			 * This condition is reached when no content-length header was
 			 * present in forward request package (transfer-encoding: chunked)
 			 */
-			request.getOXInputStream().setData(new byte[0]);
+			request.setData(new byte[0]);
 		} else if (contentLength == 0) {
 			/*
 			 * This condition is reached when content-length header's value is
 			 * set to '0'
 			 */
-			request.getOXInputStream().setData(null);
+			request.setData(null);
 		} else {
 			/*
 			 * Forward request is immediately followed by a data package
@@ -441,29 +383,28 @@ public final class AJPv13RequestHandler {
 	}
 
 	/**
-	 * Creates and writes the corresponding AJP response package to the formerly
+	 * Creates and writes the AJP response package corresponding to formerly
 	 * received AJP package.
 	 * 
 	 * @throws AJPv13Exception
-	 *             If an AJP-related error occurs
+	 *             If an AJP error occurs
 	 * @throws ServletException
-	 *             If
-	 *             {@link Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)}
-	 *             method invocation fails
+	 *             If processing the request fails
 	 */
 	public void createResponse() throws AJPv13Exception, ServletException {
 		try {
 			if (ajpRequest == null) {
 				/*
 				 * We received an unsupported prefix code before, thus
-				 * ajpRequest is null. Terminate ajp cycle
+				 * ajpRequest is null. Terminate AJP cycle.
 				 */
-				ajpCon.getOutputStream().write(AJPv13Response.getEndResponseBytes());
-				ajpCon.getOutputStream().flush();
+				final OutputStream out = ajpCon.getOutputStream();
+				out.write(AJPv13Response.getEndResponseBytes());
+				out.flush();
 				endResponseSent = true;
 				return;
 			}
-			ajpRequest.response(ajpCon.getOutputStream(), this);
+			ajpRequest.response(this);
 		} catch (final IOException e) {
 			throw new AJPv13Exception(AJPCode.IO_ERROR, false, e, e.getMessage());
 		}
@@ -476,7 +417,7 @@ public final class AJPv13RequestHandler {
 	 * @return The forward request's bytes as a formatted string
 	 */
 	String getForwardRequest() {
-		return AJPv13Config.isLogForwardRequest() ? dumpBytes(clonedForwardPackage) : "<not enabled>";
+		return AJPv13Config.isLogForwardRequest() ? AJPv13Utility.dumpBytes(clonedForwardPackage) : "<not enabled>";
 	}
 
 	/**
@@ -494,7 +435,7 @@ public final class AJPv13RequestHandler {
 	 * @param ajpCon
 	 *            The AJP connection
 	 */
-	public void setAJPConnection(final AJPv13Connection ajpCon) {
+	void setAJPConnection(final AJPv13Connection ajpCon) {
 		this.ajpCon = ajpCon;
 	}
 
@@ -507,8 +448,9 @@ public final class AJPv13RequestHandler {
 	 * @param strict
 	 *            if <code>true</code> only <code>payloadLength</code> bytes are
 	 *            read, otherwise all data is read
-	 * @return
+	 * @return The read bytes
 	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
 	private static byte[] getPayloadData(final int payloadLength, final InputStream in, final boolean strict)
 			throws IOException {
@@ -575,9 +517,9 @@ public final class AJPv13RequestHandler {
 			LOG.error(e.getMessage(), e);
 		}
 		try {
-			if (!endResponseSent && response != null && response.getOXOutputStream() != null) {
-				response.getOXOutputStream().close();
-				response.removeOXOutputStream();
+			if (!endResponseSent && response != null && response.getServletOutputStream() != null) {
+				response.getServletOutputStream().close();
+				response.removeServletOutputStream();
 			}
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
@@ -664,21 +606,95 @@ public final class AJPv13RequestHandler {
 	}
 
 	/**
-	 * Gets the servlet reference
+	 * Triggers the servlet's service method to start processing the request and
+	 * flushes the response to output stream.
+	 * <p>
+	 * This requets handler is then marked to have the service() method called;
+	 * meaning {@link #isServiceMethodCalled()} will return <code>true</code>.
 	 * 
-	 * @return The servlet reference
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 * @throws ServletException
+	 *             If a servlet error occurs
 	 */
-	public HttpServlet getServlet() {
-		return this.servlet;
+	public void doServletService() throws ServletException, IOException {
+		servlet.service(request, response);
+		doResponseFlush();
+		serviceMethodCalled = true;
 	}
 
 	/**
-	 * Gets the servlet request
+	 * Flushes the response to output stream
 	 * 
-	 * @return The servlet request
+	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
-	public HttpServletRequestWrapper getServletRequest() {
-		return request;
+	private void doResponseFlush() throws IOException {
+		if (response != null) {
+			response.flushBuffer();
+			response.getServletOutputStream().flushByteBuffer();
+		}
+	}
+
+	/**
+	 * Writes the HTTP headers to specified output stream if not already
+	 * written.
+	 * 
+	 * @param out
+	 *            The output stream
+	 * @throws AJPv13Exception
+	 *             If composing the <code>SEND_HEADERS</code> package fails
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 */
+	public void doWriteHeaders(final OutputStream out) throws AJPv13Exception, IOException {
+		if (!headersSent) {
+			out.write(AJPv13Response.getSendHeadersBytes(response));
+			out.flush();
+			response.setCommitted(true);
+			headersSent = true;
+		}
+	}
+
+	/**
+	 * Gets the response output stream's data and clears it
+	 * 
+	 * @return The response output stream's data
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 */
+	public byte[] getAndClearResponseData() throws IOException {
+		final byte[] retval = response.getServletOutputStream().getData();
+		response.getServletOutputStream().clearByteBuffer();
+		return retval;
+	}
+
+	/**
+	 * Sets/appends new data to servlet request's input stream
+	 * 
+	 * @param newData
+	 *            The new data to set
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 */
+	void setData(final byte[] newData) throws IOException {
+		request.setData(newData);
+	}
+
+	/**
+	 * Parses given form's data into servlet request
+	 * 
+	 * @param contentBytes
+	 *            The content bytes representing a form's data
+	 * @throws UnsupportedEncodingException
+	 *             If encoding is not supported
+	 */
+	public void doParseQueryString(final byte[] contentBytes) throws UnsupportedEncodingException {
+		String charEnc = request.getCharacterEncoding();
+		if (charEnc == null) {
+			charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
+		}
+		AJPv13ForwardRequest.parseQueryString(request, new String(contentBytes, charEnc));
 	}
 
 	/**
@@ -687,18 +703,9 @@ public final class AJPv13RequestHandler {
 	 * @param request
 	 *            The servlet request
 	 */
-	public void setServletRequest(final HttpServletRequestWrapper request) {
+	void setServletRequest(final HttpServletRequestWrapper request) {
 		this.request = request;
 		supplyRequestWrapperWithServlet();
-	}
-
-	/**
-	 * Gets the servlet response
-	 * 
-	 * @return The servlet response
-	 */
-	public HttpServletResponseWrapper getServletResponse() {
-		return response;
 	}
 
 	/**
@@ -707,7 +714,7 @@ public final class AJPv13RequestHandler {
 	 * @param response
 	 *            The servlet response
 	 */
-	public void setServletResponse(final HttpServletResponseWrapper response) {
+	void setServletResponse(final HttpServletResponseWrapper response) {
 		this.response = response;
 	}
 
@@ -734,7 +741,7 @@ public final class AJPv13RequestHandler {
 	 * @param contentLength
 	 *            The content length
 	 */
-	public void setContentLength(final long contentLength) {
+	void setContentLength(final long contentLength) {
 		this.contentLength = contentLength;
 		this.bContentLength = true;
 	}
@@ -760,61 +767,13 @@ public final class AJPv13RequestHandler {
 	}
 
 	/**
-	 * Sets the total requested content length
+	 * Checks if the <code>service()</code> method has already been called
 	 * 
-	 * @param totalRequestedContentLength
-	 *            The total requested content length
-	 */
-	public void setTotalRequestedContentLength(final long totalRequestedContentLength) {
-		this.totalRequestedContentLength = totalRequestedContentLength;
-	}
-
-	/**
-	 * Checks if HTTP headers have already been sent to web server
-	 * 
-	 * @return <code>true</code> if HTTP headers have already been sent to web
-	 *         server; otherwise <code>false</code>
-	 */
-	public boolean isHeadersSent() {
-		return headersSent;
-	}
-
-	/**
-	 * Sets if HTTP headers have already been sent to web server
-	 * 
-	 * @param headersSent
-	 *            <code>true</code> if HTTP headers have already been sent to
-	 *            web server; otherwise <code>false</code>
-	 */
-	public void setHeadersSent(final boolean headersSent) {
-		this.headersSent = headersSent;
-	}
-
-	/**
-	 * Checks if
-	 * {@link Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)}
-	 * has already been called
-	 * 
-	 * @return <code>true</code> if
-	 *         {@link Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)}
-	 *         has already been called; otherwise <code>false</code>
+	 * @return <code>true</code> if <code>service()</code> method has already
+	 *         been called; otherwise <code>false</code>
 	 */
 	public boolean isServiceMethodCalled() {
 		return serviceMethodCalled;
-	}
-
-	/**
-	 * Sets if
-	 * {@link Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)}
-	 * has already been called
-	 * 
-	 * @param serviceMethodCalled
-	 *            <code>true</code> if
-	 *            {@link Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)}
-	 *            has already been called; otherwise <code>false</code>
-	 */
-	public void setServiceMethodCalled(final boolean serviceMethodCalled) {
-		this.serviceMethodCalled = serviceMethodCalled;
 	}
 
 	/**
@@ -829,13 +788,9 @@ public final class AJPv13RequestHandler {
 
 	/**
 	 * Sets the end response flag
-	 * 
-	 * @param endResponseSent
-	 *            <code>true</code> if AJP's end response package has been sent
-	 *            to web server; otherwise <code>false</code>
 	 */
-	public void setEndResponseSent(final boolean endResponseSent) {
-		this.endResponseSent = endResponseSent;
+	void setEndResponseSent() {
+		this.endResponseSent = true;
 	}
 
 	/**
@@ -859,12 +814,8 @@ public final class AJPv13RequestHandler {
 	 *            <code>application/x-www-form-urlencoded</code>; otherwise
 	 *            <code>false</code>
 	 */
-	public void setFormData(final boolean isFormData) {
+	void setFormData(final boolean isFormData) {
 		this.isFormData = isFormData;
-	}
-
-	public boolean emptyDataPackageAlreadyReceived() {
-		return emptyDataPackageReceived;
 	}
 
 	/**
@@ -879,10 +830,6 @@ public final class AJPv13RequestHandler {
 			return AJPv13Response.MAX_INT_VALUE;
 		}
 		return (int) retval;
-	}
-
-	public void setEmptyDataPackageReceived(final boolean emptyDataPackageReceived) {
-		this.emptyDataPackageReceived = emptyDataPackageReceived;
 	}
 
 	/**
@@ -969,7 +916,7 @@ public final class AJPv13RequestHandler {
 	 *            <code>true</code> if the HTTP session has joined a previous
 	 *            HTTP session; otherwise <code>false</code>
 	 */
-	public void setHttpSessionId(final String httpSessionId, final boolean join) {
+	void setHttpSessionId(final String httpSessionId, final boolean join) {
 		this.httpSessionId = httpSessionId;
 		this.httpSessionJoined = join;
 	}

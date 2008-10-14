@@ -56,6 +56,7 @@ import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.server.ServerTimer;
 
 /**

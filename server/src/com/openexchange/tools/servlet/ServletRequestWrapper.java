@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.servlet;
 
 import java.io.BufferedReader;
@@ -67,8 +65,9 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
 
-import com.openexchange.ajp13.AJPv13Exception;
-import com.openexchange.ajp13.AJPv13Exception.AJPCode;
+import com.openexchange.ajp13.AJPv13ServletInputStream;
+import com.openexchange.ajp13.exception.AJPv13Exception;
+import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.mail.MailException;
@@ -118,7 +117,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
 	private boolean is_secure;
 
-	private OXServletInputStream is;
+	private AJPv13ServletInputStream is;
 
 	/**
 	 * Constructor
@@ -126,7 +125,7 @@ public class ServletRequestWrapper implements ServletRequest {
 	public ServletRequestWrapper() throws AJPv13Exception {
 		setHeaderInternal(CONTENT_LENGTH, String.valueOf(-1), false);
 	}
-	
+
 	public void setContentLength(final int contentLength) throws AJPv13Exception {
 		setHeaderInternal(CONTENT_LENGTH, String.valueOf(contentLength), false);
 	}
@@ -151,8 +150,9 @@ public class ServletRequestWrapper implements ServletRequest {
 			throws AJPv13Exception {
 		setHeaderInternal(nameArg.toLowerCase(Locale.ENGLISH), value, isContentType);
 	}
-	
-	private final void setHeaderInternal(final String name, final String value, final boolean isContentType) throws AJPv13Exception {
+
+	private final void setHeaderInternal(final String name, final String value, final boolean isContentType)
+			throws AJPv13Exception {
 		if (isContentType) {
 			handleContentType(value);
 		}
@@ -169,8 +169,8 @@ public class ServletRequestWrapper implements ServletRequest {
 			headers.put(name, new String[] { value });
 		}
 	}
-	
-	private final void handleContentType(final String value) throws AJPv13Exception  {
+
+	private final void handleContentType(final String value) throws AJPv13Exception {
 		if (value != null && value.length() > 0) {
 			final ContentType ct;
 			try {
@@ -200,9 +200,9 @@ public class ServletRequestWrapper implements ServletRequest {
 			}
 		} else {
 			/*
-			 * Although http defines to use charset "ISO-8859-1" if protocol
-			 * is set to "HTTP/1.1", we use a pre-defined charset given
-			 * through config file
+			 * Although http defines to use charset "ISO-8859-1" if protocol is
+			 * set to "HTTP/1.1", we use a pre-defined charset given through
+			 * config file
 			 */
 			try {
 				setCharacterEncoding(ServerConfig.getProperty(Property.DefaultEncoding));
@@ -305,12 +305,26 @@ public class ServletRequestWrapper implements ServletRequest {
 		return null;
 	}
 
-	public void setOXInputStream(final OXServletInputStream is) {
+	/**
+	 * Sets the servlet input stream of this servlet request
+	 * 
+	 * @param is
+	 *            The servlet input stream
+	 */
+	public void setInputStream(final AJPv13ServletInputStream is) {
 		this.is = is;
 	}
 
-	public OXServletInputStream getOXInputStream() {
-		return is;
+	/**
+	 * Sets/appends new data to this servlet request's input stream
+	 * 
+	 * @param newData
+	 *            The new data to set/append
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 */
+	public void setData(final byte[] newData) throws IOException {
+		is.setData(newData);
 	}
 
 	public ServletInputStream getInputStream() throws IOException {
@@ -333,10 +347,11 @@ public class ServletRequestWrapper implements ServletRequest {
 	}
 
 	public String getCharacterEncoding() {
-		/*if (characterEncoding == null) {
-			// CHARACTER ENCODING MUST NOT BE NULL
-			characterEncoding = ServerConfig.getProperty(Property.DefaultEncoding);
-		}*/
+		/*
+		 * if (characterEncoding == null) { // CHARACTER ENCODING MUST NOT BE
+		 * NULL characterEncoding =
+		 * ServerConfig.getProperty(Property.DefaultEncoding); }
+		 */
 		return characterEncoding;
 	}
 
@@ -441,20 +456,21 @@ public class ServletRequestWrapper implements ServletRequest {
 	public int getLocalPort() {
 		return 0;
 	}
-	
+
 	/**
 	 * IteratorEnumeration
 	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben
+	 *         Betten</a>
 	 */
 	private static class IteratorEnumeration implements Enumeration<Object> {
 
 		private final Iterator<?> iter;
-		
+
 		public IteratorEnumeration(final Iterator<?> iter) {
 			this.iter = iter;
 		}
-		
+
 		public boolean hasMoreElements() {
 			return iter.hasNext();
 		}
@@ -462,6 +478,6 @@ public class ServletRequestWrapper implements ServletRequest {
 		public Object nextElement() {
 			return iter.next();
 		}
-		
+
 	}
 }

@@ -137,7 +137,7 @@ public class SyncServlet extends PermissionServlet {
 		} catch (final AbstractOXException e) {
 			LOG.error("SyncServlet.doPut()", e);
 			final Writer writer;
-			if (((HttpServletResponseWrapper) resp).getOutputSelection() == HttpServletResponseWrapper.USE_OUTPUT_STREAM) {
+			if (((HttpServletResponseWrapper) resp).getOutputSelection() == HttpServletResponseWrapper.OUTPUT_STREAM) {
 				writer = resp.getWriter();
 			} else {
 				writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(resp.getOutputStream(), resp
@@ -154,7 +154,7 @@ public class SyncServlet extends PermissionServlet {
 			final AbstractOXException wrapper = getWrappingOXException(e);
 			LOG.error(wrapper.getMessage(), wrapper);
 			final Writer writer;
-			if (((HttpServletResponseWrapper) resp).getOutputSelection() == HttpServletResponseWrapper.USE_OUTPUT_STREAM) {
+			if (((HttpServletResponseWrapper) resp).getOutputSelection() == HttpServletResponseWrapper.OUTPUT_STREAM) {
 				writer = resp.getWriter();
 			} else {
 				writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(resp.getOutputStream(), resp
@@ -195,7 +195,7 @@ public class SyncServlet extends PermissionServlet {
 	}
 
 	private final void actionPutClearFolderContent(final Session sessionObj, final Writer writer, final String body,
-			final ParamContainer paramContainer) throws JSONException {
+			final ParamContainer paramContainer) throws JSONException, IOException {
 		/*
 		 * Some variables
 		 */
@@ -303,7 +303,7 @@ public class SyncServlet extends PermissionServlet {
 	private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final AbstractOXException e)
 			throws IOException {
 		final Writer writer;
-		if (resp.getOutputSelection() == HttpServletResponseWrapper.USE_OUTPUT_STREAM) {
+		if (resp.getOutputSelection() == HttpServletResponseWrapper.OUTPUT_STREAM) {
 			writer = resp.getWriter();
 		} else {
 			writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(resp.getOutputStream(), resp

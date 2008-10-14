@@ -47,29 +47,26 @@
  *
  */
 
-package com.openexchange.tools.servlet;
+package com.openexchange.ajp13;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.OutputStream;
 import java.net.SocketException;
 
 import javax.servlet.ServletOutputStream;
 
-import com.openexchange.ajp13.AJPv13Connection;
-import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
- * OXServletOutputStream
+ * {@link AJPv13ServletOutputStream} - The AJP's servlet output stream
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-
-public final class OXServletOutputStream extends ServletOutputStream {
+public final class AJPv13ServletOutputStream extends ServletOutputStream {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(OXServletOutputStream.class);
+			.getLog(AJPv13ServletOutputStream.class);
 
 	private static final String ERR_OUTPUT_CLOSED = "OutputStream is closed";
 
@@ -79,30 +76,30 @@ public final class OXServletOutputStream extends ServletOutputStream {
 
 	private boolean isClosed;
 
-	public OXServletOutputStream(final AJPv13Connection ajpCon) {
+	/**
+	 * Initializes a new {@link AJPv13ServletOutputStream}
+	 * 
+	 * @param ajpCon
+	 *            The associated AJP connection
+	 */
+	AJPv13ServletOutputStream(final AJPv13Connection ajpCon) {
+		super();
 		this.ajpCon = ajpCon;
 		byteBuffer = new UnsynchronizedByteArrayOutputStream(AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
 	}
 
+	/**
+	 * Resets this output stream's buffer
+	 */
 	public void resetBuffer() {
 		byteBuffer.reset();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.io.Closeable#close()
-	 */
 	@Override
 	public void close() throws IOException {
 		flushByteBuffer();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.io.OutputStream#write(int)
-	 */
 	@Override
 	public void write(final int i) throws IOException {
 		if (isClosed) {
@@ -129,29 +126,19 @@ public final class OXServletOutputStream extends ServletOutputStream {
 		return byteBuffer.toByteArray();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.io.OutputStream#write(byte[])
-	 */
 	@Override
 	public void write(final byte[] b) throws IOException {
 		write(b, 0, b.length);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.io.OutputStream#write(byte[], int, int)
-	 */
 	@Override
 	public void write(final byte[] b, final int off, final int len) throws IOException {
 		if (isClosed) {
 			throw new IOException(ERR_OUTPUT_CLOSED);
 		} else if (b == null) {
-			throw new NullPointerException("OXServletOutputStream.write(byte[], int, int): Byte array is null");
+			throw new NullPointerException("AJPv13ServletOutputStream.write(byte[], int, int): Byte array is null");
 		} else if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) > b.length) || ((off + len) < 0)) {
-			throw new IndexOutOfBoundsException("OXServletOutputStream.write(byte[], int, int): Invalid arguments");
+			throw new IndexOutOfBoundsException("AJPv13ServletOutputStream.write(byte[], int, int): Invalid arguments");
 		} else if (len == 0) {
 			return;
 		}
@@ -206,24 +193,22 @@ public final class OXServletOutputStream extends ServletOutputStream {
 	 * buffered bytes cut into AJP SEND_BODY_CHUNK packages to web server
 	 * 
 	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
 	private void responseToWebServer() throws IOException {
 		try {
-			if (!ajpCon.getAjpRequestHandler().isHeadersSent()) {
-				ajpCon.getOutputStream().write(
-						AJPv13Response.getSendHeadersBytes(ajpCon.getAjpRequestHandler().getServletResponse()));
-				ajpCon.getOutputStream().flush();
-				ajpCon.getAjpRequestHandler().setHeadersSent(true);
-				ajpCon.getAjpRequestHandler().getServletResponse().setCommitted(true);
-			}
+			final OutputStream out = ajpCon.getOutputStream();
+			/*
+			 * Ensure headers are written first
+			 */
+			ajpCon.getAjpRequestHandler().doWriteHeaders(out);
 			/*
 			 * Send data cut into MAX_BODY_CHUNK_SIZE pieces
 			 */
 			while (byteBuffer.size() > AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE) {
-				ajpCon.getOutputStream().write(
-						AJPv13Response.getSendBodyChunkBytes(byteBuffer.toByteArray(0,
-								AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE)));
-				ajpCon.getOutputStream().flush();
+				out.write(AJPv13Response.getSendBodyChunkBytes(byteBuffer.toByteArray(0,
+						AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE)));
+				out.flush();
 				byteBuffer.discard(AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
 				/**
 				 * <pre>
@@ -240,8 +225,8 @@ public final class OXServletOutputStream extends ServletOutputStream {
 				 */
 			}
 			if (byteBuffer.size() > 0) {
-				ajpCon.getOutputStream().write(AJPv13Response.getSendBodyChunkBytes(byteBuffer.toByteArray()));
-				ajpCon.getOutputStream().flush();
+				out.write(AJPv13Response.getSendBodyChunkBytes(byteBuffer.toByteArray()));
+				out.flush();
 			}
 			/*
 			 * Since we do not expect any answer here, request handler's
@@ -249,11 +234,11 @@ public final class OXServletOutputStream extends ServletOutputStream {
 			 */
 			byteBuffer.reset();
 		} catch (final SocketException e) {
-			if (e.getMessage().indexOf(ERR_BROKEN_PIPE) != -1) {
+			if (e.getMessage().indexOf(ERR_BROKEN_PIPE) == -1) {
+				LOG.error(e.getMessage(), e);
+			} else {
 				LOG.warn(new StringBuilder("Underlying (TCP) protocol communication aborted: ").append(e.getMessage())
 						.toString(), e);
-			} else {
-				LOG.error(e.getMessage(), e);
 			}
 			final IOException ioexc = new IOException(e.getMessage());
 			ioexc.initCause(e);
@@ -263,25 +248,17 @@ public final class OXServletOutputStream extends ServletOutputStream {
 			throw e;
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
-			throw new IOException(e.getMessage());
+			final IOException ioexc = new IOException(e.getMessage());
+			ioexc.initCause(e);
+			throw ioexc;
 		}
 	}
 
 	/**
-	 * @param chars
+	 * Flushes the byte buffer into stream
+	 * 
 	 * @throws IOException
-	 */
-	public void write(final char[] chars) throws IOException {
-		try {
-			write(new String(chars).getBytes(ajpCon.getAjpRequestHandler().getServletResponse().getCharacterEncoding()));
-		} catch (final UnsupportedEncodingException e) {
-			LOG.error(e.getMessage(), e);
-			throw new IOException(e.getMessage());
-		}
-	}
-
-	/**
-	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
 	public void flushByteBuffer() throws IOException {
 		if (isClosed) {
@@ -291,7 +268,10 @@ public final class OXServletOutputStream extends ServletOutputStream {
 	}
 
 	/**
+	 * Clears the byte buffer
+	 * 
 	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
 	public void clearByteBuffer() throws IOException {
 		if (isClosed) {

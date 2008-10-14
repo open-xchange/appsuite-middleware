@@ -59,6 +59,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.servlet.ServletException;
 
+import com.openexchange.ajp13.exception.AJPv13Exception;
+import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.servlet.UploadServletException;
@@ -403,7 +405,7 @@ public final class AJPv13Listener implements Runnable {
 			 * Send END_RESPONSE package
 			 */
 			writeEndResponse(client, false);
-			ajpCon.getAjpRequestHandler().setEndResponseSent(true);
+			ajpCon.getAjpRequestHandler().setEndResponseSent();
 		}
 	}
 
@@ -413,7 +415,7 @@ public final class AJPv13Listener implements Runnable {
 			 * Send END_RESPONSE package
 			 */
 			writeEndResponse(client, false);
-			ajpCon.getAjpRequestHandler().setEndResponseSent(true);
+			ajpCon.getAjpRequestHandler().setEndResponseSent();
 		}
 	}
 

@@ -59,6 +59,7 @@ import static com.openexchange.ajax.fields.ResponseFields.PROBLEMATIC;
 import static com.openexchange.ajax.fields.ResponseFields.TIMESTAMP;
 import static com.openexchange.ajax.fields.ResponseFields.TRUNCATED;
 
+import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.Map;
@@ -81,221 +82,237 @@ import com.openexchange.groupware.AbstractOXException.Truncated;
 
 /**
  * JSON writer for the response container objekt.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ResponseWriter {
 
-    /**
-     * Prevent instantiation.
-     */
-    private ResponseWriter() {
-        super();
-    }
+	/**
+	 * Prevent instantiation.
+	 */
+	private ResponseWriter() {
+		super();
+	}
 
-    public static JSONObject getJSON(final Response response) throws JSONException {
-        final JSONObject json = new JSONObject();
-        write(response, json);
-        return json;
-    }
-    
-    public static void write(final Response response, final JSONObject json) throws JSONException {
-        if (null != response.getData()) {
-            json.put(DATA, response.getData());
-        }
-        if (null != response.getTimestamp()) {
-            json.put(TIMESTAMP, response.getTimestamp().getTime());
-        }
-        if (null != response.getException()) {
-            final AbstractOXException exception = response.getException();
-            json.put(ERROR, exception.getOrigMessage());
-            if (exception.getMessageArgs() != null) {
-                final JSONArray array = new JSONArray();
-                for (final Object tmp : exception.getMessageArgs()) {
-                    array.put(tmp);
-                }
-                json.put(ERROR_PARAMS, array);
-            }
-            json.put(ERROR_CATEGORY, response.hasWarning() ? Category.WARNING.getCode() : exception.getCategory().getCode());
-            json.put(ERROR_CODE, exception.getErrorCode());
-            json.put(ERROR_ID, exception.getExceptionID());
-            toJSON(json, exception.getProblematics());
-            if (Category.TRUNCATED == exception.getCategory()) {
-                addTruncated(json, exception.getProblematics());
-            }
-        }
-    }
+	public static JSONObject getJSON(final Response response) throws JSONException {
+		final JSONObject json = new JSONObject();
+		write(response, json);
+		return json;
+	}
 
-    private static void toJSON(final JSONObject json,
-        final ProblematicAttribute[] problematics) throws JSONException {
-        final JSONArray array = new JSONArray();
-        for (final ProblematicAttribute problematic : problematics) {
-            array.put(toJSON(problematic));
-        }
-        if (array.length() > 0) {
-            json.put(PROBLEMATIC, array);
-        }
-    }
+	public static void write(final Response response, final JSONObject json) throws JSONException {
+		if (null != response.getData()) {
+			json.put(DATA, response.getData());
+		}
+		if (null != response.getTimestamp()) {
+			json.put(TIMESTAMP, response.getTimestamp().getTime());
+		}
+		if (null != response.getException()) {
+			final AbstractOXException exception = response.getException();
+			json.put(ERROR, exception.getOrigMessage());
+			if (exception.getMessageArgs() != null) {
+				final JSONArray array = new JSONArray();
+				for (final Object tmp : exception.getMessageArgs()) {
+					array.put(tmp);
+				}
+				json.put(ERROR_PARAMS, array);
+			}
+			json.put(ERROR_CATEGORY, response.hasWarning() ? Category.WARNING.getCode() : exception.getCategory()
+					.getCode());
+			json.put(ERROR_CODE, exception.getErrorCode());
+			json.put(ERROR_ID, exception.getExceptionID());
+			toJSON(json, exception.getProblematics());
+			if (Category.TRUNCATED == exception.getCategory()) {
+				addTruncated(json, exception.getProblematics());
+			}
+		}
+	}
 
-    public static JSONObject toJSON(final ProblematicAttribute problematic) throws JSONException {
-        if (problematic instanceof Truncated) {
-            return toJSON((Truncated) problematic);
-        } else if (problematic instanceof Parsing) {
-            return toJSON((Parsing) problematic);
-        }
-        return new JSONObject();
-    }
+	private static void toJSON(final JSONObject json, final ProblematicAttribute[] problematics) throws JSONException {
+		final JSONArray array = new JSONArray();
+		for (final ProblematicAttribute problematic : problematics) {
+			array.put(toJSON(problematic));
+		}
+		if (array.length() > 0) {
+			json.put(PROBLEMATIC, array);
+		}
+	}
 
-    public static JSONObject toJSON(final Truncated truncated) throws JSONException {
-        final JSONObject json = new JSONObject();
-        json.put(TruncatedFields.ID, truncated.getId());
-        json.put(TruncatedFields.LENGTH, truncated.getLength());
-        json.put(TruncatedFields.MAX_SIZE, truncated.getMaxSize());
-        return json;
-    }
+	public static JSONObject toJSON(final ProblematicAttribute problematic) throws JSONException {
+		if (problematic instanceof Truncated) {
+			return toJSON((Truncated) problematic);
+		} else if (problematic instanceof Parsing) {
+			return toJSON((Parsing) problematic);
+		}
+		return new JSONObject();
+	}
 
-    public static JSONObject toJSON(final Parsing parsing) throws JSONException {
-        final JSONObject json = new JSONObject();
-        json.put(ParsingFields.NAME, parsing.getAttribute());
-        return json;
-    }
-    
-    /**
-     * This method adds the old truncated ids.
-     */
-    private static void addTruncated(final JSONObject json,
-        final ProblematicAttribute[] problematics) throws JSONException {
-        final JSONArray array = new JSONArray();
-        for (final ProblematicAttribute problematic : problematics) {
-            if (Truncated.class.isAssignableFrom(problematic.getClass())) {
-                array.put(((Truncated) problematic).getId());
-            }
-        }
-        json.put(TRUNCATED, array);
-    }
+	public static JSONObject toJSON(final Truncated truncated) throws JSONException {
+		final JSONObject json = new JSONObject();
+		json.put(TruncatedFields.ID, truncated.getId());
+		json.put(TruncatedFields.LENGTH, truncated.getLength());
+		json.put(TruncatedFields.MAX_SIZE, truncated.getMaxSize());
+		return json;
+	}
 
-    /**
-     * Serializes a Response object to given instance of <code>
-     * {@link JSONWriter}</code>.
-     * 
-     * @param response
-     *            - the <code>{@link Response}</code> object to serialize.
-     * @param writer
-     *            - the <code>{@link JSONWriter}</code> to write to
-     * @throws JSONException
-     *             - if writing fails
-     */
-    public static void write(final Response response, final JSONWriter writer) throws JSONException {
-        writer.object();
-        final JSONObject json = new JSONObject();
-        write(response, json);
-        final Set<Map.Entry<String, Object>> entrySet = json.entrySet();
-        final int len = entrySet.size();
-        final Iterator<Map.Entry<String, Object>> iter = entrySet.iterator();
-        for (int i = 0; i < len; i++) {
-            final Map.Entry<String, Object> e = iter.next();
-            writer.key(e.getKey()).value(e.getValue());
-        }
-        writer.endObject();
-    }
+	public static JSONObject toJSON(final Parsing parsing) throws JSONException {
+		final JSONObject json = new JSONObject();
+		json.put(ParsingFields.NAME, parsing.getAttribute());
+		return json;
+	}
 
-    /**
-     * Serializes a Response object to the writer.
-     * 
-     * @param response
-     *            Response object to serialize.
-     * @param writer
-     *            the serialized object will be written to this writer.
-     * @throws JSONException
-     *             if writing fails.
-     */
-    public static void write(final Response response, final Writer writer) throws JSONException {
-        final JSONObject json = new JSONObject();
-        ResponseWriter.write(response, json);
-        json.write(writer);
-    }
+	/**
+	 * This method adds the old truncated ids.
+	 */
+	private static void addTruncated(final JSONObject json, final ProblematicAttribute[] problematics)
+			throws JSONException {
+		final JSONArray array = new JSONArray();
+		for (final ProblematicAttribute problematic : problematics) {
+			if (Truncated.class.isAssignableFrom(problematic.getClass())) {
+				array.put(((Truncated) problematic).getId());
+			}
+		}
+		json.put(TRUNCATED, array);
+	}
 
-    /**
-     * Writes given instance of <code>AbstractOXException</code> into given
-     * instance of <code>JSONWriter</code> assuming that writer's mode is
-     * already set to writing a JSON object
-     * 
-     * @param exc
-     *            - the exception to write
-     * @param writer
-     *            - the writer to write to
-     * @throws JSONException
-     *             - if writing fails
-     */
-    public static void writeException(final AbstractOXException exc,
-        final JSONWriter writer) throws JSONException {
-    	writer.key(ResponseFields.ERROR).value(exc.getOrigMessage());
-    	if (exc.getMessageArgs() != null) {
-    		final JSONArray array = new JSONArray();
-    		for (final Object tmp : exc.getMessageArgs()) {
-    			array.put(tmp);
-    		}
-    		writer.key(ResponseFields.ERROR_PARAMS).value(array);
-    	}
-    	writer.key(ResponseFields.ERROR_CATEGORY).value(exc.getCategory().getCode());
-    	writer.key(ResponseFields.ERROR_CODE).value(exc.getErrorCode());
-    	writer.key(ResponseFields.ERROR_ID).value(exc.getExceptionID());
-    	writeProblematic(exc, writer);
-    	writeTruncated(exc, writer);
-    }
+	/**
+	 * Serializes a Response object to given instance of <code>
+     * {@link JSONWriter}</code>
+	 * .
+	 * 
+	 * @param response
+	 *            - the <code>{@link Response}</code> object to serialize.
+	 * @param writer
+	 *            - the <code>{@link JSONWriter}</code> to write to
+	 * @throws JSONException
+	 *             - if writing fails
+	 */
+	public static void write(final Response response, final JSONWriter writer) throws JSONException {
+		writer.object();
+		final JSONObject json = new JSONObject();
+		write(response, json);
+		final Set<Map.Entry<String, Object>> entrySet = json.entrySet();
+		final int len = entrySet.size();
+		final Iterator<Map.Entry<String, Object>> iter = entrySet.iterator();
+		for (int i = 0; i < len; i++) {
+			final Map.Entry<String, Object> e = iter.next();
+			writer.key(e.getKey()).value(e.getValue());
+		}
+		writer.endObject();
+	}
 
-    private static void writeProblematic(final AbstractOXException exc,
-        final JSONWriter writer) throws JSONException {
-        final ProblematicAttribute[] problematics = exc.getProblematics();
-        if (problematics.length > 0) {
-            writer.key(PROBLEMATIC);
-            writer.array();
-            for (final ProblematicAttribute problematic : problematics) {
-                writer.value(toJSON(problematic));
-            }
-            writer.endArray();
-        }
-    }
-    
-    private static void writeTruncated(final AbstractOXException exc,
-        final JSONWriter writer) throws JSONException {
-        final ProblematicAttribute[] problematics = exc.getProblematics();
-        if (problematics.length > 0) {
-            final JSONArray array = new JSONArray();
-            for (final ProblematicAttribute problematic : problematics) {
-                if (problematic instanceof Truncated) {
-                    array.put(((Truncated) problematic).getId());
-                }
-            }
-            writer.key(ResponseFields.TRUNCATED).value(array);
-        }
-    }
+	/**
+	 * Serializes a Response object to the writer.
+	 * 
+	 * @param response
+	 *            Response object to serialize.
+	 * @param writer
+	 *            the serialized object will be written to this writer.
+	 * @throws JSONException
+	 *             if writing fails.
+	 * @throws IOException
+	 *             If an I/O error occurs during writing
+	 */
+	public static void write(final Response response, final Writer writer) throws JSONException, IOException {
+		final JSONObject json = new JSONObject();
+		ResponseWriter.write(response, json);
+		try {
+			json.write(writer);
+		} catch (final JSONException e) {
+			if (e.getCause() instanceof IOException) {
+				/*
+				 * Throw proper I/O error since a serious socket error could
+				 * been occurred which prevents further communication. Just
+				 * throwing a JSON error possibly hides this fact by trying to
+				 * write to/read from a broken socket connection.
+				 */
+				throw (IOException) e.getCause();
+			}
+			/*
+			 * Just re-throw JSON error probably caused by a JSON syntax error.
+			 */
+			throw e;
+		}
+	}
 
-    /**
-     * Writes given instance of <code>AbstractOXException</code> as a warning
-     * into given instance of <code>JSONWriter</code> assuming that writer's
-     * mode is already set to writing a JSON object
-     * 
-     * @param warning
-     *            - the warning to write
-     * @param writer
-     *            - the writer to write to
-     * @throws JSONException
-     *             - if writing fails
-     */
-    public static void writeWarning(final AbstractOXException warning,
-        final JSONWriter writer) throws JSONException {
-    	writer.key(ResponseFields.ERROR).value(warning.getOrigMessage());
-    	if (warning.getMessageArgs() != null) {
-    		final JSONArray array = new JSONArray();
-    		for (final Object tmp : warning.getMessageArgs()) {
-    			array.put(tmp);
-    		}
-    		writer.key(ResponseFields.ERROR_PARAMS).value(array);
-    	}
-    	writer.key(ResponseFields.ERROR_CATEGORY).value(Category.WARNING.getCode());
-    	writer.key(ResponseFields.ERROR_CODE).value(warning.getErrorCode());
-    	writer.key(ResponseFields.ERROR_ID).value(warning.getExceptionID());
-    	writeProblematic(warning, writer);
-    	writeTruncated(warning, writer);
-    }
+	/**
+	 * Writes given instance of <code>AbstractOXException</code> into given
+	 * instance of <code>JSONWriter</code> assuming that writer's mode is
+	 * already set to writing a JSON object
+	 * 
+	 * @param exc
+	 *            - the exception to write
+	 * @param writer
+	 *            - the writer to write to
+	 * @throws JSONException
+	 *             - if writing fails
+	 */
+	public static void writeException(final AbstractOXException exc, final JSONWriter writer) throws JSONException {
+		writer.key(ResponseFields.ERROR).value(exc.getOrigMessage());
+		if (exc.getMessageArgs() != null) {
+			final JSONArray array = new JSONArray();
+			for (final Object tmp : exc.getMessageArgs()) {
+				array.put(tmp);
+			}
+			writer.key(ResponseFields.ERROR_PARAMS).value(array);
+		}
+		writer.key(ResponseFields.ERROR_CATEGORY).value(exc.getCategory().getCode());
+		writer.key(ResponseFields.ERROR_CODE).value(exc.getErrorCode());
+		writer.key(ResponseFields.ERROR_ID).value(exc.getExceptionID());
+		writeProblematic(exc, writer);
+		writeTruncated(exc, writer);
+	}
+
+	private static void writeProblematic(final AbstractOXException exc, final JSONWriter writer) throws JSONException {
+		final ProblematicAttribute[] problematics = exc.getProblematics();
+		if (problematics.length > 0) {
+			writer.key(PROBLEMATIC);
+			writer.array();
+			for (final ProblematicAttribute problematic : problematics) {
+				writer.value(toJSON(problematic));
+			}
+			writer.endArray();
+		}
+	}
+
+	private static void writeTruncated(final AbstractOXException exc, final JSONWriter writer) throws JSONException {
+		final ProblematicAttribute[] problematics = exc.getProblematics();
+		if (problematics.length > 0) {
+			final JSONArray array = new JSONArray();
+			for (final ProblematicAttribute problematic : problematics) {
+				if (problematic instanceof Truncated) {
+					array.put(((Truncated) problematic).getId());
+				}
+			}
+			writer.key(ResponseFields.TRUNCATED).value(array);
+		}
+	}
+
+	/**
+	 * Writes given instance of <code>AbstractOXException</code> as a warning
+	 * into given instance of <code>JSONWriter</code> assuming that writer's
+	 * mode is already set to writing a JSON object
+	 * 
+	 * @param warning
+	 *            - the warning to write
+	 * @param writer
+	 *            - the writer to write to
+	 * @throws JSONException
+	 *             - if writing fails
+	 */
+	public static void writeWarning(final AbstractOXException warning, final JSONWriter writer) throws JSONException {
+		writer.key(ResponseFields.ERROR).value(warning.getOrigMessage());
+		if (warning.getMessageArgs() != null) {
+			final JSONArray array = new JSONArray();
+			for (final Object tmp : warning.getMessageArgs()) {
+				array.put(tmp);
+			}
+			writer.key(ResponseFields.ERROR_PARAMS).value(array);
+		}
+		writer.key(ResponseFields.ERROR_CATEGORY).value(Category.WARNING.getCode());
+		writer.key(ResponseFields.ERROR_CODE).value(warning.getErrorCode());
+		writer.key(ResponseFields.ERROR_ID).value(warning.getExceptionID());
+		writeProblematic(warning, writer);
+		writeTruncated(warning, writer);
+	}
 }

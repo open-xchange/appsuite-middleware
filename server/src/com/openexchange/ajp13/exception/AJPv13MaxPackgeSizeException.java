@@ -49,20 +49,20 @@
 
 
 
-package com.openexchange.ajp13;
+package com.openexchange.ajp13.exception;
 
 
 /**
- * AJPv13InvalidConnectionStateException
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-public class AJPv13InvalidConnectionStateException extends AJPv13Exception {
+public class AJPv13MaxPackgeSizeException extends AJPv13Exception {
 
-	private static final long serialVersionUID = -7972551880925412663L;
-	
-	public AJPv13InvalidConnectionStateException() {
-		super(AJPCode.INVALID_CONNECTION_STATE, true);
+	private static final long serialVersionUID = 6426776659588515820L;
+
+	public AJPv13MaxPackgeSizeException(final int packageSize) {
+		super(AJPCode.MAX_PACKAGE_SIZE, true, Integer.valueOf(packageSize));
 	}
 
 }

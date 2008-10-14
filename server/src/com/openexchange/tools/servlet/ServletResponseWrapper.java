@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.servlet;
 
 import java.io.BufferedWriter;
@@ -65,11 +63,12 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
 
+import com.openexchange.ajp13.AJPv13ServletOutputStream;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 
 /**
- * HttpServletReponseWrapper
+ * {@link ServletResponseWrapper} - Wrapper for {@link ServletResponse}
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -79,11 +78,11 @@ public class ServletResponseWrapper implements ServletResponse {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ServletResponseWrapper.class);
 
-	public static final int USE_OUTPUT_NONE_SELECTED_YET = -1;
+	public static final int OUTPUT_NOT_SELECTED = -1;
 
-	public static final int USE_OUTPUT_STREAM = 1;
+	public static final int OUTPUT_STREAM = 1;
 
-	public static final int USE_OUTPUT_WRITER = 2;
+	public static final int OUTPUT_WRITER = 2;
 
 	private static final String DEFAULT_CHARSET = ServerConfig.getProperty(Property.DefaultEncoding);
 
@@ -95,7 +94,7 @@ public class ServletResponseWrapper implements ServletResponse {
 
 	protected int status;
 
-	protected Map<String, String[]> headers = new HashMap<String, String[]>();
+	protected final Map<String, String[]> headers;
 
 	protected Locale locale;
 
@@ -105,16 +104,19 @@ public class ServletResponseWrapper implements ServletResponse {
 
 	protected int bytePosition;
 
-	// protected byte[] bufferedBytes;
-
-	protected OXServletOutputStream oxOutputStream;
+	protected AJPv13ServletOutputStream oxOutputStream;
 
 	protected PrintWriter writer;
 
-	protected int outputSelection = USE_OUTPUT_NONE_SELECTED_YET;
+	protected int outputSelection;
 
+	/**
+	 * Initializes a new {@link ServletResponseWrapper}
+	 */
 	public ServletResponseWrapper() {
 		super();
+		headers = new HashMap<String, String[]>();
+		outputSelection = OUTPUT_NOT_SELECTED;
 	}
 
 	private static final Pattern CONTENT_TYPE_CHARSET_PARAM = Pattern.compile("(;\\s*charset=)([^\\s|^;]+)");
@@ -125,7 +127,7 @@ public class ServletResponseWrapper implements ServletResponse {
 			/*
 			 * Check if getWriter() was already called
 			 */
-			if (outputSelection == USE_OUTPUT_WRITER && !characterEncoding.equalsIgnoreCase(m.group(2))) {
+			if (outputSelection == OUTPUT_WRITER && !characterEncoding.equalsIgnoreCase(m.group(2))) {
 				throw new IllegalStateException("\"getWriter()\" has already been called. "
 						+ "Not allowed to change its encoding afterwards");
 			}
@@ -157,15 +159,10 @@ public class ServletResponseWrapper implements ServletResponse {
 		return headers.containsKey(CONTENT_LENGTH) ? Integer.parseInt((headers.get(CONTENT_LENGTH))[0]) : 0;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletResponse#flushBuffer()
-	 */
 	public void flushBuffer() throws IOException {
-		if (outputSelection == USE_OUTPUT_WRITER && writer != null) {
+		if (outputSelection == OUTPUT_WRITER && writer != null) {
 			writer.flush();
-		} else if (outputSelection == USE_OUTPUT_STREAM && oxOutputStream != null) {
+		} else if (outputSelection == OUTPUT_STREAM && oxOutputStream != null) {
 			oxOutputStream.flush();
 		}
 	}
@@ -179,7 +176,7 @@ public class ServletResponseWrapper implements ServletResponse {
 		/*
 		 * Check if getWriter() was already called
 		 */
-		if (outputSelection == USE_OUTPUT_WRITER && !characterEncoding.equalsIgnoreCase(characterEncoding)) {
+		if (outputSelection == OUTPUT_WRITER && !characterEncoding.equalsIgnoreCase(characterEncoding)) {
 			throw new IllegalStateException("\"getWriter()\" has already been called. "
 					+ "Not allowed to change its encoding afterwards");
 		}
@@ -227,16 +224,11 @@ public class ServletResponseWrapper implements ServletResponse {
 		return characterEncoding == null ? (characterEncoding = DEFAULT_CHARSET) : characterEncoding;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletResponse#resetBuffer()
-	 */
 	public void resetBuffer() {
 		if (committed) {
 			throw new IllegalStateException("resetBuffer(): The response has already been committed");
 		}
-		if (outputSelection == USE_OUTPUT_WRITER && writer != null) {
+		if (outputSelection == OUTPUT_WRITER && writer != null) {
 			try {
 				if (bufferSize > 0) {
 					writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(oxOutputStream,
@@ -248,25 +240,15 @@ public class ServletResponseWrapper implements ServletResponse {
 			} catch (final UnsupportedEncodingException e) {
 				LOG.error(e.getMessage(), e);
 			}
-		} else if (outputSelection == USE_OUTPUT_STREAM && oxOutputStream != null) {
+		} else if (outputSelection == OUTPUT_STREAM && oxOutputStream != null) {
 			oxOutputStream.resetBuffer();
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletResponse#getLocale()
-	 */
 	public Locale getLocale() {
 		return locale;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletResponse#getWriter()
-	 */
 	public PrintWriter getWriter() throws UnsupportedEncodingException, IOException {
 		if (writer != null) {
 			return writer;
@@ -288,27 +270,22 @@ public class ServletResponseWrapper implements ServletResponse {
 		/*
 		 * Check if getOutputSteam hasn't been called before
 		 */
-		if (outputSelection == USE_OUTPUT_STREAM) {
+		if (outputSelection == OUTPUT_STREAM) {
 			throw new IllegalStateException("Servlet's OutputStream has already been selected as output");
 		}
-		if (outputSelection == USE_OUTPUT_NONE_SELECTED_YET) {
-			outputSelection = USE_OUTPUT_WRITER;
+		if (outputSelection == OUTPUT_NOT_SELECTED) {
+			outputSelection = OUTPUT_WRITER;
 		}
 		if (bufferSize > 0) {
-			writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(oxOutputStream,
-					getCharacterEncoding()), bufferSize), true);
+			writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(oxOutputStream, getCharacterEncoding()),
+					bufferSize), true);
 		} else {
-			writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(oxOutputStream,
-					getCharacterEncoding())), true);
+			writer = new PrintWriter(
+					new BufferedWriter(new OutputStreamWriter(oxOutputStream, getCharacterEncoding())), true);
 		}
 		return writer;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletResponse#isCommitted()
-	 */
 	public boolean isCommitted() {
 		return committed;
 	}
@@ -322,58 +299,43 @@ public class ServletResponseWrapper implements ServletResponse {
 		this.committed = committed;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletResponse#setBufferSize(int)
-	 */
 	public void setBufferSize(final int bufferSize) {
-		if (outputSelection != USE_OUTPUT_NONE_SELECTED_YET) {
+		if (outputSelection != OUTPUT_NOT_SELECTED) {
 			throw new IllegalStateException(
 					"Buffer size MUSTN'T be altered when body content has already been written/selected.");
 		}
 		this.bufferSize = bufferSize;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletResponse#getBufferSize()
-	 */
 	public int getBufferSize() {
 		return bufferSize;
 	}
 
 	/**
-	 * Sets the underlying <code>OXServletOutputStream</code> reference
+	 * Sets the underlying {@link AJPv13ServletOutputStream} reference
 	 * 
 	 * @param os
 	 */
-	public void setOXOutputStream(final OXServletOutputStream os) {
+	public void setServletOutputStream(final AJPv13ServletOutputStream os) {
 		this.oxOutputStream = os;
 	}
 
 	/**
-	 * @return the underlying <code>OXServletOutputStream</code> reference
+	 * @return the underlying {@link AJPv13ServletOutputStream} reference
 	 */
-	public OXServletOutputStream getOXOutputStream() {
+	public AJPv13ServletOutputStream getServletOutputStream() {
 		return oxOutputStream;
 	}
 
 	/**
-	 * Removes the underlying <code>OXServletOutputStream</code> reference by
+	 * Removes the underlying {@link AJPv13ServletOutputStream} reference by
 	 * setting it to <code>null</code>
 	 * 
 	 */
-	public void removeOXOutputStream() {
+	public void removeServletOutputStream() {
 		oxOutputStream = null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletResponse#getOutputStream()
-	 */
 	public ServletOutputStream getOutputStream() throws IOException {
 		if (oxOutputStream == null) {
 			throw new IOException("no ServletOutputStream found!");
@@ -381,11 +343,11 @@ public class ServletResponseWrapper implements ServletResponse {
 		/*
 		 * Check if getOutputSteam hasn't been called before
 		 */
-		if (outputSelection == USE_OUTPUT_WRITER) {
+		if (outputSelection == OUTPUT_WRITER) {
 			throw new IllegalStateException("Servlet's Writer has already been selected as output");
 		}
-		if (outputSelection == USE_OUTPUT_NONE_SELECTED_YET) {
-			outputSelection = USE_OUTPUT_STREAM;
+		if (outputSelection == OUTPUT_NOT_SELECTED) {
+			outputSelection = OUTPUT_STREAM;
 		}
 		return oxOutputStream;
 	}

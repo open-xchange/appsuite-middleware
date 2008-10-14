@@ -55,7 +55,8 @@ import java.net.Socket;
 import java.text.DecimalFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.openexchange.ajp13.AJPv13Exception.AJPCode;
+import com.openexchange.ajp13.exception.AJPv13Exception;
+import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.monitoring.AJPv13ListenerMonitor;
 import com.openexchange.ajp13.monitoring.AJPv13ServerThreadsMonitor;
 import com.openexchange.monitoring.MonitoringInfo;

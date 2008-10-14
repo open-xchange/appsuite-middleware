@@ -49,14 +49,11 @@
 
 package com.openexchange.ajp13;
 
-import static com.openexchange.ajp13.AJPv13ForwardRequest.parseQueryString;
-
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.openexchange.ajp13.AJPv13Exception.AJPCode;
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.ajp13.exception.AJPv13Exception;
+import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 
 /**
  * 
@@ -106,7 +103,7 @@ public final class AJPv13RequestBody extends AJPv13Request {
 				 * from web server
 				 */
 				ajpRequestHandler.makeEqual();
-				ajpRequestHandler.getServletRequest().getOXInputStream().setData(null);
+				ajpRequestHandler.setData(null);
 				return;
 			}
 			/*
@@ -117,7 +114,7 @@ public final class AJPv13RequestBody extends AJPv13Request {
 			if (ajpRequestHandler.isNotSet() || ajpRequestHandler.isMoreDataReadThanExpected()) {
 				ajpRequestHandler.makeEqual();
 			}
-			ajpRequestHandler.getServletRequest().getOXInputStream().setData(null);
+			ajpRequestHandler.setData(null);
 			return;
 		}
 		/*
@@ -128,7 +125,7 @@ public final class AJPv13RequestBody extends AJPv13Request {
 		/*
 		 * Add payload data to servlet's request input stream
 		 */
-		ajpRequestHandler.getServletRequest().getOXInputStream().setData(contentBytes);
+		ajpRequestHandler.setData(contentBytes);
 		/*
 		 * Request Data is recognized as form data and all body chunks have
 		 * already been received. Then turn post data into request parameters.
@@ -150,11 +147,7 @@ public final class AJPv13RequestBody extends AJPv13Request {
 			/*
 			 * Turn form's post data into request parameters
 			 */
-			String charEnc = ajpRequestHandler.getServletRequest().getCharacterEncoding();
-			if (charEnc == null) {
-				charEnc = ServerConfig.getProperty(Property.DefaultEncoding);
-			}
-			parseQueryString(ajpRequestHandler.getServletRequest(), new String(contentBytes, charEnc));
+			ajpRequestHandler.doParseQueryString(contentBytes);
 		}
 	}
 
