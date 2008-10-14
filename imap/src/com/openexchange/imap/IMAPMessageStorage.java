@@ -204,7 +204,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				// .toString());
 				return null;
 			}
-			final MailMessage mail = MIMEMessageConverter.convertMessage(msg);
+			final MailMessage mail;
+			try {
+				mail = MIMEMessageConverter.convertMessage(msg);
+			} catch (final MIMEMailException e) {
+				if (MIMEMailException.Code.MESSAGE_REMOVED.getNumber() == e.getDetailNumber()) {
+					/*
+					 * Obviously message was removed in the meantime
+					 */
+					return null;
+				}
+				throw e;
+			}
 			if (!mail.isSeen() && markSeen) {
 				mail.setPrevSeen(false);
 				if (imapConfig.isSupportsACLs()) {
