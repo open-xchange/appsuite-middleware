@@ -541,6 +541,21 @@ public final class AJPv13Listener implements Runnable {
 	}
 
 	/**
+	 * Discards the socket
+	 */
+	public void discardSocket() {
+		if (client != null) {
+			try {
+				client.close();
+			} catch (final IOException e) {
+				LOG.debug("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe)",
+						e);
+			}
+			client = null;
+		}
+	}
+
+	/**
 	 * @return <code>true</code> if this listener has been started; otherwise
 	 *         <code>false</code>
 	 */

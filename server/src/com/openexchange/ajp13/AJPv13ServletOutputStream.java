@@ -240,6 +240,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream {
 				LOG.warn(new StringBuilder("Underlying (TCP) protocol communication aborted: ").append(e.getMessage())
 						.toString(), e);
 			}
+			ajpCon.discardAll();
 			final IOException ioexc = new IOException(e.getMessage());
 			ioexc.initCause(e);
 			throw ioexc;

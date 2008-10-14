@@ -54,6 +54,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Socket;
 import java.net.SocketException;
 
 import javax.servlet.ServletException;
@@ -92,11 +93,20 @@ public final class AJPv13Connection {
 
 	private AJPv13RequestHandler ajpRequestHandler;
 
+	/**
+	 * Initializes a new {@link AJPv13Connection}
+	 * 
+	 * @param listener
+	 *            The AJP listener providing client socket
+	 */
 	public AJPv13Connection(final AJPv13Listener listener) {
 		this();
 		setAndApplyListener(listener);
 	}
 
+	/**
+	 * Initializes a new {@link AJPv13Connection}
+	 */
 	public AJPv13Connection() {
 		super();
 		state = IDLE_STATE;
@@ -219,7 +229,7 @@ public final class AJPv13Connection {
 	 */
 	public InputStream getInputStream() throws IOException {
 		if (inputStream == null) {
-			return (inputStream = new BufferedInputStream(listener.getSocket().getInputStream()));
+			throw new IOException("Input stream not availalbe");
 		}
 		return inputStream;
 	}
@@ -233,8 +243,7 @@ public final class AJPv13Connection {
 	 */
 	public OutputStream getOutputStream() throws IOException {
 		if (outputStream == null) {
-			return (outputStream = new BufferedOutputStream(listener.getSocket().getOutputStream(),
-					AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE));
+			throw new IOException("Output stream not availalbe");
 		}
 		return outputStream;
 	}
@@ -290,11 +299,31 @@ public final class AJPv13Connection {
 		/*
 		 * Remove underlying input/output stream
 		 */
+		discardStreams();
+		/*
+		 * Remove associated listener
+		 */
+		listener = null;
+	}
+
+	/**
+	 * Sets both input and output stream to <code>null</code> and closes
+	 * associated socket.
+	 */
+	public void discardAll() {
+		discardStreams();
+		listener.discardSocket();
+	}
+
+	/**
+	 * Sets both input and output stream to <code>null</code>
+	 */
+	private void discardStreams() {
 		if (outputStream != null) {
 			try {
 				outputStream.close();
 			} catch (final IOException e) {
-				LOG.error(e.getMessage(), e);
+				LOG.debug("Output stream could not be closed", e);
 			}
 			this.outputStream = null;
 		}
@@ -302,24 +331,15 @@ public final class AJPv13Connection {
 			try {
 				inputStream.close();
 			} catch (final IOException e) {
-				LOG.error(e.getMessage(), e);
+				LOG.debug("Input stream could not be closed", e);
 			}
 			this.inputStream = null;
 		}
-		/*
-		 * Remove associated listener
-		 */
-		listener = null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder(100);
+		final StringBuilder sb = new StringBuilder(128);
 		sb.append("State: ").append(state == IDLE_STATE ? "IDLE" : "ASSIGNED").append(" | ");
 		sb.append("Listener: ").append(listener.getListenerName()).append(" | ");
 		return sb.toString();
@@ -358,8 +378,10 @@ public final class AJPv13Connection {
 	private void setAndApplyListener(final AJPv13Listener listener) {
 		this.listener = listener;
 		try {
-			this.inputStream = new BufferedInputStream(listener.getSocket().getInputStream());
-			this.outputStream = new BufferedOutputStream(listener.getSocket().getOutputStream());
+			final Socket client = listener.getSocket();
+			this.inputStream = new BufferedInputStream(client.getInputStream());
+			this.outputStream = new BufferedOutputStream(client.getOutputStream(),
+					AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
 		} catch (final IOException e) {
 			LOG.error(e.getMessage(), e);
 		}
