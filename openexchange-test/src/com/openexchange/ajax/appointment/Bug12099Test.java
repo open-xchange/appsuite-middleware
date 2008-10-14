@@ -91,7 +91,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
      * Creates a series appointment. Deletes one occurrence and checks if series
      * then has the changed_from set to 0.
      */
-    public void _testSeriesChangedFromIsZero() throws Throwable {
+    public void testSeriesChangedFromIsZero() throws Throwable {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = client.getValues().getTimeZone();

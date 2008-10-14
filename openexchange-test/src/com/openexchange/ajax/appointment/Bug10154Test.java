@@ -127,6 +127,7 @@ public final class Bug10154Test extends AbstractAJAXSession {
         		appointment.setStartDate(new Date(TimeTools.getHour(0, tzA)));
         		appointment.setEndDate(new Date(TimeTools.getHour(1, tzA)));
         		appointment.setParticipants(onInsert);
+        		appointment.setIgnoreConflicts(true);
         		final InsertRequest request = new InsertRequest(appointment, tzA);
         		final CommonInsertResponse response = clientA.execute(request);
         		appointment.setLastModified(response.getTimestamp());
@@ -140,7 +141,8 @@ public final class Bug10154Test extends AbstractAJAXSession {
         		change.setLastModified(appointment.getLastModified());
         		change.setStartDate(new Date(TimeTools.getHour(1, tzB)));
         		change.setEndDate(new Date(TimeTools.getHour(2, tzB)));
-        		final UpdateRequest request = new UpdateRequest(appointment, tzB);
+        		change.setIgnoreConflicts(true);
+        		final UpdateRequest request = new UpdateRequest(change, tzB);
         		final UpdateResponse response = clientB.execute(request);
         		appointment.setLastModified(response.getTimestamp());
         	}
