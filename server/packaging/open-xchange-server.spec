@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.6.0
-Release:	11
+Release:	12
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -139,6 +139,14 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Oct 13 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12099: Setting modified by when updating series if a virtual
+   exception is created.
+ - Bugfix #12254: Removed overwriting of participants with old ones if an
+   appointment is changed in a shared folder.
+* Wed Oct 01 2008 - francisco.laguna@open-xchange.com
+  - Bugfix #12258 : Do not crash with NPE when requesting full time 
+    appointment with recurrences via updates without date boundaries
 * Mon Sep 29 2008 - thorben.betten@open-xchange.com
  - Bugfix #12212: Fixed moving a change exception of a recurring appointment
  - Bugfix #12231: Applying configurable separator character to a mail
