@@ -88,8 +88,6 @@ import com.openexchange.tools.servlet.http.HttpSessionManagement;
  */
 public final class AJPv13ForwardRequest extends AJPv13Request {
 
-	private static final String STR_EMPTY = "";
-
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13ForwardRequest.class);
 
@@ -98,9 +96,9 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 			"CHECKOUT", "UNCHECKOUT", "SEARCH", "MKWORKSPACE", "UPDATE", "LABEL", "MERGE", "BASELINE_CONTROL",
 			"MKACTIVITY" };
 
-	private static final Map<Integer, String> httpHeaderMapping = new HashMap<Integer, String>();
+	private static final Map<Integer, String> httpHeaderMapping = new HashMap<Integer, String>(14);
 
-	private static final Map<Integer, String> attributeMapping = new HashMap<Integer, String>();
+	private static final Map<Integer, String> attributeMapping = new HashMap<Integer, String>(14);
 
 	/**
 	 * A "set" to keep track of known JSESSIONIDs
@@ -108,6 +106,8 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 	private static final Map<String, Object> jsessionids = new ConcurrentHashMap<String, Object>();
 
 	private static final String DEFAULT_ENCODING = ServerConfig.getProperty(Property.DefaultEncoding);
+
+	private static final String STR_EMPTY = "";
 
 	private static final String MIME_FORM_DATA = "application/x-www-form-urlencoded";
 
@@ -122,9 +122,9 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 	private static final String ATTR_SSL_KEY_SIZE = "ssl_key_size";
 
 	/**
-	 * This byte value indicates termination of request.
+	 * This byte value indicates termination of a forward request.
 	 */
-	public static final int REQUEST_TERMINATOR = 0xFF;
+	private static final int REQUEST_TERMINATOR = 0xFF;
 
 	static {
 		httpHeaderMapping.put(Integer.valueOf(0x01), "accept");
@@ -157,17 +157,16 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		attributeMapping.put(Integer.valueOf(REQUEST_TERMINATOR), "are_done");
 	}
 
+	/**
+	 * Initializes a new {@link AJPv13ForwardRequest}
+	 * 
+	 * @param payloadData
+	 *            The payload data
+	 */
 	public AJPv13ForwardRequest(final byte[] payloadData) {
 		super(payloadData);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.tools.ajp13.AJPv13Request#processRequest(com.openexchange
-	 * .tools.ajp13.AJPv13RequestHandler)
-	 */
 	@Override
 	public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
 		processForwardRequest(ajpRequestHandler);
@@ -698,6 +697,8 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		addJSessionIDCookie(null, resp, ajpRequestHandler);
 	}
 
+	private static final String DEFAULT_PATH = "/";
+
 	private static void addJSessionIDCookie(final String id, final HttpServletResponseWrapper resp,
 			final AJPv13RequestHandler ajpRequestHandler) {
 		final String jsessionIdVal;
@@ -733,7 +734,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 			}
 		}
 		final Cookie jsessionIDCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, jsessionIdVal);
-		jsessionIDCookie.setPath("/");
+		jsessionIDCookie.setPath(DEFAULT_PATH);
 		jsessionIDCookie.setMaxAge(-1); // session cookie
 		ajpRequestHandler.setHttpSessionId(jsessionIdVal, join);
 		jsessionids.put(jsessionIdVal, STR_EMPTY);
