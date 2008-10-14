@@ -2,8 +2,7 @@
 
  - Bugfix #12099: Setting modified by when updating series if a virtual
    exception is created.
- - Bugfix #12254: Removed overwriting of participants with old ones if an
-   appointment is changed in a shared folder.
+ - Bugfix #12254: Merged fix made in SP3 bugfix branch.
 
 * 2008-10-01 - francisco.laguna@open-xchange.com
 
