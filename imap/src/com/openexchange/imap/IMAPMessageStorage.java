@@ -1039,6 +1039,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				composedMail.setMsgref(null);
 			}
 			/*
+			 * Force folder update
+			 */
+			notifyIMAPFolderModification(draftFullname);
+			/*
 			 * Return draft mail
 			 */
 			return getMessage(draftFullname, uid, true);
