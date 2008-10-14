@@ -337,7 +337,23 @@ public final class CalendarCommonCollection {
             }
         }
     }
-    
+
+    static final boolean checkIfUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up) {
+        final UserParticipant check[] = cdao.getUsers();
+        if (check != null && check.length > 0) {
+            Arrays.sort(check);
+            int x = Arrays.binarySearch(check, up);
+            if (x >= 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Add editing user or shared folder owner to user participants. This ensures
+     * the user itself is always on the participants list.
+     */
     static void checkAndFillIfUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up) {
         final UserParticipant check[] = cdao.getUsers();
         if (check != null && check.length > 0) {
@@ -422,6 +438,9 @@ public final class CalendarCommonCollection {
         }
     }
     
+    /**
+     * If user or shared folder owner is missing in participants it is added.
+     */
     static void checkAndFillIfUserIsUser(final CalendarDataObject cdao, final Participant p) {
         final Participant check[] = cdao.getParticipants();
         if (check != null && check.length > 0) {

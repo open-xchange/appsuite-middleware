@@ -449,18 +449,23 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 		        CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
 		    }
 		} else if (cdao.getFolderType() == FolderObject.SHARED) {
-		    if (cdao.containsParentFolderID()) {
-		        cdao.setSharedFolderOwner(ofa.getFolderOwner(cdao.getParentFolderID()));
-		    } else {
-		        cdao.setSharedFolderOwner(ofa.getFolderOwner(inFolder));
-		    }
-		    if (!isInsert && !cdao.containsUserParticipants()) {
-		        cdao.setUsers(edao.getUsers());
-		    }
-		    final UserParticipant up = new UserParticipant(cdao.getSharedFolderOwner());
-		    up.setConfirm(CalendarDataObject.ACCEPT);
-		    CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
-		    
+            if (cdao.containsParentFolderID()) {
+                cdao.setSharedFolderOwner(ofa.getFolderOwner(cdao.getParentFolderID()));
+            } else {
+                cdao.setSharedFolderOwner(ofa.getFolderOwner(inFolder));
+            }
+            final UserParticipant up = new UserParticipant(cdao.getSharedFolderOwner());
+            if (isInsert) {
+                up.setConfirm(CalendarDataObject.ACCEPT);
+            }
+            if (isInsert) {
+                CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
+            } else {
+                if (!cdao.containsUserParticipants() && !CalendarCommonCollection.checkIfUserIsParticipant(edao, up)) {
+                    cdao.setUsers(edao.getUsers());
+                    CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
+                }
+            }
 		} else if (cdao.getFolderType() == FolderObject.PUBLIC) {
 		    if(!cdao.containsParticipants()) {
 		        if(null != edao && null != edao.getParticipants()) {
