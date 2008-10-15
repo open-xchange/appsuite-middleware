@@ -1635,11 +1635,7 @@ class CalendarMySQL implements CalendarSqlImp {
 			CalendarCommonCollection.closeResultSet(rs);
 			CalendarCommonCollection.closePreparedStatement(prep);
 			if (readcon != null) {
-				try {
-					DBPool.push(ctx, readcon);
-				} catch (final DBPoolingException dbpe) {
-					LOG.error("DBPoolingException:updateAppointment (push)", dbpe);
-				}
+				DBPool.push(ctx, readcon);
 			}
 		}
 		return edao;
@@ -2921,11 +2917,7 @@ class CalendarMySQL implements CalendarSqlImp {
 			throw new OXException(dbpe);
 		} finally {
 			if (readcon != null) {
-				try {
-					DBPool.push(context, readcon);
-				} catch (final DBPoolingException dbpe) {
-					LOG.error("DBPoolingException:checkIfMasterIsOrphaned (push)", dbpe);
-				}
+				DBPool.push(context, readcon);
 			}
 		}
 		return ret;
@@ -2963,11 +2955,7 @@ class CalendarMySQL implements CalendarSqlImp {
 			throw new OXException(dbpe);
 		} finally {
 			if (readcon != null) {
-				try {
-					DBPool.push(context, readcon);
-				} catch (final DBPoolingException dbpe) {
-					LOG.error("DBPoolingException:checkForDeletedMasterObject (push)", dbpe);
-				}
+				DBPool.push(context, readcon);
 			}
 		}
 		return ret;
@@ -3006,11 +2994,7 @@ class CalendarMySQL implements CalendarSqlImp {
 			throw new OXException(dbpe);
 		} finally {
 			if (readcon != null) {
-				try {
-					DBPool.push(context, readcon);
-				} catch (final DBPoolingException dbpe) {
-					LOG.error("DBPoolingException:checkForDeletedParticipants (push)", dbpe);
-				}
+				DBPool.push(context, readcon);
 			}
 		}
 		return ret;
@@ -3236,11 +3220,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		} finally {
 			CalendarCommonCollection.closeResultSet(rs);
 			CalendarCommonCollection.closePreparedStatement(prep);
-			try {
-				DBPool.push(ctx, readcon);
-			} catch (final DBPoolingException dbpe) {
-				LOG.error("DBPoolingException:deleteAppointment (push)", dbpe);
-			}
+			DBPool.push(ctx, readcon);
 		}
 		if (clientLastModified == null) {
 			throw new OXCalendarException(OXCalendarException.Code.LAST_MODIFIED_IS_NULL);
@@ -3449,11 +3429,7 @@ class CalendarMySQL implements CalendarSqlImp {
 				throw new OXException(dbpe);
 			} finally {
 				if (close_read && readcon != null) {
-					try {
-						DBPool.push(ctx, readcon);
-					} catch (final DBPoolingException dbpe) {
-						LOG.error("DBPoolingException:deleteSingleAppointment (push) ", dbpe);
-					}
+					DBPool.push(ctx, readcon);
 				}
 			}
 		}
@@ -3542,11 +3518,7 @@ class CalendarMySQL implements CalendarSqlImp {
 					throw new OXException(dbpe);
 				} finally {
 					if (close_read && readcon != null) {
-						try {
-							DBPool.push(ctx, readcon);
-						} catch (final DBPoolingException dbpe) {
-							LOG.error("DBPoolingException:deleteSingleAppointment (push) ", dbpe);
-						}
+						DBPool.push(ctx, readcon);
 					}
 				}
 			}
@@ -3776,11 +3748,7 @@ class CalendarMySQL implements CalendarSqlImp {
 			CalendarCommonCollection.closeResultSet(rs);
 			CalendarCommonCollection.closePreparedStatement(prep);
 			if (close_read && rcon != null) {
-				try {
-					DBPool.push(c, rcon);
-				} catch (final DBPoolingException dbpe) {
-					LOG.error("DBPoolingException:deleteExceptions (push) ", dbpe);
-				}
+				DBPool.push(c, rcon);
 			}
 		}
 		return al;
@@ -3832,11 +3800,7 @@ class CalendarMySQL implements CalendarSqlImp {
 			CalendarCommonCollection.closeResultSet(rs);
 			CalendarCommonCollection.closePreparedStatement(prep);
 			if (close_read && rcon != null) {
-				try {
-					DBPool.push(c, rcon);
-				} catch (final DBPoolingException dbpe) {
-					LOG.error("DBPoolingException:getDeletedExceptionList (push) ", dbpe);
-				}
+				DBPool.push(c, rcon);
 			}
 		}
 		return al;

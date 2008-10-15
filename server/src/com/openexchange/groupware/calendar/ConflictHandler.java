@@ -248,11 +248,7 @@ public class ConflictHandler {
                 CalendarCommonCollection.closePreparedStatement(private_folder_information);
             }
             if (close_connection && readcon != null) {
-                try {
-                    DBPool.push(ctx, readcon);
-                } catch (final DBPoolingException dbpe) {
-                    LOG.error("error pushing readable connection" ,dbpe);
-                }
+                DBPool.push(ctx, readcon);
             }
         }
     }
@@ -344,11 +340,7 @@ public class ConflictHandler {
                 CalendarCommonCollection.closePreparedStatement(private_folder_information);
             }
             if (close_connection && readcon != null) {
-                try {
-                    DBPool.push(ctx, readcon);
-                } catch (final DBPoolingException dbpe) {
-                    LOG.error("error pushing readable connection" ,dbpe);
-                }
+                DBPool.push(ctx, readcon);
             }
         }
     }
@@ -447,11 +439,7 @@ public class ConflictHandler {
                 CalendarCommonCollection.closePreparedStatement(private_folder_information);
             }
             if (close_connection && readcon != null) {
-                try {
-                    DBPool.push(ctx, readcon);
-                } catch (final DBPoolingException dbpe) {
-                    LOG.error("error pushing readable connection" ,dbpe);
-                }
+                DBPool.push(ctx, readcon);
             }
         }
     }

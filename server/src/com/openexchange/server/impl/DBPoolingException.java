@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.server.impl;
 
 import com.openexchange.groupware.AbstractOXException;
@@ -66,32 +64,6 @@ public class DBPoolingException extends AbstractOXException {
      * For serialization.
      */
     private static final long serialVersionUID = -8656698696406966658L;
-
-    /**
-     * @param message error message
-     * @deprecated since all exceptions should have error codes.
-     */
-    @Deprecated
-	public DBPoolingException(final String message) {
-        super(EnumComponent.DB_POOLING, message);
-    }
-
-    /**
-     * @param exc the cause of the exception.
-     * @deprecated since all exceptions should have error codes.
-     */
-    @Deprecated
-	public DBPoolingException(final Exception exc) {
-        super(EnumComponent.DB_POOLING, exc);
-    }
-
-    /**
-     * Initializes a new exception using the information provides by the code.
-     * @param code code for the exception.
-     */
-    public DBPoolingException(final Code code) {
-        this(code, null, new Object[0]);
-    }
 
     /**
      * Initializes a new exception using the information provides by the cause.

@@ -127,12 +127,8 @@ public class CalendarSql implements AppointmentSQLInterface {
             } catch(final Exception e) {
                 throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
             } finally {
-                try {
-                    if (readcon != null) {
-                        DBPool.push(ctx, readcon);
-                    }
-                } catch (final DBPoolingException dbpe) {
-                    LOG.error(ERROR_PUSHING_DATABASE, dbpe);
+                if (readcon != null) {
+                    DBPool.push(ctx, readcon);
                 }
             }
         }
@@ -237,11 +233,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     CalendarCommonCollection.closePreparedStatement(prep);
                 }
                 if (readcon != null && close_connection) {
-                    try {
-                        DBPool.push(ctx, readcon);
-                    } catch (final DBPoolingException dbpe) {
-                        LOG.error(ERROR_PUSHING_DATABASE, dbpe);
-                    }
+                    DBPool.push(ctx, readcon);
                 }
             }
         }
@@ -311,11 +303,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     CalendarCommonCollection.closePreparedStatement(prep);
                 }
                 if (readcon != null && close_connection) {
-                    try {
-                        DBPool.push(ctx, readcon);
-                    } catch (final DBPoolingException dbpe) {
-                        LOG.error(ERROR_PUSHING_DATABASE, dbpe);
-                    }
+                    DBPool.push(ctx, readcon);
                 }
             }
         }
@@ -390,11 +378,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     CalendarCommonCollection.closePreparedStatement(prep);
                 }
                 if (readcon != null && close_connection) {
-                    try {
-                        DBPool.push(ctx, readcon);
-                    } catch (final DBPoolingException dbpe) {
-                        LOG.error(ERROR_PUSHING_DATABASE, dbpe);
-                    }
+                    DBPool.push(ctx, readcon);
                 }
             }
         }
@@ -457,11 +441,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 CalendarCommonCollection.closeResultSet(rs);
                 CalendarCommonCollection.closePreparedStatement(prep);
                 if (closeRead && rcon != null) {
-                    try {
-                        DBPool.push(ctx, rcon);
-                    } catch (final DBPoolingException dbpe) {
-                        LOG.error(ERROR_PUSHING_DATABASE, dbpe);
-                    }
+                    DBPool.push(ctx, rcon);
                 }
             }
         }
@@ -565,11 +545,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(25));
             } finally {
                 if (writecon != null) {
-                    try {
-                        DBPool.pushWrite(ctx, writecon);
-                    } catch (final DBPoolingException dbpe) {
-                        LOG.error(ERROR_PUSHING_WRITEABLE_CONNECTION, dbpe);
-                    }
+                    DBPool.pushWrite(ctx, writecon);
                 }
             }
             
@@ -676,11 +652,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(26));
             } finally {
                 if (writecon != null) {
-                    try {
-                        DBPool.pushWrite(ctx, writecon);
-                    } catch (final DBPoolingException dbpe) {
-                        LOG.error(ERROR_PUSHING_WRITEABLE_CONNECTION, dbpe);
-                    }
+                    DBPool.pushWrite(ctx, writecon);
                 }
             }
             
@@ -749,11 +721,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 } catch(final SQLException ac) {
                 	LOG.error(ac.getMessage(), ac);
                 }
-                try {
-                    DBPool.pushWrite(ctx, writecon);
-                } catch (final DBPoolingException dbpe) {
-                    LOG.error(ERROR_PUSHING_WRITEABLE_CONNECTION,  dbpe);
-                }
+                DBPool.pushWrite(ctx, writecon);
             }
         } else {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
@@ -811,18 +779,10 @@ public class CalendarSql implements AppointmentSQLInterface {
                 CalendarCommonCollection.closeResultSet(rs);
                 CalendarCommonCollection.closePreparedStatement(prep);
                 if (readcon != null) {
-                    try {
-                        DBPool.push(ctx, readcon);
-                    } catch (final DBPoolingException dbpe) {
-                        LOG.error(ERROR_PUSHING_DATABASE, dbpe);
-                    }
+                    DBPool.push(ctx, readcon);
                 }
                 if (writecon != null) {
-                    try {
-                        DBPool.pushWrite(ctx, writecon);
-                    } catch (final DBPoolingException dbpe) {
-                        LOG.error(ERROR_PUSHING_WRITEABLE_CONNECTION,  dbpe);
-                    }
+                    DBPool.pushWrite(ctx, writecon);
                 }
             }
         } else {
@@ -895,11 +855,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(30));
             } finally {
                 if (readcon != null) {
-                    try {
-                        DBPool.push(ctx, readcon);
-                    } catch (final DBPoolingException dbpe) {
-                        LOG.error(ERROR_PUSHING_DATABASE, dbpe);
-                    }
+                    DBPool.push(ctx, readcon);
                 }
             }
         }
@@ -958,11 +914,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(31));
             } finally {
                 if (readcon != null) {
-                    try {
-                        DBPool.push(ctx, readcon);
-                    } catch (final DBPoolingException dbpe) {
-                        LOG.error(ERROR_PUSHING_DATABASE, dbpe);
-                    }
+                    DBPool.push(ctx, readcon);
                 }
             }
         }
@@ -1044,11 +996,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     if (readcon != null && close_connection) {
                         CalendarCommonCollection.closeResultSet(rs);
                         CalendarCommonCollection.closePreparedStatement(prep);
-                        try {
-                            DBPool.push(ctx, readcon);
-                        } catch (final DBPoolingException dbpe) {
-                            LOG.error(ERROR_PUSHING_DATABASE ,dbpe);
-                        }
+                        DBPool.push(ctx, readcon);
                     }
                 }
             }
@@ -1125,11 +1073,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     CalendarCommonCollection.closePreparedStatement(prep);
                 }
                 if (readcon != null && close_connection) {
-                    try {
-                        DBPool.push(ctx, readcon);
-                    } catch (final DBPoolingException dbpe) {
-                        LOG.error(ERROR_PUSHING_DATABASE ,dbpe);
-                    }
+                    DBPool.push(ctx, readcon);
                 }
             }
         }
@@ -1207,11 +1151,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     CalendarCommonCollection.closePreparedStatement(prep);
                 }
                 if (readcon != null && close_connection) {
-                    try {
-                        DBPool.push(ctx, readcon);
-                    } catch (final DBPoolingException dbpe) {
-                        LOG.error(ERROR_PUSHING_DATABASE ,dbpe);
-                    }
+                    DBPool.push(ctx, readcon);
                 }
             }
         }
@@ -1247,11 +1187,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(35));
             } finally {
                 if (readcon != null && close_connection) {
-                    try {
-                        DBPool.push(ctx, readcon);
-                    } catch (final DBPoolingException dbpe) {
-                        LOG.error(ERROR_PUSHING_DATABASE ,dbpe);
-                    }
+                    DBPool.push(ctx, readcon);
                 }
             }
         }
@@ -1294,11 +1230,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     CalendarCommonCollection.closePreparedStatement(prep);
                 }
                 if (readcon != null && close_connection) {
-                    try {
-                        DBPool.push(ctx, readcon);
-                    } catch (final DBPoolingException dbpe) {
-                        LOG.error(ERROR_PUSHING_DATABASE ,dbpe);
-                    }
+                    DBPool.push(ctx, readcon);
                 }
             }
         }

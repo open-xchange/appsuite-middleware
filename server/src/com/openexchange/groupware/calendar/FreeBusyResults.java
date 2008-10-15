@@ -323,11 +323,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         CalendarCommonCollection.closePreparedStatement(prep);
         CalendarCommonCollection.closePreparedStatement(private_folder_information);
         if (con != null) {
-            try {
-                DBPool.push(c, con);
-            } catch (final DBPoolingException dbpe) {
-                LOG.error(CalendarSql.ERROR_PUSHING_DATABASE, dbpe);
-            }
+            DBPool.push(c, con);
         }
     }
     

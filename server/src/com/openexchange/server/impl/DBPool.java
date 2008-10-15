@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.server.impl;
 
 import java.sql.Connection;
@@ -78,22 +76,22 @@ public class DBPool  {
         return Database.get(context, true);
     }
     
-    public static final boolean push(final Connection con) throws DBPoolingException {
+    public static final boolean push(final Connection con) {
         Database.back(false, con);
         return true;
     }
     
-    public static final boolean push(final Context context, final Connection con) throws DBPoolingException {
+    public static final boolean push(final Context context, final Connection con) {
         Database.back(context, false, con);
         return true;
     }
     
-    public static final boolean pushWrite(final Connection con) throws DBPoolingException {
+    public static final boolean pushWrite(final Connection con) {
         Database.back(true, con);
         return true;
     }
     
-    public static final boolean pushWrite(final Context context, final Connection con) throws DBPoolingException {
+    public static final boolean pushWrite(final Context context, final Connection con) {
         Database.back(context, true, con);
         return true;
     }

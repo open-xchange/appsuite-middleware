@@ -329,11 +329,7 @@ public final class CalendarCommonCollection {
             throw new OXException(dbpe);
         } finally {
             if (readcon != null) {
-                try {
-                    DBPool.push(ctx, readcon);
-                } catch (final DBPoolingException dbpe) {
-                    LOG.error("error pushing readable connection", dbpe);
-                }
+                DBPool.push(ctx, readcon);
             }
         }
     }
@@ -1157,11 +1153,7 @@ public final class CalendarCommonCollection {
             throw new OXException(dbpe);
         } finally {
             if (close_write && writecon != null) {
-                try {
-                    DBPool.pushWrite(context, writecon);
-                } catch (final DBPoolingException dbpe) {
-                    LOG.error("DBPoolingException:deleteSingleAppointment (push) ", dbpe);
-                }
+                DBPool.pushWrite(context, writecon);
             }
         }
     }
@@ -1372,11 +1364,7 @@ public final class CalendarCommonCollection {
 			closePreparedStatement(prep);
 			closeResultSet(rs);
 			if (readcon != null) {
-				try {
-					DBPool.push(c, readcon);
-				} catch (final DBPoolingException dbpe) {
-					LOG.error("error pushing readable connection", dbpe);
-				}
+			    DBPool.push(c, readcon);
 			}
 		}
 		return ret;

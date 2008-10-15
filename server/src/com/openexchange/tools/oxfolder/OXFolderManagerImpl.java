@@ -1372,15 +1372,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 				Contacts.trashContactsFromFolder(folderID, session, readCon, writeCon, false);
 			} finally {
 				if (createReadCon && readCon != null) {
-					try {
-						DBPool.push(ctx, readCon);
-					} catch (final DBPoolingException e) {
-						/*
-						 * Just log here cause nevertheless writable connection
-						 * should be closed
-						 */
-						LOG.error(e.getMessage(), e);
-					}
+					DBPool.push(ctx, readCon);
 				}
 				if (createWriteCon && writeCon != null) {
 					DBPool.pushWrite(ctx, writeCon);

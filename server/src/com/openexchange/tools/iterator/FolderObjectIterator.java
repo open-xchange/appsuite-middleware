@@ -443,14 +443,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 		 * Close connection
 		 */
 		if (closeCon && (readCon != null)) {
-			try {
-				DBPool.push(ctx, readCon);
-			} catch (final DBPoolingException e) {
-				if (error == null) {
-					error = new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e
-							.getLocalizedMessage());
-				}
-			}
+			DBPool.push(ctx, readCon);
 			readCon = null;
 		}
 		if (error != null) {
