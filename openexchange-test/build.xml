@@ -31,7 +31,8 @@
     <!-- Classpath -->
     <path id="project.classpath">
         <fileset dir="${bundlesdir}">
-            <include name="**/*.jar" />
+            <include name="**/*.jar"/>
+            <exclude name="**/xerces.jar"/>
         </fileset>
         <fileset dir="${lib}">
             <include name="*.jar" />
