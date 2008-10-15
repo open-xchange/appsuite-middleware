@@ -146,12 +146,6 @@ public final class MailProperties {
 	private boolean adminMailLoginEnabled;
 
 	/**
-	 * Define if a search is triggered when the recipient selection dialog is
-	 * opened or the folder is changed.
-	 */
-	private boolean recipientAutoSearch = true;
-
-	/**
 	 * Initializes a new {@link MailProperties}
 	 */
 	private MailProperties() {
@@ -232,7 +226,6 @@ public final class MailProperties {
 		supportSubscription = false;
 		defaultMailProvider = null;
 		adminMailLoginEnabled = false;
-		recipientAutoSearch = true;
 	}
 
 	private void loadProperties0() throws MailConfigException {
@@ -514,13 +507,6 @@ public final class MailProperties {
 			}
 			logBuilder.append("\tJavaMail Properties loaded: ").append(javaMailProperties != null).append('\n');
 		}
-        {
-            final String recipientAutoSearchStr = configuration.getProperty(
-                "com.openexchange.mail.recipientAutoSearch", STR_TRUE);
-            recipientAutoSearch = Boolean.parseBoolean(recipientAutoSearchStr);
-            logBuilder.append("\tRecipient Auto Search Enabled: ");
-            logBuilder.append(recipientAutoSearch).append('\n');
-        }
 
 		logBuilder.append("Global mail properties successfully loaded!");
 		if (LOG.isInfoEnabled()) {
@@ -622,15 +608,6 @@ public final class MailProperties {
 	 */
 	public boolean isAdminMailLoginEnabled() {
 		return adminMailLoginEnabled;
-	}
-
-	/**
-     * Define if a search is triggered when the recipient selection dialog is
-     * opened or the folder is changed.
-     * @return <code>true</code> if search should be triggered.
-	 */
-	public boolean isRecipientAutoSearch() {
-	    return recipientAutoSearch;
 	}
 
 	/**
