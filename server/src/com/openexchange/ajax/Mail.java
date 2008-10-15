@@ -259,6 +259,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public static final String PARAMETER_FLAGS = "flags";
 
+	public static final String PARAMETER_UNSEEN = "unseen";
+
 	private static final String VIEW_TEXT = "text";
 
 	private static final String VIEW_HTML = "html";
@@ -851,6 +853,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 			final boolean saveToDisk = (tmp != null && tmp.length() > 0 && Integer.parseInt(tmp) > 0);
 			tmp = paramContainer.getStringParam(PARAMETER_VIEW);
 			final String view = null == tmp ? null : tmp.toLowerCase(Locale.ENGLISH);
+			tmp = paramContainer.getStringParam(PARAMETER_UNSEEN);
+			final boolean unseen = (tmp != null && (STR_1.equals(tmp) || Boolean.parseBoolean(tmp)));
 			tmp = null;
 			/*
 			 * Get message
@@ -862,7 +866,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					mailInterface = MailServletInterface.getInstance(session);
 					closeMailInterface = true;
 				}
-				final MailMessage mail = mailInterface.getMessage(folderPath, uid);
+				final MailMessage mail = mailInterface.getMessage(folderPath, uid, unseen);
 				if (mail == null) {
 					throw new MailException(MailException.Code.MAIL_NOT_FOUND, Long.valueOf(uid), folderPath);
 				}
