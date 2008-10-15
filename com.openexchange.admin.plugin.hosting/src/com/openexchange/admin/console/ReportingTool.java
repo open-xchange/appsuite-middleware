@@ -273,11 +273,7 @@ public class ReportingTool extends BasicCommandlineOptions {
 				e.printStackTrace();
 			}finally{
 				closePreparedStatement(ps);
-				try {
-					DBPool.push(tmp,con);
-				} catch (DBPoolingException e) {
-					e.printStackTrace();
-				}
+				DBPool.push(tmp,con);
 			}
 		}
 		
@@ -324,11 +320,7 @@ public class ReportingTool extends BasicCommandlineOptions {
 				e.printStackTrace();
 			}finally{
 				closePreparedStatement(ps);
-				try {
-					DBPool.push(tmp,con);
-				} catch (DBPoolingException e) {
-					e.printStackTrace();
-				}
+				DBPool.push(tmp,con);
 			}
 		}
 		
@@ -376,11 +368,7 @@ public class ReportingTool extends BasicCommandlineOptions {
 		}finally{
 			closePreparedStatement(ps);
 			closePreparedStatement(mapping);
-			try {
-				DBPool.pushWrite(con);
-			} catch (DBPoolingException e) {
-				e.printStackTrace();
-			}
+			DBPool.pushWrite(con);
 		}
 
 	}
