@@ -136,12 +136,7 @@ public class InfostoreDowngradeTest extends TestCase {
             fail(x.getMessage());
         } finally {
             if(con != null) {
-                try {
-                    DBPool.pushWrite(ctx, con);
-                } catch (final DBPoolingException e) {
-                    //IGNORE
-                    e.printStackTrace();
-                }
+                DBPool.pushWrite(ctx, con);
             }
         }
     }

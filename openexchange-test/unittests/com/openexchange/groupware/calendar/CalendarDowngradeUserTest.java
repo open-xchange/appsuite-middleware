@@ -137,12 +137,7 @@ public class CalendarDowngradeUserTest extends TestCase {
             fail(x.getMessage());
         } finally {
             if(con != null) {
-                try {
-                    DBPool.pushWrite(ctx, con);
-                } catch (final DBPoolingException e) {
-                    //IGNORE
-                    e.printStackTrace();
-                }
+                DBPool.pushWrite(ctx, con);
             }
         }
     }
@@ -205,11 +200,7 @@ public class CalendarDowngradeUserTest extends TestCase {
             // IGNORE
         } finally {
             if(writecon != null) {
-                try {
-                    DBPool.pushWrite(ctx, writecon);
-                } catch (final DBPoolingException e) {
-                    e.printStackTrace();
-                }
+                DBPool.pushWrite(ctx, writecon);
             }
         }
 
@@ -293,11 +284,7 @@ public class CalendarDowngradeUserTest extends TestCase {
             return -1;
         } finally {
             if(writecon != null) {
-                try {
-                    DBPool.pushWrite(ctx, writecon);
-                } catch (final DBPoolingException e) {
-                    e.printStackTrace();
-                }
+                DBPool.pushWrite(ctx, writecon);
             }
         }
     }

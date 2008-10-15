@@ -120,11 +120,7 @@ public class CalendarFolderToolkit {
             return null;
         } finally {
         	if(writecon != null) {
-                try {
-                    DBPool.pushWrite(ctx, writecon);
-                } catch (final DBPoolingException e) {
-                    //IGNORE
-                }
+                DBPool.pushWrite(ctx, writecon);
             }
         }
     }
@@ -177,11 +173,7 @@ public class CalendarFolderToolkit {
             e.printStackTrace();
         } finally {
             if(writecon != null) {
-                try {
-                    DBPool.pushWrite(ctx, writecon);
-                } catch (final DBPoolingException e) {
-                    //IGNORE
-                }
+                DBPool.pushWrite(ctx, writecon);
             }
         }
     }
