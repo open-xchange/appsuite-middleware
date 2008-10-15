@@ -92,10 +92,7 @@ public class PushDelayedObject implements Delayed {
 	
 	@Override
 	public boolean equals(final Object o) {
-		if (o.hashCode() == hashCode()) {
-			return true;
-		}
-		return false;
+		return (o.hashCode() == hashCode());
 	}
 
 	@Override
