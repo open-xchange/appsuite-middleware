@@ -1639,6 +1639,10 @@ public class Mail extends PermissionServlet implements UploadListener {
 			if (tmp != null) { // view
 				map.put(PARAMETER_VIEW, tmp);
 			}
+			tmp = paramContainer.getStringParam(PARAMETER_UNSEEN);
+			if (tmp != null) { // unseen
+				map.put(PARAMETER_UNSEEN, tmp);
+			}
 			tmp = null;
 		} catch (final AbstractOXException e) {
 			final Response response = new Response();

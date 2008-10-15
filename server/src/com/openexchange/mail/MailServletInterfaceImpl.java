@@ -428,7 +428,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		final String fullname = prepareMailFolderParam(folder);
 		final MailMessage mail = mailAccess.getMessageStorage().getMessage(fullname, msgUID, unseen ? false : true);
 		if (mail != null) {
-			if (unseen) {
+			if (unseen && !mail.isSeen()) {
 				mailAccess.getMessageStorage().updateMessageFlags(fullname, new long[] { msgUID },
 						MailMessage.FLAG_SEEN, false);
 				mail.setFlag(MailMessage.FLAG_SEEN, false);
