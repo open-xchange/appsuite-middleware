@@ -130,7 +130,9 @@ public final class PooledNotification implements Delayed {
 	}
 
 	public int compareTo(final Delayed o) {
-		return Long.valueOf(stamp).compareTo(Long.valueOf(((PooledNotification) o).stamp));
+		final long thisStamp = this.stamp;
+		final long otherStamp = ((PooledNotification) o).stamp;
+		return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
 	}
 
 	/**
