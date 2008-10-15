@@ -64,7 +64,10 @@ import com.openexchange.i18n.tools.RenderMap;
 import com.openexchange.server.ServerTimer;
 
 /**
- * {@link NotificationPool}
+ * {@link NotificationPool} - Pools instances of {@link PooledNotification} for
+ * a consolidated update notification.
+ * <p>
+ * Ensure method {@link #startup()} is invoked prior to using this pool.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -107,9 +110,9 @@ public final class NotificationPool {
 	}
 
 	/**
-	 * Puts given pooled notification into this pool. If a pooled notification
-	 * is already present for identified receiver-object pair, it is merged with
-	 * given pooled notification. Moreover its time stamp is updated.
+	 * Puts given pooled notification into this pool. If an equal pooled
+	 * notification is already present, it is merged with given pooled
+	 * notification. Moreover its time stamp is updated.
 	 * 
 	 * @param pooledNotification
 	 *            The pooled notification to put.
