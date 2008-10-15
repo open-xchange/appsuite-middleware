@@ -58,7 +58,8 @@ import com.openexchange.i18n.tools.RenderMap;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link PooledNotification}
+ * {@link PooledNotification} - Holds all necessary informations about the most
+ * up-to-date object status.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
