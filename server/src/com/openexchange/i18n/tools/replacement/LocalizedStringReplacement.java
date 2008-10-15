@@ -68,7 +68,7 @@ public abstract class LocalizedStringReplacement implements TemplateReplacement 
 
 	private final TemplateToken token;
 
-	private final String replacement;
+	private String replacement;
 
 	protected Locale locale;
 
@@ -137,4 +137,29 @@ public abstract class LocalizedStringReplacement implements TemplateReplacement 
 		return this;
 	}
 
+	public boolean merge(final TemplateReplacement other) {
+		if (LocalizedStringReplacement.class.isInstance(other)) {
+			/*
+			 * Class mismatch or null
+			 */
+			return false;
+		}
+		if (!getToken().equals(other.getToken())) {
+			/*
+			 * Token mismatch
+			 */
+			return false;
+		}
+		if (!other.changed()) {
+			/*
+			 * Other replacement does not reflect a changed value; leave
+			 * unchanged
+			 */
+			return false;
+		}
+		final LocalizedStringReplacement o = (LocalizedStringReplacement) other;
+		this.replacement = o.replacement;
+		this.changed = true;
+		return true;
+	}
 }

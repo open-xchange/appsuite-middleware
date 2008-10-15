@@ -137,8 +137,26 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		super();
 	}
 
+	/**
+	 * Sends specified message
+	 * 
+	 * @param mmsg
+	 *            The message
+	 * @param session
+	 *            The session
+	 * @param obj
+	 *            The calendar object
+	 * @param state
+	 *            The state
+	 */
+	protected static void sendMessage(final MailMessage mmsg, final ServerSession session, final CalendarObject obj,
+			final State state) {
+		new ParticipantNotify().sendMessage(mmsg.title, mmsg.message, mmsg.addresses, session, obj, mmsg.folderId,
+				state, false, mmsg.internal);
+	}
+
 	protected void sendMessage(final String messageTitle, final String message, final List<String> name,
-			final ServerSession session, final CalendarObject obj, int folderId, final State state,
+			final ServerSession session, final CalendarObject obj, final int folderId, final State state,
 			final boolean suppressOXReminderHeader, final boolean internal) {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Sending message to: " + name);
@@ -146,15 +164,16 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			LOG.debug(message);
 			LOG.debug("\n\n============");
 		}
-		if (folderId == -1) {
-			folderId = obj.getParentFolderID();
+		int fuid = folderId;
+		if (fuid == -1) {
+			fuid = obj.getParentFolderID();
 		}
 
 		if (suppressOXReminderHeader) {
-			folderId = MailObject.DONT_SET;
+			fuid = MailObject.DONT_SET;
 		}
 
-		final MailObject mail = new MailObject(session, obj.getObjectID(), folderId, state.getModule());
+		final MailObject mail = new MailObject(session, obj.getObjectID(), fuid, state.getModule());
 		mail.setFromAddr(UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail());
 		mail.setToAddrs(name.toArray(new String[name.size()]));
 		mail.setText(message);
@@ -343,10 +362,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		final RenderMap renderMap = createRenderMap(newObj, oldObj, isUpdate, title, state.getModule(), receivers,
 				sessionObj);
 		/*
-		 * The action replacement used to compose message title
-		 */
-		final TemplateReplacement actionRepl = state.getAction();
-		/*
 		 * Add confirmation action replacement to render map if non-null
 		 */
 		{
@@ -356,6 +371,24 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			}
 		}
 
+		/*
+		 * Create message list
+		 */
+		final List<MailMessage> messages = createMessageList(oldObj, newObj, state, forceNotifyOthers, isUpdate,
+				sessionObj, receivers, title, renderMap);
+
+		/*
+		 * Send messages
+		 */
+		for (final MailMessage mmsg : messages) {
+			sendMessage(mmsg.title, mmsg.message, mmsg.addresses, sessionObj, newObj, mmsg.folderId, state,
+					suppressOXReminderHeader, mmsg.internal);
+		}
+	}
+
+	private List<MailMessage> createMessageList(final CalendarObject oldObj, final CalendarObject newObj,
+			final State state, final boolean forceNotifyOthers, final boolean isUpdate, final ServerSession sessionObj,
+			final Map<Locale, List<EmailableParticipant>> receivers, final String title, final RenderMap renderMap) {
 		final OXFolderAccess access = new OXFolderAccess(sessionObj.getContext());
 		final StringBuilder b = new StringBuilder(2048);
 
@@ -364,6 +397,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			/*
 			 * Apply new locale to replacements
 			 */
+			final TemplateReplacement actionRepl = state.getAction();
 			actionRepl.setLocale(locale);
 			renderMap.applyLocale(locale);
 			/*
@@ -410,17 +444,17 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 								folderName = "";
 							}
 						}
-						final TemplateReplacement tr = new FormatLocalizedStringReplacement(TemplateToken.FOLDER_NAME,
-								Notifications.FORMAT_FOLDER, folderName);
-						tr.setLocale(locale);
+						final TemplateReplacement folderRepl = new FormatLocalizedStringReplacement(
+								TemplateToken.FOLDER_NAME, Notifications.FORMAT_FOLDER, folderName);
+						folderRepl.setLocale(locale);
 						if (oldObj != null) {
 							if (p.folderId > 0) {
-								checkChangedFolder(oldObj, p.email, folderId, tr, sessionObj);
+								checkChangedFolder(oldObj, p.email, folderId, folderRepl, sessionObj);
 							} else {
-								tr.setChanged(newObj.getParentFolderID() != oldObj.getParentFolderID());
+								folderRepl.setChanged(newObj.getParentFolderID() != oldObj.getParentFolderID());
 							}
 						}
-						renderMap.put(tr);
+						renderMap.put(folderRepl);
 					}
 
 					/*
@@ -428,21 +462,49 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 					 */
 					state.addSpecial(newObj, oldObj, renderMap, p);
 
-					/*
-					 * Compose message
-					 */
-					messages.add(createParticipantMessage(p, title, actionRepl, state, locale, renderMap, isUpdate, b));
+					if (isUpdate && EmailableParticipant.STATE_NONE == p.state) {
+						/*
+						 * Add to pool
+						 */
+						NotificationPool.getInstance().put(
+								new PooledNotification(p, title, state, locale, (RenderMap) renderMap.clone(),
+										sessionObj, newObj));
+					} else {
+						/*
+						 * Compose message
+						 */
+						messages.add(createParticipantMessage(p, title, actionRepl, state, locale, renderMap, isUpdate,
+								b));
+					}
 				}
 			}
 		}
-
-		for (final MailMessage mmsg : messages) {
-			sendMessage(mmsg.title, mmsg.message, mmsg.addresses, sessionObj, newObj, mmsg.folderId, state,
-					suppressOXReminderHeader, mmsg.internal);
-		}
+		return messages;
 	}
 
-	private MailMessage createParticipantMessage(final EmailableParticipant p, final String title,
+	/**
+	 * Creates a message for specified participant
+	 * 
+	 * @param p
+	 *            The participant
+	 * @param title
+	 *            The object's title
+	 * @param actionRepl
+	 *            The action replacement to compose the message's title
+	 * @param state
+	 *            The object's state
+	 * @param locale
+	 *            The locale
+	 * @param renderMap
+	 *            The render map
+	 * @param isUpdate
+	 *            <code>true</code> if an update event triggered the
+	 *            notification; otherwise <code>false</code>
+	 * @param b
+	 *            A string builder
+	 * @return The created message
+	 */
+	protected static MailMessage createParticipantMessage(final EmailableParticipant p, final String title,
 			final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap,
 			final boolean isUpdate, final StringBuilder b) {
 		final MailMessage msg = new MailMessage();
@@ -686,7 +748,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		return renderMap;
 	}
 
-	private RenderMap clonedRenderMap(final RenderMap renderMap) {
+	private static RenderMap clonedRenderMap(final RenderMap renderMap) {
 		return ((RenderMap) renderMap.clone()).applyChangedStatus(false);
 	}
 
@@ -1158,7 +1220,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		participantSet.add(participant);
 	}
 
-	private static class MailMessage {
+	static final class MailMessage {
 
 		/**
 		 * Initializes a new MailMessage

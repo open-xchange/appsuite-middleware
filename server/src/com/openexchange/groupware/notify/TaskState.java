@@ -90,11 +90,11 @@ public class TaskState extends LinkableState {
 	}
 
 	public void modifyInternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
-
+		// Nothing to do
 	}
 
 	public void modifyExternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
-
+		// Nothing to do
 	}
 
 	public DateFormat getDateFormat(final Locale locale) {

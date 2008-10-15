@@ -129,9 +129,11 @@ public class NotificationConfig extends AbstractConfig implements Initialization
         if(!INSTANCE.isPropertiesLoadInternal()) {
 			INSTANCE.loadPropertiesInternal();
 		}
+        NotificationPool.getInstance().startup();
     }
 
     public void stop() {
+    	 NotificationPool.getInstance().shutdown();
         INSTANCE = new NotificationConfig();
     }
 

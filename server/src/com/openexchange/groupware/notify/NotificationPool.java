@@ -1,0 +1,209 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.groupware.notify;
+
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import com.openexchange.groupware.notify.ParticipantNotify.MailMessage;
+import com.openexchange.i18n.tools.RenderMap;
+import com.openexchange.server.ServerTimer;
+
+/**
+ * {@link NotificationPool}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
+public final class NotificationPool {
+
+	private static final NotificationPool instance = new NotificationPool();
+
+	/**
+	 * Gets the {@link NotificationPool} instance
+	 * 
+	 * @return The {@link NotificationPool} instance
+	 */
+	public static NotificationPool getInstance() {
+		return instance;
+	}
+
+	private final AtomicBoolean started;
+
+	private final ReadWriteLock lock;
+
+	private final Lock readLock;
+
+	private TimerTask timerTask;
+
+	private final Map<PooledNotification, PooledNotification> map;
+
+	private final DelayQueue<PooledNotification> queue;
+
+	/**
+	 * Initializes a new {@link NotificationPool}
+	 */
+	private NotificationPool() {
+		super();
+		started = new AtomicBoolean();
+		map = new ConcurrentHashMap<PooledNotification, PooledNotification>(1024);
+		queue = new DelayQueue<PooledNotification>();
+		lock = new ReentrantReadWriteLock();
+		readLock = lock.readLock();
+	}
+
+	/**
+	 * Puts given pooled notification into this pool. If a pooled notification
+	 * is already present for identified receiver-object pair, it is merged with
+	 * given pooled notification. Moreover its time stamp is updated.
+	 * 
+	 * @param pooledNotification
+	 *            The pooled notification to put.
+	 */
+	public void put(final PooledNotification pooledNotification) {
+		readLock.lock();
+		try {
+			final PooledNotification prev = map.get(pooledNotification);
+			if (prev == null) {
+				map.put(pooledNotification, pooledNotification);
+				queue.offer(pooledNotification);
+			} else {
+				prev.merge(pooledNotification);
+				prev.touch();
+			}
+		} finally {
+			readLock.unlock();
+		}
+	}
+
+	/**
+	 * Start-up for this notification pool
+	 */
+	public void startup() {
+		if (started.compareAndSet(false, true)) {
+			/*
+			 * Create timer task and schedule it
+			 */
+			timerTask = new NotificationPoolTimerTask(map, queue, lock.writeLock());
+			ServerTimer.getTimer().schedule(timerTask, 1000, 60000);
+		}
+	}
+
+	/**
+	 * Shut-down for this notification pool
+	 */
+	public void shutdown() {
+		if (started.compareAndSet(true, false)) {
+			timerTask.cancel();
+			ServerTimer.getTimer().purge();
+			map.clear();
+			queue.clear();
+			timerTask = null;
+		}
+	}
+
+	private class NotificationPoolTimerTask extends TimerTask {
+
+		private final Lock twriteLock;
+
+		private final Map<PooledNotification, PooledNotification> tmap;
+
+		private final DelayQueue<PooledNotification> tqueue;
+
+		public NotificationPoolTimerTask(final Map<PooledNotification, PooledNotification> map,
+				final DelayQueue<PooledNotification> queue, final Lock writeLock) {
+			super();
+			this.tmap = map;
+			this.tqueue = queue;
+			this.twriteLock = writeLock;
+		}
+
+		@Override
+		public void run() {
+			twriteLock.lock();
+			try {
+				StringBuilder b = null;
+				PooledNotification cur = tqueue.poll();
+				while (cur != null) {
+					if (b == null) {
+						b = new StringBuilder(2048);
+					}
+					/*
+					 * An expired pooled notification
+					 */
+					tmap.remove(cur);
+					final EmailableParticipant p = cur.getParticipant();
+					final RenderMap renderMap = cur.getRenderMap();
+					renderMap.applyLocale(cur.getLocale());
+					renderMap.applyTimeZone(p.timeZone == null ? TimeZone.getDefault() : p.timeZone);
+					/*
+					 * Create message
+					 */
+					final MailMessage mmsg = ParticipantNotify.createParticipantMessage(p, cur.getTitle(), cur
+							.getState().getAction(), cur.getState(), cur.getLocale(), cur.getRenderMap(), true, b);
+					/*
+					 * Send notification
+					 */
+					ParticipantNotify.sendMessage(mmsg, cur.getSession(), cur.getCalendarObject(), cur.getState());
+					cur = tqueue.poll();
+				}
+			} finally {
+				twriteLock.unlock();
+			}
+		}
+	}
+}

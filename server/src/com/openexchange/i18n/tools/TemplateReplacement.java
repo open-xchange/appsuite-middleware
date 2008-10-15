@@ -131,4 +131,23 @@ public interface TemplateReplacement extends Cloneable {
 	 */
 	public TemplateReplacement getClone() throws CloneNotSupportedException;
 
+	/**
+	 * Merges this replacement with specified replacement provided that classes
+	 * and {@link TemplateToken tokens} of both replacements are equal:
+	 * <ul>
+	 * <li>If other replacement's {@link #changed()} returns <code>true</code>,
+	 * the replacement is taken from other replacement</li> <li>Otherwise this
+	 * replacement is left unchanged</li>
+	 * </ul>
+	 * <b>Note</b>:<br>
+	 * If specified replacement is <code>null</code> this method is treated as a
+	 * no-op.
+	 * 
+	 * @param other
+	 *            The other replacement to merge with
+	 * @return <code>true</code> if this replacement is merged with specified
+	 *         replacement; otherwise <code>false</code> is this replacement is
+	 *         left unchanged
+	 */
+	public boolean merge(TemplateReplacement other);
 }

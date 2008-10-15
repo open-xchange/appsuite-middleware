@@ -68,9 +68,9 @@ public class FormatLocalizedStringReplacement implements TemplateReplacement {
 
 	private final TemplateToken token;
 
-	private final String format;
+	private String format;
 
-	private final String replacement;
+	private String replacement;
 
 	private Locale locale;
 
@@ -155,4 +155,32 @@ public class FormatLocalizedStringReplacement implements TemplateReplacement {
 		clone.locale = (Locale) this.locale.clone();
 		return clone;
 	}
+
+	public boolean merge(final TemplateReplacement other) {
+		if (FormatLocalizedStringReplacement.class.isInstance(other)) {
+			/*
+			 * Class mismatch or null
+			 */
+			return false;
+		}
+		if (!getToken().equals(other.getToken())) {
+			/*
+			 * Token mismatch
+			 */
+			return false;
+		}
+		if (!other.changed()) {
+			/*
+			 * Other replacement does not reflect a changed value; leave
+			 * unchanged
+			 */
+			return false;
+		}
+		final FormatLocalizedStringReplacement o = (FormatLocalizedStringReplacement) other;
+		this.replacement = o.replacement;
+		this.format = o.format;
+		this.changed = true;
+		return true;
+	}
+
 }

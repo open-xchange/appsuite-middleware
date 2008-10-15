@@ -133,4 +133,21 @@ public abstract class AbstractFormatDateReplacement extends AbstractDateReplacem
 		}
 		return result;
 	}
+
+	@Override
+	public boolean merge(final TemplateReplacement other) {
+		if (AbstractFormatDateReplacement.class.isInstance(other)) {
+			/*
+			 * Class mismatch
+			 */
+			return false;
+		}
+		if (super.merge(other)) {
+			final AbstractFormatDateReplacement o = (AbstractFormatDateReplacement) other;
+			this.format = o.format;
+			this.fallback = o.fallback;
+			return true;
+		}
+		return false;
+	}
 }

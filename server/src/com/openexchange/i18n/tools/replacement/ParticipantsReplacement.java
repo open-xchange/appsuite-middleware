@@ -222,4 +222,32 @@ public final class ParticipantsReplacement implements TemplateReplacement {
 		return this;
 	}
 
+	public boolean merge(final TemplateReplacement other) {
+		if (ParticipantsReplacement.class.isInstance(other)) {
+			/*
+			 * Class mismatch or null
+			 */
+			return false;
+		}
+		if (!TemplateToken.PARTICIPANTS.equals(other.getToken())) {
+			/*
+			 * Token mismatch
+			 */
+			return false;
+		}
+		if (!other.changed()) {
+			/*
+			 * Other replacement does not reflect a changed value; leave
+			 * unchanged
+			 */
+			return false;
+		}
+		final ParticipantsReplacement o = (ParticipantsReplacement) other;
+		this.changed = true;
+		if (this.participantsSet == null || o.participantsSet != null) {
+			this.participantsSet = o.participantsSet;
+		}
+		return true;
+	}
+
 }

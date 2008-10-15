@@ -215,12 +215,13 @@ public final class RenderMap implements Cloneable {
 	}
 
 	/**
-	 * Applies specified changed status to all contained token-replacement mappings.
+	 * Applies specified changed status to all contained token-replacement
+	 * mappings.
 	 * 
 	 * @param changed
 	 *            The changed status to apply
-	 * @return This render map with specified changed status applied to all contained
-	 *         token-replacement mappings.
+	 * @return This render map with specified changed status applied to all
+	 *         contained token-replacement mappings.
 	 */
 	public RenderMap applyChangedStatus(final boolean changed) {
 		final Iterator<TemplateReplacement> iter = map.values().iterator();
@@ -279,5 +280,24 @@ public final class RenderMap implements Cloneable {
 		} catch (final CloneNotSupportedException e) {
 			throw new InternalError(e.getMessage());
 		}
+	}
+
+	/**
+	 * Merges this render map's token-replacement mappings with specified render
+	 * map's token-replacement mappings.
+	 * 
+	 * @param other
+	 *            The other render map to merge with
+	 * @return This render map merged with specified render map
+	 */
+	public RenderMap merge(final RenderMap other) {
+		final Iterator<TemplateReplacement> iter = this.map.values().iterator();
+		final int size = this.map.size();
+		final EnumMap<TemplateToken, TemplateReplacement> otherMap = other.map;
+		for (int i = 0; i < size; i++) {
+			final TemplateReplacement replacement = iter.next();
+			replacement.merge(otherMap.get(replacement.getToken()));
+		}
+		return this;
 	}
 }

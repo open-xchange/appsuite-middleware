@@ -117,8 +117,8 @@ public class AppointmentState extends LinkableState {
 		final TemplateReplacement tr = new FormatLocalizedStringReplacement(TemplateToken.LOCATION,
 				Notifications.FORMAT_LOCATION, location);
 		tr.setLocale(p.locale);
-		tr.setChanged(oldObj == null ? false
-				: !ParticipantNotify.compareObjects(location, ((AppointmentObject) oldObj).getLocation()));
+		tr.setChanged(oldObj == null ? false : !ParticipantNotify.compareObjects(location, ((AppointmentObject) oldObj)
+				.getLocation()));
 		renderMap.put(tr);
 	}
 
@@ -140,7 +140,7 @@ public class AppointmentState extends LinkableState {
 	}
 
 	public void modifyInternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
-
+		// Nothing to do
 	}
 
 	public void modifyExternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
@@ -148,22 +148,25 @@ public class AppointmentState extends LinkableState {
 	}
 
 	private void addICALAttachment(final MailObject mail, final AppointmentObject obj, final ServerSession sessObj) {
+		OXContainerConverter oxContainerConverter = null;
 		try {
 			final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");
-			final UnsynchronizedByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
-			final VersitDefinition.Writer versitWriter = versitDefinition.getWriter(byteArrayOutputStream, "UTF-8");
-			final VersitObject versitObjectContainer = OXContainerConverter.newCalendar("2.0");
-			versitDefinition.writeProperties(versitWriter, versitObjectContainer);
-			final OXContainerConverter oxContainerConverter = new OXContainerConverter(sessObj.getContext(),
-					TimeZone.getDefault());
-			final VersitDefinition eventDef = versitDefinition.getChildDef("VEVENT");
+			final InputStream icalFile;
+			{
+				final UnsynchronizedByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
+				final VersitDefinition.Writer versitWriter = versitDefinition.getWriter(byteArrayOutputStream, "UTF-8");
+				final VersitObject versitObjectContainer = OXContainerConverter.newCalendar("2.0");
+				versitDefinition.writeProperties(versitWriter, versitObjectContainer);
+				oxContainerConverter = new OXContainerConverter(sessObj.getContext(), TimeZone.getDefault());
+				final VersitDefinition eventDef = versitDefinition.getChildDef("VEVENT");
 
-			final VersitObject versitObject = oxContainerConverter.convertAppointment(obj);
-			eventDef.write(versitWriter, versitObject);
-			versitDefinition.writeEnd(versitWriter, versitObjectContainer);
-			versitWriter.flush();
-
-			final InputStream icalFile = new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray());
+				final VersitObject versitObject = oxContainerConverter.convertAppointment(obj);
+				eventDef.write(versitWriter, versitObject);
+				versitDefinition.writeEnd(versitWriter, versitObjectContainer);
+				versitWriter.flush();
+				versitWriter.close();
+				icalFile = new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray());
+			}
 
 			final ContentType ct = new ContentType();
 			ct.setPrimaryType("text");
@@ -180,6 +183,10 @@ public class AppointmentState extends LinkableState {
 			LOGGER.error("Can't convert appointment for notification mail.", e);
 		} catch (final MailException e) {
 			LOGGER.error("Can't add attachment", e);
+		} finally {
+			if (oxContainerConverter != null) {
+				oxContainerConverter.close();
+			}
 		}
 	}
 

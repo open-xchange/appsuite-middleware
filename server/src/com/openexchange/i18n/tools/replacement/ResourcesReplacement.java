@@ -193,4 +193,31 @@ public final class ResourcesReplacement implements TemplateReplacement {
 		return this;
 	}
 
+	public boolean merge(final TemplateReplacement other) {
+		if (ResourcesReplacement.class.isInstance(other)) {
+			/*
+			 * Class mismatch or null
+			 */
+			return false;
+		}
+		if (!TemplateToken.RESOURCES.equals(other.getToken())) {
+			/*
+			 * Token mismatch
+			 */
+			return false;
+		}
+		if (!other.changed()) {
+			/*
+			 * Other replacement does not reflect a changed value; leave
+			 * unchanged
+			 */
+			return false;
+		}
+		final ResourcesReplacement o = (ResourcesReplacement) other;
+		this.changed = true;
+		if (this.resourcesSet == null || o.resourcesSet != null) {
+			this.resourcesSet = o.resourcesSet;
+		}
+		return true;
+	}
 }

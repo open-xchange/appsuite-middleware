@@ -106,6 +106,22 @@ public final class SeriesReplacement extends LocalizedStringReplacement {
 	}
 
 	@Override
+	public boolean merge(final TemplateReplacement other) {
+		if (SeriesReplacement.class.isInstance(other)) {
+			/*
+			 * Class mismatch
+			 */
+			return false;
+		}
+		if (super.merge(other)) {
+			final SeriesReplacement o = (SeriesReplacement) other;
+			this.calendarObject = o.calendarObject;
+
+		}
+		return false;
+	}
+
+	@Override
 	public String getReplacement() {
 		return format(getSeriesString());
 	}

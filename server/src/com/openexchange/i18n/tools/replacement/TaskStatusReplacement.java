@@ -52,6 +52,7 @@ package com.openexchange.i18n.tools.replacement;
 import com.openexchange.groupware.i18n.Notifications;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.i18n.tools.TemplateReplacement;
 import com.openexchange.i18n.tools.TemplateToken;
 
 /**
@@ -76,9 +77,9 @@ public final class TaskStatusReplacement extends FormatLocalizedStringReplacemen
 
 	public static final int STATUS_DEFERRED = Task.DEFERRED;
 
-	private final int taskStatus;
+	private int taskStatus;
 
-	private final int percentComplete;
+	private int percentComplete;
 
 	/**
 	 * Initializes a new {@link TaskStatusReplacement}
@@ -109,5 +110,22 @@ public final class TaskStatusReplacement extends FormatLocalizedStringReplacemen
 		b.append(result);
 		b.append(" (").append(percentComplete).append("%)");
 		return b.toString();
+	}
+
+	@Override
+	public boolean merge(final TemplateReplacement other) {
+		if (TaskStatusReplacement.class.isInstance(other)) {
+			/*
+			 * Class mismatch
+			 */
+			return false;
+		}
+		if (super.merge(other)) {
+			final TaskStatusReplacement o = (TaskStatusReplacement) other;
+			this.taskStatus = o.taskStatus;
+			this.percentComplete = o.percentComplete;
+			return true;
+		}
+		return false;
 	}
 }

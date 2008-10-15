@@ -179,6 +179,32 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
 		return this;
 	}
 
+	public boolean merge(final TemplateReplacement other) {
+		if (AbstractDateReplacement.class.isInstance(other)) {
+			/*
+			 * Class mismatch or null
+			 */
+			return false;
+		}
+		if (!getToken().equals(other.getToken())) {
+			/*
+			 * Token mismatch
+			 */
+			return false;
+		}
+		if (!other.changed()) {
+			/*
+			 * Other replacement does not reflect a changed value; leave
+			 * unchanged
+			 */
+			return false;
+		}
+		final AbstractDateReplacement o = (AbstractDateReplacement) other;
+		this.date = o.date;
+		this.changed = true;
+		return true;
+	}
+
 	private void applyLocale(final Locale locale) {
 		if (locale == null || locale.equals(this.locale)) {
 			return;

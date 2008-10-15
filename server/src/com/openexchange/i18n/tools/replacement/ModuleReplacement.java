@@ -71,7 +71,7 @@ public final class ModuleReplacement implements TemplateReplacement {
 
 	public static final int MODULE_TASK = 1;
 
-	private final String repl;
+	private String repl;
 
 	private boolean changed;
 
@@ -119,5 +119,31 @@ public final class ModuleReplacement implements TemplateReplacement {
 
 	public TemplateReplacement getClone() throws CloneNotSupportedException {
 		return (TemplateReplacement) clone();
+	}
+
+	public boolean merge(final TemplateReplacement other) {
+		if (ModuleReplacement.class.isInstance(other)) {
+			/*
+			 * Class mismatch or null
+			 */
+			return false;
+		}
+		if (!getToken().equals(other.getToken())) {
+			/*
+			 * Token mismatch
+			 */
+			return false;
+		}
+		if (!other.changed()) {
+			/*
+			 * Other replacement does not reflect a changed value; leave
+			 * unchanged
+			 */
+			return false;
+		}
+		final ModuleReplacement o = (ModuleReplacement) other;
+		this.repl = o.repl;
+		this.changed = true;
+		return true;
 	}
 }

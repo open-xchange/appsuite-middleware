@@ -66,7 +66,7 @@ public class StringReplacement implements TemplateReplacement {
 
 	private final TemplateToken token;
 
-	private final String replacement;
+	private String replacement;
 
 	private boolean changed;
 
@@ -134,4 +134,29 @@ public class StringReplacement implements TemplateReplacement {
 		return this;
 	}
 
+	public boolean merge(final TemplateReplacement other) {
+		if (StringReplacement.class.isInstance(other)) {
+			/*
+			 * Class mismatch or null
+			 */
+			return false;
+		}
+		if (!getToken().equals(other.getToken())) {
+			/*
+			 * Token mismatch
+			 */
+			return false;
+		}
+		if (!other.changed()) {
+			/*
+			 * Other replacement does not reflect a changed value; leave
+			 * unchanged
+			 */
+			return false;
+		}
+		final StringReplacement o = (StringReplacement) other;
+		this.replacement = o.replacement;
+		this.changed = true;
+		return true;
+	}
 }

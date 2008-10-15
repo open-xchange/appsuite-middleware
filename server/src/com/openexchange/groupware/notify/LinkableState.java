@@ -85,7 +85,7 @@ public abstract class LinkableState implements State {
 
 	public void addSpecial(final CalendarObject obj, final CalendarObject oldObj, final RenderMap renderMap,
 			final EmailableParticipant p) {
-		renderMap.put(new StringReplacement(TemplateToken.LINK, generateLink(obj, p)));
+		renderMap.put(new StringReplacement(TemplateToken.LINK, generateLink(obj, p)).setChanged(true));
 	}
 
 	public String generateLink(final CalendarObject obj, final EmailableParticipant p) {
