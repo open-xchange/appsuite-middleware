@@ -127,7 +127,7 @@ public final class ServerActivator extends DeferredActivator {
 			EventAdmin.class };
 
 	private static final Class<?>[] NEEDED_SERVICES_SERVER = { ConfigurationService.class, CacheService.class,
-			EventAdmin.class, SessiondService.class};
+			EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class};
 
 	private final Starter starter;
 
@@ -267,13 +267,6 @@ public final class ServerActivator extends DeferredActivator {
 
         // ICal Emitter
         serviceTrackerList.add(new ServiceTracker(context, ICalEmitter.class.getName(), new RegistryCustomizer<ICalEmitter>(context, ICalEmitter.class)));
-
-        // JDOM XML Parser
-        serviceTrackerList.add(new ServiceTracker(context, JDOMParser.class.getName(), new RegistryCustomizer<JDOMParser>(context, JDOMParser.class)));
-
-        // Spring Parser
-        serviceTrackerList.add(new ServiceTracker(context, SpringParser.class.getName(), new RegistryCustomizer<SpringParser>(context, SpringParser.class)));
-
 
         /*
          * Register Services
