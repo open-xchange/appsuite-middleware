@@ -119,7 +119,7 @@ public class ConfigurationException extends AbstractOXException {
          */
         READ_ERROR("Cannot read file \"%1$s\".", Category.SETUP_ERROR, 4),
         /**
-         * System Property "%1$s" is not defined.
+         * Property "%1$s" is not defined.
          */
         PROPERTY_MISSING("Property \"%1$s\" is not defined.",
             Category.SETUP_ERROR, 5),
