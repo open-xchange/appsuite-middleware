@@ -49,7 +49,6 @@
 
 package com.openexchange.tools;
 
-import java.lang.reflect.Array;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -67,7 +66,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class FIFOQueue<T> {
+public class FIFOQueue<T> {
 
 	private final T[] array;
 
@@ -83,8 +82,8 @@ public final class FIFOQueue<T> {
 
 	/**
 	 * Constructor which invokes <code>{@link #FIFOQueue(Class, int, boolean)}
-	 * </code> with last <code>boolean</code> parameter (<code>sync</code>) set
-	 * to <code>true</code>
+	 * </code> with last <code>boolean</code> parameter (
+	 * <code>isSynchronized</code>) set to <code>true</code>
 	 * 
 	 * @param clazz
 	 *            - the class whose instances are kept in FIFO queue
@@ -92,15 +91,13 @@ public final class FIFOQueue<T> {
 	 *            - the max. size of this queue
 	 * @see #FIFOQueue(Class, int, boolean)
 	 */
-	public FIFOQueue(final Class<T> clazz, final int maxsize) {
-		this(clazz, maxsize, true);
+	public FIFOQueue(final int maxsize) {
+		this(maxsize, true);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param clazz
-	 *            - the class whose instances are kept in FIFO queue
 	 * @param maxsize
 	 *            - the max. size of this queue
 	 * @param isSynchronized
@@ -108,8 +105,8 @@ public final class FIFOQueue<T> {
 	 *            multiple threads accessing this queue
 	 */
 	@SuppressWarnings("unchecked")
-	public FIFOQueue(final Class<T> clazz, final int maxsize, final boolean isSynchronized) {
-		array = (T[]) Array.newInstance(clazz, maxsize);
+	public FIFOQueue(final int maxsize, final boolean isSynchronized) {
+		array = (T[]) new Object[maxsize];
 		start = end = 0;
 		full = false;
 		this.isSynchronized = isSynchronized;

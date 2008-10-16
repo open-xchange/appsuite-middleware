@@ -66,7 +66,6 @@ import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServlet;
 
 import com.openexchange.ajp13.AJPv13Config;
-import com.openexchange.tools.FIFOQueue;
 import com.openexchange.tools.NonBlockingRWLock;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 
@@ -82,12 +81,15 @@ public class HttpServletManager {
 
 	private static final AtomicBoolean initialized = new AtomicBoolean();
 
-	private static final Map<String, FIFOQueue<HttpServlet>> SERVLET_POOL = new HashMap<String, FIFOQueue<HttpServlet>>();
+	private static final Map<String, ServletQueue> SERVLET_POOL = new HashMap<String, ServletQueue>();
 
 	private static Map<String, Constructor<?>> servletConstructorMap;
 
 	private static final NonBlockingRWLock RW_LOCK = new NonBlockingRWLock(true);
 
+	/**
+	 * Initializes a new {@link HttpServletManager}
+	 */
 	private HttpServletManager() {
 		super();
 	}
@@ -101,29 +103,35 @@ public class HttpServletManager {
 	 * @param pathStorage
 	 *            A container to keep the actual servlet path contained in
 	 *            servlet mapping for later servlet release
-	 * @return The instance of {@link HttpServlet}
+	 * @return The instance of {@link HttpServlet} or <code>null</code> if no
+	 *         instance is bound to specified path
 	 */
 	public static HttpServlet getServlet(final String path, final StringBuilder pathStorage) {
 		int state;
-		HttpServlet retval = null;
+		HttpServlet retval;
+		String path2Append;
 		do {
 			state = RW_LOCK.acquireRead();
-			if (SERVLET_POOL.containsKey(path)) {
-				pathStorage.append(path);
-				retval = getServletInternal(path);
+			final ServletQueue servletQueue = SERVLET_POOL.get(path);
+			if (servletQueue != null) {
+				path2Append = path;
+				retval = getServletInternal(servletQueue, path);
 			} else {
+				retval = null;
+				path2Append = null;
 				/*
 				 * Try through resolving
 				 */
 				try {
 					final int size = SERVLET_POOL.size();
-					final Iterator<String> iter = SERVLET_POOL.keySet().iterator();
+					final Iterator<Map.Entry<String, ServletQueue>> iter = SERVLET_POOL.entrySet().iterator();
 					boolean b = true;
 					for (int i = 0; i < size && b; i++) {
-						final String currentPath = iter.next();
+						final Map.Entry<String, ServletQueue> e = iter.next();
+						final String currentPath = e.getKey();
 						if (implies(currentPath, path)) {
-							pathStorage.append(currentPath);
-							retval = getServletInternal(currentPath);
+							path2Append = currentPath;
+							retval = getServletInternal(e.getValue(), currentPath);
 							b = false;
 						}
 					}
@@ -134,6 +142,9 @@ public class HttpServletManager {
 				}
 			}
 		} while (!RW_LOCK.releaseRead(state));
+		if (path2Append != null) {
+			pathStorage.append(path2Append);
+		}
 		return retval;
 	}
 
@@ -166,17 +177,18 @@ public class HttpServletManager {
 	/**
 	 * Gets the servlet instance bound to given path
 	 * 
+	 * @param servletQueue
+	 *            The servlet queue
 	 * @param path
 	 *            The servlet path
 	 * @return The servlet instance dequeued from pool or newly created
 	 */
-	private static final HttpServlet getServletInternal(final String path) {
-		final FIFOQueue<HttpServlet> servletQueue = SERVLET_POOL.get(path);
+	private static final HttpServlet getServletInternal(final ServletQueue servletQueue, final String path) {
 		if (servletQueue.isEmpty()) {
 			/*
 			 * Empty queue: create & return a new servlet instance
 			 */
-			final HttpServlet servletInst = createServletInstance(path);
+			final HttpServlet servletInst = servletQueue.createServletInstance(path);
 			if (servletInst == null) {
 				return new HttpErrorServlet(new StringBuilder(64).append("Servlet ").append(path).append(
 						" could NOT be created").toString());
@@ -195,28 +207,7 @@ public class HttpServletManager {
 		return servletInstance;
 	}
 
-	/**
-	 * Returns a new instance of <code>javax.servlet.http.HttpServlet</code>
-	 * constructed from given <code>servletKey</code> argument
-	 * 
-	 * @param servletKey
-	 * @return
-	 */
-	private static final HttpServlet createServletInstance(final String servletKey) {
-		final Constructor<?> servletConstructor = servletConstructorMap.get(servletKey);
-		if (servletConstructor == null) {
-			return null;
-		}
-		try {
-			final HttpServlet servletInstance = (HttpServlet) servletConstructor.newInstance(new Object[] {});
-			servletInstance.init(ServletConfigLoader.getDefaultInstance().getConfig(
-					servletInstance.getClass().getCanonicalName(), servletKey));
-			return servletInstance;
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-		}
-		return null;
-	}
+	private final static Class<?>[] CLASS_ARR = new Class[] {};
 
 	/**
 	 * Puts a servlet bound to given ID into this servlet manager's pool
@@ -239,13 +230,25 @@ public class HttpServletManager {
 				 */
 				SERVLET_POOL.get(path).enqueue(servletObj);
 			} else {
-				final FIFOQueue<HttpServlet> servlets = new FIFOQueue<HttpServlet>(HttpServlet.class, 1);
+				final ServletQueue servlets;
+				try {
+					servlets = new ServletQueue(1, servletObj.getClass().getConstructor(CLASS_ARR));
+				} catch (final SecurityException e) {
+					LOG.error("Default constructor could not be found for servlet class: "
+							+ servletObj.getClass().getName(), e);
+					return;
+				} catch (final NoSuchMethodException e) {
+					LOG.error("Default constructor could not be found for servlet class: "
+							+ servletObj.getClass().getName(), e);
+					return;
+				}
 				final ServletConfig conf = ServletConfigLoader.getDefaultInstance().getConfig(
 						servletObj.getClass().getCanonicalName(), path);
 				try {
 					servletObj.init(conf);
 				} catch (final ServletException e) {
-					LOG.error("Servlet cannot be put into pool", e);
+					LOG.error("Servlet could not be put into pool", e);
+					return;
 				}
 				servlets.enqueue(servletObj);
 				SERVLET_POOL.put(path, servlets);
@@ -281,7 +284,19 @@ public class HttpServletManager {
 			if ((null != initParams) && !initParams.isEmpty()) {
 				ServletConfigLoader.getDefaultInstance().setConfig(servlet.getClass().getCanonicalName(), initParams);
 			}
-			final FIFOQueue<HttpServlet> servletQueue = new FIFOQueue<HttpServlet>(HttpServlet.class, 1);
+			/*
+			 * Try to determine default constructor for later instantiations
+			 */
+			final ServletQueue servletQueue;
+			try {
+				servletQueue = new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR));
+			} catch (final SecurityException e) {
+				throw new ServletException("Default constructor could not be found for servlet class: "
+						+ servlet.getClass().getName(), e);
+			} catch (final NoSuchMethodException e) {
+				throw new ServletException("Default constructor could not be found for servlet class: "
+						+ servlet.getClass().getName(), e);
+			}
 			final ServletConfig conf = ServletConfigLoader.getDefaultInstance().getConfig(
 					servlet.getClass().getCanonicalName(), path);
 			servlet.init(conf);
@@ -290,15 +305,6 @@ public class HttpServletManager {
 			 * Put into servlet pool for being accessible
 			 */
 			SERVLET_POOL.put(path, servletQueue);
-			/*
-			 * Try to determine default constructor for later instantiations
-			 */
-			final Constructor<?>[] constructors = servlet.getClass().getConstructors();
-			for (int i = 0; i < constructors.length; i++) {
-				if (constructors[i].getParameterTypes().length == 0) {
-					servletConstructorMap.put(path, constructors[i]);
-				}
-			}
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder(64).append("New servlet \"").append(servlet.getClass().getCanonicalName())
 						.append("\" successfully registered to \"").append(path).append('"'));
@@ -319,9 +325,13 @@ public class HttpServletManager {
 	public static final void unregisterServlet(final String id) {
 		RW_LOCK.acquireWrite();
 		try {
+			final String path = new URI(id.charAt(0) == '/' ? id.substring(1) : id).normalize().toString();
 			ServletConfigLoader.getDefaultInstance().removeConfig(
-					SERVLET_POOL.get(id).dequeue().getClass().getCanonicalName());
-			SERVLET_POOL.remove(id);
+					SERVLET_POOL.get(path).dequeue().getClass().getCanonicalName());
+			SERVLET_POOL.remove(path);
+		} catch (final URISyntaxException e) {
+			final ServletException se = new ServletException("Servlet path is not a valid URI", e);
+			LOG.error("Unregistering servlet failed. Servlet path is not a valid URI: " + id, se);
 		} finally {
 			RW_LOCK.releaseWrite();
 		}
@@ -412,35 +422,40 @@ public class HttpServletManager {
 					LOG.error("Invalid servlet path skipped: " + entry.getKey());
 					continue;
 				}
-				FIFOQueue<HttpServlet> servletQueue = null;
+				ServletQueue servletQueue = null;
 				/*
 				 * Create a pool of servlet instances
 				 */
 				final Constructor<?> servletConstructor = entry.getValue();
 				if (servletConstructor == null) {
-					servletQueue = new FIFOQueue<HttpServlet>(HttpServlet.class, 1);
+					servletQueue = new ServletQueue(1, null);
 					servletQueue.enqueue(new HttpErrorServlet("No Servlet Constructor found for " + path));
 				} else {
 					try {
 						HttpServlet servletInstance = (HttpServlet) servletConstructor.newInstance(INIT_ARGS);
-						final boolean isSTM = servletInstance instanceof SingleThreadModel;
-						servletQueue = isSTM ? new FIFOQueue<HttpServlet>(HttpServlet.class, AJPv13Config
-								.getServletPoolSize()) : new FIFOQueue<HttpServlet>(HttpServlet.class, 1);
-						final ServletConfig conf = ServletConfigLoader.getDefaultInstance().getConfig(
-								servletInstance.getClass().getCanonicalName(), path);
-						servletInstance.init(conf);
-						servletQueue.enqueue(servletInstance);
-						if (isSTM) {
-							/*
-							 * Enqueue more than one instance if it implements
-							 * SingleThreadModel
-							 */
-							final int remainingSize = AJPv13Config.getServletPoolSize() - 1;
-							for (int i = 0; i < remainingSize; i++) {
-								servletInstance = (HttpServlet) servletConstructor.newInstance(INIT_ARGS);
+						if (servletInstance instanceof SingleThreadModel) {
+							final int servletPoolSize = AJPv13Config.getServletPoolSize();
+							servletQueue = new ServletQueue(servletPoolSize, servletConstructor);
+							if (servletPoolSize > 0) {
+								final ServletConfig conf = ServletConfigLoader.getDefaultInstance().getConfig(
+										servletInstance.getClass().getCanonicalName(), path);
 								servletInstance.init(conf);
 								servletQueue.enqueue(servletInstance);
+								/*
+								 * Enqueue more than one instance if it
+								 * implements SingleThreadModel
+								 */
+								for (int i = 1; i < servletPoolSize; i++) {
+									servletInstance = (HttpServlet) servletConstructor.newInstance(INIT_ARGS);
+									servletInstance.init(conf);
+									servletQueue.enqueue(servletInstance);
+								}
 							}
+						} else {
+							servletQueue = new ServletQueue(1, servletConstructor);
+							servletInstance.init(ServletConfigLoader.getDefaultInstance().getConfig(
+									servletInstance.getClass().getCanonicalName(), path));
+							servletQueue.enqueue(servletInstance);
 						}
 					} catch (final Throwable t) {
 						LOG.error(t.getMessage(), t);
