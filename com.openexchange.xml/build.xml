@@ -12,7 +12,7 @@
     <property file="build.properties"/>
 
     <property name="version" value="${Bundle-Version}"/>
-    <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
+    <property name="bundle.name" value="${Bundle-SymbolicName}"/>
     <property name="composite.name" value="open-xchange-xml-${version}"/>
 
     <!-- Install Constants -->
