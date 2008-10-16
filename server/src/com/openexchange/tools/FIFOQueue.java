@@ -146,7 +146,7 @@ public class FIFOQueue<T> {
 	}
 
 	/**
-	 * Tests if this queue is empty
+	 * Checks if this queue is empty
 	 * 
 	 * @return <code>true</code> if queue is empty; otherwise <code>false</code>
 	 */
@@ -160,7 +160,7 @@ public class FIFOQueue<T> {
 	}
 
 	/**
-	 * Tests if this queue is full
+	 * Checks if this queue is full
 	 * 
 	 * @return <code>true</code> if queue is full; otherwise <code>false</code>
 	 */
