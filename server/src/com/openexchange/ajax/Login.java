@@ -66,6 +66,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.groupware.AbstractOXException;
@@ -163,12 +164,12 @@ public class Login extends AJAXServlet {
 					final UserStorage us = UserStorage.getInstance();
 					userId = us.getUserId(username, context);
 					u = us.getUser(userId, context);
-				} catch (final LdapException ex) {
-					switch (ex.getDetail()) {
+				} catch (final LdapException e) {
+					switch (e.getDetail()) {
 					case ERROR:
-						throw new LoginException(LoginException.Code.UNKNOWN, ex);
+						throw LoginExceptionCodes.UNKNOWN.create(e);
 					case NOT_FOUND:
-						throw new UserNotFoundException("User not found.", ex);
+						throw new UserNotFoundException("User not found.", e);
 					}
 				}
 
@@ -185,7 +186,7 @@ public class Login extends AJAXServlet {
 						SessiondService.class);
 
 				if (sessiondService == null) {
-					throw new LoginException(LoginException.Code.COMMUNICATION);
+					throw LoginExceptionCodes.COMMUNICATION.create();
 				}
 
 				final String sessionId = sessiondService.addSession(userId, username, password, context, req
@@ -194,14 +195,14 @@ public class Login extends AJAXServlet {
 
 				try {
 					if (!context.isEnabled() || !u.isMailEnabled()) {
-						throw new LoginException(LoginException.Code.INVALID_CREDENTIALS);
+						throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
 					}
 				} catch (final UndeclaredThrowableException e) {
-					throw new LoginException(LoginException.Code.UNKNOWN, e);
+					throw LoginExceptionCodes.UNKNOWN.create(e);
 				}
 
 			} catch (final LoginException e) {
-				if (LoginException.Source.USER == e.getSource()) {
+				if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
 					LOG.debug(e.getMessage(), e);
 				} else {
 					LOG.error(e.getMessage(), e);
@@ -209,13 +210,13 @@ public class Login extends AJAXServlet {
 				response.setException(e);
 			} catch (final UserNotFoundException e) {
 				LOG.debug(ERROR_USER_NOT_FOUND, e);
-				response.setException(new LoginException(LoginException.Code.INVALID_CREDENTIALS, e));
+				response.setException(LoginExceptionCodes.INVALID_CREDENTIALS.create(e));
 			} catch (final UserNotActivatedException e) {
 				LOG.debug(ERROR_USER_NOT_ACTIVE, e);
-				response.setException(new LoginException(LoginException.Code.INVALID_CREDENTIALS, e));
+				response.setException(LoginExceptionCodes.INVALID_CREDENTIALS.create(e));
 			} catch (final PasswordExpiredException e) {
 				LOG.debug(ERROR_PASSWORD_EXPIRED, e);
-				response.setException(new LoginException(LoginException.Code.INVALID_CREDENTIALS, e));
+				response.setException(LoginExceptionCodes.INVALID_CREDENTIALS.create(e));
 			} catch (final ContextException e) {
 				LOG.error("Error looking up context.", e);
 				response.setException(e);
@@ -376,10 +377,10 @@ public class Login extends AJAXServlet {
 								final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
 								final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
 								if (!ctx.isEnabled() || !user.isMailEnabled()) {
-									throw new LoginException(LoginException.Code.INVALID_CREDENTIALS);
+									throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
 								}
 							} catch (final UndeclaredThrowableException e) {
-								throw new LoginException(LoginException.Code.UNKNOWN, e);
+								throw LoginExceptionCodes.UNKNOWN.create(e);
 							}
 
 							response.setData(writeLogin(session));
@@ -412,7 +413,7 @@ public class Login extends AJAXServlet {
 				LOG.debug(e.getMessage(), e);
 				response.setException(e);
 			} catch (final LoginException e) {
-				if (LoginException.Source.USER == e.getSource()) {
+				if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
 					LOG.debug(e.getMessage(), e);
 				} else {
 					LOG.error(e.getMessage(), e);

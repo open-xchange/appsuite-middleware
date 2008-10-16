@@ -49,64 +49,106 @@
 
 package com.openexchange.authentication;
 
+import static com.openexchange.authentication.LoginExceptionMessages.*;
+
 import com.openexchange.authentication.exception.LoginExceptionFactory;
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
- * Exception for all problems appearing during the login of a user. Currently
- * we have a lot of different exceptions for all possible exception types but
- * this seems to be not handy anymore. So all different states should be
- * consolidated here.
+ * Defines all error messages for the LoginException.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class LoginException extends AbstractOXException {
+public enum LoginExceptionCodes implements OXErrorMessage {
 
     /**
-     * For serialization.
+     * Account "%s" is locked.
      */
-    private static final long serialVersionUID = 5167438141225256336L;
+    ACCOUNT_LOCKED(ACCOUNT_LOCKED_MSG, Category.PERMISSION, 1),
+    /**
+     * Account "%s" is not ready yet.
+     */
+    ACCOUNT_NOT_READY_YET(ACCOUNT_NOT_READY_YET_MSG, Category.TRY_AGAIN, 2),
+    /**
+     * Unknown problem: "%s".
+     */
+    UNKNOWN(UNKNOWN_MSG, Category.CODE_ERROR, 3),
+    /**
+     * Login not possible at the moment. Please try again later.
+     */
+    COMMUNICATION(COMMUNICATION_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 5),
+    /**
+     * Invalid credentials.
+     */
+    INVALID_CREDENTIALS(INVALID_CREDENTIALS_MSG, Category.USER_INPUT, 6),
+    /**
+     * Missing property %1$s.
+     */
+    MISSING_PROPERTY(MISSING_PROPERTY_MSG, Category.SETUP_ERROR, 9),
+    /**
+     * database down.
+     */
+    DATABASE_DOWN(DATABASE_DOWN_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 10);
 
     /**
-     * Initializes a new exception using the information provided by the cause.
-     * @param cause the cause of the exception.
-     * @deprecated TODO
+     * Message of the exception.
      */
-    @Deprecated
-    public LoginException(final AbstractOXException cause) {
-        super(cause);
+    final String message;
+
+    /**
+     * Category of the exception.
+     */
+    final Category category;
+
+    /**
+     * Detail number of the exception.
+     */
+    final int number;
+
+    /**
+     * Default constructor.
+     * @param message message.
+     * @param category category.
+     * @param detailNumber detail number.
+     */
+    private LoginExceptionCodes(final String message, final Category category,
+        final int detailNumber) {
+        this.message = message;
+        this.category = category;
+        this.number = detailNumber;
     }
 
     /**
-     * Initializes a new exception using the information provides by the code.
-     * @param code code for the exception.
-     * @param messageArgs arguments that will be formatted into the message.
-     * @deprecated use {@link LoginExceptionFactory#create(int, Object...)}.
+     * @return the category
      */
-    @Deprecated
-    public LoginException(final LoginExceptionCodes code, final Object... messageArgs) {
-        this(code, null, messageArgs);
+    public Category getCategory() {
+        return category;
     }
 
     /**
-     * Initializes a new exception using the information provides by the code.
-     * @param code code for the exception.
-     * @param cause the cause of the exception.
-     * @param messageArgs arguments that will be formatted into the message.
-     * @deprecated use {@link LoginExceptionFactory#create(int, Throwable, Object...)}.
+     * @return the message
      */
-    @Deprecated
-    public LoginException(final LoginExceptionCodes code, final Throwable cause,
-        final Object... messageArgs) {
-        super(EnumComponent.LOGIN, code.category, code.number, code.message, cause);
-        setMessageArgs(messageArgs);
+    public String getMessage() {
+        return message;
     }
 
-    public LoginException(final ErrorMessage message, final Throwable cause,
-        final Object... messageArgs) {
-        super(message.getComponent(), message.getCategory(),
-            message.getErrorCode(), message.getMessage(), cause);
-        setMessageArgs(messageArgs);
+    /**
+     * {@inheritDoc}
+     */
+    public int getErrorCode() {
+        return ordinal();
+    }
+
+    public String getHelp() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public LoginException create(final Object... messageArgs) {
+        return LoginExceptionFactory.getInstance().create(this, messageArgs);
+    }
+
+    public LoginException create(final Throwable cause, final Object... messageArgs) {
+        return LoginExceptionFactory.getInstance().create(this, cause, messageArgs);
     }
 }

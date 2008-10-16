@@ -47,67 +47,34 @@
  *
  */
 
-package com.openexchange.server;
+package com.openexchange.authentication;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-
-import com.openexchange.authentication.exception.LoginExceptionFactory;
-import com.openexchange.exceptions.ComponentRegistry;
-import com.openexchange.exceptions.impl.ComponentRegistryImpl;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exceptions.LocalizableStrings;
 
 /**
- * {@link GlobalActivator} - Activator for global (aka kernel) bundle
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * Exception messages for the {@link LoginException} that must be translated.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class GlobalActivator implements BundleActivator {
+public final class LoginExceptionMessages implements LocalizableStrings {
 
-	private static final Log LOG = LogFactory.getLog(GlobalActivator.class);
+    public static final String ACCOUNT_LOCKED_MSG = "Account \"%s\" is locked.";
 
-    private ServiceRegistration componentRegistryRegistration;
+    public static final String ACCOUNT_NOT_READY_YET_MSG = "Account \"%s\" is not ready yet.";
 
-    private ComponentRegistration loginComponent;
+    public static final String UNKNOWN_MSG = "Unknown problem: \"%s\".";
+
+    public static final String COMMUNICATION_MSG = "Login not possible at the moment. Please try again later.";
+
+    public static final String INVALID_CREDENTIALS_MSG = "Invalid credentials.";
+
+    public static final String MISSING_PROPERTY_MSG = "Missing property %1$s.";
+
+    public static final String DATABASE_DOWN_MSG = "Database down.";
 
     /**
-	 * Initializes a new {@link GlobalActivator}
-	 */
-	public GlobalActivator() {
-		super();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void start(final BundleContext context) throws Exception {
-		try {
-			ServiceHolderInit.getInstance().start();
-            componentRegistryRegistration  = context.registerService(ComponentRegistry.class.getName(), new ComponentRegistryImpl(), null);
-            loginComponent = new ComponentRegistration(context, EnumComponent.LOGIN.getAbbreviation(), "com.openexchange.authentication", LoginExceptionFactory.getInstance());
-            LOG.debug("Global bundle successfully started");
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void stop(final BundleContext context) throws Exception {
-		try {
-		    loginComponent.unregister();
-            componentRegistryRegistration.unregister();
-            ServiceHolderInit.getInstance().stop();
-			LOG.debug("Global bundle successfully stopped");
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
-		}
-	}
-
+     * Prevent instantiation.
+     */
+    private LoginExceptionMessages() {
+        super();
+    }
 }

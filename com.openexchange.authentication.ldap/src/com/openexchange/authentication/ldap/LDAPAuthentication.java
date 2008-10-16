@@ -63,9 +63,9 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.authentication.LoginException;
-import com.openexchange.authentication.LoginException.Code;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -108,7 +108,7 @@ public class LDAPAuthentication implements AuthenticationService {
         final String uid = splitted[1];
         final String password = loginInfo.getPassword();
         if ("".equals(uid) || "".equals(password)) {
-            throw new LoginException(Code.INVALID_CREDENTIALS);
+            throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS);
         }
         bind(uid, password);
         return new Authenticated() {
@@ -137,12 +137,12 @@ public class LDAPAuthentication implements AuthenticationService {
             context.addToEnvironment(Context.SECURITY_CREDENTIALS, password);
             context.reconnect(null);
         } catch (InvalidNameException e) {
-            throw new LoginException(Code.INVALID_CREDENTIALS, e);
+            throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS, e);
         } catch (AuthenticationException e) {
-            throw new LoginException(Code.INVALID_CREDENTIALS, e);
+            throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS, e);
         } catch (NamingException e) {
             LOG.error(e.getMessage(), e);
-            throw new LoginException(Code.COMMUNICATION, e);
+            throw new LoginException(LoginExceptionCodes.COMMUNICATION, e);
         } finally {
             if (null != context) {
                 try {
@@ -164,7 +164,7 @@ public class LDAPAuthentication implements AuthenticationService {
         try {
             return new InitialLdapContext(props, null);
         } catch (NamingException e) {
-            throw new LoginException(Code.COMMUNICATION, e);
+            throw new LoginException(LoginExceptionCodes.COMMUNICATION, e);
         }
     }
 
@@ -174,18 +174,18 @@ public class LDAPAuthentication implements AuthenticationService {
      */
     private void init() throws LoginException {
         if (!props.containsKey("uidAttribute")) {
-            throw new LoginException(Code.MISSING_PROPERTY, "uidAttribute");
+            throw new LoginException(LoginExceptionCodes.MISSING_PROPERTY, "uidAttribute");
         }
         uidAttribute = props.getProperty("uidAttribute");
         if (!props.containsKey("baseDN")) {
-            throw new LoginException(Code.MISSING_PROPERTY, "baseDN");
+            throw new LoginException(LoginExceptionCodes.MISSING_PROPERTY, "baseDN");
         }
         baseDN = props.getProperty("baseDN");
         props.put(LdapContext.INITIAL_CONTEXT_FACTORY,
             "com.sun.jndi.ldap.LdapCtxFactory");
         final String url = props.getProperty(LdapContext.PROVIDER_URL);
         if (null == url) {
-            throw new LoginException(Code.MISSING_PROPERTY, LdapContext.PROVIDER_URL);
+            throw new LoginException(LoginExceptionCodes.MISSING_PROPERTY, LdapContext.PROVIDER_URL);
         } else if (url.startsWith("ldaps")) {
             props.put("java.naming.ldap.factory.socket",
                 TrustAllSSLSocketFactory.class.getName());

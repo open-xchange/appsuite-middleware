@@ -47,67 +47,46 @@
  *
  */
 
-package com.openexchange.server;
+package com.openexchange.authentication.exception;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-
-import com.openexchange.authentication.exception.LoginExceptionFactory;
-import com.openexchange.exceptions.ComponentRegistry;
-import com.openexchange.exceptions.impl.ComponentRegistryImpl;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.authentication.LoginException;
+import com.openexchange.authentication.LoginExceptionCodes;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
 
 /**
- * {@link GlobalActivator} - Activator for global (aka kernel) bundle
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * The factory for creating LoginException instances.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class GlobalActivator implements BundleActivator {
+public final class LoginExceptionFactory extends Exceptions<LoginException> {
 
-	private static final Log LOG = LogFactory.getLog(GlobalActivator.class);
-
-    private ServiceRegistration componentRegistryRegistration;
-
-    private ComponentRegistration loginComponent;
+    private static final LoginExceptionFactory SINGLETON = new LoginExceptionFactory();
 
     /**
-	 * Initializes a new {@link GlobalActivator}
-	 */
-	public GlobalActivator() {
-		super();
-	}
+     * Prevent instantiation.
+     */
+    private LoginExceptionFactory() {
+        super();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void start(final BundleContext context) throws Exception {
-		try {
-			ServiceHolderInit.getInstance().start();
-            componentRegistryRegistration  = context.registerService(ComponentRegistry.class.getName(), new ComponentRegistryImpl(), null);
-            loginComponent = new ComponentRegistration(context, EnumComponent.LOGIN.getAbbreviation(), "com.openexchange.authentication", LoginExceptionFactory.getInstance());
-            LOG.debug("Global bundle successfully started");
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
-		}
-	}
+    public static LoginExceptionFactory getInstance() {
+        return SINGLETON;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void stop(final BundleContext context) throws Exception {
-		try {
-		    loginComponent.unregister();
-            componentRegistryRegistration.unregister();
-            ServiceHolderInit.getInstance().stop();
-			LOG.debug("Global bundle successfully stopped");
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
-		}
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected LoginException createException(final ErrorMessage message,
+        final Throwable cause, final Object... args) {
+        return new LoginException(message, cause, args);
+    }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void knownExceptions() {
+        declareAll(LoginExceptionCodes.values());
+    }
 }

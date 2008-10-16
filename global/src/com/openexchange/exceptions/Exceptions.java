@@ -89,11 +89,11 @@ public abstract class Exceptions<T extends AbstractOXException> {
     }
 
     protected void declare(int code, AbstractOXException.Category category, String message, String help) {
-        errors.put(code, new ErrorMessage(code, component, applicationId, category, message, help));
+        errors.put(Integer.valueOf(code), new ErrorMessage(code, component, applicationId, category, message, help));
     }
 
     protected void declare(OXErrorMessage error) {
-        errors.put(error.getErrorCode(), new ErrorMessage(error, component, applicationId));
+        errors.put(Integer.valueOf(error.getErrorCode()), new ErrorMessage(error, component, applicationId));
     }
 
     protected void declareAll(OXErrorMessage[] errors) {
@@ -109,14 +109,17 @@ public abstract class Exceptions<T extends AbstractOXException> {
     }
 
     /**
-     * Override this method and declare all your exceptions
+     * Override this method and declare all your exceptions. This method must
+     * call at least one of the methods {@link #declare(OXErrorMessage)},
+     * {@link #declare(int, com.openexchange.groupware.AbstractOXException.Category, String, String)},
+     * {@link #declareAll(Iterable)}, {@link #declareAll(OXErrorMessage[])}.
      */
     protected abstract void knownExceptions();
 
     protected abstract T createException(ErrorMessage message,Throwable cause, Object...args);
 
     public T create(int code, Throwable cause, Object...args) {
-        ErrorMessage errorMessage = errors.get(code);
+        ErrorMessage errorMessage = errors.get(Integer.valueOf(code));
         if (errorMessage == null) {
             throw new UndeclaredErrorCodeException(code, getApplicationId(), getComponent());
         }

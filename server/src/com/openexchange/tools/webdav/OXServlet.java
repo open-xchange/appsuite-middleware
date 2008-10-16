@@ -61,6 +61,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jdom.JDOMException;
 
 import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.groupware.AbstractOXException;
@@ -381,7 +382,7 @@ public abstract class OXServlet extends WebDavServlet {
 			} catch (final LdapException ex) {
 				switch (ex.getDetail()) {
 				case ERROR:
-					throw new LoginException(LoginException.Code.UNKNOWN, ex);
+					throw new LoginException(LoginExceptionCodes.UNKNOWN, ex);
 				case NOT_FOUND:
 					throw new UserNotFoundException("User not found.", ex);
 				}
@@ -402,17 +403,17 @@ public abstract class OXServlet extends WebDavServlet {
 			final String sessionId = sessiondCon.addSession(userId, username, pass, context, ipAddress, login);
 			session = sessiondCon.getSession(sessionId);
 		} catch (final LoginException e) {
-			if (LoginException.Source.USER == e.getSource()) {
+			if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
 				LOG.debug(e.getMessage(), e);
 			} else {
 				LOG.error(e.getMessage(), e);
 			}
 		} catch (final UserNotFoundException e) {
-            throw new LoginException(LoginException.Code.INVALID_CREDENTIALS, e);
+            throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS, e);
 		} catch (final PasswordExpiredException e) {
-            throw new LoginException(LoginException.Code.INVALID_CREDENTIALS, e);
+            throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS, e);
         } catch (final UserNotActivatedException e) {
-            throw new LoginException(LoginException.Code.INVALID_CREDENTIALS, e);
+            throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS, e);
         }
 		return session;
 	}

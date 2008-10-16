@@ -64,9 +64,9 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginInfo;
-import com.openexchange.authentication.LoginException.Code;
 import com.openexchange.configuration.ConfigurationException;
 
 public class IMAPAuthentication implements AuthenticationService {
@@ -111,7 +111,7 @@ public class IMAPAuthentication implements AuthenticationService {
             final String uid = splitted[1];
             final String password = loginInfo.getPassword();
             if ("".equals(uid.trim()) || "".equals(password.trim())) {
-                throw new LoginException(Code.INVALID_CREDENTIALS);
+                throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS);
             }
 
             if (props.get("IMAP_TIMEOUT") != null) {
@@ -182,14 +182,14 @@ public class IMAPAuthentication implements AuthenticationService {
             };
         } catch (ConfigurationException e) {
             LOG.error("Error reading auth plugin config!", e);
-            throw new LoginException(Code.COMMUNICATION, e);
+            throw new LoginException(LoginExceptionCodes.COMMUNICATION, e);
         } catch (NoSuchProviderException e) {
             LOG.error("Error setup initial imap envorinment!", e);
-            throw new LoginException(Code.COMMUNICATION, e);
+            throw new LoginException(LoginExceptionCodes.COMMUNICATION, e);
         } catch (MessagingException e) {
             LOG.info("Authentication error on host " + host + ":" + port + " for user " + user, e);
             LOG.debug("Debug imap authentication, e");
-            throw new LoginException(Code.INVALID_CREDENTIALS, e);
+            throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS, e);
         } finally {
             try {
                 if (imapconnection != null) {
@@ -197,7 +197,7 @@ public class IMAPAuthentication implements AuthenticationService {
                 }
             } catch (MessagingException e) {
                 LOG.error("Error closing imap connection!", e);
-                throw new LoginException(Code.COMMUNICATION, e);
+                throw new LoginException(LoginExceptionCodes.COMMUNICATION, e);
             }
         }
     }

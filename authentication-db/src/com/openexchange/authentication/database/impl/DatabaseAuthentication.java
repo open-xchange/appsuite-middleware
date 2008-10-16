@@ -49,6 +49,8 @@
 
 package com.openexchange.authentication.database.impl;
 
+import static com.openexchange.authentication.LoginExceptionCodes.*;
+
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginInfo;
@@ -81,15 +83,14 @@ public class DatabaseAuthentication implements AuthenticationService {
         throws LoginException {
         final String password = loginInfo.getPassword();
         if (null == password || 0 == password.length()) {
-            throw new LoginException(LoginException.Code.INVALID_CREDENTIALS);
+            throw INVALID_CREDENTIALS.create();
         }
         final String[] splitted = split(loginInfo.getUsername());
         final ContextStorage ctxStor = ContextStorage.getInstance();
         try {
             final int ctxId = ctxStor.getContextId(splitted[0]);
             if (ContextStorage.NOT_FOUND == ctxId) {
-                throw new LoginException(LoginException.Code
-                    .INVALID_CREDENTIALS);
+                throw INVALID_CREDENTIALS.create();
             }
             final Context ctx = ctxStor.getContext(ctxId);
             final UserStorage userStor = UserStorage.getInstance();
@@ -97,19 +98,17 @@ public class DatabaseAuthentication implements AuthenticationService {
             try {
                 userId = userStor.getUserId(splitted[1], ctx);
             } catch (LdapException e) {
-                throw new LoginException(LoginException.Code
-                    .INVALID_CREDENTIALS, e);
+                throw INVALID_CREDENTIALS.create();
             }
             final User user = userStor.getUser(userId, ctx);
             if (!UserStorage.authenticate(user, password)) {
-                throw new LoginException(LoginException.Code
-                    .INVALID_CREDENTIALS);
+                throw INVALID_CREDENTIALS.create();
             }
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             throw new LoginException(e);
-        } catch (LdapException e) {
+        } catch (final LdapException e) {
             throw new LoginException(e);
-        } catch (UserException e) {
+        } catch (final UserException e) {
             throw new LoginException(e);
         }
         return new Authenticated() {
