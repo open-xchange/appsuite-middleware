@@ -179,6 +179,7 @@ public final class AJPv13ListenerPool {
 	public static AJPv13Listener getListener() {
 		AJPv13Listener retval = null;
 		boolean decrement = true;
+		boolean add2Watcher = false;
 		int state;
 		do {
 			state = RW_LOCK.acquireRead();
@@ -189,10 +190,16 @@ public final class AJPv13ListenerPool {
 				 * non-pooled listener.
 				 */
 				retval = new AJPv13Listener(listenerNum.incrementAndGet());
-				AJPv13Watcher.addListener(retval);
+				add2Watcher = true;
 				decrement = false;
+			} else {
+				add2Watcher = false;
+				decrement = true;
 			}
 		} while (!RW_LOCK.releaseRead(state));
+		if (add2Watcher) {
+			AJPv13Watcher.addListener(retval);
+		}
 		if (decrement) {
 			AJPv13Server.ajpv13ListenerMonitor.decrementPoolSize();
 			AJPv13Server.ajpv13ListenerMonitor.decrementNumIdle();
