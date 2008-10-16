@@ -67,6 +67,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
+import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.reseller.storage.sqlStorage.OXResellerSQLStorage;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -93,11 +94,24 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     public OXResellerMySQLStorage() {
     }
 
-    private void setIdOrName(final boolean hasId, final PreparedStatement prep, final ResellerAdmin adm, final int idx) throws SQLException {
-        if( hasId ) {
-            prep.setInt(idx, adm.getId());
-        } else {
-            prep.setString(idx, adm.getName());
+    private boolean hasRestriction(final Connection con, final int sid, final int rid) throws StorageException {
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            prep = con.prepareStatement("SELECT rid FROM subadmin_restrictions WHERE sid=? AND rid=?");
+            prep.setInt(1, sid);
+            prep.setInt(2, rid);
+            rs = prep.executeQuery();
+            if( rs.next() ) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } finally {
+            cache.closeSqlStuff(null, prep, rs);
         }
     }
     
@@ -105,57 +119,78 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     public void change(final ResellerAdmin adm) throws StorageException {
         Connection oxcon = null;
         PreparedStatement prep = null;
+        ResultSet rs = null;
         
         try {
             oxcon = cache.getConnectionForConfigDB();
             oxcon.setAutoCommit(false);
             
             final String name = adm.getName();
-            final String q1 = "UPDATE subadmin ";
-            String q2 = null;
-            boolean hasId = false;
+            int sid = 0;
             if( adm.getId() != null ) {
-                q2 = " WHERE sid=?";
-                hasId = true;
+                sid = adm.getId();
             } else if( name != null ) {
-                q2 = " WHERE name=?";
+                prep = oxcon.prepareStatement("SELECT sid FROM subadmin WHERE name=?");
+                prep.setString(1, name);
+                rs = prep.executeQuery();
+                if( !rs.next() ) {
+                    throw new StorageException("unable to get id for " + name);
+                }
+                sid = rs.getInt("sid");
             } else {
                 throw new InvalidDataException("either ID or name must be specified");
             }
             if( name != null ) {
-                prep = oxcon.prepareStatement(q1 + "SET name=?" + q2);
+                prep = oxcon.prepareStatement("UPDATE subadmin SET name=? WHERE sid=?");
                 prep.setString(1, name);
-                setIdOrName(hasId, prep, adm, 2);
+                prep.setInt(2, sid);
                 prep.executeUpdate();
                 prep.close();
             }
 
             final String displayName = adm.getDisplayname();
             if( displayName != null ) {
-                prep = oxcon.prepareStatement(q1 + "SET displayName=?" + q2);
+                prep = oxcon.prepareStatement("UPDATE subadmin SET displayName=? WHERE sid=?");
                 prep.setString(1, displayName);
-                setIdOrName(hasId, prep, adm, 2);
+                prep.setInt(2, sid);
                 prep.executeUpdate();
                 prep.close();
             }
             
             final Integer parentId = adm.getParentId();
             if( parentId != null ) {
-                prep = oxcon.prepareStatement(q1 + "SET pid=?" + q2);
+                prep = oxcon.prepareStatement("UPDATE subadmin SET pid=? WHERE sid=?");
                 prep.setInt(1, parentId);
-                setIdOrName(hasId, prep, adm, 2);
+                prep.setInt(2, sid);
                 prep.executeUpdate();
                 prep.close();
             }
 
             final String password = adm.getPassword();
             if( password != null ) {
-                prep = oxcon.prepareStatement(q1 + "SET password=?, passwordMech=?" + q2);
+                prep = oxcon.prepareStatement("UPDATE subadmin SET password=?, passwordMech=? WHERE sid=?");
                 prep.setString(1, cache.encryptPassword(adm));
                 prep.setString(2, adm.getPasswordMech());
-                setIdOrName(hasId, prep, adm, 3);
+                prep.setInt(3, sid);
                 prep.executeUpdate();
                 prep.close();
+            }
+            
+            HashSet<Restriction> res = adm.getRestrictions();
+            if( res != null ) {
+                prep = oxcon.prepareStatement("DELETE FROM subadmin_restrictions WHERE sid=?");
+                prep.setInt(1, sid);
+                prep.executeUpdate();
+                prep.close();
+                for(final Restriction r : res) {
+                    int rid = r.getId();
+                    prep = oxcon.prepareStatement("INSERT INTO subadmin_restrictions (sid,rid,value) VALUES(?,?,?)");
+                    prep.setInt(1, sid);
+                    prep.setInt(2, rid);
+                    prep.setString(3, r.getValue());
+                    prep.executeUpdate();
+                    prep.close();
+                }
             }
             
             oxcon.commit();
@@ -188,7 +223,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeSqlStuff(oxcon,prep);
+            cache.closeSqlStuff(oxcon,prep,rs);
         }
     }
 
@@ -616,20 +651,27 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         ResultSet rs = null;
         try {
             ResellerAdmin adm = getData(new ResellerAdmin[]{new ResellerAdmin(creds.getLogin(),creds.getPassword())})[0];
-            if( ctx.getId() == null ) {
-                throw new InvalidDataException("ContextID must not be null");
-            }
             oxcon = cache.getConnectionForConfigDB();
-            prep = oxcon.prepareStatement("SELECT sid FROM context2subadmin WHERE cid=?");
-            prep.setInt(1, ctx.getId());
-            rs = prep.executeQuery();
-            if( ! rs.next() ) {
-                return false;
+            if( ctx == null ) {
+                prep = oxcon.prepareStatement("SELECT cid FROM context2subadmin WHERE sid=?");
+                prep.setInt(1, adm.getId());
+                rs = prep.executeQuery();
+                if( ! rs.next() ) {
+                    return false;
+                }
+                return true;
+            } else {
+                prep = oxcon.prepareStatement("SELECT sid FROM context2subadmin WHERE cid=?");
+                prep.setInt(1, ctx.getId());
+                rs = prep.executeQuery();
+                if( ! rs.next() ) {
+                    return false;
+                }
+                if( rs.getInt("sid") != adm.getId() ){
+                    return false;
+                }
+                return true;
             }
-            if( rs.getInt("sid") != adm.getId() ){
-                return false;
-            }
-            return true;
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
@@ -640,9 +682,6 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage());
         } catch (SQLException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e.getMessage());
-        } catch (InvalidDataException e) {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage());
         } finally {
@@ -682,6 +721,260 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         }
     }
 
+    /**
+     * Check whether maxvalue of {@link Restriction.MAX_CONTEXT} has been reached
+     * 
+     * @param con
+     * @param adm
+     * @param maxvalue
+     * @throws StorageException
+     * @throws OXResellerException
+     * @throws SQLException 
+     */
+    private void checkMaxContextRestriction(final Connection con, final ResellerAdmin adm, final int maxvalue) throws StorageException, OXResellerException, SQLException {
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            prep = con.prepareStatement("SELECT COUNT(cid) FROM context2subadmin WHERE sid=?");
+            prep.setInt(1, adm.getId());
+            rs = prep.executeQuery();
+            if( ! rs.next() ) {
+                throw new StorageException("unable to count the number of context belonging to " + adm.getName());
+            }
+            if( rs.getInt("COUNT(cid)") >= maxvalue ) {
+                throw new OXResellerException("maximum number of contexts reached: " + maxvalue);
+            }
+            final HashMap<String, Restriction> ret = new HashMap<String, Restriction>();
+            while( rs.next() ) {
+                Restriction res = new Restriction();
+                res.setId(rs.getInt("rid"));
+                res.setName(rs.getString("name"));
+                ret.put(res.getName(), res);
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } finally {
+            cache.closeSqlStuff(null, prep, rs);
+        }
+    }
+    
+    /**
+     * Check whether maxvalue of {@link Restriction.MAX_CONTEXT_QUOTA} has been reached
+     * 
+     * @param con
+     * @param adm
+     * @param maxvalue
+     * @throws StorageException
+     * @throws OXResellerException
+     * @throws SQLException 
+     * @throws PoolException 
+     */
+    private void checkMaxContextQuotaRestriction(final Connection con, final ResellerAdmin adm, final long maxvalue) throws StorageException, OXResellerException, SQLException, PoolException {
+        PreparedStatement prep = null;
+        PreparedStatement prep2 = null;
+        ResultSet rs = null;
+        ResultSet rs2 = null;
+        Connection oxcon = null;
+        try {
+            prep = con.prepareStatement("SELECT cid FROM context2subadmin WHERE sid=?");
+            prep.setInt(1, adm.getId());
+            rs = prep.executeQuery();
+            long qused = 0;
+            while( rs.next() ) {
+                final int cid = rs.getInt("cid");
+                oxcon = cache.getConnectionForContext(cid);
+                prep2 = oxcon.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
+                prep2.setInt(1, cid);
+                rs2 = prep2.executeQuery();
+                if( rs2.next() ) {
+                    qused += rs2.getLong(1);
+                }
+                prep2.close();
+                rs2.close();
+                oxcon.close();
+            }
+            if( (qused /= Math.pow(2, 20)) >= maxvalue ) {
+                throw new OXResellerException("maximum overall context quota reached: " + maxvalue);
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (PoolException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } finally {
+            cache.closeSqlStuff(oxcon, prep, rs);
+            cache.closeSqlStuff(null, prep2, rs2);
+        }
+    }
+
+    private void checkMaxOverallUserRestriction(final Connection con, final ResellerAdmin adm, final int maxvalue) throws StorageException, OXResellerException, SQLException, PoolException {
+        PreparedStatement prep = null;
+        PreparedStatement prep2 = null;
+        ResultSet rs = null;
+        ResultSet rs2 = null;
+        Connection oxcon = null;
+        try {
+            prep = con.prepareStatement("SELECT cid FROM context2subadmin WHERE sid=?");
+            prep.setInt(1, adm.getId());
+            rs = prep.executeQuery();
+            // start count at one for the current context to be created
+            int count = 1;
+            while( rs.next() ) {
+                final int cid = rs.getInt("cid");
+                oxcon = cache.getConnectionForContext(cid);
+                prep2 = oxcon.prepareStatement("SELECT COUNT(cid) FROM user WHERE cid=?");
+                prep2.setInt(1, cid);
+                rs2 = prep2.executeQuery();
+                if( rs2.next() ) {
+                    count += rs2.getInt(1);
+                }
+                prep2.close();
+                rs2.close();
+                oxcon.close();
+            }
+            if( count > maxvalue ) {
+                throw new OXResellerException("maximum overall number of users reached: " + maxvalue);
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (PoolException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } finally {
+            cache.closeSqlStuff(oxcon, prep, rs);
+            cache.closeSqlStuff(null, prep2, rs2);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#checkRestrictions(com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
+    @Override
+    public void checkRestrictions(final Credentials creds, final String... restriction_types) throws StorageException {
+        ResellerAdmin adm = getData(new ResellerAdmin[]{new ResellerAdmin(creds.getLogin(),creds.getPassword())})[0];
+        HashSet<Restriction> restrictions = adm.getRestrictions();
+        if( restrictions != null && restrictions.size() > 0 ) {
+            Connection con = null;
+            try {
+                con = cache.getConnectionForConfigDB();
+                for(final Restriction res : restrictions) {
+                    for(final String tocheck : restriction_types) {
+                        if( res.getName().equals(tocheck) && tocheck.equals(Restriction.MAX_CONTEXT_PER_SUBADMIN)) {
+                            checkMaxContextRestriction(con, adm, Integer.parseInt(res.getValue()));
+                        } else if( res.getName().equals(tocheck) && tocheck.equals(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN)) {
+                            checkMaxContextQuotaRestriction(con, adm, Long.parseLong(res.getValue()));
+                        } else if( res.getName().equals(tocheck) && tocheck.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN)) {
+                            checkMaxOverallUserRestriction(con, adm, Integer.parseInt(res.getValue()));
+                        }
+                    }
+                }
+            } catch (RuntimeException e) {
+                log.error(e.getMessage(), e);
+                throw new StorageException(e.getMessage());
+            } catch (PoolException e) {
+                log.error(e.getMessage(), e);
+                throw new StorageException(e.getMessage());
+            } catch (OXResellerException e) {
+                log.error(e.getMessage(), e);
+                throw new StorageException(e.getMessage());
+            } catch (SQLException e) {
+                log.error(e.getMessage(), e);
+                throw new StorageException(e.getMessage());
+            } finally {
+                cache.closeSqlStuff(con, null);
+            }
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#applyRestrictionsToContext(java.util.HashSet, com.openexchange.admin.rmi.dataobjects.Context)
+     */
+    @Override
+    public void applyRestrictionsToContext(HashSet<Restriction> restrictions, Context ctx) throws StorageException {
+        Connection oxcon = null;
+        PreparedStatement prep = null;
+        
+        try {
+            oxcon = cache.getConnectionForConfigDB();
+            oxcon.setAutoCommit(false);
+
+            final int cid = ctx.getId();
+            prep = oxcon.prepareStatement("DELETE FROM context_restrictions WHERE cid=?");
+            prep.setInt(1, cid);
+            prep.executeUpdate();
+            prep.close();
+            if( restrictions != null ) {
+                final Iterator<Restriction> i = restrictions.iterator();
+                while( i.hasNext() ) {
+                    final Restriction r = i.next();
+                    prep = oxcon.prepareStatement("INSERT INTO context_restrictions (cid,rid,value) VALUES (?,?,?)");
+                    prep.setInt(1, cid);
+                    prep.setInt(2, r.getId());
+                    prep.setString(3, r.getValue());
+                    prep.executeUpdate();
+                    prep.close();
+                }
+            }
+            
+            oxcon.commit();
+        } catch (final DataTruncation dt) {
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            doRollback(oxcon);
+            throw AdminCache.parseDataTruncation(dt);
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            doRollback(oxcon);
+            throw e;
+        } catch (PoolException e) {
+            log.error(e.getMessage(), e);
+            doRollback(oxcon);
+            throw new StorageException(e.getMessage());
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            doRollback(oxcon);
+            throw new StorageException(e.getMessage());
+        } finally {
+            cache.closeSqlStuff(oxcon,prep);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#getRestrictionsFromContext(com.openexchange.admin.rmi.dataobjects.Context)
+     */
+    @Override
+    public HashSet<Restriction> getRestrictionsFromContext(Context ctx) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            prep = con.prepareStatement("SELECT context_restrictions.rid,cid,name,value FROM context_restrictions INNER JOIN restrictions ON context_restrictions.rid=restrictions.rid WHERE cid=?");
+            prep.setInt(1, ctx.getId());
+            rs = prep.executeQuery();
+
+            HashSet<Restriction> res = new HashSet<Restriction>();
+            while( rs.next() ) {
+                Restriction r = new Restriction();
+                r.setId(rs.getInt("rid"));
+                r.setName(rs.getString("name"));
+                r.setValue(rs.getString("value"));
+                res.add(r);
+            }
+            return res.size() > 0 ? res : null;
+        } catch (PoolException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } finally {
+            cache.closeSqlStuff(con, prep, rs);
+        }
+    }
+    
     private void doRollback(final Connection con) {
         try {
             con.rollback();

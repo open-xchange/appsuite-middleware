@@ -52,15 +52,18 @@ package com.openexchange.admin.reseller.rmi.impl;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
+import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -78,10 +81,12 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
     private final static Log log = LogFactory.getLog(OXReseller.class);
     
     private final BasicAuthenticator basicauth;
-    
+
+    private final ResellerAuth resellerauth;
+
     private final OXResellerStorageInterface oxresell;
 
-    private HashMap<String, Restriction> restrictions = null;
+    private HashMap<String, Restriction> validRestrictions = null;
     
     public OXReseller() throws StorageException {
         super();
@@ -89,6 +94,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             log.debug("Class loaded: " + this.getClass().getName());
         }
         basicauth = new BasicAuthenticator();
+        resellerauth = new ResellerAuth();
         try {
             oxresell = OXResellerStorageInterface.getInstance();
         } catch (StorageException e) {
@@ -99,6 +105,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
     
     /**
      * Checks whether either id or name is specified
+     * 
      * @param adm
      * @throws InvalidDataException
      */
@@ -109,21 +116,68 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
     }
 
     /**
+     * load existing {@link Restriction} definitions from database into the 
+     * validRestrictions {@link HashMap}
+     * 
+     * @throws StorageException
+     */
+    private void initRestrictions() throws StorageException {
+        if( this.validRestrictions == null ) {
+            validRestrictions = oxresell.listRestrictions("*");
+            if( validRestrictions == null ) {
+                throw new StorageException("unable to load available restrictions from database");
+            }
+        }
+    }
+    
+    /**
      * Check whether creator supplied any {@link Restriction} and check if those exist
      * within the database. If, add the corresponding Restriction id.
+     * Check whether Restrictions can be applied to context.
+     * If not, throw {@link InvalidDataException} or {@link StorageException} if there
+     * are no Restrictions defined within the database.
+     * 
+     * @param restrictions
+     * @throws StorageException
+     * @throws InvalidDataException 
+     */
+    private void checkRestrictionsPerContext(final HashSet<Restriction> restrictions) throws StorageException, InvalidDataException {
+        initRestrictions();
+        
+        final Iterator<Restriction> i = restrictions.iterator();
+        while( i.hasNext() ) {
+            Restriction r = i.next();
+            final String rname = r.getName();
+            final String rval  = r.getValue();
+            if( rname == null ) {
+                throw new InvalidDataException("Restriction name must be set");
+            }
+            if( !( rname.equals(Restriction.MAX_USER_PER_CONTEXT) )) {
+                 throw new InvalidDataException("Restriction " + rname + " cannot be applied to context");
+             }
+            if( ! validRestrictions.containsKey(rname) ) {
+                throw new InvalidDataException("No restriction named " + rname + " found in database");
+            }
+            if( rval == null ) {
+                throw new InvalidDataException("Restriction value must be set");
+            }
+            r.setId(validRestrictions.get(rname).getId());
+        }
+    }
+    
+    /**
+     * Check whether creator supplied any {@link Restriction} and check if those exist
+     * within the database. If, add the corresponding Restriction id.
+     * Check whether Restrictions can be applied to subadmin.
      * If not, throw {@link InvalidDataException} or {@link StorageException} if there
      * are no Restrictions defined within the database.
      * 
      * @throws StorageException
      * @throws InvalidDataException 
      */
-    private void checkRestrictions(ResellerAdmin adm) throws StorageException, InvalidDataException {
-        if( this.restrictions == null ) {
-            restrictions = oxresell.listRestrictions("*");
-            if( restrictions == null ) {
-                throw new StorageException("unable to load available restrictions from database");
-            }
-        }
+    private void checkRestrictionsPerSubadmin(ResellerAdmin adm) throws StorageException, InvalidDataException {
+        initRestrictions();
+        
         HashSet<Restriction> res = adm.getRestrictions();
         if( res != null ) {
             Restriction[] rarr = res.toArray(new Restriction[res.size()]);
@@ -133,13 +187,18 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 if( rname == null ) {
                     throw new InvalidDataException("Restriction name must be set");
                 }
+                if( !( rname.equals(Restriction.MAX_CONTEXT_PER_SUBADMIN) ||
+                       rname.equals(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN) ||
+                       rname.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN) ) ) {
+                    throw new InvalidDataException("Restriction " + rname + " cannot be applied to subadmin");
+                }
                 if( rval == null ) {
                     throw new InvalidDataException("Restriction value must be set");
                 }
-                if( !restrictions.containsKey(rname) ) {
+                if( !validRestrictions.containsKey(rname) ) {
                     throw new InvalidDataException("No restriction named " + rname + " found in database");
                 }
-                rarr[i].setId(restrictions.get(rname).getId());
+                rarr[i].setId(validRestrictions.get(rname).getId());
             }
         }
     }
@@ -159,7 +218,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             basicauth.doAuthentication(creds);
 
             checkIdOrName(adm);
-            
+
             if( adm.getId()!= null && !oxresell.existsAdmin(adm) ) {
                 throw new OXResellerException(OXResellerException.RESELLER_ADMIN_NOT_EXIST + ": " + adm.getName());
             }
@@ -174,7 +233,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             final String newname = adm.getName();
             final String dbname  = dbadm.getName();
-            
+
             if( newname != null && adm.getId() != null && !newname.equals(dbname) ) {
                 // want to change name?, check whether new name does already
                 // exist
@@ -182,7 +241,8 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                     throw new OXResellerException(OXResellerException.RESELLER_ADMIN_EXISTS + ": " + adm.getName());
                 }
             }
-            
+
+            checkRestrictionsPerSubadmin(dbadm);
             oxresell.change(adm);
         } catch (InvalidDataException e) {
             log.error("Invalid data sent by client!", e);
@@ -225,7 +285,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             //TODO: parent id must be the ID of the creator
             adm.setParentId(0);
 
-            checkRestrictions(adm);
+            checkRestrictionsPerSubadmin(adm);
             
             return oxresell.create(adm);
         } catch(final StorageException e) {
@@ -259,7 +319,9 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             if( !oxresell.existsAdmin(adm) ) {
                 throw new OXResellerException(OXResellerException.RESELLER_ADMIN_NOT_EXIST + ": " + adm.getName());
             }
-            
+            if( oxresell.ownsContext(null, new Credentials(adm.getName(),null)) ) {
+                throw new OXResellerException("Unable to delete " + adm.getName() + ", still owns Context(s)");
+            }
             oxresell.delete(adm);
         } catch (InvalidDataException e) {
             log.error("Invalid data sent by client!", e);
@@ -363,6 +425,79 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      */
     public ResellerAdmin getData(ResellerAdmin adm, Credentials creds) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException {
         return getMultipleData(new ResellerAdmin[]{adm}, creds)[0];
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#applyRestrictionsToContext(java.util.HashSet, com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
+    public void applyRestrictionsToContext(HashSet<Restriction> restrictions, Context ctx, Credentials creds) throws InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException {
+        try {
+            doNullCheck(ctx);
+            doNullCheck(ctx.getId());
+        } catch (final InvalidDataException e) {            
+            log.error("Invalid data sent by client!", e);
+            throw e;
+        }
+        
+        try {
+            final boolean isMasterAdmin = ClientAdminThreadExtended.cache.isMasterAdmin(creds);
+            if( isMasterAdmin ) {
+                basicauth.doAuthentication(creds);
+            } else {
+                resellerauth.doAuthentication(creds);
+            }
+
+            if( !isMasterAdmin && ! oxresell.ownsContext(ctx, creds) ) {
+                throw new OXResellerException("ContextID " + ctx.getId() + " does not belong to " + creds.getLogin());
+            }
+
+            checkRestrictionsPerContext(restrictions);
+            
+            oxresell.applyRestrictionsToContext(restrictions, ctx);
+        } catch (InvalidDataException e) {
+            log.error("Invalid data sent by client!", e);
+            throw e;
+        } catch (StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#getRestrictionsFromContext(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
+    public HashSet<Restriction> getRestrictionsFromContext(Context ctx, Credentials creds) throws RemoteException, InvalidDataException, OXResellerException, StorageException, InvalidCredentialsException {
+        try {
+            doNullCheck(ctx);
+            doNullCheck(ctx.getId());
+        } catch (final InvalidDataException e) {            
+            log.error("Invalid data sent by client!", e);
+            throw e;
+        }
+        
+        try {
+            final boolean isMasterAdmin = ClientAdminThreadExtended.cache.isMasterAdmin(creds);
+            if( isMasterAdmin ) {
+                basicauth.doAuthentication(creds);
+            } else {
+                resellerauth.doAuthentication(creds);
+            }
+
+            if( !isMasterAdmin && ! oxresell.ownsContext(ctx, creds) ) {
+                throw new OXResellerException("ContextID " + ctx.getId() + " does not belong to " + creds.getLogin());
+            }
+
+            return oxresell.getRestrictionsFromContext(ctx);
+        } catch (StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
     }
 
 }

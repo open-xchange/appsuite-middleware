@@ -56,6 +56,7 @@ import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
+import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -142,6 +143,9 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
             return null;
         }
         try {
+            oxresell.checkRestrictions(auth, Restriction.MAX_CONTEXT_PER_SUBADMIN,
+                    Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN,
+                    Restriction.MAX_OVERALL_USER_PER_SUBADMIN);
             oxresell.ownContextToAdmin(ctx, auth);
         } catch (StorageException e) {
             log.error(e.getMessage(),e);
@@ -156,6 +160,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
     public void delete(Context ctx, Credentials auth) throws PluginException {
         final boolean ismasteradmin = cache.isMasterAdmin(auth);
         try {
+            oxresell.applyRestrictionsToContext(null, ctx);
             final ResellerAdmin owner = oxresell.getContextOwner(ctx);
             if( ismasteradmin && owner == null) {
                 // context does not belong to anybody, so it is save to be removed

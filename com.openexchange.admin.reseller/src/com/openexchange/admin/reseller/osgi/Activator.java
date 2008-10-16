@@ -65,10 +65,12 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
+import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.impl.OXReseller;
 import com.openexchange.admin.reseller.rmi.impl.OXResellerContextImpl;
+import com.openexchange.admin.reseller.rmi.impl.OXResellerUserImpl;
 import com.openexchange.admin.reseller.rmi.impl.ResellerAuth;
 import com.openexchange.admin.reseller.tools.AdminCacheExtended;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -118,6 +120,16 @@ public class Activator implements BundleActivator {
                 log.debug(reg.toString());
                 log.debug("Service registered");
             }
+        
+            props.clear();
+            props.put("name", "OXUser");
+            log.info(OXUserPluginInterface.class.getName());
+            reg = context.registerService(OXUserPluginInterface.class.getName(), new OXResellerUserImpl(), props);
+            if (log.isDebugEnabled()) {
+                log.debug(reg.toString());
+                log.debug("Service registered");
+            }
+
         } catch (final RemoteException e) {
             log.error(e.getMessage(), e);
             throw e;

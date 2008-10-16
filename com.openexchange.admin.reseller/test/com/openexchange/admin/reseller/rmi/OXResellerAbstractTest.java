@@ -49,10 +49,26 @@
 
 package com.openexchange.admin.reseller.rmi;
 
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.util.HashSet;
+
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.rmi.AbstractTest;
+import com.openexchange.admin.rmi.OXContextInterface;
+import com.openexchange.admin.rmi.OXUserInterface;
+import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
  * @author choeger
@@ -63,6 +79,7 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
     protected static final String TESTCHANGEUSER = "testchange";
     protected static final String CHANGEDNAME = "changedchangedagain";
     protected static final String TESTRESTRICTIONUSER = "testwithrestriction";
+    protected static final String TESTRESTCHANGERICTIONUSER = "testchangewithrestriction";
     
     protected static Credentials DummyMasterCredentials(){
         return new Credentials("oxadminmaster","secret");
@@ -72,6 +89,10 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
         return new Credentials("foo", "secret");
     }
     
+    protected static Credentials TestUserCredentials() {
+        return new Credentials(TESTUSER, "secret");
+    }
+
     protected static Credentials ResellerBarCredentials() {
         return new Credentials("bar", "secret");
     }
@@ -92,18 +113,80 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
         return TestAdminUser(TESTUSER, "Test Reseller Admin");
     }
     
+    protected static ResellerAdmin TestAdminUser(final String name) {
+        return TestAdminUser(name, "Test Display Name");
+    }
+
     protected static ResellerAdmin TestAdminUser(final String name, final String displayname) {
         ResellerAdmin adm = new ResellerAdmin(name);
         adm.setDisplayname(displayname);
         adm.setPassword("secret");
         return adm;
     }
-
+    
     protected static Restriction MaxContextRestriction() {
-        return new Restriction(Restriction.MAX_CONTEXT,"10");
+        return new Restriction(Restriction.MAX_CONTEXT_PER_SUBADMIN,"2");
     }
 
     protected static Restriction MaxContextQuotaRestriction() {
-        return new Restriction(Restriction.MAX_CONTEXT_QUOTA,"1000");
+        return new Restriction(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN,"1000");
+    }
+    
+    protected static Restriction MaxUserPerContextRestriction() {
+        return new Restriction(Restriction.MAX_USER_PER_CONTEXT,"2");
+    }
+
+    protected static Restriction MaxOverallUserRestriction() {
+        return new Restriction(Restriction.MAX_OVERALL_USER_PER_SUBADMIN,"2");
+    }
+
+    protected static User ContextAdmin() {
+        User oxadmin = new User();
+        oxadmin.setName("oxadmin");
+        oxadmin.setDisplay_name("oxadmin");
+        oxadmin.setGiven_name("oxadmin");
+        oxadmin.setSur_name("oxadmin");
+        oxadmin.setPrimaryEmail("oxadmin@example.com");
+        oxadmin.setPassword("secret");
+        return oxadmin;
+    }
+
+    protected static Context createContext(final int id, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+        final OXContextInterface oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
+
+        User oxadmin = ContextAdmin();
+        Context ctx = new Context(id);
+        ctx.setMaxQuota(100000L);
+        return oxctx.create(ctx, oxadmin, auth);
+    }
+    
+    protected static User createUser(final Context ctx, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+        final OXUserInterface oxusr = (OXUserInterface)Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
+
+        final String random = new Long(System.currentTimeMillis()).toString();
+        User oxuser = new User();
+        oxuser.setName("oxuser"+random);
+        oxuser.setDisplay_name("oxuser"+random);
+        oxuser.setGiven_name("oxuser"+random);
+        oxuser.setSur_name("oxuser"+random);
+        oxuser.setPrimaryEmail("oxuser"+random+"@example.com");
+        oxuser.setEmail1("oxuser"+random+"@example.com");
+        oxuser.setPassword("secret");
+        ctx.setMaxQuota(100000L);
+        return oxusr.create(ctx, oxuser, auth);
+    }
+
+    protected static void deleteContext(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException, MalformedURLException, NotBoundException {
+        final OXContextInterface oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
+        oxctx.delete(ctx, auth);
+    }
+
+    protected static Restriction getRestrictionByName(final String name, final HashSet<Restriction> res) {
+        for(final Restriction r : res.toArray(new Restriction[res.size()])) {
+            if( r.getName().equals(name) ) {
+                return r;
+            }
+        }
+        return null;
     }
 }

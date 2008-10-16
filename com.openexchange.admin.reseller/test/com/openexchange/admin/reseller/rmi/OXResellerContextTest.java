@@ -48,22 +48,23 @@
  */
 package com.openexchange.admin.reseller.rmi;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import java.util.HashSet;
 
 import org.junit.Test;
 
+import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
+import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -106,6 +107,118 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
     }
 
     @Test
+    public void testCreateTooManyContexts() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException{
+        final Credentials creds = DummyMasterCredentials();
+
+        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+
+        ResellerAdmin adm = FooAdminUser();
+        HashSet<Restriction> res = new HashSet<Restriction>();
+        res.add(MaxContextRestriction());
+        adm.setRestrictions(res);
+        oxresell.create(adm, creds);
+
+        Context ctx1 = createContext(1337, ResellerFooCredentials());
+        Context ctx2 = createContext(1338, ResellerFooCredentials());
+        Context ctx3 = null;
+        boolean failed_ctx3 = false;
+        try {
+            ctx3 = createContext(1339, ResellerFooCredentials());
+        } catch (StorageException e) {
+            failed_ctx3 = true;
+        }
+        assertTrue("creation of ctx3 must fail",failed_ctx3);
+        
+        deleteContext(ctx1, ResellerFooCredentials());
+        deleteContext(ctx2, ResellerFooCredentials());
+        if( ctx3 != null ) {
+            deleteContext(ctx3, ResellerFooCredentials());
+        }
+        
+        oxresell.delete(FooAdminUser(), DummyMasterCredentials());
+    }
+
+    @Test
+    public void testCreateTooManyOverallUser() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException{
+        final Credentials creds = DummyMasterCredentials();
+
+        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+
+        ResellerAdmin adm = FooAdminUser();
+        HashSet<Restriction> res = new HashSet<Restriction>();
+        res.add(MaxOverallUserRestriction());
+        adm.setRestrictions(res);
+        oxresell.create(adm, creds);
+
+        Context ctx1 = createContext(1337, ResellerFooCredentials());
+        Context ctx2 = createContext(1338, ResellerFooCredentials());
+        Context ctx3 = null;
+        boolean failed_ctx3 = false;
+        try {
+            ctx3 = createContext(1339, ResellerFooCredentials());
+        } catch (StorageException e) {
+            failed_ctx3 = true;
+        }
+        assertTrue("creation of ctx3 must fail",failed_ctx3);
+        
+        deleteContext(ctx1, ResellerFooCredentials());
+        deleteContext(ctx2, ResellerFooCredentials());
+        if( ctx3 != null ) {
+            deleteContext(ctx3, ResellerFooCredentials());
+        }
+        
+        oxresell.delete(FooAdminUser(), DummyMasterCredentials());
+    }
+
+    //    @Test
+//    public void testCreateTooManyUsers() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException{
+//        final Credentials creds = DummyMasterCredentials();
+//
+//        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+//
+//        ResellerAdmin adm = FooAdminUser();
+//        HashSet<Restriction> res = new HashSet<Restriction>();
+//        res.add(MaxUserRestriction());
+//        adm.setRestrictions(res);
+//        oxresell.create(adm, creds);
+//
+//        for(final Context ctx : new Context[]{createContext(1337, ResellerFooCredentials()),
+//                createContext(1338, ResellerFooCredentials()), createContext(1339, ResellerFooCredentials())} ){
+//            Credentials ctxauth = new Credentials(ContextAdmin().getName(),ContextAdmin().getPassword());
+//            for(int i=0; i<2; i++) {
+//                System.out.println("creating user " + i + " in Context " + ctx.getId());
+//                createUser(ctx, ctxauth);
+//            }
+//        }
+//
+//        try {
+//            createUser(new Context(1337), new Credentials(ContextAdmin().getName(),ContextAdmin().getPassword()));
+//        } catch (StorageException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
+//        
+//        for(final Context ctx : new Context[]{new Context(1337), new Context(1338), new Context(1339)} ){
+//            deleteContext(ctx, ResellerFooCredentials());
+//        }
+////        boolean failed_ctx3 = false;
+////        try {
+////            ctx3 = createContext(1339, ResellerFooCredentials());
+////        } catch (Exception e) {
+////            failed_ctx3 = true;
+////        }
+////        assertTrue("creation of ctx3 must fail",failed_ctx3);
+////        
+////        deleteContext(ctx1, ResellerFooCredentials());
+////        deleteContext(ctx2, ResellerFooCredentials());
+////        if( ctx3 != null ) {
+////            deleteContext(ctx3, ResellerFooCredentials());
+////        }
+//        
+//        oxresell.delete(FooAdminUser(), DummyMasterCredentials());
+//    }
+
+    @Test
     public void testListAndDeleteContextOwnedByReseller() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException{
         final Credentials creds = DummyMasterCredentials();
 
@@ -115,24 +228,14 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
         oxresell.create(FooAdminUser(), creds);
         oxresell.create(BarAdminUser(), creds);
 
-        User oxadmin = new User();
-        oxadmin.setName("oxadmin");
-        oxadmin.setDisplay_name("oxadmin");
-        oxadmin.setGiven_name("oxadmin");
-        oxadmin.setSur_name("oxadmin");
-        oxadmin.setPrimaryEmail("oxadmin@example.com");
-        oxadmin.setPassword("secret");
-        Context ctx = new Context(1337);
-        ctx.setMaxQuota(100000L);
-        oxctx.create(ctx, oxadmin, ResellerFooCredentials());
-        
+        Context ctx = createContext(1337, ResellerFooCredentials());
         Context[] ret = oxctx.listAll(ResellerFooCredentials());
-        assertEquals(1, ret.length);
+        assertEquals("listAll must return one entry", 1, ret.length);
         
         ret = oxctx.listAll(ResellerBarCredentials());
-        assertEquals(0, ret.length);
+        assertEquals("listAll must return no entries", 0, ret.length);
 
-        oxctx.delete(ctx, ResellerFooCredentials());
+        deleteContext(ctx, ResellerFooCredentials());
         
         oxresell.delete(FooAdminUser(), DummyMasterCredentials());
         oxresell.delete(BarAdminUser(), DummyMasterCredentials());

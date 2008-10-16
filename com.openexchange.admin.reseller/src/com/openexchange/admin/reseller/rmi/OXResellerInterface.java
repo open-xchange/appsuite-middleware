@@ -51,9 +51,12 @@ package com.openexchange.admin.reseller.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.HashSet;
 
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
+import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
+import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -138,4 +141,27 @@ public interface OXResellerInterface extends Remote {
      * @throws InvalidDataException 
      */
     public ResellerAdmin getData(final ResellerAdmin adm, Credentials creds) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException;
+    
+    /**
+     * @param restrictions
+     * @param ctx
+     * @param creds
+     * @throws InvalidDataException 
+     * @throws StorageException 
+     * @throws InvalidCredentialsException 
+     * @throws OXResellerException 
+     */
+    public void applyRestrictionsToContext(final HashSet<Restriction> restrictions, final Context ctx, final Credentials creds) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException;
+    
+    /**
+     * @param ctx
+     * @param creds
+     * @return
+     * @throws RemoteException
+     * @throws InvalidDataException 
+     * @throws OXResellerException 
+     * @throws StorageException 
+     * @throws InvalidCredentialsException 
+     */
+    public HashSet<Restriction> getRestrictionsFromContext(final Context ctx, final Credentials creds) throws RemoteException, InvalidDataException, OXResellerException, StorageException, InvalidCredentialsException;
 }
