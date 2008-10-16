@@ -47,18 +47,11 @@
  *
  */
 
-
-
 package com.openexchange.ajax;
-
-import java.io.File;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.core.io.FileSystemResource;
 
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.importexport.ImporterExporter;
@@ -87,6 +80,7 @@ public abstract class ImportExport extends SessionServlet {
 
     private static BeanFactory beanFactory = null;
 
+    @Override
     public void init(){
         if (importerExporter != null) {
             return;

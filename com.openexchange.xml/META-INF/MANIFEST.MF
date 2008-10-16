@@ -13,6 +13,7 @@ Import-Package: org.osgi.framework,
 Export-Package: com.openexchange.xml.jdom,
  com.openexchange.xml.spring,
  org.jdom,
+ org.jdom.input,
  org.jdom.output,
  org.springframework.beans.factory
 Bundle-ClassPath: com.openexchange.xml.jar,
