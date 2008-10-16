@@ -117,7 +117,7 @@ public class AppointmentState extends LinkableState {
 		final TemplateReplacement tr = new FormatLocalizedStringReplacement(TemplateToken.LOCATION,
 				Notifications.FORMAT_LOCATION, location);
 		tr.setLocale(p.locale);
-		tr.setChanged(oldObj == null ? false : !ParticipantNotify.compareObjects(location, ((AppointmentObject) oldObj)
+		tr.setChanged(oldObj == null ? false : !ParticipantNotify.compareStrings(location, ((AppointmentObject) oldObj)
 				.getLocation()));
 		renderMap.put(tr);
 	}

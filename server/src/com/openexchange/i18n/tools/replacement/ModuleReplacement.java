@@ -122,7 +122,7 @@ public final class ModuleReplacement implements TemplateReplacement {
 	}
 
 	public boolean merge(final TemplateReplacement other) {
-		if (ModuleReplacement.class.isInstance(other)) {
+		if (!ModuleReplacement.class.isInstance(other)) {
 			/*
 			 * Class mismatch or null
 			 */

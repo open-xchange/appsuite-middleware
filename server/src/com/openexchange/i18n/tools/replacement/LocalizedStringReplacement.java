@@ -138,7 +138,7 @@ public abstract class LocalizedStringReplacement implements TemplateReplacement 
 	}
 
 	public boolean merge(final TemplateReplacement other) {
-		if (LocalizedStringReplacement.class.isInstance(other)) {
+		if (!LocalizedStringReplacement.class.isInstance(other)) {
 			/*
 			 * Class mismatch or null
 			 */

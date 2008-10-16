@@ -107,7 +107,7 @@ public final class SeriesReplacement extends LocalizedStringReplacement {
 
 	@Override
 	public boolean merge(final TemplateReplacement other) {
-		if (SeriesReplacement.class.isInstance(other)) {
+		if (!SeriesReplacement.class.isInstance(other)) {
 			/*
 			 * Class mismatch
 			 */

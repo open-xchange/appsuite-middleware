@@ -136,9 +136,9 @@ public abstract class AbstractFormatDateReplacement extends AbstractDateReplacem
 
 	@Override
 	public boolean merge(final TemplateReplacement other) {
-		if (AbstractFormatDateReplacement.class.isInstance(other)) {
+		if (!AbstractFormatDateReplacement.class.isInstance(other)) {
 			/*
-			 * Class mismatch
+			 * Class mismatch or null
 			 */
 			return false;
 		}

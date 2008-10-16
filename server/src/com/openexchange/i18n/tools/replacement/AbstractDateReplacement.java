@@ -180,7 +180,7 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
 	}
 
 	public boolean merge(final TemplateReplacement other) {
-		if (AbstractDateReplacement.class.isInstance(other)) {
+		if (!AbstractDateReplacement.class.isInstance(other)) {
 			/*
 			 * Class mismatch or null
 			 */

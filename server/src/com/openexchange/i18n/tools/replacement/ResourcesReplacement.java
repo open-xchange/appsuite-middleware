@@ -194,7 +194,7 @@ public final class ResourcesReplacement implements TemplateReplacement {
 	}
 
 	public boolean merge(final TemplateReplacement other) {
-		if (ResourcesReplacement.class.isInstance(other)) {
+		if (!ResourcesReplacement.class.isInstance(other)) {
 			/*
 			 * Class mismatch or null
 			 */

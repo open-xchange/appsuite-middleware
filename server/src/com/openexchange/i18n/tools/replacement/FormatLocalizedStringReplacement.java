@@ -157,7 +157,7 @@ public class FormatLocalizedStringReplacement implements TemplateReplacement {
 	}
 
 	public boolean merge(final TemplateReplacement other) {
-		if (FormatLocalizedStringReplacement.class.isInstance(other)) {
+		if (!FormatLocalizedStringReplacement.class.isInstance(other)) {
 			/*
 			 * Class mismatch or null
 			 */

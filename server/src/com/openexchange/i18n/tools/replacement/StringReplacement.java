@@ -135,7 +135,7 @@ public class StringReplacement implements TemplateReplacement {
 	}
 
 	public boolean merge(final TemplateReplacement other) {
-		if (StringReplacement.class.isInstance(other)) {
+		if (!StringReplacement.class.isInstance(other)) {
 			/*
 			 * Class mismatch or null
 			 */

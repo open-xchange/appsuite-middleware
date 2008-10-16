@@ -59,6 +59,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.notify.ParticipantNotify.MailMessage;
 import com.openexchange.i18n.tools.RenderMap;
 import com.openexchange.server.ServerTimer;
@@ -73,6 +74,9 @@ import com.openexchange.server.ServerTimer;
  * 
  */
 public final class NotificationPool {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(NotificationPool.class);
 
 	private static final NotificationPool instance = new NotificationPool();
 
@@ -124,9 +128,17 @@ public final class NotificationPool {
 			if (prev == null) {
 				map.put(pooledNotification, pooledNotification);
 				queue.offer(pooledNotification);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder().append("New pooled notification added for receiver ").append(
+							pooledNotification.getParticipant().email).toString());
+				}
 			} else {
 				prev.merge(pooledNotification);
 				prev.touch();
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder().append("Pooled notification merged for receiver ").append(
+							pooledNotification.getParticipant().email).toString());
+				}
 			}
 		} finally {
 			readLock.unlock();
@@ -161,35 +173,47 @@ public final class NotificationPool {
 
 	private class NotificationPoolTimerTask extends TimerTask {
 
-		private final Lock twriteLock;
+		private final org.apache.commons.logging.Log logger;
 
-		private final Map<PooledNotification, PooledNotification> tmap;
+		private final Lock taskWriteLock;
 
-		private final DelayQueue<PooledNotification> tqueue;
+		private final Map<PooledNotification, PooledNotification> taskMap;
+
+		private final DelayQueue<PooledNotification> taskQueue;
 
 		public NotificationPoolTimerTask(final Map<PooledNotification, PooledNotification> map,
 				final DelayQueue<PooledNotification> queue, final Lock writeLock) {
 			super();
-			this.tmap = map;
-			this.tqueue = queue;
-			this.twriteLock = writeLock;
+			logger = org.apache.commons.logging.LogFactory.getLog(NotificationPoolTimerTask.class);
+			this.taskMap = map;
+			this.taskQueue = queue;
+			this.taskWriteLock = writeLock;
 		}
 
 		@Override
 		public void run() {
-			twriteLock.lock();
+			taskWriteLock.lock();
 			try {
 				StringBuilder b = null;
-				PooledNotification cur = tqueue.poll();
-				while (cur != null) {
+				/*
+				 * Poll the head of the queue until it is null; meaning the
+				 * queue has no more elements with an unexpired delay.
+				 */
+				PooledNotification cur;
+				while ((cur = taskQueue.poll()) != null) {
 					if (b == null) {
 						b = new StringBuilder(2048);
 					}
 					/*
 					 * An expired pooled notification
 					 */
-					tmap.remove(cur);
+					taskMap.remove(cur);
 					final EmailableParticipant p = cur.getParticipant();
+					if (logger.isDebugEnabled()) {
+						logger.debug(b.append("Found elapsed pooled notification for receiver ").append(p.email)
+								.toString());
+						b.setLength(0);
+					}
 					final RenderMap renderMap = cur.getRenderMap();
 					renderMap.applyLocale(cur.getLocale());
 					renderMap.applyTimeZone(p.timeZone == null ? TimeZone.getDefault() : p.timeZone);
@@ -198,14 +222,20 @@ public final class NotificationPool {
 					 */
 					final MailMessage mmsg = ParticipantNotify.createParticipantMessage(p, cur.getTitle(), cur
 							.getState().getAction(), cur.getState(), cur.getLocale(), cur.getRenderMap(), true, b);
+					if (logger.isDebugEnabled()) {
+						logger.debug(b.append("Pooled ").append(
+								(Types.APPOINTMENT == cur.getState().getModule() ? "Appointment" : "Task")).append(
+								" (id = ").append(cur.getCalendarObject().getObjectID()).append(
+								") notification message generated for receiver ").append(p.email).toString());
+						b.setLength(0);
+					}
 					/*
 					 * Send notification
 					 */
 					ParticipantNotify.sendMessage(mmsg, cur.getSession(), cur.getCalendarObject(), cur.getState());
-					cur = tqueue.poll();
 				}
 			} finally {
-				twriteLock.unlock();
+				taskWriteLock.unlock();
 			}
 		}
 	}

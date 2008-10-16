@@ -159,10 +159,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			final ServerSession session, final CalendarObject obj, final int folderId, final State state,
 			final boolean suppressOXReminderHeader, final boolean internal) {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Sending message to: " + name);
-			LOG.debug("=====[" + messageTitle + "]====\n\n");
-			LOG.debug(message);
-			LOG.debug("\n\n============");
+			LOG.debug(new StringBuilder(message.length() + 64).append("Sending message to: ").append(name).append(
+					"\n=====[").append(messageTitle).append("]====\n\n").append(message).append("\n\n============"));
 		}
 		int fuid = folderId;
 		if (fuid == -1) {
@@ -469,12 +467,25 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 						NotificationPool.getInstance().put(
 								new PooledNotification(p, title, state, locale, (RenderMap) renderMap.clone(),
 										sessionObj, newObj));
+						if (LOG.isDebugEnabled()) {
+							LOG.debug(new StringBuilder(128).append(
+									(Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task")).append(
+									" update (id = ").append(newObj.getObjectID()).append(
+									") notification added to pool for receiver ").append(p.email).toString());
+						}
 					} else {
 						/*
 						 * Compose message
 						 */
 						messages.add(createParticipantMessage(p, title, actionRepl, state, locale, renderMap, isUpdate,
 								b));
+						if (LOG.isDebugEnabled()) {
+							LOG.debug(new StringBuilder(128).append(
+									(Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task"))
+									.append(" (id = ").append(newObj.getObjectID()).append(
+											") notification message generated for receiver ").append(p.email)
+									.toString());
+						}
 					}
 				}
 			}
@@ -689,7 +700,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			final String note = null == newObj.getNote() ? "" : newObj.getNote();
 			renderMap.put(new FormatLocalizedStringReplacement(TemplateToken.DESCRIPTION,
 					Notifications.FORMAT_COMMENTS, note).setChanged(isUpdate ? (oldObj == null ? false
-					: !compareObjects(note, oldObj.getNote())) : false));
+					: !compareStrings(note, oldObj.getNote())) : false));
 		}
 		/*
 		 * Add task-specific replacements
@@ -1301,6 +1312,16 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		return true;
 	}
 
+	/**
+	 * Compares given {@link Object} references.
+	 * 
+	 * @param o1
+	 *            The first object
+	 * @param o2
+	 *            The second object
+	 * @return <code>true</code> if both {@link Object} references are
+	 *         considered to be equal; otherwise <code>false</code>
+	 */
 	static final boolean compareObjects(final Object o1, final Object o2) {
 		if (o1 == o2) {
 			return true;
@@ -1312,5 +1333,34 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			return false;
 		}
 		return o1.equals(o2);
+	}
+
+	/**
+	 * Compares given {@link String} references.
+	 * <p>
+	 * Note: A <code>null</code> reference and an empty string are considered to
+	 * be equal. Otherwise use {@link #compareObjects(Object, Object)}
+	 * 
+	 * @param s1
+	 *            The first string
+	 * @param s2
+	 *            The second string
+	 * @return <code>true</code> if both {@link String} references are
+	 *         considered to be equal; otherwise <code>false</code>
+	 */
+	static final boolean compareStrings(final String s1, final String s2) {
+		if (s1 == s2) {
+			return true;
+		}
+		if (s1 == null) {
+			if (s2 == null) {
+				return true;
+			}
+			return s2.length() == 0 ? true : false;
+		}
+		if (s2 == null && s1.length() == 0) {
+			return true;
+		}
+		return s1.equals(s2);
 	}
 }

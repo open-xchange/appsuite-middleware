@@ -223,7 +223,7 @@ public final class ParticipantsReplacement implements TemplateReplacement {
 	}
 
 	public boolean merge(final TemplateReplacement other) {
-		if (ParticipantsReplacement.class.isInstance(other)) {
+		if (!ParticipantsReplacement.class.isInstance(other)) {
 			/*
 			 * Class mismatch or null
 			 */

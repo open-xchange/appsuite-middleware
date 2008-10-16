@@ -114,9 +114,9 @@ public final class TaskStatusReplacement extends FormatLocalizedStringReplacemen
 
 	@Override
 	public boolean merge(final TemplateReplacement other) {
-		if (TaskStatusReplacement.class.isInstance(other)) {
+		if (!TaskStatusReplacement.class.isInstance(other)) {
 			/*
-			 * Class mismatch
+			 * Class mismatch or null
 			 */
 			return false;
 		}
