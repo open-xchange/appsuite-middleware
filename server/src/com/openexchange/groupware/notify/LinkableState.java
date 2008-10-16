@@ -74,6 +74,7 @@ public abstract class LinkableState implements State {
 	private static String hostname;
 
 	private static UnknownHostException warnSpam;
+
 	static {
 		try {
 			hostname = InetAddress.getLocalHost().getCanonicalHostName();
@@ -113,18 +114,16 @@ public abstract class LinkableState implements State {
 
 		subst.put(new StringReplacement(TemplateToken.FOLDER_ID, String.valueOf(folder)));
 		subst.put(new StringReplacement(TemplateToken.OBJECT_ID, String.valueOf(obj.getObjectID())));
-		final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(
-				HostnameService.class);
+		final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
 		final String hostnameStr;
 		if (hostnameService == null || (hostnameStr = hostnameService.getHostname(p.id, p.cid)) == null) {
 			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("No host name available; using local host name as fallback");
+				LOGGER.debug("No host name service available or "
+						+ "service's returned host name is null; using local host name as fallback");
 			}
 			if (warnSpam != null) {
-				LOGGER
-						.error(
-								"Can't resolve my own hostname, using 'localhost' instead, which is certainly not what you want.!",
-								warnSpam);
+				LOGGER.error("Can't resolve my own hostname, "
+						+ "using 'localhost' instead, which is certainly not what you want.!", warnSpam);
 			}
 			subst.put(new StringReplacement(TemplateToken.HOSTNAME, hostname));
 		} else {
@@ -136,8 +135,8 @@ public abstract class LinkableState implements State {
 
 	public void loadTemplate() {
 		synchronized (LinkableState.class) {
-			object_link_template = new StringTemplate(NotificationConfig.getProperty(
-					NotificationProperty.OBJECT_LINK, ""));
+			object_link_template = new StringTemplate(NotificationConfig.getProperty(NotificationProperty.OBJECT_LINK,
+					""));
 		}
 	}
 
