@@ -70,7 +70,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * {@link MIMEMultipartMailPart} - An implementation of {@link MailPart} for
  * mail parts of MIME type <code>multipart/*</code>.
  * <p>
- * Parsing of multipart data is based on <b>Knuth–Morris–Pratt (KMP)</b>
+ * Parsing of multipart data is based on <b>Knuth\u2013Morris\u2013Pratt (KMP)</b>
  * algorithm.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
