@@ -84,9 +84,10 @@
     </target>
 
     <target name="installJar" depends="jar">
-        <mkdir dir="${destdir}/${bundlesdir}"/>
+        <property name="bundlesdestdir" value="${destdir}${bundlesdir}"/>
+        <mkdir dir="${bundlesdestdir}"/>
 
-        <property name="bundledir" value="${bundlesdir}/${Bundle-SymbolicName}"/>
+        <property name="bundledir" value="${bundlesdestdir}/${bundle.name}"/>
         <mkdir dir="${bundledir}"/>
         <copy todir="${bundledir}" file="${tmp.dir}/${bundle.name}"/>
         <mkdir dir="${bundledir}/lib"/>
