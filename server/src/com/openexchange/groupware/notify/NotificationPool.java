@@ -218,6 +218,10 @@ public final class NotificationPool {
 					renderMap.applyLocale(cur.getLocale());
 					renderMap.applyTimeZone(p.timeZone == null ? TimeZone.getDefault() : p.timeZone);
 					/*
+					 * Check start/end if message is still allowed to be sent
+					 */
+					ParticipantNotify.checkStartAndEndDate(cur.getCalendarObject());
+					/*
 					 * Create message
 					 */
 					final MailMessage mmsg = ParticipantNotify.createParticipantMessage(p, cur.getTitle(), cur

@@ -338,13 +338,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		if (newObj.getParticipants() == null) {
 			return;
 		}
-		{
-			// Do not send notification mails for tasks and appointments in the
-			// past. Bug #12063
-			final Date endDate = newObj.getEndDate();
-			if (endDate != null && endDate.getTime() < System.currentTimeMillis()) {
-				return;
-			}
+		if (!checkStartAndEndDate(newObj)) {
+			return;
 		}
 		/*
 		 * A map to remember receivers
@@ -1362,5 +1357,40 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			return true;
 		}
 		return s1.equals(s2);
+	}
+
+	private static final long THIRTY_MINUTES = 1800000l;
+
+	/**
+	 * Checks the start date of specified calendar object if it is not more than
+	 * 30 minutes in the past and its end date is not in the past compared to
+	 * {@link System#currentTimeMillis()}.
+	 * 
+	 * @param calendarObj
+	 *            The calendar object whose start and end date is ought to be
+	 *            checked
+	 * @return <code>true</code> if the start date of specified calendar object
+	 *         if it is not more than 30 minutes in the past and its end date is
+	 *         not in the past compared to {@link System#currentTimeMillis()};
+	 *         otherwise <code>false</code>.
+	 */
+	static final boolean checkStartAndEndDate(final CalendarObject calendarObj) {
+		{
+			// Do not send notification mails for tasks and appointments in the
+			// past. Bug #12063
+			final Date endDate = calendarObj.getEndDate();
+			if (endDate != null && endDate.getTime() < System.currentTimeMillis()) {
+				return false;
+			}
+		}
+		{
+			// Do not send notification mails for tasks and appointments whose
+			// start date is more than 30 minutes in the past
+			final Date startDate = calendarObj.getStartDate();
+			if (startDate != null && (System.currentTimeMillis() - startDate.getTime()) > THIRTY_MINUTES) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
