@@ -55,6 +55,7 @@
 
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
+    <property name="xmlBundle" value="com.openexchange.xml" />
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
@@ -67,6 +68,7 @@
     <property name="sessiondjar" value="com.openexchange.sessiond.jar"/>
     <property name="managementjar" value="com.openexchange.management.jar"/>
 	<property name="cachingjar" value="com.openexchange.caching.jar"/>
+    <property name="xmlbundlejar" value="com.openexchange.xml.jar" />
 
     <property name="activationjar" value="activation-1.1.1.jar" />
     <property name="commonscodecjar" value="commons-codec-1.3.jar" />
@@ -83,6 +85,7 @@
     <property name="tnefjar" value="tnef-1.4.0.jar" />
 	<property name="chardetjar" value="chardet-1.0.jar" />
 
+
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
@@ -96,6 +99,7 @@
         <pathelement location="${bundlesdir}/${sessiondjar}"/>
 		<pathelement location="${bundlesdir}/${managementjar}"/>
     	<pathelement location="${bundlesdir}/${cachingjar}"/>
+        <pathelement location="${bundlesdir}/${xmlBundle}/${xmlbundlejar}"/>
 
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${activationjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonscodecjar}" />
@@ -104,12 +108,12 @@
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonsiojar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jakartawebdavjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jcsjar}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${jdomjar}"/>
+        <pathelement location="${bundlesdir}/${xmlBundle}/lib/${jdomjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mysqljdbcjar}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${springbeanjar}" />
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${springcorejar}" />
+        <pathelement location="${bundlesdir}/${xmlBundle}/lib/${springbeanjar}" />
+        <pathelement location="${bundlesdir}/${xmlBundle}/lib/${springcorejar}" />
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${tnefjar}" />
 		<pathelement location="${bundlesdir}/${commonBundle}/lib/${chardetjar}" />
     </path>

@@ -46,78 +46,25 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.xml.jdom;
 
-package com.openexchange.webdav.action;
-
+import java.io.InputStream;
 import java.io.IOException;
 
-import org.jdom.Document;
+/**
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ */
 import org.jdom.JDOMException;
+import org.jdom.Document;
 
-import com.openexchange.webdav.action.ifheader.IfHeader;
-import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
-import com.openexchange.webdav.action.ifheader.IfHeaderParser;
-import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.xml.jdom.JDOMParser;
+import java.io.InputStream;
+import java.io.IOException;
 
-public abstract class AbstractWebdavRequest implements WebdavRequest {
-	private WebdavResource res;
-	private WebdavResource dest;
-	private final WebdavFactory factory;
-	
-	public AbstractWebdavRequest(final WebdavFactory factory) {
-		this.factory = factory;
-	}
+/**
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ */
+public interface JDOMParser {
 
-	public WebdavResource getResource() throws WebdavException {
-		if(res != null) {
-			return res;
-		}
-		return res = factory.resolveResource(getUrl());
-	}
-	
-	public WebdavResource getDestination() throws WebdavException {
-		if(null == getDestinationUrl()) {
-			return null;
-		}
-		if(dest != null) {
-			return dest;
-		}
-		return dest = factory.resolveResource(getDestinationUrl());
-	}
-	
-	public WebdavCollection getCollection() throws WebdavException {
-		if(res != null && res.isCollection()) {
-			return (WebdavCollection) res;
-		}
-		return (WebdavCollection) (res = factory.resolveCollection(getUrl()));
-	}
-	
-	public Document getBodyAsDocument() throws JDOMException, IOException {
-		return ServerServiceRegistry.getInstance().getService(JDOMParser.class).parse(getBody());
-	}
-	
-	public IfHeader getIfHeader() throws IfHeaderParseException {
-		final String ifHeader = getHeader("If");
-		if(ifHeader == null) {
-			return null;
-		}
-		return new IfHeaderParser().parse(getHeader("If"));
-	}
-	
-	public int getDepth(final int def){
-		final String depth = getHeader("depth");
-		if(null == depth) {
-			return def;
-		}
-		return "Infinity".equalsIgnoreCase(depth) ? WebdavCollection.INFINITY : Integer.parseInt(depth);
-	}
-	
-	public WebdavFactory getFactory(){
-		return factory;
-	}
+    public Document parse(InputStream is) throws JDOMException, IOException;
 }
+

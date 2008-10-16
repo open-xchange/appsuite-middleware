@@ -87,7 +87,8 @@ public class ExportServlet extends ImportExport {
 	@SuppressWarnings("unchecked")
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		try {
-			final String folder = DataServlet.parseMandatoryStringParameter(req, PARAMETER_FOLDERID);
+            init();
+            final String folder = DataServlet.parseMandatoryStringParameter(req, PARAMETER_FOLDERID);
 			final int[] fieldsToBeExported = DataServlet.parsIntParameterArray(req, PARAMETER_COLUMNS);
 			
 			//checking format

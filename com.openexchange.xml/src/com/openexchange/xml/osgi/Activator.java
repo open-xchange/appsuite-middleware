@@ -46,78 +46,30 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.xml.osgi;
 
-package com.openexchange.webdav.action;
-
-import java.io.IOException;
-
-import org.jdom.Document;
-import org.jdom.JDOMException;
-
-import com.openexchange.webdav.action.ifheader.IfHeader;
-import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
-import com.openexchange.webdav.action.ifheader.IfHeaderParser;
-import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.server.services.ServerServiceRegistry;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import com.openexchange.xml.jdom.JDOMParser;
+import com.openexchange.xml.jdom.impl.JDOMParserImpl;
+import com.openexchange.xml.spring.SpringParser;
+import com.openexchange.xml.spring.impl.DefaultSpringParser;
 
-public abstract class AbstractWebdavRequest implements WebdavRequest {
-	private WebdavResource res;
-	private WebdavResource dest;
-	private final WebdavFactory factory;
-	
-	public AbstractWebdavRequest(final WebdavFactory factory) {
-		this.factory = factory;
-	}
+/**
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ */
+public class Activator implements BundleActivator {
+    private ServiceRegistration jdomRegistration;
+    private ServiceRegistration springParserRegistration;
 
-	public WebdavResource getResource() throws WebdavException {
-		if(res != null) {
-			return res;
-		}
-		return res = factory.resolveResource(getUrl());
-	}
-	
-	public WebdavResource getDestination() throws WebdavException {
-		if(null == getDestinationUrl()) {
-			return null;
-		}
-		if(dest != null) {
-			return dest;
-		}
-		return dest = factory.resolveResource(getDestinationUrl());
-	}
-	
-	public WebdavCollection getCollection() throws WebdavException {
-		if(res != null && res.isCollection()) {
-			return (WebdavCollection) res;
-		}
-		return (WebdavCollection) (res = factory.resolveCollection(getUrl()));
-	}
-	
-	public Document getBodyAsDocument() throws JDOMException, IOException {
-		return ServerServiceRegistry.getInstance().getService(JDOMParser.class).parse(getBody());
-	}
-	
-	public IfHeader getIfHeader() throws IfHeaderParseException {
-		final String ifHeader = getHeader("If");
-		if(ifHeader == null) {
-			return null;
-		}
-		return new IfHeaderParser().parse(getHeader("If"));
-	}
-	
-	public int getDepth(final int def){
-		final String depth = getHeader("depth");
-		if(null == depth) {
-			return def;
-		}
-		return "Infinity".equalsIgnoreCase(depth) ? WebdavCollection.INFINITY : Integer.parseInt(depth);
-	}
-	
-	public WebdavFactory getFactory(){
-		return factory;
-	}
+    public void start(BundleContext bundleContext) throws Exception {
+        this.jdomRegistration = bundleContext.registerService(JDOMParser.class.getName(), new JDOMParserImpl(), null);
+        this.springParserRegistration = bundleContext.registerService(SpringParser.class.getName(), new DefaultSpringParser(), null);
+    }
+
+    public void stop(BundleContext bundleContext) throws Exception {
+        jdomRegistration.unregister();
+        springParserRegistration.unregister();
+    }
 }

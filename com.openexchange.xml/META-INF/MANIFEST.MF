@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: JDOM Parser
+Bundle-SymbolicName: com.openexchange.xml
+Bundle-Version: 6.7.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: org.osgi.framework,
+ org.xml.sax,
+ org.xml.sax.ext,
+ org.xml.sax.helpers,
+ org.apache.commons.logging
+Export-Package: com.openexchange.xml.jdom,
+ com.openexchange.xml.spring,
+ org.jdom,
+ org.jdom.output,
+ org.springframework.beans.factory
+Bundle-ClassPath: com.openexchange.xml.jar,
+ lib/jdom-1.1.jar,
+ lib/xerces.jar,
+ lib/spring-beans_1.2.7.jar,
+ lib/spring-core_1.2.7.jar,
+ .
+Bundle-Activator: com.openexchange.xml.osgi.Activator

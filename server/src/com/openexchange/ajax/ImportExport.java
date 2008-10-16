@@ -57,10 +57,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.io.FileSystemResource;
 
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.importexport.ImporterExporter;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.xml.spring.SpringParser;
 
 /**
  * Abtract class for both importers and exporters that does 
@@ -81,20 +84,24 @@ public abstract class ImportExport extends SessionServlet {
 	private static final Log LOG = LogFactory.getLog(ImportExport.class);
 	
 	protected ImporterExporter importerExporter = null;
-	
-	public ImportExport(){
-		//spring init
-		final String beanPath = SystemConfig.getProperty("IMPORTEREXPORTER");
-		if (beanPath != null) {
-			//XmlBeanFactory beanfactory = new XmlBeanFactory( new FileSystemResource( new File(beanPath) ) );
-            final DefaultListableBeanFactory beanfactory = new DefaultListableBeanFactory();
-            final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanfactory);
-            reader.setBeanClassLoader(ImportExport.class.getClassLoader()); // Use the classloader that loaded this instance.
-            reader.loadBeanDefinitions(new FileSystemResource( new File(beanPath) ));
 
-            importerExporter = (ImporterExporter) beanfactory.getBean("importerExporter");
-		} else {
-			LOG.error("missing property: IMPORTEREXPORTER");
-		}
-	}
+    private static BeanFactory beanFactory = null;
+
+    public void init(){
+        if (importerExporter != null) {
+            return;
+        }
+        if(beanFactory  == null) {
+            final String beanPath = SystemConfig.getProperty("IMPORTEREXPORTER");
+		    if (beanPath != null) {
+                SpringParser springParser = ServerServiceRegistry.getInstance().getService(SpringParser.class);
+                beanFactory = springParser.parseFile(beanPath, ImportExport.class.getClassLoader());
+            } else {
+	     		LOG.error("missing property: IMPORTEREXPORTER");
+		    }
+        }
+        if(beanFactory != null) {
+            importerExporter = (ImporterExporter) beanFactory.getBean("importerExporter");
+        }
+    }
 }

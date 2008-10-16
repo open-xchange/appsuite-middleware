@@ -76,11 +76,6 @@ public class Infostore extends OXServlet {
 	private static final long serialVersionUID = -2064098724675986123L;
     private static final Log LOG = LogFactory.getLog(Infostore.class);
 	
-	public Infostore(){
-		// Force Loading of InfostorePerformer
-		InfostorePerformer.getInstance();
-	}
-	
 	@Override
 	protected void doCopy(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		doIt(req,resp,Action.COPY);

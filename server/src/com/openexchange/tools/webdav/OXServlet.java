@@ -59,7 +59,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
 
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginException;
@@ -79,6 +78,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.encoding.Base64;
+import com.openexchange.xml.jdom.JDOMParser;
 
 /**
  * This servlet can be used as super class for all OX webdav servlets.
@@ -459,7 +459,7 @@ public abstract class OXServlet extends WebDavServlet {
 			throws JDOMException, IOException {
 		org.jdom.Document doc = null;
 		if (req.getContentLength() > 0) {
-			doc = new SAXBuilder().build(req.getInputStream());
+		    doc = ServerServiceRegistry.getInstance().getService(JDOMParser.class).parse(req.getInputStream());
 		}
 		return doc;
 	}

@@ -103,12 +103,14 @@ import com.openexchange.systemname.internal.JVMRouteSystemNameImpl;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
 import com.openexchange.user.UserService;
 import com.openexchange.user.internal.UserServiceImpl;
+import com.openexchange.xml.jdom.JDOMParser;
+import com.openexchange.xml.spring.SpringParser;
 
 /**
  * {@link ServerActivator} - The activator for server bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ServerActivator extends DeferredActivator {
 
@@ -259,11 +261,19 @@ public final class ServerActivator extends DeferredActivator {
 		// Add cache dynamically to database pooling. it works without, too.
 		serviceTrackerList.add(new ServiceTracker(context, CacheService.class.getName(), new CacheCustomizer(context)));
 
+
         // ICal Parser
         serviceTrackerList.add(new ServiceTracker(context, ICalParser.class.getName(), new RegistryCustomizer<ICalParser>(context, ICalParser.class)));
 
         // ICal Emitter
         serviceTrackerList.add(new ServiceTracker(context, ICalEmitter.class.getName(), new RegistryCustomizer<ICalEmitter>(context, ICalEmitter.class)));
+
+        // JDOM XML Parser
+        serviceTrackerList.add(new ServiceTracker(context, JDOMParser.class.getName(), new RegistryCustomizer<JDOMParser>(context, JDOMParser.class)));
+
+        // Spring Parser
+        serviceTrackerList.add(new ServiceTracker(context, SpringParser.class.getName(), new RegistryCustomizer<SpringParser>(context, SpringParser.class)));
+
 
         /*
          * Register Services

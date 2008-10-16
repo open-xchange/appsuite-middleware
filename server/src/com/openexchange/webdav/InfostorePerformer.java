@@ -60,8 +60,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.beans.factory.BeanFactory;
 
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.contexts.Context;
@@ -105,6 +104,8 @@ import com.openexchange.webdav.action.behaviour.BehaviourLookup;
 import com.openexchange.webdav.action.behaviour.RequestSpecificBehaviourRegistry;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.xml.spring.SpringParser;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 public class InfostorePerformer implements SessionHolder {
 	
@@ -229,8 +230,9 @@ public class InfostorePerformer implements SessionHolder {
 		final String beanPath = SystemConfig.getProperty(SystemConfig.Property.WebdavOverrides);
 		if (beanPath != null && new File(beanPath).exists()) {
 			try {
-				final XmlBeanFactory beanfactory = new XmlBeanFactory( new FileSystemResource( new File(beanPath) ) );
-				final RequestSpecificBehaviourRegistry registry = (RequestSpecificBehaviourRegistry) beanfactory.getBean("registry");
+                SpringParser springParser = ServerServiceRegistry.getInstance().getService(SpringParser.class);
+                BeanFactory beanfactory = springParser.parseFile(beanPath, InfostorePerformer.class.getClassLoader());
+                final RequestSpecificBehaviourRegistry registry = (RequestSpecificBehaviourRegistry) beanfactory.getBean("registry");
 				registry.log();
 			} catch (final Exception x) {
 				LOG.error("Can't load webdav overrides", x);

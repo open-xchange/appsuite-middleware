@@ -140,7 +140,8 @@ public class ImportServlet extends ImportExport {
         final Response resObj = new Response();
         final List<ImportResult> importResult;
 		try {
-			//checking format
+            init();
+            //checking format
 			final String formatStr = DataServlet.parseMandatoryStringParameter(
                 req, PARAMETER_ACTION);
 			final Format format = Format.getFormatByConstantName(formatStr);

@@ -1,10 +1,10 @@
 #!/usr/bin/make -f
-# Build open-xchange-exceptions-console
+# Build open-xchange-xml
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-oxroot=$(CURDIR)/debian/open-xchange-exceptions-console
+oxroot=$(CURDIR)/debian/open-xchange-data-conversion-ical4j
 instprefix=/opt/open-xchange
 
 configure: configure-stamp
