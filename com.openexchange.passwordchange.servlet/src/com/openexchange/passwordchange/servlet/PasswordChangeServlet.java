@@ -93,18 +93,9 @@ public final class PasswordChangeServlet extends PermissionServlet {
 	private static final PasswordChangeServlet instance = new PasswordChangeServlet();
 
 	/**
-	 * Gets the singleton instance of {@link PasswordChangeServlet}
-	 * 
-	 * @return The singleton instance of {@link PasswordChangeServlet}
-	 */
-	public static PasswordChangeServlet getInstance() {
-		return instance;
-	}
-
-	/**
 	 * Initializes a new {@link PasswordChangeServlet}
 	 */
-	private PasswordChangeServlet() {
+	public PasswordChangeServlet() {
 		super();
 	}
 
