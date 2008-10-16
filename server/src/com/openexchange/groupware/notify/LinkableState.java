@@ -119,7 +119,7 @@ public abstract class LinkableState implements State {
 		if (hostnameService == null || (hostnameStr = hostnameService.getHostname(p.id, p.cid)) == null) {
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("No host name service available or "
-						+ "service's returned host name is null; using local host name as fallback");
+						+ "returned host name from service is null; using local host name as fallback");
 			}
 			if (warnSpam != null) {
 				LOGGER.error("Can't resolve my own hostname, "
