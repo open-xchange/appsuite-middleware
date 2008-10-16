@@ -177,7 +177,7 @@ public final class PasswordChangeServletActivator extends DeferredActivator {
 				/*
 				 * Register servlet
 				 */
-				httpService.registerServlet(PWC_SRVLT_ALIAS, PasswordChangeServlet.getInstance(), null, null);
+				httpService.registerServlet(PWC_SRVLT_ALIAS, new PasswordChangeServlet(), null, null);
 				if (LOG.isInfoEnabled()) {
 					LOG.info("Password change servlet successfully registered");
 				}
