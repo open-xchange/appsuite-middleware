@@ -1,4 +1,4 @@
-<project name="com.openexchange.xml.jdom" default="install" basedir=".">
+<project name="com.openexchange.xml" default="install" basedir=".">
 
     <!-- Customizable values -->
     <property name="destdir" value=""/>
@@ -13,11 +13,12 @@
 
     <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
-    <property name="composite.name" value="open-xchange-data-conversion-ical4j-${version}"/>
+    <property name="composite.name" value="open-xchange-xml-${version}"/>
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
-    <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+    <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+    <property name="adbundle.d" value="${prefix}/etc/admin/osgi/bundle.d"/>
 
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
@@ -74,8 +75,11 @@
     </target>
 
     <target name="installConfig">
-        <mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
+        <mkdir dir="${destdir}/${gwbundle.d}"/>
+        <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini"
+            message="${bundlesdir}/${Bundle-SymbolicName}${line.separator}"/>
+        <mkdir dir="${destdir}/${adbundle.d}"/>
+        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${Bundle-SymbolicName}${line.separator}"/>
     </target>
 

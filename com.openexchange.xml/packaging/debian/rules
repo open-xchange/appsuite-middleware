@@ -4,7 +4,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-oxroot=$(CURDIR)/debian/open-xchange-data-conversion-ical4j
+oxroot=$(CURDIR)/debian/open-xchange-xml
 instprefix=/opt/open-xchange
 
 configure: configure-stamp
