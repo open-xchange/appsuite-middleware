@@ -64,6 +64,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.OXException;
@@ -114,7 +119,116 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(OXFolderManagerImpl.class);
 
+	private static final class FolderLock {
+
+		final Lock lock;
+
+		final Condition condition;
+
+		final AtomicInteger count;
+
+		private final int fid;
+
+		private final int cid;
+
+		private final int hash;
+
+		/**
+		 * Initializes a new {@link FolderLock}
+		 */
+		public FolderLock(final int fid, final int cid) {
+			super();
+			count = new AtomicInteger();
+			this.lock = new ReentrantLock();
+			this.condition = lock.newCondition();
+			this.cid = cid;
+			this.fid = fid;
+			hash = _hashCode();
+		}
+
+		@Override
+		public int hashCode() {
+			return hash;
+		}
+
+		private int _hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + cid;
+			result = prime * result + fid;
+			return result;
+		}
+
+		@Override
+		public boolean equals(final Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			final FolderLock other = (FolderLock) obj;
+			if (cid != other.cid) {
+				return false;
+			}
+			if (fid != other.fid) {
+				return false;
+			}
+			return true;
+		}
+
+	}
+
 	private static final String TABLE_OXFOLDER_TREE = "oxfolder_tree";
+
+	private static final Map<FolderLock, FolderLock> MAP_LOCK = new ConcurrentHashMap<FolderLock, FolderLock>(256);
+
+	private static final Map<FolderLock, FolderLock> MAP_ACTIVE = new ConcurrentHashMap<FolderLock, FolderLock>(256);
+
+	private static void acquireFolderLock(final FolderLock fl) {
+		while (MAP_LOCK.put(fl, fl) != null) {
+			/*
+			 * Another thread already holds folder lock since a previous value
+			 * is already present; get currently active folder lock
+			 */
+			final FolderLock active = MAP_ACTIVE.get(fl);
+			active.lock.lock();
+			try {
+				while (MAP_LOCK.containsKey(fl)) {
+					active.count.incrementAndGet();
+					active.condition.await();
+					active.count.decrementAndGet();
+				}
+			} catch (final InterruptedException e) {
+				LOG.error("Interrupted while waiting for folder lock: " + fl.toString(), e);
+				active.count.decrementAndGet();
+			} finally {
+				active.lock.unlock();
+			}
+		}
+		/*
+		 * Store currently active folder lock to let threads access same lock
+		 * and condition
+		 */
+		MAP_ACTIVE.put(fl, fl);
+	}
+
+	private static void releaseFolderLock(final FolderLock fl) {
+		final FolderLock active = MAP_LOCK.remove(fl);
+		if (active.count.get() == 0) {
+			return;
+		}
+		final Lock lock = active.lock;
+		lock.lock();
+		try {
+			active.condition.signalAll();
+		} finally {
+			lock.unlock();
+		}
+	}
 
 	private final Connection readCon;
 
@@ -197,15 +311,11 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		return (oxfolderAccess = new OXFolderAccess(readCon, ctx));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.tools.oxfolder.OXFolderManager#createFolder(com.openexchange
-	 * .groupware.container.FolderObject, boolean, long)
-	 */
 	public FolderObject createFolder(final FolderObject folderObj, final boolean checkPermissions, final long createTime)
 			throws OXException {
+		/*
+		 * No need to synchronize here since new folder IDs are unique
+		 */
 		if (!folderObj.containsFolderName() || folderObj.getFolderName() == null
 				|| folderObj.getFolderName().length() == 0) {
 			throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.TITLE, "", Integer
@@ -427,14 +537,18 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.tools.oxfolder.OXFolderManager#updateFolder(com.openexchange
-	 * .groupware.container.FolderObject, boolean, long)
-	 */
 	public FolderObject updateFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified)
+			throws OXException {
+		final FolderLock fl = new FolderLock(fo.getObjectID(), ctx.getContextId());
+		acquireFolderLock(fl);
+		try {
+			return _updateFolder(fo, checkPermissions, lastModified);
+		} finally {
+			releaseFolderLock(fl);
+		}
+	}
+
+	private FolderObject _updateFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified)
 			throws OXException {
 		if (checkPermissions) {
 			if (fo.containsType()
@@ -1019,14 +1133,18 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		return isDescendant;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.tools.oxfolder.OXFolderManager#deleteFolderContent(com
-	 * .openexchange.groupware.container.FolderObject, boolean, long)
-	 */
 	public FolderObject clearFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified)
+			throws OXException {
+		final FolderLock fl = new FolderLock(fo.getObjectID(), ctx.getContextId());
+		acquireFolderLock(fl);
+		try {
+			return _clearFolder(fo, checkPermissions, lastModified);
+		} finally {
+			releaseFolderLock(fl);
+		}
+	}
+
+	private FolderObject _clearFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified)
 			throws OXException {
 		if (fo.getObjectID() <= 0) {
 			throw new OXFolderException(FolderCode.INVALID_OBJECT_ID, getFolderName(fo));
@@ -1101,14 +1219,18 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		return fo;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.tools.oxfolder.OXFolderManager#deleteFolder(com.openexchange
-	 * .groupware.container.FolderObject, boolean, long)
-	 */
 	public FolderObject deleteFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified)
+			throws OXException {
+		final FolderLock fl = new FolderLock(fo.getObjectID(), ctx.getContextId());
+		acquireFolderLock(fl);
+		try {
+			return _deleteFolder(fo, checkPermissions, lastModified);
+		} finally {
+			releaseFolderLock(fl);
+		}
+	}
+
+	private FolderObject _deleteFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified)
 			throws OXException {
 		if (fo.getObjectID() <= 0) {
 			throw new OXFolderException(FolderCode.INVALID_OBJECT_ID, getFolderName(fo));
