@@ -85,7 +85,15 @@ public class AJAXClient {
         AjaxException, IOException, SAXException, JSONException {
         AJAXConfig.init();
         final String login = AJAXConfig.getProperty(user.login);
+        if (null == login) {
+            throw new ConfigurationException(ConfigurationException.Code
+                .PROPERTY_MISSING, user.login.getPropertyName());
+        }
         final String password = AJAXConfig.getProperty(user.password);
+        if (null == password) {
+            throw new ConfigurationException(ConfigurationException.Code
+                .PROPERTY_MISSING, user.password.getPropertyName());
+        }
         session = new AJAXSession();
         session.setId(LoginTools.login(session, new LoginRequest(login,
             password)).getSessionId());
