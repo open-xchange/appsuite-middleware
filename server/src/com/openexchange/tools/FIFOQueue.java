@@ -56,8 +56,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * This class represents a fast (and optional thread-safe) implementation of a
  * FIFO (<code>first-in-first-out</code>) queue backed by an array of generic
- * objects. This class is only useful if programmer knows the size of the queue
- * in advance.
+ * objects, thus this queue is capacity bounded. This class is only useful if
+ * programmer knows the size of the queue in advance.
  * <p>
  * If this queue is created with enabled synchronization mechanism a
  * <code>{@link ReadWriteLock}</code> is used for mutually exclusive access
@@ -81,12 +81,10 @@ public class FIFOQueue<T> {
 	private final boolean isSynchronized;
 
 	/**
-	 * Constructor which invokes <code>{@link #FIFOQueue(Class, int, boolean)}
-	 * </code> with last <code>boolean</code> parameter (
-	 * <code>isSynchronized</code>) set to <code>true</code>
+	 * Constructor which invokes {@link #FIFOQueue(int, boolean)} with last
+	 * <code>boolean</code> parameter (<code>isSynchronized</code>) set to
+	 * <code>true</code>
 	 * 
-	 * @param clazz
-	 *            - the class whose instances are kept in FIFO queue
 	 * @param maxsize
 	 *            - the max. size of this queue
 	 * @see #FIFOQueue(Class, int, boolean)

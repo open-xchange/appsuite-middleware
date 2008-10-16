@@ -350,7 +350,7 @@ public class HttpServletManager {
 		try {
 			if (servletObj instanceof SingleThreadModel) {
 				/*
-				 * Single-thread are used per instance, so theres no reference
+				 * Single-thread are used per instance, so there is no reference
 				 * used by HttpServletManager, cause any reference is completely
 				 * removed on invocations of getServlet()
 				 */
