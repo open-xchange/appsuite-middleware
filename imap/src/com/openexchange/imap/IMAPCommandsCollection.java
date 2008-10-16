@@ -250,12 +250,13 @@ public final class IMAPCommandsCollection {
 				/*
 				 * Encode the mbox as per RFC2060
 				 */
-				final String mboxName = prepareStringArgument(new StringBuilder(32).append(prefix).append(
-						String.valueOf(System.currentTimeMillis())).toString());
+				final String now = String.valueOf(System.currentTimeMillis());
+				final StringBuilder sb = new StringBuilder(now.length() + prefix.length() + 16);
+				final String mboxName = prepareStringArgument(sb.append(prefix).append(now).toString());
 				/*
 				 * Perform command: CREATE
 				 */
-				final StringBuilder sb = new StringBuilder(7 + mboxName.length());
+				sb.setLength(0);
 				final Response[] r = p.command(sb.append("CREATE ").append(mboxName).toString(), null);
 				final Response response = r[r.length - 1];
 				if (response.isOK()) {
