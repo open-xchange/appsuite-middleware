@@ -62,6 +62,22 @@ import com.openexchange.tools.session.ServerSession;
 
 public interface State {
 
+	public static enum Type {
+		NEW("New"), MODIFIED("Modified"), DELETED("Deleted"), REMINDER("Reminder"), ACCEPTED("Accepted"), DECLINED(
+				"Declined"), TENTATIVELY_ACCEPTED("Tentatively accepted");
+
+		private final String str;
+
+		private Type(final String str) {
+			this.str = str;
+		}
+
+		@Override
+		public String toString() {
+			return str;
+		}
+	}
+
 	public boolean sendMail(UserSettingMail userSettingMail);
 
 	public DateFormat getDateFormat(Locale locale);
@@ -91,8 +107,15 @@ public interface State {
 	/**
 	 * Gets the confirmation action replacement
 	 * 
-	 * @return The confirmation action replacement or <code>null</code> if
-	 *         not applicable to this state
+	 * @return The confirmation action replacement or <code>null</code> if not
+	 *         applicable to this state
 	 */
 	public TemplateReplacement getConfirmationAction();
+
+	/**
+	 * Gets this state's type
+	 * 
+	 * @return This state's type
+	 */
+	public Type getType();
 }

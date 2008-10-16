@@ -68,7 +68,15 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 
+import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
@@ -78,6 +86,7 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -88,6 +97,9 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * 
  */
 public class MailObject {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(MailObject.class);
 
 	public static final int DONT_SET = -2;
 
@@ -115,14 +127,31 @@ public class MailObject {
 
 	private final int module;
 
+	private final String type;
+
 	private Multipart multipart;
 
-	public MailObject(final Session sessionObj, final int objectId, final int folderId, final int module) {
+	/**
+	 * Initializes a new {@link MailObject}
+	 * 
+	 * @param session
+	 *            The session providing needed user data
+	 * @param objectId
+	 *            The object ID this message refers to
+	 * @param folderId
+	 *            The folder ID to which the referred object belongs
+	 * @param module
+	 *            The module of the referred object
+	 * @param type
+	 *            The object's notification type
+	 */
+	public MailObject(final Session session, final int objectId, final int folderId, final int module, final String type) {
 		super();
-		this.session = sessionObj;
+		this.session = session;
 		this.objectId = objectId;
 		this.folderId = folderId;
 		this.module = module;
+		this.type = type;
 	}
 
 	private final void validateMailObject() throws MailException {
@@ -217,6 +246,12 @@ public class MailObject {
 	private final static String HEADER_ORGANIZATION = "Organization";
 
 	private final static String HEADER_X_MAILER = "X-Mailer";
+
+	private final static String HEADER_X_OX_MODULE = "X-Open-Xchange-Module";
+
+	private final static String HEADER_X_OX_TYPE = "X-Open-Xchange-Type";
+
+	private final static String HEADER_X_OX_OBJECT = "X-Open-Xchange-Object";
 
 	public final void send() throws MailException {
 		try {
@@ -315,11 +350,34 @@ public class MailObject {
 			/*
 			 * Set mailer TODO: Read in mailer from file
 			 */
-			msg.setHeader(HEADER_X_MAILER, "Open-Xchange v6.0 Mailer");
+			msg.setHeader(HEADER_X_MAILER, "Open-Xchange Mailer v" + Version.VERSION_STRING);
 			/*
-			 * Set organization TODO: read in organization from file
+			 * Set organization
 			 */
-			msg.setHeader(HEADER_ORGANIZATION, "Open-Xchange, Inc.");
+			try {
+				final Object org = session.getParameter(MailSessionParameterNames.PARAM_ORGANIZATION_HDR);
+				if (null == org) {
+					/*
+					 * Get context's admin contact object
+					 */
+					final Context ctx = ContextStorage.getStorageContext(session);
+					final ContactObject c = new RdbContactSQLInterface(session).getObjectById(UserStorage.getInstance()
+							.getUser(ctx.getMailadmin(), ctx).getContactId(), FolderObject.SYSTEM_LDAP_FOLDER_ID);
+					if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
+						session.setParameter(MailSessionParameterNames.PARAM_ORGANIZATION_HDR, c.getCompany());
+						msg.setHeader(HEADER_ORGANIZATION, c.getCompany());
+					} else {
+						session.setParameter(HEADER_ORGANIZATION, "null");
+					}
+				} else if (!"null".equals(org.toString())) {
+					/*
+					 * Apply value from session parameter
+					 */
+					msg.setHeader(HEADER_ORGANIZATION, org.toString());
+				}
+			} catch (final Exception e) {
+				LOG.warn("Header \"Organization\" could not be set", e);
+			}
 			/*
 			 * Set ox reference
 			 */
@@ -334,7 +392,21 @@ public class MailObject {
 				msg.setSentDate(new Date());
 			}
 			/*
-			 * Finally send mail
+			 * X-Open-Xchange-Module
+			 */
+			msg.setHeader(HEADER_X_OX_MODULE, Types.APPOINTMENT == module ? "Appointments" : "Tasks");
+			/*
+			 * X-Open-Xchange-Type
+			 */
+			if (type != null) {
+				msg.setHeader(HEADER_X_OX_TYPE, type);
+			}
+			/*
+			 * X-Open-Xchange-Object
+			 */
+			msg.setHeader(HEADER_X_OX_OBJECT, String.valueOf(objectId));
+			/*
+			 * Finally transport mail
 			 */
 			final MailTransport transport = MailTransport.getInstance(session);
 			try {

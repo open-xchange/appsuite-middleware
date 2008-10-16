@@ -160,7 +160,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			final boolean suppressOXReminderHeader, final boolean internal) {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(new StringBuilder(message.length() + 64).append("Sending message to: ").append(name).append(
-					"\n=====[").append(messageTitle).append("]====\n\n").append(message).append("\n\n============"));
+					"\n=====[").append(messageTitle).append("]====\n\n").append(message).append("\n\n"));
 		}
 		int fuid = folderId;
 		if (fuid == -1) {
@@ -171,7 +171,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			fuid = MailObject.DONT_SET;
 		}
 
-		final MailObject mail = new MailObject(session, obj.getObjectID(), fuid, state.getModule());
+		final MailObject mail = new MailObject(session, obj.getObjectID(), fuid, state.getModule(), state.getType()
+				.toString());
 		mail.setFromAddr(UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail());
 		mail.setToAddrs(name.toArray(new String[name.size()]));
 		mail.setText(message);
@@ -234,90 +235,94 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
 	public void appointmentCreated(final AppointmentObject appointmentObj, final Session sessionObj) {
 		sendNotification(null, appointmentObj, sessionObj, new AppointmentState(new AppointmentActionReplacement(
-				AppointmentActionReplacement.ACTION_NEW), Notifications.APPOINTMENT_CREATE_MAIL), false, false, false);
+				AppointmentActionReplacement.ACTION_NEW), Notifications.APPOINTMENT_CREATE_MAIL, State.Type.NEW),
+				false, false, false);
 	}
 
 	public void appointmentModified(final AppointmentObject appointmentObj, final Session sessionObj) {
 		sendNotification(null, appointmentObj, sessionObj, new AppointmentState(new AppointmentActionReplacement(
-				AppointmentActionReplacement.ACTION_CHANGED), Notifications.APPOINTMENT_UPDATE_MAIL), false, false,
-				true);
+				AppointmentActionReplacement.ACTION_CHANGED), Notifications.APPOINTMENT_UPDATE_MAIL,
+				State.Type.MODIFIED), false, false, true);
 	}
 
 	public void appointmentModified(final AppointmentObject oldAppointment, final AppointmentObject newAppointment,
 			final Session sessionObj) {
 		sendNotification(oldAppointment, newAppointment, sessionObj, new AppointmentState(
 				new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_CHANGED),
-				Notifications.APPOINTMENT_UPDATE_MAIL), false, false, true);
+				Notifications.APPOINTMENT_UPDATE_MAIL, State.Type.MODIFIED), false, false, true);
 	}
 
 	public void appointmentAccepted(final AppointmentObject appointmentObj, final Session sessionObj) {
 		sendNotification(null, appointmentObj, sessionObj, new AppointmentState(new AppointmentActionReplacement(
 				AppointmentActionReplacement.ACTION_ACCEPTED), new ConfirmationActionReplacement(
-				ConfirmationActionReplacement.ACTION_ACCEPTED), Notifications.APPOINTMENT_CONFIRMATION_MAIL), false,
-				false, false);
+				ConfirmationActionReplacement.ACTION_ACCEPTED), Notifications.APPOINTMENT_CONFIRMATION_MAIL,
+				State.Type.ACCEPTED), false, false, false);
 	}
 
 	public void appointmentDeclined(final AppointmentObject appointmentObj, final Session sessionObj) {
 		sendNotification(null, appointmentObj, sessionObj, new AppointmentState(new AppointmentActionReplacement(
 				AppointmentActionReplacement.ACTION_DECLINED), new ConfirmationActionReplacement(
-				ConfirmationActionReplacement.ACTION_DECLINED), Notifications.APPOINTMENT_CONFIRMATION_MAIL), false,
-				false, false);
+				ConfirmationActionReplacement.ACTION_DECLINED), Notifications.APPOINTMENT_CONFIRMATION_MAIL,
+				State.Type.DECLINED), false, false, false);
 	}
 
 	public void appointmentTentativelyAccepted(final AppointmentObject appointmentObj, final Session sessionObj) {
-		sendNotification(null, appointmentObj, sessionObj,
-				new AppointmentState(new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_TENTATIVE),
-						new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_TENTATIVELY_ACCEPTED),
-						Notifications.APPOINTMENT_CONFIRMATION_MAIL), false, false, false);
+		sendNotification(null, appointmentObj, sessionObj, new AppointmentState(new AppointmentActionReplacement(
+				AppointmentActionReplacement.ACTION_TENTATIVE), new ConfirmationActionReplacement(
+				ConfirmationActionReplacement.ACTION_TENTATIVELY_ACCEPTED),
+				Notifications.APPOINTMENT_CONFIRMATION_MAIL, State.Type.TENTATIVELY_ACCEPTED), false, false, false);
 	}
 
 	public void appointmentDeleted(final AppointmentObject appointmentObj, final Session sessionObj) {
-		sendNotification(null, appointmentObj, sessionObj, new AppointmentState(new AppointmentActionReplacement(
-				AppointmentActionReplacement.ACTION_DELETED), Notifications.APPOINTMENT_DELETE_MAIL),
-				NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false), true, false);
+		sendNotification(null, appointmentObj, sessionObj,
+				new AppointmentState(new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_DELETED),
+						Notifications.APPOINTMENT_DELETE_MAIL, State.Type.DELETED), NotificationConfig
+						.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false), true, false);
 	}
 
 	public void taskCreated(final Task taskObj, final Session sessionObj) {
 		sendNotification(null, taskObj, sessionObj, new TaskState(new TaskActionReplacement(
-				TaskActionReplacement.ACTION_NEW), Notifications.TASK_CREATE_MAIL), false, false, false);
+				TaskActionReplacement.ACTION_NEW), Notifications.TASK_CREATE_MAIL, State.Type.NEW), false, false, false);
 	}
 
 	public void taskModified(final Task taskObj, final Session sessionObj) {
 		sendNotification(null, taskObj, sessionObj, new TaskState(new TaskActionReplacement(
-				TaskActionReplacement.ACTION_CHANGED), Notifications.TASK_UPDATE_MAIL), false, false, true);
+				TaskActionReplacement.ACTION_CHANGED), Notifications.TASK_UPDATE_MAIL, State.Type.MODIFIED), false,
+				false, true);
 
 	}
 
 	public void taskModified(final Task oldTask, final Task newTask, final Session sessionObj) {
 		sendNotification(oldTask, newTask, sessionObj, new TaskState(new TaskActionReplacement(
-				TaskActionReplacement.ACTION_CHANGED), Notifications.TASK_UPDATE_MAIL), false, false, true);
+				TaskActionReplacement.ACTION_CHANGED), Notifications.TASK_UPDATE_MAIL, State.Type.MODIFIED), false,
+				false, true);
 	}
 
 	public void taskAccepted(final Task taskObj, final Session sessionObj) {
 		sendNotification(null, taskObj, sessionObj, new TaskState(new TaskActionReplacement(
 				TaskActionReplacement.ACTION_ACCEPTED), new ConfirmationActionReplacement(
-				ConfirmationActionReplacement.ACTION_ACCEPTED), Notifications.TASK_CONFIRMATION_MAIL), false, false,
-				false);
+				ConfirmationActionReplacement.ACTION_ACCEPTED), Notifications.TASK_CONFIRMATION_MAIL,
+				State.Type.ACCEPTED), false, false, false);
 	}
 
 	public void taskDeclined(final Task taskObj, final Session sessionObj) {
 		sendNotification(null, taskObj, sessionObj, new TaskState(new TaskActionReplacement(
 				TaskActionReplacement.ACTION_DECLINED), new ConfirmationActionReplacement(
-				ConfirmationActionReplacement.ACTION_DECLINED), Notifications.TASK_CONFIRMATION_MAIL), false, false,
-				false);
+				ConfirmationActionReplacement.ACTION_DECLINED), Notifications.TASK_CONFIRMATION_MAIL,
+				State.Type.DECLINED), false, false, false);
 	}
 
 	public void taskTentativelyAccepted(final Task taskObj, final Session sessionObj) {
 		sendNotification(null, taskObj, sessionObj, new TaskState(new TaskActionReplacement(
 				TaskActionReplacement.ACTION_TENTATIVE), new ConfirmationActionReplacement(
-				ConfirmationActionReplacement.ACTION_TENTATIVELY_ACCEPTED), Notifications.TASK_CONFIRMATION_MAIL),
-				false, false, false);
+				ConfirmationActionReplacement.ACTION_TENTATIVELY_ACCEPTED), Notifications.TASK_CONFIRMATION_MAIL,
+				State.Type.TENTATIVELY_ACCEPTED), false, false, false);
 	}
 
 	public void taskDeleted(final Task taskObj, final Session sessionObj) {
 		sendNotification(null, taskObj, sessionObj, new TaskState(new TaskActionReplacement(
-				TaskActionReplacement.ACTION_DELETED), Notifications.TASK_DELETE_MAIL), NotificationConfig
-				.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false), true, false);
+				TaskActionReplacement.ACTION_DELETED), Notifications.TASK_DELETE_MAIL, State.Type.DELETED),
+				NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false), true, false);
 	}
 
 	private void sendNotification(final CalendarObject oldObj, final CalendarObject newObj, final Session session,
@@ -1380,6 +1385,10 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			// past. Bug #12063
 			final Date endDate = calendarObj.getEndDate();
 			if (endDate != null && endDate.getTime() < System.currentTimeMillis()) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder().append("Ignoring notification(s) for calendar object ").append(
+							calendarObj.getObjectID()).append(" since its end date is in the past").toString());
+				}
 				return false;
 			}
 		}
@@ -1388,6 +1397,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			// start date is more than 30 minutes in the past
 			final Date startDate = calendarObj.getStartDate();
 			if (startDate != null && (System.currentTimeMillis() - startDate.getTime()) > THIRTY_MINUTES) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder().append("Ignoring notification(s) for calendar object ").append(
+							calendarObj.getObjectID()).append(
+							" since its start date is more than 30 minutes in the past").toString());
+				}
 				return false;
 			}
 		}

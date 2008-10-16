@@ -69,16 +69,19 @@ public class TaskState extends LinkableState {
 
 	private final String messageTemplate;
 
-	public TaskState(final TemplateReplacement actionRepl, final String messageTemplate) {
-		this(actionRepl, null, messageTemplate);
+	private final Type type;
+
+	public TaskState(final TemplateReplacement actionRepl, final String messageTemplate, final Type type) {
+		this(actionRepl, null, messageTemplate, type);
 	}
 
 	public TaskState(final TemplateReplacement actionRepl, final TemplateReplacement confirmationActionRepl,
-			final String messageTemplate) {
+			final String messageTemplate, final Type type) {
 		super();
 		this.actionRepl = actionRepl;
 		this.confirmationActionRepl = confirmationActionRepl;
 		this.messageTemplate = messageTemplate;
+		this.type = type;
 	}
 
 	public boolean sendMail(final UserSettingMail userSettingMail) {
@@ -111,6 +114,10 @@ public class TaskState extends LinkableState {
 
 	public TemplateReplacement getConfirmationAction() {
 		return confirmationActionRepl;
+	}
+
+	public Type getType() {
+		return type;
 	}
 
 }
