@@ -1,5 +1,83 @@
-open-xchange-exceptions-console (6.6.0) unstable; urgency=low
+open-xchange-data-conversion-ical4j (6.7.0-0) unstable; urgency=low
+
+  * new unstable cycle
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 08 Oct 2008 09:20:56 +0200
+
+open-xchange-data-conversion-ical4j (6.6.0-10) unstable; urgency=low
+
+  * first build for RC10
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 26 Sep 2008 11:24:28 +0200
+
+open-xchange-data-conversion-ical4j (6.6.0-9) unstable; urgency=low
+
+  * build for PTF 20080919
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Sun, 21 Sep 2008 19:32:35 +0200
+
+open-xchange-data-conversion-ical4j (6.6.0-8) unstable; urgency=low
+
+  * first build for RC9
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 15 Sep 2008 17:37:16 +0200
+
+open-xchange-data-conversion-ical4j (6.6.0-7) unstable; urgency=low
+
+  * build for PTF 20080911
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 12 Sep 2008 12:30:50 +0200
+
+open-xchange-data-conversion-ical4j (6.6.0-6) unstable; urgency=low
+
+  * first build for RC8
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  3 Sep 2008 16:53:51 +0200
+
+open-xchange-data-conversion-ical4j (6.6.0-5) unstable; urgency=low
+
+  * first build for RC7
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 25 Aug 2008 15:46:52 +0200
+
+open-xchange-data-conversion-ical4j (6.6.0-4) unstable; urgency=low
+
+  * first build for RC6
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 21 Aug 2008 14:32:20 +0200
+
+open-xchange-data-conversion-ical4j (6.6.0-3) unstable; urgency=low
+
+  * first build for RC5
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 19 Aug 2008 12:08:11 +0200
+
+open-xchange-data-conversion-ical4j (6.6.0-2) unstable; urgency=low
+
+  * first build for RC4
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 14 Aug 2008 14:26:52 +0200
+
+open-xchange-data-conversion-ical4j (6.6.0-1) unstable; urgency=low
+
+  * first build for RC3
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 11 Aug 2008 19:50:53 +0200
+
+open-xchange-data-conversion-ical4j (6.6.0-0) unstable; urgency=low
+
+  * prepared for stable version build 6.6.x
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 11 Aug 2008 17:47:08 +0200
+
+open-xchange-data-conversion-ical4j (6.5.0-2) unstable; urgency=low
+
+  * first build for Beta10
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed,  6 Aug 2008 17:44:00 +0200
+
+open-xchange-data-conversion-ical4j (6.5.0-1) unstable; urgency=low
 
   * Initial upstream version.
 
- -- Francisco Laguna <francisco.laguna@open-xchange.com>  Fri, 10 Oct 2008 11:56:00 +0200
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 30 Jul 2008 11:10:45 +0200
