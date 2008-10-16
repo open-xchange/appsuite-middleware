@@ -180,6 +180,11 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			return true;
 		}
 
+		@Override
+		public String toString() {
+			return new StringBuilder(super.toString()).append(" folder ID=").append(fid).append(", context ID=")
+					.append(cid).toString();
+		}
 	}
 
 	private static final String TABLE_OXFOLDER_TREE = "oxfolder_tree";
@@ -194,7 +199,10 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			 * Another thread already holds folder lock since a previous value
 			 * is already present; get currently active folder lock
 			 */
-			final FolderLock active = MAP_ACTIVE.get(fl);
+			FolderLock active = MAP_ACTIVE.get(fl);
+			while (active == null) {
+				active = MAP_ACTIVE.get(fl);
+			}
 			active.lock.lock();
 			try {
 				while (MAP_LOCK.containsKey(fl)) {
