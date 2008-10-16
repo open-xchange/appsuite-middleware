@@ -159,7 +159,7 @@ public abstract class Exceptions<T extends AbstractOXException> {
     }
 
     public ErrorMessage findMessage(int code) {
-        return errors.get(code);
+        return errors.get(Integer.valueOf(code));
     }
 
     public OXErrorMessage findOXErrorMessage(int code) {
