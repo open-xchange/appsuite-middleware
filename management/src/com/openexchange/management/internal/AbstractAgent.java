@@ -89,6 +89,8 @@ import javax.management.remote.JMXServiceURL;
 import javax.management.remote.rmi.RMIConnectorServer;
 import javax.security.auth.Subject;
 
+import org.apache.commons.codec.binary.Base64;
+
 import com.openexchange.management.ManagementException;
 
 /**
@@ -199,7 +201,7 @@ public abstract class AbstractAgent {
 			md.update(salt);
 
 			final String ret = getUSASCII().decode(
-					ByteBuffer.wrap(org.apache.commons.codec.binary.Base64.encodeBase64(md.digest()))).toString();
+					ByteBuffer.wrap(Base64.encodeBase64(md.digest()))).toString();
 
 			return ret;
 		}
