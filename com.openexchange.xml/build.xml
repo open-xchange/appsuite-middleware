@@ -12,7 +12,7 @@
     <property file="build.properties"/>
 
     <property name="version" value="${Bundle-Version}"/>
-    <property name="bundle.name" value="${Bundle-SymbolicName}"/>
+    <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
     <property name="composite.name" value="open-xchange-xml-${version}"/>
 
     <!-- Install Constants -->
@@ -87,7 +87,7 @@
         <property name="bundlesdestdir" value="${destdir}${bundlesdir}"/>
         <mkdir dir="${bundlesdestdir}"/>
 
-        <property name="bundledir" value="${bundlesdestdir}/${bundle.name}"/>
+        <property name="bundledir" value="${bundlesdestdir}/${Bundle-SymbolicName}"/>
         <mkdir dir="${bundledir}"/>
         <copy todir="${bundledir}" file="${tmp.dir}/${bundle.name}"/>
         <mkdir dir="${bundledir}/lib"/>
