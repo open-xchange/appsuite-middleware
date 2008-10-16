@@ -193,23 +193,35 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 
 	private static final Map<FolderLock, FolderLock> MAP_ACTIVE = new ConcurrentHashMap<FolderLock, FolderLock>(256);
 
-	private static void acquireFolderLock(final FolderLock fl) {
-		while (MAP_LOCK.put(fl, fl) != null) {
+	private static boolean grabFolderLockFailed(final FolderLock fl) {
+		final FolderLock previous = MAP_LOCK.put(fl, fl);
+		if (previous == null) {
 			/*
-			 * Another thread already holds folder lock since a previous value
-			 * is already present; get currently active folder lock
+			 * Store currently active folder lock to let threads access same
+			 * lock and condition
 			 */
-			FolderLock active = MAP_ACTIVE.get(fl);
-			while (active == null) {
-				active = MAP_ACTIVE.get(fl);
-			}
+			MAP_ACTIVE.put(fl, fl);
+			return false;
+		}
+		/*
+		 * Another thread already holds folder lock since a previous value is
+		 * already present
+		 */
+		return true;
+	}
+
+	private static void acquireFolderLock(final FolderLock fl) {
+		while (grabFolderLockFailed(fl)) {
+			/*
+			 * Grabbing folder lock failed; get currently active folder lock to
+			 * await being freed
+			 */
+			final FolderLock active = MAP_ACTIVE.get(fl);
 			active.lock.lock();
 			try {
-				while (MAP_LOCK.containsKey(fl)) {
-					active.count.incrementAndGet();
-					active.condition.await();
-					active.count.decrementAndGet();
-				}
+				active.count.incrementAndGet();
+				active.condition.await();
+				active.count.decrementAndGet();
 			} catch (final InterruptedException e) {
 				LOG.error("Interrupted while waiting for folder lock: " + fl.toString(), e);
 				active.count.decrementAndGet();
@@ -217,18 +229,19 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 				active.lock.unlock();
 			}
 		}
-		/*
-		 * Store currently active folder lock to let threads access same lock
-		 * and condition
-		 */
-		MAP_ACTIVE.put(fl, fl);
 	}
 
 	private static void releaseFolderLock(final FolderLock fl) {
+		/*
+		 * Remove previously grabbed folder lock
+		 */
 		final FolderLock active = MAP_LOCK.remove(fl);
 		if (active.count.get() == 0) {
 			return;
 		}
+		/*
+		 * Awake currently waiting threads
+		 */
 		final Lock lock = active.lock;
 		lock.lock();
 		try {
