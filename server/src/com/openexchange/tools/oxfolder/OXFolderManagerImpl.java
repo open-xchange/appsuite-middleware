@@ -300,7 +300,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		checkFolderPermissions(folderObj, user.getId(), ctx);
 		checkPermissionsAgainstUserConfigs(folderObj, ctx);
 		if (FolderObject.PUBLIC == folderObj.getType()) {
-			checkParentPermissions(parentFolder.getObjectID(), folderObj.getPermissionsAsArray(), user.getId());
+			checkParentPermissions(parentFolder.getObjectID(), folderObj.getPermissionsAsArray(), user.getId(),
+					createTime);
 		}
 		/*
 		 * Check if duplicate folder exists
@@ -473,7 +474,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			 */
 			final FolderObject storageObj = getFolderFromMaster(fo.getObjectID());
 			if (FolderObject.PUBLIC == storageObj.getType()) {
-				checkParentPermissions(storageObj.getParentFolderID(), storageObj.getPermissionsAsArray(), user.getId());
+				checkParentPermissions(storageObj.getParentFolderID(), storageObj.getPermissionsAsArray(),
+						user.getId(), lastModified);
 			}
 		}
 		/*
@@ -589,14 +591,15 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		checkFolderPermissions(folderObj, user.getId(), ctx);
 		checkPermissionsAgainstUserConfigs(folderObj, ctx);
 		if (FolderObject.PUBLIC == folderObj.getType()) {
-			checkParentPermissions(storageObj.getParentFolderID(), folderObj.getPermissionsAsArray(), user.getId());
+			checkParentPermissions(storageObj.getParentFolderID(), folderObj.getPermissionsAsArray(), user.getId(),
+					lastModified);
 			{
 				final OCLPermission[] removedPerms = getPermissionsWithoutFolderAccess(folderObj
 						.getPermissionsAsArray(), storageObj.getPermissionsAsArray());
 				if (removedPerms.length > 0) {
-					checkSubfolderPermissionsOnRemove(folderObj.getObjectID(), removedPerms, user.getId());
+					checkSubfolderPermissionsOnRemove(folderObj.getObjectID(), removedPerms, user.getId(), lastModified);
 					checkParentPermissionsOnRemove(storageObj.getParentFolderID(), folderObj.getObjectID(),
-							removedPerms, user.getId());
+							removedPerms, user.getId(), lastModified);
 				}
 			}
 		}
@@ -1644,8 +1647,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	 *             If one or more parent folders are not visible to an user
 	 *             entity enclosed by folder's permissions
 	 */
-	private void checkParentPermissions(final int parent, final OCLPermission[] perms, final int modifyingUser)
-			throws OXException {
+	private void checkParentPermissions(final int parent, final OCLPermission[] perms, final int modifyingUser,
+			final long lastModified) throws OXException {
 		final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
 		final UserConfiguration modifyingUserConf = userConfigStorage.getUserConfiguration(modifyingUser, ctx);
 		final Map<Integer, ToDoPermission> map = new HashMap<Integer, ToDoPermission>();
@@ -1689,7 +1692,6 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			 * folders visible in folder tree
 			 */
 			if (!map.isEmpty()) {
-				final long lastModified = System.currentTimeMillis();
 				final int size2 = map.size();
 				final Iterator<Map.Entry<Integer, ToDoPermission>> iter2 = map.entrySet().iterator();
 				for (int i = 0; i < size2; i++) {
@@ -1801,18 +1803,17 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	}
 
 	private void checkParentPermissionsOnRemove(final int parent, final int fuid, final OCLPermission[] removedPerms,
-			final int modifyingUser) throws OXException {
+			final int modifyingUser, final long lastModified) throws OXException {
 		final UserConfiguration modifyingUserConf = UserConfigurationStorage.getInstance().getUserConfiguration(
 				modifyingUser, ctx);
 		final Map<Integer, ToDoPermission> map = new HashMap<Integer, ToDoPermission>();
 		checkParentPermissionsOnRemoveRec(parent, fuid, removedPerms, modifyingUser, modifyingUserConf, map);
 		/*
-		 * Auto-delete permission from parent folders to achieve a consisten
+		 * Auto-delete permission from parent folders to achieve a consistent
 		 * folder tree
 		 */
 		if (!map.isEmpty()) {
 			try {
-				final long lastModified = System.currentTimeMillis();
 				final int size2 = map.size();
 				final Iterator<Map.Entry<Integer, ToDoPermission>> iter2 = map.entrySet().iterator();
 				for (int i = 0; i < size2; i++) {
@@ -1825,8 +1826,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 					for (int j = 0; j < users.length; j++) {
 						if (LOG.isDebugEnabled()) {
 							LOG.debug("Auto-Delete permission for user "
-									+ UserStorage.getStorageUser(users[j], ctx).getDisplayName() + " from folder "
-									+ folderId);
+									+ UserStorage.getStorageUser(users[j], ctx).getDisplayName()
+									+ " from parent folder " + folderId);
 						}
 						OXFolderSQL.removeSinglePermission(folderId, users[j], writeCon, ctx);
 					}
@@ -1836,7 +1837,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 							try {
 								LOG.debug("Auto-Delete permission for group "
 										+ GroupStorage.getInstance(true).getGroup(groups[j], ctx).getDisplayName()
-										+ " from folder " + folderId);
+										+ " from parent folder " + folderId);
 							} catch (final LdapException e) {
 								LOG.trace("Logging failed", e);
 							}
@@ -1987,7 +1988,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	}
 
 	private void checkSubfolderPermissionsOnRemove(final int folderId, final OCLPermission[] removedPerms,
-			final int modifyingUser) throws OXException {
+			final int modifyingUser, final long lastModified) throws OXException {
 		final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
 		final UserConfiguration modifyingUserConf = userConfigStorage.getUserConfiguration(modifyingUser, ctx);
 		final Map<Integer, ToDoPermission> map = new HashMap<Integer, ToDoPermission>();
@@ -2034,7 +2035,6 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			 * order to achieve a consistent folder tree
 			 */
 			if (!map.isEmpty()) {
-				final long lastModified = System.currentTimeMillis();
 				final int size2 = map.size();
 				final Iterator<Map.Entry<Integer, ToDoPermission>> iter2 = map.entrySet().iterator();
 				for (int i = 0; i < size2; i++) {
@@ -2047,7 +2047,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 					for (int j = 0; j < users.length; j++) {
 						if (LOG.isDebugEnabled()) {
 							LOG.debug("Auto-Delete permission for user "
-									+ UserStorage.getStorageUser(users[j], ctx).getDisplayName() + " from folder "
+									+ UserStorage.getStorageUser(users[j], ctx).getDisplayName() + " from subfolder "
 									+ fuid);
 						}
 						OXFolderSQL.removeSinglePermission(fuid, users[j], writeCon, ctx);
@@ -2058,7 +2058,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 							try {
 								LOG.debug("Auto-Delete permission for group "
 										+ GroupStorage.getInstance(true).getGroup(groups[j], ctx).getDisplayName()
-										+ " from folder " + fuid);
+										+ " from subfolder " + fuid);
 							} catch (final LdapException e) {
 								LOG.trace("Logging failed", e);
 							}
@@ -2153,11 +2153,10 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 					 */
 					return false;
 				}
-				final Integer key = Integer.valueOf(folderId);
-				ToDoPermission todo = map.get(key);
+				ToDoPermission todo = map.get(subfolder);
 				if (todo == null) {
-					todo = new ToDoPermission(folderId);
-					map.put(key, todo);
+					todo = new ToDoPermission(subfolder.intValue());
+					map.put(subfolder, todo);
 				}
 				if (groupId != -1) {
 					/*
