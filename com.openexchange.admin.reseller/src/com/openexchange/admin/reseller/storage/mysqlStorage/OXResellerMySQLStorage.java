@@ -60,10 +60,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -71,6 +73,7 @@ import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.reseller.storage.sqlStorage.OXResellerSQLStorage;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -1108,6 +1111,103 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         }
     }
     
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#initDatabaseRestrictions()
+     */
+    @Override
+    public void initDatabaseRestrictions() throws StorageException {
+        Connection con = null;
+        PreparedStatement prep = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            con.setAutoCommit(false);
+            for(final String res : new String[]{Restriction.MAX_CONTEXT_PER_SUBADMIN,
+                    Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN,
+                    Restriction.MAX_OVERALL_USER_PER_SUBADMIN,
+                    Restriction.MAX_USER_PER_CONTEXT} ) {
+                final int rid = IDGenerator.getId(con);
+                prep = con.prepareStatement("INSERT INTO restrictions (rid,name) VALUES (?,?)");
+                prep.setInt(1, rid);
+                prep.setString(2, res);
+                prep.executeUpdate();
+            }
+            con.commit();
+        } catch (PoolException e) {
+            log.error(e.getMessage(), e);
+            doRollback(con);
+            throw new StorageException(e.getMessage());
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            doRollback(con);
+            throw new StorageException(e.getMessage());
+        } finally {
+            cache.closeConfigDBSqlStuff(con, prep);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#removeDatabaseRestrictions()
+     */
+    @Override
+    public void removeDatabaseRestrictions() throws StorageException {
+        Connection con = null;
+        PreparedStatement prep = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            con.setAutoCommit(false);
+            prep = con.prepareStatement("DELETE FROM restrictions");
+            prep.executeUpdate();
+            con.commit();
+        } catch (PoolException e) {
+            log.error(e.getMessage(), e);
+            doRollback(con);
+            throw new StorageException(e.getMessage());
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            doRollback(con);
+            throw new StorageException(e.getMessage());
+        } finally {
+            cache.closeConfigDBSqlStuff(con, prep);
+        }
+    }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#updateModuleAccessRestrictions()
+     */
+    @Override
+    public void updateModuleAccessRestrictions() throws StorageException {
+        Connection con = null;
+        PreparedStatement prep = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            con.setAutoCommit(false);
+            cache.initAccessCombinations();
+            for(final Entry<String, UserModuleAccess> mentry : cache.getAccessCombinationNames()) {
+                final String mname = mentry.getKey();
+                
+            }
+            con.commit();
+        } catch (ClassNotFoundException e) {
+            log.error(e.getMessage(), e);
+            doRollback(con);
+            throw new StorageException(e.getMessage());
+        } catch (OXGenericException e) {
+            log.error(e.getMessage(), e);
+            doRollback(con);
+            throw new StorageException(e.getMessage());
+        } catch (PoolException e) {
+            log.error(e.getMessage(), e);
+            doRollback(con);
+            throw new StorageException(e.getMessage());
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            doRollback(con);
+            throw new StorageException(e.getMessage());
+        } finally {
+            cache.closeConfigDBSqlStuff(con, prep);
+        }
+    }
+
     private void doRollback(final Connection con) {
         try {
             con.rollback();

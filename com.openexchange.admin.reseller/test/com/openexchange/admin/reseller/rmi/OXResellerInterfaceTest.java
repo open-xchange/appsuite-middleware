@@ -58,7 +58,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.HashSet;
-import java.util.Iterator;
 
 import org.junit.Test;
 
@@ -77,6 +76,30 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class OXResellerInterfaceTest extends OXResellerAbstractTest {
 
+    @Test
+    public void testRemoveDatabaseRestrictions() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, OXResellerException {
+        final Credentials creds = DummyMasterCredentials();
+        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+    
+        oxresell.removeDatabaseRestrictions(creds);
+    }
+
+    @Test
+    public void testInitDatabaseRestrictions() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, OXResellerException {
+        final Credentials creds = DummyMasterCredentials();
+        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+    
+        oxresell.initDatabaseRestrictions(creds);
+    }
+    
+    @Test
+    public void testUpdateModuleAccessRestrictions() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException {
+        final Credentials creds = DummyMasterCredentials();
+        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+        
+        oxresell.updateDatabaseModuleAccessRestrictions(null, creds);
+    }
+    
     @Test
     public void testCreate() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException {
         final Credentials creds = DummyMasterCredentials();

@@ -120,12 +120,13 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * validRestrictions {@link HashMap}
      * 
      * @throws StorageException
+     * @throws OXResellerException 
      */
-    private void initRestrictions() throws StorageException {
-        if( this.validRestrictions == null ) {
+    private void initRestrictions() throws StorageException, OXResellerException {
+        if( this.validRestrictions == null || this.validRestrictions.size() <= 0 ) {
             validRestrictions = oxresell.listRestrictions("*");
-            if( validRestrictions == null ) {
-                throw new StorageException("unable to load available restrictions from database");
+            if( validRestrictions == null || validRestrictions.size() <= 0) {
+                throw new OXResellerException("unable to load available restrictions from database");
             }
         }
     }
@@ -140,8 +141,9 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * @param restrictions
      * @throws StorageException
      * @throws InvalidDataException 
+     * @throws OXResellerException 
      */
-    private void checkRestrictionsPerContext(final HashSet<Restriction> restrictions) throws StorageException, InvalidDataException {
+    private void checkRestrictionsPerContext(final HashSet<Restriction> restrictions) throws StorageException, InvalidDataException, OXResellerException {
         initRestrictions();
         
         final Iterator<Restriction> i = restrictions.iterator();
@@ -174,8 +176,9 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * 
      * @throws StorageException
      * @throws InvalidDataException 
+     * @throws OXResellerException 
      */
-    private void checkRestrictionsPerSubadmin(ResellerAdmin adm) throws StorageException, InvalidDataException {
+    private void checkRestrictionsPerSubadmin(ResellerAdmin adm) throws StorageException, InvalidDataException, OXResellerException {
         initRestrictions();
         
         HashSet<Restriction> res = adm.getRestrictions();
@@ -495,6 +498,69 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             log.error(e.getMessage(), e);
             throw e;
         } catch (InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#initDatabaseRestrictions(com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
+    public void initDatabaseRestrictions(Credentials creds) throws StorageException, InvalidCredentialsException, OXResellerException {
+        try {
+            basicauth.doAuthentication(creds);
+            try {
+                initRestrictions();
+            } catch (OXResellerException e) {
+                log.info("restrictions are not yet initialized within database, fine");
+            }
+            if( validRestrictions != null && validRestrictions.size() > 0 ) {
+                throw new OXResellerException("Database already contains restrictions.");
+            }
+            oxresell.initDatabaseRestrictions();
+            initRestrictions();
+        } catch (InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (OXResellerException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#removeDatabaseRestrictions(com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
+    public void removeDatabaseRestrictions(Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException {
+        try {
+            basicauth.doAuthentication(creds);
+            
+            oxresell.removeDatabaseRestrictions();
+            this.validRestrictions = null;
+        } catch (InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#updateModuleAccessRestrictions(java.lang.String)
+     */
+    public void updateDatabaseModuleAccessRestrictions(String olddefinition_file, Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException {
+        try {
+            basicauth.doAuthentication(creds);
+            
+            oxresell.updateModuleAccessRestrictions();
+        } catch (InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
         }

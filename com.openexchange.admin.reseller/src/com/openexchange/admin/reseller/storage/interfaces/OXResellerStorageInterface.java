@@ -255,4 +255,19 @@ public abstract class OXResellerStorageInterface {
      * @throws StorageException
      */
     public abstract HashSet<Restriction> getRestrictionsFromContext(final Context ctx) throws StorageException;
+    
+    /**
+     * @throws StorageException
+     */
+    public abstract void initDatabaseRestrictions() throws StorageException;
+    
+    /**
+     * @throws StorageException
+     */
+    public abstract void removeDatabaseRestrictions() throws StorageException;
+
+    /**
+     * @throws StorageException
+     */
+    public abstract void updateModuleAccessRestrictions() throws StorageException;
 }

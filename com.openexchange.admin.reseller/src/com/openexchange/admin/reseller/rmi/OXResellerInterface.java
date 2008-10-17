@@ -164,4 +164,29 @@ public interface OXResellerInterface extends Remote {
      * @throws InvalidCredentialsException 
      */
     public HashSet<Restriction> getRestrictionsFromContext(final Context ctx, final Credentials creds) throws RemoteException, InvalidDataException, OXResellerException, StorageException, InvalidCredentialsException;
+    
+    /**
+     * @param creds
+     * @throws StorageException
+     * @throws InvalidCredentialsException 
+     * @throws OXResellerException 
+     */
+    public void initDatabaseRestrictions(final Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException;
+
+    /**
+     * @param creds
+     * @throws RemoteException
+     * @throws InvalidCredentialsException 
+     * @throws StorageException 
+     */
+    public void removeDatabaseRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException;
+
+    /**
+     * @param olddefinition_file
+     * @param creds
+     * @throws RemoteException
+     * @throws StorageException 
+     * @throws InvalidCredentialsException 
+     */
+    public void updateDatabaseModuleAccessRestrictions(final String olddefinition_file, Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException;
 }

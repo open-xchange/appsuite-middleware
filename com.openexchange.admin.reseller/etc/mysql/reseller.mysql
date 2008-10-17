@@ -17,12 +17,6 @@ CREATE TABLE restrictions (
     PRIMARY KEY (rid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-INSERT INTO restrictions VALUES (1,"MaxContextPerSubadmin");
-INSERT INTO restrictions VALUES (2,"MaxOverallUserPerSubadmin");
-INSERT INTO restrictions VALUES (3,"MaxOverallContextQuotaPerSubadmin");
-INSERT INTO restrictions VALUES (4,"MaxUserPerContext");
-INSERT INTO restrictions VALUES (5,"SubadminEnabled");
-
 CREATE TABLE subadmin_restrictions (
     sid INT4 UNSIGNED NOT NULL,
     rid INT4 UNSIGNED NOT NULL,
