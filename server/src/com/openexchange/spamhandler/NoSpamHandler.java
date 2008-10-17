@@ -89,10 +89,12 @@ public final class NoSpamHandler extends SpamHandler {
 	@Override
 	public void handleHam(final String spamFullname, final long[] mailIDs, final boolean move, final Session session)
 			throws MailException {
+		// Nothing to do
 	}
 
 	@Override
 	public void handleSpam(final String fullname, final long[] mailIDs, final boolean move, final Session session)
 			throws MailException {
+		// Nothing to do
 	}
 }
