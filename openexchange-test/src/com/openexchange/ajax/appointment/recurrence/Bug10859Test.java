@@ -80,7 +80,7 @@ public final class Bug10859Test extends AbstractAJAXSession {
         final AppointmentObject appointment = new AppointmentObject();
         {
             final Calendar calendar = Calendar.getInstance(tz);
-            calendar.set(Calendar.HOUR, 12);
+            calendar.set(Calendar.HOUR_OF_DAY, 12);
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);
             calendar.set(Calendar.MILLISECOND, 0);

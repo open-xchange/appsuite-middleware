@@ -79,7 +79,15 @@ public final class TimeTools {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        calendar.add(Calendar.HOUR, diff);
+        calendar.add(Calendar.HOUR_OF_DAY, diff);
         return calendar.getTimeInMillis();
+    }
+
+    public static Calendar createCalendar(final TimeZone tz) {
+        final Calendar calendar = new GregorianCalendar(tz);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar;
     }
 }

@@ -88,7 +88,7 @@ public final class Bug11848Test extends AbstractAJAXSession {
         final Task[] tasks = new Task[NUMBER];
         {
             final Calendar calendar = new GregorianCalendar(tz);
-            calendar.set(Calendar.HOUR, 0);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);
             calendar.set(Calendar.MILLISECOND, 0);

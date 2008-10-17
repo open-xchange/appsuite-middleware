@@ -65,4 +65,11 @@ public class ListRequest extends CommonListRequest {
         final boolean failOnError) {
         super(AbstractAppointmentRequest.URL, identifier, columns, failOnError);
     }
+
+    /**
+     * Constructor without failOnError.
+     */
+    public ListRequest(final ListIDs identifier, final int[] columns) {
+        this(identifier, columns, true);
+    }
 }

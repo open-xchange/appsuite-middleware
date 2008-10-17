@@ -77,7 +77,7 @@ public final class Bug10859Test2 extends AbstractWebDAVSession {
         System.out.println(folder);
         final TimeZone tz = TimeZone.getTimeZone("Europe/Berlin");
         final Calendar calendar = Calendar.getInstance(tz);
-        calendar.set(Calendar.HOUR, 12);
+        calendar.set(Calendar.HOUR_OF_DAY, 12);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);

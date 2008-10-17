@@ -114,6 +114,10 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
         public String getValue() {
             return value;
         }
+        @Override
+        public String toString() {
+            return name + "=" + value;
+        }
     }
 
     class URLParameter extends Parameter {
@@ -123,13 +127,11 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
     }
 
     class FileParameter extends Parameter {
-        private final String fileName;
         private final InputStream inputStream;
         private final String mimeType;
         public FileParameter(final String name, final String fileName,
             final InputStream inputStream, final String mimeType) {
-            super(name, (String) null);
-            this.fileName = fileName;
+            super(name, fileName);
             this.inputStream = inputStream;
             this.mimeType = mimeType;
         }
@@ -137,7 +139,7 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
          * @return the fileName
          */
         public String getFileName() {
-            return fileName;
+            return super.getValue();
         }
         /**
          * @return the inputStream
@@ -151,20 +153,20 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
         public String getMimeType() {
             return mimeType;
         }
+        @Override
+        public String toString() {
+            return super.toString() + ',' + mimeType;
+        }
     }
 
     class FieldParameter extends Parameter {
-    	private final String fieldName;
-    	private final String fieldContent;
 		/**
 		 * Initializes a new {@link FieldParameter}
 		 * @param fieldName
 		 * @param fieldContent
 		 */
 		public FieldParameter(final String fieldName, final String fieldContent) {
-			super(fieldName, (String) null);
-			this.fieldName = fieldName;
-			this.fieldContent = fieldContent;
+			super(fieldName, fieldContent);
 		}
 		/**
 		 * Gets the fieldName
@@ -172,7 +174,7 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
 		 * @return the fieldName
 		 */
 		public String getFieldName() {
-			return fieldName;
+			return super.getName();
 		}
 		/**
 		 * Gets the fieldContent
@@ -180,7 +182,7 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
 		 * @return the fieldContent
 		 */
 		public String getFieldContent() {
-			return fieldContent;
+			return super.getValue();
 		}
     }
 

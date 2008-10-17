@@ -68,6 +68,8 @@ public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
 
     private final TimeZone timeZone;
 
+    private final boolean failOnError;
+
     /**
      * Default constructor.
      * @param appointmentObj Appointment object with updated attributes. This appointment must contain
@@ -75,9 +77,15 @@ public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
      * modification timestamp.
      */
     public UpdateRequest(final AppointmentObject appointmentObj, final TimeZone timeZone) {
+        this(appointmentObj, timeZone, true);
+    }
+
+    public UpdateRequest(final AppointmentObject appointmentObj,
+        final TimeZone timeZone, final boolean failOnError) {
         super();
         this.appointmentObj = appointmentObj;
         this.timeZone = timeZone;
+        this.failOnError = failOnError;
     }
 
     /**
@@ -114,7 +122,7 @@ public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
      * {@inheritDoc}
      */
     public UpdateParser getParser() {
-        return new UpdateParser(false);
+        return new UpdateParser(failOnError);
     }
 
     /**

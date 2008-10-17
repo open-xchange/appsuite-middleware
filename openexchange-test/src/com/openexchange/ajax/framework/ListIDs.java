@@ -83,4 +83,13 @@ public class ListIDs implements Iterable<ListID> {
     public Iterator<ListID> iterator() {
         return identifiers.iterator();
     }
+
+    public static ListIDs l(int[]... identifiers) {
+        final ListIDs retval = new ListIDs();
+        for (int[] identifier : identifiers) {
+            assert identifier.length == 2;
+            retval.add(new ListIDInt(identifier[0], identifier[1]));
+        }
+        return retval;
+    }
 }
