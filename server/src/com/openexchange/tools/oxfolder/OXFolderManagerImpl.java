@@ -64,11 +64,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.OXException;
@@ -119,137 +114,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(OXFolderManagerImpl.class);
 
-	private static final class FolderLock {
-
-		final Lock lock;
-
-		final Condition condition;
-
-		final AtomicInteger count;
-
-		private final int fid;
-
-		private final int cid;
-
-		private final int hash;
-
-		/**
-		 * Initializes a new {@link FolderLock}
-		 */
-		public FolderLock(final int fid, final int cid) {
-			super();
-			count = new AtomicInteger();
-			this.lock = new ReentrantLock();
-			this.condition = lock.newCondition();
-			this.cid = cid;
-			this.fid = fid;
-			hash = _hashCode();
-		}
-
-		@Override
-		public int hashCode() {
-			return hash;
-		}
-
-		private int _hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + cid;
-			result = prime * result + fid;
-			return result;
-		}
-
-		@Override
-		public boolean equals(final Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj == null) {
-				return false;
-			}
-			if (getClass() != obj.getClass()) {
-				return false;
-			}
-			final FolderLock other = (FolderLock) obj;
-			if (cid != other.cid) {
-				return false;
-			}
-			if (fid != other.fid) {
-				return false;
-			}
-			return true;
-		}
-
-		@Override
-		public String toString() {
-			return new StringBuilder(super.toString()).append(" folder ID=").append(fid).append(", context ID=")
-					.append(cid).toString();
-		}
-	}
-
 	private static final String TABLE_OXFOLDER_TREE = "oxfolder_tree";
-
-	private static final Map<FolderLock, FolderLock> MAP_LOCK = new ConcurrentHashMap<FolderLock, FolderLock>(256);
-
-	private static final Map<FolderLock, FolderLock> MAP_ACTIVE = new ConcurrentHashMap<FolderLock, FolderLock>(256);
-
-	private static boolean grabFolderLockFailed(final FolderLock fl) {
-		final FolderLock previous = MAP_LOCK.put(fl, fl);
-		if (previous == null) {
-			/*
-			 * Store currently active folder lock to let threads access same
-			 * lock and condition
-			 */
-			MAP_ACTIVE.put(fl, fl);
-			return false;
-		}
-		/*
-		 * Another thread already holds folder lock since a previous value is
-		 * already present
-		 */
-		return true;
-	}
-
-	private static void acquireFolderLock(final FolderLock fl) {
-		while (grabFolderLockFailed(fl)) {
-			/*
-			 * Grabbing folder lock failed; get currently active folder lock to
-			 * await being freed
-			 */
-			final FolderLock active = MAP_ACTIVE.get(fl);
-			active.lock.lock();
-			try {
-				active.count.incrementAndGet();
-				active.condition.await();
-				active.count.decrementAndGet();
-			} catch (final InterruptedException e) {
-				LOG.error("Interrupted while waiting for folder lock: " + fl.toString(), e);
-				active.count.decrementAndGet();
-			} finally {
-				active.lock.unlock();
-			}
-		}
-	}
-
-	private static void releaseFolderLock(final FolderLock fl) {
-		/*
-		 * Remove previously grabbed folder lock
-		 */
-		final FolderLock active = MAP_LOCK.remove(fl);
-		if (active.count.get() == 0) {
-			return;
-		}
-		/*
-		 * Awake currently waiting threads
-		 */
-		final Lock lock = active.lock;
-		lock.lock();
-		try {
-			active.condition.signalAll();
-		} finally {
-			lock.unlock();
-		}
-	}
 
 	private final Connection readCon;
 
@@ -559,17 +424,6 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	}
 
 	public FolderObject updateFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified)
-			throws OXException {
-		final FolderLock fl = new FolderLock(fo.getObjectID(), ctx.getContextId());
-		acquireFolderLock(fl);
-		try {
-			return _updateFolder(fo, checkPermissions, lastModified);
-		} finally {
-			releaseFolderLock(fl);
-		}
-	}
-
-	private FolderObject _updateFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified)
 			throws OXException {
 		if (checkPermissions) {
 			if (fo.containsType()
@@ -1156,17 +1010,6 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 
 	public FolderObject clearFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified)
 			throws OXException {
-		final FolderLock fl = new FolderLock(fo.getObjectID(), ctx.getContextId());
-		acquireFolderLock(fl);
-		try {
-			return _clearFolder(fo, checkPermissions, lastModified);
-		} finally {
-			releaseFolderLock(fl);
-		}
-	}
-
-	private FolderObject _clearFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified)
-			throws OXException {
 		if (fo.getObjectID() <= 0) {
 			throw new OXFolderException(FolderCode.INVALID_OBJECT_ID, getFolderName(fo));
 		}
@@ -1242,23 +1085,12 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 
 	public FolderObject deleteFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified)
 			throws OXException {
-		final FolderLock fl = new FolderLock(fo.getObjectID(), ctx.getContextId());
-		acquireFolderLock(fl);
-		try {
-			return _deleteFolder(fo, checkPermissions, lastModified);
-		} finally {
-			releaseFolderLock(fl);
-		}
-	}
-
-	private FolderObject _deleteFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified)
-			throws OXException {
 		if (fo.getObjectID() <= 0) {
 			throw new OXFolderException(FolderCode.INVALID_OBJECT_ID, getFolderName(fo));
 		}
 		if (!fo.containsParentFolderID() || fo.getParentFolderID() <= 0) {
 			/*
-			 * Incomplete, wherby its existence is checked
+			 * Incomplete, whereby its existence is checked
 			 */
 			fo.setParentFolderID(getOXFolderAccess().getParentFolderID(fo.getObjectID()));
 		} else {
