@@ -1,3 +1,8 @@
+* 2008-10-17 - marcus.klein@open-xchange.com
+
+ - Bugfix #12326: Removed recurrence type from series exceptions. Writing
+   recurrence id and position to AJAX interface.
+
 * 2008-10-13 - marcus.klein@open-xchange.com
 
  - Bugfix #12099: Setting modified by when updating series if a virtual

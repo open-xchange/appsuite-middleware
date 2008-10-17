@@ -191,11 +191,6 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     cdao.setRecurrenceCalculator(setInt(i++, load_resultset));
                     cdao.setRecurrencePosition(setInt(i++, load_resultset));
                     cdao.setRecurrence(setString(i++, load_resultset));
-					/*
-					 * Ensure that recurrence informations are contained in
-					 * corresponding fields
-					 */
-					CalendarRecurringCollection.fillDAO(cdao);
                     cdao.setDelExceptions(setString(i++, load_resultset));
                     cdao.setExceptions(setString(i++, load_resultset));
                     if (cdao.getObjectID() == cdao.getRecurrenceID()) {
@@ -748,7 +743,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             if (cdao.isSequence()) {
                 CalendarRecurringCollection.fillDAO(cdao);
                 if (cdao.getObjectID() != cdao.getRecurrenceID()) {
-                    //CalendarCommonCollection.removeRecurringType(cdao);
+                    // Recurring type on a exception must be removed.
+                    CalendarCommonCollection.removeRecurringType(cdao);
                     if (cdao.getExceptions() != null) {
                         try {
                             final long exc = new Long(cdao.getExceptions()).longValue();

@@ -938,7 +938,9 @@ public final class CalendarRecurringCollection {
     }
     
     static CalendarDataObject cloneObjectForRecurringException(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
-        final CalendarDataObject clone = (CalendarDataObject)edao.clone();
+        final CalendarDataObject clone = (CalendarDataObject) edao.clone();
+        // Recurrence exceptions MUST contain the position and date position.
+        // This is necessary for further handling of the series.
         if (cdao.containsRecurrencePosition()) {
             clone.setRecurrencePosition(cdao.getRecurrencePosition());
         }
