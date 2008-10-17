@@ -14,7 +14,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.contextrestore.dataobjects.VersionInformation;
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException;
-import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore.Parser.PoolIdAndSchema;
+import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore.Parser.PoolIdSchemaAndVersionInfo;
 import com.openexchange.admin.contextrestore.tools.PropertyHandlerExtended;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.PoolException;
@@ -86,7 +86,7 @@ public abstract class OXContextRestoreStorageInterface {
     }
 
     
-    public abstract String restorectx(final Context ctx, final PoolIdAndSchema poolidandschema) throws SQLException, FileNotFoundException, IOException, OXContextRestoreException, StorageException;
+    public abstract String restorectx(final Context ctx, final PoolIdSchemaAndVersionInfo poolidandschema) throws SQLException, FileNotFoundException, IOException, OXContextRestoreException, StorageException;
     
-    public abstract void checkVersion(final VersionInformation versionInformation, final PoolIdAndSchema poolIdAndSchema) throws SQLException, OXContextRestoreException, StorageException;
+    public abstract void checkVersion(final PoolIdSchemaAndVersionInfo poolIdAndSchema) throws SQLException, OXContextRestoreException, StorageException;
 }

@@ -19,7 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.contextrestore.dataobjects.VersionInformation;
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException;
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException.Code;
-import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore.Parser.PoolIdAndSchema;
+import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore.Parser.PoolIdSchemaAndVersionInfo;
 import com.openexchange.admin.contextrestore.storage.sqlStorage.OXContextRestoreSQLStorage;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.PoolException;
@@ -38,7 +38,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
     private final static Log LOG = LogFactory.getLog(OXContextRestoreMySQLStorage.class);
     
     @Override
-    public String restorectx(Context ctx, PoolIdAndSchema poolidandschema) throws SQLException, FileNotFoundException, IOException, OXContextRestoreException, StorageException {
+    public String restorectx(Context ctx, PoolIdSchemaAndVersionInfo poolidandschema) throws SQLException, FileNotFoundException, IOException, OXContextRestoreException, StorageException {
         Connection connection = null;
         Connection connection2 = null;
         PreparedStatement prepareStatement = null;
@@ -133,7 +133,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
     }
 
     @Override
-    public void checkVersion(VersionInformation versionInformation, PoolIdAndSchema poolIdAndSchema) throws SQLException, OXContextRestoreException, StorageException {
+    public void checkVersion(final PoolIdSchemaAndVersionInfo poolIdAndSchema) throws SQLException, OXContextRestoreException, StorageException {
         Connection connection = null;
         PreparedStatement prepareStatement = null;
         final int pool_id = poolIdAndSchema.getPool_id();
@@ -144,7 +144,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
             final ResultSet result = prepareStatement.executeQuery();
             if (result.next()) {
                 final VersionInformation versionInformation2 = new VersionInformation(result.getInt(4), result.getInt(3), result.getInt(2), result.getString(5), result.getInt(1));
-                if (!versionInformation.equals(versionInformation2)) {
+                if (!versionInformation2.equals(poolIdAndSchema.getVersionInformation())) {
                     throw new OXContextRestoreException(Code.VERSION_TABLES_INCOMPATIBLE);
                 }
             } else {

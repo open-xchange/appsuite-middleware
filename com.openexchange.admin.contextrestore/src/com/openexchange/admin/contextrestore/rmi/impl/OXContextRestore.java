@@ -21,7 +21,7 @@ import com.openexchange.admin.contextrestore.osgi.Activator;
 import com.openexchange.admin.contextrestore.rmi.OXContextRestoreInterface;
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException;
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException.Code;
-import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore.Parser.PoolIdAndSchema;
+import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore.Parser.PoolIdSchemaAndVersionInfo;
 import com.openexchange.admin.contextrestore.storage.interfaces.OXContextRestoreStorageInterface;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -45,18 +45,22 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
 
     public static class Parser {
         
-        public class PoolIdAndSchema {
+        public class PoolIdSchemaAndVersionInfo {
             private final int pool_id;
             
             private final String schema;
             
+            private VersionInformation versionInformation;
+            
             /**
              * @param pool_id
              * @param schema
+             * @param versionInformation TODO
              */
-            private PoolIdAndSchema(int pool_id, String schema) {
+            private PoolIdSchemaAndVersionInfo(int pool_id, String schema, VersionInformation versionInformation) {
                 this.pool_id = pool_id;
                 this.schema = schema;
+                this.versionInformation = versionInformation;
             }
             
             public final int getPool_id() {
@@ -65,6 +69,14 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             
             public final String getSchema() {
                 return schema;
+            }
+
+            public final VersionInformation getVersionInformation() {
+                return versionInformation;
+            }
+
+            public final void setVersionInformation(VersionInformation versionInformation) {
+                this.versionInformation = versionInformation;
             }
 
         }
@@ -83,7 +95,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         
         private final static Pattern insertIntoVersion = Pattern.compile("^INSERT INTO `version` VALUES \\((?:([^\\),]*),)(?:([^\\),]*),)(?:([^\\),]*),)(?:([^\\),]*),)([^\\),]*)\\).*$");
 
-        public PoolIdAndSchema start(final int cid, final String filename) throws FileNotFoundException, IOException, SQLException, OXContextRestoreException, StorageException {
+        public PoolIdSchemaAndVersionInfo start(final int cid, final String filename) throws FileNotFoundException, IOException, SQLException, OXContextRestoreException, StorageException {
             final BufferedReader in = new BufferedReader(new FileReader(filename));
             BufferedWriter bufferedWriter = null;
             int c;
@@ -93,145 +105,140 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             String table_name = null;
             // Set if a database is found in which the search for cid should be done
             boolean furthersearch = true;
-            boolean configdbfound = false;
             boolean searchcontext = false;
 //            boolean searchdbpool = false;
             int pool_id = -1;
             String schema = null;
             VersionInformation versionInformation = null;
-            while ((c = in.read()) != -1) {
-                if (0 == state && c == '-') {
-                    state = 1;
-                    continue;
-                } else if (1 == state) {
-                    if (c == '-') {
-                        state = 2;
+            try {
+                while ((c = in.read()) != -1) {
+                    if (0 == state && c == '-') {
+                        state = 1;
                         continue;
-                    } else {
-                        state = oldstate;
-                        continue;
-                    }
-                } else if (2 == state) {
-                    if (c == ' ') {
-                        final String readLine = in.readLine();
-                        final Matcher dbmatcher = database.matcher(readLine);
-                        final Matcher tablematcher = table.matcher(readLine);
-                        final Matcher datadumpmatcher = datadump.matcher(readLine);
-                        
-                        if (dbmatcher.matches()) {
-                            // Database found
-                            final String databasename = dbmatcher.group(1);
-                            if ("mysql".equals(databasename) || "information_schema".equals(databasename)) {
-                                furthersearch = false;
-                            } else if ("configdb".equals(databasename)) {
-                                configdbfound = true;
-                                furthersearch = true;
-                            } else {
-                                furthersearch = true;
-                            }
-                            LOG.info("Database: " + databasename);
-                            if (null != bufferedWriter) {
-                                bufferedWriter.append("/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;" + '\n');
-                                bufferedWriter.close();
-                            }
+                    } else if (1 == state) {
+                        if (c == '-') {
+                            state = 2;
+                            continue;
+                        } else {
+                            state = oldstate;
+                            continue;
+                        }
+                    } else if (2 == state) {
+                        if (c == ' ') {
+                            final String readLine = in.readLine();
+                            final Matcher dbmatcher = database.matcher(readLine);
+                            final Matcher tablematcher = table.matcher(readLine);
+                            final Matcher datadumpmatcher = datadump.matcher(readLine);
                             
-                            final String file = "/tmp/" + databasename + ".txt";
-                            bufferedWriter = new BufferedWriter(new FileWriter(file));
-                            bufferedWriter.append("/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;" + '\n');
-                            // Reset values
-                            cidpos = -1;
-                            state = 0;
-                            oldstate = 0;
-                        } else if (furthersearch && tablematcher.matches()) {
-                            // Table found
-                            table_name = tablematcher.group(1);
-                            LOG.info("Table: " + table_name);
-                            cidpos = -1;
-                            oldstate = 0;
-                            state = 3;
-                        } else if (furthersearch && datadumpmatcher.matches()) {
-                            // Content found
-                            LOG.info("Dump found");
-                            if ("version".equals(table_name)) {
-                                // The version table is quite small so it is safe to read the whole line here:
-                                if ((versionInformation = searchAndCheckVersion(in)) == null) {
-                                    throw new OXContextRestoreException(Code.NO_VERSION_INFORMATION_FOUND);
+                            if (dbmatcher.matches()) {
+                                // Database found
+                                final String databasename = dbmatcher.group(1);
+                                if ("mysql".equals(databasename) || "information_schema".equals(databasename)) {
+                                    furthersearch = false;
+                                } else {
+                                    furthersearch = true;
                                 }
-                            }
-                            if ("context_server2db_pool".equals(table_name)) {
-                                searchcontext = true;
-                            }
+                                LOG.info("Database: " + databasename);
+                                if (null != bufferedWriter) {
+                                    bufferedWriter.append("/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;" + '\n');
+                                    bufferedWriter.close();
+                                }
+                                
+                                final String file = "/tmp/" + databasename + ".txt";
+                                bufferedWriter = new BufferedWriter(new FileWriter(file));
+                                bufferedWriter.append("/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;" + '\n');
+                                // Reset values
+                                cidpos = -1;
+                                state = 0;
+                                oldstate = 0;
+                            } else if (furthersearch && tablematcher.matches()) {
+                                // Table found
+                                table_name = tablematcher.group(1);
+                                LOG.info("Table: " + table_name);
+                                cidpos = -1;
+                                oldstate = 0;
+                                state = 3;
+                            } else if (furthersearch && datadumpmatcher.matches()) {
+                                // Content found
+                                LOG.info("Dump found");
+                                if ("version".equals(table_name)) {
+                                    // The version table is quite small so it is safe to read the whole line here:
+                                    if ((versionInformation = searchAndCheckVersion(in)) == null) {
+                                        throw new OXContextRestoreException(Code.NO_VERSION_INFORMATION_FOUND);
+                                    }
+                                }
+                                if ("context_server2db_pool".equals(table_name)) {
+                                    searchcontext = true;
+                                }
 //                            if ("db_pool".equals(table_name)) {
 //                                // As the table in the dump are sorted alphabetically it's safe to
 //                                // assume that we have the pool id here
 //                                searchdbpool = true;
 //                            }
-                            state = 5;
-                            oldstate = 0;
+                                state = 5;
+                                oldstate = 0;
+                            } else {
+                                state = 0;
+                                oldstate = 0;
+                            }
+                            continue;
                         } else {
-                            state = 0;
-                            oldstate = 0;
+                            state = oldstate;
                         }
+                    } else if (3 == state && c == 'C') {
+                        final String creatematchpart = "REATE";
+                        state = returnRightStateToString(in, creatematchpart, 4, 3);
                         continue;
-                    } else {
-                        state = oldstate;
-                    }
-                } else if (3 == state && c == 'C') {
-                    final String creatematchpart = "REATE";
-                    state = returnRightStateToString(in, creatematchpart, 4, 3);
-                    continue;
-                } else if (3 == state && c == '-') {
-                    oldstate = 3;
-                    state = 1;
-                    continue;
-                } else if (4 == state && c == '(') {
-                    cidpos = cidsearch(in);
-                    LOG.info("Cid pos: " + cidpos);
-                    state = 0;
-                    continue;
-                } else if (5 == state && c == 'I') {
-                    state = returnRightStateToString(in, "NSERT", 6, 5);
-                    continue;
-                } else if (5 == state && c == '-') {
-                    oldstate = 5;
-                    state = 1;
-                } else if (6 == state && c == '(') {
-                    LOG.info("Insert found and cid=" + cidpos);
-                    // Now we search for matching cids and write them to the tmp file
-                    if (searchcontext) {
-                        final String value[] = searchAndWriteMatchingCidValues(in, bufferedWriter, cidpos, Integer.toString(cid), table_name, true, true);
-                        try {
-                            pool_id = Integer.parseInt(value[1]);
-                        } catch (final NumberFormatException e) {
-                            throw new OXContextRestoreException(Code.COULD_NOT_CONVERT_POOL_VALUE);
-                        }
-                        schema = value[2];
+                    } else if (3 == state && c == '-') {
+                        oldstate = 3;
+                        state = 1;
+                        continue;
+                    } else if (4 == state && c == '(') {
+                        cidpos = cidsearch(in);
+                        LOG.info("Cid pos: " + cidpos);
+                        state = 0;
+                        continue;
+                    } else if (5 == state && c == 'I') {
+                        state = returnRightStateToString(in, "NSERT", 6, 5);
+                        continue;
+                    } else if (5 == state && c == '-') {
+                        oldstate = 5;
+                        state = 1;
+                    } else if (6 == state && c == '(') {
+                        LOG.info("Insert found and cid=" + cidpos);
+                        // Now we search for matching cids and write them to the tmp file
+                        if (searchcontext) {
+                            final String value[] = searchAndWriteMatchingCidValues(in, bufferedWriter, cidpos, Integer.toString(cid), table_name, true, true);
+                            try {
+                                pool_id = Integer.parseInt(value[1]);
+                            } catch (final NumberFormatException e) {
+                                throw new OXContextRestoreException(Code.COULD_NOT_CONVERT_POOL_VALUE);
+                            }
+                            schema = value[2];
 //                    } else if (searchdbpool) {
 //                        final String value[] = searchAndWriteMatchingCidValues(in, bufferedWriter, 1, Integer.toString(pool_id), table_name, true, false);
 //                        searchdbpool = false;
 //                        System.out.println(Arrays.toString(value));
-                    } else {
-                        searchAndWriteMatchingCidValues(in, bufferedWriter, cidpos, Integer.toString(cid), table_name, false, true);
+                        } else {
+                            searchAndWriteMatchingCidValues(in, bufferedWriter, cidpos, Integer.toString(cid), table_name, false, true);
+                        }
+                        searchcontext = false;
+                        oldstate = 0;
+                        state = 0;
                     }
-                    searchcontext = false;
-                    oldstate = 0;
-                    state = 0;
+                    // Reset state machine at the end of the line if we are in the first two states
+                    if (3 > state && c == '\n') {
+                        state = 0;
+                        continue;
+                    }
                 }
-                // Reset state machine at the end of the line if we are in the first two states
-                if (3 > state && c == '\n') {
-                    state = 0;
-                    continue;
+            } finally {
+                if (null != bufferedWriter) {
+                    bufferedWriter.close();
                 }
             }
-            bufferedWriter.close();
-            if (configdbfound) {
-                final PoolIdAndSchema poolIdAndSchema = new PoolIdAndSchema(pool_id, schema);
-                final OXContextRestoreStorageInterface instance = OXContextRestoreStorageInterface.getInstance();
-                instance.checkVersion(versionInformation, poolIdAndSchema);
-                return poolIdAndSchema;
-            } else {
-                return null;
-            }
+            final PoolIdSchemaAndVersionInfo poolIdAndSchema = new PoolIdSchemaAndVersionInfo(pool_id, schema, versionInformation);
+            return poolIdAndSchema;
         }
 
         /**
@@ -447,17 +454,28 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         LOG.info("Filenames: " + filenames);
         
         try {
-            PoolIdAndSchema start = null; 
+            VersionInformation versionInfo = null;
+            PoolIdSchemaAndVersionInfo result = null; 
             for (final String filename : filenames) {
-                if (null != start) {
-                    parser.start(ctx.getId(), filename);
-                } else {
-                    start = parser.start(ctx.getId(), filename);
+                PoolIdSchemaAndVersionInfo start = parser.start(ctx.getId(), filename);
+                final VersionInformation versionInformation = start.getVersionInformation();
+                final String schema = start.getSchema();
+                final int pool_id = start.getPool_id();
+                if (null != versionInformation) {
+                    versionInfo = versionInformation;
+                } else if (null != schema && -1 != pool_id) {
+                    result = start;
                 }
             }
-            if (null == start) {
+            if (null == result) {
                 throw new OXContextRestoreException(Code.NO_CONFIGDB_FOUND);
+            } else if (null == versionInfo) {
+                throw new OXContextRestoreException(Code.NO_USER_DATA_DB_FOUND);
             }
+            
+            final OXContextRestoreStorageInterface instance = OXContextRestoreStorageInterface.getInstance();
+            result.setVersionInformation(versionInfo);
+            instance.checkVersion(result);
             
             final OXContextInterface contextInterface = Activator.getContextInterface();
             
@@ -471,8 +489,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                 }
             }
             // We have to do the exists check beforehand otherwise you'll find a stack trace in the logs
-            final OXContextRestoreStorageInterface instance = OXContextRestoreStorageInterface.getInstance();
-            return instance.restorectx(ctx, start);
+            return instance.restorectx(ctx, result);
         } catch (final StorageException e) {
             LOG.error(e.getMessage(), e);
             throw e;

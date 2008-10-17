@@ -108,8 +108,13 @@ public class OXContextRestoreException extends PluginException {
         /**
          * None of the files contained a configdb database dump
          */
-        NO_CONFIGDB_FOUND("None of the files contained a configdb database dump, but this is essential for the restore process");
+        NO_CONFIGDB_FOUND("None of the files contained a configdb database dump, but this is essential for the restore process"),
 
+        /**
+         * None of the files contained a userdata database dump, but this is essential for the restore process
+         */
+        NO_USER_DATA_DB_FOUND("None of the files contained a userdata database dump, but this is essential for the restore process");
+        
         private final String text;
 
         /**
