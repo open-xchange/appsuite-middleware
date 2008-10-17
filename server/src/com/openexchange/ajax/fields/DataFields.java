@@ -49,16 +49,27 @@
 
 package com.openexchange.ajax.fields;
 
+/**
+ * JSON object attribute name definitions.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
 public interface DataFields {
 
-	public static final String ID = "id";
-	
-	public static final String CREATED_BY = "created_by";
-	
-	public static final String MODIFIED_BY = "modified_by";
-	
-	public static final String CREATION_DATE = "creation_date";
-	
-	public static final String LAST_MODIFIED = "last_modified";
-	
+    public static final String ID = "id";
+
+    public static final String CREATED_BY = "created_by";
+
+    public static final String MODIFIED_BY = "modified_by";
+
+    public static final String CREATION_DATE = "creation_date";
+
+    public static final String LAST_MODIFIED = "last_modified";
+
+    /**
+     * UTC last modified attribute. Synchronization clients use this to
+     * implement a proper working synchronization independent from the users
+     * time zone.
+     */
+    public static final String LAST_MODIFIED_UTC = "last_modified_utc";
+
 }

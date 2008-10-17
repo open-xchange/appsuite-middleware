@@ -109,6 +109,7 @@ public class CommonWriter extends DataWriter {
 
 		if (commonObj.containsLastModified()) {
 			writeParameter(CommonFields.LAST_MODIFIED, commonObj.getLastModified(), timeZone, jsonObj);
+			writeParameter(CommonFields.LAST_MODIFIED_UTC, commonObj.getLastModified(), jsonObj);
 		}
 
 		if (commonObj.containsParentFolderID()) {
