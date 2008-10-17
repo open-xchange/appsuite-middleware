@@ -156,14 +156,14 @@ public class ParticipantNotifyTest extends TestCase{
 		calendar.set(2017, 4, 2, 13, 30,0);
 		String expect = "02.05.2017 13:30:00, GMT+01:00";
 		
-		DateFormat df = new AppointmentState(null, null).getDateFormat(locale);
+		DateFormat df = new AppointmentState(null, null, null).getDateFormat(locale);
 		
 		assertEquals(expect,df.format(calendar.getTime()));
 		
 		calendar.set(2017, 4, 2, 0, 0, 0);
 		expect = "02.05.2017";
 		
-		df = new TaskState(null, null).getDateFormat(locale);
+		df = new TaskState(null, null, null).getDateFormat(locale);
 		
 		assertEquals(expect,df.format(new Date(calendar.getTimeInMillis())));
 		
@@ -313,7 +313,7 @@ public class ParticipantNotifyTest extends TestCase{
 	}
 
     public void testAddICalAttachment(){
-        final AppointmentState state = new AppointmentState(null, null);
+        final AppointmentState state = new AppointmentState(null, null, null);
         final TestMailObject mailObject = new TestMailObject();
         final AppointmentObject obj = new AppointmentObject();
 
@@ -694,6 +694,10 @@ public class ParticipantNotifyTest extends TestCase{
 			// TODO Auto-generated method stub
 			return null;
 		}
+		public Type getType() {
+			// TODO Auto-generated method stub
+			return null;
+		}
 		
 	}
 
@@ -703,7 +707,7 @@ public class ParticipantNotifyTest extends TestCase{
         private ContentType theContentType;
 
         private TestMailObject() {
-            super(null, 0, 0, 0);
+            super(null, 0, 0, 0, "New");
         }
 
 
