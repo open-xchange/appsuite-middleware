@@ -133,11 +133,11 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
     }
     
     protected static Restriction MaxUserPerContextRestriction() {
-        return new Restriction(Restriction.MAX_USER_PER_CONTEXT,"2");
+        return new Restriction(Restriction.MAX_USER_PER_CONTEXT,"3");
     }
 
-    protected static Restriction MaxOverallUserRestriction() {
-        return new Restriction(Restriction.MAX_OVERALL_USER_PER_SUBADMIN,"2");
+    protected static Restriction MaxOverallUserRestriction(int count) {
+        return new Restriction(Restriction.MAX_OVERALL_USER_PER_SUBADMIN,new Integer(count).toString());
     }
 
     protected static User ContextAdmin() {
@@ -172,7 +172,6 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
         oxuser.setPrimaryEmail("oxuser"+random+"@example.com");
         oxuser.setEmail1("oxuser"+random+"@example.com");
         oxuser.setPassword("secret");
-        ctx.setMaxQuota(100000L);
         return oxusr.create(ctx, oxuser, auth);
     }
 

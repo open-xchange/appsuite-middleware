@@ -266,7 +266,7 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
         boolean deleteFailed = false;
         try {
             oxresell.delete(TestAdminUser("owned"), creds);
-        } catch (Exception e) {
+        } catch (OXResellerException e) {
             deleteFailed = true;
         }
         assertTrue("deletion of ResellerAdmin must fail",deleteFailed);

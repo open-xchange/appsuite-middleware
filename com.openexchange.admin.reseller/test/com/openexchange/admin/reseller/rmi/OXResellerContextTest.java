@@ -146,7 +146,7 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
 
         ResellerAdmin adm = FooAdminUser();
         HashSet<Restriction> res = new HashSet<Restriction>();
-        res.add(MaxOverallUserRestriction());
+        res.add(MaxOverallUserRestriction(2));
         adm.setRestrictions(res);
         oxresell.create(adm, creds);
 
@@ -169,54 +169,6 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
         
         oxresell.delete(FooAdminUser(), DummyMasterCredentials());
     }
-
-    //    @Test
-//    public void testCreateTooManyUsers() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException{
-//        final Credentials creds = DummyMasterCredentials();
-//
-//        final OXResellerInterface oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
-//
-//        ResellerAdmin adm = FooAdminUser();
-//        HashSet<Restriction> res = new HashSet<Restriction>();
-//        res.add(MaxUserRestriction());
-//        adm.setRestrictions(res);
-//        oxresell.create(adm, creds);
-//
-//        for(final Context ctx : new Context[]{createContext(1337, ResellerFooCredentials()),
-//                createContext(1338, ResellerFooCredentials()), createContext(1339, ResellerFooCredentials())} ){
-//            Credentials ctxauth = new Credentials(ContextAdmin().getName(),ContextAdmin().getPassword());
-//            for(int i=0; i<2; i++) {
-//                System.out.println("creating user " + i + " in Context " + ctx.getId());
-//                createUser(ctx, ctxauth);
-//            }
-//        }
-//
-//        try {
-//            createUser(new Context(1337), new Credentials(ContextAdmin().getName(),ContextAdmin().getPassword()));
-//        } catch (StorageException e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
-//        
-//        for(final Context ctx : new Context[]{new Context(1337), new Context(1338), new Context(1339)} ){
-//            deleteContext(ctx, ResellerFooCredentials());
-//        }
-////        boolean failed_ctx3 = false;
-////        try {
-////            ctx3 = createContext(1339, ResellerFooCredentials());
-////        } catch (Exception e) {
-////            failed_ctx3 = true;
-////        }
-////        assertTrue("creation of ctx3 must fail",failed_ctx3);
-////        
-////        deleteContext(ctx1, ResellerFooCredentials());
-////        deleteContext(ctx2, ResellerFooCredentials());
-////        if( ctx3 != null ) {
-////            deleteContext(ctx3, ResellerFooCredentials());
-////        }
-//        
-//        oxresell.delete(FooAdminUser(), DummyMasterCredentials());
-//    }
 
     @Test
     public void testListAndDeleteContextOwnedByReseller() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException{

@@ -233,7 +233,14 @@ public abstract class OXResellerStorageInterface {
      * @param creds
      * @throws StorageException
      */
-    public abstract void checkRestrictions(final Credentials creds, final String... restriction_types) throws StorageException;
+    public abstract void checkPerSubadminRestrictions(final Credentials creds, final String... restriction_types) throws StorageException;
+    
+    /**
+     * @param ctx
+     * @param restriction_types
+     * @throws StorageException
+     */
+    public abstract void checkPerContextRestrictions(final Context ctx, final String... restriction_types) throws StorageException;
     
     /**
      * @param creds

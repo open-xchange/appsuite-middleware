@@ -94,26 +94,26 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     public OXResellerMySQLStorage() {
     }
 
-    private boolean hasRestriction(final Connection con, final int sid, final int rid) throws StorageException {
-        PreparedStatement prep = null;
-        ResultSet rs = null;
-        try {
-            prep = con.prepareStatement("SELECT rid FROM subadmin_restrictions WHERE sid=? AND rid=?");
-            prep.setInt(1, sid);
-            prep.setInt(2, rid);
-            rs = prep.executeQuery();
-            if( rs.next() ) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (SQLException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e.getMessage());
-        } finally {
-            cache.closeSqlStuff(null, prep, rs);
-        }
-    }
+//    private boolean hasRestriction(final Connection con, final int sid, final int rid) throws StorageException {
+//        PreparedStatement prep = null;
+//        ResultSet rs = null;
+//        try {
+//            prep = con.prepareStatement("SELECT rid FROM subadmin_restrictions WHERE sid=? AND rid=?");
+//            prep.setInt(1, sid);
+//            prep.setInt(2, rid);
+//            rs = prep.executeQuery();
+//            if( rs.next() ) {
+//                return true;
+//            } else {
+//                return false;
+//            }
+//        } catch (SQLException e) {
+//            log.error(e.getMessage(), e);
+//            throw new StorageException(e.getMessage());
+//        } finally {
+//            cache.closeSqlStuff(null, prep, rs);
+//        }
+//    }
     
     @Override
     public void change(final ResellerAdmin adm) throws StorageException {
@@ -809,7 +809,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         }
     }
 
-    private void checkMaxOverallUserRestriction(final Connection con, final ResellerAdmin adm, final int maxvalue) throws StorageException, OXResellerException, SQLException, PoolException {
+    private void checkMaxOverallUserRestriction(final Connection con, final ResellerAdmin adm, final int maxvalue, final boolean contextMode) throws StorageException, OXResellerException, SQLException, PoolException {
         PreparedStatement prep = null;
         PreparedStatement prep2 = null;
         ResultSet rs = null;
@@ -819,8 +819,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep = con.prepareStatement("SELECT cid FROM context2subadmin WHERE sid=?");
             prep.setInt(1, adm.getId());
             rs = prep.executeQuery();
-            // start count at one for the current context to be created
-            int count = 1;
+            // start count at one for the current context to be created when called from Context Plugin
+            // methods, because the context to be created is not yet listed in context2subadmin table
+            int count = contextMode ? 1 : 0;
             while( rs.next() ) {
                 final int cid = rs.getInt("cid");
                 oxcon = cache.getConnectionForContext(cid);
@@ -849,11 +850,46 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         }
     }
 
+    /**
+     * @param ctx
+     * @param maxvalue
+     * @throws StorageException
+     * @throws OXResellerException
+     * @throws SQLException
+     * @throws PoolException
+     */
+    private void checkMaxUserRestriction(final Context ctx, final int maxvalue) throws StorageException, OXResellerException, SQLException, PoolException {
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        Connection oxcon = null;
+        try {
+            final int cid = ctx.getId();
+            oxcon = cache.getConnectionForContext(cid);
+            prep = oxcon.prepareStatement("SELECT COUNT(cid) FROM user WHERE cid=?");
+            prep.setInt(1, cid);
+            rs = prep.executeQuery();
+            if( ! rs.next() ) {
+                throw new StorageException("unable to count the number of users belonging to " + ctx.getName());
+            }
+            if( rs.getInt(1) >= maxvalue ) {
+                throw new OXResellerException("maximum number of users per context reached: " + maxvalue);
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (PoolException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } finally {
+            cache.closeSqlStuff(oxcon, prep, rs);
+        }
+    }
+
     /* (non-Javadoc)
      * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#checkRestrictions(com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     @Override
-    public void checkRestrictions(final Credentials creds, final String... restriction_types) throws StorageException {
+    public void checkPerSubadminRestrictions(final Credentials creds, final String... restriction_types) throws StorageException {
         ResellerAdmin adm = getData(new ResellerAdmin[]{new ResellerAdmin(creds.getLogin(),creds.getPassword())})[0];
         HashSet<Restriction> restrictions = adm.getRestrictions();
         if( restrictions != null && restrictions.size() > 0 ) {
@@ -867,7 +903,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                         } else if( res.getName().equals(tocheck) && tocheck.equals(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN)) {
                             checkMaxContextQuotaRestriction(con, adm, Long.parseLong(res.getValue()));
                         } else if( res.getName().equals(tocheck) && tocheck.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN)) {
-                            checkMaxOverallUserRestriction(con, adm, Integer.parseInt(res.getValue()));
+                            checkMaxOverallUserRestriction(con, adm, Integer.parseInt(res.getValue()), true);
                         }
                     }
                 }
@@ -889,6 +925,90 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#checkPerContextRestrictions(com.openexchange.admin.rmi.dataobjects.Context, java.lang.String[])
+     */
+    @Override
+    public void checkPerContextRestrictions(Context ctx, String... restriction_types) throws StorageException {
+        Connection con = null;
+
+        try {
+            for(final String tocheck : restriction_types) {
+                if( tocheck.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN)) {
+                    final ResellerAdmin adm = getResellerAdminForContext(ctx);
+                    HashSet<Restriction> restrictions = adm.getRestrictions();
+                    if( restrictions != null && restrictions.size() > 0 ) {
+                        for(final Restriction res : restrictions) {
+                            if( res.getName().equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN) ) {
+                                con = cache.getConnectionForConfigDB();
+                                checkMaxOverallUserRestriction(con, adm, Integer.parseInt(res.getValue()), false);
+                            }
+                        }
+                    }
+                } else if( tocheck.equals(Restriction.MAX_USER_PER_CONTEXT)) {
+                    HashSet<Restriction> restrictions = getRestrictionsFromContext(ctx);
+                    if( restrictions != null && restrictions.size() > 0 ) {
+                        for(final Restriction res : restrictions) {
+                            if( res.getName().equals(Restriction.MAX_USER_PER_CONTEXT) ) {
+                                checkMaxUserRestriction(ctx, Integer.parseInt(res.getValue()));
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (PoolException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } catch (NumberFormatException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } catch (OXResellerException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        } finally {
+            cache.closeSqlStuff(con, null);
+        }
+        
+    }
+
+    /**
+     * @param con
+     * @param ctx
+     * @return
+     * @throws SQLException
+     * @throws StorageException
+     * @throws PoolException 
+     */
+    private final ResellerAdmin getResellerAdminForContext(final Context ctx) throws SQLException, StorageException, PoolException {
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        Connection con = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            prep = con.prepareStatement("SELECT sid FROM context2subadmin WHERE cid=?");
+            prep.setInt(1, ctx.getId());
+            rs = prep.executeQuery();
+            if( ! rs.next() ) {
+                throw new StorageException("unable to determine owner of Context " + ctx.getId());
+            }
+            return getData(new ResellerAdmin[]{new ResellerAdmin(rs.getInt(1))})[0];
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (PoolException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } finally {
+            cache.closeSqlStuff(con, prep, rs);
+        }
+    }
+    
     /* (non-Javadoc)
      * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#applyRestrictionsToContext(java.util.HashSet, com.openexchange.admin.rmi.dataobjects.Context)
      */

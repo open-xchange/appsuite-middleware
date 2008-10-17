@@ -55,6 +55,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
+import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -88,27 +89,22 @@ public class OXResellerUserImpl implements OXUserPluginInterface {
      * @see com.openexchange.admin.plugins.OXUserPluginInterface#canHandleContextAdmin()
      */
     public boolean canHandleContextAdmin() {
-        // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.admin.plugins.OXUserPluginInterface#change(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.User, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public void change(Context ctx, User usrdata, Credentials auth) throws PluginException {
-        // TODO Auto-generated method stub
-
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.admin.plugins.OXUserPluginInterface#create(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.User, com.openexchange.admin.rmi.dataobjects.UserModuleAccess, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public void create(Context ctx, User usr, UserModuleAccess access, Credentials cred) throws PluginException {
-//        if( cache.isMasterAdmin(auth) ) {
-//            return null;
-//        }
         try {
-            oxresell.checkRestrictions(cred);
+            oxresell.checkPerContextRestrictions(ctx, Restriction.MAX_USER_PER_CONTEXT,
+                    Restriction.MAX_OVERALL_USER_PER_SUBADMIN);
         } catch (StorageException e) {
             log.error(e.getMessage(),e);
             throw new PluginException(e);
@@ -119,16 +115,14 @@ public class OXResellerUserImpl implements OXUserPluginInterface {
      * @see com.openexchange.admin.plugins.OXUserPluginInterface#delete(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.User[], com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public void delete(Context ctx, User[] user, Credentials cred) throws PluginException {
-        // TODO Auto-generated method stub
-
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.admin.plugins.OXUserPluginInterface#getData(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.User[], com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public User[] getData(Context ctx, User[] users, Credentials cred) {
-        // TODO Auto-generated method stub
-        return null;
+        // pass-through
+        return users;
     }
 
 }

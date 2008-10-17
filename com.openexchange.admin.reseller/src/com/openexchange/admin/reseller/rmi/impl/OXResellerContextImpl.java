@@ -143,7 +143,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
             return null;
         }
         try {
-            oxresell.checkRestrictions(auth, Restriction.MAX_CONTEXT_PER_SUBADMIN,
+            oxresell.checkPerSubadminRestrictions(auth, Restriction.MAX_CONTEXT_PER_SUBADMIN,
                     Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN,
                     Restriction.MAX_OVERALL_USER_PER_SUBADMIN);
             oxresell.ownContextToAdmin(ctx, auth);
@@ -252,7 +252,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
      */
     public Context getData(Context ctx, Credentials auth) throws PluginException {
         if( cache.isMasterAdmin(auth) ) {
-            return null;
+            return ctx;
         }
         // TODO Auto-generated method stub
         return null;
