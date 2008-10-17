@@ -102,8 +102,8 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     private final PreparedStatement prep;
     private CalendarFolderObject cfo;
     private final Participant conflict_objects[];
-    private long range_start;
-    private long range_end;
+    private final long range_start;
+    private final long range_end;
     
     private int last_up_oid;
     private UserParticipant last_up[];
@@ -136,7 +136,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     	this(rs, prep, c, uid, groups, uc, con, show_details, conflict_objects, private_folder_information, calendarsqlimp, 0, 0);
     }
 
-    public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final int uid, final int groups[], final UserConfiguration uc, final Connection con, final boolean show_details, final Participant conflict_objects[], final PreparedStatement private_folder_information, final CalendarSqlImp calendarsqlimp, long range_start, long range_end) throws OXException {
+    public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final int uid, final int groups[], final UserConfiguration uc, final Connection con, final boolean show_details, final Participant conflict_objects[], final PreparedStatement private_folder_information, final CalendarSqlImp calendarsqlimp, final long range_start, final long range_end) throws OXException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);
     	this.rs = rs;
         this.prep = prep;
@@ -201,6 +201,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 fid = rs.getInt(7);
                 pflag = rs.getInt(8);
                 owner = rs.getInt(9);
+                cdao.setCreatedBy(owner);
                 final int recid = rs.getInt(10);
                 if (!rs.wasNull() && recid == oid) {
                     cdao.setRecurrenceCalculator(rs.getInt(11));
@@ -269,6 +270,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
             }
             cdao.setRecurrencePosition(rr.getPosition());
             cdao.setObjectID(oid);
+            cdao.setCreatedBy(owner);
             fillDetails(cdao);
             seq--;
             return cdao;
