@@ -180,6 +180,12 @@ public enum Tree {
     /** [inside GUI] "1" - "8" */
     CalendarWorkWeekNumberOfAppointments("/gui/calendar/workweek/numberofappointments"),
 
+    /** [inside GUI] "1" - "7" */
+    CalendarCustomCountDays("/gui/calendar/custom/countdays"),
+    
+    /** [inside GUI] "1" - "8" */
+    CalendarCustomNumberOfAppointments("/gui/calendar/custom/numberofappointments"),
+    
     /** [inside GUI] Effects: Fading. If you set this, please also set EffectsGlobal to the same value. */
     EffectsFading("/gui/effects/fading"),
 
