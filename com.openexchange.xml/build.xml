@@ -18,7 +18,7 @@
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
-    <property name="adbundle.d" value="${prefix}/etc/admin/osgi/bundle.d"/>
+    <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
 
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
