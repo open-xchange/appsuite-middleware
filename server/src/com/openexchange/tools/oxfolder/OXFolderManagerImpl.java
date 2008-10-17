@@ -591,8 +591,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		if (FolderObject.PUBLIC == folderObj.getType()) {
 			checkParentPermissions(storageObj.getParentFolderID(), folderObj.getPermissionsAsArray(), user.getId());
 			{
-				final OCLPermission[] removedPerms = getRemovedPermissions(folderObj.getPermissionsAsArray(),
-						storageObj.getPermissionsAsArray());
+				final OCLPermission[] removedPerms = getPermissionsWithoutFolderAccess(folderObj
+						.getPermissionsAsArray(), storageObj.getPermissionsAsArray());
 				if (removedPerms.length > 0) {
 					checkSubfolderPermissionsOnRemove(folderObj.getObjectID(), removedPerms, user.getId());
 					checkParentPermissionsOnRemove(storageObj.getParentFolderID(), folderObj.getObjectID(),
@@ -2095,18 +2095,38 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		}
 	}
 
-	private static OCLPermission[] getRemovedPermissions(final OCLPermission[] newPerms,
+	private static OCLPermission[] getPermissionsWithoutFolderAccess(final OCLPermission[] newPerms,
 			final OCLPermission[] storagePerms) {
 		final List<OCLPermission> removed = new ArrayList<OCLPermission>(4);
+		final Set<Integer> entities = new HashSet<Integer>(4);
 		for (final OCLPermission storagePerm : storagePerms) {
 			boolean found = false;
 			for (int i = 0; i < newPerms.length && !found; i++) {
 				if (newPerms[i].getEntity() == storagePerm.getEntity()) {
-					found = true;
+					/*
+					 * Still present in new permissions
+					 */
+					found = (newPerms[i].getFolderPermission() > OCLPermission.NO_PERMISSIONS);
 				}
 			}
 			if (!found) {
 				removed.add(storagePerm);
+				entities.add(Integer.valueOf(storagePerm.getEntity()));
+			}
+		}
+		for (final OCLPermission newPerm : newPerms) {
+			boolean found = false;
+			for (int i = 0; i < storagePerms.length && !found; i++) {
+				if (newPerm.getEntity() == storagePerms[i].getEntity()) {
+					found = true;
+				}
+			}
+			if (!found && newPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS
+					&& !entities.contains(Integer.valueOf(newPerm.getEntity()))) {
+				/*
+				 * A newly added permission which grants no folder-read access
+				 */
+				removed.add(newPerm);
 			}
 		}
 		return removed.toArray(new OCLPermission[removed.size()]);
