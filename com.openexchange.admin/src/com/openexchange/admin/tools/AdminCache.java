@@ -653,7 +653,7 @@ public class AdminCache {
         }
     }
 
-    public void closeSqlStuff(final Connection con, final PreparedStatement stmt, final ResultSet rs) {
+    public void closeConfigDBSqlStuff(final Connection con, final PreparedStatement stmt, final ResultSet rs) {
         if (null != rs) {
             try {
                 rs.close();
@@ -661,23 +661,33 @@ public class AdminCache {
                 log.error("Error closing resultset", e);
             }
         }
-        closeSqlStuff(con, stmt);
+        closeConfigDBSqlStuff(con, stmt);
     }
 
-    public void closeSqlStuff(final Connection con, final PreparedStatement stmt) {
-        try {
-            if (con != null) {
-                pushConnectionForConfigDB(con);
-            }
-        } catch (final PoolException exp) {
-            log.error("Pool Error pushing ox write connection to pool!", exp);
-        }
+    public void closeConfigDBSqlStuff(final Connection con, final PreparedStatement stmt) {
         try {
             if (stmt != null) {
                 stmt.close();
             }
         } catch (final SQLException e) {
             log.error("Error closing statement", e);
+        }
+        try {
+            if (con != null) {
+                pushConnectionForConfigDB(con);
+            }
+        } catch (final PoolException exp) {
+            log.error("Pool Error pushing connection to pool!", exp);
+        }
+    }
+
+    public void closeContextSqlStuff(final Connection con, final int context_id) {
+        try {
+            if (con != null) {
+                pushConnectionForContext(context_id, con);
+            }
+        } catch (final PoolException exp) {
+            log.error("Pool Error pushing connection to pool!", exp);
         }
     }
 
