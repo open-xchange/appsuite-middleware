@@ -71,7 +71,9 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -167,6 +169,10 @@ public class AdminCache {
         this.adminAuthMechCache = new Hashtable<Integer, String>();
     }
 
+    public Set<Entry<String,UserModuleAccess>> getAccessCombinationNames() {
+        return named_access_combinations.entrySet();
+    }
+    
     public UserModuleAccess getNamedAccessCombination(String name) {
         return named_access_combinations.get(name);
     }
