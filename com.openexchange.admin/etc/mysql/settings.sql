@@ -170,6 +170,6 @@ CREATE TABLE user_setting_server (
     user INT4 UNSIGNED NOT NULL,
     contact_collect_folder INT4 UNSIGNED NOT NULL,
     contact_collect_enabled BOOL NOT NULL,
-    FOREIGN KEY(cid, user) REFERENECES user(cid, id)
+    FOREIGN KEY(cid, user) REFERENCES user(cid, id)
     FOREIGN KEY(cid, contact_collect_folder) REFERENCES oxfolder_tree(cid, fuid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
