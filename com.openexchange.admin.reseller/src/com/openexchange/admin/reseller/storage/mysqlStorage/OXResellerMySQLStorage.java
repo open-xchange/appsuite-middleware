@@ -223,7 +223,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeSqlStuff(oxcon,prep,rs);
+            cache.closeConfigDBSqlStuff(oxcon,prep,rs);
         }
     }
 
@@ -292,7 +292,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeSqlStuff(oxcon,prep);
+            cache.closeConfigDBSqlStuff(oxcon,prep);
         }
     }
 
@@ -335,7 +335,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeSqlStuff(oxcon,prep);
+            cache.closeConfigDBSqlStuff(oxcon,prep);
         }
     }
 
@@ -371,7 +371,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeSqlStuff(con, prep, rs);
+            cache.closeConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -447,7 +447,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeSqlStuff(con, prep, rs);
+            cache.closeConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -506,7 +506,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeSqlStuff(con, prep, rs);
+            cache.closeConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -548,7 +548,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeSqlStuff(oxcon,prep);
+            cache.closeConfigDBSqlStuff(oxcon,prep);
         }
     }
 
@@ -603,7 +603,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeSqlStuff(oxcon,prep);
+            cache.closeConfigDBSqlStuff(oxcon,prep);
         }
     }
 
@@ -640,7 +640,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeSqlStuff(oxcon,prep,rs);
+            cache.closeConfigDBSqlStuff(oxcon,prep,rs);
         }
     }
 
@@ -685,7 +685,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeSqlStuff(oxcon,prep,rs);
+            cache.closeConfigDBSqlStuff(oxcon,prep,rs);
         }
     }
 
@@ -717,7 +717,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeSqlStuff(con, prep, rs);
+            cache.closeConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -755,7 +755,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw e;
         } finally {
-            cache.closeSqlStuff(null, prep, rs);
+            cache.closeConfigDBSqlStuff(null, prep, rs);
         }
     }
     
@@ -776,13 +776,14 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         ResultSet rs = null;
         ResultSet rs2 = null;
         Connection oxcon = null;
+        int cid = -1;
         try {
             prep = con.prepareStatement("SELECT cid FROM context2subadmin WHERE sid=?");
             prep.setInt(1, adm.getId());
             rs = prep.executeQuery();
             long qused = 0;
             while( rs.next() ) {
-                final int cid = rs.getInt("cid");
+                cid = rs.getInt("cid");
                 oxcon = cache.getConnectionForContext(cid);
                 prep2 = oxcon.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
                 prep2.setInt(1, cid);
@@ -792,7 +793,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 }
                 prep2.close();
                 rs2.close();
-                oxcon.close();
+                cache.pushConnectionForContext(cid, oxcon);
+                // set to null to prevent double pushback in finally
+                oxcon = null;
             }
             if( (qused /= Math.pow(2, 20)) >= maxvalue ) {
                 throw new OXResellerException("maximum overall context quota reached: " + maxvalue);
@@ -804,8 +807,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw e;
         } finally {
-            cache.closeSqlStuff(oxcon, prep, rs);
-            cache.closeSqlStuff(null, prep2, rs2);
+            cache.closeContextSqlStuff(oxcon, cid);
+            cache.closeConfigDBSqlStuff(null, prep, rs);
+            cache.closeConfigDBSqlStuff(null, prep2, rs2);
         }
     }
 
@@ -815,6 +819,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         ResultSet rs = null;
         ResultSet rs2 = null;
         Connection oxcon = null;
+        int cid = -1;
         try {
             prep = con.prepareStatement("SELECT cid FROM context2subadmin WHERE sid=?");
             prep.setInt(1, adm.getId());
@@ -823,7 +828,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             // methods, because the context to be created is not yet listed in context2subadmin table
             int count = contextMode ? 1 : 0;
             while( rs.next() ) {
-                final int cid = rs.getInt("cid");
+                cid = rs.getInt("cid");
                 oxcon = cache.getConnectionForContext(cid);
                 prep2 = oxcon.prepareStatement("SELECT COUNT(cid) FROM user WHERE cid=?");
                 prep2.setInt(1, cid);
@@ -833,7 +838,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 }
                 prep2.close();
                 rs2.close();
-                oxcon.close();
+                cache.pushConnectionForContext(cid, oxcon);
+                // set to null to prevent double pushback in finally
+                oxcon = null;
             }
             if( count > maxvalue ) {
                 throw new OXResellerException("maximum overall number of users reached: " + maxvalue);
@@ -845,8 +852,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw e;
         } finally {
-            cache.closeSqlStuff(oxcon, prep, rs);
-            cache.closeSqlStuff(null, prep2, rs2);
+            cache.closeContextSqlStuff(oxcon, cid);
+            cache.closeConfigDBSqlStuff(null, prep, rs);
+            cache.closeConfigDBSqlStuff(null, prep2, rs2);
         }
     }
 
@@ -862,8 +870,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         PreparedStatement prep = null;
         ResultSet rs = null;
         Connection oxcon = null;
+        int cid = -1;
         try {
-            final int cid = ctx.getId();
+            cid = ctx.getId();
             oxcon = cache.getConnectionForContext(cid);
             prep = oxcon.prepareStatement("SELECT COUNT(cid) FROM user WHERE cid=?");
             prep.setInt(1, cid);
@@ -874,6 +883,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             if( rs.getInt(1) >= maxvalue ) {
                 throw new OXResellerException("maximum number of users per context reached: " + maxvalue);
             }
+            cache.pushConnectionForContext(cid, oxcon);
+            // set to null to prevent double pushback in finally
+            oxcon = null;
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -881,7 +893,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw e;
         } finally {
-            cache.closeSqlStuff(oxcon, prep, rs);
+            cache.closeConfigDBSqlStuff(null, prep, rs);
+            cache.closeContextSqlStuff(oxcon, cid);
         }
     }
 
@@ -920,7 +933,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 log.error(e.getMessage(), e);
                 throw new StorageException(e.getMessage());
             } finally {
-                cache.closeSqlStuff(con, null);
+                cache.closeConfigDBSqlStuff(con, null);
             }
         }
     }
@@ -969,7 +982,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeSqlStuff(con, null);
+            cache.closeConfigDBSqlStuff(con, null);
         }
         
     }
@@ -1005,7 +1018,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw e;
         } finally {
-            cache.closeSqlStuff(con, prep, rs);
+            cache.closeConfigDBSqlStuff(con, prep, rs);
         }
     }
     
@@ -1057,7 +1070,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeSqlStuff(oxcon,prep);
+            cache.closeConfigDBSqlStuff(oxcon,prep);
         }
     }
 
@@ -1091,7 +1104,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeSqlStuff(con, prep, rs);
+            cache.closeConfigDBSqlStuff(con, prep, rs);
         }
     }
     
