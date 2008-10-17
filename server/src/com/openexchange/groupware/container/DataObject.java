@@ -68,8 +68,10 @@ public abstract class DataObject extends SystemObject {
 	
 	public static final int CREATION_DATE = 4;
 	
-	public static final int LAST_MODIFIED = 5;	
-	
+	public static final int LAST_MODIFIED = 5;
+
+	public static final int LAST_MODIFIED_UTC = 6;
+
 	protected int objectId;
 	protected int createdBy;
 	protected int modifiedBy;
