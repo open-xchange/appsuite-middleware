@@ -81,16 +81,11 @@ public class DeleteTest extends AppointmentTest {
 		
 		loadAppointment = loadAppointment(getWebConversation(), newObjectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 
-        // Loaded exception will contain masters recurrence information
-        appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
-		appointmentObj.setInterval(1);
-		appointmentObj.setUntil(until);
-
+        // Loaded exception MUST NOT contain any recurrence information except recurrence identifier and position.
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 		
 		loadAppointment = loadAppointment(getWebConversation(), newObjectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
-		
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}

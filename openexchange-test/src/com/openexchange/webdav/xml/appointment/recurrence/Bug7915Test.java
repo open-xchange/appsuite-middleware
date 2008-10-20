@@ -62,12 +62,7 @@ public class Bug7915Test extends AbstractRecurrenceTest {
 		exceptionAppointmentObject.setObjectID(exceptionObjectId);
 		loadAppointment = loadAppointment(getWebConversation(), exceptionObjectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 
-        // Loaded exception will contain masters recurrence information
-        exceptionAppointmentObject.setRecurrenceType(exceptionAppointmentObject.DAILY);
-		exceptionAppointmentObject.setInterval(1);
-		exceptionAppointmentObject.setUntil(until);
-
-
+        // Loaded exception MUST NOT contains any recurrence information except recurrence identifier and position.
         compareObject(exceptionAppointmentObject, loadAppointment);
 		
 		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());

@@ -149,12 +149,7 @@ public class UpdateTest extends AppointmentTest {
 		
 		loadAppointment = loadAppointment(getWebConversation(), newObjectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 
-        // Loaded change exception will contain the masters recurrence information
-        appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
-        appointmentObj.setInterval(1);
-        appointmentObj.setUntil(until);
-
-
+        // Loaded change exception MUST NOT contain any recurrence information except recurrence identifier and position.
         compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());

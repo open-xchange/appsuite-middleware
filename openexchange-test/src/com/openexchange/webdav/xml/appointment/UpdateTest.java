@@ -177,13 +177,8 @@ public class UpdateTest extends AppointmentTest {
 		assertFalse("object id of the update is equals with the old object id", newObjectId == objectId);
 		
 		loadAppointment = loadAppointment(getWebConversation(), newObjectId, appointmentFolderId, PROTOCOL + getHostName(), login, password);
-		// Loaded exception will contain masters recurrence information
 
-        appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
-        appointmentObj.setInterval(1);
-        appointmentObj.setUntil(until);
-		
-
+		// Loaded exception MUST NOT contains any recurrence information except recurrence identifier and position.
         compareObject(appointmentObj, loadAppointment);
 		
 		deleteAppointment(getWebConversation(), new int[][] { { objectId, appointmentFolderId } }, PROTOCOL + getHostName(), login, password);
