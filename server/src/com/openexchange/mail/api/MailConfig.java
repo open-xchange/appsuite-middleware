@@ -278,12 +278,12 @@ public abstract class MailConfig {
 			if ((getCredSrc() == null) || CredSrc.SESSION.equals(getCredSrc())) {
 				mailConfig.login = getLocalMailLogin(session, user, false);
 				mailConfig.password = session.getPassword();
-			} else if (CredSrc.OTHER.equals(getCredSrc())) {
-				mailConfig.password = TEST_PW;
-				mailConfig.login = getRandomTestLogin();
 			} else if (CredSrc.USER_IMAPLOGIN.equals(getCredSrc())) {
 				mailConfig.password = session.getPassword();
 				mailConfig.login = getLocalMailLogin(session, user, true);
+			} else if (CredSrc.OTHER.equals(getCredSrc())) {
+				mailConfig.password = TEST_PW;
+				mailConfig.login = getRandomTestLogin();
 			}
 		} else if (LoginType.ANONYMOUS.equals(getLoginType())) {
 			mailConfig.login = LoginType.ANONYMOUS.toString();
