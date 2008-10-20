@@ -178,10 +178,11 @@ public class Commands implements CommandProvider {
     private void exportErrorMessages(Exceptions exceptions, PrintWriter out) {
         Component component = exceptions.getComponent();
         String componentString = component.getAbbreviation();
+        String applicationId = exceptions.getApplicationId();
         for (ErrorMessage error : (Set<ErrorMessage>)exceptions.getMessages()) {
             out.print(quote(componentString));
             out.print(';');
-            out.print(quote(component.toString()));
+            out.print(quote(applicationId));
             out.print(';');
             out.print(quote(String.valueOf(error.getCategory().getCode())));
             out.print(';');
