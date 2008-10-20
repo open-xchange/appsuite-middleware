@@ -139,7 +139,7 @@ public class DropBoxScenarioTest extends TestCase{
 		final FolderObject fo = acc.getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE);
 		
 		final FolderObject newFolder = new FolderObject();
-		newFolder.setFolderName("Drop Box");
+		newFolder.setFolderName("Drop Box "+ System.currentTimeMillis());
 		newFolder.setParentFolderID(fo.getObjectID());
 		newFolder.setType(FolderObject.PUBLIC);
 		newFolder.setModule(FolderObject.INFOSTORE);
@@ -173,7 +173,7 @@ public class DropBoxScenarioTest extends TestCase{
 		newFolder.setPermissions(perms);
 		
 		mgr.createFolder(newFolder, true, System.currentTimeMillis());
-		dropBox = new WebdavPath(fo.getFolderName(), newFolder.getFolderName());
+		dropBox = new WebdavPath("userstore", fo.getFolderName(), newFolder.getFolderName());
 		
 		clean.add(factory.resolveCollection(dropBox).getUrl());
 	}
