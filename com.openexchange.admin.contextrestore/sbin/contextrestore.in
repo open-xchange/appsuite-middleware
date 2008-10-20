@@ -68,7 +68,7 @@ test -z "$LIBPATH"          && LIBPATH=${PREFIX}jar
 
 BNAME=$(basename $0)
 
-JAVAMAIN="com.openexchange.admin.console.Restore"
+JAVAMAIN="com.openexchange.admin.contextrestore.console.Restore"
 ADMINCP=$(for jar in $LIBPATH/ox_admin*.jar; do
     echo -n "${jar}:"
     done)
