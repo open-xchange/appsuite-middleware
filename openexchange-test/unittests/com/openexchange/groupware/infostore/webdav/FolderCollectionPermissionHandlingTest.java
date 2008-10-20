@@ -94,9 +94,9 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 		try {
 			while(privateInfostoreFolder == null && iter.hasNext()) {
 				final FolderObject f = (FolderObject) iter.next();
-				final List<OCLPermission> perms = f.getPermissions();
-				if(perms.size() == 1) {
-					if(perms.get(0).getFolderPermission() >= OCLPermission.ADMIN_PERMISSION && perms.get(0).getEntity() == userIdA) {
+                final List<OCLPermission> perms = f.getPermissions();
+                for(OCLPermission perm : perms) {
+                    if(perm.getFolderPermission() >= OCLPermission.ADMIN_PERMISSION && perm.getEntity() == userIdA) {
 						privateInfostoreFolder = f;
 					}
 				}
@@ -184,7 +184,7 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 		folders.add(copyMe);
 		
 		final WebdavPath url = url(privateInfostoreFolder, copyMe);
-		final WebdavPath copyUrl = new WebdavPath(privateInfostoreFolder.getFolderName()).append("copy");
+		final WebdavPath copyUrl = new WebdavPath("userstore", privateInfostoreFolder.getFolderName()).append("copy");
 		
 		factory.resolveCollection(url).copy(copyUrl);
 		
@@ -203,7 +203,7 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 		folders.add(moveMe);
 		
 		final WebdavPath url = url(privateInfostoreFolder, moveMe);
-		final WebdavPath moveUrl = new WebdavPath(privateInfostoreFolder.getFolderName()).append("moved");
+		final WebdavPath moveUrl = new WebdavPath("userstore", privateInfostoreFolder.getFolderName()).append("moved");
 		
 		factory.resolveCollection(url).move(moveUrl);
 		
@@ -347,7 +347,7 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 	}
 
 	private WebdavPath url(final FolderObject... folders) {
-		final WebdavPath path = new WebdavPath();
+		final WebdavPath path = new WebdavPath("userstore");
 		for(final FolderObject fo : folders) {
 			path.append(fo.getFolderName());
 		}
