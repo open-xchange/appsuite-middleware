@@ -54,13 +54,11 @@ import java.util.IllegalFormatException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.admin.plugins.PluginException;
-
 /**
  * OXContextRestore exception class
  * 
  */
-public class OXContextRestoreException extends PluginException {
+public class OXContextRestoreException extends Exception {
 
     /**
      * For serialization
