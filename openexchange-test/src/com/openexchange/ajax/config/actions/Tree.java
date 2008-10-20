@@ -261,9 +261,6 @@ public enum Tree {
 
     /** Alters default setting whether external images contained in HTML content are allowed or not (added 2008-05-27) */
     AllowHtmlImages("/modules/mail/allowhtmlimages"),
-
-    /** Define if a search is triggered when the recipient selection dialog is opened or the folder is changed. (read-only, added 2008-10-10/SP5) */
-    RecipientAutoSearch("/modules/mail/autoSearch"),
     
     /** color quoted lines (added 2008-02-25) */
     ColorQuoted("/modules/mail/colorquoted"),
@@ -333,6 +330,9 @@ public enum Tree {
 
     /** */
     ContactsEnabled("/modules/contacts/module"),
+
+    /** Define if a search is triggered when the recipient selection dialog is opened or the folder is changed. (read-only, added 2008-10-20/SP5) */
+    MailAddressAutoSearch("/modules/contacts/mailAddressAutoSearch"),
 
     /** */
     TasksEnabled("/modules/tasks/module"),
