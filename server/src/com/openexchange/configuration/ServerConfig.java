@@ -105,6 +105,10 @@ public final class ServerConfig extends AbstractConfig {
 		reinit();
 	}
 
+    public static ServerConfig getInstance() {
+        return SINGLETON;
+    }
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -307,6 +311,7 @@ public final class ServerConfig extends AbstractConfig {
 		/**
 		 * Max upload file size.
 		 */
+		@Deprecated
 		MaxFileUploadSize("MAX_UPLOAD_FILE_SIZE"),
 		/**
 		 * Enable/Disable SearchIterator's ResultSet prefetch.
@@ -336,7 +341,12 @@ public final class ServerConfig extends AbstractConfig {
 		/**
 		 * Max idle time for uploaded files in milliseconds
 		 */
-		MaxUploadIdleTimeMillis("MAX_UPLOAD_IDLE_TIME_MILLIS");
+		MaxUploadIdleTimeMillis("MAX_UPLOAD_IDLE_TIME_MILLIS"),
+		/**
+		 * Number of characters a search pattern must contain to prevent slow
+		 * search queries and big responses in large contexts.
+		 */
+		MINIMUM_SEARCH_CHARACTERS("MinimumSearchCharacters");
 
 		/**
 		 * Name of the property in the server.properties file.
