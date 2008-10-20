@@ -98,7 +98,12 @@ public final class ParticipantConfig {
      */
     public Boolean getProperty(final Property key) {
         logNotInitialized();
-        return new Boolean(props.getProperty(key.propertyName, key.defaultValue));
+        return new Boolean(props.getProperty(key.name, key.value));
+    }
+
+    public Integer getIntProperty(final Property key) {
+        logNotInitialized();
+        return Integer.valueOf(props.getProperty(key.name, key.value));
     }
 
     /**
@@ -115,17 +120,22 @@ public final class ParticipantConfig {
          * triggered on opened participant dialog.
          */
         AUTO_SEARCH("com.openexchange.participant.autoSearch",
-            Boolean.TRUE.toString());
+            Boolean.TRUE.toString()),
+        /**
+         * Defines the maximum number of participants for an appointment or a
+         * task.
+         */
+        MAXIMUM_NUMBER_PARTICIPANTS("com.openexchange.participant.MaximumNumberParticipants", "0");
 
         /**
          * Name of the property in the participant.properties file.
          */
-        private String propertyName;
+        private String name;
 
         /**
          * Default value of the property.
          */
-        private String defaultValue;
+        private String value;
 
         /**
          * Default constructor.
@@ -134,8 +144,8 @@ public final class ParticipantConfig {
          * @param value Default value of the property.
          */
         private Property(final String keyName, final String value) {
-            this.propertyName = keyName;
-            this.defaultValue = value;
+            this.name = keyName;
+            this.value = value;
         }
     }
 
