@@ -101,7 +101,7 @@ public class DataWriter {
 		xo.output(e_response, os);
 	}
 	
-	protected void writeDataElements(final DataObject dataobject, final Element e_prop) throws Exception {
+	protected void writeDataElements(final DataObject dataobject, final Element e_prop) {
 		if (dataobject.containsCreatedBy()) {
 			addElement(DataFields.CREATED_BY, dataobject.getCreatedBy(), e_prop);
 		}
@@ -123,7 +123,7 @@ public class DataWriter {
 		}
 	}
 	
-	public static void addElement(final String name, final String value, final Element parent) throws Exception {
+	public static void addElement(final String name, final String value, final Element parent) {
 		if (value != null) {
 			final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
 			e.addContent(value);
@@ -131,7 +131,7 @@ public class DataWriter {
 		}
 	}
 	
-	public static void addElement(final String name, final Date value, final Element parent) throws Exception {
+	public static void addElement(final String name, final Date value, final Element parent) {
 		if (value != null) {
 			final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
 			e.addContent(String.valueOf(value.getTime()));
@@ -139,7 +139,7 @@ public class DataWriter {
 		}
 	}
 	
-	public static void addElement(final String name, final int value, final Element parent) throws Exception {
+	public static void addElement(final String name, final int value, final Element parent) {
 		final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
 		e.addContent(String.valueOf(value));
 		parent.addContent(e);
@@ -157,7 +157,7 @@ public class DataWriter {
 		parent.addContent(e);
 	}
 	
-	public static void addElement(final String name, final boolean value, final Element parent) throws Exception {
+	public static void addElement(final String name, final boolean value, final Element parent) {
 		final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
 		if (value) {
 			e.addContent("true");

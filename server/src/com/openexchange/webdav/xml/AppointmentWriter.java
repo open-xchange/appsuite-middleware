@@ -50,6 +50,7 @@
 package com.openexchange.webdav.xml;
 
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletResponse;
@@ -61,6 +62,7 @@ import org.jdom.output.XMLOutputter;
 
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
@@ -75,6 +77,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.webdav.xml.fields.AppointmentFields;
 import com.openexchange.webdav.xml.fields.CalendarFields;
 
@@ -252,7 +255,7 @@ public class AppointmentWriter extends CalendarWriter {
 		addContent2PropElement(e_prop, ao, delete, false);
 	}
 	
-	protected void addContent2PropElement(final Element e_prop, final AppointmentObject ao, final boolean delete, final boolean externalUse) throws Exception {
+	public void addContent2PropElement(final Element e_prop, final AppointmentObject ao, final boolean delete, final boolean externalUse) throws OXException, SearchIteratorException, UnsupportedEncodingException {
 		if (delete) {
 			addElement(AppointmentFields.OBJECT_ID, ao.getObjectID(), e_prop);
 			addElement(AppointmentFields.LAST_MODIFIED, ao.getLastModified(), e_prop);

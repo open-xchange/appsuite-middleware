@@ -51,15 +51,18 @@
 
 package com.openexchange.webdav.xml;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Calendar;
 
 import org.jdom.Element;
 
 import com.openexchange.api.OXConflictException;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.webdav.xml.fields.CalendarFields;
 
 /**
@@ -72,7 +75,7 @@ public abstract class CalendarWriter extends CommonWriter {
 	
 	private static final String CONFIRM_ATTRIBUTE = "confirm";
 	
-	protected void writeCalendarElements(final CalendarObject calendarobject, final Element e_prop) throws Exception {
+	protected void writeCalendarElements(final CalendarObject calendarobject, final Element e_prop) throws OXException, SearchIteratorException, UnsupportedEncodingException {
 		addElement(CalendarFields.TITLE, calendarobject.getTitle(), e_prop);
 		addElement(CalendarFields.NOTE, calendarobject.getNote(), e_prop);
 		
@@ -81,7 +84,7 @@ public abstract class CalendarWriter extends CommonWriter {
 		writeCommonElements(calendarobject, e_prop);
 	}
 	
-	public void addRecurrenceElements(final CalendarObject calendarobject, final Element e_prop) throws Exception {
+	public void addRecurrenceElements(final CalendarObject calendarobject, final Element e_prop) throws OXConflictException {
 		if (calendarobject.containsRecurrenceID()) {
 			addElement(CalendarFields.RECURRENCE_ID, calendarobject.getRecurrenceID(), e_prop);
 		}
@@ -139,7 +142,7 @@ public abstract class CalendarWriter extends CommonWriter {
 		}
 	}
 	
-	public void addElementParticipants(final CalendarObject calendarobject, final Element e_prop) throws Exception {
+	public void addElementParticipants(final CalendarObject calendarobject, final Element e_prop) throws OXConflictException {
 		boolean hasParticipants = false;
 		
 		final Element e_participants = new Element(CalendarFields.PARTICIPANTS, XmlServlet.NS);

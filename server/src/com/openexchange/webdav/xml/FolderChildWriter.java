@@ -72,7 +72,7 @@ public class FolderChildWriter extends DataWriter {
 	
 	private static final Log LOG = LogFactory.getLog(FolderChildWriter.class);
 	
-	protected void writeFolderChildElements(final FolderChildObject folderchildobject, final Element e_prop) throws Exception {
+	protected void writeFolderChildElements(final FolderChildObject folderchildobject, final Element e_prop) {
 		writeDataElements(folderchildobject, e_prop);
 		
 		if (folderchildobject.containsParentFolderID()) {
