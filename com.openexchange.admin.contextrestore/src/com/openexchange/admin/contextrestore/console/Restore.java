@@ -81,7 +81,7 @@ public class Restore extends BasicCommandlineOptions {
 
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
-        filenameOption = setShortLongOpt(parser, 'f', "filename","Comma-separated list of filenames", true, NeededQuadState.needed);
+        filenameOption = setShortLongOpt(parser, 'f', "filename","Comma-separated list of filenames with full path", true, NeededQuadState.needed);
     }
 
     public Restore() {
