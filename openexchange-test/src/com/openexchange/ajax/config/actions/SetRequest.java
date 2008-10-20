@@ -55,7 +55,7 @@ import org.json.JSONException;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class SetRequest extends AbstractConfigRequest {
+public final class SetRequest extends AbstractConfigRequest<SetResponse> {
 
     private final Tree param;
 
