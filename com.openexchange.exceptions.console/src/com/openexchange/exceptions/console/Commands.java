@@ -58,6 +58,10 @@ import com.openexchange.groupware.Component;
 
 import java.util.List;
 import java.util.Set;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.FileWriter;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -140,6 +144,69 @@ public class Commands implements CommandProvider {
         line.append(error.getComponent()).append("-").append(error.getErrorCode()).append(" ").append(error.getMessage()).append(" -- ").append(error.getHelp());
     }
 
+    public Object _dumpErrorsToCSV(CommandInterpreter intp) {
+        String filename = intp.nextArgument();
+        if (filename == null) {
+            intp.print("Please provide a filename to dump the codes into");
+            return null;
+        }
+        File file = new File(filename);
+        if(file.exists()) { file.delete(); }
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            intp.printStackTrace(e);
+            return null;
+        }
+        PrintWriter out = null;
+        try {
+            out = new PrintWriter(new FileWriter(file));
+            for(Component component : components.getComponents()) {
+                Exceptions exceptions = components.getExceptionsForComponent(component);
+                intp.print("Dumping component "+exceptions.getComponent()+" to "+file+"\n");
+                exportErrorMessages(exceptions, out);
+            }
+        } catch (IOException e) {
+            intp.printStackTrace(e);
+        } finally {
+            out.close();
+        }
+
+        return null;
+    }
+
+    private void exportErrorMessages(Exceptions exceptions, PrintWriter out) {
+        Component component = exceptions.getComponent();
+        String componentString = component.getAbbreviation();
+        for (ErrorMessage error : (Set<ErrorMessage>)exceptions.getMessages()) {
+            out.print(quote(componentString));
+            out.print(';');
+            out.print(quote(component.toString()));
+            out.print(';');
+            out.print(quote(String.valueOf(error.getCategory().getCode())));
+            out.print(';');
+            out.print(quote(error.getCategory().name()));
+            out.print(';');
+            out.print(quote(String.valueOf(error.getErrorCode())));
+            out.print(";");
+            out.print(quote(error.getMessage()));
+            out.print(";");
+            out.print(quote(error.getHelp()));
+            out.print(";");
+            out.print(quote(""));
+            out.println(";");
+            out.flush();
+        }
+
+    }
+
+    private String quote(final String s) {
+		if(s == null) {
+			return "";
+		}
+		return '"'+s.replaceAll("\\\"", "\\\"")+'"';
+	}
+
     public Object _showMessage(CommandInterpreter intp) {
         String component = intp.nextArgument();
         if (component == null) {
@@ -175,7 +242,8 @@ public class Commands implements CommandProvider {
         help.append("listComponents - Lists all components registered in the registry\n\t");
         help.append("listApplications - Lists all applicationIds registered in the registry\n\t");
         help.append("listErrorMessages [component | applicationId] - Lists all error messages declared for a component or application. Omit the argument to see all error messges.\n\t");
-        help.append("showMessage [component] [detailNumber] - Shows the error message for the given component and detailNumber.");
+        help.append("showMessage [component] [detailNumber] - Shows the error message for the given component and detailNumber.\n\t");
+        help.append("dumpErrorsToCSV [filename] - Dumps all error messages to a .csv file specified by filename. Overwrites the file.");
 
         return help.toString();
     }
