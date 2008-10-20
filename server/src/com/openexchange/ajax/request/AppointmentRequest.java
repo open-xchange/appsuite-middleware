@@ -424,7 +424,7 @@ public class AppointmentRequest {
             
 			return jsonResponseArray;
 		} catch (final SQLException e) {
-			throw new OXException("SQLException occurred", e);
+			throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e, new Object[0]);
 		} finally {
 			if (it != null) {
 				it.close();
@@ -454,7 +454,7 @@ public class AppointmentRequest {
 		try {
 			appointmentsql.deleteAppointmentObject(appointmentObj, inFolder, timestamp);
 		} catch (final SQLException e) {
-			throw new OXException("SQLException occurred", e);
+			throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e, new Object[0]);
 		}
 		
 		return new JSONArray();
@@ -733,7 +733,7 @@ public class AppointmentRequest {
 			
 			return jsonResponseArray;
 		} catch (final SQLException e) {
-			throw new OXException("SQLException occurred", e);
+			throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e, new Object[0]);
 		} finally {
 			if (it != null) {
 				it.close();
@@ -778,7 +778,7 @@ public class AppointmentRequest {
 
 			return jsonResponseObj;
 		} catch (final SQLException e) {
-			throw new OXException("SQLException occurred", e);
+			throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e, new Object[0]);
 		}
 	}
 	
@@ -959,7 +959,7 @@ public class AppointmentRequest {
 			
 			return jsonResponseArray;
 		} catch (final SQLException e) {
-			throw new OXException("SQLException occurred", e);
+			throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e, new Object[0]);
 		} finally {
 			if (it != null) {
 				it.close();
@@ -997,7 +997,7 @@ public class AppointmentRequest {
 		final AppointmentSearchObject searchObj = new AppointmentSearchObject();
 		searchObj.setRange(new Date[] { start, end } );
 		
-		final LinkedList<CalendarDataObject> appointmentList = new LinkedList<CalendarDataObject>();
+		final LinkedList<AppointmentObject> appointmentList = new LinkedList<AppointmentObject>();
 		
 		final JSONArray jsonResponseArray = new JSONArray();
 		
@@ -1054,7 +1054,7 @@ public class AppointmentRequest {
 			
 			return jsonResponseArray;
 		} catch (final SQLException e) {
-			throw new OXException("SQLException occurred", e);
+			throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e, new Object[0]);
 		} finally {
 			if (searchIterator != null) {
 				searchIterator.close();
@@ -1112,7 +1112,7 @@ public class AppointmentRequest {
 		try {
 			appointmentObj = appointmentSql.getObjectById(id, inFolder);
 		} catch (final SQLException exc) {
-			throw new OXException("SQLException occurred", exc);
+			throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, exc, new Object[0]);
 		}
 
 		appointmentObj.removeObjectID();
@@ -1138,12 +1138,12 @@ public class AppointmentRequest {
 		return jsonResponseObj;
 	}
 	
-	private void compareStartDateForList(final LinkedList appointmentList, final AppointmentObject appointmentObj, final int limit) {
+	private void compareStartDateForList(final LinkedList<AppointmentObject> appointmentList, final AppointmentObject appointmentObj, final int limit) {
 		if (limit > 0) {
 			boolean found = false;
 			
 			for (int a = 0; a < appointmentList.size(); a++) {
-				final AppointmentObject compareAppointment = (AppointmentObject)appointmentList.get(a);
+				final AppointmentObject compareAppointment = appointmentList.get(a);
 				if (appointmentObj.getStartDate().getTime() < compareAppointment.getStartDate().getTime()) {
 					appointmentList.add(a, appointmentObj);
 					found = true;
