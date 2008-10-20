@@ -1506,7 +1506,10 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		case FolderObject.SYSTEM_PUBLIC_FOLDER_ID:
 			enforcedType = FolderObject.PUBLIC;
 			break;
-		case FolderObject.SYSTEM_INFOSTORE_FOLDER_ID:
+		case FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID:
+			enforcedType = FolderObject.PUBLIC;
+			break;
+		case FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID:
 			enforcedType = FolderObject.PUBLIC;
 			break;
 		default:
