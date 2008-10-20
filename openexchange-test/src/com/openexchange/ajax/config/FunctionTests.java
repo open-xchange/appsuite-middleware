@@ -63,7 +63,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.tools.RandomString;
-import com.sun.jmx.remote.internal.ClientCommunicatorAdmin;
 
 /**
  * This class contains tests for added funtionalities of the configuration tree. 
@@ -234,5 +233,11 @@ public class FunctionTests extends AbstractAJAXSession {
         final AJAXClient client = getClient();
         final GetResponse response = client.execute(new GetRequest(Tree.MinimumSearchCharacters));
         LOG.info("Minimum of characters for a search pattern: " + response.getInteger());
+    }
+
+    public void testMaximumNumberParticipants() throws Throwable {
+        final AJAXClient client = getClient();
+        final GetResponse response = client.execute(new GetRequest(Tree.MAXIMUM_NUMBER_PARTICIPANTS));
+        LOG.info("Maximum number of participants for appointments and tasks: " + response.getInteger());
     }
 }
