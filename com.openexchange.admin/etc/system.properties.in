@@ -32,10 +32,6 @@ Server=@serverconfdir@/server.properties
 # the calendar subsystem.
 Calendar=@serverconfdir@/calendar.properties
 
-# Location of the contact.properties configuration file. This file configures
-# the contact subsystem.
-Contact=@serverconfdir@/contact.properties
-
 # Location of the infostore.properties configuration file. This file configures
 # the infostore subsystem.
 Infostore=@serverconfdir@/infostore.properties
