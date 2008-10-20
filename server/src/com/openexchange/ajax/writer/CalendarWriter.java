@@ -142,12 +142,13 @@ public abstract class CalendarWriter extends CommonWriter {
 				} else {
 					writeParameter(CalendarFields.DAY_IN_MONTH, calendarObject.getDayInMonth(), jsonObj);
 				}
-//				int dayInMonth = calendarObject.getDayInMonth();
-//				if (dayInMonth == 5) {
-//					dayInMonth = -1;
-//				}
-//
-//				writeParameter(CalendarFields.DAY_IN_MONTH, dayInMonth, jsonObj);
+				// int dayInMonth = calendarObject.getDayInMonth();
+				// if (dayInMonth == 5) {
+				// dayInMonth = -1;
+				// }
+				//
+				// writeParameter(CalendarFields.DAY_IN_MONTH, dayInMonth,
+				// jsonObj);
 			}
 			break;
 		case CalendarObject.YEARLY:
@@ -187,6 +188,13 @@ public abstract class CalendarWriter extends CommonWriter {
 		writeParameter(ParticipantsFields.DISPLAY_NAME, participant.getDisplayName(), jsonObj);
 		writeParameter(ParticipantsFields.MAIL, participant.getEmailAddress(), jsonObj);
 		writeParameter(ParticipantsFields.TYPE, participant.getType(), jsonObj, participant.getType() > 0);
+		if (Participant.USER == participant.getType()) {
+			final UserParticipant userParticipant = (UserParticipant) participant;
+			writeParameter(CalendarFields.CONFIRMATION, userParticipant.getConfirm(), jsonObj);
+			if (userParticipant.containsConfirmMessage()) {
+				writeParameter(CalendarFields.CONFIRM_MESSAGE, userParticipant.getConfirmMessage(), jsonObj);
+			}
+		}
 		return jsonObj;
 	}
 
