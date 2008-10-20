@@ -112,13 +112,14 @@ import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 
 /**
- * AppointmentRequest
+ * {@link AppointmentRequest} - Processes appointment requests
  *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public class AppointmentRequest {
-	
+
+	private static final int DAY_MILLIS = 24 * 60 * 60 * 1000;
+
 	public static final String RECURRENCE_MASTER = "recurrence_master";
 	
 	private final static int[] _appointmentFields = {
@@ -574,7 +575,7 @@ public class AppointmentRequest {
 							}
 							
 							if (appointmentobject.getFullTime() && appointmentobject.getStartDate().getTime() == appointmentobject.getEndDate().getTime()) {
-								appointmentobject.setEndDate(new Date(appointmentobject.getStartDate().getTime() + (24*60*60*1000)));
+								appointmentobject.setEndDate(new Date(appointmentobject.getStartDate().getTime() + DAY_MILLIS));
 							}
 							
 							appointmentwriter.writeArray(appointmentobject, columns, jsonResponseArray);
