@@ -106,7 +106,17 @@ public class OXContextRestoreException extends Exception {
         /**
          * None of the files contained a userdata database dump, but this is essential for the restore process
          */
-        NO_USER_DATA_DB_FOUND("None of the files contained a userdata database dump, but this is essential for the restore process");
+        NO_USER_DATA_DB_FOUND("None of the files contained a userdata database dump, but this is essential for the restore process"),
+
+        /**
+         * One of the given filenames cannot be found
+         */
+        FILE_NOT_FOUND("One of the given filenames cannot be found"),
+        
+        /**
+         * An IO Exception has occurred, see the log files for details
+         */
+        IO_EXCEPTION("An IO Exception has occurred, see the log files for details");
         
         private final String text;
 
