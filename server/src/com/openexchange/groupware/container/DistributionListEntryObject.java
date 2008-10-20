@@ -358,7 +358,7 @@ public class DistributionListEntryObject {
 			if (emailaddress == null || StringCollection.isEmpty(emailaddress)) {
 				return false;
 			}
-			if (ContactConfig.getProperty("validate_contact_email").equals("true")){
+			if (ContactConfig.getInstance().getProperty("validate_contact_email").equals("true")){
 				final InternetAddress ia = new InternetAddress(emailaddress);
 				ia.validate();
 			}

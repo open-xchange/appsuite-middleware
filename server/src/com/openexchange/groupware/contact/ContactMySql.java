@@ -270,7 +270,7 @@ public class ContactMySql implements ContactSql {
 		if (start_character != null) {
 			String field = null;
 			if (start_character_field == null) {
-				field = ContactConfig.getProperty("contact_first_letter_field");
+				field = ContactConfig.getInstance().getProperty("contact_first_letter_field");
 			} else {
 				field = start_character_field;
 			}

@@ -233,6 +233,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.calendar.CalendarFreeBusy.class,
             com.openexchange.groupware.settings.tree.modules.calendar.CalendarTeamView.class,
             com.openexchange.groupware.settings.tree.modules.contacts.GUI.class,
+            com.openexchange.groupware.settings.tree.modules.contacts.MailAddressAutoSearch.class,
             com.openexchange.groupware.settings.tree.modules.contacts.Module.class,
             com.openexchange.groupware.settings.tree.modules.extras.Module.class,
             com.openexchange.groupware.settings.tree.modules.folder.GUI.class,

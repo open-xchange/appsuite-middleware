@@ -47,82 +47,105 @@
  *
  */
 
-
-
 package com.openexchange.groupware.contact;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.configuration.SystemConfig.Property;
-import com.openexchange.server.Initialization;
-import com.openexchange.tools.conf.AbstractConfig;
+import com.openexchange.config.ConfigurationService;
 
 /**
  * Configuration class for contact options.
  * <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ContactConfig extends AbstractConfig implements Initialization {
+public class ContactConfig {
 
-    private static final Property KEY = Property.CONTACT;
-    
-    private static ContactConfig singleton;
-    
-    private static final Lock INIT_LOCK = new ReentrantLock();
+    private static final String FILENAME = "contact.properties";
 
-    private static boolean loaded = false;
-    
+    private static final ContactConfig SINGLETON = new ContactConfig();;
+
     private static final Log LOG = LogFactory.getLog(ContactConfig.class);
-    
-    @Override
-	protected String getPropertyFileName() throws ConfigurationException {
-        final String filename = SystemConfig.getProperty(KEY);
-        if (null == filename) {
-            throw new RuntimeException("Property " + KEY.getPropertyName()
-                + " is not defined in system.properties.");
-        }
-        return filename;
+
+    private final Properties props = new Properties();
+
+    /**
+     * Prevent instantiation.
+     */
+    private ContactConfig() {
+        super();
     }
 
     public static ContactConfig getInstance() {
-        if(singleton != null) {
-			return singleton;
-		}
-        return singleton = new ContactConfig();
-    }
-      
-    
-    public static String getProperty(final String key) {
-    	if(!loaded || singleton == null) {
-			try {
-				getInstance().start();
-			} catch (final ConfigurationException e) {
-				LOG.error("Can't init config:",e);
-			}
-		}
-			
-        return singleton.getPropertyInternal(key);
+        return SINGLETON;
     }
 
-    public void start() throws ConfigurationException {
-        if (!loaded || singleton == null) {
-			INIT_LOCK.lock();
-            try {
-			    getInstance().loadPropertiesInternal();
-                loaded = true;
-            } finally {
-				INIT_LOCK.unlock();
-			}
-		}   
+
+    /**
+     * @param configuration the configuration service.
+     */
+    public void initialize(final ConfigurationService configuration) {
+        final Properties props = configuration.getFile(FILENAME);
+        if (null == props) {
+            LOG.info("Configuration file " + FILENAME + " is missing. Using defaults.");
+        } else {
+            this.props.clear();
+            this.props.putAll(props);
+            LOG.info("Read configuration file " + FILENAME + ".");
+        }
     }
 
-    public void stop() throws ConfigurationException {
-        singleton = null;
-        loaded = false;
+    public String getProperty(final String key) {
+        logNotInitialized();
+        return props.getProperty(key);
+    }
+
+    /**
+     * Gets the value of a property from the file.
+     * @param key name of the property.
+     * @return the value of the property.
+     */
+    public Boolean getProperty(final Property key) {
+        logNotInitialized();
+        return new Boolean(props.getProperty(key.propertyName, key.defaultValue));
+    }
+
+    private void logNotInitialized() {
+        if (props.isEmpty()) {
+            LOG.info("Configuration file " + FILENAME + " not read. Using defaults.");
+        }
+    }
+
+    /**
+     * Properties of the contact properties file.
+     */
+    public enum Property {
+        /**
+         * Determines if a search for emailable contact is
+         * triggered on opened recipient dialog.
+         */
+        AUTO_SEARCH("mailAddressAutoSearch", Boolean.TRUE.toString());
+
+        /**
+         * Name of the property in the participant.properties file.
+         */
+        private String propertyName;
+
+        /**
+         * Default value of the property.
+         */
+        private String defaultValue;
+
+        /**
+         * Default constructor.
+         * @param keyName Name of the property in the participant.properties
+         * file.
+         * @param value Default value of the property.
+         */
+        private Property(final String keyName, final String value) {
+            this.propertyName = keyName;
+            this.defaultValue = value;
+        }
     }
 }

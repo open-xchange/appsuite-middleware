@@ -629,7 +629,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			final ContactSearchObject cso = new ContactSearchObject();
 			if (startletter){
 				cs.setStartCharacter(searchpattern);
-				cs.setStartCharacterField(ContactConfig.getProperty("contact_first_letter_field"));
+				cs.setStartCharacterField(ContactConfig.getInstance().getProperty("contact_first_letter_field"));
 			}else{
 				cso.setDisplayName(searchpattern);
 				cso.setGivenName(searchpattern);

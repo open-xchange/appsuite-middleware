@@ -47,87 +47,57 @@
  *
  */
 
+package com.openexchange.groupware.settings.tree.modules.contacts;
 
-
-package com.openexchange.groupware.configuration;
-
-import java.util.Properties;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.contact.ContactConfig;
+import com.openexchange.groupware.contact.ContactConfig.Property;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 
 /**
- * AbstractConfigWrapper
- *
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
- * @deprecated use {@link ConfigurationService}.
+ * Setup for the config tree node determining if an automatic search for
+ * emailable contacts is triggered if the recipient selection dialog is opened.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-@Deprecated
-public abstract class AbstractConfigWrapper {
-	
-	private static final Log LOG = LogFactory.getLog(AbstractConfigWrapper.class);
-	
-	public static String parseProperty(final Properties prop, final String name, final String value) {
-		String tmp = null;
-		if ((prop.containsKey(name)) && ((tmp = prop.get(name).toString().trim()).length() > 0)) {
-			return tmp;
-		}
-		return value;
-	}
-	
-	public static int parseProperty(final Properties prop, final String name, final int value) {
-		String tmp = null;
-		if ((prop.containsKey(name)) && ((tmp = prop.get(name).toString().trim()).length() > 0)) {
-			try {
-				return Integer.parseInt(tmp);
-			} catch (final NumberFormatException ex) {
-				LOG.warn("property no parsable: " + name + ':' + value);
-			}
-		}
-		return value;
-	}
-	
-	public static boolean parseProperty(final Properties prop, final String name, final boolean value) {
-		String tmp = null;
-		if ((prop.containsKey(name)) && ((tmp = prop.get(name).toString().trim()).length() > 0)) {
-			return Boolean.parseBoolean(tmp);
-		}
-		return value;
-	}
-	
-	public static int[] parseProperty(final Properties prop, final String name, final int[] value) {
-		String tmp = null;
-		if ((prop.containsKey(name)) && ((tmp = prop.get(name).toString().trim()).length() > 0)) {
-			final String s[] = tmp.split(",");
-			final int ports[] = new int[s.length];
-			
-			for (int a = 0; a < ports.length; a++) {
-				try {
-					ports[a] = Integer.parseInt(s[a]);
-				} catch (final NumberFormatException ex) {
-					LOG.warn("port in port range no parsable: " + s[a]);
-				}
-			}
-			
-			return ports;
-		}
+public class MailAddressAutoSearch implements PreferencesItemService {
 
-		return value;
-	}
-	
-	public static String[] parseProperty(final Properties prop, final String name, final String[] value) {
-		String tmp = null;
-		if ((prop.containsKey(name)) && ((tmp = prop.get(name).toString().trim()).length() > 0)) {
-			return tmp.split(",");
-		}
+    public static final String NAME = "mailAddressAutoSearch";
 
-		return value;
-	}
+    /**
+     * Default constructor.
+     */
+    public MailAddressAutoSearch() {
+        super();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String[] getPath() {
+        return new String[] { "modules", "contacts", NAME };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasContact();
+            }
+            public void getValue(final Session session, final Context ctx,
+                final User user, final UserConfiguration userConfig,
+                final Setting setting) throws SettingException {
+                setting.setSingleValue(ContactConfig.getInstance().getProperty(
+                    Property.AUTO_SEARCH));
+            }
+        };
+    }
 }
-
-
-
-
-

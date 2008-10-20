@@ -32,10 +32,6 @@ Server=@oxgroupwaresysconfdir@/server.properties
 # the calendar subsystem.
 Calendar=@oxgroupwaresysconfdir@/calendar.properties
 
-# Location of the contact.properties configuration file. This file configures
-# the contact subsystem.
-Contact=@oxgroupwaresysconfdir@/contact.properties
-
 # Location of the infostore.properties configuration file. This file configures
 # the infostore subsystem.
 Infostore=@oxgroupwaresysconfdir@/infostore.properties

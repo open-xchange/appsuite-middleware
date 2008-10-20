@@ -155,7 +155,7 @@ public final class Contacts {
 
 	@OXThrows(category = Category.USER_INPUT, desc = "0", exceptionId = 0, msg = "The application was unable to validate a given email address from this contact: %s")
 	private static void validateEmailAddress(final ContactObject co) throws OXException {
-		if ("true".equalsIgnoreCase(ContactConfig.getProperty(PROP_VALIDATE_CONTACT_EMAIL))) {
+		if ("true".equalsIgnoreCase(ContactConfig.getInstance().getProperty(PROP_VALIDATE_CONTACT_EMAIL))) {
 			String email = null;
 			try {
 				if (co.containsEmail1() && (co.getEmail1() != null)) {
@@ -188,9 +188,9 @@ public final class Contacts {
 		 * 
 		 * int scaledWidth = 76; int scaledHeight = 76; int max_size = 33750;
 		 */
-		final int scaledWidth = Integer.parseInt(ContactConfig.getProperty(PROP_SCALE_IMAGE_WIDTH));
-		final int scaledHeight = Integer.parseInt(ContactConfig.getProperty(PROP_SCALE_IMAGE_HEIGHT));
-		final int max_size = Integer.parseInt(ContactConfig.getProperty(PROP_MAX_IMAGE_SIZE));
+		final int scaledWidth = Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGE_WIDTH));
+		final int scaledHeight = Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGE_HEIGHT));
+		final int max_size = Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_MAX_IMAGE_SIZE));
 
 		/*
 		 * for (int i=0;i<allowed_mime.length;i++){ System.out.println(new
@@ -544,7 +544,7 @@ public final class Contacts {
 				writeContactLinkArrayInsert(co.getLinks(), co.getObjectID(), so.getContextId(), writecon);
 			}
 			if (co.containsImage1()) {
-				if (ContactConfig.getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
+				if (ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
 					try {
 						co.setImage1(scaleContactImage(co.getImage1(), co.getImageContentType()));
 					} catch (final OXConflictException ex) {
@@ -558,7 +558,7 @@ public final class Contacts {
 					}
 				} else {
 					checkImageSize(co.getImage1().length, Integer.parseInt(ContactConfig
-							.getProperty(PROP_MAX_IMAGE_SIZE)));
+							.getInstance().getProperty(PROP_MAX_IMAGE_SIZE)));
 				}
 
 				writeContactImage(co.getObjectID(), co.getImage1(), so.getContextId(), co.getImageContentType(),
@@ -1018,7 +1018,7 @@ public final class Contacts {
 
 			if (co.containsImage1()) {
 				if (co.getImage1() != null) {
-					if (ContactConfig.getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
+					if (ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
 						try {
 							co.setImage1(scaleContactImage(co.getImage1(), co.getImageContentType()));
 						} catch (final OXConflictException ex) {
@@ -1034,7 +1034,7 @@ public final class Contacts {
 						}
 					} else {
 						checkImageSize(co.getImage1().length, Integer.parseInt(ContactConfig
-								.getProperty(PROP_MAX_IMAGE_SIZE)));
+								.getInstance().getProperty(PROP_MAX_IMAGE_SIZE)));
 					}
 
 					if (original.containsImage1()) {

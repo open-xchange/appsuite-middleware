@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Properties;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationException.Code;
 import com.openexchange.tools.io.IOUtils;
@@ -64,7 +65,9 @@ import com.openexchange.tools.io.IOUtils;
  * Class holding configuration options loaded from property files can extend
  * this class to inherit usefull methods.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @deprecated use {@link ConfigurationService}.
  */
+@Deprecated
 public abstract class AbstractConfig {
 
     /**

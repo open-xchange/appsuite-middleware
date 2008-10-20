@@ -55,6 +55,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.configuration.ParticipantConfig;
+import com.openexchange.groupware.contact.ContactConfig;
 
 /**
  * Configuration service is dynamically pushed into configuration keeping
@@ -80,6 +81,7 @@ final class ConfigurationCustomizer implements ServiceTrackerCustomizer {
         final ConfigurationService configuration = (ConfigurationService)
             context.getService(reference);
         ParticipantConfig.getInstance().initialize(configuration);
+        ContactConfig.getInstance().initialize(configuration);
         return configuration;
     }
 
@@ -96,6 +98,7 @@ final class ConfigurationCustomizer implements ServiceTrackerCustomizer {
      */
     public void removedService(final ServiceReference reference,
         final Object service) {
+        // ConfigurationService is not referenced in ContactConfig.
         // ConfigurationService is not referenced in ParticipantConfig.
         context.ungetService(reference);
     }

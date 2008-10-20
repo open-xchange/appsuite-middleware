@@ -199,10 +199,6 @@ public final class SystemConfig extends AbstractConfig implements Initialization
 		 */
 		CALENDAR("Calendar"),
 		/**
-		 * contact.properties.
-		 */
-		CONTACT("Contact"),
-		/**
 		 * infostore.properties.
 		 */
 		INFOSTORE("Infostore"),
