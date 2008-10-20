@@ -94,7 +94,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
         userConfig2 = userConfigStorage.getUserConfiguration(user2.getId(), ctx);
 
         final OXFolderAccess oxfa = new OXFolderAccess(ctx);
-		root = oxfa.getFolderObject(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+		root = oxfa.getFolderObject(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
 
         cleanupUser = user1;
         switchUser(user1);

@@ -24,7 +24,7 @@ public class LockInteractionTest extends TestCase {
 		TestWebdavFactoryBuilder.setUp();
 		FACTORY = TestWebdavFactoryBuilder.buildFactory();
 		FACTORY.beginRequest();
-		testCollection = new WebdavPath("/testCollection"+ RANDOM.nextInt());
+		testCollection = new WebdavPath("public_infostore","testCollection"+ RANDOM.nextInt());
 		
 		FACTORY.resolveCollection(testCollection).create();
 	}

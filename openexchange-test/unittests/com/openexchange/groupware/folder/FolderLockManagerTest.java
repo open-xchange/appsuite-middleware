@@ -35,7 +35,7 @@ public class FolderLockManagerTest extends FolderTestCase{
 		lockManager = new FolderLockManagerImpl(new DBPoolProvider());
 		lockManager.startTransaction();
 		
-		entity = mkdir(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID,"folder"+r.nextInt()).getObjectID();
+		entity = mkdir(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID,"folder"+r.nextInt()).getObjectID();
 		clean.add(entity);
 		
 		entityDepth1 = mkdir(entity,"subfolder").getObjectID();

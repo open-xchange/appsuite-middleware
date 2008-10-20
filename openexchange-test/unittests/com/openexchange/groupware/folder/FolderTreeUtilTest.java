@@ -14,7 +14,7 @@ public class FolderTreeUtilTest extends FolderTestCase {
 	private final Random r = new Random();
 	
 	public void testPathIDs() throws Exception {
-		final FolderObject folder = mkdir(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, "folder"+r.nextInt());
+		final FolderObject folder = mkdir(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, "folder"+r.nextInt());
 		clean.add(folder);
 		
 		final FolderObject subfolder = mkdir(folder.getObjectID(), "subfolder");

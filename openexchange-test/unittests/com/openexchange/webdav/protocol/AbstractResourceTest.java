@@ -17,7 +17,7 @@ public static final int SKEW = 1000;
 	
 	protected WebdavFactory resourceManager;
 	
-	protected WebdavPath testCollection = new WebdavPath("testCollection"+Math.random());
+	protected WebdavPath testCollection = new WebdavPath("public_infostore","testCollection"+Math.random());
 	
 	protected abstract WebdavFactory getWebdavFactory() throws Exception;
 	protected abstract List<Property> getPropertiesToTest() throws Exception;
