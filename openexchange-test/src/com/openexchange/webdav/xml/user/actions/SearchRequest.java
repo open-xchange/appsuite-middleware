@@ -75,6 +75,10 @@ public final class SearchRequest extends AbstractGroupUserRequest<SearchResponse
         super();
     }
 
+    public Method getMethod() {
+        return Method.PROPFIND;
+    }
+
     public RequestEntity getEntity() throws IOException {
         final Element users = new Element("user", NS);
         users.addContent("*");

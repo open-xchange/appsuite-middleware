@@ -47,31 +47,51 @@
  *
  */
 
-package com.openexchange.webdav.xml.folder.actions;
+package com.openexchange.webdav.xml.framework;
 
-import com.openexchange.webdav.xml.framework.AbstractWebDAVResponse;
-import com.openexchange.webdav.xml.framework.WebDAVRequest;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jdom.Document;
+
+import com.openexchange.api.OXConflictException;
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.test.TestException;
+import com.openexchange.webdav.xml.types.Response;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractFolderRequest<T extends AbstractWebDAVResponse> implements WebDAVRequest<T> {
+public abstract class AbstractInsertParser<T extends CommonInsertResponse> extends AbstractWebDAVParser<T> {
 
-    public static final String FOLDER_URL = "/servlet/webdav.folders";
+    private static final Log LOG = LogFactory.getLog(AbstractInsertParser.class);
 
     /**
      * Default constructor.
      */
-    protected AbstractFolderRequest() {
+    protected AbstractInsertParser() {
         super();
     }
 
     /**
      * {@inheritDoc}
      */
-    public String getServletPath() {
-        return FOLDER_URL;
+    @Override
+    protected T createResponse(final Document document, final Response[] responses)
+        throws OXConflictException, TestException {
+        final T retval = instantiateResponse(document, responses);
+        if (responses.length == 1) {
+            if (responses[0].hasError()) {
+                fail(responses[0].getErrorMessage());
+            }
+            final DataObject object = (DataObject) responses[0].getDataObject();
+            retval.setIdentifier(object.getObjectID());
+            retval.setTimestamp(object.getLastModified());
+        } else {
+            LOG.error("Don't know how to handle multi insert responses: " + responses.length);
+        }
+        return retval;
     }
 
+    protected abstract T instantiateResponse(final Document document, final Response[] responses);
 }

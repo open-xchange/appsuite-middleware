@@ -57,17 +57,23 @@ import java.util.Date;
 import org.jdom.Document;
 import org.jdom.Element;
 
+import com.openexchange.webdav.xml.XmlServlet;
+
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class RequestTools {
 
+    public static final String PROPERTYUPDATE = "propertyupdate";
+
     public static final String PROPFIND = "propfind";
 
     public static final String PROP = "prop";
 
     public static final String LASTSYNC = "lastsync";
+
+    public static final String SET = "set";
 
     /**
      * Prevent instantiation.
@@ -89,5 +95,16 @@ public final class RequestTools {
         eProp.addContent(e);
         
         return new Document(ePropfind);
+    }
+
+    public static Document createPropertyUpdate(final Element e) {
+        final Element ePropertyUpdate = new Element(PROPERTYUPDATE, NS_DAV);
+        ePropertyUpdate.addNamespaceDeclaration(XmlServlet.NS);
+        
+        final Element eSet = new Element(SET, NS_DAV);
+        ePropertyUpdate.addContent(eSet);
+        eSet.addContent(e);
+        
+        return new Document(ePropertyUpdate);
     }
 }

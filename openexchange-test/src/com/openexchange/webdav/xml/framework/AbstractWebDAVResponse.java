@@ -51,6 +51,8 @@ package com.openexchange.webdav.xml.framework;
 
 import org.jdom.Document;
 
+import com.openexchange.webdav.xml.types.Response;
+
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -59,12 +61,21 @@ public abstract class AbstractWebDAVResponse {
 
     private final Document document;
 
+    private final Response[] responses;
+
     /**
      * Default constructor.
      */
-    protected AbstractWebDAVResponse(final Document document) {
+    protected AbstractWebDAVResponse(final Document document, final Response[] responses) {
         super();
         this.document = document;
+        this.responses = responses;
     }
 
+    /**
+     * @return the responses
+     */
+    public final Response[] getResponses() {
+        return responses;
+    }
 }

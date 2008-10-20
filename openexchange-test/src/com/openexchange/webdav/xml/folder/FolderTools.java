@@ -54,7 +54,7 @@ import java.util.Date;
 
 import org.jdom.JDOMException;
 
-import com.openexchange.api.OXConflictException;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.folder.actions.ListRequest;
@@ -80,12 +80,12 @@ public final class FolderTools {
     }
 
     public FolderObject getDefaultAppointmentFolder() throws IOException,
-        JDOMException, OXConflictException, TestException {
+        JDOMException, OXException, TestException {
         return getDefaultAppointmentFolder(null);
     }
 
     public FolderObject getDefaultAppointmentFolder(final String host) throws IOException,
-        JDOMException, OXConflictException, TestException {
+        JDOMException, OXException, TestException {
         if (null == defaultAppointmentFolder) {
             final ListRequest request = new ListRequest(new Date(0));
             final ListResponse response = client.execute(host, request);

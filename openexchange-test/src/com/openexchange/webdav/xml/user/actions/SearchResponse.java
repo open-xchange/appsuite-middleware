@@ -56,6 +56,7 @@ import org.jdom.Document;
 
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.webdav.xml.framework.AbstractWebDAVResponse;
+import com.openexchange.webdav.xml.types.Response;
 
 /**
  *
@@ -68,8 +69,8 @@ public final class SearchResponse extends AbstractWebDAVResponse implements Iter
     /**
      * @param document
      */
-    public SearchResponse(final Document document) {
-        super(document);
+    public SearchResponse(final Document document, final Response[] responses) {
+        super(document, responses);
     }
 
     /**

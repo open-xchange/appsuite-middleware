@@ -51,13 +51,15 @@ package com.openexchange.webdav.xml.framework;
 
 import java.io.IOException;
 
+import org.apache.commons.httpclient.HttpMethodBase;
 import org.jdom.Document;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
 import com.openexchange.api.OXConflictException;
 import com.openexchange.test.TestException;
-import com.openexchange.webdav.xml.request.PropFindMethod;
+import com.openexchange.webdav.xml.parser.ResponseParser;
+import com.openexchange.webdav.xml.types.Response;
 
 import junit.framework.Assert;
 
@@ -80,10 +82,13 @@ public abstract class AbstractWebDAVParser<T extends AbstractWebDAVResponse> ext
         assertEquals("Response code is not okay.", 207, status);        
     }
 
-    public T parse(final PropFindMethod method) throws JDOMException, IOException, OXConflictException, TestException {
+    public T parse(final HttpMethodBase method) throws JDOMException, IOException, OXConflictException, TestException {
         final Document document = builder.build(method.getResponseBodyAsStream());
-        return createResponse(document);
+        final Response[] responses = ResponseParser.parse(document, getType());
+        return createResponse(document, responses);
     }
 
-    protected abstract T createResponse(final Document document) throws OXConflictException, TestException;
+    protected abstract int getType();
+
+    protected abstract T createResponse(final Document document, final Response[] responses) throws OXConflictException, TestException;
 }

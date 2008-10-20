@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.webdav.xml.folder.actions;
+package com.openexchange.webdav.xml.appointment.actions;
 
 import com.openexchange.webdav.xml.framework.AbstractWebDAVResponse;
 import com.openexchange.webdav.xml.framework.WebDAVRequest;
@@ -56,14 +56,14 @@ import com.openexchange.webdav.xml.framework.WebDAVRequest;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractFolderRequest<T extends AbstractWebDAVResponse> implements WebDAVRequest<T> {
+public abstract class AbstractAppointmentRequest<T extends AbstractWebDAVResponse> implements WebDAVRequest<T> {
 
-    public static final String FOLDER_URL = "/servlet/webdav.folders";
+    public static final String URL = "/servlet/webdav.calendar";
 
     /**
      * Default constructor.
      */
-    protected AbstractFolderRequest() {
+    protected AbstractAppointmentRequest() {
         super();
     }
 
@@ -71,7 +71,6 @@ public abstract class AbstractFolderRequest<T extends AbstractWebDAVResponse> im
      * {@inheritDoc}
      */
     public String getServletPath() {
-        return FOLDER_URL;
+        return URL;
     }
-
 }

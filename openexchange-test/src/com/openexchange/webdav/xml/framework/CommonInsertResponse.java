@@ -47,31 +47,63 @@
  *
  */
 
-package com.openexchange.webdav.xml.folder.actions;
+package com.openexchange.webdav.xml.framework;
 
-import com.openexchange.webdav.xml.framework.AbstractWebDAVResponse;
-import com.openexchange.webdav.xml.framework.WebDAVRequest;
+import java.util.Date;
+
+import org.jdom.Document;
+
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.webdav.xml.types.Response;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractFolderRequest<T extends AbstractWebDAVResponse> implements WebDAVRequest<T> {
+public abstract class CommonInsertResponse extends AbstractWebDAVResponse {
 
-    public static final String FOLDER_URL = "/servlet/webdav.folders";
+    private int identifier;
+
+    private Date timestamp;
 
     /**
-     * Default constructor.
+     * @param document
+     * @param responses
      */
-    protected AbstractFolderRequest() {
-        super();
+    public CommonInsertResponse(final Document document, final Response[] responses) {
+        super(document, responses);
     }
 
     /**
-     * {@inheritDoc}
+     * @return the identifier
      */
-    public String getServletPath() {
-        return FOLDER_URL;
+    public final int getIdentifier() {
+        return identifier;
     }
 
+    /**
+     * @param identifier the identifier to set
+     */
+    final void setIdentifier(final int identifier) {
+        this.identifier = identifier;
+    }
+
+    /**
+     * @return the timestamp
+     */
+    public final Date getTimestamp() {
+        return timestamp;
+    }
+
+    /**
+     * @param timestamp the timestamp to set
+     */
+    final void setTimestamp(final Date timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public final void fillObject(final DataObject object) {
+        object.setObjectID(identifier);
+        object.setLastModified(timestamp);
+    }
 }

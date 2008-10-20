@@ -56,7 +56,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.framework.AbstractWebDAVParser;
-import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.types.Response;
 
 /**
@@ -72,14 +71,18 @@ public final class SearchParser extends AbstractWebDAVParser<SearchResponse> {
         super();
     }
 
+    @Override
+    protected int getType() {
+        return Types.GROUPUSER;
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    protected SearchResponse createResponse(final Document document)
+    protected SearchResponse createResponse(final Document document, final Response[] responses)
         throws OXConflictException, TestException {
-        final SearchResponse retval = new SearchResponse(document);
-        final Response[] responses = ResponseParser.parse(document, Types.GROUPUSER);
+        final SearchResponse retval = new SearchResponse(document, responses);
         final ContactObject[] contacts = new ContactObject[responses.length];
         for (int a = 0; a < contacts.length; a++) {
             if (responses[a].hasError()) {

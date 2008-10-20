@@ -47,31 +47,35 @@
  *
  */
 
-package com.openexchange.webdav.xml.folder.actions;
+package com.openexchange.webdav.xml.appointment.actions;
 
-import com.openexchange.webdav.xml.framework.AbstractWebDAVResponse;
-import com.openexchange.webdav.xml.framework.WebDAVRequest;
+import org.jdom.Document;
+
+import com.openexchange.groupware.Types;
+import com.openexchange.webdav.xml.framework.AbstractInsertParser;
+import com.openexchange.webdav.xml.types.Response;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractFolderRequest<T extends AbstractWebDAVResponse> implements WebDAVRequest<T> {
-
-    public static final String FOLDER_URL = "/servlet/webdav.folders";
+public final class InsertParser extends AbstractInsertParser<InsertResponse> {
 
     /**
      * Default constructor.
      */
-    protected AbstractFolderRequest() {
+    public InsertParser() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public String getServletPath() {
-        return FOLDER_URL;
+    @Override
+    protected int getType() {
+        return Types.APPOINTMENT;
     }
 
+    @Override
+    protected InsertResponse instantiateResponse(final Document document,
+        final Response[] responses) {
+        return new InsertResponse(document, responses);
+    }
 }

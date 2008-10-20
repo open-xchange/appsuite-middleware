@@ -53,16 +53,25 @@ import java.io.IOException;
 
 import org.apache.commons.httpclient.methods.RequestEntity;
 
+import com.openexchange.api2.OXException;
+
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public interface WebDAVRequest<T extends AbstractWebDAVResponse> {
 
+    enum Method {
+        PROPFIND,
+        PUT
+    }
+
     String getServletPath();
 
-    RequestEntity getEntity() throws IOException;
+    RequestEntity getEntity() throws OXException, IOException;
 
     AbstractWebDAVParser<T> getParser();
+
+    Method getMethod();
 
 }

@@ -47,31 +47,65 @@
  *
  */
 
-package com.openexchange.webdav.xml.folder.actions;
+package com.openexchange.webdav.xml.appointment.actions;
 
-import com.openexchange.webdav.xml.framework.AbstractWebDAVResponse;
-import com.openexchange.webdav.xml.framework.WebDAVRequest;
+import static com.openexchange.webdav.xml.framework.Constants.NS_DAV;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
+import org.apache.commons.httpclient.methods.RequestEntity;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.output.XMLOutputter;
+
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.webdav.xml.AppointmentWriter;
+import com.openexchange.webdav.xml.framework.RequestTools;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractFolderRequest<T extends AbstractWebDAVResponse> implements WebDAVRequest<T> {
+public class InsertRequest extends AbstractAppointmentRequest<InsertResponse> {
 
-    public static final String FOLDER_URL = "/servlet/webdav.folders";
+    private final AppointmentObject appointment;
 
-    /**
-     * Default constructor.
-     */
-    protected AbstractFolderRequest() {
+    public InsertRequest(final AppointmentObject appointment) {
         super();
+        this.appointment = appointment;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public String getServletPath() {
-        return FOLDER_URL;
+    public Method getMethod() {
+        return Method.PUT;
     }
 
+    protected Element createProp() throws OXException, IOException {
+        appointment.removeObjectID();
+        final Element eProp = new Element("prop", NS_DAV);
+
+        final AppointmentWriter appointmentWriter = new AppointmentWriter();
+        try {
+            appointmentWriter.addContent2PropElement(eProp, appointment, false, true);
+        } catch (final SearchIteratorException e) {
+            throw new OXException(e);
+        }
+        return eProp;
+    }
+
+    public RequestEntity getEntity() throws OXException, IOException {
+        final Document doc = RequestTools.createPropertyUpdate(createProp());
+        final XMLOutputter xo = new XMLOutputter();
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        xo.output(doc, baos);
+        
+        return new ByteArrayRequestEntity(baos.toByteArray());
+    }
+
+    public InsertParser getParser() {
+        return new InsertParser();
+    }
 }

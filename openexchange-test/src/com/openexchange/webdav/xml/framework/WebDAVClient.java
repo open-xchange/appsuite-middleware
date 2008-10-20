@@ -56,7 +56,7 @@ import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.jdom.JDOMException;
 
-import com.openexchange.api.OXConflictException;
+import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.WebDAVConfig;
 import com.openexchange.configuration.WebDAVConfig.Property;
@@ -147,11 +147,11 @@ public class WebDAVClient {
         session = new WebDAVSession();
     }
 
-    public <T extends AbstractWebDAVResponse> T execute(final WebDAVRequest<T> request) throws IOException, JDOMException, OXConflictException, TestException {
+    public <T extends AbstractWebDAVResponse> T execute(final WebDAVRequest<T> request) throws IOException, JDOMException, OXException, TestException {
          return Executor.execute(this, request);
     }
 
-    public <T extends AbstractWebDAVResponse> T execute(final String host, final WebDAVRequest<T> request) throws IOException, JDOMException, OXConflictException, TestException {
+    public <T extends AbstractWebDAVResponse> T execute(final String host, final WebDAVRequest<T> request) throws IOException, JDOMException, OXException, TestException {
         if (null == host) {
             return execute(request);
         }

@@ -56,7 +56,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.framework.AbstractWebDAVParser;
-import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.types.Response;
 
 /**
@@ -72,14 +71,17 @@ public final class ListParser extends AbstractWebDAVParser<ListResponse> {
         super();
     }
 
+    @Override
+    protected int getType() {
+        return Types.FOLDER;
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    protected ListResponse createResponse(final Document document) throws OXConflictException, TestException {
-        final ListResponse retval = new ListResponse(document);
-        final Response[] responses = ResponseParser.parse(document, Types.FOLDER);
-        retval.setResponses(responses);
+    protected ListResponse createResponse(final Document document, final Response[] responses) throws OXConflictException, TestException {
+        final ListResponse retval = new ListResponse(document, responses);
         final FolderObject[] folders = new FolderObject[responses.length];
         for (int a = 0; a < folders.length; a++) {
             if (responses[a].hasError()) {

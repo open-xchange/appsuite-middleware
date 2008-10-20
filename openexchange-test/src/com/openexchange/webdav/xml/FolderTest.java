@@ -27,6 +27,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.fields.FolderFields;
 import com.openexchange.webdav.xml.folder.FolderTools;
+import com.openexchange.webdav.xml.folder.actions.AbstractFolderRequest;
 import com.openexchange.webdav.xml.framework.WebDAVClient;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
@@ -34,7 +35,11 @@ import com.openexchange.webdav.xml.types.Response;
 
 public class FolderTest extends AbstractWebdavXMLTest {
 	
-	public static final String FOLDER_URL = "/servlet/webdav.folders";
+	/**
+     * @deprecated Use {@link AbstractFolderRequest#FOLDER_URL} instead
+     */
+    @Deprecated
+    public static final String FOLDER_URL = AbstractFolderRequest.FOLDER_URL;
 	
 	protected int userParticipantId2 = -1;
 	
@@ -140,7 +145,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		final byte b[] = baos.toByteArray();
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		final WebRequest req = new PutMethodWebRequest(host + FOLDER_URL, bais, "text/javascript");
+		final WebRequest req = new PutMethodWebRequest(host + AbstractFolderRequest.FOLDER_URL, bais, "text/javascript");
 		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
 		final WebResponse resp = webCon.getResponse(req);
 		
@@ -191,7 +196,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		final byte b[] = baos.toByteArray();
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		final WebRequest req = new PutMethodWebRequest(host + FOLDER_URL, bais, "text/javascript");
+		final WebRequest req = new PutMethodWebRequest(host + AbstractFolderRequest.FOLDER_URL, bais, "text/javascript");
 		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
 		final WebResponse resp = webCon.getResponse(req);
 		
@@ -239,7 +244,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		final byte b[] = baos.toByteArray();
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		final WebRequest req = new PutMethodWebRequest(host + FOLDER_URL, bais, "text/javascript");
+		final WebRequest req = new PutMethodWebRequest(host + AbstractFolderRequest.FOLDER_URL, bais, "text/javascript");
 		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
 		final WebResponse resp = webCon.getResponse(req);
 		
@@ -298,7 +303,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		final HttpClient httpclient = new HttpClient();
 		
 		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
-		final PropFindMethod propFindMethod = new PropFindMethod(host + FOLDER_URL);
+		final PropFindMethod propFindMethod = new PropFindMethod(host + AbstractFolderRequest.FOLDER_URL);
 		propFindMethod.setDoAuthentication( true );
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
@@ -363,7 +368,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		final HttpClient httpclient = new HttpClient();
 		
 		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
-		final PropFindMethod propFindMethod = new PropFindMethod(host + FOLDER_URL);
+		final PropFindMethod propFindMethod = new PropFindMethod(host + AbstractFolderRequest.FOLDER_URL);
 		propFindMethod.setDoAuthentication( true );
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
@@ -414,7 +419,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		final HttpClient httpclient = new HttpClient();
 		
 		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
-		final PropFindMethod propFindMethod = new PropFindMethod(host + FOLDER_URL);
+		final PropFindMethod propFindMethod = new PropFindMethod(host + AbstractFolderRequest.FOLDER_URL);
 		propFindMethod.setDoAuthentication( true );
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());

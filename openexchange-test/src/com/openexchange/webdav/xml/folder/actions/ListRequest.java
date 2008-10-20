@@ -79,6 +79,10 @@ public final class ListRequest extends AbstractFolderRequest<ListResponse> {
         this.lastModified = lastModified;
     }
 
+    public Method getMethod() {
+        return Method.PROPFIND;
+    }
+
     public RequestEntity getEntity() throws IOException {
         final Element objectmode = new Element("objectmode", XmlServlet.NS);
         objectmode.addContent("NEW_AND_MODIFIED,DELETED");

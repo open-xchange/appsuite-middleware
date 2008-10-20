@@ -54,7 +54,7 @@ import java.util.Map;
 
 import org.jdom.JDOMException;
 
-import com.openexchange.api.OXConflictException;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.framework.WebDAVClient;
@@ -79,12 +79,12 @@ public final class GroupUserTools {
         this.client = client;
     }
 
-    public final int getUserId() throws OXConflictException, IOException,
+    public final int getUserId() throws OXException, IOException,
         JDOMException, TestException {
         return getUserId(null);
     }
 
-    public final int getUserId(final String host) throws OXConflictException,
+    public final int getUserId(final String host) throws OXException,
         IOException, JDOMException, TestException {
         if (0 == userId) {
             final SearchRequest request = new SearchRequest();

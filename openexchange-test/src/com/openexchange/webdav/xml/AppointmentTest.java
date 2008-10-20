@@ -29,6 +29,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.TestException;
+import com.openexchange.webdav.xml.appointment.actions.AbstractAppointmentRequest;
 import com.openexchange.webdav.xml.fields.DataFields;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
@@ -60,7 +61,11 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	
 	protected Date endTime = null;
 	
-	private static final String APPOINTMENT_URL = "/servlet/webdav.calendar";
+	/**
+     * @deprecated Use {@link AbstractAppointmentRequest#URL} instead
+     */
+	@Deprecated
+    private static final String APPOINTMENT_URL = AbstractAppointmentRequest.URL;
 	
 	public AppointmentTest(final String name) {
 		super(name);
@@ -151,7 +156,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		final byte b[] = baos.toByteArray();
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		final WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL, bais, "text/xml");
+		final WebRequest req = new PutMethodWebRequest(host + AbstractAppointmentRequest.URL, bais, "text/xml");
 		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
 		final WebResponse resp = webCon.getResponse(req);
 		
@@ -203,7 +208,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		final byte b[] = baos.toByteArray();
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		final WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL, bais, "text/javascript");
+		final WebRequest req = new PutMethodWebRequest(host + AbstractAppointmentRequest.URL, bais, "text/javascript");
 		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
 		final WebResponse resp = webCon.getResponse(req);
 		
@@ -263,7 +268,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		final byte b[] = baos.toByteArray();
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		final WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL, bais, "text/xml");
+		final WebRequest req = new PutMethodWebRequest(host + AbstractAppointmentRequest.URL, bais, "text/xml");
 		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
 		final WebResponse resp = webCon.getResponse(req);
 		
@@ -322,7 +327,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		final byte b[] = baos.toByteArray();
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		final WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL, bais, "text/xml");
+		final WebRequest req = new PutMethodWebRequest(host + AbstractAppointmentRequest.URL, bais, "text/xml");
 		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
 		final WebResponse resp = webCon.getResponse(req);
 		
@@ -376,7 +381,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		final byte b[] = baos.toByteArray();
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		final WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL, bais, "text/javascript");
+		final WebRequest req = new PutMethodWebRequest(host + AbstractAppointmentRequest.URL, bais, "text/javascript");
 		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
 		final WebResponse resp = webCon.getResponse(req);
 		
@@ -423,7 +428,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		final HttpClient httpclient = new HttpClient();
 		
 		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
-		final PropFindMethod propFindMethod = new PropFindMethod(host + APPOINTMENT_URL);
+		final PropFindMethod propFindMethod = new PropFindMethod(host + AbstractAppointmentRequest.URL);
 		propFindMethod.setDoAuthentication( true );
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
@@ -491,7 +496,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		final HttpClient httpclient = new HttpClient();
 		
 		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
-		final PropFindMethod propFindMethod = new PropFindMethod(host + APPOINTMENT_URL);
+		final PropFindMethod propFindMethod = new PropFindMethod(host + AbstractAppointmentRequest.URL);
 		propFindMethod.setDoAuthentication( true );
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
@@ -559,7 +564,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		final HttpClient httpclient = new HttpClient();
 		
 		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
-		final PropFindMethod propFindMethod = new PropFindMethod(host + APPOINTMENT_URL);
+		final PropFindMethod propFindMethod = new PropFindMethod(host + AbstractAppointmentRequest.URL);
 		propFindMethod.setDoAuthentication( true );
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());

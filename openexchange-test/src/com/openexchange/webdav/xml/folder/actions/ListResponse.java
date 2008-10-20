@@ -64,29 +64,13 @@ import com.openexchange.webdav.xml.types.Response;
  */
 public final class ListResponse extends AbstractWebDAVResponse implements Iterable<FolderObject> {
 
-    private Response[] responses;
-
     private FolderObject[] folders;
 
     /**
      * @param document
      */
-    public ListResponse(final Document document) {
-        super(document);
-    }
-
-    /**
-     * @return the responses
-     */
-    public final Response[] getResponses() {
-        return responses;
-    }
-
-    /**
-     * @param responses the responses to set
-     */
-    final void setResponses(final Response[] responses) {
-        this.responses = responses;
+    public ListResponse(final Document document, final Response[] responses) {
+        super(document, responses);
     }
 
     /**

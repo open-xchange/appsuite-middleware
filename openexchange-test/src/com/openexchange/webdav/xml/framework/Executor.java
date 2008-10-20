@@ -51,9 +51,12 @@ package com.openexchange.webdav.xml.framework;
 
 import java.io.IOException;
 
+import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
+import org.apache.commons.httpclient.methods.PutMethod;
 import org.jdom.JDOMException;
 
-import com.openexchange.api.OXConflictException;
+import com.openexchange.api2.OXException;
 import com.openexchange.configuration.WebDAVConfig;
 import com.openexchange.configuration.WebDAVConfig.Property;
 import com.openexchange.test.TestException;
@@ -73,21 +76,33 @@ public final class Executor {
     }
 
     public static <T extends AbstractWebDAVResponse> T execute(final WebDAVClient client,
-        final WebDAVRequest<T> request) throws IOException, JDOMException, OXConflictException, TestException {
+        final WebDAVRequest<T> request) throws IOException, JDOMException, OXException, TestException {
         return execute(client, WebDAVConfig.getProperty(Property.PROTOCOL)
             + "://" + WebDAVConfig.getProperty(Property.HOSTNAME), request);
     }
 
     static <T extends AbstractWebDAVResponse> T execute(final WebDAVClient client, final String host,
-        final WebDAVRequest<T> request) throws IOException, JDOMException, OXConflictException, TestException {
+        final WebDAVRequest<T> request) throws IOException, JDOMException, OXException, TestException {
         final String urlString = host + request.getServletPath();
-        final PropFindMethod method = new PropFindMethod(urlString);
+        final HttpMethodBase method;
+        switch (request.getMethod()) {
+        case PROPFIND:
+            final EntityEnclosingMethod propFind = new PropFindMethod(urlString);
+            propFind.setRequestEntity(request.getEntity());
+            method = propFind;
+            break;
+        case PUT:
+            final EntityEnclosingMethod put = new PutMethod(urlString);
+            put.setRequestEntity(request.getEntity());
+            method = put;
+            break;
+        default:
+            throw new TestException("Unknown method.");
+        }
         method.setDoAuthentication(true);
-        method.setRequestEntity(request.getEntity());
         final int status = client.getSession().getClient().executeMethod(method);
         final AbstractWebDAVParser<T> parser = request.getParser();
         parser.checkResponse(status);
-        final T retval = parser.parse(method);
-        return retval;
+        return parser.parse(method);
     }
 }
