@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Imap Authentication Plug-in
+Bundle-SymbolicName: com.openexchange.authentication.imap
+Bundle-Version: 6.6.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-Activator: com.openexchange.authentication.imap.osgi.Activator
+Import-Package: com.openexchange.authentication,
+ com.openexchange.config,
+ com.openexchange.configuration,
+ javax.mail,
+ org.apache.commons.logging,
+ org.osgi.framework;version="1.3.0"
