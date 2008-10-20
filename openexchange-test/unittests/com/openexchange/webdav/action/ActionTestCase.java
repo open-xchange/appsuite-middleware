@@ -29,7 +29,7 @@ public abstract class ActionTestCase extends TestCase {
 		factory = TestWebdavFactoryBuilder.buildFactory();
 		factory.beginRequest();
 		try {
-			testCollection = new WebdavPath("testCollection"+System.currentTimeMillis());
+			testCollection = new WebdavPath("public_infostore", "testCollection"+System.currentTimeMillis());
 			final WebdavCollection coll = factory.resolveCollection(testCollection);
 			coll.create();
 			clean.add(coll.getUrl());
