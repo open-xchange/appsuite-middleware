@@ -63,6 +63,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.tools.RandomString;
+import com.sun.jmx.remote.internal.ClientCommunicatorAdmin;
 
 /**
  * This class contains tests for added funtionalities of the configuration tree. 
@@ -227,5 +228,11 @@ public class FunctionTests extends AbstractAJAXSession {
         final GetResponse get = ConfigTools.get(client, new GetRequest(Tree
             .MailAddressAutoSearch));
         LOG.info("Is search triggered on opened recipient dialog: " + get.getBoolean());
+    }
+
+    public void testMinimumSearchCharacters() throws Throwable {
+        final AJAXClient client = getClient();
+        final GetResponse response = client.execute(new GetRequest(Tree.MinimumSearchCharacters));
+        LOG.info("Minimum of characters for a search pattern: " + response.getInteger());
     }
 }

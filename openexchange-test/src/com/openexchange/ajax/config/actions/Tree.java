@@ -253,6 +253,9 @@ public enum Tree {
     /** Enables participant selection dialog for appointments and tasks. (read-only, added 2008-04-30/SP4) */
     ShowParticipantDialog("/participants/showDialog"),
 
+    /** Minimum number of characters a search pattern must have to prevent large responses and slow queries. (read-only, added 2008-10-20/SP5) */
+    MinimumSearchCharacters("/minimumSearchCharacters"),
+    
     /** all email addresses of the user including the primary address (read-only, added 2008-02-25) */
     MailAddresses("/modules/mail/addresses"),
 
