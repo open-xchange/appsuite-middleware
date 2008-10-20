@@ -51,9 +51,6 @@ package com.openexchange.admin.contextrestore.rmi.exceptions;
 
 import java.util.IllegalFormatException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * OXContextRestore exception class
  * 
@@ -65,8 +62,6 @@ public class OXContextRestoreException extends Exception {
      */
     private static final long serialVersionUID = 2597458638173191174L;
     
-    private final static Log LOG = LogFactory.getLog(OXContextRestoreException.class);
-
     public enum Code {
         /**
          * The version tables are incompatible
@@ -154,7 +149,7 @@ public class OXContextRestoreException extends Exception {
                 try {
                     return String.format(message, (Object[]) this.msgArgs);
                 } catch (final IllegalFormatException e) {
-                    LOG.error("Illegal message format:" + e.getMessage(), e);
+                    System.err.println("Illegal message format:" + e.getMessage());
                 }
             }
             return super.toString();
@@ -171,7 +166,7 @@ public class OXContextRestoreException extends Exception {
                 try {
                     return String.format(message, (Object[]) this.msgArgs);
                 } catch (final IllegalFormatException e) {
-                    LOG.error("Illegal message format:" + e.getMessage(), e);
+                    System.err.println("Illegal message format:" + e.getMessage());
                 }
             }
             return super.getMessage();
