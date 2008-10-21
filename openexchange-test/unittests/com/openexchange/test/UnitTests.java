@@ -119,7 +119,8 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.groupware.infostore.webdav.PermissionTest.class);
 
         tests.addTestSuite(com.openexchange.i18n.CompiledLineParserTemplateTest.class);
-		tests.addTestSuite(com.openexchange.groupware.notify.ParticipantNotifyTest.class);
+        tests.addTestSuite(com.openexchange.i18n.GettextParserTest.class);
+        tests.addTestSuite(com.openexchange.groupware.notify.ParticipantNotifyTest.class);
 
 		tests.addTestSuite(com.openexchange.groupware.attach.AttachmentBaseTest.class);
 
