@@ -51,6 +51,8 @@ package com.openexchange.server.osgi;
 
 import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -71,6 +73,8 @@ import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.client.ConfigJump;
 import com.openexchange.context.ContextService;
 import com.openexchange.context.internal.ContextServiceImpl;
+import com.openexchange.conversion.DataHandler;
+import com.openexchange.conversion.DataSource;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.event.impl.EventQueue;
@@ -79,10 +83,12 @@ import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.datahandler.VCardSaveDataHandler;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nTools;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
 import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.transport.TransportProvider;
@@ -108,9 +114,9 @@ import com.openexchange.xml.spring.SpringParser;
 
 /**
  * {@link ServerActivator} - The activator for server bundle
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
 public final class ServerActivator extends DeferredActivator {
 
@@ -127,7 +133,7 @@ public final class ServerActivator extends DeferredActivator {
 			EventAdmin.class };
 
 	private static final Class<?>[] NEEDED_SERVICES_SERVER = { ConfigurationService.class, CacheService.class,
-			EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class};
+			EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class };
 
 	private final Starter starter;
 
@@ -233,8 +239,8 @@ public final class ServerActivator extends DeferredActivator {
 		 * Add service trackers
 		 */
 		// Configuration service load
-		serviceTrackerList.add(new ServiceTracker(context, ConfigurationService
-		    .class.getName(), new ConfigurationCustomizer(context)));
+		serviceTrackerList.add(new ServiceTracker(context, ConfigurationService.class.getName(),
+				new ConfigurationCustomizer(context)));
 		// I18n service load
 		serviceTrackerList
 				.add(new ServiceTracker(context, I18nTools.class.getName(), new I18nServiceListener(context)));
@@ -261,20 +267,21 @@ public final class ServerActivator extends DeferredActivator {
 		// Add cache dynamically to database pooling. it works without, too.
 		serviceTrackerList.add(new ServiceTracker(context, CacheService.class.getName(), new CacheCustomizer(context)));
 
+		// ICal Parser
+		serviceTrackerList.add(new ServiceTracker(context, ICalParser.class.getName(),
+				new RegistryCustomizer<ICalParser>(context, ICalParser.class)));
 
-        // ICal Parser
-        serviceTrackerList.add(new ServiceTracker(context, ICalParser.class.getName(), new RegistryCustomizer<ICalParser>(context, ICalParser.class)));
+		// ICal Emitter
+		serviceTrackerList.add(new ServiceTracker(context, ICalEmitter.class.getName(),
+				new RegistryCustomizer<ICalEmitter>(context, ICalEmitter.class)));
 
-        // ICal Emitter
-        serviceTrackerList.add(new ServiceTracker(context, ICalEmitter.class.getName(), new RegistryCustomizer<ICalEmitter>(context, ICalEmitter.class)));
-
-        /*
-         * Register Services
-         */
-        final OSGiEventDispatcher dispatcher = new OSGiEventDispatcher();
-        EventQueue.setNewEventDispatcher(dispatcher);
-        dispatcher.registerService(context);
-        /*
+		/*
+		 * Register Services
+		 */
+		final OSGiEventDispatcher dispatcher = new OSGiEventDispatcher();
+		EventQueue.setNewEventDispatcher(dispatcher);
+		dispatcher.registerService(context);
+		/*
 		 * Start server dependent on whether admin bundle is available or not
 		 */
 		if (adminBundleInstalled.booleanValue()) {
@@ -324,7 +331,20 @@ public final class ServerActivator extends DeferredActivator {
 				ResourceServiceImpl.getInstance(), null));
 		registrationList.add(context.registerService(UserService.class.getName(), new UserServiceImpl(), null));
 		registrationList.add(context.registerService(ContextService.class.getName(), new ContextServiceImpl(), null));
-		registrationList.add(context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(), null));
+		registrationList.add(context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(),
+				null));
+		{
+			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+			props.put("identifier", "com.openexchange.mail.vcard");
+			registrationList.add(context.registerService(DataSource.class.getName(), new VCardMailPartDataSource(),
+					props));
+		}
+		{
+			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+			props.put("identifier", "com.openexchange.contact");
+			registrationList.add(context
+					.registerService(DataHandler.class.getName(), new VCardSaveDataHandler(), props));
+		}
 	}
 
 	@Override
