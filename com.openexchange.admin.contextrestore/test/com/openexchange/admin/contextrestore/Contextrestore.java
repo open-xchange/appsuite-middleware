@@ -17,6 +17,16 @@ public class Contextrestore {
 
     // TODO: These values should been taken from a configfile
     /**
+     * Change the username of the admin of the created temporary context here
+     */
+    private static final String CONTEXT_ADMIN_USERNAME = "oxadmin";
+
+    /**
+     * Change the password of the admin of the created temporary context here
+     */
+    private static final String CONTEXT_ADMIN_PW = "secret";
+
+    /**
      * Change the username of your mysql installation here
      */
     private final static String username = "openexchange";
@@ -50,7 +60,7 @@ public class Contextrestore {
         
         // First create a new context
         ArrayOutput retval = shellExecutor.executeprocargs(new String[]{"/opt/open-xchange/sbin/createcontext", "-A", "oxadminmaster", "-P", oxmasterpassword, "-c", newcontextid, 
-                "-u", "oxadmin", "-d", "oxadmin", "-g", "oxadmin", "-s", "oxadmin", "-p", "secret", "-e", "xyz67@bla.de", "-q", "100"});
+                "-u", CONTEXT_ADMIN_USERNAME, "-d", CONTEXT_ADMIN_USERNAME, "-g", CONTEXT_ADMIN_USERNAME, "-s", CONTEXT_ADMIN_USERNAME, "-p", CONTEXT_ADMIN_PW, "-e", "xyz67@bla.de", "-q", "100"});
         assertTrue("Context creation failed due to the following reason: " + retval.errOutput, 0 == retval.exitstatus);
         System.out.println("Temporary Context created");
     }
@@ -102,14 +112,24 @@ public class Contextrestore {
         System.out.println("Config dump created");
         
         // ... then we add some new data to the context ...
-        retval = shellExecutor.executeprocargs(new String[]{"/opt/open-xchange/sbin/createuser", "-A", "oxadmin" , "-P", "secret", "-c", newcontextid, "-u", "test1", "-d",
-                "test1", "-g", "test1", "-s", "test1", "-p", "secret", "-e", "xyz27@bla.de"});
+        retval = shellExecutor.executeprocargs(new String[]{"/opt/open-xchange/sbin/createuser", "-A", CONTEXT_ADMIN_USERNAME , "-P", CONTEXT_ADMIN_PW, "-c", 
+                newcontextid, "-u", "test1", "-d", "test1", "-g", "test1", "-s", "test1", "-p", CONTEXT_ADMIN_PW, "-e", "xyz27@bla.de"});
         assertTrue("User creation failed", 0 == retval.exitstatus);
         System.out.println("New user created");
         
+        retval = shellExecutor.executeprocargs(new String[]{"/opt/open-xchange/sbin/creategroup", "-A", CONTEXT_ADMIN_USERNAME, "-P", CONTEXT_ADMIN_PW, "-n", "test", 
+                "-d", "test", "-c", newcontextid});
+        assertTrue("Group creation failed", 0 == retval.exitstatus);
+        System.out.println("New group created");
+        
+        retval = shellExecutor.executeprocargs(new String[]{"/opt/open-xchange/sbin/createresource", "-A", CONTEXT_ADMIN_USERNAME, "-P", CONTEXT_ADMIN_PW, "-c",
+                newcontextid, "-n", "test", "-d", "test", "-e", "ressource@test.de"});
+        assertTrue("Resource creation failed", 0 == retval.exitstatus);
+        System.out.println("New resource created");
+        
         // ... afterwards the restore takes places ...
-        retval = shellExecutor.executeprocargs(new String[]{"/opt/open-xchange/sbin/contextrestore", "-A", "oxadminmaster" , "-P", oxmasterpassword, "-c", newcontextid, "-f",
-                userdumpfile + ',' + configdbdumpfile});
+        retval = shellExecutor.executeprocargs(new String[]{"/opt/open-xchange/sbin/contextrestore", "-A", "oxadminmaster" , "-P", oxmasterpassword, "-c",
+                newcontextid, "-f", userdumpfile + ',' + configdbdumpfile});
         assertTrue("Restore failed", 0 == retval.exitstatus);
         System.out.println("Restore done");
         
