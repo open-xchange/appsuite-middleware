@@ -80,6 +80,12 @@ public class Contextrestore {
         System.out.println("Temporary context deleted");
     }
     
+    /**
+     * This test does a restore on an already existing context. To verify that the context is restored right, data is created in between
+     * 
+     * @throws IOException
+     * @throws InterruptedException
+     */
     @Test
     public void testRestore() throws IOException, InterruptedException {
         final ShellExecutor shellExecutor = new ShellExecutor();
@@ -118,6 +124,61 @@ public class Contextrestore {
         assertTrue("Dump creation for configdb failed", 0 == retval.exitstatus);
         System.out.println("2nd config dump created");
 
+        // If the dump we made at first is equal to the dump created afterwards everything is fine
+        retval = shellExecutor.executeprocargs(new String[]{"/usr/bin/diff", "-I", "^.*Dump completed on.*$", userdumpfile, userdumpfile2});
+        assertTrue("The user dumps are different: " + retval.stdOutput, 0 == retval.exitstatus);
+        System.out.println("First diff ok");
+        
+        retval = shellExecutor.executeprocargs(new String[]{"/usr/bin/diff", "-I", "^.*Dump completed on.*$", configdbdumpfile, configdbdumpfile2});
+        assertTrue("The config dumps are different: " + retval.stdOutput, 0 == retval.exitstatus);
+        System.out.println("Second diff ok");
+        
+    }
+
+    /**
+     * This test does a restore on a context which was deleted beforehand
+     * 
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    @Test
+    public void testRestoreWithDelete() throws IOException, InterruptedException {
+        final ShellExecutor shellExecutor = new ShellExecutor();
+        
+        // First we dump the database...
+        ArrayOutput retval = shellExecutor.executeprocargs(new String[]{"/bin/bash" , "-c" ,
+                "mysqldump --user=" + username + " -p" + password  + " --databases information_schema choeger_7 mysql --single-transaction > " + userdumpfile});
+        assertTrue("Dump creation for user databases failed due to the following reason: " + retval.errOutput, 0 == retval.exitstatus);
+        System.out.println("User dump created");
+        
+        retval = shellExecutor.executeprocargs(new String[]{"/bin/bash" , "-c" ,
+                "mysqldump --user=" + username + " -p" + password  + " --databases information_schema configdb mysql --single-transaction > " + configdbdumpfile});
+        assertTrue("Dump creation for configdb failed", 0 == retval.exitstatus);
+        System.out.println("Config dump created");
+        
+        // ... then we delete the context ...
+        retval = shellExecutor.executeprocargs(new String[]{"/opt/open-xchange/sbin/deletecontext", "-A", "oxadminmaster", "-P", oxmasterpassword, "-c",
+                newcontextid});
+        assertTrue("Temp Context deletion failed due to the following reason: " + retval.errOutput, 0 == retval.exitstatus);
+        System.out.println("Temporary context deleted");
+        
+        // ... afterwards the restore takes places ...
+        retval = shellExecutor.executeprocargs(new String[]{"/opt/open-xchange/sbin/contextrestore", "-A", "oxadminmaster" , "-P", oxmasterpassword, "-c", newcontextid, "-f",
+                userdumpfile + ',' + configdbdumpfile});
+        assertTrue("Restore failed", 0 == retval.exitstatus);
+        System.out.println("Restore done");
+        
+        // ... finally we create new dumps
+        retval = shellExecutor.executeprocargs(new String[]{"/bin/bash" , "-c" ,
+                "mysqldump --user=" + username + " -p" + password  + " --databases information_schema choeger_7 mysql --single-transaction > " + userdumpfile2});
+        assertTrue("Dump creation failed", 0 == retval.exitstatus);
+        System.out.println("2nd user dump created");
+        
+        retval = shellExecutor.executeprocargs(new String[]{"/bin/bash" , "-c" ,
+                "mysqldump --user=" + username + " -p" + password  + " --databases information_schema configdb mysql --single-transaction > " + configdbdumpfile2});
+        assertTrue("Dump creation for configdb failed", 0 == retval.exitstatus);
+        System.out.println("2nd config dump created");
+        
         // If the dump we made at first is equal to the dump created afterwards everything is fine
         retval = shellExecutor.executeprocargs(new String[]{"/usr/bin/diff", "-I", "^.*Dump completed on.*$", userdumpfile, userdumpfile2});
         assertTrue("The user dumps are different: " + retval.stdOutput, 0 == retval.exitstatus);
