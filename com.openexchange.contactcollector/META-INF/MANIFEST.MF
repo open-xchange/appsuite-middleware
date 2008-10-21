@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Addressmemory Plug-in
+Bundle-SymbolicName: com.openexchange.contactcollector
+Bundle-Version: 1.0.0
+Bundle-Activator: com.openexchange.contactcollector.osgi.Activator
+Bundle-Vendor: OPENEXCHANGE
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.api2,
+ com.openexchange.groupware.contact,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.contexts.impl,
+ com.openexchange.groupware.ldap,
+ com.openexchange.groupware.search,
+ com.openexchange.groupware.settings,
+ com.openexchange.groupware.userconfiguration,
+ com.openexchange.server.impl,
+ com.openexchange.session,
+ com.openexchange.tools.iterator,
+ javax.mail.internet,
+ org.apache.commons.logging;version="1.0.4",
+ org.osgi.framework;version="1.3.0"
+Bundle-ActivationPolicy: lazy
