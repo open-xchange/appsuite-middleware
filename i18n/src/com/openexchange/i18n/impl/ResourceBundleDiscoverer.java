@@ -16,35 +16,27 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
-public class ResourceBundleDiscoverer {
+public class ResourceBundleDiscoverer extends FileDiscoverer{
 
     private static final Log LOG = LogFactory.getLog(ResourceBundleDiscoverer.class);
-    private final File dir;
 
     public ResourceBundleDiscoverer(final File dir) throws FileNotFoundException {
-        if (!dir.exists()) {
-            throw new FileNotFoundException("Unable to load language files. Directory does not exist: "+ dir);
-        } else if (dir.isFile())  {
-        	throw new FileNotFoundException("Unable to load language files."+ dir +" is not a directory");
-        }
-        this.dir = dir;
+        super(dir);
     }
 
     public List<ResourceBundle> getResourceBundles() throws java.util.MissingResourceException {
-        final String[] files = getFilesFromLanguageFolder();
+        final String[] files = getFilesFromLanguageFolder(".jar");
         if(files.length == 0) {
-        	Collections.emptyList();
+        	return Collections.emptyList();
         }
         final List<ResourceBundle> list = new ArrayList<ResourceBundle>(files.length);
 		for (final String file : files){
 			Locale l = null;
 
 			try{
-				if (file.indexOf("_") != -1){
-					l = new Locale(file.substring(0, file.indexOf("_")), file.substring(file.indexOf("_")+1,file.indexOf(".")));
-				}
+				l = getLocale(file);
 
-				final URLClassLoader ul = new URLClassLoader(new URL[]{new URL("file:"+ dir +File.separator+file)});
+				final URLClassLoader ul = new URLClassLoader(new URL[]{new URL("file:"+ getDirectory() +File.separator+file)});
 				final ResourceBundle rc = ResourceBundle.getBundle("com.openexchange.groupware.i18n.ServerMessages", l , ul);
 
                 list.add(rc);
@@ -58,13 +50,4 @@ public class ResourceBundleDiscoverer {
         }
         return list;
     }
-
-    public String[] getFilesFromLanguageFolder(){
-		final String[] files = dir.list(new FilenameFilter() {
-		    public boolean accept(final File d, final String f) {
-		       return f.endsWith(".jar");
-		    }
-		});
-		return files;
-	}
 }

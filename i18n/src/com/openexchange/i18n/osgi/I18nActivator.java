@@ -51,10 +51,7 @@ package com.openexchange.i18n.osgi;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.ResourceBundle;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -66,8 +63,11 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.i18n.I18nTools;
+import com.openexchange.i18n.parsing.Translations;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
+import com.openexchange.i18n.impl.POTranslationsDiscoverer;
+import com.openexchange.i18n.impl.TranslationsI18N;
 import com.openexchange.server.ServiceHolderListener;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 
@@ -145,8 +145,31 @@ public class I18nActivator implements BundleActivator {
 		final File dir = new File(config.getProperty("i18n.language.path"));
 
 		final List<ResourceBundle> resourceBundles = new ResourceBundleDiscoverer(dir).getResourceBundles();
-		final List<ServiceRegistration> serviceRegistrations = new ArrayList<ServiceRegistration>();
-		for (final ResourceBundle rc : resourceBundles) {
+		final List<Translations> translations = new POTranslationsDiscoverer(dir).getTranslations();
+        final List<ServiceRegistration> serviceRegistrations = new ArrayList<ServiceRegistration>();
+
+        final Set<Locale> locales = new HashSet<Locale>();
+
+        for (final Translations tr : translations) {
+            if(locales.contains(tr.getLocale())) {
+                continue;
+            }
+            locales.add(tr.getLocale());
+
+            final Properties prop = new Properties();
+			prop.put("language", tr.getLocale());
+
+            final I18nTools i18n = new TranslationsI18N(tr);
+
+
+            serviceRegistrations.add(context.registerService(I18nTools.class.getName(), i18n, prop));
+        }
+
+        for (final ResourceBundle rc : resourceBundles) {
+            if(locales.contains(rc.getLocale())) {
+                continue;
+            }
+            locales.add(rc.getLocale());
 			final I18nTools i18n = new I18nImpl(rc);
 
 			final Properties prop = new Properties();
