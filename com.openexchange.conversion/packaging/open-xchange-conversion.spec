@@ -36,7 +36,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Conversion Bundle
-Requires:       open-xchange-conversion
+Requires:       open-xchange-global
 #
 
 %description
