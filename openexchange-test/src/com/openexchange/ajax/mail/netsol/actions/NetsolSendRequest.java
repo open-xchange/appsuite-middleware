@@ -68,21 +68,19 @@ import com.openexchange.ajax.framework.AbstractUploadParser;
 public class NetsolSendRequest implements AJAXRequest {
 
 	public static enum BodyContentType {
-		PLAIN_TEXT("text/plain"),
-		HTML("text/html"),
-		ALTERNATIVE("ALTERNATIVE");
-		
+		PLAIN_TEXT("text/plain"), HTML("text/html"), ALTERNATIVE("ALTERNATIVE");
+
 		private final String str;
-		
+
 		private BodyContentType(final String str) {
 			this.str = str;
 		}
-		
+
 		public String getStr() {
 			return str;
 		}
 	}
-	
+
 	/**
 	 * URL of the tasks AJAX interface.
 	 */
@@ -91,12 +89,16 @@ public class NetsolSendRequest implements AJAXRequest {
 	private final String mailStr;
 
 	private final InputStream upload;
-	
+
+	private final String uploadContentType;
+
+	private final String uploadFilename;
+
 	/*
 	 * Mail object settings
 	 */
 	private final BodyContentType contentType = BodyContentType.ALTERNATIVE;
-	
+
 	private String recipientTo;
 
 	/**
@@ -118,9 +120,28 @@ public class NetsolSendRequest implements AJAXRequest {
 	 *            The upload input stream
 	 */
 	public NetsolSendRequest(final String mailStr, final InputStream upload) {
+		this(mailStr, upload, "text/plain; charset=us-ascii", "text.txt");
+	}
+
+	/**
+	 * Initializes a new {@link NetsolSendRequest}
+	 * 
+	 * @param mailStr
+	 *            The mail string (JSON)
+	 * @param upload
+	 *            The upload input stream
+	 * @param uploadContentType
+	 *            The upload's content type
+	 * @param uploadFilename
+	 *            The upload's filename
+	 */
+	public NetsolSendRequest(final String mailStr, final InputStream upload, final String uploadContentType,
+			final String uploadFilename) {
 		super();
 		this.mailStr = mailStr;
 		this.upload = upload;
+		this.uploadContentType = uploadContentType;
+		this.uploadFilename = uploadFilename;
 	}
 
 	/**
@@ -145,7 +166,7 @@ public class NetsolSendRequest implements AJAXRequest {
 		retval[0] = new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
 		retval[1] = new FieldParameter("json_0", mailStr);
 		if (upload != null) {
-			retval[2] = new FileParameter("file_0", "text.txt", upload, "text/plain; charset=us-ascii");
+			retval[2] = new FileParameter("file_0", uploadFilename, upload, uploadContentType);
 		}
 		return retval;
 	}
