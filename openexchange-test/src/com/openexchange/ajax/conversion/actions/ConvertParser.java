@@ -49,13 +49,9 @@
 
 package com.openexchange.ajax.conversion.actions;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
@@ -77,18 +73,7 @@ public final class ConvertParser extends AbstractAJAXParser<ConvertResponse> {
 
 	@Override
 	protected ConvertResponse createResponse(final Response response) throws JSONException {
-		final ConvertResponse retval = new ConvertResponse(response);
-		if (isFailOnError()) {
-			final JSONArray ja = (JSONArray) response.getData();
-			final int len = ja.length();
-			final String[][] sa = new String[len][];
-			for (int i = 0; i < len; i++) {
-				final JSONObject jo = ja.getJSONObject(i);
-				sa[i] = new String[] {jo.getString(FolderChildFields.FOLDER_ID), jo.getString(DataFields.ID)};
-			}
-			retval.setFoldersAndIDs(sa);
-		}
-		return retval;
+		return new ConvertResponse(response);
 	}
 
 }

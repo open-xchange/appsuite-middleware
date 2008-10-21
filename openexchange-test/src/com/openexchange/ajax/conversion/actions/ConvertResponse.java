@@ -49,7 +49,13 @@
 
 package com.openexchange.ajax.conversion.actions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
@@ -60,8 +66,6 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public final class ConvertResponse extends AbstractAJAXResponse {
 
-	private String[][] foldersAndIDs;
-
 	/**
 	 * Initializes a new {@link ConvertResponse}
 	 * 
@@ -71,11 +75,27 @@ public final class ConvertResponse extends AbstractAJAXResponse {
 		super(response);
 	}
 
-	public String[][] getFoldersAndIDs() {
-		return foldersAndIDs;
+	/**
+	 * Appropriate if conversion response consists of a JSON array of folder and
+	 * object ID:<br>
+	 * 
+	 * <pre>
+	 * [{&quot;folder_id&quot;:2567, &quot;id&quot;:7689}, ...]
+	 * </pre>
+	 * 
+	 * @return The folders and IDs
+	 * @throws JSONException
+	 *             If a JSON error occurs
+	 */
+	public String[][] getFoldersAndIDs() throws JSONException {
+		final JSONArray ja = (JSONArray) getData();
+		final int len = ja.length();
+		final String[][] sa = new String[len][];
+		for (int i = 0; i < len; i++) {
+			final JSONObject jo = ja.getJSONObject(i);
+			sa[i] = new String[] { jo.getString(FolderChildFields.FOLDER_ID), jo.getString(DataFields.ID) };
+		}
+		return sa;
 	}
 
-	void setFoldersAndIDs(final String[][] foldersAndIDs) {
-		this.foldersAndIDs = foldersAndIDs;
-	}
 }
