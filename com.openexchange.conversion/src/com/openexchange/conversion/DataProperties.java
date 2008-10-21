@@ -79,6 +79,11 @@ public final class DataProperties {
 	public static final String PROPERTY_CHARSET = "com.openexchange.conversion.charset";
 
 	/**
+	 * Property for name
+	 */
+	public static final String PROPERTY_NAME = "com.openexchange.conversion.name";
+
+	/**
 	 * Constant for empty data arguments
 	 */
 	public static final DataProperties EMPTY_PROPS = new DataProperties(true, 0);
