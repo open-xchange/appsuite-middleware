@@ -65,6 +65,26 @@
 
     <!--                    TARGETS                      -->
 
+	<target name="prop_check">
+		<condition property="runok">
+			<and>
+				<isset property="admin.classpath"/>
+				<isset property="adminhosting.classpath"/>
+			</and>
+		</condition>
+	</target>
+
+	<target name="prop_check_output" depends="oxadmin_prop_check_output,oxadmin_hosting_prop_check_output">
+	</target>
+
+	<target name="oxadmin_prop_check_output" unless="admin.classpath">
+		<echo>The property admin.classpath isn't set</echo>
+	</target>
+
+	<target name="oxadmin_hosting_prop_check_output" unless="adminhosting.classpath">
+		<echo>The property adminhosting.classpath isn't set</echo>
+	</target>
+	
 	<target name="replacer">
         <copy todir="." overwrite="true">
             <mapper type="glob" from="*.in" to="*"/>
@@ -73,7 +93,7 @@
         </copy>
     </target>
 
-    <target name="compile">
+    <target name="compile" depends="prop_check_output,prop_check" if="runok">
         <mkdir dir="classes"/>
         <javac failonerror="true" srcdir="src" debug="true" destdir="classes">
             <classpath>
@@ -91,14 +111,14 @@
 	</target> -->
 
 <!--    <target name="jar" depends="compile,manifest"> -->
-    <target name="jar" depends="compile">
+    <target name="jar" depends="compile" if="runok">
         <mkdir dir="jar"/>
         <jar update="true" jarfile="jar/${bundle.name}"
         basedir="classes"
         manifest="META-INF/MANIFEST.MF"/>
     </target>
 
-    <target name="client" depends="compile">
+    <target name="client" depends="compile" if="runok">
         <mkdir dir="jar"/>
         <jar jarfile="jar/${client.jar}"
          includes="com/openexchange/admin/contextrestore/rmi/,com/openexchange/admin/contextrestore/console/"
@@ -106,7 +126,7 @@
          basedir="classes"/>
     </target>
 
-         	<target name="clean">
+    <target name="clean">
         <delete dir="classes"/>
         <delete dir="jar"/>
     </target>
@@ -187,34 +207,32 @@
             message="${bundlesdir}/${bundle.name}${line.separator}"/>
     </target>
 	
-	<target name="compile-tests">
+	<target name="compile-tests" depends="compile" if="runok">
 		<mkdir dir="classes"/>
         <javac failonerror="true" srcdir="test" debug="true" destdir="classes">
-        	<include name="**/*UniqueCLTParameterTest*"/>
+        	<include name="**/**"/>
         	<classpath>
         		<path refid="project.classpath"/>
+        		<pathelement location="/usr/share/java/junit4.jar"/>
             </classpath>
         </javac>
 	</target>
 
-	<property name="ctx.build" value="${destdir}/${prefix}/sbin/createcontext"/>
-	<available file="${ctx.build}" property="ctx.available"/>
-	
-    <target name="cc-test" if="ctx.available" depends="compile-tests">
+    <target name="cc-test" depends="compile-tests" if="runok">
         <delete dir="${test.xml.dir}"/>
         <mkdir dir="${test.xml.dir}"/>
-        <junit errorProperty="test.failed" failureProperty="test.failed">
+        <junit errorProperty="test.failed" failureProperty="test.failed" showoutput="yes" printsummary="on">
             <classpath>
                 <pathelement location="classes" />
             	<path refid="project.classpath" />
+        		<pathelement location="/usr/share/java/junit4.jar"/>
             </classpath>
 
             <sysproperty key="config" value="/opt/open-xchange/etc/admindaemon/AdminDaemon.properties"/>
             <sysproperty key="openexchange.propfile" value="/opt/open-xchange/etc/admindaemon/system.properties"/>
 	
-            <test name="com.openexchange.admin.console.UniqueCLTParameterTest" todir="${test.xml.dir}" />
+            <test name="com.openexchange.admin.contextrestore.Contextrestore" todir="${test.xml.dir}" />
 
-            <formatter type="brief" usefile="false" />
             <formatter type="xml" />
         </junit>
         <fail message="Tests failed!" if="test.failed" />
