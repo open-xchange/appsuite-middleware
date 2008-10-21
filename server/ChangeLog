@@ -1,3 +1,8 @@
+* 2008-10-21 - thorben.betten@open-xchange.com
+
+ - Bugfix #12357: Adding image attachments to an inline-forwarded mail if
+   it its content-disposition is INLINE but specifies a file name
+
 * 2008-10-14 - thorben.betten@open-xchange.com
 
  - Bugfix #12303: Throwing an I/O error if socket connection is broken on
