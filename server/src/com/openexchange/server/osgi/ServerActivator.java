@@ -84,10 +84,12 @@ import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.datahandler.VCardSaveDataHandler;
+import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nTools;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mail.conversion.VCardAttachMailDataHandler;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
 import com.openexchange.mail.osgi.TransportProviderServiceTracker;
@@ -333,6 +335,9 @@ public final class ServerActivator extends DeferredActivator {
 		registrationList.add(context.registerService(ContextService.class.getName(), new ContextServiceImpl(), null));
 		registrationList.add(context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(),
 				null));
+		/*
+		 * Register data sources
+		 */
 		{
 			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
 			props.put("identifier", "com.openexchange.mail.vcard");
@@ -342,8 +347,23 @@ public final class ServerActivator extends DeferredActivator {
 		{
 			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
 			props.put("identifier", "com.openexchange.contact");
+			registrationList.add(context.registerService(DataSource.class.getName(), new ContactDataSource(),
+					props));
+		}
+		/*
+		 * Register data handlers
+		 */
+		{
+			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+			props.put("identifier", "com.openexchange.contact");
 			registrationList.add(context
 					.registerService(DataHandler.class.getName(), new VCardSaveDataHandler(), props));
+		}
+		{
+			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+			props.put("identifier", "com.openexchange.mail.vcard");
+			registrationList.add(context
+					.registerService(DataHandler.class.getName(), new VCardAttachMailDataHandler(), props));
 		}
 	}
 
