@@ -161,13 +161,15 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         final boolean ismasteradmin = cache.isMasterAdmin(auth);
         try {
             oxresell.applyRestrictionsToContext(null, ctx);
-            final ResellerAdmin owner = oxresell.getContextOwner(ctx);
-            if( ismasteradmin && owner == null) {
-                // context does not belong to anybody, so it is save to be removed
-                return;
-            } else if( ismasteradmin && owner != null ) {
-                // context belongs to somebody, so we must remove the ownership
-                oxresell.unownContextFromAdmin(ctx, owner);
+            if( ismasteradmin ) {
+                final ResellerAdmin owner = oxresell.getContextOwner(ctx);
+                if( owner == null) {
+                    // context does not belong to anybody, so it is save to be removed
+                    return;
+                } else {
+                    // context belongs to somebody, so we must remove the ownership
+                    oxresell.unownContextFromAdmin(ctx, owner);
+                }
             } else {
                 if( oxresell.ownsContext(ctx, auth) ) {
                     oxresell.unownContextFromAdmin(ctx, auth);

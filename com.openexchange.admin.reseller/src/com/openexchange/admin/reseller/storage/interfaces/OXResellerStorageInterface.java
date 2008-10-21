@@ -51,8 +51,8 @@ package com.openexchange.admin.reseller.storage.interfaces;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -227,7 +227,7 @@ public abstract class OXResellerStorageInterface {
      * @return
      * @throws StorageException
      */
-    public abstract HashMap<String, Restriction> listRestrictions(final String search_pattern) throws StorageException;
+    public abstract Map<String, Restriction> listRestrictions(final String search_pattern) throws StorageException;
     
     /**
      * @param creds

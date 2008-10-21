@@ -72,6 +72,10 @@ public class Restriction extends ExtendableDataObject implements Cloneable {
     
     public static final String MAX_OVERALL_USER_PER_SUBADMIN = "MaxOverallUserPerSubadmin";
     
+    public static final String MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX = "MaxOverallUserPerSubadminByModuleaccess_";
+    
+    public static final String MAX_OVERALL_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX = "MaxUserPerContextByModuleaccess_";
+
     private String value;
     
     private Integer id;

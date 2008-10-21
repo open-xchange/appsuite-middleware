@@ -53,6 +53,7 @@ import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -86,7 +87,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
     private final OXResellerStorageInterface oxresell;
 
-    private HashMap<String, Restriction> validRestrictions = null;
+    private Map<String, Restriction> validRestrictions = null;
     
     public OXReseller() throws StorageException {
         super();
@@ -154,7 +155,8 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             if( rname == null ) {
                 throw new InvalidDataException("Restriction name must be set");
             }
-            if( !( rname.equals(Restriction.MAX_USER_PER_CONTEXT) )) {
+            if( !( rname.equals(Restriction.MAX_USER_PER_CONTEXT)||
+                   rname.startsWith(Restriction.MAX_OVERALL_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX) )) {
                  throw new InvalidDataException("Restriction " + rname + " cannot be applied to context");
              }
             if( ! validRestrictions.containsKey(rname) ) {
@@ -192,7 +194,8 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 }
                 if( !( rname.equals(Restriction.MAX_CONTEXT_PER_SUBADMIN) ||
                        rname.equals(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN) ||
-                       rname.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN) ) ) {
+                       rname.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN) ||
+                       rname.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX)) ) {
                     throw new InvalidDataException("Restriction " + rname + " cannot be applied to subadmin");
                 }
                 if( rval == null ) {
@@ -561,6 +564,24 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             log.error(e.getMessage(), e);
             throw e;
         } catch (StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.reseller.rmi.OXResellerInterface#getAvailableRestrictions(com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
+    public HashSet<Restriction> getAvailableRestrictions(Credentials creds) throws RemoteException, InvalidCredentialsException {
+        try {
+            basicauth.doAuthentication(creds);
+
+            HashSet<Restriction> ret = new HashSet<Restriction>();
+            for(final String key : validRestrictions.keySet() ) {
+                ret.add(validRestrictions.get(key));
+            }
+            return ret;
+        } catch (InvalidCredentialsException e) {
             log.error(e.getMessage(), e);
             throw e;
         }

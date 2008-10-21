@@ -60,7 +60,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -693,7 +695,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     }
 
     @Override
-    public HashMap<String, Restriction> listRestrictions(final String search_pattern) throws StorageException {
+    public Map<String, Restriction> listRestrictions(final String search_pattern) throws StorageException {
         Connection con = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
@@ -705,7 +707,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep.setString(2, search_patterntmp);
             rs = prep.executeQuery();
 
-            final HashMap<String, Restriction> ret = new HashMap<String, Restriction>();
+            final Map<String, Restriction> ret = new ConcurrentHashMap<String, Restriction>();
             while( rs.next() ) {
                 Restriction res = new Restriction();
                 res.setId(rs.getInt("rid"));
@@ -861,6 +863,51 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         }
     }
 
+    private void checkMaxOverallUserRestrictionByModuleAccess(final Connection con, final ResellerAdmin adm, final String restrictionvalue, final int maxvalue, final boolean contextMode) throws StorageException, OXResellerException, SQLException, PoolException {
+        PreparedStatement prep = null;
+        PreparedStatement prep2 = null;
+        ResultSet rs = null;
+        ResultSet rs2 = null;
+        Connection oxcon = null;
+        int cid = -1;
+        try {
+            prep = con.prepareStatement("SELECT cid FROM context2subadmin WHERE sid=?");
+            prep.setInt(1, adm.getId());
+            rs = prep.executeQuery();
+            // start count at one for the current context to be created when called from Context Plugin
+            // methods, because the context to be created is not yet listed in context2subadmin table
+            int count = contextMode ? 1 : 0;
+            while( rs.next() ) {
+                cid = rs.getInt("cid");
+                oxcon = cache.getConnectionForContext(cid);
+                prep2 = oxcon.prepareStatement("SELECT COUNT(cid) FROM user WHERE cid=?");
+                prep2.setInt(1, cid);
+                rs2 = prep2.executeQuery();
+                if( rs2.next() ) {
+                    count += rs2.getInt(1);
+                }
+                prep2.close();
+                rs2.close();
+                cache.pushConnectionForContext(cid, oxcon);
+                // set to null to prevent double pushback in finally
+                oxcon = null;
+            }
+            if( count > maxvalue ) {
+                throw new OXResellerException("maximum overall number of users reached: " + maxvalue);
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (PoolException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } finally {
+            cache.closeContextSqlStuff(oxcon, cid);
+            cache.closeConfigDBSqlStuff(null, prep, rs);
+            cache.closeConfigDBSqlStuff(null, prep2, rs2);
+        }
+    }
+
     /**
      * @param ctx
      * @param maxvalue
@@ -920,6 +967,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                             checkMaxContextQuotaRestriction(con, adm, Long.parseLong(res.getValue()));
                         } else if( res.getName().equals(tocheck) && tocheck.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN)) {
                             checkMaxOverallUserRestriction(con, adm, Integer.parseInt(res.getValue()), true);
+                        } else if( res.getName().startsWith(tocheck) && tocheck.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX)) {
+                            checkMaxOverallUserRestrictionByModuleAccess(con, adm, res.getName(), Integer.parseInt(res.getValue()), true);
                         }
                     }
                 }
@@ -1131,12 +1180,33 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 prep.setString(2, res);
                 prep.executeUpdate();
             }
+            cache.initAccessCombinations();
+            for(final Entry<String, UserModuleAccess> mentry : cache.getAccessCombinationNames()) {
+                final String mname = mentry.getKey();
+                for(final String prefix : new String[]{
+                        Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX,
+                        Restriction.MAX_OVERALL_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX } ) {
+                final int rid = IDGenerator.getId(con);
+                prep = con.prepareStatement("INSERT INTO restrictions (rid,name) VALUES (?,?)");
+                prep.setInt(1, rid);
+                prep.setString(2, prefix+mname);
+                prep.executeUpdate();
+                }
+            }
             con.commit();
         } catch (PoolException e) {
             log.error(e.getMessage(), e);
             doRollback(con);
             throw new StorageException(e.getMessage());
         } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            doRollback(con);
+            throw new StorageException(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            log.error(e.getMessage(), e);
+            doRollback(con);
+            throw new StorageException(e.getMessage());
+        } catch (OXGenericException e) {
             log.error(e.getMessage(), e);
             doRollback(con);
             throw new StorageException(e.getMessage());
@@ -1176,36 +1246,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
      */
     @Override
     public void updateModuleAccessRestrictions() throws StorageException {
-        Connection con = null;
-        PreparedStatement prep = null;
-        try {
-            con = cache.getConnectionForConfigDB();
-            con.setAutoCommit(false);
-            cache.initAccessCombinations();
-            for(final Entry<String, UserModuleAccess> mentry : cache.getAccessCombinationNames()) {
-                final String mname = mentry.getKey();
-                
-            }
-            con.commit();
-        } catch (ClassNotFoundException e) {
-            log.error(e.getMessage(), e);
-            doRollback(con);
-            throw new StorageException(e.getMessage());
-        } catch (OXGenericException e) {
-            log.error(e.getMessage(), e);
-            doRollback(con);
-            throw new StorageException(e.getMessage());
-        } catch (PoolException e) {
-            log.error(e.getMessage(), e);
-            doRollback(con);
-            throw new StorageException(e.getMessage());
-        } catch (SQLException e) {
-            log.error(e.getMessage(), e);
-            doRollback(con);
-            throw new StorageException(e.getMessage());
-        } finally {
-            cache.closeConfigDBSqlStuff(con, prep);
-        }
+        //TODO: to be implemented
     }
 
     private void doRollback(final Connection con) {

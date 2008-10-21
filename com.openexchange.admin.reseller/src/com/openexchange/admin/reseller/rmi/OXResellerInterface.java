@@ -143,6 +143,14 @@ public interface OXResellerInterface extends Remote {
     public ResellerAdmin getData(final ResellerAdmin adm, Credentials creds) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException;
     
     /**
+     * @param creds
+     * @return
+     * @throws RemoteException
+     * @throws InvalidCredentialsException 
+     */
+    public HashSet<Restriction> getAvailableRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException;
+
+    /**
      * @param restrictions
      * @param ctx
      * @param creds
