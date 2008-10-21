@@ -94,6 +94,10 @@ public final class ConversionEngineCustomizer implements ServiceTrackerCustomize
 				LOG.error("Missing identifier in data handler: " + addedService.getClass().getName());
 				return addedService;
 			}
+			if (getInstance().getDataHandler(identifier.toString()) != null) {
+				LOG.error("A data handler is already registered for identifier: " + identifier.toString());
+				return addedService;
+			}
 			getInstance().putDataHandler(identifier.toString(), (DataHandler) addedService);
 			LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier.toString())
 					.append("' successfully registered"));
@@ -101,6 +105,10 @@ public final class ConversionEngineCustomizer implements ServiceTrackerCustomize
 			final Object identifier = reference.getProperty("identifier");
 			if (null == identifier) {
 				LOG.error("Missing identifier in data source: " + addedService.getClass().getName());
+				return addedService;
+			}
+			if (getInstance().getDataSource(identifier.toString()) != null) {
+				LOG.error("A data source is already registered for identifier: " + identifier.toString());
 				return addedService;
 			}
 			getInstance().putDataSource(identifier.toString(), (DataSource) addedService);
