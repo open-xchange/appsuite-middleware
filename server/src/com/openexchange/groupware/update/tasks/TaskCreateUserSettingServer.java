@@ -47,61 +47,78 @@
  *
  */
 
-package com.openexchange.tools.update;
+package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
-import com.openexchange.tools.sql.DBUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.database.Database;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.tasks.TaskException;
+import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.tools.update.Tools;
 
 /**
- * This class contains some tools to ease update of database.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ *
  */
-public final class Tools {
+public class TaskCreateUserSettingServer implements UpdateTask {
 
-    /**
-     * Prevent instantiation
-     */
-    private Tools() {
-        super();
-    }
+	private final String TABLE_NAME = "user_setting_server";
+	private final String CREATE_STATEMENT = "CREATE TABLE user_setting_server (" +
+	        "cid INT4 UNSIGNED NOT NULL," +
+	        "user INT4 UNSIGNED NOT NULL," +
+	        "contact_collect_folder INT4 UNSIGNED NOT NULL," +
+	        "contact_collect_enabled BOOL NOT NULL," +
+	        "FOREIGN KEY(cid, user) REFERENCES user(cid, id)," +
+	        "FOREIGN KEY(cid, contact_collect_folder) REFERENCES oxfolder_tree(cid, fuid)" +
+	        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+	
+	private static final Log LOG = LogFactory.getLog(TaskCreateUserSettingServer.class);
+	
+	public int addedWithVersion() {
+		return 23;
+	}
 
-    public static boolean isNullable(final Connection con, final String table,
-        final String column) throws SQLException {
-        final DatabaseMetaData meta = con.getMetaData();
-        ResultSet result = null;
-        boolean retval = false;
-        try {
-            result = meta.getColumns(null, null, table, column);
-            if (result.next()) {
-                retval = DatabaseMetaData.typeNullable == result
-                    .getInt(NULLABLE);
-            } else {
-                throw new SQLException("Can't get information for column "
-                    + column + " in table " + table + '.');
-            }
-        } finally {
-            DBUtils.closeSQLStuff(result);
+	public int getPriority() {
+	    return UpdateTaskPriority.NORMAL.priority;
+	}
+
+	public void perform(Schema schema, int contextId) throws AbstractOXException {
+		LOG.info("Performing update task TaskCreateUserSettingServer.");
+		
+		Connection con = null;
+		try {
+            con = Database.get(contextId, true);
+        } catch (final DBPoolingException e) {
+            throw new TaskException(TaskException.Code.NO_CONNECTION, e);
         }
-        return retval;
-    }
+        
+        try {
+        	if(!Tools.tableExists(con, TABLE_NAME)) {
+        		createTable(con);
+        	}
+        } catch (SQLException e) {
+            throw new TaskException(TaskException.Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+                Database.back(contextId, true, con);
+        }
+	}
+	
+	private void createTable(Connection con) throws SQLException {
+	    Statement stmt = con.createStatement();
+	    try {
+	        stmt.execute(CREATE_STATEMENT);
+	    } finally {
+	        stmt.close();
+	    }
+	}
 
-    public static boolean tableExists(Connection con, String table) throws SQLException {
-    	DatabaseMetaData metaData = con.getMetaData();
-    	ResultSet rs = null;
-    	boolean retval = false;
-    	try{
-    		rs = metaData.getTables(null, null, table, new String[] {TABLE});
-    		retval = (rs.next() && rs.getString("TABLE_NAME").equals(table));
-    	} finally {
-    		DBUtils.closeSQLStuff(rs);
-    	}
-    	return retval;
-    }
-    
-    private static final int NULLABLE = 11;
-    private static final String TABLE = "TABLE";
 }
