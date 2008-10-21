@@ -20,6 +20,9 @@ import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.context.ContextService;
 import com.openexchange.context.internal.ContextServiceImpl;
+import com.openexchange.conversion.engine.ConversionService;
+import com.openexchange.conversion.engine.internal.ConversionEngineRegistry;
+import com.openexchange.conversion.engine.internal.ConversionServiceImpl;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
@@ -33,6 +36,7 @@ import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.group.internal.GroupInit;
 import com.openexchange.groupware.configuration.ParticipantConfig;
+import com.openexchange.groupware.contact.datahandler.VCardSaveDataHandler;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
 import com.openexchange.i18n.tools.I18nServices;
@@ -40,6 +44,7 @@ import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.push.udp.EventAdminService;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
@@ -198,6 +203,7 @@ public final class Init {
         startAndInjectMailBundle();
         startAndInjectSpamHandler();
         startAndInjectICalServices();
+        startAndInjectConverterService();
     }
 
 	private static void startAndInjectI18NBundle() throws FileNotFoundException {
@@ -320,6 +326,16 @@ public final class Init {
         ServerServiceRegistry.getInstance().addService(ICalParser.class, parser) ;
         ServerServiceRegistry.getInstance().addService(ICalEmitter.class, emitter);
     }
+   
+    public static void startAndInjectConverterService() {
+    	ConversionEngineRegistry.getInstance().putDataHandler("com.openexchange.contact", new VCardSaveDataHandler());
+		ConversionEngineRegistry.getInstance().putDataSource("com.openexchange.mail.vcard",
+				new VCardMailPartDataSource());
+    	
+		final ConversionService conversionService = new ConversionServiceImpl();
+		services.put(ConversionService.class, conversionService);
+		ServerServiceRegistry.getInstance().addService(ConversionService.class, conversionService);
+	}
 
     public static void stopServer() {
 		// for(Initialization init: started) { init.stop(); }
