@@ -9,4 +9,3 @@ Package: open-xchange-contactcollector
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common (>= 6.7.0), open-xchange-global (>=6.7.0), open-xchange-server (>=6.7.0)
 Description: The contact collector collects eMail addresses in a custom contact folder
-  
