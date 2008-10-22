@@ -1,3 +1,8 @@
+* 2008-10-22 - choeger@open-xchange.com
+
+ - Bugfix ID#12288: admin system.properties not needed options kept
+   from upgrade SP3 to SP3
+
 * 2008-09-23 - marcus.klein@open-xchange.com
 
  - Bugfix #12207: Removed OX connection given to context storage.

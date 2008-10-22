@@ -119,6 +119,7 @@ ln -sf ../etc/init.d/open-xchange-admin %{buildroot}/sbin/rcopen-xchange-admin
 
 %post
 . /opt/open-xchange/etc/oxfunctions.sh
+
 pfile=/opt/open-xchange/etc/admindaemon/configdb.properties
 if ox_exists_property writeOnly $pfile; then
    wonly=$(ox_read_property writeOnly $pfile)
@@ -130,6 +131,16 @@ else
    echo setting writeOnly in $pfile
    ox_set_property writeOnly true $pfile
 fi
+
+# -----------------------------------------------------------------------
+# bugfix id#12288
+pfile=/opt/open-xchange/etc/admindaemon/system.properties
+for prop in SetupLink LoginInfoConfig ConfigJumpConf User2IMAPImpl \
+  InitWorker CACHECCF IMAPPROPERTIES JAVAMAILPROPERTIES LOGLEVEL; do
+   if ox_exists_property $prop $pfile; then
+	ox_remove_property $prop $pfile
+   fi
+done
 
 
 %files
