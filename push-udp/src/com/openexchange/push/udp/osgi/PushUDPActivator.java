@@ -211,7 +211,7 @@ public class PushUDPActivator implements BundleActivator {
 	}
 	
 	protected void addRegisterService(final BundleContext context) {
-		final String[] topics = new String[] { EventConstants.EVENT_TOPIC, "com/openexchange/groupware/*" };
+		final String[] topics = new String[] { EventConstants.EVENT_TOPIC, "com/openexchange/*" };
 		final Hashtable<Object, Object> ht = new Hashtable<Object, Object>();
 		ht.put(EventConstants.EVENT_TOPIC, topics);
 		final PushHandler pushHandler = new PushHandler();

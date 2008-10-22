@@ -1,3 +1,7 @@
+* 2008-10-22 - marcus.klein@open-xchange-com
+
+ - Implemented UDP push for new emails in INBOX.
+
 * 2008-10-22 - francisco.laguna@open-xchange.com
 
  - Bugfix #12361: Be more lenient with locks.

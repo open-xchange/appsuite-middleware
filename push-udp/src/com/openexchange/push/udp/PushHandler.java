@@ -57,7 +57,6 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
-import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
@@ -80,8 +79,6 @@ import com.openexchange.server.impl.OCLPermission;
 public class PushHandler implements EventHandler {
 
 	private GroupStorage groupStorage;
-
-	private FolderSQLInterface folderSql;
 
 	private static final Log LOG = LogFactory.getLog(PushHandler.class);
 
@@ -113,7 +110,7 @@ public class PushHandler implements EventHandler {
 		final int module = genericEvent.getModule();
 
 		final FolderObject parentFolder = (FolderObject) genericEvent.getSourceFolder();
-		if (parentFolder == null) {
+		if (parentFolder == null && module != Types.EMAIL) {
 			LOG.warn("folder object in event is null");
 			return;
 		}
@@ -151,6 +148,12 @@ public class PushHandler implements EventHandler {
 			event(userId, folderObj.getObjectID(), folderObj.getParentFolderID(), users,
 					module, ctx);
 			break;
+		case Types.EMAIL:
+		    users = new int[] { userId };
+		    event(userId, 1, 1, users, module, ctx);
+		    break;
+	    default:
+	        LOG.warn("Got event with unimplemented module: " + module);
 		}
 	}
 

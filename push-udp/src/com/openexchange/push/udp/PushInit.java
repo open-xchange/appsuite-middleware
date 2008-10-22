@@ -165,8 +165,9 @@ public class PushInit implements Initialization {
 		output = null;
 		input.close();
 		input = null;
+		config = null;
 
-		started.set(true);
+		started.set(false);
 	}
 
 	public boolean isStarted() {
