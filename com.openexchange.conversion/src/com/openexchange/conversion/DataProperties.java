@@ -84,6 +84,11 @@ public final class DataProperties {
 	public static final String PROPERTY_NAME = "com.openexchange.conversion.name";
 
 	/**
+	 * Property for size
+	 */
+	public static final String PROPERTY_SIZE = "com.openexchange.conversion.size";
+
+	/**
 	 * Constant for empty data arguments
 	 */
 	public static final DataProperties EMPTY_PROPS = new DataProperties(true, 0);
