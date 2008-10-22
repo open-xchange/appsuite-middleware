@@ -54,14 +54,23 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.AllResponse;
 import com.openexchange.ajax.conversion.actions.ConvertRequest;
 import com.openexchange.ajax.conversion.actions.ConvertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.ListIDs;
+import com.openexchange.ajax.mail.netsol.FolderAndID;
+import com.openexchange.ajax.mail.netsol.actions.NetsolDeleteRequest;
+import com.openexchange.ajax.mail.netsol.actions.NetsolGetRequest;
+import com.openexchange.ajax.mail.netsol.actions.NetsolGetResponse;
+import com.openexchange.ajax.mail.netsol.actions.NetsolSendRequest;
+import com.openexchange.ajax.mail.netsol.actions.NetsolSendResponse;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.mail.MailJSONField;
+import com.openexchange.mail.MailListField;
 
 /**
  * {@link VCardMailPartAttachTest}
@@ -108,15 +117,17 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
 				objectId = Integer.parseInt(listIDs.get(0).getObject());
 			}
 
+			String[] mailFolderAndMailID = null;
 			try {
 				/*
 				 * Trigger conversion
 				 */
 				final JSONObject jsonBody = new JSONObject();
 				final JSONObject jsonSource = new JSONObject().put("identifier", "com.openexchange.contact");
-				jsonSource.put("args", new JSONArray().put(
-						new JSONObject().put("com.openexchange.groupware.contact.folder", folderId)).put(
-						new JSONObject().put("com.openexchange.groupware.contact.id", objectId)));
+				jsonSource.put("args", new JSONArray().put(new JSONObject().put(
+						"com.openexchange.groupware.contact.pairs", new JSONArray().put(
+								new JSONObject().put(AJAXServlet.PARAMETER_FOLDERID, folderId).put(
+										AJAXServlet.PARAMETER_ID, objectId)).toString())));
 				jsonBody.put("datasource", jsonSource);
 				final JSONObject jsonHandler = new JSONObject().put("identifier", "com.openexchange.mail.vcard");
 				jsonHandler.put("args", new JSONArray());
@@ -126,13 +137,78 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
 
 				final JSONObject mailObject = (JSONObject) convertResponse.getData();
 
-				assertFalse("Missing response on action=convert", mailObject == null);
+				assertFalse("Missing JSON mail object on action=convert", mailObject == null);
+				assertTrue("JSON mail object misses field: " + MailJSONField.ATTACHMENTS.getKey(), mailObject
+						.has(MailJSONField.ATTACHMENTS.getKey())
+						&& !mailObject.isNull(MailJSONField.ATTACHMENTS.getKey()));
+				final JSONArray attachmentArray = mailObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
+				assertEquals("Unexpected number of attachments in JSON mail object", 2, attachmentArray.length());
+				final JSONObject vcardAttachmentObject = attachmentArray.getJSONObject(1);
+				assertTrue("JSON attachment object does not refer to a VCard file", vcardAttachmentObject.getString(
+						MailListField.ID.getKey()).startsWith("file://"));
+				assertTrue("JSON attachment object does not refer to a VCard file", vcardAttachmentObject.getString(
+						MailJSONField.CONTENT_TYPE.getKey()).startsWith("text/vcard"));
 
 				System.out.println("NEW MAIL:\n" + mailObject.toString());
 
-				// TODO: Send mail
+				/*
+				 * Prepare for transport
+				 */
+				mailObject.put(MailJSONField.FROM.getKey(), getClient().getValues().getSendAddress());
+				mailObject.put(MailJSONField.RECIPIENT_TO.getKey(), getClient().getValues().getSendAddress());
+				mailObject.put(MailJSONField.RECIPIENT_CC.getKey(), "");
+				mailObject.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
+				mailObject.put(MailJSONField.SUBJECT.getKey(), "The mail subject for "
+						+ VCardMailPartAttachTest.class.getName());
+				mailObject.put(MailJSONField.PRIORITY.getKey(), "3");
+
+				final JSONObject textBodyObject = attachmentArray.getJSONObject(0);
+				textBodyObject.put(MailJSONField.CONTENT.getKey(), "This the mail body text for test: "
+						+ VCardMailPartAttachTest.class.getName() + "<br><br>Enjoy!");
+
+				/*
+				 * Perform transport
+				 */
+				final NetsolSendResponse response = (NetsolSendResponse) Executor.execute(getSession(),
+						new NetsolSendRequest(mailObject.toString()));
+				assertTrue("Send failed", response.getFolderAndID() != null);
+				assertTrue("Duration corrupt", response.getRequestDuration() > 0);
+				mailFolderAndMailID = response.getFolderAndID();
+
+				try {
+					Long.parseLong(mailFolderAndMailID[1]);
+				} catch (final NumberFormatException e) {
+					int pos = mailFolderAndMailID[1].lastIndexOf('/');
+					if (pos == -1) {
+						pos = mailFolderAndMailID[1].lastIndexOf('.');
+						if (pos == -1) {
+							fail("UNKNOWN FORMAT FOR MAIL ID: " + mailFolderAndMailID[1]);
+						}
+					}
+					final String substr = mailFolderAndMailID[1].substring(pos + 1);
+					try {
+						Long.parseLong(substr);
+					} catch (final NumberFormatException e1) {
+						fail("UNKNOWN FORMAT FOR MAIL ID: " + mailFolderAndMailID[1]);
+					}
+					mailFolderAndMailID[1] = substr;
+				}
+
+				/*
+				 * Get previously sent mail
+				 */
+				final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
+				final NetsolGetResponse resp = ((NetsolGetResponse) Executor.execute(getSession(),
+						new NetsolGetRequest(mailPath, true)));
+				final JSONObject fetchedMailObject = (JSONObject) resp.getData();
+
+				System.out.println("FETCHED MAIL:\n" + fetchedMailObject.toString());
 			} finally {
-				// Nothing to do
+				if (mailFolderAndMailID != null) {
+					final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
+					Executor.execute(getSession(), new NetsolDeleteRequest(new FolderAndID[] { mailPath }, true));
+					System.out.println("Temporary mail successfully deleted!");
+				}
 			}
 		} catch (final Exception e) {
 			e.printStackTrace();

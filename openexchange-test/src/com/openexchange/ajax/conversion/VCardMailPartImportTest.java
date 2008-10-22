@@ -208,9 +208,11 @@ public final class VCardMailPartImportTest extends AbstractConversionTest {
 				final String[] folderAndId = sa[0];
 				System.out.println("IMPORTED VCARD: Object-ID=" + folderAndId[0] + " Folder-ID=" + folderAndId[1]);
 			} finally {
-				final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
-				Executor.execute(getSession(), new NetsolDeleteRequest(new FolderAndID[] { mailPath }, true));
-				System.out.println("Temporary mail successfully deleted!");
+				if (mailFolderAndMailID != null) {
+					final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
+					Executor.execute(getSession(), new NetsolDeleteRequest(new FolderAndID[] { mailPath }, true));
+					System.out.println("Temporary mail successfully deleted!");
+				}
 			}
 		} catch (final Exception e) {
 			e.printStackTrace();
