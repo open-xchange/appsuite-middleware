@@ -133,6 +133,21 @@ if ! ox_exists_property writeOnly $pfile; then
     ox_set_property writeOnly false $pfile
 fi
 
+# -----------------------------------------------------------------------
+# bugfix id#12292
+pfile=/opt/open-xchange/etc/groupware/imap.properties
+if ! ox_exists_property com.openexchange.imap.imapTemporaryDown $pfile; then
+    ox_set_property com.openexchange.imap.imapTemporaryDown 10000 $pfile
+fi
+for prop in imapsPort smtpsPort; do
+    if ox_exists_property $prop $pfile; then
+      ox_remove_property $prop $pfile
+    fi
+done
+if ! ox_exists_property com.openexchange.imap.spamHandler $pfile; then
+    ox_set_property com.openexchange.imap.spamHandler DefaultSpamHandler $pfile
+fi
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles

@@ -53,6 +53,21 @@ postFix() {
       ox_set_property writeOnly false $pfile
   fi
 
+  # -----------------------------------------------------------------------
+  # bugfix id#12292
+  local pfile=/opt/open-xchange/etc/groupware/imap.properties
+  if ! ox_exists_property com.openexchange.imap.imapTemporaryDown $pfile; then
+      ox_set_property com.openexchange.imap.imapTemporaryDown 10000 $pfile
+  fi
+  for prop in imapsPort smtpsPort; do
+      if ox_exists_property $prop $pfile; then
+	  ox_remove_property $prop $pfile
+      fi
+  done
+  if ! ox_exists_property com.openexchange.imap.spamHandler $pfile; then
+      ox_set_property com.openexchange.imap.spamHandler DefaultSpamHandler $pfile
+  fi
+
   # we're updating from pre sp4
   if [ $version -lt 650 ]; then
 
@@ -62,59 +77,59 @@ postFix() {
       # -----------------------------------------------------------------------
       local pfile=/opt/open-xchange/etc/groupware/ox-scriptconf.sh
       ox_exists_property PROPERTIESDIR $pfile || {
-	  v_setprop PROPERTIESDIR /opt/open-xchange/etc/groupware $pfile
+	  ox_set_property PROPERTIESDIR /opt/open-xchange/etc/groupware $pfile
       }
       ox_exists_property OSGIPATH $pfile || {
-	  v_setprop OSGIPATH /opt/open-xchange/etc/groupware/osgi $pfile
+	  ox_set_property OSGIPATH /opt/open-xchange/etc/groupware/osgi $pfile
       }
       
       # -----------------------------------------------------------------------
       local pfile=/opt/open-xchange/etc/groupware/system.properties
       ox_exists_property com.openexchange.caching.configfile $pfile || {
-	  v_setprop com.openexchange.caching.configfile /opt/open-xchange/etc/groupware/cache.ccf $pfile
+	  ox_set_property com.openexchange.caching.configfile /opt/open-xchange/etc/groupware/cache.ccf $pfile
       }
       ox_exists_property serviceUsageInspection $pfile || {
-	  v_setprop serviceUsageInspection false $pfile
+	  ox_set_property serviceUsageInspection false $pfile
       }
       ox_exists_property serviceUsageTimeout $pfile || {
-	  v_setprop serviceUsageTimeout 10000 $pfile
+	  ox_set_property serviceUsageTimeout 10000 $pfile
       }
       ox_exists_property MimeTypeFile $pfile || {
-	  v_setprop MimeTypeFile /opt/open-xchange/etc/groupware/mime.types $pfile
+	  ox_set_property MimeTypeFile /opt/open-xchange/etc/groupware/mime.types $pfile
       }
       ox_exists_property MailCacheConfig $pfile || {
-	  v_setprop MailCacheConfig /opt/open-xchange/etc/groupware/mailcache.ccf $pfile
+	  ox_set_property MailCacheConfig /opt/open-xchange/etc/groupware/mailcache.ccf $pfile
       }
       ox_exists_property TidyMessages $pfile || {
-	  v_setprop TidyMessages /opt/open-xchange/etc/groupware/TidyMessages.properties $pfile
+	  ox_set_property TidyMessages /opt/open-xchange/etc/groupware/TidyMessages.properties $pfile
       }
       ox_exists_property TidyConfiguration $pfile || {
-	  v_setprop TidyConfiguration /opt/open-xchange/etc/groupware/TidyConfiguration.properties $pfile
+	  ox_set_property TidyConfiguration /opt/open-xchange/etc/groupware/TidyConfiguration.properties $pfile
       }
       ox_exists_property Whitelist $pfile || {
-	  v_setprop Whitelist /opt/open-xchange/etc/groupware/whitelist.properties $pfile
+	  ox_set_property Whitelist /opt/open-xchange/etc/groupware/whitelist.properties $pfile
       }
 
       ox_exists_property LoginInfo $pfile && {
-	  v_delprop LoginInfo $pfile
+	  ox_remove_property LoginInfo $pfile
       } || true
       ox_exists_property SetupLink $pfile && {
-	  v_delprop SetupLink $pfile
+	  ox_remove_property SetupLink $pfile
       } || true
       ox_exists_property ConfigJumpConf $pfile && {
-	  v_delprop ConfigJumpConf $pfile
+	  ox_remove_property ConfigJumpConf $pfile
       } || true
       ox_exists_property User2IMAPImpl $pfile && {
-	  v_delprop User2IMAPImpl $pfile
+	  ox_remove_property User2IMAPImpl $pfile
       } || true
       ox_exists_property WEBDAVOVERRIDES $pfile && {
-	  v_delprop WEBDAVOVERRIDES $pfile
+	  ox_remove_property WEBDAVOVERRIDES $pfile
       } || true
       ox_exists_property IMAPPROPERTIES $pfile && {
-	  v_delprop IMAPPROPERTIES $pfile
+	  ox_remove_property IMAPPROPERTIES $pfile
       } || true
       ox_exists_property JAVAMAILPROPERTIES $pfile && {
-	  v_delprop JAVAMAILPROPERTIES $pfile
+	  ox_remove_property JAVAMAILPROPERTIES $pfile
       } || true
 
       # -----------------------------------------------------------------------
@@ -129,13 +144,13 @@ postFix() {
 	  mv $pftemp $pfile
       fi
       ox_exists_property com.openexchange.imap.User2ACLImpl $pfile || {
-	  v_setprop com.openexchange.imap.User2ACLImpl auto $pfile
+	  ox_set_property com.openexchange.imap.User2ACLImpl auto $pfile
       }
       ox_exists_property com.openexchange.imap.mboxEnabled $pfile || {
-	  v_setprop com.openexchange.imap.mboxEnabled false $pfile
+	  ox_set_property com.openexchange.imap.mboxEnabled false $pfile
       }
       ox_exists_property com.openexchange.imap.blockSize $pfile || {
-	  v_setprop com.openexchange.imap.blockSize 1000 $pfile
+	  ox_set_property com.openexchange.imap.blockSize 1000 $pfile
       }
 
       # -----------------------------------------------------------------------
@@ -144,89 +159,89 @@ postFix() {
       local mail=/opt/open-xchange/etc/groupware/mail.properties
       ox_exists_property imapLoginType $imap && {
 	  local val=$(ox_read_property imapLoginType $imap)
-	  v_delprop imapLoginType $imap
-	  v_setprop com.openexchange.mail.loginType $val $mail
+	  ox_remove_property imapLoginType $imap
+	  ox_set_property com.openexchange.mail.loginType $val $mail
       } || true
       ox_exists_property imapMasterPassword $imap && {
 	  local val=$(ox_read_property imapMasterPassword $imap)
-	  v_delprop imapMasterPassword $imap
-	  v_setprop com.openexchange.mail.masterPassword $val $mail
+	  ox_remove_property imapMasterPassword $imap
+	  ox_set_property com.openexchange.mail.masterPassword $val $mail
       } || true
       ox_exists_property imapCredSrc $imap && {
 	  local val=$(ox_read_property imapCredSrc $imap)
-	  v_delprop imapCredSrc $imap
-	  v_setprop com.openexchange.mail.credSrc $val $mail
+	  ox_remove_property imapCredSrc $imap
+	  ox_set_property com.openexchange.mail.credSrc $val $mail
       } || true
       ox_exists_property imapServer $imap && {
 	  local val=$(ox_read_property imapServer $imap)
-	  v_delprop imapServer $imap
-	  v_setprop com.openexchange.mail.mailServer $val $mail
+	  ox_remove_property imapServer $imap
+	  ox_set_property com.openexchange.mail.mailServer $val $mail
       } || true
       ox_exists_property smtpServer $imap && {
 	  local val=$(ox_read_property smtpServer $imap)
-	  v_delprop smtpServer $imap
-	  v_setprop com.openexchange.mail.transportServer $val $mail
+	  ox_remove_property smtpServer $imap
+	  ox_set_property com.openexchange.mail.transportServer $val $mail
       } || true
       ox_exists_property mail.mime.charset $imap && {
 	  local val=$(ox_read_property mail.mime.charset $imap)
-	  v_delprop mail.mime.charset $imap
-	  v_setprop mail.mime.charset $val $mail
+	  ox_remove_property mail.mime.charset $imap
+	  ox_set_property mail.mime.charset $val $mail
       } || true
       ox_exists_property imapMessageFetchLimit $imap && {
 	  local val=$(ox_read_property imapMessageFetchLimit $imap)
-	  v_delprop imapMessageFetchLimit $imap
-	  v_setprop com.openexchange.mail.mailFetchLimit $val $mail
+	  ox_remove_property imapMessageFetchLimit $imap
+	  ox_set_property com.openexchange.mail.mailFetchLimit $val $mail
       } || true
       ox_exists_property imapAttachmentDisplaySizeLimit $imap && {
 	  local val=$(ox_read_property imapAttachmentDisplaySizeLimit $imap)
-	  v_delprop imapAttachmentDisplaySizeLimit $imap
-	  v_setprop com.openexchange.mail.attachmentDisplaySizeLimit $val $mail
+	  ox_remove_property imapAttachmentDisplaySizeLimit $imap
+	  ox_set_property com.openexchange.mail.attachmentDisplaySizeLimit $val $mail
       } || true
       ox_exists_property imapMaxNumOfConnections $imap && {
 	  local val=$(ox_read_property imapMaxNumOfConnections $imap)
-	  v_delprop imapMaxNumOfConnections $imap
-	  v_setprop com.openexchange.mail.maxNumOfConnections $val $mail
+	  ox_remove_property imapMaxNumOfConnections $imap
+	  ox_set_property com.openexchange.mail.maxNumOfConnections $val $mail
       } || true
       ox_exists_property imapQuoteLineColors $imap && {
 	  local val=$(ox_read_property imapQuoteLineColors $imap)
-	  v_delprop imapQuoteLineColors $imap
-	  v_setprop com.openexchange.mail.quoteLineColors $val $mail
+	  ox_remove_property imapQuoteLineColors $imap
+	  ox_set_property com.openexchange.mail.quoteLineColors $val $mail
       } || true
       for key in userFlagsEnabled allowNestedDefaultFolderOnAltNamespace \
 	  ignoreSubscription watcherEnabled watcherFrequency watcherTime \
 	  watcherShallClose smtpLocalhost smtpAuthentication setSMTPEnvelopeFrom; do
 	  ox_exists_property $key $imap && {
 	      local val=$(ox_read_property $key $imap)
-	      v_delprop $key $imap
-	      v_setprop "com.openexchange.mail.${key}" $val $mail
+	      ox_remove_property $key $imap
+	      ox_set_property "com.openexchange.mail.${key}" $val $mail
 	  } || true
       done
       # delete non-existing params
       ox_exists_property partModifierImpl $imap && {
-	  v_delprop partModifierImpl $imap
+	  ox_remove_property partModifierImpl $imap
       } || true
       ox_exists_property imaps $imap && {
-	  v_delprop imaps $imap
+	  ox_remove_property imaps $imap
       } || true
       ox_exists_property smtps $imap && {
-	  v_delprop smtps $imap
+	  ox_remove_property smtps $imap
       } || true
       ox_exists_property spamEnabled $imap && {
-	  v_delprop spamEnabled $imap
+	  ox_remove_property spamEnabled $imap
       } || true
       ox_exists_property imapMessageFetchLimit $imap && {
-	  v_delprop imapMessageFetchLimit $imap
+	  ox_remove_property imapMessageFetchLimit $imap
       } || true
       ox_exists_property imapAttachmentDisplaySizeLimit $imap && {
-	  v_delprop imapAttachmentDisplaySizeLimit $imap
+	  ox_remove_property imapAttachmentDisplaySizeLimit $imap
       } || true
       # -----------------------------------------------------------------------
       local pfile=/opt/open-xchange/etc/groupware/server.properties
       ox_exists_property JMXLogin $pfile || {
-	  v_setprop JMXLogin "" $pfile
+	  ox_set_property JMXLogin "" $pfile
       }
       ox_exists_property JMXPassword $pfile || {
-	  v_setprop JMXPassword "" $pfile
+	  ox_set_property JMXPassword "" $pfile
       }
   fi
 }
