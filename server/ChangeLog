@@ -8,6 +8,8 @@
    update SP3 -> SP4
  - Bugfix #12296: propertie CACHECCF not removed in groupware
    system.properties after upgrade SP3 -> SP4
+ - Bugfix #12293: parameters from smtp.properties are to be found in
+   mail.properties after upgrade SP3->SP4
 
 * 2008-10-22 - marcus.klein@open-xchange-com
 

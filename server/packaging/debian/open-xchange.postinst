@@ -216,11 +216,18 @@ postFix() {
       } || true
       for key in userFlagsEnabled allowNestedDefaultFolderOnAltNamespace \
 	  ignoreSubscription watcherEnabled watcherFrequency watcherTime \
-	  watcherShallClose smtpLocalhost smtpAuthentication setSMTPEnvelopeFrom; do
+	  watcherShallClose; do
 	  ox_exists_property $key $imap && {
 	      local val=$(ox_read_property $key $imap)
 	      ox_remove_property $key $imap
 	      ox_set_property "com.openexchange.mail.${key}" $val $mail
+	  } || true
+      done
+      for key in smtpLocalhost smtpAuthentication setSMTPEnvelopeFrom; do
+	  ox_exists_property $key $imap && {
+	      local val=$(ox_read_property $key $imap)
+	      ox_remove_property $key $imap
+	      ox_set_property "com.openexchange.smtp.${key}" $val $smtp
 	  } || true
       done
       # delete non-existing params
