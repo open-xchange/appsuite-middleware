@@ -33,21 +33,6 @@ public class CollectionTest extends ResourceTest {
 		super.tearDown();
 	}
 	
-	public void testRoot() throws Exception {
-		
-		final List<WebdavResource> children = FACTORY.resolveCollection(new WebdavPath()).getChildren();
-		final int size = children.size();
-		FACTORY.resolveCollection(new WebdavPath("test")).create();
-		clean.add(new WebdavPath("test"));
-		final List<WebdavResource> childrenAfter = FACTORY.resolveCollection(new WebdavPath()).getChildren();
-		assertEquals(childrenAfter.toString(), size+1, childrenAfter.size());
-		
-		final Set<String> childrenNames = new HashSet<String>();
-		for(final WebdavResource res : childrenAfter) { childrenNames.add(res.getDisplayName()); }
-		for(final WebdavResource res : children) { childrenNames.remove(res.getDisplayName());   }
-		assertEquals("test" , childrenNames.iterator().next());
-	}
-
 	@Override
 	public void testBody() throws Exception {
 		final WebdavCollection coll = createResource().toCollection();

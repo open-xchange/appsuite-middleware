@@ -35,7 +35,6 @@ public class TestWebdavFactoryBuilder {
 	}
 
 	private static WebdavFactory buildInfoFactory() throws Exception{
-		
 		final InfostoreWebdavFactory factory = new InfostoreWebdavFactory();
         final InfostoreFacadeImpl database = new InfostoreFacadeImpl();
         factory.setDatabase(database);
