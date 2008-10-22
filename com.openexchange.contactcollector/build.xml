@@ -1,4 +1,4 @@
-<project name="com.openexchange.data.conversion.ical.ical4j" default="install" basedir=".">
+<project name="com.openexchange.contactcollector" default="install" basedir=".">
 
     <!-- Customizable values -->
     <property name="destdir" value=""/>
@@ -29,12 +29,6 @@
     <property name="serverjar" value="com.openexchange.server.jar"/>
     <property name="mailjar" value="mail-1.4.1.jar" />
 
-    <!-- Third party libs -->
-    <fileset dir="${basedir}" id="3rdpartyjars">
-        <include name="${lib.dir}/*.jar"/>
-        <exclude name="CVS"/>
-    </fileset>
-
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
@@ -42,7 +36,6 @@
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}" />
-	<fileset refid="3rdpartyjars"/>
     </path>
 
     <!-- Compile -->
