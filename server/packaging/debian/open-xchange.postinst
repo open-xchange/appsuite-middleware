@@ -75,6 +75,17 @@ postFix() {
       ox_remove_property CACHECCF $pfile
   fi
 
+  # -----------------------------------------------------------------------
+  # bugfix id#12295
+  local pfile=/opt/open-xchange/etc/groupware/server.properties
+  for prop in JMXPort JMXBindAddress; do
+      if ox_exists_property "Monitor${prop}" $pfile; then
+	  local oldval=$(ox_read_property "Monitor${prop}" $pfile)
+	  ox_set_property $prop $oldval $pfile
+	  ox_remove_property "Monitor${prop}" $pfile
+      fi
+  done
+
   # we're updating from pre sp4
   if [ $version -lt 650 ]; then
 
@@ -164,6 +175,7 @@ postFix() {
       # move key/values from imap.properties to mail.properties
       local imap=/opt/open-xchange/etc/groupware/imap.properties
       local mail=/opt/open-xchange/etc/groupware/mail.properties
+      local smtp=/opt/open-xchange/etc/groupware/smtp.properties
       ox_exists_property imapLoginType $imap && {
 	  local val=$(ox_read_property imapLoginType $imap)
 	  ox_remove_property imapLoginType $imap

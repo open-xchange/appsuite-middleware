@@ -10,6 +10,8 @@
    system.properties after upgrade SP3 -> SP4
  - Bugfix #12293: parameters from smtp.properties are to be found in
    mail.properties after upgrade SP3->SP4
+ - Bugfix #12295: MonitorJMXPort and MonitorJMXBindAddress changed
+   to JMXPort and JMXBindAddress from SP3 to SP4
 
 * 2008-10-22 - marcus.klein@open-xchange-com
 
