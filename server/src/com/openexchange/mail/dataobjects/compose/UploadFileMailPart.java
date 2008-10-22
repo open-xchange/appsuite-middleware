@@ -137,6 +137,15 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
 		return dataSource;
 	}
 
+	/**
+	 * Gets the upload file associated with this mail part
+	 * 
+	 * @return The upload file associated with this mail part
+	 */
+	public File getUploadFile() {
+		return uploadFile;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
