@@ -57,18 +57,36 @@ import com.openexchange.exceptions.LocalizableStrings;
  */
 public final class LoginExceptionMessages implements LocalizableStrings {
 
+    // The authentication mechanism is completely replaceable. Some hoster need
+    // to ban users. This message is used therefore.
+    // %s is replaced with some login name.
     public static final String ACCOUNT_LOCKED_MSG = "Account \"%s\" is locked.";
 
+    // Provisioning of some account may take some time although the login is
+    // already possible. If creating the account has not finished on OX side the
+    // login mechanism can use this message to prevent the login.
+    // %s is replaced with some login name.
     public static final String ACCOUNT_NOT_READY_YET_MSG = "Account \"%s\" is not ready yet.";
 
+    // If the problem could not be specified in some more detailed way this
+    // message can be used.
+    // %s is replaced by some own message that will not be translated.
     public static final String UNKNOWN_MSG = "Unknown problem: \"%s\".";
 
+    // This message can be used if the authentication systems are not reachable.
+    // The customer should try some time later again.
     public static final String COMMUNICATION_MSG = "Login not possible at the moment. Please try again later.";
 
+    // The supplied credentials for the authentication are invalid.
     public static final String INVALID_CREDENTIALS_MSG = "Invalid credentials.";
 
+    // This message can be used if the configuration of the authentication
+    // mechanism is not complete and some configuration option is missing.
+    // %1$s is replaced with the name of the missing configuration option.
     public static final String MISSING_PROPERTY_MSG = "Missing property %1$s.";
 
+    // If the authentication mechanism uses a database this message can be used
+    // if the database can not be read for authenticating the user.
     public static final String DATABASE_DOWN_MSG = "Database down.";
 
     /**
