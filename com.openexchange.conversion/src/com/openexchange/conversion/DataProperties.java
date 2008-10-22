@@ -186,4 +186,16 @@ public final class DataProperties {
 	public String remove(final String key) {
 		return map.remove(key);
 	}
+
+	/**
+	 * Gets this data properties as a {@link Map map}
+	 * 
+	 * @return This data properties as a {@link Map map}
+	 */
+	public Map<String, String> toMap() {
+		if (map.isEmpty()) {
+			return Collections.emptyMap();
+		}
+		return new HashMap<String, String>(map);
+	}
 }
