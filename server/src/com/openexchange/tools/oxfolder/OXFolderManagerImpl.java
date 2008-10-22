@@ -263,7 +263,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		 * Check folder types
 		 */
 		if (!checkFolderTypeAgainstParentType(parentFolder, folderObj.getType())) {
-			throw new OXFolderLogicException(FolderCode.INVALID_TYPE, getFolderName(parentFolder),
+			throw new OXFolderException(FolderCode.INVALID_TYPE, getFolderName(parentFolder),
 					folderType2String(folderObj.getType()), Integer.valueOf(ctx.getContextId()));
 		}
 		/*
