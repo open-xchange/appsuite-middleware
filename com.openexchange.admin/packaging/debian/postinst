@@ -25,16 +25,27 @@ postFix() {
   local version=${1%-*}
   version=${version//[-.]/}
 
-      # -----------------------------------------------------------------------
-      # bugfix id#12288
-      local pfile=/opt/open-xchange/etc/admindaemon/system.properties
-      for prop in SetupLink LoginInfoConfig ConfigJumpConf User2IMAPImpl \
-	  InitWorker CACHECCF IMAPPROPERTIES JAVAMAILPROPERTIES LOGLEVEL; do
-	if ox_exists_property $prop $pfile; then
-	    ox_remove_property $prop $pfile
-	fi
-      done
+  # -----------------------------------------------------------------------
+  # bugfix id#12288
+  local pfile=/opt/open-xchange/etc/admindaemon/system.properties
+  for prop in SetupLink LoginInfoConfig ConfigJumpConf User2IMAPImpl \
+      InitWorker CACHECCF IMAPPROPERTIES JAVAMAILPROPERTIES LOGLEVEL; do
+    if ox_exists_property $prop $pfile; then
+	ox_remove_property $prop $pfile
+    fi
+  done
 
+  # -----------------------------------------------------------------------
+  # bugfix id#12289
+  local pfile=/opt/open-xchange/etc/admindaemon/AdminDaemon.properties
+  if ox_exists_property DEFAULT_PASSWORD_MECHANISM $pfile; then
+      ox_remove_property DEFAULT_PASSWORD_MECHANISM $pfile
+  fi
+  local pfile=/opt/open-xchange/etc/admindaemon/User.properties
+  if ! ox_exists_property DEFAULT_PASSWORD_MECHANISM $pfile; then
+      ox_set_property DEFAULT_PASSWORD_MECHANISM SHA $pfile
+  fi
+  
   if [ $version -le 660 ]; then
       # -----------------------------------------------------------------------
       # force setting of last minute option
@@ -42,12 +53,11 @@ postFix() {
       if ox_exists_property writeOnly $pfile; then
 	  local wonly=$(ox_read_property writeOnly $pfile)
 	  if [ "$wonly" != "true" ]; then
-		ox_set_property writeOnly true $pfile
+	      ox_set_property writeOnly true $pfile
 	  fi
       else
 	  ox_set_property writeOnly true $pfile
       fi
-
   fi
 
   # we're updating from pre sp4
@@ -92,9 +102,6 @@ postFix() {
       local pfile=/opt/open-xchange/etc/admindaemon/AdminDaemon.properties
       ox_exists_property ACCESS_COMBINATIONS_FILE $pfile || {
 	  ox_set_property ACCESS_COMBINATIONS_FILE '$PWD/etc/admindaemon/ModuleAccessDefinitions.properties' $pfile
-      }
-      ox_exists_property DEFAULT_PASSWORD_MECHANISM $pfile || {
-	  ox_set_property DEFAULT_PASSWORD_MECHANISM SHA $pfile
       }
   fi
 }
