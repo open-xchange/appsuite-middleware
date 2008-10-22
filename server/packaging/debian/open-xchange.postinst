@@ -39,6 +39,13 @@ postFix() {
   local version=${1%-*}
   version=${version//[-.]/}
 
+  # -----------------------------------------------------------------------
+  # bugfix id#12290
+  local pfile=/opt/open-xchange/etc/groupware/ajp.properties
+  if ! ox_exists_property AJP_LOG_FORWARD_REQUEST $pfile; then
+      ox_set_property AJP_LOG_FORWARD_REQUEST FALSE $pfile
+  fi
+
   # we're updating from pre sp4
   if [ $version -lt 650 ]; then
 

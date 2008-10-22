@@ -116,6 +116,16 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 /usr/sbin/groupadd -r open-xchange 2> /dev/null || :
 /usr/sbin/useradd -r -g open-xchange -r -s /bin/false -c "open-xchange system user" -d /opt/open-xchange open-xchange 2> /dev/null || :
 
+%post -n open-xchange
+. /opt/open-xchange/etc/oxfunctions.sh
+
+# -----------------------------------------------------------------------
+# bugfix id#12290
+pfile=/opt/open-xchange/etc/groupware/ajp.properties
+if ! ox_exists_property AJP_LOG_FORWARD_REQUEST $pfile; then
+    ox_set_property AJP_LOG_FORWARD_REQUEST FALSE $pfile
+fi
+
 
 %files
 %defattr(-,root,root)

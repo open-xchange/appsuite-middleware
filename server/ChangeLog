@@ -1,3 +1,8 @@
+* 2008-10-22 - choeger@open-xchange-com
+
+ - Bugfix #12290: AJP_LOG_FORWARD_REQUEST parameter missing in
+   ajp.properties after upgrade SP3 SP4
+
 * 2008-10-22 - marcus.klein@open-xchange-com
 
  - Implemented UDP push for new emails in INBOX.
