@@ -162,6 +162,7 @@ public class ServerUserSetting {
 			}
         } finally {
             closeSQLStuff(rs, stmt);
+            Database.back(cid, false, con);
         }
         
         return retval;
@@ -179,6 +180,7 @@ public class ServerUserSetting {
             stmt.execute();
         } finally {
             stmt.close();
+            Database.back(cid, true, con);
         }
     }
 
