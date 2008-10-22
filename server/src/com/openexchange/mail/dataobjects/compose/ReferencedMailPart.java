@@ -52,7 +52,6 @@ package com.openexchange.mail.dataobjects.compose;
 import static com.openexchange.mail.utils.MessageUtility.readStream;
 
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -395,7 +394,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 	public InputStream getInputStream() throws MailException {
 		try {
 			if (data != null) {
-				return new ByteArrayInputStream(data);
+				return new UnsynchronizedByteArrayInputStream(data);
 			} else if (file != null) {
 				return new FileInputStream(file);
 			}
