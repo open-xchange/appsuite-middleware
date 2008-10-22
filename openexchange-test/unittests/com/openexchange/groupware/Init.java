@@ -20,7 +20,7 @@ import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.context.ContextService;
 import com.openexchange.context.internal.ContextServiceImpl;
-import com.openexchange.conversion.engine.ConversionService;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.engine.internal.ConversionEngineRegistry;
 import com.openexchange.conversion.engine.internal.ConversionServiceImpl;
 import com.openexchange.data.conversion.ical.ICalEmitter;
