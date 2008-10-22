@@ -2,6 +2,8 @@
 
  - Bugfix #12290: AJP_LOG_FORWARD_REQUEST parameter missing in
    ajp.properties after upgrade SP3 SP4
+ - Bugfix #12291: Parameter writeOnly missing in groupware
+   configdb.properties after upgrade SP3 -> SP4
 
 * 2008-10-22 - marcus.klein@open-xchange-com
 

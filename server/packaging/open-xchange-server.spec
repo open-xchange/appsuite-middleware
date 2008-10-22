@@ -126,6 +126,12 @@ if ! ox_exists_property AJP_LOG_FORWARD_REQUEST $pfile; then
     ox_set_property AJP_LOG_FORWARD_REQUEST FALSE $pfile
 fi
 
+# -----------------------------------------------------------------------
+# bugfix id#12291
+pfile=/opt/open-xchange/etc/groupware/configdb.properties
+if ! ox_exists_property writeOnly $pfile; then
+    ox_set_property writeOnly false $pfile
+fi
 
 %files
 %defattr(-,root,root)

@@ -46,6 +46,13 @@ postFix() {
       ox_set_property AJP_LOG_FORWARD_REQUEST FALSE $pfile
   fi
 
+  # -----------------------------------------------------------------------
+  # bugfix id#12291
+  local pfile=/opt/open-xchange/etc/groupware/configdb.properties
+  if ! ox_exists_property writeOnly $pfile; then
+      ox_set_property writeOnly false $pfile
+  fi
+
   # we're updating from pre sp4
   if [ $version -lt 650 ]; then
 
