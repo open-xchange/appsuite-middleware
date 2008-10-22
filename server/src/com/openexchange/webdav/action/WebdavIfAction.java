@@ -112,7 +112,7 @@ public class WebdavIfAction extends AbstractAction {
 			if(checkSourceLocks) {
 				checkNeededLocks(ifHeader,req,depth);
 			}
-			if(checkDestinationLocks) {
+			if(checkDestinationLocks || req.getResource().isLockNull()) {
 				checkDestinationLocks(ifHeader, req);
 			}
 		} catch (final IfHeaderParseException e) {

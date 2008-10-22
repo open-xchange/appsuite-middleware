@@ -188,7 +188,7 @@ public class InfostorePerformer implements SessionHolder {
 		final OXWebdavMaxUploadSizeAction oxWebdavMaxUploadSize = new OXWebdavMaxUploadSizeAction();
 		oxWebdavMaxUploadSize.setSessionHolder(this);
 		
-		put = prepare(oxWebdavPut, false, true, new WebdavIfAction(0,true,false),oxWebdavMaxUploadSize);
+		put = prepare(oxWebdavPut, false, true, new WebdavIfAction(0,false,false),oxWebdavMaxUploadSize);
 		trace = prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0,false,false));
 		
 		actions.put(Action.UNLOCK, unlock);

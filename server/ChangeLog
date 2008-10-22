@@ -1,3 +1,7 @@
+* 2008-10-22 - francisco.laguna@open-xchange.com
+
+ - Bugfix #12361: Be more lenient with locks.
+
 * 2008-10-21 - thorben.betten@open-xchange.com
 
  - Bugfix #12357: Adding image attachments to an inline-forwarded mail if
