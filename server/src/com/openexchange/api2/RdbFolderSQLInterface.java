@@ -575,7 +575,8 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 		} else if (folderId == FolderObject.SYSTEM_PRIVATE_FOLDER_ID) {
 			type = FolderObject.PRIVATE;
 		} else if (folderId == FolderObject.SYSTEM_PUBLIC_FOLDER_ID
-				|| folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
+				|| folderId == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID
+				|| folderId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
 			type = FolderObject.PUBLIC;
 		} else if (folderId == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
 			type = FolderObject.PROJECT;
