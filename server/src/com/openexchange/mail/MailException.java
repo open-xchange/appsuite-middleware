@@ -329,7 +329,11 @@ public class MailException extends AbstractOXException {
 		/**
 		 * Checking default folders on connect failed: %1$s
 		 */
-		DEFAULT_FOLDER_CHECK_FAILED("Checking default folders on connect failed: %1$s", Category.CODE_ERROR, 57);
+		DEFAULT_FOLDER_CHECK_FAILED("Checking default folders on connect failed: %1$s", Category.CODE_ERROR, 57),
+		/**
+		 * The types of specified data source are not supported
+		 */
+		UNSUPPORTED_DATASOURCE("The types of specified data source are not supported", Category.CODE_ERROR, 58);
 
 		private final String message;
 

@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.transport;
 
+import java.util.Map;
+
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
@@ -57,6 +59,7 @@ import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.DataMailPart;
 import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
@@ -230,6 +233,22 @@ public abstract class TransportProvider {
 	 *             be created
 	 */
 	public abstract InfostoreDocumentMailPart getNewDocumentPart(int documentId, Session session) throws MailException;
+
+	/**
+	 * Gets a new instance of {@link DataMailPart}
+	 * 
+	 * @param data
+	 *            The data obtained by a data source
+	 * @param dataProperties
+	 *            The data properties
+	 * @param session
+	 *            The session providing needed user data
+	 * @return A new instance of {@link DataMailPart}
+	 * @throws MailException
+	 *             If a new instance of {@link DataMailPart} cannot be created
+	 */
+	public abstract DataMailPart getNewDataPart(Object data, Map<String, String> dataProperties, Session session)
+			throws MailException;
 
 	/**
 	 * Gets a new instance of {@link TextBodyMailPart}

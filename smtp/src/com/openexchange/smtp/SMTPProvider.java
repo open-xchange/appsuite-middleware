@@ -49,6 +49,8 @@
 
 package com.openexchange.smtp;
 
+import java.util.Map;
+
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
@@ -57,6 +59,7 @@ import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.DataMailPart;
 import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
@@ -66,6 +69,7 @@ import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.SMTPProperties;
 import com.openexchange.smtp.dataobjects.SMTPBodyPart;
+import com.openexchange.smtp.dataobjects.SMTPDataPart;
 import com.openexchange.smtp.dataobjects.SMTPDocumentPart;
 import com.openexchange.smtp.dataobjects.SMTPFilePart;
 import com.openexchange.smtp.dataobjects.SMTPMailMessage;
@@ -148,6 +152,12 @@ public final class SMTPProvider extends TransportProvider {
 	@Override
 	protected AbstractProtocolProperties getProtocolProperties() {
 		return SMTPProperties.getInstance();
+	}
+
+	@Override
+	public DataMailPart getNewDataPart(final Object data, final Map<String, String> dataProperties, final Session session)
+			throws MailException {
+		return new SMTPDataPart(data, dataProperties, session);
 	}
 
 }

@@ -164,8 +164,10 @@ public final class ContactDataSource implements DataSource {
 		final String displayName = contacts.length == 1 ? contacts[0].getDisplayName() : null;
 		properties.put(DataProperties.PROPERTY_NAME, displayName == null ? "vcard.vcf" : new StringBuilder(displayName
 				.replaceAll(" +", "_")).append(".vcf").toString());
+		final byte[] vcardBytes = byteArrayOutputStream.toByteArray();
+		properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(vcardBytes.length));
 		return new SimpleData<D>((D) (InputStream.class.equals(type) ? new UnsynchronizedByteArrayInputStream(
-				byteArrayOutputStream.toByteArray()) : byteArrayOutputStream.toByteArray()), properties);
+				vcardBytes) : vcardBytes), properties);
 	}
 
 	private static void writeVCard2Stream(final ContactObject contact,

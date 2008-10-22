@@ -52,11 +52,15 @@ package com.openexchange.mail.json.parser;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressList;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.quotePersonal;
 
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.TimeZone;
 
 import javax.mail.internet.AddressException;
@@ -66,6 +70,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.openexchange.conversion.Data;
+import com.openexchange.conversion.DataArguments;
+import com.openexchange.conversion.DataException;
+import com.openexchange.conversion.DataSource;
+import com.openexchange.conversion.engine.ConversionService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -89,6 +98,8 @@ import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
+import com.openexchange.server.ServiceException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -111,6 +122,10 @@ public final class MessageParser {
 	}
 
 	private static final String STR_TRUE = "true";
+
+	private static final String JSON_ARGS = "args";
+
+	private static final String JSON_IDENTIFIER = "identifier";
 
 	/**
 	 * Completely parses given instance of {@link JSONObject} and given instance
@@ -154,6 +169,56 @@ public final class MessageParser {
 				}
 			}
 			/*
+			 * Attached data sources
+			 */
+			if (jsonObj.has(MailJSONField.DATASOURCES.getKey()) && !jsonObj.isNull(MailJSONField.DATASOURCES.getKey())) {
+				final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(
+						ConversionService.class);
+				if (conversionService == null) {
+					throw new MailException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
+							ConversionService.class.getName()));
+				}
+				final JSONArray datasourceArray = jsonObj.getJSONArray(MailJSONField.DATASOURCES.getKey());
+				final int length = datasourceArray.length();
+				final Set<Class<?>> types = new HashSet<Class<?>>(4);
+				for (int i = 0; i < length; i++) {
+					final JSONObject dataSourceObject = datasourceArray.getJSONObject(i);
+					if (!dataSourceObject.has(JSON_IDENTIFIER) || dataSourceObject.isNull(JSON_IDENTIFIER)) {
+						throw new MailException(MailException.Code.MISSING_PARAM, JSON_IDENTIFIER);
+					}
+					final DataSource dataSource = conversionService.getDataSource(dataSourceObject
+							.getString(JSON_IDENTIFIER));
+					if (dataSource == null) {
+						throw new MailException(new DataException(DataException.Code.UNKNOWN_DATA_SOURCE,
+								dataSourceObject.getString(JSON_IDENTIFIER)));
+					}
+					if (!types.isEmpty()) {
+						types.clear();
+					}
+					types.addAll(Arrays.asList(dataSource.getTypes()));
+					final Data<?> data;
+					if (types.contains(InputStream.class)) {
+						try {
+							data = dataSource.getData(InputStream.class, parseDataSourceArguments(dataSourceObject),
+									session);
+						} catch (final DataException e) {
+							throw new MailException(e);
+						}
+					} else if (types.contains(byte[].class)) {
+						try {
+							data = dataSource
+									.getData(byte[].class, parseDataSourceArguments(dataSourceObject), session);
+						} catch (final DataException e) {
+							throw new MailException(e);
+						}
+					} else {
+						throw new MailException(MailException.Code.UNSUPPORTED_DATASOURCE);
+					}
+					composedMail.addEnclosedPart(provider.getNewDataPart(data.getData(), data.getDataProperties()
+							.toMap(), session));
+				}
+			}
+			/*
 			 * Attached infostore document IDs
 			 */
 			if (jsonObj.has(MailJSONField.INFOSTORE_IDS.getKey())
@@ -168,6 +233,25 @@ public final class MessageParser {
 		} catch (final JSONException e) {
 			throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
 		}
+	}
+
+	private static DataArguments parseDataSourceArguments(final JSONObject json) throws JSONException {
+		if (!json.has(JSON_ARGS) || json.isNull(JSON_ARGS)) {
+			return DataArguments.EMPTY_ARGS;
+		}
+		final JSONArray jsonArray = json.getJSONArray(JSON_ARGS);
+		final int len = jsonArray.length();
+		final DataArguments dataArguments = new DataArguments(len);
+		for (int i = 0; i < len; i++) {
+			final JSONObject elem = jsonArray.getJSONObject(i);
+			if (elem.length() == 1) {
+				final String key = elem.keys().next();
+				dataArguments.put(key, elem.getString(key));
+			} else {
+				LOG.warn("Corrupt data argument in JSON object: " + elem.toString());
+			}
+		}
+		return dataArguments;
 	}
 
 	private static final String UPLOAD_FILE_ATTACHMENT_PREFIX = "file_";

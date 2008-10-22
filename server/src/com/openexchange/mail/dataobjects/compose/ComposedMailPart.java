@@ -81,7 +81,11 @@ public interface ComposedMailPart {
 		/**
 		 * A referenced mail part
 		 */
-		REFERENCE;
+		REFERENCE,
+		/**
+		 * A data part
+		 */
+		DATA;
 	}
 
 	/**

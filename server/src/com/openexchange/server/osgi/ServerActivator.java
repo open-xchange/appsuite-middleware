@@ -75,6 +75,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.context.internal.ContextServiceImpl;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataSource;
+import com.openexchange.conversion.engine.ConversionService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.event.impl.EventQueue;
@@ -317,6 +318,9 @@ public final class ServerActivator extends DeferredActivator {
 			// Search for host name service
 			serviceTrackerList.add(new ServiceTracker(context, HostnameService.class.getName(),
 					new HostnameServiceCustomizer(context)));
+			// Conversion service
+			serviceTrackerList.add(new ServiceTracker(context, ConversionService.class.getName(),
+					new RegistryCustomizer<ConversionService>(context, ConversionService.class)));
 			// Start up server the usual way
 			starter.start();
 		}

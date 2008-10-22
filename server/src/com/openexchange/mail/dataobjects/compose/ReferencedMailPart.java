@@ -134,7 +134,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 	 * @throws MailException
 	 *             If a mail error occurs
 	 */
-	public ReferencedMailPart(final MailPart referencedPart, final Session session) throws MailException {
+	protected ReferencedMailPart(final MailPart referencedPart, final Session session) throws MailException {
 		isMail = referencedPart.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822);
 		try {
 			handleReferencedPart(referencedPart, session);
@@ -158,7 +158,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 	 * @throws MailException
 	 *             If a mail error occurs
 	 */
-	public ReferencedMailPart(final MailMessage referencedMail, final Session session) throws MailException {
+	protected ReferencedMailPart(final MailMessage referencedMail, final Session session) throws MailException {
 		isMail = true;
 		try {
 			handleReferencedPart(referencedMail, session);
@@ -184,7 +184,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */
-	private String handleReferencedPart(final MailPart referencedPart, final Session session) throws MailException,
+	private void handleReferencedPart(final MailPart referencedPart, final Session session) throws MailException,
 			IOException {
 		final long size = referencedPart.getSize();
 		if (size > 0 && size <= TransportConfig.getReferencedPartLimit()) {
@@ -194,11 +194,12 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 				this.data = out.toByteArray();
 				setContentType(MIMETypes.MIME_MESSAGE_RFC822);
 				setContentDisposition(Part.INLINE);
+				setSize(size);
 			} else {
 				copy2ByteArr(referencedPart.getInputStream());
 				setHeaders(referencedPart);
 			}
-			return null;
+			return;
 		}
 		if (isMail) {
 			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
@@ -216,13 +217,12 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 					Float.valueOf(TransportConfig.getReferencedPartLimit() / MB).floatValue()).append(
 					"MB limit. A temporary disk copy has been created: ").append(file.getName()));
 		}
-		return fileId;
 	}
 
 	private static final String FILE_PREFIX = "openexchange";
 
-	private int copy2File(final InputStream in, final Session session) throws IOException {
-		int totalBytes = 0;
+	private void copy2File(final InputStream in, final Session session) throws IOException {
+		long totalBytes = 0;
 		{
 			final File tmpFile = File.createTempFile(FILE_PREFIX, null, new File(ServerConfig
 					.getProperty(ServerConfig.Property.UploadDirectory)));
@@ -251,10 +251,10 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 		final AJAXUploadFile uploadFile = new AJAXUploadFile(file, System.currentTimeMillis());
 		fileId = randomUUID();
 		session.putUploadedFile(fileId, uploadFile);
-		return totalBytes;
+		setSize(totalBytes);
 	}
 
-	private int copy2ByteArr(final InputStream in) throws IOException {
+	private void copy2ByteArr(final InputStream in) throws IOException {
 		final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
 		final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
 		int len;
@@ -265,7 +265,6 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 		}
 		out.flush();
 		this.data = out.toByteArray();
-		return totalBytes;
 	}
 
 	private void setHeaders(final MailPart referencedPart) {
@@ -275,7 +274,9 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 		setContentType(referencedPart.getContentType());
 		setContentDisposition(referencedPart.getContentDisposition());
 		setFileName(referencedPart.getFileName());
-		setSize(referencedPart.getSize());
+		if (!containsSize()) {
+			setSize(referencedPart.getSize());
+		}
 		final int count = referencedPart.getHeadersSize();
 		final Iterator<Map.Entry<String, String>> iter = referencedPart.getHeadersIterator();
 		for (int i = 0; i < count; i++) {
@@ -299,7 +300,8 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 						getContentType().setCharsetParameter(MailConfig.getDefaultMimeCharset());
 					}
 					return (dataSource = new MessageDataSource(data, getContentType().toString()));
-				} else if (file != null) {
+				}
+				if (file != null) {
 					if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)
 							&& getContentType().getCharsetParameter() == null) {
 						/*
@@ -335,7 +337,8 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 				}
 				applyByteContent(charset);
 				return cachedContent;
-			} else if (file != null) {
+			}
+			if (file != null) {
 				String charset = getContentType().getCharsetParameter();
 				if (null == charset) {
 					charset = System.getProperty("file.encoding", MailConfig.getDefaultMimeCharset());
@@ -395,10 +398,11 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 		try {
 			if (data != null) {
 				return new UnsynchronizedByteArrayInputStream(data);
-			} else if (file != null) {
+			}
+			if (file != null) {
 				return new FileInputStream(file);
 			}
-			throw new IllegalStateException("No content");
+			throw new MailException(MailException.Code.NO_CONTENT);
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}
