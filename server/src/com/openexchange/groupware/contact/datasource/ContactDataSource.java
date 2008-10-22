@@ -49,9 +49,16 @@
 
 package com.openexchange.groupware.contact.datasource;
 
+import static com.openexchange.ajax.AJAXServlet.PARAMETER_FOLDERID;
+import static com.openexchange.ajax.AJAXServlet.PARAMETER_ID;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
@@ -86,8 +93,7 @@ public final class ContactDataSource implements DataSource {
 
 	private static final Class<?>[] TYPES = { InputStream.class, byte[].class };
 
-	private static final String[] ARGS = { "com.openexchange.groupware.contact.folder",
-			"com.openexchange.groupware.contact.id" };
+	private static final String[] ARGS = { "com.openexchange.groupware.contact.pairs" };
 
 	/**
 	 * Initializes a new {@link ContactDataSource}
@@ -104,25 +110,36 @@ public final class ContactDataSource implements DataSource {
 		/*
 		 * Check arguments
 		 */
-		final int folderId;
-		try {
-			folderId = Integer.parseInt(dataArguments.get(ARGS[0]));
-		} catch (final NumberFormatException e) {
-			throw new DataException(DataException.Code.INVALID_ARGUMENT, ARGS[0], dataArguments.get(ARGS[0]));
-		}
-		final int objectId;
-		try {
-			objectId = Integer.parseInt(dataArguments.get(ARGS[1]));
-		} catch (final NumberFormatException e) {
-			throw new DataException(DataException.Code.INVALID_ARGUMENT, ARGS[1], dataArguments.get(ARGS[1]));
+		final int[] folderIds;
+		final int[] objectIds;
+		{
+			final JSONArray pairsArray;
+			try {
+				pairsArray = new JSONArray(dataArguments.get(ARGS[0]));
+				final int len = pairsArray.length();
+				if (len == 0) {
+					throw new DataException(DataException.Code.MISSING_ARGUMENT, ARGS[0]);
+				}
+				folderIds = new int[len];
+				objectIds = new int[len];
+				for (int i = 0; i < len; i++) {
+					final JSONObject pairObject = pairsArray.getJSONObject(i);
+					folderIds[i] = pairObject.getInt(PARAMETER_FOLDERID);
+					objectIds[i] = pairObject.getInt(PARAMETER_ID);
+				}
+			} catch (final JSONException e1) {
+				throw new DataException(DataException.Code.INVALID_ARGUMENT, ARGS[0], dataArguments.get(ARGS[0]));
+			}
 		}
 		/*
 		 * Get contact
 		 */
-		ContactObject contact;
+		final ContactObject[] contacts = new ContactObject[folderIds.length];
 		try {
 			final ContactSQLInterface contactSql = new RdbContactSQLInterface(session);
-			contact = contactSql.getObjectById(objectId, folderId);
+			for (int i = 0; i < contacts.length; i++) {
+				contacts[i] = contactSql.getObjectById(objectIds[i], folderIds[i]);
+			}
 		} catch (final ContextException e) {
 			throw new DataException(e);
 		} catch (final OXException e) {
@@ -131,8 +148,29 @@ public final class ContactDataSource implements DataSource {
 		/*
 		 * Create necessary objects
 		 */
-		final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream(8192);
+		final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream(
+				folderIds.length * 4096);
 		final VersitDefinition contactDef = Versit.getDefinition("text/vcard");
+		for (final ContactObject contact : contacts) {
+			writeVCard2Stream(contact, byteArrayOutputStream, contactDef, session);
+		}
+		/*
+		 * Return data
+		 */
+		final DataProperties properties = new DataProperties();
+		properties.put(DataProperties.PROPERTY_CHARSET, "UTF-8");
+		properties.put(DataProperties.PROPERTY_VERSION, "3.0");
+		properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "text/vcard");
+		final String displayName = contacts.length == 1 ? contacts[0].getDisplayName() : null;
+		properties.put(DataProperties.PROPERTY_NAME, displayName == null ? "vcard.vcf" : new StringBuilder(displayName
+				.replaceAll(" +", "_")).append(".vcf").toString());
+		return new SimpleData<D>((D) (InputStream.class.equals(type) ? new UnsynchronizedByteArrayInputStream(
+				byteArrayOutputStream.toByteArray()) : byteArrayOutputStream.toByteArray()), properties);
+	}
+
+	private static void writeVCard2Stream(final ContactObject contact,
+			final ByteArrayOutputStream byteArrayOutputStream, final VersitDefinition contactDef, final Session session)
+			throws DataException {
 		final VersitDefinition.Writer versitWriter;
 		try {
 			versitWriter = contactDef.getWriter(byteArrayOutputStream, "UTF-8");
@@ -159,18 +197,6 @@ public final class ContactDataSource implements DataSource {
 		} finally {
 			closeVersitResources(oxContainerConverter, versitWriter);
 		}
-		/*
-		 * Return data
-		 */
-		final DataProperties properties = new DataProperties();
-		properties.put(DataProperties.PROPERTY_CHARSET, "UTF-8");
-		properties.put(DataProperties.PROPERTY_VERSION, "3.0");
-		properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "text/vcard");
-		final String displayName = contact.getDisplayName();
-		properties.put(DataProperties.PROPERTY_NAME, displayName == null ? "vcard.vcf" : new StringBuilder(displayName
-				.replaceAll(" +", "_")).append(".vcf").toString());
-		return new SimpleData<D>((D) (InputStream.class.equals(type) ? new UnsynchronizedByteArrayInputStream(
-				byteArrayOutputStream.toByteArray()) : byteArrayOutputStream.toByteArray()), properties);
 	}
 
 	public String[] getRequiredArguments() {

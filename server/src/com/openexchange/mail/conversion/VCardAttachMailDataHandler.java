@@ -56,9 +56,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
@@ -67,6 +65,8 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.configuration.ServerConfig;
@@ -83,6 +83,8 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.impl.AJAXUploadFile;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailJSONField;
+import com.openexchange.mail.MailListField;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
@@ -163,8 +165,8 @@ public final class VCardAttachMailDataHandler implements DataHandler {
 			ct.setCharsetParameter(vcardProperties.get(DataProperties.PROPERTY_CHARSET));
 			uploadFile.setContentType(ct.toString());
 			uploadFile.setSize(vcardBytes.length);
-			final String id = plainStringToMD5(tmpFile.getName());
-			session.putUploadedFile(id, uploadFile);
+			final String fileId = UUID.randomUUID().toString();
+			session.putUploadedFile(fileId, uploadFile);
 			/*
 			 * Compose a new mail
 			 */
@@ -214,9 +216,9 @@ public final class VCardAttachMailDataHandler implements DataHandler {
 			/*
 			 * Return mail's JSON object
 			 */
-			final JSONObject mailObject = MessageWriter.writeMailMessage(MIMEMessageConverter.convertMessage(mimeMessage),
-					DisplayMode.MODIFYABLE, session, null);
-			// TODO: Add file information: id, location, etc.
+			final JSONObject mailObject = MessageWriter.writeMailMessage(MIMEMessageConverter
+					.convertMessage(mimeMessage), DisplayMode.MODIFYABLE, session, null);
+			addFileInformation(mailObject, fileId);
 			return mailObject;
 		} catch (final MailException e) {
 			throw new DataException(e);
@@ -224,10 +226,35 @@ public final class VCardAttachMailDataHandler implements DataHandler {
 			throw new DataException(DataException.Code.ERROR, e, e.getMessage());
 		} catch (final IOException e) {
 			throw new DataException(DataException.Code.ERROR, e, e.getMessage());
+		} catch (final JSONException e) {
+			throw new DataException(DataException.Code.ERROR, e, e.getMessage());
 		}
 	}
 
-	private static void write2File(final File tmpFile, final byte[] vcardBytes) throws FileNotFoundException, IOException {
+	private static final String FILE_PREFIX = "file://";
+
+	private static void addFileInformation(final JSONObject mailObject, final String fileId) throws JSONException,
+			DataException {
+		if (!mailObject.has(MailJSONField.ATTACHMENTS.getKey())
+				|| mailObject.isNull(MailJSONField.ATTACHMENTS.getKey())) {
+			throw new DataException(DataException.Code.ERROR, new StringBuilder(64).append(
+					"Parsed JSON mail object does not contain field '").append(MailJSONField.ATTACHMENTS.getKey())
+					.append('\'').toString());
+		}
+		final JSONArray attachmentArray = mailObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
+		final int len = attachmentArray.length();
+		if (len != 2) {
+			throw new DataException(DataException.Code.ERROR,
+					"Number of attachments in parsed JSON mail object is not equal to 2");
+		}
+		final JSONObject vcardAttachmentObject = attachmentArray.getJSONObject(1);
+		vcardAttachmentObject.remove(MailListField.ID.getKey());
+		vcardAttachmentObject.put(MailListField.ID.getKey(), new StringBuilder(FILE_PREFIX.length() + fileId.length())
+				.append(FILE_PREFIX).append(fileId).toString());
+	}
+
+	private static void write2File(final File tmpFile, final byte[] vcardBytes) throws FileNotFoundException,
+			IOException {
 		final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tmpFile));
 		try {
 			bos.write(vcardBytes);
@@ -258,43 +285,4 @@ public final class VCardAttachMailDataHandler implements DataHandler {
 		}
 	}
 
-	private static final String ALG_MD5 = "MD5";
-
-	private static String plainStringToMD5(final String input) {
-		final MessageDigest md;
-		try {
-			/*
-			 * Choose MD5 (SHA1 is also possible)
-			 */
-			md = MessageDigest.getInstance(ALG_MD5);
-		} catch (final NoSuchAlgorithmException e) {
-			LOG.error("Unable to generate file ID", e);
-			return input;
-		}
-		/*
-		 * Reset
-		 */
-		md.reset();
-		/*
-		 * Update the digest
-		 */
-		try {
-			md.update(input.getBytes("UTF-8"));
-		} catch (final UnsupportedEncodingException e) {
-			/*
-			 * Should not occur since utf-8 is a known encoding in jsdk
-			 */
-			LOG.error("Unable to generate file ID", e);
-			return input;
-		}
-		/*
-		 * Here comes the hash
-		 */
-		final byte[] byteHash = md.digest();
-		final StringBuilder resultString = new StringBuilder();
-		for (int i = 0; i < byteHash.length; i++) {
-			resultString.append(Integer.toHexString(0xF0 & byteHash[i]).charAt(0));
-		}
-		return resultString.toString();
-	}
 }
