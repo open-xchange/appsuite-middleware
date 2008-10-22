@@ -58,9 +58,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataSource;
-import com.openexchange.conversion.engine.ConversionService;
 import com.openexchange.conversion.engine.internal.ConversionEngineRegistry;
 import com.openexchange.conversion.engine.internal.ConversionServiceImpl;
 

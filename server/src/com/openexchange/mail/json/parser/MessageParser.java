@@ -74,7 +74,7 @@ import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataSource;
-import com.openexchange.conversion.engine.ConversionService;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;

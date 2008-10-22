@@ -51,7 +51,7 @@ package com.openexchange.conversion.servlet.osgi;
 
 import org.osgi.service.http.HttpService;
 
-import com.openexchange.conversion.engine.ConversionService;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.servlet.ConversionServlet;
 import com.openexchange.conversion.servlet.ConversionServletServiceRegistry;
 import com.openexchange.server.osgiservice.DeferredActivator;

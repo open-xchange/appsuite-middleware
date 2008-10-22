@@ -47,14 +47,10 @@
  *
  */
 
-package com.openexchange.conversion.engine;
+package com.openexchange.conversion;
 
 import java.io.InputStream;
 
-import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataException;
-import com.openexchange.conversion.DataHandler;
-import com.openexchange.conversion.DataSource;
 import com.openexchange.session.Session;
 
 /**

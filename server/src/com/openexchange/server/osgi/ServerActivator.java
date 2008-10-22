@@ -75,7 +75,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.context.internal.ContextServiceImpl;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataSource;
-import com.openexchange.conversion.engine.ConversionService;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.event.impl.EventQueue;

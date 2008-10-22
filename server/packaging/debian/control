@@ -2,12 +2,12 @@ Source: open-xchange-server
 Section: unknown
 Priority: optional
 Maintainer: choeger <choeger@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= 6.7.0), open-xchange-configread (>= 6.7.0), open-xchange-global (>= 6.7.0), open-xchange-conversion (>=6.7.0), open-xchange-conversion-engine (>=6.7.0), open-xchange-monitoring (>= 6.7.0), open-xchange-cache (>= 6.7.0), open-xchange-xml (>= 6.7.0)
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= 6.7.0), open-xchange-configread (>= 6.7.0), open-xchange-global (>= 6.7.0), open-xchange-conversion (>=6.7.0), open-xchange-monitoring (>= 6.7.0), open-xchange-cache (>= 6.7.0), open-xchange-xml (>= 6.7.0)
 Standards-Version: 3.6.1
 
 Package: open-xchange-server
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-common (>= 6.7.0), j2re1.5|sun-java5-jre, open-xchange-configread, open-xchange-global, open-xchange-conversion, open-xchange-conversion-engine, open-xchange-monitoring, open-xchange-management, open-xchange-cache, open-xchange-xml
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-common (>= 6.7.0), j2re1.5|sun-java5-jre, open-xchange-configread, open-xchange-global, open-xchange-conversion, open-xchange-monitoring, open-xchange-management, open-xchange-cache, open-xchange-xml
 Suggests: mysql-server-5.0 (>= 5.0.24)
 Conflicts: open-xchange-libs
 Replaces: open-xchange-libs
@@ -16,7 +16,7 @@ Description: The Open-Xchange Server Bundle
 Package: open-xchange
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-server, adduser
-Suggests: open-xchange-authentication, open-xchange-cache, open-xchange-charset, open-xchange-configjump, open-xchange-configread, open-xchange-control, open-xchange-global, open-xchange-conversion-servlet, open-xchange-contactcollector, open-xchange-i18n, open-xchange-mailstore, open-xchange-jcharset, open-xchange-management, open-xchange-monitoring, open-xchange-push-udp, open-xchange-sessiond, open-xchange-smtp, open-xchange-spamhandler, open-xchange-spellcheck, open-xchange-settings-extensions
+Suggests: open-xchange-authentication, open-xchange-cache, open-xchange-charset, open-xchange-configjump, open-xchange-configread, open-xchange-control, open-xchange-global, open-xchange-conversion-engine, open-xchange-conversion-servlet, open-xchange-contactcollector, open-xchange-i18n, open-xchange-mailstore, open-xchange-jcharset, open-xchange-management, open-xchange-monitoring, open-xchange-push-udp, open-xchange-sessiond, open-xchange-smtp, open-xchange-spamhandler, open-xchange-spellcheck, open-xchange-settings-extensions
 Description: Open-Xchange server scripts and configuration
 Provides: open-xchange-config
 Conflicts: open-xchange-config-hosting, open-xchange-config-standard
