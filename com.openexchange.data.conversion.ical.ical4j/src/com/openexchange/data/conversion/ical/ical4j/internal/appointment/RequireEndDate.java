@@ -48,18 +48,18 @@
  */
 package com.openexchange.data.conversion.ical.ical4j.internal.appointment;
 
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.data.conversion.ical.ical4j.internal.ObjectVerifier;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ConversionError;
-
 import java.util.List;
+
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ical4j.internal.ObjectVerifier;
+import com.openexchange.groupware.container.AppointmentObject;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class RequireEndDate  implements ObjectVerifier<AppointmentObject> {
-    public void verify(int index, AppointmentObject object, List<ConversionWarning> warnings) throws ConversionError {
+    public void verify(final int index, final AppointmentObject object, final List<ConversionWarning> warnings) throws ConversionError {
         if(!object.containsEndDate()) {
             throw new ConversionError(index, "DTEND or Duration required");
         }

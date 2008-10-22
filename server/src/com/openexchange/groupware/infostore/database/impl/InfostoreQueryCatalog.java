@@ -561,7 +561,7 @@ public class InfostoreQueryCatalog {
 		if(sort == Metadata.CURRENT_VERSION_LITERAL) {
 			return "(infostore.version = infostore_document.version_number) AS current_version";
 		}
-		String[] tuple = getFieldTuple(sort, wins);
+		final String[] tuple = getFieldTuple(sort, wins);
 		if(tuple == null) {
             return null;
         }

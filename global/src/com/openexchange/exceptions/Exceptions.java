@@ -48,17 +48,20 @@
  */
 package com.openexchange.exceptions;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
-
-import java.util.*;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public abstract class Exceptions<T extends AbstractOXException> {
 
-    private Map<Integer, ErrorMessage> errors = new HashMap<Integer, ErrorMessage>();
+    private final Map<Integer, ErrorMessage> errors = new HashMap<Integer, ErrorMessage>();
 
     private Component component;
     private String applicationId;
@@ -67,7 +70,7 @@ public abstract class Exceptions<T extends AbstractOXException> {
         return component;
     }
 
-    public void setComponent(Component component) {
+    public void setComponent(final Component component) {
         this.component = component;
         initialize();
     }
@@ -76,7 +79,7 @@ public abstract class Exceptions<T extends AbstractOXException> {
         return applicationId;
     }
 
-    public void setApplicationId(String applicationId) {
+    public void setApplicationId(final String applicationId) {
         this.applicationId = applicationId;
         initialize();
     }
@@ -88,22 +91,22 @@ public abstract class Exceptions<T extends AbstractOXException> {
         }
     }
 
-    protected void declare(int code, AbstractOXException.Category category, String message, String help) {
+    protected void declare(final int code, final AbstractOXException.Category category, final String message, final String help) {
         errors.put(Integer.valueOf(code), new ErrorMessage(code, component, applicationId, category, message, help));
     }
 
-    protected void declare(OXErrorMessage error) {
+    protected void declare(final OXErrorMessage error) {
         errors.put(Integer.valueOf(error.getErrorCode()), new ErrorMessage(error, component, applicationId));
     }
 
-    protected void declareAll(OXErrorMessage[] errors) {
-        for(OXErrorMessage error : errors) {
+    protected void declareAll(final OXErrorMessage[] errors) {
+        for(final OXErrorMessage error : errors) {
             declare(error);
         }
     }
 
-    protected void declareAll(Iterable<OXErrorMessage> errors) {
-        for(OXErrorMessage error : errors) {
+    protected void declareAll(final Iterable<OXErrorMessage> errors) {
+        for(final OXErrorMessage error : errors) {
             declare(error);
         }
     }
@@ -118,39 +121,39 @@ public abstract class Exceptions<T extends AbstractOXException> {
 
     protected abstract T createException(ErrorMessage message,Throwable cause, Object...args);
 
-    public T create(int code, Throwable cause, Object...args) {
-        ErrorMessage errorMessage = errors.get(Integer.valueOf(code));
+    public T create(final int code, final Throwable cause, final Object...args) {
+        final ErrorMessage errorMessage = errors.get(Integer.valueOf(code));
         if (errorMessage == null) {
             throw new UndeclaredErrorCodeException(code, getApplicationId(), getComponent());
         }
         return createException(errorMessage,cause, args);
     }
 
-    public T create(int code, Object...args) {
+    public T create(final int code, final Object...args) {
         return create(code, null, args);
     }
 
-    public void throwException(int code, Object...args) throws T {
+    public void throwException(final int code, final Object...args) throws T {
         throw create(code, args);
     }
 
-    public void throwException(int code, Throwable cause, Object...args) throws T {
+    public void throwException(final int code, final Throwable cause, final Object...args) throws T {
         throw create(code, cause, args);
     }
 
-    public T create(OXErrorMessage message, Object...args) {
+    public T create(final OXErrorMessage message, final Object...args) {
         return create(message.getErrorCode(), args);
     }
 
-    public T create(OXErrorMessage message, Throwable cause, Object...args) {
+    public T create(final OXErrorMessage message, final Throwable cause, final Object...args) {
         return create(message.getErrorCode(), cause,  args);
     }
 
-    public void throwException(OXErrorMessage message, Object...args) throws T {
+    public void throwException(final OXErrorMessage message, final Object...args) throws T {
         throw create(message, args);
     }
 
-    public void throwException(OXErrorMessage message, Throwable cause, Object...args) throws T {
+    public void throwException(final OXErrorMessage message, final Throwable cause, final Object...args) throws T {
         throw create(message, cause, args);
     }
 
@@ -158,11 +161,11 @@ public abstract class Exceptions<T extends AbstractOXException> {
         return new TreeSet<ErrorMessage>(errors.values());
     }
 
-    public ErrorMessage findMessage(int code) {
+    public ErrorMessage findMessage(final int code) {
         return errors.get(Integer.valueOf(code));
     }
 
-    public OXErrorMessage findOXErrorMessage(int code) {
+    public OXErrorMessage findOXErrorMessage(final int code) {
         return findMessage(code).getOXErrorMessage();
     }
 

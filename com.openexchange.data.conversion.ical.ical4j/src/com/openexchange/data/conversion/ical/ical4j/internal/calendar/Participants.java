@@ -57,9 +57,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 
+import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.ResourceList;
-import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.Attendee;
 import net.fortuna.ical4j.model.property.Resources;
@@ -99,24 +99,24 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
 
     public static UserResolver userResolver = new UserResolver() {
 
-        public List<User> findUsers(List<String> mails, Context ctx) throws LdapException {
+        public List<User> findUsers(final List<String> mails, final Context ctx) throws LdapException {
             return new ArrayList<User>();
         }
 
-        public User loadUser(int userId, Context ctx) throws LdapException {
+        public User loadUser(final int userId, final Context ctx) throws LdapException {
             return null;
         }
     };
     
     public static ResourceResolver resourceResolver = new OXResourceResolver();
 
-    public boolean isSet(U cObj) {
+    public boolean isSet(final U cObj) {
         return cObj.containsParticipants();
     }
 
-    public void emit(int index, U cObj, T component, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
-        List<ResourceParticipant> resources = new LinkedList<ResourceParticipant>();
-        for(Participant p : cObj.getParticipants()) {
+    public void emit(final int index, final U cObj, final T component, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
+        final List<ResourceParticipant> resources = new LinkedList<ResourceParticipant>();
+        for(final Participant p : cObj.getParticipants()) {
             switch(p.getType()) {
                 case Participant.USER:
                     addUserAttendee(index, (UserParticipant)p, ctx, component);
@@ -136,11 +136,11 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
     private void setResources(final int index, final T component,
         final List<ResourceParticipant> resources, final Context ctx) throws ConversionError {
         final ResourceList list = new ResourceList();
-        for (ResourceParticipant res : resources) {
+        for (final ResourceParticipant res : resources) {
             String displayName = res.getDisplayName();
             if (null == displayName) {
                 try {
-                    Resource resource = resourceResolver.load(res.getIdentifier(), ctx);
+                    final Resource resource = resourceResolver.load(res.getIdentifier(), ctx);
                     displayName = resource.getDisplayName();
                 } catch (final ResourceException e) {
                     throw new ConversionError(index, e);
@@ -150,27 +150,27 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             }
             list.add(displayName);
         }
-        Resources property = new Resources(list);
+        final Resources property = new Resources(list);
         component.getProperties().add(property);
     }
 
-    private void addExternalAttendee(ExternalUserParticipant externalUserParticipant, T component) {
-        Attendee attendee = new Attendee();
+    private void addExternalAttendee(final ExternalUserParticipant externalUserParticipant, final T component) {
+        final Attendee attendee = new Attendee();
         try {
             attendee.setValue("MAILTO:"+externalUserParticipant.getEmailAddress());
             component.getProperties().add(attendee);
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             LOG.error(e); // Shouldn't happen
         }
     }
 
-    private void addUserAttendee(int index, UserParticipant userParticipant, Context ctx, T component) throws ConversionError {
-        Attendee attendee = new Attendee();
+    private void addUserAttendee(final int index, final UserParticipant userParticipant, final Context ctx, final T component) throws ConversionError {
+        final Attendee attendee = new Attendee();
         try {
             String address = userParticipant.getEmailAddress();
             if(address == null) {
                 try {
-                    User user = userResolver.loadUser(userParticipant.getIdentifier(), ctx);
+                    final User user = userResolver.loadUser(userParticipant.getIdentifier(), ctx);
                     address = user.getMail();
                 } catch (final LdapException e) {
                     throw new ConversionError(index, e);
@@ -183,26 +183,26 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         }
     }
 
-    public boolean hasProperty(T component) {
-        PropertyList properties = component.getProperties("ATTENDEE");
-        PropertyList resourcesList = component.getProperties("RESOURCES");
+    public boolean hasProperty(final T component) {
+        final PropertyList properties = component.getProperties("ATTENDEE");
+        final PropertyList resourcesList = component.getProperties("RESOURCES");
         return properties.size() > 0 || resourcesList.size() > 0;
     }
 
-    public void parse(int index, T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
-        PropertyList properties = component.getProperties("ATTENDEE");
-        List<String> mails = new LinkedList<String>();
+    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+        final PropertyList properties = component.getProperties("ATTENDEE");
+        final List<String> mails = new LinkedList<String>();
         final List<String> resourceNames = new LinkedList<String>();
 
         for(int i = 0, size = properties.size(); i < size; i++) {
-            Attendee attendee = (Attendee) properties.get(i);
+            final Attendee attendee = (Attendee) properties.get(i);
             if(attendee.getParameter(CUTYPE) != null && RESOURCE.equalsIgnoreCase(attendee.getParameter(CUTYPE).getValue())) {
-                Parameter cn = attendee.getParameter(CN);
+                final Parameter cn = attendee.getParameter(CN);
                 if(cn != null) { resourceNames.add( cn.getValue() ); }
             } else {
-                URI uri = attendee.getCalAddress();
+                final URI uri = attendee.getCalAddress();
                 if("mailto".equalsIgnoreCase(uri.getScheme())) {
-                    String mail = uri.getSchemeSpecificPart();
+                    final String mail = uri.getSchemeSpecificPart();
                     mails.add( mail );
                 }
             }
@@ -216,20 +216,20 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             throw new ConversionError(index, e);
         }
 
-        for(User user : users) {
+        for(final User user : users) {
             cObj.addParticipant( new UserParticipant(user.getId()) );
             mails.remove(user.getMail());
         }
 
-        for(String mail : mails) {
-            ExternalUserParticipant external = new ExternalUserParticipant(mail);
+        for(final String mail : mails) {
+            final ExternalUserParticipant external = new ExternalUserParticipant(mail);
             external.setDisplayName(null);
             cObj.addParticipant(external);
         }
 
-        PropertyList resourcesList = component.getProperties("RESOURCES");
+        final PropertyList resourcesList = component.getProperties("RESOURCES");
         for (int i = 0, size = resourcesList.size(); i < size; i++) {
-            Resources resources = (Resources) resourcesList.get(i);
+            final Resources resources = (Resources) resourcesList.get(i);
             final Iterator<?> resObjects = resources.getResources().iterator();
             while (resObjects.hasNext()) {
                 resourceNames.add(resObjects.next().toString());
@@ -244,11 +244,11 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             throw new ConversionError(index, e);
         }
 
-        for (Resource resource : resources) {
+        for (final Resource resource : resources) {
             cObj.addParticipant(new ResourceParticipant(resource.getIdentifier()));
             resourceNames.remove(resource.getDisplayName());
         }
-        for (String resourceName : resourceNames) {
+        for (final String resourceName : resourceNames) {
             final ConversionWarning warning = new ConversionWarning(index,
                 Code.CANT_RESOLVE_RESOURCE, resourceName);
             warnings.add(warning);

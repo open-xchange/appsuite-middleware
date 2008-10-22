@@ -49,14 +49,14 @@
 
 package com.openexchange.webdav.action;
 
-import javax.servlet.http.HttpServletResponse;
-
-import com.openexchange.webdav.protocol.WebdavException;
-
 import java.io.IOException;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.webdav.protocol.WebdavException;
 
 public class WebdavExistsAction extends AbstractAction {
     private boolean tolerateLockNull = false;
@@ -75,10 +75,10 @@ public class WebdavExistsAction extends AbstractAction {
         yield(req,res);
 	}
 
-    private void notFound(WebdavRequest req, WebdavResponse res) throws WebdavException {
+    private void notFound(final WebdavRequest req, final WebdavResponse res) throws WebdavException {
         try {
             res.sendString(NOT_FOUND);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.debug("Client gone?", e);
         }
         throw new WebdavException(req.getUrl(), HttpServletResponse.SC_NOT_FOUND);

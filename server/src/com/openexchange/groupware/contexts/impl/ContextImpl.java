@@ -155,7 +155,7 @@ public class ContextImpl implements ContextExtended {
     /**
      * @param name the name to set
      */
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 

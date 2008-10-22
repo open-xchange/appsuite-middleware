@@ -338,7 +338,7 @@ public final class CalendarCommonCollection {
         final UserParticipant check[] = cdao.getUsers();
         if (check != null && check.length > 0) {
             Arrays.sort(check);
-            int x = Arrays.binarySearch(check, up);
+            final int x = Arrays.binarySearch(check, up);
             if (x >= 0) {
                 return true;
             }

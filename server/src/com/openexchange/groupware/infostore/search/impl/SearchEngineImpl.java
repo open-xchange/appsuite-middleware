@@ -204,7 +204,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
  		}
 		
 		if(!query.equals("") && !query.equals("*") ) {
-			boolean containsWildcard = query.contains("*");
+			final boolean containsWildcard = query.contains("*");
 
             query = query.replaceAll("%", "\\\\%"); // Escape \ twice, due to regexp parser in replaceAll
 			query = query.replace('*', '%');

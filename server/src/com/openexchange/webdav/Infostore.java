@@ -54,22 +54,20 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Cookie;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.OXServlet;
 import com.openexchange.webdav.InfostorePerformer.Action;
 import com.openexchange.webdav.tools.WebdavWhiteList;
-import com.openexchange.ajp13.AJPv13RequestHandler;
-import com.openexchange.ajax.Login;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.server.services.ServerServiceRegistry;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class Infostore extends OXServlet {
 
@@ -164,12 +162,12 @@ public class Infostore extends OXServlet {
 
 	}
 
-    private void logout(ServerSession session, HttpServletRequest req, HttpServletResponse resp) {
+    private void logout(final ServerSession session, final HttpServletRequest req, final HttpServletResponse resp) {
         removeCookie(req, resp);
         removeSession(session);
     }
 
-    private void removeSession(ServerSession session) {
+    private void removeSession(final ServerSession session) {
         LOG.debug("Removing Session "+session.getSessionID());
         final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
                                 SessiondService.class);
@@ -177,11 +175,11 @@ public class Infostore extends OXServlet {
             
     }
 
-    private void removeCookie(HttpServletRequest req, HttpServletResponse resp) {
+    private void removeCookie(final HttpServletRequest req, final HttpServletResponse resp) {
         // FIXME: Kleini hilf!
     }
 
-    private boolean mustLogOut(HttpServletRequest req) {
+    private boolean mustLogOut(final HttpServletRequest req) {
         return !WebdavWhiteList.getInstance().acceptClient(req);
     }
 

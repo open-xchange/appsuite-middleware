@@ -1,7 +1,5 @@
 package com.openexchange.event.impl;
 
-import com.openexchange.event.impl.AppointmentEventInterface;
-import com.openexchange.event.impl.TaskEventInterface;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

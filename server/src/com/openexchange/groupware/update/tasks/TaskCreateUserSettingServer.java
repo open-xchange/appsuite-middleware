@@ -91,7 +91,7 @@ public class TaskCreateUserSettingServer implements UpdateTask {
 	    return UpdateTaskPriority.NORMAL.priority;
 	}
 
-	public void perform(Schema schema, int contextId) throws AbstractOXException {
+	public void perform(final Schema schema, final int contextId) throws AbstractOXException {
 		LOG.info("Performing update task TaskCreateUserSettingServer.");
 		
 		Connection con = null;
@@ -105,15 +105,15 @@ public class TaskCreateUserSettingServer implements UpdateTask {
         	if(!Tools.tableExists(con, TABLE_NAME)) {
         		createTable(con);
         	}
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new TaskException(TaskException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
                 Database.back(contextId, true, con);
         }
 	}
 	
-	private void createTable(Connection con) throws SQLException {
-	    Statement stmt = con.createStatement();
+	private void createTable(final Connection con) throws SQLException {
+	    final Statement stmt = con.createStatement();
 	    try {
 	        stmt.execute(CREATE_STATEMENT);
 	    } finally {

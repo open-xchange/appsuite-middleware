@@ -56,9 +56,9 @@ import com.openexchange.groupware.Component;
  */
 public class StringComponent implements Component {
 
-    private String abbreviation;
+    private final String abbreviation;
 
-    public StringComponent(String abbreviation) {
+    public StringComponent(final String abbreviation) {
         this.abbreviation = abbreviation;
     }
 
@@ -66,7 +66,8 @@ public class StringComponent implements Component {
         return abbreviation;
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return abbreviation;
     }
 }

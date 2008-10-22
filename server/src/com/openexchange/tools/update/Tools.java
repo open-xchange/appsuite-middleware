@@ -89,8 +89,8 @@ public final class Tools {
         return retval;
     }
 
-    public static boolean tableExists(Connection con, String table) throws SQLException {
-    	DatabaseMetaData metaData = con.getMetaData();
+    public static boolean tableExists(final Connection con, final String table) throws SQLException {
+    	final DatabaseMetaData metaData = con.getMetaData();
     	ResultSet rs = null;
     	boolean retval = false;
     	try{

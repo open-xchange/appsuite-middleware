@@ -53,12 +53,12 @@ import java.net.SocketException;
 import java.util.List;
 import java.util.TimeZone;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.util.UidGenerator;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
@@ -96,8 +96,8 @@ public final class Uid<T extends CalendarComponent, U extends CalendarObject> ex
     /**
      * {@inheritDoc}
      */
-    public void emit(int index, final U calendar, final T component,
-        final List<ConversionWarning> warnings, Context ctx) throws ConversionError {
+    public void emit(final int index, final U calendar, final T component,
+        final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
         final UidGenerator generator;
         try {
             generator = new UidGenerator(String.valueOf(Thread.currentThread().getId()));
@@ -118,7 +118,7 @@ public final class Uid<T extends CalendarComponent, U extends CalendarObject> ex
     /**
      * {@inheritDoc}
      */
-    public void parse(int index, final T component, final U calendar, final TimeZone timeZone,
+    public void parse(final int index, final T component, final U calendar, final TimeZone timeZone,
         final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         // Nothing to parse.
     }

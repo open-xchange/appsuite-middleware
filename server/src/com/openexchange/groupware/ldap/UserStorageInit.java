@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.ldap;
 
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
 /**

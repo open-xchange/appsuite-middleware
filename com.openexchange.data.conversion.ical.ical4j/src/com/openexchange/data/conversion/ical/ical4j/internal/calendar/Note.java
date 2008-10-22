@@ -49,14 +49,14 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-import java.util.TimeZone;
 import java.util.List;
+import java.util.TimeZone;
 
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.Description;
 
-import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 
@@ -83,7 +83,7 @@ public final class Note<T extends CalendarComponent, U extends CalendarObject> e
     /**
      * {@inheritDoc}
      */
-    public void emit(int index, final U calendarObject, final T calendarComponent, List<ConversionWarning> warnings, Context ctx) {
+    public void emit(final int index, final U calendarObject, final T calendarComponent, final List<ConversionWarning> warnings, final Context ctx) {
         calendarComponent.getProperties().add(new Description(calendarObject.getNote()));
     }
 
@@ -91,7 +91,7 @@ public final class Note<T extends CalendarComponent, U extends CalendarObject> e
         return null != calendarComponent.getProperty(Description.DESCRIPTION);
     }
 
-    public void parse(int index, final T calendarComponent, final U calendarObject, final TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) {
+    public void parse(final int index, final T calendarComponent, final U calendarObject, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         calendarObject.setNote(calendarComponent.getProperty(Description.DESCRIPTION).getValue());
     }
 }

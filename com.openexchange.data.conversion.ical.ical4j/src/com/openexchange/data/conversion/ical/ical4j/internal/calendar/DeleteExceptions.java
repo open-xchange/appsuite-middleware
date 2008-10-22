@@ -48,60 +48,61 @@
  */
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.PropertyList;
-import net.fortuna.ical4j.model.DateList;
-import net.fortuna.ical4j.model.property.ExDate;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
-import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ConversionError;
-
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.Date;
+
+import net.fortuna.ical4j.model.DateList;
+import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.property.ExDate;
+
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
+import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.contexts.Context;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class DeleteExceptions<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
 
-    public boolean isSet(U calendar) {
+    public boolean isSet(final U calendar) {
         return calendar.containsDeleteExceptions();
     }
 
-    public void emit(int index, U calendar, T t, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
-        Date[] dates = calendar.getDeleteException();
+    public void emit(final int index, final U calendar, final T t, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
+        final Date[] dates = calendar.getDeleteException();
         if(null == dates) { return; }
-        DateList deleteExceptions = new DateList(dates.length);
+        final DateList deleteExceptions = new DateList(dates.length);
         for(int i = 0, size = dates.length; i < size; i++) {
             deleteExceptions.add(EmitterTools.toDateTime(dates[i]));
         }
 
         deleteExceptions.setUtc(true);
 
-        ExDate property = new ExDate(deleteExceptions);
+        final ExDate property = new ExDate(deleteExceptions);
         t.getProperties().add(property);
 
         return;
     }
 
-    public boolean hasProperty(T t) {
+    public boolean hasProperty(final T t) {
         return null != t.getProperty("EXDATE");
     }
 
-    public void parse(int index, T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
-       PropertyList exdates = component.getProperties("EXDATE");
+    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+       final PropertyList exdates = component.getProperties("EXDATE");
         for(int i = 0, size = exdates.size(); i < size; i++) {
-            ExDate exdate = (ExDate) exdates.get(0);
+            final ExDate exdate = (ExDate) exdates.get(0);
 
-            DateList dates = exdate.getDates();
+            final DateList dates = exdate.getDates();
             for(int j = 0, size2 = dates.size(); j < size2; j++) {
-                net.fortuna.ical4j.model.Date icaldate = (net.fortuna.ical4j.model.Date) dates.get(j);
-                Date date = ParserTools.recalculateAsNeeded(icaldate, exdate, timeZone);
+                final net.fortuna.ical4j.model.Date icaldate = (net.fortuna.ical4j.model.Date) dates.get(j);
+                final Date date = ParserTools.recalculateAsNeeded(icaldate, exdate, timeZone);
                 cObj.addDeleteException(date);
             }
         }

@@ -151,15 +151,15 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 		}
 	}
 
-    private String decode(String component, String encoding) throws UnsupportedEncodingException {
-        List<Integer> plusPositions = new ArrayList<Integer>();
+    private String decode(final String component, final String encoding) throws UnsupportedEncodingException {
+        final List<Integer> plusPositions = new ArrayList<Integer>();
         for(int i = 0, size = component.length(); i < size; i++) {
             if(component.charAt(i) == '+') {
                 plusPositions.add(i);
             }
         }
-        StringBuilder decoded = new StringBuilder(URLDecoder.decode(component, encoding));
-        for(Integer i : plusPositions) {
+        final StringBuilder decoded = new StringBuilder(URLDecoder.decode(component, encoding));
+        for(final Integer i : plusPositions) {
             decoded.setCharAt(i, '+');
         }
         return decoded.toString();

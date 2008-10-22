@@ -80,7 +80,7 @@ public class ServerUserSetting {
      * @param cid context id
      * @param user user id
      */
-    public static void setContactColletion(int cid, int user, boolean enabled){
+    public static void setContactColletion(final int cid, final int user, final boolean enabled){
         setAttributeWithoutException(cid, user, "contact_collect_enabled", enabled);
     }
     
@@ -90,10 +90,11 @@ public class ServerUserSetting {
      * @param user user id
      * @return true if mails should be collected, false otherwise
      */
-    public static boolean contactCollectionEnabled(int cid, int user){
-        Object retval = getAttributeWithoutException(cid, user, "contact_collect_enabled");
-        if(retval == null)
-            return false;
+    public static boolean contactCollectionEnabled(final int cid, final int user){
+        final Object retval = getAttributeWithoutException(cid, user, "contact_collect_enabled");
+        if(retval == null) {
+			return false;
+		}
         return (Boolean) retval;
     }
     
@@ -103,7 +104,7 @@ public class ServerUserSetting {
      * @param user user id
      * @param folder folder id
      */
-    public static void setContactCollectionFolder(int cid, int user, int folder){
+    public static void setContactCollectionFolder(final int cid, final int user, final int folder){
         setAttributeWithoutException(cid, user, "contact_collect_folder", folder);
     }
     
@@ -113,39 +114,40 @@ public class ServerUserSetting {
      * @param user user id
      * @return folder id
      */
-    public static int getContactCollectionFolder(int cid, int user){
-        Object retval = getAttributeWithoutException(cid, user, "contact_collect_folder");
-        if(retval == null)
-            return 0;
+    public static int getContactCollectionFolder(final int cid, final int user){
+        final Object retval = getAttributeWithoutException(cid, user, "contact_collect_folder");
+        if(retval == null) {
+			return 0;
+		}
         return (Integer) retval;
     }
     
-    private static Object getAttributeWithoutException(int cid, int user, String column) {
+    private static Object getAttributeWithoutException(final int cid, final int user, final String column) {
         try {
             return getAttribute(cid, user, column);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             LOG.info("Can not retrieve Connection", e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             LOG.info("SQL Exception occurred", new ContactException(Category.CODE_ERROR, -1, "SQL Exception occurred", e));
         }
         return null;
     }
     
-    private static void setAttributeWithoutException(int cid, int user, String column, Object value) {
+    private static void setAttributeWithoutException(final int cid, final int user, final String column, final Object value) {
         try {
             setAttribute(cid, user, column, value);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             LOG.info("Can not retrieve Connection", e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
     
-    private static Object getAttribute(int cid, int user, String column) throws DBPoolingException, SQLException{
+    private static Object getAttribute(final int cid, final int user, final String column) throws DBPoolingException, SQLException{
         Object retval = null;
-        Connection con = Database.get(cid, false);
-        String select = "SELECT " + column + " FROM user_setting_server WHERE cid = ? AND user = ?";
+        final Connection con = Database.get(cid, false);
+        final String select = "SELECT " + column + " FROM user_setting_server WHERE cid = ? AND user = ?";
         
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -155,8 +157,9 @@ public class ServerUserSetting {
             stmt.setInt(1, cid);
             stmt.setInt(2, user);
             rs = stmt.executeQuery();
-            if (rs.next())
-                retval = rs.getObject(column);
+            if (rs.next()) {
+				retval = rs.getObject(column);
+			}
         } finally {
             closeSQLStuff(rs, stmt);
         }
@@ -164,9 +167,9 @@ public class ServerUserSetting {
         return retval;
     }
     
-    private static void setAttribute(int cid, int user, String column, Object value) throws DBPoolingException, SQLException {
-        Connection con = Database.get(cid, true);
-        String insert = "INSERT INTO user_setting_server (" + column + ") VALUES (?)";
+    private static void setAttribute(final int cid, final int user, final String column, final Object value) throws DBPoolingException, SQLException {
+        final Connection con = Database.get(cid, true);
+        final String insert = "INSERT INTO user_setting_server (" + column + ") VALUES (?)";
         
         PreparedStatement stmt = null;
         

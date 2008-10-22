@@ -51,7 +51,14 @@ package com.openexchange.ajax.request;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -209,7 +216,7 @@ public class InfostoreRequest extends CommonRequest {
 					return true;
 				}
 				final Object toDelete = req.getBody();
-                Map<Integer, Integer> folderMapping = new HashMap<Integer, Integer>();
+                final Map<Integer, Integer> folderMapping = new HashMap<Integer, Integer>();
                 final int[] ids = parseIDList(toDelete, folderMapping);
 				final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
 				delete(ids, folderMapping, timestamp);
@@ -329,7 +336,7 @@ public class InfostoreRequest extends CommonRequest {
 		}
 	}
 
-	protected int[] parseIDList(final Object toDelete, Map<Integer, Integer> folderMapping) throws JSONException {
+	protected int[] parseIDList(final Object toDelete, final Map<Integer, Integer> folderMapping) throws JSONException {
         if(JSONArray.class.isAssignableFrom(toDelete.getClass())) {
             final JSONArray array = (JSONArray) toDelete;
             final int[] ids = new int[array.length()];
@@ -692,7 +699,7 @@ public class InfostoreRequest extends CommonRequest {
 		}
 	}
 
-	protected void delete(final int[] ids, Map<Integer, Integer> folderMapping, final long timestamp) {
+	protected void delete(final int[] ids, final Map<Integer, Integer> folderMapping, final long timestamp) {
 		final InfostoreFacade infostore = getInfostore();
 		final SearchEngine searchEngine = getSearchEngine();
 
@@ -776,7 +783,7 @@ public class InfostoreRequest extends CommonRequest {
 
 				notDetached = infostore.removeVersion(objectId, ids, sessionObj);
 
-                DocumentMetadata currentVersion = infostore.getDocumentMetadata(objectId, InfostoreFacade.CURRENT_VERSION, ctx,
+                final DocumentMetadata currentVersion = infostore.getDocumentMetadata(objectId, InfostoreFacade.CURRENT_VERSION, ctx,
                         user, userConfiguration);
                 searchEngine.index(currentVersion, ctx, user, userConfiguration);
                 newTimestamp = currentVersion.getLastModified().getTime();
@@ -1066,7 +1073,7 @@ public class InfostoreRequest extends CommonRequest {
 
 			infostore.commit();
 
-            DocumentMetadata currentVersion = infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx,
+            final DocumentMetadata currentVersion = infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx,
                     user, userConfiguration);
 
             try {
@@ -1106,7 +1113,7 @@ public class InfostoreRequest extends CommonRequest {
 
 			infostore.commit();
 
-            DocumentMetadata currentVersion = infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx,
+            final DocumentMetadata currentVersion = infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx,
                                 user, userConfiguration);
 
             try {

@@ -65,11 +65,11 @@ import com.openexchange.groupware.contexts.Context;
 
 public class EmptyReminderDeleteImpl implements ReminderDeleteInterface {
 	
-	public void updateTargetObject(Context ctx, Connection con, final int targetId) throws AbstractOXException {
+	public void updateTargetObject(final Context ctx, final Connection con, final int targetId) throws AbstractOXException {
 		
 	}
 
-	public void updateTargetObject(Context ctx, Connection con, final int targetId, final int userId) throws AbstractOXException {
+	public void updateTargetObject(final Context ctx, final Connection con, final int targetId, final int userId) throws AbstractOXException {
 		
 	}
 }

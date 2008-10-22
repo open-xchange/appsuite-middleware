@@ -58,7 +58,6 @@ import org.json.JSONObject;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.database.impl.CheckSizeSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
 

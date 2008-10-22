@@ -49,12 +49,12 @@
 
 package com.openexchange.data.conversion.ical;
 
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.contexts.Context;
-
 import java.io.OutputStream;
 import java.util.List;
+
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

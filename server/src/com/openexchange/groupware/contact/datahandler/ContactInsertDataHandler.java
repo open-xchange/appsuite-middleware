@@ -86,25 +86,25 @@ import com.openexchange.tools.versit.filetokenizer.VCardFileToken;
 import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 
 /**
- * {@link VCardSaveDataHandler} - A data handler for storing VCards into a
+ * {@link ContactInsertDataHandler} - A data handler for storing VCards into a
  * contact folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class VCardSaveDataHandler implements DataHandler {
+public final class ContactInsertDataHandler implements DataHandler {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(VCardSaveDataHandler.class);
+			.getLog(ContactInsertDataHandler.class);
 
 	private static final String[] ARGS = { "com.openexchange.groupware.contact.folder" };
 
 	private static final Class<?>[] TYPES = { InputStream.class };
 
 	/**
-	 * Initializes a new {@link VCardSaveDataHandler}
+	 * Initializes a new {@link ContactInsertDataHandler}
 	 */
-	public VCardSaveDataHandler() {
+	public ContactInsertDataHandler() {
 		super();
 	}
 

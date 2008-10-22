@@ -61,11 +61,11 @@ import javax.naming.ldap.LdapContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
-import com.openexchange.authentication.LoginException;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -136,18 +136,18 @@ public class LDAPAuthentication implements AuthenticationService {
                 + "=" + uid + "," + baseDN);
             context.addToEnvironment(Context.SECURITY_CREDENTIALS, password);
             context.reconnect(null);
-        } catch (InvalidNameException e) {
+        } catch (final InvalidNameException e) {
             throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS, e);
-        } catch (AuthenticationException e) {
+        } catch (final AuthenticationException e) {
             throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS, e);
-        } catch (NamingException e) {
+        } catch (final NamingException e) {
             LOG.error(e.getMessage(), e);
             throw new LoginException(LoginExceptionCodes.COMMUNICATION, e);
         } finally {
             if (null != context) {
                 try {
                     context.close();
-                } catch (NamingException e) {
+                } catch (final NamingException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
@@ -163,7 +163,7 @@ public class LDAPAuthentication implements AuthenticationService {
     private LdapContext createContext() throws LoginException {
         try {
             return new InitialLdapContext(props, null);
-        } catch (NamingException e) {
+        } catch (final NamingException e) {
             throw new LoginException(LoginExceptionCodes.COMMUNICATION, e);
         }
     }

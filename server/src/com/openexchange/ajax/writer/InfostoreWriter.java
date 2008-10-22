@@ -304,7 +304,7 @@ public class InfostoreWriter extends TimedWriter {
         private void writeNull() {
             try {
                 writer.value(null);
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 LOG.error("",e);
             }
         }

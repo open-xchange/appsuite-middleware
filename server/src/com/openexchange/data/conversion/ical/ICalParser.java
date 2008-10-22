@@ -49,13 +49,13 @@
 
 package com.openexchange.data.conversion.ical;
 
+import java.io.InputStream;
+import java.util.List;
+import java.util.TimeZone;
+
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-
-import java.util.TimeZone;
-import java.util.List;
-import java.io.InputStream;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

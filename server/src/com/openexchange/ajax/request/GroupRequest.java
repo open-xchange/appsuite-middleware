@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.request;
 
-import static com.openexchange.ajax.AJAXServlet.*;
+import static com.openexchange.ajax.AJAXServlet.PARAMETER_ID;
 
 import java.util.Date;
 

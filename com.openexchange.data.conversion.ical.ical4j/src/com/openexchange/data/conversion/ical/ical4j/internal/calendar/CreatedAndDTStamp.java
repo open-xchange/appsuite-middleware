@@ -48,46 +48,46 @@
  */
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
+import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDateTime;
+
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+
 import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.DateList;
-import net.fortuna.ical4j.model.PropertyList;
-import net.fortuna.ical4j.model.property.*;
+import net.fortuna.ical4j.model.property.Created;
+import net.fortuna.ical4j.model.property.DateProperty;
+
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
-import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
-import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDateTime;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ConversionError;
-
-import java.util.List;
-import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class CreatedAndDTStamp <T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
 
-    public boolean isSet(U calendar) {
+    public boolean isSet(final U calendar) {
         return calendar.containsCreationDate();
     }
 
-    public void emit(int index, U calendar, T t, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
+    public void emit(final int index, final U calendar, final T t, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
         final Created created = new Created();
         created.setDate(toDateTime(calendar.getCreationDate()));
         t.getProperties().add(created);
         return;
     }
 
-    public boolean hasProperty(T t) {
+    public boolean hasProperty(final T t) {
         return null != t.getProperty("CREATED") || null != t.getProperty("DTSTAMP");
     }
 
-    public void parse(int index, T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
-        DateProperty property = (DateProperty) ((null != component.getProperty("CREATED")) ? component.getProperty("CREATED") : component.getProperty("DTSTAMP"));
-        Date creationDate = ParserTools.parseDate(component, property, timeZone);
+    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+        final DateProperty property = (DateProperty) ((null != component.getProperty("CREATED")) ? component.getProperty("CREATED") : component.getProperty("DTSTAMP"));
+        final Date creationDate = ParserTools.parseDate(component, property, timeZone);
         cObj.setCreationDate(creationDate);
     }
 }

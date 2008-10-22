@@ -49,7 +49,24 @@
 
 package com.openexchange.webdav.xml;
 
-import static com.openexchange.webdav.xml.fields.TaskFields.*;
+import static com.openexchange.webdav.xml.fields.CalendarFields.ALARM;
+import static com.openexchange.webdav.xml.fields.CalendarFields.ALARM_FLAG;
+import static com.openexchange.webdav.xml.fields.CalendarFields.END_DATE;
+import static com.openexchange.webdav.xml.fields.CalendarFields.START_DATE;
+import static com.openexchange.webdav.xml.fields.DataFields.LAST_MODIFIED;
+import static com.openexchange.webdav.xml.fields.DataFields.OBJECT_ID;
+import static com.openexchange.webdav.xml.fields.TaskFields.ACTUAL_COSTS;
+import static com.openexchange.webdav.xml.fields.TaskFields.ACTUAL_DURATION;
+import static com.openexchange.webdav.xml.fields.TaskFields.BILLING_INFORMATION;
+import static com.openexchange.webdav.xml.fields.TaskFields.COMPANIES;
+import static com.openexchange.webdav.xml.fields.TaskFields.CURRENCY;
+import static com.openexchange.webdav.xml.fields.TaskFields.DATE_COMPLETED;
+import static com.openexchange.webdav.xml.fields.TaskFields.PERCENT_COMPLETED;
+import static com.openexchange.webdav.xml.fields.TaskFields.PRIORITY;
+import static com.openexchange.webdav.xml.fields.TaskFields.STATUS;
+import static com.openexchange.webdav.xml.fields.TaskFields.TARGET_COSTS;
+import static com.openexchange.webdav.xml.fields.TaskFields.TARGET_DURATION;
+import static com.openexchange.webdav.xml.fields.TaskFields.TRIP_METER;
 
 import java.io.OutputStream;
 import java.util.Date;

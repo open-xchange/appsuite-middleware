@@ -61,7 +61,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -695,7 +694,7 @@ public final class ical extends PermissionServlet {
         private final String userAgent;
         private int calendarFolder;
         private int taskFolder;
-        private Principal(int id, String userAgent, int calendarFolder, int taskFolder) {
+        private Principal(final int id, final String userAgent, final int calendarFolder, final int taskFolder) {
             super();
             this.id = id;
             this.userAgent = userAgent;
@@ -849,7 +848,7 @@ public final class ical extends PermissionServlet {
         try {
             con.setAutoCommit(false);
             ps = con.prepareStatement(SQL_ENTRY_INSERT);
-            for (Map.Entry<String, Integer> entry : entriesApp.entrySet()) {
+            for (final Map.Entry<String, Integer> entry : entriesApp.entrySet()) {
                 final int objectId = IDGenerator.getId(ctx, Types.ICAL, con);
                 ps.setInt(1, objectId);
                 ps.setLong(2, ctx.getContextId());
@@ -859,7 +858,7 @@ public final class ical extends PermissionServlet {
                 ps.setInt(6, Types.APPOINTMENT);
                 ps.addBatch();
             }
-            for (Map.Entry<String, Integer> entry : entriesTask.entrySet()) {
+            for (final Map.Entry<String, Integer> entry : entriesTask.entrySet()) {
                 final int objectId = IDGenerator.getId(ctx, Types.ICAL, con);
                 ps.setInt(1, objectId);
                 ps.setLong(2, ctx.getContextId());
@@ -992,11 +991,11 @@ public final class ical extends PermissionServlet {
         private Mapping() {
             super();
         }
-        public void addAppointment(String clientId, int targetId) {
+        public void addAppointment(final String clientId, final int targetId) {
             client2App.put(clientId, Integer.valueOf(targetId));
             app2Client.put(Integer.valueOf(targetId), clientId);
         }
-        public void addTask(String clientId, int targetId) {
+        public void addTask(final String clientId, final int targetId) {
             client2Task.put(clientId, Integer.valueOf(targetId));
             task2Client.put(Integer.valueOf(targetId), clientId);
         }

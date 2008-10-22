@@ -48,17 +48,18 @@
  */
 package com.openexchange.webdav.tools;
 
-import com.openexchange.config.ConfigurationService;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.config.ConfigurationService;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -74,22 +75,22 @@ public class WebdavWhiteList {
         return INSTANCE;
     }
 
-    public void init(ConfigurationService config) {
-        String[] clientNames = config.getProperty("com.openexchange.webdav.whitelist.clients", "").split("\\s*,\\s*");
+    public void init(final ConfigurationService config) {
+        final String[] clientNames = config.getProperty("com.openexchange.webdav.whitelist.clients", "").split("\\s*,\\s*");
 
         patterns = new ArrayList<Pattern>(clientNames.length);
 
-        for(String clientName : clientNames) {
-            String key = "com.openexchange.webdav.whitelist." + clientName;
-            String patternString = config.getProperty(key);
+        for(final String clientName : clientNames) {
+            final String key = "com.openexchange.webdav.whitelist." + clientName;
+            final String patternString = config.getProperty(key);
             LOG.debug(key+" : "+patternString);
 
             try {
                 if(patternString != null) {
-                    Pattern pattern = Pattern.compile(patternString);
+                    final Pattern pattern = Pattern.compile(patternString);
                     patterns.add(pattern);
                 }
-            } catch (PatternSyntaxException x) {
+            } catch (final PatternSyntaxException x) {
                 LOG.error("Invalid pattern in "+key+": "+patternString);
             }
 
@@ -97,15 +98,15 @@ public class WebdavWhiteList {
         
     }
 
-    public boolean acceptClient(HttpServletRequest req) {
-        String client = req.getHeader("User-Agent");
+    public boolean acceptClient(final HttpServletRequest req) {
+        final String client = req.getHeader("User-Agent");
         if(client == null) {
             LOG.debug("No user agent set, so assuming the client is not on the whitelist.");
             return false;
         }
 
-        for(Pattern pattern : patterns) {
-            boolean result = pattern.matcher(client).find();
+        for(final Pattern pattern : patterns) {
+            final boolean result = pattern.matcher(client).find();
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Does the pattern "+pattern+" apply to user agent "+client+"? "+result);
             }

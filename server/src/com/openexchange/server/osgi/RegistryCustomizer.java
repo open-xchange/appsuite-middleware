@@ -48,9 +48,10 @@
  */
 package com.openexchange.server.osgi;
 
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -58,25 +59,25 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class RegistryCustomizer<T> implements ServiceTrackerCustomizer {
 
-    private BundleContext context;
-    private Class<T> clazz;
+    private final BundleContext context;
+    private final Class<T> clazz;
 
-    public RegistryCustomizer(BundleContext context, Class<T> clazz) {
+    public RegistryCustomizer(final BundleContext context, final Class<T> clazz) {
         this.context = context;
         this.clazz = clazz;
     }
 
-    public Object addingService(ServiceReference serviceReference) {
-        Object service = context.getService(serviceReference);
+    public Object addingService(final ServiceReference serviceReference) {
+        final Object service = context.getService(serviceReference);
         ServerServiceRegistry.getInstance().addService(clazz, service);
         return service;
     }
 
-    public void modifiedService(ServiceReference serviceReference, Object o) {
+    public void modifiedService(final ServiceReference serviceReference, final Object o) {
 
     }
 
-    public void removedService(ServiceReference serviceReference, Object o) {
+    public void removedService(final ServiceReference serviceReference, final Object o) {
         ServerServiceRegistry.getInstance().removeService(clazz);
     }
 }

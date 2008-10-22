@@ -48,19 +48,20 @@
  */
 package com.openexchange.xml.jdom.impl;
 
-import com.openexchange.xml.jdom.JDOMParser;
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.jdom.Document;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
-import java.io.InputStream;
-import java.io.IOException;
+import com.openexchange.xml.jdom.JDOMParser;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class JDOMParserImpl implements JDOMParser {
-    public Document parse(InputStream is) throws JDOMException, IOException {
+    public Document parse(final InputStream is) throws JDOMException, IOException {
         return new SAXBuilder().build(is);
     }
 }

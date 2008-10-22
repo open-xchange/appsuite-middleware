@@ -49,19 +49,20 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal.task;
 
-import net.fortuna.ical4j.model.component.VToDo;
-import net.fortuna.ical4j.model.property.Completed;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
-import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ConversionError;
-
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.Date;
+
+import net.fortuna.ical4j.model.component.VToDo;
+import net.fortuna.ical4j.model.property.Completed;
+
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
+import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -86,8 +87,8 @@ public class DateCompleted extends AbstractVerifyingAttributeConverter<VToDo, Ta
     /**
      * {@inheritDoc}
      */
-    public void emit(int index, final Task task, final VToDo vToDo,
-                     final List<ConversionWarning> warnings, Context ctx) throws ConversionError {
+    public void emit(final int index, final Task task, final VToDo vToDo,
+                     final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
         final Completed completed = new Completed(EmitterTools.toDateTime(task.getDateCompleted()));
         vToDo.getProperties().add(completed);
     }
@@ -102,7 +103,7 @@ public class DateCompleted extends AbstractVerifyingAttributeConverter<VToDo, Ta
     /**
      * {@inheritDoc}
      */
-    public void parse(int index, final VToDo vToDo, final Task task, final TimeZone timeZone,
+    public void parse(final int index, final VToDo vToDo, final Task task, final TimeZone timeZone,
         final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         final Completed completed =  vToDo.getDateCompleted();
         final Date completedDate = ParserTools.toDate(completed,timeZone);

@@ -49,10 +49,10 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ConversionError;
-
 import java.util.List;
+
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

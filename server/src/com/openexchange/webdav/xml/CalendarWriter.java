@@ -53,7 +53,6 @@ package com.openexchange.webdav.xml;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
-import java.util.Calendar;
 
 import org.jdom.Element;
 

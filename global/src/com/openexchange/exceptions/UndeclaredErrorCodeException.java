@@ -54,11 +54,15 @@ import com.openexchange.groupware.Component;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class UndeclaredErrorCodeException extends RuntimeException {
-    private int errorCode;
-    private String applicationId;
-    private Component component;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -7091321672667546138L;
+	private final int errorCode;
+    private final String applicationId;
+    private final Component component;
 
-    public UndeclaredErrorCodeException(int code, String applicationId, Component component) {
+    public UndeclaredErrorCodeException(final int code, final String applicationId, final Component component) {
         super("Use of undeclared error code "+code+" in application "+applicationId+", component "+component);
         this.errorCode = code;
         this.applicationId = applicationId;

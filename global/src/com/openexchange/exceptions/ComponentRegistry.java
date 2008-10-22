@@ -49,9 +49,9 @@
 
 package com.openexchange.exceptions;
 
-import com.openexchange.groupware.Component;
-
 import java.util.List;
+
+import com.openexchange.groupware.Component;
 
 /**
  * The component registry makes sure that the component shorthand for messages is uniquely assigned to individual

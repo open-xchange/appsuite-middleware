@@ -48,12 +48,12 @@
  */
 package com.openexchange.xml.spring.impl;
 
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.core.io.FileSystemResource;
-
 import java.io.File;
+
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.core.io.FileSystemResource;
 
 import com.openexchange.xml.spring.SpringParser;
 
@@ -61,7 +61,7 @@ import com.openexchange.xml.spring.SpringParser;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class DefaultSpringParser implements SpringParser {
-    public BeanFactory parseFile(String path, ClassLoader classLoader) {
+    public BeanFactory parseFile(final String path, final ClassLoader classLoader) {
         final DefaultListableBeanFactory beanfactory = new DefaultListableBeanFactory();
         final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanfactory);
         reader.setBeanClassLoader(classLoader);

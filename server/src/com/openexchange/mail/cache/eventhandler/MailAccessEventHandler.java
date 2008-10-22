@@ -64,6 +64,10 @@ import com.openexchange.mail.api.MailAccess;
  */
 public final class MailAccessEventHandler implements ElementEventHandler {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6568843006180170658L;
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailAccessEventHandler.class);
 

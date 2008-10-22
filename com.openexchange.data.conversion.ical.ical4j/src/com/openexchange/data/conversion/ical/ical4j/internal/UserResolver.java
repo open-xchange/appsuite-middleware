@@ -49,11 +49,11 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.contexts.Context;
-
 import java.util.List;
+
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

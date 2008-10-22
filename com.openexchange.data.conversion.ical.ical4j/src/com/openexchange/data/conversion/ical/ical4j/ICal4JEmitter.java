@@ -49,42 +49,42 @@
 
 package com.openexchange.data.conversion.ical.ical4j;
 
-import com.openexchange.data.conversion.ical.ICalEmitter;
-import com.openexchange.data.conversion.ical.ConversionError;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ICalItem;
-import com.openexchange.data.conversion.ical.ICalSession;
-import com.openexchange.data.conversion.ical.ConversionWarning.Code;
-import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
-import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
-import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tasks.Task;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.ProdId;
+
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ICalEmitter;
+import com.openexchange.data.conversion.ical.ICalItem;
+import com.openexchange.data.conversion.ical.ICalSession;
+import com.openexchange.data.conversion.ical.ConversionWarning.Code;
+import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
+import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class ICal4JEmitter implements ICalEmitter {
 
-    public String writeAppointments(List<AppointmentObject> appointmentObjects, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) {
-        Calendar calendar = new Calendar();
+    public String writeAppointments(final List<AppointmentObject> appointmentObjects, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
+        final Calendar calendar = new Calendar();
         initCalendar(calendar);
         int i = 0;
-        for(AppointmentObject appointment : appointmentObjects) {
-            VEvent event = createEvent(i++, appointment, ctx, errors, warnings);
+        for(final AppointmentObject appointment : appointmentObjects) {
+            final VEvent event = createEvent(i++, appointment, ctx, errors, warnings);
             calendar.getComponents().add(event);
         }
 
@@ -96,7 +96,7 @@ public class ICal4JEmitter implements ICalEmitter {
      */
     public String writeTasks(final List<Task> tasks,
         final List<ConversionError> errors,
-        final List<ConversionWarning> warnings, Context ctx) {
+        final List<ConversionWarning> warnings, final Context ctx) {
         final Calendar calendar = new Calendar();
         initCalendar(calendar);
         int i = 0;
@@ -105,21 +105,21 @@ public class ICal4JEmitter implements ICalEmitter {
             try {
                 vtodo = createEvent(i++, task, ctx, warnings);
                 calendar.getComponents().add(vtodo);
-            } catch (ConversionError conversionError) {
+            } catch (final ConversionError conversionError) {
                 errors.add( conversionError );
             }
         }
         return calendar.toString();
     }
 
-    private VEvent createEvent(int index, AppointmentObject appointment, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) {
+    private VEvent createEvent(final int index, final AppointmentObject appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
 
         final VEvent vevent = new VEvent();
         for (final AttributeConverter<VEvent, AppointmentObject> converter : AppointmentConverters.ALL) {
             if (converter.isSet(appointment)) {
                 try {
                     converter.emit(index, appointment, vevent, warnings, ctx);
-                } catch (ConversionError conversionError) {
+                } catch (final ConversionError conversionError) {
                     errors.add( conversionError );
                 }
             }
@@ -133,7 +133,7 @@ public class ICal4JEmitter implements ICalEmitter {
      * @param task task to convert.
      * @return the iCal event representing the task.
      */
-    private VToDo createEvent(int index, final Task task, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+    private VToDo createEvent(final int index, final Task task, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         final VToDo vtodo = new VToDo();
         for (final AttributeConverter<VToDo, Task> converter : TaskConverters.ALL) {
             if (converter.isSet(task)) {
@@ -197,7 +197,7 @@ public class ICal4JEmitter implements ICalEmitter {
     }
 
 
-    private int getAndIncreaseIndex(ICalSession session) throws ConversionError {
+    private int getAndIncreaseIndex(final ICalSession session) throws ConversionError {
         if (!(session instanceof ICal4jSession)) {
             throw new ConversionError(-1, Code.INVALID_SESSION, session.getClass().getName());
         }

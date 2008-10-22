@@ -65,7 +65,7 @@ public class ErrorMessage implements Comparable<ErrorMessage>, OXErrorMessage{
     private AbstractOXException.Category category;
     private OXErrorMessage delegate;
 
-    public ErrorMessage(int errorCode, Component component, String applicationId, AbstractOXException.Category category, String message, String help) {
+    public ErrorMessage(final int errorCode, final Component component, final String applicationId, final AbstractOXException.Category category, final String message, final String help) {
         this.errorCode = errorCode;
         this.component = component;
         this.applicationId = applicationId;
@@ -74,7 +74,7 @@ public class ErrorMessage implements Comparable<ErrorMessage>, OXErrorMessage{
         this.help = help;
     }
 
-    public ErrorMessage(OXErrorMessage error, Component component, String applicationId) {
+    public ErrorMessage(final OXErrorMessage error, final Component component, final String applicationId) {
         this.delegate = error;
         this.component = component;
         this.applicationId = applicationId;
@@ -87,7 +87,7 @@ public class ErrorMessage implements Comparable<ErrorMessage>, OXErrorMessage{
         return errorCode;
     }
 
-    public void setErrorCode(int errorCode) {
+    public void setErrorCode(final int errorCode) {
         this.errorCode = errorCode;
     }
 
@@ -98,7 +98,7 @@ public class ErrorMessage implements Comparable<ErrorMessage>, OXErrorMessage{
         return message;
     }
 
-    public void setMessage(String message) {
+    public void setMessage(final String message) {
         this.message = message;
     }
 
@@ -109,7 +109,7 @@ public class ErrorMessage implements Comparable<ErrorMessage>, OXErrorMessage{
         return help;
     }
 
-    public void setHelp(String help) {
+    public void setHelp(final String help) {
         this.help = help;
     }
 
@@ -117,7 +117,7 @@ public class ErrorMessage implements Comparable<ErrorMessage>, OXErrorMessage{
         return component;
     }
 
-    public void setComponent(Component component) {
+    public void setComponent(final Component component) {
         this.component = component;
     }
 
@@ -128,7 +128,7 @@ public class ErrorMessage implements Comparable<ErrorMessage>, OXErrorMessage{
         return category;
     }
 
-    public void setCategory(AbstractOXException.Category category) {
+    public void setCategory(final AbstractOXException.Category category) {
         this.category = category;
     }
 
@@ -136,11 +136,11 @@ public class ErrorMessage implements Comparable<ErrorMessage>, OXErrorMessage{
         return applicationId;
     }
 
-    public void setApplicationId(String applicationId) {
+    public void setApplicationId(final String applicationId) {
         this.applicationId = applicationId;
     }
 
-    public int compareTo(ErrorMessage other) {
+    public int compareTo(final ErrorMessage other) {
         return getErrorCode() - other.getErrorCode();
     }
 

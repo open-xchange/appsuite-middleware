@@ -50,14 +50,15 @@
 package com.openexchange.data.conversion.ical.ical4j;
 
 
-import java.io.*;
-import java.net.URI;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -66,31 +67,14 @@ import java.util.TimeZone;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Component;
-import net.fortuna.ical4j.model.ComponentList;
-import net.fortuna.ical4j.model.DateList;
-import net.fortuna.ical4j.model.DateTime;
-import net.fortuna.ical4j.model.Dur;
-import net.fortuna.ical4j.model.NumberList;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.PropertyList;
-import net.fortuna.ical4j.model.Recur;
-import net.fortuna.ical4j.model.WeekDay;
-import net.fortuna.ical4j.model.WeekDayList;
 import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
-import net.fortuna.ical4j.model.property.Attendee;
-import net.fortuna.ical4j.model.property.Categories;
 import net.fortuna.ical4j.model.property.Completed;
 import net.fortuna.ical4j.model.property.DateProperty;
 import net.fortuna.ical4j.model.property.DtEnd;
 import net.fortuna.ical4j.model.property.DtStart;
 import net.fortuna.ical4j.model.property.Due;
-import net.fortuna.ical4j.model.property.Duration;
-import net.fortuna.ical4j.model.property.ExDate;
-import net.fortuna.ical4j.model.property.RRule;
-import net.fortuna.ical4j.model.property.Resources;
 import net.fortuna.ical4j.util.CompatibilityHints;
 
 import org.apache.commons.logging.Log;
@@ -99,19 +83,13 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
-import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
-import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.ExternalUserParticipant;
-import com.openexchange.groupware.container.ResourceParticipant;
-import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -141,37 +119,37 @@ public class ICal4JParser implements ICalParser {
 
     }
 
-    public List<CalendarDataObject> parseAppointments(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+    public List<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         try {
             return parseAppointments(new ByteArrayInputStream(icalText.getBytes("UTF-8")), defaultTZ, ctx, errors, warnings);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             LOG.error(e.getMessage(), e);
         }
         return new LinkedList<CalendarDataObject>();
     }
 
-    public List<CalendarDataObject> parseAppointments(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-        List<CalendarDataObject> appointments = new ArrayList<CalendarDataObject>();
-        boolean cont = true;
+    public List<CalendarDataObject> parseAppointments(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
+        final List<CalendarDataObject> appointments = new ArrayList<CalendarDataObject>();
+        final boolean cont = true;
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(ical, "UTF-8"));
 
             while(true) {
-                net.fortuna.ical4j.model.Calendar calendar = parse(reader);
+                final net.fortuna.ical4j.model.Calendar calendar = parse(reader);
                 if(calendar == null) { break; }
                 int i = 0;
-                for(Object componentObj : calendar.getComponents("VEVENT")) {
-                    Component vevent = (Component) componentObj;
+                for(final Object componentObj : calendar.getComponents("VEVENT")) {
+                    final Component vevent = (Component) componentObj;
                     try {
                         appointments.add(convertAppointment(i++, (VEvent)vevent, defaultTZ, ctx, warnings ));
-                    } catch (ConversionError conversionError) {
+                    } catch (final ConversionError conversionError) {
                         errors.add(conversionError);
                     }
                 }
             }
             
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             // IGNORE
         }
 
@@ -180,34 +158,34 @@ public class ICal4JParser implements ICalParser {
         return appointments;
     }
 
-    public List<Task> parseTasks(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+    public List<Task> parseTasks(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         try {
             return parseTasks(new ByteArrayInputStream(icalText.getBytes("UTF-8")), defaultTZ, ctx, errors, warnings);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             LOG.error(e.getMessage(), e);
         }
         return new LinkedList<Task>();
     }
 
-    public List<Task> parseTasks(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-        List<Task> tasks = new ArrayList<Task>();
+    public List<Task> parseTasks(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
+        final List<Task> tasks = new ArrayList<Task>();
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(ical, "UTF-8"));
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(ical, "UTF-8"));
             while(true) {
-                net.fortuna.ical4j.model.Calendar calendar = parse(reader);
+                final net.fortuna.ical4j.model.Calendar calendar = parse(reader);
                 if(calendar == null) { break; }
                 int i = 0;
-                for(Object componentObj : calendar.getComponents("VTODO")) {
-                    Component vtodo = (Component) componentObj;
+                for(final Object componentObj : calendar.getComponents("VTODO")) {
+                    final Component vtodo = (Component) componentObj;
                     try {
                         tasks.add(convertTask(i++, (VToDo) vtodo, defaultTZ, ctx, warnings ));
-                    } catch (ConversionError conversionError) {
+                    } catch (final ConversionError conversionError) {
                         errors.add(conversionError);
                     }
                 }
             }
 
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             // IGNORE
         }
 
@@ -216,11 +194,11 @@ public class ICal4JParser implements ICalParser {
     }
 
 
-    protected CalendarDataObject convertAppointment(int index, final VEvent vevent, TimeZone defaultTZ, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+    protected CalendarDataObject convertAppointment(final int index, final VEvent vevent, final TimeZone defaultTZ, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
 
-        CalendarDataObject appointment = new CalendarDataObject();
+        final CalendarDataObject appointment = new CalendarDataObject();
 
-        TimeZone tz = determineTimeZone(vevent, defaultTZ);
+        final TimeZone tz = determineTimeZone(vevent, defaultTZ);
 
         for (final AttributeConverter<VEvent, AppointmentObject> converter : AppointmentConverters.ALL) {
             if (converter.hasProperty(vevent)) {
@@ -236,7 +214,7 @@ public class ICal4JParser implements ICalParser {
         return appointment;
     }
 
-    protected Task convertTask(int index, VToDo vtodo, TimeZone defaultTZ, Context ctx, List<ConversionWarning> warnings) throws ConversionError{
+    protected Task convertTask(final int index, final VToDo vtodo, final TimeZone defaultTZ, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError{
         final TimeZone tz = determineTimeZone(vtodo, defaultTZ);
         final Task task = new Task();
         for (final AttributeConverter<VToDo, Task> converter : TaskConverters.ALL) {
@@ -251,7 +229,7 @@ public class ICal4JParser implements ICalParser {
 
     private static final TimeZone determineTimeZone(final CalendarComponent component,
         final TimeZone defaultTZ) throws ConversionError {
-        for (String name : new String[] { DtStart.DTSTART, DtEnd.DTEND, Due.DUE, Completed.COMPLETED }) {
+        for (final String name : new String[] { DtStart.DTSTART, DtEnd.DTEND, Due.DUE, Completed.COMPLETED }) {
             final DateProperty dateProp = (DateProperty) component.getProperty(name);
             if (dateProp != null) {
                 return chooseTimeZone(dateProp, defaultTZ);
@@ -261,19 +239,19 @@ public class ICal4JParser implements ICalParser {
         return null;
     }
 
-    private static final TimeZone chooseTimeZone(DateProperty dateProperty, TimeZone defaultTZ) {
+    private static final TimeZone chooseTimeZone(final DateProperty dateProperty, final TimeZone defaultTZ) {
         TimeZone tz = defaultTZ;
         if (dateProperty.isUtc()) {
             tz = TimeZone.getTimeZone("UTC");
         }
-        TimeZone inTZID = (null != dateProperty.getParameter("TZID")) ? TimeZone.getTimeZone(dateProperty.getParameter("TZID").getValue()) : null;
+        final TimeZone inTZID = (null != dateProperty.getParameter("TZID")) ? TimeZone.getTimeZone(dateProperty.getParameter("TZID").getValue()) : null;
         if (null != inTZID) {
             tz = inTZID;
         }
         return tz;
     }
 
-    private String getTimeZoneID(TimeZone tz) {
+    private String getTimeZoneID(final TimeZone tz) {
         if(net.fortuna.ical4j.model.TimeZone.class.isAssignableFrom(tz.getClass())) {
             return "UTC";
         }
@@ -283,11 +261,11 @@ public class ICal4JParser implements ICalParser {
         return tz.getID();
     }
 
-    private net.fortuna.ical4j.model.Calendar parse(BufferedReader reader) throws ConversionError {
-        CalendarBuilder builder = new CalendarBuilder();
+    private net.fortuna.ical4j.model.Calendar parse(final BufferedReader reader) throws ConversionError {
+        final CalendarBuilder builder = new CalendarBuilder();
 
         try {
-            StringBuilder chunk = new StringBuilder();
+            final StringBuilder chunk = new StringBuilder();
             String line;
             boolean read = false;
             // Copy until we find an END:VCALENDAR
@@ -304,9 +282,9 @@ public class ICal4JParser implements ICalParser {
             if(!read) {  return null; }
             chunk.append("END:VCALENDAR\n");
             return builder.build(new StringReader(chunk.toString())); // FIXME: Encoding!
-        } catch (IOException e) {
+        } catch (final IOException e) {
             //IGNORE
-        } catch (ParserException e) {
+        } catch (final ParserException e) {
             LOG.warn(e.getMessage(), e);
             throw new ConversionError(-1, ConversionWarning.Code.PARSE_EXCEPTION, e.getMessage());
         }

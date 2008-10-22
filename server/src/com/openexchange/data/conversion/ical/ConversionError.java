@@ -65,15 +65,15 @@ public class ConversionError extends ConversionWarning {
      * @deprecated use {@link #ConversionError(int, Code, Object...)}.
      */
     @Deprecated
-    public ConversionError(int index, String message, Object... args) {
+    public ConversionError(final int index, final String message, final Object... args) {
         super(index,message, args);
     }
 
-    public ConversionError(int index, Code code, Object...args) {
+    public ConversionError(final int index, final Code code, final Object...args) {
         this(index, code, null, args);
     }
 
-    public ConversionError(int index, Code code, Throwable cause, Object... args) {
+    public ConversionError(final int index, final Code code, final Throwable cause, final Object... args) {
         super(index, code, cause, args);
     }
 

@@ -72,6 +72,7 @@ import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.tx.AlwaysWriteConnectionProvider;
 import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.webdav.action.AbstractAction;
@@ -105,7 +106,6 @@ import com.openexchange.webdav.action.behaviour.RequestSpecificBehaviourRegistry
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.xml.spring.SpringParser;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 public class InfostorePerformer implements SessionHolder {
 	
@@ -230,8 +230,8 @@ public class InfostorePerformer implements SessionHolder {
 		final String beanPath = SystemConfig.getProperty(SystemConfig.Property.WebdavOverrides);
 		if (beanPath != null && new File(beanPath).exists()) {
 			try {
-                SpringParser springParser = ServerServiceRegistry.getInstance().getService(SpringParser.class);
-                BeanFactory beanfactory = springParser.parseFile(beanPath, InfostorePerformer.class.getClassLoader());
+                final SpringParser springParser = ServerServiceRegistry.getInstance().getService(SpringParser.class);
+                final BeanFactory beanfactory = springParser.parseFile(beanPath, InfostorePerformer.class.getClassLoader());
                 final RequestSpecificBehaviourRegistry registry = (RequestSpecificBehaviourRegistry) beanfactory.getBean("registry");
 				registry.log();
 			} catch (final Exception x) {

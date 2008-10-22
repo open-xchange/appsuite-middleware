@@ -48,17 +48,18 @@
  */
 package com.openexchange.exceptions.osgi;
 
-import com.openexchange.groupware.Component;
-import com.openexchange.exceptions.Exceptions;
-import com.openexchange.exceptions.StringComponent;
-import com.openexchange.exceptions.ComponentRegistry;
-import com.openexchange.exceptions.ComponentAlreadyRegisteredException;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.osgi.util.tracker.ServiceTracker;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
+import com.openexchange.exceptions.ComponentAlreadyRegisteredException;
+import com.openexchange.exceptions.ComponentRegistry;
+import com.openexchange.exceptions.Exceptions;
+import com.openexchange.exceptions.StringComponent;
+import com.openexchange.groupware.Component;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -67,14 +68,14 @@ public class ComponentRegistration implements ServiceTrackerCustomizer {
 
     private static final Log LOG = LogFactory.getLog(ComponentRegistration.class);
 
-    private Component component;
-    private String applicationId;
-    private Exceptions exceptions;
-    private BundleContext context;
+    private final Component component;
+    private final String applicationId;
+    private final Exceptions exceptions;
+    private final BundleContext context;
     private ComponentRegistry registry;
-    private ServiceTracker serviceTracker;
+    private final ServiceTracker serviceTracker;
 
-    public ComponentRegistration(BundleContext context, String component, String applicationId, Exceptions exceptions) {
+    public ComponentRegistration(final BundleContext context, final String component, final String applicationId, final Exceptions exceptions) {
         this.component = new StringComponent(component);
         this.applicationId = applicationId;
         this.exceptions = exceptions;
@@ -90,13 +91,13 @@ public class ComponentRegistration implements ServiceTrackerCustomizer {
         this.serviceTracker.close();
     }
 
-    public Object addingService(ServiceReference serviceReference) {
+    public Object addingService(final ServiceReference serviceReference) {
         final Object addedService = context.getService(serviceReference);
         if(ComponentRegistry.class.isAssignableFrom(addedService.getClass())) {
-            ComponentRegistry registry = (ComponentRegistry) addedService;
+            final ComponentRegistry registry = (ComponentRegistry) addedService;
             try {
                 registry.registerComponent(component, applicationId, exceptions);
-            } catch (ComponentAlreadyRegisteredException e) {
+            } catch (final ComponentAlreadyRegisteredException e) {
                 LOG.fatal(applicationId+" could not register component for excetpions: "+e.getMessage(),e);
             }
             this.registry = registry;
@@ -104,10 +105,10 @@ public class ComponentRegistration implements ServiceTrackerCustomizer {
         return addedService;
     }
 
-    public void modifiedService(ServiceReference serviceReference, Object o) {
+    public void modifiedService(final ServiceReference serviceReference, final Object o) {
     }
 
-    public void removedService(ServiceReference serviceReference, Object o) {
+    public void removedService(final ServiceReference serviceReference, final Object o) {
         this.registry = null;
     }
 }

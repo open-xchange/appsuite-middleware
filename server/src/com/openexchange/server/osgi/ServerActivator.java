@@ -83,7 +83,7 @@ import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.datahandler.VCardSaveDataHandler;
+import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -357,7 +357,7 @@ public final class ServerActivator extends DeferredActivator {
 			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
 			props.put("identifier", "com.openexchange.contact");
 			registrationList.add(context
-					.registerService(DataHandler.class.getName(), new VCardSaveDataHandler(), props));
+					.registerService(DataHandler.class.getName(), new ContactInsertDataHandler(), props));
 		}
 		{
 			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();

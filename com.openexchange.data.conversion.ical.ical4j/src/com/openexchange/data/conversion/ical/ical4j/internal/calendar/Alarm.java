@@ -48,37 +48,40 @@
  */
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+
+import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.ComponentList;
+import net.fortuna.ical4j.model.Dur;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
-import net.fortuna.ical4j.model.*;
-import net.fortuna.ical4j.model.property.Trigger;
 import net.fortuna.ical4j.model.property.Action;
 import net.fortuna.ical4j.model.property.Description;
-import com.openexchange.groupware.container.CalendarObject;
+import net.fortuna.ical4j.model.property.Trigger;
+
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
+import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
-import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ConversionError;
-
-import java.util.List;
-import java.util.TimeZone;
-import java.util.Date;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Alarm<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
-    public boolean isSet(U calendar) {
+    public boolean isSet(final U calendar) {
         return true;
     }
 
-    public void emit(int index, U calendar, T component, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
+    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
         if(Task.class.isAssignableFrom(calendar.getClass())) {
             emitTaskAlarm((Task)calendar, (VToDo) component, warnings);
         }  else if ( AppointmentObject.class.isAssignableFrom(calendar.getClass())) {
@@ -86,22 +89,22 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
         }
     }
 
-    private void emitAppointmentAlarm(AppointmentObject appointmentObject, VEvent component, List<ConversionWarning> warnings) {
+    private void emitAppointmentAlarm(final AppointmentObject appointmentObject, final VEvent component, final List<ConversionWarning> warnings) {
         if(0 >= appointmentObject.getAlarm()) {
             return;
         }
-        VAlarm alarm = new VAlarm();
-        Dur duration = new Dur(String.format("-PT%dM", appointmentObject.getAlarm()));
-        Trigger trigger = new Trigger(duration);
+        final VAlarm alarm = new VAlarm();
+        final Dur duration = new Dur(String.format("-PT%dM", appointmentObject.getAlarm()));
+        final Trigger trigger = new Trigger(duration);
         alarm.getProperties().add(trigger);
 
-        Action action = new Action("DISPLAY");
+        final Action action = new Action("DISPLAY");
         alarm.getProperties().add(action);
 
         String note = appointmentObject.getNote();
         if(note == null) { note = "Open-XChange"; }
 
-        Description description = new Description(note);
+        final Description description = new Description(note);
         alarm.getProperties().add(description);
 
         component.getAlarms().add(alarm);
@@ -109,33 +112,33 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
         
     }
 
-    private void emitTaskAlarm(Task task, VToDo component, List<ConversionWarning> warnings) {
+    private void emitTaskAlarm(final Task task, final VToDo component, final List<ConversionWarning> warnings) {
         if(task.getAlarm() == null) {
             return;
         }
-        VAlarm alarm = new VAlarm();
-        Trigger trigger = new Trigger(EmitterTools.toDateTime(task.getAlarm()));
+        final VAlarm alarm = new VAlarm();
+        final Trigger trigger = new Trigger(EmitterTools.toDateTime(task.getAlarm()));
         alarm.getProperties().add(trigger);
 
-        Action action = new Action("DISPLAY");
+        final Action action = new Action("DISPLAY");
         alarm.getProperties().add(action);
 
         String note = task.getNote();
         if(note == null) { note = "Open-XChange"; }
 
-        Description description = new Description(note);
+        final Description description = new Description(note);
         alarm.getProperties().add(description);
 
         component.getAlarms().add(alarm);
     }
 
 
-    public boolean hasProperty(T t) {
+    public boolean hasProperty(final T t) {
         return true; // Not strictly true, but to inlcude the warning we have to enter #parse always
     }
 
-    public void parse(int index, T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
-       VAlarm alarm = getAlarm(index, component, warnings);
+    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+       final VAlarm alarm = getAlarm(index, component, warnings);
 
         if(alarm == null) {
             return;
@@ -151,14 +154,14 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
         if(null != icaldate) {
             remindOn = ParserTools.recalculateAsNeeded(icaldate, alarm.getTrigger(), timeZone);
         } else {
-            Dur duration = alarm.getTrigger().getDuration();
+            final Dur duration = alarm.getTrigger().getDuration();
             if(!duration.isNegative()) {
                 return;
             }
             remindOn = duration.getTime(cObj.getStartDate());
         }
 
-        int delta = (int) (cObj.getStartDate().getTime() - remindOn.getTime());
+        final int delta = (int) (cObj.getStartDate().getTime() - remindOn.getTime());
 
         if(AppointmentObject.class.isAssignableFrom(cObj.getClass())) {
             final AppointmentObject appObj = (AppointmentObject) cObj;
@@ -171,13 +174,13 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
         }
     }
 
-    private VAlarm getAlarm(int index, Component component, List<ConversionWarning> warnings) {
+    private VAlarm getAlarm(final int index, final Component component, final List<ConversionWarning> warnings) {
         ComponentList alarms = null;
         if(VEvent.class.isAssignableFrom(component.getClass())) {
-            VEvent event = (VEvent) component;
+            final VEvent event = (VEvent) component;
             alarms = event.getAlarms();
         } else if (VToDo.class.isAssignableFrom(component.getClass())) {
-            VToDo todo = (VToDo) component;
+            final VToDo todo = (VToDo) component;
             alarms = todo.getAlarms();
         }
 
@@ -186,7 +189,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
         }
 
         for(int i = 0, size = alarms.size(); i < size; i++) {
-            VAlarm alarm = (VAlarm) alarms.get(0);
+            final VAlarm alarm = (VAlarm) alarms.get(0);
             
             if(null != alarm.getTrigger() && "DISPLAY".equalsIgnoreCase(alarm.getAction().getValue())) {
                 return alarm;

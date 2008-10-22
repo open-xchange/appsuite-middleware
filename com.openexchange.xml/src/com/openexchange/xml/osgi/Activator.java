@@ -51,6 +51,7 @@ package com.openexchange.xml.osgi;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.jdom.impl.JDOMParserImpl;
 import com.openexchange.xml.spring.SpringParser;
@@ -63,12 +64,12 @@ public class Activator implements BundleActivator {
     private ServiceRegistration jdomRegistration;
     private ServiceRegistration springParserRegistration;
 
-    public void start(BundleContext bundleContext) throws Exception {
+    public void start(final BundleContext bundleContext) throws Exception {
         this.jdomRegistration = bundleContext.registerService(JDOMParser.class.getName(), new JDOMParserImpl(), null);
         this.springParserRegistration = bundleContext.registerService(SpringParser.class.getName(), new DefaultSpringParser(), null);
     }
 
-    public void stop(BundleContext bundleContext) throws Exception {
+    public void stop(final BundleContext bundleContext) throws Exception {
         jdomRegistration.unregister();
         springParserRegistration.unregister();
     }

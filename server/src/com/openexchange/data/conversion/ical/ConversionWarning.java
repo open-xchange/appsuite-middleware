@@ -62,13 +62,13 @@ public class ConversionWarning extends AbstractOXException {
      */
     private static final long serialVersionUID = -7593693106963732974L;
 
-    private int index;
+    private final int index;
 
     /**
      * @deprecated use {@link #ConversionWarning(Code, Object...)}.
      */
     @Deprecated
-    public ConversionWarning(int index, String message, Object...args) {
+    public ConversionWarning(final int index, final String message, final Object...args) {
         super(EnumComponent.ICAL, Category.CODE_ERROR, 9999, message, null);
         setMessageArgs(args);
         this.index = index;
@@ -82,11 +82,11 @@ public class ConversionWarning extends AbstractOXException {
         return String.format(super.getOrigMessage(), super.getMessageArgs());
     }
 
-    public ConversionWarning(int index, final Code code, final Object... args) {
+    public ConversionWarning(final int index, final Code code, final Object... args) {
         this(index, code, null, args);
     }
 
-    public ConversionWarning(int index, final Code code, final Throwable cause, final Object... args) {
+    public ConversionWarning(final int index, final Code code, final Throwable cause, final Object... args) {
         super(EnumComponent.ICAL, code.getCategory(), code.getNumber(),
             code.getMessage(), cause);
         setMessageArgs(args);

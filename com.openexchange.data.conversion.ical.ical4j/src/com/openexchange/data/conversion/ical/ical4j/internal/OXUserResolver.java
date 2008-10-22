@@ -48,26 +48,26 @@
  */
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.contexts.Context;
-
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class OXUserResolver implements UserResolver {
 
-    public List<User> findUsers(List<String> mails, Context ctx) throws LdapException {
-        List<User> users = new ArrayList<User>();
-        UserStorage storage = UserStorage.getInstance();
-        for(String mail : mails) {
+    public List<User> findUsers(final List<String> mails, final Context ctx) throws LdapException {
+        final List<User> users = new ArrayList<User>();
+        final UserStorage storage = UserStorage.getInstance();
+        for(final String mail : mails) {
             try {
                 users.add( storage.searchUser(mail, ctx) );
-            } catch (LdapException x) {
+            } catch (final LdapException x) {
                 if(x.getDetailNumber() != 14) {  // 14 == user not found
                     throw x;
                 }
@@ -76,7 +76,7 @@ public class OXUserResolver implements UserResolver {
         return users;
     }
 
-    public User loadUser(int userId, Context ctx) throws LdapException {
+    public User loadUser(final int userId, final Context ctx) throws LdapException {
         return UserStorage.getStorageUser(userId, ctx);
     }
 }

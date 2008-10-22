@@ -48,39 +48,40 @@
  */
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ConversionError;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.contexts.Context;
-import net.fortuna.ical4j.model.component.CalendarComponent;
-
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.Date;
+
+import net.fortuna.ical4j.model.component.CalendarComponent;
+
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.contexts.Context;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Duration<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
-    public boolean isSet(U calendar) {
+    public boolean isSet(final U calendar) {
         return false; // Always emitting endDate
     }
 
-    public void emit(int index, U u, T t, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
+    public void emit(final int index, final U u, final T t, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
         return; // Always emitting endDate
     }
 
-    public boolean hasProperty(T t) {
+    public boolean hasProperty(final T t) {
         return null != t.getProperty("Duration");
     }
 
-    public void parse(int index, T component, U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
-       net.fortuna.ical4j.model.property.Duration duration = (net.fortuna.ical4j.model.property.Duration) component.getProperty("Duration");
+    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+       final net.fortuna.ical4j.model.property.Duration duration = (net.fortuna.ical4j.model.property.Duration) component.getProperty("Duration");
         if(duration == null) {
             return;
         }
-        Date endDate = duration.getDuration().getTime(cObj.getStartDate());
+        final Date endDate = duration.getDuration().getTime(cObj.getStartDate());
         cObj.setEndDate(endDate);
     }
 }

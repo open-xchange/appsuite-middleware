@@ -48,25 +48,35 @@
  */
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.property.RRule;
-import net.fortuna.ical4j.model.*;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.data.conversion.ical.ConversionWarning.Code;
-import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
-import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ConversionError;
-
-import java.util.*;
-import java.util.TimeZone;
-import java.util.Calendar;
-import java.util.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+
+import net.fortuna.ical4j.model.NumberList;
+import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.Recur;
+import net.fortuna.ical4j.model.WeekDay;
+import net.fortuna.ical4j.model.WeekDayList;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.property.RRule;
+
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ConversionWarning.Code;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
+import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.contexts.Context;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -85,14 +95,14 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         weekdays.put("SA", Integer.valueOf(AppointmentObject.SATURDAY));
         weekdays.put("SU", Integer.valueOf(AppointmentObject.SUNDAY));
 
-        for(Map.Entry<String, Integer> entry : weekdays.entrySet()) {
+        for(final Map.Entry<String, Integer> entry : weekdays.entrySet()) {
             allDays.add(entry.getValue());
             reverseDays.put(entry.getValue(), entry.getKey());
         }
         Collections.sort(allDays); // nicer order in BYDAYS
     }
 
-    private SimpleDateFormat date = new SimpleDateFormat("yyyyMMdd");
+    private final SimpleDateFormat date = new SimpleDateFormat("yyyyMMdd");
 
     /**
      * {@inheritDoc}
@@ -108,7 +118,7 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         return calendar.containsRecurrenceType();
     }
 
-    public void emit(int index, final U calendar, final T component, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
+    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
         switch(calendar.getRecurrenceType()) {
             case CalendarObject.DAILY:
                 addDailyRecurrence(calendar, component, warnings);
@@ -126,8 +136,8 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         }
     }
 
-    private void addYearlyRecurrence(int index, U calendar, T component, List<ConversionWarning> warnings) throws ConversionError {
-        StringBuilder recur = getRecurBuilder("YEARLY", calendar);
+    private void addYearlyRecurrence(final int index, final U calendar, final T component, final List<ConversionWarning> warnings) throws ConversionError {
+        final StringBuilder recur = getRecurBuilder("YEARLY", calendar);
         if(calendar.containsDays()) {
             addDays("BYDAY", calendar.getDays(), recur);
             recur.append(";BYMONTH=").append(calendar.getMonth()+1);
@@ -138,8 +148,8 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         addRRule(index, recur, component);
     }
 
-    private void addMonthlyRecurrence(int index, U calendar, T component, List<ConversionWarning> warnings) throws ConversionError {
-        StringBuilder recur = getRecurBuilder("MONTHLY", calendar);
+    private void addMonthlyRecurrence(final int index, final U calendar, final T component, final List<ConversionWarning> warnings) throws ConversionError {
+        final StringBuilder recur = getRecurBuilder("MONTHLY", calendar);
         if(calendar.containsDays()) {
             addDays("BYDAY", calendar.getDays(), recur);
             int weekNo = calendar.getDayInMonth();
@@ -152,10 +162,10 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         addRRule(index, recur, component);
     }
 
-    private void addWeeklyRecurrence(int index, U calendar, T component, List<ConversionWarning> warnings) throws ConversionError {
-        StringBuilder recur = getRecurBuilder("WEEKLY", calendar);
+    private void addWeeklyRecurrence(final int index, final U calendar, final T component, final List<ConversionWarning> warnings) throws ConversionError {
+        final StringBuilder recur = getRecurBuilder("WEEKLY", calendar);
         if(calendar.containsDays()) {
-            int days = calendar.getDays();
+            final int days = calendar.getDays();
             addDays("BYDAY", days, recur);
         }
 
@@ -163,18 +173,18 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
 
     }
 
-    private void addRRule(int index, StringBuilder recur, T component) throws ConversionError {
+    private void addRRule(final int index, final StringBuilder recur, final T component) throws ConversionError {
         try {
-            RRule rrule = new RRule(new Recur(recur.toString()));
+            final RRule rrule = new RRule(new Recur(recur.toString()));
             component.getProperties().add(rrule);
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             throw new ConversionError(index,ConversionError.Code.CANT_CREATE_RRULE, recur.toString());
         }
     }
 
-    private void addDays(String attr, int days, StringBuilder recur) {
+    private void addDays(final String attr, final int days, final StringBuilder recur) {
         recur.append(';').append(attr).append("=");
-        for(int day : allDays) {
+        for(final int day : allDays) {
             if(day == (day & days)) {
                 recur.append(reverseDays.get(day)).append(",");        
             }
@@ -182,8 +192,8 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         recur.setLength(recur.length()-1);
     }
 
-    private StringBuilder getRecurBuilder(String frequency, U calendar) {
-        StringBuilder recur =  new StringBuilder("FREQ=").append(frequency).append(";INTERVAL=").append(calendar.getInterval());
+    private StringBuilder getRecurBuilder(final String frequency, final U calendar) {
+        final StringBuilder recur =  new StringBuilder("FREQ=").append(frequency).append(";INTERVAL=").append(calendar.getInterval());
         if (calendar.containsRecurrenceCount()) {
             recur.append(";COUNT=").append(calendar.getRecurrenceCount());
         } else if (calendar.containsUntil()) {
@@ -192,16 +202,16 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         return recur;
     }
 
-    private void addDailyRecurrence(U calendar, T component, List<ConversionWarning> warnings) {
-        Recur recur = getRecur("DAILY", calendar);
+    private void addDailyRecurrence(final U calendar, final T component, final List<ConversionWarning> warnings) {
+        final Recur recur = getRecur("DAILY", calendar);
         recur.setInterval(calendar.getInterval());
         
-        RRule rrule = new RRule(recur);
+        final RRule rrule = new RRule(recur);
         component.getProperties().add(rrule);
         
     }
 
-    private Recur getRecur(String frequency, U calendar) {
+    private Recur getRecur(final String frequency, final U calendar) {
         if(calendar.containsRecurrenceCount()) {
             return new Recur(frequency, calendar.getRecurrenceCount());
         } else {
@@ -212,21 +222,21 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
     /**
      * {@inheritDoc}
      */
-    public void parse(int index, final T component, final U cObj, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         if(null == cObj.getStartDate()) {
             return;
         }
-        Calendar startDate = new GregorianCalendar();
+        final Calendar startDate = new GregorianCalendar();
         startDate.setTime(cObj.getStartDate());
 
-        PropertyList list = component.getProperties("RRULE");
+        final PropertyList list = component.getProperties("RRULE");
         if(list.isEmpty()) {
             return;
         }
         if(list.size() > 1) {
             warnings.add(new ConversionWarning(index, "Only converting first recurrence rule, additional recurrence rules will be ignored."));
         }
-        Recur rrule = ((RRule) list.get(0)).getRecur();
+        final Recur rrule = ((RRule) list.get(0)).getRecur();
         
         if("DAILY".equalsIgnoreCase(rrule.getFrequency())) {
             cObj.setRecurrenceType(AppointmentObject.DAILY);
@@ -241,7 +251,7 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
             setMonthDay(index, cObj, rrule, startDate);
         } else if ("YEARLY".equalsIgnoreCase(rrule.getFrequency())) {
             cObj.setRecurrenceType(AppointmentObject.YEARLY);
-            NumberList monthList = rrule.getMonthList();
+            final NumberList monthList = rrule.getMonthList();
             if(!monthList.isEmpty()) {
                 cObj.setMonth((Integer)monthList.get(0) - 1);
                 setMonthDay(index, cObj, rrule, startDate);
@@ -258,9 +268,9 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         int interval = rrule.getInterval();
         if(interval == -1) { interval = 1; }
         cObj.setInterval(interval);
-        int count = rrule.getCount();
+        final int count = rrule.getCount();
         if(-1 != count) {
-            int recurrenceCount = rrule.getCount();
+            final int recurrenceCount = rrule.getCount();
             cObj.setRecurrenceCount(recurrenceCount);
             setOccurrenceIfNeededRecoveryFIXME(cObj, recurrenceCount);
         } else if(null != rrule.getUntil()) {
@@ -268,18 +278,18 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         }
     }
 
-    private void setOccurrenceIfNeededRecoveryFIXME(U cObj, int recurrenceCount) {
+    private void setOccurrenceIfNeededRecoveryFIXME(final U cObj, final int recurrenceCount) {
         if(AppointmentObject.class.isAssignableFrom(cObj.getClass())) {
             ((AppointmentObject)cObj).setOccurrence(recurrenceCount);
         }
     }
 
-    private void setMonthDay(int index, CalendarObject cObj, Recur rrule, Calendar startDate) throws ConversionError {
-            NumberList monthDayList = rrule.getMonthDayList();
+    private void setMonthDay(final int index, final CalendarObject cObj, final Recur rrule, final Calendar startDate) throws ConversionError {
+            final NumberList monthDayList = rrule.getMonthDayList();
             if(!monthDayList.isEmpty()) {
                 cObj.setDayInMonth((Integer)monthDayList.get(0));
             } else {
-                NumberList weekNoList = rrule.getWeekNoList();
+                final NumberList weekNoList = rrule.getWeekNoList();
                 if(!weekNoList.isEmpty()) {
                     int week = (Integer)weekNoList.get(0);
                     if(week == -1) { week = 5; }
@@ -295,16 +305,16 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
             }
         }
 
-    private void setWeekdayInMonth(int index, CalendarObject cObj, Recur rrule, Calendar startDate) throws ConversionError {
-        WeekDayList weekdayList = rrule.getDayList();
+    private void setWeekdayInMonth(final int index, final CalendarObject cObj, final Recur rrule, final Calendar startDate) throws ConversionError {
+        final WeekDayList weekdayList = rrule.getDayList();
         if(!weekdayList.isEmpty()) {
             int days = 0;
             for(int i = 0, size = weekdayList.size(); i < size; i++) {
-                WeekDay weekday = (WeekDay) weekdayList.get(i);
+                final WeekDay weekday = (WeekDay) weekdayList.get(i);
                 int offset = weekday.getOffset();
                 if(offset == -1) { offset = 5; }
                 cObj.setDayInMonth(offset);
-                Integer day = weekdays.get(weekday.getDay());
+                final Integer day = weekdays.get(weekday.getDay());
                 if(null == day) {
                     throw new ConversionError(index, "Unknown day: %s", weekday.getDay());
                 }
@@ -314,14 +324,14 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         }
     }
 
-    private void setDays(int index, CalendarObject cObj, Recur rrule, Calendar startDate) throws ConversionError {
-            WeekDayList weekdayList = rrule.getDayList();
+    private void setDays(final int index, final CalendarObject cObj, final Recur rrule, final Calendar startDate) throws ConversionError {
+            final WeekDayList weekdayList = rrule.getDayList();
             if(!weekdayList.isEmpty()) {
                 int days = 0;
                 for(int i = 0, size = weekdayList.size(); i < size; i++) {
-                    WeekDay weekday = (WeekDay) weekdayList.get(i);
+                    final WeekDay weekday = (WeekDay) weekdayList.get(i);
                     
-                    Integer day = weekdays.get(weekday.getDay());
+                    final Integer day = weekdays.get(weekday.getDay());
                     if(null == day) {
                         throw new ConversionError(index, "Unknown day: %s", weekday.getDay());
                     }
@@ -329,7 +339,7 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
                 }
                 cObj.setDays(days);
             } else {
-                int day_of_week = startDate.get(Calendar.DAY_OF_WEEK);
+                final int day_of_week = startDate.get(Calendar.DAY_OF_WEEK);
                 int days = -1;
                 switch(day_of_week) {
                     case Calendar.MONDAY : days = AppointmentObject.MONDAY; break;

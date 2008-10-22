@@ -49,27 +49,32 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
-import java.util.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.*;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.tools.sql.DBUtils;
 
 @OXExceptionSource(
 		classId=Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_CHECKSIZESWITCH,
@@ -81,8 +86,8 @@ public class CheckSizeSwitch {
     private static final Log LOG = LogFactory.getLog(CheckSizeSwitch.class);
 
     private static Map<Metadata, Integer> SIZES = new HashMap<Metadata, Integer>();
-    private DBProvider provider;
-    private Context ctx;
+    private final DBProvider provider;
+    private final Context ctx;
 
     private static final Set<Metadata> FIELDS_TO_CHECK = new HashSet<Metadata>() {{
         add(Metadata.CATEGORIES_LITERAL);
@@ -94,7 +99,7 @@ public class CheckSizeSwitch {
         add(Metadata.VERSION_COMMENT_LITERAL);
     }};
 
-    public CheckSizeSwitch(DBProvider provider, Context ctx) {
+    public CheckSizeSwitch(final DBProvider provider, final Context ctx) {
         this.provider = provider;
         this.ctx = ctx;
     }
@@ -105,7 +110,7 @@ public class CheckSizeSwitch {
 			exceptionId = 0,
 			msg = "Some fields have values, that are too long"
 	)
-	public static void checkSizes(final DocumentMetadata metadata, DBProvider provider, Context ctx) throws OXException {
+	public static void checkSizes(final DocumentMetadata metadata, final DBProvider provider, final Context ctx) throws OXException {
 		boolean error = false;
 		
 		final CheckSizeSwitch checkSize = new CheckSizeSwitch(provider, ctx);
@@ -117,8 +122,8 @@ public class CheckSizeSwitch {
             if(!FIELDS_TO_CHECK.contains(m)) {
                 continue;
             }
-            Object value = m.doSwitch(get);
-            int maxSize = checkSize.getSize(m);
+            final Object value = m.doSwitch(get);
+            final int maxSize = checkSize.getSize(m);
             int valueLength;
             if (value instanceof String) {
                 valueLength = Charsets.getBytes((String) value, Charsets.UTF_8).length;
@@ -126,7 +131,7 @@ public class CheckSizeSwitch {
                 valueLength = 0;
             }
             if(maxSize < valueLength) {
-                AbstractOXException.ProblematicAttribute attr = new SimpleTruncatedAttribute(m.getId(), maxSize, valueLength);
+                final AbstractOXException.ProblematicAttribute attr = new SimpleTruncatedAttribute(m.getId(), maxSize, valueLength);
                 x.addProblematic(attr);
                 error = true;
             }
@@ -139,7 +144,7 @@ public class CheckSizeSwitch {
 	
 
 
-    public int getSize(Metadata field) {
+    public int getSize(final Metadata field) {
         if(SIZES.containsKey(field)) {
             return SIZES.get(field);
         }
@@ -147,14 +152,14 @@ public class CheckSizeSwitch {
         Connection con = null;
         try {
             con = provider.getWriteConnection(ctx);
-            String[] tuple = new InfostoreQueryCatalog().getFieldTuple(field, new InfostoreQueryCatalog.VersionWins());
-            int size = DBUtils.getColumnSize(con, tuple[0], tuple[1]);
+            final String[] tuple = new InfostoreQueryCatalog().getFieldTuple(field, new InfostoreQueryCatalog.VersionWins());
+            final int size = DBUtils.getColumnSize(con, tuple[0], tuple[1]);
             SIZES.put(field, size);
             return size;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
             return 0;
-        } catch (TransactionException e) {
+        } catch (final TransactionException e) {
             LOG.error(e.getMessage(),  e);
             return 0;
         } finally {

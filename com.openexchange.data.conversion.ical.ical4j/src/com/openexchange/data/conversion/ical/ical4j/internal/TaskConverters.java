@@ -54,13 +54,25 @@ import java.util.List;
 
 import net.fortuna.ical4j.model.component.VToDo;
 
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.*;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Alarm;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Categories;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedAndDTStamp;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.DeleteExceptions;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Duration;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.End;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Klass;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.LastModified;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Note;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Recurrence;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Start;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Title;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Uid;
 import com.openexchange.data.conversion.ical.ical4j.internal.task.DateCompleted;
 import com.openexchange.data.conversion.ical.ical4j.internal.task.DueDate;
-import com.openexchange.data.conversion.ical.ical4j.internal.task.State;
-import com.openexchange.data.conversion.ical.ical4j.internal.task.Priority;
 import com.openexchange.data.conversion.ical.ical4j.internal.task.PercentComplete;
-
+import com.openexchange.data.conversion.ical.ical4j.internal.task.Priority;
+import com.openexchange.data.conversion.ical.ical4j.internal.task.State;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -99,6 +111,6 @@ public final class TaskConverters {
         tmp.add(new Uid<VToDo, Task>());
         tmp.add(new CreatedAndDTStamp<VToDo, Task>());
         tmp.add(new LastModified<VToDo, Task>());
-        ALL = (AttributeConverter<VToDo, Task>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
+        ALL = tmp.toArray(new AttributeConverter[tmp.size()]);
     }
 }

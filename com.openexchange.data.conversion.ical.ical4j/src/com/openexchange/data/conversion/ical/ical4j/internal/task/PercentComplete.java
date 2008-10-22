@@ -48,38 +48,39 @@
  */
 package com.openexchange.data.conversion.ical.ical4j.internal.task;
 
-import net.fortuna.ical4j.model.component.VToDo;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ConversionError;
-
 import java.util.List;
 import java.util.TimeZone;
+
+import net.fortuna.ical4j.model.component.VToDo;
+
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class PercentComplete extends AbstractVerifyingAttributeConverter<VToDo, Task> {
-    public boolean isSet(Task task) {
+    public boolean isSet(final Task task) {
         return task.containsPercentComplete();
     }
 
-    public void emit(int index, Task task, VToDo vToDo, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
-        net.fortuna.ical4j.model.property.PercentComplete percentage = new net.fortuna.ical4j.model.property.PercentComplete(task.getPercentComplete());
+    public void emit(final int index, final Task task, final VToDo vToDo, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
+        final net.fortuna.ical4j.model.property.PercentComplete percentage = new net.fortuna.ical4j.model.property.PercentComplete(task.getPercentComplete());
         vToDo.getProperties().add(percentage);
     }
 
-    public boolean hasProperty(VToDo vToDo) {
+    public boolean hasProperty(final VToDo vToDo) {
         return vToDo.getPercentComplete() != null;
     }
 
-    public void parse(int index, VToDo todo, Task task, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final VToDo todo, final Task task, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         if(null == todo.getPercentComplete()) {
             return;
         }
-        int percentage = todo.getPercentComplete().getPercentage();
+        final int percentage = todo.getPercentComplete().getPercentage();
         task.setPercentComplete(percentage);
     }
 }

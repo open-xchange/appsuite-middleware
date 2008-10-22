@@ -48,10 +48,10 @@
  */
 package com.openexchange.webdav.tools;
 
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.config.ConfigurationService;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

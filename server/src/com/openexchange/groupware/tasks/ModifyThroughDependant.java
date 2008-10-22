@@ -81,7 +81,7 @@ public final class ModifyThroughDependant implements ReminderDeleteInterface {
     /**
      * {@inheritDoc}
      */
-    public void updateTargetObject(final Context ctx, Connection con,
+    public void updateTargetObject(final Context ctx, final Connection con,
         final int targetId) throws AbstractOXException {
         final Task task = stor.selectTask(ctx, targetId, StorageType.ACTIVE);
         final Date lastModified = task.getLastModified();

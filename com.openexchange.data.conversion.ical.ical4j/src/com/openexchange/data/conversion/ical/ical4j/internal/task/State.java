@@ -77,8 +77,8 @@ public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task
     /**
      * {@inheritDoc}
      */
-    public void emit(int index, final Task task, final VToDo vtodo,
-                     final List<ConversionWarning> warnings, Context ctx) throws ConversionError {
+    public void emit(final int index, final Task task, final VToDo vtodo,
+                     final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
         try {
             final Status status = new Status(toStatus(index, task.getStatus()).getValue());
             vtodo.getProperties().add(status);
@@ -104,7 +104,7 @@ public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task
     /**
      * {@inheritDoc}
      */
-    public void parse(int index, final VToDo vtodo, final Task task, final TimeZone timeZone, final Context ctx,
+    public void parse(final int index, final VToDo vtodo, final Task task, final TimeZone timeZone, final Context ctx,
         final List<ConversionWarning> warnings) throws ConversionError {
         try {
             task.setStatus(toTask(index, vtodo.getStatus()));

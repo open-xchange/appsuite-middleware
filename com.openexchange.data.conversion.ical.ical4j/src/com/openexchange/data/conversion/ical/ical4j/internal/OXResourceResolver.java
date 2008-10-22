@@ -94,7 +94,7 @@ public final class OXResourceResolver implements ResourceResolver {
             throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
                 ResourceService.class.getName());
         }
-        for (String name : resourceNames) {
+        for (final String name : resourceNames) {
             final Resource[] resources = resourceService.searchResources(name,
                 ctx);
             if (resources.length == 1) {

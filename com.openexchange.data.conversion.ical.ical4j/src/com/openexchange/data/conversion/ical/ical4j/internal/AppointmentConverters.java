@@ -48,13 +48,32 @@
  */
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
-import net.fortuna.ical4j.model.component.VEvent;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.*;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.*;
-
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+
+import net.fortuna.ical4j.model.component.VEvent;
+
+import com.openexchange.data.conversion.ical.ical4j.internal.appointment.IgnoreConflicts;
+import com.openexchange.data.conversion.ical.ical4j.internal.appointment.Location;
+import com.openexchange.data.conversion.ical.ical4j.internal.appointment.PrivateAppointmentsHaveNoParticipants;
+import com.openexchange.data.conversion.ical.ical4j.internal.appointment.RequireEndDate;
+import com.openexchange.data.conversion.ical.ical4j.internal.appointment.RequireStartDate;
+import com.openexchange.data.conversion.ical.ical4j.internal.appointment.Transparency;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Alarm;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Categories;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedAndDTStamp;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.DeleteExceptions;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Duration;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.End;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Klass;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.LastModified;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Note;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Recurrence;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Start;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Title;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Uid;
+import com.openexchange.groupware.container.AppointmentObject;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -74,13 +93,13 @@ public class AppointmentConverters {
         tmp.add(new Title<VEvent, AppointmentObject>());
         tmp.add(new Note<VEvent, AppointmentObject>());
 
-        Start<VEvent, AppointmentObject> start = new Start<VEvent, AppointmentObject>();
+        final Start<VEvent, AppointmentObject> start = new Start<VEvent, AppointmentObject>();
         start.setVerifier(new RequireStartDate());
         tmp.add(start);
 
         tmp.add(new End<VEvent, AppointmentObject>());
 
-        Duration<VEvent, AppointmentObject> duration = new Duration<VEvent, AppointmentObject>();
+        final Duration<VEvent, AppointmentObject> duration = new Duration<VEvent, AppointmentObject>();
         duration.setVerifier(new RequireEndDate());
         tmp.add(duration);
 
@@ -89,7 +108,7 @@ public class AppointmentConverters {
         tmp.add(new Location());
         tmp.add(new Transparency());
 
-        Participants<VEvent, AppointmentObject> participants = new Participants<VEvent, AppointmentObject>();
+        final Participants<VEvent, AppointmentObject> participants = new Participants<VEvent, AppointmentObject>();
         participants.setVerifier(new PrivateAppointmentsHaveNoParticipants());
         tmp.add(participants);
 
@@ -106,6 +125,6 @@ public class AppointmentConverters {
         tmp.add(new CreatedAndDTStamp<VEvent, AppointmentObject>());
         tmp.add(new LastModified<VEvent, AppointmentObject>());
         
-        ALL = (AttributeConverter<VEvent, AppointmentObject>[]) tmp.toArray(new AttributeConverter[tmp.size()]);
+        ALL = tmp.toArray(new AttributeConverter[tmp.size()]);
     }
 }

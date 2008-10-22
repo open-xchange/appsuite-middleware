@@ -48,12 +48,13 @@
  */
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ConversionError;
-
 import java.util.List;
+
+import net.fortuna.ical4j.model.component.CalendarComponent;
+
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.groupware.container.CalendarObject;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -69,11 +70,11 @@ public abstract class AbstractVerifyingAttributeConverter<T extends CalendarComp
 
     private ObjectVerifier<U> verifier;
 
-    public void setVerifier(ObjectVerifier<U> verifier) {
+    public void setVerifier(final ObjectVerifier<U> verifier) {
         this.verifier = verifier;
     }
 
-    public void verify(int index, U object, List<ConversionWarning> warnings) throws ConversionError {
+    public void verify(final int index, final U object, final List<ConversionWarning> warnings) throws ConversionError {
         if(null == verifier) {
             return;
         }

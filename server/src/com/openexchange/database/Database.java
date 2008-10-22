@@ -308,7 +308,7 @@ public final class Database {
         return AssignmentStorage.getInstance();
     }
 
-    public static void setForceWrite(boolean forceWriteOnly) {
+    public static void setForceWrite(final boolean forceWriteOnly) {
         Database.forceWriteOnly = forceWriteOnly;
     }
 }

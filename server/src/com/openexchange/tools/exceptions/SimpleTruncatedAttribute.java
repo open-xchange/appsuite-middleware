@@ -54,11 +54,11 @@ import com.openexchange.groupware.AbstractOXException;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class SimpleTruncatedAttribute implements AbstractOXException.Truncated {
-    private int length;
-    private int maxSize;
-    private int id;
+    private final int length;
+    private final int maxSize;
+    private final int id;
 
-    public SimpleTruncatedAttribute(int id, int maxSize, int length) {
+    public SimpleTruncatedAttribute(final int id, final int maxSize, final int length) {
         this.id = id;
         this.maxSize = maxSize;
         this.length = length;

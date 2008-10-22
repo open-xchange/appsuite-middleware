@@ -48,17 +48,11 @@
  */
 package com.openexchange.xml.jdom;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
-/**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
- */
-import org.jdom.JDOMException;
 import org.jdom.Document;
-
-import java.io.InputStream;
-import java.io.IOException;
+import org.jdom.JDOMException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

@@ -49,7 +49,8 @@
 
 package com.openexchange.ajax.parser;
 
-import static com.openexchange.ajax.fields.TaskFields.*;
+import static com.openexchange.ajax.fields.TaskFields.ACTUAL_DURATION;
+import static com.openexchange.ajax.fields.TaskFields.TARGET_DURATION;
 
 import java.util.TimeZone;
 

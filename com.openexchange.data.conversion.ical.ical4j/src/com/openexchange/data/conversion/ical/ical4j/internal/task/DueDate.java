@@ -49,18 +49,19 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal.task;
 
-import net.fortuna.ical4j.model.component.VToDo;
-import net.fortuna.ical4j.model.property.Due;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ConversionError;
-
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.Date;
+
+import net.fortuna.ical4j.model.component.VToDo;
+import net.fortuna.ical4j.model.property.Due;
+
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -82,7 +83,7 @@ public class DueDate extends AbstractVerifyingAttributeConverter<VToDo, Task> {
         return false;  // EndDate only
     }
 
-    public void emit(int index, Task task, VToDo vToDo, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
+    public void emit(final int index, final Task task, final VToDo vToDo, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
        return; // EndDate only
     }
 
@@ -93,7 +94,7 @@ public class DueDate extends AbstractVerifyingAttributeConverter<VToDo, Task> {
         return null != vToDo.getDue();
     }
 
-    public void parse(int index, VToDo vToDo, Task task, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final VToDo vToDo, final Task task, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         if(task.containsEndDate()) {
             return;
         }

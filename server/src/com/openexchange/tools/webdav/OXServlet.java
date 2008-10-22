@@ -61,8 +61,8 @@ import org.apache.commons.logging.LogFactory;
 import org.jdom.JDOMException;
 
 import com.openexchange.authentication.Authenticated;
-import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginException;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;

@@ -48,16 +48,17 @@
  */
 package com.openexchange.exceptions.osgi;
 
+import java.util.List;
+
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
+import com.openexchange.exceptions.ComponentAlreadyRegisteredException;
 import com.openexchange.exceptions.ComponentRegistry;
 import com.openexchange.exceptions.Exceptions;
-import com.openexchange.exceptions.ComponentAlreadyRegisteredException;
 import com.openexchange.groupware.Component;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.BundleContext;
-
-import java.util.List;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -65,10 +66,10 @@ import java.util.List;
 public class OSGiComponentRegistry implements ComponentRegistry, ServiceTrackerCustomizer {
 
     private ComponentRegistry delegate = null;
-    private BundleContext context;
-    private ServiceTracker serviceTracker;
+    private final BundleContext context;
+    private final ServiceTracker serviceTracker;
 
-    public OSGiComponentRegistry(BundleContext context) {
+    public OSGiComponentRegistry(final BundleContext context) {
         this.context = context;
         this.serviceTracker = new ServiceTracker(context, ComponentRegistry.class.getName(), this);
         this.serviceTracker.open();
@@ -78,22 +79,22 @@ public class OSGiComponentRegistry implements ComponentRegistry, ServiceTrackerC
         this.serviceTracker.close();;
     }
 
-    public void registerComponent(Component component, String applicationId, Exceptions exceptions) throws ComponentAlreadyRegisteredException {
+    public void registerComponent(final Component component, final String applicationId, final Exceptions exceptions) throws ComponentAlreadyRegisteredException {
         checkDelegate();
         delegate.registerComponent(component, applicationId, exceptions);
     }
 
-    public void deregisterComponent(Component component) {
+    public void deregisterComponent(final Component component) {
         checkDelegate();
         delegate.deregisterComponent(component);
     }
 
-    public Exceptions getExceptionsForComponent(Component component) {
+    public Exceptions getExceptionsForComponent(final Component component) {
         checkDelegate();
         return delegate.getExceptionsForComponent(component);
     }
 
-    public List<Exceptions> getExceptionsForApplication(String applicationId) {
+    public List<Exceptions> getExceptionsForApplication(final String applicationId) {
         checkDelegate();
         return delegate.getExceptionsForApplication(applicationId);
     }
@@ -117,7 +118,7 @@ public class OSGiComponentRegistry implements ComponentRegistry, ServiceTrackerC
         if(delegate == null) { throw new ComponentRegistryUnavailableException(); }
     }
 
-    public Object addingService(ServiceReference serviceReference) {
+    public Object addingService(final ServiceReference serviceReference) {
         final Object addedService = context.getService(serviceReference);
         if(ComponentRegistry.class.isAssignableFrom(addedService.getClass())) {
             this.delegate = (ComponentRegistry) addedService;
@@ -125,10 +126,10 @@ public class OSGiComponentRegistry implements ComponentRegistry, ServiceTrackerC
         return addedService;
     }
 
-    public void modifiedService(ServiceReference serviceReference, Object o) {
+    public void modifiedService(final ServiceReference serviceReference, final Object o) {
     }
 
-    public void removedService(ServiceReference serviceReference, Object o) {
+    public void removedService(final ServiceReference serviceReference, final Object o) {
         this.delegate = null;
     }
 }

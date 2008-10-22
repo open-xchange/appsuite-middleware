@@ -49,21 +49,21 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDateTime;
 import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDate;
+import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDateTime;
 import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.isDateTime;
 import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.parseDate;
 
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.List;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DtStart;
 
-import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
@@ -84,14 +84,14 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
     /**
      * {@inheritDoc}
      */
-    public void emit(int index, final U calendar, final T component, List<ConversionWarning> warnings, Context ctx) {
+    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx) {
         final DtStart start = new DtStart();
-        net.fortuna.ical4j.model.Date date = (needsDate(calendar)) ? toDate(calendar.getStartDate()) : toDateTime(calendar.getStartDate());
+        final net.fortuna.ical4j.model.Date date = (needsDate(calendar)) ? toDate(calendar.getStartDate()) : toDateTime(calendar.getStartDate());
         start.setDate(date);
         component.getProperties().add(start);
     }
 
-    private boolean needsDate(U calendar) {
+    private boolean needsDate(final U calendar) {
         return AppointmentObject.class.isAssignableFrom(calendar.getClass()) && ((AppointmentObject)calendar).getFullTime();
     }
 
@@ -112,7 +112,7 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
     /**
      * {@inheritDoc}
      */
-    public void parse(int index, final T component, final U calendar, final TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) {
+    public void parse(final int index, final T component, final U calendar, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         final DtStart dtStart = new DtStart();
         final Date start = parseDate(component, dtStart, timeZone);
         calendar.setStartDate(start);
@@ -136,7 +136,7 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
     private void setFullTime(final AppointmentObject appointment,
         final Date start, final TimeZone tz) {
         appointment.setFullTime(true);
-        Calendar calendar = Calendar.getInstance();
+        final Calendar calendar = Calendar.getInstance();
         calendar.setTime(start);
         calendar.setTimeZone(tz);
         calendar.set(Calendar.HOUR_OF_DAY, 0);

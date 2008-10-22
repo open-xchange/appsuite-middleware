@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.delete;
 
-import java.sql.Connection;
 import java.util.EventObject;
 
 import com.openexchange.groupware.contexts.Context;

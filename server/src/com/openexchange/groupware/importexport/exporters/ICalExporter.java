@@ -53,11 +53,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -99,9 +105,6 @@ import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
-import com.openexchange.data.conversion.ical.ICalEmitter;
-import com.openexchange.data.conversion.ical.ConversionError;
-import com.openexchange.data.conversion.ical.ConversionWarning;
 
 @OXExceptionSource(
 		classId=ImportExportExceptionClasses.ICALEXPORTER,
@@ -250,7 +253,7 @@ public class ICalExporter implements Exporter {
 	    }
 		String icalText;
         try {
-            ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
+            final ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
             if(null == emitter) {
                 throw importExportExceptionFactory.create(5);
             }
@@ -267,7 +270,7 @@ public class ICalExporter implements Exporter {
 				
 				final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
 				final SearchIterator<CalendarDataObject> searchIterator = appointmentSql.getModifiedAppointmentsInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO, true);
-				List<AppointmentObject> appointments = new LinkedList<AppointmentObject>();
+				final List<AppointmentObject> appointments = new LinkedList<AppointmentObject>();
                 try {
 					while (searchIterator.hasNext()) {
                         final AppointmentObject appointment = searchIterator.next();
@@ -279,8 +282,8 @@ public class ICalExporter implements Exporter {
                         }
                         appointments.add(appointment);
 				   	}
-                    List<ConversionError> errors = new LinkedList<ConversionError>();
-                    List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
+                    final List<ConversionError> errors = new LinkedList<ConversionError>();
+                    final List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
                     icalText = emitter.writeAppointments(appointments, sessObj.getContext(), errors, warnings);
                     log(errors, warnings);
                 } finally {
@@ -298,13 +301,13 @@ public class ICalExporter implements Exporter {
 				
 				final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(sessObj);
 				final SearchIterator<Task> searchIterator = taskSql.getModifiedTasksInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO);
-                List<Task> tasks = new LinkedList<Task>();
+                final List<Task> tasks = new LinkedList<Task>();
                 try {
 					while (searchIterator.hasNext()) {
                         tasks.add(searchIterator.next());
                     }
-                    List<ConversionError> errors = new LinkedList<ConversionError>();
-                    List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
+                    final List<ConversionError> errors = new LinkedList<ConversionError>();
+                    final List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
                     icalText = emitter.writeTasks(tasks, errors, warnings, sessObj.getContext());
                     log(errors, warnings);
 
@@ -324,7 +327,7 @@ public class ICalExporter implements Exporter {
         byte[] bytes = new byte[0];
         try {
             bytes = icalText.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             LOG.error(e.getMessage(), e); // Impropable
         }
         return new SizedInputStream(
@@ -333,12 +336,12 @@ public class ICalExporter implements Exporter {
 				Format.ICAL);
 	}
 
-    private void log(List<ConversionError> errors, List<ConversionWarning> warnings) {
-        for(ConversionError error : errors) {
+    private void log(final List<ConversionError> errors, final List<ConversionWarning> warnings) {
+        for(final ConversionError error : errors) {
             LOG.warn(error.getMessage());
         }
 
-        for(ConversionWarning warning : warnings) {
+        for(final ConversionWarning warning : warnings) {
             LOG.warn(warning.getMessage());
         }
     }

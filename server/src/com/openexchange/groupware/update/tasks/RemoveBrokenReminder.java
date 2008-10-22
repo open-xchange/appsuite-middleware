@@ -148,7 +148,7 @@ public final class RemoveBrokenReminder implements UpdateTask {
             }
             final int[] mRows = stmt.executeBatch();
             int rows = 0;
-            for (int mRow : mRows) {
+            for (final int mRow : mRows) {
                 rows += mRow;
             }
             if (brokens.length != rows) {

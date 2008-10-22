@@ -49,8 +49,8 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
-import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Date;
+import net.fortuna.ical4j.model.DateTime;
 
 /**
  *

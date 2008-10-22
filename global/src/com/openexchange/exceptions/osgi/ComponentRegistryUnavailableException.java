@@ -52,7 +52,12 @@ package com.openexchange.exceptions.osgi;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class ComponentRegistryUnavailableException extends RuntimeException {
-    public ComponentRegistryUnavailableException() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 8898458657567357740L;
+
+	public ComponentRegistryUnavailableException() {
         super("Could not find Component Registry Service.");
     }
 }

@@ -53,10 +53,10 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DateProperty;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.DateTime;
 
 /**
  *
@@ -102,10 +102,10 @@ public final class ParserTools {
      */
     public static Date recalculate(final Date date, final TimeZone timeZone) {
     
-        java.util.Calendar inDefault = new GregorianCalendar();
+        final java.util.Calendar inDefault = new GregorianCalendar();
         inDefault.setTime(date);
     
-        java.util.Calendar inTimeZone = new GregorianCalendar();
+        final java.util.Calendar inTimeZone = new GregorianCalendar();
         inTimeZone.setTimeZone(timeZone);
         inTimeZone.set(inDefault.get(java.util.Calendar.YEAR),
             inDefault.get(java.util.Calendar.MONTH),
@@ -117,7 +117,7 @@ public final class ParserTools {
         return inTimeZone.getTime();
     }
 
-    public static Date toDate(DateProperty dateProperty, TimeZone tz) {
+    public static Date toDate(final DateProperty dateProperty, final TimeZone tz) {
         Date date = new Date(dateProperty.getDate().getTime());
         if (ParserTools.inDefaultTimeZone(dateProperty, tz)) {
             date = ParserTools.recalculate(date, tz);
@@ -125,12 +125,12 @@ public final class ParserTools {
         return date;
     }
 
-    public static Date recalculateAsNeeded(net.fortuna.ical4j.model.Date icaldate, Property property, TimeZone tz) {
+    public static Date recalculateAsNeeded(final net.fortuna.ical4j.model.Date icaldate, final Property property, final TimeZone tz) {
         boolean mustRecalculate = true;
         if(property.getParameter("TZID") != null) {
             mustRecalculate = false;
         } else if(DateTime.class.isAssignableFrom(icaldate.getClass())) {
-            DateTime dateTime = (DateTime) icaldate;
+            final DateTime dateTime = (DateTime) icaldate;
             mustRecalculate = !dateTime.isUtc();
         }
         if(mustRecalculate) {

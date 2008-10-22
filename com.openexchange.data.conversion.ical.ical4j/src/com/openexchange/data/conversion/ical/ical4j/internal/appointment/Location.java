@@ -48,34 +48,35 @@
  */
 package com.openexchange.data.conversion.ical.ical4j.internal.appointment;
 
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ConversionError;
-import net.fortuna.ical4j.model.component.VEvent;
-
 import java.util.List;
 import java.util.TimeZone;
+
+import net.fortuna.ical4j.model.component.VEvent;
+
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.contexts.Context;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Location extends AbstractVerifyingAttributeConverter<VEvent, AppointmentObject> {
-    public boolean isSet(AppointmentObject appointmentObject) {
+    public boolean isSet(final AppointmentObject appointmentObject) {
         return appointmentObject.containsLocation() && null != appointmentObject.getLocation() && appointmentObject.getLocation().length() != 0;
     }
 
-    public void emit(int index, AppointmentObject appointmentObject, VEvent event, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
-        net.fortuna.ical4j.model.property.Location location = new net.fortuna.ical4j.model.property.Location(appointmentObject.getLocation());
+    public void emit(final int index, final AppointmentObject appointmentObject, final VEvent event, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
+        final net.fortuna.ical4j.model.property.Location location = new net.fortuna.ical4j.model.property.Location(appointmentObject.getLocation());
         event.getProperties().add(location);
     }
 
-    public boolean hasProperty(VEvent event) {
+    public boolean hasProperty(final VEvent event) {
         return event.getLocation() != null;
     }
 
-    public void parse(int index, VEvent event, AppointmentObject appointment, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final VEvent event, final AppointmentObject appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         appointment.setLocation(event.getProperty("LOCATION").getValue());
     }
 }

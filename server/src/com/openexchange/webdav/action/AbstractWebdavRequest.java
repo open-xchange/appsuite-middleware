@@ -54,6 +54,7 @@ import java.io.IOException;
 import org.jdom.Document;
 import org.jdom.JDOMException;
 
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.webdav.action.ifheader.IfHeader;
 import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.action.ifheader.IfHeaderParser;
@@ -61,7 +62,6 @@ import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.xml.jdom.JDOMParser;
 
 public abstract class AbstractWebdavRequest implements WebdavRequest {

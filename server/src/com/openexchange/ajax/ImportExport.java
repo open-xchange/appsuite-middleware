@@ -88,7 +88,7 @@ public abstract class ImportExport extends SessionServlet {
         if(beanFactory  == null) {
             final String beanPath = SystemConfig.getProperty("IMPORTEREXPORTER");
 		    if (beanPath != null) {
-                SpringParser springParser = ServerServiceRegistry.getInstance().getService(SpringParser.class);
+                final SpringParser springParser = ServerServiceRegistry.getInstance().getService(SpringParser.class);
                 beanFactory = springParser.parseFile(beanPath, ImportExport.class.getClassLoader());
             } else {
 	     		LOG.error("missing property: IMPORTEREXPORTER");
