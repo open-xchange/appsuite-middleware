@@ -74,10 +74,11 @@ public class RegistryCustomizer<T> implements ServiceTrackerCustomizer {
     }
 
     public void modifiedService(final ServiceReference serviceReference, final Object o) {
-
+    	// Nothing to do
     }
 
     public void removedService(final ServiceReference serviceReference, final Object o) {
-        ServerServiceRegistry.getInstance().removeService(clazz);
+    	ServerServiceRegistry.getInstance().removeService(clazz);
+		context.ungetService(serviceReference);
     }
 }
