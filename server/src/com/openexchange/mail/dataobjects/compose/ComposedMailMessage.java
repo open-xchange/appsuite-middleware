@@ -50,6 +50,7 @@
 package com.openexchange.mail.dataobjects.compose;
 
 import java.io.DataOutput;
+import java.io.File;
 import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
@@ -59,6 +60,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartType;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.session.Session;
 
@@ -178,10 +180,19 @@ public abstract class ComposedMailMessage extends MailMessage {
 			try {
 				final int count = getEnclosedCount();
 				for (int i = 0; i < count; i++) {
-					if (ReferencedMailPart.class.isInstance(getEnclosedMailPart(i))) {
-						final String fileId = ((ReferencedMailPart) (getEnclosedMailPart(i))).getFileID();
-						if (null != fileId) {
-							session.removeUploadedFile(fileId);
+					if (getEnclosedMailPart(i) instanceof ComposedMailPart) {
+						final ComposedMailPart composedMailPart = (ComposedMailPart) getEnclosedMailPart(i);
+						if (ComposedPartType.REFERENCE.equals(composedMailPart.getType())) {
+							final String fileId = ((ReferencedMailPart) (composedMailPart)).getFileID();
+							if (null != fileId) {
+								session.removeUploadedFile(fileId);
+							}
+						} else if (ComposedPartType.FILE.equals(composedMailPart.getType())) {
+							final File f = ((UploadFileMailPart) (composedMailPart)).getUploadFile();
+							if (f.exists() && !f.delete()) {
+								LOG.warn(new StringBuilder().append("Temporary store file '").append(f.getName())
+										.append("' could not be deleted."));
+							}
 						}
 					}
 				}
