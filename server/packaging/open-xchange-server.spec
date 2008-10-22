@@ -148,6 +148,13 @@ if ! ox_exists_property com.openexchange.imap.spamHandler $pfile; then
     ox_set_property com.openexchange.imap.spamHandler DefaultSpamHandler $pfile
 fi
 
+# -----------------------------------------------------------------------
+# bugfix id#12296
+pfile=/opt/open-xchange/etc/groupware/system.properties
+if ox_exists_property CACHECCF $pfile; then
+    ox_remove_property CACHECCF $pfile
+fi
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles

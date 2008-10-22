@@ -68,6 +68,13 @@ postFix() {
       ox_set_property com.openexchange.imap.spamHandler DefaultSpamHandler $pfile
   fi
 
+  # -----------------------------------------------------------------------
+  # bugfix id#12296
+  local pfile=/opt/open-xchange/etc/groupware/system.properties
+  if ox_exists_property CACHECCF $pfile; then
+      ox_remove_property CACHECCF $pfile
+  fi
+
   # we're updating from pre sp4
   if [ $version -lt 650 ]; then
 
