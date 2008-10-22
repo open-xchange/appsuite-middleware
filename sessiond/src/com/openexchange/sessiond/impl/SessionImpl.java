@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.impl;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
@@ -216,9 +217,10 @@ public final class SessionImpl implements Session {
 			 * Cancel timer task
 			 */
 			uploadFile.cancelTimerTask();
-			if (!uploadFile.getFile().delete()) {
-				LOG.warn(new StringBuilder(256).append("Temporary uploaded file \"").append(
-						uploadFile.getFile().getName()).append("\" could not be deleted"));
+			final File file = uploadFile.getFile();
+			if (file.exists() && !file.delete()) {
+				LOG.warn(new StringBuilder(256).append("Temporary uploaded file \"").append(file.getName()).append(
+						"\" could not be deleted"));
 			}
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=")
