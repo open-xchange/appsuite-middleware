@@ -64,6 +64,7 @@
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
     <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="conversionjar" value="com.openexchange.conversion.jar"/>
+    <property name="convenginejar" value="com.openexchange.conversion.engine.jar"/>
     <property name="configjar" value="com.openexchange.configread.jar"/>
     <property name="monitoringjar" value="com.openexchange.monitoring.jar"/>
     <property name="sessiondjar" value="com.openexchange.sessiond.jar"/>
@@ -95,6 +96,7 @@
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${conversionjar}"/>
+        <pathelement location="${bundlesdir}/${convenginejar}"/>
         <pathelement location="${bundlesdir}/${configjar}"/>
         <pathelement location="${bundlesdir}/${monitoringjar}"/>
         <pathelement location="${bundlesdir}/${sessiondjar}"/>
@@ -108,7 +110,6 @@
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonshttpclientjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonsiojar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jakartawebdavjar}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${jcsjar}"/>
         <pathelement location="${bundlesdir}/${xmlBundle}/lib/${jdomjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
