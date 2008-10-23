@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>open-xchange-mailfilter</name>
+	<name>com.openexchange.mail.filter</name>
 	<comment>JavaCC Nature</comment>
 	<projects>
 	</projects>
