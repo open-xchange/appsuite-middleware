@@ -39,7 +39,7 @@ public class ContactCollectEnabled implements PreferencesItemService {
 
             public void writeValue(Context ctx, User user, Setting setting) throws SettingException {
                 if(setting != null) {
-                    ServerUserSetting.setContactColletion(ctx.getContextId(), user.getId(), Boolean.parseBoolean((String) setting.getSingleValue()));
+                    ServerUserSetting.setContactColletion(ctx.getContextId(), user.getId(), Boolean.parseBoolean(setting.getSingleValue().toString()));
                 }
             }
             

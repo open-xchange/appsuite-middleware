@@ -70,7 +70,7 @@ public abstract class AbstractUserFuncs implements IValueHandler {
         final Setting setting) throws SettingException {
         try {
             final UserImpl newUser = new UserImpl(user);
-            setValue(newUser, (String) setting.getSingleValue());
+            setValue(newUser, setting.getSingleValue().toString());
             UserStorage.getInstance().updateUser(newUser, ctx);
         } catch (final LdapException e) {
             throw new SettingException(e);

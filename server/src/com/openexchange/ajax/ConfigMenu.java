@@ -262,8 +262,8 @@ public class ConfigMenu extends SessionServlet {
             }
             storage.save(setting);
         } else {
-            final JSONObject json = new JSONObject((String) setting
-                .getSingleValue());
+            final JSONObject json = new JSONObject(setting.getSingleValue()
+                .toString());
             final Iterator<String> iter = json.keys();
             SettingException exc = null;
             while (iter.hasNext()) {

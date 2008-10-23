@@ -111,8 +111,8 @@ public class LineWrap implements PreferencesItemService {
                         user.getId(), ctx);
                 if (null != settings) {
                     try {
-                        settings.setAutoLinebreak(Integer.parseInt(
-                            (String) setting.getSingleValue()));
+                        settings.setAutoLinebreak(Integer.parseInt(setting
+                            .getSingleValue().toString()));
                         storage.saveUserSettingMail(settings, user.getId(),
                                 ctx);
                     } catch (final NumberFormatException e) {

@@ -104,7 +104,7 @@ public class SendAddress implements PreferencesItemService {
             }
             public void writeValue(final Context ctx, final User user,
                 final Setting setting) throws SettingException {
-                final String newAlias = (String) setting.getSingleValue();
+                final String newAlias = setting.getSingleValue().toString();
                 final String[] aliases = user.getAliases();
                 boolean found = false;
                 for (int i = 0; aliases != null && i < aliases.length && !found; i++) {
