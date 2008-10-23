@@ -52,6 +52,8 @@ package com.openexchange.ajax.request;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -243,8 +245,10 @@ public class ContactRequest {
 	public JSONArray actionUpdates(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException,
 			SearchIteratorException, OXException, OXJSONException, AjaxException {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
-		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-		final Date requestedTimestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
+		int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+        int[] columnsToLoad = removeVirtual(columns);
+
+        final Date requestedTimestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
 		timestamp = new Date(requestedTimestamp.getTime());
 
 		final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
@@ -265,9 +269,9 @@ public class ContactRequest {
 				bIgnoreDelete = true;
 			}
 
-			final int[] internalColumns = new int[columns.length + 1];
-			System.arraycopy(columns, 0, internalColumns, 0, columns.length);
-			internalColumns[columns.length] = DataObject.LAST_MODIFIED;
+			final int[] internalColumns = new int[columnsToLoad.length + 1];
+			System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
+			internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 
 			Context ctx = null;
 			try {
@@ -359,8 +363,9 @@ public class ContactRequest {
 
 		try {
 			final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
-			final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-			final JSONArray jData = DataParser.checkJSONArray(jsonObj, AJAXServlet.PARAMETER_DATA);
+			int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+            int[] columnsToLoad = removeVirtual(columns);
+            final JSONArray jData = DataParser.checkJSONArray(jsonObj, AJAXServlet.PARAMETER_DATA);
 			int oldfolderId = 0;
 			final int[][] objectIdAndFolderId = new int[jData.length()][2];
 			for (int a = 0; a < objectIdAndFolderId.length; a++) {
@@ -375,9 +380,9 @@ public class ContactRequest {
 				oldfolderId = objectIdAndFolderId[0][1];
 			}
 
-			final int[] internalColumns = new int[columns.length + 1];
-			System.arraycopy(columns, 0, internalColumns, 0, columns.length);
-			internalColumns[columns.length] = DataObject.LAST_MODIFIED;
+			final int[] internalColumns = new int[columnsToLoad.length + 1];
+			System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
+			internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 
 			Context ctx = null;
 			try {
@@ -515,8 +520,9 @@ public class ContactRequest {
 	public JSONArray actionAll(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException,
 			SearchIteratorException, OXException, OXJSONException, AjaxException {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
-		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-		final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
+		int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+        int[] columnsToLoad = removeVirtual(columns);
+        final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
 		final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
 		final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
 
@@ -530,9 +536,9 @@ public class ContactRequest {
 		SearchIterator<ContactObject> it = null;
 
 		try {
-			final int[] internalColumns = new int[columns.length + 1];
-			System.arraycopy(columns, 0, internalColumns, 0, columns.length);
-			internalColumns[columns.length] = DataObject.LAST_MODIFIED;
+			final int[] internalColumns = new int[columnsToLoad.length + 1];
+			System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
+			internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 
 			Context ctx = null;
 			try {
@@ -577,7 +583,19 @@ public class ContactRequest {
 		}
 	}
 
-	public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException,
+    private int[] removeVirtual(int[] columns) {
+        List<Integer> helper = new ArrayList<Integer>(columns.length);
+        for(int col : columns) {
+            if(col != ContactObject.LAST_MODIFIED_UTC) {
+                helper.add(col);
+            }
+        }
+        int[] copy = new int[helper.size()];
+        for(int i = 0; i < copy.length; i++) { copy[i] = helper.get(i); }
+        return copy;
+    }
+
+    public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException,
 			OXJSONException, AjaxException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
@@ -640,8 +658,9 @@ public class ContactRequest {
 			SearchIteratorException, OXException, OXJSONException, AjaxException {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+        final int[] columnsToLoad = removeVirtual(columns);
 
-		boolean startletter = false;
+        boolean startletter = false;
 
 		timestamp = new Date(0);
 
@@ -694,9 +713,9 @@ public class ContactRequest {
 			searchObj.setCatgories(DataParser.parseString(jData, "categories"));
 			searchObj.setSubfolderSearch(DataParser.parseBoolean(jData, "subfoldersearch"));
 
-			final int[] internalColumns = new int[columns.length + 1];
-			System.arraycopy(columns, 0, internalColumns, 0, columns.length);
-			internalColumns[columns.length] = DataObject.LAST_MODIFIED;
+			final int[] internalColumns = new int[columnsToLoad.length + 1];
+			System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
+			internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 
 			Context ctx = null;
 			try {

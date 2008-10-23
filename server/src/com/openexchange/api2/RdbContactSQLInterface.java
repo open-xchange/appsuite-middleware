@@ -1230,7 +1230,17 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		
 		return co;
 	}
-
+    @OXThrowsMultiple(
+    			category={
+    								Category.CODE_ERROR,
+    								Category.CODE_ERROR
+    								},
+    			desc={"52","53"},
+    			exceptionId={52,53},
+    			msg={	ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D,
+    							ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D
+    						}
+    	)
 	private class ContactObjectIterator implements SearchIterator<ContactObject> {
 
         private ContactObject nexto; 
@@ -1245,17 +1255,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
         private final List<AbstractOXException> warnings;
 
 
-    	@OXThrowsMultiple(
-    			category={ 	
-    								Category.CODE_ERROR,				
-    								Category.CODE_ERROR
-    								},
-    			desc={"52","53"},
-    			exceptionId={52,53},
-    			msg={	ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D,
-    							ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D
-    						}
-    	)
+
 		public ContactObjectIterator(final ResultSet rs,final Statement stmt, final int[] cols, final boolean securecheck, final Connection readcon) throws SearchIteratorException {
     		this.warnings =  new ArrayList<AbstractOXException>(2);
     		this.rs = rs;

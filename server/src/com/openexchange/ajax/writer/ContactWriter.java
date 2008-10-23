@@ -69,7 +69,9 @@ import com.openexchange.groupware.container.LinkEntryObject;
  */
 public class ContactWriter extends CommonWriter {
 
-	/**
+    private TimeZone utc = TimeZone.getTimeZone("utc");
+
+    /**
 	 * Initializes a new {@link ContactWriter}
 	 * 
 	 * @param timeZone
@@ -258,7 +260,10 @@ public class ContactWriter extends CommonWriter {
 		case ContactObject.LAST_MODIFIED:
 			writeValue(contactobject.getLastModified(), timeZone, jsonArray);
 			break;
-		case ContactObject.FOLDER_ID:
+        case ContactObject.LAST_MODIFIED_UTC:
+            writeValue(contactobject.getLastModified(), utc, jsonArray);
+            break;
+        case ContactObject.FOLDER_ID:
 			writeValue(contactobject.getParentFolderID(), jsonArray, contactobject.containsParentFolderID());
 			break;
 		case ContactObject.PRIVATE_FLAG:
