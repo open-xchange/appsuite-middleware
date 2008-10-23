@@ -24,7 +24,7 @@ public class ContactCollectFolder implements PreferencesItemService {
             }
 
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
-                int value = ServerUserSetting.getContactCollectionFolder(ctx.getContextId(), user.getId());
+                long value = ServerUserSetting.getContactCollectionFolder(ctx.getContextId(), user.getId());
                 if(setting != null)
                     setting.setSingleValue(value);
             }
@@ -39,7 +39,7 @@ public class ContactCollectFolder implements PreferencesItemService {
 
             public void writeValue(Context ctx, User user, Setting setting) throws SettingException {
                 if(setting != null)
-                    ServerUserSetting.setContactCollectionFolder(ctx.getContextId(), user.getId(), (Integer) setting.getSingleValue());
+                    ServerUserSetting.setContactCollectionFolder(ctx.getContextId(), user.getId(), Long.parseLong((String) setting.getSingleValue()));
             }
             
         };

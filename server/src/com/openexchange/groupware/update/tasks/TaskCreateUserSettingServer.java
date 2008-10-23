@@ -75,10 +75,9 @@ public class TaskCreateUserSettingServer implements UpdateTask {
 	private final String CREATE_STATEMENT = "CREATE TABLE user_setting_server (" +
 	        "cid INT4 UNSIGNED NOT NULL," +
 	        "user INT4 UNSIGNED NOT NULL," +
-	        "contact_collect_folder INT4 UNSIGNED NOT NULL," +
-	        "contact_collect_enabled BOOL NOT NULL," +
-	        "FOREIGN KEY(cid, user) REFERENCES user(cid, id)," +
-	        "FOREIGN KEY(cid, contact_collect_folder) REFERENCES oxfolder_tree(cid, fuid)" +
+	        "contact_collect_folder INT4 UNSIGNED," +
+	        "contact_collect_enabled BOOL," +
+	        "FOREIGN KEY(cid, user) REFERENCES user(cid, id)" +
 	        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 	
 	private static final Log LOG = LogFactory.getLog(TaskCreateUserSettingServer.class);
