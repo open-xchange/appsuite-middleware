@@ -46,78 +46,34 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-
 package com.openexchange.ajax.contact.action;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.CommonAllRequest;
-import com.openexchange.ajax.request.AppointmentRequest;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.ajax.framework.CommonUpdatesRequest;
 import com.openexchange.groupware.search.Order;
 
+import java.util.Date;
+
 /**
- * Contains the data for an appointment all request.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- * @author <a href="mailto:ben.pahne@open-xchange.org">Ben Pahne</a>
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class AllRequest extends CommonAllRequest {
-
-    public static final int[] GUI_COLUMNS = new int[] {
-    	ContactObject.OBJECT_ID,
-    	ContactObject.FOLDER_ID
-    };
-
-    public static final int GUI_SORT = ContactObject.SUR_NAME;
-
-    public static final Order GUI_ORDER = Order.ASCENDING;
-
-    @Deprecated
-    public AllRequest(final int folderId, final int[] columns, final Date start,
-                      final Date end) {
-        this(folderId, columns);
-    }
-
-    @Deprecated
-    public AllRequest(final int folderId, final int[] columns, final Date start,
-                      final Date end, final boolean recurrenceMaster) {
-        this(folderId, columns);
-    }
-    
-    /**
-     * Default constructor.
-     */
-    public AllRequest(final int folderId, final int[] columns) {
-        super(AbstractContactRequest.URL, folderId, addGUIColumns(columns),
-            0, null, true);
-    }
-
-    private static int[] addGUIColumns(final int[] columns) {
-        final List<Integer> list = new ArrayList<Integer>();
-        for (int i = 0; i < columns.length; i++) {
-            list.add(Integer.valueOf(columns[i]));
-        }
-        // Move GUI_COLUMNS to end.
-        for (int i = 0; i < GUI_COLUMNS.length; i++) {
-            final Integer column = Integer.valueOf(GUI_COLUMNS[i]);
-            list.remove(column);
-            list.add(column);
-        }
-        final int[] retval = new int[list.size()];
-        for (int i = 0; i < retval.length; i++) {
-            retval[i] = list.get(i).intValue();
-        }
-        return retval;
-    }
+public class UpdatesRequest extends CommonUpdatesRequest {
 
     /**
-     * {@inheritDoc}
+     * @param folderId
+     * @param columns
+     * @param sort
+     * @param order
+     * @param lastModified
      */
-    @Override
-    public AllParser getParser() {
-        return new AllParser(isFailOnError(), getColumns());
+    public UpdatesRequest(final int folderId, final int[] columns,
+        final int sort, final Order order, final Date lastModified) {
+        this(folderId, columns, sort, order, lastModified, Ignore.DELETED);
+    }
+
+    public UpdatesRequest(final int folderId, final int[] columns,
+        final int sort, final Order order, final Date lastModified,
+        final Ignore ignore) {
+        super(AbstractContactRequest.URL, folderId, columns, sort, order,
+            lastModified, ignore, true);
     }
 }

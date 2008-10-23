@@ -2,8 +2,14 @@ package com.openexchange.ajax.contact;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 
 import com.openexchange.ajax.ContactTest;
+import com.openexchange.ajax.contact.action.SearchRequest;
+import com.openexchange.ajax.contact.action.SearchResponse;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
@@ -82,5 +88,31 @@ public class SearchTest extends ContactTest {
 		assertTrue("contact array size >= 3", contactArray2.length >= 3);
 		
 	}
+
+    // Node 2652
+    public void testLastModifiedUTC() throws Exception {
+        AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final int cols[] = new int[]{ ContactObject.OBJECT_ID, ContactObject.FOLDER_ID, ContactObject.LAST_MODIFIED_UTC};
+
+        final ContactObject contactObj = createContactObject("testLastModifiedUTC");
+		final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
+        try {
+
+            SearchRequest searchRequest  = new SearchRequest("*", contactFolderId, cols, true);
+            SearchResponse response = Executor.execute(client, searchRequest);
+            JSONArray arr = (JSONArray) response.getResponse().getData();
+
+            assertNotNull(arr);
+            int size = arr.length();
+            assertTrue(size > 0);
+            for(int i = 0; i < size; i++ ){
+                JSONArray objectData = arr.optJSONArray(i);
+                assertNotNull(objectData);
+                assertNotNull(objectData.opt(2));
+            }
+        } finally {
+            deleteContact(getWebConversation(), objectId, contactFolderId, getHostName(), getSessionId());
+        }
+    }
 	
 }

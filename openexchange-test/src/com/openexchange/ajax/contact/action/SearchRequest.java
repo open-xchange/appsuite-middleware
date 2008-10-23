@@ -46,78 +46,80 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-
 package com.openexchange.ajax.contact.action;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
+import org.json.JSONObject;
+import org.json.JSONException;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.CommonAllRequest;
-import com.openexchange.ajax.request.AppointmentRequest;
-import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.groupware.search.Order;
+import com.openexchange.ajax.fields.SearchFields;
+
+import java.util.List;
+import java.util.ArrayList;
 
 /**
- * Contains the data for an appointment all request.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- * @author <a href="mailto:ben.pahne@open-xchange.org">Ben Pahne</a>
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class AllRequest extends CommonAllRequest {
+public class SearchRequest  extends AbstractContactRequest<SearchResponse>{
+    private JSONObject body = new JSONObject();
+    private SearchParser searchParser;
+    private List<AJAXRequest.Parameter> params = new ArrayList<AJAXRequest.Parameter>();
 
-    public static final int[] GUI_COLUMNS = new int[] {
-    	ContactObject.OBJECT_ID,
-    	ContactObject.FOLDER_ID
-    };
-
-    public static final int GUI_SORT = ContactObject.SUR_NAME;
-
-    public static final Order GUI_ORDER = Order.ASCENDING;
-
-    @Deprecated
-    public AllRequest(final int folderId, final int[] columns, final Date start,
-                      final Date end) {
-        this(folderId, columns);
+    public SearchRequest(String pattern, int inFolder, int[] columns, boolean failOnError) {
+        this(pattern, inFolder, columns, -1, null, failOnError);
     }
 
-    @Deprecated
-    public AllRequest(final int folderId, final int[] columns, final Date start,
-                      final Date end, final boolean recurrenceMaster) {
-        this(folderId, columns);
-    }
-    
-    /**
-     * Default constructor.
-     */
-    public AllRequest(final int folderId, final int[] columns) {
-        super(AbstractContactRequest.URL, folderId, addGUIColumns(columns),
-            0, null, true);
-    }
+    public SearchRequest(String pattern, int inFolder, int[] columns, int orderBy, String orderDir, boolean failOnError) {
+        searchParser = new SearchParser(failOnError, columns);
 
-    private static int[] addGUIColumns(final int[] columns) {
-        final List<Integer> list = new ArrayList<Integer>();
-        for (int i = 0; i < columns.length; i++) {
-            list.add(Integer.valueOf(columns[i]));
+        param(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
+        param(AJAXServlet.PARAMETER_COLUMNS, join(columns));
+        if(orderBy != -1) {
+            param(AJAXServlet.PARAMETER_SORT, String.valueOf(orderBy));
+            param(AJAXServlet.PARAMETER_ORDER, orderDir);
         }
-        // Move GUI_COLUMNS to end.
-        for (int i = 0; i < GUI_COLUMNS.length; i++) {
-            final Integer column = Integer.valueOf(GUI_COLUMNS[i]);
-            list.remove(column);
-            list.add(column);
+
+        try {
+            if(inFolder != -1) {
+                body.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
+            }
+            if(pattern != null) {
+                body.put(SearchFields.PATTERN, pattern);
+            }
+        } catch (JSONException e) {
+            throw new IllegalStateException(e); // Shouldn't happen
         }
-        final int[] retval = new int[list.size()];
-        for (int i = 0; i < retval.length; i++) {
-            retval[i] = list.get(i).intValue();
-        }
-        return retval;
+
+
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public AllParser getParser() {
-        return new AllParser(isFailOnError(), getColumns());
+    private void param(String key, String value) {
+        if(value != null) {
+            params.add(new AJAXRequest.Parameter(key, value));
+        }
+    }
+
+    public AJAXRequest.Method getMethod() {
+        return AJAXRequest.Method.PUT;
+    }
+
+    public AJAXRequest.Parameter[] getParameters() {
+        return params.toArray(new AJAXRequest.Parameter[params.size()]);
+    }
+
+    public AbstractAJAXParser<SearchResponse> getParser() {
+        return searchParser;
+    }
+
+    public Object getBody() throws JSONException {
+        return body;
+    }
+
+    private String join(int[] values) {
+        StringBuilder b = new StringBuilder();
+        for(int v : values) { b.append(v).append(", ");}
+        b.setLength(b.length()-2);
+        return b.toString();
     }
 }

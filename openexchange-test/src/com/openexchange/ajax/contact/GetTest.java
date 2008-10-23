@@ -2,13 +2,16 @@ package com.openexchange.ajax.contact;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.contact.action.UserGetRequest;
+import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.container.ContactObject;
 
 public class GetTest extends ContactTest {
@@ -72,4 +75,22 @@ public class GetTest extends ContactTest {
         assertEquals("user id is not equals", userId, loadContact.getInternalUserId());
         assertTrue("object id not set", loadContact.getObjectID() > 0);
 	}
+
+    // Node 2652
+    public void testLastModifiedUTC() throws Exception {
+        AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+
+        final ContactObject contactObj = createContactObject("testNew");
+		final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
+        try {
+            GetRequest req = new GetRequest(contactFolderId, objectId);
+
+            AbstractAJAXResponse response = Executor.execute(client, req);
+            JSONObject contact = (JSONObject) response.getResponse().getData();
+            assertTrue(contact.has("last_modified_utc"));
+
+        } finally {
+            deleteContact(getWebConversation(), objectId, contactFolderId, getHostName(), getSessionId());
+        }
+    }
 }
