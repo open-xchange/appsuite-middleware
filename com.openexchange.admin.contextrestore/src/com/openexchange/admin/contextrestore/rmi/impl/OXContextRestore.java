@@ -105,6 +105,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             String table_name = null;
             // Set if a database is found in which the search for cid should be done
             boolean furthersearch = true;
+            // Defines if we have found a contextserver2pool table
             boolean searchcontext = false;
 //            boolean searchdbpool = false;
             int pool_id = -1;
@@ -209,18 +210,25 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                         // Now we search for matching cids and write them to the tmp file
                         if (searchcontext) {
                             final String value[] = searchAndWriteMatchingCidValues(in, bufferedWriter, cidpos, Integer.toString(cid), table_name, true, true);
-                            try {
-                                pool_id = Integer.parseInt(value[1]);
-                            } catch (final NumberFormatException e) {
-                                throw new OXContextRestoreException(Code.COULD_NOT_CONVERT_POOL_VALUE);
+                            if (value.length >= 2) {
+                                try {
+                                    pool_id = Integer.parseInt(value[1]);
+                                } catch (final NumberFormatException e) {
+                                    throw new OXContextRestoreException(Code.COULD_NOT_CONVERT_POOL_VALUE);
+                                }
+                                schema = value[2];
+                                //                    } else if (searchdbpool) {
+                                //                        final String value[] = searchAndWriteMatchingCidValues(in, bufferedWriter, 1, Integer.toString(pool_id), table_name, true, false);
+                                //                        searchdbpool = false;
+                                //                        System.out.println(Arrays.toString(value));
+                            } else {
+                                throw new OXContextRestoreException(Code.CONTEXT_NOT_FOUND_IN_POOL_MAPPING);
                             }
-                            schema = value[2];
-//                    } else if (searchdbpool) {
-//                        final String value[] = searchAndWriteMatchingCidValues(in, bufferedWriter, 1, Integer.toString(pool_id), table_name, true, false);
-//                        searchdbpool = false;
-//                        System.out.println(Arrays.toString(value));
                         } else {
-                            searchAndWriteMatchingCidValues(in, bufferedWriter, cidpos, Integer.toString(cid), table_name, false, true);
+                            // Here we should only search if a fitting db was found and thus the writer was set
+                            if (null != bufferedWriter) {
+                                searchAndWriteMatchingCidValues(in, bufferedWriter, cidpos, Integer.toString(cid), table_name, false, true);
+                            }
                         }
                         searchcontext = false;
                         oldstate = 0;
@@ -270,7 +278,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
          * @param value The value itself
          * @param table_name
          * @param readall If the rest of the row should be returned as string array after a match or not
-         * @param contextsearch TODO
+         * @param contextsearch
          * @throws IOException
          */
         private String[] searchAndWriteMatchingCidValues(final BufferedReader in, final Writer bufferedWriter, final int valuepos, final String value, final String table_name, boolean readall, boolean contextsearch) throws IOException {

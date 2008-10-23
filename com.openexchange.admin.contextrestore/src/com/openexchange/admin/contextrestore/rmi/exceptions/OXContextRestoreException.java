@@ -116,7 +116,12 @@ public class OXContextRestoreException extends Exception {
         /**
          * An IO Exception has occurred, see the log files for details
          */
-        IO_EXCEPTION("An IO Exception has occurred, see the log files for details");
+        IO_EXCEPTION("An IO Exception has occurred, see the log files for details"),
+        
+        /**
+         * The context id wasn't found in the context_server2db_pool table
+         */
+        CONTEXT_NOT_FOUND_IN_POOL_MAPPING("The context id wasn't found in the context_server2db_pool table");
         
         private final String text;
 
