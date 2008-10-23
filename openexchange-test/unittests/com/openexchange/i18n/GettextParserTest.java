@@ -92,7 +92,7 @@ public class GettextParserTest extends TestCase {
                 "\"This is part of a longer string\\n\"\n"+
                 "\"Typically multiline\"\n"+
                 "msgstr \"\"\n"+
-                "\"Dies ist ein Teil einerer längeren Zeichenkette\\n\"\n"+
+                "\"Dies ist ein Teil einerer l\u00e4ngeren Zeichenkette\\n\"\n"+
                 "\"Typischerweise mehrzeilig\"\n"+
                 "msgid \"\"\n"+
                 "\"This is another long string\\n\"\n"+
@@ -106,7 +106,7 @@ public class GettextParserTest extends TestCase {
 
         assertTranslation(translations,
                 "This is part of a longer string\\nTypically multiline",
-                "Dies ist ein Teil einerer längeren Zeichenkette\\nTypischerweise mehrzeilig");
+                "Dies ist ein Teil einerer l\u00e4ngeren Zeichenkette\\nTypischerweise mehrzeilig");
 
     }
 
@@ -140,10 +140,10 @@ public class GettextParserTest extends TestCase {
                 "\"A multiline message about\\n\"\n"+
                 "\"%d messages\"\n"+
                 "msgstr[0] \"\"\n"+
-                "\"Eine mehrzeilige Nachricht über\\n\"\n"+
+                "\"Eine mehrzeilige Nachricht \u00fcber\\n\"\n"+
                 "\"%d Nachricht\"\n"+
                 "msgstr[1] \"\"\n"+
-                "\"Eine mehrzeilige Nachricht über\\n\"\n"+
+                "\"Eine mehrzeilige Nachricht \u00fcber\\n\"\n"+
                 "\"%d Nachrichten\"\n"+
                 "msgid \"Another message\"\n"+
                 "msgstr \"Andere Nachricht\"\n";
@@ -153,10 +153,10 @@ public class GettextParserTest extends TestCase {
         assertNotNull(translations);
         assertTranslation(translations,
                 "A multiline message about\\n%d message",
-                "Eine mehrzeilige Nachricht über\\n%d Nachricht");
+                "Eine mehrzeilige Nachricht \u00fcber\\n%d Nachricht");
         assertTranslation(translations,
                 "A multiline message about\\n%d messages",
-                "Eine mehrzeilige Nachricht über\\n%d Nachricht");
+                "Eine mehrzeilige Nachricht \u00fcber\\n%d Nachricht");
 
         assertTranslation(translations, "Another message", "Andere Nachricht");
            
