@@ -36,7 +36,7 @@ import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.group.internal.GroupInit;
 import com.openexchange.groupware.configuration.ParticipantConfig;
-import com.openexchange.groupware.contact.datahandler.VCardSaveDataHandler;
+import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
 import com.openexchange.i18n.tools.I18nServices;
@@ -328,7 +328,7 @@ public final class Init {
     }
    
     public static void startAndInjectConverterService() {
-    	ConversionEngineRegistry.getInstance().putDataHandler("com.openexchange.contact", new VCardSaveDataHandler());
+    	ConversionEngineRegistry.getInstance().putDataHandler("com.openexchange.contact", new ContactInsertDataHandler());
 		ConversionEngineRegistry.getInstance().putDataSource("com.openexchange.mail.vcard",
 				new VCardMailPartDataSource());
     	
