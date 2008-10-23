@@ -20,21 +20,6 @@ set -e
 . /opt/open-xchange/etc/oxfunctions.sh
 
 
-v_setprop() {
-    local prop="$1"
-    local val="$2"
-    local propfile="$3"
-    echo setting $prop in $propfile
-    ox_set_property "$prop" "$val" "$propfile"
-}
-
-v_delprop() {
-    local prop="$1"
-    local propfile="$2"
-    echo removing $prop in $propfile
-    ox_remove_property "$prop" "$propfile"
-}
-
 postFix() {
   local version=${1%-*}
   version=${version//[-.]/}
@@ -88,6 +73,16 @@ postFix() {
 
   # we're updating from pre sp4
   if [ $version -lt 650 ]; then
+
+      # -----------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/groupware/configdb.properties
+      if ox_exists_property testThreads $pfile; then
+	  local val=$(ox_read_property testThreads $pfile)
+	  if [ "$val" != "false" ]; then
+	      ox_set_property testThreads false $pfile
+	  fi
+      fi
+
 
       # did not exist in SP3
       chown -R open-xchange: /opt/open-xchange/etc/groupware/osgi || true
