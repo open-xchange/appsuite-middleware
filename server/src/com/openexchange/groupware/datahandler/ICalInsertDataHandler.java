@@ -358,6 +358,9 @@ public final class ICalInsertDataHandler implements DataHandler {
 				fileId = null;
 				file = null;
 			}
+			if (bytes != null) {
+				bytes = null;
+			}
 		}
 
 		private int copy2ByteArr(final InputStream in) throws IOException {
