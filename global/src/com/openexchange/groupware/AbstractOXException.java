@@ -63,6 +63,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.exceptions.ErrorMessage;
+
 /**
  * This should be the super class of all exceptions that are sent as error codes
  * to the client.
@@ -330,6 +332,19 @@ public class AbstractOXException extends Exception {
         this.component = component;
         this.category = category;
         this.detailNumber = detailNumber;
+        problematics = new ArrayList<ProblematicAttribute>();
+    }
+
+    /**
+     * Constructor in conjuction with {@link ErrorMessage}.
+     * @param message ErrorMessage
+     * @param cause the initial cause.
+     */
+    public AbstractOXException(final ErrorMessage message, final Throwable cause) {
+        super(message.getMessage(), cause);
+        this.component = message.getComponent();
+        this.category = message.getCategory();
+        this.detailNumber = message.getErrorCode();
         problematics = new ArrayList<ProblematicAttribute>();
     }
 

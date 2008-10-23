@@ -51,6 +51,7 @@ package com.openexchange.mail.conversion;
 
 import java.io.InputStream;
 
+import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
@@ -84,7 +85,7 @@ public final class VCardMailPartDataSource extends MailPartDataSource {
 	public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session)
 			throws DataException {
 		if (!InputStream.class.equals(type)) {
-			throw new DataException(DataException.Code.TYPE_NOT_SUPPORTED, type.getName());
+			throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(type.getName());
 		}
 		final MailPart mailPart;
 		{
@@ -93,7 +94,7 @@ public final class VCardMailPartDataSource extends MailPartDataSource {
 			try {
 				mailId = Long.parseLong(dataArguments.get(ARGS[1]));
 			} catch (final NumberFormatException e) {
-				throw new DataException(DataException.Code.INVALID_ARGUMENT, ARGS[1], dataArguments.get(ARGS[1]));
+				throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[1], dataArguments.get(ARGS[1]));
 			}
 			final String sequenceId = dataArguments.get(ARGS[2]);
 			mailPart = getMailPart(fullname, mailId, sequenceId, session);

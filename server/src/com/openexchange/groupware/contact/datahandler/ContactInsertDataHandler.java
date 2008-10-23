@@ -62,6 +62,7 @@ import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
@@ -122,7 +123,7 @@ public final class ContactInsertDataHandler implements DataHandler {
 		try {
 			folder = Integer.parseInt(dataArguments.get(ARGS[0]));
 		} catch (final NumberFormatException e) {
-			throw new DataException(DataException.Code.INVALID_ARGUMENT, ARGS[0], e, dataArguments.get(ARGS[0]));
+			throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[0], e, dataArguments.get(ARGS[0]));
 		}
 		final Context ctx;
 		try {
@@ -183,11 +184,11 @@ public final class ContactInsertDataHandler implements DataHandler {
 			 */
 			return jsonArray;
 		} catch (final ConverterException e) {
-			throw new DataException(DataException.Code.ERROR, e, e.getMessage());
+			throw DataExceptionCodes.ERROR.create(e, e.getMessage());
 		} catch (final JSONException e) {
-			throw new DataException(DataException.Code.ERROR, e, e.getMessage());
+			throw DataExceptionCodes.ERROR.create(e, e.getMessage());
 		} catch (final IOException e) {
-			throw new DataException(DataException.Code.ERROR, e, e.getMessage());
+			throw DataExceptionCodes.ERROR.create(e, e.getMessage());
 		} finally {
 			converter.close();
 			try {
@@ -211,7 +212,7 @@ public final class ContactInsertDataHandler implements DataHandler {
 				}
 			}
 			bob.setLength(bob.length() - separator.length());
-			return new DataException(DataException.Code.TRUNCATED, bob.toString());
+			return DataExceptionCodes.TRUNCATED.create(bob.toString());
 		}
 		return new DataException(e);
 	}

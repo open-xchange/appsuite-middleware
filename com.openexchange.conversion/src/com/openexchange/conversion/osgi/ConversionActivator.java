@@ -47,43 +47,55 @@
  *
  */
 
-package com.openexchange.conversion;
+package com.openexchange.conversion.osgi;
 
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+
+import com.openexchange.conversion.DataException;
+import com.openexchange.conversion.exception.DataExceptionFactory;
+import com.openexchange.exceptions.osgi.ComponentRegistration;
 
 /**
- * {@link DataException} - The exception for data conversion
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ * Activator for this bundle that registers a new Component.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class DataException extends AbstractOXException {
+public final class ConversionActivator implements BundleActivator {
 
-	public static final Component CONV_COMPONENT = new Component() {
-		public String getAbbreviation() {
-			return STR_COMPONENT;
-		}
-	};
+    private static final Log LOG = LogFactory.getLog(ConversionActivator.class);
 
-	private static final long serialVersionUID = -1114834069849112275L;
+    private ComponentRegistration convComponent;
 
-	private static final String STR_COMPONENT = "CNV";
+    /**
+     * Default constructor.
+     */
+    public ConversionActivator() {
+        super();
+    }
 
-	/**
-	 * Initializes a new {@link DataException}
-	 * 
-	 * @param cause
-	 *            The cause
-	 */
-	public DataException(final AbstractOXException cause) {
-		super(cause);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public void start(final BundleContext context) throws Exception {
+        try {
+            convComponent = new ComponentRegistration(context, DataException.CONV_COMPONENT.getAbbreviation(), "com.openexchange.conversion", DataExceptionFactory.getInstance());
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 
-    public DataException(final ErrorMessage message, final Throwable cause,
-        final Object... args) {
-        super(message, cause);
-        setMessageArgs(args);
+    /**
+     * {@inheritDoc}
+     */
+    public void stop(final BundleContext context) throws Exception {
+        try {
+            convComponent.unregister();
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
     }
 }

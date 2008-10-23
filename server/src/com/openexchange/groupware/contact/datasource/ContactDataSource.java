@@ -63,6 +63,7 @@ import org.json.JSONObject;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
@@ -105,7 +106,7 @@ public final class ContactDataSource implements DataSource {
 	public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session)
 			throws DataException {
 		if (!InputStream.class.equals(type) && !byte[].class.equals(type)) {
-			throw new DataException(DataException.Code.TYPE_NOT_SUPPORTED, type.getName());
+			throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(type.getName());
 		}
 		/*
 		 * Check arguments
@@ -118,7 +119,7 @@ public final class ContactDataSource implements DataSource {
 				pairsArray = new JSONArray(dataArguments.get(ARGS[0]));
 				final int len = pairsArray.length();
 				if (len == 0) {
-					throw new DataException(DataException.Code.MISSING_ARGUMENT, ARGS[0]);
+					throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[0]);
 				}
 				folderIds = new int[len];
 				objectIds = new int[len];
@@ -128,7 +129,7 @@ public final class ContactDataSource implements DataSource {
 					objectIds[i] = pairObject.getInt(PARAMETER_ID);
 				}
 			} catch (final JSONException e1) {
-				throw new DataException(DataException.Code.INVALID_ARGUMENT, ARGS[0], dataArguments.get(ARGS[0]));
+				throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[0], dataArguments.get(ARGS[0]));
 			}
 		}
 		/*
@@ -177,13 +178,13 @@ public final class ContactDataSource implements DataSource {
 		try {
 			versitWriter = contactDef.getWriter(byteArrayOutputStream, "UTF-8");
 		} catch (final IOException e) {
-			throw new DataException(DataException.Code.ERROR, e, e.getMessage());
+			throw DataExceptionCodes.ERROR.create(e, e.getMessage());
 		}
 		final OXContainerConverter oxContainerConverter;
 		try {
 			oxContainerConverter = new OXContainerConverter(session);
 		} catch (final ConverterException e) {
-			throw new DataException(DataException.Code.ERROR, e, e.getMessage());
+			throw DataExceptionCodes.ERROR.create(e, e.getMessage());
 		}
 		/*
 		 * Convert
@@ -193,9 +194,9 @@ public final class ContactDataSource implements DataSource {
 			contactDef.write(versitWriter, versitObject);
 			versitWriter.flush();
 		} catch (final ConverterException e) {
-			throw new DataException(DataException.Code.ERROR, e, e.getMessage());
+			throw DataExceptionCodes.ERROR.create(e, e.getMessage());
 		} catch (final IOException e) {
-			throw new DataException(DataException.Code.ERROR, e, e.getMessage());
+			throw DataExceptionCodes.ERROR.create(e, e.getMessage());
 		} finally {
 			closeVersitResources(oxContainerConverter, versitWriter);
 		}

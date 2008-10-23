@@ -47,43 +47,49 @@
  *
  */
 
-package com.openexchange.conversion;
+package com.openexchange.conversion.exception;
 
+import com.openexchange.conversion.DataException;
+import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.exceptions.Exceptions;
 
 /**
- * {@link DataException} - The exception for data conversion
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ * Factory for creating {@link DataException}.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class DataException extends AbstractOXException {
+public final class DataExceptionFactory extends Exceptions<DataException> {
 
-	public static final Component CONV_COMPONENT = new Component() {
-		public String getAbbreviation() {
-			return STR_COMPONENT;
-		}
-	};
+    private static final DataExceptionFactory SINGLETON = new DataExceptionFactory();
+    
+    /**
+     * Prevent instantiation.
+     */
+    private DataExceptionFactory() {
+        super();
+    }
 
-	private static final long serialVersionUID = -1114834069849112275L;
+    /**
+     * @return the singleton instance.
+     */
+    public static DataExceptionFactory getInstance() {
+        return SINGLETON;
+    }
 
-	private static final String STR_COMPONENT = "CNV";
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected DataException createException(final ErrorMessage message,
+        final Throwable cause, final Object... args) {
+        return new DataException(message, cause, args);
+    }
 
-	/**
-	 * Initializes a new {@link DataException}
-	 * 
-	 * @param cause
-	 *            The cause
-	 */
-	public DataException(final AbstractOXException cause) {
-		super(cause);
-	}
-
-    public DataException(final ErrorMessage message, final Throwable cause,
-        final Object... args) {
-        super(message, cause);
-        setMessageArgs(args);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void knownExceptions() {
+        declareAll(DataExceptionCodes.values());
     }
 }

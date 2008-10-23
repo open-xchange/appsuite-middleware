@@ -71,9 +71,7 @@ public class LoginException extends AbstractOXException {
     /**
      * Initializes a new exception using the information provided by the cause.
      * @param cause the cause of the exception.
-     * @deprecated TODO
      */
-    @Deprecated
     public LoginException(final AbstractOXException cause) {
         super(cause);
     }
@@ -105,8 +103,7 @@ public class LoginException extends AbstractOXException {
 
     public LoginException(final ErrorMessage message, final Throwable cause,
         final Object... messageArgs) {
-        super(message.getComponent(), message.getCategory(),
-            message.getErrorCode(), message.getMessage(), cause);
+        super(message, cause);
         setMessageArgs(messageArgs);
     }
 }

@@ -59,7 +59,6 @@ import com.openexchange.session.Session;
  * handlers}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public interface ConversionService {
 

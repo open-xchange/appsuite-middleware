@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.api;
 
 import com.openexchange.api2.OXException;
@@ -81,31 +79,6 @@ public class OXObjectNotFoundException extends OXException
 	@Deprecated
 	public OXObjectNotFoundException(final String message) {
 		super(message);
-	}
-	
-    /**
-     * @deprecated use error code handling
-     */
-	@Deprecated
-	public OXObjectNotFoundException(final String message, final Exception exc) {
-		super(message, exc);
-	}
-	
-    /**
-     * @deprecated use error code handling
-     */
-	@Deprecated
-	public OXObjectNotFoundException(final Exception exc) {
-		super(exc);
-	}
-	
-    /**
-     * @deprecated use error code handling
-     */
-	@Deprecated
-	public OXObjectNotFoundException(final String message, final int id) {
-		super(message);
-		this.id = id;
 	}
 	
 	public int getId(){

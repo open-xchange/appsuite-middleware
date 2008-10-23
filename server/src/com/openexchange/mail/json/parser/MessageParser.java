@@ -70,6 +70,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
@@ -189,7 +190,7 @@ public final class MessageParser {
 					final DataSource dataSource = conversionService.getDataSource(dataSourceObject
 							.getString(JSON_IDENTIFIER));
 					if (dataSource == null) {
-						throw new MailException(new DataException(DataException.Code.UNKNOWN_DATA_SOURCE,
+						throw new MailException(DataExceptionCodes.UNKNOWN_DATA_SOURCE.create(
 								dataSourceObject.getString(JSON_IDENTIFIER)));
 					}
 					if (!types.isEmpty()) {

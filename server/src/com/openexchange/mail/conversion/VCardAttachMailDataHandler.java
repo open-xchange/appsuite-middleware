@@ -70,6 +70,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
@@ -223,11 +224,11 @@ public final class VCardAttachMailDataHandler implements DataHandler {
 		} catch (final MailException e) {
 			throw new DataException(e);
 		} catch (final MessagingException e) {
-			throw new DataException(DataException.Code.ERROR, e, e.getMessage());
+			throw DataExceptionCodes.ERROR.create(e, e.getMessage());
 		} catch (final IOException e) {
-			throw new DataException(DataException.Code.ERROR, e, e.getMessage());
+			throw DataExceptionCodes.ERROR.create(e, e.getMessage());
 		} catch (final JSONException e) {
-			throw new DataException(DataException.Code.ERROR, e, e.getMessage());
+			throw DataExceptionCodes.ERROR.create(e, e.getMessage());
 		}
 	}
 
@@ -237,14 +238,14 @@ public final class VCardAttachMailDataHandler implements DataHandler {
 			DataException {
 		if (!mailObject.has(MailJSONField.ATTACHMENTS.getKey())
 				|| mailObject.isNull(MailJSONField.ATTACHMENTS.getKey())) {
-			throw new DataException(DataException.Code.ERROR, new StringBuilder(64).append(
+			throw DataExceptionCodes.ERROR.create(new StringBuilder(64).append(
 					"Parsed JSON mail object does not contain field '").append(MailJSONField.ATTACHMENTS.getKey())
 					.append('\'').toString());
 		}
 		final JSONArray attachmentArray = mailObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
 		final int len = attachmentArray.length();
 		if (len != 2) {
-			throw new DataException(DataException.Code.ERROR,
+			throw DataExceptionCodes.ERROR.create(
 					"Number of attachments in parsed JSON mail object is not equal to 2");
 		}
 		final JSONObject vcardAttachmentObject = attachmentArray.getJSONObject(1);
@@ -277,11 +278,11 @@ public final class VCardAttachMailDataHandler implements DataHandler {
 			} else if (vcard instanceof byte[]) {
 				bout.write((byte[]) vcard);
 			} else {
-				throw new DataException(DataException.Code.TYPE_NOT_SUPPORTED, vcard.getClass().getName());
+				throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(vcard.getClass().getName());
 			}
 			return bout.toByteArray();
 		} catch (final IOException e) {
-			throw new DataException(DataException.Code.ERROR, e, e.getMessage());
+			throw DataExceptionCodes.ERROR.create(e, e.getMessage());
 		}
 	}
 

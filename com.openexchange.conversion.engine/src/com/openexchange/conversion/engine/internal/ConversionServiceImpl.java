@@ -56,6 +56,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -98,7 +99,7 @@ public final class ConversionServiceImpl implements ConversionService {
 		 */
 		final Class<?> type = findMatchingType(dataSource, dataHandler);
 		if (type == null) {
-			throw new DataException(DataException.Code.NO_MATCHING_TYPE, dataSourceIdentifier, dataHandlerIdentifier);
+			throw DataExceptionCodes.NO_MATCHING_TYPE.create(dataSourceIdentifier, dataHandlerIdentifier);
 		}
 		/*
 		 * Get data from data source
@@ -117,7 +118,7 @@ public final class ConversionServiceImpl implements ConversionService {
 		 * Check for input stream support
 		 */
 		if (!new HashSet<Class<?>>(Arrays.asList(dataHandler.getTypes())).contains(InputStream.class)) {
-			throw new DataException(DataException.Code.NO_MATCHING_TYPE, InputStream.class.getName(),
+			throw DataExceptionCodes.NO_MATCHING_TYPE.create(InputStream.class.getName(),
 					dataHandlerIdentifier);
 		}
 		/*
@@ -130,12 +131,12 @@ public final class ConversionServiceImpl implements ConversionService {
 			final DataArguments dataSourceArguments) throws DataException {
 		final DataSource dataSource = getInstance().getDataSource(dataSourceID);
 		if (dataSource == null) {
-			throw new DataException(DataException.Code.UNKNOWN_DATA_SOURCE, dataSourceID);
+			throw DataExceptionCodes.UNKNOWN_DATA_SOURCE.create(dataSourceID);
 		}
 		final String[] args = dataSource.getRequiredArguments();
 		for (final String arg : args) {
 			if (!dataSourceArguments.containsKey(arg)) {
-				throw new DataException(DataException.Code.MISSING_ARGUMENT, arg);
+				throw DataExceptionCodes.MISSING_ARGUMENT.create(arg);
 			}
 		}
 		return dataSource;
@@ -145,12 +146,12 @@ public final class ConversionServiceImpl implements ConversionService {
 			final DataArguments dataHandlerArguments) throws DataException {
 		final DataHandler dataHandler = getInstance().getDataHandler(dataHandlerID);
 		if (dataHandler == null) {
-			throw new DataException(DataException.Code.UNKNOWN_DATA_HANDLER, dataHandlerID);
+			throw DataExceptionCodes.UNKNOWN_DATA_HANDLER.create(dataHandlerID);
 		}
 		final String[] args = dataHandler.getRequiredArguments();
 		for (final String arg : args) {
 			if (!dataHandlerArguments.containsKey(arg)) {
-				throw new DataException(DataException.Code.MISSING_ARGUMENT, arg);
+				throw DataExceptionCodes.MISSING_ARGUMENT.create(arg);
 			}
 		}
 		return dataHandler;

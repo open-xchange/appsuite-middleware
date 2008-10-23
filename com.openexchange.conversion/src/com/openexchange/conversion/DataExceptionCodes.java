@@ -49,41 +49,86 @@
 
 package com.openexchange.conversion;
 
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import static com.openexchange.conversion.DataExceptionMessages.*;
+
+import com.openexchange.conversion.exception.DataExceptionFactory;
+import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
- * {@link DataException} - The exception for data conversion
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ * Enumeration about all {@link DataException}s.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class DataException extends AbstractOXException {
-
-	public static final Component CONV_COMPONENT = new Component() {
-		public String getAbbreviation() {
-			return STR_COMPONENT;
-		}
-	};
-
-	private static final long serialVersionUID = -1114834069849112275L;
-
-	private static final String STR_COMPONENT = "CNV";
+public enum DataExceptionCodes implements OXErrorMessage {
 
 	/**
-	 * Initializes a new {@link DataException}
-	 * 
-	 * @param cause
-	 *            The cause
+	 * The given type of %1$s is not supported
 	 */
-	public DataException(final AbstractOXException cause) {
-		super(cause);
+	TYPE_NOT_SUPPORTED(TYPE_NOT_SUPPORTED_MSG, Category.CODE_ERROR, 1),
+	/**
+	 * Missing argument %1$s
+	 */
+	MISSING_ARGUMENT(MISSING_ARGUMENT_MSG, Category.CODE_ERROR, 2),
+	/**
+	 * Invalid value for argument %1$s: %2$s
+	 */
+	INVALID_ARGUMENT(INVALID_ARGUMENT_MSG, Category.CODE_ERROR, 3),
+	/**
+	 * Unknown data source identifier: %1$s
+	 */
+	UNKNOWN_DATA_SOURCE(UNKNOWN_DATA_SOURCE_MSG, Category.CODE_ERROR, 4),
+	/**
+	 * Unknown data handler identifier: %1$s
+	 */
+	UNKNOWN_DATA_HANDLER(UNKNOWN_DATA_HANDLER_MSG, Category.CODE_ERROR, 5),
+	/**
+	 * No matching type could be found for data source %1$s and data handler
+	 * %2$s
+	 */
+	NO_MATCHING_TYPE(NO_MATCHING_TYPE_MSG, Category.CODE_ERROR, 6),
+	/**
+	 * An error occurred: %1$s
+	 */
+	ERROR(ERROR_MSG, Category.CODE_ERROR, 7),
+	/**
+	 * The following field(s) are too long: %1$s
+	 */
+	TRUNCATED(TRUNCATED_MSG, Category.TRUNCATED, 8);
+
+	private final Category category;
+
+	private final int detailNumber;
+
+	private final String message;
+
+	private DataExceptionCodes(final String message, final Category category, final int detailNumber) {
+		this.message = message;
+		this.detailNumber = detailNumber;
+		this.category = category;
 	}
 
-    public DataException(final ErrorMessage message, final Throwable cause,
-        final Object... args) {
-        super(message, cause);
-        setMessageArgs(args);
+	public Category getCategory() {
+		return category;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+    public int getErrorCode() {
+        return detailNumber;
+    }
+
+    public String getHelp() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public DataException create(final Object... messageArgs) {
+        return DataExceptionFactory.getInstance().create(this, messageArgs);
+    }
+
+    public DataException create(final Throwable cause, final Object... messageArgs) {
+        return DataExceptionFactory.getInstance().create(this, cause, messageArgs);
     }
 }
