@@ -420,12 +420,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 		    cdao.setModifiedBy(uid);
 		    checkInsertMandatoryFields(cdao);
 		    cdao.setFolderType(ofa.getFolderType(inFolder, uid));
-		    
 		    if (cdao.getFolderType() == FolderObject.PRIVATE) {
 		        cdao.setPrivateFolderID(inFolder);
 		        cdao.setGlobalFolderID(0);
 		    }
-		    
+		    // Strange bugs can be produced if the recurrence identifier is set to some value on insert.
+            cdao.removeRecurrenceID();
 		} else {
 		    if (cdao.containsParentFolderID()) {
 		        cdao.setFolderType(ofa.getFolderType(cdao.getParentFolderID(), uid));
