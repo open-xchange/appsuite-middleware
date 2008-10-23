@@ -49,39 +49,53 @@
 
 package com.openexchange.ajax.appointment;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Calendar;
+import java.util.TimeZone;
+
+import com.openexchange.ajax.appointment.action.DeleteRequest;
+import com.openexchange.ajax.appointment.action.InsertRequest;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonInsertResponse;
+import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.groupware.container.AppointmentObject;
 
 /**
- * Suite for appointment bug tests.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class AppointmentBugTestSuite extends TestSuite{
+public final class Bug12372Test extends AbstractAJAXSession {
 
-    private AppointmentBugTestSuite() {
-        super();
+    /**
+     * @param name test name.
+     */
+    public Bug12372Test(final String name) {
+        super(name);
     }
 
-	/**
-	 * @return the suite.
-	 */
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(Bug4392Test.class);
-		tests.addTestSuite(Bug4541Test.class);
-		tests.addTestSuite(Bug6055Test.class);
-		tests.addTestSuite(Bug8317Test.class);
-        tests.addTestSuite(Bug8724Test.class);
-		tests.addTestSuite(Bug8836Test.class);
-		tests.addTestSuite(Bug9089Test.class);
-		tests.addTestSuite(Bug10154Test.class);
-		tests.addTestSuite(Bug10733Test.class);
-        tests.addTestSuite(Bug10836Test.class);
-		tests.addTestSuite(Bug11250Test.class);
-		tests.addTestSuite(Bug11865Test.class);
-		tests.addTestSuite(Bug12099Test.class);
-        tests.addTestSuite(Bug12326Test.class);
-        tests.addTestSuite(Bug12372Test.class);
-		return tests;
-	}
+    public void testDeleteOfStrangeApp() throws Throwable {
+        final AJAXClient client = getClient();
+        final TimeZone tz = client.getValues().getTimeZone();
+        final AppointmentObject appointment = new AppointmentObject();
+        appointment.setTitle("bug 12372 test");
+        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setIgnoreConflicts(true);
+        final Calendar calendar = TimeTools.createCalendar(tz);
+        calendar.set(Calendar.HOUR_OF_DAY, 11);
+        appointment.setStartDate(calendar.getTime());
+        calendar.set(Calendar.HOUR_OF_DAY, 12);
+        appointment.setEndDate(calendar.getTime());
+        // Recurrence start should be yesterday.
+        appointment.setRecurrenceType(AppointmentObject.DAILY);
+        appointment.setInterval(1);
+        calendar.add(Calendar.DATE, -1);
+        calendar.set(Calendar.HOUR_OF_DAY, 2);
+        appointment.setRecurringStart(calendar.getTimeInMillis());
+        appointment.setOccurrence(7);
+        appointment.setRecurrenceID(1868);
+        final InsertRequest request = new InsertRequest(appointment, tz);
+        final CommonInsertResponse response = client.execute(request);
+        response.fillObject(appointment);
+        client.execute(new DeleteRequest(appointment));
+    }
 }
