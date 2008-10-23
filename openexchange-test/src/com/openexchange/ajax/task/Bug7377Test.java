@@ -180,7 +180,7 @@ public class Bug7377Test extends AbstractTaskTest {
             task.setLastModified(response.getTimestamp());
         }
         // Create public folder
-        folder = Create.createPublicFolder("Bug7377TaskFolder1",
+        folder = Create.setupPublicFolder("Bug7377TaskFolder1",
             FolderObject.TASK, client1.getValues().getUserId());
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         {

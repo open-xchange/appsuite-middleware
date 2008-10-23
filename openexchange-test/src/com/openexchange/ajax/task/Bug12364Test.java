@@ -49,77 +49,61 @@
 
 package com.openexchange.ajax.task;
 
-import java.util.Date;
+import java.util.TimeZone;
 
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.ajax.task.actions.GetRequest;
-import com.openexchange.ajax.task.actions.GetResponse;
-import com.openexchange.ajax.task.actions.InsertRequest;
-import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.MultipleRequest;
+import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * Tests problem described in bug #9295.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Bug9252Test extends AbstractTaskTest {
-
-    private AJAXClient client1;
-
-    private AJAXClient client2;
+public final class Bug12364Test extends AbstractAJAXSession {
 
     /**
-     * @param name
+     * Default constructor.
      */
-    public Bug9252Test(final String name) {
+    public Bug12364Test(final String name) {
         super(name);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client1 = getClient();
-        client2 = new AJAXClient(AJAXClient.User.User2);
-    }
-
-    /**
-     * Tests if tasks in public folders created by other users can be read.
-     * @throws Throwable if this test fails.
-     */
-    public void testReadAccess() throws Throwable {
-        // Create public folder.
-        final FolderObject folder = Create.setupPublicFolder(
-            "Bug9295TaskFolder", FolderObject.TASK, client1.getValues()
-            .getUserId());
-        folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-        final CommonInsertResponse fInsertR = FolderTools.insert(client1,
-            new com.openexchange.ajax.folder.actions.InsertRequest(folder));
-        folder.setObjectID(fInsertR.getId());
+    public void testMoveTasks() throws Throwable {
+        final AJAXClient client = getClient();
+        final TimeZone tz = client.getValues().getTimeZone();
+        final FolderObject folder1;
+        final FolderObject folder2;
+        {
+            folder1 = Create.createPublicFolder(client,
+                "bug 12364 test folder 1", FolderObject.TASK);
+            folder2 = Create.createPublicFolder(client,
+                "bug 12364 test folder 2", FolderObject.TASK);
+        }
         try {
-            // Create a task in there.
-            final Task task = com.openexchange.groupware.tasks.Create
-                .createWithDefaults();
-            task.setParentFolderID(folder.getObjectID());
-            task.setTitle("Test bug #9295");
-            final InsertResponse iResponse = TaskTools.insert(client1,
-                new InsertRequest(task, client1.getValues().getTimeZone()));
-            task.setObjectID(iResponse.getId());
-            // Now second user tries to read the task.
-            final GetResponse gResponse = TaskTools.get(client2,
-                new GetRequest(folder.getObjectID(), task.getObjectID()));
-            final Task reload = gResponse.getTask(client2.getValues()
-                .getTimeZone());
-            TaskTools.compareAttributes(task, reload);
+            // Create tasks.
+            final Task task1 = new Task();
+            task1.setTitle("bug 12364 test 1");
+            task1.setParentFolderID(folder1.getObjectID());
+            final Task task2 = new Task();
+            task2.setTitle("bug 12364 test 2");
+            task2.setParentFolderID(folder2.getObjectID());
+            TaskTools.insert(client, task1, task2);
+            // Move them
+            task1.setParentFolderID(folder2.getObjectID());
+            task2.setParentFolderID(folder1.getObjectID());
+            final UpdateRequest request1 = new UpdateRequest(folder1.getObjectID(), task1, tz);
+            final UpdateRequest request2 = new UpdateRequest(folder2.getObjectID(), task2, tz);
+            client.execute(MultipleRequest.create(new UpdateRequest[] {
+                request1,
+                request2
+            }));
         } finally {
-            FolderTools.delete(client1, new com.openexchange.ajax.folder.actions
-                .DeleteRequest(folder.getObjectID(), new Date()));
+            FolderTools.deleteFolder(client, folder1, folder2);
         }
     }
 }

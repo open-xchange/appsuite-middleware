@@ -57,6 +57,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.CommonDeleteParser;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
  * Stores the parameters to delete a folder.
@@ -81,6 +82,18 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
         this(new int[] { folderId }, lastModified);
     }
 
+    public DeleteRequest(final FolderObject... folder) {
+        super();
+        folderIds = new int[folder.length];
+        Date maxLastModified = new Date(Long.MIN_VALUE);
+        for (int i = 0; i < folder.length; i++) {
+            folderIds[i] = folder[i].getObjectID();
+            if (maxLastModified.before(folder[i].getLastModified())) {
+                maxLastModified = folder[i].getLastModified();
+            }
+        }
+        lastModified = maxLastModified;
+    }
     /**
      * {@inheritDoc}
      */

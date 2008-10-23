@@ -49,8 +49,17 @@
 
 package com.openexchange.ajax.folder;
 
+import java.io.IOException;
+
+import org.json.JSONException;
+import org.xml.sax.SAXException;
+
+import com.openexchange.ajax.folder.actions.InsertRequest;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * 
@@ -73,7 +82,7 @@ public final class Create {
      * @param admin user identifier of the admin.
      * @return a ready to insert folder.
      */
-    public static FolderObject createPublicFolder(final String name,
+    public static FolderObject setupPublicFolder(final String name,
         final int type, final int admin) {
         final FolderObject folder = new FolderObject();
         folder.setFolderName(name);
@@ -101,6 +110,17 @@ public final class Create {
         return folder;
     }
 
+    public static FolderObject createPublicFolder(final AJAXClient client,
+        final String name, final int type) throws AjaxException, IOException,
+        SAXException, JSONException {
+        final FolderObject folder = setupPublicFolder(name, type, client.getValues().getUserId());
+        folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+        final InsertRequest request = new InsertRequest(folder);
+        final CommonInsertResponse response = client.execute(request);
+        response.fillObject(folder);
+        return folder;
+    }
+    
     /**
      * This method creates a private folder object. Admin user gets full access
      * permissions.

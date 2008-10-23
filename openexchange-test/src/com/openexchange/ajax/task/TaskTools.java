@@ -78,6 +78,8 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.framework.MultipleRequest;
+import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.ajax.task.actions.AllResponse;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -558,5 +560,19 @@ public final class TaskTools extends Assert {
 //        task.setTripMeter("trip meter");
 //        task.setBillingInformation("billing information");
 //        task.setCompanies("companies");
+    }
+
+    public static void insert(final AJAXClient client, final Task... tasks)
+        throws AjaxException, IOException, SAXException, JSONException {
+        final TimeZone tz = client.getValues().getTimeZone();
+        final InsertRequest[] inserts = new InsertRequest[tasks.length];
+        for (int i = 0; i < tasks.length; i++) {
+            inserts[i] = new InsertRequest(tasks[i], tz);
+        }
+        final MultipleRequest<InsertResponse> request = MultipleRequest.create(inserts);
+        final MultipleResponse<InsertResponse> response = client.execute(request);
+        for (int i = 0; i < tasks.length; i++) {
+            response.getResponse(i).fillTask(tasks[i]);
+        }
     }
 }

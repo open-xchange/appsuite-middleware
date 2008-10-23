@@ -137,4 +137,10 @@ public final class FolderTools {
         }
         return retval;
     }
+
+    public static void deleteFolder(final AJAXClient client,
+        final FolderObject... folder) throws AjaxException, IOException,
+        SAXException, JSONException {
+        client.execute(new DeleteRequest(folder));
+    }
 }

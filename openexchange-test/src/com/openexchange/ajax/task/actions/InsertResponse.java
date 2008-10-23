@@ -82,7 +82,6 @@ public class InsertResponse extends CommonInsertResponse {
      * especially the task identifier and the modified time stamp. 
      */
     public void fillTask(final Task task) {
-        task.setObjectID(getId());
-        task.setLastModified(getTimestamp());
+        fillObject(task);
     }
 }
