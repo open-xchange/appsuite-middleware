@@ -69,30 +69,25 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
- * {@link VCardMailPartImportTest}
+ * {@link ICalMailPartImportTest}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class VCardMailPartImportTest extends AbstractConversionTest {
+public final class ICalMailPartImportTest extends AbstractConversionTest {
 
-	private static final byte[] VCARD_BYTES = String.valueOf(
-			"" + "BEGIN:VCARD\n" + "VERSION:2.1\n" + "FN:Mustermann, Thomas\n"
-					+ "N:Mustermann;Thomas;;Dipl.,Informatiker;\n" + "BDAY:19851213\n"
-					+ "ADR;TYPE=work:;;Martinstr. 41;Olpe;NRW;57462;DE\n"
-					+ "ADR;TYPE=home:;;Musterstr. 10;Olpe;NRW;57666;Deutschland\n"
-					+ "TEL;TYPE=work;TYPE=voice:+49 (2761) 8385-16\n" + "TEL;TYPE=work;TYPE=fax:+49 (2761) 8385-30\n"
-					+ "TEL;TYPE=home;TYPE=voice:+49 2761 / 843 157\n" + "TEL;TYPE=cell;TYPE=voice:0171 / 835 72 89\n"
-					+ "EMAIL:thomas.mustermann@open-xchange.com\n" + "ORG:Open-Xchange Inc.;Development\n"
-					+ "REV:20080818T064153.771Z\n" + "UID:5@ox6-unstable.netline.de\n" + "END:VCARD").getBytes();
+	private static final byte[] ICAL_BYTES = String.valueOf(
+			"BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\n" + "DTSTART;VALUE=DATE:20061221\n" + "DTEND;VALUE=DATE:20070106\n"
+					+ "SUMMARY:Weihnachtsferien\n" + "UID:4A47CF83-9AC8-4B4F-A082-DB84A877D9A2\n" + "SEQUENCE:8\n"
+					+ "DTSTAMP:20060520T163834Z\n" + "END:VEVENT\n" + "END:VCALENDAR").getBytes();
 
 	/**
-	 * Initializes a new {@link VCardMailPartImportTest}
+	 * Initializes a new {@link ICalMailPartImportTest}
 	 * 
 	 * @param name
 	 *            The name
 	 */
-	public VCardMailPartImportTest(final String name) {
+	public ICalMailPartImportTest(final String name) {
 		super(name);
 	}
 
@@ -101,7 +96,7 @@ public final class VCardMailPartImportTest extends AbstractConversionTest {
 	 * 
 	 * @throws Throwable
 	 */
-	public void testVCardImport() throws Throwable {
+	public void testICalImport() throws Throwable {
 		final String[] mailFolderAndMailID;
 		try {
 			/*
@@ -128,13 +123,13 @@ public final class VCardMailPartImportTest extends AbstractConversionTest {
 
 			InputStream in = null;
 			try {
-				in = new UnsynchronizedByteArrayInputStream(VCARD_BYTES);
+				in = new UnsynchronizedByteArrayInputStream(ICAL_BYTES);
 				/*
 				 * Perform send
 				 */
 				final NetsolSendResponse response = (NetsolSendResponse) Executor.execute(getSession(),
-						new NetsolSendRequest(mailObject_25kb.toString(), in, "text/x-vcard; charset=US-ASCII",
-								"vcard.vcf"));
+						new NetsolSendRequest(mailObject_25kb.toString(), in, "text/calendar; charset=US-ASCII",
+								"ical.ics"));
 				assertTrue("Send failed", response.getFolderAndID() != null);
 				assertTrue("Duration corrupt", response.getRequestDuration() > 0);
 				mailFolderAndMailID = response.getFolderAndID();
@@ -176,7 +171,7 @@ public final class VCardMailPartImportTest extends AbstractConversionTest {
 				String sequenceId = null;
 				for (int i = 0; i < len && sequenceId == null; i++) {
 					final JSONObject attachObj = attachments.getJSONObject(i);
-					if (attachObj.getString(MailJSONField.CONTENT_TYPE.getKey()).startsWith("text/x-vcard")) {
+					if (attachObj.getString(MailJSONField.CONTENT_TYPE.getKey()).startsWith("text/calendar")) {
 						sequenceId = attachObj.getString(MailListField.ID.getKey());
 					}
 				}
@@ -184,15 +179,16 @@ public final class VCardMailPartImportTest extends AbstractConversionTest {
 				 * Trigger conversion
 				 */
 				final JSONObject jsonBody = new JSONObject();
-				final JSONObject jsonSource = new JSONObject().put("identifier", "com.openexchange.mail.vcard");
+				final JSONObject jsonSource = new JSONObject().put("identifier", "com.openexchange.mail.ical");
 				jsonSource.put("args", new JSONArray().put(
 						new JSONObject().put("com.openexchange.mail.conversion.fullname", mailFolderAndMailID[0])).put(
 						new JSONObject().put("com.openexchange.mail.conversion.mailid", mailFolderAndMailID[1])).put(
 						new JSONObject().put("com.openexchange.mail.conversion.sequenceid", sequenceId)));
 				jsonBody.put("datasource", jsonSource);
-				final JSONObject jsonHandler = new JSONObject().put("identifier", "com.openexchange.contact");
-				jsonHandler.put("args", new JSONArray().put(new JSONObject().put(
-						"com.openexchange.groupware.contact.folder", getPrivateContactFolder())));
+				final JSONObject jsonHandler = new JSONObject().put("identifier", "com.openexchange.ical");
+				jsonHandler.put("args", new JSONArray().put(
+						new JSONObject().put("com.openexchange.groupware.calendar.folder", getPrivateCalendarFolder()))
+						.put(new JSONObject().put("com.openexchange.groupware.task.folder", getPrivateTaskFolder())));
 				jsonBody.put("datahandler", jsonHandler);
 				final ConvertResponse convertResponse = (ConvertResponse) Executor.execute(getSession(),
 						new ConvertRequest(jsonBody, true));
@@ -201,8 +197,7 @@ public final class VCardMailPartImportTest extends AbstractConversionTest {
 				assertFalse("Missing response on action=convert", sa == null);
 				assertTrue("Unexpected response length", sa.length == 1);
 
-				final String[] folderAndId = sa[0];
-				System.out.println("IMPORTED VCARD: Object-ID=" + folderAndId[0] + " Folder-ID=" + folderAndId[1]);
+				System.out.println("IMPORTED ICAL:\n" + convertResponse.getData());
 			} finally {
 				if (mailFolderAndMailID != null) {
 					final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
@@ -216,5 +211,4 @@ public final class VCardMailPartImportTest extends AbstractConversionTest {
 		}
 
 	}
-
 }

@@ -81,6 +81,20 @@ public abstract class AbstractConversionTest extends AbstractAJAXSession {
 		return getClient().getValues().getPrivateContactFolder();
 	}
 
+	/**
+	 * @return the private calendar folder of the user.
+	 */
+	protected int getPrivateCalendarFolder() throws AjaxException, IOException, SAXException, JSONException {
+		return getClient().getValues().getPrivateAppointmentFolder();
+	}
+
+	/**
+	 * @return the private task folder of the user.
+	 */
+	protected int getPrivateTaskFolder() throws AjaxException, IOException, SAXException, JSONException {
+		return getClient().getValues().getPrivateTaskFolder();
+	}
+
 	protected TimeZone getTimeZone() throws AjaxException, IOException, SAXException, JSONException {
 		return getClient().getValues().getTimeZone();
 	}
