@@ -297,7 +297,9 @@ public abstract class DeferredActivator implements BundleActivator {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
+	 * @see
+	 * org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext
+	 * )
 	 */
 	public final void start(final BundleContext context) throws Exception {
 		try {
@@ -328,7 +330,8 @@ public abstract class DeferredActivator implements BundleActivator {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+	 * @see
+	 * org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
 	public final void stop(final BundleContext context) throws Exception {
 		try {
@@ -381,4 +384,26 @@ public abstract class DeferredActivator implements BundleActivator {
 		return clazz.cast(service);
 	}
 
+	/**
+	 * Checks if activator currently holds all needed services
+	 * 
+	 * @return <code>true</code> if activator currently holds all needed
+	 *         services; otherwise <code>false</code>
+	 */
+	protected final boolean allAvailable() {
+		final Class<?>[] classes = getNeededServices();
+		final int len = classes == null ? 0 : classes.length;
+		if (len == 0) {
+			/*
+			 * This deferred activator waits for no services
+			 */
+			return true;
+		}
+		for (int i = 0; i < classes.length; i++) {
+			if (!services.containsKey(classes[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
 }
