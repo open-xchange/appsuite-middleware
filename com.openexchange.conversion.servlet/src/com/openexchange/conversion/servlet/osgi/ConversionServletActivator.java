@@ -49,6 +49,8 @@
 
 package com.openexchange.conversion.servlet.osgi;
 
+import javax.servlet.Servlet;
+
 import org.osgi.service.http.HttpService;
 
 import com.openexchange.conversion.ConversionService;
@@ -70,6 +72,8 @@ public final class ConversionServletActivator extends DeferredActivator {
 
 	private static final String ALIAS = "ajax/conversion";
 
+	private Servlet conversionServlet;
+
 	/**
 	 * Initializes a new {@link ConversionServletActivator}
 	 */
@@ -87,9 +91,12 @@ public final class ConversionServletActivator extends DeferredActivator {
 	@Override
 	protected void handleAvailability(final Class<?> clazz) {
 		ConversionServletServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
+		if (!allAvailable()) {
+			return;
+		}
+		final HttpService httpService = getService(HttpService.class);
 		try {
-			final HttpService httpService = getService(HttpService.class);
-			httpService.registerServlet(ALIAS, new ConversionServlet(), null, null);
+			httpService.registerServlet(ALIAS, (conversionServlet = new ConversionServlet()), null, null);
 			LOG.info(ConversionServlet.class.getName() + " successfully re-registered due to re-appearing of "
 					+ clazz.getName());
 		} catch (final Exception e) {
@@ -100,8 +107,11 @@ public final class ConversionServletActivator extends DeferredActivator {
 	@Override
 	protected void handleUnavailability(final Class<?> clazz) {
 		final HttpService httpService = getService(HttpService.class);
-		httpService.unregister(ALIAS);
-		LOG.info(ConversionServlet.class.getName() + " unregistered due to disappearing of " + clazz.getName());
+		if (httpService != null && conversionServlet != null) {
+			httpService.unregister(ALIAS);
+			conversionServlet = null;
+			LOG.info(ConversionServlet.class.getName() + " unregistered due to disappearing of " + clazz.getName());
+		}
 		ConversionServletServiceRegistry.getServiceRegistry().removeService(clazz);
 	}
 
@@ -126,7 +136,7 @@ public final class ConversionServletActivator extends DeferredActivator {
 			 * Http service is available: Register servlet
 			 */
 			final HttpService httpService = getService(HttpService.class);
-			httpService.registerServlet(ALIAS, new ConversionServlet(), null, null);
+			httpService.registerServlet(ALIAS, (conversionServlet = new ConversionServlet()), null, null);
 			LOG.info(ConversionServlet.class.getName() + " successfully registered");
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
@@ -141,8 +151,11 @@ public final class ConversionServletActivator extends DeferredActivator {
 			 * Unregister on bundle stop
 			 */
 			final HttpService httpService = getService(HttpService.class);
-			httpService.unregister(ALIAS);
-			LOG.info(ConversionServlet.class.getName() + " unregistered due to bundle stop");
+			if (httpService != null && conversionServlet != null) {
+				httpService.unregister(ALIAS);
+				conversionServlet = null;
+				LOG.info(ConversionServlet.class.getName() + " unregistered due to bundle stop");
+			}
 			/*
 			 * Clear service registry
 			 */
