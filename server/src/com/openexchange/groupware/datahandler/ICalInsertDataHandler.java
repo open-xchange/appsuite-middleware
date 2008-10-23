@@ -102,7 +102,8 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
- * {@link ICalInsertDataHandler}
+ * {@link ICalInsertDataHandler} - The data handler to insert appointments and
+ * tasks parsed from an ICal input stream.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
