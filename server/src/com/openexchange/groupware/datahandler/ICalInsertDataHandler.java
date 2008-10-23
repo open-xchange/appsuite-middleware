@@ -169,7 +169,7 @@ public final class ICalInsertDataHandler implements DataHandler {
 			} catch (final NumberFormatException e) {
 				size = 0;
 			}
-			inputStreamCopy = copyStream((InputStream) data, size, session);
+			inputStreamCopy = copyStream((InputStream) data.getData(), size, session);
 		}
 		try {
 			/*
@@ -207,6 +207,7 @@ public final class ICalInsertDataHandler implements DataHandler {
 			final AppointmentSQLInterface appointmentSql = new CalendarSql(session);
 			for (final CalendarDataObject appointment : appointments) {
 				appointment.setParentFolderID(calendarFolder);
+				appointment.setContext(ctx);
 				final CalendarDataObject[] conflicts = appointmentSql.insertAppointmentObject(appointment);
 
 				final JSONObject jsonResponseObj = new JSONObject();
