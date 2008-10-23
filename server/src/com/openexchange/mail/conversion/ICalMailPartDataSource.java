@@ -66,18 +66,18 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.session.Session;
 
 /**
- * {@link VCardMailPartDataSource} - The {@link MailPartDataSource} for VCard
+ * {@link ICalMailPartDataSource} - The {@link MailPartDataSource} for VCard
  * parts.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class VCardMailPartDataSource extends MailPartDataSource {
+public final class ICalMailPartDataSource extends MailPartDataSource {
 
 	/**
-	 * Initializes a new {@link VCardMailPartDataSource}
+	 * Initializes a new {@link ICalMailPartDataSource}
 	 */
-	public VCardMailPartDataSource() {
+	public ICalMailPartDataSource() {
 		super();
 	}
 
@@ -101,8 +101,8 @@ public final class VCardMailPartDataSource extends MailPartDataSource {
 			if (contentType == null) {
 				throw DataExceptionCodes.ERROR.create("Missing header 'Content-Type' in requested mail part");
 			}
-			if (!contentType.isMimeType(MIMETypes.MIME_TEXT_ALL_CARD)) {
-				throw DataExceptionCodes.ERROR.create("Requested mail part is not a VCard: "
+			if (!contentType.isMimeType(MIMETypes.MIME_TEXT_ALL_CALENDAR)) {
+				throw DataExceptionCodes.ERROR.create("Requested mail part is not an ICal: "
 						+ contentType.getBaseType());
 			}
 			final DataProperties properties = new DataProperties();
