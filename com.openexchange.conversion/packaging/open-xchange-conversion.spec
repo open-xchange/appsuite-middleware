@@ -3,7 +3,7 @@
 
 Name:           open-xchange-conversion
 BuildArch:	noarch
-BuildRequires:  ant open-xchange-global
+BuildRequires:  ant open-xchange-global open-xchange-common
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
@@ -36,7 +36,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Conversion Bundle
-Requires:       open-xchange-global
+Requires:       open-xchange-global open-xchange-common
 #
 
 %description
