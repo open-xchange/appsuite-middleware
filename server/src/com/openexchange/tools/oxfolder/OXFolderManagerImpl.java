@@ -1823,7 +1823,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 					final Map.Entry<Integer, ToDoPermission> entry = iter2.next();
 					final int folderId = entry.getKey().intValue();
 					/*
-					 * Insert read permissions
+					 * Delete read permissions
 					 */
 					final int[] users = entry.getValue().getUsers();
 					for (int j = 0; j < users.length; j++) {
