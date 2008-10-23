@@ -73,9 +73,9 @@ import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.client.ConfigJump;
 import com.openexchange.context.ContextService;
 import com.openexchange.context.internal.ContextServiceImpl;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataSource;
-import com.openexchange.conversion.ConversionService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.event.impl.EventQueue;
@@ -90,6 +90,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nTools;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mail.conversion.ICalMailPartDataSource;
 import com.openexchange.mail.conversion.VCardAttachMailDataHandler;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
@@ -350,9 +351,14 @@ public final class ServerActivator extends DeferredActivator {
 		}
 		{
 			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
-			props.put("identifier", "com.openexchange.contact");
-			registrationList.add(context.registerService(DataSource.class.getName(), new ContactDataSource(),
+			props.put("identifier", "com.openexchange.mail.ical");
+			registrationList.add(context.registerService(DataSource.class.getName(), new ICalMailPartDataSource(),
 					props));
+		}
+		{
+			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+			props.put("identifier", "com.openexchange.contact");
+			registrationList.add(context.registerService(DataSource.class.getName(), new ContactDataSource(), props));
 		}
 		/*
 		 * Register data handlers
@@ -360,14 +366,14 @@ public final class ServerActivator extends DeferredActivator {
 		{
 			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
 			props.put("identifier", "com.openexchange.contact");
-			registrationList.add(context
-					.registerService(DataHandler.class.getName(), new ContactInsertDataHandler(), props));
+			registrationList.add(context.registerService(DataHandler.class.getName(), new ContactInsertDataHandler(),
+					props));
 		}
 		{
 			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
 			props.put("identifier", "com.openexchange.mail.vcard");
-			registrationList.add(context
-					.registerService(DataHandler.class.getName(), new VCardAttachMailDataHandler(), props));
+			registrationList.add(context.registerService(DataHandler.class.getName(), new VCardAttachMailDataHandler(),
+					props));
 		}
 	}
 
