@@ -61,7 +61,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.UUID;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -92,8 +91,6 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
-import com.openexchange.groupware.upload.ManagedUploadFile;
-import com.openexchange.groupware.upload.impl.AJAXUploadFile;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -170,7 +167,7 @@ public final class ICalInsertDataHandler implements DataHandler {
 			} catch (final NumberFormatException e) {
 				size = 0;
 			}
-			inputStreamCopy = copyStream((InputStream) data.getData(), size, session);
+			inputStreamCopy = copyStream((InputStream) data.getData(), size);
 		}
 		try {
 			/*
@@ -306,10 +303,9 @@ public final class ICalInsertDataHandler implements DataHandler {
 
 	private static final int LIMIT = 1048576;
 
-	private static InputStreamCopy copyStream(final InputStream orig, final long size, final Session session)
-			throws DataException {
+	private static InputStreamCopy copyStream(final InputStream orig, final long size) throws DataException {
 		try {
-			return new InputStreamCopy(orig, (size <= 0 || size > LIMIT), session);
+			return new InputStreamCopy(orig, (size <= 0 || size > LIMIT));
 		} catch (final IOException e) {
 			throw DataExceptionCodes.ERROR.create(e, e.getMessage());
 		}
@@ -325,18 +321,12 @@ public final class ICalInsertDataHandler implements DataHandler {
 
 		private File file;
 
-		private String fileId;
-
 		private final long size;
 
-		private final Session session;
-
-		public InputStreamCopy(final InputStream orig, final boolean createFile, final Session session)
-				throws IOException {
+		public InputStreamCopy(final InputStream orig, final boolean createFile) throws IOException {
 			super();
-			this.session = session;
 			if (createFile) {
-				size = copy2File(orig, session);
+				size = copy2File(orig);
 			} else {
 				size = copy2ByteArr(orig);
 			}
@@ -352,10 +342,10 @@ public final class ICalInsertDataHandler implements DataHandler {
 		}
 
 		public void close() {
-			if (fileId != null) {
-				file.delete();
-				session.removeUploadedFile(fileId);
-				fileId = null;
+			if (file != null) {
+				if (file.exists()) {
+					file.delete();
+				}
 				file = null;
 			}
 			if (bytes != null) {
@@ -375,7 +365,7 @@ public final class ICalInsertDataHandler implements DataHandler {
 			return bytes.length;
 		}
 
-		private long copy2File(final InputStream in, final Session session) throws IOException {
+		private long copy2File(final InputStream in) throws IOException {
 			long totalBytes = 0;
 			{
 				final File tmpFile = File.createTempFile(FILE_PREFIX, null, new File(ServerConfig
@@ -402,9 +392,6 @@ public final class ICalInsertDataHandler implements DataHandler {
 				}
 				file = tmpFile;
 			}
-			final ManagedUploadFile uploadFile = new AJAXUploadFile(file, System.currentTimeMillis());
-			fileId = UUID.randomUUID().toString();
-			session.putUploadedFile(fileId, uploadFile);
 			return totalBytes;
 		}
 	}
