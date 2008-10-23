@@ -6,10 +6,16 @@ import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.ResourceTest;
+import com.openexchange.ajax.appointment.action.GetRequest;
+import com.openexchange.ajax.appointment.action.GetResponse;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
@@ -176,4 +182,26 @@ public class GetTest extends AppointmentTest {
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
+
+    // Node 2652
+    public void testLastModifiedUTC() throws Exception {
+        AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+
+        final AppointmentObject appointmentObj = createAppointmentObject("testShowLastModifiedUTC");
+        appointmentObj.setStartDate(new Date());
+        appointmentObj.setEndDate(new Date(System.currentTimeMillis() + 60*60*1000));
+        appointmentObj.setIgnoreConflicts(true);
+        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        try {
+            GetRequest getRequest = new GetRequest(appointmentFolderId, objectId);
+            GetResponse response = Executor.execute(client, getRequest);
+            JSONObject appointment = (JSONObject) response.getResponse().getData();
+
+            assertNotNull(appointment);
+            assertTrue(appointment.has("last_modified_utc"));
+
+        } finally {
+            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+        }
+    }
 }

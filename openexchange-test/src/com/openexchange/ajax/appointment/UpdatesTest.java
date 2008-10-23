@@ -4,8 +4,12 @@ import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 
 import com.openexchange.ajax.AppointmentTest;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
@@ -20,7 +24,8 @@ public class UpdatesTest extends AppointmentTest {
 		DataObject.CREATED_BY,
 		DataObject.CREATION_DATE,
 		DataObject.LAST_MODIFIED,
-		DataObject.MODIFIED_BY,
+        DataObject.LAST_MODIFIED_UTC,
+        DataObject.MODIFIED_BY,
 		FolderChildObject.FOLDER_ID,
 		CommonObject.PRIVATE_FLAG,
 		CommonObject.CATEGORIES,
@@ -192,5 +197,6 @@ public class UpdatesTest extends AppointmentTest {
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
 	}
+
 }
 
