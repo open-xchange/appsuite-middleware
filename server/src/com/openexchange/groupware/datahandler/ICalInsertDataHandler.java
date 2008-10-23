@@ -310,8 +310,6 @@ public final class ICalInsertDataHandler implements DataHandler {
 
 		private final Session session;
 
-		private InputStream returnedInputStream;
-
 		public InputStreamCopy(final InputStream orig, final boolean createFile, final Session session)
 				throws IOException {
 			super();
@@ -324,8 +322,8 @@ public final class ICalInsertDataHandler implements DataHandler {
 		}
 
 		public InputStream getInputStream() throws IOException {
-			return (returnedInputStream = (bytes == null ? (file == null ? null : (new BufferedInputStream(
-					new FileInputStream(file), DEFAULT_BUF_SIZE))) : (new UnsynchronizedByteArrayInputStream(bytes))));
+			return bytes == null ? (file == null ? null : (new BufferedInputStream(new FileInputStream(file),
+					DEFAULT_BUF_SIZE))) : (new UnsynchronizedByteArrayInputStream(bytes));
 		}
 
 		public long getSize() {
@@ -333,14 +331,6 @@ public final class ICalInsertDataHandler implements DataHandler {
 		}
 
 		public void close() {
-			if (returnedInputStream != null) {
-				try {
-					returnedInputStream.close();
-				} catch (final IOException e) {
-					LOG.error("Error closing input stream", e);
-				}
-				returnedInputStream = null;
-			}
 			if (fileId != null) {
 				file.delete();
 				session.removeUploadedFile(fileId);
