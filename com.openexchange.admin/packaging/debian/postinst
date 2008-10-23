@@ -46,6 +46,18 @@ postFix() {
       ox_set_property DEFAULT_PASSWORD_MECHANISM SHA $pfile
   fi
   
+  # -----------------------------------------------------------------------
+  # bugfix id#12286
+  local pfile=/opt/open-xchange/etc/admindaemon/configdb.properties
+  for mode in write read; do
+      if ! ox_exists_property "${mode}Property.9" $pfile; then
+	  ox_set_property "${mode}Property.9" "connectTimeout=15000" $pfile
+      fi
+      if ! ox_exists_property "${mode}Property.10" $pfile; then
+	  ox_set_property "${mode}Property.10" "socketTimeout=15000" $pfile
+      fi
+  done
+
   if [ $version -le 660 ]; then
       # -----------------------------------------------------------------------
       # force setting of last minute option
