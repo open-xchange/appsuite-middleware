@@ -284,14 +284,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		return timeZone;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.parser.MailMessageHandler#handleAttachment(com.
-	 * openexchange.mail.dataobjects.MailPart, boolean, java.lang.String,
-	 * java.lang.String, java.lang.String)
-	 */
 	public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType,
 			final String fileName, final String id) throws MailException {
 		if (Part.INLINE.equalsIgnoreCase(part.getContentDisposition().getDisposition()) /*
@@ -382,13 +374,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.parser.MailMessageHandler#handleBccRecipient(javax
-	 * .mail.internet.InternetAddress[])
-	 */
 	public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws MailException {
 		try {
 			jsonObject.put(MailJSONField.RECIPIENT_BCC.getKey(), MessageWriter.getAddressesAsArray(recipientAddrs));
@@ -398,13 +383,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.parser.MailMessageHandler#handleCcRecipient(javax
-	 * .mail.internet.InternetAddress[])
-	 */
 	public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws MailException {
 		try {
 			jsonObject.put(MailJSONField.RECIPIENT_CC.getKey(), MessageWriter.getAddressesAsArray(recipientAddrs));
@@ -414,12 +392,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.parser.MailMessageHandler#handleColorLabel(int)
-	 */
 	public boolean handleColorLabel(final int colorLabel) throws MailException {
 		try {
 			jsonObject.put(MailJSONField.COLOR_LABEL.getKey(), colorLabel);
@@ -429,13 +401,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.parser.MailMessageHandler#handleContentId(java.
-	 * lang.String)
-	 */
 	public boolean handleContentId(final String contentId) throws MailException {
 		try {
 			jsonObject.put(MailJSONField.CID.getKey(), contentId);
@@ -445,13 +410,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.parser.MailMessageHandler#handleFrom(javax.mail
-	 * .internet.InternetAddress[])
-	 */
 	public boolean handleFrom(final InternetAddress[] fromAddrs) throws MailException {
 		try {
 			jsonObject.put(MailJSONField.FROM.getKey(), MessageWriter.getAddressesAsArray(fromAddrs));
@@ -469,12 +427,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			MessageHeaders.BCC, MessageHeaders.CC, MessageHeaders.DATE, MessageHeaders.DISP_NOT_TO,
 			MessageHeaders.FROM, MessageHeaders.X_PRIORITY, MessageHeaders.SUBJECT, MessageHeaders.TO }));
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.parser.MailMessageHandler#handleHeaders(int,
-	 * java.util.Iterator)
-	 */
 	public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws MailException {
 		if (size == 0) {
 			return true;
@@ -521,29 +473,13 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.openexchange.mail.parser.MailMessageHandler#handleImagePart(com.
-	 * openexchange.mail.dataobjects.MailPart, java.lang.String,
-	 * java.lang.String, java.lang.String)
-	 */
 	public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType,
 			final boolean isInline, final String fileName, final String id) throws MailException {
 		return handleAttachment(part, isInline, baseContentType, fileName, id);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.parser.MailMessageHandler#handleInlineHtml(java
-	 * .lang.String, com.openexchange.tools.mail.ContentType, long,
-	 * java.lang.String, java.lang.String)
-	 */
 	public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size,
 			final String fileName, final String id) throws MailException {
-
 		if (textAppended) {
 			/*
 			 * A text part has already been detected as message's body
@@ -551,7 +487,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			if (isAlternative) {
 				if (DisplayMode.DISPLAY.equals(displayMode)) {
 					/*
-					 * Add html alternative part as attachment
+					 * Add HTML alternative part as attachment
 					 */
 					asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName);
 				} else {
@@ -562,7 +498,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 				}
 			} else {
 				/*
-				 * Add html part as attachment
+				 * Add HTML part as attachment
 				 */
 				asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName);
 			}
@@ -599,14 +535,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
 	// private static final RTF2HtmlConverter RTFCONV = new RTF2HtmlConverter();
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.parser.MailMessageHandler#handleInlinePlainText
-	 * (java.lang.String, com.openexchange.tools.mail.ContentType, long,
-	 * java.lang.String, java.lang.String)
-	 */
 	public boolean handleInlinePlainText(final String plainTextContentArg, final ContentType contentType,
 			final long size, final String fileName, final String id) throws MailException {
 		if (isAlternative && usm.isDisplayHtmlInlineContent() && contentType.isMimeType(MIMETypes.MIME_TEXT_PLAIN)) {
@@ -686,13 +614,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		return HTMLProcessing.formatTextForDisplay(src, usm, displayMode);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.openexchange.mail.parser.MailMessageHandler#
-	 * handleInlineUUEncodedAttachment
-	 * (com.openexchange.tools.mail.UUEncodedPart, java.lang.String)
-	 */
 	public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws MailException {
 		try {
 			final JSONObject jsonObject = new JSONObject();
@@ -733,26 +654,11 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.openexchange.mail.parser.MailMessageHandler#
-	 * handleInlineUUEncodedPlainText(java.lang.String,
-	 * com.openexchange.tools.mail.ContentType, int, java.lang.String,
-	 * java.lang.String)
-	 */
 	public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType,
 			final int size, final String fileName, final String id) throws MailException {
 		return handleInlinePlainText(decodedTextContent, contentType, size, fileName, id);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.parser.MailMessageHandler#handleMessageEnd(com.
-	 * openexchange.mail.dataobjects.MailMessage)
-	 */
 	public void handleMessageEnd(final MailMessage mail) throws MailException {
 		/*
 		 * Since we obviously touched message's content, mark its corresponding
@@ -775,12 +681,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		// }
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.openexchange.mail.parser.MailMessageHandler#handleMultipart(com.
-	 * openexchange.mail.dataobjects.MailPart, int, java.lang.String)
-	 */
 	public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws MailException {
 		/*
 		 * Determine if message is of MIME type multipart/alternative
@@ -821,11 +721,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.parser.MailMessageHandler#handlePriority(int)
-	 */
 	public boolean handlePriority(final int priority) throws MailException {
 		try {
 			jsonObject.put(MailJSONField.PRIORITY.getKey(), priority);
@@ -835,13 +730,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.parser.MailMessageHandler#handleMsgRef(java.lang
-	 * .String)
-	 */
 	public boolean handleMsgRef(final String msgRef) throws MailException {
 		try {
 			jsonObject.put(MailJSONField.MSGREF.getKey(), msgRef);
@@ -851,13 +739,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.parser.MailMessageHandler#handleDispositionNotification
-	 * (javax.mail.internet.InternetAddress)
-	 */
 	public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen)
 			throws MailException {
 		try {
@@ -871,13 +752,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.parser.MailMessageHandler#handleReceivedDate(java
-	 * .util.Date)
-	 */
 	public boolean handleReceivedDate(final Date receivedDate) throws MailException {
 		try {
 			jsonObject.put(MailJSONField.RECEIVED_DATE.getKey(), receivedDate == null ? JSONObject.NULL : Long
@@ -888,13 +762,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.parser.MailMessageHandler#handleSentDate(java.util
-	 * .Date)
-	 */
 	public boolean handleSentDate(final Date sentDate) throws MailException {
 		try {
 			jsonObject.put(MailJSONField.SENT_DATE.getKey(), sentDate == null ? JSONObject.NULL : Long
@@ -905,14 +772,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.parser.MailMessageHandler#handleSpecialPart(com
-	 * .openexchange.mail.dataobjects.MailPart, java.lang.String,
-	 * java.lang.String)
-	 */
 	public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName,
 			final String id) throws MailException {
 		if (!textAppended && part.getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
@@ -936,13 +795,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		return handleAttachment(part, false, baseContentType, fileName, id);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.parser.MailMessageHandler#handleSubject(java.lang
-	 * .String)
-	 */
 	public boolean handleSubject(final String subject) throws MailException {
 		try {
 			jsonObject.put(MailJSONField.SUBJECT.getKey(), subject == null ? JSONObject.NULL : subject.trim());
@@ -952,12 +804,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.parser.MailMessageHandler#handleSystemFlags(int)
-	 */
 	public boolean handleSystemFlags(final int flags) throws MailException {
 		try {
 			jsonObject.put(MailJSONField.FLAGS.getKey(), flags);
@@ -967,13 +813,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.parser.MailMessageHandler#handleToRecipient(javax
-	 * .mail.internet.InternetAddress[])
-	 */
 	public boolean handleToRecipient(final InternetAddress[] recipientAddrs) throws MailException {
 		try {
 			jsonObject.put(MailJSONField.RECIPIENT_TO.getKey(), MessageWriter.getAddressesAsArray(recipientAddrs));
@@ -983,13 +822,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.mail.parser.MailMessageHandler#handleUserFlags(java.
-	 * lang.String[])
-	 */
 	public boolean handleUserFlags(final String[] userFlags) throws MailException {
 		if (userFlags == null) {
 			return true;
