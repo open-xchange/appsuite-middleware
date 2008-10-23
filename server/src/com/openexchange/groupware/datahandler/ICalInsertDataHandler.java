@@ -199,56 +199,76 @@ public final class ICalInsertDataHandler implements DataHandler {
 		} finally {
 			inputStreamCopy.close();
 		}
+		/*
+		 * The JSON array to return
+		 */
 		final JSONArray folderAndIdArray = new JSONArray();
-		/*
-		 * Insert parsed appointments into denoted calendar folder
-		 */
-		try {
-			final AppointmentSQLInterface appointmentSql = new CalendarSql(session);
-			for (final CalendarDataObject appointment : appointments) {
-				appointment.setParentFolderID(calendarFolder);
-				appointment.setContext(ctx);
-				final CalendarDataObject[] conflicts = appointmentSql.insertAppointmentObject(appointment);
-
-				final JSONObject jsonResponseObj = new JSONObject();
-				if (conflicts == null) {
-					jsonResponseObj.put(AppointmentFields.FOLDER_ID, calendarFolder).put(AppointmentFields.ID,
-							appointment.getObjectID());
-				} else {
-					final JSONArray jsonConflictArray = new JSONArray();
-					final AppointmentWriter appointmentWriter = new AppointmentWriter(defaultZone);
-					for (int a = 0; a < conflicts.length; a++) {
-						final JSONObject jsonAppointmentObj = new JSONObject();
-						appointmentWriter.writeAppointment(conflicts[a], jsonAppointmentObj);
-						jsonConflictArray.put(jsonAppointmentObj);
-					}
-
-					jsonResponseObj.put("conflicts", jsonConflictArray);
-				}
-				folderAndIdArray.put(jsonResponseObj);
+		if (!appointments.isEmpty()) {
+			/*
+			 * Insert parsed appointments into denoted calendar folder
+			 */
+			try {
+				insertAppointments(session, calendarFolder, ctx, defaultZone, appointments, folderAndIdArray);
+			} catch (final OXException e) {
+				throw new DataException(e);
+			} catch (final JSONException e) {
+				throw new DataException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]));
 			}
-		} catch (final OXException e) {
-			throw new DataException(e);
-		} catch (final JSONException e) {
-			throw new DataException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]));
 		}
-		/*
-		 * Insert parsed tasks into denoted task folder
-		 */
-		try {
-			final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(session);
-			for (final Task task : tasks) {
-				task.setParentFolderID(taskFolder);
-				taskSql.insertTaskObject(task);
-				folderAndIdArray.put(new JSONObject().put(TaskFields.FOLDER_ID, taskFolder).put(TaskFields.ID,
-						task.getObjectID()));
+		if (!tasks.isEmpty()) {
+			/*
+			 * Insert parsed tasks into denoted task folder
+			 */
+			try {
+				insertTasks(session, taskFolder, tasks, folderAndIdArray);
+			} catch (final OXException e) {
+				throw new DataException(e);
+			} catch (final JSONException e) {
+				throw new DataException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]));
 			}
-		} catch (final OXException e) {
-			throw new DataException(e);
-		} catch (final JSONException e) {
-			throw new DataException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]));
 		}
 		return folderAndIdArray;
+	}
+
+	private void insertTasks(final Session session, final int taskFolder, final List<Task> tasks,
+			final JSONArray folderAndIdArray) throws OXException, JSONException {
+		final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(session);
+		for (final Task task : tasks) {
+			task.setParentFolderID(taskFolder);
+			taskSql.insertTaskObject(task);
+			folderAndIdArray.put(new JSONObject().put(TaskFields.FOLDER_ID, taskFolder).put(TaskFields.ID,
+					task.getObjectID()));
+		}
+	}
+
+	private void insertAppointments(final Session session, final int calendarFolder, final Context ctx,
+			final TimeZone defaultZone, final List<CalendarDataObject> appointments, final JSONArray folderAndIdArray)
+			throws OXException, JSONException {
+		final AppointmentSQLInterface appointmentSql = new CalendarSql(session);
+		for (final CalendarDataObject appointment : appointments) {
+			appointment.setParentFolderID(calendarFolder);
+			appointment.setContext(ctx);
+			// TODO: Clarify if conflicts shall be ignore
+			appointment.setIgnoreConflicts(true);
+			final CalendarDataObject[] conflicts = appointmentSql.insertAppointmentObject(appointment);
+
+			final JSONObject jsonResponseObj = new JSONObject();
+			if (conflicts == null) {
+				jsonResponseObj.put(AppointmentFields.FOLDER_ID, calendarFolder).put(AppointmentFields.ID,
+						appointment.getObjectID());
+			} else {
+				final JSONArray jsonConflictArray = new JSONArray();
+				final AppointmentWriter appointmentWriter = new AppointmentWriter(defaultZone);
+				for (int a = 0; a < conflicts.length; a++) {
+					final JSONObject jsonAppointmentObj = new JSONObject();
+					appointmentWriter.writeAppointment(conflicts[a], jsonAppointmentObj);
+					jsonConflictArray.put(jsonAppointmentObj);
+				}
+
+				jsonResponseObj.put("conflicts", jsonConflictArray);
+			}
+			folderAndIdArray.put(jsonResponseObj);
+		}
 	}
 
 	private List<CalendarDataObject> parseAppointmentStream(final Context ctx, final ICalParser iCalParser,
