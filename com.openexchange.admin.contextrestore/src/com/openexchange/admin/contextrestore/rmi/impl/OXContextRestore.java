@@ -208,7 +208,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                     } else if (6 == state && c == '(') {
                         LOG.info("Insert found and cid=" + cidpos);
                         // Now we search for matching cids and write them to the tmp file
-                        if (searchcontext) {
+                        if (searchcontext && null != bufferedWriter) {
                             final String value[] = searchAndWriteMatchingCidValues(in, bufferedWriter, cidpos, Integer.toString(cid), table_name, true, true);
                             if (value.length >= 2) {
                                 try {
@@ -224,11 +224,9 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                             } else {
                                 throw new OXContextRestoreException(Code.CONTEXT_NOT_FOUND_IN_POOL_MAPPING);
                             }
-                        } else {
+                        } else if (null != bufferedWriter) {
                             // Here we should only search if a fitting db was found and thus the writer was set
-                            if (null != bufferedWriter) {
-                                searchAndWriteMatchingCidValues(in, bufferedWriter, cidpos, Integer.toString(cid), table_name, false, true);
-                            }
+                            searchAndWriteMatchingCidValues(in, bufferedWriter, cidpos, Integer.toString(cid), table_name, false, true);
                         }
                         searchcontext = false;
                         oldstate = 0;
