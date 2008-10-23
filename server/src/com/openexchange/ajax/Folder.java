@@ -50,8 +50,8 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
-import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.folderModule2String;
-import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
+import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2String;
+import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 
 import java.io.IOException;
 import java.text.Collator;

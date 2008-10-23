@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getFolderName;
-import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
+import static com.openexchange.tools.oxfolder.OXFolderUtility.getFolderName;
+import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

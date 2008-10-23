@@ -49,8 +49,9 @@
 
 package com.openexchange.tools.oxfolder;
 
-import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.folderModule2String;
-import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
+import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2String;
+import static com.openexchange.tools.oxfolder.OXFolderUtility.getFolderName;
+import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 
 import java.sql.Connection;
@@ -743,8 +744,8 @@ public final class OXFolderIteratorSQL {
 					/*
 					 * Starting folder is not visible to user
 					 */
-					throw new OXFolderException(FolderCode.NOT_VISIBLE, OXFolderManagerImpl
-							.getFolderName(folderId, ctx), getUserName(userId, ctx), Integer
+					throw new OXFolderException(FolderCode.NOT_VISIBLE, 
+							getFolderName(folderId, ctx), getUserName(userId, ctx), Integer
 							.valueOf(ctx.getContextId()));
 				}
 				return;

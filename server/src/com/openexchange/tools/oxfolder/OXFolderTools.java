@@ -49,8 +49,8 @@
 
 package com.openexchange.tools.oxfolder;
 
-import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.folderModule2String;
-import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
+import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2String;
+import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 
 import java.sql.Connection;
@@ -180,10 +180,10 @@ public class OXFolderTools {
 				try {
 					return folderObj.getEffectiveUserPermission(userId, userConfig);
 				} catch (final SQLException e) {
-					throw new OXFolderException(FolderCode.FOLDER_COULD_NOT_BE_LOADED, e, OXFolderManagerImpl
+					throw new OXFolderException(FolderCode.FOLDER_COULD_NOT_BE_LOADED, e, OXFolderUtility
 							.getFolderName(folderId, ctx), Integer.valueOf(ctx.getContextId()), e);
 				} catch (final DBPoolingException e) {
-					throw new OXFolderException(FolderCode.FOLDER_COULD_NOT_BE_LOADED, e, OXFolderManagerImpl
+					throw new OXFolderException(FolderCode.FOLDER_COULD_NOT_BE_LOADED, e, OXFolderUtility
 							.getFolderName(folderId, ctx), Integer.valueOf(ctx.getContextId()), e);
 				}
 			}
@@ -485,8 +485,8 @@ public class OXFolderTools {
 	}
 
 	/**
-	 * Determines if folder is a shared folder for given user. <b>NOTE:</b>
-	 * This method assumes that given user has read access!
+	 * Determines if folder is a shared folder for given user. <b>NOTE:</b> This
+	 * method assumes that given user has read access!
 	 */
 	public static boolean isFolderShared(final int folderId, final String user, final Context ctx,
 			final Connection readCon) throws OXException {
@@ -494,8 +494,8 @@ public class OXFolderTools {
 	}
 
 	/**
-	 * Determines if folder is a shared folder for given user. <b>NOTE:</b>
-	 * This method assumes that given user has read access!
+	 * Determines if folder is a shared folder for given user. <b>NOTE:</b> This
+	 * method assumes that given user has read access!
 	 */
 	public static boolean isFolderShared(final int folderId, final int user, final Context ctx, final Connection readCon)
 			throws OXException {
@@ -979,9 +979,9 @@ public class OXFolderTools {
 	}
 
 	/**
-	 * Returns a <code>SearchIterator</code> of <code>FolderObject</code>
-	 * which represent all visible folders lying on path from given folder to
-	 * root folder.
+	 * Returns a <code>SearchIterator</code> of <code>FolderObject</code> which
+	 * represent all visible folders lying on path from given folder to root
+	 * folder.
 	 */
 	public static SearchIterator getFoldersOnPathToRoot(final int folderId, final int userId,
 			final UserConfiguration userConfig, final Locale locale, final Context ctx) throws OXException,
@@ -1005,9 +1005,8 @@ public class OXFolderTools {
 					/*
 					 * Starting folder is not visible to user
 					 */
-					throw new OXFolderException(FolderCode.NOT_VISIBLE, OXFolderManagerImpl
-							.getFolderName(folderId, ctx), getUserName(userId, ctx), Integer
-							.valueOf(ctx.getContextId()));
+					throw new OXFolderException(FolderCode.NOT_VISIBLE, OXFolderUtility.getFolderName(folderId, ctx),
+							getUserName(userId, ctx), Integer.valueOf(ctx.getContextId()));
 				}
 				return;
 			}
@@ -1357,8 +1356,7 @@ public class OXFolderTools {
 
 	/**
 	 * Returns an <code>SearchIterator</code> of <code>FolderObject</code>
-	 * instances which represent <b>all</b> modified folders since a given
-	 * date.
+	 * instances which represent <b>all</b> modified folders since a given date.
 	 */
 	public static SearchIterator getAllModifiedFoldersSince(final Date since, final Context ctx) throws OXException,
 			SearchIteratorException {

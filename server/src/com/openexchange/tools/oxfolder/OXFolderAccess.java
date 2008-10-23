@@ -49,8 +49,8 @@
 
 package com.openexchange.tools.oxfolder;
 
-import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.folderModule2String;
-import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
+import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2String;
+import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 
 import java.sql.Connection;
 import java.sql.SQLException;
