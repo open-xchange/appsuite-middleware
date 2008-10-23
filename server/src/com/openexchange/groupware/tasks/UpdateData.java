@@ -398,7 +398,7 @@ class UpdateData {
         final Iterator<Folder> iter = addedFolder.iterator();
         while (iter.hasNext()) {
             final Folder addedFolder = iter.next();
-            for (final Folder origFolder : origFolders) {
+            for (final Folder origFolder : getOrigFolder()) {
                 if (addedFolder.getUser() == origFolder.getUser()
                     && !removedFolder.contains(origFolder)) {
                     iter.remove();
