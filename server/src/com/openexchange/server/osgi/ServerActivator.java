@@ -133,6 +133,11 @@ public final class ServerActivator extends DeferredActivator {
 	 */
 	private static final String BUNDLE_ID_ADMIN = "open_xchange_admin";
 
+	/**
+	 * Constant for string: "identifier"
+	 */
+	private static final String STR_IDENTIFIER = "identifier";
+
 	private static final Class<?>[] NEEDED_SERVICES_ADMIN = { ConfigurationService.class, CacheService.class,
 			EventAdmin.class };
 
@@ -345,19 +350,19 @@ public final class ServerActivator extends DeferredActivator {
 		 */
 		{
 			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
-			props.put("identifier", "com.openexchange.mail.vcard");
+			props.put(STR_IDENTIFIER, "com.openexchange.mail.vcard");
 			registrationList.add(context.registerService(DataSource.class.getName(), new VCardMailPartDataSource(),
 					props));
 		}
 		{
 			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
-			props.put("identifier", "com.openexchange.mail.ical");
+			props.put(STR_IDENTIFIER, "com.openexchange.mail.ical");
 			registrationList.add(context.registerService(DataSource.class.getName(), new ICalMailPartDataSource(),
 					props));
 		}
 		{
 			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
-			props.put("identifier", "com.openexchange.contact");
+			props.put(STR_IDENTIFIER, "com.openexchange.contact");
 			registrationList.add(context.registerService(DataSource.class.getName(), new ContactDataSource(), props));
 		}
 		/*
@@ -365,13 +370,13 @@ public final class ServerActivator extends DeferredActivator {
 		 */
 		{
 			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
-			props.put("identifier", "com.openexchange.contact");
+			props.put(STR_IDENTIFIER, "com.openexchange.contact");
 			registrationList.add(context.registerService(DataHandler.class.getName(), new ContactInsertDataHandler(),
 					props));
 		}
 		{
 			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
-			props.put("identifier", "com.openexchange.mail.vcard");
+			props.put(STR_IDENTIFIER, "com.openexchange.mail.vcard");
 			registrationList.add(context.registerService(DataHandler.class.getName(), new VCardAttachMailDataHandler(),
 					props));
 		}
