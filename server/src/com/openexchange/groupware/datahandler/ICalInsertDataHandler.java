@@ -246,7 +246,6 @@ public final class ICalInsertDataHandler implements DataHandler {
 		for (final CalendarDataObject appointment : appointments) {
 			appointment.setParentFolderID(calendarFolder);
 			appointment.setContext(ctx);
-			// TODO: Clarify if conflicts shall be ignore
 			appointment.setIgnoreConflicts(true);
 			final CalendarDataObject[] conflicts = appointmentSql.insertAppointmentObject(appointment);
 
