@@ -321,6 +321,12 @@ public enum Tree {
 
     /** header(s) identifying phishing headers (added 2008-05-27) */
     PhishingHeaders("/modules/mail/phishingheaders"),
+    
+    /** contact folder id to save mail addresses from sent mails (added 2008-10-16) */
+    ContactCollectFolder("/modules/mail/contactCollectFolder"),
+    
+    /** switch contact collection on/off (added 2008-10-16) */
+    ContactCollectEnabled("/modules/mail/contactCollectEnabled"),
 
     /** */
     CalendarEnabled("/modules/calendar/module"),
