@@ -73,7 +73,9 @@ public class AppointmentWriter extends CalendarWriter {
 
 	private static final Log LOG = LogFactory.getLog(AppointmentWriter.class);
 
-	/**
+    private TimeZone utc = TimeZone.getTimeZone("utc");
+
+    /**
 	 * Initializes a new {@link AppointmentWriter}
 	 * 
 	 * @param timeZone
@@ -214,8 +216,11 @@ public class AppointmentWriter extends CalendarWriter {
 			break;
 		case AppointmentObject.LAST_MODIFIED:
 			writeValue(appointmentObject.getLastModified(), timeZone, jsonArray);
-			break;
-		case AppointmentObject.FOLDER_ID:
+            break;
+        case AppointmentObject.LAST_MODIFIED_UTC:
+            writeValue(appointmentObject.getLastModified(), utc, jsonArray);
+            break;
+        case AppointmentObject.FOLDER_ID:
 			writeValue(appointmentObject.getParentFolderID(), jsonArray, appointmentObject.containsParentFolderID());
 			break;
 		case AppointmentObject.TITLE:
