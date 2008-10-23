@@ -67,6 +67,7 @@ public class ComponentRegistryTest extends TestCase {
     private DummyExceptions exceptionsA;
     private DummyExceptions exceptionsB;
 
+    @Override
     public void setUp() {
         this.registry = new ComponentRegistryImpl();
         this.componentA = new StringComponent("CMA");
@@ -161,13 +162,15 @@ public class ComponentRegistryTest extends TestCase {
     }
 
 
-    private static final class DummyExceptions extends Exceptions {
+    private static final class DummyExceptions extends Exceptions<AbstractOXException> {
 
+        @Override
         protected void knownExceptions() {
             //To change body of implemented methods use File | Settings | File Templates.
         }
 
-        protected AbstractOXException createException(ErrorMessage message, Throwable cause, Object[] args) {
+        @Override
+        protected AbstractOXException createException(ErrorMessage message, Throwable cause, Object... args) {
             return null;  //To change body of implemented methods use File | Settings | File Templates.
         }
 
