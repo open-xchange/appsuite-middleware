@@ -86,6 +86,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
+import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nTools;
@@ -372,6 +373,12 @@ public final class ServerActivator extends DeferredActivator {
 			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
 			props.put(STR_IDENTIFIER, "com.openexchange.contact");
 			registrationList.add(context.registerService(DataHandler.class.getName(), new ContactInsertDataHandler(),
+					props));
+		}
+		{
+			final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+			props.put(STR_IDENTIFIER, "com.openexchange.ical");
+			registrationList.add(context.registerService(DataHandler.class.getName(), new ICalInsertDataHandler(),
 					props));
 		}
 		{
