@@ -134,6 +134,30 @@ public final class MimeForward {
 	 */
 	public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session)
 			throws MailException {
+		return getFowardMail(originalMails, session, null);
+	}
+
+	/**
+	 * Composes a forward message from specified original messages based on MIME
+	 * objects from <code>JavaMail</code> API
+	 * <p>
+	 * If multiple messages are given these messages are forwarded as
+	 * attachments
+	 * 
+	 * @param originalMails
+	 *            The referenced original mails
+	 * @param session
+	 *            The session containing needed user data
+	 * @param usm
+	 *            The user mail settings to use; leave to <code>null</code> to
+	 *            obtain from specified session
+	 * @return An instance of {@link MailMessage} representing an user-editable
+	 *         forward mail
+	 * @throws MailException
+	 *             If forward mail cannot be composed
+	 */
+	public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session,
+			final UserSettingMail usm) throws MailException {
 		final MimeMessage[] mimeMessages = new MimeMessage[originalMails.length];
 		try {
 			for (int i = 0; i < mimeMessages.length; i++) {
@@ -154,7 +178,7 @@ public final class MimeForward {
 		/*
 		 * Compose forward message
 		 */
-		return getFowardMail(mimeMessages, session);
+		return getFowardMail(mimeMessages, session, usm);
 	}
 
 	/**
@@ -168,20 +192,23 @@ public final class MimeForward {
 	 *            The referenced original messages
 	 * @param session
 	 *            The session containing needed user data
+	 * @param userSettingMail
+	 *            The user mail settings to use; leave to <code>null</code> to
+	 *            obtain from specified session
 	 * @return An instance of {@link MailMessage} representing an user-editable
 	 *         forward mail
 	 * @throws MailException
 	 *             If forward mail cannot be composed
 	 */
-	private static MailMessage getFowardMail(final MimeMessage[] originalMsgs, final Session session)
-			throws MailException {
+	private static MailMessage getFowardMail(final MimeMessage[] originalMsgs, final Session session,
+			final UserSettingMail userSettingMail) throws MailException {
 		try {
 			/*
 			 * New MIME message with a dummy session
 			 */
 			final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-			final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
-					ctx);
+			final UserSettingMail usm = userSettingMail == null ? UserSettingMailStorage.getInstance()
+					.getUserSettingMail(session.getUserId(), ctx) : userSettingMail;
 			final MimeMessage forwardMsg = new MimeMessage(MIMEDefaultSession.getDefaultSession());
 			{
 				/*
