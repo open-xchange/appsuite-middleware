@@ -51,6 +51,8 @@ package com.openexchange.ajax.request;
 
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -74,11 +76,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.groupware.container.DataObject;
-import com.openexchange.groupware.container.FolderChildObject;
-import com.openexchange.groupware.container.Participants;
+import com.openexchange.groupware.container.*;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -231,7 +229,8 @@ public class TaskRequest {
 	public JSONArray actionUpdates(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException, OXJSONException, AjaxException {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-		final Date requestedTimestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
+		final int[] columnsToLoad = removeVirtualColumns(columns);
+        final Date requestedTimestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
         timestamp = new Date(requestedTimestamp.getTime());
 		final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
 		String ignore = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_IGNORE);
@@ -251,9 +250,9 @@ public class TaskRequest {
 		final JSONArray jsonResponseArray = new JSONArray();
 		SearchIterator<Task> it = null;
 		try {
-			final int[] internalColumns = new int[columns.length+1];
-			System.arraycopy(columns, 0, internalColumns, 0, columns.length);
-			internalColumns[columns.length] = DataObject.LAST_MODIFIED;
+			final int[] internalColumns = new int[columnsToLoad.length+1];
+			System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
+			internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 			
 			final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(sessionObj);
 			final TaskWriter taskWriter = new TaskWriter(timeZone);
@@ -314,7 +313,8 @@ public class TaskRequest {
 		
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-		final JSONArray jData = DataParser.checkJSONArray(jsonObj, ResponseFields.DATA);
+		final int[] columnsToLoad = removeVirtualColumns(columns);
+        final JSONArray jData = DataParser.checkJSONArray(jsonObj, ResponseFields.DATA);
 		final int[][] objectIdAndFolderId = new int[jData.length()][2];
 		for (int a = 0; a < objectIdAndFolderId.length; a++) {
 			final JSONObject jObject = jData.getJSONObject(a);
@@ -322,9 +322,9 @@ public class TaskRequest {
 			objectIdAndFolderId[a][1] = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_FOLDERID);
 		}
 
-		final int[] internalColumns = new int[columns.length+1];
-		System.arraycopy(columns, 0, internalColumns, 0, columns.length);
-		internalColumns[columns.length] = DataObject.LAST_MODIFIED;
+		final int[] internalColumns = new int[columnsToLoad.length+1];
+		System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
+		internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 
 		SearchIterator<Task> it = null;
 		
@@ -357,16 +357,17 @@ public class TaskRequest {
 	public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXException, OXJSONException, AjaxException {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-		final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
+		final int[] columnsToLoad = removeVirtualColumns(columns);
+        final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
 		final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
 		final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
 		
 		final int leftHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.LEFT_HAND_LIMIT);
 		final int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
 		
-		final int[] internalColumns = new int[columns.length+1];
-		System.arraycopy(columns, 0, internalColumns, 0, columns.length);
-		internalColumns[columns.length] = DataObject.LAST_MODIFIED;
+		final int[] internalColumns = new int[columnsToLoad.length+1];
+		System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
+		internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 
 		timestamp = new Date(0);
 		
@@ -438,7 +439,7 @@ public class TaskRequest {
 	public JSONArray actionSearch(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, SearchIteratorException, OXException, OXJSONException, AjaxException {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-		
+		final int[] columnsToLoad = removeVirtualColumns(columns);
 		timestamp = new Date(0);
 		
 		Date lastModified = null;
@@ -488,9 +489,9 @@ public class TaskRequest {
 			searchObj.setParticipants(CalendarParser.parseParticipants(jData, participants));
 		}
 		
-		final int[] internalColumns = new int[columns.length+1];
-		System.arraycopy(columns, 0, internalColumns, 0, columns.length);
-		internalColumns[columns.length] = DataObject.LAST_MODIFIED;
+		final int[] internalColumns = new int[columnsToLoad.length+1];
+		System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
+		internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 
 		final JSONArray jsonResponseArray = new JSONArray();
 		
@@ -540,4 +541,17 @@ public class TaskRequest {
 		
 		return jsonResponseObject;
 	}
+
+    private int[] removeVirtualColumns(int[] columns) {
+            List<Integer> helper = new ArrayList<Integer>(columns.length);
+            for(int col : columns) {
+                if(col != ContactObject.LAST_MODIFIED_UTC) {
+                    helper.add(col);
+                }
+            }
+            int[] copy = new int[helper.size()];
+            for(int i = 0; i < copy.length; i++) { copy[i] = helper.get(i); }
+            return copy;
+        }
+
 }

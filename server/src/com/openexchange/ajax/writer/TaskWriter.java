@@ -70,7 +70,9 @@ public class TaskWriter extends CalendarWriter {
 
 	private static final Log LOG = LogFactory.getLog(TaskWriter.class);
 
-	/**
+    private TimeZone utc = TimeZone.getTimeZone("utc");
+
+    /**
 	 * Initializes a new {@link TaskWriter}
 	 * 
 	 * @param timeZone
@@ -156,7 +158,10 @@ public class TaskWriter extends CalendarWriter {
 		case Task.LAST_MODIFIED:
 			writeValue(taskObject.getLastModified(), timeZone, jsonArray);
 			break;
-		case Task.FOLDER_ID:
+        case Task.LAST_MODIFIED_UTC:
+            writeValue(taskObject.getLastModified(), utc, jsonArray);
+            break;
+        case Task.FOLDER_ID:
 			writeValue(taskObject.getParentFolderID(), jsonArray, taskObject.containsParentFolderID());
 			break;
 		case Task.TITLE:
