@@ -45,6 +45,9 @@
 #    with this program; if not, write to the Free Software Foundation, Inc., 59
 #    Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
+# debian postinst is going to fail when not set'ting +e
+set +e
+
 JAVA_BIN=
 
 ox_set_JAVA_BIN() {
@@ -184,25 +187,105 @@ ox_set_property() {
     test -e "$propfile" || die "ox_set_property: $propfile does not exist"
     local tmp=${propfile}.tmp$$
     rm -f $tmp
-    # quote & in URLs to make sed happy
-    test -n "$val" && val="$(echo $val | sed 's/\&/\\\&/g')"
-    # some values need quoting, so leave quotes, if already present
-    local q=
-    if grep -E "^.*$prop[:=].*\".*\".*$" $propfile >/dev/null; then
-	q='"'
+
+    ox_system_type
+    local type=$?
+    if [ $type -eq $DEBIAN ]; then
+	local origfile="${propfile}.dpkg-dist"
+    else
+	local origfile="${propfile}.rpmnew"
     fi
-    if grep -E "^$prop" $propfile >/dev/null; then
-	cat<<EOF | sed -f - $propfile > $tmp
-s;\(^$prop[:=]\).*$;\1${q}${val}${q};
-EOF
+    if [ -n "$origfile" ] && [ -e "$origfile" ]; then
+	export origfile
+	export propfile
+	export prop
+	export val
+	perl -e '
+use strict;
+
+open(IN,"$ENV{origfile}") || die "unable to open $ENV{origfile}: $!";
+open(OUT,"$ENV{propfile}") || die "unable to open $ENV{propfile}: $!";
+
+my @LINES = <IN>;
+my @OUTLINES = <OUT>;
+
+my $opt = $ENV{prop};
+my $val = $ENV{val};
+my $count = 0;
+my $back  = 1;
+my $out = "";
+foreach my $line (@LINES) {
+  if ( $line =~ /^$opt[:=]/ ) {
+    $out = $line;
+    $out =~ s/^(.*?[:=]).*$/$1$val/;
+    while ( $LINES[$count-$back] =~ /^#/ ) {
+      $out = $LINES[$count-$back++].$out;
+    }
+		
+  }
+  $count++;
+}
+
+$back  = 1;
+$count = 0;
+my $start = 0;
+my $end = 0;
+foreach my $line (@OUTLINES) {
+  if ( $line =~ /^$opt[:=]/ ) {
+    $end=$count;
+    while ( $OUTLINES[$count-$back++] =~ /^#/ ) {
+    }
+    ;
+    $start=$count-$back;
+  }
+  $count++;
+}
+
+if ( $end > 0 ) {
+  for (my $i=0; $i<=$#OUTLINES; $i++) {
+    if ( $i <= $start+1 || $i > $end ) {
+      print $OUTLINES[$i];
+    }
+    if ( $i == $start+1 ) {
+      print $out;
+    }
+  }
+} else {
+  print @OUTLINES;
+  print $out;
+}
+' > $tmp
 	if [ $? -gt 0 ]; then
 	    rm -f $tmp
 	    die "ox_set_property: FATAL: error setting property $prop to \"$val\" in $propfile"
 	else
 	    mv $tmp $propfile
 	fi
+	unset origfile
+	unset propfile
+	unset prop
+	unset val
     else
-	echo "${prop}=$val" >> $propfile
+        # quote & in URLs to make sed happy
+	test -n "$val" && val="$(echo $val | sed 's/\&/\\\&/g')"
+        # some values need quoting, so leave quotes, if already present
+	local q=
+	if grep -E "^.*$prop[:=].*\".*\".*$" $propfile >/dev/null; then
+	    q='"'
+	fi
+	if grep -E "^$prop" $propfile >/dev/null; then
+	    cat<<EOF | sed -f - $propfile > $tmp
+s;\(^$prop[:=]\).*$;\1${q}${val}${q};
+EOF
+           if [ $? -gt 0 ]; then
+	       rm -f $tmp
+	       die "ox_set_property: FATAL: error setting property $prop to \"$val\" in $propfile"
+	   else
+	       mv $tmp $propfile
+	   fi
+	else
+	    echo "${prop}=$val" >> $propfile
+	fi
     fi
 }
 
@@ -244,13 +327,45 @@ ox_remove_property() {
 
     local tmp=${propfile}.tmp$$
     rm -f $tmp
-    grep -v -E "^$prop[:=]" $propfile > $tmp
+    export propfile
+    export prop
+    perl -e '
+use strict;
+
+open(IN,"$ENV{propfile}") || die "unable to open $ENV{propfile}: $!";
+
+my @LINES = <IN>;
+
+my $opt = $ENV{prop};
+my $count = 0;
+my $back  = 1;
+my $start = 0;
+my $end = 0;
+foreach my $line (@LINES) {
+  if ( $line =~ /^$opt[:=]/ ) {
+    $end=$count;
+    while ( $LINES[$count-$back++] =~ /^#/ ) {
+    }
+    ;
+    $start=$count-$back;
+  }
+  $count++;
+}
+
+for (my $i=0; $i<=$#LINES; $i++) {
+  if ( $i <= $start+1 || $i > $end ) {
+    print $LINES[$i];
+  }
+}
+' > $tmp
     if [ $? -gt 0 ]; then
-	rm -f $tmp
-	die "ox_remove_property: FATAL: error removing property $prop from $propfile"
+ 	rm -f $tmp
+ 	die "ox_remove_property: FATAL: error removing property $prop from $propfile"
     else
-	mv $tmp $propfile
+ 	mv $tmp $propfile
     fi
+    unset propfile
+    unset prop
 }
 
 # adding or removing comment (ONLY # supported)
