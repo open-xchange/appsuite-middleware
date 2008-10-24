@@ -64,16 +64,19 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.i18n.I18nTools;
 import com.openexchange.i18n.parsing.Translations;
+import com.openexchange.i18n.parsing.I18NErrorMessages;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
 import com.openexchange.i18n.impl.POTranslationsDiscoverer;
 import com.openexchange.i18n.impl.TranslationsI18N;
 import com.openexchange.server.ServiceHolderListener;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
+import com.openexchange.exceptions.osgi.ComponentRegistration;
 
 public class I18nActivator implements BundleActivator {
+    private ComponentRegistration componentRegistration;
 
-	/**
+    /**
 	 * {@link I18nServiceHolderListener} - Properly registers all I18n services
 	 * defined through property <code>"i18n.language.path"</code> when
 	 * configuration service is available
@@ -194,7 +197,7 @@ public class I18nActivator implements BundleActivator {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("I18n Starting");
 		}
-
+        this.componentRegistration = new ComponentRegistration(context, "I18N", "com.openexchange.i18n", I18NErrorMessages.FACTORY);
 		try {
 			csh = ConfigurationServiceHolder.newInstance();
 
@@ -239,7 +242,8 @@ public class I18nActivator implements BundleActivator {
 				tracker.close();
 			}
 			serviceTrackerList.clear();
-		} catch (final Throwable e) {
+            this.componentRegistration.unregister();
+        } catch (final Throwable e) {
 			LOG.error("I18nActivator: stop: ", e);
 			throw e instanceof Exception ? (Exception) e : new Exception(e);
 		}
