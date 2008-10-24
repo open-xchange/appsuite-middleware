@@ -53,17 +53,21 @@ package com.openexchange.server.impl;
  * Version
  * @author <a href="mailto:sebastian.kauss@open-xchange.de">Sebastian Kauss</a>
  */
-public final class Version {
+public class Version {
 
-    public static final String VERSION = "@replaceVersion@";
-    public static final String CODENAME = "@replaceCodename@";
+    public static String VERSION = "";
+    public static String CODENAME = "";
     public static final String NAME = "Open-Xchange";
-    public static final String BUILDNUMBER = "@replaceBuildnumber@";
+    public static String BUILDNUMBER = "";
 
-    public static final String VERSION_STRING = VERSION + '-' + BUILDNUMBER;
+    public static String VERSION_STRING = "";
 
+    public static void setVersionString() {
+        VERSION_STRING = VERSION + '-' + BUILDNUMBER;
+    }
+    
     /**
-     * Prevent instanciation.
+     * Prevent instantiation.
      */
     private Version() {
         super();

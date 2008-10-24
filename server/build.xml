@@ -46,13 +46,6 @@
     <property name="bin.install.dir" value="${prefix}/sbin/"/>
     <property name="bin.install.copy.dir" location="${destdir}${bin.install.dir}"/>
 
-    <!-- Replacements in Version.java.in -->
-    <filterset id="version">
-        <filter token="replaceVersion" value="${version}" />
-        <filter token="replaceBuildnumber" value="${buildnumber}" />
-        <filter token="replaceCodename" value="${codename}" />
-    </filterset>
-
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
     <property name="xmlBundle" value="com.openexchange.xml" />
@@ -140,16 +133,16 @@
         <mkdir dir="${tmp.dir}"/>
     </target>
 
-    <target name="compile" depends="prepare,patchVersionJava">
+    <target name="compile" depends="prepare">
         <javac memoryMaximumSize="90m" fork="yes" srcdir="${source..}" destdir="${output..}" debug="true"
             encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
             <classpath refid="project.classpath" />
         </javac>
     </target>
 
-    <target name="jar" depends="compile">
+    <target name="jar" depends="compile,manifest">
         <jar jarfile="${tmp.dir}/${bundle.name}"
-            manifest="META-INF/MANIFEST.MF">
+            manifest="META-INF/MANIFEST.MF.package">
             <fileset dir="${output..}"/>
         </jar>
     </target>
@@ -264,14 +257,6 @@
     	<delete dir="${dist-package}"/>
     </target>
 
-    <target name="patchVersionJava">
-        <copy file="${source..}/com/openexchange/server/impl/Version.java.in"
-            tofile="${source..}/com/openexchange/server/impl/Version.java"
-            overwrite="yes">
-            <filterset refid="version"/>
-        </copy>
-    </target>
-
     <target name="patchConfigFiles">
         <fail message="Define conf.subst.patch." unless="conf.subst.patch"/>
         <antcall target="patchOSGiIni"/>
@@ -373,5 +358,14 @@
             <replacefilter token="@bundle.d@" value="${gwbundle.d}"/>
         </replace>
     </target>
+
+	<!-- generate manifest as shipped in jar -->
+	<target name="manifest">
+		<copy file="META-INF/MANIFEST.MF" tofile="META-INF/MANIFEST.MF.package"/>
+		<manifest mode="update" file="META-INF/MANIFEST.MF.package">
+			    <attribute name="Build" value="${pversion}"/>
+			    <attribute name="Codename" value="${codename}"/>
+		</manifest>
+	</target>
 
 </project>

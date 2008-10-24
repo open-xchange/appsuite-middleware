@@ -104,6 +104,7 @@ import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.impl.Starter;
+import com.openexchange.server.impl.Version;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
@@ -223,7 +224,17 @@ public final class ServerActivator extends DeferredActivator {
 
 	@Override
 	protected void startBundle() throws Exception {
-		/*
+
+	        /*
+	         * get version information from MANIFEST file 
+	         */
+	        final Dictionary<Object, Object> headers = context.getBundle().getHeaders();
+	        Version.BUILDNUMBER = (String)headers.get("Build");
+	        Version.VERSION     = (String)headers.get("Bundle-Version");
+	        Version.CODENAME    = (String)headers.get("Codename");
+	        Version.setVersionString();
+	        
+	        /*
 		 * (Re-)Initialize server service registry with available services
 		 */
 		{
