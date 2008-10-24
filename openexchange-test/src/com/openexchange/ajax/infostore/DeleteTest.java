@@ -52,7 +52,7 @@ public class DeleteTest extends InfostoreAJAXTest {
 		assertTrue(notDeletedExpect.isEmpty());
 		
 		notDeletedExpect = new HashSet<Integer>(clean);
-		tearDown();
+		removeDocumentsAndFolders();
 		clean.clear();
 		
 		notDeleted = delete(getWebConversation(),getHostName(),sessionId, 0, toDelete);

@@ -72,6 +72,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		clean.add(c);
 	}
 
+    
     private int createFolderForTest(int userId) throws JSONException, OXException, IOException, SAXException, TestException, AjaxException {
         int parent = FolderTest.getMyInfostoreFolder(getWebConversation(),getHostName(),sessionId,userId).getObjectID();
         return FolderTest.insertFolder(getWebConversation(), getHostName(), getSessionId(), userId, false,parent,
@@ -80,11 +81,16 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 
     @Override
 	public void tearDown() throws Exception {
-		removeAll();
-        FolderTest.deleteFolders(getWebConversation(), getHostName(), sessionId, new int[]{folderId}, Long.MAX_VALUE, false);
-
+		removeDocumentsAndFolders();
+        this.logout();
+            
         //assertEquals("Couldn't delete "+j(notDeleted),0,notDeleted.length);
 	}
+
+    protected void removeDocumentsAndFolders() throws JSONException, IOException, SAXException {
+        removeAll();
+        FolderTest.deleteFolders(getWebConversation(), getHostName(), sessionId, new int[]{folderId}, Long.MAX_VALUE, false);
+    }
 
     public void removeAll() throws JSONException, IOException, SAXException {
         final int[][] toDelete = new int[clean.size()][2];

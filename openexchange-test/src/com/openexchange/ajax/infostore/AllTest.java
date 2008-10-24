@@ -49,4 +49,19 @@ public class AllTest extends InfostoreAJAXTest {
 		assertNoError(res);
 		assertEquals(0, ((JSONArray) res.getData()).length());
 	}
+
+    // Node 2652
+    public void testLastModifiedUTC() throws Exception {
+        final Response res = all(getWebConversation(), getHostName(), sessionId, folderId, new int[] {Metadata.LAST_MODIFIED_UTC});
+        assertNoError(res);
+
+        final JSONArray entries = (JSONArray) res.getData();
+		int size = entries.length();
+        assertTrue(size > 0);
+
+        for(int i = 0; i < size; i++) {
+			final JSONArray entry = entries.getJSONArray(i);
+			assertNotNull(entry.get(0));
+		}
+    }
 }

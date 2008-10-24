@@ -1,10 +1,14 @@
 package com.openexchange.ajax.infostore;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.net.MalformedURLException;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
@@ -94,4 +98,17 @@ public class UpdatesTest extends InfostoreAJAXTest{
 		final JSONArray modAndDel = (JSONArray) res.getData();
 		assertEquals(0, modAndDel.length());
 	}
+
+    // Node 2652
+    public void testLastModifiedUTC() throws JSONException, IOException, SAXException {
+        Response res = updates(getWebConversation(),getHostName(),sessionId,folderId, new int[]{Metadata.LAST_MODIFIED_UTC}, 0);
+		assertNoError(res);
+
+		JSONArray modAndDel = (JSONArray) res.getData();
+
+		assertTrue(modAndDel.length() > 0);
+
+		final JSONArray fields = modAndDel.getJSONArray(0);
+        assertNotNull(fields.optLong(0));
+    }
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.net.MalformedURLException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,6 +52,31 @@ public class ListTest extends InfostoreAJAXTest {
 
 
         
+    }
+
+    // Node 2652
+    public void testLastModifiedUTC() throws JSONException, IOException, SAXException {
+        final int[][] bothEntries = new int[2][2];
+		bothEntries[0][1] = clean.get(0);
+		bothEntries[1][1] = clean.get(1);
+
+		bothEntries[0][0] = folderId;
+		bothEntries[1][0] = folderId;
+
+        final Response res = list(getWebConversation(), getHostName(),sessionId, new int[]{Metadata.LAST_MODIFIED_UTC}, bothEntries);
+
+        assertNoError(res);
+
+        JSONArray arr = (JSONArray) res.getData();
+        int size = arr.length();
+        assertTrue(size > 0);
+
+        for(int i = 0; i < size; i++) {
+            JSONArray row = arr.optJSONArray(i);
+            assertTrue(row.length() == 1);
+            assertNotNull(row.optLong(0));
+        }
+
     }
 
     // Find a non-existing ID 

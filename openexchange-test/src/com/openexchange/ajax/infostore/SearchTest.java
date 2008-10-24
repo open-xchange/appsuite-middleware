@@ -1,12 +1,14 @@
 package com.openexchange.ajax.infostore;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.InfostoreAJAXTest;
@@ -214,9 +216,26 @@ public class SearchTest extends InfostoreAJAXTest {
 		assertTitles(res, "Test 0");
 		
 	}
-	
-	
-	public static void assertTitle(final int index, final JSONArray results, final String title) throws JSONException {
+
+    // Node 2652
+
+    public void testLastModifiedUTC() throws JSONException, IOException, SAXException {
+        Response res = search(getWebConversation(), getHostName(), sessionId, "*", new int[]{Metadata.LAST_MODIFIED_UTC}, folderId);
+		assertNoError(res);
+        JSONArray results = (JSONArray) res.getData();
+        int size = results.length();
+        assertTrue(size > 0);
+
+        for(int i = 0; i < size; i++) {
+            JSONArray row = results.optJSONArray(i);
+            assertNotNull(row);
+            assertTrue(row.length() > 0);
+            assertNotNull(row.optLong(0));
+        }
+    }
+
+
+    public static void assertTitle(final int index, final JSONArray results, final String title) throws JSONException {
 		final JSONArray entry = results.getJSONArray(index);
 		assertEquals(title,entry.getString(0));
 	}

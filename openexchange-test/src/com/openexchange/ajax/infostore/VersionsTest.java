@@ -1,14 +1,17 @@
 package com.openexchange.ajax.infostore;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.net.MalformedURLException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
@@ -81,8 +84,33 @@ public class VersionsTest extends InfostoreAJAXTest {
 
 		
 	}
-	
-	public static final void assureVersions(final Integer[] ids, final Response res, final Integer current) throws JSONException{
+
+    public void testLastModifiedUTC() throws JSONException, IOException, SAXException {
+        final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        Response res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),Long.MAX_VALUE,m("version_comment" , "Comment 1"), upload, "text/plain");
+        assertNoError(res);
+        res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),Long.MAX_VALUE,m("version_comment" , "Comment 2"), upload, "text/plain");
+        assertNoError(res);
+        res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),Long.MAX_VALUE,m("version_comment" , "Comment 3"), upload, "text/plain");
+        assertNoError(res);
+
+        res = versions(getWebConversation(),getHostName(), sessionId, clean.get(0), new int[]{Metadata.LAST_MODIFIED_UTC});
+        assertNoError(res);
+
+
+        JSONArray arr = (JSONArray) res.getData();
+        int size = arr.length();
+        assertTrue(size > 0);
+
+        for(int i = 0; i < size; i++) {
+            JSONArray row = arr.optJSONArray(i);
+            assertTrue(row.length() == 1);
+            assertNotNull(row.optLong(0));
+        }
+
+    }
+
+    public static final void assureVersions(final Integer[] ids, final Response res, final Integer current) throws JSONException{
 		final Set<Integer> versions = new HashSet<Integer>(Arrays.asList(ids));
 		final JSONArray arrayOfarrays = (JSONArray) res.getData();
 		
