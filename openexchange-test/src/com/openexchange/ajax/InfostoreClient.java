@@ -150,6 +150,5 @@ public class InfostoreClient {
 	public static Response versions(final WebConversation webConv, final String hostname, final String sessionId, final int objectId, final int[] columns) throws MalformedURLException, JSONException, IOException, SAXException {
 		return test.versions(webConv, hostname, sessionId, objectId, columns);
 	}
-	
-	
+
 }
