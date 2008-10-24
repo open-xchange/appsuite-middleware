@@ -717,11 +717,15 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 				final int status = task.getStatus();
 				final int percentComplete = task.getPercentComplete();
 				boolean changed = false;
-				if (oldTask != null) {
+				if (status != 0 && oldTask != null) {
 					changed |= (status != oldTask.getStatus());
 					changed |= (percentComplete != oldTask.getPercentComplete());
 				}
-				renderMap.put(new TaskStatusReplacement(status, percentComplete).setChanged(changed));
+				try {
+					renderMap.put(new TaskStatusReplacement(status, percentComplete).setChanged(changed));
+				} catch (final IllegalArgumentException e) {
+					renderMap.put(TaskStatusReplacement.emptyTaskStatusReplacement());
+				}
 			}
 		}
 		/*
