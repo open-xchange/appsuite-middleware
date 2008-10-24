@@ -450,6 +450,11 @@ public class Notifications {
 	 */
 	public static final String RESOURCE_TITLE_PREFIX = "Resource";
 
+	/**
+	 * Not set
+	 */
+	public static final String NOT_SET = "Not set";
+
 	/*
 	 * Confirmation actions
 	 */
