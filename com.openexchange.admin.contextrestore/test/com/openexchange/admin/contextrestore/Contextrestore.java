@@ -128,9 +128,9 @@ public class Contextrestore {
         System.out.println("New resource created");
         
         // ... afterwards the restore takes places ...
-        retval = shellExecutor.executeprocargs(new String[]{"/opt/open-xchange/sbin/contextrestore", "-A", "oxadminmaster" , "-P", oxmasterpassword, "-c",
+        retval = shellExecutor.executeprocargs(new String[]{"/opt/open-xchange/sbin/restorecontext", "-A", "oxadminmaster" , "-P", oxmasterpassword, "-c",
                 newcontextid, "-f", userdumpfile + ',' + configdbdumpfile});
-        assertTrue("Restore failed", 0 == retval.exitstatus);
+        assertTrue("Restore failed with reason " + retval.errOutput, 0 == retval.exitstatus);
         System.out.println("Restore done");
         
         // ... finally we create new dumps
@@ -207,9 +207,9 @@ public class Contextrestore {
         System.out.println("New resource created");
         
         // ... afterwards the restore takes places ...
-        retval = shellExecutor.executeprocargs(new String[]{"/opt/open-xchange/sbin/contextrestore", "-A", "oxadminmaster" , "-P", oxmasterpassword, "-c",
+        retval = shellExecutor.executeprocargs(new String[]{"/opt/open-xchange/sbin/restorecontext", "-A", "oxadminmaster" , "-P", oxmasterpassword, "-c",
                 newcontextid, "-f", userdumpfile + ',' + configdbdumpfile});
-        assertTrue("Restore failed", 0 == retval.exitstatus);
+        assertTrue("Restore failed with reason " + retval.errOutput, 0 == retval.exitstatus);
         System.out.println("Restore done");
         
         // ... finally we create new dumps
@@ -262,9 +262,9 @@ public class Contextrestore {
         System.out.println("Temporary context deleted");
         
         // ... afterwards the restore takes places ...
-        retval = shellExecutor.executeprocargs(new String[]{"/opt/open-xchange/sbin/contextrestore", "-A", "oxadminmaster" , "-P", oxmasterpassword, "-c", newcontextid, "-f",
+        retval = shellExecutor.executeprocargs(new String[]{"/opt/open-xchange/sbin/restorecontext", "-A", "oxadminmaster" , "-P", oxmasterpassword, "-c", newcontextid, "-f",
                 userdumpfile + ',' + configdbdumpfile});
-        assertTrue("Restore failed", 0 == retval.exitstatus);
+        assertTrue("Restore failed with reason " + retval.errOutput, 0 == retval.exitstatus);
         System.out.println("Restore done");
         
         // ... finally we create new dumps
