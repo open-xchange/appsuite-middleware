@@ -99,7 +99,7 @@ public class OXContextRestoreException extends Exception {
         NO_FILESTORE_VALUE("No values found for the filestore in the database"),
 
         /**
-         * None of the files contained a configdb database dump
+         * None of the files contained a configdb database dump, but this is essential for the restore process
          */
         NO_CONFIGDB_FOUND("None of the files contained a configdb database dump, but this is essential for the restore process"),
 
