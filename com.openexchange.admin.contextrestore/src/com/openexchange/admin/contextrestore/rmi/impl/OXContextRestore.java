@@ -289,8 +289,16 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             boolean indatarow = true;
             boolean found = false;
             boolean firstfound = true;
+            boolean escapted = false;
+            boolean firstescaperun = false;
             final ArrayList<String> retval = new ArrayList<String>();
             while ((c = in.read()) != -1) {
+                if (firstescaperun && escapted) {
+                    escapted = false;
+                }
+                if (escapted) {
+                    firstescaperun = true;
+                }
                 if (indatarow) {
                     if (c == ',' || (!instring && c == ')')) {
                         if (counter == valuepos) {
@@ -302,7 +310,9 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                         }
                         counter++;
                         lastpart.setLength(0);
-                    } else if (c == '\'') {
+                    } else if (instring && c == '\\') { // ' is escaped
+                        escapted = true;
+                    } else if (!escapted && c == '\'') {
                         instring = !instring;
                     } else {
                         lastpart.append((char)c);
