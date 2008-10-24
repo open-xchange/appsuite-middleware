@@ -108,6 +108,10 @@ public final class MailAPITestSuite extends TestSuite {
 		 * Unique ID tests
 		 */
 		mailSuite.addTestSuite(com.openexchange.mail.MailIDTest.class);
+		/*
+		 * Bugfix tests
+		 */
+		mailSuite.addTestSuite(com.openexchange.mail.MailBugfixTest.class);
 		return mailSuite;
 	}
 }
