@@ -113,14 +113,14 @@ public final class TaskStatusReplacement extends FormatLocalizedStringReplacemen
 	 *             If specified task status is invalid
 	 */
 	public TaskStatusReplacement(final int taskStatus, final int percentComplete) {
-		super(TemplateToken.TASK_STATUS, Notifications.FORMAT_STATUS, STATUSES[checkStatus(taskStatus) - 1]);
+		super(TemplateToken.TASK_STATUS, Notifications.FORMAT_STATUS, STATUSES[checkDecrStatus(taskStatus - 1)]);
 		this.taskStatus = taskStatus;
 		this.percentComplete = percentComplete;
 	}
 
-	private static int checkStatus(final int taskStatus) {
-		if (taskStatus < STATUS_NOT_STARTED || taskStatus > STATUS_DEFERRED) {
-			throw new IllegalArgumentException("Invalid task status: " + taskStatus);
+	private static int checkDecrStatus(final int taskStatus) {
+		if (taskStatus < 0 || taskStatus >= STATUSES.length) {
+			throw new IllegalArgumentException("Invalid task status specified: " + (taskStatus + 1));
 		}
 		return taskStatus;
 	}
