@@ -469,7 +469,8 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                 final int pool_id = start.getPool_id();
                 if (null != versionInformation) {
                     versionInfo = versionInformation;
-                } else if (null != schema && -1 != pool_id) {
+                }
+                if (null != schema && -1 != pool_id) {
                     result = start;
                 }
             }
