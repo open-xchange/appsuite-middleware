@@ -71,14 +71,38 @@ public final class TaskPriorityReplacement extends FormatLocalizedStringReplacem
 	}
 
 	/**
+	 * Gets an empty task priority replacement
+	 * 
+	 * @return An empty task priority replacement
+	 */
+	public static TaskPriorityReplacement emptyTaskPriorityReplacement() {
+		return new TaskPriorityReplacement();
+	}
+
+	/**
+	 * Initializes a new {@link TaskPriorityReplacement}
+	 */
+	private TaskPriorityReplacement() {
+		super(TemplateToken.TASK_PRIORITY, null, "");
+	}
+
+	/**
 	 * Initializes a new {@link TaskPriorityReplacement}
 	 * 
 	 * @param taskPriority
 	 *            The task priority; supposed to be either {@link Task#LOW},
 	 *            {@link Task#NORMAL}, or {@link Task#HIGH},
+	 * @throws IllegalArgumentException
+	 *             If task priority is invalid
 	 */
 	public TaskPriorityReplacement(final int taskPriority) {
-		super(TemplateToken.TASK_PRIORITY, Notifications.FORMAT_PRIORITY, PRIOS[taskPriority]);
+		super(TemplateToken.TASK_PRIORITY, Notifications.FORMAT_PRIORITY, PRIOS[checkPriority(taskPriority)]);
 	}
 
+	private static int checkPriority(final int taskPriority) {
+		if (taskPriority < 1 || taskPriority >= PRIOS.length) {
+			throw new IllegalArgumentException("Invalid task priority specified: " + taskPriority);
+		}
+		return taskPriority;
+	}
 }
