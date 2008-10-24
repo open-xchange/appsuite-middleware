@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.dataobjects;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -57,9 +58,17 @@ import java.util.List;
 import java.util.Map;
 
 import javax.activation.DataHandler;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.mime.MIMEDefaultSession;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
 
 /**
  * {@link CompositeMailMessage} - Extends the common {@link MailMessage} class
@@ -307,7 +316,58 @@ public final class CompositeMailMessage extends MailMessage {
 
 	@Override
 	public void writeTo(final OutputStream out) throws MailException {
-		delegate.writeTo(out);
+		if (additionalParts.isEmpty()) {
+			delegate.writeTo(out);
+			return;
+		}
+		try {
+			final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession());
+			/*
+			 * Copy headers
+			 */
+			final int size = getHeadersSize();
+			final Iterator<Map.Entry<String, String>> iter = getHeadersIterator();
+			for (int i = 0; i < size; i++) {
+				final Map.Entry<String, String> entry = iter.next();
+				mimeMessage.addHeader(entry.getKey(), entry.getValue());
+			}
+			final MimeMultipart mimeMultipart = new MimeMultipart("mixed");
+			/*
+			 * Add parts from delegate
+			 */
+			for (int i = 0; i < delegateEnclosedCount; i++) {
+				final MailPart mp = delegate.getEnclosedMailPart(i);
+				final MimeBodyPart bodyPart = new MimeBodyPart();
+				bodyPart
+						.setDataHandler(new DataHandler(new MessageDataSource(mp.getInputStream(), mp.getContentType())));
+				bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, mp.getContentType().toString());
+				bodyPart.setDisposition(mp.getContentDisposition().getDisposition());
+				if (mp.getFileName() != null) {
+					bodyPart.setFileName(mp.getFileName());
+				}
+				mimeMultipart.addBodyPart(bodyPart);
+			}
+			/*
+			 * Add additional parts
+			 */
+			for (final MailPart mp : additionalParts) {
+				final MimeBodyPart bodyPart = new MimeBodyPart();
+				bodyPart
+						.setDataHandler(new DataHandler(new MessageDataSource(mp.getInputStream(), mp.getContentType())));
+				bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, mp.getContentType().toString());
+				bodyPart.setDisposition(mp.getContentDisposition().getDisposition());
+				if (mp.getFileName() != null) {
+					bodyPart.setFileName(mp.getFileName());
+				}
+				mimeMultipart.addBodyPart(bodyPart);
+			}
+			mimeMessage.setContent(mimeMultipart);
+			mimeMessage.writeTo(out);
+		} catch (final MessagingException e) {
+			throw MIMEMailException.handleMessagingException(e);
+		} catch (final IOException e) {
+			throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+		}
 	}
 
 }
