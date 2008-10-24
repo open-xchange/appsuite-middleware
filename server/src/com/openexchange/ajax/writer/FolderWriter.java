@@ -358,7 +358,7 @@ public final class FolderWriter extends DataWriter {
 				jsonwriter.value(JSONObject.NULL);
 			}
 		});
-	}
+    }
 
 	/**
 	 * Initializes a new {@link FolderWriter}
@@ -558,7 +558,24 @@ public final class FolderWriter extends DataWriter {
 						}
 					};
 					break Fields;
-				case FolderObject.TYPE:
+                case FolderObject.LAST_MODIFIED_UTC:
+                    retval[i] = new FolderFieldWriter() {
+                        @Override
+						public void writeField(final JSONWriter jsonwriter, final FolderObject fo,
+								final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
+							if (withKey) {
+								if (fo.containsLastModified()) {
+									jsonwriter.key(FolderFields.LAST_MODIFIED_UTC);
+									jsonwriter.value(fo.getLastModified().getTime());
+								}
+							} else {
+								jsonwriter.value(fo.containsLastModified() ? Long.valueOf(fo
+										.getLastModified().getTime()) : JSONObject.NULL);
+							}
+						}
+                    };
+                    break Fields;
+                case FolderObject.TYPE:
 					retval[i] = new FolderFieldWriter() {
 						@Override
 						public void writeField(final JSONWriter jsonwriter, final FolderObject fo,
