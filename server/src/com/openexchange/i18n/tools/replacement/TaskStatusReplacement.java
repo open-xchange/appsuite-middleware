@@ -77,9 +77,27 @@ public final class TaskStatusReplacement extends FormatLocalizedStringReplacemen
 
 	public static final int STATUS_DEFERRED = Task.DEFERRED;
 
+	/**
+	 * Gets an empty task status replacement
+	 * 
+	 * @return An empty task status replacement
+	 */
+	public static TaskStatusReplacement emptyTaskStatusReplacement() {
+		return new TaskStatusReplacement();
+	}
+
 	private int taskStatus;
 
 	private int percentComplete;
+
+	/**
+	 * Initializes a new {@link TaskStatusReplacement}
+	 */
+	private TaskStatusReplacement() {
+		super(TemplateToken.TASK_STATUS, null, "");
+		this.taskStatus = 0;
+		this.percentComplete = 0;
+	}
 
 	/**
 	 * Initializes a new {@link TaskStatusReplacement}
@@ -91,16 +109,28 @@ public final class TaskStatusReplacement extends FormatLocalizedStringReplacemen
 	 *            {@link #STATUS_DEFERRED}
 	 * @param percentComplete
 	 *            The percent complete
+	 * @throws IllegalArgumentException
+	 *             If specified task status is invalid
 	 */
 	public TaskStatusReplacement(final int taskStatus, final int percentComplete) {
-		super(TemplateToken.TASK_STATUS, Notifications.FORMAT_STATUS, STATUSES[taskStatus - 1]);
+		super(TemplateToken.TASK_STATUS, Notifications.FORMAT_STATUS, STATUSES[checkStatus(taskStatus) - 1]);
 		this.taskStatus = taskStatus;
 		this.percentComplete = percentComplete;
+	}
+
+	private static int checkStatus(final int taskStatus) {
+		if (taskStatus < STATUS_NOT_STARTED || taskStatus > STATUS_DEFERRED) {
+			throw new IllegalArgumentException("Invalid task status: " + taskStatus);
+		}
+		return taskStatus;
 	}
 
 	@Override
 	public String getReplacement() {
 		final StringHelper sh = getStringHelper();
+		if (taskStatus < STATUS_NOT_STARTED || taskStatus > STATUS_DEFERRED) {
+			return String.format(sh.getString(Notifications.FORMAT_STATUS), sh.getString(Notifications.NOT_SET));
+		}
 		final String result = String.format(sh.getString(Notifications.FORMAT_STATUS), sh
 				.getString(STATUSES[taskStatus - 1]));
 		final StringBuilder b = new StringBuilder(result.length() + 16);
