@@ -325,7 +325,7 @@ public class Starter implements Initialization {
 		}
 
 		if (LOG.isInfoEnabled()) {
-			LOG.info("System version : Open-Xchange Server [" + Version.BUILDNUMBER + "] initializing ...");
+			LOG.info("System version : Open-Xchange Server [" + Version.buildnumber + "] initializing ...");
 			LOG.info("Server Footprint : " + AbstractOXException.SERVER_ID);
 		}
 	}

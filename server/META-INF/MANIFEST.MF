@@ -4,7 +4,6 @@ Bundle-Name: Open-Xchange Server
 Bundle-SymbolicName: com.openexchange.server
 Bundle-Version: 6.7.0
 Build: 0
-Codename: Hyperion
 Bundle-Activator: com.openexchange.server.osgi.ServerActivator
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.mysql.jdbc;version="3.1.13",

@@ -350,7 +350,7 @@ public class MailObject {
 			/*
 			 * Set mailer TODO: Read in mailer from file
 			 */
-			msg.setHeader(HEADER_X_MAILER, "Open-Xchange Mailer v" + Version.VERSION_STRING);
+			msg.setHeader(HEADER_X_MAILER, "Open-Xchange Mailer v" + Version.getVersionString());
 			/*
 			 * Set organization
 			 */

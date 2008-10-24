@@ -599,7 +599,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 			errorMsgStr = errorMsgStr.replaceAll("#STATUS_CODE#", String.valueOf(this.status)).replaceAll(
 					"#STATUS_MSG#", this.statusMsg).replaceFirst("#STATUS_DESC#", desc).replaceFirst("#DATE#",
 					HEADER_DATE_FORMAT.format(new Date(System.currentTimeMillis()))).replaceFirst("#VERSION#",
-					Version.VERSION_STRING);
+					Version.getVersionString());
 			setContentType(new StringBuilder("text/html; charset=").append(getCharacterEncoding()).toString());
 			errormessage = errorMsgStr.getBytes(getCharacterEncoding());
 			setContentLength(errormessage.length);

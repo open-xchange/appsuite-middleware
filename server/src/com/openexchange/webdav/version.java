@@ -82,7 +82,7 @@ public final class version extends HttpServlet {
         	resp.setContentType("text/html");
 
 			pw = resp.getWriter();
-			pw.println("WebDAV: " + Version.BUILDNUMBER);
+			pw.println("WebDAV: " + Version.buildnumber);
             pw.flush();
 		} catch(final Exception exc) {
 			System.err.println("cannot get version informations: " + exc);

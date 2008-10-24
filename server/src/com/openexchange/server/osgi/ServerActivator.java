@@ -224,19 +224,11 @@ public final class ServerActivator extends DeferredActivator {
 
 	@Override
 	protected void startBundle() throws Exception {
-
-	        /*
-	         * get version information from MANIFEST file 
-	         */
-	        final Dictionary<Object, Object> headers = context.getBundle().getHeaders();
-	        Version.BUILDNUMBER = (String)headers.get("Build");
-	        Version.VERSION     = (String)headers.get("Bundle-Version");
-	        Version.CODENAME    = (String)headers.get("Codename");
-	        Version.setVersionString();
-	        
-	        /*
-		 * (Re-)Initialize server service registry with available services
-		 */
+	    // get version information from MANIFEST file
+	    final Dictionary<?, ?> headers = context.getBundle().getHeaders();
+        Version.buildnumber = (String) headers.get("Build");
+        Version.version     = (String) headers.get("Bundle-Version");
+        // (Re-)Initialize server service registry with available services
 		{
 			final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
 			registry.clearRegistry();

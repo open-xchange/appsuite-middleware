@@ -98,7 +98,7 @@ public final class ServerVersion implements PreferencesItemService {
              */
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
-                setting.setSingleValue(Version.VERSION_STRING);
+                setting.setSingleValue(Version.getVersionString());
             }
         };
     }

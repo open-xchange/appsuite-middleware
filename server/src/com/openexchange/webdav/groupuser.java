@@ -167,7 +167,7 @@ public final class groupuser extends PermissionServlet {
 			}
 			
 			os.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n").getBytes());
-			os.write(("<D:multistatus xmlns:D=\"DAV:\" buildnumber=\"" + Version.BUILDNUMBER + "\" buildname=\"" + Version.NAME + "\">").getBytes());
+			os.write(("<D:multistatus xmlns:D=\"DAV:\" buildnumber=\"" + Version.buildnumber + "\" buildname=\"" + Version.NAME + "\">").getBytes());
 			
 			os.write(("<D:response xmlns:ox=\"http://www.open-xchange.org\">").getBytes());
 			os.write(("<D:propstat><D:prop>").getBytes());

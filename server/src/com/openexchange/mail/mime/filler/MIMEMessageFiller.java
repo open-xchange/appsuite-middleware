@@ -262,7 +262,7 @@ public class MIMEMessageFiller {
 		/*
 		 * Set mailer
 		 */
-		mimeMessage.setHeader(MessageHeaders.HDR_X_MAILER, "Open-Xchange Mailer v" + Version.VERSION_STRING);
+		mimeMessage.setHeader(MessageHeaders.HDR_X_MAILER, "Open-Xchange Mailer v" + Version.getVersionString());
 		/*
 		 * Set organization to context-admin's company field setting
 		 */

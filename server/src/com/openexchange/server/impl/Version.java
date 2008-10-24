@@ -55,17 +55,20 @@ package com.openexchange.server.impl;
  */
 public class Version {
 
-    public static String VERSION = "";
-    public static String CODENAME = "";
+    public static String version = "";
+    public static final String CODENAME = "Hyperion";
     public static final String NAME = "Open-Xchange";
-    public static String BUILDNUMBER = "";
+    public static String buildnumber = "";
 
-    public static String VERSION_STRING = "";
+    private static String versionString = "";
 
-    public static void setVersionString() {
-        VERSION_STRING = VERSION + '-' + BUILDNUMBER;
+    public static String getVersionString() {
+        if (null == versionString) {
+            versionString = version + '-' + buildnumber;
+        }
+        return versionString;
     }
-    
+
     /**
      * Prevent instantiation.
      */
