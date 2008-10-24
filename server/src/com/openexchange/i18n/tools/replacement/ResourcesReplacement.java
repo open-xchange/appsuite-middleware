@@ -49,6 +49,7 @@
 
 package com.openexchange.i18n.tools.replacement;
 
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.SortedSet;
 import java.util.TimeZone;
@@ -111,50 +112,63 @@ public final class ResourcesReplacement implements TemplateReplacement {
 		if (resourcesSet.isEmpty()) {
 			return getStringHelper().getString(Notifications.NO_RESOURCES);
 		}
-		final StringBuilder b = new StringBuilder(resourcesSet.size() * 32);
+		final int size = resourcesSet.size();
+		final StringBuilder b = new StringBuilder(size * 32);
 		final StringHelper stringHelper = getStringHelper();
-		for (final EmailableParticipant resource : resourcesSet) {
-			String name = resource.displayName;
-			if (name == null) {
-				name = resource.email;
-			}
-			if (changed) {
-				if (resource.state == EmailableParticipant.STATE_NEW) {
-					/*
-					 * Resource was newly added
-					 */
-					b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.ADDED))
-							.append(": ");
-					b.append(name);
-				} else if (resource.state == EmailableParticipant.STATE_REMOVED) {
-					/*
-					 * Resource was removed
-					 */
-					b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.REMOVED))
-							.append(": ");
-					b.append(name);
-				} else {
-					/*
-					 * Resource was neither newly added nor removed
-					 */
-					b.append(name);
-				}
-				b.append(CRLF);
-			} else {
-				if (resource.state != EmailableParticipant.STATE_REMOVED) {
-					/*
-					 * Just add resources's display name
-					 */
-					b.append(name);
-					b.append(CRLF);
-				}
-			}
-		}
+		final Iterator<EmailableParticipant> iter = resourcesSet.iterator();
 		/*
-		 * Remove last CRLF
+		 * Process fist resource
 		 */
-		b.delete(b.length() - 2, b.length());
+		boolean added = processResource(b, stringHelper, iter.next());
+		/*
+		 * Process remaining (if any)
+		 */
+		for (int i = 1; i < size; i++) {
+			if (added) {
+				b.append(CRLF);
+			}
+			added = processResource(b, stringHelper, iter.next());
+		}
 		return b.toString();
+	}
+
+	private boolean processResource(final StringBuilder b, final StringHelper stringHelper,
+			final EmailableParticipant resource) {
+		String name = resource.displayName;
+		if (name == null) {
+			name = resource.email;
+		}
+		if (changed) {
+			if (resource.state == EmailableParticipant.STATE_NEW) {
+				/*
+				 * Resource was newly added
+				 */
+				b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.ADDED))
+						.append(": ");
+				b.append(name);
+			} else if (resource.state == EmailableParticipant.STATE_REMOVED) {
+				/*
+				 * Resource was removed
+				 */
+				b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.REMOVED))
+						.append(": ");
+				b.append(name);
+			} else {
+				/*
+				 * Resource was neither newly added nor removed
+				 */
+				b.append(name);
+			}
+			return true;
+		}
+		if (resource.state != EmailableParticipant.STATE_REMOVED) {
+			/*
+			 * Just add resources's display name
+			 */
+			b.append(name);
+			return true;
+		}
+		return false;
 	}
 
 	public TemplateToken getToken() {

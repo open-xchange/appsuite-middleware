@@ -49,6 +49,7 @@
 
 package com.openexchange.i18n.tools.replacement;
 
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.SortedSet;
 import java.util.TimeZone;
@@ -115,75 +116,88 @@ public final class ParticipantsReplacement implements TemplateReplacement {
 		if (participantsSet.isEmpty()) {
 			return "";
 		}
-		final StringBuilder b = new StringBuilder(participantsSet.size() * 32);
+		final int size = participantsSet.size();
+		final StringBuilder b = new StringBuilder(size * 32);
 		final Locale l = getLocale();
 		final StringHelper stringHelper = getStringHelper();
-		for (final EmailableParticipant participant : participantsSet) {
-			String name = participant.displayName;
-			if (name == null) {
-				name = participant.email;
-			}
-			if (changed) {
-				if (participant.state == EmailableParticipant.STATE_NEW) {
-					/*
-					 * Participant was newly added
-					 */
-					b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.ADDED))
-							.append(": ");
-					b.append(name);
-					if (participant.type == Participant.USER) {
-						b.append(" (");
-						b.append(new StatusReplacement(participant.confirm, l).getReplacement());
-						if (participant.confirmMessage != null) {
-							b.append(": ").append(participant.confirmMessage);
-						}
-						b.append(')');
-					}
-				} else if (participant.state == EmailableParticipant.STATE_REMOVED) {
-					/*
-					 * Participant was removed
-					 */
-					b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.REMOVED))
-							.append(": ");
-					b.append(name);
-				} else {
-					/*
-					 * Participant was neither newly added nor removed
-					 */
-					b.append(name);
-					if (participant.type == Participant.USER) {
-						b.append(" (");
-						b.append(new StatusReplacement(participant.confirm, l).getReplacement());
-						if (participant.confirmMessage != null) {
-							b.append(": ").append(participant.confirmMessage);
-						}
-						b.append(')');
-					}
-				}
-				b.append(CRLF);
-			} else {
-				if (participant.state != EmailableParticipant.STATE_REMOVED) {
-					/*
-					 * Just add participant's display name
-					 */
-					b.append(name);
-					if (participant.type == Participant.USER) {
-						b.append(" (");
-						b.append(new StatusReplacement(participant.confirm, l).getReplacement());
-						if (participant.confirmMessage != null) {
-							b.append(": ").append(participant.confirmMessage);
-						}
-						b.append(')');
-					}
-					b.append(CRLF);
-				}
-			}
-		}
+		final Iterator<EmailableParticipant> iter = participantsSet.iterator();
 		/*
-		 * Remove last CRLF
+		 * Process first
 		 */
-		b.delete(b.length() - 2, b.length());
+		boolean added = processParticipant(b, l, stringHelper, iter.next());
+		/*
+		 * Iterate remaining (if any)
+		 */
+		for (int i = 1; i < size; i++) {
+			if (added) {
+				b.append(CRLF);
+			}
+			added = processParticipant(b, l, stringHelper, iter.next());
+		}
 		return b.toString();
+	}
+
+	private boolean processParticipant(final StringBuilder b, final Locale l, final StringHelper stringHelper,
+			final EmailableParticipant participant) {
+		String name = participant.displayName;
+		if (name == null) {
+			name = participant.email;
+		}
+		if (changed) {
+			if (participant.state == EmailableParticipant.STATE_NEW) {
+				/*
+				 * Participant was newly added
+				 */
+				b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.ADDED))
+						.append(": ");
+				b.append(name);
+				if (participant.type == Participant.USER) {
+					b.append(" (");
+					b.append(new StatusReplacement(participant.confirm, l).getReplacement());
+					if (participant.confirmMessage != null) {
+						b.append(": ").append(participant.confirmMessage);
+					}
+					b.append(')');
+				}
+			} else if (participant.state == EmailableParticipant.STATE_REMOVED) {
+				/*
+				 * Participant was removed
+				 */
+				b.append(TemplateReplacement.PREFIX_MODIFIED).append(stringHelper.getString(Notifications.REMOVED))
+						.append(": ");
+				b.append(name);
+			} else {
+				/*
+				 * Participant was neither newly added nor removed
+				 */
+				b.append(name);
+				if (participant.type == Participant.USER) {
+					b.append(" (");
+					b.append(new StatusReplacement(participant.confirm, l).getReplacement());
+					if (participant.confirmMessage != null) {
+						b.append(": ").append(participant.confirmMessage);
+					}
+					b.append(')');
+				}
+			}
+			return true;
+		}
+		if (participant.state != EmailableParticipant.STATE_REMOVED) {
+			/*
+			 * Just add participant's display name
+			 */
+			b.append(name);
+			if (participant.type == Participant.USER) {
+				b.append(" (");
+				b.append(new StatusReplacement(participant.confirm, l).getReplacement());
+				if (participant.confirmMessage != null) {
+					b.append(": ").append(participant.confirmMessage);
+				}
+				b.append(')');
+			}
+			return true;
+		}
+		return false;
 	}
 
 	public TemplateToken getToken() {
