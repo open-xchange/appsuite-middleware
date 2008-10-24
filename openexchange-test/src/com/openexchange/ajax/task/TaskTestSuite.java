@@ -83,6 +83,9 @@ public final class TaskTestSuite {
         tests.addTestSuite(ListTest.class);
         tests.addTestSuite(UpdatesTest.class);
 
+        // Nodes
+        tests.addTestSuite(LastModifiedUTCTest.class);
+
         // And finally bug tests.
         tests.addTestSuite(Bug6335Test.class);
         tests.addTestSuite(Bug7276Test.class);
