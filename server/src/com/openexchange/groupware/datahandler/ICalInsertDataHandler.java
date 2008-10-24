@@ -66,8 +66,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.fields.AppointmentFields;
-import com.openexchange.ajax.fields.TaskFields;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
@@ -236,7 +235,7 @@ public final class ICalInsertDataHandler implements DataHandler {
 		for (final Task task : tasks) {
 			task.setParentFolderID(taskFolder);
 			taskSql.insertTaskObject(task);
-			folderAndIdArray.put(new JSONObject().put(TaskFields.FOLDER_ID, taskFolder).put(TaskFields.ID,
+			folderAndIdArray.put(new JSONObject().put(CalendarFields.FOLDER_ID, taskFolder).put(CalendarFields.ID,
 					task.getObjectID()));
 		}
 	}
@@ -250,8 +249,8 @@ public final class ICalInsertDataHandler implements DataHandler {
 			appointment.setContext(ctx);
 			appointment.setIgnoreConflicts(true);
 			appointmentSql.insertAppointmentObject(appointment);
-			folderAndIdArray.put(new JSONObject().put(AppointmentFields.FOLDER_ID, calendarFolder).put(
-					AppointmentFields.ID, appointment.getObjectID()));
+			folderAndIdArray.put(new JSONObject().put(CalendarFields.FOLDER_ID, calendarFolder).put(CalendarFields.ID,
+					appointment.getObjectID()));
 		}
 	}
 
