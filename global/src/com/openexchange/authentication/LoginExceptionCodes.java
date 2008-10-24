@@ -49,13 +49,7 @@
 
 package com.openexchange.authentication;
 
-import static com.openexchange.authentication.LoginExceptionMessages.ACCOUNT_LOCKED_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.ACCOUNT_NOT_READY_YET_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.COMMUNICATION_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.DATABASE_DOWN_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.INVALID_CREDENTIALS_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.MISSING_PROPERTY_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.UNKNOWN_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.*;
 
 import com.openexchange.authentication.exception.LoginExceptionFactory;
 import com.openexchange.exceptions.OXErrorMessage;
@@ -87,6 +81,18 @@ public enum LoginExceptionCodes implements OXErrorMessage {
      * Invalid credentials.
      */
     INVALID_CREDENTIALS(INVALID_CREDENTIALS_MSG, Category.USER_INPUT, 6),
+    /**
+     * Instantiating the class failed.
+     * @deprecated this can not appear anymore with OSGi services.
+     */
+    @Deprecated
+    INSTANTIATION_FAILED(INSTANTIATION_FAILED_MSG, Category.CODE_ERROR, 7),
+    /**
+     * Class %1$s can not be found.
+     * @deprecated this can not appear anymore with OSGi services.
+     */
+    @Deprecated
+    CLASS_NOT_FOUND(CLASS_NOT_FOUND_MSG, Category.SETUP_ERROR, 8),
     /**
      * Missing property %1$s.
      */

@@ -80,6 +80,14 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // The supplied credentials for the authentication are invalid.
     public static final String INVALID_CREDENTIALS_MSG = "Invalid credentials.";
 
+    // The instantiation of the login implementing class has failed. This will
+    // not occur anymore since SP4 release.
+    public static final String INSTANTIATION_FAILED_MSG = "Instantiating the class failed.";
+
+    // The classes are not named anymore anywhere. So this will not occur
+    // anymore since SP4 release.
+    public static final String CLASS_NOT_FOUND_MSG = "Class %1$s can not be found.";
+
     // This message can be used if the configuration of the authentication
     // mechanism is not complete and some configuration option is missing.
     // %1$s is replaced with the name of the missing configuration option.

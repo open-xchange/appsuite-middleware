@@ -80,10 +80,36 @@ public class LoginException extends AbstractOXException {
      * Initializes a new exception using the information provides by the code.
      * @param code code for the exception.
      * @param messageArgs arguments that will be formatted into the message.
+     * @deprecated use {@link LoginExceptionCodes#create(Object...)} instead.
+     */
+    @Deprecated
+    public LoginException(final Code code, final Object... messageArgs) {
+        this(code.code, null, messageArgs);
+    }
+
+    /**
+     * Initializes a new exception using the information provides by the code.
+     * @param code code for the exception.
+     * @param cause the cause of the exception.
+     * @param messageArgs arguments that will be formatted into the message.
+     * @deprecated use {@link LoginExceptionCodes#create(Throwable, Object...)}
+     * instead.
+     */
+    @Deprecated
+    public LoginException(final Code code, final Throwable cause,
+        final Object... messageArgs) {
+        this(code.code, cause, messageArgs);
+    }
+
+    /**
+     * Initializes a new exception using the information provides by the code.
+     * @param code code for the exception.
+     * @param messageArgs arguments that will be formatted into the message.
      * @deprecated use {@link LoginExceptionFactory#create(int, Object...)}.
      */
     @Deprecated
-    public LoginException(final LoginExceptionCodes code, final Object... messageArgs) {
+    public LoginException(final LoginExceptionCodes code,
+        final Object... messageArgs) {
         this(code, null, messageArgs);
     }
 
@@ -92,18 +118,88 @@ public class LoginException extends AbstractOXException {
      * @param code code for the exception.
      * @param cause the cause of the exception.
      * @param messageArgs arguments that will be formatted into the message.
-     * @deprecated use {@link LoginExceptionFactory#create(int, Throwable, Object...)}.
+     * @deprecated use
+     * {@link LoginExceptionFactory#create(int, Throwable, Object...)} instead.
      */
     @Deprecated
     public LoginException(final LoginExceptionCodes code, final Throwable cause,
         final Object... messageArgs) {
-        super(EnumComponent.LOGIN, code.category, code.number, code.message, cause);
+        super(EnumComponent.LOGIN, code.category, code.number, code.message,
+            cause);
         setMessageArgs(messageArgs);
     }
 
+    /**
+     * Constructor for the {@link LoginExceptionFactory}. If you want to
+     * instantiate a {@link LoginException} use
+     * {@link LoginExceptionCodes#create(Object...)} or
+     * {@link LoginExceptionCodes#create(Throwable, Object...)} methods.
+     * @param message Parameters for filling the exception with all necessary
+     * data.
+     * @param cause the initial cause of the exception.
+     * @param messageArgs arguments for the exception message.
+     */
     public LoginException(final ErrorMessage message, final Throwable cause,
         final Object... messageArgs) {
         super(message, cause);
         setMessageArgs(messageArgs);
+    }
+
+    /**
+     * Error codes for login exceptions.
+     * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+     * @deprecated use {@link LoginExceptionCodes} instead.
+     */
+    @Deprecated
+    public enum Code {
+        /**
+         * @deprecated use {@link LoginExceptionCodes#ACCOUNT_LOCKED} instead.
+         */
+        @Deprecated
+        ACCOUNT_LOCKED(LoginExceptionCodes.ACCOUNT_LOCKED),
+        /**
+         * @deprecated use {@link LoginExceptionCodes#ACCOUNT_NOT_READY_YET} instead.
+         */
+        @Deprecated
+        ACCOUNT_NOT_READY_YET(LoginExceptionCodes.ACCOUNT_NOT_READY_YET),
+        /**
+         * @deprecated use {@link LoginExceptionCodes#UNKNOWN} instead.
+         */
+        @Deprecated
+        UNKNOWN(LoginExceptionCodes.UNKNOWN),
+        /**
+         * @deprecated use {@link LoginExceptionCodes#COMMUNICATION} instead.
+         */
+        @Deprecated
+        COMMUNICATION(LoginExceptionCodes.COMMUNICATION),
+        /**
+         * @deprecated use {@link LoginExceptionCodes#INVALID_CREDENTIALS} instead.
+         */
+        @Deprecated
+        INVALID_CREDENTIALS(LoginExceptionCodes.INVALID_CREDENTIALS),
+        /**
+         * @deprecated use {@link LoginExceptionCodes#INSTANTIATION_FAILED} instead.
+         */
+        @Deprecated
+        INSTANTIATION_FAILED(LoginExceptionCodes.INSTANTIATION_FAILED),
+        /**
+         * @deprecated use {@link LoginExceptionCodes#CLASS_NOT_FOUND} instead.
+         */
+        @Deprecated
+        CLASS_NOT_FOUND(LoginExceptionCodes.CLASS_NOT_FOUND),
+        /**
+         * @deprecated use {@link LoginExceptionCodes#MISSING_PROPERTY} instead.
+         */
+        @Deprecated
+        MISSING_PROPERTY(LoginExceptionCodes.MISSING_PROPERTY),
+        /**
+         * @deprecated use {@link LoginExceptionCodes#DATABASE_DOWN} instead.
+         */
+        @Deprecated
+        DATABASE_DOWN(LoginExceptionCodes.DATABASE_DOWN);
+        private LoginExceptionCodes code;
+        private Code(final LoginExceptionCodes code) {
+            this.code = code;
+        }
     }
 }
