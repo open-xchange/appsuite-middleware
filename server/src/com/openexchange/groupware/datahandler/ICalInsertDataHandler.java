@@ -68,7 +68,6 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.TaskFields;
-import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
@@ -155,8 +154,6 @@ public final class ICalInsertDataHandler implements DataHandler {
 			throw new DataException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ICalParser.class
 					.getName()));
 		}
-		final TimeZone defaultZone = Tools.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx)
-				.getTimeZone());
 		final List<CalendarDataObject> appointments;
 		final List<Task> tasks;
 		final InputStreamCopy inputStreamCopy;
@@ -170,6 +167,11 @@ public final class ICalInsertDataHandler implements DataHandler {
 			inputStreamCopy = copyStream((InputStream) data.getData(), size);
 		}
 		try {
+			/*
+			 * Get user time zone
+			 */
+			final TimeZone defaultZone = Tools.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx)
+					.getTimeZone());
 			/*
 			 * Errors and warnings
 			 */
@@ -206,7 +208,7 @@ public final class ICalInsertDataHandler implements DataHandler {
 			 * Insert parsed appointments into denoted calendar folder
 			 */
 			try {
-				insertAppointments(session, calendarFolder, ctx, defaultZone, appointments, folderAndIdArray);
+				insertAppointments(session, calendarFolder, ctx, appointments, folderAndIdArray);
 			} catch (final OXException e) {
 				throw new DataException(e);
 			} catch (final JSONException e) {
@@ -240,31 +242,16 @@ public final class ICalInsertDataHandler implements DataHandler {
 	}
 
 	private void insertAppointments(final Session session, final int calendarFolder, final Context ctx,
-			final TimeZone defaultZone, final List<CalendarDataObject> appointments, final JSONArray folderAndIdArray)
-			throws OXException, JSONException {
+			final List<CalendarDataObject> appointments, final JSONArray folderAndIdArray) throws OXException,
+			JSONException {
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(session);
 		for (final CalendarDataObject appointment : appointments) {
 			appointment.setParentFolderID(calendarFolder);
 			appointment.setContext(ctx);
 			appointment.setIgnoreConflicts(true);
-			final CalendarDataObject[] conflicts = appointmentSql.insertAppointmentObject(appointment);
-
-			final JSONObject jsonResponseObj = new JSONObject();
-			if (conflicts == null) {
-				jsonResponseObj.put(AppointmentFields.FOLDER_ID, calendarFolder).put(AppointmentFields.ID,
-						appointment.getObjectID());
-			} else {
-				final JSONArray jsonConflictArray = new JSONArray();
-				final AppointmentWriter appointmentWriter = new AppointmentWriter(defaultZone);
-				for (int a = 0; a < conflicts.length; a++) {
-					final JSONObject jsonAppointmentObj = new JSONObject();
-					appointmentWriter.writeAppointment(conflicts[a], jsonAppointmentObj);
-					jsonConflictArray.put(jsonAppointmentObj);
-				}
-
-				jsonResponseObj.put("conflicts", jsonConflictArray);
-			}
-			folderAndIdArray.put(jsonResponseObj);
+			appointmentSql.insertAppointmentObject(appointment);
+			folderAndIdArray.put(new JSONObject().put(AppointmentFields.FOLDER_ID, calendarFolder).put(
+					AppointmentFields.ID, appointment.getObjectID()));
 		}
 	}
 
