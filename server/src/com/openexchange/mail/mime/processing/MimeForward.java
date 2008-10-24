@@ -151,6 +151,9 @@ public final class MimeForward {
 		} catch (final MessagingException e) {
 			throw MIMEMailException.handleMessagingException(e);
 		}
+		/*
+		 * Compose forward message
+		 */
 		return getFowardMail(mimeMessages, session);
 	}
 
