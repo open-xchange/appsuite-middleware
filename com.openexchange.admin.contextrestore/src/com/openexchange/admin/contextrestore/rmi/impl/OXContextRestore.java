@@ -437,7 +437,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         basicauth = new BasicAuthenticator();
     }
 
-    public String restore(final Context ctx, final String[] filenames, final Credentials auth) throws InvalidDataException, InvalidCredentialsException, StorageException, OXContextRestoreException, DatabaseUpdateException {
+    public String restore(final Context ctx, final String[] filenames, final Credentials auth, final boolean dryrun) throws InvalidDataException, InvalidCredentialsException, StorageException, OXContextRestoreException, DatabaseUpdateException {
         try {
             doNullCheck(ctx, filenames);
             for (final String filename : filenames) {
@@ -494,8 +494,12 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                     LOG.fatal("FATAL:" + e.getMessage(), e);
                 }
             }
-            // We have to do the exists check beforehand otherwise you'll find a stack trace in the logs
-            return instance.restorectx(ctx, result);
+            if (dryrun) {
+                return "Done nothing (dry run)";
+            } else {
+                // We have to do the exists check beforehand otherwise you'll find a stack trace in the logs
+                return instance.restorectx(ctx, result);
+            }
         } catch (final StorageException e) {
             LOG.error(e.getMessage(), e);
             throw e;

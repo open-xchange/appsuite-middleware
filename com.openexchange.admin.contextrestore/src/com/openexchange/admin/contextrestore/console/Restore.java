@@ -73,6 +73,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public class Restore extends BasicCommandlineOptions {
 	
     Option filenameOption = null;
+    Option dryRun = null;
     
     public static void main(final String[] args) {
         final Restore restore = new Restore();
@@ -82,6 +83,7 @@ public class Restore extends BasicCommandlineOptions {
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
         filenameOption = setShortLongOpt(parser, 'f', "filename","Comma-separated list of filenames with full path", true, NeededQuadState.needed);
+        dryRun = setShortLongOpt(parser, 'n', "dry-run","Activate this option if do not want to apply the changes to the database", false, NeededQuadState.needed);
     }
 
     public Restore() {
@@ -107,7 +109,11 @@ public class Restore extends BasicCommandlineOptions {
             final String filenames = (String) parser.getOptionValue(filenameOption);
 
             final String[] filenamearray = filenames.split(",");
-            System.out.println(oxrestore.restore(ctx, filenamearray, auth));
+            if (null == parser.getOptionValue(dryRun)) {
+                System.out.println(oxrestore.restore(ctx, filenamearray, auth, false));
+            } else {
+                System.out.println(oxrestore.restore(ctx, filenamearray, auth, true));
+            }
             
             sysexit(0);
         } catch (final IllegalOptionValueException e) {

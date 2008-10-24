@@ -86,6 +86,7 @@ public interface OXContextRestoreInterface extends Remote {
      *                  have to be available to the admin daemon, so they must reside on the machine on which the admin
      *                  daemon is running.
      * @param auth Credentials for authenticating against server.
+     * @param dryrun TODO
      * @return TODO
      * @throws RemoteException General RMI Exception
      * @throws InvalidDataException 
@@ -97,6 +98,6 @@ public interface OXContextRestoreInterface extends Remote {
      * @throws NoSuchContextException 
      * @throws  
      */
-    public String restore(final Context ctx, final String[] filenames, final Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXContextRestoreException, DatabaseUpdateException;
+    public String restore(final Context ctx, final String[] filenames, final Credentials auth, boolean dryrun) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXContextRestoreException, DatabaseUpdateException;
     
 }
