@@ -2042,7 +2042,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 					 * Must not be zero since JSON array's length is greater
 					 * than zero.
 					 */
-					LOG.error("Parsing of folder-and-ID-pairs failed", new Throwable());
+					final String jsonIDsStr = jsonIDs.toString();
+					LOG.error(new StringBuilder(jsonIDsStr.length() + 64).append(
+							"Parsing of folder-and-ID-pairs failed:\n").append(jsonIDsStr).toString(), new Throwable());
 				}
 				MailServletInterface mailInterface = mailInterfaceArg;
 				boolean closeMailInterface = false;
