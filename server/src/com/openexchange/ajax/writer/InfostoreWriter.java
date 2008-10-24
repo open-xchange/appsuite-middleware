@@ -321,7 +321,15 @@ public class InfostoreWriter extends TimedWriter {
 			writeString(dm.getFilestoreLocation());
 			return null;
 		}
-	}
+
+        public Object lastModifiedUTC() {
+            if(dm.getLastModified() == null) {
+                return null;
+            }
+            writeInteger(dm.getLastModified().getTime());
+            return null;
+        }
+    }
 
 	@Override
 	protected int getId(final Object object) {

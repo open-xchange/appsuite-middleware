@@ -148,4 +148,8 @@ public class GetSwitch implements MetadataSwitcher {
 		return metadata.getFilestoreLocation();
 	}
 
+    public Object lastModifiedUTC() {
+        return metadata.getLastModified();
+    }
+
 }

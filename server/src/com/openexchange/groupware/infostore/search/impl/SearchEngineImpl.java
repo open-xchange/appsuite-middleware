@@ -304,7 +304,8 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 			Metadata2DBSwitch : switch(current.getId()) {
 			default : break Metadata2DBSwitch;
 			case Metadata.LAST_MODIFIED : retval.add("infostore.last_modified"); break Metadata2DBSwitch;
-			case Metadata.CREATION_DATE : retval.add("infostore.creating_date"); break Metadata2DBSwitch;
+            case Metadata.LAST_MODIFIED_UTC : retval.add("infostore.last_modified"); break Metadata2DBSwitch;
+            case Metadata.CREATION_DATE : retval.add("infostore.creating_date"); break Metadata2DBSwitch;
 			case Metadata.MODIFIED_BY : retval.add("infostore.changed_by"); break Metadata2DBSwitch;
 			case Metadata.FOLDER_ID : retval.add("infostore.folder_id"); break Metadata2DBSwitch;
 			case Metadata.TITLE : retval.add("infostore_document.title"); break Metadata2DBSwitch;
@@ -460,7 +461,8 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 				FillDocumentMetadata : switch(columns[i].getId()) {
 				default : break FillDocumentMetadata;
 				case Metadata.LAST_MODIFIED : retval.setLastModified(new Date(result.getLong(i+1))); break FillDocumentMetadata;
-				case Metadata.CREATION_DATE : retval.setCreationDate(new Date(result.getLong(i+1))); break FillDocumentMetadata;
+                case Metadata.LAST_MODIFIED_UTC : retval.setLastModified(new Date(result.getLong(i+1))); break FillDocumentMetadata;
+                case Metadata.CREATION_DATE : retval.setCreationDate(new Date(result.getLong(i+1))); break FillDocumentMetadata;
 				case Metadata.MODIFIED_BY : retval.setModifiedBy(result.getInt(i+1)); break FillDocumentMetadata;
 				case Metadata.FOLDER_ID : retval.setFolderId(result.getInt(i+1)); break FillDocumentMetadata;
 				case Metadata.TITLE : retval.setTitle(result.getString(i+1)); break FillDocumentMetadata;

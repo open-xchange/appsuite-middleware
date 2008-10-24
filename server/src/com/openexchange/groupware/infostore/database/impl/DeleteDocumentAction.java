@@ -85,7 +85,7 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
 
 				@Override
 				public void fillStatement() throws SQLException {
-					fillStmt(stmt,getQueryCatalog().getDocumentFields(),doc,Integer.valueOf(getContext().getContextId()));
+					fillStmt(stmt,getQueryCatalog().getWritableDocumentFields(),doc,Integer.valueOf(getContext().getContextId()));
 				}
 				
 			};
@@ -131,7 +131,7 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
 
 				@Override
 				public void fillStatement() throws SQLException {
-					fillStmt(stmt,getQueryCatalog().getDocumentFields(),doc,Integer.valueOf(getContext().getContextId()));
+					fillStmt(stmt,getQueryCatalog().getWritableDocumentFields(),doc,Integer.valueOf(getContext().getContextId()));
 				}
 				
 			};

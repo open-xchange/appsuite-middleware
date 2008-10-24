@@ -1814,7 +1814,14 @@ public class DatabaseImpl extends DBService {
 					retval[i] = INFOSTORE_last_modified;
 				}
 				break Metadata2DBSwitch;
-			case Metadata.CREATION_DATE:
+            case Metadata.LAST_MODIFIED_UTC:
+                if (versionPriorityHigh) {
+                    retval[i] = INFOSTORE_DOCUMENT_last_modified;
+                } else {
+                    retval[i] = INFOSTORE_last_modified;
+                }
+                break Metadata2DBSwitch;
+            case Metadata.CREATION_DATE:
 				if (versionPriorityHigh) {
 					retval[i] = INFOSTORE_DOCUMENT_creating_date;
 				} else {

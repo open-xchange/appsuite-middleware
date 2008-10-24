@@ -221,5 +221,9 @@ public class SetSwitch implements MetadataSwitcher{
         impl.setFilestoreLocation((String)value);
 		return null;
 	}
-	
+
+    public Object lastModifiedUTC() {
+       return lastModified();
+    }
+
 }

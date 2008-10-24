@@ -97,8 +97,10 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 		Metadata.CREATION_DATE_LITERAL,
 		Metadata.LAST_MODIFIED_LITERAL,
 		Metadata.CREATED_BY_LITERAL,
-		Metadata.MODIFIED_BY_LITERAL
-	};
+		Metadata.MODIFIED_BY_LITERAL,
+        Metadata.LAST_MODIFIED_UTC_LITERAL
+
+    };
 	
 	private static final Set<Metadata> INFOSTORE_FIELDS_SET = Collections.unmodifiableSet(new HashSet<Metadata>(Arrays.asList(INFOSTORE_FIELDS)));
 	
@@ -117,8 +119,9 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 		Metadata.FILE_SIZE_LITERAL,
 		Metadata.FILE_MIMETYPE_LITERAL,
 		Metadata.FILE_MD5SUM_LITERAL,
-		Metadata.VERSION_COMMENT_LITERAL
-	};
+		Metadata.VERSION_COMMENT_LITERAL,
+        Metadata.LAST_MODIFIED_UTC_LITERAL
+    };
 	
 	private static final Set<Metadata> INFOSTORE_DOCUMENT_FIELDS_SET = Collections.unmodifiableSet(new HashSet<Metadata>(Arrays.asList(INFOSTORE_DOCUMENT_FIELDS)));
 	
@@ -498,8 +501,12 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 			// TODO Auto-generated method stub
 			return null;
 		}
-		
-	}
+
+        public Object lastModifiedUTC() {
+            return lastModified();
+        }
+
+    }
 		
 	private static final class InfostoreDocumentColumnsSwitch implements MetadataSwitcher{
 
@@ -591,7 +598,11 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 			// TODO Auto-generated method stub
 			return null;
 		}
-	}
+
+        public Object lastModifiedUTC() {
+            return lastModified();
+        }
+    }
 	
 	private static interface FieldChooser {
 		public Table choose(Metadata m);

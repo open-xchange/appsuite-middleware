@@ -101,7 +101,7 @@ public class CreateVersionAction extends AbstractDocumentListAction {
 			msg = "Invalid SQL Query : %s")
 	public void perform() throws AbstractOXException {
 		try {
-			doUpdates(getQueryCatalog().getVersionInsert(), getQueryCatalog().getVersionFields(), getDocuments());
+			doUpdates(getQueryCatalog().getVersionInsert(), getQueryCatalog().getWritableVersionFields(), getDocuments());
 		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
 		}

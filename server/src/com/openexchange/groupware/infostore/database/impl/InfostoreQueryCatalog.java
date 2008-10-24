@@ -87,8 +87,9 @@ public class InfostoreQueryCatalog {
 		Metadata.CREATION_DATE_LITERAL,
 		Metadata.LAST_MODIFIED_LITERAL,
 		Metadata.CREATED_BY_LITERAL,
-		Metadata.MODIFIED_BY_LITERAL
-	};
+		Metadata.MODIFIED_BY_LITERAL,
+        Metadata.LAST_MODIFIED_UTC_LITERAL
+    };
 	
 	public static final Set<Metadata> INFOSTORE_FIELDS_SET = Collections.unmodifiableSet(new HashSet<Metadata>(Arrays.asList(INFOSTORE_FIELDS)));
 	
@@ -108,13 +109,18 @@ public class InfostoreQueryCatalog {
 		Metadata.FILE_MIMETYPE_LITERAL,
 		Metadata.FILE_MD5SUM_LITERAL,
 		Metadata.VERSION_COMMENT_LITERAL,
-		Metadata.FILESTORE_LOCATION_LITERAL
-	};
+		Metadata.FILESTORE_LOCATION_LITERAL,
+        Metadata.LAST_MODIFIED_UTC_LITERAL
+    };
 	
 	public static final Set<Metadata> INFOSTORE_DOCUMENT_FIELDS_SET = Collections.unmodifiableSet(new HashSet<Metadata>(Arrays.asList(INFOSTORE_DOCUMENT_FIELDS)));
-	
-	
-	public static enum Table {
+
+
+    public static final Set<Metadata> IGNORE_ON_WRITE = Collections.unmodifiableSet(new HashSet<Metadata>(Arrays.asList(
+            Metadata.LAST_MODIFIED_UTC_LITERAL
+    )));
+
+    public static enum Table {
 		INFOSTORE(INFOSTORE_FIELDS, INFOSTORE_FIELDS_SET,"infostore"), 
 		INFOSTORE_DOCUMENT(INFOSTORE_DOCUMENT_FIELDS, INFOSTORE_DOCUMENT_FIELDS_SET, "infostore_document"),
 		DEL_INFOSTORE(INFOSTORE_FIELDS, INFOSTORE_FIELDS_SET,"del_infostore"),
@@ -157,8 +163,12 @@ public class InfostoreQueryCatalog {
 		builder.append("INSERT INTO ").append(tablename).append(" (");
 		final StringBuilder questionMarks = new StringBuilder();
 		
-		for(final Metadata m : metadata) {
-			final String col = (String) m.doSwitch(columnNames);
+
+        for(final Metadata m : metadata) {
+            if(IGNORE_ON_WRITE.contains(m)) {
+                continue;
+            }
+            final String col = (String) m.doSwitch(columnNames);
 			if(col != null) {
 				builder.append(col);
 				builder.append(',');
@@ -193,7 +203,10 @@ public class InfostoreQueryCatalog {
 			if(m == Metadata.VERSION_LITERAL && ( tablename.equals("infostore_document") || tablename.equals("del_infostore_document"))) {
 				continue;
 			}
-			final String col = (String) m.doSwitch(columnNames);
+            if(IGNORE_ON_WRITE.contains(m)) {
+                continue;
+            }
+            final String col = (String) m.doSwitch(columnNames);
 			if(col != null) {
 				builder.append(col);
 				builder.append(" = ?,");
@@ -251,8 +264,20 @@ public class InfostoreQueryCatalog {
 	public Metadata[] getDocumentFields() {
 		return Table.INFOSTORE.getFields();
 	}
-	
-	public Metadata[] filterForDocument(final Metadata[] modified) {
+
+    public Metadata[] getWritableDocumentFields() {
+        Metadata[] fields = getDocumentFields();
+        Metadata[] writableFields = new Metadata[fields.length-IGNORE_ON_WRITE.size()];
+        int index = 0;
+        for(Metadata field : fields) {
+            if(!IGNORE_ON_WRITE.contains(field)) {
+                writableFields[index++] = field;
+            }
+        }
+        return writableFields;
+    }
+
+    public Metadata[] filterForDocument(final Metadata[] modified) {
 		final List<Metadata> m = new ArrayList<Metadata>();
 		final Set<Metadata> knownFields = Table.INFOSTORE.getFieldSet();
 		for(final Metadata metadata : modified) {
@@ -288,8 +313,20 @@ public class InfostoreQueryCatalog {
 	public Metadata[] getVersionFields(){
 		return Table.INFOSTORE_DOCUMENT.getFields();	
 	}
-	
-	public Metadata[] filterForVersion(final Metadata[] modified) {
+
+    public Metadata[] getWritableVersionFields() {
+        Metadata[] fields = getVersionFields();
+        Metadata[] writableFields = new Metadata[fields.length-IGNORE_ON_WRITE.size()];
+        int index = 0;
+        for(Metadata field : fields) {
+            if(!IGNORE_ON_WRITE.contains(field)) {
+                writableFields[index++] = field;
+            }
+        }
+        return writableFields;
+    }
+
+    public Metadata[] filterForVersion(final Metadata[] modified) {
 		final List<Metadata> m = new ArrayList<Metadata>();
 		final Set<Metadata> knownFields = Table.INFOSTORE_DOCUMENT.getFieldSet();
 		for(final Metadata metadata : modified) {
@@ -671,8 +708,12 @@ public class InfostoreQueryCatalog {
 			// TODO Auto-generated method stub
 			return null;
 		}
-		
-	}
+
+        public Object lastModifiedUTC() {
+            return lastModified();
+        }
+
+    }
 		
 	public static final class InfostoreDocumentColumnsSwitch implements MetadataSwitcher{
 
@@ -763,7 +804,11 @@ public class InfostoreQueryCatalog {
 		public Object filestoreLocation() {
 			return "file_store_location";
 		}
-	}
+
+        public Object lastModifiedUTC() {
+            return lastModified();
+        }
+    }
 	
 	public static interface FieldChooser {
 		public Table choose(Metadata m);

@@ -87,7 +87,7 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
 
 				@Override
 				public void fillStatement() throws SQLException {
-					fillStmt(stmt,getQueryCatalog().getVersionFields(),doc,Integer.valueOf(getContext().getContextId()));
+					fillStmt(stmt,getQueryCatalog().getWritableVersionFields(),doc,Integer.valueOf(getContext().getContextId()));
 				}
 				
 			};
@@ -136,7 +136,7 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
 
 				@Override
 				public void fillStatement() throws SQLException {
-					fillStmt(stmt,getQueryCatalog().getVersionFields(),doc,Integer.valueOf(getContext().getContextId()));
+					fillStmt(stmt,getQueryCatalog().getWritableVersionFields(),doc,Integer.valueOf(getContext().getContextId()));
 				}
 				
 			};

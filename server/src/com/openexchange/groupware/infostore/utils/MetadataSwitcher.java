@@ -94,4 +94,6 @@ public interface MetadataSwitcher {
 	public Object colorLabel();
 
 	public Object filestoreLocation();
+
+    public Object lastModifiedUTC();
 }

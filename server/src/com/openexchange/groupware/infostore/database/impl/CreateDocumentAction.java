@@ -98,7 +98,7 @@ public class CreateDocumentAction extends AbstractDocumentListAction {
 			msg = "Invalid SQL Query : %s")
 	public void perform() throws AbstractOXException {
 		try {
-			doUpdates( getQueryCatalog().getDocumentInsert(), getQueryCatalog().getDocumentFields(), getDocuments());
+			doUpdates( getQueryCatalog().getDocumentInsert(), getQueryCatalog().getWritableDocumentFields(), getDocuments());
 		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
 		}

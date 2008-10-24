@@ -79,9 +79,10 @@ public class Metadata {
 	public static final int VERSION_COMMENT = 709;
 	public static final int CURRENT_VERSION = 710;
 	public static final int COLOR_LABEL = 102;
-	
-	
-	public static final Metadata LAST_MODIFIED_LITERAL = new Metadata(LAST_MODIFIED,"last_modified");
+    public static final int LAST_MODIFIED_UTC = 6;
+
+
+    public static final Metadata LAST_MODIFIED_LITERAL = new Metadata(LAST_MODIFIED,"last_modified");
 	public static final Metadata CREATION_DATE_LITERAL = new Metadata(CREATION_DATE,"creation_date");
 	public static final Metadata MODIFIED_BY_LITERAL = new Metadata(MODIFIED_BY,"modified_by");
 	public static final Metadata FOLDER_ID_LITERAL = new Metadata(FOLDER_ID,"folder_id");
@@ -103,10 +104,11 @@ public class Metadata {
 	public static final Metadata CURRENT_VERSION_LITERAL = new Metadata(CURRENT_VERSION,"current_version");
 	public static final Metadata COLOR_LABEL_LITERAL = new Metadata(COLOR_LABEL,"color_label");
 	public static final Metadata FILESTORE_LOCATION_LITERAL = new Metadata(FILESTORE_LOCATION,"filestore_location");
-	
+    public static final Metadata LAST_MODIFIED_UTC_LITERAL = new Metadata(LAST_MODIFIED_UTC, "last_modified_utc");
 
-	
-	public static final Metadata[] VALUES_ARRAY = new Metadata[]{
+
+
+    public static final Metadata[] VALUES_ARRAY = new Metadata[]{
 		LAST_MODIFIED_LITERAL,
 		CREATION_DATE_LITERAL,
 		MODIFIED_BY_LITERAL,
@@ -128,9 +130,10 @@ public class Metadata {
 		VERSION_COMMENT_LITERAL,
 		CURRENT_VERSION_LITERAL,
 		COLOR_LABEL_LITERAL,
-		FILESTORE_LOCATION_LITERAL
+		FILESTORE_LOCATION_LITERAL,
+        LAST_MODIFIED_UTC_LITERAL
 
-	};
+    };
 	
 	public static final Metadata[] HTTPAPI_VALUES_ARRAY = new Metadata[]{
 		LAST_MODIFIED_LITERAL,
@@ -152,8 +155,9 @@ public class Metadata {
 		FILE_MD5SUM_LITERAL,
 		VERSION_COMMENT_LITERAL,
 		CURRENT_VERSION_LITERAL,
-		COLOR_LABEL_LITERAL 
-	};
+		COLOR_LABEL_LITERAL,
+        LAST_MODIFIED_UTC_LITERAL
+    };
 	
 	public static final List<Metadata> VALUES = Collections.unmodifiableList(Arrays.asList(VALUES_ARRAY));
 	public static final List<Metadata> HTTPAPI_VALUES = Collections.unmodifiableList(Arrays.asList(HTTPAPI_VALUES_ARRAY));
@@ -199,7 +203,8 @@ public class Metadata {
 		case CURRENT_VERSION: return CURRENT_VERSION_LITERAL;
 		case COLOR_LABEL: return COLOR_LABEL_LITERAL;
 		case FILESTORE_LOCATION : return FILESTORE_LOCATION_LITERAL;
-		default : return null;
+        case LAST_MODIFIED_UTC : return LAST_MODIFIED_UTC_LITERAL;
+        default : return null;
 		}
 	}
 	
@@ -236,7 +241,8 @@ public class Metadata {
 		case CURRENT_VERSION: return switcher.currentVersion();
 		case COLOR_LABEL: return switcher.colorLabel();
 		case FILESTORE_LOCATION : return switcher.filestoreLocation();
-		default : return null;
+        case LAST_MODIFIED_UTC : return switcher.lastModifiedUTC();
+        default : return null;
 		}
 	}
 
