@@ -96,6 +96,8 @@ import com.openexchange.mail.conversion.VCardAttachMailDataHandler;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
 import com.openexchange.mail.osgi.TransportProviderServiceTracker;
+import com.openexchange.mail.service.MailService;
+import com.openexchange.mail.service.impl.MailServiceImpl;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.management.ManagementService;
 import com.openexchange.passwordchange.PasswordChangeService;
@@ -346,6 +348,7 @@ public final class ServerActivator extends DeferredActivator {
 		registrationList.add(context.registerService(ContextService.class.getName(), new ContextServiceImpl(), null));
 		registrationList.add(context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(),
 				null));
+		registrationList.add(context.registerService(MailService.class.getName(), new MailServiceImpl(), null));
 		/*
 		 * Register data sources
 		 */
