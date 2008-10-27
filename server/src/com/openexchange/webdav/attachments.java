@@ -82,6 +82,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.webdav.OXServlet;
 import com.openexchange.webdav.xml.XmlServlet;
@@ -394,6 +395,16 @@ public final class attachments extends OXServlet {
 		} catch (final TransactionException exc) {
 			LOG.error("finishTransaction", exc);
 		}
+	}
+
+	@Override
+	protected void decrementRequests() {
+		MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.OUTLOOK);
+	}
+
+	@Override
+	protected void incrementRequests() {
+		MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.OUTLOOK);
 	}
 }
 

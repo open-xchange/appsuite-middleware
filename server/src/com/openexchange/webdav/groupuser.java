@@ -76,6 +76,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.DBPool;
@@ -411,5 +412,15 @@ public final class groupuser extends PermissionServlet {
 	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
 		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
 				ctx).hasWebDAVXML();
+	}
+
+	@Override
+	protected void decrementRequests() {
+		MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.OUTLOOK);
+	}
+
+	@Override
+	protected void incrementRequests() {
+		MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.OUTLOOK);
 	}
 }

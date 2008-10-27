@@ -80,6 +80,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
@@ -88,7 +89,7 @@ import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
- * SyncServlet
+ * {@link SyncServlet} - The AJAX servlet to serve SyncML requests
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -109,25 +110,21 @@ public class SyncServlet extends PermissionServlet {
 		super();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.ajax.PermissionServlet#hasModulePermission(com.openexchange
-	 * .sessiond.Session)
-	 */
+	@Override
+	protected void incrementRequests() {
+		MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.SYNCML);
+	}
+
+	@Override
+	protected void decrementRequests() {
+		MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.SYNCML);
+	}
+
 	@Override
 	protected boolean hasModulePermission(final Session session, final Context ctx) {
 		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx).hasSyncML();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest
-	 * , javax.servlet.http.HttpServletResponse)
-	 */
 	@Override
 	protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		resp.setContentType(CONTENTTYPE_JAVASCRIPT);

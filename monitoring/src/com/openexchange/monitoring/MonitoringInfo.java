@@ -49,8 +49,10 @@
 
 package com.openexchange.monitoring;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
- * {@link MonitoringInfo} . Conainer for various monitoring informations
+ * {@link MonitoringInfo} - Container for various monitoring informations
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -82,23 +84,23 @@ public class MonitoringInfo {
 	public static final int UNKNOWN = -1;
 
 	// Static fields
-	private static int numberOfOpenAJPSockets;
+	private static final AtomicInteger numberOfOpenAJPSockets = new AtomicInteger();
 
-	private static int numberOfAJAXConnections;
+	private static final AtomicInteger numberOfAJAXConnections = new AtomicInteger();
 
-	private static int numberOfWebDAVUserConnections;
+	private static final AtomicInteger numberOfWebDAVUserConnections = new AtomicInteger();
 
-	private static int numberOfOutlookConnections;
+	private static final AtomicInteger numberOfOutlookConnections = new AtomicInteger();
 
-	private static int numberOfSyncMLConnections;
+	private static final AtomicInteger numberOfSyncMLConnections = new AtomicInteger();
 
-	private static int numberOfIMAPConnections;
+	private static final AtomicInteger numberOfIMAPConnections = new AtomicInteger();
 
-	private static int numberOfActiveSessions;
+	private static final AtomicInteger numberOfActiveSessions = new AtomicInteger();
 
 	private static int[] numberOfSessionsInContainer;
 
-	private static int numberOfRunningAJPListeners;
+	private static final AtomicInteger numberOfRunningAJPListeners = new AtomicInteger();
 
 	public static int getNumberOfActiveSessions() {
 		return getNumberOfConnections(SESSION);
@@ -123,15 +125,15 @@ public class MonitoringInfo {
 	}
 
 	public static int getNumberOfRunningAJPListeners() {
-		return numberOfRunningAJPListeners;
+		return numberOfRunningAJPListeners.get();
 	}
 
 	public static void setNumberOfRunningAJPListeners(final int num) {
-		numberOfRunningAJPListeners = num;
+		numberOfRunningAJPListeners.set(num);
 	}
 
 	public static int getNumberOfOpenSockets() {
-		return numberOfOpenAJPSockets;
+		return numberOfOpenAJPSockets.get();
 	}
 
 	public static void incrementNumberOfConnections(final int connectionType) {
@@ -152,25 +154,25 @@ public class MonitoringInfo {
 		int retval = -1;
 		switch (connectionType) {
 		case AJP_SOCKET:
-			retval = numberOfOpenAJPSockets;
+			retval = numberOfOpenAJPSockets.get();
 			break;
 		case AJAX:
-			retval = numberOfAJAXConnections;
+			retval = numberOfAJAXConnections.get();
 			break;
 		case WEBDAV_USER:
-			retval = numberOfWebDAVUserConnections;
+			retval = numberOfWebDAVUserConnections.get();
 			break;
 		case OUTLOOK:
-			retval = numberOfOutlookConnections;
+			retval = numberOfOutlookConnections.get();
 			break;
 		case SYNCML:
-			retval = numberOfSyncMLConnections;
+			retval = numberOfSyncMLConnections.get();
 			break;
 		case IMAP:
-			retval = numberOfIMAPConnections;
+			retval = numberOfIMAPConnections.get();
 			break;
 		case SESSION:
-			retval = numberOfActiveSessions;
+			retval = numberOfActiveSessions.get();
 			break;
 		default:
 			LOG.error(new StringBuilder("MonitoringInfo.getNumberOfConnections(): Unknown connection type: ").append(
@@ -180,66 +182,61 @@ public class MonitoringInfo {
 	}
 
 	private static void changeNumberOfConnections(final int connectionType, final boolean increment) {
-		synchronized (MonitoringInfo.class) {
-			final int i = increment ? 1 : -1;
-			switch (connectionType) {
-			case AJP_SOCKET:
-				numberOfOpenAJPSockets += i;
-				break;
-			case AJAX:
-				numberOfAJAXConnections += i;
-				break;
-			case WEBDAV_USER:
-				numberOfWebDAVUserConnections += i;
-				break;
-			case OUTLOOK:
-				numberOfOutlookConnections += i;
-				break;
-			case SYNCML:
-				numberOfSyncMLConnections += i;
-				break;
-			case IMAP:
-				numberOfIMAPConnections += i;
-				break;
-			case SESSION:
-				numberOfActiveSessions += i;
-				break;
-			default:
-				if (LOG.isInfoEnabled()) {
-					LOG.info(new StringBuilder("MonitoringInfo.changeNumberOfConnections(): Unknown connection type: ")
-							.append(connectionType).toString());
-				}
+		switch (connectionType) {
+		case AJP_SOCKET:
+			if (increment) {
+				numberOfOpenAJPSockets.incrementAndGet();
+			} else {
+				numberOfOpenAJPSockets.decrementAndGet();
 			}
-		}
-	}
-
-	private static final String TYPE_AJAX = "ajax";
-
-	private static final String TYPE_WEBDAV_USER = "servlet/webdav.documents";
-
-	private static final String TYPE_OUTLOOK = "servlet/webdav.";
-
-	private static final String TYPE_SYNCML = "ajax/sync";
-
-	private static final String TYPE_OXADMIN_UMIN = "oxadmin/umin";
-
-	private static final String TYPE_ADMIN_UMIN = "admin/umin";
-
-	public static final int getConnectionType(final String pathInfo) {
-		if (pathInfo.startsWith(TYPE_AJAX)) {
-			return MonitoringInfo.AJAX;
-		} else if (pathInfo.startsWith(TYPE_WEBDAV_USER)) {
-			return MonitoringInfo.WEBDAV_USER;
-		} else if (pathInfo.startsWith(TYPE_OUTLOOK)) {
-			return MonitoringInfo.OUTLOOK;
-		} else if (pathInfo.startsWith(TYPE_SYNCML)) {
-			return MonitoringInfo.SYNCML;
-		} else if (pathInfo.startsWith(TYPE_OXADMIN_UMIN)) {
-			return MonitoringInfo.AJAX;
-		} else if (pathInfo.startsWith(TYPE_ADMIN_UMIN)) {
-			return MonitoringInfo.AJAX;
-		} else {
-			return UNKNOWN;
+			break;
+		case AJAX:
+			if (increment) {
+				numberOfAJAXConnections.incrementAndGet();
+			} else {
+				numberOfAJAXConnections.decrementAndGet();
+			}
+			break;
+		case WEBDAV_USER:
+			if (increment) {
+				numberOfWebDAVUserConnections.incrementAndGet();
+			} else {
+				numberOfWebDAVUserConnections.decrementAndGet();
+			}
+			break;
+		case OUTLOOK:
+			if (increment) {
+				numberOfOutlookConnections.incrementAndGet();
+			} else {
+				numberOfOutlookConnections.decrementAndGet();
+			}
+			break;
+		case SYNCML:
+			if (increment) {
+				numberOfSyncMLConnections.incrementAndGet();
+			} else {
+				numberOfSyncMLConnections.decrementAndGet();
+			}
+			break;
+		case IMAP:
+			if (increment) {
+				numberOfIMAPConnections.incrementAndGet();
+			} else {
+				numberOfIMAPConnections.decrementAndGet();
+			}
+			break;
+		case SESSION:
+			if (increment) {
+				numberOfActiveSessions.incrementAndGet();
+			} else {
+				numberOfActiveSessions.decrementAndGet();
+			}
+			break;
+		default:
+			if (LOG.isInfoEnabled()) {
+				LOG.info(new StringBuilder("MonitoringInfo.changeNumberOfConnections(): Unknown connection type: ")
+						.append(connectionType).toString());
+			}
 		}
 	}
 

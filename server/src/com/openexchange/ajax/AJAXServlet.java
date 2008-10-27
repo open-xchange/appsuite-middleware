@@ -93,6 +93,7 @@ import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
+import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.UploadServletException;
 
@@ -372,6 +373,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	@Override
 	protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
 			IOException {
+		incrementRequests();
 		try {
 			super.service(req, resp);
 		} catch (final ServletException x) {
@@ -380,7 +382,27 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			final ServletException se = new ServletException(e.getMessage());
 			se.initCause(e);
 			throw se;
+		} finally {
+			decrementRequests();
 		}
+	}
+
+	/**
+	 * Increments the number of requests to path <code>&quot;ajax*&quot;</code>
+	 * at the very beginning of
+	 * {@link #service(HttpServletRequest, HttpServletResponse) service} method
+	 */
+	protected void incrementRequests() {
+		MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.AJAX);
+	}
+
+	/**
+	 * Decrements the number of requests to path <code>&quot;ajax*&quot;</code>
+	 * at the very end of
+	 * {@link #service(HttpServletRequest, HttpServletResponse) service} method
+	 */
+	protected void decrementRequests() {
+		MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.AJAX);
 	}
 
 	public static boolean containsParameter(final HttpServletRequest req, final String name) {

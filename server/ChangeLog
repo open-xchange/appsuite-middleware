@@ -5,6 +5,7 @@
    draft-edit
  - Bugfix #12333: Added property to HTML parser to work in relaxed mode;
    meaning it ignores parsing errors.
+ - Bugfix #12300: Fixed request type counting for monitoring information
 
 * 2008-10-27 - choeger@open-xchange-com
 

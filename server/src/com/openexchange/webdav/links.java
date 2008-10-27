@@ -72,6 +72,16 @@ public final class links extends OXServlet {
 	protected String getUniqueName () {
 		return "links";
 	}
+
+	@Override
+	protected void decrementRequests() {
+		// Nothing to decrement
+	}
+
+	@Override
+	protected void incrementRequests() {
+		// Nothing to increment
+	}
 } 
 
 

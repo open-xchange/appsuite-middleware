@@ -60,7 +60,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Abstrakte Klasse mit Funktionen, die jedes Servlet fuer WebDAV braucht.
+ * {@link WebDavServlet} - An abstract class for servlets serving WebDAV requests
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class WebDavServlet extends HttpServlet {
@@ -82,9 +83,9 @@ public abstract class WebDavServlet extends HttpServlet {
     protected void doOptions(final HttpServletRequest req,
         final HttpServletResponse resp) throws ServletException, IOException {
         final Method[] methods = getClass().getMethods();
-        final Class clazz = WebDavServlet.class;
-        final Class superClazz = WebDavServlet.class.getSuperclass();
-        final StringBuilder allow = new StringBuilder();
+        final Class<WebDavServlet> clazz = WebDavServlet.class;
+        final Class<?> superClazz = WebDavServlet.class.getSuperclass();
+        final StringBuilder allow = new StringBuilder(64);
         for (int i = 0; i < methods.length; i++) {
             if ("doGet".equals(methods[i].getName())
                 && !clazz.equals(methods[i].getDeclaringClass())
@@ -181,37 +182,48 @@ public abstract class WebDavServlet extends HttpServlet {
     @Override
     protected void service(final HttpServletRequest req,
         final HttpServletResponse resp) throws ServletException, IOException {
-        final String method = req.getMethod();
-        if ("GET".equals(method) || "HEAD".equals(method)
-            || "POST".equals(method) || "DELETE".equals(method)
-            || "OPTIONS".equals(method) || "PUT".equals(method)
-            || "TRACE".equals(method)) {
-            super.service(req, resp);
-        } else if ("PROPFIND".equals(method)) {
-            doPropFind(req, resp);
-        } else if ("PROPPATCH".equals(method)) {
-            doPropPatch(req, resp);
-        } else if ("MKCOL".equals(method)) {
-            doMkCol(req, resp);
-        } else if ("COPY".equals(method)) {
-            doCopy(req, resp);
-        } else if ("MOVE".equals(method)) {
-            doMove(req, resp);
-        } else if ("LOCK".equals(method)) {
-            doLock(req, resp);
-        } else if ("UNLOCK".equals(method)) {
-            doUnLock(req, resp);
-        } else {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Method \""
-                + method + "\" is not supported by this servlet");
-        }
+    	incrementRequests();
+    	try {
+			final String method = req.getMethod();
+			if ("PROPFIND".equals(method)) {
+				doPropFind(req, resp);
+			} else if ("PROPPATCH".equals(method)) {
+				doPropPatch(req, resp);
+			} else if ("MKCOL".equals(method)) {
+				doMkCol(req, resp);
+			} else if ("COPY".equals(method)) {
+				doCopy(req, resp);
+			} else if ("MOVE".equals(method)) {
+				doMove(req, resp);
+			} else if ("LOCK".equals(method)) {
+				doLock(req, resp);
+			} else if ("UNLOCK".equals(method)) {
+				doUnLock(req, resp);
+			} else {
+				super.service(req, resp);
+			}
+		} finally {
+			decrementRequests();
+		}
     }
 
-   /**
-    * Status code (207) indicating that the returned content contains XML for
-    * WebDAV.
-    */
-   public static final int SC_MULTISTATUS = 207;
+	/**
+	 * Increments the number of requests to servlet at the very beginning of
+	 * {@link #service(HttpServletRequest, HttpServletResponse) service} method
+	 */
+	protected abstract void incrementRequests();
+
+	/**
+	 * Decrements the number of requests to servlet at the very end of
+	 * {@link #service(HttpServletRequest, HttpServletResponse) service} method
+	 */
+	protected abstract void decrementRequests();
+
+	/**
+	 * Status code (207) indicating that the returned content contains XML for
+	 * WebDAV.
+	 */
+	public static final int SC_MULTISTATUS = 207;
 
    /**
     * Status code (423) indicating that the requested ressource is locked.

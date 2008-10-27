@@ -738,6 +738,16 @@ public final class vcard extends PermissionServlet {
 		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx);
 		return (uc.hasVCard() && uc.hasContact());
 	}
+
+	@Override
+	protected void decrementRequests() {
+		// Nothing to do
+	}
+
+	@Override
+	protected void incrementRequests() {
+		// Nothing to do
+	}
 	
 }
 
