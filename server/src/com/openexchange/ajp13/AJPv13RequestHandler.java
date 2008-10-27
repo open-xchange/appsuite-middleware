@@ -66,7 +66,6 @@ import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
 import com.openexchange.ajp13.exception.AJPv13UnknownPrefixCodeException;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.servlet.http.HttpErrorServlet;
 import com.openexchange.tools.servlet.http.HttpServletManager;
 import com.openexchange.tools.servlet.http.HttpServletRequestWrapper;
@@ -148,8 +147,6 @@ public final class AJPv13RequestHandler {
 
 	private final StringBuilder servletId;
 
-	private int connectionType = -1;
-
 	private HttpServletRequestWrapper request;
 
 	private HttpServletResponseWrapper response;
@@ -171,8 +168,6 @@ public final class AJPv13RequestHandler {
 	private boolean endResponseSent;
 
 	private boolean isFormData;
-
-	private boolean emptyDataPackageReceived;
 
 	private String httpSessionId;
 
@@ -490,9 +485,6 @@ public final class AJPv13RequestHandler {
 	private void releaseServlet() {
 		if (servletId.length() > 0) {
 			HttpServletManager.putServlet(servletId.toString(), servlet);
-			if (MonitoringInfo.UNKNOWN != connectionType) {
-				MonitoringInfo.decrementNumberOfConnections(connectionType);
-			}
 		}
 		servletId.setLength(0);
 		servlet = null;
@@ -507,7 +499,6 @@ public final class AJPv13RequestHandler {
 			return;
 		}
 		releaseServlet();
-		connectionType = -1;
 		try {
 			if (request != null && request.getInputStream() != null) {
 				request.getInputStream().close();
@@ -534,7 +525,6 @@ public final class AJPv13RequestHandler {
 		serviceMethodCalled = false;
 		endResponseSent = false;
 		isFormData = false;
-		emptyDataPackageReceived = false;
 		httpSessionId = null;
 		httpSessionJoined = false;
 		servletPath = null;
@@ -577,7 +567,6 @@ public final class AJPv13RequestHandler {
 		 * Remove leading slash character
 		 */
 		final String path = preparePath(pathArg);
-		connectionType = MonitoringInfo.getConnectionType(path);
 		/*
 		 * Lookup path in available servlet paths
 		 */
@@ -592,9 +581,6 @@ public final class AJPv13RequestHandler {
 		// servletId = pathStorage.length() > 0 ? pathStorage.toString() : null;
 		if (servletId.length() > 0) {
 			servletPath = servletId.toString().replaceFirst("\\*", ""); // path;
-		}
-		if (MonitoringInfo.UNKNOWN != connectionType) {
-			MonitoringInfo.incrementNumberOfConnections(connectionType);
 		}
 		supplyRequestWrapperWithServlet();
 	}
