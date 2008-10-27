@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.6.0
-Release:	12
+Release:	13
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -139,11 +139,16 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Oct 27 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12325: Flushing the WebDAV/XML output after a usefull part has been
+   generated. This should prevent AJP connection timeouts.
+* Fri Oct 17 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12326: Removed recurrence type from series exceptions. Writing
+   recurrence id and position to AJAX interface.
 * Mon Oct 13 2008 - marcus.klein@open-xchange.com
  - Bugfix #12099: Setting modified by when updating series if a virtual
    exception is created.
- - Bugfix #12254: Removed overwriting of participants with old ones if an
-   appointment is changed in a shared folder.
+ - Bugfix #12254: Merged fix made in SP3 bugfix branch.
 * Wed Oct 01 2008 - francisco.laguna@open-xchange.com
   - Bugfix #12258 : Do not crash with NPE when requesting full time 
     appointment with recurrences via updates without date boundaries
