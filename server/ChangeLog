@@ -1,3 +1,7 @@
+* 2008-10-27 - tobias.prinz@open-xchange.com
+
+ - Bugfix #9367: Added several other fields that had not been translated before.
+
 * 2008-10-27 - thorben.betten@open-xchange.com
 
  - Bugfix #12250: Changed (and fastened) parsing of PUT data on action=list

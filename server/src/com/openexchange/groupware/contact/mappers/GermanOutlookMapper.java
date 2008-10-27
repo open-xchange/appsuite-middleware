@@ -341,9 +341,32 @@ public class GermanOutlookMapper implements ContactFieldMapper {
 
         //french2field.put("Benutzer 4" , ContactField.);
         //field2french.put(ContactField. , "Utilisateur 4");
-
-
-        }
+        
+        /*
+         * Changes since bug 9367: Fields that Outlook 2007 is exporting
+         * either new or with a different name than 2003.
+         * 
+         * We can be pretty tolerant when importing these, because only one
+         * of the fields will be set (either the old one or the new one),
+         * but it does not work in the other direction.
+         * 
+         * TODO: Split the mapper between Outlook 2003 and 2007 
+         * because different fields need to be set.
+         */
+        german2field.put("Land/Region gesch\u00e4ftlich" , ContactField.STATE_BUSINESS);
+        german2field.put("E-Mail-Adresse" , ContactField.EMAIL1); //this is the second asignment for EMAIL1. One should only occur in 2003, the other only in 2007
+        german2field.put("Position" , ContactField.POSITION);
+        german2field.put("B\u00fcro" , ContactField.ROOM_NUMBER);
+        german2field.put("Bundesland/Kanton privat" , ContactField.STATE_HOME);
+        german2field.put("Land/Region privat" , ContactField.COUNTRY_HOME);
+        german2field.put("Weiteres/r Bundesland/Kanton" , ContactField.STATE_OTHER);
+        german2field.put("Weiteres/e Land/Region" , ContactField.COUNTRY_OTHER);
+        german2field.put("E-Mail 3: Adresse" , ContactField.EMAIL3);        
+    }
+    
+    	/*
+    	 * Accessors (and stuff)
+    	 */
 
         public ContactField getFieldByName(final String name){
                 return german2field.get(name);
