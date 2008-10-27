@@ -538,6 +538,7 @@ public abstract class XmlServlet extends PermissionServlet {
 		e_response.addContent(e_propstat);
 
 		xo.output(e_response, os);
+		os.flush();
 	}
 
 	/**
@@ -557,7 +558,7 @@ public abstract class XmlServlet extends PermissionServlet {
 		os.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n").getBytes());
 		os.write(("<D:multistatus xmlns:D=\"DAV:\" buildnumber=\"" + Version.BUILDNUMBER + "\" buildname=\""
 				+ Version.NAME + "\">").getBytes());
-
+		os.flush();
 		performActions(os, session);
 
 		os.write(("</D:multistatus>").getBytes());

@@ -88,7 +88,15 @@ public final class OXServletOutputStream extends ServletOutputStream {
 		byteBuffer.reset();
 	}
 
-	/*
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void flush() throws IOException {
+        flushByteBuffer();
+    }
+
+    /*
 	 * (non-Javadoc)
 	 * 
 	 * @see java.io.Closeable#close()

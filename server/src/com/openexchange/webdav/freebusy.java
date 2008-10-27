@@ -208,6 +208,7 @@ public class freebusy extends HttpServlet {
 			it = appointmentInterface.getFreeBusyInformation(user.getId(), Participant.USER, start, end);
 			while (it.hasNext()) {
 				writeFreeBusy(it.next(), printWriter, outputFormat);
+				printWriter.flush();
 			}
 		} catch (final Exception exc) {
 			LOG.error("writeVCalendar", exc);
