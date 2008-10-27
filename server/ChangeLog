@@ -1,3 +1,8 @@
+* 2008-10-27 - marcus.klein@open-xchange.com
+
+ - Bugfix #12325: Flushing the WebDAV/XML output after a usefull part has been
+   generated. This should prevent AJP connection timeouts.
+
 * 2008-10-27 - tobias.prinz@open-xchange.com
 
  - Bugfix #9367 for German Outlook: Added several other fields that had not

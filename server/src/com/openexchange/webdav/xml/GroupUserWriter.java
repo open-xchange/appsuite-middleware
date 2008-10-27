@@ -275,6 +275,7 @@ public class GroupUserWriter extends ContactWriter {
 		try {
 			addContent2Element(e, contactobject, delete);
 			xo.output(e, os);
+			os.flush();
 		} catch (final Exception exc) {
 			LOG.error("writeObject", exc);
 		}

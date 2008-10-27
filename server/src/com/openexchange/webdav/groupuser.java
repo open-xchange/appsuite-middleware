@@ -175,6 +175,7 @@ public final class groupuser extends PermissionServlet {
 			
 			if (s_user != null) {
 				os.write(("<ox:users>").getBytes());
+				os.flush();
 				final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
 				final GroupUserWriter groupuserwriter = new GroupUserWriter(userObj, ctx, sessionObj, new Element("user", XmlServlet.NS));
 				
@@ -267,6 +268,7 @@ public final class groupuser extends PermissionServlet {
 		}
 		
 		os.write(("</ox:groups>").getBytes());
+		os.flush();
 	}
 	
 	private void writeElementGroup(final Group group, final XMLOutputter xo, final OutputStream os, final boolean delete)  throws Exception {
@@ -303,6 +305,7 @@ public final class groupuser extends PermissionServlet {
 		e_group.addContent(e_members);
 		
 		xo.output(e_group, os);
+		os.flush();
 	}
 	
 	private void writeElementMember(final int member, final Element e_members) throws Exception {
@@ -358,6 +361,7 @@ public final class groupuser extends PermissionServlet {
 		}
 		
 		os.write(("</ox:resources>").getBytes());
+		os.flush();
 	}
 	
 	private void writeElementResource(final Resource resource, final XMLOutputter xo, final OutputStream os, final boolean delete) throws Exception {
@@ -389,6 +393,7 @@ public final class groupuser extends PermissionServlet {
 		}
 		
 		xo.output(eResource, os);
+		os.flush();
 	}
 	
 	public void doError(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {

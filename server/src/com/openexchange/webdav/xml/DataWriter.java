@@ -99,6 +99,7 @@ public class DataWriter {
 		e_propstat.addContent(new Element("responsedescription", dav).addContent(description));
 		
 		xo.output(e_response, os);
+		os.flush();
 	}
 	
 	protected void writeDataElements(final DataObject dataobject, final Element e_prop) {

@@ -95,7 +95,15 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream {
 		byteBuffer.reset();
 	}
 
-	@Override
+	/**
+     * {@inheritDoc}
+     */
+    @Override
+    public void flush() throws IOException {
+        flushByteBuffer();
+    }
+
+    @Override
 	public void close() throws IOException {
 		flushByteBuffer();
 	}
