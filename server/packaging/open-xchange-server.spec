@@ -117,42 +117,79 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 /usr/sbin/useradd -r -g open-xchange -r -s /bin/false -c "open-xchange system user" -d /opt/open-xchange open-xchange 2> /dev/null || :
 
 %post -n open-xchange
-. /opt/open-xchange/etc/oxfunctions.sh
 
-# -----------------------------------------------------------------------
-# bugfix id#12290
-pfile=/opt/open-xchange/etc/groupware/ajp.properties
-if ! ox_exists_property AJP_LOG_FORWARD_REQUEST $pfile; then
-    ox_set_property AJP_LOG_FORWARD_REQUEST FALSE $pfile
-fi
+if [ ${1:-0} -eq 2 ]; then
+   # only when updating
+   . /opt/open-xchange/etc/oxfunctions.sh
 
-# -----------------------------------------------------------------------
-# bugfix id#12291
-pfile=/opt/open-xchange/etc/groupware/configdb.properties
-if ! ox_exists_property writeOnly $pfile; then
-    ox_set_property writeOnly false $pfile
-fi
+   # -----------------------------------------------------------------------
+   # bugfix id#12290
+   pfile=/opt/open-xchange/etc/groupware/ajp.properties
+   if ! ox_exists_property AJP_LOG_FORWARD_REQUEST $pfile; then
+     ox_set_property AJP_LOG_FORWARD_REQUEST FALSE $pfile
+   fi
 
-# -----------------------------------------------------------------------
-# bugfix id#12292
-pfile=/opt/open-xchange/etc/groupware/imap.properties
-if ! ox_exists_property com.openexchange.imap.imapTemporaryDown $pfile; then
-    ox_set_property com.openexchange.imap.imapTemporaryDown 10000 $pfile
-fi
-for prop in imapsPort smtpsPort; do
-    if ox_exists_property $prop $pfile; then
-      ox_remove_property $prop $pfile
+   # -----------------------------------------------------------------------
+   # bugfix id#12291
+   pfile=/opt/open-xchange/etc/groupware/configdb.properties
+   if ! ox_exists_property writeOnly $pfile; then
+     ox_set_property writeOnly false $pfile
+   fi
+
+   # -----------------------------------------------------------------------
+   # bugfix id#12292
+   pfile=/opt/open-xchange/etc/groupware/imap.properties
+   if ! ox_exists_property com.openexchange.imap.imapTemporaryDown $pfile; then
+     ox_set_property com.openexchange.imap.imapTemporaryDown 10000 $pfile
+   fi
+   for prop in imapsPort smtpsPort; do
+     if ox_exists_property $prop $pfile; then
+       ox_remove_property $prop $pfile
+     fi
+   done
+   if ! ox_exists_property com.openexchange.imap.spamHandler $pfile; then
+     ox_set_property com.openexchange.imap.spamHandler DefaultSpamHandler $pfile
+   fi
+
+   # -----------------------------------------------------------------------
+   # bugfix id#12296
+   pfile=/opt/open-xchange/etc/groupware/system.properties
+   if ox_exists_property CACHECCF $pfile; then
+     ox_remove_property CACHECCF $pfile
+   fi
+
+  # we're updating from pre sp5
+  # -----------------------------------------------------------------------
+  pfile=/opt/open-xchange/etc/groupware/participant.properties
+    if ! ox_exists_property com.openexchange.participant.ShowWithoutEmail $pfile; then
+	if ox_exists_property ShowWithoutEmail $pfile; then
+	    oldval=$(ox_read_property ShowWithoutEmail $pfile)
+	    ox_set_property com.openexchange.participant.ShowWithoutEmail $oldval $pfile
+	    ox_remove_property ShowWithoutEmail $pfile
+        else
+	    ox_set_property com.openexchange.participant.ShowWithoutEmail true $pfile
+	fi
     fi
-done
-if ! ox_exists_property com.openexchange.imap.spamHandler $pfile; then
-    ox_set_property com.openexchange.imap.spamHandler DefaultSpamHandler $pfile
-fi
+    if ! ox_exists_property com.openexchange.participant.autoSearch $pfile; then
+	ox_set_property com.openexchange.participant.autoSearch true $pfile
+    fi
+    if ! ox_exists_property com.openexchange.participant.MaximumNumberParticipants $pfile; then
+	ox_set_property com.openexchange.participant.MaximumNumberParticipants 0 $pfile
+    fi
 
-# -----------------------------------------------------------------------
-# bugfix id#12296
-pfile=/opt/open-xchange/etc/groupware/system.properties
-if ox_exists_property CACHECCF $pfile; then
-    ox_remove_property CACHECCF $pfile
+    # -----------------------------------------------------------------------
+    pfile=/opt/open-xchange/etc/groupware/system.properties
+    for prop in InitWorker Participant SPELLCHECKCFG Contact; do
+	if ox_exists_property $prop $pfile; then
+	   ox_remove_property $prop $pfile
+	fi
+    done
+
+    # -----------------------------------------------------------------------
+    pfile=/opt/open-xchange/etc/groupware/server.properties
+    if ! ox_exists_property MinimumSearchCharacters $pfile; then
+	ox_set_property MinimumSearchCharacters 0 $pfile
+    fi
 fi
 
 %files
