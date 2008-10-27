@@ -19,14 +19,6 @@ set -e
 
 . /opt/open-xchange/etc/oxfunctions.sh
 
-v_setprop() {
-    local prop="$1"
-    local val="$2"
-    local propfile="$3"
-    echo setting $prop in $propfile
-    ox_set_property "$prop" "$val" "$propfile"
-}
-
 postFix() {
   local version=${1%-*}
   version=${version//[-.]/}
@@ -36,7 +28,7 @@ postFix() {
       # -----------------------------------------------------------------------
       local pfile=/opt/open-xchange/etc/admindaemon/plugin/hosting.properties
       ox_exists_property NEW_CONTEXT_DEFAULT_ACCESS_COMBINATION_NAME $pfile || {
-	  v_setprop NEW_CONTEXT_DEFAULT_ACCESS_COMBINATION_NAME webmail_plus $pfile
+	  ox_set_property NEW_CONTEXT_DEFAULT_ACCESS_COMBINATION_NAME webmail_plus $pfile
       }
   fi
 }
