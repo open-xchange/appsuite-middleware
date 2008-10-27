@@ -29,7 +29,8 @@ postFix() {
   # bugfix id#12288
   local pfile=/opt/open-xchange/etc/admindaemon/system.properties
   for prop in SetupLink LoginInfoConfig ConfigJumpConf User2IMAPImpl \
-      InitWorker CACHECCF IMAPPROPERTIES JAVAMAILPROPERTIES LOGLEVEL; do
+      InitWorker CACHECCF IMAPPROPERTIES JAVAMAILPROPERTIES LOGLEVEL \
+      Participant SPELLCHECKCFG Contact; do
     if ox_exists_property $prop $pfile; then
 	ox_remove_property $prop $pfile
     fi
@@ -64,18 +65,6 @@ postFix() {
   grep JAVA_OXCMD_OPTS $pfile >/dev/null || {
     echo 'JAVA_OXCMD_OPTS="-Djava.net.preferIPv4Stack=true"' >> $pfile
   }
-
-  # we're updating from pre sp5
-  if [ $version -le 670 ]; then
-      
-      # -----------------------------------------------------------------------
-      local pfile=/opt/open-xchange/etc/admindaemon/system.properties
-      for prop in InitWorker Participant SPELLCHECKCFG Contact; do
-	  if ox_exists_property $prop $pfile; then
-	      ox_remove_property $prop $pfile
-	  fi
-      done
-  fi
 
   if [ $version -le 660 ]; then
       # -----------------------------------------------------------------------
