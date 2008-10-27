@@ -57,8 +57,8 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
-import com.openexchange.imap.IMAPException;
 import com.openexchange.mail.mime.MIMEDefaultSession;
+import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.BODY;
@@ -164,28 +164,13 @@ public final class ExtractSpamMsgIMAPCommand extends AbstractIMAPCommand<Message
 		return msgList.toArray(new Message[msgList.size()]);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(
-	 * com.sun.mail.iap.Response)
-	 */
 	@Override
-	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
+	protected void handleLastResponse(final Response lastResponse) throws ProtocolException {
 		if (!lastResponse.isOK()) {
-			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
-					"UID FETCH failed: " + lastResponse.getRest()));
+			throw new ProtocolException(lastResponse);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.
-	 * sun.mail.iap.Response)
-	 */
 	@Override
 	protected void handleResponse(final Response response) throws MessagingException {
 		if (response == null) {

@@ -51,7 +51,7 @@ package com.openexchange.imap.command;
 
 import javax.mail.MessagingException;
 
-import com.openexchange.imap.IMAPException;
+import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
@@ -154,18 +154,10 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
 		return Boolean.TRUE;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(
-	 * com.sun.mail.iap.Response)
-	 */
 	@Override
-	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
+	protected void handleLastResponse(final Response lastResponse) throws ProtocolException {
 		if (!lastResponse.isOK()) {
-			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
-					"Command \"" + command + "\" failed: " + lastResponse.getRest()));
+			throw new ProtocolException(lastResponse);
 		}
 	}
 

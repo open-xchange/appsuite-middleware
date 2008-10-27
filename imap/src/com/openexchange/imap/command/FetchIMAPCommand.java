@@ -72,7 +72,6 @@ import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeUtility;
 
 import com.openexchange.imap.IMAPCommandsCollection;
-import com.openexchange.imap.IMAPException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
@@ -83,6 +82,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.BODY;
@@ -439,10 +439,9 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	}
 
 	@Override
-	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
+	protected void handleLastResponse(final Response lastResponse) throws ProtocolException {
 		if (!lastResponse.isOK()) {
-			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
-					(uid ? "UID FETCH failed: " : "FETCH failed: ") + lastResponse.getRest()));
+			throw new ProtocolException(lastResponse);
 		}
 	}
 

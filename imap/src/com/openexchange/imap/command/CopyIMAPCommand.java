@@ -56,8 +56,8 @@ import java.util.Locale;
 
 import javax.mail.MessagingException;
 
-import com.openexchange.imap.IMAPException;
 import com.openexchange.tools.Collections.SmartLongArray;
+import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
@@ -240,12 +240,9 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	}
 
 	@Override
-	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
+	protected void handleLastResponse(final Response lastResponse) throws ProtocolException {
 		if (!lastResponse.isOK()) {
-			final String rest = lastResponse.getRest();
-			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
-					new StringBuilder(rest.length() + 17).append(uid ? "UID COPY failed: " : "COPY failed: ").append(
-							rest).toString()));
+			throw new ProtocolException(lastResponse);
 		}
 	}
 

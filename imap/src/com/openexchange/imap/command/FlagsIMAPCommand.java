@@ -53,7 +53,7 @@ import javax.mail.Flags;
 import javax.mail.MessagingException;
 import javax.mail.Flags.Flag;
 
-import com.openexchange.imap.IMAPException;
+import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
@@ -334,18 +334,10 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 		return Boolean.TRUE;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(
-	 * com.sun.mail.iap.Response)
-	 */
 	@Override
-	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
+	protected void handleLastResponse(final Response lastResponse) throws ProtocolException {
 		if (!lastResponse.isOK()) {
-			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
-					"UID STORE failed: " + lastResponse.getRest()));
+			throw new ProtocolException(lastResponse);
 		}
 	}
 

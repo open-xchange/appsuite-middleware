@@ -17,6 +17,8 @@
    meaning it ignores parsing errors.
  - Bugfix #12300: Fixed request type counting for monitoring information
  - Bugfix #12297: Checking a task's start/due date on day-base
+ - Bugfix #12249: Improved handling of exceptions internally created by
+   JavaMail when receiving a "BYE" response code.
 
 * 2008-10-27 - choeger@open-xchange-com
 

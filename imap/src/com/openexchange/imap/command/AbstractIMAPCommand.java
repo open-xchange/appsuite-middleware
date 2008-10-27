@@ -134,31 +134,21 @@ public abstract class AbstractIMAPCommand<T> {
 				}
 				response = r[r.length - 1];
 				try {
-					abstractIMAPCommand.handleLastResponse(response);
-				} catch (final MessagingException e) {
-					if (e.getMessage().indexOf(ERR_01) > -1) {
-						return abstractIMAPCommand.getDefaultValue();
+					if (response.isBYE()) {
+						/*
+						 * The BYE response is always untagged, and indicates
+						 * that the server is about to close the connection.
+						 */
+						throw new ProtocolException(response);
 					}
-					final ProtocolException pe = new ProtocolException(e.getMessage());
-					pe.initCause(e);
-					throw pe;
-				}
-				try {
+					abstractIMAPCommand.handleLastResponse(response);
 					for (int index = 0; (index < r.length) && abstractIMAPCommand.addLoopCondition(); index++) {
-						try {
-							abstractIMAPCommand.handleResponse(r[index]);
-							r[index] = null;
-						} catch (final MessagingException e) {
-							final ProtocolException pe = new ProtocolException(e.getMessage());
-							pe.initCause(e);
-							throw pe;
-						}
+						abstractIMAPCommand.handleResponse(r[index]);
 						/*
 						 * Discard handled response
 						 */
 						r[index] = null;
 					}
-				} finally {
 					if (abstractIMAPCommand.performNotifyResponseHandlers()) {
 						/*
 						 * Dispatch unhandled responses
@@ -179,6 +169,18 @@ public abstract class AbstractIMAPCommand<T> {
 							throw cfe;
 						}
 					}
+				} catch (final MessagingException e) {
+					if (e.getMessage().indexOf(ERR_01) > -1) {
+						return abstractIMAPCommand.getDefaultValue();
+					}
+					final ProtocolException pe;
+					if (response == null) {
+						pe = new ProtocolException(e.getMessage());
+					} else {
+						pe = new ProtocolException(response);
+					}
+					pe.initCause(e);
+					throw pe;
 				}
 			}
 			return abstractIMAPCommand.getReturnVal();
@@ -287,10 +289,10 @@ public abstract class AbstractIMAPCommand<T> {
 	 * 
 	 * @param lastResponse
 	 *            - the last response
-	 * @throws MessagingException
+	 * @throws ProtocolException
 	 *             - if a response-related error occurs
 	 */
-	protected abstract void handleLastResponse(Response lastResponse) throws MessagingException;
+	protected abstract void handleLastResponse(Response lastResponse) throws ProtocolException;
 
 	/**
 	 * Gets the return value

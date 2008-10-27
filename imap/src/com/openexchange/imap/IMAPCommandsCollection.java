@@ -981,6 +981,29 @@ public final class IMAPCommandsCollection {
 				 */
 				throw e;
 			} catch (final MessagingException e) {
+				if (e.getNextException() instanceof ProtocolException) {
+					final ProtocolException protocolException = (ProtocolException) e.getNextException();
+					final Response response = protocolException.getResponse();
+					if (response != null && response.isBYE()) {
+						/*
+						 * The BYE response is always untagged, and indicates
+						 * that the server is about to close the connection.
+						 */
+						throw new StoreClosedException(imapFolder.getStore(), protocolException.getMessage());
+					}
+					final Throwable cause = protocolException.getCause();
+					if (cause instanceof StoreClosedException) {
+						/*
+						 * Connection is down. No retry.
+						 */
+						throw ((StoreClosedException) cause);
+					} else if (cause instanceof FolderClosedException) {
+						/*
+						 * Connection is down. No retry.
+						 */
+						throw ((FolderClosedException) cause);
+					}
+				}
 				if (LOG.isWarnEnabled()) {
 					LOG.warn(new StringBuilder(64).append("UID EXPUNGE failed: ").append(e.getLocalizedMessage())
 							.append(".\nPerforming fallback actions.").toString(), e);
