@@ -63,6 +63,10 @@ import com.openexchange.tools.servlet.ServletConfigLoader;
 import com.openexchange.tools.servlet.http.HttpManagersInit;
 import com.openexchange.user.UserService;
 import com.openexchange.user.internal.UserServiceImpl;
+import com.openexchange.xml.spring.SpringParser;
+import com.openexchange.xml.spring.impl.DefaultSpringParser;
+import com.openexchange.xml.jdom.JDOMParser;
+import com.openexchange.xml.jdom.impl.JDOMParserImpl;
 
 /**
  * This class contains methods for initialising tests.
@@ -204,9 +208,18 @@ public final class Init {
         startAndInjectSpamHandler();
         startAndInjectICalServices();
         startAndInjectConverterService();
+        startAndInjectXMLServices();
     }
 
-	private static void startAndInjectI18NBundle() throws FileNotFoundException {
+    private static void startAndInjectXMLServices() {
+        SpringParser springParser = new DefaultSpringParser();
+        ServerServiceRegistry.getInstance().addService(SpringParser.class, springParser);
+
+        JDOMParser jdomParser = new JDOMParserImpl();
+        ServerServiceRegistry.getInstance().addService(JDOMParser.class, jdomParser);
+    }
+
+    private static void startAndInjectI18NBundle() throws FileNotFoundException {
 		final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
 		final String directory_name = config.getProperty("i18n.language.path");
 		final File dir = new File(directory_name);
