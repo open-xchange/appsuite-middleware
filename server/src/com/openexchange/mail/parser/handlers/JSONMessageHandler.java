@@ -130,7 +130,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
 	private final JSONObject jsonObject;
 
-	//private Html2TextConverter converter;
+	// private Html2TextConverter converter;
 
 	private HTML2TextHandler html2textHandler;
 
@@ -263,12 +263,10 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		return nestedMsgsArr;
 	}
 
-	/*private Html2TextConverter getConverter() {
-		if (converter == null) {
-			converter = new Html2TextConverter();
-		}
-		return converter;
-	}*/
+	/*
+	 * private Html2TextConverter getConverter() { if (converter == null) {
+	 * converter = new Html2TextConverter(); } return converter; }
+	 */
 
 	private HTML2TextHandler getHandler() {
 		if (html2textHandler == null) {
@@ -510,7 +508,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 				if (usm.isDisplayHtmlInlineContent()) {
 					asDisplayHtml(id, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
 				} else {
-					asDisplayText(id, contentType.getBaseType(), htmlContent, fileName);
+					asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, false);
 				}
 			} else {
 				try {
@@ -571,7 +569,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 						return true;
 					}
 					asDisplayText(id, contentType.getBaseType(),
-							getHtmlDisplayVersion(contentType, plainTextContentArg), fileName);
+							getHtmlDisplayVersion(contentType, plainTextContentArg), fileName, false);
 				} else {
 					final JSONObject jsonObject = new JSONObject();
 					jsonObject.put(MailListField.ID.getKey(), id);
@@ -608,8 +606,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			return HTMLProcessing.formatHTMLForDisplay(ENRCONV.convert(src), contentType.getCharsetParameter(), session
 					.getSecret(), mailPath, usm, modified, displayMode);
 		} else if (contentType.isMimeType(MIMETypes.MIME_TEXT_RTF)) {
-			return HTMLProcessing.formatHTMLForDisplay(RTF2HTMLConverter.convertRTFToHTML(src), contentType.getCharsetParameter(), session
-					.getSecret(), mailPath, usm, modified, displayMode);
+			return HTMLProcessing.formatHTMLForDisplay(RTF2HTMLConverter.convertRTFToHTML(src), contentType
+					.getCharsetParameter(), session.getSecret(), mailPath, usm, modified, displayMode);
 		}
 		return HTMLProcessing.formatTextForDisplay(src, usm, displayMode);
 	}
@@ -907,7 +905,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	}
 
 	private void asDisplayText(final String id, final String baseContentType, final String htmlContent,
-			final String fileName) throws MailException {
+			final String fileName, final boolean addAttachment) throws MailException {
 		try {
 			final JSONObject jsonObject = new JSONObject();
 			jsonObject.put(MailListField.ID.getKey(), id);
@@ -921,25 +919,28 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
 			jsonObject.put(MailJSONField.CONTENT.getKey(), content);
 			getAttachmentsArr().put(jsonObject);
-			/*
-			 * Create attachment object for original html content
-			 */
-			final JSONObject originalVersion = new JSONObject();
-			originalVersion.put(MailListField.ID.getKey(), id);
-			originalVersion.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
-			originalVersion.put(MailJSONField.DISPOSITION.getKey(), Part.ATTACHMENT);
-			originalVersion.put(MailJSONField.SIZE.getKey(), htmlContent.length());
-			originalVersion.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
-			if (fileName == null) {
-				originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), JSONObject.NULL);
-			} else {
-				try {
-					originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), MimeUtility.decodeText(fileName));
-				} catch (final UnsupportedEncodingException e) {
-					originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), fileName);
+			if (addAttachment) {
+				/*
+				 * Create attachment object for original html content
+				 */
+				final JSONObject originalVersion = new JSONObject();
+				originalVersion.put(MailListField.ID.getKey(), id);
+				originalVersion.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
+				originalVersion.put(MailJSONField.DISPOSITION.getKey(), Part.ATTACHMENT);
+				originalVersion.put(MailJSONField.SIZE.getKey(), htmlContent.length());
+				originalVersion.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
+				if (fileName == null) {
+					originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), JSONObject.NULL);
+				} else {
+					try {
+						originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), MimeUtility
+								.decodeText(fileName));
+					} catch (final UnsupportedEncodingException e) {
+						originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), fileName);
+					}
 				}
+				getAttachmentsArr().put(originalVersion);
 			}
-			getAttachmentsArr().put(originalVersion);
 		} catch (final JSONException e) {
 			throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
 		}
