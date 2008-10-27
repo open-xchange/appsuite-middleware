@@ -58,6 +58,13 @@ postFix() {
       fi
   done
 
+  # -----------------------------------------------------------------------
+  # bugfix id#12287
+  local pfile=/opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
+  grep JAVA_OXCMD_OPTS $pfile >/dev/null || {
+    echo 'JAVA_OXCMD_OPTS="-Djava.net.preferIPv4Stack=true"' >> $pfile
+  }
+
   if [ $version -le 660 ]; then
       # -----------------------------------------------------------------------
       # force setting of last minute option
