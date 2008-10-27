@@ -595,7 +595,7 @@ public final class AJPv13RequestHandler {
 	 * Triggers the servlet's service method to start processing the request and
 	 * flushes the response to output stream.
 	 * <p>
-	 * This requets handler is then marked to have the service() method called;
+	 * This request handler is then marked to have the service() method called;
 	 * meaning {@link #isServiceMethodCalled()} will return <code>true</code>.
 	 * 
 	 * @throws IOException
