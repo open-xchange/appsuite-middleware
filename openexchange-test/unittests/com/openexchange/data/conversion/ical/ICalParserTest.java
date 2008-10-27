@@ -1122,6 +1122,21 @@ public class ICalParserTest extends TestCase {
         assertNull(appointment.getParticipants());
     }
 
+    // Bug 11958 - a timezone element in a file should be relevant for all data, even if listed afterwards
+    public void testTimezoneShouldBeRelevantForAllData() throws ConversionError{
+    	String timezone = "BEGIN:VTIMEZONE\nTZID:/mozilla.org/20050126_1/America/New_York\nX-LIC-LOCATION:America/New_York\nBEGIN:STANDARD\nTZOFFSETFROM:-0400\nTZOFFSETTO:-0500\nTZNAME:EST\nDTSTART:19701025T020000\nRRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=-1SU;BYMONTH=10\nEND:STANDARD\nBEGIN:DAYLIGHT\nTZOFFSETFROM:-0500\nTZOFFSETTO:-0400\nTZNAME:EDT\nDTSTART:19700405T020000\nRRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=1SU;BYMONTH=4\nEND:DAYLIGHT\nEND:VTIMEZONE\n";
+    	String icalText1 = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n"+timezone+"BEGIN:VEVENT\nCREATED:20080216T152600Z\nLAST-MODIFIED:20080216T152600Z\nDTSTAMP:20080216T152600Z\nUID:3a289f91-f83a-4614-83c6-660c7740abd8\nSUMMARY:New York, 2008-08-31 09:00 - 10:00 (EST)\nDTSTART;TZID=/mozilla.org/20050126_1/America/New_York:20080831T090000\nDTEND;TZID=/mozilla.org/20050126_1/America/New_York:20080831T100000\nEND:VEVENT\nEND:VCALENDAR\n";
+    	String icalText2 = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\nBEGIN:VEVENT\nCREATED:20080216T152600Z\nLAST-MODIFIED:20080216T152600Z\nDTSTAMP:20080216T152600Z\nUID:3a289f91-f83a-4614-83c6-660c7740abd8\nSUMMARY:New York, 2008-08-31 09:00 - 10:00 (EST)\nDTSTART;TZID=/mozilla.org/20050126_1/America/New_York:20080831T090000\nDTEND;TZID=/mozilla.org/20050126_1/America/New_York:20080831T100000\nEND:VEVENT\n"+ timezone + "END:VCALENDAR\n";
+    	AppointmentObject appointmentThatTroublesUs = parseAppointment(icalText1);
+        AppointmentObject appointmentAsExpected = parseAppointment(icalText2);
+        assertEquals("Start dates should be equal, independent of the placement of the timezone information", 
+        		appointmentAsExpected.getStartDate(), 
+        		appointmentThatTroublesUs.getStartDate());
+        assertEquals("End dates should be equal, independent of the placement of the timezone information", 
+        		appointmentAsExpected.getEndDate(), 
+        		appointmentThatTroublesUs.getEndDate());
+    }
+
     @Override
     protected void setUp() throws Exception {
         fixtures = new ICALFixtures();
