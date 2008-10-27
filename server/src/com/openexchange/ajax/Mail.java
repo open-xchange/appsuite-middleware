@@ -143,11 +143,15 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.text.HTMLProcessing;
+import com.openexchange.mail.text.parser.HTMLParser;
+import com.openexchange.mail.text.parser.handler.HTMLFilterHandler;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Helper;
@@ -160,6 +164,7 @@ import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.utility.VersitUtility;
 
@@ -259,6 +264,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 	public static final String PARAMETER_FLAGS = "flags";
 
 	public static final String PARAMETER_UNSEEN = "unseen";
+
+	public static final String PARAMETER_FILTER = "filter";
 
 	private static final String VIEW_TEXT = "text";
 
@@ -1231,10 +1238,16 @@ public class Mail extends PermissionServlet implements UploadListener {
 			final long uid = Long.parseLong(checkStringParam(req, PARAMETER_ID));
 			final String sequenceId = req.getParameter(PARAMETER_MAILATTCHMENT);
 			final String imageContentId = req.getParameter(PARAMETER_MAILCID);
-			String saveIdentifier = req.getParameter(PARAMETER_SAVE);
-			saveToDisk = ((saveIdentifier == null || saveIdentifier.length() == 0) ? false : ((Integer
-					.parseInt(saveIdentifier)) > 0));
-			saveIdentifier = null;
+			{
+				final String saveParam = req.getParameter(PARAMETER_SAVE);
+				saveToDisk = ((saveParam == null || saveParam.length() == 0) ? false
+						: ((Integer.parseInt(saveParam)) > 0));
+			}
+			final boolean filter;
+			{
+				final String filterParam = req.getParameter(PARAMETER_FILTER);
+				filter = Boolean.parseBoolean(filterParam) || STR_1.equals(filterParam);
+			}
 			/*
 			 * Get attachment
 			 */
@@ -1245,10 +1258,26 @@ public class Mail extends PermissionServlet implements UploadListener {
 							PARAMETER_MAILATTCHMENT).append(" | ").append(PARAMETER_MAILCID).toString());
 				}
 				final MailPart mailPart;
+				final InputStream attachmentInputStream;
 				if (imageContentId == null) {
 					mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, !saveToDisk);
 					if (mailPart == null) {
 						throw new MailException(MailException.Code.NO_ATTACHMENT_FOUND, sequenceId);
+					}
+					if (filter && !saveToDisk && mailPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
+						/*
+						 * Apply filter
+						 */
+						final ContentType contentType = mailPart.getContentType();
+						final String cs = contentType.containsCharsetParameter() ? contentType.getCharsetParameter()
+								: MailConfig.getDefaultMimeCharset();
+						final String htmlContent = MessageUtility.readMailPart(mailPart, cs);
+						final HTMLFilterHandler filterHandler = new HTMLFilterHandler(htmlContent.length());
+						HTMLParser.parse(HTMLProcessing.getConformHTML(htmlContent, contentType), filterHandler);
+						attachmentInputStream = new UnsynchronizedByteArrayInputStream(filterHandler.getHTML()
+								.getBytes(cs));
+					} else {
+						attachmentInputStream = mailPart.getInputStream();
 					}
 					/**
 					 * TODO: Does not work, yet.
@@ -1271,6 +1300,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					if (mailPart == null) {
 						throw new MailException(MailException.Code.NO_ATTACHMENT_FOUND, sequenceId);
 					}
+					attachmentInputStream = mailPart.getInputStream();
 				}
 				/*
 				 * Write to response
@@ -1284,7 +1314,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					contentType = new ContentType();
 					contentType.setPrimaryType(STR_APPLICATION);
 					contentType.setSubType(STR_OCTET_STREAM);
-					resp.setHeader(STR_CONTENT_DISPOSITION, new StringBuilder(50).append(STR_ATTACHMENT_FILENAME)
+					resp.setHeader(STR_CONTENT_DISPOSITION, new StringBuilder(64).append(STR_ATTACHMENT_FILENAME)
 							.append(
 									getSaveAsFileName(mailPart.getFileName(), internetExplorer, mailPart
 											.getContentType().toString())).append('"').toString());
@@ -1307,10 +1337,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 				}
 				resp.setContentType(contentType.toString());
 				/*
-				 * Write from content's input stream to response output stream
-				 */
-				InputStream contentInputStream = null;
-				/*
 				 * Reset response header values since we are going to directly
 				 * write into servlet's output stream and then some browsers do
 				 * not allow header "Pragma"
@@ -1318,17 +1344,17 @@ public class Mail extends PermissionServlet implements UploadListener {
 				Tools.removeCachingHeader(resp);
 				final OutputStream out = resp.getOutputStream();
 				outSelected = true;
+				/*
+				 * Write from content's input stream to response output stream
+				 */
 				try {
-					contentInputStream = mailPart.getInputStream();
 					final byte[] buffer = new byte[0xFFFF];
-					for (int len; (len = contentInputStream.read(buffer)) != -1;) {
+					for (int len; (len = attachmentInputStream.read(buffer, 0, buffer.length)) != -1;) {
 						out.write(buffer, 0, len);
 					}
 					out.flush();
 				} finally {
-					if (contentInputStream != null) {
-						contentInputStream.close();
-					}
+					attachmentInputStream.close();
 				}
 			} finally {
 				if (mailInterface != null) {
