@@ -156,7 +156,6 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
-import com.openexchange.tools.regex.RegexUtility;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -2034,17 +2033,23 @@ public class Mail extends PermissionServlet implements UploadListener {
 				 * Pre-Select field writers
 				 */
 				final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
-				final Map<String, SmartLongArray> idMap = new HashMap<String, SmartLongArray>();
-				fillMap(idMap, body, length);
+				final Map<String, SmartLongArray> idMap = new HashMap<String, SmartLongArray>(4);
+				fillMapByArray(idMap, jsonIDs, length);
 				final int size = idMap.size();
-				if (size == 0 && LOG.isErrorEnabled()) {
+				if (size == 0) {
 					/*
 					 * Must not be zero since JSON array's length is greater
 					 * than zero.
 					 */
-					final String jsonIDsStr = jsonIDs.toString();
-					LOG.error(new StringBuilder(jsonIDsStr.length() + 64).append(
-							"Parsing of folder-and-ID-pairs failed:\n").append(jsonIDsStr).toString(), new Throwable());
+					if (LOG.isWarnEnabled()) {
+						final String jsonIDsStr = jsonIDs.toString();
+						LOG.warn(new StringBuilder(jsonIDsStr.length() + 64).append(
+								"Parsing of folder-and-ID-pairs failed:\n").append(jsonIDsStr).toString(),
+								new Throwable());
+					}
+					final Response r = new Response();
+					r.setData(EMPTY_JSON_ARR);
+					return r;
 				}
 				MailServletInterface mailInterface = mailInterfaceArg;
 				boolean closeMailInterface = false;
@@ -2098,55 +2103,24 @@ public class Mail extends PermissionServlet implements UploadListener {
 		return response;
 	}
 
-	private static final String idRegex = "\"id\":\"?([0-9]+)\"?";
-
-	private static final String fldRegex = "\"folder\":\"(.+?)\"";
-
-	private static final String commaRegex = "\\p{Blank}*,\\p{Blank}*";
-
-	private static final Pattern PATTERN_IDS = Pattern.compile(RegexUtility.OR(RegexUtility.group(RegexUtility.concat(
-			idRegex, commaRegex, fldRegex), false), RegexUtility.group(RegexUtility.concat(fldRegex, commaRegex,
-			idRegex), false)));
-
-	private static final void fillMap(final Map<String, SmartLongArray> idMap, final String requestBody,
-			final int length) {
-		final Matcher m = PATTERN_IDS.matcher(requestBody);
+	private static final void fillMapByArray(final Map<String, SmartLongArray> idMap, final JSONArray idArray,
+			final int length) throws JSONException {
 		String folder = null;
 		SmartLongArray sla = null;
-		while (m.find()) {
-			String fld, id;
-			if (m.group(2) == null) {
-				fld = m.group(3);
-				id = m.group(4);
-			} else {
-				fld = m.group(2);
-				id = m.group(1);
-			}
-			boolean found = false;
-			do {
-				if (folder == null || !folder.equals(fld)) {
-					folder = fld;
+		for (int i = 0; i < length; i++) {
+			final JSONObject idObject = idArray.getJSONObject(i);
+			final String fld = idObject.getString(PARAMETER_FOLDERID);
+			if (folder == null || !folder.equals(fld)) {
+				folder = fld;
+				final SmartLongArray tmp = idMap.get(folder);
+				if (tmp == null) {
 					sla = new SmartLongArray(length);
 					idMap.put(folder, sla);
+				} else {
+					sla = tmp;
 				}
-				sla.append(Long.parseLong(id));
-				found = m.find();
-				if (found) {
-					if (m.group(2) == null) {
-						fld = m.group(3);
-						id = m.group(4);
-					} else {
-						fld = m.group(2);
-						id = m.group(1);
-					}
-				}
-			} while (found && folder.equals(fld));
-			if (found) {
-				folder = fld;
-				sla = new SmartLongArray(length);
-				sla.append(Long.parseLong(id));
-				idMap.put(folder, sla);
 			}
+			sla.append(Long.parseLong(idObject.getString(PARAMETER_ID)));
 		}
 	}
 
@@ -3264,8 +3238,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 		private final int growthSize;
 
-		private long[] trimmedArray;
-
 		public SmartLongArray() {
 			this(1024);
 		}
@@ -3281,8 +3253,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 		public void reset() {
 			pointer = 0;
-			// Arrays.fill(array, 0);
-			trimmedArray = null;
 		}
 
 		public int size() {
@@ -3290,7 +3260,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 		}
 
 		public SmartLongArray append(final long l) {
-			trimmedArray = null;
 			if (pointer >= array.length) {
 				/*
 				 * time to grow!
@@ -3304,28 +3273,16 @@ public class Mail extends PermissionServlet implements UploadListener {
 		}
 
 		public long[] toArray() {
-			if (trimmedArray == null) {
-				trimmedArray = new long[pointer];
-				System.arraycopy(array, 0, trimmedArray, 0, trimmedArray.length);
-			}
+			final long[] trimmedArray = new long[pointer];
+			System.arraycopy(array, 0, trimmedArray, 0, trimmedArray.length);
 			return trimmedArray;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.lang.Object#toString()
-		 */
 		@Override
 		public String toString() {
 			return Arrays.toString(toArray());
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.lang.Object#clone()
-		 */
 		@Override
 		public Object clone() {
 			SmartLongArray clone;
@@ -3333,10 +3290,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 				clone = (SmartLongArray) super.clone();
 				clone.array = new long[this.array.length];
 				System.arraycopy(array, 0, clone.array, 0, array.length);
-				if (trimmedArray != null) {
-					clone.trimmedArray = new long[this.trimmedArray.length];
-					System.arraycopy(trimmedArray, 0, clone.trimmedArray, 0, trimmedArray.length);
-				}
 				return clone;
 			} catch (final CloneNotSupportedException e) {
 				throw new InternalError(e.getMessage());

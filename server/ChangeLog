@@ -1,3 +1,7 @@
+* 2008-10-27 - thorben.betten@open-xchange.com
+
+ - Bugfix #12250: Changed (and fastened) parsing of PUT data on action=list
+
 * 2008-10-27 - choeger@open-xchange-com
 
  - Bugfix #12370 Wrong dependency in configjump package on rpm based distributions
