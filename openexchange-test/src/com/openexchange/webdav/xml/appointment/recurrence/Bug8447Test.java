@@ -11,7 +11,7 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 public class Bug8447Test extends AbstractRecurrenceTest {
 	
-	private static final Log LOG = LogFactory.getLog(Bug7915Test.class);
+	private static final Log LOG = LogFactory.getLog(Bug8447Test.class);
 	
 	public Bug8447Test(final String name) {
 		super(name);

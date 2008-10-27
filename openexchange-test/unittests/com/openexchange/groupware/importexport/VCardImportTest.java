@@ -89,7 +89,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		final List <String> folders = Arrays.asList( Integer.toString(folderId) );
 		//import and tests
 		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(vcard.getBytes("UTF-8")), folders, null);
-		assertEquals("One import?" , 1 , results.size());
+		assertTrue("One import?", 1 == results.size());
 		assertTrue("Should have an error" , results.get(0).hasError() );
 		final AbstractOXException e = results.get(0).getException();
 		assertEquals("Should be truncation error" , Category.TRUNCATED , e.getCategory());
@@ -108,7 +108,7 @@ public class VCardImportTest extends AbstractVCardTest {
 
 		//import and tests
 		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(vcard.getBytes("UTF-8")), folders, null);
-		assertEquals("One import?" , 1 , results.size());
+		assertTrue("One import?" , 1 == results.size());
 		final ImportResult res = results.get(0);
 		assertEquals("Should have no error" , null, res.getException() );
 
@@ -124,12 +124,11 @@ public class VCardImportTest extends AbstractVCardTest {
 
 		//import and tests
 		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(vcard.getBytes("UTF-8")), folders, null);
-		assertEquals("One import?" , 1 , results.size());
+		assertTrue("One import?" , 1 == results.size());
 		final ImportResult res = results.get(0);
 		assertEquals("Should have no error" , null, res.getException() );
 
 		final ContactSQLInterface contacts = new RdbContactSQLInterface(sessObj);
 		final ContactObject co = contacts.getObjectById(Integer.parseInt( res.getObjectId()), Integer.parseInt( res.getFolder() ) );
-
 	}
 }

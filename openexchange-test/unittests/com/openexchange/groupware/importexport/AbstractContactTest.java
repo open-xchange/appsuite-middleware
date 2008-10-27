@@ -450,10 +450,14 @@ public class AbstractContactTest {
 	}
 
 	protected List<ImportResult> importStuff(final String csv) throws ImportExportException, UnsupportedEncodingException{
-		final InputStream is = new ByteArrayInputStream( csv.getBytes("UTF-8") );
+		return importStuff(csv, "UTF-8");
+	}
+
+	protected List<ImportResult> importStuff(final String csv, final String encoding) throws ImportExportException, UnsupportedEncodingException{
+		final InputStream is = new ByteArrayInputStream( csv.getBytes(encoding) );
 		return imp.importData(sessObj, defaultFormat, is, _folders(), null);
 	}
-	
+
 	protected boolean existsEntry(final int entryNumber) throws ContextException {
 		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
 		try {
