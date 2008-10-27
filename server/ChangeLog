@@ -1,3 +1,8 @@
+* 2008-10-27 - choeger@open-xchange-com
+
+ - Bugfix #12370 Wrong dependency in configjump package on rpm based distributions
+   removed dependency to open-xchange-configjump
+
 * 2008-10-24 - thorben.betten@open-xchange.com
 
  - Bugfix #12371: Proper notification handling if participants replacement
