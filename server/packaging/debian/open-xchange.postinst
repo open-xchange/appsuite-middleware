@@ -71,6 +71,42 @@ postFix() {
       fi
   done
 
+  # we're updating from pre sp5
+  if [ $version -le 670 ]; then
+
+      # -----------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/groupware/participant.properties
+      if ! ox_exists_property com.openexchange.participant.ShowWithoutEmail $pfile; then
+	  if ox_exists_property ShowWithoutEmail $pfile; then
+	      local oldval=$(ox_read_property ShowWithoutEmail $pfile)
+	      ox_set_property com.openexchange.participant.ShowWithoutEmail $oldval $pfile
+	      ox_remove_property ShowWithoutEmail $pfile
+	  else
+	      ox_set_property com.openexchange.participant.ShowWithoutEmail true $pfile
+	  fi
+      fi
+      if ! ox_exists_property com.openexchange.participant.autoSearch $pfile; then
+	  ox_set_property com.openexchange.participant.autoSearch true $pfile
+      fi
+      if ! ox_exists_property com.openexchange.participant.MaximumNumberParticipants $pfile; then
+	  ox_set_property com.openexchange.participant.MaximumNumberParticipants 0 $pfile
+      fi
+
+      # -----------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/groupware/system.properties
+      for prop in InitWorker Participant SPELLCHECKCFG Contact; do
+	  if ox_exists_property $prop $pfile; then
+	      ox_remove_property $prop $pfile
+	  fi
+      done
+
+      # -----------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/groupware/server.properties
+      if ! ox_exists_property MinimumSearchCharacters $pfile; then
+	  ox_set_property MinimumSearchCharacters 0 $pfile
+      fi
+  fi
+
   # we're updating from pre sp4
   if [ $version -lt 650 ]; then
 
