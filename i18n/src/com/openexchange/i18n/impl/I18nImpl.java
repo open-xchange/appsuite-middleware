@@ -81,7 +81,7 @@ public class I18nImpl implements I18nTools {
 			return serverBundle.getString(key);
 		} catch (final MissingResourceException x) {
 			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder("Using default for bundle ").append(serverBundle));
+				LOG.info(new StringBuilder("Missing key "+key+" for locale "+getLocale()+". Using default."));
 			}
 			return key;
 		}
