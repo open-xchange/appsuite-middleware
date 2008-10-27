@@ -55,6 +55,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -172,6 +173,11 @@ public final class Collections {
 			System.arraycopy(array, 0, trimmedArray, 0, trimmedArray.length);
 			return trimmedArray;
 		}
+
+		@Override
+		public String toString() {
+			return Arrays.toString(toArray());
+		}
 	}
 	
 	/**
@@ -222,6 +228,11 @@ public final class Collections {
 			final long[] trimmedArray = new long[pointer];
 			System.arraycopy(array, 0, trimmedArray, 0, trimmedArray.length);
 			return trimmedArray;
+		}
+
+		@Override
+		public String toString() {
+			return Arrays.toString(toArray());
 		}
 	}
 
