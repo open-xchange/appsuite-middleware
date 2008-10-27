@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -154,7 +155,7 @@ public class ParticipantNotifyTest extends TestCase{
 		final Calendar calendar = Calendar.getInstance(locale);
 		
 		calendar.set(2017, 4, 2, 13, 30,0);
-		String expect = "02.05.2017 13:30:00, GMT+01:00";
+		String expect = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss, z").format(calendar.getTime());
 		
 		DateFormat df = new AppointmentState(null, null, null).getDateFormat(locale);
 		
@@ -362,6 +363,7 @@ public class ParticipantNotifyTest extends TestCase{
     // Bug 9950
 
     public void testShouldNotifyOldAndNewParticipants() throws Exception{
+        NotificationPool.getInstance().clear();
         final Participant[] oldParticipants = getParticipants(U(2,4,10),G(),S(), R());
 		final Task oldTask = getTask(oldParticipants);
 
@@ -370,19 +372,21 @@ public class ParticipantNotifyTest extends TestCase{
 
         notify.taskModified(oldTask, newTask, session);
 
+
+
         final List<Message> messages = notify.getMessages();
 
         final List<String> mailAddresses = new LinkedList<String>();
         for(final Message message : messages) { mailAddresses.addAll(message.addresses); }
 
-        final Message msg = messages.get(0);
+        List<PooledNotification> pooledNotifications = NotificationPool.getInstance().getNotifications();
+        for (PooledNotification pooledNotification : pooledNotifications) {
+            mailAddresses.add(pooledNotification.getParticipant().email);
+        }
 
-        final String[] participantNames = parseParticipants( msg );
 
 		assertNames( mailAddresses, "user1@test.invalid", "user3@test.invalid", "user7@test.invalid", "user9@test.invalid" );
-		assertLanguage( EN , msg );
-		assertNames( participantNames,"> Removed: User 1", "User 3 (waiting)","> Added: User 7 (waiting)", "User 9 (waiting)");
-    }
+	}
 
 
     public static final void assertLanguage(final int lang, final Message msg) {
@@ -623,7 +627,7 @@ public class ParticipantNotifyTest extends TestCase{
 		}
 		
 		public List<Message> getMessages(){
-			return messageCollector;
+            return messageCollector;
 		}
 		
 		public void clearMessages(){

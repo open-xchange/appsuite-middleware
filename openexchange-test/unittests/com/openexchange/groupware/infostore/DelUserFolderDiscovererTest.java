@@ -22,6 +22,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 public class DelUserFolderDiscovererTest extends TestCase{
 	
@@ -40,8 +41,8 @@ public class DelUserFolderDiscovererTest extends TestCase{
 	
 	private FolderObject privateInfostoreFolder;
 	private FolderObject folderWithOtherEntity;
-	
-	@Override
+   
+    @Override
 	public void setUp() throws Exception {
 		Init.startServer();
 		ctx = ContextStorage.getInstance().getContext(1); 
@@ -70,10 +71,12 @@ public class DelUserFolderDiscovererTest extends TestCase{
 			while(privateInfostoreFolder == null && iter.hasNext()) {
 				final FolderObject f = (FolderObject) iter.next();
 				final List<OCLPermission> perms = f.getPermissions();
-				if(perms.size() == 1) {
-					if(perms.get(0).getFolderPermission() >= OCLPermission.ADMIN_PERMISSION && perms.get(0).getEntity() == userIdA) {
-						privateInfostoreFolder = f;
-					}
+				if(f.isDefaultFolder()) {
+					for(OCLPermission perm : perms) {
+                        if(perm.getFolderPermission() >= OCLPermission.ADMIN_PERMISSION && perm.getEntity() == userIdA) {
+						    privateInfostoreFolder = f;
+					    }
+                    }
 				}
 			}
 		} finally {
@@ -88,12 +91,13 @@ public class DelUserFolderDiscovererTest extends TestCase{
 		final OCLPermission perm1 = buildReadAll(userIdA,true);
 		final OCLPermission perm2 = buildReadOwn(userIdB,false);
 		folderWithOtherEntity.setPermissionsAsArray(new OCLPermission[]{perm1, perm2});
-		
-		// Create all folders
+
+        // Create all folders
 		//OXFolderAction oxfa = new OXFolderAction(session);
 		final OXFolderManager manager = new OXFolderManagerImpl(session);
 		manager.createFolder(folderWithOtherEntity,true, System.currentTimeMillis());
-		discoverer = new DelUserFolderDiscoverer(new DBPoolProvider());
+
+        discoverer = new DelUserFolderDiscoverer(new DBPoolProvider());
 	}
 
 	@Override

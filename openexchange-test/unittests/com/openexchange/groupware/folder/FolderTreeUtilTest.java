@@ -23,10 +23,11 @@ public class FolderTreeUtilTest extends FolderTestCase {
 		
 		final List<Integer> ids = treeUtil.getPath(subsubfolder.getObjectID(), ctx, user, userConfig);
 		
-		assertEquals(5, ids.size());
-		assertEquals(folder.getObjectID(), (int) ids.get(2));
-		assertEquals(subfolder.getObjectID(), (int) ids.get(3));
-		assertEquals(subsubfolder.getObjectID(), (int) ids.get(4));
+		assertEquals(6, ids.size());
+
+        assertEquals(folder.getObjectID(), (int) ids.get(3));
+		assertEquals(subfolder.getObjectID(), (int) ids.get(4));
+		assertEquals(subsubfolder.getObjectID(), (int) ids.get(5));
 		
 	}
 	

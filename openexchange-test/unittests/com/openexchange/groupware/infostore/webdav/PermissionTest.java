@@ -131,7 +131,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
 
         switchUser(user2);
 
-        final WebdavCollection collection = factory.resolveCollection(new WebdavPath("parent"));
+        final WebdavCollection collection = factory.resolveCollection(new WebdavPath("public_infostore","parent"));
 
         final List<WebdavResource> children = collection.getChildren();
         assertEquals(1, children.size());
@@ -146,7 +146,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
 
         final DocumentMetadata document = touch(testFolder, "testDocument");
 
-        final WebdavResource resource = factory.resolveResource(new WebdavPath(testFolder.getFolderName(), document.getFileName()));
+        final WebdavResource resource = factory.resolveResource(new WebdavPath("public_infostore", testFolder.getFolderName(), document.getFileName()));
 
         switchUser(user2);
         final WebdavProperty prop = new WebdavProperty("http://www.open-xchange.com/testProperties","test");
@@ -194,7 +194,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
 
         final DocumentMetadata document = touch(testFolder, "testDocument");
 
-        final WebdavResource resource = factory.resolveResource(new WebdavPath(testFolder.getFolderName(), document.getFileName()));
+        final WebdavResource resource = factory.resolveResource(new WebdavPath("public_infostore", testFolder.getFolderName(), document.getFileName()));
 
         switchUser(user2);
 
@@ -215,7 +215,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
                 adminPermission(user1),
                 permission(user2, false, OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS));
 
-        final WebdavCollection collection = factory.resolveCollection(new WebdavPath(testFolder.getFolderName()));
+        final WebdavCollection collection = factory.resolveCollection(new WebdavPath("public_infostore", testFolder.getFolderName()));
 
         switchUser(user2);
 
@@ -237,7 +237,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
 
         switchUser(user2);
 
-        WebdavResource resource = factory.resolveResource(new WebdavPath(testFolder.getFolderName(), "test.bin"));
+        WebdavResource resource = factory.resolveResource(new WebdavPath("public_infostore", testFolder.getFolderName(), "test.bin"));
 
         resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[0]));
         resource.create();
@@ -245,7 +245,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
         factory.endRequest(200);
         factory.beginRequest();
 
-        resource = factory.resolveResource(new WebdavPath(testFolder.getFolderName(), "test.bin"));
+        resource = factory.resolveResource(new WebdavPath("public_infostore", testFolder.getFolderName(), "test.bin"));
 
         resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] {1,2,3}));
         assertTrue(resource.exists());
@@ -281,7 +281,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
                 adminPermission(user1),
                 permission(user2, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.WRITE_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS));
 
-        WebdavResource resource = factory.resolveResource(new WebdavPath(testFolder.getFolderName(), "test.bin"));
+        WebdavResource resource = factory.resolveResource(new WebdavPath("public_infostore", testFolder.getFolderName(), "test.bin"));
 
         resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[0]));
         resource.create();
@@ -289,7 +289,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
 
         switchUser(user2);
 
-        resource = factory.resolveResource(new WebdavPath(testFolder.getFolderName(), "test.bin"));
+        resource = factory.resolveResource(new WebdavPath("public_infostore", testFolder.getFolderName(), "test.bin"));
 
         try {
             resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] {1,2,3}));

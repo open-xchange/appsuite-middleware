@@ -41,7 +41,8 @@ public class PathResolverTest extends TestCase {
 	
 	private int root;
 	
-	private int id8;
+	private int id9;
+    private int id8;
 	private int id7;
 	private int id6;
 	private int id5;
@@ -56,8 +57,9 @@ public class PathResolverTest extends TestCase {
 	private Context ctx = null;
 	private User user;
 	private UserConfiguration userConfig;
-	
-	@Override
+
+
+    @Override
 	public void setUp() throws Exception {
 		Init.startServer();
 		database.setTransactional(true);
@@ -81,7 +83,7 @@ public class PathResolverTest extends TestCase {
 		id6 = touch(id5,"document.txt");
 		id7 = mkdir(id5,"path");
 		id8 = mkdir(id7,"path");
-		mkdir(id8,"path");
+		id9 = mkdir(id8,"path");
 		
 	}
 	
@@ -94,7 +96,8 @@ public class PathResolverTest extends TestCase {
 	@Override
 	public void tearDown() throws Exception {
 		pathResolver.finish();
-		rmdir(id8);
+        rmdir(id9);
+        rmdir(id8);
 		rmdir(id7);
 		rmdir(id5);
 		rmdir(id4);

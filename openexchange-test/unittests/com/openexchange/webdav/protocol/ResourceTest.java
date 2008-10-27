@@ -298,7 +298,7 @@ public class ResourceTest extends AbstractResourceTest{
 		
 		res.lock(lock2);
 		locks = res.getLocks();
-		assertEquals(1, locks.size());
+    		assertEquals(1, locks.size());
 		lock = res.getLock(lock.getToken());
 		res.unlock(lock.getToken());
 		res.save();
