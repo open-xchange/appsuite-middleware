@@ -285,72 +285,127 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             final StringBuilder lastpart = new StringBuilder();
             int c = 0;
             int counter = 1;
+            // If we are inside a string '' or not
             boolean instring = false;
+            // If we are inside a dataset () or not
             boolean indatarow = true;
+            // Have we found the value we searched for?
             boolean found = false;
+            // Is this the first time we found the value
             boolean firstfound = true;
+            // Are we in escapted mode
             boolean escapted = false;
+            // Used for only escaping one char
             boolean firstescaperun = false;
+            // Used to leave the loop
+            boolean continuation = true;
             final ArrayList<String> retval = new ArrayList<String>();
-            while ((c = in.read()) != -1) {
+            while ((c = in.read()) != -1 && continuation) {
                 if (firstescaperun && escapted) {
                     escapted = false;
                 }
                 if (escapted) {
                     firstescaperun = true;
                 }
-                if (indatarow) {
-                    if (c == ',' || (!instring && c == ')')) {
-                        if (counter == valuepos) {
-                            if (lastpart.toString().equals(value)) {
-                                found = true;
-                            }
-                        } else if (readall && found) {
-                            retval.add(lastpart.toString());
-                        }
-                        counter++;
-                        lastpart.setLength(0);
-                    } else if (instring && c == '\\') { // ' is escaped
-                        escapted = true;
-                    } else if (!escapted && c == '\'') {
-                        instring = !instring;
-                    } else {
-                        lastpart.append((char)c);
-                    }
-                    currentValues.append((char)c);
-                } else {
-                    if (c == ',') {
-                        // New datarow comes
-                        counter = 1;
-                    } else if (c == '(') {
+                switch (c) {
+                case '(':
+                    if (!indatarow) {
                         indatarow = true;
                         currentValues.setLength(0);
                         currentValues.append('(');
-                    } else if (c == ';') {
+                    } else {
+                        currentValues.append((char)c);
+                    }
+                    break;
+                case ')':
+                    if (indatarow) {
+                        if (!instring) {
+                            if (counter == valuepos) {
+                                if (lastpart.toString().equals(value)) {
+                                    found = true;
+                                }
+                            } else if (readall && found) {
+                                retval.add(lastpart.toString());
+                            }
+                            counter++;
+                            lastpart.setLength(0);
+                            indatarow = false;
+                        }
+                        if (found && contextsearch) {
+                            if (firstfound) {
+                                bufferedWriter.write("INSERT INTO `");
+                                bufferedWriter.write(table_name);
+                                bufferedWriter.write("` VALUES ");
+                                firstfound = false;
+                            } else {
+                                bufferedWriter.write(",");
+                            }
+                            
+                            bufferedWriter.write(currentValues.toString());
+                            bufferedWriter.write(")");
+                            bufferedWriter.flush();
+                            found = false;
+                        }
+                        currentValues.append((char)c);
+                    }
+                    break;
+                case ',':
+                    if (indatarow) {
+                        if (!instring) {
+                            if (counter == valuepos) {
+                                if (lastpart.toString().equals(value)) {
+                                    found = true;
+                                }
+                            } else if (readall && found) {
+                                retval.add(lastpart.toString());
+                            }
+                            counter++;
+                            lastpart.setLength(0);
+                        }
+                        currentValues.append((char)c);
+                    } else {
+                        // New datarow comes
+                        counter = 1;
+                    }
+                    break;
+                case '\'':
+                    if (indatarow) {
+                        if (!instring) {
+                            instring = true;
+                        } else {
+                            if (!escapted) {
+                                instring = false;
+                            }
+                        }
+                        currentValues.append((char)c);
+                    }
+                    break;
+                case '\\':
+                    if (indatarow) {
+                        if (instring && !escapted) {
+                            escapted = true;
+                        }
+                        currentValues.append((char)c);
+                    }
+                    break;
+                case ';':
+                    if (!indatarow) {
                         if (!firstfound && contextsearch) {
                             // End of VALUES part
                             bufferedWriter.write(";");
                             bufferedWriter.write("\n");
                         }
-                        break;
+                        continuation = false;
+                    } else {
+                        currentValues.append((char)c);
                     }
-                }
-                if (!instring && c == ')') {
-                    indatarow = false;
-                    lastpart.setLength(0);
-                    if (found && contextsearch) {
-                        if (firstfound) {
-                            bufferedWriter.write("INSERT INTO `");
-                            bufferedWriter.write(table_name);
-                            bufferedWriter.write("` VALUES ");
-                            firstfound = false;
-                        } else {
-                            bufferedWriter.write(",");
-                        }
-                        bufferedWriter.write(currentValues.toString());
-                        bufferedWriter.flush();
-                        found = false;
+                    break;
+                default:
+                    if (indatarow) {
+                        lastpart.append((char) c);
+                        currentValues.append((char) c);
                     }
+                break;
                 }
             }
             return retval.toArray(new String[retval.size()]);
