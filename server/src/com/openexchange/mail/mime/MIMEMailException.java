@@ -407,14 +407,28 @@ public class MIMEMailException extends MailException {
 				return new MIMEMailException(Code.SEND_FAILED, exc, Arrays.toString(exc.getInvalidAddresses()));
 			} else if (e instanceof StoreClosedException) {
 				return new MIMEMailException(Code.STORE_CLOSED, e, e.getMessage());
-			} else if (e.getNextException() instanceof BindException) {
+			}
+			final Exception nextException = e.getNextException();
+			if (nextException == null) {
+				if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_QUOTA) != -1) {
+					return new MIMEMailException(Code.QUOTA_EXCEEDED, e, EMPTY_ARGS);
+				}
+				/*
+				 * Default case
+				 */
+				return new MIMEMailException(Code.MESSAGING_ERROR, e, e.getMessage());
+			}
+			/*
+			 * Messaging exception has a nested exception
+			 */
+			if (nextException instanceof BindException) {
 				return new MIMEMailException(Code.BIND_ERROR, e, mailConfig == null ? STR_EMPTY : Integer
 						.valueOf(mailConfig.getPort()));
-			} else if (e.getNextException() instanceof ConnectionException) {
+			} else if (nextException instanceof ConnectionException) {
 				mailInterfaceMonitor.changeNumBrokenConnections(true);
 				return new MIMEMailException(Code.CONNECT_ERROR, e, mailConfig == null ? STR_EMPTY : mailConfig
 						.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
-			} else if (e.getNextException() instanceof ConnectException) {
+			} else if (nextException instanceof ConnectException) {
 				/*
 				 * Most modern IP stack implementations sense connection
 				 * idleness, and abort the connection attempt, resulting in a
@@ -425,27 +439,27 @@ public class MIMEMailException extends MailException {
 						mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY
 								: mailConfig.getLogin());
 				return me;
-			} else if (e.getNextException().getClass().getName().endsWith(EXC_CONNECTION_RESET_EXCEPTION)) {
+			} else if (nextException.getClass().getName().endsWith(EXC_CONNECTION_RESET_EXCEPTION)) {
 				mailInterfaceMonitor.changeNumBrokenConnections(true);
 				return new MIMEMailException(Code.CONNECTION_RESET, e, new Object[0]);
-			} else if (e.getNextException() instanceof NoRouteToHostException) {
+			} else if (nextException instanceof NoRouteToHostException) {
 				return new MIMEMailException(Code.NO_ROUTE_TO_HOST, e, mailConfig == null ? STR_EMPTY : mailConfig
 						.getServer());
-			} else if (e.getNextException() instanceof PortUnreachableException) {
+			} else if (nextException instanceof PortUnreachableException) {
 				return new MIMEMailException(Code.PORT_UNREACHABLE, e, mailConfig == null ? STR_EMPTY : Integer
 						.valueOf(mailConfig.getPort()));
-			} else if (e.getNextException() instanceof SocketException) {
+			} else if (nextException instanceof SocketException) {
 				/*
 				 * Treat dependent on message
 				 */
-				final SocketException se = (SocketException) e.getNextException();
+				final SocketException se = (SocketException) nextException;
 				if ("Socket closed".equals(se.getMessage()) || "Connection reset".equals(se.getMessage())) {
 					mailInterfaceMonitor.changeNumBrokenConnections(true);
 					return new MIMEMailException(Code.BROKEN_CONNECTION, e, mailConfig == null ? STR_EMPTY : mailConfig
 							.getServer());
 				}
 				return new MIMEMailException(Code.SOCKET_ERROR, e, e.getMessage());
-			} else if (e.getNextException() instanceof UnknownHostException) {
+			} else if (nextException instanceof UnknownHostException) {
 				return new MIMEMailException(Code.UNKNOWN_HOST, e, e.getMessage());
 			} else if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_QUOTA) != -1) {
 				return new MIMEMailException(Code.QUOTA_EXCEEDED, e, EMPTY_ARGS);
