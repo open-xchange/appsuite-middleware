@@ -93,6 +93,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * @author Tobias Prinz <tobias.prinz@open-xchange.com> ( hacks to fix bug 11958, which is ical4j ignoring timezone information if given after event data )
  */
 public class ICal4JParser implements ICalParser {
 
@@ -268,19 +269,43 @@ public class ICal4JParser implements ICalParser {
             final StringBuilder chunk = new StringBuilder();
             String line;
             boolean read = false;
+            boolean timezoneStarted = false; //hack to fix bug 11958 
+            boolean timezoneEnded = false; //hack to fix bug 11958
+            boolean timezoneRead = false; //hack to fix bug 11958
+            StringBuilder timezoneInfo = new StringBuilder(); //hack to fix bug 11958
             // Copy until we find an END:VCALENDAR
             while((line = reader.readLine()) != null) {
-                if(!line.startsWith("END:VCALENDAR")){
+                if(!line.startsWith("END:VCALENDAR")){ //hack to fix bug 11958
+                	if(line.matches("^\\s*BEGIN:VTIMEZONE")){
+                		timezoneStarted = true;
+                	}
                     if(!line.matches("\\s*")) {
                         read = true;
-                        chunk.append(line).append("\n");
+                        if(timezoneStarted && !timezoneEnded){ //hack to fix bug 11958
+                        	timezoneInfo.append(line).append("\n");
+                        } else {
+                        	chunk.append(line).append("\n");
+                        }
                     }
+                	if(line.matches("^\\s*END:VTIMEZONE")){ //hack to fix bug 11958
+                		timezoneEnded = true;
+                		timezoneRead = true && timezoneStarted;
+                	}
                 } else {
                     break;
                 }
             }
             if(!read) {  return null; }
             chunk.append("END:VCALENDAR\n");
+            if(timezoneRead){
+            	int locationForInsertion = chunk.indexOf("BEGIN:");
+            	if(locationForInsertion > -1){
+            		locationForInsertion = chunk.indexOf("BEGIN:", locationForInsertion + 1);
+            		if(locationForInsertion > -1){
+            			chunk.insert(locationForInsertion, timezoneInfo);
+            		}
+            	}
+            }
             return builder.build(new StringReader(chunk.toString())); // FIXME: Encoding!
         } catch (final IOException e) {
             //IGNORE

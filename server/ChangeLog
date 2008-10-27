@@ -7,6 +7,8 @@
 
  - Bugfix #9367 for German Outlook: Added several other fields that had not
    been translated before. Missing translations for French and English.
+ - Bugfix #11958: Added a hack that moves timezone information to the front
+   of the file to ensure the library bug is circumvented.
 
 * 2008-10-27 - thorben.betten@open-xchange.com
 
