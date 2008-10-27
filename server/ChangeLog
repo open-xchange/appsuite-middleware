@@ -3,6 +3,8 @@
  - Bugfix #12250: Changed (and fastened) parsing of PUT data on action=list
  - Bugfix #12347: No original HTML part appended as attachment on
    draft-edit
+ - Bugfix #12333: Added property to HTML parser to work in relaxed mode;
+   meaning it ignores parsing errors.
 
 * 2008-10-27 - choeger@open-xchange-com
 

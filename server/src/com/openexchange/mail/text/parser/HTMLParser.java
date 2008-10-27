@@ -103,7 +103,7 @@ public final class HTMLParser {
 		try {
 			parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
 			parser.setFeature(FEATURE_PRESERVE_TEXT, true);
-			// parser.setFeature(FEATURE_RELAXED, true);
+			parser.setFeature(FEATURE_RELAXED, true);
 			parser.setInput(new StringReader(html));
 			int event = XmlPullParser.END_DOCUMENT;
 			int[] holderForStartAndLength = null;
