@@ -120,6 +120,24 @@ public class InfostoreQueryCatalog {
             Metadata.LAST_MODIFIED_UTC_LITERAL
     )));
 
+    public Metadata[] filterWritable(Metadata[] fields) {
+        boolean mustRemove = false;
+        for (Metadata field : fields) {
+            mustRemove = mustRemove || IGNORE_ON_WRITE.contains(field);
+        }
+        if(!mustRemove) {
+            return fields;
+        }
+        Metadata[] writableFields = new Metadata[fields.length-IGNORE_ON_WRITE.size()];
+        int index = 0;
+        for(Metadata field : fields) {
+            if(!IGNORE_ON_WRITE.contains(field)) {
+                writableFields[index++] = field;
+            }
+        }
+        return writableFields;
+    }
+
     public static enum Table {
 		INFOSTORE(INFOSTORE_FIELDS, INFOSTORE_FIELDS_SET,"infostore"), 
 		INFOSTORE_DOCUMENT(INFOSTORE_DOCUMENT_FIELDS, INFOSTORE_DOCUMENT_FIELDS_SET, "infostore_document"),
@@ -267,14 +285,8 @@ public class InfostoreQueryCatalog {
 
     public Metadata[] getWritableDocumentFields() {
         Metadata[] fields = getDocumentFields();
-        Metadata[] writableFields = new Metadata[fields.length-IGNORE_ON_WRITE.size()];
-        int index = 0;
-        for(Metadata field : fields) {
-            if(!IGNORE_ON_WRITE.contains(field)) {
-                writableFields[index++] = field;
-            }
-        }
-        return writableFields;
+
+        return filterWritable(fields);
     }
 
     public Metadata[] filterForDocument(final Metadata[] modified) {
@@ -316,14 +328,7 @@ public class InfostoreQueryCatalog {
 
     public Metadata[] getWritableVersionFields() {
         Metadata[] fields = getVersionFields();
-        Metadata[] writableFields = new Metadata[fields.length-IGNORE_ON_WRITE.size()];
-        int index = 0;
-        for(Metadata field : fields) {
-            if(!IGNORE_ON_WRITE.contains(field)) {
-                writableFields[index++] = field;
-            }
-        }
-        return writableFields;
+        return filterWritable(fields);
     }
 
     public Metadata[] filterForVersion(final Metadata[] modified) {

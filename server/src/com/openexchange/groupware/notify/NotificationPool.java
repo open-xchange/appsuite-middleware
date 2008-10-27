@@ -49,9 +49,7 @@
 
 package com.openexchange.groupware.notify;
 
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -146,7 +144,17 @@ public final class NotificationPool {
 		}
 	}
 
-	/**
+
+    // For the tests we need to get at the pool
+    public List<PooledNotification> getNotifications() {
+        return new ArrayList<PooledNotification>(queue);
+    }
+
+    public void clear() {
+        queue.clear();
+    }
+
+    /**
 	 * Start-up for this notification pool
 	 */
 	public void startup() {

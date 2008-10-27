@@ -579,18 +579,20 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 				}
 				database.saveDocument(metadata, body, Long.MAX_VALUE, session);
 				database.commit();
-            } catch (final OXException x) {
-                if(415 == x.getDetailNumber()) {
-                    throw new WebdavException(getUrl(), Protocol.SC_LOCKED);
-                }
             } catch (final Exception x) {
 				try {
 					database.rollback();
 				} catch (final TransactionException e) {
 					LOG.error("Couldn't rollback transaction. Run the recovery tool.");
 				}
-                if(x instanceof InfostoreException && InfostoreExceptionFactory.isPermissionException((InfostoreException)x)) {
-                    throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+                if(x instanceof InfostoreException) {
+                    InfostoreException iStoreException = (InfostoreException) x;
+                    if(415 == iStoreException.getDetailNumber()) {
+                       throw new WebdavException(getUrl(), Protocol.SC_LOCKED);
+                    }
+                    if(InfostoreExceptionFactory.isPermissionException(iStoreException)) {
+                        throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+                    }
                 }
                 throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			} finally {

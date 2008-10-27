@@ -97,8 +97,11 @@ public class DelUserFolderDiscoverer extends DBService {
 
 			folder: while (iter.hasNext()) {
 				final FolderObject fo = (FolderObject) iter.next();
-				for (final OCLPermission perm : fo.getPermissionsAsArray()) {
-					if (perm.isGroupPermission() || perm.getEntity() != userId) {
+                if(isVirtual(fo)) {
+                    continue folder;
+                }
+                for (final OCLPermission perm : fo.getPermissionsAsArray()) {
+					if (someoneElseMayReadInfoitems(perm, userId)) {
 						continue folder;
 					}
 				}
@@ -113,4 +116,13 @@ public class DelUserFolderDiscoverer extends DBService {
 
 		return discovered;
 	}
+
+    private boolean isVirtual(FolderObject fo) {
+        int id = fo.getObjectID();
+        return id == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID || id == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID;
+    }
+
+    private boolean someoneElseMayReadInfoitems(OCLPermission perm, int userId) {
+       return (perm.isGroupPermission() || perm.getEntity() != userId) && (perm.canReadAllObjects() || perm.canReadOwnObjects());
+    }
 }

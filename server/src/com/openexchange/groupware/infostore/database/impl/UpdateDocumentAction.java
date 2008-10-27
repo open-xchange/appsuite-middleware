@@ -58,6 +58,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.utils.Metadata;
 
 
 @OXExceptionSource(
@@ -96,7 +97,9 @@ public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
 	public void perform() throws AbstractOXException {
 		int counter = 0;
 		try {
-			counter = doUpdates(getQueryCatalog().getDocumentUpdate(getModified()), getQueryCatalog().filterForDocument(getModified()), getDocuments());
+            Metadata[] fields = getQueryCatalog().filterForDocument(getModified());
+            fields = getQueryCatalog().filterWritable(fields);
+            counter = doUpdates(getQueryCatalog().getDocumentUpdate(fields), fields, getDocuments());
 		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
 		}
