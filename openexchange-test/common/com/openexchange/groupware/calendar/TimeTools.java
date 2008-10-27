@@ -83,6 +83,11 @@ public final class TimeTools {
         return calendar.getTimeInMillis();
     }
 
+    /**
+     * Creates a new calendar and sets it to the last current full hour. 
+     * @param tz TimeZone.
+     * @return a calendar set to last full hour.
+     */
     public static Calendar createCalendar(final TimeZone tz) {
         final Calendar calendar = new GregorianCalendar(tz);
         calendar.set(Calendar.MINUTE, 0);

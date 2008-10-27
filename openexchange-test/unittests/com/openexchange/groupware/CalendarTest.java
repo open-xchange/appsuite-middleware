@@ -70,6 +70,7 @@ import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.CalendarSqlImp;
 import com.openexchange.groupware.calendar.ConflictHandler;
+import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
@@ -166,24 +167,21 @@ public class CalendarTest extends TestCase {
     }
     
     public static final void fillDatesInDao(final CalendarDataObject cdao) {
-        long s = System.currentTimeMillis();
-        long cals = s;
-        final long calsmod = s%CalendarRecurringCollection.MILLI_DAY;
-        cals = cals- calsmod;
-        final long endcalc = 3600000;
-        long mod = s%3600000;
-        s = s - mod;
-        final long saves = s;
-        final long e = s + endcalc;
-        final long savee = e;
-        long u = s + (CalendarRecurringCollection.MILLI_DAY * 10);
-        mod = u%CalendarRecurringCollection.MILLI_DAY;
-        u = u - mod;
+        long start = System.currentTimeMillis();
+        long mod = start % Constants.MILLI_HOUR;
+        // start should be a full hour.
+        start = start - mod;
+        // end is one hour after start.
+        final long end = start + Constants.MILLI_HOUR;
+        // until should be 10 days after start
+        long until = start + (Constants.MILLI_DAY * 10);
+        mod = until % Constants.MILLI_DAY;
+        // and on day start
+        until = until - mod;
         
-        cdao.setStartDate(new Date(s));
-        cdao.setEndDate(new Date(e));
-        cdao.setUntil(new Date(u));
-        
+        cdao.setStartDate(new Date(start));
+        cdao.setEndDate(new Date(end));
+        cdao.setUntil(new Date(until));
     }    
     
     public static int getPrivateFolder() throws Exception {

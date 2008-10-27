@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
+import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
@@ -18,9 +19,11 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarOperation;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
+import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
+import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
@@ -51,8 +54,8 @@ public class AppointmentBugTests extends TestCase {
     int cols[] = new int[] { AppointmentObject.START_DATE, AppointmentObject.END_DATE, AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.USERS, AppointmentObject.FULL_TIME };
     public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
     public static final String TIMEZONE = "Europe/Berlin";
-    private static int userid = 11; // bishoph
-    public final static int contextid = 1;
+    private static int userid = 9; // bishoph
+    public final static int contextid = 1337;
     
     private static boolean init = false;
     
@@ -2141,9 +2144,13 @@ public class AppointmentBugTests extends TestCase {
         cdao.setContext(context);
         cdao.setParentFolderID(fid);
         cdao.setTimezone(TIMEZONE);
-        CalendarTest.fillDatesInDao(cdao);
-        cdao.setStartDate(new Date(cdao.getStartDate().getTime()+CalendarRecurringCollection.MILLI_DAY));
-        cdao.setEndDate(new Date(cdao.getEndDate().getTime()+CalendarRecurringCollection.MILLI_DAY));
+        // Full day appointment must be inserted with UTC times. Otherwise day is wrong.
+        Calendar calendar = TimeTools.createCalendar(TimeZone.getTimeZone("UTC"));
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        // full time appointment is on tomorrow.
+        cdao.setStartDate(calendar.getTime());
+        calendar.add(Calendar.HOUR_OF_DAY, 24);
+        cdao.setEndDate(calendar.getTime());
         cdao.setFullTime(true);
         cdao.setTitle("testBug8317");
         cdao.setIgnoreConflicts(true);
@@ -2156,19 +2163,13 @@ public class AppointmentBugTests extends TestCase {
         cdao2.setContext(context);
         cdao2.setParentFolderID(fid);
         cdao2.setTimezone(TIMEZONE);
-        CalendarTest.fillDatesInDao(cdao2);
-        long starttime = cdao2.getStartDate().getTime();
-        final long mod = starttime%CalendarRecurringCollection.MILLI_DAY;
-        starttime -= mod;
-        starttime -= 3600000*2; // UTC shift !?
-        starttime = starttime + 1800000;
-        long endtime = starttime + 1800000;
-        starttime +=CalendarRecurringCollection.MILLI_DAY;
-        endtime +=CalendarRecurringCollection.MILLI_DAY;
-        final Date startdate = new Date(starttime);
-        final Date enddate = new Date(endtime);
-        cdao2.setStartDate(startdate);
-        cdao2.setEndDate(enddate);
+        // Normal time based appointments must be inserted with local time zone.
+        calendar = TimeTools.createCalendar(TimeZone.getTimeZone(TIMEZONE));
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 30);
+        cdao2.setStartDate(calendar.getTime());
+        calendar.add(Calendar.MINUTE, 30);
+        cdao2.setEndDate(calendar.getTime());
         cdao2.setTitle("testBug8317 - 2");
         final CalendarDataObject conflicts[] = csql.insertAppointmentObject(cdao2);
         
