@@ -324,6 +324,7 @@ public class InfostoreWriter extends TimedWriter {
 
         public Object lastModifiedUTC() {
             if(dm.getLastModified() == null) {
+                writeNull();
                 return null;
             }
             writeInteger(dm.getLastModified().getTime());
