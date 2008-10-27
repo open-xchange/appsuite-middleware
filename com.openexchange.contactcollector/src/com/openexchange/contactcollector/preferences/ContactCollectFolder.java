@@ -40,7 +40,7 @@ public class ContactCollectFolder implements PreferencesItemService {
             // TODO folder identifier can only be integer.
             public void writeValue(Context ctx, User user, Setting setting) throws SettingException {
                 if(setting != null)
-                    ServerUserSetting.setContactCollectionFolder(ctx.getContextId(), user.getId(), Long.parseLong(setting.getSingleValue().toString()));
+                    ServerUserSetting.setContactCollectionFolder(ctx.getContextId(), user.getId(), Integer.parseInt(setting.getSingleValue().toString()));
             }
             
         };
