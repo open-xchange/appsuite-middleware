@@ -118,29 +118,35 @@ ln -sf ../etc/init.d/open-xchange-admin %{buildroot}/sbin/rcopen-xchange-admin
 %{__rm} -rf %{buildroot}
 
 %post
-. /opt/open-xchange/etc/oxfunctions.sh
 
-pfile=/opt/open-xchange/etc/admindaemon/configdb.properties
-if ox_exists_property writeOnly $pfile; then
-   wonly=$(ox_read_property writeOnly $pfile)
-   if [ "$wonly" != "true" ]; then
-	 echo setting writeOnly in $pfile
+
+if [ ${1:-0} -eq 2 ]; then
+   # only when updating
+   . /opt/open-xchange/etc/oxfunctions.sh
+
+   pfile=/opt/open-xchange/etc/admindaemon/configdb.properties
+   if ox_exists_property writeOnly $pfile; then
+      wonly=$(ox_read_property writeOnly $pfile)
+      if [ "$wonly" != "true" ]; then
          ox_set_property writeOnly true $pfile
+      fi
+   else
+      ox_set_property writeOnly true $pfile
    fi
-else
-   echo setting writeOnly in $pfile
-   ox_set_property writeOnly true $pfile
+
+   # -----------------------------------------------------------------------
+   # bugfix id#12288
+   pfile=/opt/open-xchange/etc/admindaemon/system.properties
+   for prop in SetupLink LoginInfoConfig ConfigJumpConf User2IMAPImpl \
+     InitWorker CACHECCF IMAPPROPERTIES JAVAMAILPROPERTIES LOGLEVEL \
+     Participant SPELLCHECKCFG Contact; do
+      if ox_exists_property $prop $pfile; then
+	ox_remove_property $prop $pfile
+      fi
+   done
+
 fi
 
-# -----------------------------------------------------------------------
-# bugfix id#12288
-pfile=/opt/open-xchange/etc/admindaemon/system.properties
-for prop in SetupLink LoginInfoConfig ConfigJumpConf User2IMAPImpl \
-  InitWorker CACHECCF IMAPPROPERTIES JAVAMAILPROPERTIES LOGLEVEL; do
-   if ox_exists_property $prop $pfile; then
-	ox_remove_property $prop $pfile
-   fi
-done
 
 
 %files
