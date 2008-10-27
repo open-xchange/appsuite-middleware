@@ -71,6 +71,7 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
@@ -343,7 +344,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		if (newObj.getParticipants() == null) {
 			return;
 		}
-		if (!checkStartAndEndDate(newObj)) {
+		if (!checkStartAndEndDate(newObj, state.getModule())) {
 			return;
 		}
 		/*
@@ -1382,37 +1383,75 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 	 * @param calendarObj
 	 *            The calendar object whose start and end date is ought to be
 	 *            checked
+	 * @param module
+	 *            The module
 	 * @return <code>true</code> if the start date of specified calendar object
 	 *         if it is not more than 30 minutes in the past and its end date is
 	 *         not in the past compared to {@link System#currentTimeMillis()};
 	 *         otherwise <code>false</code>.
 	 */
-	static final boolean checkStartAndEndDate(final CalendarObject calendarObj) {
+	static final boolean checkStartAndEndDate(final CalendarObject calendarObj, final int module) {
+		final long now = System.currentTimeMillis();
 		{
 			// Do not send notification mails for tasks and appointments in the
 			// past. Bug #12063
 			final Date endDate = calendarObj.getEndDate();
-			if (endDate != null && endDate.getTime() < System.currentTimeMillis()) {
-				if (LOG.isDebugEnabled()) {
-					LOG.debug(new StringBuilder().append("Ignoring notification(s) for calendar object ").append(
-							calendarObj.getObjectID()).append(" since its end date is in the past").toString());
+			if (endDate != null) {
+				if (Types.APPOINTMENT == module && endDate.getTime() < now) {
+					if (LOG.isDebugEnabled()) {
+						LOG.debug(new StringBuilder().append("Ignoring notification(s) for appointment object ")
+								.append(calendarObj.getObjectID()).append(" since its end date is in the past")
+								.toString());
+					}
+					return false;
 				}
-				return false;
+				if (Types.TASK == module && !compare2Date(endDate.getTime(), now)) {
+					if (LOG.isDebugEnabled()) {
+						LOG.debug(new StringBuilder().append("Ignoring notification(s) for task object ").append(
+								calendarObj.getObjectID()).append(" since its end date is in the past").toString());
+					}
+					return false;
+				}
 			}
 		}
 		{
 			// Do not send notification mails for tasks and appointments whose
 			// start date is more than 30 minutes in the past
 			final Date startDate = calendarObj.getStartDate();
-			if (startDate != null && (System.currentTimeMillis() - startDate.getTime()) > THIRTY_MINUTES) {
-				if (LOG.isDebugEnabled()) {
-					LOG.debug(new StringBuilder().append("Ignoring notification(s) for calendar object ").append(
-							calendarObj.getObjectID()).append(
-							" since its start date is more than 30 minutes in the past").toString());
+			if (startDate != null) {
+				if (Types.APPOINTMENT == module && (now - startDate.getTime()) > THIRTY_MINUTES) {
+					if (LOG.isDebugEnabled()) {
+						LOG.debug(new StringBuilder().append("Ignoring notification(s) for appointment object ")
+								.append(calendarObj.getObjectID()).append(
+										" since its start date is more than 30 minutes in the past").toString());
+					}
+					return false;
 				}
-				return false;
+				if (Types.TASK == module && !compare2Date(startDate.getTime(), now)) {
+					if (LOG.isDebugEnabled()) {
+						LOG.debug(new StringBuilder().append("Ignoring notification(s) for task object ").append(
+								calendarObj.getObjectID()).append(" since its start date is in the past").toString());
+					}
+					return false;
+				}
+
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Compares if given time millis fit into the date denoted by specified date
+	 * millis.
+	 * 
+	 * @param date
+	 *            The date millis
+	 * @param millis
+	 *            The time millis
+	 * @return <code>true</code> if given time millis fit into the date denoted
+	 *         by specified date millis; otherwise <code>false</code>
+	 */
+	private static boolean compare2Date(final long date, final long millis) {
+		return date == (millis - (millis % Constants.MILLI_DAY));
 	}
 }

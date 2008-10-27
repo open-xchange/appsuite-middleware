@@ -60,6 +60,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.notify.ParticipantNotify.MailMessage;
 import com.openexchange.i18n.tools.RenderMap;
 import com.openexchange.server.ServerTimer;
@@ -220,23 +221,27 @@ public final class NotificationPool {
 					/*
 					 * Check start/end if message is still allowed to be sent
 					 */
-					ParticipantNotify.checkStartAndEndDate(cur.getCalendarObject());
-					/*
-					 * Create message
-					 */
-					final MailMessage mmsg = ParticipantNotify.createParticipantMessage(p, cur.getTitle(), cur
-							.getState().getAction(), cur.getState(), cur.getLocale(), cur.getRenderMap(), true, b);
-					if (logger.isDebugEnabled()) {
-						logger.debug(b.append("Pooled ").append(
-								(Types.APPOINTMENT == cur.getState().getModule() ? "Appointment" : "Task")).append(
-								" (id = ").append(cur.getCalendarObject().getObjectID()).append(
-								") notification message generated for receiver ").append(p.email).toString());
-						b.setLength(0);
+					final State state = cur.getState();
+					final CalendarObject calendarObject = cur.getCalendarObject();
+					if (ParticipantNotify.checkStartAndEndDate(calendarObject, state.getModule())) {
+						/*
+						 * Create message
+						 */
+						final MailMessage mmsg = ParticipantNotify.createParticipantMessage(p, cur.getTitle(), cur
+								.getState().getAction(), state, cur.getLocale(), cur.getRenderMap(), true, b);
+						if (logger.isDebugEnabled()) {
+							logger.debug(b.append("Pooled ").append(
+									(Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task"))
+									.append(" (id = ").append(calendarObject.getObjectID()).append(
+											") notification message generated for receiver ").append(p.email)
+									.toString());
+							b.setLength(0);
+						}
+						/*
+						 * Send notification
+						 */
+						ParticipantNotify.sendMessage(mmsg, cur.getSession(), calendarObject, state);
 					}
-					/*
-					 * Send notification
-					 */
-					ParticipantNotify.sendMessage(mmsg, cur.getSession(), cur.getCalendarObject(), cur.getState());
 				}
 			} finally {
 				taskWriteLock.unlock();
