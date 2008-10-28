@@ -330,21 +330,21 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                             counter++;
                             lastpart.setLength(0);
                             indatarow = false;
-                        }
-                        if (found && contextsearch) {
-                            if (firstfound) {
-                                bufferedWriter.write("INSERT INTO `");
-                                bufferedWriter.write(table_name);
-                                bufferedWriter.write("` VALUES ");
-                                firstfound = false;
-                            } else {
-                                bufferedWriter.write(",");
+                            if (found && contextsearch) {
+                                if (firstfound) {
+                                    bufferedWriter.write("INSERT INTO `");
+                                    bufferedWriter.write(table_name);
+                                    bufferedWriter.write("` VALUES ");
+                                    firstfound = false;
+                                } else {
+                                    bufferedWriter.write(",");
+                                }
+                                
+                                bufferedWriter.write(currentValues.toString());
+                                bufferedWriter.write(")");
+                                bufferedWriter.flush();
+                                found = false;
                             }
-                            
-                            bufferedWriter.write(currentValues.toString());
-                            bufferedWriter.write(")");
-                            bufferedWriter.flush();
-                            found = false;
                         }
                         currentValues.append((char)c);
                     }
