@@ -75,7 +75,8 @@ public class PathResolverTest extends TestCase {
 		findRoot();
 		
 		pathResolver.startTransaction();
-		id = mkdir(root, "this");
+        root = mkdir(root, "folder-"+System.currentTimeMillis());
+        id = mkdir(root, "this");
 		id2 = mkdir(id, "is");
 		id3 = mkdir(id2, "a");
 		id4 = mkdir(id3, "nice");
@@ -104,7 +105,8 @@ public class PathResolverTest extends TestCase {
 		rmdir(id3);
 		rmdir(id2);
 		rmdir(id);
-		Init.stopServer();
+        rmdir(root);
+        Init.stopServer();
 	}
 
 	private void findRoot() throws Exception {
