@@ -524,14 +524,24 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	private void update(final FolderObject folderObj, final long lastModified) throws OXException {
 		if (folderObj.getObjectID() <= 0) {
 			throw new OXFolderException(FolderCode.INVALID_OBJECT_ID, OXFolderUtility.getFolderName(folderObj));
-		} else if (folderObj.getPermissions() == null || folderObj.getPermissions().size() == 0) {
-			throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.PERMISSIONS, OXFolderUtility
-					.getFolderName(folderObj), Integer.valueOf(ctx.getContextId()));
 		}
 		/*
 		 * Get storage version (and thus implicitly check existence)
 		 */
 		final FolderObject storageObj = getFolderFromMaster(folderObj.getObjectID());
+		if (folderObj.getPermissions() == null || folderObj.getPermissions().size() == 0) {
+			if (folderObj.containsPermissions()) {
+				/*
+				 * Deny to set empty permissions
+				 */
+				throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.PERMISSIONS,
+						OXFolderUtility.getFolderName(folderObj), Integer.valueOf(ctx.getContextId()));
+			}
+			/*
+			 * Pass storage's permissions
+			 */
+			folderObj.setPermissionsAsArray(storageObj.getPermissionsAsArray());
+		}
 		/*
 		 * Check if a move is done here
 		 */
@@ -597,8 +607,11 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 				final OCLPermission[] removedPerms = OXFolderUtility.getPermissionsWithoutFolderAccess(folderObj
 						.getPermissionsAsArray(), storageObj.getPermissionsAsArray());
 				if (removedPerms.length > 0) {
-					new CheckSubfolderPermissionOnRemove(session, writeCon, ctx).checkSubfolderPermissionsOnRemove(
-							folderObj.getObjectID(), removedPerms, lastModified, true);
+					final CheckSubfolderPermissionOnRemove tmp = new CheckSubfolderPermissionOnRemove(session,
+							writeCon, ctx);
+					tmp.checkSubfolderPermissionsOnRemove(folderObj.getObjectID(), removedPerms, folderObj
+							.getPermissionsAsArray(), lastModified, true);
+					folderObj.setPermissionsAsArray(tmp.getNewPerms());
 					new CheckParentPermissionOnRemove(session, writeCon, ctx).checkParentPermissionsOnRemove(storageObj
 							.getParentFolderID(), folderObj.getObjectID(), removedPerms, lastModified, true);
 				}
