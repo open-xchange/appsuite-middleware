@@ -565,7 +565,24 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 						throw new IMAPException(IMAPException.Code.NO_CREATE_ACCESS, parentFullname);
 					}
 				} catch (final MessagingException e) {
-					throw new IMAPException(IMAPException.Code.NO_ACCESS, e, parentFullname);
+					/*
+					 * MYRIGHTS command failed for given mailbox
+					 */
+					if (!imapConfig.getImapCapabilities().hasNamespace()) {
+						/*
+						 * No namespace support
+						 */
+						throw new IMAPException(IMAPException.Code.NO_ACCESS, e, parentFullname);
+					}
+					if (!NamespaceFoldersCache.containedInPersonalNamespaces(parent.getFullName(), imapStore, true,
+							session)) {
+						/*
+						 * Given parent is NOT covered by user's personal
+						 * namespaces.
+						 */
+						throw new IMAPException(IMAPException.Code.NO_ACCESS, e, parentFullname);
+					}
+					LOG.warn("MYRIGHTS command failed", e);
 				}
 			}
 			if (!checkFolderNameValidity(toCreate.getName(), parent.getSeparator())) {
@@ -786,8 +803,23 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 							throw new IMAPException(IMAPException.Code.NO_CREATE_ACCESS, newParent);
 						}
 					} catch (final MessagingException e) {
-						LOG.error(e.getMessage(), e);
-						throw new IMAPException(IMAPException.Code.NO_ACCESS, e, newParent);
+						/*
+						 * MYRIGHTS command failed for given mailbox
+						 */
+						if (!imapConfig.getImapCapabilities().hasNamespace()) {
+							/*
+							 * No namespace support
+							 */
+							throw new IMAPException(IMAPException.Code.NO_ACCESS, e, newParent);
+						}
+						if (!NamespaceFoldersCache.containedInPersonalNamespaces(newParent, imapStore, true, session)) {
+							/*
+							 * Given parent is NOT covered by user's personal
+							 * namespaces.
+							 */
+							throw new IMAPException(IMAPException.Code.NO_ACCESS, e, newParent);
+						}
+						LOG.warn("MYRIGHTS command failed", e);
 					}
 				}
 				if (!checkFolderNameValidity(newName, separator)) {
@@ -1157,14 +1189,16 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 										/*
 										 * We face an Over-Quota-Exception
 										 */
-										throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, nestedExc, new Object[0]);
+										throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, nestedExc,
+												new Object[0]);
 									}
 								}
 								if (e.getMessage().indexOf("Over quota") > -1) {
 									/*
 									 * We face an Over-Quota-Exception
 									 */
-									throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, e, new Object[0]);
+									throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, e,
+											new Object[0]);
 								}
 								throw new IMAPException(IMAPException.Code.MOVE_ON_DELETE_FAILED, e, new Object[0]);
 							}
@@ -1602,11 +1636,32 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 				if (!RightsCache.getCachedRights(toMove, true, session).contains(Rights.Right.READ)) {
 					throw new IMAPException(IMAPException.Code.NO_READ_ACCESS, toMove.getFullName());
 				}
+			} catch (final MessagingException e) {
+				throw new IMAPException(IMAPException.Code.NO_ACCESS, e, toMove.getFullName());
+			}
+			try {
 				if (!RightsCache.getCachedRights(toMove, true, session).contains(Rights.Right.CREATE)) {
 					throw new IMAPException(IMAPException.Code.NO_CREATE_ACCESS, toMove.getFullName());
 				}
 			} catch (final MessagingException e) {
-				throw new IMAPException(IMAPException.Code.NO_ACCESS, e, toMove.getFullName());
+				/*
+				 * MYRIGHTS command failed for given mailbox
+				 */
+				if (!imapConfig.getImapCapabilities().hasNamespace()) {
+					/*
+					 * No namespace support
+					 */
+					throw new IMAPException(IMAPException.Code.NO_ACCESS, e, toMove.getFullName());
+				}
+				if (!NamespaceFoldersCache
+						.containedInPersonalNamespaces(toMove.getFullName(), imapStore, true, session)) {
+					/*
+					 * Given parent is NOT covered by user's personal
+					 * namespaces.
+					 */
+					throw new IMAPException(IMAPException.Code.NO_ACCESS, e, toMove.getFullName());
+				}
+				LOG.warn("MYRIGHTS command failed", e);
 			}
 		}
 		/*

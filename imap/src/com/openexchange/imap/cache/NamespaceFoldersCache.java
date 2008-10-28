@@ -125,6 +125,28 @@ public final class NamespaceFoldersCache {
 	}
 
 	/**
+	 * Checks if personal namespaces contain the specified fullname
+	 * 
+	 * @param fullname
+	 *            The fullname to check
+	 * @param imapStore
+	 *            The IMAP store
+	 * @param load
+	 *            Whether <code>NAMESPACE</code> command should be invoked if no
+	 *            cache entry present or not
+	 * @param session
+	 *            The session providing the session-bound cache
+	 * @return <code>true</code> if personal namespaces contain the specified
+	 *         fullname; otherwise <code>false</code>
+	 * @throws MessagingException
+	 *             If <code>NAMESPACE</code> command fails
+	 */
+	public static boolean containedInPersonalNamespaces(final String fullname, final IMAPStore imapStore,
+			final boolean load, final Session session) throws MessagingException {
+		return Arrays.binarySearch(getPersonalNamespaces(imapStore, load, session), fullname) >= 0;
+	}
+
+	/**
 	 * Gets cached user namespaces when invoking <code>NAMESPACE</code> command
 	 * on given IMAP store
 	 * 
