@@ -121,7 +121,7 @@ public final class CheckSubfolderPermissionOnRemove extends CheckPermission {
 			final long lastModified, final boolean enforceAdminPermission) throws OXException {
 		final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
 		final UserConfiguration sessionUserConf = userConfigStorage.getUserConfiguration(sessionUser, ctx);
-		final Map<Integer, ToDoPermission> map = new HashMap<Integer, ToDoPermission>();
+		final Map<Integer, ToDoPermission> toRemove = new HashMap<Integer, ToDoPermission>();
 		/*
 		 * Iterate removed permissions if a subfolder grants folder-read
 		 * permission
@@ -139,7 +139,7 @@ public final class CheckSubfolderPermissionOnRemove extends CheckPermission {
 						for (final int user : members) {
 							if (!areSubfoldersVisible(folderId, user,
 									userConfigStorage.getUserConfiguration(user, ctx), groupId, sessionUserConf,
-									enforceAdminPermission, map)) {
+									enforceAdminPermission, toRemove)) {
 								throw new OXFolderException(OXFolderException.FolderCode.SUBFOLDER_STILL_VISIBLE_GROUP,
 										UserStorage.getStorageUser(user, ctx).getDisplayName(), GroupStorage
 												.getInstance(true).getGroup(groupId, ctx).getDisplayName());
@@ -154,7 +154,7 @@ public final class CheckSubfolderPermissionOnRemove extends CheckPermission {
 					 */
 					final int user = removedPerm.getEntity();
 					if (!areSubfoldersVisible(folderId, user, userConfigStorage.getUserConfiguration(user, ctx), -1,
-							sessionUserConf, enforceAdminPermission, map)) {
+							sessionUserConf, enforceAdminPermission, toRemove)) {
 						throw new OXFolderException(OXFolderException.FolderCode.SUBFOLDER_STILL_VISIBLE_USER,
 								UserStorage.getStorageUser(user, ctx).getDisplayName());
 					}
@@ -164,9 +164,9 @@ public final class CheckSubfolderPermissionOnRemove extends CheckPermission {
 			 * Auto-delete permission to make visible subfolder non-visible in
 			 * order to achieve a consistent folder tree
 			 */
-			if (!map.isEmpty()) {
-				final int size2 = map.size();
-				final Iterator<Map.Entry<Integer, ToDoPermission>> iter2 = map.entrySet().iterator();
+			if (!toRemove.isEmpty()) {
+				final int size2 = toRemove.size();
+				final Iterator<Map.Entry<Integer, ToDoPermission>> iter2 = toRemove.entrySet().iterator();
 				for (int i = 0; i < size2; i++) {
 					final Map.Entry<Integer, ToDoPermission> entry = iter2.next();
 					final int fuid = entry.getKey().intValue();
@@ -227,7 +227,7 @@ public final class CheckSubfolderPermissionOnRemove extends CheckPermission {
 
 	private boolean areSubfoldersVisible(final int folderId, final int entity,
 			final UserConfiguration entityConfiguration, final int groupId, final UserConfiguration sessionUserConf,
-			final boolean enforceAdminPermission, final Map<Integer, ToDoPermission> map) throws DBPoolingException,
+			final boolean enforceAdminPermission, final Map<Integer, ToDoPermission> toRemove) throws DBPoolingException,
 			OXException, SQLException {
 		/*
 		 * Iterate folder's subfolders
@@ -240,17 +240,17 @@ public final class CheckSubfolderPermissionOnRemove extends CheckPermission {
 				 * Current subfolder is visible; try to remove permission
 				 */
 				if (enforceAdminPermission
-						&& !subfolderObj.getEffectiveUserPermission(sessionUser, sessionUserConf).isFolderAdmin()) {
+						&& !subfolderObj.getEffectiveUserPermission(sessionUser, sessionUserConf, writeCon).isFolderAdmin()) {
 					/*
 					 * Modifying user is not allowed to change subfolder's
 					 * permissions
 					 */
 					return false;
 				}
-				ToDoPermission todo = map.get(subfolder);
+				ToDoPermission todo = toRemove.get(subfolder);
 				if (todo == null) {
 					todo = new ToDoPermission(subfolder.intValue());
-					map.put(subfolder, todo);
+					toRemove.put(subfolder, todo);
 				}
 				if (groupId != -1) {
 					/*
@@ -265,7 +265,7 @@ public final class CheckSubfolderPermissionOnRemove extends CheckPermission {
 
 			}
 			if (!areSubfoldersVisible(subfolder.intValue(), entity, entityConfiguration, groupId, sessionUserConf,
-					enforceAdminPermission, map)) {
+					enforceAdminPermission, toRemove)) {
 				return false;
 			}
 		}

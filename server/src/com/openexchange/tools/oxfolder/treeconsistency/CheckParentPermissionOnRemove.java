@@ -218,14 +218,15 @@ public final class CheckParentPermissionOnRemove extends CheckPermission {
 						final int[] members = GroupStorage.getInstance(true).getGroup(groupId, ctx).getMember();
 						for (final int user : members) {
 							final UserConfiguration userConf = userConfigStorage.getUserConfiguration(user, ctx);
-							if (parentObj.getEffectiveUserPermission(user, userConf).isFolderVisible()
+							if (parentObj.getEffectiveUserPermission(user, userConf, writeCon).isFolderVisible()
 									&& !isSiblingVisible(parent, folderId, user, userConf)) {
 								/*
 								 * No sibling visible to removed user, thus
 								 * permission can be removed from parent, too.
 								 */
 								if (enforceAdminPermission
-										&& !parentObj.getEffectiveUserPermission(sessionUser, sessionUserConf)
+										&& !parentObj
+												.getEffectiveUserPermission(sessionUser, sessionUserConf, writeCon)
 												.isFolderAdmin()) {
 									throw new OXFolderException(
 											OXFolderException.FolderCode.PARENT_STILL_VISIBLE_GROUP, UserStorage
@@ -254,14 +255,15 @@ public final class CheckParentPermissionOnRemove extends CheckPermission {
 					 */
 					final int user = removedPerm.getEntity();
 					final UserConfiguration userConf = userConfigStorage.getUserConfiguration(user, ctx);
-					if (parentObj.getEffectiveUserPermission(user, userConf).isFolderVisible()
+					if (parentObj.getEffectiveUserPermission(user, userConf, writeCon).isFolderVisible()
 							&& !isSiblingVisible(parent, folderId, user, userConf)) {
 						/*
 						 * No sibling visible to removed user, thus permission
 						 * can be removed from parent, too.
 						 */
 						if (enforceAdminPermission
-								&& !parentObj.getEffectiveUserPermission(sessionUser, sessionUserConf).isFolderAdmin()) {
+								&& !parentObj.getEffectiveUserPermission(sessionUser, sessionUserConf, writeCon)
+										.isFolderAdmin()) {
 							throw new OXFolderException(OXFolderException.FolderCode.PARENT_STILL_VISIBLE_USER,
 									UserStorage.getStorageUser(user, ctx).getDisplayName());
 						}
