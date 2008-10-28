@@ -124,7 +124,8 @@ public abstract class LockHelper {
 			loadLocks();
 			if(lock.getToken()!= null && locks.containsKey(lock.getToken())) {
 				relock(lock);
-				return;
+                locks.put(lock.getToken(), lock);
+                return;
 			}
 			
 			final int lockId = saveLock(lock);
