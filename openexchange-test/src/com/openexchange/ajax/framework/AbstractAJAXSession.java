@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.framework;
 
+import com.openexchange.ajax.framework.AJAXClient.User;
+
 import junit.framework.TestCase;
 
 public abstract class AbstractAJAXSession extends TestCase {
@@ -69,7 +71,7 @@ public abstract class AbstractAJAXSession extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        client = new AJAXClient(AJAXClient.User.User1);
+        client = new AJAXClient(User.User1);
     }
 
     /**
