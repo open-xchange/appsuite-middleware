@@ -158,6 +158,27 @@ public class Executor extends Assert {
 		return retval;
 	}
 
+	public static WebResponse execute4Download(final AJAXSession session, final AJAXRequest<?> request,
+			final String protocol, final String hostname) throws AjaxException, IOException {
+		final String urlString = protocol + "://" + hostname + request.getServletPath();
+		final WebRequest req;
+		switch (request.getMethod()) {
+		case GET:
+			req = new GetMethodWebRequest(urlString);
+			addParameter(req, session, request);
+			break;
+		default:
+			throw new AjaxException(AjaxException.Code.InvalidParameter, request.getMethod().name());
+		}
+		final WebConversation conv = session.getConversation();
+		final WebResponse resp;
+		// The upload returns a web page that should not be interpreted.
+		// final long startRequest = System.currentTimeMillis();
+		resp = conv.getResource(req);
+		//final long requestDuration = System.currentTimeMillis() - startRequest;
+		return resp;
+	}
+
     private static void addParameter(final WebRequest req,
         final AJAXSession session, final AJAXRequest<?> request) {
         if (null != session.getId()) {
