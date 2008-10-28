@@ -54,26 +54,25 @@ public class AppointmentBugTests extends TestCase {
     int cols[] = new int[] { AppointmentObject.START_DATE, AppointmentObject.END_DATE, AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.USERS, AppointmentObject.FULL_TIME };
     public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
     public static final String TIMEZONE = "Europe/Berlin";
+    // Override these in setup
     private static int userid = 9; // bishoph
-    public final static int contextid = 1337;
+    public static int contextid = 1337;
     
-    private static boolean init = false;
-    
+
     @Override
 	protected void setUp() throws Exception {        
         super.setUp();
+        Init.startServer();
         final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
-        this.userid = getUserId();
-        ContextStorage.start();
+        
+        contextid = ContextStorage.getInstance().getContextId("defaultcontext");
+        userid = getUserId();
     }
     
     @Override
 	protected void tearDown() throws Exception {
-        if (init) {
-            init = false;
-            Init.stopServer();
-        }
+        Init.stopServer();
         super.tearDown();
     }
     
@@ -88,10 +87,7 @@ public class AppointmentBugTests extends TestCase {
     }
     
     public static int getUserId() throws Exception {
-        if (!init) {
-            Init.startServer();
-            init = true;
-        }
+
         final String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");        
         return resolveUser(user);
     }
