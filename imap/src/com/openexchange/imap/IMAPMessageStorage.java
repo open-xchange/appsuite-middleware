@@ -525,14 +525,20 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 							.append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
 				}
 			} catch (final MessagingException e) {
-				if (e.getNextException() instanceof CommandFailedException) {
-					final CommandFailedException exc = (CommandFailedException) e.getNextException();
-					if (exc.getMessage().indexOf("Over quota") > -1) {
+				final Exception nestedExc = e.getNextException();
+				if (nestedExc != null) {
+					if (nestedExc.getMessage().indexOf("Over quota") > -1) {
 						/*
 						 * We face an Over-Quota-Exception
 						 */
-						throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, exc, new Object[0]);
+						throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, nestedExc, new Object[0]);
 					}
+				}
+				if (e.getMessage().indexOf("Over quota") > -1) {
+					/*
+					 * We face an Over-Quota-Exception
+					 */
+					throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, e, new Object[0]);
 				}
 				throw new IMAPException(IMAPException.Code.MOVE_ON_DELETE_FAILED, e, new Object[0]);
 			}
