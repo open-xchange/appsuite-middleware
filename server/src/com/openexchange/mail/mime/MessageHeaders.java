@@ -170,4 +170,8 @@ public final class MessageHeaders {
 
 	public static final HeaderName RETURN_PATH = HeaderName.valueOf(HDR_RETURN_PATH);
 
+	public static final String HDR_X_OX_VCARD = "X-OX-VCard-Attached";
+
+	public static final HeaderName X_OX_VCARD = HeaderName.valueOf(HDR_X_OX_VCARD);
+
 }
