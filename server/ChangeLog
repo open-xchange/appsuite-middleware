@@ -2,6 +2,7 @@
 
  - Bugfix #12393: Enhanced tree-consistency-check on a removed group
    permission
+ - Bugfix #12256: Fixed equals() method in class 'ExternalUserParticipant'
 
 * 2008-10-27 - marcus.klein@open-xchange.com
 

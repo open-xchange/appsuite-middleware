@@ -156,13 +156,17 @@ public class ExternalUserParticipant implements Participant, Comparable<Particip
             return false;
         }
         final ExternalUserParticipant other = (ExternalUserParticipant) obj;
-        if (id != other.id) {
+        if (emailaddress == null) {
+			if (other.emailaddress != null) {
+				return false;
+			}
+		} else if (!emailaddress.equals(other.emailaddress)) {
 			return false;
 		}
-        if (null == emailaddress && null != other.emailaddress) {
-            return false;
-        }
-        return emailaddress.equals(other.emailaddress);
+		if (id != other.id) {
+			return false;
+		}
+		return true;
     }
 
     /**
