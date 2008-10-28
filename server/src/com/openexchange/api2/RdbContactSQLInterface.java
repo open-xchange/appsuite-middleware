@@ -99,8 +99,10 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.PrefetchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.sql.DBUtils;
 
 @OXExceptionSource(
 		classId=Classes.COM_OPENEXCHANGE_API2_DATABASEIMPL_RDBCONTACTSQLINTERFACE,
@@ -1119,60 +1121,106 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 						}
 	)
 	public SearchIterator<ContactObject> getObjectsById(final int[][] object_id, final int[] cols) throws OXException {
-		boolean error = false;
-		Connection readcon = null;
-		SearchIterator<ContactObject> si = null;
-		Statement stmt = null;
-		ResultSet rs = null;
-		try{
-			readcon = DBPool.pickup(ctx);
-	
-			final ContactSql contactSQL = new ContactMySql(session, ctx);
-			contactSQL.setSelect(contactSQL.iFgetColsString(cols).toString());			
-			contactSQL.setObjectArray(object_id);
-			
-			stmt = contactSQL.getSqlStatement(readcon);
-			rs = ((PreparedStatement) stmt).executeQuery();
-			
-			if (object_id.length == 1 && !rs.first()){
+		try {
+			final List<ContactObject> retval = new ArrayList<ContactObject>(object_id.length);
+
+			int remain = object_id.length;
+			int offset = 0;
+			final int blockSize = 10;
+			while (remain > blockSize) {
+				/*
+				 * Copy block
+				 */
+				final int[][] block_object_id = new int[blockSize][];
+				System.arraycopy(object_id, offset, block_object_id, 0, block_object_id.length);
+				/*
+				 * Add contacts
+				 */
+				addQueriedContacts(cols, retval, block_object_id);
+				remain -= blockSize;
+				offset += blockSize;
+			}
+			if (remain > 0) {
+				final int[][] block_object_id = new int[remain][];
+				System.arraycopy(object_id, offset, block_object_id, 0, block_object_id.length);
+				/*
+				 * Add contacts
+				 */
+				addQueriedContacts(cols, retval, block_object_id);
+			}
+			final int size = retval.size();
+			if (size < object_id.length) {
 				throw EXCEPTIONS.createOXObjectNotFoundException(59);
 			}
-			rs.beforeFirst();
-			
-			si = new ContactObjectIterator(rs,stmt,cols,true,readcon);
-		} catch (final DBPoolingException e) {
-			error = true;
-			throw EXCEPTIONS.create(47,e);
+			return new SearchIteratorDelegator<ContactObject>(retval.iterator(), size);
 		} catch (final SearchIteratorException e) {
-			error = true;
-			throw EXCEPTIONS.create(48,e, Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
+			throw EXCEPTIONS.create(48, e, Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 		} catch (final SQLException e) {
-			error = true;
-			throw EXCEPTIONS.create(49,e, Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
-		} finally {
-			if (error){
-				try{
-					if (rs != null){
-						rs.close();
+			throw EXCEPTIONS.create(49, e, Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
+		}
+	}
+
+	private int addQueriedContacts(final int[] cols, final List<ContactObject> retval, final int[][] object_id)
+			throws SQLException, SearchIteratorException, OXException {
+		final Connection readcon;
+		try {
+			readcon = DBPool.pickup(ctx);
+		} catch (final DBPoolingException e) {
+			throw new ContactException(e);
+		}
+		boolean closeCon = true;
+		try {
+			/*
+			 * Create new contact SQL
+			 */
+			final ContactSql contactSQL = new ContactMySql(session, ctx);
+			contactSQL.setSelect(contactSQL.iFgetColsString(cols).toString());
+			contactSQL.setObjectArray(object_id);
+			/*
+			 * Necessary resources
+			 */
+			PreparedStatement ps = null;
+			ResultSet res = null;
+			boolean closeStuff = true;
+			SearchIterator<ContactObject> searchIterator = null;
+			try {
+				ps = contactSQL.getSqlStatement(readcon);
+				res = ps.executeQuery();
+				searchIterator = new ContactObjectIterator(res, ps, cols, true, readcon);
+				if (searchIterator.hasSize()) {
+					final int size = searchIterator.size();
+					for (int i = 0; i < size; i++) {
+						retval.add(searchIterator.next());
 					}
-					if (stmt != null){
-						stmt.close();
-					}
-				} catch (final SQLException sxe){
-					LOG.error("Unable to close Statement or ResultSet",sxe);
+					return size;
 				}
-				try{
-					if (readcon != null) {
-						DBPool.closeReaderSilent(ctx, readcon);
+				int count = 0;
+				while (searchIterator.hasNext()) {
+					retval.add(searchIterator.next());
+					count++;
+				}
+				return count;
+			} finally {
+				if (searchIterator != null) {
+					try {
+						searchIterator.close();
+						closeCon = false;
+						closeStuff = false;
+					} catch (final SearchIteratorException e) {
+						LOG.error("Unable to close search iterator", e);
 					}
-				} catch (final Exception ex){
-					LOG.error("Unable to return Connection",ex);
+				}
+				if (closeStuff) {
+					DBUtils.closeSQLStuff(res, ps);
 				}
 			}
-		}	
-		return new PrefetchIterator<ContactObject>(si);
+		} finally {
+			if (closeCon) {
+				DBPool.closeReaderSilent(ctx, readcon);
+			}
+		}
 	}
-	
+
 	public static boolean performSecurityReadCheck(final int fid, final int created_from, final int user, final int[] group, final Session so, final Connection readcon, final Context ctx) {
 		return Contacts.performContactReadCheck(fid, created_from, user, group, ctx,
 				UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx),

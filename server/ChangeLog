@@ -3,6 +3,7 @@
  - Bugfix #12393: Enhanced tree-consistency-check on a removed group
    permission
  - Bugfix #12256: Fixed equals() method in class 'ExternalUserParticipant'
+ - Bugfix #12362: Splitted large number of contacts to query into blocks
 
 * 2008-10-27 - marcus.klein@open-xchange.com
 
