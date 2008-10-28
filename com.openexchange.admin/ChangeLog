@@ -1,3 +1,7 @@
+* 2008-10-28 - marcus.klein@open-xchange.com
+
+ - Bugfix #12392: Removed the creation of some tables only needed for OXEE.
+
 * 2008-10-27 - choeger@open-xchange.com
 
  - Bugfix ID#12287 JAVA_OXCMD_OPTS option missing after upgrade from SP3 to
