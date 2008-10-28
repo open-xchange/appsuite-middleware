@@ -230,7 +230,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                         }
                         searchcontext = false;
                         oldstate = 0;
-                        state = 0;
+                        state = 5;
                     }
                     // Reset state machine at the end of the line if we are in the first two states
                     if (3 > state && c == '\n') {
