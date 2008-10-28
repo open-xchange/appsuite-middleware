@@ -110,12 +110,31 @@ public class DelUserFolderDiscovererTest extends TestCase{
 	
 	public void testDiscoverFolders() throws Exception{
 		final List<FolderObject> folders = discoverer.discoverFolders(userIdA, ctx);
-		assertEquals(1,folders.size());
-		assertEquals(privateInfostoreFolder.getObjectID(), folders.get(0).getObjectID());
-		
-	}
-	
-	private void addDefaults(final FolderObject folder) {
+        boolean privateFolderFound = false;
+        for(FolderObject folder : folders) {
+            assertFalse(folder.getObjectID() == this.folderWithOtherEntity.getObjectID());
+            assertOnlyUserCanRead(folder, userIdA);
+            privateFolderFound = privateFolderFound || privateInfostoreFolder.getObjectID() == folder.getObjectID();
+        }
+        assertTrue(privateFolderFound);
+
+    }
+
+    private void assertOnlyUserCanRead(FolderObject folder, int userIdA) {
+        boolean userCanRead = false;
+        for(OCLPermission perm : folder.getPermissions()) {
+            if(perm.isGroupPermission()) {
+                assertFalse(perm.canReadOwnObjects() || perm.canReadAllObjects());
+            } else if (userIdA != perm.getEntity()){
+                assertFalse(perm.canReadOwnObjects() || perm.canReadAllObjects());
+            } else {
+                userCanRead = userCanRead || perm.canReadAllObjects() || perm.canReadOwnObjects();
+            }
+        }
+        assertTrue(userCanRead);
+    }
+
+    private void addDefaults(final FolderObject folder) {
 		folder.setType(FolderObject.PUBLIC);
 		folder.setModule(FolderObject.INFOSTORE);
 		folder.setParentFolderID(this.privateInfostoreFolder.getObjectID());
