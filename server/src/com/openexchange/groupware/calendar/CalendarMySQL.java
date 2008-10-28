@@ -1836,11 +1836,10 @@ class CalendarMySQL implements CalendarSqlImp {
 			update.append(cdao.getContextID());
 			update.append(DATES_IDENTIFIER_IS);
 			update.append(cdao.getObjectID());
-			update.append(" AND changing_date <= ");
-			if (clientLastModifiedCheck) {
+			// very fast tests fail if check is done against System.currentTimeMillis().
+            if (clientLastModifiedCheck) {
+                update.append(" AND changing_date <= ");
 				update.append(clientLastModified.getTime());
-			} else {
-				update.append(System.currentTimeMillis());
 			}
 
 			PreparedStatement pst = null;
@@ -3285,7 +3284,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		}
 	}
 
-	private final void deleteSingleAppointment(final int cid, int oid, final int uid, final int owner, final int fid, Connection readcon, final Connection writecon, final int foldertype, final Session so, final Context ctx, final int recurring_action, final CalendarDataObject cdao, final CalendarDataObject edao, final java.util.Date clientLastModified) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
+	private final void deleteSingleAppointment(final int cid, int oid, final int uid, final int owner, final int fid, Connection readcon, final Connection writecon, final int foldertype, final Session so, final Context ctx, final int recurring_action, final CalendarDataObject cdao, final CalendarDataObject edao, final Date clientLastModified) throws SQLException, OXException {
 
 		if (foldertype == FolderObject.PRIVATE && uid != owner) {
 			// SHARED
@@ -3355,6 +3354,8 @@ class CalendarMySQL implements CalendarSqlImp {
 							// OBJECT
 						} catch (final LdapException le) {
 							throw new OXException(le);
+						} catch (final OXException e) {
+						    throw e;
 						} catch (final Exception e) {
 							throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(9));
 						}
