@@ -94,20 +94,6 @@ public class ICalImportTest extends AbstractICalImportTest {
 	public void setUp() throws Exception {
         Init.startServer();
     }
-
-    // We can now handle TimeZones
-    public void _notest7386() throws UnsupportedEncodingException, ImportExportException, DBPoolingException, SQLException, LdapException, OXFolderException {
-		folderId = createTestFolder(FolderObject.TASK, sessObj, ctx, "icalTaskTestFolder");
-		final String ical =  "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//ellie//ellie//EN\nCALSCALE:GREGORIAN\nBEGIN:VTODO\nDTSTART;TZID=US/Eastern:20040528T000000\nSUMMARY:grade quizzes and m1\nUID:2\nSEQUENCE:0\nDTSTAMP:20040606T230400\nPRIORITY:2\nDUE;VALUE=DATE:20040528T000000\nEND:VTODO\nBEGIN:VTODO\nDTSTART;TZID=US/Eastern:20040525T000000\nSUMMARY:get timesheet signed\nUID:1\nSEQUENCE:0\nDTSTAMP:20040606T230400\nPRIORITY:1\nDUE;VALUE=DATE:20040525T000000\nEND:VTODO\nEND:VCALENDAR";
-
-		assertTrue("Can import?" ,  imp.canImport(sessObj, format, _folders(), null));
-
-		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), _folders(), null);
-		for(final ImportResult res : results){
-			assertTrue("Should have error" , res.hasError());
-			assertEquals("I_E-0505",res.getException().getErrorCode());
-		}
-	}
 	
 
 	@Test public void test7472_confidential() throws UnsupportedEncodingException, ImportExportException, DBPoolingException, SQLException, LdapException, OXFolderException {
@@ -155,7 +141,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 		final AppointmentObject appointmentObj = appointmentSql.getObjectById(objectId, folderId);
 		assertTrue("Has participants" , appointmentObj.containsParticipants());
 		final Participant[] participants = appointmentObj.getParticipants();
-		assertEquals("Two participants" , 2 , participants.length);
+		assertEquals("Two participants" , (Integer) 2 , (Integer) participants.length);
 		assertTrue("One user is " + testMailAddress + " (external user)", testMailAddress.equals(participants[0].getEmailAddress()) || testMailAddress.equals(participants[1].getEmailAddress()) );
 		assertTrue("One user is the user doing the import", participants[0].getIdentifier() == userId || participants[1].getIdentifier() == userId );
 	}
@@ -170,7 +156,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 
 		assertEquals("Should be truncation error" , Category.TRUNCATED , e.getCategory());
         e.printStackTrace();
-        assertEquals("SUMMARY was too long" , CalendarField.TITLE.getAppointmentObjectID() , ((AbstractOXException.Truncated)e.getProblematics()[0]).getId());
+        assertEquals("SUMMARY was too long" , (Integer) CalendarField.TITLE.getAppointmentObjectID() , (Integer) ((AbstractOXException.Truncated)e.getProblematics()[0]).getId());
 	}
 	
 	/*
@@ -200,7 +186,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 		
 		final AppointmentSQLInterface appointments = new CalendarSql(sessObj);
 		final CalendarDataObject app = appointments.getObjectById( Integer.valueOf(res.getObjectId()), Integer.valueOf(res.getFolder()) );
-		assertEquals("Comparing interval: ", interval , app.getInterval() );
+		assertEquals("Comparing interval: ", (Integer) interval , (Integer) app.getInterval() );
 	}
 
 //	/*
@@ -255,7 +241,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
 		final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
 		assertTrue("Has alarm" , appointmentObj.containsAlarm());
-		assertEquals("Alarm is "+alarm+" minutes earlier" , alarm , appointmentObj.getAlarm());
+		assertEquals("Alarm is "+alarm+" minutes earlier" , (Integer) alarm , (Integer) appointmentObj.getAlarm());
 	}
 	
 	/*
@@ -335,8 +321,8 @@ public class ICalImportTest extends AbstractICalImportTest {
 		final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7735_negative", ctx,true);
 		assertTrue(res.hasError());
 	}
-	// FIXME? MAYBE?
-    public void _test7470() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, LdapException {
+
+	@Test public void test7470() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, LdapException {
 		final String ical = 
 			"BEGIN:VCALENDAR\n" +
 			"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" +
@@ -378,7 +364,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 		final AppointmentSQLInterface appointments = new CalendarSql(sessObj);
 		final CalendarDataObject app = appointments.getObjectById( Integer.valueOf(res.getObjectId()), Integer.valueOf(res.getFolder()) );
 		final Participant[] participants = app.getParticipants();
-		assertEquals("Two participants?" , 2, participants.length);
+		assertEquals("Two participants?" , (Integer) 2, (Integer) participants.length);
 		boolean found = false;
 		for(final Participant p : participants){
 			if("cbartkowiak@oxhemail.open-xchange.com".equals( p.getEmailAddress() ) ){

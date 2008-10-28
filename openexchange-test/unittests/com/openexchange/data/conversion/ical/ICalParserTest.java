@@ -1136,6 +1136,18 @@ public class ICalParserTest extends TestCase {
         		appointmentAsExpected.getEndDate(), 
         		appointmentThatTroublesUs.getEndDate());
     }
+    
+    /* Bug 7470 - part III: Multiple line arguments are supposed to be 'unfolded'
+     * according to RFC 2445 - iCal4J does not seem to do this. This test is meant to confirm
+     * the wrapping parser does handle the case.
+     */
+    public void testShouldHandleMultipleLineArguments() throws ConversionError{
+    	String foldedSummary = "This is a so called 'folded' argument\n meaning it is split\n into multiple lines\n each starting with a whitespace character";
+    	String unfoldedSummary = foldedSummary.replace("\n ","");
+    	String icalText = fixtures.veventWithSimpleProperties(new Date(), new Date(), "SUMMARY", foldedSummary);
+    	AppointmentObject appointment = parseAppointment(icalText);
+    	assertEquals("Unfolded summary does not match transformed title", unfoldedSummary, appointment.getTitle());
+    }
 
     @Override
     protected void setUp() throws Exception {
