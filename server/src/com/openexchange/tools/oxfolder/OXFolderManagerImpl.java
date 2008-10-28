@@ -601,8 +601,6 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		OXFolderUtility.checkFolderPermissions(folderObj, user.getId(), ctx);
 		OXFolderUtility.checkPermissionsAgainstUserConfigs(folderObj, ctx);
 		if (FolderObject.PUBLIC == folderObj.getType()) {
-			new CheckParentPermission(session, writeCon, ctx).checkParentPermissions(storageObj.getParentFolderID(),
-					folderObj.getPermissionsAsArray(), lastModified, true);
 			{
 				final OCLPermission[] removedPerms = OXFolderUtility.getPermissionsWithoutFolderAccess(folderObj
 						.getPermissionsAsArray(), storageObj.getPermissionsAsArray());
@@ -616,6 +614,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 							.getParentFolderID(), folderObj.getObjectID(), removedPerms, lastModified, true);
 				}
 			}
+			new CheckParentPermission(session, writeCon, ctx).checkParentPermissions(storageObj.getParentFolderID(),
+					folderObj.getPermissionsAsArray(), lastModified, true);
 		}
 		boolean rename = false;
 		if (folderObj.containsFolderName() && !storageObj.getFolderName().equals(folderObj.getFolderName())) {

@@ -1,3 +1,8 @@
+* 2008-10-28 - thorben.betten@open-xchange.com
+
+ - Bugfix #12393: Enhanced tree-consistency-check on a removed group
+   permission
+
 * 2008-10-27 - marcus.klein@open-xchange.com
 
  - Bugfix #12325: Flushing the WebDAV/XML output after a usefull part has been
