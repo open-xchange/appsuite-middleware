@@ -51,6 +51,8 @@ package com.openexchange.imap.cache;
 
 import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
 
+import java.util.Arrays;
+
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 
@@ -96,7 +98,7 @@ public final class NamespaceFoldersCache {
 	 *            cache entry present or not
 	 * @param session
 	 *            The session providing the session-bound cache
-	 * @return The personal namespace folders
+	 * @return The binary-sorted personal namespace folders
 	 * @throws MessagingException
 	 *             If <code>NAMESPACE</code> command fails
 	 */
@@ -114,6 +116,7 @@ public final class NamespaceFoldersCache {
 				for (int i = 0; i < pns.length; i++) {
 					fullnames[i] = pns[i].getFullName();
 				}
+				Arrays.sort(fullnames);
 				entry.setValue(fullnames);
 			}
 			mailCache.put(entry);
