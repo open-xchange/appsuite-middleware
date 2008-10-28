@@ -119,7 +119,7 @@ public final class MIMEMessageConverter {
 				MessageHeaders.HDR_CC, MessageHeaders.HDR_BCC, MessageHeaders.HDR_DISP_NOT_TO,
 				MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_SUBJECT, MessageHeaders.HDR_DATE,
 				MessageHeaders.HDR_X_PRIORITY, MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_IN_REPLY_TO,
-				MessageHeaders.HDR_REFERENCES };
+				MessageHeaders.HDR_REFERENCES, MessageHeaders.HDR_X_OX_VCARD };
 
 		public static final org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory
 				.getLog(MailMessageFieldFiller.class);
