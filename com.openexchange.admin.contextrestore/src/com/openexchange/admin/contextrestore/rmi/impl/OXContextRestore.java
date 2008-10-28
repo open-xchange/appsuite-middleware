@@ -303,6 +303,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             while ((c = in.read()) != -1 && continuation) {
                 if (firstescaperun && escapted) {
                     escapted = false;
+                    firstescaperun = false;
                 }
                 if (escapted) {
                     firstescaperun = true;
@@ -327,7 +328,6 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                             } else if (readall && found) {
                                 retval.add(lastpart.toString());
                             }
-                            counter++;
                             lastpart.setLength(0);
                             indatarow = false;
                             if (found && contextsearch) {
@@ -405,7 +405,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                         lastpart.append((char) c);
                         currentValues.append((char) c);
                     }
-                break;
+                    break;
                 }
             }
             return retval.toArray(new String[retval.size()]);
