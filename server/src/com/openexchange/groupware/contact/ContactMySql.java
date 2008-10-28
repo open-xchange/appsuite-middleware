@@ -185,7 +185,7 @@ public class ContactMySql implements ContactSql {
 	}
 
 	public PreparedStatement getSqlStatement(final Connection con) throws SQLException {
-		final StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder(256);
 		sb.append(getSelect());
 		if (all_folders != null && all_folders.length() > 1) {
 			sb.append(all_folders);
