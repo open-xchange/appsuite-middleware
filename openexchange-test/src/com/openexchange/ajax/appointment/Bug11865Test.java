@@ -49,25 +49,40 @@
 
 package com.openexchange.ajax.appointment;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 
 import com.openexchange.ajax.appointment.action.DeleteRequest;
+import com.openexchange.ajax.appointment.action.DeleteResponse;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.database.Database;
+import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * Checks if the data of recurring appointment exceptions is correctly stored
  * and given to the GUI.
+ * Checks also, if an old recurring appointment with bad data can be deleted.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public final class Bug11865Test extends AbstractAJAXSession {
 
@@ -79,6 +94,16 @@ public final class Bug11865Test extends AbstractAJAXSession {
 		super(name);
 	}
 
+	protected void setUp() throws Exception {
+	    super.setUp();
+	    Init.startServer();
+	}
+	
+	protected void tearDown() throws Exception {
+	    super.tearDown();
+	    Init.stopServer();
+	}
+	
 	/**
 	 * Creates an appointment series and modifies one appointment of the series
 	 * to be an exception.
@@ -160,4 +185,91 @@ public final class Bug11865Test extends AbstractAJAXSession {
                 series.getLastModified()));
 		}
 	}
+	
+	public void testDeleteBadData() throws Throwable {
+	    AJAXClient client = null;
+        int objectId = 0;
+        int folderId = 0;
+        
+        client = getClient();
+        final TimeZone tz = client.getValues().getTimeZone();
+        folderId = client.getValues().getPrivateAppointmentFolder();
+        
+        //Create an objectId, which does not longer exist in the database.
+        final AppointmentObject dummyAppointment = new AppointmentObject();
+        dummyAppointment.setTitle("bug 11865 dummy appointment");
+        dummyAppointment.setParentFolderID(folderId);
+        dummyAppointment.setIgnoreConflicts(true);
+        Calendar calendar = TimeTools.createCalendar(tz);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.HOUR_OF_DAY, 8);
+        dummyAppointment.setStartDate(calendar.getTime());
+        calendar.set(Calendar.HOUR_OF_DAY, 9);
+        dummyAppointment.setEndDate(calendar.getTime());
+        
+        InsertRequest request = new InsertRequest(dummyAppointment, tz);
+        CommonInsertResponse response = client.execute(request);
+        dummyAppointment.setObjectID(response.getId());
+        dummyAppointment.setLastModified(response.getTimestamp());
+        
+        int dummyId = dummyAppointment.getObjectID();
+        
+        DeleteRequest deleteRequest = new DeleteRequest(dummyAppointment.getObjectID(), folderId, dummyAppointment.getLastModified());
+        client.execute(deleteRequest);
+        
+        //Create an Appointment
+        final AppointmentObject appointment = new AppointmentObject();
+        appointment.setTitle("Bug 11865 Corrupted Data Appointment.");
+        appointment.setParentFolderID(folderId);
+        appointment.setIgnoreConflicts(true);
+        calendar = TimeTools.createCalendar(tz);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.HOUR_OF_DAY, 8);
+        appointment.setStartDate(calendar.getTime());
+        calendar.set(Calendar.HOUR_OF_DAY, 9);
+        appointment.setEndDate(calendar.getTime());
+        
+        request = new InsertRequest(appointment, tz);
+        response = client.execute(request);
+        appointment.setObjectID(response.getId());
+        appointment.setLastModified(response.getTimestamp());
+        
+        objectId = appointment.getObjectID();
+        
+        //Manipulate Database to invalidate the appointment
+        calendar = TimeTools.createCalendar(TimeZone.getTimeZone("GMT"));
+        ContextStorage ctxStorage = ContextStorage.getInstance();
+        String context = AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME);
+        int contextId = ctxStorage.getContextId(context);
+        Connection writeCon = Database.get(contextId, true);
+        String sql = "UPDATE prg_dates SET intfield02 = ?, field08 = ? WHERE intfield01 = ?";
+        PreparedStatement pstmt = writeCon.prepareStatement(sql);
+        pstmt.setInt(1, dummyId);
+        pstmt.setString(2, Long.toString(calendar.getTimeInMillis()));
+        pstmt.setInt(3, objectId);
+        pstmt.execute();
+        pstmt.close();
+        Database.back(contextId, true, writeCon);
+        
+        //Try to delete the appointment
+        deleteRequest = new DeleteRequest(appointment.getObjectID(), folderId, appointment.getLastModified());
+        try {
+            DeleteResponse deleteResponse = client.execute(deleteRequest);
+            String test = "123";
+        } catch (Exception e) {
+            fail("Exception during deletion of corrupted appointment.");
+        }
+        
+        //Check if appointment still exists
+        GetRequest getRequest = new GetRequest(folderId, appointment.getObjectID());
+        GetResponse getResponse = client.execute(getRequest);
+        Response r = getResponse.getResponse();
+        assertTrue(r.hasError());
+        assertTrue(r.getErrorMessage().contains("Object not found"));
+	}
+	
 }
