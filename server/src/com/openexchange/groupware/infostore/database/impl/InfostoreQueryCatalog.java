@@ -120,17 +120,17 @@ public class InfostoreQueryCatalog {
             Metadata.LAST_MODIFIED_UTC_LITERAL
     )));
 
-    public Metadata[] filterWritable(Metadata[] fields) {
+    public Metadata[] filterWritable(final Metadata[] fields) {
         boolean mustRemove = false;
-        for (Metadata field : fields) {
+        for (final Metadata field : fields) {
             mustRemove = mustRemove || IGNORE_ON_WRITE.contains(field);
         }
         if(!mustRemove) {
             return fields;
         }
-        Metadata[] writableFields = new Metadata[fields.length-IGNORE_ON_WRITE.size()];
+        final Metadata[] writableFields = new Metadata[fields.length-IGNORE_ON_WRITE.size()];
         int index = 0;
-        for(Metadata field : fields) {
+        for(final Metadata field : fields) {
             if(!IGNORE_ON_WRITE.contains(field)) {
                 writableFields[index++] = field;
             }
@@ -284,7 +284,7 @@ public class InfostoreQueryCatalog {
 	}
 
     public Metadata[] getWritableDocumentFields() {
-        Metadata[] fields = getDocumentFields();
+        final Metadata[] fields = getDocumentFields();
 
         return filterWritable(fields);
     }
@@ -327,7 +327,7 @@ public class InfostoreQueryCatalog {
 	}
 
     public Metadata[] getWritableVersionFields() {
-        Metadata[] fields = getVersionFields();
+        final Metadata[] fields = getVersionFields();
         return filterWritable(fields);
     }
 

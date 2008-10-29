@@ -93,6 +93,8 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public abstract class DataMailPart extends MailPart implements ComposedMailPart {
 
+	private static final long serialVersionUID = -2377505617785953620L;
+
 	private static final int DEFAULT_BUF_SIZE = 0x2000;
 
 	private static final String FILE_PREFIX = "openexchange";

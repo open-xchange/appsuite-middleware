@@ -49,10 +49,10 @@
 
 package com.openexchange.ajax.request;
 
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -76,7 +76,12 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
-import com.openexchange.groupware.container.*;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -542,14 +547,14 @@ public class TaskRequest {
 		return jsonResponseObject;
 	}
 
-    private int[] removeVirtualColumns(int[] columns) {
-            List<Integer> helper = new ArrayList<Integer>(columns.length);
-            for(int col : columns) {
+    private int[] removeVirtualColumns(final int[] columns) {
+            final List<Integer> helper = new ArrayList<Integer>(columns.length);
+            for(final int col : columns) {
                 if(col != ContactObject.LAST_MODIFIED_UTC) {
                     helper.add(col);
                 }
             }
-            int[] copy = new int[helper.size()];
+            final int[] copy = new int[helper.size()];
             for(int i = 0; i < copy.length; i++) { copy[i] = helper.get(i); }
             return copy;
         }

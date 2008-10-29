@@ -84,7 +84,13 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.webdav.protocol.*;
+import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavLock;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.impl.AbstractResource;
 
@@ -586,7 +592,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 					LOG.error("Couldn't rollback transaction. Run the recovery tool.");
 				}
                 if(x instanceof InfostoreException) {
-                    InfostoreException iStoreException = (InfostoreException) x;
+                    final InfostoreException iStoreException = (InfostoreException) x;
                     if(415 == iStoreException.getDetailNumber()) {
                        throw new WebdavException(getUrl(), Protocol.SC_LOCKED);
                     }

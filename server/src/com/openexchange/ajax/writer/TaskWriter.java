@@ -70,7 +70,7 @@ public class TaskWriter extends CalendarWriter {
 
 	private static final Log LOG = LogFactory.getLog(TaskWriter.class);
 
-    private TimeZone utc = TimeZone.getTimeZone("utc");
+    private final TimeZone utc = TimeZone.getTimeZone("utc");
 
     /**
 	 * Initializes a new {@link TaskWriter}

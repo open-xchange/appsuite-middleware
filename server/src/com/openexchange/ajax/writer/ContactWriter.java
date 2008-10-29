@@ -69,7 +69,7 @@ import com.openexchange.groupware.container.LinkEntryObject;
  */
 public class ContactWriter extends CommonWriter {
 
-    private TimeZone utc = TimeZone.getTimeZone("utc");
+    private final TimeZone utc = TimeZone.getTimeZone("utc");
 
     /**
 	 * Initializes a new {@link ContactWriter}

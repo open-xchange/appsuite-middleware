@@ -73,7 +73,7 @@ public class AppointmentWriter extends CalendarWriter {
 
 	private static final Log LOG = LogFactory.getLog(AppointmentWriter.class);
 
-    private TimeZone utc = TimeZone.getTimeZone("utc");
+    private final TimeZone utc = TimeZone.getTimeZone("utc");
 
     /**
 	 * Initializes a new {@link AppointmentWriter}

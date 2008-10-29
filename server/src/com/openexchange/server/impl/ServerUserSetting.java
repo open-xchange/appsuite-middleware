@@ -95,9 +95,9 @@ public class ServerUserSetting {
                 setAttributeWithoutException(cid, user, CONTACT_COLLECT_FOLDER, defaultFolder);
             }
             setAttributeWithoutException(cid, user, CONTACT_COLLECT_ENABLED, enabled);
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             LOG.info("Error during Context creation.", e);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.info("Error during folder creation.", e);
         }
     }

@@ -117,12 +117,12 @@ public class DelUserFolderDiscoverer extends DBService {
 		return discovered;
 	}
 
-    private boolean isVirtual(FolderObject fo) {
-        int id = fo.getObjectID();
+    private boolean isVirtual(final FolderObject fo) {
+        final int id = fo.getObjectID();
         return id == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID || id == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID;
     }
 
-    private boolean someoneElseMayReadInfoitems(OCLPermission perm, int userId) {
+    private boolean someoneElseMayReadInfoitems(final OCLPermission perm, final int userId) {
        return (perm.isGroupPermission() || perm.getEntity() != userId) && (perm.canReadAllObjects() || perm.canReadOwnObjects());
     }
 }

@@ -50,10 +50,10 @@
 package com.openexchange.ajax.request;
 
 import java.sql.Connection;
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -245,8 +245,8 @@ public class ContactRequest {
 	public JSONArray actionUpdates(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException,
 			SearchIteratorException, OXException, OXJSONException, AjaxException {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
-		int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-        int[] columnsToLoad = removeVirtual(columns);
+		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+        final int[] columnsToLoad = removeVirtual(columns);
 
         final Date requestedTimestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
 		timestamp = new Date(requestedTimestamp.getTime());
@@ -363,8 +363,8 @@ public class ContactRequest {
 
 		try {
 			final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
-			int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-            int[] columnsToLoad = removeVirtual(columns);
+			final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+            final int[] columnsToLoad = removeVirtual(columns);
             final JSONArray jData = DataParser.checkJSONArray(jsonObj, AJAXServlet.PARAMETER_DATA);
 			int oldfolderId = 0;
 			final int[][] objectIdAndFolderId = new int[jData.length()][2];
@@ -520,8 +520,8 @@ public class ContactRequest {
 	public JSONArray actionAll(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException,
 			SearchIteratorException, OXException, OXJSONException, AjaxException {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
-		int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-        int[] columnsToLoad = removeVirtual(columns);
+		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+        final int[] columnsToLoad = removeVirtual(columns);
         final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
 		final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
 		final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
@@ -583,14 +583,14 @@ public class ContactRequest {
 		}
 	}
 
-    private int[] removeVirtual(int[] columns) {
-        List<Integer> helper = new ArrayList<Integer>(columns.length);
-        for(int col : columns) {
+    private int[] removeVirtual(final int[] columns) {
+        final List<Integer> helper = new ArrayList<Integer>(columns.length);
+        for(final int col : columns) {
             if(col != ContactObject.LAST_MODIFIED_UTC) {
                 helper.add(col);
             }
         }
-        int[] copy = new int[helper.size()];
+        final int[] copy = new int[helper.size()];
         for(int i = 0; i < copy.length; i++) { copy[i] = helper.get(i); }
         return copy;
     }
