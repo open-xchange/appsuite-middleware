@@ -52,9 +52,7 @@ package com.openexchange.mail;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * {@link MailFields} - Container for instances of {@link MailField} providing
@@ -65,15 +63,7 @@ import java.util.Map;
  */
 public final class MailFields {
 
-	private static final Map<Integer, MailField> REVERSE_ORDINAL_MAP;
-
-	static {
-		final MailField[] values = MailField.values();
-		REVERSE_ORDINAL_MAP = new HashMap<Integer, MailField>(values.length);
-		for (final MailField mailField : values) {
-			REVERSE_ORDINAL_MAP.put(Integer.valueOf(mailField.ordinal()), mailField);
-		}
-	}
+	private static final MailField[] VALUES = MailField.values();
 
 	private final boolean[] arr;
 
@@ -82,7 +72,7 @@ public final class MailFields {
 	 */
 	public MailFields() {
 		super();
-		arr = new boolean[REVERSE_ORDINAL_MAP.size()];
+		arr = new boolean[VALUES.length];
 		Arrays.fill(arr, false);
 	}
 
@@ -191,7 +181,7 @@ public final class MailFields {
 		final List<MailField> l = new ArrayList<MailField>(arr.length);
 		for (int i = 0; i < arr.length; i++) {
 			if (arr[i]) {
-				l.add(REVERSE_ORDINAL_MAP.get(Integer.valueOf(i)));
+				l.add(VALUES[i]);
 			}
 		}
 		return l.toArray(new MailField[l.size()]);
