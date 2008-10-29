@@ -187,8 +187,14 @@ if [ ${1:-0} -eq 2 ]; then
 
     # -----------------------------------------------------------------------
     pfile=/opt/open-xchange/etc/groupware/server.properties
-    if ! ox_exists_property MinimumSearchCharacters $pfile; then
-	ox_set_property MinimumSearchCharacters 0 $pfile
+    if ! ox_exists_property com.openexchange.MinimumSearchCharacters $pfile; then
+	ox_set_property com.openexchange.MinimumSearchCharacters 0 $pfile
+    fi
+
+    # -----------------------------------------------------------------------
+    pfile=/opt/open-xchange/etc/groupware/contact.properties
+    if ! ox_exists_property com.openexchange.contact.mailAddressAutoSearch $pfile; then
+	ox_set_property com.openexchange.contact.mailAddressAutoSearch true $pfile
     fi
 fi
 
