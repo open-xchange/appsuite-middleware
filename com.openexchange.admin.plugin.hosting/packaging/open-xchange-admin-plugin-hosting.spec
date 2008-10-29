@@ -29,7 +29,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.7.0
-Release:	0
+Release:	1
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -99,6 +99,8 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Mon Oct 13 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12234: Closing statements correctly.
 * Tue Sep 09 2008 - choeger@open-xchange.com
  - Bugfix ID#9972: Checking if context already exists in target database on context move operation
 * Fri Aug 22 2008 - choeger@open-xchange.com
