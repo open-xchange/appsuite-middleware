@@ -195,14 +195,15 @@ public class PathResolverTest extends TestCase {
 		Connection writeCon = null;
 		try {
 			writeCon = provider.getWriteConnection(ctx);
-		} finally {
-			if (writeCon != null) {
-				provider.releaseWriteConnection(ctx, writeCon);
+            final OXFolderManager oxma = new OXFolderManagerImpl(session, writeCon, writeCon);
+            oxma.createFolder(folder, true, System.currentTimeMillis());
+        } finally {
+            if (writeCon != null) {
+                provider.releaseWriteConnection(ctx, writeCon);
 			}
 		}
-		final OXFolderManager oxma = new OXFolderManagerImpl(session, writeCon, writeCon);
-		oxma.createFolder(folder, true, System.currentTimeMillis());
-		//oxfa.createFolder(folder, session, true, writeCon, writeCon, false);
+
+        //oxfa.createFolder(folder, session, true, writeCon, writeCon, false);
 		return folder.getObjectID();
 	}
 	
