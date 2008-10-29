@@ -780,8 +780,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 				if (isStandardFolder(moveMe.getFullName())) {
 					throw new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, moveMe.getFullName());
 				}
-				IMAPFolder destFolder = ((IMAPFolder) (newParent.length() == 0 ? imapStore.getDefaultFolder()
-						: imapStore.getFolder(newParent)));
+				IMAPFolder destFolder = ((IMAPFolder) (MailFolder.DEFAULT_FOLDER_ID.equals(newParent) ? imapStore
+						.getDefaultFolder() : imapStore.getFolder(newParent)));
 				if (!destFolder.exists()) {
 					destFolder = checkForNamespaceFolder(newParent);
 					if (null == destFolder) {
@@ -789,7 +789,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 						 * Destination folder could not be found, thus an
 						 * invalid name was specified by user
 						 */
-						throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(separator));
+						throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, newParent);
 					}
 				}
 				if (destFolder instanceof DefaultFolder) {

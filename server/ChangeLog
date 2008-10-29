@@ -1,6 +1,8 @@
 * 2008-10-29 - thorben.betten@open-xchange.com
 
  - Bugfix #12409: Sending proper fields back to GUI on edit-draft operation
+ - Bugfix #11658: Checking given destination folder's fullname to be the
+   default folder ID
 
 * 2008-10-28 - thorben.betten@open-xchange.com
 
