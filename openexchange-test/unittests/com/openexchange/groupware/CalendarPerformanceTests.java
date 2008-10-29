@@ -41,6 +41,8 @@ public class CalendarPerformanceTests extends TestCase {
     
     public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
     public static final String TIMEZONE = "Europe/Berlin";
+    
+    // Override these in setup
     private static int userid = 11; // bishoph
     public final static int contextid = 1;
     
