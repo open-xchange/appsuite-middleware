@@ -1,3 +1,9 @@
+open-xchange-xml (6.7.0-1) unstable; urgency=low
+
+  * first build for SP5 Beta1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 29 Oct 2008 17:26:18 +0100
+
 open-xchange-xml (6.7.0-0) unstable; urgency=low
 
   * Initial upstream version.

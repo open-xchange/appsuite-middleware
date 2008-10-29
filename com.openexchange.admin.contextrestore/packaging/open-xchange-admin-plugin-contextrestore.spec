@@ -29,7 +29,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.7.0
-Release:	0
+Release:	1
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -85,3 +85,4 @@ mv doc javadoc
 /opt/open-xchange/lib/*
 %config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/*
 
+%changelog

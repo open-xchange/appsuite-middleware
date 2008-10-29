@@ -1,3 +1,9 @@
+open-xchange-management (6.7.0-1) unstable; urgency=low
+
+  * first build for SP5 Beta1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 29 Oct 2008 17:26:37 +0100
+
 open-xchange-management (6.7.0-0) unstable; urgency=low
 
   * new unstable cycle

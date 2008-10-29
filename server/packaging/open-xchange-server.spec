@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.7.0
-Release:	0
+Release:	1
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -220,10 +220,88 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Oct 29 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12409: Sending proper fields back to GUI on edit-draft operation
+ - Bugfix #11658: Checking given destination folder's fullname to be the
+   default folder ID
+ - Bugfix #12270: Fixed keeping attachment on copying a contact
+ - Bugfix #12271: More robust parsing of messages with possible invalid
+   header lines
+* Wed Oct 29 2008 - martin.herfurth@open-xchange.com
+ - Bugfix #11865: Deleting corrupted Appointments.
+* Tue Oct 28 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12393: Enhanced tree-consistency-check on a removed group
+   permission
+ - Bugfix #12256: Fixed equals() method in class 'ExternalUserParticipant'
+ - Bugfix #12362: Splitted large number of contacts to query into blocks
+* Mon Oct 27 2008 - choeger@open-xchange-com
+ - Bugfix #12370 Wrong dependency in configjump package on rpm based distributions
+   removed dependency to open-xchange-configjump
+* Mon Oct 27 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12250: Changed (and fastened) parsing of PUT data on action=list
+ - Bugfix #12347: No original HTML part appended as attachment on
+   draft-edit
+ - Bugfix #12333: Added property to HTML parser to work in relaxed mode;
+   meaning it ignores parsing errors.
+ - Bugfix #12300: Fixed request type counting for monitoring information
+ - Bugfix #12297: Checking a task's start/due date on day-base
+ - Bugfix #12249: Improved handling of exceptions internally created by
+   JavaMail when receiving a "BYE" response code.
+* Mon Oct 27 2008 - tobias.prinz@open-xchange.com
+ - Bugfix #9367 for German Outlook: Added several other fields that had not
+   been translated before. Missing translations for French and English.
+ - Bugfix #11958: Added a hack that moves timezone information to the front
+   of the file to ensure the library bug is circumvented.
+* Mon Oct 27 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12325: Flushing the WebDAV/XML output after a useful part has been
+   generated. This should prevent AJP connection timeouts.
+* Fri Oct 24 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12371: Proper notification handling if participants replacement
+   is empty
+* Thu Oct 23 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12364: Replaced use of local variable with proxy method.
+ - Bugfix #12372: Removing recurrence id from interface when appointment is
+   created.
+* Wed Oct 22 2008 - francisco.laguna@open-xchange.com
+ - Bugfix #12361: Be more lenient with locks.
+* Wed Oct 22 2008 - marcus.klein@open-xchange-com
+ - Implemented UDP push for new emails in INBOX.
+* Wed Oct 22 2008 - choeger@open-xchange-com
+ - Bugfix #12290: AJP_LOG_FORWARD_REQUEST parameter missing in
+   ajp.properties after upgrade SP3 SP4
+ - Bugfix #12291: Parameter writeOnly missing in groupware
+   configdb.properties after upgrade SP3 -> SP4
+ - Bugfix #12292: imap.properties not correctly updated after
+   update SP3 -> SP4
+ - Bugfix #12296: propertie CACHECCF not removed in groupware
+   system.properties after upgrade SP3 -> SP4
+ - Bugfix #12293: parameters from smtp.properties are to be found in
+   mail.properties after upgrade SP3->SP4
+ - Bugfix #12295: MonitorJMXPort and MonitorJMXBindAddress changed
+   to JMXPort and JMXBindAddress from SP3 to SP4
+* Tue Oct 21 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12357: Adding image attachments to an inline-forwarded mail if
+   it its content-disposition is INLINE but specifies a file name
+* Fri Oct 17 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12326: Removed recurrence type from series exceptions. Writing
+   recurrence id and position to AJAX interface.
+* Tue Oct 14 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12303: Throwing an I/O error if socket connection is broken on
+   write/read attempt
+ - Bugfix #12202: Fixed saving draft mails
+* Mon Oct 13 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12099: Setting modified by when updating series if a virtual
+   exception is created.
+ - Bugfix #12254: Merged fix made in SP3 bugfix branch.
+* Mon Oct 13 2008 - thorben.betten@open-xchange.com
+ - Bugfix #12205: Parsing header Content-Length into a long instead of an
+   integer
+* Thu Oct 09 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12200: Corrected german translation.
 * Fri Sep 26 2008 - thorben.betten@open-xchange.com
  - Bugfix #12231: Using default separator character from 'mail.properties'
    to configure folder path prefix equal to mailing system's separator
- - Bugfix #12212: Fixed moving a chamge exception of a recurring appointment
+ - Bugfix #12212: Fixed moving a change exception of a recurring appointment
 * Thu Sep 25 2008 - thorben.betten@open-xchange.com
  - Bugfix #12166: Fixed max. end date calculation for yearly recurring
    appointment
