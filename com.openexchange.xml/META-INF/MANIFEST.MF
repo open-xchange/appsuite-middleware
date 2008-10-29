@@ -13,8 +13,7 @@ Import-Package: org.osgi.framework,
  javax.xml,
  javax.xml.parsers,
  org.w3c.dom,
- org.w3c.dom.events,
- org.w3c.dom.traversal
+ org.w3c.dom.events
 Export-Package: com.openexchange.xml.jdom,
  com.openexchange.xml.spring,
  org.jdom,
