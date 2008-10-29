@@ -76,7 +76,7 @@ public class ParticipantNotifyTest extends TestCase{
 	
 	
 	private final TestParticipantNotify notify = new TestParticipantNotify();
-	
+
 	private final Date start = new Date(System.currentTimeMillis()+ 2*Constants.MILLI_DAY);
 	// end date must be in the future for creating notifications. See bug 12063.
 	private final Date end = new Date(System.currentTimeMillis() + 3*Constants.MILLI_DAY);
@@ -536,7 +536,8 @@ public class ParticipantNotifyTest extends TestCase{
 
         ParticipantNotify.messageSender = notify;
         //session.setUserConfiguration(new UserConfigurationFactory().getConfiguration(1));
-	}
+	    NotificationPool.getInstance().clear();
+    }
 	
 	@Override
 	public void tearDown() throws Exception {
