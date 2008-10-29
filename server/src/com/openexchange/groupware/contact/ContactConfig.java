@@ -125,7 +125,8 @@ public class ContactConfig {
          * Determines if a search for emailable contact is
          * triggered on opened recipient dialog.
          */
-        AUTO_SEARCH("mailAddressAutoSearch", Boolean.TRUE.toString());
+        AUTO_SEARCH("com.openexchange.contact.mailAddressAutoSearch",
+            Boolean.TRUE.toString());
 
         /**
          * Name of the property in the participant.properties file.

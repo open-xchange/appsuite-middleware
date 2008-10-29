@@ -346,7 +346,7 @@ public final class ServerConfig extends AbstractConfig {
 		 * Number of characters a search pattern must contain to prevent slow
 		 * search queries and big responses in large contexts.
 		 */
-		MINIMUM_SEARCH_CHARACTERS("MinimumSearchCharacters");
+		MINIMUM_SEARCH_CHARACTERS("com.openexchange.MinimumSearchCharacters");
 
 		/**
 		 * Name of the property in the server.properties file.
