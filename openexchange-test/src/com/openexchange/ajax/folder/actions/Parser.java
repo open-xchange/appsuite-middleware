@@ -51,6 +51,7 @@ package com.openexchange.ajax.folder.actions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.api2.OXException;
@@ -95,10 +96,14 @@ public final class Parser {
             folder.setSubfolderFlag(((Boolean) value).booleanValue());
             break;
         case FolderObject.STANDARD_FOLDER:
-            folder.setDefaultFolder(((Boolean) value).booleanValue());
+            if(null != value && JSONObject.NULL != value) {
+                folder.setDefaultFolder(((Boolean) value).booleanValue());
+            } else {
+                folder.setDefaultFolder(false);
+            }
             break;
         case FolderObject.CREATED_BY:
-            if (null != value) {
+            if (null != value && JSONObject.NULL != value) {
                 folder.setCreatedBy(((Integer) value).intValue());
             }
             break;

@@ -857,7 +857,7 @@ public class FolderTest extends AbstractAJAXTest {
 			final WebResponse resp = getWebConversation().getResponse(req);
 			System.out.println(resp.toString());
 
-			assertTrue(exc != null);
+    			assertTrue(exc != null);
 
 			printTestEnd("testFailDeleteFolder");
 		} catch (final Exception e) {
