@@ -29,7 +29,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.7.0
-Release:	0
+Release:	1
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -178,6 +178,17 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Tue Oct 28 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12392: Removed the creation of some tables only needed for OXEE.
+* Mon Oct 27 2008 - choeger@open-xchange.com
+ - Bugfix ID#12287 JAVA_OXCMD_OPTS option missing after upgrade from SP3 to
+ SP4 in ox-admin-scriptconf.sh
+* Thu Oct 23 2008 - choeger@open-xchange.com
+ - Bugfix ID#12286: connection timeouts not added for admin configdb.properties
+* Wed Oct 22 2008 - choeger@open-xchange.com
+ - Bugfix ID#12288: admin system.properties not needed options kept
+   from upgrade SP3 to SP3
+ - Bugfix ID#12289: DEFAULT_PASSWORD_MECHANISM=SHA added to AdminDaemon.properties
 * Tue Sep 23 2008 - marcus.klein@open-xchange.com
  - Bugfix #12207: Removed OX connection given to context storage.
 * Tue Sep 09 2008 - choeger@open-xchange.com
