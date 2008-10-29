@@ -1,3 +1,7 @@
+* 2008-10-29 - martin.herfurth@open-xchange.com
+
+ - Bugfix #12865: Deleting corrupted Appointments.
+
 * 2008-10-29 - thorben.betten@open-xchange.com
 
  - Bugfix #12409: Sending proper fields back to GUI on edit-draft operation
