@@ -108,8 +108,9 @@ public class CalendarTest extends TestCase {
     private final static int TEST_PASS_HOT_SPOT = 1;
     //public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
     
-    private static int userid = 17; // bishoph
-    public final static int contextid = 1337;
+    // Override these in setup
+    private static int userid = 11; // bishoph
+    public final static int contextid = 1;
     
     private static boolean init = false;
     
