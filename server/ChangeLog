@@ -1,3 +1,7 @@
+* 2008-10-29 - thorben.betten@open-xchange.com
+
+ - Bugfix #12409: Sending proper fields back to GUI on edit-draft operation
+
 * 2008-10-28 - thorben.betten@open-xchange.com
 
  - Bugfix #12393: Enhanced tree-consistency-check on a removed group

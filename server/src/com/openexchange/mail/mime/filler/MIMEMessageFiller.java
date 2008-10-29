@@ -291,6 +291,9 @@ public class MIMEMessageFiller {
 		}
 	}
 
+	private static final String[] SUPPRESS_HEADERS = { MessageHeaders.HDR_X_OX_VCARD, MessageHeaders.HDR_X_OXMSGREF,
+			MessageHeaders.HDR_X_OX_MARKER, MessageHeaders.HDR_X_OX_NOTIFICATION };
+
 	/**
 	 * Sets necessary headers in specified MIME message: <code>From</code>/
 	 * <code>Sender</code>, <code>To</code>, <code>Cc</code>, <code>Bcc</code>,
@@ -431,7 +434,11 @@ public class MIMEMessageFiller {
 		 * Set disposition notification
 		 */
 		if (mail.getDispositionNotification() != null) {
-			mimeMessage.setHeader(MessageHeaders.HDR_DISP_TO, mail.getDispositionNotification().toString());
+			if (mail.isDraft()) {
+				mimeMessage.setHeader(MessageHeaders.HDR_X_OX_NOTIFICATION, mail.getDispositionNotification().toString());
+			} else {
+				mimeMessage.setHeader(MessageHeaders.HDR_DISP_TO, mail.getDispositionNotification().toString());
+			}
 		}
 		/*
 		 * Set priority
@@ -440,9 +447,8 @@ public class MIMEMessageFiller {
 		/*
 		 * Headers
 		 */
-		final int size = mail.getHeadersSize();
-		final Iterator<Map.Entry<String, String>> iter = mail.getHeadersIterator();
-		for (int i = 0; i < size; i++) {
+		for (final Iterator<Map.Entry<String, String>> iter = mail.getNonMatchingHeaders(SUPPRESS_HEADERS); iter
+				.hasNext();) {
 			final Map.Entry<String, String> entry = iter.next();
 			mimeMessage.addHeader(entry.getKey(), entry.getValue());
 		}
@@ -722,6 +728,9 @@ public class MIMEMessageFiller {
 					 * Append body part
 					 */
 					primaryMultipart.addBodyPart(vcardPart);
+					if (mail.isDraft()) {
+						mimeMessage.setHeader(MessageHeaders.HDR_X_OX_VCARD, "true");
+					}
 				} catch (final MailException e) {
 					LOG.error(VCARD_ERROR, e);
 				}

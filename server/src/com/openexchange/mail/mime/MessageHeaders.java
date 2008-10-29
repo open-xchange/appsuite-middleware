@@ -174,4 +174,8 @@ public final class MessageHeaders {
 
 	public static final HeaderName X_OX_VCARD = HeaderName.valueOf(HDR_X_OX_VCARD);
 
+	public static final String HDR_X_OX_NOTIFICATION = "X-OX-Notification";
+
+	public static final HeaderName X_OX_NOTIFICATION = HeaderName.valueOf(HDR_X_OX_NOTIFICATION);
+
 }

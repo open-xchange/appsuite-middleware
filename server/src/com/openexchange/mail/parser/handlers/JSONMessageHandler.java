@@ -458,6 +458,10 @@ public final class JSONMessageHandler implements MailMessageHandler {
 					jsonObject.put(MailJSONField.PRIORITY.getKey(), priority);
 				} else if (MessageHeaders.HDR_X_MAILER.equalsIgnoreCase(entry.getKey())) {
 					hdrObject.put(entry.getKey(), entry.getValue());
+				} else if (MessageHeaders.HDR_X_OX_VCARD.equalsIgnoreCase(entry.getKey())) {
+					jsonObject.put(MailJSONField.VCARD.getKey(), true);
+				} else if (MessageHeaders.HDR_X_OX_NOTIFICATION.equalsIgnoreCase(entry.getKey())) {
+					jsonObject.put(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey(), entry.getValue());
 				} else {
 					if (!COVERED_HEADER_NAMES.contains(HeaderName.valueOf(entry.getKey()))) {
 						hdrObject.put(entry.getKey(), entry.getValue());
@@ -508,7 +512,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 				if (usm.isDisplayHtmlInlineContent()) {
 					asDisplayHtml(id, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
 				} else {
-					asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, false);
+					asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, DisplayMode.DISPLAY
+							.equals(displayMode));
 				}
 			} else {
 				try {
@@ -569,7 +574,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 						return true;
 					}
 					asDisplayText(id, contentType.getBaseType(),
-							getHtmlDisplayVersion(contentType, plainTextContentArg), fileName, false);
+							getHtmlDisplayVersion(contentType, plainTextContentArg), fileName, DisplayMode.DISPLAY
+									.equals(displayMode));
 				} else {
 					final JSONObject jsonObject = new JSONObject();
 					jsonObject.put(MailListField.ID.getKey(), id);
