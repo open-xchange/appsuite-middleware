@@ -98,7 +98,7 @@ public final class NamespaceFoldersCache {
 	 *            cache entry present or not
 	 * @param session
 	 *            The session providing the session-bound cache
-	 * @return The binary-sorted personal namespace folders
+	 * @return The <b>binary-sorted</b> personal namespace folders
 	 * @throws MessagingException
 	 *             If <code>NAMESPACE</code> command fails
 	 */
@@ -158,7 +158,7 @@ public final class NamespaceFoldersCache {
 	 *            cache entry present or not
 	 * @param session
 	 *            The session providing the session-bound cache
-	 * @return The user namespace folders
+	 * @return The <b>binary-sorted</b> user namespace folders
 	 * @throws MessagingException
 	 *             If <code>NAMESPACE</code> command fails
 	 */
@@ -176,6 +176,7 @@ public final class NamespaceFoldersCache {
 				for (int i = 0; i < uns.length; i++) {
 					fullnames[i] = uns[i].getFullName();
 				}
+				Arrays.sort(fullnames);
 				entry.setValue(fullnames);
 			}
 			mailCache.put(entry);
@@ -195,7 +196,7 @@ public final class NamespaceFoldersCache {
 	 *            cache entry present or not
 	 * @param session
 	 *            The session providing the session-bound cache
-	 * @return The shared namespace folders
+	 * @return The <b>binary-sorted</b> shared namespace folders
 	 * @throws MessagingException
 	 *             If <code>NAMESPACE</code> command fails
 	 */
@@ -213,6 +214,7 @@ public final class NamespaceFoldersCache {
 				for (int i = 0; i < sns.length; i++) {
 					fullnames[i] = sns[i].getFullName();
 				}
+				Arrays.sort(fullnames);
 				entry.setValue(fullnames);
 			}
 			mailCache.put(entry);
