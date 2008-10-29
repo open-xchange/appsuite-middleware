@@ -123,7 +123,7 @@ public class ServerUserSetting {
      * @param user user id
      * @param folder folder id
      */
-    public static void setContactCollectionFolder(final int cid, final int user, final long folder){
+    public static void setContactCollectionFolder(final int cid, final int user, final int folder){
         if(getAttributeWithoutException(cid, user, CONTACT_COLLECT_ENABLED) == null) {
             setAttributeWithoutException(cid, user, CONTACT_COLLECT_ENABLED, false);
         }
