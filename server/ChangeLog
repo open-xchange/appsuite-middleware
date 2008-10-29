@@ -8,6 +8,8 @@
  - Bugfix #11658: Checking given destination folder's fullname to be the
    default folder ID
  - Bugfix #12270: Fixed keeping attachment on copying a contact
+ - Bugfix #12271: More robust parsing of messages with possible invalid
+   header lines
 
 * 2008-10-28 - thorben.betten@open-xchange.com
 

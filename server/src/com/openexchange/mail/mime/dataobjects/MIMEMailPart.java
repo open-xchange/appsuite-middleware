@@ -120,9 +120,9 @@ public final class MIMEMailPart extends MailPart {
 	private transient Part part;
 
 	/**
-	 * Cached instance of {@link Multipart}
+	 * Cached instance of multipart
 	 */
-	private transient Multipart multipart;
+	private transient MIMEMultipartMailPart multipart;
 
 	/**
 	 * Whether this part's content is of MIME type <code>multipart/*</code>
@@ -286,9 +286,10 @@ public final class MIMEMailPart extends MailPart {
 		} else if (isMulti) {
 			try {
 				if (null == multipart) {
-					multipart = (Multipart) part.getContent();
+					createMultipart();
 				}
-				return MIMEMessageConverter.convertPart(multipart.getBodyPart(index));
+				// return MIMEMessageConverter.convertPart(multipart.get);
+				return multipart.getEnclosedMailPart(index);
 			} catch (final MessagingException e) {
 				throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
 			} catch (final IOException e) {
@@ -298,6 +299,15 @@ public final class MIMEMailPart extends MailPart {
 		return null;
 	}
 
+	private void createMultipart() throws IOException, MessagingException, MailException {
+		// multipart = (Multipart) part.getContent();
+		final int size = (int) getSize();
+		final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size > 0 ? size : 8192);
+		part.writeTo(out);
+		multipart = new MIMEMultipartMailPart(getContentType(), new UnsynchronizedByteArrayInputStream(out
+				.toByteArray()));
+	}
+
 	@Override
 	public int getEnclosedCount() throws MailException {
 		if (null == part) {
@@ -305,9 +315,9 @@ public final class MIMEMailPart extends MailPart {
 		} else if (isMulti) {
 			try {
 				if (null == multipart) {
-					multipart = (Multipart) part.getContent();
+					createMultipart();
 				}
-				return multipart.getCount();
+				return multipart.getEnclosedCount();
 			} catch (final MessagingException e) {
 				throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
 			} catch (final IOException e) {
