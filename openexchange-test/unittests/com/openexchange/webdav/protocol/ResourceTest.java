@@ -249,7 +249,7 @@ public class ResourceTest extends AbstractResourceTest{
 		lock.setScope(WebdavLock.Scope.EXCLUSIVE_LITERAL);
 		lock.setDepth(0);
 		lock.setOwner("me");
-		lock.setTimeout(1000);
+		lock.setTimeout(10000);
 		assertNull(lock.getToken());
 		
 		final WebdavResource res = createResource();
