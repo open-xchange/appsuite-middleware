@@ -173,7 +173,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 			setContentType(contentType);
 		}
 		try {
-			this.dataSource = new MessageDataSource(inputStream, contentType);
+			this.dataSource = new MessageDataSource(inputStream, getContentType());
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
 		}
