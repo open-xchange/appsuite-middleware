@@ -3,6 +3,7 @@
  - Bugfix #12409: Sending proper fields back to GUI on edit-draft operation
  - Bugfix #11658: Checking given destination folder's fullname to be the
    default folder ID
+ - Bugfix #12270: Fixed keeping attachment on copying a contact
 
 * 2008-10-28 - thorben.betten@open-xchange.com
 

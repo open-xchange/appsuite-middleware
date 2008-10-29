@@ -763,7 +763,6 @@ public class ContactRequest {
 	                }
 				}
 			}
-
 			return jsonResponseArray;
 		} finally {
 			if (it != null) {
@@ -805,7 +804,9 @@ public class ContactRequest {
 		if (inFolder == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
 			contactObj.removeInternalUserId();
 		}
-		
+
+		contactObj.setNumberOfAttachments(0);
+
 		contactInterface.insertContactObject(contactObj);
 		
 		final User user = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
@@ -900,6 +901,7 @@ public class ContactRequest {
 					final AttachmentMetadata copy = new AttachmentImpl(orig);
 					copy.setFolderId(folderId);
 					copy.setAttachedId(contactObj.getObjectID());
+					copy.setId(AttachmentBase.NEW);
 					attachmentBase.attachToObject(copy, attachmentBase.getAttachedFile(origFolderId, origObjectId,
 							Types.CONTACT, orig.getId(), ctx, user, uc), ctx, user, uc);
 				} while (iterator.hasNext());
