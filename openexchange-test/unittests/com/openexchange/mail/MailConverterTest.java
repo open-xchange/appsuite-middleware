@@ -486,9 +486,100 @@ public class MailConverterTest extends AbstractMailTest {
 			final MailPart part = handler.getMailPart();
 			
 			assertTrue("Nested message not recognized", part.getContent() instanceof MailMessage);
-			
-			
+		} catch (final Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
 
+	private static final String SRC2 = "From lothar.freihoff@arcor.de  Thu Oct  2 12:49:22 2008\n" + 
+	"Return-Path: <lothar.freihoff@arcor.de>\n" + 
+	"X-Original-To: l.f@mailgh.com\n" + 
+	"Delivered-To: l.f@mailgh.com\n" + 
+	"Received: from mail-in-14.arcor-online.net (mail-in-14.arcor-online.net [151.189.21.54])\n" + 
+	" (using TLSv1 with cipher ADH-AES256-SHA (256/256 bits))\n" + 
+	" (No client certificate requested)\n" + 
+	" by hermes.mailgh.com (Postfix) with ESMTPS id 314A3124C0D\n" + 
+	" for <l.f@mailgh.com>; Thu,  2 Oct 2008 12:49:21 +0200 (CEST)\n" + 
+	"Received: from mail-in-01-z2.arcor-online.net (mail-in-01-z2.arcor-online.net [151.189.8.13])\n" + 
+	" by mail-in-14.arcor-online.net (Postfix) with ESMTP id 278C3187A8D\n" + 
+	" for <l.f@mailgh.com>; Thu,  2 Oct 2008 12:49:12 +0200 (CEST)\n" + 
+	"Received: from mail-in-04.arcor-online.net (mail-in-04.arcor-online.net [151.189.21.44])\n" + 
+	" by mail-in-01-z2.arcor-online.net (Postfix) with ESMTP id AD4D82C0309\n" + 
+	" for <l.f@mailgh.com>; Thu,  2 Oct 2008 12:49:11 +0200 (CEST)\n" + 
+	"Received: from webmail10.arcor-online.net (webmail10.arcor-online.net [151.189.8.93])\n" + 
+	" by mail-in-04.arcor-online.net (Postfix) with ESMTP id 6B4561F7042\n" + 
+	" for <l.f@mailgh.com>; Thu,  2 Oct 2008 12:49:11 +0200 (CEST)\n" + 
+	"Received: from [84.62.189.67] by webmail10.arcor-online.net (151.189.8.93) with HTTP (Arcor Webmail); Thu, 2 Oct 2008 12:49:09 +0200 (CEST)\n" + 
+	"Message-ID: <27546971.1222944551364.JavaMail.ngmail@webmail10.arcor-online.net>\n" + 
+	"Date: Thu, 2 Oct 2008 12:49:11 +0200 (CEST)\n" + 
+	"From: lothar.freihoff@arcor.de\n" + 
+	"To: l.f@mailgh.com\n" + 
+	"Subject: Aw: test\n" + 
+	"In-Reply-To: <1584118582.1.1222942365178.JavaMail.open-xchange@hermes>\n" + 
+	"MIME-Version: 1.0\n" + 
+	"Content-Type: multipart/mixed; \n" + 
+	" boundary=\"----=_Part_45472_32597969.1222944551363\"\n" + 
+	"References: <1584118582.1.1222942365178.JavaMail.open-xchange@hermes>\n" + 
+	"X-ngMessageSubType: MessageSubType_MAIL\n" + 
+	"X-WebmailclientIP: 84.62.189.67\n" + 
+	"\n" + 
+	"------=_Part_45472_32597969.1222944551363\n" + 
+	"Content-Type: multipart/alternative; \n" + 
+	" boundary=\"----=_Part_45471_6887715.1222944551363\"\n" + 
+	"\n" + 
+	"------=_Part_45471_6887715.1222944551363\n" + 
+	"Content-Type: text/plain; charset=ISO-8859-1\n" + 
+	"Content-Transfer-Encoding: 7bit\n" + 
+	"\n" + 
+	" \n" + 
+	"\n" + 
+	"\n" + 
+	"----- Original Nachricht ----\n" + 
+	"Von:     l f <l.f@mailgh.com>\n" + 
+	"An:      lothar.freihoff@arcor.de\n" + 
+	"Datum:   02.10.2008 12:12\n" + 
+	"Betreff: test\n" + 
+	"\n" + 
+	"> test\n" + 
+	"------=_Part_45471_6887715.1222944551363--\n" + 
+	"\n" + 
+	"------=_Part_45472_32597969.1222944551363\n" + 
+	"Content-Type: text/plain; charset=ISO-8859-1\n" + 
+	"Content-Transfer-Encoding: 7bit\n" + 
+	"Content-Disposition: attachment; filename=test.txt\n" + 
+	"\n" + 
+	"Foo bar foo bar foo bar\n" +
+	"------=_Part_45472_32597969.1222944551363--\n" + 
+	"\n";
+
+	public void testMIMEConverter2() {
+		try {
+			final MailMessage mail = MIMEMessageConverter.convertMessage(SRC2.getBytes("US-ASCII"));
+
+			final int expectedCount = 2;
+			assertEquals("Unexpected number of enclosed parts", expectedCount, mail.getEnclosedCount());
+
+			for (int i = 0; i < expectedCount; i++) {
+				final MailPart enclosedMailPart = mail.getEnclosedMailPart(i);
+
+				if (i == 0) {
+					assertTrue("Unexpected content-type: " + enclosedMailPart.getContentType().toString(),
+							enclosedMailPart.getContentType().isMimeType("multipart/alternative"));
+					final int expectedNestedCount = 1;
+					assertEquals("Unexpected number of nested enclosed parts", expectedNestedCount, enclosedMailPart
+							.getEnclosedCount());
+
+					final MailPart mp = enclosedMailPart.getEnclosedMailPart(0);
+					assertTrue("Unexpected content-type: " + mp.getContentType().toString(), mp.getContentType()
+							.isMimeType("text/plain"));
+				} else {
+					assertTrue("Unexpected content-type: " + enclosedMailPart.getContentType().toString(),
+							enclosedMailPart.getContentType().isMimeType("text/plain"));
+					assertEquals("Non-multipart part contains nested parts", MailPart.NO_ENCLOSED_PARTS,
+							enclosedMailPart.getEnclosedCount());
+				}
+			}
 
 		} catch (final Exception e) {
 			e.printStackTrace();
