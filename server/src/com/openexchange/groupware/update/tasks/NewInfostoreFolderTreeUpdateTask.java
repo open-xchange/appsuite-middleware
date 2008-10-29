@@ -124,14 +124,14 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
 		return UpdateTask.UpdateTaskPriority.HIGHEST.priority;
 	}
 
-	private static final String STR_INFO = "Performing update task 'NewInfostoreFolderTreeUpdateTask'";
+	private static final String STR_INFO = "Performing update task 'NewInfostoreFolderTreeUpdateTask' on schema ";
 
 	private static final String SQL_01 = "SELECT cid FROM oxfolder_tree WHERE fuid = "
 			+ FolderObject.SYSTEM_INFOSTORE_FOLDER_ID + " GROUP BY cid";
 
 	public void perform(final Schema schema, final int cid) throws AbstractOXException {
-		if (LOG.isInfoEnabled()) {
-			LOG.info(STR_INFO);
+	    if (LOG.isInfoEnabled()) {
+			LOG.info(STR_INFO + schema.getSchema());
 		}
 		final SortedSet<Integer> contextIds = new TreeSet<Integer>();
 		/*
@@ -145,6 +145,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
 		for (final Integer contextId : contextIds) {
 			processContext(contextId.intValue(), creatingTime);
 		}
+		LOG.info("Update task 'NewInfostoreFolderTreeUpdateTask' finished on schema " + schema.getSchema());
 	}
 
 	private void gatherContextIDs(final int cid, final SortedSet<Integer> contextIds) throws UpdateException {
@@ -171,6 +172,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
 	}
 
 	private void processContext(final int cid, final long creatingTime) throws UpdateException {
+	    LOG.info("Performing 'NewInfostoreFolderTreeUpdateTask' on context " + cid);
 		final Connection writeCon;
 		try {
 			writeCon = Database.get(cid, true);
