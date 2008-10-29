@@ -48,12 +48,13 @@
  */
 package com.openexchange.exceptions;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import junit.framework.TestCase;
+
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
-
-import java.util.Set;
-import java.util.HashSet;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -63,7 +64,8 @@ public class ExceptionsTest extends TestCase {
     private Component component;
     private String applicationId;
 
-    public void setUp() {
+    @Override
+	public void setUp() {
         this.exceptions = new TestExceptions();
         this.applicationId = "com.openexchange.test";
         this.exceptions.setApplicationId(applicationId);
@@ -73,7 +75,7 @@ public class ExceptionsTest extends TestCase {
 
 
     public void testCreateExceptionByCode() {
-        NullPointerException cause = new NullPointerException();
+        final NullPointerException cause = new NullPointerException();
         OXTestException exception = exceptions.create(12, cause, "arg1", "arg2", "arg3");
 
         assertEquals(12, exception.getDetailNumber());
@@ -96,8 +98,8 @@ public class ExceptionsTest extends TestCase {
     }
 
     public void testCreateExceptionByErrorMessage() {
-        NullPointerException cause = new NullPointerException();
-        OXTestException exception = exceptions.create(errorMessage, cause, "arg11", "arg12", "arg13", "arg14");
+        final NullPointerException cause = new NullPointerException();
+        final OXTestException exception = exceptions.create(errorMessage, cause, "arg11", "arg12", "arg13", "arg14");
 
         assertEquals(13, exception.getDetailNumber());
         assertEquals(component, exception.getComponent());
@@ -109,11 +111,11 @@ public class ExceptionsTest extends TestCase {
     }
 
     public void testThrowExceptionByCode() {
-        NullPointerException cause = new NullPointerException();
+        final NullPointerException cause = new NullPointerException();
         try {
             exceptions.throwException(12, cause, "arg1", "arg2", "arg3");
             fail("Didn't throw exception");
-        } catch (OXTestException exception) {
+        } catch (final OXTestException exception) {
             assertEquals(12, exception.getDetailNumber());
             assertEquals(component, exception.getComponent());
             assertEquals(AbstractOXException.Category.USER_INPUT, exception.getCategory());
@@ -124,11 +126,11 @@ public class ExceptionsTest extends TestCase {
     }
 
     public void testThrowExceptionByErrorMessage() {
-        NullPointerException cause = new NullPointerException();
+        final NullPointerException cause = new NullPointerException();
         try {
             exceptions.throwException(errorMessage, cause,"arg11", "arg12", "arg13", "arg14");
             fail("Didn't throw exception");
-        } catch (OXTestException exception) {
+        } catch (final OXTestException exception) {
             assertEquals(13, exception.getDetailNumber());
             assertEquals(component, exception.getComponent());
             assertEquals(AbstractOXException.Category.CODE_ERROR, exception.getCategory());
@@ -168,12 +170,12 @@ public class ExceptionsTest extends TestCase {
     }
 
     public void testGetMessages() {
-        Set<ErrorMessage> messages = exceptions.getMessages();
+        final Set<ErrorMessage> messages = exceptions.getMessages();
         assertEquals(2, messages.size());
 
-        Set<Integer> codes = new HashSet<Integer>();
+        final Set<Integer> codes = new HashSet<Integer>();
 
-        for(ErrorMessage message : messages) { codes.add(message.getErrorCode()); }
+        for(final ErrorMessage message : messages) { codes.add(message.getErrorCode()); }
 
         assertTrue(codes.remove(12));
         assertTrue(codes.remove(13));
@@ -184,15 +186,15 @@ public class ExceptionsTest extends TestCase {
         try {
             exceptions.create(23);
             fail("Should throw exception");
-        } catch (UndeclaredErrorCodeException undeclared) {
+        } catch (final UndeclaredErrorCodeException undeclared) {
             assertEquals(23, undeclared.getErrorCode());
             assertEquals(component, undeclared.getComponent());
             assertEquals(applicationId, undeclared.getApplicationId());
         }
     }
 
-    private static void assertMessageArgs(AbstractOXException exception, Object...expected) {
-        Object[] actual = exception.getMessageArgs();
+    private static void assertMessageArgs(final AbstractOXException exception, final Object...expected) {
+        final Object[] actual = exception.getMessageArgs();
         assertEquals(actual.length , expected.length);
         for(int i = 0; i < actual.length; i++) {
             assertEquals(expected[i], actual[i]);
@@ -222,7 +224,12 @@ public class ExceptionsTest extends TestCase {
 
 
     private static final class OXTestException extends AbstractOXException {
-        public OXTestException(ErrorMessage message, Throwable cause, Object...args) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 5072841402483911499L;
+
+		public OXTestException(final ErrorMessage message, final Throwable cause, final Object...args) {
             super(message.getComponent(), message.getCategory(), message.getErrorCode(), message.getMessage(), cause);
             setMessageArgs(args);
         }
@@ -230,12 +237,14 @@ public class ExceptionsTest extends TestCase {
 
     private static final class TestExceptions extends Exceptions<OXTestException> {
 
-        protected void knownExceptions() {
+        @Override
+		protected void knownExceptions() {
             declare(12, AbstractOXException.Category.USER_INPUT, "MESSAGE12", "HELP12");
             declare(errorMessage);
         }
 
-        protected OXTestException createException(ErrorMessage message, Throwable cause, Object... args) {
+        @Override
+		protected OXTestException createException(final ErrorMessage message, final Throwable cause, final Object... args) {
             return new OXTestException(message, cause, args);
         }
     }

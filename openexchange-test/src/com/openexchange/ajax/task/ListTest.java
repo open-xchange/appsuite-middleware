@@ -103,7 +103,7 @@ public class ListTest extends AbstractTaskTest {
             task.setParentFolderID(getPrivateFolder());
             inserts[i] = new InsertRequest(task, getTimeZone());
         }
-        final MultipleResponse mInsert = (MultipleResponse) Executor.execute(
+        final MultipleResponse mInsert = Executor.execute(
             getClient(), MultipleRequest.create(inserts));
         
         final int[][] tasks = new int[NUMBER][2];
@@ -170,7 +170,7 @@ public class ListTest extends AbstractTaskTest {
             task.addParticipant(new UserParticipant(clientB.getValues().getUserId()));
             inserts[i] = new InsertRequest(task, getTimeZone());
         }
-        final MultipleResponse mInsert = (MultipleResponse) Executor.execute(
+        final MultipleResponse mInsert = Executor.execute(
             getClient(), MultipleRequest.create(inserts));
         final List<InsertResponse> toDelete = new ArrayList<InsertResponse>(NUMBER);
         final Iterator<AbstractAJAXResponse> iter = mInsert.iterator();

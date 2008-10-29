@@ -54,7 +54,6 @@ import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.task.actions.AbstractTaskRequest;
 import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.ajax.task.actions.AllResponse;

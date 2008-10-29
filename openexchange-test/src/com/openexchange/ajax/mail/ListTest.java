@@ -107,7 +107,7 @@ public final class ListTest extends AbstractMailTest {
 		/*
 		 * Perform list request
 		 */
-		final CommonListResponse response = (CommonListResponse) Executor.execute(getSession(), new ListRequest(
+		final CommonListResponse response = Executor.execute(getSession(), new ListRequest(
 				folderAndIDs, COLUMNS_DEFAULT_LIST));
 		assertTrue("List request failed", response.getArray() != null && response.getArray().length == numOfMails);
 		/*

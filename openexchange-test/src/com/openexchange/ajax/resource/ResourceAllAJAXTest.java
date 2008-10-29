@@ -94,7 +94,7 @@ public final class ResourceAllAJAXTest extends AbstractResourceTest {
 			/*
 			 * Perform all request
 			 */
-			final ResourceAllResponse allResponse = (ResourceAllResponse) Executor.execute(getSession(),
+			final ResourceAllResponse allResponse = Executor.execute(getSession(),
 					new ResourceAllRequest(true));
 			final int[] ids = allResponse.getIDs();
 			assertTrue("All request failed", ids != null && ids.length >= 1);

@@ -309,7 +309,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		return contactObj;
 	}
 	
-	public static int insertContact(final WebConversation webCon, ContactObject contactObj, String host, final String login, final String password) throws OXException, Exception {
+	public static int insertContact(final WebConversation webCon, final ContactObject contactObj, String host, final String login, final String password) throws OXException, Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 		contactObj.removeObjectID();
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -319,7 +319,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		final Document doc = addProp2Document(eProp);
 		final XMLOutputter xo = new XMLOutputter();
 		xo.output(doc, baos);
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL, bais, "text/xml");
 		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
 		final WebResponse resp = webCon.getResponse(req);

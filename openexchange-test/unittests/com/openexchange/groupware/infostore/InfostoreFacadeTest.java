@@ -1,10 +1,10 @@
 package com.openexchange.groupware.infostore;
 
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
 
 import junit.framework.TestCase;
 
@@ -195,10 +195,10 @@ public class InfostoreFacadeTest extends TestCase {
             infostore.saveDocument(dm, new ByteArrayInputStream("Hallo".getBytes("UTF-8")), Long.MAX_VALUE, session);
             infostore.removeVersion(dm.getId(), new int[]{1}, session);
             infostore.commit();
-        } catch(OXException x) {
+        } catch(final OXException x) {
             infostore.rollback();
             throw x;
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             // Subba!
         } finally {
             infostore.finish();

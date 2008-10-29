@@ -95,7 +95,7 @@ public final class ResourceListAJAXTest extends AbstractResourceTest {
 			/*
 			 * Perform all request
 			 */
-			final ResourceAllResponse allResponse = (ResourceAllResponse) Executor.execute(getSession(),
+			final ResourceAllResponse allResponse = Executor.execute(getSession(),
 					new ResourceAllRequest(true));
 			final int[] ids = allResponse.getIDs();
 			assertTrue("All request failed", ids != null);
@@ -103,7 +103,7 @@ public final class ResourceListAJAXTest extends AbstractResourceTest {
 			/*
 			 * Perform list request
 			 */
-			final ResourceListResponse listResponse = (ResourceListResponse) Executor.execute(getSession(),
+			final ResourceListResponse listResponse = Executor.execute(getSession(),
 					new ResourceListRequest(ids, true));
 			final Resource[] resources = listResponse.getResources();
 

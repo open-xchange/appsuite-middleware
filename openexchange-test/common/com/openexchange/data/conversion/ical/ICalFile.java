@@ -68,7 +68,7 @@ public class ICalFile {
     }
 
     private void addLine(final String line) {
-        int colonPos = line.indexOf(':');
+        final int colonPos = line.indexOf(':');
         final String key;
         final String value;
         if (-1 == colonPos) {
@@ -113,7 +113,7 @@ public class ICalFile {
         return sb.toString();
     }
 
-    public boolean containsPair(String name, String value) {
+    public boolean containsPair(final String name, final String value) {
         for (final String[] line : lines) {
             final String key = line[0];
             final String val = line[1];
@@ -123,7 +123,7 @@ public class ICalFile {
         }
         return false;
     }
-    public boolean containsLine(String line) {
+    public boolean containsLine(final String line) {
         for (final String[] l : lines) {
             final String key = l[0];
             if(key.equals(line)) {
@@ -133,7 +133,7 @@ public class ICalFile {
         return false;
     }
 
-    public boolean containsKey(String key) {
+    public boolean containsKey(final String key) {
         return containsLine(key);
     }
 }

@@ -90,7 +90,7 @@ public final class ResourceNewAJAXTest extends AbstractResourceTest {
 			/*
 			 * Perform new request
 			 */
-			final ResourceNewResponse newResponse = (ResourceNewResponse) Executor.execute(getSession(),
+			final ResourceNewResponse newResponse = Executor.execute(getSession(),
 					new ResourceNewRequest(resource, true));
 			id = newResponse.getID();
 			assertTrue("New request failed", id > 0);

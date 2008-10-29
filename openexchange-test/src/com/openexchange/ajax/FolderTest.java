@@ -74,11 +74,15 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.folder.FolderTools;
-import com.openexchange.ajax.folder.actions.*;
-import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.folder.actions.GetRequest;
+import com.openexchange.ajax.folder.actions.GetResponse;
+import com.openexchange.ajax.folder.actions.ListRequest;
+import com.openexchange.ajax.folder.actions.ListResponse;
+import com.openexchange.ajax.folder.actions.UpdatesRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ConfigurationException;
@@ -1215,25 +1219,25 @@ public class FolderTest extends AbstractAJAXTest {
     // Node 2652
 
     public void testLastModifiedUTCInGet() throws JSONException, AjaxException, IOException, SAXException {
-        AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
         // Load an existing folder
-        GetRequest getRequest = new GetRequest(""+FolderObject.SYSTEM_PUBLIC_FOLDER_ID, new int[]{FolderObject.LAST_MODIFIED_UTC}, true);
-        GetResponse response = Executor.execute(client, getRequest);
+        final GetRequest getRequest = new GetRequest(""+FolderObject.SYSTEM_PUBLIC_FOLDER_ID, new int[]{FolderObject.LAST_MODIFIED_UTC}, true);
+        final GetResponse response = Executor.execute(client, getRequest);
         assertTrue(((JSONObject)response.getData()).has("last_modified_utc"));
     }
 
     // Node 2652
 
     public void testLastModifiedUTCInList() throws JSONException, IOException, SAXException, AjaxException {
-        AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
         // List known folder
-        ListRequest listRequest = new ListRequest(""+FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, new int[]{FolderObject.LAST_MODIFIED_UTC}, false);
-        ListResponse listResponse = Executor.execute(client, listRequest);
-        JSONArray arr = (JSONArray) listResponse.getData();
-        int size = arr.length();
+        final ListRequest listRequest = new ListRequest(""+FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, new int[]{FolderObject.LAST_MODIFIED_UTC}, false);
+        final ListResponse listResponse = Executor.execute(client, listRequest);
+        final JSONArray arr = (JSONArray) listResponse.getData();
+        final int size = arr.length();
         assertTrue(size > 0);
         for(int i = 0; i < size; i++) {
-            JSONArray row = arr.optJSONArray(i);
+            final JSONArray row = arr.optJSONArray(i);
             assertNotNull(row);
             assertTrue(row.length() == 1);
             assertNotNull(row.get(0));
@@ -1243,16 +1247,16 @@ public class FolderTest extends AbstractAJAXTest {
     // Node 2652
 
     public void testLastModifiedUTCInUpdates() throws JSONException, AjaxException, IOException, SAXException {
-        AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
         // List known folder
-        UpdatesRequest updatesRequest = new UpdatesRequest(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, new int[]{FolderObject.LAST_MODIFIED_UTC}, -1, null, new Date(0));
-        AbstractAJAXResponse response = Executor.execute(client, updatesRequest);
+        final UpdatesRequest updatesRequest = new UpdatesRequest(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, new int[]{FolderObject.LAST_MODIFIED_UTC}, -1, null, new Date(0));
+        final AbstractAJAXResponse response = Executor.execute(client, updatesRequest);
 
-        JSONArray arr = (JSONArray) response.getData();
-        int size = arr.length();
+        final JSONArray arr = (JSONArray) response.getData();
+        final int size = arr.length();
         assertTrue(size > 0);
         for(int i = 0; i < size; i++) {
-            JSONArray row = arr.optJSONArray(i);
+            final JSONArray row = arr.optJSONArray(i);
             assertNotNull(row);
             assertTrue(row.length() == 1);
             assertNotNull(row.get(0));

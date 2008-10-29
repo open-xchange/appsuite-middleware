@@ -36,11 +36,12 @@ public class MailTest extends AbstractMailTest {
     
     private static final String PROTOCOL = "http://";
 
-    public MailTest(String name) {
+    public MailTest(final String name) {
         super(name);
     }
     
-    public void setUp() throws Exception {
+    @Override
+	public void setUp() throws Exception {
         super.setUp();
         this.client = getClient();
     }
@@ -69,8 +70,9 @@ public class MailTest extends AbstractMailTest {
             checkContacts(folder.getObjectID());
             
         } finally {
-            if(folder != null)
-                deleteContactFolder(folder);
+            if(folder != null) {
+				deleteContactFolder(folder);
+			}
             
             clearFolder(getInboxFolder());
             clearFolder(getSentFolder());
@@ -100,15 +102,15 @@ public class MailTest extends AbstractMailTest {
         Executor.execute(client, new SendRequest(mail.toString(), null));
     }
     
-    private void checkContacts(int folderId) throws Exception {
-        int[] cols = new int[]{ContactObject.OBJECT_ID, ContactObject.EMAIL1};
-        ContactObject[] contacts = ContactTest.listContact(client.getSession().getConversation(), folderId, cols, AJAXConfig.getProperty(Property.HOSTNAME), client.getSession().getId());
+    private void checkContacts(final int folderId) throws Exception {
+        final int[] cols = new int[]{ContactObject.OBJECT_ID, ContactObject.EMAIL1};
+        final ContactObject[] contacts = ContactTest.listContact(client.getSession().getConversation(), folderId, cols, AJAXConfig.getProperty(Property.HOSTNAME), client.getSession().getId());
         assertEquals("Number of collected Contacts not correct.", 1, contacts.length);
         assertEquals("Email does not match.", getSendAddress(), contacts[0].getEmail1());
     }
     
     private FolderObject createContactFolder() throws AjaxException, IOException, SAXException, JSONException {
-        FolderObject folder = Create.createPrivateFolder("ContactCollectionFolder " + System.currentTimeMillis(), FolderObject.CONTACT, client.getValues().getUserId());
+        final FolderObject folder = Create.createPrivateFolder("ContactCollectionFolder " + System.currentTimeMillis(), FolderObject.CONTACT, client.getValues().getUserId());
         folder.setParentFolderID(client.getValues().getPrivateContactFolder());
         final CommonInsertResponse response = Executor.execute(client, new InsertRequest(folder));
         folder.setObjectID(response.getId());
@@ -119,7 +121,7 @@ public class MailTest extends AbstractMailTest {
         return folder;
     }
     
-    private void deleteContactFolder(FolderObject folder) throws AjaxException, IOException, SAXException, JSONException {
+    private void deleteContactFolder(final FolderObject folder) throws AjaxException, IOException, SAXException, JSONException {
         Executor.execute(client, new SetRequest(Tree.ContactCollectEnabled, false));
         Executor.execute(client, new DeleteRequest(folder.getObjectID(), folder.getLastModified()));
     }

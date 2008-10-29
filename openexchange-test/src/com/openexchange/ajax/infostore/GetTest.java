@@ -3,12 +3,10 @@ package com.openexchange.ajax.infostore;
 import java.io.File;
 
 import org.json.JSONObject;
-import org.json.JSONArray;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.test.TestInit;
-import com.openexchange.groupware.infostore.utils.Metadata;
 
 
 public class GetTest extends InfostoreAJAXTest {

@@ -51,6 +51,8 @@ package com.openexchange.webdav.xml.framework;
 
 import java.io.IOException;
 
+import junit.framework.Assert;
+
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.jdom.Document;
 import org.jdom.JDOMException;
@@ -60,8 +62,6 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.types.Response;
-
-import junit.framework.Assert;
 
 /**
  *

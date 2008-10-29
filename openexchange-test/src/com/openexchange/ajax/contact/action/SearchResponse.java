@@ -48,8 +48,8 @@
  */
 package com.openexchange.ajax.contact.action;
 
-import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.CommonSearchResponse;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

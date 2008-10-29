@@ -182,7 +182,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
 	 */
 	protected final String[][] getFolderAndIDs(final String folder) throws AjaxException, IOException, SAXException,
 			JSONException {
-		final CommonAllResponse allR = (CommonAllResponse) Executor.execute(getSession(), new AllRequest(folder,
+		final CommonAllResponse allR = Executor.execute(getSession(), new AllRequest(folder,
 				COLUMNS_FOLDER_ID, 0, null));
 		final Object[][] array = allR.getArray();
 		final String[][] folderAndIDs = new String[array.length][];

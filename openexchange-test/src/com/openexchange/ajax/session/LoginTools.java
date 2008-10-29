@@ -67,30 +67,30 @@ public class LoginTools {
     public static LoginResponse login(final AJAXSession session,
         final LoginRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (LoginResponse) Executor.execute(session, request);
+        return Executor.execute(session, request);
     }
 
     public static LoginResponse login(final AJAXSession session,
         final LoginRequest request, final String protocol, final String hostname) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (LoginResponse) Executor.execute(session, request, protocol, hostname);
+        return Executor.execute(session, request, protocol, hostname);
     }
 
     public static LogoutResponse logout(final AJAXSession session,
         final LogoutRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (LogoutResponse) Executor.execute(session, request);
+        return Executor.execute(session, request);
     }
 	
     public static LogoutResponse logout(final AJAXSession session,
         final LogoutRequest request, final String protocol, final String hostname) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (LogoutResponse) Executor.execute(session, request, protocol, hostname);
+        return Executor.execute(session, request, protocol, hostname);
     }
 
     public static RedirectResponse redirect(final AJAXSession session,
         final RedirectRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (RedirectResponse) Executor.execute(session, request);
+        return Executor.execute(session, request);
     }
 }

@@ -103,7 +103,7 @@ public final class AllTest extends AbstractMailTest {
 		/*
 		 * Perform all request
 		 */
-		final CommonAllResponse allR = (CommonAllResponse) Executor.execute(getSession(), new AllRequest(
+		final CommonAllResponse allR = Executor.execute(getSession(), new AllRequest(
 				getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null));
 		final Object[][] array = allR.getArray();
 		assertTrue("All request failed", array != null && array.length == numOfMails
@@ -149,7 +149,7 @@ public final class AllTest extends AbstractMailTest {
 		final AllRequest allRequest = new AllRequest(getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null);
 		allRequest.setLeftHandLimit(left);
 		allRequest.setRightHandLimit(right);
-		final CommonAllResponse allR = (CommonAllResponse) Executor.execute(getSession(), allRequest);
+		final CommonAllResponse allR = Executor.execute(getSession(), allRequest);
 		final Object[][] array = allR.getArray();
 		assertTrue("All request failed", array != null && array.length == (right - left)
 				&& array[0].length == COLUMNS_DEFAULT_LIST.length);

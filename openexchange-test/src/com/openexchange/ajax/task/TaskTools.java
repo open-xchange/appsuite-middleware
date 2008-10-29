@@ -446,7 +446,7 @@ public final class TaskTools extends Assert {
     public static CommonListResponse list(final AJAXClient client,
         final ListRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (CommonListResponse) Executor.execute(client.getSession(), request);
+        return Executor.execute(client.getSession(), request);
     }
 
     public static void confirmTask(final WebConversation conversation,

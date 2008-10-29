@@ -28,7 +28,7 @@ public class Bug7590Test extends ReminderTest {
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.MILLISECOND, 0);
 		
-		long startTime = calendar.getTimeInMillis();
+		final long startTime = calendar.getTimeInMillis();
 		final long endTime = startTime + 3600000;
 		
         final int alarmMinutes = 60;

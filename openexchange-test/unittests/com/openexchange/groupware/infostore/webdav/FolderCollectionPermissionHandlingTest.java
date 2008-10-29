@@ -95,7 +95,7 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 			while(privateInfostoreFolder == null && iter.hasNext()) {
 				final FolderObject f = (FolderObject) iter.next();
                 final List<OCLPermission> perms = f.getPermissions();
-                for(OCLPermission perm : perms) {
+                for(final OCLPermission perm : perms) {
                     if(perm.getFolderPermission() >= OCLPermission.ADMIN_PERMISSION && perm.getEntity() == userIdA) {
 						privateInfostoreFolder = f;
 					}

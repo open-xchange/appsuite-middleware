@@ -61,13 +61,10 @@ import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -76,35 +73,30 @@ import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.config.ConfigTools;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.CommonFields;
-import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
-import com.openexchange.api2.OXException;
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ICalEmitter;
+import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.data.conversion.ical.ICalSession;
+import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
+import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
 import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.versit.Property;
-import com.openexchange.tools.versit.Versit;
-import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
-import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
-import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
-import com.openexchange.data.conversion.ical.*;
 
 public class AbstractICalTest extends AbstractAJAXTest {
 	
@@ -215,7 +207,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		return iResponse.getImports();
 	}
 	
-	public AppointmentObject[] exportAppointment(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session, Context ctx) throws Exception, TestException {
+	public AppointmentObject[] exportAppointment(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session, final Context ctx) throws Exception, TestException {
 		host = appendPrefix(host);
 		
 		final String contentType = "text/calendar";
@@ -234,9 +226,9 @@ public class AbstractICalTest extends AbstractAJAXTest {
 
 		List<CalendarDataObject> exportData = null;
 		try {
-            ICalParser parser = new ICal4JParser();
-            List<ConversionError> errors = new ArrayList<ConversionError>();
-            List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+            final ICalParser parser = new ICal4JParser();
+            final List<ConversionError> errors = new ArrayList<ConversionError>();
+            final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
             exportData = parser.parseAppointments(byteArrayInputStream, timeZone, ctx, errors, warnings);
         } catch (final Exception exc) {
             exc.printStackTrace();
@@ -247,7 +239,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		return exportData.toArray(new AppointmentObject[exportData.size()]);
 	}
 	
-	public Task[] exportTask(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session, Context ctx) throws Exception, TestException {
+	public Task[] exportTask(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session, final Context ctx) throws Exception, TestException {
 		host = appendPrefix(host);
 		
 		final String contentType = "text/calendar";
@@ -269,9 +261,9 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		List<Task> exportData = new ArrayList<Task>();
 		
 		try {
-			ICalParser parser = new ICal4JParser();
-            List<ConversionError> errors = new ArrayList<ConversionError>();
-            List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+			final ICalParser parser = new ICal4JParser();
+            final List<ConversionError> errors = new ArrayList<ConversionError>();
+            final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
             exportData = parser.parseTasks(byteArrayInputStream, timeZone, ctx, errors, warnings);
 		} catch (final Exception exc) {
 			System.out.println("error: " + exc);

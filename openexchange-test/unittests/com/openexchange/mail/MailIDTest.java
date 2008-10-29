@@ -50,7 +50,6 @@
 package com.openexchange.mail;
 
 import com.openexchange.imap.dataobjects.IMAPMailFolder;
-import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;

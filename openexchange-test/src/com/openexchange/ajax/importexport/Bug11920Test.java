@@ -69,7 +69,7 @@ public final class Bug11920Test extends AbstractAJAXSession {
      * Default constructor.
      * @param name test name.
      */
-    public Bug11920Test(String name) {
+    public Bug11920Test(final String name) {
         super(name);
     }
 

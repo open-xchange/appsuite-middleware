@@ -45,11 +45,9 @@
 
 package com.openexchange.webdav.xml.parser;
 
-import java.io.IOException;
 import java.util.Date;
 
 import org.jdom.Element;
-import org.xmlpull.v1.XmlPullParserException;
 
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.webdav.xml.XmlServlet;

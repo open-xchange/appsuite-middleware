@@ -115,7 +115,7 @@ public class UserTest extends AbstractAJAXTest {
         loadUser(getWebConversation(), users[0].getId(), PROTOCOL + getHostName(), getSessionId());
     }
 
-    public static UserImpl4Test[] listUser(final WebConversation webCon, final int[] id, String host, final String session) throws Exception {
+    public static UserImpl4Test[] listUser(final WebConversation webCon, final int[] id, final String host, final String session) throws Exception {
 
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
@@ -165,7 +165,7 @@ public class UserTest extends AbstractAJAXTest {
         return user;
     }
 
-    public static UserImpl4Test loadUser(final WebConversation webCon, final int userId, String host, final String session) throws Exception {
+    public static UserImpl4Test loadUser(final WebConversation webCon, final int userId, final String host, final String session) throws Exception {
 
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);

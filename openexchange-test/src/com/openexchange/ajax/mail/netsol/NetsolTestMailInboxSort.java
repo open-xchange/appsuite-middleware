@@ -123,7 +123,7 @@ public final class NetsolTestMailInboxSort extends AbstractNetsolTest {
 		final DurationTracker parseTracker = new DurationTracker(runs);
 		System.out.println("Starting test runs...");
 		for (int i = 0; i < runs; i++) {
-			final CommonAllResponse response = (CommonAllResponse) Executor.execute(getSession(), new NetsolAllRequest(
+			final CommonAllResponse response = Executor.execute(getSession(), new NetsolAllRequest(
 					getInboxFolder(), COLUMNS_FOLDER_ID, MailListField.SUBJECT.getField(), Order.ASCENDING));
 			assertTrue("Sort failed", response.getArray() != null && response.getArray().length > 0);
 			assertTrue("Duration corrupt", response.getRequestDuration() > 0);

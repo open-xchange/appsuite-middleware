@@ -21,8 +21,8 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.TestException;
@@ -73,8 +73,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 	}
 
     
-    private int createFolderForTest(int userId) throws JSONException, OXException, IOException, SAXException, TestException, AjaxException {
-        int parent = FolderTest.getMyInfostoreFolder(getWebConversation(),getHostName(),sessionId,userId).getObjectID();
+    private int createFolderForTest(final int userId) throws JSONException, OXException, IOException, SAXException, TestException, AjaxException {
+        final int parent = FolderTest.getMyInfostoreFolder(getWebConversation(),getHostName(),sessionId,userId).getObjectID();
         return FolderTest.insertFolder(getWebConversation(), getHostName(), getSessionId(), userId, false,parent,
                 "NewInfostoreFolder"+System.currentTimeMillis(), "infostore", FolderObject.PUBLIC, -1, true);
     }
@@ -381,10 +381,10 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 	}
 	
 	public int[] delete(final WebConversation webConv, final String protocol, final String hostname, final String sessionId, final long timestamp, final int[][] ids) throws MalformedURLException, JSONException, IOException, SAXException {
-		int[][] notDeletedTuple = deleteFromFolders(webConv, protocol, hostname, sessionId, timestamp, ids);
-        int[] retval = new int[notDeletedTuple.length];
+		final int[][] notDeletedTuple = deleteFromFolders(webConv, protocol, hostname, sessionId, timestamp, ids);
+        final int[] retval = new int[notDeletedTuple.length];
         int i = 0;
-        for(int[] tuple : notDeletedTuple) {
+        for(final int[] tuple : notDeletedTuple) {
             retval[i++] = tuple[0];
         }
         return retval;
@@ -415,7 +415,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 
 		data.append("]");
 
-        JSONObject response = put(webConv, url.toString(), data.toString());
+        final JSONObject response = put(webConv, url.toString(), data.toString());
         final JSONArray arr = response.getJSONArray("data");
 		final int[][] notDeleted = new int[arr.length()][2];
 
@@ -458,10 +458,11 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		final String content = putS(webConv, url.toString(), data.toString());
 		JSONArray arr = null;
 		try{
-            JSONObject response = new JSONObject(content);
+            final JSONObject response = new JSONObject(content);
             arr = response.getJSONArray("data");
-            if(!response.has("error"))
-                assertNotNull(response.opt(ResponseFields.TIMESTAMP)); // FIXME!
+            if(!response.has("error")) {
+				assertNotNull(response.opt(ResponseFields.TIMESTAMP)); // FIXME!
+			}
         } catch (final JSONException x) {
 			final Response res = Response.parse(content);
 			if(res.hasError()) {

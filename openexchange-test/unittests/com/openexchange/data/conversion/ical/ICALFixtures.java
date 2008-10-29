@@ -48,25 +48,25 @@
  */
 package com.openexchange.data.conversion.ical;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-import java.text.SimpleDateFormat;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class ICALFixtures {
 
-    private SimpleDateFormat dateTime = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-    private SimpleDateFormat date = new SimpleDateFormat("yyyyMMdd");
+    private final SimpleDateFormat dateTime = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+    private final SimpleDateFormat date = new SimpleDateFormat("yyyyMMdd");
 
 
     public ICALFixtures() {
         dateTime.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    public String veventWithLocalDTStartAndDTEnd(Date start, Date end) {
-        StringBuilder bob = new StringBuilder();
+    public String veventWithLocalDTStartAndDTEnd(final Date start, final Date end) {
+        final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
         beginEvent(bob);
@@ -79,14 +79,14 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    private void localDTStartAndDTEnd(StringBuilder bob, Date start, Date end) {
+    private void localDTStartAndDTEnd(final StringBuilder bob, final Date start, final Date end) {
         bob.append("DTSTART:").append(dateTime.format(start)).append("\n");
         bob.append("DTEND:").append(dateTime.format(end)).append("\n");
     }
 
 
-    public String veventWithUTCDTStartAndDTEnd(Date start, Date end) {
-        StringBuilder bob = new StringBuilder();
+    public String veventWithUTCDTStartAndDTEnd(final Date start, final Date end) {
+        final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
         beginEvent(bob);
@@ -99,14 +99,14 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    private void utcDTStartAndDTEnd(StringBuilder bob, Date start, Date end) {
+    private void utcDTStartAndDTEnd(final StringBuilder bob, final Date start, final Date end) {
         bob.append("DTSTART:").append(dateTime.format(start)).append("Z\n");
         bob.append("DTEND:").append(dateTime.format(end)).append("Z\n");
     }
 
 
-    public String veventWithDTStartAndEndInTimeZone(Date start, Date end, TimeZone timeZone) {
-        StringBuilder bob = new StringBuilder();
+    public String veventWithDTStartAndEndInTimeZone(final Date start, final Date end, final TimeZone timeZone) {
+        final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
         beginEvent(bob);
@@ -119,8 +119,8 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String veventWithDTStartAndEndInTimeZone(Date start, Date end, String timeZone) {
-        StringBuilder bob = new StringBuilder();
+    public String veventWithDTStartAndEndInTimeZone(final Date start, final Date end, final String timeZone) {
+        final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
         beginEvent(bob);
@@ -134,14 +134,14 @@ public class ICALFixtures {
     }
 
 
-    private void timezoneDTStartAndDTEnd(StringBuilder bob, Date start, Date end, String timeZone) {
+    private void timezoneDTStartAndDTEnd(final StringBuilder bob, final Date start, final Date end, final String timeZone) {
         bob.append("DTSTART;TZID=").append(timeZone).append(":").append(dateTime.format(start)).append("\n");
         bob.append("DTEND;TZID=").append(timeZone).append(":").append(dateTime.format(end)).append("\n");
     }
 
 
-    public String veventWithDTStartAndDTEndInCustomTimezone(Date start, Date end) {
-        StringBuilder bob = new StringBuilder();
+    public String veventWithDTStartAndDTEndInCustomTimezone(final Date start, final Date end) {
+        final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
 
@@ -157,14 +157,14 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    private void customTimezoneDTStartAndDTEnd(StringBuilder bob, Date start, Date end) {
+    private void customTimezoneDTStartAndDTEnd(final StringBuilder bob, final Date start, final Date end) {
         bob.append("DTSTART;TZID=").append("/custom/Japan").append(":").append(dateTime.format(start)).append("\n");
         bob.append("DTEND;TZID=").append("/custom/Japan").append(":").append(dateTime.format(end)).append("\n");
     }
 
 
-    public String veventWithLocalDTStartAndDuration(Date start, String duration) {
-        StringBuilder bob = new StringBuilder();
+    public String veventWithLocalDTStartAndDuration(final Date start, final String duration) {
+        final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
         beginEvent(bob);
@@ -178,13 +178,13 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String veventWithSimpleProperties(Date start, Date end, String...properties) {
-        StringBuilder bob = new StringBuilder();
+    public String veventWithSimpleProperties(final Date start, final Date end, final String...properties) {
+        final StringBuilder bob = new StringBuilder();
         standardAppFields(bob, start,end);
 
         for(int i = 0; i < properties.length; i++) {
-            String name = properties[i++];
-            String value = properties[i];
+            final String name = properties[i++];
+            final String value = properties[i];
             bob.append(name).append(":").append(value).append("\n");
         }
 
@@ -192,11 +192,11 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String veventWithAttendees(Date start, Date end, String[] mails) {
-        StringBuilder bob = new StringBuilder();
+    public String veventWithAttendees(final Date start, final Date end, final String[] mails) {
+        final StringBuilder bob = new StringBuilder();
         standardAppFields(bob, start,end);
 
-        for(String mail : mails) {
+        for(final String mail : mails) {
             bob.append("ATTENDEE:MAILTO:").append(mail).append("\n");
         }
 
@@ -204,11 +204,11 @@ public class ICALFixtures {
         return bob.toString();        
     }
 
-    public String veventWithResources(Date start, Date end, String[] resources) {
-        StringBuilder bob = new StringBuilder();
+    public String veventWithResources(final Date start, final Date end, final String[] resources) {
+        final StringBuilder bob = new StringBuilder();
         standardAppFields(bob, start,end);
         bob.append("RESOURCES:");
-        for(String resource : resources) {
+        for(final String resource : resources) {
            bob.append(resource).append(",");
         }
         bob.setCharAt(bob.length()-1, '\n');
@@ -219,11 +219,11 @@ public class ICALFixtures {
 
 
 
-    public String veventWithResourcesInAttendees(Date start, Date end, String[] resources) {
-        StringBuilder bob = new StringBuilder();
+    public String veventWithResourcesInAttendees(final Date start, final Date end, final String[] resources) {
+        final StringBuilder bob = new StringBuilder();
         standardAppFields(bob, start,end);
 
-        for(String cn : resources) {
+        for(final String cn : resources) {
             bob.append("ATTENDEE;CUTYPE=RESOURCE;CN=").append(cn).append(":MAILTO:ignored@bla.invalid\n");
         }
 
@@ -231,11 +231,11 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String veventWithCategories(Date start, Date end, String[] categories) {
-        StringBuilder bob = new StringBuilder();
+    public String veventWithCategories(final Date start, final Date end, final String[] categories) {
+        final StringBuilder bob = new StringBuilder();
         standardAppFields(bob, start,end);
         bob.append("CATEGORIES:");
-        for(String category : categories) {
+        for(final String category : categories) {
             bob.append(category).append(",");
         }
         bob.setCharAt(bob.length()-1, '\n');
@@ -246,15 +246,15 @@ public class ICALFixtures {
 
 
 
-    public String veventWithDeleteExceptionsAsDateTime(Date start, Date end, String rrule, Date[] exceptions) {
-        StringBuilder bob = new StringBuilder();
+    public String veventWithDeleteExceptionsAsDateTime(final Date start, final Date end, final String rrule, final Date[] exceptions) {
+        final StringBuilder bob = new StringBuilder();
         standardAppFields(bob, start,end);
 
         bob.append("RRULE:").append(rrule).append("\n");
 
         bob.append("EXDATE:");
 
-        for(Date exception : exceptions) {
+        for(final Date exception : exceptions) {
             bob.append(dateTime.format(exception)).append(",");
         }
         bob.setCharAt(bob.length()-1,'\n');
@@ -263,15 +263,15 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String veventWithDeleteExceptionsAsDate(Date start, Date end, String rrule, Date[] exceptions) {
-        StringBuilder bob = new StringBuilder();
+    public String veventWithDeleteExceptionsAsDate(final Date start, final Date end, final String rrule, final Date[] exceptions) {
+        final StringBuilder bob = new StringBuilder();
         standardAppFields(bob, start,end);
 
         bob.append("RRULE:").append(rrule).append("\n");
 
         bob.append("EXDATE;VALUE=DATE:");
 
-        for(Date exception : exceptions) {
+        for(final Date exception : exceptions) {
             bob.append(date.format(exception)).append(",");
         }
         bob.setCharAt(bob.length()-1,'\n');
@@ -281,8 +281,8 @@ public class ICALFixtures {
     }
 
 
-    public String veventWithDisplayAlarm(Date start, Date end, String trigger, String description) {
-        StringBuilder bob = new StringBuilder();
+    public String veventWithDisplayAlarm(final Date start, final Date end, final String trigger, final String description) {
+        final StringBuilder bob = new StringBuilder();
         standardAppFields(bob, start,end);
 
         bob.append("BEGIN:VALARM\n");
@@ -296,7 +296,7 @@ public class ICALFixtures {
     }
 
 
-    private void standardAppFields(StringBuilder bob, Date start, Date end) {
+    private void standardAppFields(final StringBuilder bob, final Date start, final Date end) {
         beginCalendar(bob);
         beginEvent(bob);
 
@@ -305,13 +305,13 @@ public class ICALFixtures {
 
     }
 
-    private void endStandardAppFields(StringBuilder bob) {
+    private void endStandardAppFields(final StringBuilder bob) {
         endEvent(bob);
         endCalendar(bob);
 
     }
 
-    private void addTimeZone(StringBuilder bob) {
+    private void addTimeZone(final StringBuilder bob) {
         bob.append("BEGIN:VTIMEZONE\n");
         bob.append("TZID:/custom/Japan\n");
         bob.append("BEGIN:STANDARD\n");
@@ -323,21 +323,21 @@ public class ICALFixtures {
         bob.append("END:VTIMEZONE\n");
     }
 
-    private void beginCalendar(StringBuilder bob) {
+    private void beginCalendar(final StringBuilder bob) {
         bob.append("BEGIN:VCALENDAR\n")
            .append("VERSION:2.0\n");
     }
 
 
-    private void beginEvent(StringBuilder bob) {
+    private void beginEvent(final StringBuilder bob) {
         bob.append("BEGIN:VEVENT\n");
     }
 
-    private void endEvent(StringBuilder bob) {
+    private void endEvent(final StringBuilder bob) {
         bob.append("END:VEVENT\n");
     }
 
-    private void endCalendar(StringBuilder bob) {
+    private void endCalendar(final StringBuilder bob) {
         bob.append("END:VCALENDAR\n");
     }
 
@@ -345,31 +345,31 @@ public class ICALFixtures {
     // VTODO
 
 
-    private void standardTodoFields(StringBuilder bob) {
+    private void standardTodoFields(final StringBuilder bob) {
         bob.append("BEGIN:VCALENDAR\nBEGIN:VTODO\n");
     }
 
-    private void endStandardTodoFields(StringBuilder bob) {
+    private void endStandardTodoFields(final StringBuilder bob) {
         bob.append("END:VTODO\nEND:VCALENDAR");
     }
 
-    private void endTodo(StringBuilder bob) {
+    private void endTodo(final StringBuilder bob) {
         bob.append("END:VTODO\n");
     }
 
-    private void beginTodo(StringBuilder bob) {
+    private void beginTodo(final StringBuilder bob) {
         bob.append("BEGIN:VTODO\n");
     }
 
-    public String vtodoWithSimpleProperties(String...properties) {
+    public String vtodoWithSimpleProperties(final String...properties) {
 
-        StringBuilder bob = new StringBuilder();
+        final StringBuilder bob = new StringBuilder();
 
         standardTodoFields(bob);
 
         for(int i = 0; i < properties.length; i++) {
-            String name = properties[i++];
-            String value = properties[i];
+            final String name = properties[i++];
+            final String value = properties[i];
             bob.append(name).append(":").append(value).append("\n");
         }
 
@@ -378,8 +378,8 @@ public class ICALFixtures {
     }
 
 
-    public String vtodoWithLocalDTStartAndDTEnd(Date start, Date end) {
-        StringBuilder bob = new StringBuilder();
+    public String vtodoWithLocalDTStartAndDTEnd(final Date start, final Date end) {
+        final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
         beginTodo(bob);
@@ -392,8 +392,8 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String vtodoWithUTCDTStartAndDTEnd(Date start, Date end) {
-        StringBuilder bob = new StringBuilder();
+    public String vtodoWithUTCDTStartAndDTEnd(final Date start, final Date end) {
+        final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
         beginTodo(bob);
@@ -406,8 +406,8 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String vtodoWithDTStartAndEndInTimeZone(Date start, Date end, TimeZone timeZone) {
-        StringBuilder bob = new StringBuilder();
+    public String vtodoWithDTStartAndEndInTimeZone(final Date start, final Date end, final TimeZone timeZone) {
+        final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
         beginTodo(bob);
@@ -420,8 +420,8 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String vtodoWithDTStartAndDTEndInCustomTimezone(Date start, Date end) {
-        StringBuilder bob = new StringBuilder();
+    public String vtodoWithDTStartAndDTEndInCustomTimezone(final Date start, final Date end) {
+        final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
 
@@ -437,8 +437,8 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String vtodoWithLocalDTStartAndDuration(Date start, String duration) {
-        StringBuilder bob = new StringBuilder();
+    public String vtodoWithLocalDTStartAndDuration(final Date start, final String duration) {
+        final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
         beginTodo(bob);
@@ -452,11 +452,11 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String vtodoWithAttendees(String[] mails) {
-        StringBuilder bob = new StringBuilder();
+    public String vtodoWithAttendees(final String[] mails) {
+        final StringBuilder bob = new StringBuilder();
         standardTodoFields(bob);
 
-        for(String mail : mails) {
+        for(final String mail : mails) {
             bob.append("ATTENDEE:MAILTO:").append(mail).append("\n");
         }
 
@@ -465,11 +465,11 @@ public class ICALFixtures {
     }
 
 
-    public String vtodoWithCategories(String[] categories) {
-        StringBuilder bob = new StringBuilder();
+    public String vtodoWithCategories(final String[] categories) {
+        final StringBuilder bob = new StringBuilder();
         standardTodoFields(bob);
         bob.append("CATEGORIES:");
-        for(String category : categories) {
+        for(final String category : categories) {
             bob.append(category).append(",");
         }
         bob.setCharAt(bob.length()-1, '\n');
@@ -478,8 +478,8 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String vtodoWithSimpleProperties(Date start, Date end, String...properties) {
-        StringBuilder bob = new StringBuilder();
+    public String vtodoWithSimpleProperties(final Date start, final Date end, final String...properties) {
+        final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
         beginTodo(bob);
@@ -487,8 +487,8 @@ public class ICALFixtures {
         utcDTStartAndDTEnd(bob, start, end);
 
         for(int i = 0; i < properties.length; i++) {
-            String name = properties[i++];
-            String value = properties[i];
+            final String name = properties[i++];
+            final String value = properties[i];
             bob.append(name).append(":").append(value).append("\n");
         }
 
@@ -499,8 +499,8 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String vtodoWithDeleteExceptionsAsDateTime(Date start, Date end, String rrule, Date[] exceptions) {
-        StringBuilder bob = new StringBuilder();
+    public String vtodoWithDeleteExceptionsAsDateTime(final Date start, final Date end, final String rrule, final Date[] exceptions) {
+        final StringBuilder bob = new StringBuilder();
         beginCalendar(bob);
         beginTodo(bob);
 
@@ -510,7 +510,7 @@ public class ICALFixtures {
 
         bob.append("EXDATE:");
 
-        for(Date exception : exceptions) {
+        for(final Date exception : exceptions) {
             bob.append(dateTime.format(exception)).append(",");
         }
         bob.setCharAt(bob.length()-1,'\n');
@@ -521,8 +521,8 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String vtodoWithDeleteExceptionsAsDate(Date start, Date end, String rrule, Date[] exceptions) {
-        StringBuilder bob = new StringBuilder();
+    public String vtodoWithDeleteExceptionsAsDate(final Date start, final Date end, final String rrule, final Date[] exceptions) {
+        final StringBuilder bob = new StringBuilder();
         beginCalendar(bob);
         beginTodo(bob);
 
@@ -532,7 +532,7 @@ public class ICALFixtures {
 
         bob.append("EXDATE;VALUE=DATE:");
 
-        for(Date exception : exceptions) {
+        for(final Date exception : exceptions) {
             bob.append(date.format(exception)).append(",");
         }
         bob.setCharAt(bob.length()-1,'\n');
@@ -543,8 +543,8 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String vtodoWithDisplayAlarm(Date start, Date end, String trigger, String description) {
-        StringBuilder bob = new StringBuilder();
+    public String vtodoWithDisplayAlarm(final Date start, final Date end, final String trigger, final String description) {
+        final StringBuilder bob = new StringBuilder();
         beginCalendar(bob);
         beginTodo(bob);
 
@@ -562,8 +562,8 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String vtodoWithDueDate(Date due) {
-        StringBuilder bob = new StringBuilder();
+    public String vtodoWithDueDate(final Date due) {
+        final StringBuilder bob = new StringBuilder();
         beginCalendar(bob);
         beginTodo(bob);
 
@@ -575,8 +575,8 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String vtodoWithDateCompleted(Date dateCompleted) {
-        StringBuilder bob = new StringBuilder();
+    public String vtodoWithDateCompleted(final Date dateCompleted) {
+        final StringBuilder bob = new StringBuilder();
         beginCalendar(bob);
         beginTodo(bob);
 
@@ -591,17 +591,17 @@ public class ICALFixtures {
 
     //Error Cases
     
-    public String veventWithEnd(Date date) {
+    public String veventWithEnd(final Date date) {
         return veventWithOneDate("DTEND", date);
     }
 
 
-    public String veventWithStart(Date date) {
+    public String veventWithStart(final Date date) {
         return veventWithOneDate("DTSTART", date);
     }
 
-    private String veventWithOneDate(String property, Date date) {
-        StringBuilder bob = new StringBuilder();
+    private String veventWithOneDate(final String property, final Date date) {
+        final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
         beginEvent(bob);
@@ -614,8 +614,8 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String veventWithUnspecifiedVTimeZone(Date start, Date end) {
-        StringBuilder bob = new StringBuilder();
+    public String veventWithUnspecifiedVTimeZone(final Date start, final Date end) {
+        final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
 
@@ -630,12 +630,12 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String veventWithTwoRecurrences(Date start, Date end) {
+    public String veventWithTwoRecurrences(final Date start, final Date end) {
        return veventWithSimpleProperties(start, end, "RRULE", "FREQ=DAILY;INTERVAL=1;COUNT=3", "RRULE", "FREQ=DAILY;INTERVAL=2;COUNT=6");
     }
 
-    public String veventWithAudioAlarm(Date start, Date end, String trigger, String audioFile) {
-        StringBuilder bob = new StringBuilder();
+    public String veventWithAudioAlarm(final Date start, final Date end, final String trigger, final String audioFile) {
+        final StringBuilder bob = new StringBuilder();
         standardAppFields(bob, start,end);
 
         bob.append("BEGIN:VALARM\n");
@@ -648,8 +648,8 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String veventWithWholeDayEvent(Date start) {
-        StringBuilder bob = new StringBuilder();
+    public String veventWithWholeDayEvent(final Date start) {
+        final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
         beginEvent(bob);
@@ -662,8 +662,8 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String veventWithDTStartAsDateWithoutValue(Date start) {
-        StringBuilder bob = new StringBuilder();
+    public String veventWithDTStartAsDateWithoutValue(final Date start) {
+        final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
         beginEvent(bob);

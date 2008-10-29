@@ -129,7 +129,7 @@ public class NewListTest extends AbstractAJAXSession {
 
         // List request of A must now not contain the deleted objects and give
         // no error.
-        final CommonListResponse listR = (CommonListResponse) Executor.execute(
+        final CommonListResponse listR = Executor.execute(
             clientA, new ListRequest(allR.getListIDs(), columns, true));
         
         final Iterator<Object[]> it = listR.iterator();

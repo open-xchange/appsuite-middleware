@@ -109,7 +109,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 	@Test
 	public void importOneContact() throws NumberFormatException, Exception {
 		final List<ImportResult> results = importStuff(IMPORT_ONE); 
-		assertEquals("One result?" , (Integer) 1, (Integer) results.size());
+		assertEquals("One result?" , 1, results.size());
 		final ImportResult res = results.get(0);
 		if(res.hasError()){
 			res.getException().printStackTrace();
@@ -118,7 +118,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 
 		//basic check: 1 entry in folder
 		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
-		assertEquals("One contact in folder?", (Integer) 1, (Integer) contactSql.getNumberOfContacts(folderId));
+		assertEquals("One contact in folder?", 1, contactSql.getNumberOfContacts(folderId));
 
 		//detailed check:
 		checkFirstResult(
@@ -130,7 +130,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 	@Test
 	public void bug7105() throws NumberFormatException, Exception {
 		final List<ImportResult> results = importStuff(IMPORT_ONE+"\n"+NAME2); 
-		assertEquals("Two results?" , (Integer) 2 , (Integer) results.size());
+		assertEquals("Two results?" , 2 , results.size());
 
 		int i = 0;
 		for(final ImportResult res : results){
@@ -142,7 +142,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 	@Test
 	public void bug7552() throws NumberFormatException, Exception {
 		final List<ImportResult> results = importStuff(IMPORT_HEADERS + NAME1+", "+EMAIL1+", 1.4.1981"); 
-		assertEquals("One result?" , (Integer) 1, (Integer) results.size());
+		assertEquals("One result?" , 1, results.size());
 		final ImportResult res = results.get(0);
 		if(res.hasError()){
 			res.getException().printStackTrace();
@@ -165,7 +165,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 				", "
 				+EMAIL1+
 				", 1.4.1981"); 
-		assertEquals("One result?" , (Integer) 1, (Integer) results.size());
+		assertEquals("One result?" , 1, results.size());
 		final ImportResult res = results.get(0);
 		assertTrue("Has error" , res.hasError());
 		final AbstractOXException dirk = res.getException();
@@ -179,14 +179,14 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 	@Test public void bug7710() throws UnsupportedEncodingException, NumberFormatException, OXException, ContextException {
 		String file = ContactField.SUR_NAME.getGermanOutlookName() + ", " + ContactField.PRIVATE_FLAG.getGermanOutlookName() + "\nTobias Prinz,PRIVAT";
 		List<ImportResult> results = importStuff(file);
-		assertEquals("Only one result", (Integer) 1, (Integer) results.size());
+		assertEquals("Only one result", 1, results.size());
 		ImportResult res = results.get(0);
 		ContactObject conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
 		assertTrue("Is private?", conObj.getPrivateFlag());
 		
 		file = ContactField.SUR_NAME.getGermanOutlookName() + ", " + ContactField.PRIVATE_FLAG.getGermanOutlookName() + "\nTobias Prinz,Ã–FFENTLICH";
 		results = importStuff(file);
-		assertEquals("Only one result", (Integer) 1, (Integer) results.size());
+		assertEquals("Only one result", 1, results.size());
 		res = results.get(0);
 		conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
 		assertTrue("Is private?", !conObj.getPrivateFlag());
@@ -198,11 +198,11 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 	 * This test confirmed that it was simply missing translations for those fields.
 	 */
 	@Test public void bug9367_should_translate_several_more_fields() throws UnsupportedEncodingException, NumberFormatException, OXException, ContextException {
-		final String file = "\"Anrede\",\"Vorname\",\"Weitere Vornamen\",\"Nachname\",\"Suffix\",\"Firma\",\"Abteilung\",\"Position\",\"Stra§e geschŠftlich\",\"Stra§e geschŠftlich 2\",\"Stra§e geschŠftlich 3\",\"Ort geschŠftlich\",\"Region geschŠftlich\",\"Postleitzahl geschŠftlich\",\"Land/Region geschŠftlich\",\"Stra§e privat\",\"Stra§e privat 2\",\"Stra§e privat 3\",\"Ort privat\",\"Bundesland/Kanton privat\",\"Postleitzahl privat\",\"Land/Region privat\",\"Weitere Stra§e\",\"Weitere Stra§e 2\",\"Weitere Stra§e 3\",\"Weiterer Ort\",\"Weiteres/r Bundesland/Kanton\",\"Weitere Postleitzahl\",\"Weiteres/e Land/Region\",\"Telefon Assistent\",\"Fax geschŠftlich\",\"Telefon geschŠftlich\",\"Telefon geschŠftlich 2\",\"RŸckmeldung\",\"Autotelefon\",\"Telefon Firma\",\"Fax privat\",\"Telefon privat\",\"Telefon privat 2\",\"ISDN\",\"Mobiltelefon\",\"Weiteres Fax\",\"Weiteres Telefon\",\"Pager\",\"Haupttelefon\",\"Mobiltelefon 2\",\"Telefon fŸr Hšrbehinderte\",\"Telex\",\"Abrechnungsinformation\",\"Benutzer 1\",\"Benutzer 2\",\"Benutzer 3\",\"Benutzer 4\",\"Beruf\",\"BŸro\",\"E-Mail-Adresse\",\"E-Mail-Typ\",\"E-Mail: Angezeigter Name\",\"E-Mail 2: Adresse\",\"E-Mail 2: Typ\",\"E-Mail 2: Angezeigter Name\",\"E-Mail 3: Adresse\",\"E-Mail 3: Typ\",\"E-Mail 3: Angezeigter Name\",\"Empfohlen von\",\"Geburtstag\",\"Geschlecht\",\"Hobby\",\"Initialen\",\"Internet-Frei/Gebucht\",\"Jahrestag\",\"Kategorien\",\"Kinder\",\"Konto\",\"Name Assistent\",\"Name des/der Vorgesetzten\",\"Notizen\",\"Organisationsnr.\",\"Ort\",\"Partner\",\"Postfach geschŠftlich\",\"Postfach privat\",\"PrioritŠt\",\"Privat\",\"Regierungsnr.\",\"Reisekilometer\",\"Sprache\",\"Stichwšrter\",\"Vertraulichkeit\",\"Verzeichnisserver\",\"Webseite\",\"Weiteres Postfach\""+ 
-		"\n\"Anrede\",\"Vorname\",\"Zweiter Vorname\",\"Nachname\",\"Namenszusatz\",\"Firma\",\"Abteilung\",\"Position\",\"Stra§e\",,,\"Stadt\",\"Bundesland\",\"PLZ\",\"Land\",\"Stra§e\",,,\" Stadt \",\"Bundesland\",\"PLZ\",\"Land\",\"Stra§e (weitere)\",,,\"Stadt (weitere)\",\"Bundesland (weiteres)\",\"PLZ\",\"Land (weiteres)\",,\"Fax (geschŠftlich)\",\"Telefon (geschŠftlich)\",\"Telefon (geschŠftlich 2)\",,\"Autotelefon\",\"Telefon (Zentrale)\",\"Fax (privat)\",\"Telefon (privat)\",\"Telefon (privat 2)\",,\"Mobiltelefon\",\"Fax (weiteres)\",\"Telefon (weiteres)\",\"Pager\",,,\"Texttelefon\",\"Telex\",,,,,,\"Beruf\",\"Raumnummer\",\"email@geschaeftlich.tld\",\"SMTP\",\"Angezeigter Name (email@geschaeftlich.tld)\",\"email@privat.tld\",\"SMTP\",\"Angezeigter Name (email@privat.tld)\",\"E-Mail (weitere)\",\"SMTP\",\"Angezeigter Name (E-Mail (weitere))\",,\"10.9.2007\",\"Keine Angabe\",,,,\"9.9.2007\",\"Tag1\",,,\"Assistent\",\"Manager\",\"Anmerkungen\",,,\"Ehepartner\",,,\"Niedrig\",\"Ein\",,,,,\"Privat\",,\"URL\"";
+		final String file = "\"Anrede\",\"Vorname\",\"Weitere Vornamen\",\"Nachname\",\"Suffix\",\"Firma\",\"Abteilung\",\"Position\",\"Straï¿½e geschï¿½ftlich\",\"Straï¿½e geschï¿½ftlich 2\",\"Straï¿½e geschï¿½ftlich 3\",\"Ort geschï¿½ftlich\",\"Region geschï¿½ftlich\",\"Postleitzahl geschï¿½ftlich\",\"Land/Region geschï¿½ftlich\",\"Straï¿½e privat\",\"Straï¿½e privat 2\",\"Straï¿½e privat 3\",\"Ort privat\",\"Bundesland/Kanton privat\",\"Postleitzahl privat\",\"Land/Region privat\",\"Weitere Straï¿½e\",\"Weitere Straï¿½e 2\",\"Weitere Straï¿½e 3\",\"Weiterer Ort\",\"Weiteres/r Bundesland/Kanton\",\"Weitere Postleitzahl\",\"Weiteres/e Land/Region\",\"Telefon Assistent\",\"Fax geschï¿½ftlich\",\"Telefon geschï¿½ftlich\",\"Telefon geschï¿½ftlich 2\",\"Rï¿½ckmeldung\",\"Autotelefon\",\"Telefon Firma\",\"Fax privat\",\"Telefon privat\",\"Telefon privat 2\",\"ISDN\",\"Mobiltelefon\",\"Weiteres Fax\",\"Weiteres Telefon\",\"Pager\",\"Haupttelefon\",\"Mobiltelefon 2\",\"Telefon fï¿½r Hï¿½rbehinderte\",\"Telex\",\"Abrechnungsinformation\",\"Benutzer 1\",\"Benutzer 2\",\"Benutzer 3\",\"Benutzer 4\",\"Beruf\",\"Bï¿½ro\",\"E-Mail-Adresse\",\"E-Mail-Typ\",\"E-Mail: Angezeigter Name\",\"E-Mail 2: Adresse\",\"E-Mail 2: Typ\",\"E-Mail 2: Angezeigter Name\",\"E-Mail 3: Adresse\",\"E-Mail 3: Typ\",\"E-Mail 3: Angezeigter Name\",\"Empfohlen von\",\"Geburtstag\",\"Geschlecht\",\"Hobby\",\"Initialen\",\"Internet-Frei/Gebucht\",\"Jahrestag\",\"Kategorien\",\"Kinder\",\"Konto\",\"Name Assistent\",\"Name des/der Vorgesetzten\",\"Notizen\",\"Organisationsnr.\",\"Ort\",\"Partner\",\"Postfach geschï¿½ftlich\",\"Postfach privat\",\"Prioritï¿½t\",\"Privat\",\"Regierungsnr.\",\"Reisekilometer\",\"Sprache\",\"Stichwï¿½rter\",\"Vertraulichkeit\",\"Verzeichnisserver\",\"Webseite\",\"Weiteres Postfach\""+ 
+		"\n\"Anrede\",\"Vorname\",\"Zweiter Vorname\",\"Nachname\",\"Namenszusatz\",\"Firma\",\"Abteilung\",\"Position\",\"Straï¿½e\",,,\"Stadt\",\"Bundesland\",\"PLZ\",\"Land\",\"Straï¿½e\",,,\" Stadt \",\"Bundesland\",\"PLZ\",\"Land\",\"Straï¿½e (weitere)\",,,\"Stadt (weitere)\",\"Bundesland (weiteres)\",\"PLZ\",\"Land (weiteres)\",,\"Fax (geschï¿½ftlich)\",\"Telefon (geschï¿½ftlich)\",\"Telefon (geschï¿½ftlich 2)\",,\"Autotelefon\",\"Telefon (Zentrale)\",\"Fax (privat)\",\"Telefon (privat)\",\"Telefon (privat 2)\",,\"Mobiltelefon\",\"Fax (weiteres)\",\"Telefon (weiteres)\",\"Pager\",,,\"Texttelefon\",\"Telex\",,,,,,\"Beruf\",\"Raumnummer\",\"email@geschaeftlich.tld\",\"SMTP\",\"Angezeigter Name (email@geschaeftlich.tld)\",\"email@privat.tld\",\"SMTP\",\"Angezeigter Name (email@privat.tld)\",\"E-Mail (weitere)\",\"SMTP\",\"Angezeigter Name (E-Mail (weitere))\",,\"10.9.2007\",\"Keine Angabe\",,,,\"9.9.2007\",\"Tag1\",,,\"Assistent\",\"Manager\",\"Anmerkungen\",,,\"Ehepartner\",,,\"Niedrig\",\"Ein\",,,,,\"Privat\",,\"URL\"";
 
 		final List<ImportResult> results = importStuff(file, "cp1252");
-		assertEquals("Only one result" , (Integer) 1 , (Integer) results.size() );
+		assertEquals("Only one result" , 1 , results.size() );
 		final ImportResult res = results.get(0);
 		final ContactObject conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
 		assertEquals("email@geschaeftlich.tld", conObj.getEmail1() );
@@ -222,14 +222,14 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		c1.setTime(date1);
 		c2.setTime(date2);
 		assertEquals("Day", 
-				(Integer) c1.get(Calendar.DAY_OF_MONTH),
-				(Integer) c2.get(Calendar.DAY_OF_MONTH));
+				c1.get(Calendar.DAY_OF_MONTH),
+				c2.get(Calendar.DAY_OF_MONTH));
 		assertEquals("Month", 
-				(Integer) c1.get(Calendar.MONTH), 
-				(Integer) c2.get(Calendar.MONTH));
+				c1.get(Calendar.MONTH), 
+				c2.get(Calendar.MONTH));
 		assertEquals("Year", 
-				(Integer) c1.get(Calendar.YEAR), 
-				(Integer) c2.get(Calendar.YEAR));
+				c1.get(Calendar.YEAR), 
+				c2.get(Calendar.YEAR));
 	}
 
 	

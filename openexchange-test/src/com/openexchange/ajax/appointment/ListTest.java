@@ -1,5 +1,7 @@
 package com.openexchange.ajax.appointment;
 
+import static com.openexchange.ajax.framework.ListIDs.l;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -14,8 +16,8 @@ import com.openexchange.ajax.ResourceTest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.CommonListResponse;
+import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -25,8 +27,6 @@ import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
-
-import static com.openexchange.ajax.framework.ListIDs.l;
 
 public class ListTest extends AppointmentTest {
 	
@@ -230,7 +230,7 @@ public class ListTest extends AppointmentTest {
 
     // Node 2652
     public void testLastModifiedUTC() throws Exception {
-        AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
         final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.LAST_MODIFIED_UTC};
 
         final AppointmentObject appointmentObj = createAppointmentObject("testShowLastModifiedUTC");
@@ -239,16 +239,16 @@ public class ListTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
         try {
-            ListRequest listRequest = new ListRequest(l(new int[] {appointmentFolderId, objectId}), cols, true);
-            CommonListResponse response = Executor.execute(client, listRequest);
-            JSONArray arr = (JSONArray) response.getResponse().getData();
+            final ListRequest listRequest = new ListRequest(l(new int[] {appointmentFolderId, objectId}), cols, true);
+            final CommonListResponse response = Executor.execute(client, listRequest);
+            final JSONArray arr = (JSONArray) response.getResponse().getData();
 
             assertNotNull(arr);
-            int size = arr.length();
+            final int size = arr.length();
             assertTrue(size > 0);
 
             for(int i = 0; i < size; i++ ){
-                JSONArray objectData = arr.optJSONArray(i);
+                final JSONArray objectData = arr.optJSONArray(i);
                 assertNotNull(objectData);
                 assertNotNull(objectData.opt(2));
             }

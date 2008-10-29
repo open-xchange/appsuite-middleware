@@ -130,7 +130,7 @@ public final class NetsolTestMailInbox extends AbstractNetsolTest {
 			/*
 			 * Fetch INBOX mails
 			 */
-			final CommonListResponse resp = (CommonListResponse) Executor.execute(getSession(), new NetsolListRequest(paths));
+			final CommonListResponse resp = Executor.execute(getSession(), new NetsolListRequest(paths));
 			assertTrue("List failed", resp.getArray() != null && resp.getArray().length > 0);
 			assertTrue("Duration corrupt", resp.getRequestDuration() > 0);
 			requestTracker.addDuration(resp.getRequestDuration());

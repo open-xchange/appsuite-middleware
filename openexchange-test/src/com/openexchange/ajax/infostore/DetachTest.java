@@ -23,7 +23,7 @@ public class DetachTest extends InfostoreAJAXTest {
 	public void setUp() throws Exception {
 		super.setUp();
 		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        long FAR_FUTURE = Long.MAX_VALUE;
+        final long FAR_FUTURE = Long.MAX_VALUE;
         Response res = update(getWebConversation(),getHostName(),sessionId,clean.get(0), FAR_FUTURE ,m(), upload, "text/plain");
 		assertNoError(res);
 		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),FAR_FUTURE,m(), upload, "text/plain");

@@ -379,8 +379,8 @@ public class ParticipantNotifyTest extends TestCase{
         final List<String> mailAddresses = new LinkedList<String>();
         for(final Message message : messages) { mailAddresses.addAll(message.addresses); }
 
-        List<PooledNotification> pooledNotifications = NotificationPool.getInstance().getNotifications();
-        for (PooledNotification pooledNotification : pooledNotifications) {
+        final List<PooledNotification> pooledNotifications = NotificationPool.getInstance().getNotifications();
+        for (final PooledNotification pooledNotification : pooledNotifications) {
             mailAddresses.add(pooledNotification.getParticipant().email);
         }
 

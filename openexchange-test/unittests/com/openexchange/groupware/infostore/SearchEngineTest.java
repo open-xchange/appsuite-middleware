@@ -58,10 +58,10 @@ import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
+import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
@@ -70,11 +70,11 @@ import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.test.TestInit;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -150,22 +150,22 @@ public class SearchEngineTest extends TestCase {
     // Bug 11569
 
     public void testSearchForPercent() throws OXException, SearchIteratorException {
-        DocumentMetadata doc1 = createWithTitle("100%");
+        final DocumentMetadata doc1 = createWithTitle("100%");
                                 createWithTitle("Hallo");
         
 
-        SearchIterator iter = searchEngine.search("%",new Metadata[]{Metadata.ID_LITERAL, Metadata.TITLE_LITERAL}, folderId, Metadata.TITLE_LITERAL, SearchEngine.ASC,0,10,ctx, user, userConfig);
+        final SearchIterator iter = searchEngine.search("%",new Metadata[]{Metadata.ID_LITERAL, Metadata.TITLE_LITERAL}, folderId, Metadata.TITLE_LITERAL, SearchEngine.ASC,0,10,ctx, user, userConfig);
 
         assertTrue(iter.hasNext());
-        DocumentMetadata gotDoc = (DocumentMetadata) iter.next();
+        final DocumentMetadata gotDoc = (DocumentMetadata) iter.next();
 
         assertFalse(iter.hasNext());
 
         assertEquals(doc1.getId(), gotDoc.getId());
     }
 
-    private DocumentMetadata createWithTitle(String title) throws OXException {
-        DocumentMetadata metadata = new DocumentMetadataImpl() ;
+    private DocumentMetadata createWithTitle(final String title) throws OXException {
+        final DocumentMetadata metadata = new DocumentMetadataImpl() ;
         metadata.setTitle(title);
         metadata.setFolderId(folderId);
         try {
@@ -173,17 +173,17 @@ public class SearchEngineTest extends TestCase {
             infostore.saveDocumentMetadata(metadata, InfostoreFacade.NEW, session);
             infostore.commit();
             clean.add( metadata );
-        } catch (OXException x) {
+        } catch (final OXException x) {
             try {
                 infostore.rollback();
-            } catch (TransactionException e) {
+            } catch (final TransactionException e) {
                 e.printStackTrace();
             }
             throw x;
         } finally {
             try {
                 infostore.finish();
-            } catch (TransactionException e) {
+            } catch (final TransactionException e) {
                 e.printStackTrace();
             }
         }

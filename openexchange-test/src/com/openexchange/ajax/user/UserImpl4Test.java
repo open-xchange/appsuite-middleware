@@ -23,6 +23,11 @@ import com.openexchange.groupware.ldap.User;
  */
 public class UserImpl4Test implements User {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5888772849310386010L;
+
 	private int id = 0;
 	
 	private String userPassword;

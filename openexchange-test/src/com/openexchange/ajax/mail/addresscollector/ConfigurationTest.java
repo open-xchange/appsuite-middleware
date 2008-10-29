@@ -10,12 +10,12 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 public class ConfigurationTest extends AbstractAJAXSession {
 
-    public ConfigurationTest(String name) {
+    public ConfigurationTest(final String name) {
         super(name);
     }
 
     public void testEnableAttribute() throws Throwable {
-        AJAXClient client = getClient();
+        final AJAXClient client = getClient();
         SetRequest setRequest = new SetRequest(Tree.ContactCollectEnabled, true);
         SetResponse setResponse = client.execute(setRequest);
         assertFalse(setResponse.hasError());
@@ -34,7 +34,7 @@ public class ConfigurationTest extends AbstractAJAXSession {
     }
     
     public void testFolderId() throws Throwable {
-        AJAXClient client = getClient();
+        final AJAXClient client = getClient();
         SetRequest setRequest = new SetRequest(Tree.ContactCollectFolder, 100);
         SetResponse setResponse = client.execute(setRequest);
         assertFalse(setResponse.hasError());

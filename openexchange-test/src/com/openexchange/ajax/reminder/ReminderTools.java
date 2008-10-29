@@ -78,7 +78,7 @@ public final class ReminderTools extends Assert {
     public static RangeResponse get(final AJAXClient client,
         final RangeRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (RangeResponse) Executor.execute(client.getSession(), request);
+        return Executor.execute(client.getSession(), request);
     }
 
     public static ReminderObject searchByTarget(final ReminderObject[] list,

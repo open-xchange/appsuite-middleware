@@ -113,7 +113,7 @@ public class NewListTest extends AbstractAJAXSession {
             app.addParticipant(new UserParticipant(clientA.getValues().getUserId()));
             inserts[i] = new InsertRequest(app, clientA.getValues().getTimeZone());
         }
-        final MultipleResponse mInsert = (MultipleResponse) Executor.execute(
+        final MultipleResponse mInsert = Executor.execute(
             getClient(), MultipleRequest.create(inserts));
         final List<CommonInsertResponse> toDelete = new ArrayList<CommonInsertResponse>(NUMBER);
         final Iterator<AbstractAJAXResponse> iter = mInsert.iterator();
@@ -140,7 +140,7 @@ public class NewListTest extends AbstractAJAXSession {
 
         // List request of A must now not contain the deleted objects and give
         // no error.
-        final CommonListResponse listR = (CommonListResponse) Executor.execute(
+        final CommonListResponse listR = Executor.execute(
             clientA, new ListRequest(allR.getListIDs(), columns, true));
         
         final DeleteRequest[] deletes2 = new DeleteRequest[toDelete.size()];

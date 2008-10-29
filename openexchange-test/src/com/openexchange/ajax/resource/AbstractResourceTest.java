@@ -62,7 +62,6 @@ import com.openexchange.ajax.resource.actions.ResourceDeleteRequest;
 import com.openexchange.ajax.resource.actions.ResourceGetRequest;
 import com.openexchange.ajax.resource.actions.ResourceGetResponse;
 import com.openexchange.ajax.resource.actions.ResourceNewRequest;
-import com.openexchange.ajax.resource.actions.ResourceNewResponse;
 import com.openexchange.resource.Resource;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -178,7 +177,7 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
 		/*
 		 * Perform new request
 		 */
-		final int id = ((ResourceNewResponse) Executor.execute(getSession(), new ResourceNewRequest(toCreate, true)))
+		final int id = (Executor.execute(getSession(), new ResourceNewRequest(toCreate, true)))
 				.getID();
 		System.out.println(new StringBuilder(32).append("(Temporary) Resource with ID ").append(id).append(
 				" successfully created").toString());

@@ -56,7 +56,7 @@ public class AllTest extends InfostoreAJAXTest {
         assertNoError(res);
 
         final JSONArray entries = (JSONArray) res.getData();
-		int size = entries.length();
+		final int size = entries.length();
         assertTrue(size > 0);
 
         for(int i = 0; i < size; i++) {

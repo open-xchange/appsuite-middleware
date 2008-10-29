@@ -48,10 +48,10 @@
  */
 package com.openexchange.ajax.folder.actions;
 
+import java.util.Date;
+
 import com.openexchange.ajax.framework.CommonUpdatesRequest;
 import com.openexchange.groupware.search.Order;
-
-import java.util.Date;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

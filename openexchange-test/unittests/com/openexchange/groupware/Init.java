@@ -63,10 +63,10 @@ import com.openexchange.tools.servlet.ServletConfigLoader;
 import com.openexchange.tools.servlet.http.HttpManagersInit;
 import com.openexchange.user.UserService;
 import com.openexchange.user.internal.UserServiceImpl;
-import com.openexchange.xml.spring.SpringParser;
-import com.openexchange.xml.spring.impl.DefaultSpringParser;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.jdom.impl.JDOMParserImpl;
+import com.openexchange.xml.spring.SpringParser;
+import com.openexchange.xml.spring.impl.DefaultSpringParser;
 
 /**
  * This class contains methods for initialising tests.
@@ -212,10 +212,10 @@ public final class Init {
     }
 
     private static void startAndInjectXMLServices() {
-        SpringParser springParser = new DefaultSpringParser();
+        final SpringParser springParser = new DefaultSpringParser();
         ServerServiceRegistry.getInstance().addService(SpringParser.class, springParser);
 
-        JDOMParser jdomParser = new JDOMParserImpl();
+        final JDOMParser jdomParser = new JDOMParserImpl();
         ServerServiceRegistry.getInstance().addService(JDOMParser.class, jdomParser);
     }
 

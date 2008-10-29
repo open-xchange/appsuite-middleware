@@ -48,29 +48,30 @@
  */
 package com.openexchange.ajax.contact.action;
 
-import org.json.JSONObject;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.JSONException;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import org.json.JSONObject;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.SearchFields;
-
-import java.util.List;
-import java.util.ArrayList;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class SearchRequest  extends AbstractContactRequest<SearchResponse>{
-    private JSONObject body = new JSONObject();
-    private SearchParser searchParser;
-    private List<AJAXRequest.Parameter> params = new ArrayList<AJAXRequest.Parameter>();
+    private final JSONObject body = new JSONObject();
+    private final SearchParser searchParser;
+    private final List<AJAXRequest.Parameter> params = new ArrayList<AJAXRequest.Parameter>();
 
-    public SearchRequest(String pattern, int inFolder, int[] columns, boolean failOnError) {
+    public SearchRequest(final String pattern, final int inFolder, final int[] columns, final boolean failOnError) {
         this(pattern, inFolder, columns, -1, null, failOnError);
     }
 
-    public SearchRequest(String pattern, int inFolder, int[] columns, int orderBy, String orderDir, boolean failOnError) {
+    public SearchRequest(final String pattern, final int inFolder, final int[] columns, final int orderBy, final String orderDir, final boolean failOnError) {
         searchParser = new SearchParser(failOnError, columns);
 
         param(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
@@ -87,14 +88,14 @@ public class SearchRequest  extends AbstractContactRequest<SearchResponse>{
             if(pattern != null) {
                 body.put(SearchFields.PATTERN, pattern);
             }
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             throw new IllegalStateException(e); // Shouldn't happen
         }
 
 
     }
 
-    private void param(String key, String value) {
+    private void param(final String key, final String value) {
         if(value != null) {
             params.add(new AJAXRequest.Parameter(key, value));
         }
@@ -116,9 +117,9 @@ public class SearchRequest  extends AbstractContactRequest<SearchResponse>{
         return body;
     }
 
-    private String join(int[] values) {
-        StringBuilder b = new StringBuilder();
-        for(int v : values) { b.append(v).append(", ");}
+    private String join(final int[] values) {
+        final StringBuilder b = new StringBuilder();
+        for(final int v : values) { b.append(v).append(", ");}
         b.setLength(b.length()-2);
         return b.toString();
     }

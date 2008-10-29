@@ -108,8 +108,8 @@ public class CalendarTest extends TestCase {
     private final static int TEST_PASS_HOT_SPOT = 1;
     //public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
     
-    private static int userid = 11; // bishoph
-    public final static int contextid = 1;
+    private static int userid = 17; // bishoph
+    public final static int contextid = 1337;
     
     private static boolean init = false;
     
@@ -1148,16 +1148,20 @@ public class CalendarTest extends TestCase {
         final OCLPermission oclp2 = new OCLPermission();
         oclp2.setEntity(uid2);
         oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        fo.setFolderName("testSharedFolder");
+        fo.setFolderName("testSharedFolder_" + String.valueOf(System.currentTimeMillis()));
         fo.setParentFolderID(fid);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
         fo.setPermissionsAsArray(new OCLPermission[] { oclp1, oclp2 });       
         
+        /*
+         * Create folder
+         */
+        fo = oxma.createFolder(fo, true, System.currentTimeMillis());
+        
         int shared_folder_id = 0;
         try {
             //ofa.createFolder(fo, so, true, readcon, writecon, false);
-            fo = oxma.createFolder(fo, true, System.currentTimeMillis());
             shared_folder_id = fo.getObjectID();       
             
             final CalendarDataObject cdao = new CalendarDataObject();
@@ -1171,11 +1175,11 @@ public class CalendarTest extends TestCase {
             final int object_id = cdao.getObjectID();    
             
             final CalendarSql csql2 = new CalendarSql(so2);
-            SearchIterator si = csql2.getModifiedAppointmentsInFolder(shared_folder_id, cols, new Date(0), true);
+            SearchIterator<CalendarDataObject> si = csql2.getModifiedAppointmentsInFolder(shared_folder_id, cols, new Date(0), true);
             boolean found = false;
             while (si.hasNext()) {
-                final CalendarDataObject tdao = (CalendarDataObject)si.next();
-                if (object_id == cdao.getObjectID()) {
+                final CalendarDataObject tdao = si.next();
+                if (object_id == tdao.getObjectID()) {
                     found = true;
                 }
             }          
@@ -1189,7 +1193,7 @@ public class CalendarTest extends TestCase {
             boolean found_deleted = false;        
             si = csql2.getDeletedAppointmentsInFolder(shared_folder_id, cols, new Date(0));
             while (si.hasNext()) {
-                final CalendarDataObject tdao = (CalendarDataObject)si.next();
+                final CalendarDataObject tdao = si.next();
                 if (object_id == cdao.getObjectID()) {
                 found_deleted = true;
                 }

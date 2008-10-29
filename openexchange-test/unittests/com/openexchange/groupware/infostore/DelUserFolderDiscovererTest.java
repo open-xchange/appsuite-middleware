@@ -22,7 +22,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderTools;
-import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 public class DelUserFolderDiscovererTest extends TestCase{
 	
@@ -72,7 +71,7 @@ public class DelUserFolderDiscovererTest extends TestCase{
 				final FolderObject f = (FolderObject) iter.next();
 				final List<OCLPermission> perms = f.getPermissions();
 				if(f.isDefaultFolder()) {
-					for(OCLPermission perm : perms) {
+					for(final OCLPermission perm : perms) {
                         if(perm.getFolderPermission() >= OCLPermission.ADMIN_PERMISSION && perm.getEntity() == userIdA) {
 						    privateInfostoreFolder = f;
 					    }
@@ -111,7 +110,7 @@ public class DelUserFolderDiscovererTest extends TestCase{
 	public void testDiscoverFolders() throws Exception{
 		final List<FolderObject> folders = discoverer.discoverFolders(userIdA, ctx);
         boolean privateFolderFound = false;
-        for(FolderObject folder : folders) {
+        for(final FolderObject folder : folders) {
             assertFalse(folder.getObjectID() == this.folderWithOtherEntity.getObjectID());
             assertOnlyUserCanRead(folder, userIdA);
             privateFolderFound = privateFolderFound || privateInfostoreFolder.getObjectID() == folder.getObjectID();
@@ -120,9 +119,9 @@ public class DelUserFolderDiscovererTest extends TestCase{
 
     }
 
-    private void assertOnlyUserCanRead(FolderObject folder, int userIdA) {
+    private void assertOnlyUserCanRead(final FolderObject folder, final int userIdA) {
         boolean userCanRead = false;
-        for(OCLPermission perm : folder.getPermissions()) {
+        for(final OCLPermission perm : folder.getPermissions()) {
             if(perm.isGroupPermission()) {
                 assertFalse(perm.canReadOwnObjects() || perm.canReadAllObjects());
             } else if (userIdA != perm.getEntity()){

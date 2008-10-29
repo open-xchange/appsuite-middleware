@@ -105,7 +105,7 @@ public class DeleteTest extends AppointmentTest {
         final int changeExceptionPosition = 3;
         final Date exceptionDate = new Date(c.getTimeInMillis() + (changeExceptionPosition * dayInMillis));
 
-        AppointmentObject appointmentObj = new AppointmentObject();
+        final AppointmentObject appointmentObj = new AppointmentObject();
         appointmentObj.setTitle("testDeleteRecurrenceWithDate");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));

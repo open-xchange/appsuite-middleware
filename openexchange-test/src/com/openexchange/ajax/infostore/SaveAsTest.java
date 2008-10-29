@@ -8,7 +8,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
-import com.openexchange.ajax.attach.TaskAttachmentTest;
 import com.openexchange.ajax.attach.SimpleAttachmentTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.attach.AttachmentMetadata;

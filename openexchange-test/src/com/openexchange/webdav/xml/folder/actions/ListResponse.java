@@ -83,7 +83,7 @@ public final class ListResponse extends AbstractWebDAVResponse implements Iterab
     /**
      * @param folders the folders to set
      */
-    final void setFolders(FolderObject[] folders) {
+    final void setFolders(final FolderObject[] folders) {
         this.folders = folders;
     }
 

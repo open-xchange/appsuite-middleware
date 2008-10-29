@@ -98,7 +98,7 @@ public final class GroupTools {
     public static ListResponse list(final AJAXClient client,
         final ListRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (ListResponse) Executor.execute(client, request);
+        return Executor.execute(client, request);
     }
 
     public static CreateResponse create(final AJAXClient client,

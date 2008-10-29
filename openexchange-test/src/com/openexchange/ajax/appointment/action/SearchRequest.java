@@ -48,31 +48,31 @@
  */
 package com.openexchange.ajax.appointment.action;
 
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.SearchFields;
-import com.openexchange.ajax.request.AppointmentRequest;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.SearchFields;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.request.AppointmentRequest;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class SearchRequest extends AbstractAppointmentRequest<SearchResponse> {
-    private JSONObject body = new JSONObject();
-    private SearchParser searchParser;
-    private List<Parameter> params = new ArrayList<Parameter>();
+    private final JSONObject body = new JSONObject();
+    private final SearchParser searchParser;
+    private final List<Parameter> params = new ArrayList<Parameter>();
 
-    public SearchRequest(String pattern, int inFolder, int[] columns, boolean failOnError) {
+    public SearchRequest(final String pattern, final int inFolder, final int[] columns, final boolean failOnError) {
         this(pattern, inFolder, null, null, columns, -1, null, false, failOnError);
     }
 
-    public SearchRequest(String pattern, int inFolder, Date startDate, Date endDate, int[] columns, int orderBy, String orderDir, boolean recurrenceMaster, boolean failOnError) {
+    public SearchRequest(final String pattern, final int inFolder, final Date startDate, final Date endDate, final int[] columns, final int orderBy, final String orderDir, final boolean recurrenceMaster, final boolean failOnError) {
         searchParser = new SearchParser(failOnError, columns);
 
         param(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
@@ -94,20 +94,20 @@ public class SearchRequest extends AbstractAppointmentRequest<SearchResponse> {
             if(pattern != null) {
                 body.put(SearchFields.PATTERN, pattern);
             }
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             throw new IllegalStateException(e); // Shouldn't happen
         }
 
 
     }
 
-    private void param(String key, String value) {
+    private void param(final String key, final String value) {
         if(value != null) {
             params.add(new Parameter(key, value));
         }
     }
 
-    private void param(String key, Date value) {
+    private void param(final String key, final Date value) {
         if(value != null) {
             params.add(new Parameter(key, value));
         }
@@ -129,9 +129,9 @@ public class SearchRequest extends AbstractAppointmentRequest<SearchResponse> {
         return body;
     }
 
-    private String join(int[] values) {
-        StringBuilder b = new StringBuilder();
-        for(int v : values) { b.append(v).append(", ");}
+    private String join(final int[] values) {
+        final StringBuilder b = new StringBuilder();
+        for(final int v : values) { b.append(v).append(", ");}
         b.setLength(b.length()-2);
         return b.toString();
     }

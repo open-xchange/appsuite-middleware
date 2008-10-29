@@ -14,7 +14,6 @@ import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AttachmentTest;
 import com.openexchange.webdav.xml.ContactTest;
 import com.openexchange.webdav.xml.FolderTest;
-import com.openexchange.webdav.xml.XmlServlet;
 
 public class NewTest extends ContactTest {
 	

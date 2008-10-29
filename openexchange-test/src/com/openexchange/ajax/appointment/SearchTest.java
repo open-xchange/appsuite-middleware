@@ -46,7 +46,7 @@ public class SearchTest extends AppointmentTest {
 
     // Node 2652
     public void testLastModifiedUTC() throws Exception {
-        AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
         final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.LAST_MODIFIED_UTC};
 
         final AppointmentObject appointmentObj = createAppointmentObject("testShowLastModifiedUTC");
@@ -55,16 +55,16 @@ public class SearchTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
         try {
-            SearchRequest searchRequest = new SearchRequest("testShowLastModifiedUTC", appointmentFolderId, cols, true);
-            SearchResponse response = Executor.execute(client, searchRequest);
-            JSONArray arr = (JSONArray) response.getResponse().getData();
+            final SearchRequest searchRequest = new SearchRequest("testShowLastModifiedUTC", appointmentFolderId, cols, true);
+            final SearchResponse response = Executor.execute(client, searchRequest);
+            final JSONArray arr = (JSONArray) response.getResponse().getData();
 
             assertNotNull(arr);
-            int size = arr.length();
+            final int size = arr.length();
             assertTrue(size > 0);
 
             for(int i = 0; i < size; i++ ){
-                JSONArray objectData = arr.optJSONArray(i);
+                final JSONArray objectData = arr.optJSONArray(i);
                 assertNotNull(objectData);
                 assertNotNull(objectData.opt(2));
             }

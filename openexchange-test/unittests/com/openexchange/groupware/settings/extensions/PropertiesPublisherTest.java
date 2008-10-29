@@ -48,16 +48,15 @@
  */
 package com.openexchange.groupware.settings.extensions;
 
-import junit.framework.TestCase;
-
-import java.util.Properties;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
+
+import junit.framework.TestCase;
 
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
-
-import java.util.Arrays;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -65,21 +64,21 @@ import java.util.Arrays;
 public class PropertiesPublisherTest extends TestCase {
 
     public void testShouldPublishProperties() {
-        Properties p = new Properties();
+        final Properties p = new Properties();
         p.setProperty("a/certain/path", "value1");
         p.setProperty("another/path", "value2");
         p.setProperty("and/yet/another", "value3");
 
-        List items = publish(p);
+        final List items = publish(p);
 
         assertEquals(p.size(), items.size());
 
-        for(Object item : items) {
-            PreferencesItemService prefItem = (PreferencesItemService) item;
-            String[] path = prefItem.getPath();
+        for(final Object item : items) {
+            final PreferencesItemService prefItem = (PreferencesItemService) item;
+            final String[] path = prefItem.getPath();
             assertNotNull(path);
             assertTrue("Invalid Path: "+ Arrays.asList(path).toString(), path.length > 1);
-            String firstSegment = path[0];
+            final String firstSegment = path[0];
             if(firstSegment.equals("a")) {
                 assertEquals(3, path.length);
                 assertEquals("certain", path[1]);
@@ -103,31 +102,31 @@ public class PropertiesPublisherTest extends TestCase {
     }
 
     public void testShouldParseMultiValues() {
-        Properties p = new Properties();
+        final Properties p = new Properties();
         p.setProperty("multivalue", "[value1, va\\,lue2, value3]");
 
-        List items = publish(p);
+        final List items = publish(p);
         assertEquals(1, items.size());
 
-        PreferencesItemService prefItem = (PreferencesItemService) items.get(0);
+        final PreferencesItemService prefItem = (PreferencesItemService) items.get(0);
         assertMultiValue(prefItem, "value1", "va,lue2", "value3");
 
     }
 
     public void testShouldAllowEscaping() {
-        Properties p = new Properties();
+        final Properties p = new Properties();
         p.setProperty("value", "\\[value1\\, v\\alue2, \\\\value3\\]");
 
-        List items = publish(p);
+        final List items = publish(p);
         assertEquals(1, items.size());
 
-        PreferencesItemService prefItem = (PreferencesItemService) items.get(0);
+        final PreferencesItemService prefItem = (PreferencesItemService) items.get(0);
         assertValue(prefItem, "[value1, value2, \\value3]");
 
     }
 
     public void testShouldBeUpdateable() {
-        Properties p = new Properties();
+        final Properties p = new Properties();
         p.setProperty("remove", "value1");
         p.setProperty("leaveAsItIs", "static");
         p.setProperty("update", "value2");
@@ -135,13 +134,13 @@ public class PropertiesPublisherTest extends TestCase {
         p.setProperty("updateFromSingleToMulti","value5");
         p.setProperty("updateFromMultiToSingle", "[value6, value7]");
 
-        MockServiceRegistry registry = new MockServiceRegistry();
-        PropertiesPublisher publisher = new PropertiesPublisher();
+        final MockServiceRegistry registry = new MockServiceRegistry();
+        final PropertiesPublisher publisher = new PropertiesPublisher();
         publisher.setServicePublisher(registry);
 
         publisher.publish( p );
 
-        Properties update = new Properties();
+        final Properties update = new Properties();
         update.setProperty("add", "valueUpdate1");
         update.setProperty("update", "valueUpdate2");
         update.setProperty("updateMultiple", "[valueUpdate3, valueUpdate4]");
@@ -152,10 +151,10 @@ public class PropertiesPublisherTest extends TestCase {
         registry.clearHistory();
         publisher.publish( update );
 
-        List items = registry.getAllServices(PreferencesItemService.class);
-        for(Object service : items) {
-            PreferencesItemService prefItem = (PreferencesItemService) service;
-            String name = prefItem.getPath()[0];
+        final List items = registry.getAllServices(PreferencesItemService.class);
+        for(final Object service : items) {
+            final PreferencesItemService prefItem = (PreferencesItemService) service;
+            final String name = prefItem.getPath()[0];
             if("add".equals(name)) {
                 assertValue(prefItem, "valueUpdate1");
             } else if ("update".equals(name)) {
@@ -173,28 +172,28 @@ public class PropertiesPublisherTest extends TestCase {
             }
         }
 
-        List added = registry.getAdded(PreferencesItemService.class);
+        final List added = registry.getAdded(PreferencesItemService.class);
         assertEquals(added.toString(), 1, added.size());
-        PreferencesItemService addedItem = (PreferencesItemService)added.get(0);
+        final PreferencesItemService addedItem = (PreferencesItemService)added.get(0);
         assertEquals("add", addedItem.getPath()[0]);
 
-        List removed = registry.getRemoved(PreferencesItemService.class);
+        final List removed = registry.getRemoved(PreferencesItemService.class);
         assertEquals(removed.toString(), 1, removed.size());
-        PreferencesItemService removedItem = (PreferencesItemService)removed.get(0);
+        final PreferencesItemService removedItem = (PreferencesItemService)removed.get(0);
         assertEquals("remove", removedItem.getPath()[0]);
     }
 
     public void testDottedSubpathShouldBePossible() {
-        Properties p = new Properties();
+        final Properties p = new Properties();
         p.setProperty("com.openexchange.myPlugin/a/certain/path", "value1");
 
-        List items = publish(p);
+        final List items = publish(p);
 
         assertEquals(1, items.size());
 
-        PreferencesItemService item = (PreferencesItemService) items.get(0);
+        final PreferencesItemService item = (PreferencesItemService) items.get(0);
 
-        String[] path = item.getPath();
+        final String[] path = item.getPath();
         assertEquals("com.openexchange.myPlugin", path[0]);
         assertEquals("a", path[1]);
         assertEquals("certain", path[2]);
@@ -203,33 +202,33 @@ public class PropertiesPublisherTest extends TestCase {
 
     }
 
-    private List publish(Properties p) {
-        MockServiceRegistry registry = new MockServiceRegistry();
-        PropertiesPublisher publisher = new PropertiesPublisher();
+    private List publish(final Properties p) {
+        final MockServiceRegistry registry = new MockServiceRegistry();
+        final PropertiesPublisher publisher = new PropertiesPublisher();
         publisher.setServicePublisher(registry);
         publisher.publish(p);
 
         return registry.getAllServices(PreferencesItemService.class);
     }
 
-    private void assertValue(PreferencesItemService prefItem, String expected) {
-        Setting setting = new Setting("",-1,prefItem.getSharedValue());
+    private void assertValue(final PreferencesItemService prefItem, final String expected) {
+        final Setting setting = new Setting("",-1,prefItem.getSharedValue());
         try {
             prefItem.getSharedValue().getValue(null,null,null,null,setting);
-        } catch (SettingException e) {
+        } catch (final SettingException e) {
             fail(e.toString());
         }
         assertEquals(expected, setting.getSingleValue());
     }
 
-    private void assertMultiValue(PreferencesItemService prefItem, String...values) {
-        Setting setting = new Setting("",-1,prefItem.getSharedValue());
+    private void assertMultiValue(final PreferencesItemService prefItem, final String...values) {
+        final Setting setting = new Setting("",-1,prefItem.getSharedValue());
         try {
             prefItem.getSharedValue().getValue(null,null,null,null,setting);
-        } catch (SettingException e) {
+        } catch (final SettingException e) {
             fail(e.toString());
         }
-        Object[] objects = setting.getMultiValue();
+        final Object[] objects = setting.getMultiValue();
         assertNotNull("Expected multivalue", objects);
         assertEquals(values.length, objects.length);
         for(int i = 0; i < objects.length; i++) {

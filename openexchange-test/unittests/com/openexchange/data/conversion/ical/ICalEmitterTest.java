@@ -49,9 +49,9 @@
 
 package com.openexchange.data.conversion.ical;
 
+import static com.openexchange.data.conversion.ical.Assert.assertNoProperty;
 import static com.openexchange.data.conversion.ical.Assert.assertProperty;
 import static com.openexchange.data.conversion.ical.Assert.assertStandardAppFields;
-import static com.openexchange.data.conversion.ical.Assert.assertNoProperty;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 
 import java.io.IOException;
@@ -88,10 +88,10 @@ public class ICalEmitterTest extends TestCase {
     private UserResolver oldUserResolver;
 
     private AppointmentObject getDefault() {
-        AppointmentObject app = new AppointmentObject();
+        final AppointmentObject app = new AppointmentObject();
 
-        Date start = D("24/02/1981 10:00");
-        Date end = D("24/02/1981 12:00");
+        final Date start = D("24/02/1981 10:00");
+        final Date end = D("24/02/1981 12:00");
 
         app.setStartDate(start);
         app.setEndDate(end);
@@ -101,20 +101,20 @@ public class ICalEmitterTest extends TestCase {
     }
 
     public void testSimpleAppointment() throws Exception {
-        AppointmentObject app = new AppointmentObject();
+        final AppointmentObject app = new AppointmentObject();
 
         app.setTitle("The Title");
         app.setNote("The Note");
         app.setCategories("cat1, cat2, cat3");
         app.setLocation("The Location");
 
-        Date start = D("24/02/1981 10:00");
-        Date end = D("24/02/1981 12:00");
+        final Date start = D("24/02/1981 10:00");
+        final Date end = D("24/02/1981 12:00");
 
         app.setStartDate(start);
         app.setEndDate(end);
 
-        ICalFile ical = serialize(app);
+        final ICalFile ical = serialize(app);
 
         assertStandardAppFields(ical, start, end);
         assertProperty(ical, "SUMMARY","The Title");
@@ -125,19 +125,19 @@ public class ICalEmitterTest extends TestCase {
 
 
     public void testAppWholeDay() throws IOException {
-        AppointmentObject app = new AppointmentObject();
+        final AppointmentObject app = new AppointmentObject();
         app.setStartDate(D("24/02/1981 00:00"));
         app.setEndDate(D("26/02/1981 00:00"));
         app.setFullTime(true);
 
-        ICalFile ical = serialize(app);
+        final ICalFile ical = serialize(app);
 
         assertProperty(ical, "DTSTART;VALUE=DATE", "19810224");
         assertProperty(ical, "DTEND;VALUE=DATE", "19810226");
     }
 
     public void testCategoriesMayBeNullOrUnset() throws Exception {
-        AppointmentObject app = new AppointmentObject();
+        final AppointmentObject app = new AppointmentObject();
         ICalFile ical = serialize(app);
 
         assertNoProperty(ical, "CATEGORIES");
@@ -149,26 +149,26 @@ public class ICalEmitterTest extends TestCase {
     }
 
     public void testDeleteExceptionsMayBeNull() throws Exception {
-        AppointmentObject app = new AppointmentObject();
+        final AppointmentObject app = new AppointmentObject();
         app.setDeleteExceptions(null);
         serialize(app);
         assertTrue("Just testing survival", true);
     }
 
     public void testAppCreated() throws IOException {
-        AppointmentObject appointment = getDefault();
+        final AppointmentObject appointment = getDefault();
         appointment.setCreationDate(D("24/02/1981 10:00"));
 
-        ICalFile ical = serialize(appointment);
+        final ICalFile ical = serialize(appointment);
 
         assertProperty(ical, "CREATED", "19810224T100000Z");
     }
 
     public void testAppLastModified() throws IOException {
-        AppointmentObject appointment = getDefault();
+        final AppointmentObject appointment = getDefault();
         appointment.setLastModified(D("24/02/1981 10:00"));
 
-        ICalFile ical = serialize(appointment);
+        final ICalFile ical = serialize(appointment);
 
         assertProperty(ical, "LAST-MODIFIED", "19810224T100000Z");
     }
@@ -276,13 +276,13 @@ public class ICalEmitterTest extends TestCase {
 
 
     public void testAppAlarm() throws IOException {
-        int MINUTES = 1;
+        final int MINUTES = 1;
 
-        AppointmentObject appointment = getDefault();
+        final AppointmentObject appointment = getDefault();
         appointment.setAlarm(15 *MINUTES);
         appointment.setNote("Blupp");
         
-        ICalFile ical = serialize(appointment);
+        final ICalFile ical = serialize(appointment);
 
         assertProperty(ical, "BEGIN", "VALARM");
         assertProperty(ical, "ACTION", "DISPLAY");
@@ -293,7 +293,7 @@ public class ICalEmitterTest extends TestCase {
     }
 
     public void testAppPrivateFlag() throws IOException {
-        AppointmentObject app = getDefault();
+        final AppointmentObject app = getDefault();
 
         app.setPrivateFlag(false);
         ICalFile ical = serialize(app);
@@ -309,7 +309,7 @@ public class ICalEmitterTest extends TestCase {
     public void testAppTransparency() throws IOException {
         // RESERVED
 
-        AppointmentObject app = getDefault();
+        final AppointmentObject app = getDefault();
         app.setShownAs(AppointmentObject.RESERVED);
 
 
@@ -353,14 +353,14 @@ public class ICalEmitterTest extends TestCase {
 
     }
 
-    private void setUserParticipants(AppointmentObject app, int...ids) {
-        Participant[] allParticipants = new Participant[ids.length];
-        UserParticipant[] users = new UserParticipant[ids.length];
+    private void setUserParticipants(final AppointmentObject app, final int...ids) {
+        final Participant[] allParticipants = new Participant[ids.length];
+        final UserParticipant[] users = new UserParticipant[ids.length];
 
 
         int i = 0,j = 0;
-        for(int id : ids) {
-            UserParticipant p = new UserParticipant(id);
+        for(final int id : ids) {
+            final UserParticipant p = new UserParticipant(id);
             allParticipants[i++] = p;
             users[j++] = p;
         }
@@ -369,22 +369,22 @@ public class ICalEmitterTest extends TestCase {
     }
 
 
-    private void setParticipants(CalendarObject calendarObject, String[] internal, String[] external) {
-        Participant[] allParticipants = new Participant[internal.length+ external.length];
-        UserParticipant[] users = new UserParticipant[internal.length];
+    private void setParticipants(final CalendarObject calendarObject, final String[] internal, final String[] external) {
+        final Participant[] allParticipants = new Participant[internal.length+ external.length];
+        final UserParticipant[] users = new UserParticipant[internal.length];
 
 
         int i = 0,j = 0;
-        for(String mail : internal) {
-            UserParticipant p = new UserParticipant(-1);
+        for(final String mail : internal) {
+            final UserParticipant p = new UserParticipant(-1);
             p.setEmailAddress(mail);
             allParticipants[i++] = p;
             users[j++] = p;
         }
 
         j = 0;
-        for(String mail : external) {
-            ExternalUserParticipant p = new ExternalUserParticipant(mail);
+        for(final String mail : external) {
+            final ExternalUserParticipant p = new ExternalUserParticipant(mail);
             p.setEmailAddress(mail);
             allParticipants[i++] = p;
 
@@ -397,20 +397,20 @@ public class ICalEmitterTest extends TestCase {
 
 
     public void testAppResources() throws IOException {
-        AppointmentObject app = getDefault();
+        final AppointmentObject app = getDefault();
         setResources(app, "beamer", "toaster", "deflector");
-        ICalFile ical = serialize(app);
+        final ICalFile ical = serialize(app);
 
         assertProperty(ical, "RESOURCES", "beamer,toaster,deflector");
 
 
     }
 
-    private void setResources(CalendarObject calendarObject, String...displayNames) {
-        Participant[] participants = new Participant[displayNames.length];
+    private void setResources(final CalendarObject calendarObject, final String...displayNames) {
+        final Participant[] participants = new Participant[displayNames.length];
         int i = 0;
-        for(String displayName : displayNames) {
-            ResourceParticipant p = new ResourceParticipant(-1);
+        for(final String displayName : displayNames) {
+            final ResourceParticipant p = new ResourceParticipant(-1);
             p.setDisplayName(displayName);
             participants[i++] = p;
         }
@@ -419,13 +419,13 @@ public class ICalEmitterTest extends TestCase {
     }
 
     public void testAppDeleteExceptions() throws IOException {
-        AppointmentObject app = getDefault();
+        final AppointmentObject app = getDefault();
         app.setRecurrenceType(AppointmentObject.DAILY);
         app.setInterval(3);
         app.setRecurrenceCount(5);
         app.setDeleteExceptions(new Date[]{D("25/02/2009 10:00"), D("28/02/2009 12:00")});
 
-        ICalFile ical = serialize(app);
+        final ICalFile ical = serialize(app);
 
         assertProperty(ical, "EXDATE", "20090225T100000Z,20090228T120000Z");
     }
@@ -455,7 +455,7 @@ public class ICalEmitterTest extends TestCase {
     }
 
     public void testTaskCategoriesMayBeNullOrUnset() throws Exception {
-        Task task = new Task();
+        final Task task = new Task();
         ICalFile ical = serialize(task);
 
         assertNoProperty(ical, "CATEGORIES");
@@ -467,19 +467,19 @@ public class ICalEmitterTest extends TestCase {
     }
 
     public void testTaskCreated() throws IOException {
-        Task task = new Task();
+        final Task task = new Task();
         task.setCreationDate(D("24/02/1981 10:00"));
 
-        ICalFile ical = serialize(task);
+        final ICalFile ical = serialize(task);
 
         assertProperty(ical, "CREATED", "19810224T100000Z");
     }
 
     public void testTaskLastModified() throws IOException {
-        Task task = new Task();
+        final Task task = new Task();
         task.setLastModified(D("24/02/1981 10:00"));
 
-        ICalFile ical = serialize(task);
+        final ICalFile ical = serialize(task);
 
         assertProperty(ical, "LAST-MODIFIED", "19810224T100000Z");
     }
@@ -497,15 +497,16 @@ public class ICalEmitterTest extends TestCase {
 
     // SetUp
 
-    public void setUp() {
+    @Override
+	public void setUp() {
         users = new MockUserLookup();
         emitter = new ICal4JEmitter();
         oldUserResolver = com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants.userResolver;
         com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants.userResolver = new UserResolver(){
-            public List<User> findUsers(List<String> mails, Context ctx) {
-                List<User> found = new LinkedList<User>();
-                for(String mail : mails) {
-                    User user = ICalEmitterTest.this.users.getUserByMail(mail);
+            public List<User> findUsers(final List<String> mails, final Context ctx) {
+                final List<User> found = new LinkedList<User>();
+                for(final String mail : mails) {
+                    final User user = ICalEmitterTest.this.users.getUserByMail(mail);
                     if(user != null) {
                         found.add( user );
                     }
@@ -514,21 +515,22 @@ public class ICalEmitterTest extends TestCase {
                 return found;
             }
 
-            public User loadUser(int userId, Context ctx) throws LdapException {
+            public User loadUser(final int userId, final Context ctx) throws LdapException {
                 return ICalEmitterTest.this.users.getUser(userId);
             }
         };
     }
 
-    public void tearDown() {
+    @Override
+	public void tearDown() {
         com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants.userResolver = oldUserResolver;
     }
 
     // Helper Class
 
 
-    private ICalFile serialize(AppointmentObject app) throws IOException {
-        String icalText = emitter.writeAppointments(Arrays.asList(app), null, new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+    private ICalFile serialize(final AppointmentObject app) throws IOException {
+        final String icalText = emitter.writeAppointments(Arrays.asList(app), null, new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
         return new ICalFile(new StringReader(icalText));
     }
 

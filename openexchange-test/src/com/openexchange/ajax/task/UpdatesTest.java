@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;

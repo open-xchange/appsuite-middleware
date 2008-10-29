@@ -48,9 +48,10 @@
  */
 package com.openexchange.ajax.contact.action;
 
-import com.openexchange.ajax.framework.AbstractSearchParser;
-import com.openexchange.ajax.container.Response;
 import org.json.JSONException;
+
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractSearchParser;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -62,15 +63,17 @@ public class SearchParser extends AbstractSearchParser<SearchResponse> {
      * @param failOnError <code>true</code> and this parser checks the server
      *                    response for containing error messages and lets the test fail.
      */
-    protected SearchParser(final boolean failOnError, int[] columns) {
+    protected SearchParser(final boolean failOnError, final int[] columns) {
         super(failOnError, columns);
     }
 
-    protected SearchResponse createResponse(Response response) throws JSONException {
+    @Override
+	protected SearchResponse createResponse(final Response response) throws JSONException {
         return new SearchResponse(response);
     }
 
-    protected SearchResponse instanciateResponse(Response response) {
+    @Override
+	protected SearchResponse instanciateResponse(final Response response) {
         return new SearchResponse(response);
     }
 }

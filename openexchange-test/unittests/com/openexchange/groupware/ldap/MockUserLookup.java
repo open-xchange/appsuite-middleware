@@ -23,9 +23,9 @@ public class MockUserLookup {
 		return users.get(uid);
 	}
 
-    public User getUserByMail(String mail) {
-        for(User user : users.values()) {
-            String cur_mail = user.getMail();
+    public User getUserByMail(final String mail) {
+        for(final User user : users.values()) {
+            final String cur_mail = user.getMail();
             if(cur_mail != null && cur_mail.equals(mail)) {
                 return user;
             }

@@ -237,6 +237,6 @@ public final class ConfigTools extends Assert {
     public static SetResponse set(final AJAXClient client,
         final SetRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (SetResponse) Executor.execute(client.getSession(), request);
+        return Executor.execute(client.getSession(), request);
     }
 }

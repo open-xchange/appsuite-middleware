@@ -88,7 +88,7 @@ public abstract class AbstractNetsolTest extends AbstractMailTest {
 
 	protected final FolderAndID[] getIDs(final String folder) throws AjaxException, IOException, SAXException,
 			JSONException {
-		final CommonAllResponse allR = (CommonAllResponse) Executor.execute(getSession(), new NetsolAllRequest(folder,
+		final CommonAllResponse allR = Executor.execute(getSession(), new NetsolAllRequest(folder,
 				COLUMNS_ID, 0, null));
 		final Object[][] array = allR.getArray();
 		final FolderAndID[] paths = new FolderAndID[array.length];

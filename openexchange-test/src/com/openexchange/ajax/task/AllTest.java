@@ -96,7 +96,7 @@ public final class AllTest extends AbstractTaskTest {
             // TODO add participants
             inserts[i] = new InsertRequest(task, getTimeZone());
         }
-        final MultipleResponse mInsert = (MultipleResponse) Executor.execute(
+        final MultipleResponse mInsert = Executor.execute(
             getSession(), MultipleRequest.create(inserts));
         final GetRequest[] gets = new GetRequest[NUMBER];
         for (int i = 0; i < gets.length; i++) {
@@ -104,7 +104,7 @@ public final class AllTest extends AbstractTaskTest {
             LOG.info(Integer.valueOf(ins.getId()));
             gets[i] = new GetRequest(ins);
         }
-        final MultipleResponse mGet = (MultipleResponse) Executor.execute(
+        final MultipleResponse mGet = Executor.execute(
             getSession(), MultipleRequest.create(gets));
         // TODO Read Task.ALARM
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,

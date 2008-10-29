@@ -53,9 +53,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.CommonAllRequest;
-import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.search.Order;
 

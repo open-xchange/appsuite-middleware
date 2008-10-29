@@ -48,12 +48,13 @@
  */
 package com.openexchange.exceptions;
 
+import java.util.List;
+
 import junit.framework.TestCase;
+
 import com.openexchange.exceptions.impl.ComponentRegistryImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
-
-import java.util.List;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -85,7 +86,7 @@ public class ComponentRegistryTest extends TestCase {
         try {
             registry.registerComponent(componentA, applicationIdB, exceptionsB);
             fail("Could register same component with two different application ids");
-        } catch (ComponentAlreadyRegisteredException x) {
+        } catch (final ComponentAlreadyRegisteredException x) {
             // Passes :)
         }
     }
@@ -94,7 +95,7 @@ public class ComponentRegistryTest extends TestCase {
         try {
             registry.registerComponent(componentA, applicationIdA, exceptionsA);
             registry.registerComponent(componentA, applicationIdA, exceptionsA);
-        } catch (ComponentAlreadyRegisteredException e) {
+        } catch (final ComponentAlreadyRegisteredException e) {
             fail(e.getMessage());
         }
 
@@ -114,7 +115,7 @@ public class ComponentRegistryTest extends TestCase {
     public void testShouldLookUpExceptionsForComponent() throws ComponentAlreadyRegisteredException {
         registry.registerComponent(componentA, applicationIdA, exceptionsA);
 
-        Exceptions exceptions = registry.getExceptionsForComponent(componentA);
+        final Exceptions exceptions = registry.getExceptionsForComponent(componentA);
         assertEquals(exceptionsA, exceptions);
     }
 
@@ -122,7 +123,7 @@ public class ComponentRegistryTest extends TestCase {
         registry.registerComponent(componentA, applicationIdA, exceptionsA);
         registry.registerComponent(componentB, applicationIdA, exceptionsB);
 
-        List<Exceptions> exceptions = registry.getExceptionsForApplication(applicationIdA);
+        final List<Exceptions> exceptions = registry.getExceptionsForApplication(applicationIdA);
         assertEquals(2, exceptions.size());
         assertEquals(exceptionsA, exceptions.get(0));
         assertEquals(exceptionsB, exceptions.get(1));
@@ -132,7 +133,7 @@ public class ComponentRegistryTest extends TestCase {
         registry.registerComponent(componentA, applicationIdA, exceptionsA);
         registry.registerComponent(componentB, applicationIdB, exceptionsB);
 
-        List<Component> components = registry.getComponents();
+        final List<Component> components = registry.getComponents();
         assertEquals(2,components.size());
         assertTrue(components.remove(componentA));
         assertTrue(components.remove(componentB));
@@ -143,7 +144,7 @@ public class ComponentRegistryTest extends TestCase {
         registry.registerComponent(componentA, applicationIdA, exceptionsA);
         registry.registerComponent(componentB, applicationIdB, exceptionsB);
 
-        List<String> applicationIds = registry.getApplicationIds();
+        final List<String> applicationIds = registry.getApplicationIds();
         assertEquals(2, applicationIds.size());
         assertTrue(applicationIds.remove(applicationIdA));
         assertTrue(applicationIds.remove(applicationIdB));
@@ -154,7 +155,7 @@ public class ComponentRegistryTest extends TestCase {
         registry.registerComponent(componentA, applicationIdA, exceptionsA);
         registry.registerComponent(componentB, applicationIdB, exceptionsB);
 
-        List<Exceptions> exceptions = registry.getExceptions();
+        final List<Exceptions> exceptions = registry.getExceptions();
         assertEquals(2, exceptions.size());
         assertTrue(exceptions.remove(exceptionsA));
         assertTrue(exceptions.remove(exceptionsB));
@@ -170,7 +171,7 @@ public class ComponentRegistryTest extends TestCase {
         }
 
         @Override
-        protected AbstractOXException createException(ErrorMessage message, Throwable cause, Object... args) {
+        protected AbstractOXException createException(final ErrorMessage message, final Throwable cause, final Object... args) {
             return null;  //To change body of implemented methods use File | Settings | File Templates.
         }
 

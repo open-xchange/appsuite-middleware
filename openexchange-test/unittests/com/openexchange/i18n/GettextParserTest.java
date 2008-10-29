@@ -48,11 +48,11 @@
  */
 package com.openexchange.i18n;
 
-import junit.framework.TestCase;
-
-import java.io.StringReader;
-import java.io.Reader;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+
+import junit.framework.TestCase;
 
 import com.openexchange.exceptions.StringComponent;
 import com.openexchange.i18n.parsing.I18NErrorMessages;
@@ -65,20 +65,21 @@ import com.openexchange.i18n.parsing.Translations;
  */
 public class GettextParserTest extends TestCase {
 
-    public void setUp() {
+    @Override
+	public void setUp() {
         I18NErrorMessages.FACTORY.setApplicationId("com.openexchange.test");
         I18NErrorMessages.FACTORY.setComponent(new StringComponent("TST"));
 
     }
 
     public void testShouldParseSingleLineEntries() throws I18NException {
-        String poText =
+        final String poText =
                 "msgid \"I am a message.\"\n"+
                 "msgstr \"Ich bin eine Nachricht.\"\n"+
                 "msgid \"I am another message.\"\n"+
                 "msgstr \"Ich bin eine andere Nachricht.\"\n";
 
-        Translations translations = parse(poText);
+        final Translations translations = parse(poText);
         assertNotNull(translations);
 
         assertTranslation(translations, "I am a message.", "Ich bin eine Nachricht.");
@@ -87,7 +88,7 @@ public class GettextParserTest extends TestCase {
 
 
     public void testShouldParseMultiLineEntries() throws I18NException {
-        String poText =
+        final String poText =
                 "msgid \"\"\n"+
                 "\"This is part of a longer string\\n\"\n"+
                 "\"Typically multiline\"\n"+
@@ -101,7 +102,7 @@ public class GettextParserTest extends TestCase {
                 "\"Dies ist ein weitere lange Zeichenkette\\n\"\n"+
                 "\"Ebenfalls mehrzeilig\\n\"\n";
 
-        Translations translations = parse(poText);
+        final Translations translations = parse(poText);
         assertNotNull(translations);
 
         assertTranslation(translations,
@@ -113,7 +114,7 @@ public class GettextParserTest extends TestCase {
     public void testShouldParsePluralForms() throws I18NException {
         // Do no die on plurals, but until we need more complex handling
         // this will ignore every value but the first
-        String poText =
+        final String poText =
                 "msgid \"%d message\"\n"+
                 "msgid_plural \"%d messages\"\n"+
                 "msgstr[0] \"%d Nachricht\"\n"+
@@ -121,7 +122,7 @@ public class GettextParserTest extends TestCase {
                 "msgid \"Another message\"\n"+
                 "msgstr \"Andere Nachricht\"\n";
 
-        Translations translations = parse(poText);
+        final Translations translations = parse(poText);
 
         assertNotNull(translations);
         assertTranslation(translations, "%d message", "%d Nachricht");
@@ -132,7 +133,7 @@ public class GettextParserTest extends TestCase {
     public void testShouldParseMultilinePlurals() throws I18NException {
         // Do no die on plurals, but until we need more complex handling
         // this will ignore every value but the first
-        String poText =
+        final String poText =
                 "msgid \"\"\n"+
                 "\"A multiline message about\\n\"\n"+
                 "\"%d message\"\n"+
@@ -148,7 +149,7 @@ public class GettextParserTest extends TestCase {
                 "msgid \"Another message\"\n"+
                 "msgstr \"Andere Nachricht\"\n";
 
-        Translations translations = parse(poText);
+        final Translations translations = parse(poText);
 
         assertNotNull(translations);
         assertTranslation(translations,
@@ -163,7 +164,7 @@ public class GettextParserTest extends TestCase {
     }
 
     public void testShouldIgnoreComments() throws I18NException {
-        String poText =
+        final String poText =
                 "# This is a comment line.\n"+
                 "msgid \"I am a message.\"\n"+
                 "msgstr \"Ich bin eine Nachricht.\"\n"+
@@ -172,7 +173,7 @@ public class GettextParserTest extends TestCase {
                 "# Comments can appear practically everywhere\n"+
                 "msgstr \"Ich bin eine andere Nachricht.\"\n";
 
-        Translations translations = parse(poText);
+        final Translations translations = parse(poText);
         assertNotNull(translations);
 
         assertTranslation(translations, "I am a message.", "Ich bin eine Nachricht.");
@@ -180,13 +181,13 @@ public class GettextParserTest extends TestCase {
     }
 
     public void testShouldIgnoreWhitespace() throws I18NException {
-        String poText =
+        final String poText =
                 "msgid     \"I am a message.\"\n"+
                 "msgstr    \"Ich bin eine Nachricht.\"    \n"+
                 "msgid   \"I am another message.\"\n"+
                 "msgstr \"Ich bin eine andere Nachricht.\"";
 
-        Translations translations = parse(poText);
+        final Translations translations = parse(poText);
         assertNotNull(translations);
 
         assertTranslation(translations, "I am a message.", "Ich bin eine Nachricht.");
@@ -194,13 +195,13 @@ public class GettextParserTest extends TestCase {
     }
 
     public void testShouldIgnoreEmptyLines() throws I18NException {
-        String poText =
+        final String poText =
                 "msgid \"I am a message.\"\n\n"+
                 "msgstr \"Ich bin eine Nachricht.\"\n\n\n"+
                 "msgid \"I am another message.\"\n\n  \n"+
                 "msgstr \"Ich bin eine andere Nachricht.\"\n";
 
-        Translations translations = parse(poText);
+        final Translations translations = parse(poText);
         assertNotNull(translations);
 
         assertTranslation(translations, "I am a message.", "Ich bin eine Nachricht.");
@@ -208,7 +209,7 @@ public class GettextParserTest extends TestCase {
     }
 
     public void testShouldIgnoreMessageContext() throws I18NException {
-        String poText =
+        final String poText =
                 "msgctxt Testing\n"+
                 "msgid \"I am a message.\"\n\n"+
                 "msgstr \"Ich bin eine Nachricht.\"\n\n\n"+
@@ -216,7 +217,7 @@ public class GettextParserTest extends TestCase {
                 "msgid \"I am another message.\"\n\n  \n"+
                 "msgstr \"Ich bin eine andere Nachricht.\"\n";
 
-        Translations translations = parse(poText);
+        final Translations translations = parse(poText);
         assertNotNull(translations);
 
         assertTranslation(translations, "I am a message.", "Ich bin eine Nachricht.");
@@ -224,13 +225,13 @@ public class GettextParserTest extends TestCase {
     }
 
     public void testShouldSurviveRunawayStrings() throws I18NException {
-        String poText =
+        final String poText =
                 "msgid \"I am a message.\"\n"+
                 "msgstr \"Ich bin eine Nachricht.\n"+
                 "msgid \"I am another message.\"\n"+
                 "msgstr \"Ich bin eine andere Nachricht.";
 
-        Translations translations = parse(poText);
+        final Translations translations = parse(poText);
         assertNotNull(translations);
 
         assertTranslation(translations, "I am a message.", "Ich bin eine Nachricht.");
@@ -238,7 +239,7 @@ public class GettextParserTest extends TestCase {
     }
 
     public void testSyntaxError1() {
-        String poText =
+        final String poText =
                 "msgid \"I am a message.\"\n"+
                 "msgstr \"Ich bin eine Nachricht.\n"+
                 "BLUPP! \"I am another message.\"\n"+
@@ -247,13 +248,13 @@ public class GettextParserTest extends TestCase {
         try {
             parse(poText);
             fail("Expected parsing error");
-        } catch (I18NException x) {
+        } catch (final I18NException x) {
             assertEquals(I18NErrorMessages.UNEXPECTED_TOKEN.getErrorCode(), x.getDetailNumber());
-            Object[] messageArgs = x.getMessageArgs();
-            String incorrectToken = (String) messageArgs[0];
-            String filename = (String) messageArgs[1];
-            int line = (Integer) messageArgs[2];
-            String expectedList = (String) messageArgs[3];
+            final Object[] messageArgs = x.getMessageArgs();
+            final String incorrectToken = (String) messageArgs[0];
+            final String filename = (String) messageArgs[1];
+            final int line = (Integer) messageArgs[2];
+            final String expectedList = (String) messageArgs[3];
 
             assertEquals("BLUPP! \"I am another message.\"", incorrectToken);
             assertEquals("test.po", filename);
@@ -264,7 +265,7 @@ public class GettextParserTest extends TestCase {
     }
 
     public void testSyntaxError2() {
-        String poText =
+        final String poText =
                 "msgid \"I am a message.\"\n"+
                         "msgid \"Ich bin eine Nachricht.\n"+
                         "msgid \"I am another message.\"\n"+
@@ -273,13 +274,13 @@ public class GettextParserTest extends TestCase {
         try {
             parse(poText);
             fail("Expected parsing error");
-        } catch (I18NException x) {
+        } catch (final I18NException x) {
             assertEquals(com.openexchange.i18n.parsing.I18NErrorMessages.UNEXPECTED_TOKEN_CONSUME.getErrorCode(), x.getDetailNumber());
-            Object[] messageArgs = x.getMessageArgs();
-            String incorrectToken = (String) messageArgs[0];
-            String filename = (String) messageArgs[1];
-            int line = (Integer) messageArgs[2];
-            String expectedList = (String) messageArgs[3];
+            final Object[] messageArgs = x.getMessageArgs();
+            final String incorrectToken = (String) messageArgs[0];
+            final String filename = (String) messageArgs[1];
+            final int line = (Integer) messageArgs[2];
+            final String expectedList = (String) messageArgs[3];
 
             assertEquals("msgid", incorrectToken);
             assertEquals("test.po", filename);
@@ -290,19 +291,19 @@ public class GettextParserTest extends TestCase {
     }
 
     public void testSyntaxError3() {
-        String poText =
+        final String poText =
                 "msgid \"I am a message.\"\n"+
                  "msgstr[Blupp] \"Ich bin eine andere Nachricht.\"";
 
         try {
             parse(poText);
             fail("Expected parsing error");
-        } catch (I18NException x) {
+        } catch (final I18NException x) {
             assertEquals(I18NErrorMessages.EXPECTED_NUMBER.getErrorCode(), x.getDetailNumber());
-            Object[] messageArgs = x.getMessageArgs();
-            String incorrectToken = (String) messageArgs[0];
-            String filename = (String) messageArgs[1];
-            int line = (Integer) messageArgs[2];
+            final Object[] messageArgs = x.getMessageArgs();
+            final String incorrectToken = (String) messageArgs[0];
+            final String filename = (String) messageArgs[1];
+            final int line = (Integer) messageArgs[2];
 
             assertEquals("Blupp", incorrectToken);
             assertEquals("test.po", filename);
@@ -312,20 +313,20 @@ public class GettextParserTest extends TestCase {
     }
 
     public void testSyntaxError4() {
-        String poText =
+        final String poText =
                 "msgid \"I am a message.\"\n"+
                 "msgstTUEDELUE \"Ich bin eine andere Nachricht.\"";
 
         try {
             parse(poText);
             fail("Expected parsing error");
-        } catch (I18NException x) {
+        } catch (final I18NException x) {
             assertEquals(I18NErrorMessages.MALFORMED_TOKEN.getErrorCode(), x.getDetailNumber());
-            Object[] messageArgs = x.getMessageArgs();
-            String incorrectToken = (String) messageArgs[0];
-            String expected = (String) messageArgs[1];
-            String filename = (String) messageArgs[2];
-            int line = (Integer) messageArgs[3];
+            final Object[] messageArgs = x.getMessageArgs();
+            final String incorrectToken = (String) messageArgs[0];
+            final String expected = (String) messageArgs[1];
+            final String filename = (String) messageArgs[2];
+            final int line = (Integer) messageArgs[3];
 
             assertEquals("T", incorrectToken);
             assertEquals("r", expected);
@@ -339,31 +340,33 @@ public class GettextParserTest extends TestCase {
     public void testIOException() {
         try {
             new POParser().parse(new ExceptionThrowingReader(), "test.po");
-        } catch (I18NException e) {
+        } catch (final I18NException e) {
             assertEquals(I18NErrorMessages.IO_EXCEPTION.getErrorCode(),  e.getDetailNumber());
             assertEquals("test.po", e.getMessageArgs()[0]);
             assertEquals("BUMM!", e.getCause().getMessage());
         }
     }
 
-    protected Translations parse(String poText) throws I18NException{
-        StringReader reader = new StringReader(poText);
+    protected Translations parse(final String poText) throws I18NException{
+        final StringReader reader = new StringReader(poText);
         return new POParser().parse(reader, "test.po");
     }
 
-    protected static void assertTranslation(Translations translations, String original, String expectedTranslation) {
-        String actualTranslation = translations.translate(original);
+    protected static void assertTranslation(final Translations translations, final String original, final String expectedTranslation) {
+        final String actualTranslation = translations.translate(original);
         assertNotNull("Could not find \'"+original+"' in "+translations.getKnownStrings(),  actualTranslation);
         assertEquals(expectedTranslation, actualTranslation);
     }
 
     private static final class ExceptionThrowingReader extends Reader {
 
-        public int read(char cbuf[], int off, int len) throws IOException {
+        @Override
+		public int read(final char cbuf[], final int off, final int len) throws IOException {
             throw new IOException("BUMM!");
         }
 
-        public void close() throws IOException {
+        @Override
+		public void close() throws IOException {
         }
     }
 

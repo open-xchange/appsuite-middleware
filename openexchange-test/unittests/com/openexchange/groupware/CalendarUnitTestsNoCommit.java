@@ -46,16 +46,35 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.ajax.appointment.action;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.CommonSearchResponse;
+package com.openexchange.groupware;
 
-/**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
- */
-public class SearchResponse extends CommonSearchResponse {
-    public SearchResponse(final Response response) {
-        super(response);
-    }
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+public class CalendarUnitTestsNoCommit {
+
+	public static Test suite() {
+		final TestSuite tests = new TestSuite();
+
+		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
+		
+		// Cisco tests
+		tests.addTestSuite(com.openexchange.groupware.calendar.CalendarSqlTest.class);
+		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
+
+		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.DailyRecurrenceTest.class);
+		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.WeeklyRecurrenceTest.class);
+		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9497Test.class);
+		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9742Test.class);
+
+		// Kauss tests
+		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
+		tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
+		tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
+
+		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
+
+		return tests;
+	}
 }

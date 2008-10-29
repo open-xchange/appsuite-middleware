@@ -185,7 +185,7 @@ public class GetTest extends AppointmentTest {
 
     // Node 2652
     public void testLastModifiedUTC() throws Exception {
-        AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
 
         final AppointmentObject appointmentObj = createAppointmentObject("testShowLastModifiedUTC");
         appointmentObj.setStartDate(new Date());
@@ -193,9 +193,9 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
         try {
-            GetRequest getRequest = new GetRequest(appointmentFolderId, objectId);
-            GetResponse response = Executor.execute(client, getRequest);
-            JSONObject appointment = (JSONObject) response.getResponse().getData();
+            final GetRequest getRequest = new GetRequest(appointmentFolderId, objectId);
+            final GetResponse response = Executor.execute(client, getRequest);
+            final JSONObject appointment = (JSONObject) response.getResponse().getData();
 
             assertNotNull(appointment);
             assertTrue(appointment.has("last_modified_utc"));

@@ -30,7 +30,7 @@ public class Bug6408Test extends ReminderTest {
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
 		
-		long startTime = c.getTimeInMillis();
+		final long startTime = c.getTimeInMillis();
 		final long endTime = startTime + 3600000;
 		
 		final FolderObject folderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());

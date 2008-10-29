@@ -51,7 +51,6 @@ package com.openexchange.ajax.reminder;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -97,7 +96,7 @@ public class ReminderTest extends AbstractAJAXTest {
      * @deprecated use {@link RangeRequest}.
      */
     @Deprecated
-    public static ReminderObject[] listReminder(final WebConversation webConversation, final Date end, final TimeZone timeZone, String host, final String sessionId) throws IOException, SAXException, JSONException, OXJSONException, AjaxException {
+    public static ReminderObject[] listReminder(final WebConversation webConversation, final Date end, final TimeZone timeZone, final String host, final String sessionId) throws IOException, SAXException, JSONException, OXJSONException, AjaxException {
         final AJAXSession session = new AJAXSession(webConversation, sessionId);
         final RangeRequest request = new RangeRequest(end);
         final RangeResponse response = Executor.execute(session, request, host);

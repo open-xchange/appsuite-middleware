@@ -13,7 +13,6 @@ import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.FolderTest;
 import com.openexchange.webdav.xml.GroupUserTest;
 import com.openexchange.webdav.xml.TaskTest;
-import com.openexchange.webdav.xml.XmlServlet;
 
 public class NewTest extends TaskTest {
 	
@@ -105,7 +104,7 @@ public class NewTest extends TaskTest {
         int[] objectIds = null;
 
         final int NUMBER_OF_TASKS = 30;
-        Task[] tasks = new Task[NUMBER_OF_TASKS];
+        final Task[] tasks = new Task[NUMBER_OF_TASKS];
 
         for(int i = 0; i < NUMBER_OF_TASKS; i++) {
             tasks[i] = createTask("TASK - "+i);
@@ -117,8 +116,8 @@ public class NewTest extends TaskTest {
 
             int i = 0;
 
-            for(int objectId : objectIds) {
-                Task task = loadTask(getWebConversation(), objectId, tasks[i].getParentFolderID(), PROTOCOL + getHostName(), getLogin(), getPassword());
+            for(final int objectId : objectIds) {
+                final Task task = loadTask(getWebConversation(), objectId, tasks[i].getParentFolderID(), PROTOCOL + getHostName(), getLogin(), getPassword());
                 tasks[i].setObjectID(objectId);
                 compareObject(task, tasks[i]);
                 i++;
@@ -129,11 +128,11 @@ public class NewTest extends TaskTest {
             if(null != objectIds) {
                 int i = 0;
                 try {
-                    for(int objectId : objectIds) {
+                    for(final int objectId : objectIds) {
                         deleteTask(getWebConversation(), objectId, tasks[i].getParentFolderID(), PROTOCOL + getHostName(), getLogin(), getPassword());
                         i++;
                     }
-                } catch (Exception x) {
+                } catch (final Exception x) {
                     x.printStackTrace(); // Not that interesting
                 }
             }

@@ -450,7 +450,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		return folderArray[0];
 	}
 
-    public static FolderObject getAppointmentDefaultFolder(final WebConversation webCon, String host, final String login, final String password) throws Exception {
+    public static FolderObject getAppointmentDefaultFolder(final WebConversation webCon, final String host, final String login, final String password) throws Exception {
         final WebDAVClient client = new WebDAVClient(login, password);
         return new FolderTools(client).getDefaultAppointmentFolder(AbstractWebdavXMLTest.appendPrefix(host));
     }

@@ -48,11 +48,12 @@
  */
 package com.openexchange.tools.events;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import com.openexchange.event.CommonEvent;
 import com.openexchange.groupware.container.CommonObject;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNotNull;
 
 
 /**
@@ -65,7 +66,7 @@ public class EventAssertions {
      * @param parentFolderID The folder that contained the object
      * @param objectID The ID of the deleted object
      */
-    public static void assertDeleteEvent(Class type, final int parentFolderID, final int objectID) {
+    public static void assertDeleteEvent(final Class type, final int parentFolderID, final int objectID) {
          assertEvent(type, CommonEvent.DELETE, parentFolderID, objectID, false);
     }
 
@@ -77,7 +78,7 @@ public class EventAssertions {
      * @param objectID  The ID of the object
      * @return
      */
-    public static <T> T assertModificationEvent(Class<T> type, final int parentFolderID, final int objectID) {
+    public static <T> T assertModificationEvent(final Class<T> type, final int parentFolderID, final int objectID) {
         return assertEvent(type, CommonEvent.UPDATE, parentFolderID, objectID, false);
     }
 
@@ -90,11 +91,11 @@ public class EventAssertions {
      * @param objectID  The ID of the object, must be present in both the new and the old object.
      * @return
      */
-    public static <T> T assertModificationEventWithOldObject(Class<T> type, final int parentFolderID, final int objectID) {
+    public static <T> T assertModificationEventWithOldObject(final Class<T> type, final int parentFolderID, final int objectID) {
         return assertEvent(type, CommonEvent.UPDATE, parentFolderID, objectID, true);
     }
 
-    public static <T> T assertEvent(Class<T> type, final int action, final int parentFolderID, final int objectID, boolean checkForOldObject) {
+    public static <T> T assertEvent(final Class<T> type, final int action, final int parentFolderID, final int objectID, final boolean checkForOldObject) {
         final TestEventAdmin events = TestEventAdmin.getInstance();
 
         final CommonEvent event = events.getNewest();

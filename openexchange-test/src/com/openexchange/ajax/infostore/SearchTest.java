@@ -10,7 +10,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 
-import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -220,14 +219,14 @@ public class SearchTest extends InfostoreAJAXTest {
     // Node 2652
 
     public void testLastModifiedUTC() throws JSONException, IOException, SAXException {
-        Response res = search(getWebConversation(), getHostName(), sessionId, "*", new int[]{Metadata.LAST_MODIFIED_UTC}, folderId);
+        final Response res = search(getWebConversation(), getHostName(), sessionId, "*", new int[]{Metadata.LAST_MODIFIED_UTC}, folderId);
 		assertNoError(res);
-        JSONArray results = (JSONArray) res.getData();
-        int size = results.length();
+        final JSONArray results = (JSONArray) res.getData();
+        final int size = results.length();
         assertTrue(size > 0);
 
         for(int i = 0; i < size; i++) {
-            JSONArray row = results.optJSONArray(i);
+            final JSONArray row = results.optJSONArray(i);
             assertNotNull(row);
             assertTrue(row.length() > 0);
             assertNotNull(row.optLong(0));
@@ -244,7 +243,7 @@ public class SearchTest extends InfostoreAJAXTest {
 		final JSONArray arrayOfarrays = (JSONArray) res.getData();
         final Set<String> titlesSet = new HashSet<String>(Arrays.asList(titles));
 
-        String error = "Expected: " + titlesSet + " but got " + arrayOfarrays;
+        final String error = "Expected: " + titlesSet + " but got " + arrayOfarrays;
         assertEquals(error, titles.length, arrayOfarrays.length());
 		for(int i = 0; i < arrayOfarrays.length(); i++) {
 			final JSONArray entry = arrayOfarrays.getJSONArray(i);

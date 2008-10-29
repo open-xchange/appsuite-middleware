@@ -1,9 +1,9 @@
 package com.openexchange.webdav.action;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,8 +52,8 @@ public class MockWebdavResponse implements WebdavResponse {
 		setHeader("Content-Type", s);
 	}
 
-    public void sendString(String notFound) throws IOException {
-        byte[] bytes = notFound.getBytes("UTF-8");
+    public void sendString(final String notFound) throws IOException {
+        final byte[] bytes = notFound.getBytes("UTF-8");
         setHeader("Content-Length", String.valueOf(bytes.length));
         getOutputStream().write(bytes);
     }

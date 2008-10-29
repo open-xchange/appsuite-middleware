@@ -49,9 +49,9 @@
 
 package com.openexchange.webdav.xml.user.actions;
 
+import com.openexchange.webdav.xml.GroupUserTest;
 import com.openexchange.webdav.xml.framework.AbstractWebDAVResponse;
 import com.openexchange.webdav.xml.framework.WebDAVRequest;
-import com.openexchange.webdav.xml.GroupUserTest;
 
 /**
  *

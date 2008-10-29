@@ -93,7 +93,7 @@ public class Bug11650Test extends AbstractTaskTest {
         final CommonInsertResponse fResponse = Executor.execute(anton,
             new com.openexchange.ajax.folder.actions.InsertRequest(folder));
         fResponse.fillObject(folder);
-        Task task = Create.createWithDefaults();
+        final Task task = Create.createWithDefaults();
         task.setTitle("Bug11650Test");
         task.setParentFolderID(folder.getObjectID());
         try {

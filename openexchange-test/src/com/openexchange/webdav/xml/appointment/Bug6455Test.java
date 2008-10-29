@@ -5,7 +5,6 @@ import com.openexchange.groupware.calendar.OXCalendarException.Code;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
-import com.openexchange.webdav.xml.XmlServlet;
 
 public class Bug6455Test extends AppointmentTest {
 	

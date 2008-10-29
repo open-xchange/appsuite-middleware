@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.net.MalformedURLException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -67,12 +66,12 @@ public class ListTest extends InfostoreAJAXTest {
 
         assertNoError(res);
 
-        JSONArray arr = (JSONArray) res.getData();
-        int size = arr.length();
+        final JSONArray arr = (JSONArray) res.getData();
+        final int size = arr.length();
         assertTrue(size > 0);
 
         for(int i = 0; i < size; i++) {
-            JSONArray row = arr.optJSONArray(i);
+            final JSONArray row = arr.optJSONArray(i);
             assertTrue(row.length() == 1);
             assertNotNull(row.optLong(0));
         }

@@ -71,20 +71,20 @@ public class Assert extends junit.framework.Assert {
         utc.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    public static void assertStandardAppFields(ICalFile ical, Date start, Date end) {
+    public static void assertStandardAppFields(final ICalFile ical, final Date start, final Date end) {
         assertProperty(ical, "DTSTART", utc.format(start));
         assertProperty(ical, "DTEND", utc.format(end));               
     }
 
-    public static void assertProperty(ICalFile ical, String name, String value) {
+    public static void assertProperty(final ICalFile ical, final String name, final String value) {
         assertTrue(name+" missing in: \n"+ical.toString(), ical.containsPair(name, value));
     }
 
-    public static void assertNoProperty(ICalFile ical, String name) {
+    public static void assertNoProperty(final ICalFile ical, final String name) {
         assertFalse("Didn't expect to find "+name+" in: \n"+ical.toString(), ical.containsKey(name));
     }
 
-    public static void assertLine(ICalFile ical, String line) {
+    public static void assertLine(final ICalFile ical, final String line) {
         assertTrue(line+" missing in: \n"+ical.toString(), ical.containsLine(line));
     }
 }

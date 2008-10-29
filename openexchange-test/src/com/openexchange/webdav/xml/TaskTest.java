@@ -174,16 +174,16 @@ public class TaskTest extends AbstractWebdavXMLTest {
 
     public static int[] insertTasks(final WebConversation webCon, String host, final String login, final String password, final Task... tasks) throws Exception{
         host = AbstractWebdavXMLTest.appendPrefix(host);
-        int[] objectIds = new int[tasks.length];
+        final int[] objectIds = new int[tasks.length];
 
         final TaskWriter taskWriter = new TaskWriter();
 
         final Element rootElement = new Element("propertyupdate", webdav);
 		rootElement.addNamespaceDeclaration(XmlServlet.NS);
 
-        Document doc =  new Document(rootElement);
+        final Document doc =  new Document(rootElement);
 
-        for(Task taskObj : tasks) {
+        for(final Task taskObj : tasks) {
             final Element eProp = new Element("prop", webdav);
             taskWriter.addContent2PropElement(eProp, taskObj, false);
             final Element eSet = new Element("set", webdav);
@@ -214,7 +214,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
             if (response[i].hasError()) {
                 throw new TestException(response[i].getErrorMessage());
             } else {
-                Task taskObj = (Task)response[i].getDataObject();
+                final Task taskObj = (Task)response[i].getDataObject();
                 objectIds[i] = taskObj.getObjectID();
 
                 assertNotNull("last modified is null", taskObj.getLastModified());

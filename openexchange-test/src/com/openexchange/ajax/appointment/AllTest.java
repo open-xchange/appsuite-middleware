@@ -9,11 +9,11 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
-import com.openexchange.ajax.appointment.action.AllRequest;
+import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.container.AppointmentObject;
 
 public class AllTest extends AppointmentTest {
@@ -128,9 +128,9 @@ public class AllTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 
-        AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, new Date(0), new Date(Long.MAX_VALUE), timeZone, false, getHostName(), getSessionId());
+        final AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, new Date(0), new Date(Long.MAX_VALUE), timeZone, false, getHostName(), getSessionId());
 
-        for(AppointmentObject loaded : appointmentArray) {
+        for(final AppointmentObject loaded : appointmentArray) {
             if(loaded.getObjectID() == objectId) {
                 assertEquals(appointmentObj.getOccurrence(), loaded.getOccurrence());
             }
@@ -139,7 +139,7 @@ public class AllTest extends AppointmentTest {
 
     // Node 2652
     public void testLastModifiedUTC() throws Exception {
-        AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
         final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.LAST_MODIFIED_UTC};
 
         final AppointmentObject appointmentObj = createAppointmentObject("testShowLastModifiedUTC");
@@ -148,16 +148,16 @@ public class AllTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
         try {
-            AllRequest req = new AllRequest(appointmentFolderId, cols, new Date(0), new Date(Long.MAX_VALUE));
+            final AllRequest req = new AllRequest(appointmentFolderId, cols, new Date(0), new Date(Long.MAX_VALUE));
 
-            CommonAllResponse response = Executor.execute(client, req);
-            JSONArray arr = (JSONArray) response.getResponse().getData();
+            final CommonAllResponse response = Executor.execute(client, req);
+            final JSONArray arr = (JSONArray) response.getResponse().getData();
 
             assertNotNull(arr);
-            int size = arr.length();
+            final int size = arr.length();
             assertTrue(size > 0);
             for(int i = 0; i < size; i++ ){
-                JSONArray objectData = arr.optJSONArray(i);
+                final JSONArray objectData = arr.optJSONArray(i);
                 assertNotNull(objectData);
                 assertNotNull(objectData.opt(2));
             }

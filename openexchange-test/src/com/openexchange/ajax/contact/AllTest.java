@@ -34,22 +34,22 @@ public class AllTest extends ContactTest {
 
     // Node 2652
     public void testLastModifiedUTC() throws Exception {
-        AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
         final int cols[] = new int[]{ ContactObject.OBJECT_ID, ContactObject.FOLDER_ID, ContactObject.LAST_MODIFIED_UTC};
 
         final ContactObject contactObj = createContactObject("testLastModifiedUTC");
 		final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
         try {
-            AllRequest req = new AllRequest(contactFolderId, cols);
+            final AllRequest req = new AllRequest(contactFolderId, cols);
             
-            CommonAllResponse response = Executor.execute(client, req);
-            JSONArray arr = (JSONArray) response.getResponse().getData();
+            final CommonAllResponse response = Executor.execute(client, req);
+            final JSONArray arr = (JSONArray) response.getResponse().getData();
 
             assertNotNull(arr);
-            int size = arr.length();
+            final int size = arr.length();
             assertTrue(size > 0);
             for(int i = 0; i < size; i++ ){
-                JSONArray objectData = arr.optJSONArray(i);
+                final JSONArray objectData = arr.optJSONArray(i);
                 assertNotNull(objectData);
                 assertNotNull(objectData.opt(2));
             }

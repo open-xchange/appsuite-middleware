@@ -67,6 +67,8 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Init;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarField;
@@ -78,9 +80,6 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Init;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.oxfolder.OXFolderException;
 
@@ -141,7 +140,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 		final AppointmentObject appointmentObj = appointmentSql.getObjectById(objectId, folderId);
 		assertTrue("Has participants" , appointmentObj.containsParticipants());
 		final Participant[] participants = appointmentObj.getParticipants();
-		assertEquals("Two participants" , (Integer) 2 , (Integer) participants.length);
+		assertEquals("Two participants" , 2 , participants.length);
 		assertTrue("One user is " + testMailAddress + " (external user)", testMailAddress.equals(participants[0].getEmailAddress()) || testMailAddress.equals(participants[1].getEmailAddress()) );
 		assertTrue("One user is the user doing the import", participants[0].getIdentifier() == userId || participants[1].getIdentifier() == userId );
 	}
@@ -156,7 +155,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 
 		assertEquals("Should be truncation error" , Category.TRUNCATED , e.getCategory());
         e.printStackTrace();
-        assertEquals("SUMMARY was too long" , (Integer) CalendarField.TITLE.getAppointmentObjectID() , (Integer) ((AbstractOXException.Truncated)e.getProblematics()[0]).getId());
+        assertEquals("SUMMARY was too long" , CalendarField.TITLE.getAppointmentObjectID() , ((AbstractOXException.Truncated)e.getProblematics()[0]).getId());
 	}
 	
 	/*
@@ -186,7 +185,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 		
 		final AppointmentSQLInterface appointments = new CalendarSql(sessObj);
 		final CalendarDataObject app = appointments.getObjectById( Integer.valueOf(res.getObjectId()), Integer.valueOf(res.getFolder()) );
-		assertEquals("Comparing interval: ", (Integer) interval , (Integer) app.getInterval() );
+		assertEquals("Comparing interval: ", interval , app.getInterval() );
 	}
 
 //	/*
@@ -241,7 +240,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
 		final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
 		assertTrue("Has alarm" , appointmentObj.containsAlarm());
-		assertEquals("Alarm is "+alarm+" minutes earlier" , (Integer) alarm , (Integer) appointmentObj.getAlarm());
+		assertEquals("Alarm is "+alarm+" minutes earlier" , alarm , appointmentObj.getAlarm());
 	}
 	
 	/*
@@ -364,7 +363,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 		final AppointmentSQLInterface appointments = new CalendarSql(sessObj);
 		final CalendarDataObject app = appointments.getObjectById( Integer.valueOf(res.getObjectId()), Integer.valueOf(res.getFolder()) );
 		final Participant[] participants = app.getParticipants();
-		assertEquals("Two participants?" , (Integer) 2, (Integer) participants.length);
+		assertEquals("Two participants?" , 2, participants.length);
 		boolean found = false;
 		for(final Participant p : participants){
 			if("cbartkowiak@oxhemail.open-xchange.com".equals( p.getEmailAddress() ) ){

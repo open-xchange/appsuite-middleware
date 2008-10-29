@@ -100,7 +100,7 @@ public final class FunambolTest extends AbstractAJAXSession {
         System.out.println("ServerTime: " + serverTime);
         final CommonInsertResponse insertR = Executor.execute(
             client, new InsertRequest(app, tz));
-        final GetResponse getR = (GetResponse) Executor.execute(client,
+        final GetResponse getR = Executor.execute(client,
             new GetRequest(folder, insertR));
         final AppointmentObject reload = getR.getAppointment(tz);
         final Date creationDate = reload.getCreationDate();
