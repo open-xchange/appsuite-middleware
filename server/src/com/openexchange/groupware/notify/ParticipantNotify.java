@@ -1452,6 +1452,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 	 *         by specified date millis; otherwise <code>false</code>
 	 */
 	private static boolean compare2Date(final long date, final long millis) {
-		return date == (millis - (millis % Constants.MILLI_DAY));
+		return date >= (millis - (millis % Constants.MILLI_DAY));
 	}
 }
