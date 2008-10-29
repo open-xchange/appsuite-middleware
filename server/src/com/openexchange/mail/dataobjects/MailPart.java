@@ -509,14 +509,13 @@ public abstract class MailPart implements Serializable, Cloneable {
 	/**
 	 * Gets a read-only version of this part's headers
 	 * 
-	 * @return A read-only version of this part's headers or <code>null</code>
-	 *         if not exists
+	 * @return A read-only version of this part's headers
 	 */
 	public HeaderCollection getHeaders() {
 		if (containsHeaders() && (null != headers)) {
 			return headers.getReadOnlyCollection();
 		}
-		return null;
+		return HeaderCollection.EMPTY_COLLECTION;
 	}
 
 	/**
@@ -524,14 +523,13 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * 
 	 * @param nonMatchingHeaders
 	 *            The non-matching headers
-	 * @return An iterator for non-matching headers or <code>null</code> if not
-	 *         exists
+	 * @return An iterator for non-matching headers
 	 */
 	public Iterator<Map.Entry<String, String>> getNonMatchingHeaders(final String[] nonMatchingHeaders) {
 		if (containsHeaders() && (null != headers)) {
 			return headers.getNonMatchingHeaders(nonMatchingHeaders);
 		}
-		return null;
+		return EMPTY_ITER;
 	}
 
 	/**
@@ -546,7 +544,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 		if (containsHeaders() && (null != headers)) {
 			return headers.getMatchingHeaders(matchingHeaders);
 		}
-		return null;
+		return EMPTY_ITER;
 	}
 
 	/**
