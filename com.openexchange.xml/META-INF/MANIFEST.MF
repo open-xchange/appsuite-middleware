@@ -9,7 +9,11 @@ Import-Package: org.osgi.framework,
  org.xml.sax,
  org.xml.sax.ext,
  org.xml.sax.helpers,
- org.apache.commons.logging
+ org.apache.commons.logging,
+ javax.xml,
+ javax.xml.parsers,
+ org.w3c.dom,
+ org.w3c.dom.events
 Export-Package: com.openexchange.xml.jdom,
  com.openexchange.xml.spring,
  org.jdom,
