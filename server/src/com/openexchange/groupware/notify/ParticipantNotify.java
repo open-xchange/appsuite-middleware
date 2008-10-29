@@ -60,7 +60,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
-import java.awt.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
