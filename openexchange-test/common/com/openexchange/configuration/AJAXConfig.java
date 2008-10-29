@@ -122,6 +122,10 @@ public class AJAXConfig extends AbstractConfig {
          * Whether SP3 or SP4 data
          */
         IS_SP3("isSP3"),
+        /**
+         * Context name.
+         */
+        CONTEXTNAME("contextName"),
 
         /**
          * USER PARTICIPANTS
