@@ -1149,7 +1149,10 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 				addQueriedContacts(cols, retval, block_object_id);
 			}
 			final int size = retval.size();
-			if (size < object_id.length) {
+			if (object_id.length == 1 && size < object_id.length) {
+				/*
+				 * Throw error if single contact is requested
+				 */
 				throw EXCEPTIONS.createOXObjectNotFoundException(59);
 			}
 			return new SearchIteratorDelegator<ContactObject>(retval.iterator(), size);
