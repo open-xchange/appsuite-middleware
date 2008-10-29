@@ -158,6 +158,11 @@ public final class NotificationPool {
         queue.clear();
     }
 
+    // For tests to force message sending
+    public void sendAllMessages() {
+        new NotificationPoolTimerTask(map, queue, lock.writeLock()).run();   
+    }
+
     /**
 	 * Start-up for this notification pool
 	 */

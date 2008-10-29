@@ -60,6 +60,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.awt.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -130,8 +131,9 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 	private final static Log LOG = LogFactory.getLog(ParticipantNotify.class);
 
 	private final static LoggingLogic LL = LoggingLogic.getLoggingLogic(ParticipantNotify.class);
+    public static ParticipantNotify messageSender = new ParticipantNotify();
 
-	/**
+    /**
 	 * Initializes a new {@link ParticipantNotify}
 	 */
 	public ParticipantNotify() {
@@ -152,7 +154,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 	 */
 	protected static void sendMessage(final MailMessage mmsg, final ServerSession session, final CalendarObject obj,
 			final State state) {
-		new ParticipantNotify().sendMessage(mmsg.title, mmsg.message, mmsg.addresses, session, obj, mmsg.folderId,
+		messageSender.sendMessage(mmsg.title, mmsg.message, mmsg.addresses, session, obj, mmsg.folderId,
 				state, false, mmsg.internal);
 	}
 
