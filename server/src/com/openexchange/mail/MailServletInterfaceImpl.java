@@ -79,6 +79,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
@@ -992,26 +993,28 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 							MailMessage.FLAG_ANSWERED, true);
 				}
 			} else if (ComposeType.FORWARD.equals(type)) {
-				if (null == composedMail.getMsgref()) {
+				final MailPath supPath = composedMail.getMsgref();
+				if (null == supPath) {
 					final int count = composedMail.getEnclosedCount();
+					final long[] ids = new long[1];
 					for (int i = 0; i < count; i++) {
 						final MailPart part = composedMail.getEnclosedMailPart(i);
-						if ((part.getMsgref() != null) && MailMessage.class.isInstance(part)) {
+						final MailPath path = part.getMsgref();
+						if ((path != null) && part.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
 							/*
 							 * Mark referenced mail as forwarded
 							 */
-							final MailPath path = part.getMsgref();
-							mailAccess.getMessageStorage().updateMessageFlags(path.getFolder(),
-									new long[] { path.getUid() }, MailMessage.FLAG_FORWARDED, true);
+							ids[0] = path.getUid();
+							mailAccess.getMessageStorage().updateMessageFlags(path.getFolder(), ids,
+									MailMessage.FLAG_FORWARDED, true);
 						}
 					}
 				} else {
 					/*
 					 * Mark referenced mail as forwarded
 					 */
-					final MailPath path = composedMail.getMsgref();
-					mailAccess.getMessageStorage().updateMessageFlags(path.getFolder(), new long[] { path.getUid() },
-							MailMessage.FLAG_FORWARDED, true);
+					mailAccess.getMessageStorage().updateMessageFlags(supPath.getFolder(),
+							new long[] { supPath.getUid() }, MailMessage.FLAG_FORWARDED, true);
 				}
 			}
 			if (UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx)

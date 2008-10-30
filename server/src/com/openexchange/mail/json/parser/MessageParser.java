@@ -190,8 +190,8 @@ public final class MessageParser {
 					final DataSource dataSource = conversionService.getDataSource(dataSourceObject
 							.getString(JSON_IDENTIFIER));
 					if (dataSource == null) {
-						throw new MailException(DataExceptionCodes.UNKNOWN_DATA_SOURCE.create(
-								dataSourceObject.getString(JSON_IDENTIFIER)));
+						throw new MailException(DataExceptionCodes.UNKNOWN_DATA_SOURCE.create(dataSourceObject
+								.getString(JSON_IDENTIFIER)));
 					}
 					if (!types.isEmpty()) {
 						types.clear();
@@ -572,14 +572,14 @@ public final class MessageParser {
 						continue NextAttachment;
 					}
 					final MailMessage referencedMail;
-					if (previousReferencedMail == null
-							|| (previousReferencedMail.getFolder().equals(msgref.getFolder()) && previousReferencedMail
-									.getMailId() == msgref.getUid())) {
+					if ((previousReferencedMail != null)
+							&& previousReferencedMail.getFolder().equals(msgref.getFolder())
+							&& (previousReferencedMail.getMailId() == msgref.getUid())) {
+						referencedMail = previousReferencedMail;
+					} else {
 						referencedMail = access.getMessageStorage().getMessage(msgref.getFolder(), msgref.getUid(),
 								false);
 						previousReferencedMail = referencedMail;
-					} else {
-						referencedMail = previousReferencedMail;
 					}
 					/*
 					 * Decide how to retrieve part
