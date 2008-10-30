@@ -59,8 +59,10 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -1315,6 +1317,15 @@ class CalendarMySQL implements CalendarSqlImp {
 		query.append(sqlin);
 		query.append(" ORDER BY object_id ASC");
 		final ResultSet rs = stmt.executeQuery(query.toString());
+		final Map<Integer, CalendarDataObject> map;
+		{
+			final int size = list.size();
+			map = new HashMap<Integer, CalendarDataObject>(size);
+			for (int i = 0; i < size; i++) {
+				final CalendarDataObject cdo = list.get(i);
+				map.put(Integer.valueOf(cdo.getObjectID()), cdo);
+			}
+		}
 		int last_oid = -1;
 		Participants participants = null;
 		CalendarDataObject cdao = null;
@@ -1328,9 +1339,8 @@ class CalendarMySQL implements CalendarSqlImp {
 					}
 					participants = new Participants();
 					last_oid = oid;
-					cdao = CalendarCommonCollection.getDAOFromList(list, oid);
+					cdao = map.get(Integer.valueOf(oid));
 				}
-
 				final int id = rs.getInt(2);
 				final int type = rs.getInt(3);
 				if (type == Participant.USER) {
@@ -1457,6 +1467,15 @@ class CalendarMySQL implements CalendarSqlImp {
 		query.append(sqlin);
 		query.append(" ORDER BY object_id");
 		final ResultSet rs = stmt.executeQuery(query.toString());
+		final Map<Integer, CalendarDataObject> map;
+		{
+			final int size = list.size();
+			map = new HashMap<Integer, CalendarDataObject>(size);
+			for (int i = 0; i < size; i++) {
+				final CalendarDataObject cdo = list.get(i);
+				map.put(Integer.valueOf(cdo.getObjectID()), cdo);
+			}
+		}
 		String temp = null;
 		int last_oid = -1;
 		UserParticipant up = null;
@@ -1474,7 +1493,7 @@ class CalendarMySQL implements CalendarSqlImp {
 					}
 					participants = new Participants();
 					last_oid = oid;
-					cdao = CalendarCommonCollection.getDAOFromList(list, oid);
+					cdao = map.get(Integer.valueOf(oid));
 				}
 				final int tuid = rs.getInt(2);
 				up = new UserParticipant(tuid);

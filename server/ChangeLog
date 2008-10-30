@@ -1,6 +1,7 @@
 * 2008-10-30 - thorben.betten@open-xchange.com
 
  - Bugfix #12420: Fixed forwarding of multiple mails
+ - Bugfix #12385: Fastened traversal of (user) participants
 
 * 2008-10-29 - martin.herfurth@open-xchange.com
 
