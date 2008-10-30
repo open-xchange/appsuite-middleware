@@ -5,16 +5,17 @@ Bundle-SymbolicName: com.openexchange.xml
 Bundle-Version: 6.7.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Import-Package: org.osgi.framework,
- org.xml.sax,
- org.xml.sax.ext,
- org.xml.sax.helpers,
- org.apache.commons.logging,
- javax.xml,
+Import-Package: javax.xml,
  javax.xml.parsers,
+ org.apache.commons.logging,
+ org.osgi.framework,
  org.w3c.dom,
  org.w3c.dom.events,
- org.w3c.dom.traversal
+ org.w3c.dom.ranges,
+ org.w3c.dom.traversal,
+ org.xml.sax,
+ org.xml.sax.ext,
+ org.xml.sax.helpers
 Export-Package: com.openexchange.xml.jdom,
  com.openexchange.xml.spring,
  org.jdom,
