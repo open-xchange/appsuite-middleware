@@ -186,13 +186,13 @@ public class VCardImportTest extends AbstractVCardTest {
 	}
 	
 	public void test7106() throws TestException, IOException, SAXException, JSONException, Exception{
-		final String vcard ="BEGIN:VCARD\nVERSION:3.0\nN:;Hübört;;;\nFN:Hübört Sönderzeichön\nTEL;type=CELL;type=pref:6670373\nEND:VCARD\n";
-		final ImportResult[] importResult = importVCard(getWebConversation(), new ByteArrayInputStream(vcard.getBytes()), contactFolderId, timeZone, emailaddress, getHostName(), getSessionId());
+		final String vcard ="BEGIN:VCARD\nVERSION:3.0\nN:;H\u00fcb\u00fcrt;;;\nFN:H\u00fcb\u00fcrt S\u00f6nderzeich\u00f6n\nTEL;type=CELL;type=pref:6670373\nEND:VCARD\n";
+		final ImportResult[] importResult = importVCard(getWebConversation(), new ByteArrayInputStream(vcard.getBytes("UTF-8")), contactFolderId, timeZone, emailaddress, getHostName(), getSessionId());
 		
 		assertFalse("Worked?", importResult[0].hasError());
 		final int contactId = Integer.parseInt(importResult[0].getObjectId());
 		final ContactObject myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
-		assertEquals("Checking surname:" , "Hübört Sönderzeichön" , myImport.getDisplayName());
+		assertEquals("Checking surname:" , "H\u00fcb\u00fcrt S\u00f6nderzeich\u00f6n" , myImport.getDisplayName());
 	
 		ContactTest.deleteContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
 	}
@@ -236,13 +236,13 @@ public class VCardImportTest extends AbstractVCardTest {
 	 * Deals with umlauts
 	 */
 	public void test7250() throws TestException, IOException, SAXException, JSONException, Exception{
-		final String vcard ="BEGIN:VCARD\nVERSION:2.1\nN;CHARSET=Windows-1252:Börnig;Anke;;;\nFN;CHARSET=Windows-1252:Anke  Börnig\nEND:VCARD";
+		final String vcard ="BEGIN:VCARD\nVERSION:2.1\nN;CHARSET=Windows-1252:B\u00f6rnig;Anke;;;\nFN;CHARSET=Windows-1252:Anke  B\u00f6rnig\nEND:VCARD";
 		final ImportResult[] importResult = importVCard(getWebConversation(), new ByteArrayInputStream(vcard.getBytes("Cp1252")), contactFolderId, timeZone, emailaddress, getHostName(), getSessionId());
 		
 		assertFalse("Worked?", importResult[0].hasError());
 		final int contactId = Integer.parseInt(importResult[0].getObjectId());
 		final ContactObject myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
-		assertEquals("Checking surname:" , "Börnig" , myImport.getSurName());
+		assertEquals("Checking surname:" , "B\u00f6rnig" , myImport.getSurName());
 	
 		ContactTest.deleteContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
 	}
