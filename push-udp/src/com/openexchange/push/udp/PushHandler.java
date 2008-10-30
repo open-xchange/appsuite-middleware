@@ -63,10 +63,12 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.impl.OCLPermission;
 
@@ -152,12 +154,17 @@ public class PushHandler implements EventHandler {
 		    users = new int[] { userId };
 		    event(userId, 1, 1, users, module, ctx);
 		    break;
+		case Types.INFOSTORE:
+		    users = getAffectedUsers4Folder(parentFolder, usersSet, ctx);
+		    final DocumentMetadata object = (DocumentMetadata) genericEvent.getActionObj();
+		    event(userId, object.getId(), parentFolder.getObjectID(), users, module, ctx);
+		    break;
 	    default:
 	        LOG.warn("Got event with unimplemented module: " + module);
 		}
 	}
 
-	public static void event(final int userId, final int objectId, final int folderId,
+	private static void event(final int userId, final int objectId, final int folderId,
 			final int[] users, final int module, final Context ctx) {
 		if (users == null) {
 			return;
