@@ -110,10 +110,21 @@ public final class Create {
         return folder;
     }
 
+    /**
+     * This method creates a public folder
+     * @param client
+     * @param name
+     * @param module the module (e.g. CONTACT) from FolderObject.java
+     * @return
+     * @throws AjaxException
+     * @throws IOException
+     * @throws SAXException
+     * @throws JSONException
+     */
     public static FolderObject createPublicFolder(final AJAXClient client,
-        final String name, final int type) throws AjaxException, IOException,
+        final String name, final int module) throws AjaxException, IOException,
         SAXException, JSONException {
-        final FolderObject folder = setupPublicFolder(name, type, client.getValues().getUserId());
+        final FolderObject folder = setupPublicFolder(name, module, client.getValues().getUserId());
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         final InsertRequest request = new InsertRequest(folder);
         final CommonInsertResponse response = client.execute(request);
