@@ -50,34 +50,18 @@
 package com.openexchange.ajax.contact.action;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.CommonInsertResponse;
 
 /**
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class InsertResponse extends AbstractAJAXResponse {
+public class InsertResponse extends CommonInsertResponse {
 
-    private int id;
-    
     /**
      * @param response
      */
     public InsertResponse(final Response response) {
         super(response);
-    }
-
-    /**
-     * @return the id
-     */
-    public int getId() {
-        return id;
-    }
-
-    /**
-     * @param id the id to set
-     */
-    void setId(final int id) {
-        this.id = id;
     }
 }

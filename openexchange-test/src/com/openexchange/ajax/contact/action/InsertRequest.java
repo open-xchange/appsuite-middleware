@@ -52,14 +52,13 @@ package com.openexchange.ajax.contact.action;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.groupware.container.ContactObject;
 
 /**
  * Stores the parameters for inserting the contact.
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class InsertRequest extends AbstractContactRequest {
+public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 	
 	/**
 	 * Contact to insert.
@@ -119,7 +118,7 @@ public class InsertRequest extends AbstractContactRequest {
 	/**
 	 * {@inheritDoc}
 	 */
-	public AbstractAJAXParser getParser() {
+	public InsertParser getParser() {
 		return new InsertParser(failOnError);
 	}
 }

@@ -49,48 +49,24 @@
 
 package com.openexchange.ajax.contact.action;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AbstractInsertParser;
 
 /**
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class InsertParser extends AbstractAJAXParser {
-
-    /**
-     * Remembers if this parser fails out with an error.
-     */
-    private final boolean failOnError;
+public class InsertParser extends AbstractInsertParser<InsertResponse> {
 
     /**
      * Default constructor.
      */
     InsertParser(final boolean failOnError) {
         super(failOnError);
-        this.failOnError = failOnError;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected InsertResponse createResponse(final Response response) throws JSONException {
-        final InsertResponse retval = new InsertResponse(response);
-        final JSONObject data = (JSONObject) response.getData();
-        if (failOnError) {
-            if (data.has(DataFields.ID)) {
-                final int objectId = data.getInt(DataFields.ID);
-                assertTrue("Problem while inserting contact", objectId > 0);
-                retval.setId(objectId);
-            } else {
-                fail(response.getErrorMessage());
-            }
-        }
-        return retval;
+    protected InsertResponse instantiateResponse(final Response response) {
+        return new InsertResponse(response);
     }
 }
