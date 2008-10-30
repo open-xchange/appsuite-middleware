@@ -60,6 +60,7 @@ public class AJAXSession {
     private final WebConversation conversation;
 
     private String id;
+    private boolean mustLogout = true;
 
     public AJAXSession() {
         this(new WebConversation(), null);
@@ -73,6 +74,7 @@ public class AJAXSession {
         super();
         this.conversation = conversation;
         this.id = id;
+        this.mustLogout = false;
         conversation.getClientProperties().setAcceptGzip(false);
     }
     
@@ -95,5 +97,9 @@ public class AJAXSession {
      */
     public void setId(final String id) {
         this.id = id;
+    }
+
+    public boolean mustLogout() {
+        return mustLogout;
     }
 }

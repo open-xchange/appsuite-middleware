@@ -73,12 +73,14 @@ public class AJAXClient {
     private final AJAXSession session;
 
     private final UserValues values = new UserValues(this);
+    private boolean mustLogout;
 
     /**
      * Default constructor.
      */
     public AJAXClient(final AJAXSession session) {
         this.session = session;
+        this.mustLogout = session.mustLogout();
     }
 
     public AJAXClient(final User user) throws ConfigurationException,
@@ -132,7 +134,8 @@ public class AJAXClient {
     @Override
     protected void finalize() throws Throwable {
         try {
-            logout();
+            if( mustLogout )
+                logout();
         } finally {  
             super.finalize();
         }
