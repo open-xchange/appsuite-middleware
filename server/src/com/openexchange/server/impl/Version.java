@@ -60,7 +60,7 @@ public class Version {
     public static final String NAME = "Open-Xchange";
     public static String buildnumber = "";
 
-    private static String versionString = "";
+    private static String versionString = null;
 
     public static String getVersionString() {
         if (null == versionString) {
