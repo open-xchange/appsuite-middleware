@@ -499,7 +499,7 @@ public final class MailForwardTest extends AbstractMailTest {
 	 * instances through invoking {@link InternetAddress#toUnicodeString()}
 	 * 
 	 * @param addrs
-	 *            The rray of {@link InternetAddress} instances
+	 *            The array of {@link InternetAddress} instances
 	 * @return A comma-separated list of addresses as a {@link String}
 	 */
 	private static String addrs2String(final InternetAddress[] addrs) {
