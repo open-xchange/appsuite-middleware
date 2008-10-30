@@ -122,10 +122,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class ParticipantNotify implements AppointmentEventInterface2, TaskEventInterface2 {
 
-	// TODO: Signatur?
-	// TODO: Abgesagt / Zugesagt
-
-	// TODO: user getLocale of user instead of detemining locale yourself
+	// TODO: Signature?
 
 	private final static Log LOG = LogFactory.getLog(ParticipantNotify.class);
 
