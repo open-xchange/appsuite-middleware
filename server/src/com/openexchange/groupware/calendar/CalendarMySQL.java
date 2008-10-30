@@ -1039,7 +1039,7 @@ class CalendarMySQL implements CalendarSqlImp {
 
 	}
 
-	public final CalendarDataObject[] insertAppointment(final CalendarDataObject cdao, final Connection writecon, final Session so) throws DataTruncation, SQLException, LdapException, Exception {
+	public final CalendarDataObject[] insertAppointment(final CalendarDataObject cdao, final Connection writecon, final Session so) throws DataTruncation, SQLException, LdapException, OXException {
 		int i = 1;
 		PreparedStatement pst = null;
 		try {
@@ -1305,7 +1305,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		}
 	}
 
-	public final void getParticipantsSQLIn(final ArrayList al, final Connection readcon, final int cid, final String sqlin) throws SQLException {
+	public final void getParticipantsSQLIn(final List<CalendarDataObject> list, final Connection readcon, final int cid, final String sqlin) throws SQLException {
 
 		final Statement stmt = readcon.createStatement();
 		final StringBuilder query = new StringBuilder(128);
@@ -1328,7 +1328,7 @@ class CalendarMySQL implements CalendarSqlImp {
 					}
 					participants = new Participants();
 					last_oid = oid;
-					cdao = CalendarCommonCollection.getDAOFromList(al, oid);
+					cdao = CalendarCommonCollection.getDAOFromList(list, oid);
 				}
 
 				final int id = rs.getInt(2);
@@ -1448,7 +1448,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		return participants;
 	}
 
-	public final void getUserParticipantsSQLIn(final ArrayList al, final Connection readcon, final int cid, final int uid, final String sqlin) throws SQLException, OXException {
+	public final void getUserParticipantsSQLIn(final List<CalendarDataObject> list, final Connection readcon, final int cid, final int uid, final String sqlin) throws SQLException, OXException {
 		final Statement stmt = readcon.createStatement();
 		final StringBuilder query = new StringBuilder(140);
 		query.append("SELECT object_id, member_uid, confirm, reason, pfid, reminder from prg_dates_members WHERE cid = ");
@@ -1474,7 +1474,7 @@ class CalendarMySQL implements CalendarSqlImp {
 					}
 					participants = new Participants();
 					last_oid = oid;
-					cdao = CalendarCommonCollection.getDAOFromList(al, oid);
+					cdao = CalendarCommonCollection.getDAOFromList(list, oid);
 				}
 				final int tuid = rs.getInt(2);
 				up = new UserParticipant(tuid);
@@ -3470,8 +3470,8 @@ class CalendarMySQL implements CalendarSqlImp {
 							update.setChangeExceptions(CalendarCommonCollection.removeException(ldao.getChangeException(), edao.getRecurrenceDatePosition()));
 							update.setDeleteExceptions(CalendarCommonCollection.addException(ldao.getDeleteException(), edao.getRecurrenceDatePosition()));
 							updateAppointment(update, ldao, writecon, so, ctx, fid, clientLastModified, false, false); // MAIN
-							// OBJECT
-						} catch (OXObjectNotFoundException onfe) {
+							// OBJfinal ECT
+						} catch (final OXObjectNotFoundException onfe) {
 						    LOG.info("Unable to find master during Exception delete. Ignoring. Seems to be corrupt data.", onfe);
 						    final long modified = deleteAppointment(writecon, cid, oid, uid);
 

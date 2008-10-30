@@ -54,10 +54,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -1452,32 +1452,44 @@ public final class CalendarCommonCollection {
         }
     }
     
-    public static CalendarDataObject getDAOFromList(final ArrayList al, final int oid) {
-        CalendarDataObject cdao = null;
-        for (int a = 0; a < al.size(); a++) {
-            cdao = (CalendarDataObject) al.get(a);
-            if (cdao.getObjectID() == oid) {
-                return cdao;
-            }
-        }
-        return null;
-    }
-    
-    static boolean checkForSoloReminderUpdate(final CalendarDataObject cdao, final int[] ucols, final MBoolean cup) {
-        if (cup.getMBoolean()) {
-            return false;
-        } else if (CalendarConfig.getSoloReminderTriggerEvent()) {
-            final Set<Integer> IGNORE_FIELDS = new HashSet<Integer>(Arrays.asList(AppointmentObject.ALARM, AppointmentObject.LAST_MODIFIED, AppointmentObject.MODIFIED_BY, 0));
-            for (int i = 0; i < ucols.length; i++) {
-                final int ucol = ucols[i];
-                if(!IGNORE_FIELDS.contains(ucol)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return false;
-    }
+    /**
+	 * Gets the calendar data object from specified list whose ID matches given
+	 * ID.
+	 * 
+	 * @param list
+	 *            The list of calendar data objects
+	 * @param oid
+	 *            The ID to search for
+	 * @return The calendar data object from specified list whose ID matches
+	 *         given ID or <code>null</code> if none matches
+	 */
+	public static CalendarDataObject getDAOFromList(final List<CalendarDataObject> list, final int oid) {
+		for (int a = 0; a < list.size(); a++) {
+			final CalendarDataObject cdao = list.get(a);
+			if (cdao.getObjectID() == oid) {
+				return cdao;
+			}
+		}
+		return null;
+	}
+
+    private static final Set<Integer> IGNORE_FIELDS = new HashSet<Integer>(Arrays.asList(Integer
+			.valueOf(AppointmentObject.ALARM), Integer.valueOf(AppointmentObject.LAST_MODIFIED), Integer
+			.valueOf(AppointmentObject.MODIFIED_BY), Integer.valueOf(0)));
+
+	static boolean checkForSoloReminderUpdate(final CalendarDataObject cdao, final int[] ucols, final MBoolean cup) {
+		if (cup.getMBoolean()) {
+			return false;
+		} else if (CalendarConfig.getSoloReminderTriggerEvent()) {
+			for (int i = 0; i < ucols.length; i++) {
+				if (!IGNORE_FIELDS.contains(Integer.valueOf(ucols[i]))) {
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
+	}
     
     static void checkAndRemovePastReminders(final CalendarDataObject cdao, final CalendarDataObject edao) {
         if (CalendarConfig.getCheckAndRemovePastReminders() && cdao.containsAlarm() && cdao.getAlarm() >= 0) {

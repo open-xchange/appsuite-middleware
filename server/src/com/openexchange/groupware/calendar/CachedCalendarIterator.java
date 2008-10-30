@@ -80,7 +80,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 public class CachedCalendarIterator implements SearchIterator<CalendarDataObject> {
 
 	private final List<AbstractOXException> warnings;
-    private final ArrayList<CalendarDataObject> list;
+    private final List<CalendarDataObject> list;
     private final SearchIterator<CalendarDataObject> non_cached_iterator;
     private final boolean cache;
     private int counter;

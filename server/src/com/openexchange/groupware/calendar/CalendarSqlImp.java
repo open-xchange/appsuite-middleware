@@ -53,8 +53,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
@@ -68,10 +68,10 @@ import com.openexchange.session.Session;
 
 
 /**
- * CalendarSqlImp
+ * {@link CalendarSqlImp} - The calendar SQL interface
+ * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
-
 public interface CalendarSqlImp {
     
     public PreparedStatement getAllAppointmentsForUser(Context c, int uid, int groups[], UserConfiguration uc, java.util.Date d1, java.util.Date d2, String select, Connection readcon, Date since, int orderBy, String orderDir) throws OXException, SQLException;
@@ -118,13 +118,13 @@ public interface CalendarSqlImp {
     
     public Participants getUserParticipants(CalendarDataObject cdao, Connection readcon, int uid) throws SQLException, OXException;
     
-    public void getUserParticipantsSQLIn(ArrayList al, Connection readcon, int cid, int uid, String sqlin) throws SQLException, OXException;
+    public void getUserParticipantsSQLIn(List<CalendarDataObject> list, Connection readcon, int cid, int uid, String sqlin) throws SQLException, OXException;
     
-    public void getParticipantsSQLIn(final ArrayList al, final Connection readcon, final int cid, final String sqlin) throws SQLException;
+    public void getParticipantsSQLIn(List<CalendarDataObject> list, Connection readcon, int cid, String sqlin) throws SQLException;
     
     public Participants getParticipants(CalendarDataObject cdao, Connection readcon) throws SQLException;
     
-    public CalendarDataObject[] insertAppointment(CalendarDataObject cdao, Connection writecon, Session so) throws SQLException, LdapException, Exception;
+    public CalendarDataObject[] insertAppointment(CalendarDataObject cdao, Connection writecon, Session so) throws SQLException, LdapException, OXException;
     
     public CalendarDataObject[] updateAppointment(CalendarDataObject cdao, CalendarDataObject edao, Connection writecon, Session so, Context ctx, int inFolder, Date clientLastModified) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException;
     
