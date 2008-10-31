@@ -141,6 +141,7 @@ public class ServerUserSetting {
         if(retval == null) {
 			return 0;
 		}
+        // TODO this is ugly looking code. we should optimize that.
         return (int)(long)(Long) retval;
     }
     
@@ -183,6 +184,7 @@ public class ServerUserSetting {
             stmt.setInt(2, user);
             rs = stmt.executeQuery();
             if (rs.next()) {
+                // TODO use specialized get methods for every possible type
 				retval = rs.getObject(column);
 			}
         } finally {
