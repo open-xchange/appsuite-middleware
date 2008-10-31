@@ -1,3 +1,7 @@
+* 2008-10-31 - marcus.klein@open-xchange.com
+
+ - Bugfix #12387: Improved handling of exceptions in WebDAV super class. 
+
 * 2008-10-30 - marcus.klein@open-xchange.com
 
  - Bugfix #12428: Supporting InfoStore events in UDP push framework.
