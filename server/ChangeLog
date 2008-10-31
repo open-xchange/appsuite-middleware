@@ -1,9 +1,11 @@
 * 2008-10-31 - francisco.laguna@open-xchange.com
+
  - Bugfix #11305: Fixed batching of deletes
 
 * 2008-10-31 - marcus.klein@open-xchange.com
 
- - Bugfix #12387: Improved handling of exceptions in WebDAV super class. 
+ - Bugfix #12387: Improved handling of exceptions in WebDAV super class.
+ - Bugfix #12437: Corrected error code if invalid credentials are supplied.
 
 * 2008-10-30 - marcus.klein@open-xchange.com
 

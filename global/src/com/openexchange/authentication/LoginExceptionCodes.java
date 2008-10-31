@@ -148,7 +148,7 @@ public enum LoginExceptionCodes implements OXErrorMessage {
      * {@inheritDoc}
      */
     public int getErrorCode() {
-        return ordinal();
+        return number;
     }
 
     public String getHelp() {
