@@ -154,7 +154,9 @@ public final class AJAXFile extends PermissionServlet {
 				Response.write(response, resp.getWriter());
 			} catch (final JSONException e) {
 				LOG.error(e.getMessage(), e);
-				throw new ServletException(e.getMessage(), e);
+                final ServletException se = new ServletException(e.getMessage(), e);
+                se.initCause(e);
+                throw se;
 			}
 		}
 	}
@@ -171,7 +173,9 @@ public final class AJAXFile extends PermissionServlet {
 				Response.write(response, resp.getWriter());
 			} catch (final JSONException e1) {
 				LOG.error(e1.getMessage(), e1);
-				throw new ServletException(e1.getMessage(), e1);
+				final ServletException se = new ServletException(e1.getMessage(), e1);
+				se.initCause(e1);
+				throw se;
 			}
 		}
 	}

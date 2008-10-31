@@ -116,7 +116,9 @@ public final class HttpServiceImpl implements HttpService {
 		try {
 			HttpServletManager.registerServlet(alias, (HttpServlet) servlet, initparams);
 		} catch (final ClassCastException e) {
-			throw new ServletException("Only http servlets are supported", e);
+		    final ServletException se = new ServletException("Only http servlets are supported", e);
+		    se.initCause(e);
+		    throw se;
 		}
 	}
 

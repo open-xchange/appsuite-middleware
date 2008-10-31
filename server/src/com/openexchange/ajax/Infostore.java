@@ -187,7 +187,9 @@ public class Infostore extends PermissionServlet {
 					ResponseWriter.write(resp, w);
 				} catch (final JSONException e) {
 					// shouldn't happen
-					throw new ServletException(e);
+					final ServletException se = new ServletException(e);
+					se.initCause(e);
+					throw se;
 				}
 				res.setContentType(MIME_TEXT_HTML);
 				res.getWriter().write(substitute(JS_FRAGMENT, STR_ACTION, STR_ERROR, STR_JSON, w.toString()));

@@ -79,6 +79,7 @@ public class UploadServletException extends ServletException {
 	public UploadServletException(final HttpServletResponse res, final String data, final String message,
 			final Throwable arg1) {
 		super(message, arg1);
+		initCause(arg1);
 		this.data = data;
 		this.res = res;
 	}
@@ -91,6 +92,7 @@ public class UploadServletException extends ServletException {
 
 	public UploadServletException(final HttpServletResponse res, final String data, final Throwable arg0) {
 		super(arg0);
+		initCause(arg0);
 		this.data = data;
 		this.res = res;
 	}

@@ -291,11 +291,17 @@ public class HttpServletManager {
 			try {
 				servletQueue = new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR));
 			} catch (final SecurityException e) {
-				throw new ServletException("Default constructor could not be found for servlet class: "
-						+ servlet.getClass().getName(), e);
+			    final ServletException se = new ServletException(
+			        "Default constructor could not be found for servlet class: "
+			        + servlet.getClass().getName(), e);
+                se.initCause(e);
+                throw se;
 			} catch (final NoSuchMethodException e) {
-				throw new ServletException("Default constructor could not be found for servlet class: "
-						+ servlet.getClass().getName(), e);
+			    final ServletException se = new ServletException(
+			        "Default constructor could not be found for servlet class: "
+			        + servlet.getClass().getName(), e);
+                se.initCause(e);
+                throw se;
 			}
 			final ServletConfig conf = ServletConfigLoader.getDefaultInstance().getConfig(
 					servlet.getClass().getCanonicalName(), path);
@@ -310,7 +316,9 @@ public class HttpServletManager {
 						.append("\" successfully registered to \"").append(path).append('"'));
 			}
 		} catch (final URISyntaxException e) {
-			throw new ServletException("Servlet path is not a valid URI", e);
+			final ServletException se = new ServletException("Servlet path is not a valid URI", e);
+			se.initCause(e);
+			throw se;
 		} finally {
 			RW_LOCK.releaseWrite();
 		}
@@ -331,6 +339,7 @@ public class HttpServletManager {
 			SERVLET_POOL.remove(path);
 		} catch (final URISyntaxException e) {
 			final ServletException se = new ServletException("Servlet path is not a valid URI", e);
+			se.initCause(e);
 			LOG.error("Unregistering servlet failed. Servlet path is not a valid URI: " + id, se);
 		} finally {
 			RW_LOCK.releaseWrite();

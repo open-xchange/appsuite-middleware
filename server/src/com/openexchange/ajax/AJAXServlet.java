@@ -525,7 +525,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			jw.endObject();
 			w.flush();
 		} catch (final JSONException e1) {
-			throw new ServletException("Cannot create JSON object.", e1);
+            final ServletException se = new ServletException(e1.getMessage(), e1);
+            se.initCause(e1);
+            throw se;
 		}
 	}
 

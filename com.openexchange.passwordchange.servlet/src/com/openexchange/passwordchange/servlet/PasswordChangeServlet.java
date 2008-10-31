@@ -117,7 +117,9 @@ public final class PasswordChangeServlet extends PermissionServlet {
 			try {
 				Response.write(response, writer);
 			} catch (final JSONException e1) {
-				throw new ServletException(e1);
+				final ServletException se = new ServletException(e1);
+				se.initCause(e1);
+				throw se;
 			}
 			writer.flush();
 		}
@@ -141,7 +143,9 @@ public final class PasswordChangeServlet extends PermissionServlet {
 			try {
 				Response.write(response, writer);
 			} catch (final JSONException e1) {
-				throw new ServletException(e1);
+				final ServletException se = new ServletException(e1);
+				se.initCause(e1);
+				throw se;
 			}
 			writer.flush();
 		} catch (final JSONException e) {
@@ -153,7 +157,9 @@ public final class PasswordChangeServlet extends PermissionServlet {
 			try {
 				Response.write(response, writer);
 			} catch (final JSONException e1) {
-				throw new ServletException(e1);
+				final ServletException se = new ServletException(e1);
+				se.initCause(e1);
+				throw se;
 			}
 			writer.flush();
 		}
