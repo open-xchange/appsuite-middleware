@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.session;
+package com.openexchange.ajax.session.actions;
 
 import com.openexchange.ajax.AJAXServlet;
 

@@ -5,6 +5,10 @@ package com.openexchange.ajax.session;
 
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.session.actions.LoginRequest;
+import com.openexchange.ajax.session.actions.LoginResponse;
+import com.openexchange.ajax.session.actions.RedirectRequest;
+import com.openexchange.ajax.session.actions.RedirectResponse;
 import com.openexchange.configuration.AJAXConfig;
 
 /**

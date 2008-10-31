@@ -47,56 +47,41 @@
  *
  */
 
-package com.openexchange.ajax.session;
+package com.openexchange.ajax.session.actions;
 
-import java.io.IOException;
+import com.openexchange.ajax.AJAXServlet;
 
-import org.json.JSONException;
-import org.xml.sax.SAXException;
+/**
+ * 
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public class LoginRequest extends AbstractRequest<LoginResponse> {
 
-import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.Executor;
-import com.openexchange.ajax.session.actions.LoginRequest;
-import com.openexchange.ajax.session.actions.LoginResponse;
-import com.openexchange.ajax.session.actions.LogoutRequest;
-import com.openexchange.ajax.session.actions.LogoutResponse;
-import com.openexchange.ajax.session.actions.RedirectRequest;
-import com.openexchange.ajax.session.actions.RedirectResponse;
-import com.openexchange.tools.servlet.AjaxException;
+    private static final String PARAM_PASSWORD = "password";
 
-public class LoginTools {
+    private static final String PARAM_NAME = "name";
 
-    private LoginTools() {
-        super();
-    }
-    
-    public static LoginResponse login(final AJAXSession session,
-        final LoginRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return Executor.execute(session, request);
+    private final boolean failOnError;
+
+    public LoginRequest(final String login, final String password) {
+        this(login, password, true);
     }
 
-    public static LoginResponse login(final AJAXSession session,
-        final LoginRequest request, final String protocol, final String hostname) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return Executor.execute(session, request, protocol, hostname);
+    public LoginRequest(final String login, final String password,
+        final boolean failOnError) {
+        super(new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
+                .ACTION_LOGIN),
+            new Parameter(PARAM_NAME, login),
+            new Parameter(PARAM_PASSWORD, password)
+        });
+        this.failOnError = failOnError;
     }
 
-    public static LogoutResponse logout(final AJAXSession session,
-        final LogoutRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return Executor.execute(session, request);
-    }
-	
-    public static LogoutResponse logout(final AJAXSession session,
-        final LogoutRequest request, final String protocol, final String hostname) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return Executor.execute(session, request, protocol, hostname);
-    }
-
-    public static RedirectResponse redirect(final AJAXSession session,
-        final RedirectRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return Executor.execute(session, request);
+    /**
+     * {@inheritDoc}
+     */
+    public LoginResponseParser getParser() {
+        return new LoginResponseParser(failOnError);
     }
 }

@@ -49,54 +49,69 @@
 
 package com.openexchange.ajax.session;
 
-import java.io.IOException;
-
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
-import com.openexchange.ajax.session.actions.LogoutRequest;
-import com.openexchange.ajax.session.actions.LogoutResponse;
-import com.openexchange.ajax.session.actions.RedirectRequest;
-import com.openexchange.ajax.session.actions.RedirectResponse;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.AbstractOXException.Category;
 
-public class LoginTools {
+import junit.framework.TestCase;
 
-    private LoginTools() {
-        super();
-    }
-    
-    public static LoginResponse login(final AJAXSession session,
-        final LoginRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return Executor.execute(session, request);
-    }
+/**
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public final class Bug12437Test extends TestCase {
 
-    public static LoginResponse login(final AJAXSession session,
-        final LoginRequest request, final String protocol, final String hostname) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return Executor.execute(session, request, protocol, hostname);
-    }
+    private AJAXClient client;
 
-    public static LogoutResponse logout(final AJAXSession session,
-        final LogoutRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return Executor.execute(session, request);
-    }
-	
-    public static LogoutResponse logout(final AJAXSession session,
-        final LogoutRequest request, final String protocol, final String hostname) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return Executor.execute(session, request, protocol, hostname);
+    private String login;
+
+    private String password;
+
+    /**
+     * Default constructor.
+     * @param name test name.
+     */
+    public Bug12437Test(final String name) {
+        super(name);
     }
 
-    public static RedirectResponse redirect(final AJAXSession session,
-        final RedirectRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return Executor.execute(session, request);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        AJAXConfig.init();
+        final AJAXSession session = new AJAXSession();
+        client = new AJAXClient(session);
+        login = "some invalid login";
+        password = "some invalid password";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        client.getSession().getConversation().clearContents();
+        super.tearDown();
+    }
+
+    /**
+     * Checks if login with wrong credentials gives LGI-0006.
+     */
+    public void testWrongErrorCode() throws Throwable {
+        final LoginRequest request = new LoginRequest(login, password, false);
+        final LoginResponse response = client.execute(request);
+        assertTrue("Wrong credentials are not detected.", response.hasError());
+        final AbstractOXException exc = response.getException();
+        assertEquals("Wrong exception message.", EnumComponent.LOGIN, exc.getComponent());
+        assertEquals("Wrong exception message.", Category.USER_INPUT, exc.getCategory());
+        assertEquals("Wrong exception message.", 6, exc.getDetailNumber());
     }
 }

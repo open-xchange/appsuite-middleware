@@ -54,9 +54,9 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 
-import com.openexchange.ajax.session.LoginRequest;
 import com.openexchange.ajax.session.LoginTools;
-import com.openexchange.ajax.session.LogoutRequest;
+import com.openexchange.ajax.session.actions.LoginRequest;
+import com.openexchange.ajax.session.actions.LogoutRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.AJAXConfig.Property;

@@ -47,57 +47,14 @@
  *
  */
 
-package com.openexchange.ajax.session;
+package com.openexchange.ajax.session.actions;
 
-import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-/**
- * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- */
-public abstract class AbstractRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+public class LogoutResponse extends AbstractAJAXResponse {
 
-    /**
-     * URL of the login AJAX servlet.
-     */
-    private static final String LOGIN_URL = "/ajax/login";
-
-    private final Parameter[] parameters;
-
-    /**
-     * Default constructor.
-     */
-    protected AbstractRequest(final Parameter[] parameters) {
-        super();
-        this.parameters = parameters;
+    public LogoutResponse() {
+        super(null);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getServletPath() {
-        return LOGIN_URL;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.POST;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return parameters.clone();
-    }
 }

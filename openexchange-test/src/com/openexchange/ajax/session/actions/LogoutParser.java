@@ -47,14 +47,41 @@
  *
  */
 
-package com.openexchange.ajax.session;
+package com.openexchange.ajax.session.actions;
 
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import org.json.JSONException;
 
-public class LogoutResponse extends AbstractAJAXResponse {
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-    public LogoutResponse() {
-        super(null);
+/**
+ * 
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public class LogoutParser extends AbstractAJAXParser<LogoutResponse> {
+
+    /**
+     * Default constructor.
+     */
+    LogoutParser() {
+        super(true);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    
+    @Override
+    public LogoutResponse parse(final String body) throws JSONException {
+        return createResponse(null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected LogoutResponse createResponse(final Response response)
+        throws JSONException {
+        return new LogoutResponse();
+    }
 }

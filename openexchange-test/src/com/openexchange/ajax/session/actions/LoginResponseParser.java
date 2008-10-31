@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.openexchange.ajax.session;
+package com.openexchange.ajax.session.actions;
 
 import java.io.IOException;
 
@@ -31,8 +31,8 @@ public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
     /**
      * Default constructor.
      */
-    LoginResponseParser() {
-        super(true);
+    LoginResponseParser(final boolean failOnError) {
+        super(failOnError);
     }
 
     /**
@@ -55,19 +55,21 @@ public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
             fail(e.getMessage());
         }
         final String[] newCookies = resp.getNewCookieNames();
-        boolean oxCookieFound = false;
-        for (final String newCookie : newCookies) {
-            if (newCookie.startsWith(Login.cookiePrefix)) {
-                oxCookieFound = true;
-                break;
+        if (isFailOnError()) {
+            boolean oxCookieFound = false;
+            for (final String newCookie : newCookies) {
+                if (newCookie.startsWith(Login.cookiePrefix)) {
+                    oxCookieFound = true;
+                    break;
+                }
             }
+            assertTrue("Session cookie is missing.", oxCookieFound);
+            final String jsessionId = resp.getNewCookieValue("JSESSIONID");
+            assertNotNull("JSESSIONID cookie is missing.", jsessionId);
+            final int dotPos = jsessionId.lastIndexOf('.');
+            assertTrue("jvmRoute is missing.", dotPos > 0);
+            jvmRoute = jsessionId.substring(dotPos + 1);
         }
-        assertTrue("Session cookie is missing.", oxCookieFound);
-        final String jsessionId = resp.getNewCookieValue("JSESSIONID");
-        assertNotNull("JSESSIONID cookie is missing.", jsessionId);
-        final int dotPos = jsessionId.lastIndexOf('.');
-        assertTrue("jvmRoute is missing.", dotPos > 0);
-        jvmRoute = jsessionId.substring(dotPos + 1);
     }
 
     /**
@@ -97,9 +99,11 @@ public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
             retval.setSessionId(json.getString(Login.PARAMETER_SESSION));
             retval.setRandom(json.getString(Login._random));
         }
-        assertFalse(response.getErrorMessage(), response.hasError());
-        assertTrue("Session ID is missing.", json.has(Login.PARAMETER_SESSION));
-        assertTrue("Random is missing.", json.has(Login._random));
+        if (isFailOnError()) {
+            assertFalse(response.getErrorMessage(), response.hasError());
+            assertTrue("Session ID is missing.", json.has(Login.PARAMETER_SESSION));
+            assertTrue("Random is missing.", json.has(Login._random));
+        }
         return retval;
     }
 }

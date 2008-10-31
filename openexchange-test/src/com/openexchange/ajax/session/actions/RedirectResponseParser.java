@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.openexchange.ajax.session;
+package com.openexchange.ajax.session.actions;
 
 import javax.servlet.http.HttpServletResponse;
 

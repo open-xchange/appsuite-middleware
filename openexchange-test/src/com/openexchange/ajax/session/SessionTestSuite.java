@@ -49,31 +49,31 @@
 
 package com.openexchange.ajax.session;
 
-import com.openexchange.ajax.AJAXServlet;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class LoginRequest extends AbstractRequest<LoginResponse> {
+public final class SessionTestSuite {
 
-    private static final String PARAM_PASSWORD = "password";
-
-    private static final String PARAM_NAME = "name";
-
-    public LoginRequest(final String login, final String password) {
-        super(new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_LOGIN),
-            new Parameter(PARAM_NAME, login),
-            new Parameter(PARAM_PASSWORD, password)
-        });
+    /**
+     * Prevent instantiation.
+     */
+    private SessionTestSuite() {
+        super();
     }
 
     /**
-     * {@inheritDoc}
+     * Generates the session tests suite.
+     * @return the session tests suite.
      */
-    public LoginResponseParser getParser() {
-        return new LoginResponseParser();
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTestSuite(LoginTest.class);
+        tests.addTestSuite(RedirectTest.class);
+        tests.addTestSuite(Bug12437Test.class);
+        return tests;
     }
 }

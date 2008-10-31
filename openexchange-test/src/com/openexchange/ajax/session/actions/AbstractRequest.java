@@ -47,41 +47,57 @@
  *
  */
 
-package com.openexchange.ajax.session;
+package com.openexchange.ajax.session.actions;
 
-import org.json.JSONException;
-
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class LogoutParser extends AbstractAJAXParser<LogoutResponse> {
+public abstract class AbstractRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+
+    /**
+     * URL of the login AJAX servlet.
+     */
+    private static final String LOGIN_URL = "/ajax/login";
+
+    private final Parameter[] parameters;
 
     /**
      * Default constructor.
      */
-    LogoutParser() {
-        super(true);
+    protected AbstractRequest(final Parameter[] parameters) {
+        super();
+        this.parameters = parameters;
     }
 
     /**
      * {@inheritDoc}
      */
-    
-    @Override
-    public LogoutResponse parse(final String body) throws JSONException {
-        return createResponse(null);
+    public Object getBody() {
+        return null;
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected LogoutResponse createResponse(final Response response)
-        throws JSONException {
-        return new LogoutResponse();
+    public String getServletPath() {
+        return LOGIN_URL;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Method getMethod() {
+        return Method.POST;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Parameter[] getParameters() {
+        return parameters.clone();
     }
 }
