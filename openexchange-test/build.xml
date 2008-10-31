@@ -135,8 +135,7 @@
             <test name="com.openexchange.ajax.infostore.InfostoreAJAXSuite" todir="${test.xml.dir}" />
             <test name="com.openexchange.ajax.links.LinksTestSuite" todir="${test.xml.dir}" />
             <test name="com.openexchange.ajax.reminder.ReminderAJAXSuite" todir="${test.xml.dir}" />
-            <test name="com.openexchange.ajax.session.LoginTest" todir="${test.xml.dir}" />
-            <test name="com.openexchange.ajax.session.RedirectTest" todir="${test.xml.dir}" />
+            <test name="com.openexchange.ajax.session.SessionTestSuite" todir="${test.xml.dir}" />
             <test name="com.openexchange.ajax.task.TaskTestSuite" todir="${test.xml.dir}" />
 
             <test name="com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite" todir="${test.xml.dir}" />
