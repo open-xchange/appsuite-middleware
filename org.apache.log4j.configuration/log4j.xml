@@ -8,12 +8,12 @@
             <param name="ConversionPattern" value="%d open-xchange-groupware %-5p [%c][%t]: %C,%M %m%n"/>
         </layout>
     </appender>
+    <category name="org.apache.jcs">
+        <level value="WARN"/>
+        <appender-ref ref="SERVER_LOG"/>
+    </category>
     <root>
         <level value="INFO"/>
         <appender-ref ref="SERVER_LOG"/>
     </root>
-    <category name="org.apache.jcs">
-        <appender-ref ref="SERVER_LOG"/>
-        <priority value="WARN"/>
-    </category>
 </log4j:configuration>
