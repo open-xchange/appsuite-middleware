@@ -74,7 +74,7 @@ public class AJAXSession {
         super();
         this.conversation = conversation;
         this.id = id;
-        this.mustLogout = false;
+        this.mustLogout = id == null; // Don't auto logout when supplied with id.
         conversation.getClientProperties().setAcceptGzip(false);
     }
     
