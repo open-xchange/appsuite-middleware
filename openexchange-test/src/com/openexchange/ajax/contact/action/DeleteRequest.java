@@ -62,7 +62,7 @@ import com.openexchange.groupware.container.ContactObject;
  * Stores parameters for the delete request.
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class DeleteRequest extends AbstractContactRequest {
+public class DeleteRequest extends AbstractContactRequest<DeleteResponse> {
 
     private final int folderId;
 

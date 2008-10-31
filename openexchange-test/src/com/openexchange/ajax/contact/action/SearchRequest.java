@@ -62,7 +62,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class SearchRequest  extends AbstractContactRequest<SearchResponse>{
+public class SearchRequest  extends AbstractContactRequest<SearchResponse> {
     private final JSONObject body = new JSONObject();
     private final SearchParser searchParser;
     private final List<AJAXRequest.Parameter> params = new ArrayList<AJAXRequest.Parameter>();

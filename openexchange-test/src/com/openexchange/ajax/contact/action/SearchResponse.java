@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.ajax.contact.action;
 
 import com.openexchange.ajax.container.Response;
@@ -55,6 +56,7 @@ import com.openexchange.ajax.framework.CommonSearchResponse;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class SearchResponse extends CommonSearchResponse {
+
     public SearchResponse(final Response response) {
         super(response);
     }
