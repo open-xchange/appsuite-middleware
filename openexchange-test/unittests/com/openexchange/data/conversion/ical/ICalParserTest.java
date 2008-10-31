@@ -52,14 +52,7 @@ package com.openexchange.data.conversion.ical;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.recalculate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 
 import junit.framework.TestCase;
 
@@ -619,6 +612,31 @@ public class ICalParserTest extends TestCase {
         final AppointmentObject appointment = parseAppointment(icalText);
 
         assertTrue(appointment.getFullTime());
+
+        Calendar start = Calendar.getInstance();
+        start.setTimeZone(TimeZone.getTimeZone("UTC"));
+        start.setTime(appointment.getStartDate());
+
+        assertEquals(1990, start.get(Calendar.YEAR));
+        assertEquals(Calendar.FEBRUARY, start.get(Calendar.MONTH));
+        assertEquals(24, start.get(Calendar.DAY_OF_MONTH));
+        assertEquals(0, start.get(Calendar.HOUR_OF_DAY));
+        assertEquals(0, start.get(Calendar.MINUTE));
+        assertEquals(0, start.get(Calendar.SECOND));
+
+
+        Calendar end = Calendar.getInstance();
+        end.setTimeZone(TimeZone.getTimeZone("UTC"));
+        end.setTime(appointment.getEndDate());
+
+        assertEquals(1990, end.get(Calendar.YEAR));
+        assertEquals(Calendar.FEBRUARY, end.get(Calendar.MONTH));
+        assertEquals(25, end.get(Calendar.DAY_OF_MONTH));
+        assertEquals(0, end.get(Calendar.HOUR_OF_DAY));
+        assertEquals(0, end.get(Calendar.MINUTE));
+        assertEquals(0, end.get(Calendar.SECOND));
+
+
     }
 
     // Tasks
