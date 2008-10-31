@@ -87,4 +87,24 @@ public abstract class AbstractDocumentListAction extends AbstractInfostoreAction
 	public List<DocumentMetadata> getDocuments(){
 		return this.documents;
 	}
+
+    public List<DocumentMetadata>[] getSlices(int batchSize, List<DocumentMetadata> documents) {
+        final boolean addOne = (0 != (documents.size() % batchSize));
+        int numberOfSlices = documents.size() / batchSize;
+        if(addOne) { numberOfSlices += 1; }
+
+        final List<DocumentMetadata>[] slices = new List[numberOfSlices];
+
+        final int max = documents.size();
+        for(int i = 0; i < numberOfSlices; i++) {
+            final int start = i * batchSize;
+            int end = (i+1) * batchSize;
+            if(end > max) { end = max; };
+            final List<DocumentMetadata> slice = documents.subList(start, end);
+            slices[i] = slice;
+
+        }
+
+        return slices;
+    }
 }
