@@ -7,6 +7,7 @@
 
  - Bugfix #12387: Improved handling of exceptions in WebDAV super class.
  - Bugfix #12437: Corrected error code if invalid credentials are supplied.
+ - Bugfix #12384: Servlets must not have fields.
 
 * 2008-10-30 - marcus.klein@open-xchange.com
 

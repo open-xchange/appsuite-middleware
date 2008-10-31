@@ -52,7 +52,6 @@ package com.openexchange.webdav;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.Queue;
 
 import javax.servlet.http.HttpServletRequest;
@@ -96,21 +95,18 @@ public final class folders extends XmlServlet {
 
 	private static final String _invalidMethodError = "invalid method!";
 
-	private static final transient Log LOG = LogFactory.getLog(folders.class);
-
-	private final Queue<QueuedFolder> pendingInvocations;
+	private static final Log LOG = LogFactory.getLog(folders.class);
 
 	/**
 	 * Initializes a new {@link folders}
 	 */
 	public folders() {
 		super();
-		pendingInvocations = new LinkedList<QueuedFolder>();
 	}
 
 	@Override
 	protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
-			final XmlPullParser parser) throws XmlPullParserException, IOException, AbstractOXException {
+			final XmlPullParser parser, final Queue<QueuedObject> pendingInvocations) throws XmlPullParserException, IOException, AbstractOXException {
 		final Session session = getSession(req);
 		if (isTag(parser, "prop", "DAV:")) {
 			/*
@@ -176,11 +172,11 @@ public final class folders extends XmlServlet {
 	}
 
 	@Override
-	protected void performActions(final OutputStream os, final Session session) throws IOException, AbstractOXException {
+	protected void performActions(final OutputStream os, final Session session, final Queue<QueuedObject> pendingInvocations) throws IOException, AbstractOXException {
 		final FolderSQLInterface foldersql = new RdbFolderSQLInterface(session, ContextStorage.getInstance()
 				.getContext(session.getContextId()));
 		while (!pendingInvocations.isEmpty()) {
-			final QueuedFolder qfld = pendingInvocations.poll();
+			final QueuedFolder qfld = (QueuedFolder) pendingInvocations.poll();
 			if (null != qfld) {
 				qfld.actionPerformed(foldersql, os, session.getUserId());
 			}
@@ -213,7 +209,7 @@ public final class folders extends XmlServlet {
 				.hasWebDAVXML();
 	}
 
-	private final class QueuedFolder {
+	private final class QueuedFolder implements QueuedObject {
 
 		private final FolderObject folderObject;
 

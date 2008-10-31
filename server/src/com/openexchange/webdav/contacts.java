@@ -52,7 +52,6 @@ package com.openexchange.webdav;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.Queue;
 
 import javax.servlet.http.HttpServletRequest;
@@ -96,18 +95,15 @@ public final class contacts extends XmlServlet {
 
 	private static final long serialVersionUID = -3731372041610025543L;
 
-	private static final transient Log LOG = LogFactory.getLog(contacts.class);
-
-	private final Queue<QueuedContact> pendingInvocations;
+	private static final Log LOG = LogFactory.getLog(contacts.class);
 
 	public contacts() {
 		super();
-		pendingInvocations = new LinkedList<QueuedContact>();
 	}
 
 	@Override
 	protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
-			final XmlPullParser parser) throws XmlPullParserException, IOException, AbstractOXException {
+			final XmlPullParser parser, final Queue<QueuedObject> pendingInvocations) throws XmlPullParserException, IOException, AbstractOXException {
 		final Session session = getSession(req);
 
 		if (isTag(parser, "prop", "DAV:")) {
@@ -161,10 +157,10 @@ public final class contacts extends XmlServlet {
 	}
 
 	@Override
-	protected void performActions(final OutputStream os, final Session session) throws IOException, AbstractOXException {
+	protected void performActions(final OutputStream os, final Session session, final Queue<QueuedObject> pendingInvocations) throws IOException, AbstractOXException {
 		final ContactSQLInterface contactsql = new RdbContactSQLInterface(session);
 		while (!pendingInvocations.isEmpty()) {
-			final QueuedContact qcon = pendingInvocations.poll();
+			final QueuedContact qcon = (QueuedContact) pendingInvocations.poll();
 			if (null != qcon) {
 				qcon.actionPerformed(contactsql, os, session.getUserId());
 			}
@@ -202,7 +198,7 @@ public final class contacts extends XmlServlet {
 		return (uc.hasWebDAVXML() && uc.hasContact());
 	}
 
-	private final class QueuedContact {
+	private final class QueuedContact implements QueuedObject {
 
 		private final ContactObject contactObject;
 
