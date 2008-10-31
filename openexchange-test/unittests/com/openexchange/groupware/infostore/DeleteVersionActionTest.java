@@ -3,7 +3,13 @@ package com.openexchange.groupware.infostore;
 import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.CreateVersionAction;
 import com.openexchange.groupware.infostore.database.impl.DeleteVersionAction;
+import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.tx.UndoableAction;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 public class DeleteVersionActionTest extends AbstractInfostoreActionTest {
 
@@ -76,6 +82,37 @@ public class DeleteVersionActionTest extends AbstractInfostoreActionTest {
         action.perform();
         verifyPerformed();
 
+        // Bug 11305
+
+        List<DocumentMetadata> documents = new ArrayList<DocumentMetadata>();
+        for(int i = 0; i < 1001; i++) {
+            DocumentMetadataImpl document = new DocumentMetadataImpl();
+            document.setTitle("doc "+i);
+            documents.add(document);
+        }
+
+        trySlicing(action, documents, 1000);
+        trySlicing(action, documents, 1001);
+        trySlicing(action, documents, 1002);
+        trySlicing(action, documents, 10);
+        trySlicing(action, documents, 11);
+
     }
+
+    private void trySlicing(DeleteVersionAction action, List<DocumentMetadata> documents, int batchSize) {
+        Set<String> titles = new HashSet<String>();
+        for (DocumentMetadata document : documents) {
+            titles.add(document.getTitle());
+        }
+        List<DocumentMetadata>[] slices = action.getSlices(batchSize, documents);
+        for (List<DocumentMetadata> slice : slices) {
+            assertTrue(slice.size() <= batchSize);
+            for (DocumentMetadata documentMetadata : slice) {
+                assertTrue(titles.remove(documentMetadata.getTitle()));
+            }
+        }
+        assertTrue(titles.isEmpty());
+    }
+
 
 }
