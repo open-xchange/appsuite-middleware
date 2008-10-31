@@ -311,9 +311,11 @@ public final class CalendarCommonCollection {
                 return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.UPDATE);
             }
             return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.UPDATE);
-        } catch(final OXObjectNotFoundException onfe) {
-        	throw onfe;            
-        } catch(final Exception ex) {
+        } catch (final OXException e) {
+        	throw e;
+        } catch (final AbstractOXException e) {
+            throw new OXException(e);
+        } catch (final Exception ex) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, ex);
         }
     }

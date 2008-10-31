@@ -94,7 +94,9 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
                 LOG.error(StringCollection.convertArraytoString(new Object[] { "checkMayAttach failed. The object does not exists (cid:oid) : ",ctx.getContextId(),":",objectId } ));
             }
             throw oxonfe;
-        } catch(final Exception e) {
+        } catch (final OXException e) {
+            throw e;
+        } catch (final Exception e) {
             throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, 14);
         }
     }
