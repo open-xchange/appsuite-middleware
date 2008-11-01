@@ -137,12 +137,28 @@ public class CalendarParser extends CommonParser {
 			calendarobject.setInterval(parseInt(jsonobject, CalendarFields.INTERVAL));
 		}
 		
+		if (jsonobject.has(CalendarFields.UNTIL) && jsonobject.has(CalendarFields.OCCURRENCES)) {
+		    if(jsonobject.isNull(CalendarFields.UNTIL) != (jsonobject.isNull(CalendarFields.OCCURRENCES) || Integer.parseInt(jsonobject.getString(CalendarFields.OCCURRENCES)) == 0)) {
+	            throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, "Illegal combination of until and occurrences value.");
+		    }
+		}
+		
+		// TODO:
+		// Workaround: Set occurrences to 0 when until is null. Atm it is not possible to remove an until value with null. Too many sideffects.
 		if (jsonobject.has(CalendarFields.UNTIL)) {
-			calendarobject.setUntil(parseDate(jsonobject, CalendarFields.UNTIL));
+		    if (jsonobject.isNull(CalendarFields.UNTIL)) {
+		        calendarobject.setOccurrence(0);
+		    } else {
+		        calendarobject.setUntil(parseDate(jsonobject, CalendarFields.UNTIL));
+		    }
 		}
 		
 		if (jsonobject.has(CalendarFields.OCCURRENCES)) {
-			calendarobject.setOccurrence(parseInt(jsonobject, CalendarFields.OCCURRENCES));
+		    if (jsonobject.isNull(CalendarFields.OCCURRENCES)) {
+		        calendarobject.setOccurrence(0);
+		    } else {
+		        calendarobject.setOccurrence(parseInt(jsonobject, CalendarFields.OCCURRENCES));
+		    }
 		}
 		
 		if (jsonobject.has(CalendarFields.NOTIFICATION)) {
