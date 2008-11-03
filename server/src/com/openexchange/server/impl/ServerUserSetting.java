@@ -83,7 +83,7 @@ public class ServerUserSetting {
         }
 
         public String getColumnName() {
-            return "contact_collect_folder";
+            return "contact_collect_enabled";
         }
 
         public void setAttribute(PreparedStatement pstmt, Boolean value) throws SQLException {
