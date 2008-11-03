@@ -175,10 +175,18 @@ public class ExternalUserParticipant implements Participant, Comparable<Particip
     public int compareTo(final Participant part) {
         final int retval;
         if (EXTERNAL_USER == part.getType()) {
-            if (null == emailaddress && null == part.getEmailAddress()) {
-                retval = 0;
+            if (null == emailaddress) {
+                if (null == part.getEmailAddress()) {
+                    retval = 0;
+                } else {
+                    retval = -1;
+                }
             } else {
-                retval = emailaddress.compareTo(part.getEmailAddress());
+                if (null == part.getEmailAddress()) {
+                    retval = 1;
+                } else {
+                    retval = emailaddress.compareTo(part.getEmailAddress());
+                }
             }
         } else {
             retval = Integer.valueOf(EXTERNAL_USER).compareTo(Integer.valueOf(part.getType()));

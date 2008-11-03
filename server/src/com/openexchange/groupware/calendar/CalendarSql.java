@@ -65,6 +65,7 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -553,7 +554,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 		throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
     }
     
-    public CalendarDataObject[] updateAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified) throws OXException, OXPermissionException, OXConcurrentModificationException, OXObjectNotFoundException {
+    public CalendarDataObject[] updateAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified) throws OXException {
         if (session != null) {
             Connection writecon = null;
             final Context ctx = Tools.getContext(session);
@@ -642,12 +643,10 @@ public class CalendarSql implements AppointmentSQLInterface {
                 throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
             } catch(final DBPoolingException dbpe) {
                 throw new OXException(dbpe);
-            } catch(final OXObjectNotFoundException oxonfe) {
-                throw oxonfe;
-            } catch(final OXCalendarException oxce) {
-                throw oxce;
             } catch(final OXException oxe) {
                 throw oxe;
+            } catch (final AbstractOXException e) {
+                throw new OXException(e);
             } catch (final Exception e) {
                 throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(26));
             } finally {
