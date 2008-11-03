@@ -170,7 +170,7 @@ public abstract class DataServlet extends PermissionServlet {
 			final String name = e.nextElement().toString();
 			final String value = httpServletRequest.getParameter(name);
 
-			if (name.equals(AJAXServlet.PARAMETER_COLUMNS)) {
+			if (AJAXServlet.PARAMETER_COLUMNS.equals(name)) {
 				final String[] sa = value.split(" *, *");
 				for (int a = 0; a < sa.length; a++) {
 					sb.append(sa[a]);
