@@ -59,6 +59,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.database.Database;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -66,27 +67,29 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * Bug 12099 caused some appointments to have the modifiedBy attribute stored
- * as 0. This task fixes those appointments.
+ * Removes the duplicate recurrence date positions from appointment exceptions.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
-public final class AppointmentChangedFromZeroTask implements UpdateTask {
+public final class AppointmentExceptionRemoveDuplicateDatePosition implements
+    UpdateTask {
 
-    private static final Log LOG = LogFactory.getLog(AppointmentChangedFromZeroTask.class);
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(
+        AppointmentExceptionRemoveDuplicateDatePosition.class);
 
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(AppointmentChangedFromZeroTask.class);
+    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(AppointmentExceptionRemoveDuplicateDatePosition.class);
 
     /**
      * Default constructor.
      */
-    public AppointmentChangedFromZeroTask() {
+    public AppointmentExceptionRemoveDuplicateDatePosition() {
         super();
     }
 
@@ -94,7 +97,7 @@ public final class AppointmentChangedFromZeroTask implements UpdateTask {
      * {@inheritDoc}
      */
     public int addedWithVersion() {
-        return 21;
+        return 22;
     }
 
     /**
@@ -112,16 +115,19 @@ public final class AppointmentChangedFromZeroTask implements UpdateTask {
         exceptionId = { 1 },
         msg = { "An SQL error occurred: %1$s." }
     )
-    public void perform(final Schema schema, final int contextId) throws DBPoolingException, UpdateException {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Performing update task to remove 0 set changed_from in appointments.");
-        }
+    public void perform(final Schema schema, final int contextId)
+        throws AbstractOXException {
+        LOG.info("Performing update task to remove duplicate date recurrence "
+            + "position from appointment change exceptions on schema "
+            + schema.getSchema());
         final Connection con = Database.get(contextId, true);
         Statement st = null;
         try {
             con.setAutoCommit(false);
             st = con.createStatement();
-            st.executeUpdate("UPDATE prg_dates SET changed_from=created_from WHERE changed_from=0");
+            st.executeUpdate("UPDATE prg_dates SET "
+                + "field08=SUBSTR(field08,1,LOCATE(',', field08)-1) "
+                + "WHERE intfield01!=intfield02 AND field08 LIKE '%,%';");
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
@@ -133,8 +139,7 @@ public final class AppointmentChangedFromZeroTask implements UpdateTask {
                 Database.back(contextId, true, con);
             }
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Update task to remove 0 set changed_from in appointments performed.");
-        }
+        LOG.info("Update task to remove duplicate date recurrence position from"
+            + " appointment change exceptions performed.");
     }
 }
