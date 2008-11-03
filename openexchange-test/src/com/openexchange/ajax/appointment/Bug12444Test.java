@@ -47,90 +47,63 @@
  *
  */
 
-package com.openexchange.ajax.appointment.action;
+package com.openexchange.ajax.appointment;
 
+import java.util.Calendar;
 import java.util.TimeZone;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.appointment.action.InsertRequest;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.container.Participant;
 
 /**
- * Stores the parameters for inserting the appointment.
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ *
  */
-public class InsertRequest extends AbstractAppointmentRequest<CommonInsertResponse> {
-
-    /**
-     * Appointment to insert.
-     */
-    final AppointmentObject appointmentObj;
-
-    /**
-     * Time zone of the user.
-     */
-    final TimeZone timeZone;
-
-    /**
-     * Should the parser fail on error in server response.
-     */
-    final boolean failOnError;
-
-    /**
-     * More detailed constructor.
-     * @param appointmentObj appointment to insert.
-     * @param timeZone time zone of the user.
-     * @param failOnError <code>true</code> to check the response for error
-     * messages.
-     */
-    public InsertRequest(final AppointmentObject appointmentObj, final TimeZone timeZone,
-        final boolean failOnError) {
-        super();
-        this.appointmentObj = appointmentObj;
-        this.timeZone = timeZone;
-        this.failOnError = failOnError;
-    }
+public final class Bug12444Test extends AbstractAJAXSession {
 
     /**
      * Default constructor.
-     * @param appointmentObj appointment to insert.
-     * @param timeZone time zone of the user.
+     * @param name test name.
      */
-    public InsertRequest(final AppointmentObject appointmentObj, final TimeZone timeZone) {
-        this(appointmentObj, timeZone, true);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public JSONObject getBody() throws JSONException {
-        return convert(appointmentObj, timeZone);
+    public Bug12444Test(final String name) {
+        super(name);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.PUT;
+    public void testExternalWithoutEmail() throws Throwable {
+        final AJAXClient client = getClient();
+        final int folderId = client.getValues().getPrivateAppointmentFolder();
+        final TimeZone tz = client.getValues().getTimeZone();
+        final AppointmentObject appointment = new AppointmentObject();
+        appointment.setTitle("Test for bug 12444");
+        final Calendar calendar = TimeTools.createCalendar(tz);
+        appointment.setStartDate(calendar.getTime());
+        calendar.add(Calendar.HOUR_OF_DAY, 1);
+        appointment.setEndDate(calendar.getTime());
+        appointment.setParentFolderID(folderId);
+        appointment.setParticipants(createParticipants());
+        final InsertRequest request = new InsertRequest(appointment, tz, false);
+        final CommonInsertResponse response = client.execute(request);
+        assertTrue("Server responded not with expected exception.", response.hasError());
+        final AbstractOXException e = response.getException();
+        assertEquals("Wrong exception component.", EnumComponent.APPOINTMENT, e.getComponent());
+        assertEquals("Wrong exception code.", 8, e.getDetailNumber());
+        assertEquals("Wrong exception category.", Category.USER_INPUT, e.getCategory());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
-            new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(appointmentObj.getParentFolderID()))
-        };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public InsertParser getParser() {
-        return new InsertParser(failOnError);
+    private Participant[] createParticipants() {
+        final ExternalUserParticipant p1 = new ExternalUserParticipant("");
+        p1.setDisplayName("User 1");
+        final ExternalUserParticipant p2 = new ExternalUserParticipant("user@example.com");
+        p2.setDisplayName("User 2");
+        return new Participant[] { p1, p2 };
     }
 }
