@@ -110,7 +110,7 @@ public final class AppointmentChangedFromZeroTask implements UpdateTask {
     @OXThrowsMultiple(category = { Category.CODE_ERROR },
         desc = { "" },
         exceptionId = { 1 },
-        msg = { "An SQL error occurred while performing task ContactsChangedFromUpdateTask: %1$s." }
+        msg = { "An SQL error occurred: %1$s." }
     )
     public void perform(final Schema schema, final int contextId) throws DBPoolingException, UpdateException {
         if (LOG.isInfoEnabled()) {

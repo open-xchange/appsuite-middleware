@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -58,66 +60,86 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.tasks.TaskException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.tools.update.Tools;
+import com.openexchange.groupware.update.exception.Classes;
+import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
- * 
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
- *
+ * Removes the duplicate recurrence date positions from appointment exceptions.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TaskCreateUserSettingServer implements UpdateTask {
+@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
+public final class AppointmentExceptionRemoveDuplicateDatePosition implements
+    UpdateTask {
 
-	private final String TABLE_NAME = "user_setting_server";
-	private final String CREATE_STATEMENT = "CREATE TABLE user_setting_server (" +
-	        "cid INT4 UNSIGNED NOT NULL," +
-	        "user INT4 UNSIGNED NOT NULL," +
-	        "contact_collect_folder INT4 UNSIGNED," +
-	        "contact_collect_enabled BOOL," +
-	        "FOREIGN KEY(cid, user) REFERENCES user(cid, id)" +
-	        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-	
-	private static final Log LOG = LogFactory.getLog(TaskCreateUserSettingServer.class);
-	
-	public int addedWithVersion() {
-		return 24;
-	}
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(
+        AppointmentExceptionRemoveDuplicateDatePosition.class);
 
-	public int getPriority() {
-	    return UpdateTaskPriority.NORMAL.priority;
-	}
+    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(AppointmentExceptionRemoveDuplicateDatePosition.class);
 
-	public void perform(final Schema schema, final int contextId) throws AbstractOXException {
-		LOG.info("Performing update task TaskCreateUserSettingServer.");
-		
-		Connection con = null;
-		try {
-            con = Database.get(contextId, true);
-        } catch (final DBPoolingException e) {
-            throw new TaskException(TaskException.Code.NO_CONNECTION, e);
-        }
-        
+    /**
+     * Default constructor.
+     */
+    public AppointmentExceptionRemoveDuplicateDatePosition() {
+        super();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int addedWithVersion() {
+        return 22;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getPriority() {
+        return UpdateTaskPriority.NORMAL.priority;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @OXThrowsMultiple(category = { Category.CODE_ERROR },
+        desc = { "" },
+        exceptionId = { 1 },
+        msg = { "An SQL error occurred: %1$s." }
+    )
+    public void perform(final Schema schema, final int contextId)
+        throws AbstractOXException {
+        LOG.info("Performing update task to remove duplicate date recurrence "
+            + "position from appointment change exceptions on schema "
+            + schema.getSchema());
+        final Connection con = Database.get(contextId, true);
+        Statement st = null;
         try {
-        	if(!Tools.tableExists(con, TABLE_NAME)) {
-        		createTable(con);
-        	}
+            con.setAutoCommit(false);
+            st = con.createStatement();
+            st.executeUpdate("UPDATE prg_dates SET "
+                + "field08=SUBSTR(field08,1,LOCATE(',', field08)-1) "
+                + "WHERE intfield01!=intfield02 AND field08 LIKE '%,%';");
+            con.commit();
         } catch (final SQLException e) {
-            throw new TaskException(TaskException.Code.SQL_ERROR, e, e.getMessage());
+            DBUtils.rollback(con);
+            throw EXCEPTION.create(1, e, e.getMessage());
         } finally {
+            DBUtils.autocommit(con);
+            closeSQLStuff(null, st);
+            if (con != null) {
                 Database.back(contextId, true, con);
+            }
         }
-	}
-	
-	private void createTable(final Connection con) throws SQLException {
-	    final Statement stmt = con.createStatement();
-	    try {
-	        stmt.execute(CREATE_STATEMENT);
-	    } finally {
-	        stmt.close();
-	    }
-	}
-
+        LOG.info("Update task to remove duplicate date recurrence position from"
+            + " appointment change exceptions performed.");
+    }
 }

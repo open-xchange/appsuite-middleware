@@ -3,6 +3,11 @@
  - Bugfix #12445: Fixed possible NPE in MailFolderUtility
  - Bugfix #12441: Added wrapping try-catch block for timer safety reasons
 
+* 2008-11-03 - marcus.klein@open-xchange.com
+
+ - Bugfix #12442: Added update task to remove duplicate recurrence date position
+   from appointment change exceptions.
+
 * 2008-10-31 - francisco.laguna@open-xchange.com
 
  - Bugfix #11305: Fixed batching of deletes
