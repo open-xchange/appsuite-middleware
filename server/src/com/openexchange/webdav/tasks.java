@@ -52,7 +52,6 @@ package com.openexchange.webdav;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.Queue;
 
 import javax.servlet.http.HttpServletRequest;
@@ -96,21 +95,18 @@ public final class tasks extends XmlServlet {
 
 	private static final long serialVersionUID = 1750720959626156342L;
 
-	private static final transient Log LOG = LogFactory.getLog(tasks.class);
-
-	private final Queue<QueuedTask> pendingInvocations;
+	private static final Log LOG = LogFactory.getLog(tasks.class);
 
 	/**
 	 * Initializes a new {@link tasks}
 	 */
 	public tasks() {
 		super();
-		pendingInvocations = new LinkedList<QueuedTask>();
 	}
 
 	@Override
 	protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
-			final XmlPullParser parser) throws AbstractOXException, XmlPullParserException, IOException {
+			final XmlPullParser parser, final Queue<QueuedObject> pendingInvocations) throws AbstractOXException, XmlPullParserException, IOException {
 		final Session session = getSession(req);
 		if (isTag(parser, "prop", "DAV:")) {
 			/*
@@ -172,10 +168,10 @@ public final class tasks extends XmlServlet {
 	}
 
 	@Override
-	protected void performActions(final OutputStream os, final Session session) throws IOException {
+	protected void performActions(final OutputStream os, final Session session, final Queue<QueuedObject> pendingInvocations) throws IOException {
 		final TasksSQLInterface tasksql = new TasksSQLInterfaceImpl(session);
 		while (!pendingInvocations.isEmpty()) {
-			final QueuedTask qtask = pendingInvocations.poll();
+			final QueuedTask qtask = (QueuedTask) pendingInvocations.poll();
 			if (null != qtask) {
 				qtask.actionPerformed(tasksql, os, session.getUserId());
 			}
@@ -213,7 +209,7 @@ public final class tasks extends XmlServlet {
 		return (uc.hasWebDAVXML() && uc.hasTask());
 	}
 
-	private final class QueuedTask {
+	public final class QueuedTask implements QueuedObject {
 
 		private final Task task;
 

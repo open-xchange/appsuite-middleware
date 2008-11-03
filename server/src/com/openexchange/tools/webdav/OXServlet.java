@@ -105,16 +105,21 @@ public abstract class OXServlet extends WebDavServlet {
 	/**
 	 * Authentication identifier.
 	 */
-	private static String authIdentifier = "OX WebDAV";
+	private static final String authIdentifier = "OX WebDAV";
+
+	protected OXServlet() {
+	    super();
+	}
 
 	/**
 	 * Defines if this servlet uses the HTTP Authorization header to identify
-	 * the user. Set it to false to deactivate the use of the HTTP Authorization
+	 * the user. Return false to deactivate the use of the HTTP Authorization
 	 * header. Do the authorization with the extending class through the method
-	 * initializeService() and don't forget to cleanup after your service with
-	 * the methode cleanupService().
+	 * {@link #doAuth(HttpServletRequest, HttpServletResponse)}.
 	 */
-	protected transient boolean httpAuth = true;
+	protected boolean useHttpAuth() {
+	    return true;
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -123,7 +128,7 @@ public abstract class OXServlet extends WebDavServlet {
 	protected void service(final HttpServletRequest req,
 			final HttpServletResponse resp) throws ServletException,
 			IOException {
-		if (!"TRACE".equals(req.getMethod()) && httpAuth && !doAuth(req, resp)) {
+		if (!"TRACE".equals(req.getMethod()) && useHttpAuth() && !doAuth(req, resp)) {
 			return;
 		}
 		try {
@@ -368,7 +373,7 @@ public abstract class OXServlet extends WebDavServlet {
 			final Context context = contextStor.getContext(contextId);
 			if (null == context) {
 				throw new ContextException(ContextException.Code.NOT_FOUND,
-						contextId);
+					Integer.valueOf(contextId));
 			}
 
 			int userId = -1;
@@ -390,8 +395,7 @@ public abstract class OXServlet extends WebDavServlet {
 			// is user active
 			if (u.isMailEnabled()) {
 				if (u.getShadowLastChange() == 0) {
-					throw new PasswordExpiredException(
-							"user password is expired!");
+					throw new PasswordExpiredException("user password is expired!");
 				}
 			} else {
 				throw new UserNotActivatedException("user is not activated!");

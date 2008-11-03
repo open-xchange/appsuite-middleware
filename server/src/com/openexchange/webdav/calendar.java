@@ -52,7 +52,6 @@ package com.openexchange.webdav;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.Queue;
 
 import javax.servlet.http.HttpServletRequest;
@@ -98,18 +97,15 @@ public final class calendar extends XmlServlet {
 
 	private static final long serialVersionUID = 5779820324953825111L;
 
-	private static final transient Log LOG = LogFactory.getLog(calendar.class);
-
-	private final Queue<QueuedAppointment> pendingInvocations;
+	private static final Log LOG = LogFactory.getLog(calendar.class);
 
 	public calendar() {
 		super();
-		pendingInvocations = new LinkedList<QueuedAppointment>();
 	}
 
 	@Override
 	protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
-			final XmlPullParser parser) throws XmlPullParserException, IOException, AbstractOXException {
+			final XmlPullParser parser, final Queue<QueuedObject> pendingInvocations) throws XmlPullParserException, IOException, AbstractOXException {
 		final Session session = getSession(req);
 
 		if (isTag(parser, "prop", "DAV:")) {
@@ -180,10 +176,10 @@ public final class calendar extends XmlServlet {
 	}
 
 	@Override
-	protected void performActions(final OutputStream os, final Session session) throws IOException {
+	protected void performActions(final OutputStream os, final Session session, final Queue<QueuedObject> pendingInvocations) throws IOException {
 		final AppointmentSQLInterface appointmentsSQL = new CalendarSql(session);
 		while (!pendingInvocations.isEmpty()) {
-			final QueuedAppointment qapp = pendingInvocations.poll();
+			final QueuedAppointment qapp = (QueuedAppointment) pendingInvocations.poll();
 			if (null != qapp) {
 				qapp.actionPerformed(appointmentsSQL, os, session.getUserId());
 			}
@@ -221,7 +217,7 @@ public final class calendar extends XmlServlet {
 		return (uc.hasWebDAVXML() && uc.hasCalendar());
 	}
 
-	private final class QueuedAppointment {
+	private final class QueuedAppointment implements QueuedObject {
 
 		private final CalendarDataObject appointmentobject;
 

@@ -52,6 +52,8 @@ package com.openexchange.webdav.xml;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -81,6 +83,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.PermissionServlet;
+import com.openexchange.webdav.QueuedObject;
 import com.openexchange.webdav.xml.fields.CalendarFields;
 import com.openexchange.webdav.xml.fields.CommonFields;
 import com.openexchange.webdav.xml.fields.DataFields;
@@ -175,7 +178,7 @@ public abstract class XmlServlet extends PermissionServlet {
 		}
 
 		XmlPullParser parser = null;
-
+		final Queue<QueuedObject> pendingInvocations = new LinkedList<QueuedObject>();
 		try {
 			parser = new KXmlParser();
 			parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
@@ -190,13 +193,13 @@ public abstract class XmlServlet extends PermissionServlet {
 					parser.nextTag();
 					parser.require(XmlPullParser.START_TAG, davUri, "propertyupdate");
 
-					parsePropertyUpdate(req, resp, parser);
+					parsePropertyUpdate(req, resp, parser, pendingInvocations);
 
-					commit(resp.getOutputStream(), getSession(req));
+					commit(resp.getOutputStream(), getSession(req), pendingInvocations);
 				} else if (isTag(parser, "propertyupdate", davUri)) {
-					parsePropertyUpdate(req, resp, parser);
+					parsePropertyUpdate(req, resp, parser, pendingInvocations);
 
-					commit(resp.getOutputStream(), getSession(req));
+					commit(resp.getOutputStream(), getSession(req), pendingInvocations);
 				} else {
 					doError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "XML ERROR");
 					return;
@@ -395,11 +398,11 @@ public abstract class XmlServlet extends PermissionServlet {
 	}
 
 	protected void parsePropertyUpdate(final HttpServletRequest req, final HttpServletResponse resp,
-			final XmlPullParser parser) throws XmlPullParserException, IOException, AbstractOXException {
+			final XmlPullParser parser, final Queue<QueuedObject> pendingInvocations) throws XmlPullParserException, IOException, AbstractOXException {
 
 		while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
 			if (isTag(parser, "set", davUri)) {
-				openSet(req, resp, parser);
+				openSet(req, resp, parser, pendingInvocations);
 			} else {
 				parser.next();
 			}
@@ -407,17 +410,17 @@ public abstract class XmlServlet extends PermissionServlet {
 
 	}
 
-	protected void openSet(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser)
+	protected void openSet(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser, final Queue<QueuedObject> pendingInvocations)
 			throws XmlPullParserException, IOException, AbstractOXException {
-		openProp(req, resp, parser);
+		openProp(req, resp, parser, pendingInvocations);
 	}
 
-	protected void openProp(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser)
+	protected void openProp(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser, final Queue<QueuedObject> pendingInvocations)
 			throws XmlPullParserException, IOException, AbstractOXException {
 		parser.nextTag();
 		parser.require(XmlPullParser.START_TAG, davUri, prop);
 
-		parsePropChilds(req, resp, parser);
+		parsePropChilds(req, resp, parser, pendingInvocations);
 
 		closeProp(parser);
 	}
@@ -554,12 +557,12 @@ public abstract class XmlServlet extends PermissionServlet {
 	 * @throws AbstractOXException
 	 *             If an OX exception occurs
 	 */
-	private final void commit(final OutputStream os, final Session session) throws IOException, AbstractOXException {
+    private final void commit(final OutputStream os, final Session session, final Queue<QueuedObject> pendingInvocations) throws IOException, AbstractOXException {
 		os.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n").getBytes());
 		os.write(("<D:multistatus xmlns:D=\"DAV:\" buildnumber=\"" + Version.BUILDNUMBER + "\" buildname=\""
 				+ Version.NAME + "\">").getBytes());
 		os.flush();
-		performActions(os, session);
+        performActions(os, session, pendingInvocations);
 
 		os.write(("</D:multistatus>").getBytes());
 	}
@@ -571,15 +574,16 @@ public abstract class XmlServlet extends PermissionServlet {
 	 *            The output stream to write response to
 	 * @param session
 	 *            The session providing needed user data
+	 * @param pendingInvocations queues the objects to process.
 	 * @throws IOException
 	 *             If writing response fails
 	 * @throws AbstractOXException
 	 *             If an OX exception occurs
 	 */
-	protected abstract void performActions(final OutputStream os, final Session session) throws IOException,
+	protected abstract void performActions(final OutputStream os, final Session session, final Queue<QueuedObject> pendingInvocations) throws IOException,
 			AbstractOXException;
 
-	protected abstract void parsePropChilds(HttpServletRequest req, HttpServletResponse resp, XmlPullParser parser)
+	protected abstract void parsePropChilds(HttpServletRequest req, HttpServletResponse resp, XmlPullParser parser, Queue<QueuedObject> pendingInvocations)
 			throws XmlPullParserException, IOException, AbstractOXException;
 
 	protected abstract void startWriter(Session sessionObj, Context ctx, int objectId, int folderId, OutputStream os)

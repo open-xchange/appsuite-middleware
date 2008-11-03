@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.webdav;
 
 import java.io.IOException;
@@ -66,9 +64,13 @@ import javax.servlet.http.HttpServletResponse;
 public abstract class WebDavServlet extends HttpServlet {
 
     /**
-	 * 
+     * For serialization. 
 	 */
 	private static final long serialVersionUID = 4869234414872430531L;
+
+    protected WebDavServlet() {
+        super();
+    }
 
 	protected int getDavClass() {
         return 1;

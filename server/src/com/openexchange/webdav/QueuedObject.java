@@ -49,56 +49,10 @@
 
 package com.openexchange.webdav;
 
-import java.io.IOException;
+/**
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public interface QueuedObject {
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.session.Session;
-import com.openexchange.tools.webdav.OXServlet;
-
-public abstract class PermissionServlet extends OXServlet {
-
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 2572228529208334966L;
-
-	public PermissionServlet() {
-	    super();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean useHttpAuth() {
-        return false;
-    }
-
-    @Override
-    protected void service(final HttpServletRequest req,
-        final HttpServletResponse resp) throws ServletException, IOException {
-    	if (!super.doAuth(req, resp)) {
-            return;
-        }
-		final Session sessionObj = getSession(req);
-		try{
-			final Context ct = ContextStorage.getStorageContext(sessionObj.getContextId());
-			// No redundant null check.
-			if (sessionObj != null && !hasModulePermission(sessionObj, ct)) {
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
-				return;
-			}
-		} catch (final ContextException ce){
-			return;
-		}
-        super.service(req, resp);
-	}
-	
-	protected abstract boolean hasModulePermission(Session sessionObj, Context ctx);
 }
