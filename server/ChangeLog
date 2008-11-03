@@ -1,6 +1,6 @@
 * 2008-11-03 - thorben.betten@open-xchange.com
 
- - Bugfix #12445: Fixed possile NPE in MailFolderUtility
+ - Bugfix #12445: Fixed possible NPE in MailFolderUtility
 
 * 2008-10-31 - francisco.laguna@open-xchange.com
 
