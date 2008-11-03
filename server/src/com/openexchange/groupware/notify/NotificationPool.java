@@ -260,6 +260,8 @@ public final class NotificationPool {
 						ParticipantNotify.sendMessage(mmsg, cur.getSession(), calendarObject, state);
 					}
 				}
+			} catch (final Exception e) {
+				logger.error(e.getMessage(), e);
 			} finally {
 				taskWriteLock.unlock();
 			}

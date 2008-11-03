@@ -93,25 +93,25 @@ public final class AJAXUploadFile implements ManagedUploadFile {
 		 */
 		@Override
 		public void run() {
-		    try {
-			if (file != null && !file.isDeleted() && !file.isBlockedForTimer()
-					&& ((System.currentTimeMillis() - file.getLastAccess()) >= IDLE_TIME_MILLIS)) {
-				managedUploadFiles.remove(id);
-				final String fileName = file.getFile().getName();
-				file.delete();
-				if (LOG.isInfoEnabled()) {
-					LOG.info(new StringBuilder(256).append("Upload file \"").append(fileName).append(
-							"\" removed from session and deleted from disk through timer task").toString());
+			try {
+				if (file != null && !file.isDeleted() && !file.isBlockedForTimer()
+						&& ((System.currentTimeMillis() - file.getLastAccess()) >= IDLE_TIME_MILLIS)) {
+					managedUploadFiles.remove(id);
+					final String fileName = file.getFile().getName();
+					file.delete();
+					if (LOG.isInfoEnabled()) {
+						LOG.info(new StringBuilder(256).append("Upload file \"").append(fileName).append(
+								"\" removed from session and deleted from disk through timer task").toString());
+					}
+					/*
+					 * Cancel this task
+					 */
+					this.cancel();
+					ServerTimer.getTimer().purge();
 				}
-				/*
-				 * Cancel this task
-				 */
-				this.cancel();
-				ServerTimer.getTimer().purge();
+			} catch (final Exception e) {
+				LOG.error(e.getMessage(), e);
 			}
-		    } catch (final Exception e) {
-		        LOG.error(e.getMessage(), e);
-		    }
 		}
 
 	}

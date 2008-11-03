@@ -115,19 +115,19 @@ public final class EventQueue {
 					useFirst.set(true);
 					callEvent(q2);
 				}
+				if (closing.get() && q1.isEmpty() && q2.isEmpty()) {
+					cancel(); // Stops this TimerTask
+					ServerTimer.getTimer().purge(); // Remove canceled tasks
+					shutdownLock.lock();
+					try {
+						shutdown.set(true);
+						allEventsProcessed.signalAll();
+					} finally {
+						shutdownLock.unlock();
+					}
+				}
 			} catch (final Exception exc) {
 				LOG.error(exc.getMessage(), exc);
-			}
-			if (closing.get() && q1.isEmpty() && q2.isEmpty()) {
-				cancel(); // Stops this TimerTask
-				ServerTimer.getTimer().purge(); // Remove canceled tasks
-				shutdownLock.lock();
-				try {
-					shutdown.set(true);
-					allEventsProcessed.signalAll();
-				} finally {
-					shutdownLock.unlock();
-				}
 			}
 		}
 	}

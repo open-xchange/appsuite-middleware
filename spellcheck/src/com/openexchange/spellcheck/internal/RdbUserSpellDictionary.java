@@ -536,11 +536,15 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 
 			@Override
 			public void run() {
-				for (final Iterator<Key> iter = userDicts.keySet().iterator(); iter.hasNext();) {
-					final Key key = iter.next();
-					if ((System.currentTimeMillis() - key.timestamp) > 60000) {
-						iter.remove();
+				try {
+					for (final Iterator<Key> iter = userDicts.keySet().iterator(); iter.hasNext();) {
+						final Key key = iter.next();
+						if ((System.currentTimeMillis() - key.timestamp) > 60000) {
+							iter.remove();
+						}
 					}
+				} catch (final Exception e) {
+					LOG.error(e.getMessage(), e);
 				}
 			}
 		}), 1000, 30000);
