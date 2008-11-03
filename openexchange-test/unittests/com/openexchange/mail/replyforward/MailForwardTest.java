@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.replyforward;
 
+import java.io.ByteArrayOutputStream;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -70,6 +71,7 @@ import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MailForwardTest}
@@ -465,6 +467,9 @@ public final class MailForwardTest extends AbstractMailTest {
 				final int count = forwardMail.getEnclosedCount();
 				assertTrue("Unexpected number of attachments: " + count, count == 3);
 
+				boolean partOfFirstMailFound = false;
+				boolean partOfSecondMailFound = false;
+
 				for (int i = 0; i < count; i++) {
 					final MailPart part = forwardMail.getEnclosedMailPart(i);
 					if (i == 0) {
@@ -474,7 +479,24 @@ public final class MailForwardTest extends AbstractMailTest {
 						assertTrue("Unexpected enclosed part's content type: " + part.getContentType(), part
 								.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822));
 					}
+					/* additional checks for bug 12420, where there is an amount of forwarded mails,
+					 * yet their content is always that of the main mail.
+					 */
+					if(i == 1 || i == 2){						
+						MailMessage myMail = (MailMessage) part.getContent();
+						ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
+						myMail.writeTo(out);
+						String mailtext = new String(out.toByteArray(), "US-ASCII" );
+						if (mailtext.contains("gibt obwohl er nen courier hat")){
+							partOfFirstMailFound = true;
+						}
+						if( mailtext.contains("nach Hause bringen und somit helfen") ){
+							partOfSecondMailFound = true;
+						}
+					}
 				}
+				assertTrue("Part of first mail missing", partOfFirstMailFound);
+				assertTrue("Part of second mail missing", partOfSecondMailFound);
 
 			} finally {
 
