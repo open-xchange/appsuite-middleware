@@ -70,8 +70,8 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * {@link MIMEMultipartMailPart} - An implementation of {@link MailPart} for
  * mail parts of MIME type <code>multipart/*</code>.
  * <p>
- * Parsing of multipart data is based on <b>Knuth\u2013Morris\u2013Pratt (KMP)</b>
- * algorithm.
+ * Parsing of multipart data is based on <b>Knuth\u2013Morris\u2013Pratt
+ * (KMP)</b> algorithm.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -251,7 +251,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 				 */
 				if (count + 1 > positions.length) {
 					final int newbuf[] = new int[Math.max(positions.length << 1, count)];
-					System.arraycopy(positions, 0, newbuf, 0, count);
+					System.arraycopy(positions, 0, newbuf, 0, positions.length);
 					positions = newbuf;
 				}
 				positions[count] = index;
@@ -259,7 +259,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 			}
 			if (++count > positions.length) {
 				final int newbuf[] = new int[Math.max(positions.length << 1, count)];
-				System.arraycopy(positions, 0, newbuf, 0, count);
+				System.arraycopy(positions, 0, newbuf, 0, positions.length);
 				positions = newbuf;
 			}
 			positions[count - 1] = index;
