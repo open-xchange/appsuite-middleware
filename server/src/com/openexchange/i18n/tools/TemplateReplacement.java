@@ -60,7 +60,7 @@ import java.util.TimeZone;
  */
 public interface TemplateReplacement extends Cloneable {
 
-	public static final String PREFIX_MODIFIED = "> ";
+	public static final String PREFIX_MODIFIED = "* ";
 
 	/**
 	 * Gets the token occurring in a template which is supposed to be replaced
