@@ -76,8 +76,39 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  */
 public class ServerUserSetting {
     
-    private static final String CONTACT_COLLECT_ENABLED = "contact_collect_enabled";
-    private static final String CONTACT_COLLECT_FOLDER = "contact_collect_folder";
+    private static final Attribute<Boolean> CONTACT_COLLECT_ENABLED = new Attribute<Boolean>(){
+
+        public Boolean getAttribute(ResultSet rs) throws SQLException {
+            return rs.getBoolean(this.getColumnName());
+        }
+
+        public String getColumnName() {
+            return "contact_collect_folder";
+        }
+
+        public void setAttribute(PreparedStatement pstmt, Boolean value) throws SQLException {
+            pstmt.setBoolean(1, value);
+            
+        }
+        
+    };
+    
+    private static final Attribute<Integer> CONTACT_COLLECT_FOLDER = new Attribute<Integer>(){
+
+        public Integer getAttribute(ResultSet rs) throws SQLException {
+            return rs.getInt(this.getColumnName());
+        }
+
+        public String getColumnName() {
+            return "contact_collect_folder";
+        }
+
+        public void setAttribute(PreparedStatement pstmt, Integer value) throws SQLException {
+            pstmt.setInt(1, value);
+            
+        }
+        
+    };
     
     private static final Log LOG = LogFactory.getLog(ServerUserSetting.class);
     
@@ -110,9 +141,9 @@ public class ServerUserSetting {
      */
     public static boolean contactCollectionEnabled(final int cid, final int user){
         boolean retval = false;
-        final Object temp = getAttributeWithoutException(cid, user, CONTACT_COLLECT_ENABLED);
+        final Boolean temp = getAttributeWithoutException(cid, user, CONTACT_COLLECT_ENABLED);
         if(temp != null) {
-            retval = (Boolean)temp;
+            retval = temp;
         }
         return retval;
     }
@@ -137,17 +168,16 @@ public class ServerUserSetting {
      * @return folder id
      */
     public static int getContactCollectionFolder(final int cid, final int user){
-        final Object retval = getAttributeWithoutException(cid, user, CONTACT_COLLECT_FOLDER);
+        final Integer retval = getAttributeWithoutException(cid, user, CONTACT_COLLECT_FOLDER);
         if(retval == null) {
 			return 0;
 		}
-        // TODO this is ugly looking code. we should optimize that.
-        return (int)(long)(Long) retval;
+        return retval;
     }
     
-    private static Object getAttributeWithoutException(final int cid, final int user, final String column) {
+    private static <T> T getAttributeWithoutException(final int cid, final int user, final Attribute<T> attribute) {
         try {
-            return getAttribute(cid, user, column);
+            return getAttribute(cid, user, attribute);
         } catch (final DBPoolingException e) {
             LOG.info("Can not retrieve Connection", e);
         } catch (final SQLException e) {
@@ -156,12 +186,12 @@ public class ServerUserSetting {
         return null;
     }
     
-    private static void setAttributeWithoutException(final int cid, final int user, final String column, final Object value) {
+    private static <T> void setAttributeWithoutException(final int cid, final int user, final Attribute<T> attribute, final T value) {
         try {
             if(hasEntry(cid, user)){
-                updateAttribute(cid, user, column, value);
+                updateAttribute(cid, user, attribute, value);
             } else {
-                setAttribute(cid, user, column, value);
+                setAttribute(cid, user, attribute, value);
             }
         } catch (final DBPoolingException e) {
             LOG.info("Can not retrieve Connection", e);
@@ -170,10 +200,10 @@ public class ServerUserSetting {
         }
     }
     
-    private static Object getAttribute(final int cid, final int user, final String column) throws DBPoolingException, SQLException{
-        Object retval = null;
+    private static <T> T getAttribute(final int cid, final int user, final Attribute<T> attribute) throws DBPoolingException, SQLException{
+        T retval = null;
         final Connection con = Database.get(cid, false);
-        final String select = "SELECT " + column + " FROM user_setting_server WHERE cid = ? AND user = ?";
+        final String select = "SELECT " + attribute.getColumnName() + " FROM user_setting_server WHERE cid = ? AND user = ?";
         
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -184,8 +214,7 @@ public class ServerUserSetting {
             stmt.setInt(2, user);
             rs = stmt.executeQuery();
             if (rs.next()) {
-                // TODO use specialized get methods for every possible type
-				retval = rs.getObject(column);
+				retval = attribute.getAttribute(rs);
 			}
         } finally {
             closeSQLStuff(rs, stmt);
@@ -195,15 +224,15 @@ public class ServerUserSetting {
         return retval;
     }
     
-    private static void updateAttribute(final int cid, final int user, final String column, final Object value) throws DBPoolingException, SQLException{
+    private static <T> void updateAttribute(final int cid, final int user, final Attribute<T> attribute, final T value) throws DBPoolingException, SQLException{
         final Connection con = Database.get(cid, true);
-        final String update = "UPDATE user_setting_server SET " + column + " = ? WHERE cid = ? AND user = ?";
+        final String update = "UPDATE user_setting_server SET " + attribute.getColumnName() + " = ? WHERE cid = ? AND user = ?";
         
         PreparedStatement stmt = null;
         
         try {
             stmt = con.prepareStatement(update);
-            stmt.setObject(1, value);
+            attribute.setAttribute(stmt, value);
             stmt.setInt(2, cid);
             stmt.setInt(3, user);
             stmt.execute();
@@ -213,17 +242,17 @@ public class ServerUserSetting {
         }
     }
     
-    private static void setAttribute(final int cid, final int user, final String column, final Object value) throws DBPoolingException, SQLException{
+    private static <T> void setAttribute(final int cid, final int user, final Attribute<T> attribute, final T value) throws DBPoolingException, SQLException{
         final Connection con = Database.get(cid, true);
-        final String insert = "INSERT INTO user_setting_server (cid, user, " + column + ") VALUES (?, ?, ?)";
+        final String insert = "INSERT INTO user_setting_server (" + attribute.getColumnName() + ", cid, user) VALUES (?, ?, ?)";
         
         PreparedStatement stmt = null;
         
         try {
             stmt = con.prepareStatement(insert);
-            stmt.setInt(1, cid);
-            stmt.setInt(2, user);
-            stmt.setObject(3, value);
+            attribute.setAttribute(stmt, value);
+            stmt.setInt(2, cid);
+            stmt.setInt(3, user);
             stmt.execute();
         } finally {
             stmt.close();
@@ -251,6 +280,14 @@ public class ServerUserSetting {
         }
         
         return retval;
+    }
+    
+    private interface Attribute<T> {
+        void setAttribute(PreparedStatement pstmt, T value) throws SQLException;
+        
+        T getAttribute(ResultSet rs) throws SQLException;
+        
+        String getColumnName();
     }
 
 }
