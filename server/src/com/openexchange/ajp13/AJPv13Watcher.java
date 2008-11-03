@@ -82,7 +82,8 @@ public final class AJPv13Watcher {
 			/*
 			 * Start task
 			 */
-			ServerTimer.getTimer().schedule((task = new Task()), 1000, AJPv13Config.getAJPWatcherFrequency());
+			ServerTimer.getTimer().schedule((task = new Task(LOCK, listeners, LOG)), 1000,
+					AJPv13Config.getAJPWatcherFrequency());
 		}
 	}
 
@@ -151,6 +152,32 @@ public final class AJPv13Watcher {
 	}
 
 	private static class Task extends TimerTask {
+
+		private final Lock lock;
+
+		private final Map<Integer, AJPv13Listener> listeners;
+
+		private final org.apache.commons.logging.Log log;
+
+		/**
+		 * Initializes a new {@link Task}
+		 * 
+		 * @param lock
+		 *            The lock to obtain prior to performing this task's run()
+		 *            method
+		 * @param listeners
+		 *            The map to iterate
+		 * @param log
+		 *            The logger instance to use
+		 */
+		public Task(final Lock lock, final Map<Integer, AJPv13Listener> listeners,
+				final org.apache.commons.logging.Log log) {
+			super();
+			this.lock = lock;
+			this.listeners = listeners;
+			this.log = log;
+		}
+
 		/*
 		 * (non-Javadoc)
 		 * 
@@ -158,7 +185,7 @@ public final class AJPv13Watcher {
 		 */
 		@Override
 		public void run() {
-			LOCK.lock();
+			lock.lock();
 			try {
 				int countWaiting = 0;
 				int countProcessing = 0;
@@ -177,12 +204,12 @@ public final class AJPv13Watcher {
 						countProcessing++;
 						final long currentProcTime = (System.currentTimeMillis() - l.getProcessingStartTime());
 						if (currentProcTime > AJPv13Config.getAJPWatcherMaxRunningTime()) {
-							if (LOG.isInfoEnabled()) {
+							if (log.isInfoEnabled()) {
 								final Throwable t = new Throwable();
 								t.setStackTrace(l.getStackTrace());
-								LOG.info(new StringBuilder("AJP Listener exceeds max. running time of ").append(
-										AJPv13Config.getAJPWatcherMaxRunningTime()).append("msec -> Processing time: ").append(
-										currentProcTime).append("msec").toString(), t);
+								log.info(new StringBuilder("AJP Listener exceeds max. running time of ").append(
+										AJPv13Config.getAJPWatcherMaxRunningTime()).append("msec -> Processing time: ")
+										.append(currentProcTime).append("msec").toString(), t);
 							}
 							countExceeded++;
 						}
@@ -194,7 +221,7 @@ public final class AJPv13Watcher {
 				 */
 				if (AJPv13Config.getAJPWatcherPermission() && countProcessing > 0 && countExceeded == countProcessing) {
 					final String delimStr = "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-					LOG.error(new StringBuilder(300).append(delimStr).append(
+					log.error(new StringBuilder(300).append(delimStr).append(
 							"AJP-Watcher's run done: SYSTEM DEADLOCK DETECTED!").append(
 							" Going to stop and re-initialize system").append(delimStr).toString());
 					/*
@@ -203,21 +230,21 @@ public final class AJPv13Watcher {
 					try {
 						AJPv13Server.restartAJPServer();
 					} catch (final AJPv13Exception e) {
-						LOG.error(e.getMessage(), e);
+						log.error(e.getMessage(), e);
 					}
 				} else {
-					if (LOG.isTraceEnabled()) {
+					if (log.isTraceEnabled()) {
 						final String delimStr = "\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-						LOG.trace(new StringBuilder(300).append(delimStr).append("AJP-Watcher's run done: ").append(
+						log.trace(new StringBuilder(300).append(delimStr).append("AJP-Watcher's run done: ").append(
 								"    Waiting=").append(countWaiting).append("    Running=").append(countProcessing)
 								.append("    Exceeded=").append(countExceeded).append("    Total=").append(size)
 								.append(delimStr).toString());
 					}
 				}
 			} catch (final Exception e) {
-				LOG.error(e.getMessage(), e);
+				log.error(e.getMessage(), e);
 			} finally {
-				LOCK.unlock();
+				lock.unlock();
 			}
 		}
 	}
