@@ -3,6 +3,8 @@
  - Bugfix #12384: Servlets must not have fields.
  - Bugfix #12442: Added update task to remove duplicate recurrence date position
    from appointment change exceptions.
+ - Bugfix #12444: Implementing correct check for empty email address in external
+   participants.
 
 * 2008-10-27 - marcus.klein@open-xchange.com
 
