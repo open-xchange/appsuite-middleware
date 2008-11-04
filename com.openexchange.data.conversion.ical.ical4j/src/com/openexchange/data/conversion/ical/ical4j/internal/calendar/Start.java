@@ -118,7 +118,7 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
         calendar.setStartDate(start);
         if (!isDateTime(component, dtStart)) {
             if (calendar instanceof AppointmentObject) {
-                setFullTime((AppointmentObject)calendar, start, timeZone);
+                setFullTime((AppointmentObject)calendar, start, TimeZone.getTimeZone("UTC"));
             } else {
                 calendar.setEndDate(new Date(start.getTime() + 24 * 60 * 60 * 1000));
             }
