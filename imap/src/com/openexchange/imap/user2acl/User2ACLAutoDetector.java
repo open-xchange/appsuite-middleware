@@ -61,8 +61,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
-import javax.net.SocketFactory;
-
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.api.MailConfig.BoolCapVal;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
@@ -190,8 +188,7 @@ public final class User2ACLAutoDetector {
 			try {
 				try {
 					if (isSecure) {
-						final SocketFactory sslSocketFactory = TrustAllSSLSocketFactory.getDefault();
-						s = sslSocketFactory.createSocket();
+						s = TrustAllSSLSocketFactory.getDefault().createSocket();
 					} else {
 						s = new Socket();
 					}
@@ -314,8 +311,7 @@ public final class User2ACLAutoDetector {
 			try {
 				try {
 					if (isSecure) {
-						final SocketFactory sslSocketFactory = TrustAllSSLSocketFactory.getDefault();
-						s = sslSocketFactory.createSocket();
+						s = TrustAllSSLSocketFactory.getDefault().createSocket();
 					} else {
 						s = new Socket();
 					}
