@@ -208,7 +208,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         try {
             cdao = list.get(counter++);
             if (CACHED_ITERATOR_FAST_FETCH && pre_fetch < counter) {
-			    if ((cdao.fillParticipants() || cdao.fillUserParticipants() || (cdao.fillFolderID() && cdao.containsParentFolderID()))) {
+			    if ((cdao.fillParticipants() || cdao.fillUserParticipants() || (cdao.fillFolderID()))) {
 			        try {
 			            readcon = DBPool.pickup(c);
 			        } catch (final DBPoolingException ex) {

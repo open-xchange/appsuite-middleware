@@ -265,6 +265,8 @@ public class ReminderRequest {
                     } catch (final OXObjectNotFoundException exc) {
                     	LOG.warn("Cannot load target object of this reminder");
                     	reminderSql.deleteReminder(targetId, userObj.getId(), reminderObj.getModule());
+                    } catch (final OXException x) {
+                        LOG.error("Can not calculate recurrence of appointment "+targetId+":"+sessionObj.getContextId(), x);    
                     }
                     
                     if (latestReminder == null) {
@@ -361,7 +363,13 @@ public class ReminderRequest {
         final CalendarDataObject calendarDataObject = calendarSql.getObjectById(objectId, inFolder);
         final int alarm = calendarDataObject.getAlarm();
         
-        final RecurringResults recurringResults = CalendarRecurringCollection.calculateRecurring(calendarDataObject, 0, 0, recurrencePosition+1, 0, false);
+        RecurringResults recurringResults = null;
+        try {
+            recurringResults = CalendarRecurringCollection.calculateRecurring(calendarDataObject, 0, 0, recurrencePosition+1, 0, false);
+        } catch (OXException x) {
+            LOG.error("Can't calculate recurrence for appointment "+objectId+":"+sessionObj.getContextId());
+            return null;
+        }
         if (recurringResults != null && recurringResults.size() >= 1) {
             final RecurringResult recurringResult = recurringResults.getRecurringResult(recurringResults.size()-1);
             final ReminderObject reminderObj = new ReminderObject();
