@@ -86,14 +86,14 @@ public abstract class User2ACL {
 			/*
 			 * Auto-detect dependent on user's IMAP settings
 			 */
-			return getUser2ACLImpl(imapConfig.getServer(), imapConfig.getPort());
+			return getUser2ACLImpl(imapConfig.getServer(), imapConfig.getPort(), imapConfig.isSecure());
 		}
 		return singleton;
 	}
 
-	private static final User2ACL getUser2ACLImpl(final String imapServer, final int port) throws User2ACLException {
+	private static final User2ACL getUser2ACLImpl(final String imapServer, final int port, final boolean isSecure) throws User2ACLException {
 		try {
-			return User2ACLAutoDetector.getUser2ACLImpl(imapServer, port);
+			return User2ACLAutoDetector.getUser2ACLImpl(imapServer, port, isSecure);
 		} catch (final IOException e) {
 			throw new User2ACLException(User2ACLException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}
