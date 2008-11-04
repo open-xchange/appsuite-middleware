@@ -677,7 +677,13 @@ public final class FolderWriter extends DataWriter {
 							final OCLPermission[] perms = fo.getPermissionsAsArray();
 							final UserConfigurationStorage userConfStorage = UserConfigurationStorage.getInstance();
 							try {
-								for (int k = 0; k < perms.length; k++) {
+								NextPerm: for (int k = 0; k < perms.length; k++) {
+									if (perms[k].isSystem()) {
+										/*
+										 * Withhold system permissions
+										 */
+										continue NextPerm;
+									}
 									final OCLPermission perm;
 									if (perms[k].isGroupPermission()) {
 										perm = perms[k];

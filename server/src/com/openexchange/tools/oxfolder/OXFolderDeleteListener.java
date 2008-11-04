@@ -131,9 +131,14 @@ public class OXFolderDeleteListener implements DeleteListener {
 								.getContextId()));
 					}
 				}
+				/*
+				 * Drop system permissions
+				 */
+				OXFolderSQL.cleanseSystemPermissions(userId, TABLE_WORKING_PERMS, writeCon, ctx);
+				OXFolderSQL.cleanseSystemPermissions(userId, TABLE_BACKUP_PERMS, writeCon, ctx);
 				final boolean isMailAdmin = (mailadmin == userId);
 				/*
-				 * Hander user's permissions
+				 * Handle user's permissions
 				 */
 				if (isMailAdmin) {
 					/*
@@ -232,6 +237,11 @@ public class OXFolderDeleteListener implements DeleteListener {
 								.getContextId()));
 					}
 				}
+				/*
+				 * Drop system permissions for group
+				 */
+				OXFolderSQL.cleanseSystemPermissions(groupId, TABLE_WORKING_PERMS, writeCon, ctx);
+				OXFolderSQL.cleanseSystemPermissions(groupId, TABLE_BACKUP_PERMS, writeCon, ctx);
 				/*
 				 * Hander group's permissions
 				 */

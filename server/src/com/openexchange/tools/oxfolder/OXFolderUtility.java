@@ -411,7 +411,7 @@ public final class OXFolderUtility {
 					OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
 			ocls.add(pownerPerm);
 		}
-		folderObj.setPermissions((ArrayList<?>) ocls);
+		folderObj.setPermissions(ocls);
 	}
 
 	private static final int[] SORTED_STD_MODULES = { FolderObject.TASK, FolderObject.CALENDAR, FolderObject.CONTACT,

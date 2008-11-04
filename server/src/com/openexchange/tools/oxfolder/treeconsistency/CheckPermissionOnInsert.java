@@ -65,8 +65,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -74,18 +72,19 @@ import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 
 /**
- * {@link CheckParentPermission} - Checks for parental visibility permissions.
+ * {@link CheckPermissionOnInsert} - Checks for system permissions which shall
+ * be inserted.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class CheckParentPermission extends CheckPermission {
+public final class CheckPermissionOnInsert extends CheckPermission {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(CheckParentPermission.class);
+			.getLog(CheckPermissionOnInsert.class);
 
 	/**
-	 * Initializes a new {@link CheckParentPermission}
+	 * Initializes a new {@link CheckPermissionOnInsert}
 	 * 
 	 * @param session
 	 *            The session
@@ -94,7 +93,7 @@ public final class CheckParentPermission extends CheckPermission {
 	 * @param ctx
 	 *            The context
 	 */
-	public CheckParentPermission(final Session session, final Connection writeCon, final Context ctx) {
+	public CheckPermissionOnInsert(final Session session, final Connection writeCon, final Context ctx) {
 		super(session, writeCon, ctx);
 	}
 
@@ -110,56 +109,25 @@ public final class CheckParentPermission extends CheckPermission {
 	 *            folder
 	 * @param lastModified
 	 *            The last-modified time stamp to use when adding permissions
-	 * @param enforceAdminPermission
-	 *            <code>true</code> to check for admin permission prior to
-	 *            adding a folder-read-only-permission; otherwise
-	 *            <code>false</code>
 	 * @throws OXException
 	 *             If checking parental visibility permissions fails
 	 */
-	public void checkParentPermissions(final int parent, final OCLPermission[] perms, final long lastModified,
-			final boolean enforceAdminPermission) throws OXException {
-		final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
-		final UserConfiguration sessionUserConf = userConfigStorage.getUserConfiguration(sessionUser, ctx);
-		final Map<Integer, ToDoPermission> map = new HashMap<Integer, ToDoPermission>();
+	public void checkParentPermissions(final int parent, final OCLPermission[] perms, final long lastModified)
+			throws OXException {
 		try {
+			final Map<Integer, ToDoPermission> map = new HashMap<Integer, ToDoPermission>();
 			for (int i = 0; i < perms.length; i++) {
 				final OCLPermission assignedPerm = perms[i];
-				if (assignedPerm.isGroupPermission()) {
-					final int groupId = assignedPerm.getEntity();
+				if (assignedPerm.isFolderVisible()) {
 					/*
-					 * Resolve group
+					 * Grant system-permission for this group to parent folders
 					 */
-					try {
-						final int[] members = GroupStorage.getInstance(true).getGroup(groupId, ctx).getMember();
-						for (final int user : members) {
-							if (!isParentVisible(parent, user, userConfigStorage.getUserConfiguration(user, ctx),
-									groupId, sessionUserConf, enforceAdminPermission, map)) {
-								throw new OXFolderException(OXFolderException.FolderCode.PATH_NOT_VISIBLE_GROUP,
-										UserStorage.getStorageUser(user, ctx).getDisplayName(), GroupStorage
-												.getInstance(true).getGroup(groupId, ctx).getDisplayName(), UserStorage
-												.getStorageUser(sessionUser, ctx).getDisplayName());
-							}
-						}
-					} catch (final LdapException e) {
-						throw new OXFolderException(e);
-					}
-				} else {
-					/*
-					 * Check for user
-					 */
-					final int user = assignedPerm.getEntity();
-					if (!isParentVisible(parent, user, userConfigStorage.getUserConfiguration(user, ctx), -1,
-							sessionUserConf, enforceAdminPermission, map)) {
-						throw new OXFolderException(OXFolderException.FolderCode.PATH_NOT_VISIBLE_USER, UserStorage
-								.getStorageUser(user, ctx).getDisplayName(), UserStorage.getStorageUser(sessionUser,
-								ctx).getDisplayName());
-					}
+					ensureParentVisibility(parent, assignedPerm.getEntity(), assignedPerm.isGroupPermission(), map);
 				}
 			}
 			/*
-			 * Auto-insert folder-read permission to make non-visible parent
-			 * folders visible in folder tree
+			 * Auto-insert system-folder-read permission to make possible
+			 * non-visible parent folders visible in folder tree
 			 */
 			if (!map.isEmpty()) {
 				final int size2 = map.size();
@@ -173,29 +141,29 @@ public final class CheckParentPermission extends CheckPermission {
 					final int[] users = entry.getValue().getUsers();
 					for (int j = 0; j < users.length; j++) {
 						if (LOG.isDebugEnabled()) {
-							LOG.debug("Auto-Insert folder-read permission for user "
+							LOG.debug("Auto-Insert system-folder-read permission for user "
 									+ UserStorage.getStorageUser(users[j], ctx).getDisplayName() + " to folder "
 									+ folderId);
 						}
-						addFolderReadPermission(folderId, users[j], false);
+						addSystemFolderReadPermission(folderId, users[j], false);
 					}
 					final int[] groups = entry.getValue().getGroups();
 					for (int j = 0; j < groups.length; j++) {
 						if (LOG.isDebugEnabled()) {
 							try {
-								LOG.debug("Auto-Insert folder-read permission for group "
+								LOG.debug("Auto-Insert system-folder-read permission for group "
 										+ GroupStorage.getInstance(true).getGroup(groups[j], ctx).getDisplayName()
 										+ " to folder " + folderId);
 							} catch (final LdapException e) {
 								LOG.trace("Logging failed", e);
 							}
 						}
-						addFolderReadPermission(folderId, groups[j], true);
+						addSystemFolderReadPermission(folderId, groups[j], true);
 					}
 					/*
 					 * Update folders last-modified
 					 */
-					OXFolderSQL.updateLastModified(folderId, lastModified, sessionUser, writeCon, ctx);
+					OXFolderSQL.updateLastModified(folderId, lastModified, ctx.getMailadmin(), writeCon, ctx);
 					/*
 					 * Update caches
 					 */
@@ -222,55 +190,62 @@ public final class CheckParentPermission extends CheckPermission {
 		}
 	}
 
-	private boolean isParentVisible(final int parent, final int entity, final UserConfiguration entityConfiguration,
-			final int groupId, final UserConfiguration sessionUserConf, final boolean enforceAdminPermission,
+	private void ensureParentVisibility(final int parent, final int entity, final boolean isGroup,
 			final Map<Integer, ToDoPermission> map) throws DBPoolingException, OXException, SQLException {
 		if (parent < FolderObject.MIN_FOLDER_ID) {
 			/*
 			 * We reached a context-created folder
 			 */
-			return true;
+			return;
 		}
 		final FolderObject fo = getFolderFromMaster(parent);
 		/*
-		 * Check entity's effective permission
+		 * Check for system-read-folder permission for current entity
 		 */
-		if (!fo.getEffectiveUserPermission(entity, entityConfiguration, writeCon).isFolderVisible()) {
+		if (!containsSystemPermission(fo.getPermissions(), entity)) {
 			/*
-			 * Current folder is not visible; check if modifying user is allowed
-			 * to grant folder visibility to entity
+			 * Add system-read-folder permission for current entity
 			 */
-			if (enforceAdminPermission
-					&& !fo.getEffectiveUserPermission(sessionUser, sessionUserConf, writeCon).isFolderAdmin()) {
-				return false;
-			}
 			final Integer key = Integer.valueOf(parent);
 			ToDoPermission todo = map.get(key);
 			if (todo == null) {
 				todo = new ToDoPermission(parent);
 				map.put(key, todo);
 			}
-			if (groupId == -1) {
-				todo.addUser(entity);
+			if (isGroup) {
+				todo.addGroup(entity);
 			} else {
-				/*
-				 * User was resolved from a group, thus add group
-				 */
-				todo.addGroup(groupId);
+				todo.addUser(entity);
 			}
 		}
-		return isParentVisible(fo.getParentFolderID(), entity, entityConfiguration, groupId, sessionUserConf,
-				enforceAdminPermission, map);
+		/*
+		 * Recursive call with parent's parent
+		 */
+		ensureParentVisibility(fo.getParentFolderID(), entity, isGroup, map);
 	}
 
-	private void addFolderReadPermission(final int folderId, final int entity, final boolean isGroup)
+	/**
+	 * Adds system-read-folder permission to specified folder for given entity
+	 * 
+	 * @param folderId
+	 *            The folder ID
+	 * @param entity
+	 *            The entity
+	 * @param isGroup
+	 *            whether entity denotes a group
+	 * @throws DBPoolingException
+	 *             If a pooling error occurs
+	 * @throws SQLException
+	 *             If a SQL error occurs
+	 */
+	private void addSystemFolderReadPermission(final int folderId, final int entity, final boolean isGroup)
 			throws DBPoolingException, SQLException {
 		/*
 		 * Add folder-read permission
 		 */
 		OXFolderSQL.addSinglePermission(folderId, entity, isGroup, OCLPermission.READ_FOLDER,
 				OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, false,
-				writeCon, ctx);
+				OCLPermission.SYSTEM_SYSTEM, writeCon, ctx);
 	}
 
 }

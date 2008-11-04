@@ -117,7 +117,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 				throw new DowngradeFailedException(e);
 			}
 			if (LOG.isInfoEnabled()) {
-				LOG.info("All task-related folder data removed due to loss of task module access");
+				LOG.info("All calendar-related folder data removed due to loss of task module access");
 			}
 		}
 		if (!newUserConfiguration.hasTask()) {
@@ -130,7 +130,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 				throw new DowngradeFailedException(e);
 			}
 			if (LOG.isInfoEnabled()) {
-				LOG.info("All calendar-related folder data removed due to loss of task module access");
+				LOG.info("All task-related folder data removed due to loss of task module access");
 			}
 		}
 		if (!newUserConfiguration.hasInfostore()) {
@@ -311,6 +311,11 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 					ids.add(Integer.valueOf(fuid));
 				}
 			}
+			/*
+			 * Remove entity's system permissions belonging to module
+			 */
+			OXFolderDowngradeSQL.dropModuleSystemPermission(module, entity, cid, TABLE_FOLDER_WORKING,
+					TABLE_PERMISSIONS_WORKING, writeCon);
 			/*
 			 * Handle module's public folders
 			 */

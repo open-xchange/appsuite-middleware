@@ -49,15 +49,96 @@
 
 package com.openexchange.tools.oxfolder;
 
+import java.sql.Connection;
+
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.session.Session;
 
 /**
  * OXFolderManager offers routines for folder creation, update and deletion
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface OXFolderManager {
+public abstract class OXFolderManager {
+
+	/**
+	 * Gets an appropriate instance of {@link OXFolderManager}
+	 * 
+	 * @param session
+	 *            The session
+	 * @return An appropriate instance of {@link OXFolderManager}
+	 * @throws OXFolderException
+	 *             If an appropriate instance of {@link OXFolderManager} cannot
+	 *             be generated
+	 */
+	public static final OXFolderManager getInstance(final Session session) throws OXFolderException {
+		return new OXFolderManagerImpl(session);
+	}
+
+	/**
+	 * Gets an appropriate instance of {@link OXFolderManager}
+	 * 
+	 * @param session
+	 *            The session
+	 * @param oxfolderAccess
+	 *            An instance of {@link OXFolderAccess} to use; may be
+	 *            <code>null</code>
+	 * @return An appropriate instance of {@link OXFolderManager}
+	 * @throws OXFolderException
+	 *             If an appropriate instance of {@link OXFolderManager} cannot
+	 *             be generated
+	 */
+	public static final OXFolderManager getInstance(final Session session, final OXFolderAccess oxfolderAccess)
+			throws OXFolderException {
+		return new OXFolderManagerImpl(session, oxfolderAccess);
+	}
+
+	/**
+	 * Gets an appropriate instance of {@link OXFolderManager}
+	 * 
+	 * @param session
+	 *            The session
+	 * @param readCon
+	 *            A connection with read capability; pass <code>null</code> to
+	 *            fetch from pool
+	 * @param writeCon
+	 *            A connection with write capability; pass <code>null</code> to
+	 *            fetch from pool
+	 * @return An appropriate instance of {@link OXFolderManager}
+	 * @throws OXFolderException
+	 *             If an appropriate instance of {@link OXFolderManager} cannot
+	 *             be generated
+	 */
+	public static final OXFolderManager getInstance(final Session session, final Connection readCon,
+			final Connection writeCon) throws OXFolderException {
+		return new OXFolderManagerImpl(session, readCon, writeCon);
+	}
+
+	/**
+	 * Gets an appropriate instance of {@link OXFolderManager}
+	 * 
+	 * @param session
+	 *            The session
+	 * @param oxfolderAccess
+	 *            An instance of {@link OXFolderAccess} to use; may be
+	 *            <code>null</code>
+	 * @param readCon
+	 *            A connection with read capability; pass <code>null</code> to
+	 *            fetch from pool
+	 * @param writeCon
+	 *            A connection with write capability; pass <code>null</code> to
+	 *            fetch from pool
+	 * @return An appropriate instance of {@link OXFolderManager}
+	 * @throws OXFolderException
+	 *             If an appropriate instance of {@link OXFolderManager} cannot
+	 *             be generated
+	 */
+	public static final OXFolderManager getInstance(final Session session, final OXFolderAccess oxfolderAccess,
+			final Connection readCon, final Connection writeCon) throws OXFolderException {
+		return new OXFolderManagerImpl(session, oxfolderAccess, readCon, writeCon);
+	}
 
 	/**
 	 * Creates a folder filled with values from given folder object.
@@ -69,7 +150,8 @@ public interface OXFolderManager {
 	 * @return an instance of <tt>FolderObject</tt> representing newly created
 	 *         folder
 	 */
-	public FolderObject createFolder(FolderObject fo, boolean checkPermissions, long createTime) throws OXException;
+	public abstract FolderObject createFolder(FolderObject fo, boolean checkPermissions, long createTime)
+			throws OXException;
 
 	/**
 	 * Updates an existing folder according to changes contained in given folder
@@ -80,7 +162,7 @@ public interface OXFolderManager {
 	 * <p>
 	 * Possible operations here: rename, move and/or permissions update: When a
 	 * rename should be performed, given folder object should contain field
-	 * 'folder name', so that invokation of
+	 * 'folder name', so that invocation of
 	 * <tt>FolderObject.containsFolderName()</tt> returns <tt>true</tt>. If a
 	 * move should be done, routine
 	 * <tt>FolderObject.containsParentFolderID()</tt> should return
@@ -91,7 +173,8 @@ public interface OXFolderManager {
 	 * 
 	 * @return an instance of <tt>FolderObject</tt> representing modified folder
 	 */
-	public FolderObject updateFolder(FolderObject fo, boolean checkPermissions, long lastModified) throws OXException;
+	public abstract FolderObject updateFolder(FolderObject fo, boolean checkPermissions, long lastModified)
+			throws OXException;
 
 	/**
 	 * Deletes a folder identified by given folder object. This operation causes
@@ -111,7 +194,8 @@ public interface OXFolderManager {
 	 *            usually {@link System#currentTimeMillis()}.
 	 * @return an instance of <tt>FolderObject</tt> representing deleted folder
 	 */
-	public FolderObject deleteFolder(FolderObject fo, boolean checkPermissions, long lastModified) throws OXException;
+	public abstract FolderObject deleteFolder(FolderObject fo, boolean checkPermissions, long lastModified)
+			throws OXException;
 
 	/**
 	 * Clears a folder's content so that all items located in given folder are
@@ -122,6 +206,11 @@ public interface OXFolderManager {
 	 * 
 	 * @return the cleaned instance of <tt>FolderObject</tt>
 	 */
-	public FolderObject clearFolder(FolderObject fo, boolean checkPermissions, long lastModified) throws OXException;
+	public abstract FolderObject clearFolder(FolderObject fo, boolean checkPermissions, long lastModified)
+			throws OXException;
 
+	/**
+	 * This routine is called through AJAX' folder tests!
+	 */
+	public abstract void cleanUpTestFolders(int[] fuids, Context ctx);
 }

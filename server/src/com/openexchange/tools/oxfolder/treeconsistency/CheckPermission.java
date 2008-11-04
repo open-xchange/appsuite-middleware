@@ -50,12 +50,17 @@
 package com.openexchange.tools.oxfolder.treeconsistency;
 
 import java.sql.Connection;
+import java.util.Arrays;
+import java.util.List;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
@@ -95,10 +100,30 @@ abstract class CheckPermission {
 		this.sessionUser = session.getUserId();
 	}
 
+	/**
+	 * Gets the folder from master database
+	 * 
+	 * @param folderId
+	 *            The folder ID
+	 * @return The folder from master database
+	 * @throws OXException
+	 *             If folder cannot be fetched from master database
+	 */
 	protected FolderObject getFolderFromMaster(final int folderId) throws OXException {
 		return getFolderFromMaster(folderId, false);
 	}
 
+	/**
+	 * Gets the folder from master database with or without subfolder IDs loaded
+	 * 
+	 * @param folderId
+	 *            The folder ID
+	 * @param withSubfolders
+	 *            whether to load subfolder IDs, too
+	 * @return The folder from master database
+	 * @throws OXException
+	 *             If folder cannot be fetched from master database
+	 */
 	protected FolderObject getFolderFromMaster(final int folderId, final boolean withSubfolders) throws OXException {
 		try {
 			/*
@@ -121,5 +146,77 @@ abstract class CheckPermission {
 		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		}
+	}
+
+	/**
+	 * Gets the effective user permission
+	 * 
+	 * @param userId
+	 *            The user ID
+	 * @param userConfig
+	 *            The user's configuration
+	 * @param folder
+	 *            The folder needed to determine type, module, etc.
+	 * @param permissions
+	 *            The basic permissions to check against
+	 * @return The effective user permission
+	 */
+	protected static EffectivePermission getEffectiveUserPermission(final int userId,
+			final UserConfiguration userConfig, final FolderObject folder, final OCLPermission[] permissions) {
+		final EffectivePermission maxPerm = new EffectivePermission(userId, folder.getObjectID(), folder
+				.getType(userId), folder.getModule(), userConfig);
+		maxPerm.setAllPermission(OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
+				OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+		final int[] idArr;
+		{
+			final int[] groups = userConfig.getGroups();
+			idArr = new int[groups.length + 1];
+			idArr[0] = userId;
+			System.arraycopy(groups, 0, idArr, 1, groups.length);
+			Arrays.sort(idArr);
+		}
+		NextPerm: for (int i = 0; i < permissions.length; i++) {
+			final OCLPermission oclPerm = permissions[i];
+			if (Arrays.binarySearch(idArr, oclPerm.getEntity()) < 0) {
+				continue NextPerm;
+			}
+			if (oclPerm.getFolderPermission() > maxPerm.getFolderPermission()) {
+				maxPerm.setFolderPermission(oclPerm.getFolderPermission());
+			}
+			if (oclPerm.getReadPermission() > maxPerm.getReadPermission()) {
+				maxPerm.setReadObjectPermission(oclPerm.getReadPermission());
+			}
+			if (oclPerm.getWritePermission() > maxPerm.getWritePermission()) {
+				maxPerm.setWriteObjectPermission(oclPerm.getWritePermission());
+			}
+			if (oclPerm.getDeletePermission() > maxPerm.getDeletePermission()) {
+				maxPerm.setDeleteObjectPermission(oclPerm.getDeletePermission());
+			}
+			if (!maxPerm.isFolderAdmin() && oclPerm.isFolderAdmin()) {
+				maxPerm.setFolderAdmin(true);
+			}
+		}
+		return maxPerm;
+	}
+
+	/**
+	 * Checks if specified permissions contain a system-read-folder permission
+	 * for given entity
+	 * 
+	 * @param permissions
+	 *            The permissions to check
+	 * @param entity
+	 *            The entity
+	 * @return <code>true</code> if specified permissions contain a
+	 *         system-read-folder permission for given entity; otherwise
+	 *         <code>false</code>
+	 */
+	protected static boolean containsSystemPermission(final List<OCLPermission> permissions, final int entity) {
+		for (final OCLPermission cur : permissions) {
+			if (cur.getEntity() == entity && cur.isSystem()) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

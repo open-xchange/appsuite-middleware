@@ -534,7 +534,7 @@ public final class OXFolderAdminHelper {
 	 * @param readCon
 	 *            A readable connection to database
 	 * @param writeCon
-	 *            A writeable connection to database
+	 *            A writable connection to database
 	 * @param cid
 	 *            The context ID
 	 * @throws SQLException

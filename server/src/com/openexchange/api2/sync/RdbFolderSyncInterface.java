@@ -71,7 +71,7 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
+import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
@@ -148,7 +148,7 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
 						getFolderName(folderobject), getUserName(session, user), Integer.valueOf(ctx.getContextId()));
 			}
 			final long lastModified = System.currentTimeMillis();
-			new OXFolderManagerImpl(session, oxfolderAccess).clearFolder(folderobject, false, lastModified);
+			OXFolderManager.getInstance(session, oxfolderAccess).clearFolder(folderobject, false, lastModified);
 			return folderobject.getObjectID();
 		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));

@@ -64,6 +64,7 @@ import java.util.List;
 import java.util.Locale;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
@@ -461,10 +462,20 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 		b_permissionFlag = false;
 	}
 
+	/**
+	 * Gets all permissions
+	 * 
+	 * @return All permissions
+	 */
 	public List<OCLPermission> getPermissions() {
 		return permissions;
 	}
 
+	/**
+	 * Gets all permissions
+	 * 
+	 * @return All permissions
+	 */
 	public OCLPermission[] getPermissionsAsArray() {
 		final OCLPermission[] perms = new OCLPermission[permissions.size()];
 		System.arraycopy(permissions.toArray(), 0, perms, 0, perms.length);
@@ -472,122 +483,276 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	}
 
 	/**
-	 * Gets the permission granted to this folder for specified entity
+	 * Gets the non-system permissions
+	 * 
+	 * @return The non-system permissions
+	 */
+	public OCLPermission[] getNonSystemPermissionsAsArray() {
+		final List<OCLPermission> retval = new ArrayList<OCLPermission>(permissions.size());
+		for (final OCLPermission permission : permissions) {
+			if (!permission.isSystem()) {
+				retval.add(permission);
+			}
+		}
+		return retval.toArray(new OCLPermission[retval.size()]);
+	}
+
+	/**
+	 * Gets the non-system permission this folder grants to specified entity
 	 * 
 	 * @param entity
-	 *            The entity ID (either a user or a group ID)
-	 * @return The corresponding permission or <code>null</code>
+	 *            The entity ID; either a group or user ID
+	 * @return The non-system permission or <code>null</code> if none granted
 	 */
-	public OCLPermission getPermission(final int entity) {
-		for (final OCLPermission cur : permissions) {
-			if (cur.getEntity() == entity) {
-				return cur.deepClone();
+	public OCLPermission getNonSystemPermission(final int entity) {
+		for (final OCLPermission permission : permissions) {
+			if (!permission.isSystem() && permission.getEntity() == entity) {
+				return permission.deepClone();
 			}
 		}
 		return null;
 	}
 
+	/**
+	 * Checks if this folder grants a non-system permission to specified entity
+	 * which allows at least folder visibility
+	 * 
+	 * @param entity
+	 *            The entity ID; either a group or user ID
+	 * @return <code>true</code> if this folder grants a non-system permission
+	 *         to specified entity which allows at least folder visibility;
+	 *         otherwise <code>false</code>
+	 * @see #isVisible(int)
+	 */
+	public boolean isNonSystemVisible(final int entity) {
+		for (final OCLPermission permission : permissions) {
+			if (!permission.isSystem() && permission.getEntity() == entity && permission.isFolderVisible()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Checks if this folder is visible to specified entity
+	 * <p>
+	 * <b>Note</b>: This method only checks <b><small>ALL</small></b> basic
+	 * permissions and does not consider any configuration settings. Use
+	 * {@link #isVisible(int, UserConfiguration)} for a detailed check if this
+	 * folder is visible to a certain user.
+	 * 
+	 * @param entity
+	 *            The entity ID (either a user or a group ID)
+	 * @return <code>true</code> if this folder is visible to specified entity;
+	 *         otherwise <code>false</code>
+	 * @see #isVisible(int, UserConfiguration)
+	 */
+	public boolean isVisible(final int entity) {
+		for (final OCLPermission cur : permissions) {
+			if (cur.getEntity() == entity && cur.isFolderVisible()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Checks if this folder has permissions set
+	 * 
+	 * @return <code>true</code> if this folder has permissions set; otherwise
+	 *         <code>false</code>
+	 */
 	public boolean containsPermissions() {
 		return b_permissions;
 	}
 
-	@SuppressWarnings("unchecked")
-	public void setPermissions(final ArrayList permissions) {
-		this.permissions = (ArrayList<OCLPermission>) permissions.clone();
+	/**
+	 * Applies given permissions to this folder.
+	 * <p>
+	 * <b>NOTE</b>: A <b><small>DEEP</small></b> copy of specified permissions
+	 * is passed to this folder not a reference.
+	 * 
+	 * @param permissions
+	 *            The permissions to set
+	 */
+	public void setPermissions(final List<OCLPermission> permissions) {
+		final int size = permissions.size();
+		this.permissions = new ArrayList<OCLPermission>(size);
+		for (final OCLPermission permission : permissions) {
+			this.permissions.add(permission.deepClone());
+		}
 		b_permissions = true;
 	}
 
+	/**
+	 * Applies given permissions to this folder.
+	 * <p>
+	 * <b>NOTE</b>: A <b><small>DEEP</small></b> copy of specified permissions
+	 * is passed to this folder not a reference.
+	 * 
+	 * @param permissions
+	 *            The permissions to set
+	 */
 	public void setPermissionsAsArray(final OCLPermission[] permissions) {
-		final List<OCLPermission> tmpList = Arrays.asList(permissions);
 		if (this.permissions == null) {
 			this.permissions = new ArrayList<OCLPermission>();
 		} else {
 			this.permissions.clear();
 		}
-		this.permissions.addAll(tmpList);
+		for (final OCLPermission permission : permissions) {
+			this.permissions.add(permission.deepClone());
+		}
 		b_permissions = true;
 	}
 
+	/**
+	 * Removes the permissions from this folder
+	 */
 	public void removePermissions() {
 		this.permissions = null;
 		b_permissions = false;
 	}
 
 	/**
+	 * Gets this folder's type
+	 * <p>
+	 * <b>NOTE</b>: To check if this folder is shared call
+	 * {@link #isShared(int)} or {@link #getType(int)}
 	 * 
-	 * @return the folder's type which is either
-	 *         <code>FolderObject.PUBLIC</code> or
-	 *         <code>FolderObject.PRIVATE</code>.
-	 *         <p>
-	 *         NOTE: To check if this folder is shared call the
-	 *         <code>isShared(int userId)</code>
+	 * @return The type which is either {@link #PUBLIC} or {@link #PRIVATE}.
 	 */
 	public int getType() {
 		return type;
 	}
 
 	/**
+	 * Gets this folder's type with respect to specified user
+	 * <p>
+	 * <b>NOTE</b>: This method does not check if specified used holds at least
+	 * read-folder permission but only checks against its type and owner values.
 	 * 
 	 * @param userId
-	 * @return the folder's type which is <code>FolderObject.PUBLIC</code>,
-	 *         <code>FolderObject.PRIVATE</code> or
-	 *         <code>FolderObject.SHARED</code>.
+	 *            The user ID
+	 * @return The type which is either {@link #PUBLIC}, {@link #PRIVATE} or
+	 *         {@link #SHARED}.
 	 */
 	public int getType(final int userId) {
 		return isShared(userId) ? SHARED : type;
 	}
 
+	/**
+	 * Checks if this folder has its type set
+	 * 
+	 * @return <code>true</code> if this folder has its type set; otherwise
+	 *         <code>false</code>
+	 */
 	public boolean containsType() {
 		return b_type;
 	}
 
+	/**
+	 * Sets this folder's type
+	 * 
+	 * @param type
+	 *            The type which is either {@link #PUBLIC} or {@link #PRIVATE}
+	 */
 	public void setType(final int type) {
 		this.type = type;
 		b_type = true;
 	}
 
+	/**
+	 * Removes this folder's type
+	 */
 	public void removeType() {
 		this.type = 0;
 		b_type = false;
 	}
 
+	/**
+	 * Gets the creator
+	 * 
+	 * @return The creator
+	 */
 	public int getCreator() {
 		return createdBy;
 	}
 
+	/**
+	 * Checks if creator is set
+	 * 
+	 * @return <code>true</code> if creator is set; otherwise <code>false</code>
+	 */
 	public boolean containsCreator() {
 		return b_created_by;
 	}
 
+	/**
+	 * Sets the creator
+	 * 
+	 * @param creator
+	 *            The creator
+	 */
 	public void setCreator(final int creator) {
 		this.createdBy = creator;
 		this.b_created_by = true;
 	}
 
+	/**
+	 * Removes the creator
+	 */
 	public void removeCreator() {
 		this.createdBy = 0;
 		this.b_created_by = false;
 	}
 
+	/**
+	 * Checks if this folder has subfolders
+	 * 
+	 * @return <code>true</code> if this folder has subfolders; otherwise
+	 *         <code>false</code>
+	 */
 	public boolean hasSubfolders() {
 		return subfolderFlag;
 	}
 
 	/**
-	 * Returns <code>true</code> if this folder contains user-visible
-	 * subfolders, <code>false</code> otherwise
+	 * Checks if this folder has subfolders visible to specified user
+	 * 
+	 * @param user
+	 *            The user
+	 * @param userConfig
+	 *            The user's configuration
+	 * @param ctx
+	 *            The context
+	 * @return <code>true</code> if this folder has subfolders visible to
+	 *         specified user; otherwise <code>false</code>
+	 * @throws OXException
+	 *             If user-visible subfolders cannot be checked
 	 */
-	public final boolean hasVisibleSubfolders(final User userObj, final UserConfiguration userConfig, final Context ctx)
-			throws DBPoolingException, OXException, SQLException, SearchIteratorException {
-		return hasVisibleSubfolders(userObj.getId(), userObj.getGroups(), userConfig, ctx);
+	public final boolean hasVisibleSubfolders(final User user, final UserConfiguration userConfig, final Context ctx)
+			throws OXException {
+		return hasVisibleSubfolders(user.getId(), user.getGroups(), userConfig, ctx);
 	}
 
 	/**
-	 * Returns <code>true</code> if this folder contains user-visible
-	 * subfolders, <code>false</code> otherwise
+	 * Checks if this folder has subfolders visible to specified user
+	 * 
+	 * @param userId
+	 *            The user ID
+	 * @param groups
+	 *            The user's group IDs
+	 * @param userConfig
+	 *            The user configuration
+	 * @param ctx
+	 *            The context
+	 * @return <code>true</code> if this folder has subfolders visible to
+	 *         specified user; otherwise <code>false</code>
+	 * @throws OXException
+	 *             If user-visible subfolders cannot be checked
 	 */
 	public final boolean hasVisibleSubfolders(final int userId, final int[] groups, final UserConfiguration userConfig,
-			final Context ctx) throws DBPoolingException, OXException, SQLException, SearchIteratorException {
+			final Context ctx) throws OXException {
 		SearchIterator<FolderObject> iter = null;
 		try {
 			if (objectId == SYSTEM_ROOT_FOLDER_ID) {
@@ -608,9 +773,12 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 						.getAccessibleModules(), FolderObject.PUBLIC, modules, SYSTEM_PUBLIC_FOLDER_ID, ctx)).hasNext();
 			} else if (objectId == SYSTEM_INFOSTORE_FOLDER_ID) {
 				return userConfig.hasInfostore();
-//				return (iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(userId, groups, userConfig
-//						.getAccessibleModules(), FolderObject.PUBLIC, new int[] { INFOSTORE },
-//						SYSTEM_INFOSTORE_FOLDER_ID, ctx)).hasNext();
+				// return (iter =
+				// OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType
+				// (userId, groups, userConfig
+				// .getAccessibleModules(), FolderObject.PUBLIC, new int[] {
+				// INFOSTORE },
+				// SYSTEM_INFOSTORE_FOLDER_ID, ctx)).hasNext();
 			} else if (!subfolderFlag) {
 				/*
 				 * Folder has no subfolder(s)
@@ -623,13 +791,27 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 			}
 			return (iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig,
 					null)).hasNext();
+		} catch (final AbstractOXException e) {
+			throw new OXFolderException(e);
+		} catch (final SQLException e) {
+			throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		} finally {
 			if (iter != null) {
-				iter.close();
+				try {
+					iter.close();
+				} catch (final SearchIteratorException e) {
+					LOG.error("SearchIterator cannot be closed", e);
+				}
 			}
 		}
 	}
 
+	/**
+	 * Checks if this folder has the subfolder-flag set
+	 * 
+	 * @return <code>true</code> if this folder has the subfolder-flag set;
+	 *         otherwise <code>false</code>
+	 */
 	public boolean containsSubfolderFlag() {
 		return b_subfolderFlag;
 	}
@@ -854,7 +1036,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 			setPermissionFlag(other.getPermissionFlag());
 		}
 		if (other.containsPermissions() && (overwrite || !containsPermissions())) {
-			setPermissions((ArrayList<OCLPermission>) other.getPermissions());
+			setPermissions(other.getPermissions());
 		}
 		if (other.containsSubfolderFlag() && (overwrite || !containsSubfolderFlag())) {
 			setSubfolderFlag(other.hasSubfolders());
@@ -1289,7 +1471,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 		return getFolderPermissions(folderId, ctx, readConArg, TABLE_OP);
 	}
 
-	private static final String SQL_LOAD_P = "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag FROM #TABLE# WHERE cid = ? AND fuid = ?";
+	private static final String SQL_LOAD_P = "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system"
+			+ " FROM #TABLE# WHERE cid = ? AND fuid = ?";
 
 	/**
 	 * Loads folder permissions from database. Creates a new connection if
@@ -1353,6 +1536,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 					p.setAllPermission(rs.getInt(2), rs.getInt(3), owp, rs.getInt(5));
 					p.setFolderAdmin(rs.getInt(6) > 0 ? true : false);
 					p.setGroupPermission(rs.getInt(7) > 0 ? true : false);
+					p.setSystem(rs.getInt(8));
 					permissions[0] = p;
 				}
 				stmt.close();
@@ -1385,6 +1569,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 				p.setAllPermission(rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getInt(5));
 				p.setFolderAdmin(rs.getInt(6) > 0 ? true : false);
 				p.setGroupPermission(rs.getInt(7) > 0 ? true : false);
+				p.setSystem(rs.getInt(8));
 				permList.add(p);
 			}
 			stmt.close();

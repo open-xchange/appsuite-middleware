@@ -83,7 +83,6 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
@@ -234,7 +233,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 		}
 		final FolderObject folderobject = folderobjectArg;
 		final boolean insert = (!folderobject.containsObjectID() || folderobject.getObjectID() == -1);
-		final OXFolderManager manager = new OXFolderManagerImpl(sessionObj, oxfolderAccess);
+		final OXFolderManager manager = OXFolderManager.getInstance(sessionObj, oxfolderAccess);
 		try {
 			if (insert) {
 				if (folderobject.containsParentFolderID()) {
@@ -379,7 +378,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 						sessionObj, user), getFolderName(folderobject), Integer.valueOf(ctx.getContextId()));
 			}
 			final long lastModified = System.currentTimeMillis();
-			new OXFolderManagerImpl(sessionObj, oxfolderAccess).deleteFolder(folderobject, false, lastModified);
+			OXFolderManager.getInstance(sessionObj, oxfolderAccess).deleteFolder(folderobject, false, lastModified);
 			return folderobject.getObjectID();
 		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));

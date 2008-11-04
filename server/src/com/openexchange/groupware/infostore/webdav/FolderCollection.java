@@ -83,7 +83,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -148,7 +147,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		Connection con = null;
 		try {
 			con = provider.getWriteConnection(getSession().getContext());
-			final OXFolderManager oxma = new OXFolderManagerImpl(getSession(), con, con);
+			final OXFolderManager oxma = OXFolderManager.getInstance(getSession(), con, con);
 			oxma.deleteFolder(new FolderObject(id), true, System.currentTimeMillis());
 			//oxfa.deleteFolder(id, getSession(),con, con, true,System.currentTimeMillis()); // FIXME
 			exists = false;
@@ -485,7 +484,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			try {
 				
 				writeCon = provider.getWriteConnection(ctx);
-				final OXFolderManager oxma = new OXFolderManagerImpl(getSession(), writeCon, writeCon);
+				final OXFolderManager oxma = OXFolderManager.getInstance(getSession(), writeCon, writeCon);
 				oxma.updateFolder(folder, true, System.currentTimeMillis());
 				//oxfa.updateMoveRenameFolder(folder, session, true, folder.getLastModified().getTime(), writeCon, writeCon);
 			} catch (final OXFolderException x) {
@@ -514,7 +513,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			
 			try {
 				writeCon = provider.getWriteConnection(ctx);
-				final OXFolderManager oxma = new OXFolderManagerImpl(getSession(), writeCon, writeCon);
+				final OXFolderManager oxma = OXFolderManager.getInstance(getSession(), writeCon, writeCon);
 				folder = oxma.createFolder(folder, true, System.currentTimeMillis());
 				//oxfa.createFolder(folder, session, true, writeCon, writeCon, true);
 				setId(folder.getObjectID());

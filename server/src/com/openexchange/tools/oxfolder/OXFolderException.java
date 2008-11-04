@@ -592,17 +592,15 @@ public class OXFolderException extends OXException {
 				"One or more parent folders are not visible to user %1$s member of group %2$s and %3$s is not allowed to add necessary permission to affected folder(s).",
 				Category.USER_INPUT, 80),
 		/**
-		 * One or more subfolders' visibility cannot be took away for removed
-		 * user %1$s.
+		 * One or more subfolders are still visible to user %1$s.
 		 */
-		SUBFOLDER_STILL_VISIBLE_USER("One or more subfolders' visibility cannot be took away for removed user %1$s.",
+		SUBFOLDER_STILL_VISIBLE_WARNING("One or more subfolders are still visible to user %1$s.",
 				Category.WARNING, 81),
 		/**
-		 * One or more subfolders' visibility cannot be took away for removed
-		 * user %1$s member of group %2$s.
+		 * One or more subfolders are still visible to removed user %1$s member of group %2$s.
 		 */
 		SUBFOLDER_STILL_VISIBLE_GROUP(
-				"One or more subfolders' visibility cannot be took away for removed user %1$s member of group %2$s.",
+				"One or more subfolders are still visible to removed user %1$s member of group %2$s.",
 				Category.WARNING, 82),
 		/**
 		 * One or more parents' visibility cannot be took away for removed user

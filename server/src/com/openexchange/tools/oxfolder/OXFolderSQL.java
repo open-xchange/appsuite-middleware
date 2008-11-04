@@ -521,8 +521,8 @@ public final class OXFolderSQL {
 	}
 
 	private static final String SQL_ADD_PERMS = "INSERT INTO oxfolder_permissions"
-			+ " (cid, fuid, permission_id, group_flag, fp, orp, owp, odp, admin_flag)"
-			+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			+ " (cid, fuid, permission_id, group_flag, fp, orp, owp, odp, admin_flag, system)"
+			+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 	/**
 	 * Inserts a single folder permission.
@@ -545,6 +545,8 @@ public final class OXFolderSQL {
 	 * @param isAdmin
 	 *            <code>true</code> if permission ID is a folder administrator;
 	 *            otherwise <code>false</code>
+	 * @param system
+	 *            The system bit mask
 	 * @param writeCon
 	 *            A connection with write capability; may be <code>null</code>
 	 *            to fetch from pool
@@ -559,8 +561,8 @@ public final class OXFolderSQL {
 	 */
 	public static boolean addSinglePermission(final int folderId, final int permissionId, final boolean isGroup,
 			final int folderPermission, final int objectReadPermission, final int objectWritePermission,
-			final int objectDeletePermission, final boolean isAdmin, final Connection writeCon, final Context ctx)
-			throws DBPoolingException, SQLException {
+			final int objectDeletePermission, final boolean isAdmin, final int system, final Connection writeCon,
+			final Context ctx) throws DBPoolingException, SQLException {
 		Connection wc = writeCon;
 		boolean closeWriteCon = false;
 		PreparedStatement stmt = null;
@@ -580,24 +582,26 @@ public final class OXFolderSQL {
 			stmt.setInt(pos++, objectWritePermission);
 			stmt.setInt(pos++, objectDeletePermission);
 			stmt.setInt(pos++, isAdmin ? 1 : 0);
+			stmt.setInt(pos++, system);
 			return (stmt.executeUpdate() == 1);
 		} finally {
 			closeResources(null, stmt, closeWriteCon ? wc : null, false, ctx);
 		}
 	}
 
-	private static final String SQL_REMOVE_PERM = "DELETE FROM oxfolder_permissions"
-			+ " WHERE cid = ? AND fuid = ? AND permission_id = ?";
+	private static final String SQL_REM_SINGLE_SYS_PERM = "DELETE FROM oxfolder_permissions "
+			+ "WHERE cid = ? AND fuid = ? AND permission_id = ? AND system = 1";
 
 	/**
-	 * Removes a single permission.
+	 * Deletes a single system permission
 	 * 
 	 * @param folderId
 	 *            The folder ID
 	 * @param permissionId
-	 *            The permission/entity ID (either a user or a group ID)
+	 *            The entity ID; either user or group ID
 	 * @param writeCon
-	 *            A connection with write capability/access
+	 *            A connection with write capability; may be <code>null</code>
+	 *            to fetch from pool
 	 * @param ctx
 	 *            The context
 	 * @return <code>true</code> if corresponding entry was successfully
@@ -607,8 +611,8 @@ public final class OXFolderSQL {
 	 * @throws SQLException
 	 *             If a SQL error occurred
 	 */
-	public static boolean removeSinglePermission(final int folderId, final int permissionId, final Connection writeCon,
-			final Context ctx) throws DBPoolingException, SQLException {
+	public static boolean deleteSingleSystemPermission(final int folderId, final int permissionId,
+			final Connection writeCon, final Context ctx) throws DBPoolingException, SQLException {
 		Connection wc = writeCon;
 		boolean closeWriteCon = false;
 		PreparedStatement stmt = null;
@@ -617,12 +621,49 @@ public final class OXFolderSQL {
 				wc = DBPool.pickupWriteable(ctx);
 				closeWriteCon = true;
 			}
-			stmt = wc.prepareStatement(SQL_REMOVE_PERM);
+			stmt = wc.prepareStatement(SQL_REM_SINGLE_SYS_PERM);
 			int pos = 1;
 			stmt.setInt(pos++, ctx.getContextId());
 			stmt.setInt(pos++, folderId);
 			stmt.setInt(pos++, permissionId);
 			return (stmt.executeUpdate() == 1);
+		} finally {
+			closeResources(null, stmt, closeWriteCon ? wc : null, false, ctx);
+		}
+	}
+
+	private static final String SQL_REM_ALL_SYS_PERM = "DELETE FROM oxfolder_permissions "
+			+ "WHERE cid = ? AND fuid = ? AND system = 1";
+
+	/**
+	 * Deletes all system permission from specified folder
+	 * 
+	 * @param folderId
+	 *            The folder ID
+	 * @param writeCon
+	 *            A writable connection
+	 * @param ctx
+	 *            The context
+	 * @throws DBPoolingException
+	 *             If a pooling error occurred
+	 * @throws SQLException
+	 *             If a SQL error occurred
+	 */
+	public static void deleteAllSystemPermission(final int folderId, final Connection writeCon, final Context ctx)
+			throws DBPoolingException, SQLException {
+		Connection wc = writeCon;
+		boolean closeWriteCon = false;
+		PreparedStatement stmt = null;
+		try {
+			if (wc == null) {
+				wc = DBPool.pickupWriteable(ctx);
+				closeWriteCon = true;
+			}
+			stmt = wc.prepareStatement(SQL_REM_ALL_SYS_PERM);
+			int pos = 1;
+			stmt.setInt(pos++, ctx.getContextId());
+			stmt.setInt(pos++, folderId);
+			stmt.executeUpdate();
 		} finally {
 			closeResources(null, stmt, closeWriteCon ? wc : null, false, ctx);
 		}
@@ -725,7 +766,8 @@ public final class OXFolderSQL {
 
 	private static final String SQL_INSERT_NEW_FOLDER = "INSERT INTO oxfolder_tree VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-	private static final String SQL_INSERT_NEW_PERMISSIONS = "INSERT INTO oxfolder_permissions (cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag) VALUES (?,?,?,?,?,?,?,?,?)";
+	private static final String SQL_INSERT_NEW_PERMISSIONS = "INSERT INTO oxfolder_permissions "
+			+ "(cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag) " + "VALUES (?,?,?,?,?,?,?,?,?)";
 
 	private static final String SQL_UPDATE_PARENT_SUBFOLDER_FLAG = "UPDATE oxfolder_tree SET subfolder_flag = 1, changing_date = ? WHERE cid = ? AND fuid = ?";
 
@@ -875,7 +917,7 @@ public final class OXFolderSQL {
 	private static final String SQL_UPDATE_WITHOUT_FOLDERNAME = "UPDATE oxfolder_tree SET changing_date = ?, changed_from = ?, "
 			+ "permission_flag = ?, module = ? WHERE cid = ? AND fuid = ?";
 
-	private static final String SQL_DELETE_EXISTING_PERMISSIONS = "DELETE FROM oxfolder_permissions WHERE cid = ? AND fuid = ?";
+	private static final String SQL_DELETE_EXISTING_PERMISSIONS = "DELETE FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND system = 0";
 
 	static void updateFolderSQL(final int userId, final FolderObject folderObj, final long lastModified,
 			final Context ctx, final Connection writeConArg) throws SQLException, DBPoolingException {
@@ -938,7 +980,7 @@ public final class OXFolderSQL {
 					stmt = null;
 				}
 				/*
-				 * Delete old permissions
+				 * Delete old non-system-permissions
 				 */
 				stmt = writeCon.prepareStatement(SQL_DELETE_EXISTING_PERMISSIONS);
 				pos = 1;
@@ -948,13 +990,19 @@ public final class OXFolderSQL {
 				stmt.close();
 				stmt = null;
 				/*
-				 * Insert new permissions
+				 * Insert new non-system-permissions
 				 */
 				stmt = writeCon.prepareStatement(SQL_INSERT_NEW_PERMISSIONS);
 				final int permissionsSize = folderObj.getPermissions().size();
 				final Iterator<OCLPermission> iter = folderObj.getPermissions().iterator();
-				for (int i = 0; i < permissionsSize; i++) {
+				NextPerm: for (int i = 0; i < permissionsSize; i++) {
 					final OCLPermission oclPerm = iter.next();
+					if (oclPerm.isSystem()) {
+						/*
+						 * Don't write system-permission
+						 */
+						continue NextPerm;
+					}
 					pos = 1;
 					stmt.setInt(pos++, ctx.getContextId());
 					stmt.setInt(pos++, folderObj.getObjectID());
@@ -1384,6 +1432,50 @@ public final class OXFolderSQL {
 	 * --------------
 	 */
 
+	private static final String TMPL_FOLDER_TABLE = "#FOLDER#";
+
+	private static final String TMPL_PERM_TABLE = "#PERM#";
+
+	private static final String TMPL_IDS = "#IDS#";
+
+	private static final String SQL_DROP_SYS_PERMS = "DELETE FROM " + TMPL_PERM_TABLE
+			+ " WHERE cid = ? AND permission_id = ? AND system > 0";
+
+	/**
+	 * Drops all system-permissions belonging to specified entity in given
+	 * context
+	 * 
+	 * @param entity
+	 *            The entity
+	 * @param permTable
+	 *            The permission table
+	 * @param writeConArg
+	 *            The writable connection
+	 * @param ctx
+	 *            The context
+	 * @throws DBPoolingException
+	 *             If a pooling error occurs
+	 * @throws SQLException
+	 *             If a SQL error occurs
+	 */
+	static void cleanseSystemPermissions(final int entity, final String permTable, final Connection writeConArg,
+			final Context ctx) throws DBPoolingException, SQLException {
+		Connection writeCon = writeConArg;
+		boolean createReadCon = false;
+		PreparedStatement stmt = null;
+		try {
+			if (writeCon == null) {
+				writeCon = DBPool.pickupWriteable(ctx);
+				createReadCon = true;
+			}
+			stmt = writeCon.prepareStatement(SQL_DROP_SYS_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
+			stmt.setInt(1, ctx.getContextId());
+			stmt.executeUpdate();
+		} finally {
+			closeResources(null, stmt, createReadCon ? writeCon : null, false, ctx);
+		}
+	}
+
 	private static final String SQL_GET_CONTEXT_MAILADMIN = "SELECT user FROM user_setting_admin WHERE cid = ?";
 
 	static int getContextMailAdmin(final Connection readConArg, final Context ctx) throws DBPoolingException,
@@ -1409,13 +1501,10 @@ public final class OXFolderSQL {
 		}
 	}
 
-	private static final String SQL_SEL_PERMS = "SELECT ot.fuid, ot.type FROM #PERM# AS op JOIN #FOLDER# AS ot ON op.fuid = ot.fuid AND op.cid = ? AND ot.cid = ? WHERE op.permission_id IN #IDS# GROUP BY ot.fuid";
-
-	private static final String TMPL_FOLDER_TABLE = "#FOLDER#";
-
-	private static final String TMPL_PERM_TABLE = "#PERM#";
-
-	private static final String TMPL_IDS = "#IDS#";
+	private static final String SQL_SEL_PERMS = "SELECT ot.fuid, ot.type FROM " + TMPL_PERM_TABLE + " AS op JOIN "
+			+ TMPL_FOLDER_TABLE
+			+ " AS ot ON op.fuid = ot.fuid AND op.cid = ? AND ot.cid = ? WHERE op.permission_id IN " + TMPL_IDS
+			+ " GROUP BY ot.fuid";
 
 	/**
 	 * Deletes all permissions assigned to context's mail admin from given
@@ -1515,7 +1604,8 @@ public final class OXFolderSQL {
 		}
 	}
 
-	private static final String SQL_DELETE_PERMS = "DELETE FROM #PERM# WHERE cid = ? AND fuid = ? AND permission_id = ?";
+	private static final String SQL_DELETE_PERMS = "DELETE FROM " + TMPL_PERM_TABLE
+			+ " WHERE cid = ? AND fuid = ? AND permission_id = ?";
 
 	private static void deletePermissions(final Set<Integer> deletePerms, final int entity, final String permTable,
 			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
@@ -1545,9 +1635,11 @@ public final class OXFolderSQL {
 		}
 	}
 
-	private static final String SQL_REASSIGN_PERMS = "UPDATE #PERM# SET permission_id = ?, group_flag = 0 WHERE cid = ? AND fuid = ? AND permission_id = ?";
+	private static final String SQL_REASSIGN_PERMS = "UPDATE " + TMPL_PERM_TABLE
+			+ " SET permission_id = ?, group_flag = 0 WHERE cid = ? AND fuid = ? AND permission_id = ?";
 
-	private static final String SQL_REASSIGN_UPDATE_TIMESTAMP = "UPDATE #FOLDER# SET changed_from = ?, changing_date = ? WHERE cid = ? AND fuid = ?";
+	private static final String SQL_REASSIGN_UPDATE_TIMESTAMP = "UPDATE " + TMPL_FOLDER_TABLE
+			+ " SET changed_from = ?, changing_date = ? WHERE cid = ? AND fuid = ?";
 
 	private static void reassignPermissions(final Set<Integer> reassignPerms, final int entity, final int mailAdmin,
 			final long lastModified, final String folderTable, final String permTable, final Connection readConArg,
@@ -1641,7 +1733,8 @@ public final class OXFolderSQL {
 		}
 	}
 
-	private static final String SQL_REASSIGN_DEL_PERM = "DELETE FROM #PERM# WHERE cid = ? AND permission_id = ? AND fuid = ?";
+	private static final String SQL_REASSIGN_DEL_PERM = "DELETE FROM " + TMPL_PERM_TABLE
+			+ " WHERE cid = ? AND permission_id = ? AND fuid = ?";
 
 	private static void deleteSingleEntityPermission(final int entity, final int fuid, final String permTable,
 			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
@@ -1663,7 +1756,9 @@ public final class OXFolderSQL {
 		}
 	}
 
-	private static final String SQL_REASSIGN_UPDATE_PERM = "UPDATE #PERM# SET fp = ?, orp = ?, owp = ?, odp = ?, admin_flag = ?, group_flag = ? WHERE cid = ? AND permission_id = ? AND fuid = ?";
+	private static final String SQL_REASSIGN_UPDATE_PERM = "UPDATE "
+			+ TMPL_PERM_TABLE
+			+ " SET fp = ?, orp = ?, owp = ?, odp = ?, admin_flag = ?, group_flag = ? WHERE cid = ? AND permission_id = ? AND fuid = ?";
 
 	private static void updateSingleEntityPermission(final OCLPermission mergedPerm, final int mailAdmin,
 			final int fuid, final String permTable, final Connection writeConArg, final Context ctx)
@@ -1692,7 +1787,8 @@ public final class OXFolderSQL {
 		}
 	}
 
-	private static final String SQL_REASSIGN_SEL_PERM = "SELECT fp, orp, owp, odp, admin_flag FROM #PERM# WHERE cid = ? AND permission_id = ? AND fuid = ?";
+	private static final String SQL_REASSIGN_SEL_PERM = "SELECT fp, orp, owp, odp, admin_flag FROM " + TMPL_PERM_TABLE
+			+ " WHERE cid = ? AND permission_id = ? AND fuid = ?";
 
 	private static OCLPermission getMergedPermission(final int entity, final int mailAdmin, final int fuid,
 			final String permTable, final Connection readConArg, final Context ctx) throws SQLException,

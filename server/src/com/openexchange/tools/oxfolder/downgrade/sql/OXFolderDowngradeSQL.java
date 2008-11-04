@@ -201,6 +201,46 @@ public final class OXFolderDowngradeSQL {
 		super();
 	}
 
+	private static final String SQL_DROP_MODULE_SYS_PERMS = "DELETE op FROM " + RPL_PERM + " AS op JOIN " + RPL_FOLDER
+			+ " AS ot ON op.fuid = ot.fuid AND op.cid = ? AND ot.cid = ? "
+			+ "WHERE ot.module = ? AND ot.type = ? AND op.permission_id = ? AND op.system > 0";
+
+	/**
+	 * Drops all system permissions from public folders of given module
+	 * 
+	 * @param module
+	 *            The module
+	 * @param entity
+	 *            The entity whose system permissions shall be removed
+	 * @param cid
+	 *            The context ID
+	 * @param folderTable
+	 *            The folder table
+	 * @param permTable
+	 *            The permission table
+	 * @param writeCon
+	 *            A writable connection
+	 * @throws SQLException
+	 *             If a SQL error occurs
+	 */
+	public static void dropModuleSystemPermission(final int module, final int entity, final int cid,
+			final String folderTable, final String permTable, final Connection writeCon) throws SQLException {
+		PreparedStatement stmt = null;
+		try {
+			stmt = writeCon.prepareStatement(SQL_DROP_MODULE_SYS_PERMS.replaceFirst(RPL_PERM, permTable).replaceFirst(
+					RPL_FOLDER, folderTable));
+			int pos = 1;
+			stmt.setInt(pos++, cid);
+			stmt.setInt(pos++, cid);
+			stmt.setInt(pos++, module);
+			stmt.setInt(pos++, FolderObject.PUBLIC);
+			stmt.setInt(pos++, entity);
+			stmt.executeUpdate();
+		} finally {
+			closeSQLStuff(null, stmt);
+		}
+	}
+
 	private static final String SQL_SEL_MOD_PRIV_FLD = "SELECT ot.fuid FROM " + RPL_FOLDER
 			+ " AS ot WHERE ot.cid = ? AND ot.type = ? AND ot.created_from = ? AND ot.module = ?"
 			+ " AND ot.default_flag = 0 GROUP BY ot.fuid";

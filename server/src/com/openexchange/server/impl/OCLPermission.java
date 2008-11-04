@@ -66,15 +66,15 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	 * Permisson Matrix # 2 4 8 16 32 64 128 #WERT
 	 * 
 	 * Folder z 0 Folder +r 2 2 Folder +co 2 4 6 Folder +csf 2 4 8 14 Folder
-	 * admin*a 128
+	 * admina 128
 	 * 
-	 * Object z 0 Object +ro 2 2 Object +ra 2 4 6 Object admin*r 128
+	 * Object z 0 Object +ro 2 2 Object +ra 2 4 6 Object adminr 128
 	 * 
-	 * Object z 0 Object +wo 2 2 Object +wa 2 4 6 Object admin*w 128
+	 * Object z 0 Object +wo 2 2 Object +wa 2 4 6 Object adminw 128
 	 * 
-	 * Object +do 2 2 Object +da 2 4 4 Object admin*d 128
+	 * Object +do 2 2 Object +da 2 4 4 Object admind 128
 	 * 
-	 * (*a) to delete a folder the user needs permissons to delete every object
+	 * (a) to delete a folder the user needs permissons to delete every object
 	 * in the folder!
 	 * 
 	 * We must be able to: - set the owner - set role (only if principal ==
@@ -97,9 +97,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	 * 
 	 * puid = unique permission id pid = permission id (folder.pid) role = role
 	 * entity = entity (uid, group, ...) sealed = sealed (0 / n) fp = folder
-	 * permission orp = object read permission owp = object write permission odp =
-	 * object delete permission
-	 * 
+	 * permission orp = object read permission owp = object write permission odp
+	 * = object delete permission
 	 */
 
 	private static final char CHAR_DOT = '.';
@@ -141,6 +140,11 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
 	public static final int ALL_GROUPS_AND_USERS = 0;
 
+	/**
+	 * The bit for system flag
+	 */
+	public static final int SYSTEM_SYSTEM = 1;
+
 	private String name;
 
 	private int fuid;
@@ -154,6 +158,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	private int owp;
 
 	private int odp;
+
+	private int system;
 
 	/**
 	 * This property defines if this permission declares the owner to be the
@@ -202,6 +208,17 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		odp = 0;
 		folderAdmin = false;
 		groupPermission = false;
+		system = 0;
+	}
+
+	/**
+	 * Sets the system bit mask
+	 * 
+	 * @param system
+	 *            The system bit mask
+	 */
+	public void setSystem(final int system) {
+		this.system = system;
 	}
 
 	/**
@@ -260,8 +277,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	 * 
 	 * @param p
 	 *            The folder permission
-	 * @return <code>true</code> if given permission value could be
-	 *         successfully applied; otherwise <code>false</code>
+	 * @return <code>true</code> if given permission value could be successfully
+	 *         applied; otherwise <code>false</code>
 	 */
 	public boolean setFolderPermission(final int p) {
 		if (validatePermission(p)) {
@@ -276,8 +293,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	 * 
 	 * @param p
 	 *            The read permission
-	 * @return <code>true</code> if given permission value could be
-	 *         successfully applied; otherwise <code>false</code>
+	 * @return <code>true</code> if given permission value could be successfully
+	 *         applied; otherwise <code>false</code>
 	 */
 	public boolean setReadObjectPermission(final int p) {
 		if (validatePermission(p)) {
@@ -292,8 +309,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	 * 
 	 * @param p
 	 *            The write permission
-	 * @return <code>true</code> if given permission value could be
-	 *         successfully applied; otherwise <code>false</code>
+	 * @return <code>true</code> if given permission value could be successfully
+	 *         applied; otherwise <code>false</code>
 	 */
 	public boolean setWriteObjectPermission(final int p) {
 		if (validatePermission(p)) {
@@ -308,8 +325,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	 * 
 	 * @param p
 	 *            The delete permission
-	 * @return <code>true</code> if given permission value could be
-	 *         successfully applied; otherwise <code>false</code>
+	 * @return <code>true</code> if given permission value could be successfully
+	 *         applied; otherwise <code>false</code>
 	 */
 	public boolean setDeleteObjectPermission(final int p) {
 		if (validatePermission(p)) {
@@ -371,8 +388,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	 * 
 	 * @param p
 	 *            The permission value to validate
-	 * @return <code>true</code> if value is valid; otherwise
-	 *         <code>false</code>
+	 * @return <code>true</code> if value is valid; otherwise <code>false</code>
 	 */
 	private final boolean validatePermission(final int p) {
 		return ((p % 2 == 0 && (p <= 128 && p >= 0)));
@@ -480,8 +496,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	/**
 	 * Checks if this permission grants at least own object read access
 	 * 
-	 * @return <code>true</code> if own object read access is granted;
-	 *         otherwise <code>false</code>
+	 * @return <code>true</code> if own object read access is granted; otherwise
+	 *         <code>false</code>
 	 */
 	public boolean canReadOwnObjects() {
 		return (getReadPermission() >= READ_OWN_OBJECTS);
@@ -490,8 +506,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	/**
 	 * Checks if this permission grants at least all object read access
 	 * 
-	 * @return <code>true</code> if all object read access is granted;
-	 *         otherwise <code>false</code>
+	 * @return <code>true</code> if all object read access is granted; otherwise
+	 *         <code>false</code>
 	 */
 	public boolean canReadAllObjects() {
 		return (getReadPermission() >= READ_ALL_OBJECTS);
@@ -565,6 +581,25 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	}
 
 	/**
+	 * Gets the system bit mask
+	 * 
+	 * @return The system bit mask
+	 */
+	public int getSystem() {
+		return system;
+	}
+
+	/**
+	 * Checks if this permission's system bit mask indicates the system flag
+	 * 
+	 * @return <code>true</code> if system flag is set; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isSystem() {
+		return (system & SYSTEM_SYSTEM) == SYSTEM_SYSTEM;
+	}
+
+	/**
 	 * Compares this permission's sole permission values to the ones in
 	 * <code>op</code>.
 	 * 
@@ -592,7 +627,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		}
 		final OCLPermission op = (OCLPermission) other;
 		return (entity == op.entity) && (fuid == op.fuid) && (fp == op.fp) && (orp == op.orp) && (owp == op.owp)
-				&& (odp == op.odp) && (folderAdmin == op.folderAdmin) && (groupPermission == op.groupPermission);
+				&& (odp == op.odp) && (folderAdmin == op.folderAdmin) && (groupPermission == op.groupPermission)
+				&& (system == op.system);
 	}
 
 	@Override
@@ -606,14 +642,10 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		hash = 31 * hash + odp;
 		hash = 31 * hash + (folderAdmin ? 1 : 0);
 		hash = 31 * hash + (groupPermission ? 1 : 0);
+		hash = 31 * hash + system;
 		return hash;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer(50);
@@ -623,22 +655,12 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		return sb.toString();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#clone()
-	 */
 	@SuppressWarnings("cast")
 	@Override
 	public Object clone() throws CloneNotSupportedException {
 		return ((OCLPermission) super.clone());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.tools.OXCloneable#deepClone()
-	 */
 	public OCLPermission deepClone() {
 		try {
 			return ((OCLPermission) super.clone());

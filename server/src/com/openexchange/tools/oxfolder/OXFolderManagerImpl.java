@@ -94,19 +94,17 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
-import com.openexchange.tools.oxfolder.treeconsistency.CheckParentPermission;
-import com.openexchange.tools.oxfolder.treeconsistency.CheckParentPermissionOnRemove;
-import com.openexchange.tools.oxfolder.treeconsistency.CheckSubfolderPermissionOnRemove;
+import com.openexchange.tools.oxfolder.treeconsistency.CheckPermissionOnInsert;
+import com.openexchange.tools.oxfolder.treeconsistency.CheckPermissionOnRemove;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link OXFolderManagerImpl} implements interface
- * <code>com.openexchange.tools.oxfolder.OXFolderManager</code>
+ * {@link OXFolderManagerImpl} - The {@link OXFolderManager} implementation
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OXFolderManagerImpl implements OXFolderManager {
+final class OXFolderManagerImpl extends OXFolderManager {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(OXFolderManagerImpl.class);
@@ -136,7 +134,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	 * @throws OXFolderException
 	 *             If instantiation fails
 	 */
-	public OXFolderManagerImpl(final Session session) throws OXFolderException {
+	OXFolderManagerImpl(final Session session) throws OXFolderException {
 		this(session, null, null);
 	}
 
@@ -148,7 +146,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	 * @throws OXFolderException
 	 *             If instantiation fails
 	 */
-	public OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess) throws OXFolderException {
+	OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess) throws OXFolderException {
 		this(session, oxfolderAccess, null, null);
 	}
 
@@ -159,7 +157,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	 * @throws OXFolderException
 	 *             If instantiation fails
 	 */
-	public OXFolderManagerImpl(final Session session, final Connection readCon, final Connection writeCon)
+	OXFolderManagerImpl(final Session session, final Connection readCon, final Connection writeCon)
 			throws OXFolderException {
 		this(session, null, readCon, writeCon);
 	}
@@ -171,7 +169,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	 * @throws OXFolderException
 	 *             If instantiation fails
 	 */
-	public OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess, final Connection readCon,
+	OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess, final Connection readCon,
 			final Connection writeCon) throws OXFolderException {
 		super();
 		this.session = session;
@@ -191,9 +189,10 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		if (oxfolderAccess != null) {
 			return oxfolderAccess;
 		}
-		return (oxfolderAccess = new OXFolderAccess(readCon, ctx));
+		return (oxfolderAccess = new OXFolderAccess(writeCon, ctx));
 	}
 
+	@Override
 	public FolderObject createFolder(final FolderObject folderObj, final boolean checkPermissions, final long createTime)
 			throws OXException {
 		/*
@@ -296,8 +295,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		OXFolderUtility.checkFolderPermissions(folderObj, user.getId(), ctx);
 		OXFolderUtility.checkPermissionsAgainstUserConfigs(folderObj, ctx);
 		if (FolderObject.PUBLIC == folderObj.getType()) {
-			new CheckParentPermission(session, writeCon, ctx).checkParentPermissions(parentFolder.getObjectID(),
-					folderObj.getPermissionsAsArray(), createTime, true);
+			new CheckPermissionOnInsert(session, writeCon, ctx).checkParentPermissions(parentFolder.getObjectID(),
+					folderObj.getNonSystemPermissionsAsArray(), createTime);
 		}
 		/*
 		 * Check if duplicate folder exists
@@ -421,6 +420,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		}
 	}
 
+	@Override
 	public FolderObject updateFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified)
 			throws OXException {
 		if (checkPermissions) {
@@ -467,15 +467,10 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			}
 			rename(fo, lastModified);
 		} else if (performMove) {
-			move(fo.getObjectID(), fo.getParentFolderID(), lastModified);
 			/*
-			 * Check for parent folder permission consistency
+			 * Perform move
 			 */
-			final FolderObject storageObj = getFolderFromMaster(fo.getObjectID());
-			if (FolderObject.PUBLIC == storageObj.getType()) {
-				new CheckParentPermission(session, writeCon, ctx).checkParentPermissions(
-						storageObj.getParentFolderID(), storageObj.getPermissionsAsArray(), lastModified, true);
-			}
+			move(fo.getObjectID(), fo.getParentFolderID(), lastModified);
 		}
 		/*
 		 * Finally update cache
@@ -603,19 +598,14 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		if (FolderObject.PUBLIC == folderObj.getType()) {
 			{
 				final OCLPermission[] removedPerms = OXFolderUtility.getPermissionsWithoutFolderAccess(folderObj
-						.getPermissionsAsArray(), storageObj.getPermissionsAsArray());
+						.getNonSystemPermissionsAsArray(), storageObj.getNonSystemPermissionsAsArray());
 				if (removedPerms.length > 0) {
-					final CheckSubfolderPermissionOnRemove tmp = new CheckSubfolderPermissionOnRemove(session,
-							writeCon, ctx);
-					tmp.checkSubfolderPermissionsOnRemove(folderObj.getObjectID(), removedPerms, folderObj
-							.getPermissionsAsArray(), lastModified, true);
-					folderObj.setPermissionsAsArray(tmp.getNewPerms());
-					new CheckParentPermissionOnRemove(session, writeCon, ctx).checkParentPermissionsOnRemove(storageObj
-							.getParentFolderID(), folderObj.getObjectID(), removedPerms, lastModified, true);
+					new CheckPermissionOnRemove(session, writeCon, ctx).checkPermissionsOnUpdate(folderObj
+							.getObjectID(), removedPerms, lastModified);
 				}
 			}
-			new CheckParentPermission(session, writeCon, ctx).checkParentPermissions(storageObj.getParentFolderID(),
-					folderObj.getPermissionsAsArray(), lastModified, true);
+			new CheckPermissionOnInsert(session, writeCon, ctx).checkParentPermissions(storageObj.getParentFolderID(),
+					folderObj.getNonSystemPermissionsAsArray(), lastModified);
 		}
 		boolean rename = false;
 		if (folderObj.containsFolderName() && !storageObj.getFolderName().equals(folderObj.getFolderName())) {
@@ -958,6 +948,17 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		}
 		/*
+		 * First treat as a delete prior to actual move
+		 */
+		try {
+			processDeletedFolderThroughMove(storageSrc, new CheckPermissionOnRemove(session, writeCon, ctx),
+					lastModified);
+		} catch (final DBPoolingException e) {
+			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+		} catch (final SQLException e) {
+			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+		}
+		/*
 		 * Call SQL move
 		 */
 		try {
@@ -968,6 +969,17 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+		}
+		/*
+		 * Now treat as an insert after actual move
+		 */
+		try {
+			processInsertedFolderThroughMove(getFolderFromMaster(folderId), new CheckPermissionOnInsert(session,
+					writeCon, ctx), lastModified);
+		} catch (final DBPoolingException e) {
+			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+		} catch (final SQLException e) {
+			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		}
 		/*
 		 * Update last-modified time stamps
@@ -993,6 +1005,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 						wc = DBPool.pickupWriteable(ctx);
 					}
 					FolderCacheManager.getInstance().loadFolderObject(storageSrc.getParentFolderID(), ctx, wc);
+					FolderCacheManager.getInstance().loadFolderObject(storageDest.getParentFolderID(), ctx, wc);
 				} finally {
 					if (create && wc != null) {
 						DBPool.closeWriterSilent(ctx, wc);
@@ -1004,6 +1017,35 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		}
 	}
 
+	private void processDeletedFolderThroughMove(final FolderObject folder, final CheckPermissionOnRemove checker,
+			final long lastModified) throws DBPoolingException, SQLException, OXException {
+		final int folderId = folder.getObjectID();
+		final List<Integer> subflds = FolderObject.getSubfolderIds(folderId, ctx, writeCon);
+		for (final Integer subfld : subflds) {
+			processDeletedFolderThroughMove(getOXFolderAccess().getFolderObject(subfld.intValue()), checker,
+					lastModified);
+		}
+		checker.checkPermissionsOnDelete(folder.getParentFolderID(), folderId, folder.getNonSystemPermissionsAsArray(),
+				lastModified);
+		/*
+		 * Now strip all system permissions
+		 */
+		OXFolderSQL.deleteAllSystemPermission(folderId, writeCon, ctx);
+	}
+
+	private void processInsertedFolderThroughMove(final FolderObject folder, final CheckPermissionOnInsert checker,
+			final long lastModified) throws DBPoolingException, SQLException, OXException {
+		final int folderId = folder.getObjectID();
+		checker.checkParentPermissions(folder.getParentFolderID(), folder.getNonSystemPermissionsAsArray(),
+				lastModified);
+		final List<Integer> subflds = FolderObject.getSubfolderIds(folderId, ctx, writeCon);
+		for (final Integer subfld : subflds) {
+			processInsertedFolderThroughMove(getOXFolderAccess().getFolderObject(subfld.intValue()), checker,
+					lastModified);
+		}
+	}
+
+	@Override
 	public FolderObject clearFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified)
 			throws OXException {
 		if (fo.getObjectID() <= 0) {
@@ -1011,7 +1053,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		}
 		if (!fo.containsParentFolderID() || fo.getParentFolderID() <= 0) {
 			/*
-			 * Incomplete, wherby its existence is checked
+			 * Incomplete, whereby its existence is checked
 			 */
 			fo.setParentFolderID(getOXFolderAccess().getParentFolderID(fo.getObjectID()));
 		} else {
@@ -1081,6 +1123,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		return fo;
 	}
 
+	@Override
 	public FolderObject deleteFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified)
 			throws OXException {
 		if (fo.getObjectID() <= 0) {
@@ -1147,9 +1190,13 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		}
 		/*
+		 * Remember folder type
+		 */
+		final int type = getOXFolderAccess().getFolderType(fo.getObjectID());
+		/*
 		 * Delete folders
 		 */
-		deleteValidatedFolders(deleteableFolders, lastModified);
+		deleteValidatedFolders(deleteableFolders, lastModified, type);
 		/*
 		 * Invalidate query caches
 		 */
@@ -1206,8 +1253,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void deleteValidatedFolders(final HashMap<Integer, HashMap<?, ?>> deleteableIDs, final long lastModified)
-			throws OXException {
+	private void deleteValidatedFolders(final HashMap<Integer, HashMap<?, ?>> deleteableIDs, final long lastModified,
+			final int type) throws OXException {
 		final int deleteableIDsSize = deleteableIDs.size();
 		final Iterator<Map.Entry<Integer, HashMap<?, ?>>> iter = deleteableIDs.entrySet().iterator();
 		for (int i = 0; i < deleteableIDsSize; i++) {
@@ -1218,13 +1265,13 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			 * Delete subfolders first, if any exist
 			 */
 			if (hashMap != null) {
-				deleteValidatedFolders(hashMap, lastModified);
+				deleteValidatedFolders(hashMap, lastModified, type);
 			}
-			deleteValidatedFolder(folderID.intValue(), lastModified);
+			deleteValidatedFolder(folderID.intValue(), lastModified, type);
 		}
 	}
 
-	private void deleteValidatedFolder(final int folderID, final long lastModified) throws OXException {
+	private void deleteValidatedFolder(final int folderID, final long lastModified, final int type) throws OXException {
 		/*
 		 * Delete folder
 		 */
@@ -1251,6 +1298,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			throw new OXFolderException(FolderCode.UNKNOWN_MODULE, Integer.valueOf(module), Integer.valueOf(ctx
 					.getContextId()));
 		}
+		final OCLPermission[] perms = getOXFolderAccess().getFolderObject(folderID).getPermissionsAsArray();
+		final int parent = getOXFolderAccess().getParentFolderID(folderID);
 		/*
 		 * Call SQL delete
 		 */
@@ -1260,6 +1309,13 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+		}
+		/*
+		 * Process system permissions
+		 */
+		if (FolderObject.PUBLIC == type) {
+			new CheckPermissionOnRemove(session, writeCon, ctx).checkPermissionsOnDelete(parent, folderID, perms,
+					lastModified);
 		}
 		/*
 		 * Remove from cache
@@ -1480,6 +1536,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	/**
 	 * This routine is called through AJAX' folder tests!
 	 */
+	@Override
 	public void cleanUpTestFolders(final int[] fuids, final Context ctx) {
 		for (int i = 0; i < fuids.length; i++) {
 			try {

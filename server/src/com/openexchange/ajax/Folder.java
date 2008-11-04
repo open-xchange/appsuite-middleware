@@ -116,7 +116,7 @@ import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
+import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -1675,7 +1675,7 @@ public class Folder extends SessionServlet {
 		String dataObj = "FAILED";
 		try {
 			final int[] delids = checkIntArrayParam(req, "del_ids");
-			final OXFolderManagerImpl oxma = new OXFolderManagerImpl(session);
+			final OXFolderManager oxma = OXFolderManager.getInstance(session);
 			oxma.cleanUpTestFolders(delids, ContextStorage.getStorageContext(session.getContextId()));
 			dataObj = "OK";
 		} catch (final Exception e) {
