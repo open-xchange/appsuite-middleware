@@ -54,6 +54,8 @@ import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import static com.openexchange.tools.events.EventAssertions.assertModificationEventWithOldObject;
 
 import java.sql.SQLException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -62,13 +64,20 @@ import java.util.List;
 import java.util.TimeZone;
 
 import junit.framework.TestCase;
+import junit.framework.TestResult;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONArray;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.search.AppointmentSearchObject;
+import com.openexchange.groupware.search.SearchObject;
 import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
 import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
@@ -80,10 +89,15 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.database.Database;
+import com.openexchange.ajax.request.AppointmentRequest;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.SearchFields;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -113,6 +127,7 @@ public class CalendarSqlTest extends TestCase {
     private CalendarFolderToolkit folders;
 
     private Session session;
+    private TestResult result;
 
     @Override
 	public void setUp() throws Exception {
@@ -158,6 +173,7 @@ public class CalendarSqlTest extends TestCase {
 	public void tearDown() throws OXException, SQLException {
         appointments.removeAll(user, clean);
         folders.removeAll(session, cleanFolders);
+        TestResult testResult = createResult();
         Init.stopServer();
     }
 
@@ -166,7 +182,7 @@ public class CalendarSqlTest extends TestCase {
         final CalendarDataObject cdao = appointments.buildRecurringAppointment();
         appointments.save( cdao );
         clean.add( cdao );
-
+        fail("Bumm!");
         final CalendarDataObject modified = new CalendarDataObject();
         modified.setStartDate(cdao.getStartDate());
         modified.setEndDate(cdao.getEndDate());
@@ -245,6 +261,249 @@ public class CalendarSqlTest extends TestCase {
         } catch (final SQLException x) {
             x.printStackTrace();
             fail(x.toString());
+        }
+    }
+
+    // Bug #11148
+    public void testShouldSurviveLoadingInvalidPattern() throws SQLException, OXException, DBPoolingException {
+        final CalendarDataObject cdao = appointments.buildRecurringAppointment();
+        
+        appointments.save( cdao );
+        clean.add( cdao );
+
+        invalidatePattern( cdao );
+
+        try {
+            CalendarDataObject reloaded = appointments.reload( cdao );
+            assertTrue(reloaded.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE);
+            assertTrue(reloaded.getEndDate().getTime() < System.currentTimeMillis()+240*3600000);
+            // Check load by list requests
+
+
+            final AppointmentSQLInterface sqlInterface = appointments.getCurrentAppointmentSQLInterface();
+            final Date SUPER_START = new Date(-2);
+            final Date SUPER_END = new Date(Long.MAX_VALUE);
+            final int[] COLS = new int[]{CalendarDataObject.OBJECT_ID, CalendarDataObject.START_DATE, CalendarDataObject.END_DATE, CalendarDataObject.FOLDER_ID, CalendarDataObject.USERS};
+            final int USER_ID = userId;
+            final int FOLDER_ID = cdao.getParentFolderID();
+            SearchIterator iter = sqlInterface.getActiveAppointments(USER_ID, SUPER_START, SUPER_END, COLS);
+            assertContains(iter, cdao);
+
+            iter = sqlInterface.getAppointmentsBetween(USER_ID, SUPER_START, SUPER_END, COLS, AppointmentObject.OBJECT_ID, null);
+            assertContains(iter, cdao);
+
+            iter = sqlInterface.getAppointmentsBetweenInFolder(FOLDER_ID, COLS, SUPER_START, SUPER_END, AppointmentObject.OBJECT_ID, null);
+            assertContains(iter, cdao);
+
+            AppointmentSearchObject search = new AppointmentSearchObject();
+            search.setFolder(cdao.getParentFolderID());
+            search.setPattern("*");
+            iter = sqlInterface.getAppointmentsByExtendedSearch(search, AppointmentObject.OBJECT_ID,  null, COLS);
+            assertContains(iter, cdao);
+
+            iter = sqlInterface.getFreeBusyInformation(USER_ID,Participant.USER, SUPER_START, SUPER_END);
+            assertContains(iter, cdao);
+
+            iter = sqlInterface.getModifiedAppointmentsBetween(USER_ID, SUPER_START, SUPER_END, COLS, SUPER_START, AppointmentObject.OBJECT_ID, null);
+            assertContains(iter, cdao);
+
+            iter = sqlInterface.getObjectsById(new int[][] {{cdao.getObjectID(), cdao.getParentFolderID()}}, COLS);
+            assertContains(iter, cdao);
+
+            iter = sqlInterface.searchAppointments("*", cdao.getParentFolderID(), AppointmentObject.OBJECT_ID ,null, COLS);
+            assertContains(iter, cdao);
+
+            sqlInterface.hasAppointmentsBetween(SUPER_START, new Date(SUPER_START.getTime() + 3600000l * 24 * 30));
+
+            // Check AppointmentRequest interface methods
+
+            StringBuilder cols = new StringBuilder();
+            for(int col : COLS) { cols.append(col).append(","); }
+            cols.setLength(cols.length()-1);
+            final String COLS_STRING = cols.toString();
+
+            // ALL
+            AppointmentRequest req = new AppointmentRequest(session, ctx);
+            JSONObject requestData = json(
+                    AJAXServlet.PARAMETER_COLUMNS, COLS_STRING,
+                    AJAXServlet.PARAMETER_FOLDERID, String.valueOf(cdao.getParentFolderID()),
+                    AJAXServlet.PARAMETER_START, String.valueOf(SUPER_START.getTime()),
+                    AJAXServlet.PARAMETER_END, String.valueOf(SUPER_END.getTime())
+            );
+            JSONArray arr = req.actionAll(requestData);
+            assertContains(arr, cdao);
+
+            // Recurrence Master
+            requestData.put(AppointmentRequest.RECURRENCE_MASTER, true);
+            arr = req.actionAll(requestData);
+            assertContains(arr, cdao);
+
+            // Freebusy
+            arr = req.actionFreeBusy(json(
+                    AJAXServlet.PARAMETER_ID, String.valueOf(userId),
+                    "type", String.valueOf(Participant.USER),
+                    AJAXServlet.PARAMETER_START, String.valueOf(SUPER_START.getTime()),
+                    AJAXServlet.PARAMETER_END, String.valueOf(SUPER_END.getTime())
+            ));
+            assertContainsAsJSONObject(arr, cdao);
+
+            // Get
+            JSONObject loaded = req.actionGet(json(
+                    AJAXServlet.PARAMETER_ID, String.valueOf(cdao.getObjectID()),
+                    AJAXServlet.PARAMETER_FOLDERID, String.valueOf(cdao.getParentFolderID())
+            ));
+            assertEquals(loaded.getInt("id"), cdao.getObjectID());
+
+            // Has
+            req.actionHas(json(
+                    AJAXServlet.PARAMETER_START, String.valueOf(SUPER_START.getTime()),
+                    AJAXServlet.PARAMETER_END, String.valueOf(SUPER_START.getTime() + 3600000l * 24 * 30)
+            ));
+
+            // List
+            JSONArray idArray = new JSONArray();
+            idArray.put(json(AJAXServlet.PARAMETER_ID, cdao.getObjectID(), AJAXServlet.PARAMETER_FOLDERID, cdao.getParentFolderID()));
+            JSONObject jsonRequest = json(
+                    AJAXServlet.PARAMETER_COLUMNS, COLS_STRING,
+                    AJAXServlet.PARAMETER_DATA, idArray
+            );
+            arr = req.actionList(jsonRequest);
+            assertContains(arr, cdao);
+            // Recurrence Master
+            jsonRequest.put(AppointmentRequest.RECURRENCE_MASTER, true);
+            arr = req.actionList(jsonRequest);
+            assertContains(arr, cdao);
+
+            // New Appointments Search
+            arr = req.actionNewAppointmentsSearch(json(
+                    AJAXServlet.PARAMETER_COLUMNS, COLS_STRING,
+                    AJAXServlet.PARAMETER_START, String.valueOf(SUPER_START.getTime()),
+                    AJAXServlet.PARAMETER_END, String.valueOf(SUPER_END.getTime()),
+                    "limit" , Integer.MAX_VALUE
+            ));
+            assertContains(arr, cdao);
+
+            // Search
+            requestData = json(
+                    AJAXServlet.PARAMETER_COLUMNS, COLS_STRING,
+                    AJAXServlet.PARAMETER_DATA, json(
+                            SearchFields.PATTERN, "*",
+                            AJAXServlet.PARAMETER_INFOLDER, cdao.getParentFolderID()
+                    ),
+                    AJAXServlet.PARAMETER_SORT, AppointmentObject.START_DATE,
+                    AJAXServlet.PARAMETER_ORDER, "ASC"
+            );
+            arr = req.actionSearch(requestData);
+            assertContains(arr, cdao);
+
+            // With start and end date
+            requestData.put(AJAXServlet.PARAMETER_START, SUPER_START.getTime());
+            requestData.put(AJAXServlet.PARAMETER_END, SUPER_END.getTime());
+            arr = req.actionSearch(requestData);
+            assertContains(arr, cdao);
+
+            // Recurrence Master
+            requestData.remove(AJAXServlet.PARAMETER_START);
+            requestData.remove(AJAXServlet.PARAMETER_END);
+            requestData.put(AppointmentRequest.RECURRENCE_MASTER, true);
+
+            arr = req.actionSearch(requestData);
+            assertContains(arr, cdao);
+
+            requestData.put(AJAXServlet.PARAMETER_START, SUPER_START.getTime());
+            requestData.put(AJAXServlet.PARAMETER_END, SUPER_END.getTime());
+            arr = req.actionSearch(requestData);
+            assertContains(arr, cdao);
+
+            // Updates
+
+            requestData = json(
+                    AJAXServlet.PARAMETER_COLUMNS, COLS_STRING,
+                    AJAXServlet.PARAMETER_START, String.valueOf(SUPER_START.getTime()),
+                    AJAXServlet.PARAMETER_END, String.valueOf(SUPER_END.getTime()),
+                    AJAXServlet.PARAMETER_TIMESTAMP, 0,
+                    AJAXServlet.PARAMETER_FOLDERID, cdao.getParentFolderID()
+            );
+            arr = req.actionUpdates(requestData);
+            assertContains(arr, cdao);
+
+            // Recurrence Master
+            requestData.put(AppointmentRequest.RECURRENCE_MASTER, true);
+            arr = req.actionUpdates(requestData);
+            assertContains(arr, cdao);
+            
+
+        } catch (Exception x) {
+            x.printStackTrace();
+            fail(x.toString());
+        }
+
+
+    }
+
+    private JSONObject json(Object...objects) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        for(int i = 0; i < objects.length; i++) {
+            jsonObject.put(objects[i++].toString(), objects[i]);
+        }
+        return jsonObject;
+    }
+
+    private void assertContains(SearchIterator iter, CalendarDataObject cdao) throws OXException, SearchIteratorException {
+        boolean found = false;
+        while(iter.hasNext()) {
+            CalendarDataObject cdao2 = (CalendarDataObject)iter.next();
+            found = found || cdao.getObjectID() == cdao2.getObjectID();
+        }
+        assertTrue(found);
+    }
+
+    private void assertContains(JSONArray arr, CalendarDataObject cdao) throws JSONException {
+        for(int i = 0, size = arr.length(); i < size; i++) {
+            JSONArray row = arr.getJSONArray(i);
+            if(row.getInt(0) == cdao.getObjectID()) {
+                return;
+            }
+        }
+        fail("Could not find appointment in respone: "+arr);
+    }
+
+    private void assertContainsAsJSONObject(JSONArray arr, CalendarDataObject cdao) throws JSONException {
+        for(int i = 0, size = arr.length(); i < size; i++) {
+            JSONObject row = arr.getJSONObject(i);
+            if(row.getInt("id") == cdao.getObjectID()) {
+                return;
+            }
+        }
+        fail("Could not find appointment in respone: "+arr);
+    }
+
+
+    private void invalidatePattern(CalendarDataObject cdao) throws DBPoolingException {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+
+        String invalidPattern = "t|6|i|1|a|32|b|21|c|3|s|"+ (System.currentTimeMillis()+240*3600000) +"|";
+        try {
+            con = Database.get(ctx, true);
+            pstmt = con.prepareStatement("UPDATE prg_dates SET field06 = ? WHERE intfield01 = ?");
+            pstmt.setString(1, invalidPattern);
+            pstmt.setInt(2, cdao.getObjectID());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        } finally {
+            if(pstmt != null) {
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    // IGNORE
+                }
+            }
+            if(con != null) {
+                Database.back(ctx, true, con);
+            }
         }
     }
 
