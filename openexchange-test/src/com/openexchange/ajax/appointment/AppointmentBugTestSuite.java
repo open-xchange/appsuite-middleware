@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.appointment;
 
+import com.openexchange.ajax.appointment.recurrence.Bug12212Test;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -84,6 +86,7 @@ public class AppointmentBugTestSuite extends TestSuite{
         tests.addTestSuite(Bug12372Test.class);
         tests.addTestSuite(Bug12444Test.class);
         tests.addTestSuite(Bug12264Test.class);
+        tests.addTestSuite(Bug12212Test.class);
 		return tests;
 	}
 }
