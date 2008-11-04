@@ -39,7 +39,6 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderLogicException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
@@ -339,7 +338,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
         Connection writecon = null;
         try {
         	writecon = DBPool.pickupWriteable(ctx);
-	        final OXFolderManager oxma = new OXFolderManagerImpl(session, writecon, writecon);
+	        final OXFolderManager oxma = OXFolderManager.getInstance(session, writecon, writecon);
 	        FolderObject fo = new FolderObject();
 	        fo.setFolderName(fname);
 	        fo.setParentFolderID(parent.getObjectID());
@@ -391,7 +390,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
 
     protected void rm(final int objectID) throws SQLException, OXFolderPermissionException, OXFolderLogicException, Exception {
 		//OXFolderAction ofa = new OXFolderAction(session);
-		final OXFolderManager oxma = new OXFolderManagerImpl(session);
+		final OXFolderManager oxma = OXFolderManager.getInstance(session);
 		//ofa.deleteFolder(objectID, session, true, System.currentTimeMillis());
 		oxma.deleteFolder(new FolderObject(objectID), true, System.currentTimeMillis());
 	}

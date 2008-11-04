@@ -45,7 +45,6 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 
 
 public class AppointmentBugTests extends TestCase {
@@ -539,7 +538,7 @@ public class AppointmentBugTests extends TestCase {
         
         final int fid = getPrivateFolder(userid);
         //OXFolderAction ofa = new OXFolderAction(so);
-        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         FolderObject fo = new FolderObject();
         
         final OCLPermission oclp1 = new OCLPermission();
@@ -814,7 +813,7 @@ public class AppointmentBugTests extends TestCase {
         
         final int fid = getPrivateFolder(userid);
         //OXFolderAction ofa = new OXFolderAction(so);
-        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         FolderObject fo = new FolderObject();
         
         final OCLPermission oclp1 = new OCLPermission();
@@ -1014,7 +1013,7 @@ public class AppointmentBugTests extends TestCase {
         
         final int fid = getPrivateFolder(userid);
         //OXFolderAction ofa = new OXFolderAction(so);
-        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         FolderObject fo = new FolderObject();
         
         final OCLPermission oclp1 = new OCLPermission();
@@ -1317,7 +1316,7 @@ public class AppointmentBugTests extends TestCase {
         final int fid = getPrivateFolder(userid);
         final int fid2 = getPrivateFolder(uid2);
         
-        final OXFolderManager oxma = new OXFolderManagerImpl(so2, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so2, readcon, writecon);
         FolderObject fo = new FolderObject();
         
         final OCLPermission oclp1 = new OCLPermission();
@@ -1435,7 +1434,7 @@ public class AppointmentBugTests extends TestCase {
         final Connection writecon = DBPool.pickupWriteable(context);        
         
         final int fid = getPrivateFolder(userid);
-        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         FolderObject fo = new FolderObject();
         
         final OCLPermission oclp1 = new OCLPermission();
@@ -1544,7 +1543,7 @@ public class AppointmentBugTests extends TestCase {
         final Connection writecon = DBPool.pickupWriteable(context);        
         
         final int fid = getPrivateFolder(userid);
-        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         FolderObject fo = new FolderObject();
         
         final OCLPermission oclp1 = new OCLPermission();
@@ -2217,7 +2216,7 @@ public class AppointmentBugTests extends TestCase {
         final Connection writecon = DBPool.pickupWriteable(context);        
         
         final int fid = AppointmentBugTests.getPrivateFolder(userid);
-        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         FolderObject fo = new FolderObject();
         
         final CalendarSql csql = new CalendarSql(so);
@@ -2334,7 +2333,7 @@ public class AppointmentBugTests extends TestCase {
         final int fid = AppointmentBugTests.getPrivateFolder(userid);
         final int fid2 = AppointmentBugTests.getPrivateFolder(uid2);
         
-        final OXFolderManager oxma = new OXFolderManagerImpl(so2, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so2, readcon, writecon);
         FolderObject fo = new FolderObject();
         
         final CalendarSql csql = new CalendarSql(so);
@@ -2532,7 +2531,7 @@ public class AppointmentBugTests extends TestCase {
         final int fid = AppointmentBugTests.getPrivateFolder(userid);
         final int fid2 = AppointmentBugTests.getPrivateFolder(uid2);
         
-        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         FolderObject fo = new FolderObject();
         
         final CalendarSql csql = new CalendarSql(so);
@@ -2776,7 +2775,7 @@ public class AppointmentBugTests extends TestCase {
         final Connection readcon = DBPool.pickup(context);
         final Connection writecon = DBPool.pickupWriteable(context);        
         final int fid = AppointmentBugTests.getPrivateFolder(userid);
-        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         FolderObject fo = new FolderObject();
         final CalendarSql csql = new CalendarSql(so);
         final OCLPermission oclp1 = new OCLPermission();
@@ -2947,7 +2946,7 @@ public class AppointmentBugTests extends TestCase {
         final Connection writecon = DBPool.pickupWriteable(context);        
         
         final int fid = getPrivateFolder(userid);
-        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         FolderObject fo = new FolderObject();
         
         final OCLPermission oclp1 = new OCLPermission();
@@ -3541,7 +3540,7 @@ public class AppointmentBugTests extends TestCase {
 			/*
 			 * Create a temporary folder for move operation
 			 */
-			final OXFolderManager folderManager = new OXFolderManagerImpl(so);
+			final OXFolderManager folderManager = OXFolderManager.getInstance(so);
 			final FolderObject fo = new FolderObject();
 			fo.setFolderName("TestFolder-testBug12045-" + String.valueOf(System.currentTimeMillis()));
 			fo.setParentFolderID(fid);

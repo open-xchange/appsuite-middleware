@@ -20,7 +20,6 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 
 public class DelUserFolderDiscovererTest extends TestCase{
@@ -93,7 +92,7 @@ public class DelUserFolderDiscovererTest extends TestCase{
 
         // Create all folders
 		//OXFolderAction oxfa = new OXFolderAction(session);
-		final OXFolderManager manager = new OXFolderManagerImpl(session);
+		final OXFolderManager manager = OXFolderManager.getInstance(session);
 		manager.createFolder(folderWithOtherEntity,true, System.currentTimeMillis());
 
         discoverer = new DelUserFolderDiscoverer(new DBPoolProvider());
@@ -102,7 +101,7 @@ public class DelUserFolderDiscovererTest extends TestCase{
 	@Override
 	public void tearDown() throws Exception{
 //		Remove all folders
-		final OXFolderManager manager = new OXFolderManagerImpl(session);
+		final OXFolderManager manager = OXFolderManager.getInstance(session);
 		manager.deleteFolder(folderWithOtherEntity, true, System.currentTimeMillis());
 		Init.stopServer();
 	}

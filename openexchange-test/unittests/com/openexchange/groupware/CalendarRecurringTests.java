@@ -39,7 +39,6 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 
 
 public class CalendarRecurringTests extends TestCase {
@@ -1473,7 +1472,7 @@ public class CalendarRecurringTests extends TestCase {
         
         final int fid = AppointmentBugTests.getPrivateFolder(userid);
         
-        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         FolderObject fo = new FolderObject();
         
         final CalendarSql csql = new CalendarSql(so);

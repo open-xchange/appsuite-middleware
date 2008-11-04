@@ -24,7 +24,6 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
 import com.openexchange.webdav.protocol.WebdavFactory;
@@ -80,8 +79,8 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 		sessionB = SessionObjectWrapper.createSessionObject(userIdB, ctx, "blupp");
 		
 		
-		manager = new OXFolderManagerImpl(session);
-		managerB = new OXFolderManagerImpl(sessionB);
+		manager = OXFolderManager.getInstance(session);
+		managerB = OXFolderManager.getInstance(sessionB);
 		
 		folders.clear();
 		foldersB.clear();

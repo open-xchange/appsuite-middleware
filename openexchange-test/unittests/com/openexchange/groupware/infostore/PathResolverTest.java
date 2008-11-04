@@ -27,7 +27,6 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderLogicException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
@@ -195,7 +194,7 @@ public class PathResolverTest extends TestCase {
 		Connection writeCon = null;
 		try {
 			writeCon = provider.getWriteConnection(ctx);
-            final OXFolderManager oxma = new OXFolderManagerImpl(session, writeCon, writeCon);
+            final OXFolderManager oxma = OXFolderManager.getInstance(session, writeCon, writeCon);
             oxma.createFolder(folder, true, System.currentTimeMillis());
         } finally {
             if (writeCon != null) {
@@ -229,7 +228,7 @@ public class PathResolverTest extends TestCase {
 	private void rmdir(final int id) throws SQLException, OXFolderPermissionException, OXFolderLogicException, Exception {
 //		OXFolderAction oxfa = new OXFolderAction(session);
 //		oxfa.deleteFolder(id, session, true, Long.MAX_VALUE);
-		final OXFolderManager oxma = new OXFolderManagerImpl(session);
+		final OXFolderManager oxma = OXFolderManager.getInstance(session);
 		oxma.deleteFolder(new FolderObject(id), true, System.currentTimeMillis());
 	}
 

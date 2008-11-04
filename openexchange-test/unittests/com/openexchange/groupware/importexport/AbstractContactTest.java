@@ -396,7 +396,7 @@ public class AbstractContactTest {
 		ocl.setGroupPermission(false);
 		ocl.setFolderAdmin(true);
 		fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-		final OXFolderManager oxfa = new OXFolderManagerImpl(sessObj);
+		final OXFolderManager oxfa = OXFolderManager.getInstance(sessObj);
 		int tempFolderId = -1;
 		//deleting old folder if existing
 		try {
@@ -421,7 +421,7 @@ public class AbstractContactTest {
 		if(fuid < 0){
 			return;
 		}
-		final OXFolderManager oxfa = new OXFolderManagerImpl(sessObj);
+		final OXFolderManager oxfa = OXFolderManager.getInstance(sessObj);
 		final FolderObject fo = new FolderObject(fuid);
 		if(fo.exists(sessObj.getContext())){
 			oxfa.deleteFolder(fo, true, System.currentTimeMillis());

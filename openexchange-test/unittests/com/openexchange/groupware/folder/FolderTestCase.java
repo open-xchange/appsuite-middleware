@@ -22,7 +22,6 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.oxfolder.OXFolderLogicException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 
 public class FolderTestCase extends TestCase {
@@ -65,7 +64,7 @@ public class FolderTestCase extends TestCase {
         try {
         	writecon = DBPool.pickupWriteable(ctx);
 	        //OXFolderAction ofa = new OXFolderAction(session);
-	        final OXFolderManager oxma = new OXFolderManagerImpl(session, writecon, writecon);
+	        final OXFolderManager oxma = OXFolderManager.getInstance(session, writecon, writecon);
 	        final OCLPermission oclp = new OCLPermission();
 	        oclp.setEntity(user.getId());
 	        oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -88,7 +87,7 @@ public class FolderTestCase extends TestCase {
 	
 	protected void rm(final int objectID) throws SQLException, OXFolderPermissionException, OXFolderLogicException, Exception {
 		//OXFolderAction ofa = new OXFolderAction(session);
-		final OXFolderManager oxma = new OXFolderManagerImpl(session);
+		final OXFolderManager oxma = OXFolderManager.getInstance(session);
 		//ofa.deleteFolder(objectID, session, true, System.currentTimeMillis());
 		oxma.deleteFolder(new FolderObject(objectID), true, System.currentTimeMillis());
 	}

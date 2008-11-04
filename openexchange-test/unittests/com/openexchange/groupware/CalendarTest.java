@@ -99,7 +99,6 @@ import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 
 public class CalendarTest extends TestCase {
     
@@ -513,7 +512,7 @@ public class CalendarTest extends TestCase {
         final int folder_id = getPrivateFolder();
         
         //OXFolderAction ofa = new OXFolderAction(so);
-        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         final OCLPermission oclp = new OCLPermission();
         oclp.setEntity(userid);
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -605,7 +604,7 @@ public class CalendarTest extends TestCase {
         final Connection writecon = DBPool.pickupWriteable(context);
         
         //OXFolderAction ofa = new OXFolderAction(so);
-        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         final OCLPermission oclp = new OCLPermission();
         oclp.setEntity(userid);
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -715,7 +714,7 @@ public class CalendarTest extends TestCase {
         final Connection writecon = DBPool.pickupWriteable(context);
         
         //OXFolderAction ofa = new OXFolderAction(so);
-        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         final OCLPermission oclp = new OCLPermission();
         oclp.setEntity(userid);
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -1139,7 +1138,7 @@ public class CalendarTest extends TestCase {
         
         final int fid = getPrivateFolder();
         //OXFolderAction ofa = new OXFolderAction(so);
-        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         FolderObject fo = new FolderObject();
         
         final OCLPermission oclp1 = new OCLPermission();
@@ -1384,7 +1383,7 @@ public class CalendarTest extends TestCase {
         final Connection writecon = DBPool.pickupWriteable(context);
         
         //OXFolderAction ofa = new OXFolderAction(so);
-        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         final OCLPermission oclp = new OCLPermission();
         oclp.setEntity(userid);
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);

@@ -25,7 +25,6 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.TestInit;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
 
@@ -93,7 +92,7 @@ public class InfostoreFacadeTest extends TestCase {
 			infostore.removeDocument(new int[]{dm.getId()}, System.currentTimeMillis(), session);
 		}
 		
-		final OXFolderManager oxma = new OXFolderManagerImpl(session);
+		final OXFolderManager oxma = OXFolderManager.getInstance(session);
 		for(final FolderObject folder : cleanFolders) {
 			oxma.deleteFolder(folder, false, System.currentTimeMillis());
 		}
@@ -173,7 +172,7 @@ public class InfostoreFacadeTest extends TestCase {
 				provider.releaseWriteConnection(ctx, writeCon);
 			}
 		}
-		final OXFolderManager oxma = new OXFolderManagerImpl(session, writeCon, writeCon);
+		final OXFolderManager oxma = OXFolderManager.getInstance(session, writeCon, writeCon);
 		oxma.createFolder(folder, true, System.currentTimeMillis());
 		cleanFolders.add(folder);
 		return folder.getObjectID();

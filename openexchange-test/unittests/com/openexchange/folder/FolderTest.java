@@ -35,7 +35,6 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 
 /**
@@ -102,7 +101,7 @@ public class FolderTest extends TestCase {
 	public void testFolderInsertSuccess() throws Throwable {
 		final int userId = session.getUserId();
 		//final OXFolderAction oxfa = new OXFolderAction(session);
-		final OXFolderManager oxma = new OXFolderManagerImpl(session);
+		final OXFolderManager oxma = OXFolderManager.getInstance(session);
 		int fuid = -1;
 		try {
 			final FolderObject fo = new FolderObject();
@@ -171,7 +170,7 @@ public class FolderTest extends TestCase {
 			ocl.setFolderAdmin(true);
 			fo.setPermissionsAsArray(new OCLPermission[] { ocl });
 			//final OXFolderAction oxfa = new OXFolderAction(session);
-			final OXFolderManager oxma = new OXFolderManagerImpl(session); 
+			final OXFolderManager oxma = OXFolderManager.getInstance(session); 
 			Exception exc = null;
 			try {
 				oxma.createFolder(fo, true, System.currentTimeMillis());
@@ -216,7 +215,7 @@ public class FolderTest extends TestCase {
 			perms.add(ocl);
 			fo.setPermissions(perms);
 			//final OXFolderAction oxfa = new OXFolderAction(session);
-			final OXFolderManager oxma = new OXFolderManagerImpl(session);
+			final OXFolderManager oxma = OXFolderManager.getInstance(session);
 			Exception exc = null;
 			try {
 				oxma.createFolder(fo, true, System.currentTimeMillis());
@@ -258,7 +257,7 @@ public class FolderTest extends TestCase {
 			perms.add(ocl);
 			fo.setPermissions(perms);
 			//final OXFolderAction oxfa = new OXFolderAction(session);
-			final OXFolderManager oxma = new OXFolderManagerImpl(session);
+			final OXFolderManager oxma = OXFolderManager.getInstance(session);
 			int fuid = -1;
 			Exception exc = null;
 			try {
@@ -299,7 +298,7 @@ public class FolderTest extends TestCase {
 			perms.add(ocl);
 			fo.setPermissions(perms);
 			//final OXFolderAction oxfa = new OXFolderAction(session);
-			final OXFolderManager oxma = new OXFolderManagerImpl(session);
+			final OXFolderManager oxma = OXFolderManager.getInstance(session);
 			int fuid = -1;
 			Exception exc = null;
 			try {
@@ -338,7 +337,7 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				oxfa = new OXFolderManagerImpl(session);
+				oxfa = OXFolderManager.getInstance(session);
 				fuid = oxfa.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
 				// fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 				/*
@@ -396,7 +395,7 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				oxfa = new OXFolderManagerImpl(session);
+				oxfa = OXFolderManager.getInstance(session);
 				fuid = oxfa.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
 				//fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 				/*
@@ -456,7 +455,7 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				oxfa = new OXFolderManagerImpl(session);
+				oxfa = OXFolderManager.getInstance(session);
 				fuid = oxfa.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
 				//fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 				/*
@@ -517,7 +516,7 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				oxfa = new OXFolderManagerImpl(session);
+				oxfa = OXFolderManager.getInstance(session);
 				oxfa.createFolder(fo, true, System.currentTimeMillis());
 				fuid = fo.getObjectID();
 				//fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
@@ -601,7 +600,7 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				oxfa = new OXFolderManagerImpl(session);
+				oxfa = OXFolderManager.getInstance(session);
 				fo = oxfa.createFolder(fo, true, System.currentTimeMillis());
 				//fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 				fuid = fo.getObjectID();
@@ -733,7 +732,7 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				oxfa = new OXFolderManagerImpl(session);
+				oxfa = OXFolderManager.getInstance(session);
 				try {
 					oxfa.createFolder(fo, true, System.currentTimeMillis());
 					fuid = fo.getObjectID();
@@ -798,7 +797,7 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				oxfa = new OXFolderManagerImpl(session);
+				oxfa = OXFolderManager.getInstance(session);
 				oxfa.createFolder(fo, true, System.currentTimeMillis());
 				fuid = fo.getObjectID();
 				// fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
@@ -856,7 +855,7 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				oxfa = new OXFolderManagerImpl(session);
+				oxfa = OXFolderManager.getInstance(session);
 				oxfa.createFolder(fo, true, System.currentTimeMillis());
 				fuid = fo.getObjectID();
 				/*
@@ -895,7 +894,7 @@ public class FolderTest extends TestCase {
 		         * Clean folder
 		         */
 		        try {
-					new OXFolderManagerImpl(session).clearFolder(fo, true, System.currentTimeMillis());
+					OXFolderManager.getInstance(session).clearFolder(fo, true, System.currentTimeMillis());
 				} catch (final Exception e) {
 					fail(e.getMessage());
 				}

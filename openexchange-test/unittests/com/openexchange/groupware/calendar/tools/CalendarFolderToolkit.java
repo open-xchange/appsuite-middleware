@@ -61,7 +61,6 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -92,7 +91,7 @@ public class CalendarFolderToolkit {
         Connection writecon = null;
         try {
         	writecon = DBPool.pickupWriteable(ctx);
-	        final OXFolderManager oxma = new OXFolderManagerImpl(session, writecon, writecon);
+	        final OXFolderManager oxma = OXFolderManager.getInstance(session, writecon, writecon);
 
             final ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(users.length);
             for(final int user : users) {
@@ -128,7 +127,7 @@ public class CalendarFolderToolkit {
     public void removeAll(final Session session, final List<FolderObject> cleanFolders) {
         final OXFolderManager oxma;
         try {
-            oxma = new OXFolderManagerImpl(session);
+            oxma = OXFolderManager.getInstance(session);
             for(final FolderObject folder : cleanFolders) {
                 oxma.deleteFolder(folder, true, System.currentTimeMillis());
             }
@@ -165,7 +164,7 @@ public class CalendarFolderToolkit {
         Connection writecon = null;
         try {
             writecon = DBPool.pickupWriteable(ctx);
-            final OXFolderManager oxma = new OXFolderManagerImpl(session, writecon, writecon);
+            final OXFolderManager oxma = OXFolderManager.getInstance(session, writecon, writecon);
             oxma.updateFolder(fo, false, System.currentTimeMillis());
         } catch (final OXException e) {
             e.printStackTrace();

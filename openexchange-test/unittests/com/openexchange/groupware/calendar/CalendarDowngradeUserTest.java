@@ -81,7 +81,6 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -190,7 +189,7 @@ public class CalendarDowngradeUserTest extends TestCase {
         Connection writecon = null;
         try {
             writecon = DBPool.pickupWriteable(ctx);
-            final OXFolderManager oxma = new OXFolderManagerImpl(session, writecon, writecon);
+            final OXFolderManager oxma = OXFolderManager.getInstance(session, writecon, writecon);
             for(final FolderObject folder : cleanFolders) {
                 oxma.deleteFolder(folder,false, System.currentTimeMillis());
             }
@@ -265,7 +264,7 @@ public class CalendarDowngradeUserTest extends TestCase {
         Connection writecon = null;
         try {
             writecon = DBPool.pickupWriteable(ctx);
-            final OXFolderManager oxma = new OXFolderManagerImpl(session, writecon, writecon);
+            final OXFolderManager oxma = OXFolderManager.getInstance(session, writecon, writecon);
             final OCLPermission oclp = new OCLPermission();
             oclp.setEntity(user);
             oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);

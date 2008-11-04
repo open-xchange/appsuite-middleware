@@ -78,7 +78,6 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 
 /**
  *
@@ -281,7 +280,7 @@ public class DowngradeTest extends TestCase {
     private FolderObject createPublicFolder() throws DBPoolingException, OXException {
         final Connection con = DBPool.pickupWriteable(ctx);
         try {
-            final OXFolderManager oxma = new OXFolderManagerImpl(session, con, con);
+            final OXFolderManager oxma = OXFolderManager.getInstance(session, con, con);
             final OCLPermission oclp1 = new OCLPermission();
             oclp1.setEntity(user.getId());
             oclp1.setAllPermission(
@@ -315,7 +314,7 @@ public class DowngradeTest extends TestCase {
         throws DBPoolingException, OXException {
         final Connection con = DBPool.pickupWriteable(ctx);
         try {
-            final OXFolderManager oxma = new OXFolderManagerImpl(session, con, con);
+            final OXFolderManager oxma = OXFolderManager.getInstance(session, con, con);
             final Iterator<OCLPermission> iter = folder.getPermissions().iterator();
             while (iter.hasNext()) {
                 if (iter.next().getEntity() == secondUser.getId()) {
@@ -332,7 +331,7 @@ public class DowngradeTest extends TestCase {
         throws DBPoolingException, OXException {
         final Connection con = DBPool.pickupWriteable(ctx);
         try {
-            final OXFolderManager oxma = new OXFolderManagerImpl(session, con, con);
+            final OXFolderManager oxma = OXFolderManager.getInstance(session, con, con);
             oxma.deleteFolder(folder, false, System.currentTimeMillis());
         } finally {
             DBPool.pushWrite(ctx, con);

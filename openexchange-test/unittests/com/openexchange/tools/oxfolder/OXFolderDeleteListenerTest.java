@@ -47,7 +47,7 @@ public class OXFolderDeleteListenerTest extends TestCase {
 		session = SessionObjectWrapper.createSessionObject(userWhichWillBeDeletedId, ctx, "Blubb");
 		
 		oxfa = new OXFolderAccess(ctx);
-		oxma = new OXFolderManagerImpl(session);
+		oxma = OXFolderManager.getInstance(session);
 		
 		myInfostoreFolder = oxfa.getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE).getObjectID();
 	}
