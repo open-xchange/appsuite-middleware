@@ -61,7 +61,6 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -104,8 +103,6 @@ public final class SessionHandler {
 	private static final AtomicBoolean initialized = new AtomicBoolean();
 
 	private static final Log LOG = LogFactory.getLog(SessionHandler.class);
-
-	private static final AtomicInteger numberOfActiveSessions = new AtomicInteger();
 
 	/**
 	 * Initializes a new {@link SessionHandler session handler}
@@ -283,7 +280,6 @@ public final class SessionHandler {
 
 		randomMap.put(session.getRandomToken(), session.getSessionID());
 		userMap.put(session.getLoginName(), session.getSessionID());
-		numberOfActiveSessions.incrementAndGet();
 		return sessionControlObject;
 	}
 
@@ -320,7 +316,6 @@ public final class SessionHandler {
 				}
 				LOG.info("Session timed out. ID: " + sessionid);
 				sessionContainer.removeSessionById(sessionid);
-				numberOfActiveSessions.decrementAndGet();
 
 				return false;
 			}
@@ -342,7 +337,6 @@ public final class SessionHandler {
 
 			if (sessionContainer.containsSessionId(sessionid)) {
 				final SessionControl sessionControl = sessionContainer.removeSessionById(sessionid);
-				numberOfActiveSessions.decrementAndGet();
 				postSessionRemoval(sessionControl.getSession());
 				LOG.info("Session closed. ID: " + sessionid);
 				return true;
@@ -397,7 +391,6 @@ public final class SessionHandler {
 				}
 				LOG.info("Session timed out. ID: " + sessionid);
 				sessionContainer.removeSessionById(sessionid);
-				numberOfActiveSessions.decrementAndGet();
 				throw new SessiondException(SessiondException.Code.PASSWORD_UPDATE_FAILED);
 			}
 		}
@@ -538,7 +531,7 @@ public final class SessionHandler {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("getSessions");
 		}
-		final List<SessionControl> retval = new ArrayList<SessionControl>(numberOfActiveSessions.get());
+		final List<SessionControl> retval = new ArrayList<SessionControl>();
 		for (int a = 0; a < numberOfSessionContainers; a++) {
 			retval.addAll(sessionList.get(a).getSessionControls());
 		}
@@ -557,7 +550,6 @@ public final class SessionHandler {
 			}
 		}
 		prependContainer();
-		decrementNumberOfActiveSessions(sessionList.getLast().size());
 		removeContainer();
 	}
 
@@ -587,11 +579,11 @@ public final class SessionHandler {
 	}
 
 	public static int getNumberOfActiveSessions() {
-		return numberOfActiveSessions.get();
-	}
-
-	protected static void decrementNumberOfActiveSessions(final int amount) {
-		numberOfActiveSessions.addAndGet(-amount);
+	    int numSessions = 0;
+	    for (SessionContainer container : sessionList) {
+	        numSessions += container.size();
+	    }
+		return numSessions;
 	}
 
 	private static void postSessionRemoval(final Session session) {
