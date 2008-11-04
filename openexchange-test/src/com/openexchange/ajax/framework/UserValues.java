@@ -75,6 +75,7 @@ public class UserValues {
     private String inboxFolder;
     private String sentFolder;
     private String trashFolder;
+    private String draftsFolder;
     private String sendAddress;
     private Locale locale;
     private int privateAppointmentFolder = -1;
@@ -118,6 +119,15 @@ public class UserValues {
 	            new GetRequest(Tree.TrashFolder)).getString();
 	    }
 	    return trashFolder;
+	}
+    
+    public String getDraftsFolder() throws AjaxException, IOException,
+    SAXException, JSONException {
+	    if (null == draftsFolder) {
+	    	draftsFolder = ConfigTools.get(client,
+	            new GetRequest(Tree.DraftsFolder)).getString();
+	    }
+	    return draftsFolder;
 	}
 
     public String getSendAddress() throws AjaxException, IOException,

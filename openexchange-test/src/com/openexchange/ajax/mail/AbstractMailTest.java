@@ -203,6 +203,10 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
 	protected String getTrashFolder() throws AjaxException, IOException, SAXException, JSONException {
 		return getClient().getValues().getTrashFolder();
 	}
+	
+	protected String getDraftsFolder() throws AjaxException, IOException, SAXException, JSONException {
+		return getClient().getValues().getDraftsFolder();
+	}
 
 	/**
 	 * @return User's default send address
