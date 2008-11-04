@@ -379,7 +379,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		} catch (final ServletException x) {
 			throw x;
 		} catch (final Exception e) {
-			final ServletException se = new ServletException(e.getMessage());
+			LOG.error(e.getMessage(), e);
+            final ServletException se = new ServletException(e.getMessage());
 			se.initCause(e);
 			throw se;
 		} finally {
