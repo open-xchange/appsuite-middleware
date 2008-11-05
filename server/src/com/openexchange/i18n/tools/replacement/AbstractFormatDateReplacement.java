@@ -124,8 +124,8 @@ public abstract class AbstractFormatDateReplacement extends AbstractDateReplacem
 			final StringHelper sh = new StringHelper(locale == null ? Locale.ENGLISH : locale);
 			result = String.format(sh.getString(format), sh.getString(fallback));
 		} else {
-			result = String.format(new StringHelper(locale == null ? Locale.ENGLISH : locale).getString(format), super
-					.getReplacement());
+			result = String.format(new StringHelper(locale == null ? Locale.ENGLISH : locale).getString(format),
+					dateRepl);
 		}
 		if (changed) {
 			return new StringBuilder(PREFIX_MODIFIED.length() + result.length()).append(PREFIX_MODIFIED).append(result)
