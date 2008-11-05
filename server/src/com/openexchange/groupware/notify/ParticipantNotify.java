@@ -359,7 +359,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		/*
 		 * Remember object's title
 		 */
-		final String title = null == newObj.getTitle() ? "" : newObj.getTitle();
+		final String title = newObj.getTitle() == null ? (oldObj == null ? "" : (oldObj.getTitle() == null ? ""
+				: oldObj.getTitle())) : newObj.getTitle();
 		/*
 		 * Check if notification shall be dropped
 		 */
@@ -374,15 +375,41 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			return;
 		}
 		if (newObj.getParticipants() == null) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(new StringBuilder(256).append("Dropping notification for ").append(
-						(state.getModule() == Types.APPOINTMENT ? "appointment " : "task ")).append(title).append(" (")
-						.append(newObj.getObjectID()).append(") since it contains NO participants").toString());
+			if (oldObj == null || oldObj.getParticipants() == null) {
+				if (LOG.isDebugEnabled()) {
+					final StringBuilder builder = new StringBuilder(256).append("Dropping notification for ").append(
+							(state.getModule() == Types.APPOINTMENT ? "appointment " : "task ")).append(title).append(
+							" (").append(newObj.getObjectID()).append(") since it contains NO participants");
+					LOG.debug(builder.toString());
+				}
+				return;
 			}
-			return;
+			/*
+			 * Grab participants/users from old object
+			 */
+			newObj.setParticipants(oldObj.getParticipants());
+			newObj.setUsers(oldObj.getUsers());
+		}
+		/*
+		 * Ensure start/end is set
+		 */
+		if (newObj.getStartDate() == null && oldObj != null && oldObj.getStartDate() != null) {
+			newObj.setStartDate(oldObj.getStartDate());
+		}
+		if (newObj.getEndDate() == null && oldObj != null && oldObj.getEndDate() != null) {
+			newObj.setEndDate(oldObj.getEndDate());
 		}
 		if (!checkStartAndEndDate(newObj, state.getModule())) {
 			return;
+		}
+		/*
+		 * Ensure that important fields are set
+		 */
+		if (!newObj.containsCreatedBy() && oldObj != null && oldObj.containsCreatedBy()) {
+			newObj.setCreatedBy(oldObj.getCreatedBy());
+		}
+		if (!newObj.containsCreationDate() && oldObj != null && oldObj.containsCreationDate()) {
+			newObj.setCreationDate(oldObj.getCreationDate());
 		}
 		/*
 		 * A map to remember receivers
