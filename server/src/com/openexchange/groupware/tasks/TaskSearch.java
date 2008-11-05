@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.util.Date;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * Interface to different SQL implementations for searching for tasks and its
@@ -106,7 +107,7 @@ abstract class TaskSearch {
      * @return a SearchIterator for iterating over all returned tasks.
      * @throws TaskException if an error occurs while listing modified tasks.
      */
-    abstract TaskIterator listModifiedTasks(Context ctx, int folderId,
+    abstract SearchIterator<Task> listModifiedTasks(Context ctx, int folderId,
         StorageType type, int[] columns, Date since, boolean onlyOwn,
         int userId, boolean noPrivate) throws TaskException;
 

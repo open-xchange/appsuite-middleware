@@ -90,6 +90,7 @@ public class RdbTaskStorage extends TaskStorage {
 
     /**
      * This SQL statement counts the tasks in a folder.
+     * TODO Move to {@link SQL} class.
      */
     private static final String COUNT_TASKS = "SELECT COUNT(task.id) "
         + "FROM task JOIN task_folder USING (cid,id) WHERE task.cid=? AND "
@@ -215,7 +216,7 @@ public class RdbTaskStorage extends TaskStorage {
             if (onlyOwn) {
                 stmt.setInt(pos++, userId);
             }
-            return new TaskIterator(ctx, userId, stmt.executeQuery(),
+            return new ThreadedTaskIterator(ctx, userId, stmt.executeQuery(),
                 folderId, columns, StorageType.ACTIVE);
         } catch (final SQLException e) {
             DBPool.closeWriterSilent(ctx, con);
@@ -288,7 +289,7 @@ public class RdbTaskStorage extends TaskStorage {
 				LOG.trace(stmt);
 			}
             result = stmt.executeQuery();
-            return new TaskIterator(ctx, userId, result, -1, columns,
+            return new ThreadedTaskIterator(ctx, userId, result, -1, columns,
                 StorageType.ACTIVE);
         } catch (final SQLException e) {
             closeSQLStuff(result, stmt);
@@ -573,6 +574,7 @@ public class RdbTaskStorage extends TaskStorage {
         return retval;
     }
 
+    /** TODO move to {@link SQL} class. */
     static {
         LIST_MODIFIED.put(StorageType.ACTIVE, "SELECT @fields@ FROM task JOIN "
             + "task_folder USING (cid,id) "

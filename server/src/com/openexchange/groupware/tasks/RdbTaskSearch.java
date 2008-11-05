@@ -60,11 +60,10 @@ import java.util.Date;
 import java.util.List;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tasks.TaskException.Code;
-import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.groupware.tasks.TaskIterator2.StatementSetter;
 import com.openexchange.tools.Collections;
-import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.iterator.CombinedSearchIterator;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * Implementation of search for tasks interface using a relational database
@@ -112,98 +111,99 @@ public class RdbTaskSearch extends TaskSearch {
      * {@inheritDoc}
      */
     @Override
-    TaskIterator listModifiedTasks(final Context ctx,
+    SearchIterator<Task> listModifiedTasks(final Context ctx,
         final int folderId, final StorageType type, final int[] columns,
         final Date since, final boolean onlyOwn, final int userId,
         final boolean noPrivate) throws TaskException {
-        final StringBuilder sql = new StringBuilder();
-        sql.append("SELECT ");
-        sql.append(SQL.getFields(columns, false));
-        sql.append(" FROM ");
+        final StringBuilder sql1 = new StringBuilder();
+        sql1.append("SELECT ");
+        sql1.append(SQL.getFields(columns, false));
+        sql1.append(" FROM ");
         final String taskTable = SQL.TASK_TABLES.get(type);
-        sql.append(taskTable);
-        sql.append(" JOIN ");
+        sql1.append(taskTable);
+        sql1.append(" JOIN ");
         final String folderTable = SQL.FOLDER_TABLES.get(type);
-        sql.append(folderTable);
-        sql.append(" USING (cid,id) WHERE ");
-        sql.append(taskTable);
-        sql.append(".cid=? AND ");
-        sql.append(folderTable);
-        sql.append(".folder=? AND ");
-        sql.append(taskTable);
-        sql.append(".last_modified>=?");
+        sql1.append(folderTable);
+        sql1.append(" USING (cid,id) WHERE ");
+        sql1.append(taskTable);
+        sql1.append(".cid=? AND ");
+        sql1.append(folderTable);
+        sql1.append(".folder=? AND ");
+        sql1.append(taskTable);
+        sql1.append(".last_modified>=?");
         if (onlyOwn) {
-            sql.append(" AND ");
-            sql.append(SQL.getOnlyOwn(taskTable));
+            sql1.append(" AND ");
+            sql1.append(SQL.getOnlyOwn(taskTable));
         }
         if (noPrivate) {
-            sql.append(" AND ");
-            sql.append(SQL.getNoPrivate(taskTable));
+            sql1.append(" AND ");
+            sql1.append(SQL.getNoPrivate(taskTable));
         }
+        final TaskIterator iter1 = new TaskIterator2(ctx, userId, sql1.toString(),
+            new StatementSetter() {
+                public void perform(final PreparedStatement stmt)
+                    throws SQLException {
+                    int pos = 1;
+                    stmt.setInt(pos++, ctx.getContextId());
+                    stmt.setInt(pos++, folderId);
+                    stmt.setLong(pos++, since.getTime());
+                    if (onlyOwn) {
+                        stmt.setInt(pos++, userId);
+                    }
+                }
+            }, folderId, columns, type);
         if (StorageType.DELETED == type) {
-            sql.append(" UNION ALL SELECT ");
-            sql.append(SQL.getFields(columns, false));
-            sql.append(" FROM ");
+            final StringBuilder sql2 = new StringBuilder();
+            sql2.append("SELECT ");
+            sql2.append(SQL.getFields(columns, false));
+            sql2.append(" FROM ");
             final String activeTaskTable = SQL.TASK_TABLES.get(StorageType
                 .ACTIVE);
-            sql.append(activeTaskTable);
-            sql.append(" JOIN ");
+            sql2.append(activeTaskTable);
+            sql2.append(" JOIN ");
             final String removedPartsTable = SQL.PARTS_TABLES.get(StorageType
                 .REMOVED);
-            sql.append(removedPartsTable);
-            sql.append(" ON ");
-            sql.append(activeTaskTable);
-            sql.append(".cid=");
-            sql.append(removedPartsTable);
-            sql.append(".cid AND ");
-            sql.append(activeTaskTable);
-            sql.append(".id=");
-            sql.append(removedPartsTable);
-            sql.append(".task ");
-            sql.append("WHERE ");
-            sql.append(activeTaskTable);
-            sql.append(".cid=? AND ");
-            sql.append(removedPartsTable);
-            sql.append(".folder=? AND ");
-            sql.append(activeTaskTable);
-            sql.append(".last_modified>=?");
+            sql2.append(removedPartsTable);
+            sql2.append(" ON ");
+            sql2.append(activeTaskTable);
+            sql2.append(".cid=");
+            sql2.append(removedPartsTable);
+            sql2.append(".cid AND ");
+            sql2.append(activeTaskTable);
+            sql2.append(".id=");
+            sql2.append(removedPartsTable);
+            sql2.append(".task ");
+            sql2.append("WHERE ");
+            sql2.append(activeTaskTable);
+            sql2.append(".cid=? AND ");
+            sql2.append(removedPartsTable);
+            sql2.append(".folder=? AND ");
+            sql2.append(activeTaskTable);
+            sql2.append(".last_modified>=?");
             if (onlyOwn) {
-                sql.append(" AND ");
-                sql.append(SQL.getOnlyOwn(activeTaskTable));
+                sql2.append(" AND ");
+                sql2.append(SQL.getOnlyOwn(activeTaskTable));
             }
             if (noPrivate) {
-                sql.append(" AND ");
-                sql.append(SQL.getNoPrivate(activeTaskTable));
+                sql2.append(" AND ");
+                sql2.append(SQL.getNoPrivate(activeTaskTable));
             }
+            final TaskIterator iter2 = new TaskIterator2(ctx, userId,
+                sql2.toString(),
+                new StatementSetter() {
+                    public void perform(final PreparedStatement stmt)
+                        throws SQLException {
+                        int pos = 1;
+                        stmt.setInt(pos++, ctx.getContextId());
+                        stmt.setInt(pos++, folderId);
+                        stmt.setLong(pos++, since.getTime());
+                        if (onlyOwn) {
+                            stmt.setInt(pos++, userId);
+                        }
+                    }
+                }, folderId, columns, StorageType.REMOVED);
+            return new CombinedSearchIterator<Task>(iter1, iter2);
         }
-        Connection con = null;
-        PreparedStatement stmt = null;
-        try {
-            con = DBPool.pickup(ctx);
-            stmt = con.prepareStatement(sql.toString());
-            int pos = 1;
-            stmt.setInt(pos++, ctx.getContextId());
-            stmt.setInt(pos++, folderId);
-            stmt.setLong(pos++, since.getTime());
-            if (onlyOwn) {
-                stmt.setInt(pos++, userId);
-            }
-            if (StorageType.DELETED == type) {
-                stmt.setInt(pos++, ctx.getContextId());
-                stmt.setInt(pos++, folderId);
-                stmt.setLong(pos++, since.getTime());
-                if (onlyOwn) {
-                    stmt.setInt(pos++, userId);
-                }
-            }
-            return new TaskIterator(ctx, userId, stmt.executeQuery(),
-                folderId, columns, type);
-        } catch (final SQLException e) {
-            DBUtils.closeSQLStuff(null, stmt);
-            DBPool.closeWriterSilent(ctx, con);
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
-        } catch (final DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
+        return iter1;
     }
 }

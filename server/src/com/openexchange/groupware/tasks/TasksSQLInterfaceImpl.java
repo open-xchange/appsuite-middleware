@@ -230,7 +230,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
     /**
      * {@inheritDoc}
      */
-    public TaskIterator getDeletedTasksInFolder(final int folderId,
+    public SearchIterator<Task> getDeletedTasksInFolder(final int folderId,
         final int[] columns, final Date since) throws OXException {
         final Context ctx;
         final User user;

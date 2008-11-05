@@ -55,19 +55,19 @@ import java.util.List;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
 
 /**
  * {@link CombinedSearchIterator} - Combines one or more instances of
  * {@link SearchIterator}
- * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * 
  */
-public class CombinedSearchIterator implements SearchIterator<Object> {
+public class CombinedSearchIterator<T> implements SearchIterator<T> {
 
-	private final SearchIterator<?>[] iterators;
+	private final SearchIterator<T>[] iterators;
 
-	private int i;
+	private int i = 0;
 
 	private AbstractOXException[] warnings;
 
@@ -79,34 +79,39 @@ public class CombinedSearchIterator implements SearchIterator<Object> {
 	 * @param iterators
 	 *            The instances of {@link SearchIterator}
 	 */
-	public CombinedSearchIterator(final SearchIterator<?>... iterators) {
+	public CombinedSearchIterator(final SearchIterator<T>... iterators) {
+	    super();
 		this.iterators = iterators;
 	}
+
+	private boolean next = false;
 
 	public boolean hasNext() {
 		if (iterators.length == 0) {
 			return false;
 		}
-		for (; (i < iterators.length) && !iterators[i].hasNext(); i++) {
-		}
-		if (i >= iterators.length) {
-			return false;
-		}
-		return iterators[i].hasNext();
+		next = false;
+		while (i < iterators.length && !next) { 
+    		if (iterators[i].hasNext()) {
+    		    next = true;
+    		} else {
+    		    i++;
+    		}
+	    }
+		return next;
 	}
 
-	public Object next() throws SearchIteratorException, OXException {
-		if (hasNext()) {
-			return iterators[i].next();
-		}
-		return null;
+	public T next() throws SearchIteratorException, OXException {
+	    if (iterators.length == 0 || !next) {
+	        throw new SearchIteratorException(SearchIteratorCode.NO_SUCH_ELEMENT, EnumComponent.NONE);
+	    }
+	    return iterators[i].next();
 	}
 
 	public void close() throws SearchIteratorException {
-		for (final SearchIterator<?> iter : iterators) {
+		for (final SearchIterator<T> iter : iterators) {
 			iter.close();
 		}
-
 	}
 
 	public int size() {
@@ -154,5 +159,4 @@ public class CombinedSearchIterator implements SearchIterator<Object> {
 		}
 		return hasWarnings.booleanValue();
 	}
-
 }
