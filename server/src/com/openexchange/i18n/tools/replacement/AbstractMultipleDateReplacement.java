@@ -109,8 +109,8 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
 				this.dates[i] = (Date) dates[i].clone();
 			}
 		}
-		this.dateFormat = locale == null ? DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.ENGLISH) : DateFormat
-				.getDateInstance(DateFormat.DEFAULT, locale);
+		this.dateFormat = locale == null ? DateFormat.getDateInstance(DateFormat.SHORT, Locale.ENGLISH) : DateFormat
+				.getDateInstance(DateFormat.SHORT, locale);
 		if (timeZone != null) {
 			if (dateFormat instanceof SimpleDateFormat) {
 				/*
@@ -239,7 +239,7 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
 		if (locale == null || locale.equals(this.locale)) {
 			return;
 		}
-		this.dateFormat = DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
+		this.dateFormat = DateFormat.getDateInstance(DateFormat.SHORT, locale);
 		if (this.timeZone != null) {
 			if (dateFormat instanceof SimpleDateFormat) {
 				/*
