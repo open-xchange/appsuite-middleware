@@ -124,12 +124,15 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
 	// TODO: Signature?
 
+	private static final String STR_UNKNOWN = "UNKNOWN";
+
 	private final static Log LOG = LogFactory.getLog(ParticipantNotify.class);
 
 	private final static LoggingLogic LL = LoggingLogic.getLoggingLogic(ParticipantNotify.class);
-    public static ParticipantNotify messageSender = new ParticipantNotify();
 
-    /**
+	public static ParticipantNotify messageSender = new ParticipantNotify();
+
+	/**
 	 * Initializes a new {@link ParticipantNotify}
 	 */
 	public ParticipantNotify() {
@@ -150,8 +153,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 	 */
 	protected static void sendMessage(final MailMessage mmsg, final ServerSession session, final CalendarObject obj,
 			final State state) {
-		messageSender.sendMessage(mmsg.title, mmsg.message, mmsg.addresses, session, obj, mmsg.folderId,
-				state, false, mmsg.internal);
+		messageSender.sendMessage(mmsg.title, mmsg.message, mmsg.addresses, session, obj, mmsg.folderId, state, false,
+				mmsg.internal);
 	}
 
 	protected void sendMessage(final String messageTitle, final String message, final List<String> name,
@@ -196,9 +199,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
 	protected User[] resolveUsers(final Context ctx, final int... ids) throws LdapException {
 		final User[] r = new User[ids.length];
-		int i = 0;
-		for (final int id : ids) {
-			r[i++] = UserStorage.getInstance().getUser(id, ctx); // FIXME
+		for (int i = 0; i < ids.length; i++) {
+			r[i] = UserStorage.getInstance().getUser(ids[i], ctx);
 		}
 		return r;
 	}
@@ -677,19 +679,21 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		renderMap.put(new ParticipantsReplacement(participantSet).setChanged(isUpdate));
 		renderMap.put(new ResourcesReplacement(resourceSet).setChanged(isUpdate));
 		{
-			String createdByDisplayName = "UNKNOWN";
-			String modifiedByDisplayName = "UNKNOWN";
-			try {
-				final Context ctx = session.getContext();
-				if (0 != newObj.getCreatedBy()) {
+			String createdByDisplayName = STR_UNKNOWN;
+			final Context ctx = session.getContext();
+			if (0 != newObj.getCreatedBy()) {
+				try {
 					createdByDisplayName = resolveUsers(ctx, newObj.getCreatedBy())[0].getDisplayName();
+				} catch (final LdapException e) {
+					createdByDisplayName = STR_UNKNOWN;
+					LL.log(e);
 				}
-				if (0 != newObj.getModifiedBy()) {
-					modifiedByDisplayName = resolveUsers(ctx, newObj.getModifiedBy())[0].getDisplayName();
-				}
+			}
+			String modifiedByDisplayName = STR_UNKNOWN;
+			try {
+				modifiedByDisplayName = resolveUsers(ctx, session.getUserId())[0].getDisplayName();
 			} catch (final LdapException e) {
-				createdByDisplayName = e.toString();
-				modifiedByDisplayName = e.toString();
+				modifiedByDisplayName = STR_UNKNOWN;
 				LL.log(e);
 			}
 			renderMap.put(new StringReplacement(TemplateToken.CREATED_BY, createdByDisplayName));
