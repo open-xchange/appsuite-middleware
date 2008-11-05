@@ -1265,6 +1265,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 						 * Neither occurrences nor until date set; calculate end
 						 * date from last possible occurrence
 						 */
+						if (!cdao.containsTimezone()) {
+							cdao.setTimezone(edao.getTimezone());
+						}
 						cdao.setEndDate(calculateRealRecurringEndDate(cdao));
 					}
 
