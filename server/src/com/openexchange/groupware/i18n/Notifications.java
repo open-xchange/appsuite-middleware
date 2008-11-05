@@ -71,6 +71,8 @@ public class Notifications {
 			"[start]\n" + 
 			"[end]\n" + 
 			"[series]\n" + 
+			"[delete_exceptions]\n" + 
+			"[change_exceptions]\n" + 
 			"\n" + 
 			"[description]\n" + 
 			"\n" + 
@@ -100,6 +102,8 @@ public class Notifications {
 		"[start]\n" + 
 		"[end]\n" + 
 		"[series]\n" + 
+		"[delete_exceptions]\n" + 
+		"[change_exceptions]\n" + 
 		"\n" + 
 		"[description]\n" + 
 		"\n" + 
@@ -133,6 +137,8 @@ public class Notifications {
 		"[start]\n" +
 		"[end]\n" +
 		"[series]\n" + 
+		"[delete_exceptions]\n" + 
+		"[change_exceptions]\n" + 
 		"\n" + 
 		"[description]" + 
 		"\n" + 
@@ -164,6 +170,8 @@ public class Notifications {
 		"[start]\n" +
 		"[end]\n" + 
 		"[series]\n" + 
+		"[delete_exceptions]\n" + 
+		"[change_exceptions]\n" + 
 		"\n" + 
 		"[description]" + 
 		"\n" + 
@@ -198,6 +206,8 @@ public class Notifications {
 		"[start]\n" + 
 		"[end]\n" + 
 		"[series]\n" + 
+		"[delete_exceptions]\n" + 
+		"[change_exceptions]\n" + 
 		"\n" + 
 		"[description]\n" + 
 		"\n" + 
@@ -229,6 +239,8 @@ public class Notifications {
 		"[start]\n" + 
 		"[end]\n" + 
 		"[series]\n" + 
+		"[delete_exceptions]\n" + 
+		"[change_exceptions]\n" + 
 		"\n" + 
 		"[description]\n" + 
 		"\n" + 
@@ -265,6 +277,8 @@ public class Notifications {
 		"[start]\n" + 
 		"[end]\n" + 
 		"[series]\n" + 
+		"[delete_exceptions]\n" + 
+		"[change_exceptions]\n" + 
 		"\n" + 
 		"[description]\n" + 
 		"\n" + 
@@ -298,6 +312,8 @@ public class Notifications {
 		"[start]\n" + 
 		"[end]\n" + 
 		"[series]\n" + 
+		"[delete_exceptions]\n" + 
+		"[change_exceptions]\n" + 
 		"\n" + 
 		"[description]\n" + 
 		"\n" + 
@@ -334,6 +350,8 @@ public class Notifications {
 		"[start]\n" + 
 		"[end]\n" + 
 		"[series]\n" + 
+		"[delete_exceptions]\n" + 
+		"[change_exceptions]\n" + 
 		"\n" + 
 		"[description]" + 
 		"\n" + 
@@ -367,6 +385,8 @@ public class Notifications {
 		"[start]\n" + 
 		"[end]\n" + 
 		"[series]\n" + 
+		"[delete_exceptions]\n" + 
+		"[change_exceptions]\n" + 
 		"\n" + 
 		"[description]" + 
 		"\n" + 
@@ -439,6 +459,16 @@ public class Notifications {
 	 * No due date
 	 */
 	public static final String NO_DUE_DATE = "No due date";
+
+	/**
+	 * No delete exceptions
+	 */
+	public static final String NO_DELETE_EXCEPTIONS = "No delete exceptions";
+
+	/**
+	 * No change exceptions
+	 */
+	public static final String NO_CHANGE_EXCEPTIONS = "No change exceptions";
 
 	/**
 	 * Mail to resource %1$s
@@ -562,6 +592,16 @@ public class Notifications {
 	 * Status: %1$s
 	 */
 	public static final String FORMAT_STATUS = "Status: %1$s";
+
+	/**
+	 * Delete exceptions: %1$s
+	 */
+	public static final String FORMAT_DELETE_EXCEPTIONS = "Delete exceptions: %1$s";
+
+	/**
+	 * Change exceptions: %1$s
+	 */
+	public static final String FORMAT_CHANGE_EXCEPTIONS = "Change exceptions: %1$s";
 
 	/*
 	 * Task statuses

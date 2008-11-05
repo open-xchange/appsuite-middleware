@@ -148,7 +148,15 @@ public enum TemplateToken {
 	/**
 	 * Task's status
 	 */
-	TASK_STATUS("task_status");
+	TASK_STATUS("task_status"),
+	/**
+	 * Delete exceptions
+	 */
+	DELETE_EXCEPTIONS("delete_exceptions"),
+	/**
+	 * Change exceptions
+	 */
+	CHANGE_EXCEPTIONS("change_exceptions");
 
 	private final String token;
 

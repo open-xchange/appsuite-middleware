@@ -250,6 +250,22 @@ public final class PooledNotification implements Delayed {
 		return obj;
 	}
 
+	/**
+	 * Checks if the calendar object held by this pooled notification is denoted
+	 * by specified object ID and context ID.
+	 * 
+	 * @param objectId
+	 *            The calendar object's ID
+	 * @param contextId
+	 *            The calendar object's context ID
+	 * @return <code>true</code> if the calendar object held by this pooled
+	 *         notification denotes the specified calendar object; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean equalsByObject(final int objectId, final int contextId) {
+		return obj.getObjectID() == objectId && session.getContextId() == contextId;
+	}
+
 	@Override
 	public int hashCode() {
 		return hash;

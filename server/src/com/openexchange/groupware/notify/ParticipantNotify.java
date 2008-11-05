@@ -51,6 +51,7 @@ package com.openexchange.groupware.notify;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -98,8 +99,10 @@ import com.openexchange.i18n.tools.Template;
 import com.openexchange.i18n.tools.TemplateReplacement;
 import com.openexchange.i18n.tools.TemplateToken;
 import com.openexchange.i18n.tools.replacement.AppointmentActionReplacement;
+import com.openexchange.i18n.tools.replacement.ChangeExceptionsReplacement;
 import com.openexchange.i18n.tools.replacement.ConfirmationActionReplacement;
 import com.openexchange.i18n.tools.replacement.CreationDateReplacement;
+import com.openexchange.i18n.tools.replacement.DeleteExceptionsReplacement;
 import com.openexchange.i18n.tools.replacement.EndDateReplacement;
 import com.openexchange.i18n.tools.replacement.FormatLocalizedStringReplacement;
 import com.openexchange.i18n.tools.replacement.ParticipantsReplacement;
@@ -277,6 +280,13 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 	}
 
 	public void appointmentDeleted(final AppointmentObject appointmentObj, final Session sessionObj) {
+		/*
+		 * Clear calendar object from notification pool
+		 */
+		NotificationPool.getInstance().removeByObject(appointmentObj.getObjectID(), sessionObj.getContextId());
+		/*
+		 * Send delete notification
+		 */
 		sendNotification(null, appointmentObj, sessionObj,
 				new AppointmentState(new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_DELETED),
 						Notifications.APPOINTMENT_DELETE_MAIL, State.Type.DELETED), NotificationConfig
@@ -323,6 +333,13 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 	}
 
 	public void taskDeleted(final Task taskObj, final Session sessionObj) {
+		/*
+		 * Clear calendar object from notification pool
+		 */
+		NotificationPool.getInstance().removeByObject(taskObj.getObjectID(), sessionObj.getContextId());
+		/*
+		 * Send delete notification
+		 */
 		sendNotification(null, taskObj, sessionObj, new TaskState(new TaskActionReplacement(
 				TaskActionReplacement.ACTION_DELETED), Notifications.TASK_DELETE_MAIL, State.Type.DELETED),
 				NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false), true, false);
@@ -339,11 +356,29 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			LOG.error(e.getLocalizedMessage(), e);
 			return;
 		}
-
-		if (!newObj.getNotification() && newObj.getCreatedBy() == sessionObj.getUserId() && !forceNotifyOthers) {
+		/*
+		 * Remember object's title
+		 */
+		final String title = null == newObj.getTitle() ? "" : newObj.getTitle();
+		/*
+		 * Check if notification shall be dropped
+		 */
+		if (newObj.containsNotification() && !newObj.getNotification()
+				&& newObj.getCreatedBy() == sessionObj.getUserId() && !forceNotifyOthers) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(new StringBuilder(256).append("Dropping notification for ").append(
+						(state.getModule() == Types.APPOINTMENT ? "appointment " : "task ")).append(title).append(" (")
+						.append(newObj.getObjectID()).append(") since it indicates to discard its notification")
+						.toString());
+			}
 			return;
 		}
 		if (newObj.getParticipants() == null) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(new StringBuilder(256).append("Dropping notification for ").append(
+						(state.getModule() == Types.APPOINTMENT ? "appointment " : "task ")).append(title).append(" (")
+						.append(newObj.getObjectID()).append(") since it contains NO participants").toString());
+			}
 			return;
 		}
 		if (!checkStartAndEndDate(newObj, state.getModule())) {
@@ -353,10 +388,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		 * A map to remember receivers
 		 */
 		final Map<Locale, List<EmailableParticipant>> receivers = new HashMap<Locale, List<EmailableParticipant>>();
-		/*
-		 * Remember object's title
-		 */
-		final String title = null == newObj.getTitle() ? "" : newObj.getTitle();
 		/*
 		 * Generate a render map filled with object-specific information
 		 */
@@ -412,14 +443,17 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 				if (isUser(sessionObj.getContext(), p)) {
 					try {
 						final UserSettingMail userSettingMail = getUserSettingMail(p.id, sessionObj.getContext());
-						sendMail = state.sendMail(userSettingMail) && newObj.getModifiedBy() != p.id
-								&& (newObj.getNotification() || p.id == newObj.getCreatedBy() || forceNotifyOthers);
+						sendMail = state.sendMail(userSettingMail)
+								&& newObj.getModifiedBy() != p.id
+								&& ((!newObj.containsNotification() || newObj.getNotification())
+										|| p.id == newObj.getCreatedBy() || forceNotifyOthers);
 						tz = p.timeZone;
 					} catch (final AbstractOXException e) {
 						LL.log(e);
 					}
 				} else {
-					sendMail = newObj.getNotification() || (newObj.getModifiedBy() != p.id && forceNotifyOthers);
+					sendMail = (!newObj.containsNotification() || newObj.getNotification())
+							|| (newObj.getModifiedBy() != p.id && forceNotifyOthers);
 					if (p.timeZone != null) {
 						tz = p.timeZone;
 					}
@@ -745,6 +779,14 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			renderMap.put(new StartDateReplacement(start).setChanged(isUpdate ? (oldObj == null ? false
 					: !compareObjects(start, oldObj.getStartDate())) : false));
 			Date end = newObj.getEndDate();
+			/*
+			 * Determine changed status with original end time
+			 */
+			final boolean endChanged = isUpdate ? (oldObj == null ? false : !compareObjects(end, oldObj.getEndDate()))
+					: false;
+			/*
+			 * Set end time to first occurrence's end time if necessary
+			 */
 			if (newObj.containsRecurrenceType()) {
 				if (start != null && end != null) {
 					end = computeFirstOccurrenceEnd(start.getTime(), end.getTime());
@@ -758,16 +800,13 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 					end = computeFirstOccurrenceEnd(start.getTime(), end.getTime());
 				}
 			}
-			renderMap
-					.put(new EndDateReplacement(end, Types.TASK == module)
-							.setChanged(isUpdate ? (oldObj == null ? false : !compareObjects(end, oldObj.getEndDate()))
-									: false));
+			renderMap.put(new EndDateReplacement(end, Types.TASK == module).setChanged(endChanged));
 		}
 		renderMap.put(new CreationDateReplacement(newObj.containsCreationDate() ? newObj.getCreationDate()
 				: (oldObj == null ? null : oldObj.getCreationDate()), null));
 		{
 			final SeriesReplacement seriesRepl;
-			if (newObj.containsRecurrenceType()) {
+			if (newObj.containsRecurrenceType() || newObj.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
 				seriesRepl = new SeriesReplacement(newObj);
 				seriesRepl.setChanged(isUpdate ? (oldObj == null ? false : !compareRecurrenceInformations(newObj,
 						oldObj)) : false);
@@ -779,6 +818,38 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 				seriesRepl.setChanged(false);
 			}
 			renderMap.put(seriesRepl);
+		}
+		{
+			final DeleteExceptionsReplacement deleteExceptionsReplacement;
+			final Date[] deleteExcs = newObj.getDeleteException();
+			if (newObj.containsDeleteExceptions() || deleteExcs != null) {
+				deleteExceptionsReplacement = new DeleteExceptionsReplacement(deleteExcs);
+				deleteExceptionsReplacement.setChanged(isUpdate ? (oldObj == null ? false : !compareDates(deleteExcs,
+						oldObj.getDeleteException())) : false);
+			} else if (oldObj != null && oldObj.containsDeleteExceptions()) {
+				deleteExceptionsReplacement = new DeleteExceptionsReplacement(oldObj.getDeleteException());
+				deleteExceptionsReplacement.setChanged(false);
+			} else {
+				deleteExceptionsReplacement = new DeleteExceptionsReplacement(deleteExcs);
+				deleteExceptionsReplacement.setChanged(false);
+			}
+			renderMap.put(deleteExceptionsReplacement);
+		}
+		{
+			final ChangeExceptionsReplacement changeExceptionsReplacement;
+			final Date[] changeExcs = newObj.getChangeException();
+			if (newObj.containsDeleteExceptions() || changeExcs != null) {
+				changeExceptionsReplacement = new ChangeExceptionsReplacement(changeExcs);
+				changeExceptionsReplacement.setChanged(isUpdate ? (oldObj == null ? false : !compareDates(changeExcs,
+						oldObj.getChangeException())) : false);
+			} else if (oldObj != null && oldObj.containsDeleteExceptions()) {
+				changeExceptionsReplacement = new ChangeExceptionsReplacement(oldObj.getChangeException());
+				changeExceptionsReplacement.setChanged(false);
+			} else {
+				changeExceptionsReplacement = new ChangeExceptionsReplacement(changeExcs);
+				changeExceptionsReplacement.setChanged(false);
+			}
+			renderMap.put(changeExceptionsReplacement);
 		}
 		return renderMap;
 	}
@@ -1357,6 +1428,22 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			return false;
 		}
 		return o1.equals(o2);
+	}
+
+	static final boolean compareDates(final Date[] dates1, final Date[] dates2) {
+		if (dates1 == dates2) {
+			return true;
+		}
+		if (dates1 == null) {
+			if (dates2 == null) {
+				return true;
+			}
+			return dates2.length == 0 ? true : false;
+		}
+		if (dates2 == null && dates1.length == 0) {
+			return true;
+		}
+		return Arrays.equals(dates1, dates2);
 	}
 
 	/**

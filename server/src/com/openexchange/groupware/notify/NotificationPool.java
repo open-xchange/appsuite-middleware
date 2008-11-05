@@ -50,6 +50,7 @@
 package com.openexchange.groupware.notify;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -117,6 +118,30 @@ public final class NotificationPool {
 	}
 
 	/**
+	 * Removes all pooled notifications from this pool whose calendar object
+	 * matches specified object ID and context ID
+	 * 
+	 * @param objectId
+	 *            The calendar object's ID
+	 * @param contextId
+	 *            The calendar object's context ID
+	 */
+	public void removeByObject(final int objectId, final int contextId) {
+		readLock.lock();
+		try {
+			for (final Iterator<PooledNotification> queueIter = queue.iterator(); queueIter.hasNext();) {
+				final PooledNotification pn = queueIter.next();
+				if (pn.equalsByObject(objectId, contextId)) {
+					map.remove(pn);
+					queueIter.remove();
+				}
+			}
+		} finally {
+			readLock.unlock();
+		}
+	}
+
+	/**
 	 * Puts given pooled notification into this pool. If an equal pooled
 	 * notification is already present, it is merged with given pooled
 	 * notification. Moreover its time stamp is updated.
@@ -148,22 +173,30 @@ public final class NotificationPool {
 		}
 	}
 
+	// For the tests we need to get at the pool
+	public List<PooledNotification> getNotifications() {
+		return new ArrayList<PooledNotification>(queue);
+	}
 
-    // For the tests we need to get at the pool
-    public List<PooledNotification> getNotifications() {
-        return new ArrayList<PooledNotification>(queue);
-    }
+	/**
+	 * Clears the notification pool
+	 */
+	public void clear() {
+		readLock.lock();
+		try {
+			queue.clear();
+			map.clear();
+		} finally {
+			readLock.unlock();
+		}
+	}
 
-    public void clear() {
-        queue.clear();
-    }
+	// For tests to force message sending
+	public void sendAllMessages() {
+		new NotificationPoolTimerTask(map, queue, lock.writeLock()).run();
+	}
 
-    // For tests to force message sending
-    public void sendAllMessages() {
-        new NotificationPoolTimerTask(map, queue, lock.writeLock()).run();   
-    }
-
-    /**
+	/**
 	 * Start-up for this notification pool
 	 */
 	public void startup() {
