@@ -99,9 +99,9 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
 
 	private static final String STR_INFO = "Performing update task 'FolderAddPermColumnUpdateTask'";
 
-	private static final String SQL_MODIFY1 = "ALTER TABLE oxfolder_permissions ADD COLUMN `system` tinyint(3) unsigned default '0'";
+	private static final String SQL_MODIFY1 = "ALTER TABLE oxfolder_permissions ADD COLUMN `system` TINYINT unsigned default '0'";
 
-	private static final String SQL_MODIFY2 = "ALTER TABLE del_oxfolder_permissions ADD COLUMN `system` tinyint(3) unsigned default '0'";
+	private static final String SQL_MODIFY2 = "ALTER TABLE del_oxfolder_permissions ADD COLUMN `system` TINYINT unsigned default '0'";
 
 	private static final String SQL_MODIFY3 = "ALTER TABLE oxfolder_permissions DROP PRIMARY KEY, ADD PRIMARY KEY(cid, permission_id, fuid, system)";
 
