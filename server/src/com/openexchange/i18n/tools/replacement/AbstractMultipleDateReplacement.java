@@ -109,8 +109,8 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
 				this.dates[i] = (Date) dates[i].clone();
 			}
 		}
-		this.dateFormat = locale == null ? DateFormat.getDateInstance(DateFormat.SHORT, Locale.ENGLISH) : DateFormat
-				.getDateInstance(DateFormat.SHORT, locale);
+		this.dateFormat = locale == null ? DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.ENGLISH) : DateFormat
+				.getDateInstance(DateFormat.DEFAULT, locale);
 		if (timeZone != null) {
 			if (dateFormat instanceof SimpleDateFormat) {
 				/*
@@ -239,7 +239,7 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
 		if (locale == null || locale.equals(this.locale)) {
 			return;
 		}
-		this.dateFormat = DateFormat.getDateInstance(DateFormat.SHORT, locale);
+		this.dateFormat = DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
 		if (this.timeZone != null) {
 			if (dateFormat instanceof SimpleDateFormat) {
 				/*
@@ -259,17 +259,6 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
 	private void applyTimeZone(final TimeZone timeZone) {
 		if (timeZone == null || timeZone.equals(this.timeZone)) {
 			return;
-		}
-		if (this.timeZone == null && dateFormat instanceof SimpleDateFormat) {
-			/*
-			 * Time zone was not set before: extend pattern to contain time zone
-			 * information
-			 */
-			final SimpleDateFormat simpleDateFormat = (SimpleDateFormat) dateFormat;
-			final String pattern = simpleDateFormat.toPattern();
-			simpleDateFormat.applyPattern(new StringBuilder(pattern.length() + 3).append(pattern).append(PAT_ZONE)
-					.toString());
-
 		}
 		this.timeZone = timeZone;
 		this.dateFormat.setTimeZone(timeZone);
