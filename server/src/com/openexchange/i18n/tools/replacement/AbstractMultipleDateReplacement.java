@@ -241,16 +241,6 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
 		}
 		this.dateFormat = DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
 		if (this.timeZone != null) {
-			if (dateFormat instanceof SimpleDateFormat) {
-				/*
-				 * Time zone was set before: extend new pattern to contain time
-				 * zone information
-				 */
-				final SimpleDateFormat simpleDateFormat = (SimpleDateFormat) dateFormat;
-				final String pattern = simpleDateFormat.toPattern();
-				simpleDateFormat.applyPattern(new StringBuilder(pattern.length() + 3).append(pattern).append(PAT_ZONE)
-						.toString());
-			}
 			this.dateFormat.setTimeZone(timeZone);
 		}
 
