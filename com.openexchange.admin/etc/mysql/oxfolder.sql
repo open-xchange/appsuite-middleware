@@ -13,10 +13,10 @@ CREATE TABLE `oxfolder_tree` (
   `permission_flag` TINYINT UNSIGNED NOT NULL,
   `subfolder_flag` TINYINT UNSIGNED NOT NULL,
   `default_flag` TINYINT UNSIGNED NOT NULL default '0',
-  ADD PRIMARY KEY (`cid`, `fuid`),
-  ADD INDEX (`cid`, `parent`),
-  ADD FOREIGN KEY (`cid`, `created_from`) REFERENCES user (`cid`, `id`),
-  ADD FOREIGN KEY (`cid`, `changed_from`) REFERENCES user (`cid`, `id`)
+  PRIMARY KEY (`cid`, `fuid`),
+  INDEX (`cid`, `parent`),
+  FOREIGN KEY (`cid`, `created_from`) REFERENCES user (`cid`, `id`),
+  FOREIGN KEY (`cid`, `changed_from`) REFERENCES user (`cid`, `id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
   	 
 CREATE TABLE `oxfolder_permissions` (
@@ -30,18 +30,18 @@ CREATE TABLE `oxfolder_permissions` (
   `admin_flag` TINYINT UNSIGNED NOT NULL,
   `group_flag` TINYINT UNSIGNED NOT NULL,
   `system` TINYINT UNSIGNED NOT NULL default '0',
-  ADD PRIMARY KEY  (`cid`,`permission_id`,`fuid`,`system`),
-  ADD INDEX (`cid`,`fuid`),
-  ADD INDEX (`cid`,`fuid`,`permission_id`),
-  ADD FOREIGN KEY (`cid`, `fuid`) REFERENCES oxfolder_tree (`cid`, `fuid`)
+  PRIMARY KEY  (`cid`,`permission_id`,`fuid`,`system`),
+  INDEX (`cid`,`fuid`),
+  INDEX (`cid`,`fuid`,`permission_id`),
+  FOREIGN KEY (`cid`, `fuid`) REFERENCES oxfolder_tree (`cid`, `fuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `oxfolder_specialfolders` (
   `tag` VARCHAR(16) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `cid` INT4 UNSIGNED NOT NULL,
   `fuid` INT4 UNSIGNED NOT NULL,
-  ADD PRIMARY KEY (`cid`,`fuid`,`tag`),
-  ADD FOREIGN KEY (`cid`, `fuid`) REFERENCES oxfolder_tree (`cid`, `fuid`)
+  PRIMARY KEY (`cid`,`fuid`,`tag`),
+  FOREIGN KEY (`cid`, `fuid`) REFERENCES oxfolder_tree (`cid`, `fuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `oxfolder_userfolders` (
@@ -50,7 +50,7 @@ CREATE TABLE `oxfolder_userfolders` (
   `linksite` VARCHAR(32) NOT NULL,
   `target` VARCHAR(32) NOT NULL,
   `img` VARCHAR(32) NOT NULL,
-  ADD PRIMARY KEY (`cid`,`module`)
+  PRIMARY KEY (`cid`,`module`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `oxfolder_userfolders_standardfolders` (
@@ -58,8 +58,8 @@ CREATE TABLE `oxfolder_userfolders_standardfolders` (
   `cid` INT4 UNSIGNED NOT NULL,
   `module` TINYINT UNSIGNED NOT NULL,
   `fuid` INT4 UNSIGNED NOT NULL,
-  ADD PRIMARY KEY (`owner`, `cid`, `module`, `fuid`),
-  ADD FOREIGN KEY (`cid`, `fuid`) REFERENCES oxfolder_tree (`cid`, `fuid`)
+  PRIMARY KEY (`owner`, `cid`, `module`, `fuid`),
+  FOREIGN KEY (`cid`, `fuid`) REFERENCES oxfolder_tree (`cid`, `fuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `del_oxfolder_tree` (
@@ -76,10 +76,10 @@ CREATE TABLE `del_oxfolder_tree` (
   `permission_flag` TINYINT UNSIGNED NOT NULL,
   `subfolder_flag` TINYINT UNSIGNED NOT NULL,
   `default_flag` TINYINT UNSIGNED NOT NULL default '0',
-  ADD PRIMARY KEY (`cid`, `fuid`),
-  ADD INDEX (`cid`, `parent`),
-  ADD FOREIGN KEY (`cid`, `created_from`) REFERENCES user (`cid`, `id`),
-  ADD FOREIGN KEY (`cid`, `changed_from`) REFERENCES user (`cid`, `id`)
+  PRIMARY KEY (`cid`, `fuid`),
+  INDEX (`cid`, `parent`),
+  FOREIGN KEY (`cid`, `created_from`) REFERENCES user (`cid`, `id`),
+  FOREIGN KEY (`cid`, `changed_from`) REFERENCES user (`cid`, `id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
   	 
 CREATE TABLE `del_oxfolder_permissions` (
@@ -93,10 +93,10 @@ CREATE TABLE `del_oxfolder_permissions` (
   `admin_flag` TINYINT UNSIGNED NOT NULL,
   `group_flag` TINYINT UNSIGNED NOT NULL,
   `system` TINYINT UNSIGNED NOT NULL default '0',
-  ADD PRIMARY KEY  (`cid`,`permission_id`,`fuid`,`system`),
-  ADD INDEX (`cid`,`fuid`),
-  ADD INDEX (`cid`,`fuid`,`permission_id`),
-  ADD FOREIGN KEY (`cid`, `fuid`) REFERENCES oxfolder_tree (`cid`, `fuid`)
+  PRIMARY KEY  (`cid`,`permission_id`,`fuid`,`system`),
+  INDEX (`cid`,`fuid`),
+  INDEX (`cid`,`fuid`,`permission_id`),
+  FOREIGN KEY (`cid`, `fuid`) REFERENCES oxfolder_tree (`cid`, `fuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `oxfolder_lock` (
@@ -109,7 +109,7 @@ CREATE TABLE `oxfolder_lock` (
   `type` TINYINT UNSIGNED NOT NULL,
   `scope` TINYINT UNSIGNED NOT NULL,
   `ownerDesc` VARCHAR(128) default NULL,
-  ADD PRIMARY KEY (cid, id)
+  PRIMARY KEY (cid, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `oxfolder_property` (
@@ -120,13 +120,6 @@ CREATE TABLE `oxfolder_property` (
   `value` VARCHAR(255) COLLATE utf8_unicode_ci default NULL,
   `language` VARCHAR(128) COLLATE utf8_unicode_ci default NULL,
   `xml` BOOLEAN default NULL,
-  ADD PRIMARY KEY (cid, id, name, namespace)
+  PRIMARY KEY (cid, id, name, namespace)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-
-#@(#) oxfolder.sql optimizations
-
-
-#@(#) oxfolder.sql consistency
-
     
