@@ -1,3 +1,7 @@
+* 2008-11-05 - francisco.laguna@open-xchange.com
+
+ - Bugfix #12459: Accept more than one file per language and parse names correctly.
+
 * 2008-11-05 - thorben.betten@open-xchange.com
 
  - Bugfix #12426: Properly setting modified-by replacement to session

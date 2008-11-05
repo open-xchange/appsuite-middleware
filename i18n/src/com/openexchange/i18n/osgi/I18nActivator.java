@@ -65,10 +65,7 @@ import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.i18n.I18nTools;
 import com.openexchange.i18n.parsing.Translations;
 import com.openexchange.i18n.parsing.I18NErrorMessages;
-import com.openexchange.i18n.impl.I18nImpl;
-import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
-import com.openexchange.i18n.impl.POTranslationsDiscoverer;
-import com.openexchange.i18n.impl.TranslationsI18N;
+import com.openexchange.i18n.impl.*;
 import com.openexchange.server.ServiceHolderListener;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
@@ -151,36 +148,52 @@ public class I18nActivator implements BundleActivator {
 		final List<Translations> translations = new POTranslationsDiscoverer(dir).getTranslations();
         final List<ServiceRegistration> serviceRegistrations = new ArrayList<ServiceRegistration>();
 
-        final Set<Locale> locales = new HashSet<Locale>();
+        final Map<Locale, List<I18nTools>> locales = new HashMap<Locale, List<I18nTools>>();
 
         for (final Translations tr : translations) {
-            if(locales.contains(tr.getLocale())) {
-                continue;
+
+            List<I18nTools> list = locales.get(tr.getLocale());
+            if (list == null) {
+                list = new ArrayList<I18nTools>();
+                locales.put(tr.getLocale(), list);
             }
-            locales.add(tr.getLocale());
 
-            final Properties prop = new Properties();
-			prop.put("language", tr.getLocale());
-
-            final I18nTools i18n = new TranslationsI18N(tr);
-
-
-            serviceRegistrations.add(context.registerService(I18nTools.class.getName(), i18n, prop));
+            list.add( new TranslationsI18N(tr) );
         }
 
         for (final ResourceBundle rc : resourceBundles) {
-            if(locales.contains(rc.getLocale())) {
-                continue;
+
+            List<I18nTools> list = locales.get(rc.getLocale());
+            if (list == null) {
+                list = new ArrayList<I18nTools>();
+                locales.put(rc.getLocale(), list);
             }
-            locales.add(rc.getLocale());
-			final I18nTools i18n = new I18nImpl(rc);
+
+            list.add( new I18nImpl(rc) );
 
 			final Properties prop = new Properties();
 			prop.put("language", rc.getLocale());
 
-			serviceRegistrations.add(context.registerService(I18nTools.class.getName(), i18n, prop));
 		}
-		if (LOG.isInfoEnabled()) {
+
+        for(Locale locale : locales.keySet()) {
+            List<I18nTools> list = locales.get(locale);
+
+            final Properties prop = new Properties();
+            prop.put("language", locale);
+
+            I18nTools i18n = null;
+            if(list.size() == 1) {
+                i18n = list.get(0);
+            } else {
+                i18n = new CompositeI18nTools(list);
+            }
+
+            serviceRegistrations.add( context.registerService(I18nTools.class.getName(), i18n, prop) );
+
+        }
+
+        if (LOG.isInfoEnabled()) {
 			LOG.info("All I18n services registered");
 		}
 		return serviceRegistrations.toArray(new ServiceRegistration[serviceRegistrations.size()]);

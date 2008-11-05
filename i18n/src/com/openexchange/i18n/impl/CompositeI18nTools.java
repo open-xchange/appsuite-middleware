@@ -48,54 +48,42 @@
  */
 package com.openexchange.i18n.impl;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
+import com.openexchange.i18n.I18nTools;
+
 import java.util.Locale;
+import java.util.List;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class FileDiscoverer {
+public class CompositeI18nTools implements I18nTools {
 
-    private File dir;
+    private Locale locale;
+    private List<I18nTools> tools;
 
-    public FileDiscoverer(File dir) throws FileNotFoundException {
-        if (!dir.exists()) {
-            throw new FileNotFoundException("Unable to load language files. Directory does not exist: "+ dir);
-        } else if (dir.isFile())  {
-        	throw new FileNotFoundException("Unable to load language files."+ dir +" is not a directory");
+    public CompositeI18nTools(List<I18nTools> i18n) {
+        Locale locale = null;
+        for(I18nTools i18nTool : i18n) {
+            if(locale == null) { locale = i18nTool.getLocale(); }
+            if(!locale.equals(i18nTool.getLocale())) {
+                throw new IllegalArgumentException();
+            }
         }
-        this.dir = dir;
+        this.tools = i18n;
     }
 
-    public String[] getFilesFromLanguageFolder(final String extension){
-		final String[] files = dir.list(new FilenameFilter() {
-		    public boolean accept(final File d, final String f) {
-		       return f.endsWith(extension);
-		    }
-		});
-		return files;
-	}
-
-    public Locale getLocale(String file) {
-        int indexOfUnderscore = file.indexOf("_");
-        if (indexOfUnderscore == -1) {
-            return null;
-        }
-        int indexOfLastDot = file.lastIndexOf(".");
-        if(indexOfLastDot < indexOfUnderscore) {
-            return null;
-        }
-        int indexOfDotBeforeUnderscore = file.lastIndexOf(".", indexOfUnderscore);
-        
-        if (indexOfUnderscore != -1){
-            return new Locale(file.substring(indexOfDotBeforeUnderscore+1, indexOfUnderscore), file.substring(indexOfUnderscore+1, indexOfLastDot));
+    public String getLocalized(String key) {
+        for (I18nTools tool : tools) {
+            String translation = tool.getLocalized(key);
+            if(translation != null) {
+                return translation;
+            }
         }
         return null;
     }
 
-    public File getDirectory() {
-        return dir;
+    public Locale getLocale() {
+        return locale;
     }
 }
+    
