@@ -295,10 +295,75 @@ public class Notifications {
 		"\n" + 
 		"==========================================";
 
+	public static final String APPOINTMENT_UPDATE_MAIL_EXT =
+		"This appointment was changed by [changed_by].\n" +
+		"\n" + 
+		"Appointment\n" + 
+		"===========\n" + 
+		"Created by: [created_by]\n" + 
+		"Created at: [creation_datetime]\n" + 
+		"[title]\n" + 
+		"[location]\n" + 
+		"[folder_name]\n" + 
+		"\n" + 
+		"[start]\n" + 
+		"[end]\n" + 
+		"[series]\n" + 
+		"[delete_exceptions]\n" + 
+		"[change_exceptions]\n" + 
+		"\n" + 
+		"[description]\n" + 
+		"\n" + 
+		"\n" + 
+		"Participants\n" + 
+		"============\n" + 
+		"[participants]" +
+		"\n" + 
+		"\n" + 
+		"Resources\n" + 
+		"=========\n" + 
+		"[resources]" +
+		"\n" + 
+		"\n" + 
+		"==========================================";
+
 	public static final String TASK_UPDATE_MAIL = 
 		"This task was changed by [changed_by].\n" +
 		"You can check this task in your tasks:\n" +
 		"[link]\n" +
+		"\n" +
+		"Task\n" +
+		"====\n" +
+		"Created by: [created_by]\n" +
+		"Created at: [creation_datetime]\n" +
+		"[title]\n" +
+		"[folder_name]\n" + 
+		"[priority]\n" +
+		"[task_status]\n" +
+		"\n" + 
+		"[start]\n" + 
+		"[end]\n" + 
+		"[series]\n" + 
+		"[delete_exceptions]\n" + 
+		"[change_exceptions]\n" + 
+		"\n" + 
+		"[description]\n" + 
+		"\n" + 
+		"\n" + 
+		"Participants\n" + 
+		"============\n" + 
+		"[participants]" +
+		"\n" + 
+		"\n" + 
+		"Resources\n" + 
+		"=========\n" + 
+		"[resources]" +
+		"\n" + 
+		"\n" + 
+		"==========================================";
+
+	public static final String TASK_UPDATE_MAIL_EXT = 
+		"This task was changed by [changed_by].\n" +
 		"\n" +
 		"Task\n" +
 		"====\n" +

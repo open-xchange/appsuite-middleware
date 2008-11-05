@@ -675,10 +675,25 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 					b.setLength(0);
 				}
 			} else {
-				msg.message = createTemplate.render(renderMap);
+				if (p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE) {
+					final String template = strings
+							.getString(Types.APPOINTMENT == state.getModule() ? Notifications.APPOINTMENT_UPDATE_MAIL_EXT
+									: Notifications.TASK_UPDATE_MAIL_EXT);
+					msg.message = new StringTemplate(template).render(renderMap);
+				} else {
+					msg.message = createTemplate.render(renderMap);
+				}
 			}
 		} else {
-			msg.message = createTemplate.render(renderMap);
+			if (State.Type.NEW.equals(state.getType())
+					&& (p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE)) {
+				final String template = strings
+						.getString(Types.APPOINTMENT == state.getModule() ? Notifications.APPOINTMENT_CREATE_MAIL_EXT
+								: Notifications.TASK_CREATE_MAIL_EXT);
+				msg.message = new StringTemplate(template).render(renderMap);
+			} else {
+				msg.message = createTemplate.render(renderMap);
+			}
 		}
 		if (Participant.RESOURCE == p.type) {
 			/*

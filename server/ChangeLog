@@ -15,7 +15,9 @@
    appointment to notification message
  - Bugfix #12448: Proper check of calendar object's notification flag to
    not withhold notification messages by mistake AND added delete/change
-   exceptions information to notification messages 
+   exceptions information to notification messages
+ - Bugfix #12431: Removed direct link in notification message to external
+   participant
 
 * 2008-11-04 - francisco.laguna@open-xchange.com
 
