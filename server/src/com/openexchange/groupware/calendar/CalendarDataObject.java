@@ -430,6 +430,9 @@ public class CalendarDataObject extends AppointmentObject {
         if (containsDeleteExceptions()) {
         	clone.setDeleteExceptions(copy(getDeleteException()));
         }
+        if (containsNotification()) {
+        	clone.setNotification(getNotification());
+        }
         clone.setIgnoreConflicts(ignoreConflicts);
         clone.setUsers(getUsers());
         clone.setParticipants(getParticipants());
