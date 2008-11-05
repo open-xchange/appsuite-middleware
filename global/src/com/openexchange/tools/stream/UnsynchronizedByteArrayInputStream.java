@@ -63,9 +63,9 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
 
 	/**
 	 * Creates a <code>ByteArrayInputStream</code> so that it uses
-	 * <code>buf</code> as its buffer array. The buffer array is not copied.
-	 * The initial value of <code>pos</code> is <code>0</code> and the
-	 * initial value of <code>count</code> is the length of <code>buf</code>.
+	 * <code>buf</code> as its buffer array. The buffer array is not copied. The
+	 * initial value of <code>pos</code> is <code>0</code> and the initial value
+	 * of <code>count</code> is the length of <code>buf</code>.
 	 * 
 	 * @param buf
 	 *            the input buffer.
@@ -75,11 +75,11 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
 	}
 
 	/**
-	 * Creates <code>ByteArrayInputStream</code> that uses <code>buf</code>
-	 * as its buffer array. The initial value of <code>pos</code> is
-	 * <code>offset</code> and the initial value of <code>count</code> is
-	 * the minimum of <code>offset+length</code> and <code>buf.length</code>.
-	 * The buffer array is not copied. The buffer's mark is set to the specified
+	 * Creates <code>ByteArrayInputStream</code> that uses <code>buf</code> as
+	 * its buffer array. The initial value of <code>pos</code> is
+	 * <code>offset</code> and the initial value of <code>count</code> is the
+	 * minimum of <code>offset+length</code> and <code>buf.length</code>. The
+	 * buffer array is not copied. The buffer's mark is set to the specified
 	 * offset.
 	 * 
 	 * @param buf
@@ -96,8 +96,8 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
 	/**
 	 * Reads the next byte of data from this input stream. The value byte is
 	 * returned as an <code>int</code> in the range <code>0</code> to
-	 * <code>255</code>. If no byte is available because the end of the
-	 * stream has been reached, the value <code>-1</code> is returned.
+	 * <code>255</code>. If no byte is available because the end of the stream
+	 * has been reached, the value <code>-1</code> is returned.
 	 * <p>
 	 * This <code>read</code> method cannot block.
 	 * 
@@ -111,15 +111,15 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
 
 	/**
 	 * Reads up to <code>len</code> bytes of data into an array of bytes from
-	 * this input stream. If <code>pos</code> equals <code>count</code>,
-	 * then <code>-1</code> is returned to indicate end of file. Otherwise,
-	 * the number <code>k</code> of bytes read is equal to the smaller of
+	 * this input stream. If <code>pos</code> equals <code>count</code>, then
+	 * <code>-1</code> is returned to indicate end of file. Otherwise, the
+	 * number <code>k</code> of bytes read is equal to the smaller of
 	 * <code>len</code> and <code>count-pos</code>. If <code>k</code> is
 	 * positive, then bytes <code>buf[pos]</code> through
 	 * <code>buf[pos+k-1]</code> are copied into <code>b[off]</code> through
 	 * <code>b[off+k-1]</code> in the manner performed by
-	 * <code>System.arraycopy</code>. The value <code>k</code> is added
-	 * into <code>pos</code> and <code>k</code> is returned.
+	 * <code>System.arraycopy</code>. The value <code>k</code> is added into
+	 * <code>pos</code> and <code>k</code> is returned.
 	 * <p>
 	 * This <code>read</code> method cannot block.
 	 * 
@@ -164,8 +164,8 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
 	 * Skips <code>n</code> bytes of input from this input stream. Fewer bytes
 	 * might be skipped if the end of the input stream is reached. The actual
 	 * number <code>k</code> of bytes to be skipped is equal to the smaller of
-	 * <code>n</code> and <code>count-pos</code>. The value <code>k</code>
-	 * is added into <code>pos</code> and <code>k</code> is returned.
+	 * <code>n</code> and <code>count-pos</code>. The value <code>k</code> is
+	 * added into <code>pos</code> and <code>k</code> is returned.
 	 * 
 	 * @param n
 	 *            the number of bytes to be skipped.
@@ -187,8 +187,8 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
 	 * Returns the number of remaining bytes that can be read (or skipped over)
 	 * from this input stream.
 	 * <p>
-	 * The value returned is <code>count&nbsp;- pos</code>, which is the
-	 * number of bytes remaining to be read from the input buffer.
+	 * The value returned is <code>count&nbsp;- pos</code>, which is the number
+	 * of bytes remaining to be read from the input buffer.
 	 * 
 	 * @return the number of remaining bytes that can be read (or skipped over)
 	 *         from this input stream without blocking.
@@ -217,11 +217,8 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
 	 * <p>
 	 * If no mark has been set, then the value of the mark is the offset passed
 	 * to the constructor (or 0 if the offset was not supplied).
-	 * 
 	 * <p>
 	 * Note: The <code>readAheadLimit</code> for this class has no meaning.
-	 * 
-	 * @since JDK1.1
 	 */
 	@Override
 	public void mark(final int readAheadLimit) {
@@ -242,7 +239,6 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
 	 * Closing a <tt>ByteArrayInputStream</tt> has no effect. The methods in
 	 * this class can be called after the stream has been closed without
 	 * generating an <tt>IOException</tt>.
-	 * <p>
 	 */
 	@Override
 	public void close() throws IOException {

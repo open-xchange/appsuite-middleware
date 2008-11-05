@@ -56,15 +56,14 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * <p>
- * UnsynchronizedByteArrayOutputStream - an implementation of
- * <code>ByteArrayOutputStream</code> that does not use synchronized methods
+ * {@link UnsynchronizedByteArrayOutputStream} - an implementation of
+ * {@link ByteArrayOutputStream} that does not use synchronized methods
  * </p>
  * 
  * <p>
  * This class implements an output stream in which the data is written into a
  * byte array. The buffer automatically grows as data is written to it. The data
- * can be retrieved using <code>toByteArray()</code> and
- * <code>toString()</code>.
+ * can be retrieved using <code>toByteArray()</code> and <code>toString()</code>.
  * <p>
  * Closing a <tt>ByteArrayOutputStream</tt> has no effect. The methods in this
  * class can be called after the stream has been closed without generating an
@@ -163,8 +162,6 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
 	 * zero, so that all currently accumulated output in the output stream is
 	 * discarded. The output stream can be used again, reusing the already
 	 * allocated buffer space.
-	 * 
-	 * @see java.io.ByteArrayInputStream#count
 	 */
 	@Override
 	public void reset() {
@@ -176,8 +173,6 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
 	 * 
 	 * @param discardSize
 	 *            The number of bytes to discard
-	 * 
-	 * @see java.io.ByteArrayInputStream#count
 	 */
 	public void discard(final int discardSize) {
 		if ((discardSize < 0) || (discardSize > count)) {
@@ -231,9 +226,8 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
 	/**
 	 * Returns the current size of the buffer.
 	 * 
-	 * @return the value of the <code>count</code> field, which is the number
-	 *         of valid bytes in this output stream.
-	 * @see java.io.ByteArrayOutputStream#count
+	 * @return the value of the <code>count</code> field, which is the number of
+	 *         valid bytes in this output stream.
 	 */
 	@Override
 	public int size() {
@@ -245,7 +239,6 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
 	 * characters according to the platform's default character encoding.
 	 * 
 	 * @return String translated from the buffer's contents.
-	 * @since JDK1.1
 	 */
 	@Override
 	public String toString() {
@@ -261,7 +254,6 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
 	 * @return String translated from the buffer's contents.
 	 * @throws UnsupportedEncodingException
 	 *             If the named encoding is not supported.
-	 * @since JDK1.1
 	 */
 	@Override
 	public String toString(final String enc) throws UnsupportedEncodingException {
@@ -290,9 +282,6 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
 	 * @param hibyte
 	 *            the high byte of each resulting Unicode character.
 	 * @return the current contents of the output stream, as a string.
-	 * @see java.io.ByteArrayOutputStream#size()
-	 * @see java.io.ByteArrayOutputStream#toString(String)
-	 * @see java.io.ByteArrayOutputStream#toString()
 	 */
 	@Override
 	@Deprecated
@@ -305,7 +294,6 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
 	 * this class can be called after the stream has been closed without
 	 * generating an <tt>IOException</tt>.
 	 * <p>
-	 * 
 	 */
 	@Override
 	public void close() throws IOException {
