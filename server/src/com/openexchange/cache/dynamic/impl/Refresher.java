@@ -145,7 +145,8 @@ public abstract class Refresher<T extends Serializable> {
                     retval = (T) cache.get(key);
                 } else {
                     // We have to load it, too.
-                    LOG.warn("Found 2 threads loading cached objects after 1 second.");
+                    LOG.warn("Found 2 threads loading cached objects after 1 "
+                        + "second. Cache: " + regionName);
                     load = true;
                 }
             } else {
