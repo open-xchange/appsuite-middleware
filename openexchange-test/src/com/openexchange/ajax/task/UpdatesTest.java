@@ -54,9 +54,9 @@ import java.util.TimeZone;
 
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonUpdatesResponse;
-import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
+import com.openexchange.ajax.framework.CommonUpdatesRequest.Ignore;
 import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.ajax.task.actions.AllResponse;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -65,6 +65,8 @@ import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.ajax.task.actions.UpdatesRequest;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Task;
 
@@ -91,16 +93,17 @@ public class UpdatesTest extends AbstractTaskTest {
         final int total = UPDATES + UNTOUCHED + DELETES;
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateTaskFolder();
+        final int userId = client.getValues().getUserId();
         final TimeZone timeZone = client.getValues().getTimeZone();
-        final InsertRequest[] inserts =
-            new InsertRequest[total];
+        final InsertRequest[] inserts = new InsertRequest[total];
         for (int i = 0; i < inserts.length; i++) {
             final Task task = new Task();
             task.setParentFolderID(folderId);
             task.setTitle("Task " + (i + 1));
+            task.setParticipants(new Participant[] { new UserParticipant(userId) });
             inserts[i] = new InsertRequest(task, timeZone);
         }
-        final MultipleResponse mInsert =  Executor.execute(client,
+        final MultipleResponse<InsertResponse> mInsert = client.execute(
             MultipleRequest.create(inserts));
         int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.FOLDER_ID };
         final AllResponse allR = TaskTools.all(client, new AllRequest(
@@ -112,49 +115,47 @@ public class UpdatesTest extends AbstractTaskTest {
         for (int i = 0; i < updates.length; i++) {
             final Task task = new Task();
             task.setTitle("UpdatedTask " + (i + 1));
-            final InsertResponse insertR = (InsertResponse) mInsert
-            .getResponse(i);
+            final InsertResponse insertR = mInsert.getResponse(i);
             task.setObjectID(insertR.getId());
             task.setParentFolderID(folderId);
             task.setLastModified(insertR.getTimestamp());
             updates[i] = new UpdateRequest(task, timeZone);
         }
-        final MultipleResponse mUpdate = Executor.execute(client,
+        final MultipleResponse<UpdateResponse> mUpdate = client.execute(
             MultipleRequest.create(updates));
         // And delete 2
         final DeleteRequest[] deletes = new DeleteRequest[DELETES];
         for (int i = 0; i < deletes.length; i++) {
-            final InsertResponse insertR = (InsertResponse) mInsert
-                .getResponse(total - (i + 1));
+            final InsertResponse insertR = mInsert.getResponse(total - (i + 1));
             deletes[i] = new DeleteRequest(folderId, insertR.getId(), insertR
                 .getTimestamp());
         }
-        Executor.execute(client, MultipleRequest.create(deletes));
+        client.execute(MultipleRequest.create(deletes));
         // Now request updates for the list
         columns = new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.TITLE,
             Task.START_DATE, Task.END_DATE, Task.PERCENT_COMPLETED,
-            Task.PRIORITY };
+            Task.PRIORITY, Task.PARTICIPANTS };
         final CommonUpdatesResponse updatesR = TaskTools.updates(client,
-            new UpdatesRequest(folderId, columns, 0, null, allR.getTimestamp()));
-        // TODO add deletes.
+            new UpdatesRequest(folderId, columns, 0, null, allR.getTimestamp(),
+            Ignore.NONE));
         assertTrue("Only found " + updatesR.size()
             + " updated tasks but should be more than "
-            + UPDATES + '.', updatesR.size() >= UPDATES);
+            + (UPDATES + DELETES) + '.', updatesR.size() >= UPDATES + DELETES);
+        // TODO Check more exactly if above done updates and deletes are found.
         // Clean up
         final DeleteRequest[] deletes2 = new DeleteRequest[UPDATES + UNTOUCHED];
         for (int i = 0; i < deletes2.length; i++) {
-            final InsertResponse insertR = (InsertResponse) mInsert
+            final InsertResponse insertR = mInsert
                 .getResponse(i);
             final Date lastModified;
             if (i < UPDATES) {
-                lastModified = ((UpdateResponse) mUpdate.getResponse(i))
-                    .getTimestamp();
+                lastModified = mUpdate.getResponse(i).getTimestamp();
             } else {
                 lastModified = insertR.getTimestamp();
             }
             deletes2[i] = new DeleteRequest(folderId, insertR.getId(),
                 lastModified);
         }
-        Executor.execute(client, MultipleRequest.create(deletes2));
+        client.execute(MultipleRequest.create(deletes2));
     }
 }
