@@ -51,7 +51,9 @@ package com.openexchange.groupware.notify;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -742,9 +744,20 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			final Date start = newObj.getStartDate();
 			renderMap.put(new StartDateReplacement(start).setChanged(isUpdate ? (oldObj == null ? false
 					: !compareObjects(start, oldObj.getStartDate())) : false));
-		}
-		{
-			final Date end = newObj.getEndDate();
+			Date end = newObj.getEndDate();
+			if (newObj.containsRecurrenceType()) {
+				if (start != null && end != null) {
+					end = computeFirstOccurrenceEnd(start.getTime(), end.getTime());
+				}
+			} else if (oldObj != null && oldObj.containsRecurrenceType()) {
+				if (start != null && end != null) {
+					end = computeFirstOccurrenceEnd(start.getTime(), end.getTime());
+				}
+			} else if (newObj.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
+				if (start != null && end != null) {
+					end = computeFirstOccurrenceEnd(start.getTime(), end.getTime());
+				}
+			}
 			renderMap
 					.put(new EndDateReplacement(end, Types.TASK == module)
 							.setChanged(isUpdate ? (oldObj == null ? false : !compareObjects(end, oldObj.getEndDate()))
@@ -1455,5 +1468,25 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 	 */
 	private static boolean compare2Date(final long date, final long millis) {
 		return date >= (millis - (millis % Constants.MILLI_DAY));
+	}
+
+	/**
+	 * Computes the first occurence's end time.
+	 * 
+	 * @param startMillis
+	 *            The start time in UTC milliseconds
+	 * @param endMillis
+	 *            The end time in UTC milliseconds
+	 * @return The first occurence's end time.
+	 */
+	private static Date computeFirstOccurrenceEnd(final long startMillis, final long endMillis) {
+		final Calendar cal = GregorianCalendar.getInstance(Tools.getTimeZone("UTC"), Locale.ENGLISH);
+		cal.setTimeInMillis(endMillis);
+		final int hourOfDay = cal.get(Calendar.HOUR_OF_DAY);
+		final int minutes = cal.get(Calendar.MINUTE);
+		cal.setTimeInMillis(startMillis);
+		cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+		cal.set(Calendar.MINUTE, minutes);
+		return cal.getTime();
 	}
 }
