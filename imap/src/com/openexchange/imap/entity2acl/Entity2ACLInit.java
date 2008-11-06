@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap.user2acl;
+package com.openexchange.imap.entity2acl;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
@@ -58,28 +58,28 @@ import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.server.Initialization;
 
 /**
- * {@link User2ACLInit}
+ * {@link Entity2ACLInit}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class User2ACLInit implements Initialization {
+public final class Entity2ACLInit implements Initialization {
 
 	private static final Object[] EMPTY_ARGS = new Object[0];
 
-	private static User2ACLInit instance = new User2ACLInit();
+	private static Entity2ACLInit instance = new Entity2ACLInit();
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(User2ACLInit.class);
+			.getLog(Entity2ACLInit.class);
 
 	/**
-	 * @return The singleton instance of {@link User2ACLInit}
+	 * @return The singleton instance of {@link Entity2ACLInit}
 	 */
-	public static User2ACLInit getInstance() {
+	public static Entity2ACLInit getInstance() {
 		return instance;
 	}
 
-	private Class<? extends User2ACL> implementingClass;
+	private Class<? extends Entity2ACL> implementingClass;
 
 	private final Lock lock;
 
@@ -88,22 +88,23 @@ public final class User2ACLInit implements Initialization {
 	/**
 	 * No instantiation
 	 */
-	private User2ACLInit() {
+	private Entity2ACLInit() {
 		super();
 		lock = new ReentrantLock();
 	}
 
 	public void start() throws AbstractOXException {
 		if (started.get()) {
-			LOG.error(User2ACLInit.class.getName() + " already started");
+			LOG.error(Entity2ACLInit.class.getName() + " already started");
 			return;
 		}
 		lock.lock();
 		try {
 			if (null == implementingClass) {
-				final String classNameProp = IMAPConfig.getUser2AclImpl();
+				final String classNameProp = IMAPConfig.getEntity2AclImpl();
 				if ((null == classNameProp) || (classNameProp.length() == 0)) {
-					throw new User2ACLException(User2ACLException.Code.MISSING_SETTING, "User2ACLImpl");
+					throw new Entity2ACLException(Entity2ACLException.Code.MISSING_SETTING,
+							"com.openexchange.imap.User2ACLImpl");
 				}
 				if ("auto".equalsIgnoreCase(classNameProp)) {
 					/*
@@ -116,19 +117,19 @@ public final class User2ACLInit implements Initialization {
 					return;
 				}
 				final String className = IMAPServer.getIMAPServerImpl(classNameProp);
-				implementingClass = className == null ? Class.forName(classNameProp).asSubclass(User2ACL.class) : Class
-						.forName(className).asSubclass(User2ACL.class);
+				implementingClass = className == null ? Class.forName(classNameProp).asSubclass(Entity2ACL.class)
+						: Class.forName(className).asSubclass(Entity2ACL.class);
 				if (LOG.isInfoEnabled()) {
 					LOG.info("Used IMAP server implementation: " + implementingClass.getName());
 				}
-				User2ACL.setInstance(implementingClass.newInstance());
+				Entity2ACL.setInstance(implementingClass.newInstance());
 			}
 		} catch (final ClassNotFoundException e) {
-			throw new User2ACLException(User2ACLException.Code.CLASS_NOT_FOUND, e, EMPTY_ARGS);
+			throw new Entity2ACLException(Entity2ACLException.Code.CLASS_NOT_FOUND, e, EMPTY_ARGS);
 		} catch (final InstantiationException e) {
-			throw new User2ACLException(User2ACLException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
+			throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
 		} catch (final IllegalAccessException e) {
-			throw new User2ACLException(User2ACLException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
+			throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
 		} finally {
 			lock.unlock();
 		}
@@ -137,11 +138,11 @@ public final class User2ACLInit implements Initialization {
 
 	public void stop() throws AbstractOXException {
 		if (!started.get()) {
-			LOG.error(User2ACLInit.class.getName() + " cannot be stopped since it has not been started before");
+			LOG.error(Entity2ACLInit.class.getName() + " cannot be stopped since it has not been started before");
 			return;
 		}
 		implementingClass = null;
-		User2ACL.resetUser2ACL();
+		Entity2ACL.resetEntity2ACL();
 		started.set(false);
 	}
 

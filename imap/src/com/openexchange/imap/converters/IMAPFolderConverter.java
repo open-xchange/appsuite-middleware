@@ -70,9 +70,9 @@ import com.openexchange.imap.cache.RootSubfolderCache;
 import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.dataobjects.IMAPMailFolder;
-import com.openexchange.imap.user2acl.IMAPServer;
-import com.openexchange.imap.user2acl.User2ACLArgs;
-import com.openexchange.imap.user2acl.User2ACLException;
+import com.openexchange.imap.entity2acl.Entity2ACLArgs;
+import com.openexchange.imap.entity2acl.Entity2ACLException;
+import com.openexchange.imap.entity2acl.IMAPServer;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailConfig;
@@ -103,7 +103,7 @@ public final class IMAPFolderConverter {
 
 	private static final String STR_EMPTY = "";
 
-	private static final class _User2ACLArgs implements User2ACLArgs {
+	private static final class _Entity2ACLArgs implements Entity2ACLArgs {
 
 		private final InetSocketAddress imapServerAddress;
 
@@ -114,7 +114,7 @@ public final class IMAPFolderConverter {
 		private final char separator;
 
 		/**
-		 * Initializes a new {@link _User2ACLArgs}
+		 * Initializes a new {@link _Entity2ACLArgs}
 		 * 
 		 * @param imapServerAddress
 		 *            The IMAP server address
@@ -125,7 +125,7 @@ public final class IMAPFolderConverter {
 		 * @param separator
 		 *            The separator character
 		 */
-		public _User2ACLArgs(final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname,
+		public _Entity2ACLArgs(final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname,
 				final char separator) {
 			this.imapServerAddress = imapServerAddress;
 			this.sessionUser = sessionUser;
@@ -140,7 +140,7 @@ public final class IMAPFolderConverter {
 				return new Object[] { imapServerAddress, Integer.valueOf(sessionUser), fullname,
 						Character.valueOf(separator) };
 			}
-			throw new User2ACLException(User2ACLException.Code.UNKNOWN_IMAP_SERVER, imapServer.getName());
+			throw new Entity2ACLException(Entity2ACLException.Code.UNKNOWN_IMAP_SERVER, imapServer.getName());
 
 		}
 	}
@@ -167,7 +167,7 @@ public final class IMAPFolderConverter {
 	}
 
 	/**
-	 * Creates an appropriate implementation of {@link User2ACLArgs}
+	 * Creates an appropriate implementation of {@link Entity2ACLArgs}
 	 * 
 	 * @param session
 	 *            The session
@@ -175,13 +175,13 @@ public final class IMAPFolderConverter {
 	 *            The IMAP folder
 	 * @param imapConfig
 	 *            The IMAP configuration
-	 * @return An appropriate implementation of {@link User2ACLArgs}
+	 * @return An appropriate implementation of {@link Entity2ACLArgs}
 	 * @throws MessagingException
 	 *             If IMAP folder's attributes cannot be accessed
 	 */
-	public static User2ACLArgs getUser2AclArgs(final Session session, final IMAPFolder imapFolder,
+	public static Entity2ACLArgs getEntity2AclArgs(final Session session, final IMAPFolder imapFolder,
 			final IMAPConfig imapConfig) throws MessagingException {
-		return new _User2ACLArgs(new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort()), session
+		return new _Entity2ACLArgs(new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort()), session
 				.getUserId(), imapFolder.getFullName(), imapFolder.getSeparator());
 	}
 
@@ -493,7 +493,7 @@ public final class IMAPFolderConverter {
 				throw MIMEMailException.handleMessagingException(e);
 			}
 			try {
-				final User2ACLArgs args = new _User2ACLArgs(new InetSocketAddress(imapConfig.getServer(), imapConfig
+				final Entity2ACLArgs args = new _Entity2ACLArgs(new InetSocketAddress(imapConfig.getServer(), imapConfig
 						.getPort()), session.getUserId(), imapFolder.getFullName(), imapFolder.getSeparator());
 				final StringBuilder debugBuilder;
 				if (LOG.isDebugEnabled()) {

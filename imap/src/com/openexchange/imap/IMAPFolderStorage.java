@@ -81,8 +81,8 @@ import com.openexchange.imap.command.CopyIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.converters.IMAPFolderConverter;
-import com.openexchange.imap.user2acl.User2ACL;
-import com.openexchange.imap.user2acl.User2ACLArgs;
+import com.openexchange.imap.entity2acl.Entity2ACL;
+import com.openexchange.imap.entity2acl.Entity2ACLArgs;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailConfig;
@@ -664,11 +664,11 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 						 */
 						final ACL[] removedACLs = getRemovedACLs(newACLs, initialACLs);
 						if (removedACLs.length > 0) {
-							final User2ACL user2ACL = User2ACL.getInstance(imapConfig);
-							final User2ACLArgs user2ACLArgs = IMAPFolderConverter.getUser2AclArgs(session, createMe,
+							final Entity2ACL entity2ACL = Entity2ACL.getInstance(imapConfig);
+							final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, createMe,
 									imapConfig);
 							for (int i = 0; i < removedACLs.length; i++) {
-								if (isKnownEntity(removedACLs[i].getName(), user2ACL, ctx, user2ACLArgs)) {
+								if (isKnownEntity(removedACLs[i].getName(), entity2ACL, ctx, args)) {
 									createMe.removeACL(removedACLs[i].getName());
 								}
 							}
@@ -979,11 +979,11 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 						 */
 						final ACL[] removedACLs = getRemovedACLs(newACLs, oldACLs);
 						if (removedACLs.length > 0) {
-							final User2ACL user2ACL = User2ACL.getInstance(imapConfig);
-							final User2ACLArgs user2ACLArgs = IMAPFolderConverter.getUser2AclArgs(session, updateMe,
+							final Entity2ACL entity2ACL = Entity2ACL.getInstance(imapConfig);
+							final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, updateMe,
 									imapConfig);
 							for (int i = 0; i < removedACLs.length; i++) {
-								if (isKnownEntity(removedACLs[i].getName(), user2ACL, ctx, user2ACLArgs)) {
+								if (isKnownEntity(removedACLs[i].getName(), entity2ACL, ctx, args)) {
 									updateMe.removeACL(removedACLs[i].getName());
 								}
 							}
@@ -1542,8 +1542,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 		/*
 		 * Ensure that owner still holds full rights
 		 */
-		final String ownerACLName = User2ACL.getInstance(imapConfig).getACLName(session.getUserId(), ctx,
-				IMAPFolderConverter.getUser2AclArgs(session, defaultFolder, imapConfig));
+		final String ownerACLName = Entity2ACL.getInstance(imapConfig).getACLName(session.getUserId(), ctx,
+				IMAPFolderConverter.getEntity2AclArgs(session, defaultFolder, imapConfig));
 		for (int i = 0; i < newACLs.length; i++) {
 			if (newACLs[i].getName().equals(ownerACLName) && newACLs[i].getRights().contains(FULL_RIGHTS)) {
 				return true;
@@ -1766,7 +1766,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 			MessagingException {
 		final ACL[] acls = new ACL[perms.length];
 		for (int i = 0; i < perms.length; i++) {
-			acls[i] = ((ACLPermission) perms[i]).getPermissionACL(IMAPFolderConverter.getUser2AclArgs(session,
+			acls[i] = ((ACLPermission) perms[i]).getPermissionACL(IMAPFolderConverter.getEntity2AclArgs(session,
 					imapFolder, imapConfig), imapConfig, ctx);
 		}
 		return acls;
@@ -1788,10 +1788,10 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 		return retval.toArray(new ACL[retval.size()]);
 	}
 
-	private static boolean isKnownEntity(final String entity, final User2ACL user2ACL, final Context ctx,
-			final User2ACLArgs user2ACLArgs) {
+	private static boolean isKnownEntity(final String entity, final Entity2ACL entity2ACL, final Context ctx,
+			final Entity2ACLArgs args) {
 		try {
-			return user2ACL.getUserID(entity, ctx, user2ACLArgs) != -1;
+			return entity2ACL.getEntityID(entity, ctx, args)[0] != -1;
 		} catch (final AbstractOXException e) {
 			return false;
 		}

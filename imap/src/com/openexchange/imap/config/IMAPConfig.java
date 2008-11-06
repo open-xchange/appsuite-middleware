@@ -137,12 +137,12 @@ public final class IMAPConfig extends MailConfig {
 	}
 
 	/**
-	 * Gets the user2acl implementation's canonical class name
+	 * Gets the entity2acl implementation's canonical class name
 	 * 
-	 * @return The user2acl implementation's canonical class name
+	 * @return The entity2acl implementation's canonical class name
 	 */
-	public static String getUser2AclImpl() {
-		return IMAPProperties.getInstance().getUser2AclImpl();
+	public static String getEntity2AclImpl() {
+		return IMAPProperties.getInstance().getEntity2AclImpl();
 	}
 
 	/**

@@ -63,8 +63,8 @@ import javax.mail.MessagingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPSessionProperties;
-import com.openexchange.imap.user2acl.User2ACLException;
-import com.openexchange.imap.user2acl.User2ACLInit;
+import com.openexchange.imap.entity2acl.Entity2ACLException;
+import com.openexchange.imap.entity2acl.Entity2ACLInit;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.MailAccess;
@@ -419,8 +419,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 	@Override
 	protected void startup() throws MailException {
 		try {
-			User2ACLInit.getInstance().start();
-		} catch (final User2ACLException e) {
+			Entity2ACLInit.getInstance().start();
+		} catch (final Entity2ACLException e) {
 			throw new MailException(e);
 		} catch (final MailException e) {
 			throw e;
@@ -432,8 +432,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 	@Override
 	protected void shutdown() throws MailException {
 		try {
-			User2ACLInit.getInstance().stop();
-		} catch (final User2ACLException e) {
+			Entity2ACLInit.getInstance().stop();
+		} catch (final Entity2ACLException e) {
 			throw new MailException(e);
 		} catch (final MailException e) {
 			throw e;

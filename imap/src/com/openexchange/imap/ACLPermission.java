@@ -52,8 +52,8 @@ package com.openexchange.imap;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.imap.user2acl.User2ACL;
-import com.openexchange.imap.user2acl.User2ACLArgs;
+import com.openexchange.imap.entity2acl.Entity2ACL;
+import com.openexchange.imap.entity2acl.Entity2ACLArgs;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.sun.mail.imap.ACL;
@@ -264,8 +264,8 @@ public final class ACLPermission extends MailPermission {
 	 * Maps this permission to ACL rights and fills them into an instance of
 	 * {@link ACL}.
 	 * 
-	 * @param user2aclArgs
-	 *            The IMAP-server-specific user2acl arguments used for mapping
+	 * @param args
+	 *            The IMAP-server-specific arguments used for mapping
 	 * @param imapConfig
 	 *            The user's IMAP configuration
 	 * @param ctx
@@ -275,7 +275,7 @@ public final class ACLPermission extends MailPermission {
 	 *             If this permission cannot be mapped to an instance of
 	 *             {@link ACL}
 	 */
-	public ACL getPermissionACL(final User2ACLArgs user2aclArgs, final IMAPConfig imapConfig, final Context ctx)
+	public ACL getPermissionACL(final Entity2ACLArgs args, final IMAPConfig imapConfig, final Context ctx)
 			throws AbstractOXException {
 		if (this.acl != null) {
 			/*
@@ -284,7 +284,7 @@ public final class ACLPermission extends MailPermission {
 			return acl;
 		}
 		final Rights rights = permission2Rights(this);
-		return (acl = new ACL(User2ACL.getInstance(imapConfig).getACLName(getEntity(), ctx, user2aclArgs), rights));
+		return (acl = new ACL(Entity2ACL.getInstance(imapConfig).getACLName(getEntity(), ctx, args), rights));
 	}
 
 	/**
@@ -293,8 +293,8 @@ public final class ACLPermission extends MailPermission {
 	 * 
 	 * @param acl
 	 *            The source instance of {@link ACL}
-	 * @param user2aclArgs
-	 *            The IMAP-server-specific user2acl arguments used for mapping
+	 * @param args
+	 *            The IMAP-server-specific arguments used for mapping
 	 * @param imapConfig
 	 *            The user's IMAP configuration
 	 * @param ctx
@@ -302,9 +302,11 @@ public final class ACLPermission extends MailPermission {
 	 * @throws AbstractOXException
 	 *             If given ACL cannot be applied to this permission
 	 */
-	public void parseACL(final ACL acl, final User2ACLArgs user2aclArgs, final IMAPConfig imapConfig, final Context ctx)
+	public void parseACL(final ACL acl, final Entity2ACLArgs args, final IMAPConfig imapConfig, final Context ctx)
 			throws AbstractOXException {
-		setEntity(User2ACL.getInstance(imapConfig).getUserID(acl.getName(), ctx, user2aclArgs));
+		final int[] res = Entity2ACL.getInstance(imapConfig).getEntityID(acl.getName(), ctx, args);
+		setEntity(res[0]);
+		setGroupPermission(res[1] > 0);
 		parseRights(acl.getRights());
 		this.acl = acl;
 	}

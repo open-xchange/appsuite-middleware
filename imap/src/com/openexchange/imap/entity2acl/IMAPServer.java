@@ -47,17 +47,17 @@
  *
  */
 
-package com.openexchange.imap.user2acl;
+package com.openexchange.imap.entity2acl;
 
 public enum IMAPServer {
 	/**
-	 * Courier: <code>com.openexchange.imap.user2acl.CourierUser2ACL</code>
+	 * Courier
 	 */
-	COURIER("Courier", CourierUser2ACL.class.getName()),
+	COURIER("Courier", CourierEntity2ACL.class.getName()),
 	/**
-	 * Cyrus: <code>com.openexchange.imap.user2acl.CyrusUser2ACL</code>
+	 * Cyrus
 	 */
-	CYRUS("Cyrus", CyrusUser2ACL.class.getName());
+	CYRUS("Cyrus", CyrusEntity2ACL.class.getName());
 
 	private final String impl;
 
@@ -69,9 +69,9 @@ public enum IMAPServer {
 	}
 
 	/**
-	 * Gets the class name of {@link User2ACL} implementation
+	 * Gets the class name of {@link Entity2ACL} implementation
 	 * 
-	 * @return The class name of {@link User2ACL} implementation
+	 * @return The class name of {@link Entity2ACL} implementation
 	 */
 	public String getImpl() {
 		return impl;
@@ -87,12 +87,12 @@ public enum IMAPServer {
 	}
 
 	/**
-	 * Gets the class name of {@link User2ACL} implementation that corresponds
+	 * Gets the class name of {@link Entity2ACL} implementation that corresponds
 	 * to specified name.
 	 * 
 	 * @param name
 	 *            The IMAP server name
-	 * @return The class name of {@link User2ACL} implementation or
+	 * @return The class name of {@link Entity2ACL} implementation or
 	 *         <code>null</code> if none matches.
 	 */
 	public static final String getIMAPServerImpl(final String name) {

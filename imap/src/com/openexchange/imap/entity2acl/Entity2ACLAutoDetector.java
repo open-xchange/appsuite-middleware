@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap.user2acl;
+package com.openexchange.imap.entity2acl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,19 +66,19 @@ import com.openexchange.mail.api.MailConfig.BoolCapVal;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
- * {@link User2ACLAutoDetector}
+ * {@link Entity2ACLAutoDetector}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class User2ACLAutoDetector {
+public final class Entity2ACLAutoDetector {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(User2ACLAutoDetector.class);
+			.getLog(Entity2ACLAutoDetector.class);
 
 	private static final Object[] EMPTY_ARGS = new Object[0];
 
-	private static final Map<InetAddress, User2ACL> map = new ConcurrentHashMap<InetAddress, User2ACL>();
+	private static final Map<InetAddress, Entity2ACL> map = new ConcurrentHashMap<InetAddress, Entity2ACL>();
 
 	private static final Lock CONTACT_LOCK = new ReentrantLock();
 
@@ -91,19 +91,19 @@ public final class User2ACLAutoDetector {
 	/**
 	 * Prevent instantiation
 	 */
-	private User2ACLAutoDetector() {
+	private Entity2ACLAutoDetector() {
 		super();
 	}
 
 	/**
-	 * Resets the user2acl auto-detector
+	 * Resets the auto-detector
 	 */
-	static void resetUser2ACLMappings() {
+	static void resetEntity2ACLMappings() {
 		map.clear();
 	}
 
 	/**
-	 * Determines the {@link User2ACL} implementation dependent on IMAP server's
+	 * Determines the {@link Entity2ACL} implementation dependent on IMAP server's
 	 * greeting.
 	 * <p>
 	 * The IMAP server name can either be a machine name, such as
@@ -117,25 +117,25 @@ public final class User2ACLAutoDetector {
 	 * @param isSecure
 	 *            <code>true</code> if a secure connection must be established;
 	 *            otherwise <code>false</code>
-	 * @return the IMAP server's depending {@link User2ACL} implementation
+	 * @return the IMAP server's depending {@link Entity2ACL} implementation
 	 * @throws IOException
 	 *             - if an I/O error occurs
-	 * @throws User2ACLException
+	 * @throws Entity2ACLException
 	 *             - if a server greeting could not be mapped to a supported
 	 *             IMAP server
 	 */
-	public static User2ACL getUser2ACLImpl(final String imapServer, final int imapPort, final boolean isSecure)
-			throws IOException, User2ACLException {
+	public static Entity2ACL getEntity2ACLImpl(final String imapServer, final int imapPort, final boolean isSecure)
+			throws IOException, Entity2ACLException {
 		final InetAddress key = InetAddress.getByName(imapServer);
-		User2ACL impl = map.get(key);
+		Entity2ACL impl = map.get(key);
 		if (impl == null) {
-			impl = loadUser2ACLImpl(key, imapPort, isSecure);
+			impl = loadEntity2ACLImpl(key, imapPort, isSecure);
 		}
 		return impl;
 	}
 
 	private static IMAPServer mapInfo2IMAPServer(final String info, final InetAddress inetAddress, final int port,
-			final boolean isSecure) throws IOException, User2ACLException {
+			final boolean isSecure) throws IOException, Entity2ACLException {
 		final IMAPServer[] imapServers = IMAPServer.values();
 		for (int i = 0; i < imapServers.length; i++) {
 			if (toLowerCase(info).indexOf(toLowerCase(imapServers[i].getName())) > -1) {
@@ -144,7 +144,7 @@ public final class User2ACLAutoDetector {
 		}
 		/*
 		 * No known IMAP server found, check if ACLs are disabled anyway. If yes
-		 * user2acl is never used and can safely be mapped to default
+		 * entity2acl is never used and can safely be mapped to default
 		 * implementation.
 		 */
 		final BoolCapVal supportsACLs = IMAPConfig.isSupportsACLsConfig();
@@ -167,7 +167,7 @@ public final class User2ACLAutoDetector {
 			}
 			return IMAPServer.CYRUS;
 		}
-		throw new User2ACLException(User2ACLException.Code.UNKNOWN_IMAP_SERVER, info);
+		throw new Entity2ACLException(Entity2ACLException.Code.UNKNOWN_IMAP_SERVER, info);
 	}
 
 	private static String toLowerCase(final String str) {
@@ -181,7 +181,7 @@ public final class User2ACLAutoDetector {
 	private static final Pattern PAT_ACL = Pattern.compile("(^|\\s)(ACL)(\\s+|$)");
 
 	private static boolean checkForACLSupport(final InetAddress inetAddress, final int imapPort, final boolean isSecure)
-			throws IOException, User2ACLException {
+			throws IOException, Entity2ACLException {
 		CONTACT_LOCK.lock();
 		try {
 			Socket s = null;
@@ -207,7 +207,7 @@ public final class User2ACLAutoDetector {
 						s.setSoTimeout(IMAPConfig.getImapTimeout());
 					}
 				} catch (final IOException e) {
-					throw new User2ACLException(User2ACLException.Code.CREATING_SOCKET_FAILED, e, inetAddress
+					throw new Entity2ACLException(Entity2ACLException.Code.CREATING_SOCKET_FAILED, e, inetAddress
 							.toString(), e.getLocalizedMessage());
 				}
 				final InputStream in = s.getInputStream();
@@ -295,17 +295,17 @@ public final class User2ACLAutoDetector {
 		}
 	}
 
-	private static User2ACL loadUser2ACLImpl(final InetAddress inetAddress, final int imapPort, final boolean isSecure)
-			throws IOException, User2ACLException {
-		User2ACL user2Acl = map.get(inetAddress);
-		if (user2Acl != null) {
-			return user2Acl;
+	private static Entity2ACL loadEntity2ACLImpl(final InetAddress inetAddress, final int imapPort, final boolean isSecure)
+			throws IOException, Entity2ACLException {
+		Entity2ACL entity2Acl = map.get(inetAddress);
+		if (entity2Acl != null) {
+			return entity2Acl;
 		}
 		CONTACT_LOCK.lock();
 		try {
-			user2Acl = map.get(inetAddress);
-			if (user2Acl != null) {
-				return user2Acl;
+			entity2Acl = map.get(inetAddress);
+			if (entity2Acl != null) {
+				return entity2Acl;
 			}
 			Socket s = null;
 			try {
@@ -330,7 +330,7 @@ public final class User2ACLAutoDetector {
 						s.setSoTimeout(IMAPConfig.getImapTimeout());
 					}
 				} catch (final IOException e) {
-					throw new User2ACLException(User2ACLException.Code.CREATING_SOCKET_FAILED, e, inetAddress
+					throw new Entity2ACLException(Entity2ACLException.Code.CREATING_SOCKET_FAILED, e, inetAddress
 							.toString(), e.getLocalizedMessage());
 				}
 				final InputStream in = s.getInputStream();
@@ -368,20 +368,20 @@ public final class User2ACLAutoDetector {
 				 */
 				final IMAPServer imapServer = mapInfo2IMAPServer(sb.toString(), inetAddress, imapPort, isSecure);
 				try {
-					user2Acl = Class.forName(imapServer.getImpl()).asSubclass(User2ACL.class).newInstance();
+					entity2Acl = Class.forName(imapServer.getImpl()).asSubclass(Entity2ACL.class).newInstance();
 				} catch (final InstantiationException e) {
-					throw new User2ACLException(User2ACLException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
+					throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
 				} catch (final IllegalAccessException e) {
-					throw new User2ACLException(User2ACLException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
+					throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
 				} catch (final ClassNotFoundException e) {
-					throw new User2ACLException(User2ACLException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
+					throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
 				}
-				map.put(inetAddress, user2Acl);
+				map.put(inetAddress, entity2Acl);
 				if (LOG.isInfoEnabled()) {
 					LOG.info(new StringBuilder(256).append("\n\tIMAP server [").append(inetAddress.toString()).append(
 							"] greeting successfully mapped to: ").append(imapServer.getName()));
 				}
-				return user2Acl;
+				return entity2Acl;
 			} finally {
 				if (s != null) {
 					try {

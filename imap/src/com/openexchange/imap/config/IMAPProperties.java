@@ -104,7 +104,7 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 
 	private String imapAuthEnc;
 
-	private String user2AclImpl;
+	private String entity2AclImpl;
 
 	private boolean mboxEnabled;
 
@@ -226,11 +226,11 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 		}
 
 		{
-			user2AclImpl = configuration.getProperty("com.openexchange.imap.User2ACLImpl");
-			if (null == user2AclImpl) {
+			entity2AclImpl = configuration.getProperty("com.openexchange.imap.User2ACLImpl");
+			if (null == entity2AclImpl) {
 				throw new MailConfigException("Missing IMAP property \"com.openexchange.imap.User2ACLImpl\"");
 			}
-			user2AclImpl = user2AclImpl.trim();
+			entity2AclImpl = entity2AclImpl.trim();
 		}
 
 		{
@@ -279,7 +279,7 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 		imapConnectionIdleTime = 0;
 		imapTemporaryDown = 0;
 		imapAuthEnc = null;
-		user2AclImpl = null;
+		entity2AclImpl = null;
 		mboxEnabled = false;
 		blockSize = 0;
 		spamHandlerName = null;
@@ -367,12 +367,12 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 	}
 
 	/**
-	 * Gets the user2AclImpl
+	 * Gets the entity2AclImpl
 	 * 
-	 * @return the user2AclImpl
+	 * @return the entity2AclImpl
 	 */
-	String getUser2AclImpl() {
-		return user2AclImpl;
+	String getEntity2AclImpl() {
+		return entity2AclImpl;
 	}
 
 	/**

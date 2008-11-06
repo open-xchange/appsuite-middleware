@@ -47,21 +47,21 @@
  *
  */
 
-package com.openexchange.imap.user2acl;
+package com.openexchange.imap.entity2acl;
 
 import com.openexchange.groupware.AbstractOXException;
 
 /**
- * {@link User2ACLArgs} - Offers implementation-specific arguments for proper
+ * {@link Entity2ACLArgs} - Offers implementation-specific arguments for proper
  * mapping of user IDs to their mail login
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public interface User2ACLArgs {
+public interface Entity2ACLArgs {
 
 	/**
-	 * Provides necessary arguments needed by {@link User2ACL} implementation.
+	 * Provides necessary arguments needed by {@link Entity2ACL} implementation.
 	 * 
 	 * @param imapServer
 	 *            The current IMAP server

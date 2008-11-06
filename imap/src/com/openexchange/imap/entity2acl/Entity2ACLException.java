@@ -47,18 +47,18 @@
  *
  */
 
-package com.openexchange.imap.user2acl;
+package com.openexchange.imap.entity2acl;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
 /**
- * {@link User2ACLException} - Indicates errors related to user2ACL mappings
+ * {@link Entity2ACLException} - Indicates errors related to entity2ACL mappings
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class User2ACLException extends AbstractOXException {
+public final class Entity2ACLException extends AbstractOXException {
 
 	public static enum Code {
 
@@ -162,7 +162,7 @@ public final class User2ACLException extends AbstractOXException {
 	 * @param cause
 	 *            the cause of the exception.
 	 */
-	public User2ACLException(final AbstractOXException cause) {
+	public Entity2ACLException(final AbstractOXException cause) {
 		super(cause);
 	}
 
@@ -174,7 +174,7 @@ public final class User2ACLException extends AbstractOXException {
 	 * @param messageArgs
 	 *            arguments that will be formatted into the message.
 	 */
-	public User2ACLException(final User2ACLException.Code code, final Object... messageArgs) {
+	public Entity2ACLException(final Entity2ACLException.Code code, final Object... messageArgs) {
 		this(code, null, messageArgs);
 	}
 
@@ -188,7 +188,7 @@ public final class User2ACLException extends AbstractOXException {
 	 * @param messageArgs
 	 *            arguments that will be formatted into the message.
 	 */
-	public User2ACLException(final User2ACLException.Code code, final Throwable cause, final Object... messageArgs) {
+	public Entity2ACLException(final Entity2ACLException.Code code, final Throwable cause, final Object... messageArgs) {
 		super(EnumComponent.ACL_ERROR, code.category, code.number, code.message, cause);
 		setMessageArgs(messageArgs);
 	}
