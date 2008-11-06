@@ -68,6 +68,10 @@ public class TranslationsI18N implements I18nTools {
         return translations.translate(key);
     }
 
+    public boolean hasKey(String key) {
+        return translations.getKnownStrings().contains(key);
+    }
+
     public Locale getLocale() {
         return translations.getLocale();
     }

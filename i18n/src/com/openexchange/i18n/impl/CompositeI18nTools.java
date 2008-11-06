@@ -74,12 +74,22 @@ public class CompositeI18nTools implements I18nTools {
 
     public String getLocalized(String key) {
         for (I18nTools tool : tools) {
-            String translation = tool.getLocalized(key);
-            if(translation != null) {
-                return translation;
+
+            if(tool.hasKey(key)) {
+                return tool.getLocalized(key);
+            }
+
+        }
+        return key;
+    }
+
+    public boolean hasKey(String key) {
+        for (I18nTools tool : tools) {
+            if(tool.hasKey(key)) {
+                return true;
             }
         }
-        return null;
+        return false;
     }
 
     public Locale getLocale() {

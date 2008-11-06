@@ -87,7 +87,16 @@ public class I18nImpl implements I18nTools {
 		}
 	}
 
-	public Locale getLocale() {
+    public boolean hasKey(String key) {
+        try {
+          serverBundle.getString(key);
+          return true;
+        } catch (final MissingResourceException x) {
+			return false;
+		}
+    }
+
+    public Locale getLocale() {
 		if (null == serverBundle){
 			return null;
 		}

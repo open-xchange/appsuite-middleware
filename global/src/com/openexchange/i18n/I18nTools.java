@@ -61,8 +61,10 @@ public interface I18nTools {
 	
 
 	public String getLocalized(String key);
-	
-	public Locale getLocale();
+
+    public boolean hasKey(String key);
+
+    public Locale getLocale();
 	
 	
 } 
