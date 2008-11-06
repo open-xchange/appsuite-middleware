@@ -343,10 +343,10 @@ public final class MIMEMultipartMailPart extends MailPart {
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}
+		if (null == in) {
+			throw new MailException(MailException.Code.NO_CONTENT);
+		}
 		try {
-			if (null == in) {
-				throw new MailException(MailException.Code.NO_CONTENT);
-			}
 			final byte[] buf = new byte[8192];
 			int count = -1;
 			while ((count = in.read(buf, 0, buf.length)) != -1) {
