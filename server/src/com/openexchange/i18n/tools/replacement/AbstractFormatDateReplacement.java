@@ -80,11 +80,14 @@ public abstract class AbstractFormatDateReplacement extends AbstractDateReplacem
 	 * 
 	 * @param date
 	 *            The date
+	 * @param withTime
+	 *            <code>true</code> to include given date's time and time zone;
+	 *            otherwise <code>false</code>
 	 * @param format
 	 *            The format string
 	 */
-	protected AbstractFormatDateReplacement(final Date date, final String format) {
-		super(date);
+	protected AbstractFormatDateReplacement(final Date date, final boolean withTime, final String format) {
+		super(date, withTime);
 		this.format = format;
 	}
 
@@ -93,6 +96,9 @@ public abstract class AbstractFormatDateReplacement extends AbstractDateReplacem
 	 * 
 	 * @param date
 	 *            The date
+	 * @param withTime
+	 *            <code>true</code> to include given date's time and time zone;
+	 *            otherwise <code>false</code>
 	 * @param format
 	 *            The format string
 	 * @param locale
@@ -100,9 +106,9 @@ public abstract class AbstractFormatDateReplacement extends AbstractDateReplacem
 	 * @param timeZone
 	 *            The time zone
 	 */
-	public AbstractFormatDateReplacement(final Date date, final String format, final Locale locale,
-			final TimeZone timeZone) {
-		super(date, locale, timeZone);
+	public AbstractFormatDateReplacement(final Date date, final boolean withTime, final String format,
+			final Locale locale, final TimeZone timeZone) {
+		super(date, withTime, locale, timeZone);
 		this.format = format;
 	}
 

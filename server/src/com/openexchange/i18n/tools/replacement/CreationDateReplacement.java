@@ -49,10 +49,13 @@
 
 package com.openexchange.i18n.tools.replacement;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import com.openexchange.groupware.calendar.Tools;
 import com.openexchange.i18n.tools.TemplateToken;
 
 /**
@@ -86,11 +89,18 @@ public final class CreationDateReplacement extends AbstractDateReplacement {
 	 *            The time zone
 	 */
 	public CreationDateReplacement(final Date creationDate, final Locale locale, final TimeZone timeZone) {
-		super(creationDate, locale, timeZone);
+		super(trimDateToMinutesOnly(creationDate), true, locale, timeZone);
 	}
 
 	public TemplateToken getToken() {
 		return TemplateToken.CREATION_DATETIME;
 	}
 
+	private static Date trimDateToMinutesOnly(final Date d) {
+		final Calendar helper = GregorianCalendar.getInstance(Tools.getTimeZone("UTC"), Locale.ENGLISH);
+		helper.setTime(d);
+		helper.set(Calendar.SECOND, 0);
+		helper.set(Calendar.MILLISECOND, 0);
+		return helper.getTime();
+	}
 }

@@ -5,6 +5,8 @@
  - Bugfix #12416: Extended wording of notification for deleted calendar
    objects to hint to the possibility that receiver was removed from the
    list of participants
+ - Bugfix #12452: Removing time information from tasks and full-time
+   appointments
 
 * 2008-11-05 - marcus.klein@open-xchange.com
 

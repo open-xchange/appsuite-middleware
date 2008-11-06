@@ -69,9 +69,12 @@ public final class StartDateReplacement extends AbstractFormatDateReplacement {
 	 * 
 	 * @param startDate
 	 *            The start date
+	 * @param fulltime
+	 *            <code>true</code> if given start date denotes a full-time
+	 *            start date; otherwise <code>false</code>
 	 */
-	public StartDateReplacement(final Date startDate) {
-		this(startDate, null, null);
+	public StartDateReplacement(final Date startDate, final boolean fulltime) {
+		this(startDate, fulltime, null, null);
 	}
 
 	/**
@@ -79,13 +82,17 @@ public final class StartDateReplacement extends AbstractFormatDateReplacement {
 	 * 
 	 * @param startDate
 	 *            The start date
+	 * @param fulltime
+	 *            <code>true</code> if given start date denotes a full-time
+	 *            start date; otherwise <code>false</code>
 	 * @param locale
 	 *            The locale
 	 * @param timeZone
 	 *            The time zone
 	 */
-	public StartDateReplacement(final Date startDate, final Locale locale, final TimeZone timeZone) {
-		super(startDate, Notifications.FORMAT_START_DATE, locale, timeZone);
+	public StartDateReplacement(final Date startDate, final boolean fulltime, final Locale locale,
+			final TimeZone timeZone) {
+		super(startDate, !fulltime, Notifications.FORMAT_START_DATE, locale, timeZone);
 		fallback = Notifications.NO_START_DATE;
 	}
 

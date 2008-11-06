@@ -411,6 +411,13 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		if (!newObj.containsCreationDate() && oldObj != null && oldObj.containsCreationDate()) {
 			newObj.setCreationDate(oldObj.getCreationDate());
 		}
+		if (Types.APPOINTMENT == state.getModule()) {
+			final AppointmentObject newApp = (AppointmentObject) newObj;
+			final AppointmentObject oldApp = oldObj == null ? null : ((AppointmentObject) oldObj);
+			if (!newApp.containsFullTime() && oldApp != null && oldApp.containsFullTime()) {
+				newApp.setFullTime(oldApp.getFullTime());
+			}
+		}
 		/*
 		 * A map to remember receivers
 		 */
@@ -817,8 +824,15 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 		 * Generate replacements which got modified by participant data
 		 */
 		{
+			final boolean isTask = (Types.TASK == module);
+			final boolean isFulltime;
+			if (isTask) {
+				isFulltime = true;
+			} else {
+				isFulltime = ((AppointmentObject) newObj).getFullTime();
+			}
 			final Date start = newObj.getStartDate();
-			renderMap.put(new StartDateReplacement(start).setChanged(isUpdate ? (oldObj == null ? false
+			renderMap.put(new StartDateReplacement(start, isFulltime).setChanged(isUpdate ? (oldObj == null ? false
 					: !compareObjects(start, oldObj.getStartDate())) : false));
 			Date end = newObj.getEndDate();
 			/*
@@ -829,11 +843,12 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			/*
 			 * Set end time to first occurrence's end time if necessary
 			 */
-			if (newObj.containsRecurrenceType()) {
+			if (newObj.containsRecurrenceType() && newObj.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
 				if (start != null && end != null) {
 					end = computeFirstOccurrenceEnd(start.getTime(), end.getTime());
 				}
-			} else if (oldObj != null && oldObj.containsRecurrenceType()) {
+			} else if (oldObj != null && oldObj.containsRecurrenceType()
+					&& oldObj.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
 				if (start != null && end != null) {
 					end = computeFirstOccurrenceEnd(start.getTime(), end.getTime());
 				}
@@ -842,7 +857,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 					end = computeFirstOccurrenceEnd(start.getTime(), end.getTime());
 				}
 			}
-			renderMap.put(new EndDateReplacement(end, Types.TASK == module).setChanged(endChanged));
+			renderMap.put(new EndDateReplacement(end, isFulltime, isTask).setChanged(endChanged));
 		}
 		renderMap.put(new CreationDateReplacement(newObj.containsCreationDate() ? newObj.getCreationDate()
 				: (oldObj == null ? null : oldObj.getCreationDate()), null));
