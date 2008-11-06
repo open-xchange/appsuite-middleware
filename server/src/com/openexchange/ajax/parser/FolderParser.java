@@ -86,6 +86,10 @@ public class FolderParser {
 		this.userConfig = userConfig;
 	}
 
+	public FolderParser() {
+	    this(null);
+	}
+
 	public void parse(final FolderObject fo, final JSONObject jsonObj) throws OXException {
 		try {
 			parseElementFolder(fo, jsonObj);
@@ -164,6 +168,9 @@ public class FolderParser {
 				try {
 					entity = elem.getInt(FolderFields.ENTITY);
 				} catch (final JSONException e) {
+				    if (null == userConfig) {
+				        throw e;
+				    }
 					try {
 						final String entityStr = elem.getString(FolderFields.ENTITY);
 						entity = UserStorage.getInstance().getUserId(entityStr, userConfig.getContext());
