@@ -83,6 +83,10 @@ public class OXCalendarException extends OXException {
         super.setMessageArgs(messageArgs);
     }
     
+    /**
+     * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+     *
+     */
     public enum Code {
         CFO_NOT_INITIALIZIED("FATAL: CalendarFolderObject not initialized!", 1, AbstractOXException.Category.CODE_ERROR),
         NOT_YET_SUPPORTED("Not yet supported!", 2, AbstractOXException.Category.CODE_ERROR),
@@ -220,7 +224,11 @@ public class OXCalendarException extends OXException {
         /**
          * Changing recurrence position of a change exception denied
          */
-        INVALID_RECURRENCE_POSITION_CHANGE("Changing recurrence position of a change exception denied.", 83, Category.USER_INPUT);
+        INVALID_RECURRENCE_POSITION_CHANGE("Changing recurrence position of a change exception denied.", 83, Category.USER_INPUT),
+        /**
+         * User changing the appointment is missing.
+         */
+        MODIFIED_BY_MISSING("User changing the appointment is missing.", 84, Category.CODE_ERROR);
         
         /**
          * Message of the exception.

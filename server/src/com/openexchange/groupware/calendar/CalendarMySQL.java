@@ -1891,7 +1891,11 @@ class CalendarMySQL implements CalendarSqlImp {
 						pst.setInt(a + 1, cdao.getLabel());
 						break;
 					case AppointmentObject.MODIFIED_BY:
-						pst.setInt(a + 1, cdao.getModifiedBy());
+					    if (cdao.containsModifiedBy()) {
+					        pst.setInt(a + 1, cdao.getModifiedBy());
+					    } else {
+					        throw new OXCalendarException(OXCalendarException.Code.MODIFIED_BY_MISSING);
+					    }
 						break;
 					case AppointmentObject.LAST_MODIFIED:
 						if (cdao.containsLastModified()) {
@@ -3350,6 +3354,7 @@ class CalendarMySQL implements CalendarSqlImp {
 						final CalendarDataObject update = new CalendarDataObject();
 						update.setContext(ctx);
 						update.setObjectID(edao.getRecurrenceID());
+						update.setModifiedBy(uid);
 						if ((!edao.containsRecurrenceDatePosition() || edao.getRecurrenceDatePosition() == null)) {
 							/*
 							 * Determine recurrence date position
@@ -3380,6 +3385,7 @@ class CalendarMySQL implements CalendarSqlImp {
 						final CalendarDataObject update = new CalendarDataObject();
 						update.setContext(ctx);
 						update.setObjectID(edao.getRecurrenceID());
+						update.setModifiedBy(uid);
 						if ((!edao.containsRecurrenceDatePosition() || edao.getRecurrenceDatePosition() == null)) {
 							/*
 							 * Determine recurrence date position
@@ -3444,6 +3450,7 @@ class CalendarMySQL implements CalendarSqlImp {
 						final CalendarDataObject update = new CalendarDataObject();
 						update.setContext(ctx);
 						update.setObjectID(edao.getRecurrenceID());
+						update.setModifiedBy(uid);
 						if ((!edao.containsRecurrenceDatePosition() || edao.getRecurrenceDatePosition() == null)) {
 							/*
 							 * Determine recurrence date position
@@ -3474,6 +3481,7 @@ class CalendarMySQL implements CalendarSqlImp {
 						final CalendarDataObject update = new CalendarDataObject();
 						update.setContext(ctx);
 						update.setObjectID(edao.getRecurrenceID());
+                        update.setModifiedBy(uid);
 						if ((!edao.containsRecurrenceDatePosition() || edao.getRecurrenceDatePosition() == null)) {
 							/*
 							 * Determine recurrence date position

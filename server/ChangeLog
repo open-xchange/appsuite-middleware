@@ -1,3 +1,7 @@
+* 2008-11-06 - marcus.klein@open-xchange.com
+
+ - Bugfix #12442: Setting modified_by attribute if series is updated.
+
 * 2008-11-04 - marcus.klein@open-xchange.com
 
  - Bugfix #12317: Appointments lasting an entire day start 00:00 UTC.
