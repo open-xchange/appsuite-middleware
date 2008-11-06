@@ -30,7 +30,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.6.0
-Release:	13
+Release:	14
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -139,6 +139,15 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Nov 04 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12317: Appointments lasting an entire day start 00:00 UTC.
+ - Bugfix #12253: Removed additional session counter variable.
+* Mon Nov 03 2008 - marcus.klein@open-xchange.com
+ - Bugfix #12384: Servlets must not have fields.
+ - Bugfix #12442: Added update task to remove duplicate recurrence date position
+   from appointment change exceptions.
+ - Bugfix #12444: Implementing correct check for empty email address in external
+   participants.
 * Mon Oct 27 2008 - marcus.klein@open-xchange.com
  - Bugfix #12325: Flushing the WebDAV/XML output after a usefull part has been
    generated. This should prevent AJP connection timeouts.
