@@ -466,7 +466,7 @@ public class ContactWriter extends CommonWriter {
 			}
 			
 			final Element e = new Element("email", XmlServlet.NS);
-			e.addContent(email);
+			e.addContent(correctCharacterData(email));
 			e.setAttribute("id", String.valueOf(distributionlist[a].getEntryID()), XmlServlet.NS);
 			e.setAttribute(ContactFields.FOLDER_ID, String.valueOf(distributionlist[a].getFolderID()), XmlServlet.NS);
 			e.setAttribute("displayname", displayname.trim(), XmlServlet.NS);

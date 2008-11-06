@@ -85,6 +85,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.webdav.OXServlet;
+import com.openexchange.webdav.xml.DataWriter;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.DataFields;
 
@@ -209,7 +210,7 @@ public final class attachments extends OXServlet {
 			
 			if (client_id != null && client_id.length() > 0) {
 				final Element e_client_id = new Element("client_id", PREFIX, NAMESPACE);
-				e_client_id.addContent(client_id);
+				e_client_id.addContent(DataWriter.correctCharacterData(client_id));
 				
 				e_prop.addContent(e_client_id);
 			}

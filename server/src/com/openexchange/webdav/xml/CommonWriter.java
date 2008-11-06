@@ -112,7 +112,7 @@ public abstract class CommonWriter extends FolderChildWriter {
 					filename = URLEncoder.encode(filename, "UTF-8");
 				}
 				
-				e.addContent(filename);
+				e.addContent(correctCharacterData(filename));
 				e.setAttribute("id", String.valueOf(attachmentMeta.getId()), XmlServlet.NS);
 				e.setAttribute("last_modified", String.valueOf(attachmentMeta.getCreationDate().getTime()), XmlServlet.NS);
 				e.setAttribute("mimetype", attachmentMeta.getFileMIMEType(), XmlServlet.NS);

@@ -500,7 +500,7 @@ public abstract class XmlServlet extends PermissionServlet {
 
 		if (client_id != null && client_id.length() > 0) {
 			final Element e_client_id = new Element("client_id", NS);
-			e_client_id.addContent(client_id);
+			e_client_id.addContent(DataWriter.correctCharacterData(client_id));
 
 			e_prop.addContent(e_client_id);
 		}
