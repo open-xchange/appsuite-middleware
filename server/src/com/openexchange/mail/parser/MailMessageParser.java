@@ -374,7 +374,9 @@ public final class MailMessageParser {
 					try {
 						mp = ReadReceiptHandler.convert(message);
 					} catch (final RuntimeException e) {
-						LOG.error("Invalid TNEF read receipt", e);
+						if (LOG.isWarnEnabled()) {
+							LOG.warn("Invalid TNEF read receipt", e);
+						}
 						return;
 					}
 					final int mpsize = mp.getCount();
