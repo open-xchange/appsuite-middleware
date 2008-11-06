@@ -15,7 +15,6 @@ import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
-import com.openexchange.ajax.contact.action.AllResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
@@ -121,7 +120,7 @@ public class Bug12212Test extends AbstractAJAXSession {
 			}
 	
 			{//assert no duplicate exists
-				AllRequest request = new AllRequest(folderId, new int[]{AppointmentObject.TITLE}, exception.getStartDate(), exception.getEndDate());
+				AllRequest request = new AllRequest(folderId, new int[]{AppointmentObject.TITLE}, exception.getStartDate(), exception.getEndDate(), false);
 				CommonAllResponse response = client.execute(request);
 				Object[][] allAppointmentsWithinTimeframe = response.getArray();
 				int countOfPotentialDuplicates = 0;
