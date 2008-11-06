@@ -32,6 +32,7 @@ sub doRequest {
   my $email = "testuser\@bla.de";
   my $lang = "de_DE";
   my $timezone = "Europe/Berlin";
+  my @aliases = ("test1\@example.com","test2\@example.com");
 #
 # the lexical representation of the date time as follows
 # '-'? yyyy '-' mm '-' dd 'T' hh ':' mm ':' ss ('.' s+)? (zzzzzz)?
@@ -53,7 +54,8 @@ sub doRequest {
 			SOAP::Data->name("language" => $lang),
 			SOAP::Data->name("timezone" => $timezone),
 			SOAP::Data->name("birthday" => $birthday),
-			SOAP::Data->name("passwordMech" => $pwmech)
+			SOAP::Data->name("passwordMech" => $pwmech),
+			SOAP::Data->name("aliases" => @aliases)
    	          )),
 		  $inSelf->{'creds'}
 		 );
