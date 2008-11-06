@@ -97,6 +97,9 @@ public final class CreationDateReplacement extends AbstractDateReplacement {
 	}
 
 	private static Date trimDateToMinutesOnly(final Date d) {
+		if (d == null) {
+			return d;
+		}
 		final Calendar helper = GregorianCalendar.getInstance(Tools.getTimeZone("UTC"), Locale.ENGLISH);
 		helper.setTime(d);
 		helper.set(Calendar.SECOND, 0);
