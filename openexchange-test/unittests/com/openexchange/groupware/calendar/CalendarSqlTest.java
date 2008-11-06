@@ -173,7 +173,6 @@ public class CalendarSqlTest extends TestCase {
 	public void tearDown() throws OXException, SQLException {
         appointments.removeAll(user, clean);
         folders.removeAll(session, cleanFolders);
-        TestResult testResult = createResult();
         Init.stopServer();
     }
 
@@ -182,7 +181,6 @@ public class CalendarSqlTest extends TestCase {
         final CalendarDataObject cdao = appointments.buildRecurringAppointment();
         appointments.save( cdao );
         clean.add( cdao );
-        fail("Bumm!");
         final CalendarDataObject modified = new CalendarDataObject();
         modified.setStartDate(cdao.getStartDate());
         modified.setEndDate(cdao.getEndDate());
