@@ -1,3 +1,8 @@
+* 2008-11-06 - thorben.betten@open-xchange.com
+
+ - Bugfix #12460: Lowered log level of fallback to system upload quota to
+   DEBUG
+
 * 2008-11-05 - marcus.klein@open-xchange.com
 
  - Removed UNION sql statement arising in MySQL slow logs because MySQL

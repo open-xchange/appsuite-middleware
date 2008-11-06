@@ -3055,7 +3055,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				final Context ctx = ContextStorage.getStorageContext(session.getContextId());
 				final Collection<UploadListener> listeners = new ArrayList<UploadListener>(2);
 				listeners.add(new UploadQuotaChecker(UserSettingMailStorage.getInstance().getUserSettingMail(
-						session.getUserId(), ctx), resp, actionStr));
+						session.getUserId(), ctx), resp, actionStr, LOG));
 				listeners.add(this);
 				/*
 				 * Create and fire upload event
@@ -3325,7 +3325,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	private class UploadQuotaChecker implements UploadListener {
 
-		private static final String WARN01 = "Upload Quota is less than zero."
+		private static final String DEBUG01 = "Upload Quota is less than zero."
 				+ " Using global server property \"MAX_UPLOAD_SIZE\" instead.";
 
 		private final long uploadQuota;
@@ -3338,27 +3338,23 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 		private final boolean doAction;
 
-		public UploadQuotaChecker(final long uploadQuota, final long uploadQuotaPerFile,
-				final HttpServletResponse resp, final String actionStr) {
-			this.uploadQuota = uploadQuota;
-			this.uploadQuotaPerFile = uploadQuotaPerFile;
-			this.resp = resp;
-			this.actionStr = actionStr;
-			doAction = ((uploadQuotaPerFile > 0) || (uploadQuota > 0));
-		}
+		final org.apache.commons.logging.Log logger;
 
-		public UploadQuotaChecker(final UserSettingMail usm, final HttpServletResponse resp, final String actionStr) {
+		public UploadQuotaChecker(final UserSettingMail usm, final HttpServletResponse resp, final String actionStr,
+				final org.apache.commons.logging.Log logger) {
+			super();
+			this.logger = logger;
 			if (usm.getUploadQuota() >= 0) {
 				this.uploadQuota = usm.getUploadQuota();
 			} else {
-				if (LOG.isWarnEnabled()) {
-					LOG.warn(WARN01);
+				if (logger.isDebugEnabled()) {
+					logger.debug(DEBUG01);
 				}
 				long tmp;
 				try {
 					tmp = ServerConfig.getInteger(Property.MAX_UPLOAD_SIZE);
 				} catch (final ConfigurationException e) {
-					LOG.error(e.getLocalizedMessage(), e);
+					logger.error(e.getMessage(), e);
 					tmp = 0;
 				}
 				this.uploadQuota = tmp;
@@ -3369,13 +3365,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			doAction = ((uploadQuotaPerFile > 0) || (uploadQuota > 0));
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * com.openexchange.groupware.upload.UploadListener#action(com.openexchange
-		 * .groupware.upload.UploadEvent)
-		 */
 		public boolean action(final UploadEvent uploadEvent) throws UploadServletException {
 			if (!doAction) {
 				return true;
@@ -3398,7 +3387,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 						response.setException(oxme);
 						responseObj = ResponseWriter.getJSON(response);
 					} catch (final JSONException e) {
-						LOG.error(e.getMessage(), e);
+						logger.error(e.getMessage(), e);
 					}
 					throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
 							responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString()))
@@ -3417,7 +3406,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 						response.setException(me);
 						responseObj = ResponseWriter.getJSON(response);
 					} catch (final JSONException e) {
-						LOG.error(e.getMessage(), e);
+						logger.error(e.getMessage(), e);
 					}
 					throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
 							responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString()))
@@ -3427,11 +3416,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			return true;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see com.openexchange.groupware.upload.UploadListener#getRegistry()
-		 */
 		public UploadRegistry getRegistry() {
 			return Mail.this.getRegistry();
 		}
