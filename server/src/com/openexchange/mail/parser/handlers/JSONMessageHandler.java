@@ -284,22 +284,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
 	public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType,
 			final String fileName, final String id) throws MailException {
-		if (Part.INLINE.equalsIgnoreCase(part.getContentDisposition().getDisposition()) /*
-																						 * &&
-																						 * part
-																						 * .
-																						 * getFileName
-																						 * (
-																						 * )
-																						 * ==
-																						 * null
-																						 */
-				&& MIMETypes.MIME_PGP_SIGN.equalsIgnoreCase(baseContentType)) {
-			/*
-			 * Ignore inline PGP signatures
-			 */
-			return true;
-		}
 		try {
 			final JSONObject jsonObject = new JSONObject();
 			/*

@@ -109,7 +109,8 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
 	public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType,
 			final String fileName, final String id) throws MailException {
 		if (!isInline || part.getContentDisposition().containsFilenameParameter()
-				|| part.getHeader(MessageHeaders.HDR_CONTENT_ID) != null) {
+				|| part.getHeader(MessageHeaders.HDR_CONTENT_ID) != null
+				|| part.getContentType().isMimeType(MIMETypes.MIME_APPL_ALL)) {
 			nonInlineParts.add(part);
 		}
 		return true;

@@ -12,6 +12,7 @@
  - Bugfix #12138: Added group support to entity2ACL mapping
  - Bugfix #12390: Cleaning possibly invalid text prior to passing to a XML
    element/attribute
+ - Bugfix #9589: Showing PGP signatures
 
 * 2008-11-05 - marcus.klein@open-xchange.com
 
