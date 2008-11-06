@@ -48,15 +48,15 @@
  */
 
 
-
 package com.openexchange.tools;
 
 /**
+ * {@link OXCloneable} - Parameterized cloneable interface
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface OXCloneable<T extends OXCloneable> {
-	
+public interface OXCloneable<T extends OXCloneable<?>> {
+
 	T deepClone();
 
 }
