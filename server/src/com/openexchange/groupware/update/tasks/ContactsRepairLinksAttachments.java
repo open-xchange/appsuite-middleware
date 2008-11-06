@@ -52,11 +52,14 @@ package com.openexchange.groupware.update.tasks;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.openexchange.api2.OXException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -72,28 +75,33 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.filestore.FilestoreException;
+import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
+import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
- * ContactsChangedFromUpdateTask
- *
+ * Remove orphaned links and attachments for contacts.
  * @author <a href="mailto:ben.pahne@open-xchange.com">Ben Pahne</a>
- *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public final class ContactsRepairLinksAttachments implements UpdateTask {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-    .getLog(ContactsRepairLinksAttachments.class);
+    private static final Log LOG = LogFactory.getLog(ContactsRepairLinksAttachments.class);
 
     private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(ContactsRepairLinksAttachments.class);
-    
+
     /**
      * Default constructor
      */
@@ -101,309 +109,243 @@ public final class ContactsRepairLinksAttachments implements UpdateTask {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTask#addedWithVersion()
+    /**
+     * {@inheritDoc}
      */
     public int addedWithVersion() {
         return 17;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTask#getPriority()
+    /**
+     * {@inheritDoc}
      */
     public int getPriority() {
-        /*
-         * Modification on database: highest priority.
-         */
-        return UpdateTask.UpdateTaskPriority.HIGHEST.priority;
+        return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
 
-    private static final String STR_INFO = "Performing update task 'ContactsRepairLinksAttachments'";
-
-    //private static final String SQL_QUERY = "SELECT created_from,changed_from,cid FROM prg_contacts WHERE changed_from IS NULL";
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTask#perform(com.openexchange.groupware.update.Schema,
-     *      int)
+    /**
+     * {@inheritDoc}
      */
-
+    @OXThrowsMultiple(category = { Category.CODE_ERROR },
+        desc = { "" },
+        exceptionId = { 1 },
+        msg = { "An SQL error occurred: %1$s." }
+    )
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
-    	if (LOG.isInfoEnabled()) {
-            LOG.info(STR_INFO);
-        }
-    	correctContacts(contextId);
-    	correctLinks(contextId);
-    	correctAttachments(contextId);    
-    }
-    
-    private void correctContacts(final int contextId) throws AbstractOXException {
-        Connection writeCon = null;
-        Statement st = null;
-        ResultSet resultSet = null;
+        LOG.info("Performing update task ContactRepairLinksAttachments.");
+        Connection con = Database.get(contextId, true);
         try {
-            writeCon = Database.get(contextId, true);           
-            st = writeCon.createStatement();               
-            resultSet = st.executeQuery("SELECT "+"" +
-            			"prg_contacts.intfield01, "+
-            			"prg_contacts.fid, "+
-            			"prg_contacts.cid, "+
-            			"prg_contacts.pflag, "+
-            			"oxfolder_tree.fuid, "+
-            			"oxfolder_tree.fname "+
-            			"FROM prg_contacts LEFT JOIN oxfolder_tree ON "+
-            			"prg_contacts.fid = oxfolder_tree.fuid AND prg_contacts.cid = oxfolder_tree.cid "+
-            			"WHERE oxfolder_tree.fuid is NULL");
+            con.setAutoCommit(false);
+            correctContacts(con);
+            correctLinks(con);
+            correctAttachments(con);
+            con.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw EXCEPTION.create(1, e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            if (con != null) {
+                Database.back(contextId, true, con);
+            }
+        }
+        LOG.info("Update task ContactsRepairLinksAttachmentes finished.");
+    }
 
-            int id = 0;
-            int cid = 0;
-            int fid = 0;
-            int pflag = 0;
+    private void correctContacts(final Connection con) throws SQLException {
+        final String sql = "SELECT c.intfield01,c.fid,c.cid,c.pflag,f.fuid,f.fname "
+            + "FROM prg_contacts c LEFT JOIN oxfolder_tree f ON c.fid=f.fuid AND "
+            + "c.cid=f.cid WHERE f.fuid is NULL";
+        Statement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.createStatement();
+            result = stmt.executeQuery(sql);
             Context ctx = null;
             FolderObject fo = null;
-            boolean delete = false;
             OXFolderAccess oxfs = null;
-            
-            while (resultSet.next()) {
-            	
-            	delete = false;
-            	id = resultSet.getInt("intfield01"); 
-            	cid = resultSet.getInt("cid");
-            	fid = resultSet.getInt("fid");
-            	pflag = resultSet.getInt("pflag");
-            	
-            	try {
-            		ctx = ContextStorage.getInstance().loadContext(cid);
-            		if (null == ctx){
-            			delete = true;
-            		} else {
-            			if (id == ctx.getMailadmin()){
-            				delete = true;
-            			} else {
-            				if (pflag == 0){
-            					Statement tmp =null;
-            					try {      						
-            						oxfs = new OXFolderAccess(writeCon, ctx);            				
-            						fo = oxfs.getDefaultFolder(ctx.getMailadmin(), FolderObject.CONTACT);
-            						final int admin_folder = fo.getObjectID();            					
-            						final ContactSql cs = new ContactMySql(ctx, ctx.getMailadmin());
-            						//System.out.println("MOVIN CONTACT "+id+" CID "+cid);
-            						tmp = writeCon.createStatement();
-            						cs.iFgiveUserContacToAdmin(tmp, id, admin_folder, ctx);
-            					} catch (final Exception oxee) {
-            						oxee.printStackTrace();
-            						LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!."
-    										+ "This contact will be deleted."
-    										+ "Context "
-    										+ ctx.getContextId()
-    										+ " Folder "
-    										+ fid + " Contact" + id);
+            while (result.next()) {
+                boolean delete = false;
+                int pos = 0;
+                final int id = result.getInt(pos++);
+                final int fid = result.getInt(pos++);
+                final int cid = result.getInt(pos++);
+                final int pflag = result.getInt(pos++);
+                try {
+                    ctx = ContextStorage.getInstance().loadContext(cid);
+                    if (pflag == 0) {
+                        Statement tmp =null;
+                        try {
+                            oxfs = new OXFolderAccess(con, ctx);
+                            fo = oxfs.getDefaultFolder(ctx.getMailadmin(), FolderObject.CONTACT);
+                            final int folderId = fo.getObjectID();
+                            final ContactSql cs = new ContactMySql(ctx, ctx.getMailadmin());
+                            //System.out.println("MOVIN CONTACT "+id+" CID "+cid);
+                            tmp = con.createStatement();
+                            cs.iFgiveUserContacToAdmin(tmp, id, folderId, ctx);
+                        } catch (final Exception oxee) {
+                            oxee.printStackTrace();
+                            LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!."
+                                    + "This contact will be deleted."
+                                    + "Context "
+                                    + ctx.getContextId()
+                                    + " Folder "
+                                    + fid + " Contact" + id);
 
-            						delete = true;
-            					} finally {
-            			            closeSQLStuff(null, tmp);
-            					}
-            				} else{
-            					delete = true;
-            				}
-            			}
-            		}
-            	} catch (final ContextException ce){
-            		delete = true;
-            		LOG.info("MARKED CONTACT "+id+" IN CONTEXT "+cid+" TO GET DELETED BECAUSE THE CONTEXT IS GONE");
-            	}
-            	
-            	if (delete){
-            		//System.out.println("DELETE CONTACT "+id+" IN CONTEXT "+cid+" ");
-            		LOG.info("DELETE CONTACT "+id+" IN CONTEXT "+cid+" BECAUSE THE CONTEXT IS GONE");
-            		st.addBatch("DELETE FROM prg_contacts WHERE intfield01 = "+id+" AND cid = "+cid);
-            	}
+                            delete = true;
+                        } finally {
+                            closeSQLStuff(null, tmp);
+                        }
+                    } else {
+                        delete = true;
+                    }
+                } catch (final ContextException ce){
+                    delete = true;
+                    LOG.info("MARKED CONTACT "+id+" IN CONTEXT "+cid+" TO GET DELETED BECAUSE THE CONTEXT IS GONE");
+                }
+                if (delete) {
+                    //System.out.println("DELETE CONTACT "+id+" IN CONTEXT "+cid+" ");
+                    LOG.info("DELETE CONTACT "+id+" IN CONTEXT "+cid+" BECAUSE THE CONTEXT IS GONE");
+                    stmt.addBatch("DELETE FROM prg_contacts WHERE intfield01 = "+id+" AND cid = "+cid);
+                }
             }
-            st.executeBatch();
-            
-            	
-        } catch (final SQLException e) {
-        	throw EXCEPTION.create(1, e, e.getMessage());
+            stmt.executeBatch();
         } finally {
-            closeSQLStuff(resultSet, st);
-            if (writeCon != null) {
-                Database.back(contextId, true, writeCon);
-            }
+            closeSQLStuff(result, stmt);
         }
-	}
-
-	public boolean checkContactExistence(final Connection writeCon, final int id, final int cid){
-    	boolean killit = false;
-    	ResultSet rs = null;
-    	Statement st = null;
-    	try{
-    		st = writeCon.createStatement();
-    		rs = st.executeQuery("SELECT intfield01 FROM prg_contacts WHERE intfield01 = "+id+" AND cid = "+cid);
-   		
-    		while (rs.next()){
-    				final int chk = rs.getInt(1);
-    				if (chk == id){
-    					killit = true;
-    				}
-    		}
-    	} catch (final SQLException sqle){
-    		LOG.error("UNABLE TO FETCH THIS CONTACT: ID "+id+" CID "+cid);
-    		sqle.printStackTrace();
-    	} finally {
-            closeSQLStuff(rs, st);
-    	}
-    	return killit;
     }
-    
-    @OXThrowsMultiple(category = { Category.CODE_ERROR },
-            desc = { "" },
-            exceptionId = { 1 },
-            msg = { "An SQL error occurred while performing task ContactsRepairLinksAttachments: %1$s." }
-    )
-    public void correctLinks(final int contextId) throws AbstractOXException {
-            	
 
-        Connection writeCon = null;
-        Statement st = null;
-        ResultSet resultSet = null;
+    public boolean checkContactExistence(final Connection con, final int id,
+        final int cid) throws SQLException {
+        final String sql = "SELECT intfield01 FROM prg_contacts WHERE cid=? AND intfield01=?";
+        ResultSet result = null;
+        PreparedStatement ps = null;
+        boolean exists = false;
         try {
-            writeCon = Database.get(contextId, true);
-           
-            st = writeCon.createStatement();
-            int id1 = 0;
-            int mod1 = 0;
-            int id2 = 0;
-            int mod2 = 0;
-            int cid = 0;
-            boolean deleteit = false;
-                
-            resultSet = st.executeQuery("SELECT firstid, firstmodule, secondid, secondmodule, cid FROM prg_links WHERE firstmodule = "+Types.CONTACT+" OR secondmodule = "+Types.CONTACT);
-
-            while (resultSet.next()) {
-            	
-            	id1 = resultSet.getInt("firstid"); 
-            	mod1 = resultSet.getInt("firstmodule"); 
-            	id2 = resultSet.getInt("secondid");
-            	mod2 = resultSet.getInt("secondmodule");
-            	deleteit = false;
-            	cid = resultSet.getInt("cid");
-                
-            	if (mod1 == Types.CONTACT){
-            		if (!checkContactExistence(writeCon, id1, cid)){
-            			deleteit = true;
-            		}
-            	}
-            	if (mod2 == Types.CONTACT && !deleteit){
-            		if (!checkContactExistence(writeCon, id2, cid)){
-            			deleteit = true;
-            		}
-            	}
-            	
-            	if (deleteit){
-            		//System.out.println("DELETE LINK: ID1="+id1+" ID2="+id2+" CID="+cid);
-            		st.addBatch("DELETE FROM prg_links WHERE firstid = "+id1+" AND secondid = "+id2+" AND firstmodule = "+mod1+" AND secondmodule = "+mod2+" AND cid = "+cid);
-            	}
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, cid);
+            ps.setInt(2, id);
+            result = ps.executeQuery();
+            while (result.next()) {
+                final int chk = result.getInt(1);
+                if (chk == id) {
+                    exists = true;
+                }
             }
-             
-            st.executeBatch();
-            st.close();
-                
-        } catch (final SQLException e) {
-        	throw EXCEPTION.create(1, e, e.getMessage());
         } finally {
-            closeSQLStuff(resultSet, st);
-            if (writeCon != null) {
-                Database.back(contextId, true, writeCon);
-            }
+            closeSQLStuff(result, ps);
         }
+        return exists;
     }
-    
-    public void correctAttachments(final int contextId) throws AbstractOXException {
-    	
 
-        Connection writeCon = null;
-        Statement st = null;
-        ResultSet resultSet = null;
-        
+    public void correctLinks(final Connection con) throws SQLException {
+        final String sql = "SELECT firstid,firstmodule,secondid,secondmodule,cid "
+            + "FROM prg_links WHERE firstmodule=? OR secondmodule=?";
+        PreparedStatement ps = null;
+        ResultSet result = null;
         try {
-            writeCon = Database.get(contextId, true);
-           
-            st = writeCon.createStatement();
-            int id = 0;
-            int mod = 0;
-            int cid = 0;
-            
-            int attachId = 0;    
-            
-            resultSet = st.executeQuery("SELECT "+
-            			"prg_attachment.attached, "+
-            			"prg_attachment.cid, "+
-            			"prg_attachment.module, "+
-            			"prg_attachment.id "+
-            			"FROM prg_attachment "+
-            			"LEFT JOIN prg_contacts ON "+
-            			"prg_attachment.attached = prg_contacts.intfield01 AND prg_attachment.cid = prg_contacts.cid "+
-            			"WHERE prg_attachment.module = "+Types.CONTACT+" AND prg_contacts.intfield01 IS NULL");
-
-           
-            while (resultSet.next()) {
-            	
-            	id = resultSet.getInt("attached"); 
-            	mod = resultSet.getInt("module");             	
-            	cid = resultSet.getInt("cid");
-            	attachId = resultSet.getInt("id");
-
-            	//System.out.println("DELETE ATTACHMENT: ID="+id+" CID="+cid);
-            	deleteAttachments(-1, id, mod, new int[]{ attachId }, cid);
-
-            }                
-        } catch (final SQLException e) {
-        	throw EXCEPTION.create(1, e, e.getMessage());
-        } finally {
-            closeSQLStuff(resultSet, st);
-            if (writeCon != null) {
-                Database.back(contextId, true, writeCon);
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, Types.CONTACT);
+            ps.setInt(2, Types.CONTACT);
+            result = ps.executeQuery();
+            while (result.next()) {
+                int pos = 0;
+                final int id1 = result.getInt(pos++);
+                final int mod1 = result.getInt(pos++);
+                final int id2 = result.getInt(pos++);
+                final int mod2 = result.getInt(pos++);
+                final int cid = result.getInt(pos++);
+                boolean deleteit = false;
+                if (mod1 == Types.CONTACT) {
+                    if (!checkContactExistence(con, id1, cid)) {
+                        deleteit = true;
+                    }
+                }
+                if (mod2 == Types.CONTACT && !deleteit) {
+                    if (!checkContactExistence(con, id2, cid)) {
+                        deleteit = true;
+                    }
+                }
+                if (deleteit) {
+                    deleteLink(cid, con, id1, id2, mod1, mod2);
+                }
             }
+        } finally {
+            closeSQLStuff(result, ps);
         }
     }
-    
-	private static final AttachmentBase ATTACHMENT_BASE = new AttachmentBaseImpl(new DBPoolProvider());
-    
-	private final void deleteAttachments(final int parentFolderID, final int objectID, final int type, final int[] attachIds, final int contextId) {
 
-		try {
-			final Context ctx = ContextStorage.getInstance().loadContext(contextId);
-            ATTACHMENT_BASE.startTransaction();			
-			ATTACHMENT_BASE.detachFromObject(parentFolderID, objectID, type, attachIds, ctx, null, null);
-			ATTACHMENT_BASE.commit();
-		} catch (final TransactionException e) {
-			rollback(e);
-		} catch (final OXException e) {
-			rollback(e);
-		} catch (final ContextException e) {
-            LOG.error(e);
+    private void deleteLink(final int cid, final Connection con,
+        final int id1, final int id2, final int mod1, final int mod2) throws SQLException {
+        LOG.info("Deleting orphaned link in context " + cid + ".");
+        final String sql = "DELETE FROM prg_links WHERE firstid=? AND secondid=?"
+            + " AND firstmodule=? AND secondmodule=? AND cid=?";
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, id1);
+            ps.setInt(2, id2);
+            ps.setInt(3, mod1);
+            ps.setInt(4, mod2);
+            ps.setInt(5, cid);
+            ps.executeUpdate();
         } finally {
-			try {
-				ATTACHMENT_BASE.finish();
-			} catch (final TransactionException e) {
-				LOG.error(e);
-			}
-		}
-	}
-	
-	private void rollback(final AbstractOXException x) {
-		try {
-			ATTACHMENT_BASE.rollback();
-		} catch (final TransactionException e) {
-			LOG.error(e);
-		}
-		LOG.error(x);
-	}
+            closeSQLStuff(null, ps);
+        }
+    }
 
-    
+    public void correctAttachments(final Connection con) throws AbstractOXException {
+        final String sql = "SELECT a.cid,a.id,a.filename FROM prg_attachment a "
+            + "LEFT JOIN prg_contacts c ON a.attached=c.intfield01 AND a.cid=c.cid "
+            + "WHERE a.module=? AND c.intfield01 IS NULL";
+        PreparedStatement ps = null;
+        ResultSet result = null;
+        try {
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, Types.CONTACT);
+            result = ps.executeQuery();
+            while (result.next()) {
+                int pos = 1;
+                final int cid = result.getInt(pos++);
+                final int attachId = result.getInt(pos++);
+                final String filename = result.getString(pos++);
+                deleteAttachments(cid, con, attachId, filename);
+            }
+        } catch (final SQLException e) {
+            throw EXCEPTION.create(1, e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, ps);
+        }
+    }
+
+    private final void deleteAttachments(final int cid, Connection con,
+        final int id, final String filename) throws SQLException {
+        LOG.info("Deleting orphaned attachment " + id + " in context " + cid + ".");
+        try {
+            final Context ctx = ContextStorage.getInstance().loadContext(cid);
+            final FileStorage fs = FileStorage.getInstance(
+                FilestoreStorage.createURI(ctx), ctx,
+                new SimpleDBProvider(con, con));
+            fs.deleteFile(filename);
+        } catch (final ContextException e) {
+            LOG.warn("Unable to delete file '" + filename + "' in context "
+                + cid + ". Context loading problem.", e);
+        } catch (final FilestoreException e) {
+            LOG.warn("Unable to delete file '" + filename + "' in context "
+                + cid + ". Problem with FilestoreStorage.", e);
+        } catch (final FileStorageException e) {
+            LOG.warn("Unable to delete file '" + filename + "' in context "
+                + cid + ". Problem with Filestore.", e);
+        }
+        final String sql = "DELETE FROM prg_attachment WHERE cid=? AND id=?";
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, cid);
+            ps.setInt(2, id);
+            ps.executeUpdate();
+        } finally {
+            closeSQLStuff(null, ps);
+        }
+    }
 }
