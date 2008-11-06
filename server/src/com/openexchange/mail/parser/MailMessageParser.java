@@ -361,7 +361,7 @@ public final class MailMessageParser {
 								partCount++);
 					}
 					/*
-					 * Stop to further process tnef attachment
+					 * Stop to further process TNEF attachment
 					 */
 					return;
 				} else if (messageClassName.equalsIgnoreCase(TNEF_IPM_MS_READ_RECEIPT)) {
@@ -390,12 +390,12 @@ public final class MailMessageParser {
 								partCount++);
 					}
 					/*
-					 * Stop to further process tnef attachment
+					 * Stop to further process TNEF attachment
 					 */
 					return;
 				}
 				/*
-				 * Look for body. Usually the body is the rtf text.
+				 * Look for body. Usually the body is the RTF text.
 				 */
 				final Attr attrBody = Attr.findAttr(message.getAttributes(), Attr.attBody);
 				if (attrBody != null) {
