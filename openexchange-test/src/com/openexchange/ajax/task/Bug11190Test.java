@@ -64,6 +64,7 @@ public class Bug11190Test extends AbstractAJAXSession {
 			taskWithRecurrence.setInterval(2);
 			//...every twelfth day
 			taskWithRecurrence.setDayInMonth(12);
+			// TODO The remove method clears the value in the object. If the value should be cleared over the AJAX interface it must be set to null. This is currently not possible with the int primitive type.
 			taskWithRecurrence.removeDays(); //otherwise, the old value (Monday) will be kept, which then means "the twelfth Monday every two months" (which then is reduced to every 5th Monday)  
 			//send
 			UpdateRequest updateRequest = new UpdateRequest(taskWithRecurrence,timezone);
