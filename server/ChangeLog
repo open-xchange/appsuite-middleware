@@ -2,6 +2,9 @@
 
  - Bugfix #12460: Lowered log level of fallback to system upload quota to
    DEBUG
+ - Bugfix #12416: Extended wording of notification for deleted calendar
+   objects to hint to the possibility that receiver was removed from the
+   list of participants
 
 * 2008-11-05 - marcus.klein@open-xchange.com
 

@@ -193,7 +193,9 @@ public class Notifications {
 	 */
 
 	public static final String APPOINTMENT_DELETE_MAIL = 
-		"This appointment has been deleted by [changed_by].\n" + 
+		"This appointment does not take place.\n" + 
+		"It was either deleted by [changed_by] or\n" +
+		"you have been removed from the list of participants.\n" + 
 		"\n" + 
 		"Appointment\n" + 
 		"===========\n" + 
@@ -225,7 +227,8 @@ public class Notifications {
 		"==========================================";
 	
 	public static final String TASK_DELETE_MAIL = 
-		"This task has been deleted by [changed_by].\n" + 
+		"This task was either deleted by [changed_by] or\n" + 
+		"you have been removed from the list of participants.\n" + 
 		"\n" + 
 		"Task\n" + 
 		"====\n" + 
