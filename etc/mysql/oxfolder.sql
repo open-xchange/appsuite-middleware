@@ -96,7 +96,7 @@ CREATE TABLE `del_oxfolder_permissions` (
   PRIMARY KEY  (`cid`,`permission_id`,`fuid`,`system`),
   INDEX (`cid`,`fuid`),
   INDEX (`cid`,`fuid`,`permission_id`),
-  FOREIGN KEY (`cid`, `fuid`) REFERENCES oxfolder_tree (`cid`, `fuid`)
+  FOREIGN KEY (`cid`, `fuid`) REFERENCES del_oxfolder_tree (`cid`, `fuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `oxfolder_lock` (
