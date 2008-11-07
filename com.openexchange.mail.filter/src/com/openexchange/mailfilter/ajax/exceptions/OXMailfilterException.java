@@ -120,9 +120,9 @@ public class OXMailfilterException extends AbstractOXException {
          */
         IO_CONNECTION_ERROR("Error in low level connection to sieve server", Category.CODE_ERROR, 14),
         /**
-         * Error while communicating with the sieve server
+         * Error while communicating with the sieve server: %1$s
          */
-        SIEVE_COMMUNICATION_ERROR("Error while communicating with the sieve server: %s", Category.CODE_ERROR, 15),
+        SIEVE_COMMUNICATION_ERROR("Error while communicating with the sieve server: %1$s", Category.CODE_ERROR, 15),
         /**
          * Lexical error: %1$s
          */
