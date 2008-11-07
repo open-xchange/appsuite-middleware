@@ -169,9 +169,9 @@ public class GroupException extends AbstractOXException {
         NO_GROUP_DELETE("Group \"%1$s\" can not be deleted.", Category
             .USER_INPUT, 13),
         /**
-         * Group %1$s can not be changed.
+         * Group "%1$s" can not be changed.
          */
-        NO_GROUP_UPDATE("Group %1$s can not be changed.", Category
+        NO_GROUP_UPDATE("Group \"%1$s\" can not be changed.", Category
             .USER_INPUT, 14);
 
         /**
