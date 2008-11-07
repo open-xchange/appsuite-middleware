@@ -233,6 +233,29 @@ public class SearchTest extends InfostoreAJAXTest {
         }
     }
 
+    // Bug 12427
+
+    public void notestNumberOfVersions() throws JSONException, IOException, SAXException {
+        final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        Response res;    
+        for(int i = 0; i < clean.size(); i++) {
+            res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),Long.MAX_VALUE,m(), upload, "text/plain");
+            assertNoError(res);
+        }
+
+        res = search(getWebConversation(), getHostName(), sessionId, "*", new int[]{Metadata.ID,  Metadata.NUMBER_OF_VERSIONS}, folderId);
+
+        JSONArray rows = (JSONArray) res.getData();
+        for(int i = 0, size = rows.length(); i < size; i++) {
+            JSONArray row = rows.getJSONArray(i);
+            int id = row.getInt(0);
+            int numberOfVersions = row.getInt(1);
+
+            assertEquals(1, numberOfVersions);
+
+        }
+    }
+
 
     public static void assertTitle(final int index, final JSONArray results, final String title) throws JSONException {
 		final JSONArray entry = results.getJSONArray(index);

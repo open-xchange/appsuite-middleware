@@ -3,13 +3,19 @@ package com.openexchange.ajax.infostore;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.test.TestInit;
 
 public class AllTest extends InfostoreAJAXTest {
 
@@ -63,5 +69,29 @@ public class AllTest extends InfostoreAJAXTest {
 			final JSONArray entry = entries.getJSONArray(i);
 			assertNotNull(entry.get(0));
 		}
+    }
+
+    // Bug 12427
+
+    public void testNumberOfVersions() throws JSONException, IOException, SAXException {
+        final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        Response res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),Long.MAX_VALUE,m("description","New description"), upload, "text/plain");
+        assertNoError(res);
+
+        res = all(getWebConversation(), getHostName(), sessionId, folderId, new int[]{Metadata.ID, Metadata.NUMBER_OF_VERSIONS});
+
+        JSONArray rows = (JSONArray) res.getData();
+        boolean found = false;
+        for(int i = 0, size = rows.length(); i < size; i++) {
+            JSONArray row = rows.getJSONArray(i);
+            int id = row.getInt(0);
+            int numberOfVersions = row.getInt(1);
+
+            if(id == clean.get(0)) {
+                assertEquals(1, numberOfVersions);
+                found = true;
+            }
+        }
+        assertTrue(found);
     }
 }
