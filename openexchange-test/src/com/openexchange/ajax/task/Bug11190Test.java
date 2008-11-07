@@ -5,9 +5,11 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -23,6 +25,21 @@ import com.openexchange.tools.servlet.OXJSONException;
 
 public class Bug11190Test extends AbstractAJAXSession {
 
+	private class IntToNullSettingUpdateRequest extends UpdateRequest{
+		public IntToNullSettingUpdateRequest(Task task, TimeZone timeZone) {
+			super(task, timeZone);
+		}
+
+		@Override
+		public Object getBody() throws JSONException {
+			JSONObject obj = (JSONObject) super.getBody();
+			if(!getTask().containsDays() && getTask().containsDayInMonth()){
+				obj.put(TaskFields.DAYS, JSONObject.NULL);
+			}
+			return obj;
+		}
+	}
+	
 	public Bug11190Test(String name) {
 		super(name);
 	}
@@ -67,7 +84,7 @@ public class Bug11190Test extends AbstractAJAXSession {
 			// TODO The remove method clears the value in the object. If the value should be cleared over the AJAX interface it must be set to null. This is currently not possible with the int primitive type.
 			taskWithRecurrence.removeDays(); //otherwise, the old value (Monday) will be kept, which then means "the twelfth Monday every two months" (which then is reduced to every 5th Monday)  
 			//send
-			UpdateRequest updateRequest = new UpdateRequest(taskWithRecurrence,timezone);
+			UpdateRequest updateRequest = new IntToNullSettingUpdateRequest(taskWithRecurrence,timezone);
 			UpdateResponse updateResponse = ajaxClient.execute(updateRequest);
 			taskWithRecurrence.setLastModified(updateResponse.getTimestamp());			
 			//get data
