@@ -49,238 +49,243 @@
 
 package com.openexchange.groupware.container;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 
 /**
- * {@link AppointmentObject} - The appointment object
- * 
+ * The appointment object.
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 public class AppointmentObject extends CalendarObject implements Cloneable {
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(AppointmentObject.class);
+    public static final int LOCATION = 400;
 
-	public static final int LOCATION = 400;
-	
-	public static final int FULL_TIME = 401;
-	
-	public static final int SHOWN_AS = 402;
-	
-	public static final int TIMEZONE = 408;	
-	
-	public static final int RECURRENCE_START = 410;
-	
-	public static final int RESERVED = 1;
-	public static final int TEMPORARY = 2;
-	public static final int ABSENT = 3;
-	public static final int FREE = 4;
-	
-	protected int DEFAULTFOLDER = -1;
-	
-	protected String location;
-	protected boolean fulltime;
-	protected int shown_as;
-	protected int alarm;
-	protected long recurring_start;
-        
-	protected boolean ignoreConflicts;
-	
-	protected String timezone;
-	
-	protected boolean b_location;
-	protected boolean b_fulltime;
-	protected boolean b_shown_as;
-	protected boolean bAlarm;
-	protected boolean b_timezone;
+    public static final int FULL_TIME = 401;
+
+    public static final int SHOWN_AS = 402;
+
+    public static final int TIMEZONE = 408;
+
+    public static final int RECURRENCE_START = 410;
+
+    public static final int RESERVED = 1;
+    public static final int TEMPORARY = 2;
+    public static final int ABSENT = 3;
+    public static final int FREE = 4;
+
+    protected int DEFAULTFOLDER = -1;
+
+    protected String location;
+    protected boolean fulltime;
+    protected int shown_as;
+    protected int alarm;
+    protected long recurring_start;
+
+    protected boolean ignoreConflicts;
+
+    protected String timezone;
+
+    protected boolean b_location;
+    protected boolean b_fulltime;
+    protected boolean b_shown_as;
+    protected boolean bAlarm;
+    protected boolean b_timezone;
     protected boolean b_recurring_start;
-	
-	/**
-	 * Initializes a new {@link AppointmentObject}
-	 */
-	public AppointmentObject() {
-		super();
-	}
-	
-	// GET METHODS
-	public String getLocation( ) {
-		return location;
-	}
-	
-	public boolean getFullTime() {
-		return fulltime;
-	}
-	
-	public int getShownAs( ) {
-		return shown_as;
-	}
-	
-	public int getAlarm() {
-		return alarm;
-	}
-	
-	public boolean getIgnoreConflicts() {
-		return ignoreConflicts;
-	}
-	
-        public final long getRecurringStart() {
-            return recurring_start;
-        }           
-        
-	public String getTimezone() {
+
+    /**
+     * Initializes a new {@link AppointmentObject}
+     */
+    public AppointmentObject() {
+        super();
+    }
+
+    // GET METHODS
+    public String getLocation( ) {
+        return location;
+    }
+
+    public boolean getFullTime() {
+        return fulltime;
+    }
+
+    public int getShownAs( ) {
+        return shown_as;
+    }
+
+    public int getAlarm() {
+        return alarm;
+    }
+
+    public boolean getIgnoreConflicts() {
+        return ignoreConflicts;
+    }
+
+    public final long getRecurringStart() {
+        return recurring_start;
+    }
+
+    /**
+	 * Returns the time zone essential for recurring appointments.
+	 * @return the time zone if it has been set otherwise <code>null</code>.
+     */
+    public String getTimezone() {
+        return timezone;
+    }
+
+    /**
+     * Returns the time zone essential for recurring appointments.
+     * @return the time zone if it has been set otherwise UTC.
+     * @deprecated use {@link #getTimezone()} and handle fallback to UTC yourself.
+     */
+    @Deprecated
+    public String getTimezoneFallbackUTC() {
         if (timezone != null) {
             return timezone;
         }
         return "UTC";
-	}
-	
+    }
+
     public final void setRecurringStart(final long recurring_start) {
         this.recurring_start = CalendarRecurringCollection.normalizeLong(recurring_start);
         b_recurring_start = true;
-    }     
-        
-	// SET METHODS
-	public void setLocation( final String location ) {
-		this.location = location;
-		b_location = true;
-	}
-	
-	public void setFullTime( final boolean fulltime) {
-		this.fulltime = fulltime;
-		b_fulltime = true;
-	}
-	
-	public void setShownAs( final int shown_as ) {
-		this.shown_as = shown_as;
-		b_shown_as = true;
-	}
-	
-	public void setAlarm(final int alarm) {
-		this.alarm = alarm;
-		bAlarm = true;
-	}
-	
-	public void setIgnoreConflicts(final boolean ignoreConflicts) {
-		this.ignoreConflicts = ignoreConflicts;
-	}
-	
-	public void setTimezone(final String timezone) {
-		this.timezone = timezone;
-		b_timezone = true;
-	}
-	
-	// REMOVE METHODS
-	public void removeLocation( ) {
-		location = null;
-		b_location = false;
-	}
-	
-	public void removeFullTime( ) {
-		fulltime = false;
-		b_fulltime = false;
-	}
-	
-	public void removeShownAs( ) {
-		shown_as = 0;
-		b_shown_as = false;
-	}
-	
-	public void removeAlarm() {
-		alarm = 0;
-		bAlarm = false;
-	}
-	
-	public void removeTimezone() {
-		timezone = null;
-		b_timezone = false;
-	}
-	
+    }
+
+    // SET METHODS
+    public void setLocation( final String location ) {
+        this.location = location;
+        b_location = true;
+    }
+
+    public void setFullTime( final boolean fulltime) {
+        this.fulltime = fulltime;
+        b_fulltime = true;
+    }
+
+    public void setShownAs( final int shown_as ) {
+        this.shown_as = shown_as;
+        b_shown_as = true;
+    }
+
+    public void setAlarm(final int alarm) {
+        this.alarm = alarm;
+        bAlarm = true;
+    }
+
+    public void setIgnoreConflicts(final boolean ignoreConflicts) {
+        this.ignoreConflicts = ignoreConflicts;
+    }
+
+    public void setTimezone(final String timezone) {
+        this.timezone = timezone;
+        b_timezone = true;
+    }
+
+    // REMOVE METHODS
+    public void removeLocation( ) {
+        location = null;
+        b_location = false;
+    }
+
+    public void removeFullTime( ) {
+        fulltime = false;
+        b_fulltime = false;
+    }
+
+    public void removeShownAs( ) {
+        shown_as = 0;
+        b_shown_as = false;
+    }
+
+    public void removeAlarm() {
+        alarm = 0;
+        bAlarm = false;
+    }
+
+    public void removeTimezone() {
+        timezone = null;
+        b_timezone = false;
+    }
+
         public void removeRecurringStart() {
             recurring_start = 0;
             b_recurring_start = false;
         }
-        
-	// CONTAINS METHODS
-        
+
+    // CONTAINS METHODS
+
         public boolean containsRecurringStart() {
             return b_recurring_start;
         }
-        
-	public boolean containsLocation() {
-		return b_location;
-	}
-	
-	public boolean containsFullTime() {
-		return b_fulltime;
-	}
-	
-	public boolean containsShownAs() {
-		return b_shown_as;
-	}
-	
-	public boolean containsAlarm()	{
-		return bAlarm;
-	}
-	
-	public boolean containsTimezone()	{
-		return b_timezone;
-	}
-	
-	@Override
-	public void reset() {
-		super.reset();
-		
-		location = null;
-		fulltime = false;
-		shown_as = 0;
-		alarm = 0;
-		timezone = null;
-		
-		b_location = false;
-		b_fulltime = false;
-		b_shown_as = false;
-		bAlarm = false;
-		b_timezone = false;
-	}
-	
-	@Override
-	public int hashCode() {
-		return objectId;
-	}
-	
-	@Override
-	public boolean equals(final Object o) {
-		if (o instanceof AppointmentObject) {
-			if (((AppointmentObject)o).hashCode() == hashCode()) {
-				return true;
-			}
-			return false;
-		}
-		return false;
-	}
-	
-	@Override
-	public Object clone() {
-		try {
-			final AppointmentObject appointmentobject = (AppointmentObject) super.clone();/*new AppointmentObject();*/
-			appointmentobject.setLabel(getLabel());
-			appointmentobject.setFullTime(getFullTime());
-			appointmentobject.setLocation(getLocation());
-			appointmentobject.setShownAs(getShownAs());
-			appointmentobject.setLabel(getLabel());
-			appointmentobject.setOccurrence(getOccurrence());
-			appointmentobject.setTimezone(getTimezone());
-			return appointmentobject;
-		} catch (final CloneNotSupportedException e) {
-			/*
-			 * Cannot occur since we are cloneable
-			 */
-			throw new InternalError(e.getMessage());
-		}
-	}
+
+    public boolean containsLocation() {
+        return b_location;
+    }
+
+    public boolean containsFullTime() {
+        return b_fulltime;
+    }
+
+    public boolean containsShownAs() {
+        return b_shown_as;
+    }
+
+    public boolean containsAlarm()    {
+        return bAlarm;
+    }
+
+    public boolean containsTimezone()    {
+        return b_timezone;
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+
+        location = null;
+        fulltime = false;
+        shown_as = 0;
+        alarm = 0;
+        timezone = null;
+
+        b_location = false;
+        b_fulltime = false;
+        b_shown_as = false;
+        bAlarm = false;
+        b_timezone = false;
+    }
+
+    @Override
+    public int hashCode() {
+        return objectId;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (o instanceof AppointmentObject) {
+            if (((AppointmentObject)o).hashCode() == hashCode()) {
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
+    @Override
+    public Object clone() {
+        try {
+            final AppointmentObject appointmentobject = (AppointmentObject) super.clone();/*new AppointmentObject();*/
+            appointmentobject.setLabel(getLabel());
+            appointmentobject.setFullTime(getFullTime());
+            appointmentobject.setLocation(getLocation());
+            appointmentobject.setShownAs(getShownAs());
+            appointmentobject.setLabel(getLabel());
+            appointmentobject.setOccurrence(getOccurrence());
+            appointmentobject.setTimezone(getTimezoneFallbackUTC());
+            return appointmentobject;
+        } catch (final CloneNotSupportedException e) {
+            /*
+             * Cannot occur since we are cloneable
+             */
+            throw new InternalError(e.getMessage());
+        }
+    }
 }

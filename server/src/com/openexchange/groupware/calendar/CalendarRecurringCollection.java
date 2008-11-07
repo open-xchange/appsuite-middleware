@@ -745,8 +745,9 @@ public final class CalendarRecurringCollection {
                 delete_exceptions = calDataObject.getDelExceptions();
             }
             if (!calDataObject.getFullTime()) {
-                calc_timezone = calDataObject.getTimezone();
-                if ("UTC".equals(calc_timezone)) {
+                if (calDataObject.containsTimezone()) {
+                    calc_timezone = calDataObject.getTimezone();
+                } else {
                     final OXCalendarException e = new OXCalendarException(Code.TIMEZONE_MISSING);
                     LOG.warn(e.getMessage(), e);
                 }

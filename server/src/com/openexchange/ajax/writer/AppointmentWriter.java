@@ -184,7 +184,7 @@ public class AppointmentWriter extends CalendarWriter {
 		}
 
 		if (appointmentObject.containsTimezone()) {
-			writeParameter(AppointmentFields.TIMEZONE, appointmentObject.getTimezone(), jsonObj);
+			writeParameter(AppointmentFields.TIMEZONE, appointmentObject.getTimezoneFallbackUTC(), jsonObj);
 		}
 
 		if (appointmentObject.containsRecurringStart()) {
@@ -320,7 +320,7 @@ public class AppointmentWriter extends CalendarWriter {
 					.containsRecurrencePosition());
 			break;
 		case AppointmentObject.TIMEZONE:
-			writeValue(appointmentObject.getTimezone(), jsonArray);
+			writeValue(appointmentObject.getTimezoneFallbackUTC(), jsonArray);
 			break;
 		case AppointmentObject.RECURRENCE_START:
 			writeValue(appointmentObject.getRecurringStart(), jsonArray, appointmentObject.containsRecurringStart());

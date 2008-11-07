@@ -468,7 +468,7 @@ class CalendarMySQL implements CalendarSqlImp {
 					try {
                         if (CalendarRecurringCollection.fillDAO(cdao)) {
                             final RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(cdao, start, end, 0);
-                            final TimeZone zone = Tools.getTimeZone(cdao.getTimezone());
+                            final TimeZone zone = Tools.getTimeZone(cdao.getTimezoneFallbackUTC());
                             for (int a = 0; a < rrs.size(); a++) {
                                 final RecurringResult rr = rrs.getRecurringResult(a);
                                 fillActiveDates(start, rr.getStart(), rr.getEnd(), activeDates, CalendarRecurringCollection.exceedsHourOfDay(rr.getStart(), zone));
@@ -1071,7 +1071,7 @@ class CalendarMySQL implements CalendarSqlImp {
 			pst.setInt(i++, cdao.getContextID());
 			pst.setTimestamp(i++, new java.sql.Timestamp(cdao.getStartDate().getTime()));
 			pst.setTimestamp(i++, new java.sql.Timestamp(cdao.getEndDate().getTime()));
-			pst.setString(i++, cdao.getTimezone());
+			pst.setString(i++, cdao.getTimezoneFallbackUTC());
 			pst.setInt(i++, cdao.getObjectID());
 			pst.setInt(i++, cdao.getLabel());
 			pst.setInt(i++, cdao.getShownAs());
@@ -1962,7 +1962,7 @@ class CalendarMySQL implements CalendarSqlImp {
 						pst.setInt(a + 1, cdao.getNumberOfAttachments());
 						break;
 					case CalendarDataObject.TIMEZONE:
-						pst.setString(a + 1, cdao.getTimezone());
+						pst.setString(a + 1, cdao.getTimezoneFallbackUTC());
 						break;
 					default:
 						throw new SQLException("Error: Calendar: Update: Mapping for " + ucols[a] + " not implemented!");

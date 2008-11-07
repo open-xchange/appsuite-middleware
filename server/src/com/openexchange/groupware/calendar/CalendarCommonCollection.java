@@ -1671,7 +1671,7 @@ public final class CalendarCommonCollection {
             case AppointmentObject.LOCATION  : return cdao.getLocation();
             case AppointmentObject.NOTE : return cdao.getNote();
             case AppointmentObject.CATEGORIES : return cdao.getCategories();
-            case AppointmentObject.TIMEZONE : return cdao.getTimezone();
+            case AppointmentObject.TIMEZONE : return cdao.getTimezoneFallbackUTC();
             case AppointmentObject.DELETE_EXCEPTIONS : return cdao.getDelExceptions();
             case AppointmentObject.CHANGE_EXCEPTIONS : return cdao.getExceptions();
         }

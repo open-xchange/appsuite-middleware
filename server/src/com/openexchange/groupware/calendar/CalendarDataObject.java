@@ -88,7 +88,7 @@ public class CalendarDataObject extends AppointmentObject {
         if (until != null) {
             final long mod = until.getTime()%CalendarRecurringCollection.MILLI_DAY;
             if (mod != 0) {
-            	if (CalendarRecurringCollection.exceedsHourOfDay(until.getTime(), getTimezone())) {
+            	if (CalendarRecurringCollection.exceedsHourOfDay(until.getTime(), getTimezoneFallbackUTC())) {
 					until.setTime((((until.getTime() - mod) + CalendarRecurringCollection.MILLI_DAY)));
 				} else {
 					until.setTime(until.getTime() - mod);
@@ -439,7 +439,7 @@ public class CalendarDataObject extends AppointmentObject {
         clone.setRecurrenceCalculator(getRecurrenceCalculator());
         clone.setRecurrence(getRecurrence());
         clone.setFolderType(getFolderType());
-        clone.setTimezone(getTimezone());
+        clone.setTimezone(getTimezoneFallbackUTC());
         clone.setParentFolderID(getParentFolderID());
         clone.setPrivateFolderID(getPrivateFolderID());
         clone.setActionFolder(getActionFolder());
