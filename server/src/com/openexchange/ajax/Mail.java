@@ -215,7 +215,13 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	private static final long serialVersionUID = 1980226522220313667L;
 
-	private static final AbstractOXException getWrappingOXException(final Throwable cause) {
+	private static final AbstractOXException getWrappingOXException(final Exception cause) {
+		if (LOG.isWarnEnabled()) {
+			final StringBuilder warnBuilder = new StringBuilder(140);
+			warnBuilder.append("An unexpected exception occurred, which is going to be wrapped for proper display.\n");
+			warnBuilder.append("For safety reason its original content is display here");
+			LOG.warn(warnBuilder.toString(), cause);
+		}
 		return new AbstractOXException(EnumComponent.MAIL, Category.INTERNAL_ERROR, 9999, cause.getMessage(), cause);
 	}
 
