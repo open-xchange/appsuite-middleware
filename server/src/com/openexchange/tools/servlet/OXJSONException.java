@@ -123,7 +123,12 @@ public class OXJSONException extends AbstractOXException {
          * Unable to parse value "%1$s" within field %2$s as a number.
          */
         NUMBER_PARSING("Unable to parse value \"%1$s\" within field %2$s as a number.",
-            Category.CODE_ERROR, 7);
+            Category.CODE_ERROR, 7),
+        /**
+         * Invalid value \"%2$s\" in JSON attribute \"%1$s\".
+         */
+        INVALID_VALUE("Invalid value \"%2$s\" in JSON attribute \"%1$s\".",
+            Category.USER_INPUT, 8);
 
         /**
          * Message of the exception.

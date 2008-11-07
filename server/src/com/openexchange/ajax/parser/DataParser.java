@@ -72,24 +72,12 @@ import com.openexchange.tools.servlet.OXJSONException.Code;
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 public abstract class DataParser {
-	
-    /**
-     * @deprecated adding strings to exception message breaks i18n.
-     */
-    @Deprecated
-	private static final String STR_VALUE = "' value '";
 
-	/**
-	 * @deprecated adding strings to exception message breaks i18n.
-	 */
-	@Deprecated
-	private static final String STR_INVALID_VALUE_IN_ATTRIBUTE = "invalid value in attribute '";
+    protected boolean parseAll;
 
-	protected boolean parseAll;
-	
-	protected TimeZone timeZone;
-	
-	protected Session sessionObj;
+    protected TimeZone timeZone;
+
+    protected Session sessionObj;
 
     /**
      * Default old constructor.
@@ -98,7 +86,7 @@ public abstract class DataParser {
         this(false, null, null);
     }
 
-	/**
+    /**
      * Constructor for setting timeZone only.
      * @param timeZone TimeZone for converting Javascript specific timestamps.
      */
@@ -125,28 +113,28 @@ public abstract class DataParser {
     }
 
     protected void parseElementDataObject(final DataObject dataobject, final JSONObject jsonobject) throws JSONException, OXJSONException {
-		if (jsonobject.has(DataFields.ID)) {
-			dataobject.setObjectID(parseInt(jsonobject, DataFields.ID));
-		}
-		
-		if (parseAll && jsonobject.has(DataFields.CREATED_BY)) {
-			dataobject.setCreatedBy(parseInt(jsonobject, DataFields.CREATED_BY));
-		}
-		
-		if (parseAll && jsonobject.has(DataFields.CREATION_DATE)) {
-			dataobject.setCreationDate(parseTime(jsonobject, DataFields.CREATION_DATE, timeZone));
-		}
-		
-		if (parseAll && jsonobject.has(DataFields.MODIFIED_BY)) {
-			dataobject.setModifiedBy(parseInt(jsonobject, DataFields.MODIFIED_BY));
-		}
-		
-		if (parseAll && jsonobject.has(DataFields.LAST_MODIFIED)) {
-			dataobject.setLastModified(parseTime(jsonobject, DataFields.LAST_MODIFIED, timeZone));
-		}
-	}
+        if (jsonobject.has(DataFields.ID)) {
+            dataobject.setObjectID(parseInt(jsonobject, DataFields.ID));
+        }
 
-	public static String parseString(final JSONObject jsonObj, final String name) throws JSONException {
+        if (parseAll && jsonobject.has(DataFields.CREATED_BY)) {
+            dataobject.setCreatedBy(parseInt(jsonobject, DataFields.CREATED_BY));
+        }
+
+        if (parseAll && jsonobject.has(DataFields.CREATION_DATE)) {
+            dataobject.setCreationDate(parseTime(jsonobject, DataFields.CREATION_DATE, timeZone));
+        }
+
+        if (parseAll && jsonobject.has(DataFields.MODIFIED_BY)) {
+            dataobject.setModifiedBy(parseInt(jsonobject, DataFields.MODIFIED_BY));
+        }
+
+        if (parseAll && jsonobject.has(DataFields.LAST_MODIFIED)) {
+            dataobject.setLastModified(parseTime(jsonobject, DataFields.LAST_MODIFIED, timeZone));
+        }
+    }
+
+    public static String parseString(final JSONObject jsonObj, final String name) throws JSONException {
         String retval = null;
         if (jsonObj.has(name) && !jsonObj.isNull(name)) {
             final String test = jsonObj.getString(name);
@@ -154,52 +142,52 @@ public abstract class DataParser {
                 retval = test;
             }
         }
-		return retval;
-	}
+        return retval;
+    }
 
-	public static int parseInt(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
-		if (!jsonObj.has(name)) {
-			return 0;
-		}
-		
-		final String tmp = jsonObj.getString(name);
-		if (tmp != null && tmp.length() == 0) {
-			return 0;
-		}
-		
-		try {
-			return Integer.parseInt(tmp);
-		} catch (final NumberFormatException exc) {
-			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
-		}
-	}
-	
-	public static boolean parseBoolean(final JSONObject jsonObj, final String name) throws JSONException {
-		if (!jsonObj.has(name)) {
-			return false;
-		}
-		
-		return jsonObj.getBoolean(name);
-	}
-	
-	public static float parseFloat(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
-		if (!jsonObj.has(name)) {
-			return 0;
-		}
-		
-		final String tmp = jsonObj.getString(name);
-		if (tmp != null && tmp.length() == 0) {
-			return 0;
-		}
-		
-		try {
-			return Float.parseFloat(tmp);
-		} catch (final NumberFormatException exc) {
-			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
-		}
-	}
+    public static int parseInt(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
+        if (!jsonObj.has(name)) {
+            return 0;
+        }
 
-	private static final Pattern DIGITS = Pattern.compile("^\\-?\\d+$");
+        final String tmp = jsonObj.getString(name);
+        if (tmp != null && tmp.length() == 0) {
+            return 0;
+        }
+
+        try {
+            return Integer.parseInt(tmp);
+        } catch (final NumberFormatException exc) {
+            throw new OXJSONException(Code.INVALID_VALUE, name, tmp);
+        }
+    }
+
+    public static boolean parseBoolean(final JSONObject jsonObj, final String name) throws JSONException {
+        if (!jsonObj.has(name)) {
+            return false;
+        }
+
+        return jsonObj.getBoolean(name);
+    }
+
+    public static float parseFloat(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
+        if (!jsonObj.has(name)) {
+            return 0;
+        }
+
+        final String tmp = jsonObj.getString(name);
+        if (tmp != null && tmp.length() == 0) {
+            return 0;
+        }
+
+        try {
+            return Float.parseFloat(tmp);
+        } catch (final NumberFormatException exc) {
+            throw new OXJSONException(Code.INVALID_VALUE, name, tmp);
+        }
+    }
+
+    private static final Pattern DIGITS = Pattern.compile("^\\-?\\d+$");
 
     public static long parseLong(final JSONObject jsonObj, final String name)
         throws OXJSONException {
@@ -243,188 +231,188 @@ public abstract class DataParser {
         }
     }
 
-	public static Date parseTime(final JSONObject jsonObj, final String name, final TimeZone timeZone) throws JSONException {
-		final Date d = parseDate(jsonObj, name);
-		if (d == null) {
-			return null;
-		}
-		
-		final int offset = timeZone.getOffset(d.getTime());
-		d.setTime(d.getTime()-offset);
-		return d;
-	}
-	
-	public static Date parseDate(final JSONObject jsonObj, final String name) throws JSONException {
-		if (!jsonObj.has(name)) {
-			return null;
-		}
-		
-		final String tmp = parseString(jsonObj, name);
-		if (tmp == null) {
-			return null;
-		}
-		return new Date(Long.parseLong(tmp));
-	}
-	
-	public static String checkString(final JSONObject jsonObj, final String name) throws JSONException, AjaxException {
-		final String tmp = parseString(jsonObj, name);
-		if (tmp == null) {
-			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
-		}
-		if (tmp.length() == 0) {
-			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
-		}
-		return tmp;
-	}
-	
-	public static int checkInt(final JSONObject jsonObj, final String name) throws OXJSONException, JSONException, AjaxException {
-		final String tmp = checkString(jsonObj, name);
-		if (tmp != null && tmp.length() == 0) {
-			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
-		}
-		
+    public static Date parseTime(final JSONObject jsonObj, final String name, final TimeZone timeZone) throws JSONException {
+        final Date d = parseDate(jsonObj, name);
+        if (d == null) {
+            return null;
+        }
+
+        final int offset = timeZone.getOffset(d.getTime());
+        d.setTime(d.getTime()-offset);
+        return d;
+    }
+
+    public static Date parseDate(final JSONObject jsonObj, final String name) throws JSONException {
+        if (!jsonObj.has(name)) {
+            return null;
+        }
+
+        final String tmp = parseString(jsonObj, name);
+        if (tmp == null) {
+            return null;
+        }
+        return new Date(Long.parseLong(tmp));
+    }
+
+    public static String checkString(final JSONObject jsonObj, final String name) throws JSONException, AjaxException {
+        final String tmp = parseString(jsonObj, name);
+        if (tmp == null) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+        }
+        if (tmp.length() == 0) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+        }
+        return tmp;
+    }
+
+    public static int checkInt(final JSONObject jsonObj, final String name) throws OXJSONException, JSONException, AjaxException {
+        final String tmp = checkString(jsonObj, name);
+        if (tmp != null && tmp.length() == 0) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+        }
+
         try {
             return Integer.parseInt(tmp);
-		} catch (final NumberFormatException exc) {
-			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
+        } catch (final NumberFormatException exc) {
+            throw new OXJSONException(Code.INVALID_VALUE, name, tmp);
         }
-	}
-	
-	public static boolean checkBoolean(final JSONObject jsonObj, final String name) throws JSONException, AjaxException {
-		final String tmp = jsonObj.getString(name);
-		if (tmp != null && tmp.length() == 0) {
-			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
-		}
-		return Boolean.parseBoolean(tmp);
-	}
-	
-	public static float checkFloat(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException, AjaxException {
-		final String tmp = jsonObj.getString(name);
-		if (tmp != null && tmp.length() == 0) {
-			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
-		}
-		
-		try {
-			return Float.parseFloat(tmp);
-		} catch (final NumberFormatException exc) {
-			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
-		}
-	}
-	
-	public static Date checkDate(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException, AjaxException {
-		final String tmp = parseString(jsonObj, name);
-		if (tmp == null) {
-			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
-		}
-		
-		try {
-			return new Date(Long.parseLong(tmp));
-		} catch (final NumberFormatException exc) {
-			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
-		}
-	}
-	
-	public static Date checkTime(final JSONObject jsonObj, final String name, final TimeZone timeZone) throws JSONException, OXJSONException, AjaxException {
-		final String tmp = parseString(jsonObj, name);
-		if (tmp == null) {
-			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
-		}
-		try {
-			final Date d = new Date(Long.parseLong(tmp));
-			final int offset = timeZone.getOffset(d.getTime());
-			d.setTime(d.getTime()-offset);
-			return d;
-		} catch (final NumberFormatException exc) {
-			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
-		}
-	}
-	
-	public static JSONObject checkJSONObject(final JSONObject jsonObj, final String name) throws AjaxException {
-		final JSONObject tmp = jsonObj.optJSONObject(name);
-		if (tmp == null) {
-			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
-		}
-		return tmp;
-	}
-	
-	public static JSONArray checkJSONArray(final JSONObject jsonObj, final String name) throws AjaxException {
-		final JSONArray tmp = jsonObj.optJSONArray(name);
-		if (tmp == null) {
-			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
-		}
-		return tmp;
-	}
-	
-	public static int[] parseJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
-		if (!jsonObj.has(name)) {
-			return null;
-		}
-		
-		final JSONArray tmp = jsonObj.getJSONArray(name);
-		if (tmp == null) {
-			return null;
-		}
-		
-		try {
-			final int i[] = new int[tmp.length()];
-			for (int a = 0; a < tmp.length(); a++) {
-				i[a] = tmp.getInt(a);
-			}
-		
-			return i;
-		} catch (final NumberFormatException exc) {
-			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
-		}
-	}
-	
-	public static String[] parseJSONStringArray(final JSONObject jsonObj, final String name) throws JSONException {
-		if (!jsonObj.has(name)) {
-			return null;
-		}
-		
-		final JSONArray tmp = jsonObj.getJSONArray(name);
-		if (tmp == null) {
-			return null;
-		}
-		
-		final String s[] = new String[tmp.length()];
-		for (int a = 0; a < tmp.length(); a++) {
-			s[a] = tmp.getString(a);
-		}
-		
-		return s;
-	}
-	
-	public static Date[] parseJSONDateArray(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
-		if (!jsonObj.has(name)) {
-			return null;
-		}
-		
-		final JSONArray tmp = jsonObj.getJSONArray(name);
-		if (tmp == null) {
-			return null;
-		}
-		
-		try {
-			final Date d[] = new Date[tmp.length()];
-			for (int a = 0; a < tmp.length(); a++) {
-				d[a] = new Date(tmp.getLong(a));
-			}
-		
-			return d;
-		} catch (final NumberFormatException exc) {
-			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
-		}
-	}
-	
-	public static int[] checkJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException, AjaxException {
-		final int[] i = parseJSONIntArray(jsonObj, name);
-		if (i == null) {
-			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
-		}
-		
-		return i;
-	}
+    }
+
+    public static boolean checkBoolean(final JSONObject jsonObj, final String name) throws JSONException, AjaxException {
+        final String tmp = jsonObj.getString(name);
+        if (tmp != null && tmp.length() == 0) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+        }
+        return Boolean.parseBoolean(tmp);
+    }
+
+    public static float checkFloat(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException, AjaxException {
+        final String tmp = jsonObj.getString(name);
+        if (tmp != null && tmp.length() == 0) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+        }
+
+        try {
+            return Float.parseFloat(tmp);
+        } catch (final NumberFormatException exc) {
+            throw new OXJSONException(Code.INVALID_VALUE, name, tmp);
+        }
+    }
+
+    public static Date checkDate(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException, AjaxException {
+        final String tmp = parseString(jsonObj, name);
+        if (tmp == null) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+        }
+
+        try {
+            return new Date(Long.parseLong(tmp));
+        } catch (final NumberFormatException exc) {
+            throw new OXJSONException(Code.INVALID_VALUE, name, tmp);
+        }
+    }
+
+    public static Date checkTime(final JSONObject jsonObj, final String name, final TimeZone timeZone) throws JSONException, OXJSONException, AjaxException {
+        final String tmp = parseString(jsonObj, name);
+        if (tmp == null) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+        }
+        try {
+            final Date d = new Date(Long.parseLong(tmp));
+            final int offset = timeZone.getOffset(d.getTime());
+            d.setTime(d.getTime()-offset);
+            return d;
+        } catch (final NumberFormatException exc) {
+            throw new OXJSONException(Code.INVALID_VALUE, name, tmp);
+        }
+    }
+
+    public static JSONObject checkJSONObject(final JSONObject jsonObj, final String name) throws AjaxException {
+        final JSONObject tmp = jsonObj.optJSONObject(name);
+        if (tmp == null) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+        }
+        return tmp;
+    }
+
+    public static JSONArray checkJSONArray(final JSONObject jsonObj, final String name) throws AjaxException {
+        final JSONArray tmp = jsonObj.optJSONArray(name);
+        if (tmp == null) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+        }
+        return tmp;
+    }
+
+    public static int[] parseJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
+        if (!jsonObj.has(name)) {
+            return null;
+        }
+
+        final JSONArray tmp = jsonObj.getJSONArray(name);
+        if (tmp == null) {
+            return null;
+        }
+
+        try {
+            final int i[] = new int[tmp.length()];
+            for (int a = 0; a < tmp.length(); a++) {
+                i[a] = tmp.getInt(a);
+            }
+
+            return i;
+        } catch (final NumberFormatException exc) {
+            throw new OXJSONException(Code.INVALID_VALUE, name, tmp);
+        }
+    }
+
+    public static String[] parseJSONStringArray(final JSONObject jsonObj, final String name) throws JSONException {
+        if (!jsonObj.has(name)) {
+            return null;
+        }
+
+        final JSONArray tmp = jsonObj.getJSONArray(name);
+        if (tmp == null) {
+            return null;
+        }
+
+        final String s[] = new String[tmp.length()];
+        for (int a = 0; a < tmp.length(); a++) {
+            s[a] = tmp.getString(a);
+        }
+
+        return s;
+    }
+
+    public static Date[] parseJSONDateArray(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
+        if (!jsonObj.has(name)) {
+            return null;
+        }
+
+        final JSONArray tmp = jsonObj.getJSONArray(name);
+        if (tmp == null) {
+            return null;
+        }
+
+        try {
+            final Date d[] = new Date[tmp.length()];
+            for (int a = 0; a < tmp.length(); a++) {
+                d[a] = new Date(tmp.getLong(a));
+            }
+
+            return d;
+        } catch (final NumberFormatException exc) {
+            throw new OXJSONException(Code.INVALID_VALUE, name, tmp);
+        }
+    }
+
+    public static int[] checkJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException, AjaxException {
+        final int[] i = parseJSONIntArray(jsonObj, name);
+        if (i == null) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
+        }
+
+        return i;
+    }
 
     /**
      * @return the timeZone
@@ -433,7 +421,3 @@ public abstract class DataParser {
         return timeZone;
     }
 }
-
-
-
-
