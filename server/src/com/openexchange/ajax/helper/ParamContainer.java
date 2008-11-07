@@ -207,13 +207,12 @@ public abstract class ParamContainer {
 
 		@Override
 		public int[] checkIntArrayParam(final String paramName) throws AbstractOXException {
-			String tmp = map.get(paramName);
+			final String tmp = map.get(paramName);
 			if (tmp == null) {
 				throw new ParamContainerException(component, errorInfo.getMissingParamCategory(), errorInfo
 						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null, paramName);
 			}
 			final String[] sa = tmp.split(SPLIT_PAT);
-			tmp = null;
 			final int intArray[] = new int[sa.length];
 			for (int a = 0; a < sa.length; a++) {
 				try {
@@ -355,13 +354,12 @@ public abstract class ParamContainer {
 
 		@Override
 		public int[] checkIntArrayParam(final String paramName) throws AbstractOXException {
-			String tmp = req.getParameter(paramName);
+			final String tmp = req.getParameter(paramName);
 			if (tmp == null) {
 				throw new ParamContainerException(component, errorInfo.getMissingParamCategory(), errorInfo
 						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null, paramName);
 			}
 			final String[] sa = tmp.split(SPLIT_PAT);
-			tmp = null;
 			final int intArray[] = new int[sa.length];
 			for (int a = 0; a < sa.length; a++) {
 				try {
