@@ -237,6 +237,10 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	public static final int SUBSCRIBED = 314;
 
 	public static final int SUBSCR_SUBFLDS = 315;
+	
+	public static final int [] ALL_COLUMNS = {FOLDER_NAME, MODULE, TYPE, SUBFOLDERS, OWN_RIGHTS, PERMISSIONS_BITS, SUMMARY,
+		STANDARD_FOLDER, TOTAL, NEW, UNREAD, DELETED, CAPABILITIES, SUBSCRIBED, SUBSCR_SUBFLDS, OBJECT_ID, CREATED_BY,
+		MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC, FOLDER_ID};
 
 	// Modules
 	public static final int TASK = 1;
