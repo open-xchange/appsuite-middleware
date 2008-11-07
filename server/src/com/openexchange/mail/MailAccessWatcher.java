@@ -176,14 +176,14 @@ public final class MailAccessWatcher {
 
 	private static class WatcherTask extends TimerTask {
 
-		private final ConcurrentMap<MailAccess<?, ?>, Long> mailAccesses;
+		private final ConcurrentMap<MailAccess<?, ?>, Long> mailAccessMap;
 
 		private final org.apache.commons.logging.Log logger;
 
 		public WatcherTask(final ConcurrentMap<MailAccess<?, ?>, Long> mailAccesses,
 				final org.apache.commons.logging.Log logger) {
 			super();
-			this.mailAccesses = mailAccesses;
+			this.mailAccessMap = mailAccesses;
 			this.logger = logger;
 		}
 
@@ -192,15 +192,10 @@ public final class MailAccessWatcher {
 			try {
 				final StringBuilder sb = new StringBuilder(512);
 				final List<MailAccess<?, ?>> exceededCons = new ArrayList<MailAccess<?, ?>>();
-				for (final Iterator<Entry<MailAccess<?, ?>, Long>> iter = mailAccesses.entrySet().iterator(); iter
+				for (final Iterator<Entry<MailAccess<?, ?>, Long>> iter = mailAccessMap.entrySet().iterator(); iter
 						.hasNext();) {
 					final Entry<MailAccess<?, ?>, Long> e = iter.next();
-					if (!e.getKey().isConnectedUnsafe()) {
-						/*
-						 * Remove closed connection from watcher
-						 */
-						iter.remove();
-					} else {
+					if (e.getKey().isConnectedUnsafe()) {
 						if ((System.currentTimeMillis() - e.getValue().longValue()) > MailConfig.getWatcherTime()) {
 							sb.setLength(0);
 							logger.info(sb.append(
@@ -208,6 +203,11 @@ public final class MailAccessWatcher {
 									.append(e.getKey().getTrace()).toString());
 							exceededCons.add(e.getKey());
 						}
+					} else {
+						/*
+						 * Remove closed connection from watcher
+						 */
+						iter.remove();
 					}
 				}
 				if (!exceededCons.isEmpty()) {
@@ -226,7 +226,7 @@ public final class MailAccessWatcher {
 								logger.info(sb.toString());
 							}
 						} finally {
-							mailAccesses.remove(mailAccess);
+							mailAccessMap.remove(mailAccess);
 						}
 					}
 				}
