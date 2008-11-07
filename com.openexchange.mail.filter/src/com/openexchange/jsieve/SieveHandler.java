@@ -131,7 +131,7 @@ public class SieveHandler {
     
     public class Capabilities {
 
-        private Boolean starttls = false;
+        private Boolean starttls = Boolean.FALSE;
 
         private String implementation = null;
 
