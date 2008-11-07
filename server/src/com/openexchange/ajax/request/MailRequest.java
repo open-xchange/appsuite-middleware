@@ -194,7 +194,7 @@ public final class MailRequest {
 			/*
 			 * Collect
 			 */
-			collectObj = CollectObject.newInstance(jsonObject, op);
+			collectObj = CollectObject.newInstance(jsonObject, op, MAIL_SERVLET);
 			collectObj.addCollectable(jsonObject);
 			contCollecting = true;
 		} else {
@@ -206,7 +206,7 @@ public final class MailRequest {
 				/*
 				 * Start new collect
 				 */
-				collectObj = CollectObject.newInstance(jsonObject, op);
+				collectObj = CollectObject.newInstance(jsonObject, op, MAIL_SERVLET);
 				collectObj.addCollectable(jsonObject);
 				contCollecting = false;
 			}
@@ -268,17 +268,17 @@ public final class MailRequest {
 
 	private static abstract class CollectObject {
 
-		public static CollectObject newInstance(final JSONObject jsonObject, final CollectableOperation op)
-				throws JSONException {
+		public static CollectObject newInstance(final JSONObject jsonObject, final CollectableOperation op,
+				final Mail mailServlet) throws JSONException {
 			switch (op) {
 			case COPY:
-				return new CopyCollectObject(jsonObject);
+				return new CopyCollectObject(jsonObject, mailServlet);
 			case MOVE:
-				return new MoveCollectObject(jsonObject);
+				return new MoveCollectObject(jsonObject, mailServlet);
 			case STORE_FLAG:
-				return new FlagsCollectObject(jsonObject);
+				return new FlagsCollectObject(jsonObject, mailServlet);
 			case COLOR_LABEL:
-				return new ColorCollectObject(jsonObject);
+				return new ColorCollectObject(jsonObject, mailServlet);
 			default:
 				/*
 				 * Cannot occur since all enums are covered in
@@ -288,14 +288,20 @@ public final class MailRequest {
 			}
 		}
 
+		protected final Mail mailServlet;
+
 		protected final List<Long> mailIDs;
 
 		/**
 		 * Initializes a new {@link CollectObject}
+		 * 
+		 * @param mailServlet
+		 *            The mail servlet
 		 */
-		protected CollectObject() {
+		protected CollectObject(final Mail mailServlet) {
 			super();
 			this.mailIDs = new ArrayList<Long>();
+			this.mailServlet = mailServlet;
 		}
 
 		/**
@@ -371,8 +377,8 @@ public final class MailRequest {
 
 		private final String destFld;
 
-		public MoveCollectObject(final JSONObject dataObject) throws JSONException {
-			super();
+		public MoveCollectObject(final JSONObject dataObject, final Mail mailServlet) throws JSONException {
+			super(mailServlet);
 			this.srcFld = dataObject.getString(AJAXServlet.PARAMETER_FOLDERID);
 			this.destFld = dataObject.getJSONObject(ResponseFields.DATA).getString(FolderFields.FOLDER_ID);
 		}
@@ -392,7 +398,7 @@ public final class MailRequest {
 		@Override
 		public void performOperations(final Session session, final OXJSONWriter writer,
 				final MailServletInterface mailInterface) throws JSONException {
-			MAIL_SERVLET.actionPutMailMultiple(session, writer, getMailIDs(), srcFld, destFld, true, mailInterface);
+			mailServlet.actionPutMailMultiple(session, writer, getMailIDs(), srcFld, destFld, true, mailInterface);
 		}
 
 	}
@@ -403,8 +409,8 @@ public final class MailRequest {
 
 		private final String destFld;
 
-		public CopyCollectObject(final JSONObject dataObject) throws JSONException {
-			super();
+		public CopyCollectObject(final JSONObject dataObject, final Mail mailServlet) throws JSONException {
+			super(mailServlet);
 			this.srcFld = dataObject.getString(AJAXServlet.PARAMETER_FOLDERID);
 			this.destFld = dataObject.getJSONObject(ResponseFields.DATA).getString(FolderFields.FOLDER_ID);
 		}
@@ -424,7 +430,7 @@ public final class MailRequest {
 		@Override
 		public void performOperations(final Session session, final OXJSONWriter writer,
 				final MailServletInterface mailInterface) throws JSONException {
-			MAIL_SERVLET.actionPutMailMultiple(session, writer, getMailIDs(), srcFld, destFld, false, mailInterface);
+			mailServlet.actionPutMailMultiple(session, writer, getMailIDs(), srcFld, destFld, false, mailInterface);
 		}
 
 	}
@@ -437,8 +443,8 @@ public final class MailRequest {
 
 		private final boolean flagValue;
 
-		public FlagsCollectObject(final JSONObject dataObject) throws JSONException {
-			super();
+		public FlagsCollectObject(final JSONObject dataObject, final Mail mailServlet) throws JSONException {
+			super(mailServlet);
 			this.srcFld = dataObject.getString(AJAXServlet.PARAMETER_FOLDERID);
 			final JSONObject bodyObj = dataObject.getJSONObject(ResponseFields.DATA);
 			flagInt = bodyObj.getInt(MailJSONField.FLAGS.getKey());
@@ -462,7 +468,7 @@ public final class MailRequest {
 		@Override
 		public void performOperations(final Session session, final OXJSONWriter writer,
 				final MailServletInterface mailInterface) throws JSONException {
-			MAIL_SERVLET.actionPutStoreFlagsMultiple(session, writer, getMailIDs(), srcFld, flagInt, flagValue,
+			mailServlet.actionPutStoreFlagsMultiple(session, writer, getMailIDs(), srcFld, flagInt, flagValue,
 					mailInterface);
 		}
 	}
@@ -473,8 +479,8 @@ public final class MailRequest {
 
 		private final int flagInt;
 
-		public ColorCollectObject(final JSONObject dataObject) throws JSONException {
-			super();
+		public ColorCollectObject(final JSONObject dataObject, final Mail mailServlet) throws JSONException {
+			super(mailServlet);
 			this.srcFld = dataObject.getString(AJAXServlet.PARAMETER_FOLDERID);
 			flagInt = dataObject.getJSONObject(ResponseFields.DATA).getInt(CommonFields.COLORLABEL);
 		}
@@ -494,7 +500,7 @@ public final class MailRequest {
 		@Override
 		public void performOperations(final Session session, final OXJSONWriter writer,
 				final MailServletInterface mailInterface) throws JSONException {
-			MAIL_SERVLET.actionPutColorLabelMultiple(session, writer, getMailIDs(), srcFld, flagInt, mailInterface);
+			mailServlet.actionPutColorLabelMultiple(session, writer, getMailIDs(), srcFld, flagInt, mailInterface);
 		}
 	}
 
