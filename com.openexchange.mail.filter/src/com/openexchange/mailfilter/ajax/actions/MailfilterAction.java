@@ -61,6 +61,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.parser.generated.ParseException;
+import org.apache.jsieve.parser.generated.TokenMgrError;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -219,6 +220,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
         } catch (final JSONException e) {
             throw new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e, getUserPrefix(credentials) + e.getMessage());
+        } catch (final TokenMgrError error) {
+        	throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, getUserPrefix(credentials) + error.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
@@ -265,6 +268,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
         } catch (final JSONException e) {
             throw new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e, getUserPrefix(credentials) + e.getMessage());
+        } catch (final TokenMgrError error) {
+        	throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, getUserPrefix(credentials) + error.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
@@ -332,6 +337,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
         } catch (final JSONException e) {
             throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e, getUserPrefix(credentials) + e.getMessage());
+        } catch (final TokenMgrError error) {
+        	throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, getUserPrefix(credentials) + error.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
@@ -387,6 +394,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
         } catch (final JSONException e) {
             throw new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e, getUserPrefix(credentials) + e.getMessage());
+        } catch (final TokenMgrError error) {
+        	throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, getUserPrefix(credentials) + error.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
@@ -448,6 +457,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             throw new OXMailfilterException(Code.SIEVE_ERROR, e, getUserPrefix(credentials) + e.getMessage());
         } catch (final JSONException e) {
             throw new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e, getUserPrefix(credentials) + e.getMessage());
+        } catch (final TokenMgrError error) {
+        	throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, getUserPrefix(credentials) + error.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
