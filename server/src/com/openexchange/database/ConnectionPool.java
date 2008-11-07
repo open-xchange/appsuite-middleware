@@ -184,6 +184,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
             this.url = url;
             this.info = info;
         }
+
         /**
          * {@inheritDoc}
          */
