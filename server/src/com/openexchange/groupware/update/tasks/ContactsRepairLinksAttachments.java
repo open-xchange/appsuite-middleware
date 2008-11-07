@@ -60,6 +60,7 @@ import java.sql.Statement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.api2.OXException;
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -67,8 +68,6 @@ import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.container.FolderObject;
@@ -77,10 +76,7 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
-import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.SimpleDBProvider;
-import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
@@ -96,7 +92,7 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
-public final class ContactsRepairLinksAttachments implements UpdateTask {
+public class ContactsRepairLinksAttachments implements UpdateTask {
 
     private static final Log LOG = LogFactory.getLog(ContactsRepairLinksAttachments.class);
 
@@ -162,56 +158,74 @@ public final class ContactsRepairLinksAttachments implements UpdateTask {
             stmt = con.createStatement();
             result = stmt.executeQuery(sql);
             Context ctx = null;
-            FolderObject fo = null;
-            OXFolderAccess oxfs = null;
             while (result.next()) {
                 boolean delete = false;
-                int pos = 0;
+                int pos = 1;
                 final int id = result.getInt(pos++);
-                final int fid = result.getInt(pos++);
                 final int cid = result.getInt(pos++);
                 final int pflag = result.getInt(pos++);
                 try {
                     ctx = ContextStorage.getInstance().loadContext(cid);
                     if (pflag == 0) {
-                        Statement tmp =null;
                         try {
-                            oxfs = new OXFolderAccess(con, ctx);
-                            fo = oxfs.getDefaultFolder(ctx.getMailadmin(), FolderObject.CONTACT);
-                            final int folderId = fo.getObjectID();
-                            final ContactSql cs = new ContactMySql(ctx, ctx.getMailadmin());
-                            //System.out.println("MOVIN CONTACT "+id+" CID "+cid);
-                            tmp = con.createStatement();
-                            cs.iFgiveUserContacToAdmin(tmp, id, folderId, ctx);
-                        } catch (final Exception oxee) {
-                            oxee.printStackTrace();
-                            LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!."
-                                    + "This contact will be deleted."
-                                    + "Context "
-                                    + ctx.getContextId()
-                                    + " Folder "
-                                    + fid + " Contact" + id);
-
+                            moveContactToAdmin(con, ctx, id);
+                        } catch (final OXException e) {
+                            LOG.info("Failed moving contact " + id
+                                + " to admin in context " + cid
+                                + ". Removing contact.", e);
                             delete = true;
-                        } finally {
-                            closeSQLStuff(null, tmp);
+                        } catch (final Exception e) {
+                            LOG.info("Failed moving contact " + id
+                                + " to admin in context " + cid
+                                + ". Removing contact.", e);
+                            delete = true;
                         }
                     } else {
+                        LOG.info("Removing private contact " + id + " in context "
+                            + cid + " because its folder does not exist anymore.");
                         delete = true;
                     }
-                } catch (final ContextException ce){
+                } catch (final ContextException ce) {
+                    LOG.info("Removing contact " + id + " in context " + cid
+                        + " because context does not exist anymore.");
                     delete = true;
-                    LOG.info("MARKED CONTACT "+id+" IN CONTEXT "+cid+" TO GET DELETED BECAUSE THE CONTEXT IS GONE");
                 }
                 if (delete) {
-                    //System.out.println("DELETE CONTACT "+id+" IN CONTEXT "+cid+" ");
-                    LOG.info("DELETE CONTACT "+id+" IN CONTEXT "+cid+" BECAUSE THE CONTEXT IS GONE");
-                    stmt.addBatch("DELETE FROM prg_contacts WHERE intfield01 = "+id+" AND cid = "+cid);
+                    deleteContact(con, cid, id);
                 }
             }
-            stmt.executeBatch();
         } finally {
             closeSQLStuff(result, stmt);
+        }
+    }
+
+    private void moveContactToAdmin(final Connection con, Context ctx,
+        final int id) throws SQLException, OXException {
+        Statement tmp = null;
+        try {
+            LOG.info("Trying to move contact " + id+ " to admin in context "
+                + ctx.getContextId() + ".");
+            final int folderId = new OXFolderAccess(con, ctx).getDefaultFolder(
+                ctx.getMailadmin(), FolderObject.CONTACT).getObjectID();
+            final ContactSql cs = new ContactMySql(ctx, ctx.getMailadmin());
+            tmp = con.createStatement();
+            cs.iFgiveUserContacToAdmin(tmp, id, folderId, ctx);
+        } finally {
+            closeSQLStuff(null, tmp);
+        }
+    }
+
+    private void deleteContact(final Connection con, final int cid, final int id)
+        throws SQLException {
+        final String sql = "DELETE FROM prg_contacts WHERE cid=? AND intfield01=?";
+        PreparedStatement stmt2 = null;
+        try {
+            stmt2 = con.prepareStatement(sql);
+            stmt2.setInt(1, cid);
+            stmt2.setInt(2, id);
+            stmt2.execute();
+        } finally {
+            closeSQLStuff(null, stmt2);
         }
     }
 
@@ -249,7 +263,7 @@ public final class ContactsRepairLinksAttachments implements UpdateTask {
             ps.setInt(2, Types.CONTACT);
             result = ps.executeQuery();
             while (result.next()) {
-                int pos = 0;
+                int pos = 1;
                 final int id1 = result.getInt(pos++);
                 final int mod1 = result.getInt(pos++);
                 final int id2 = result.getInt(pos++);
@@ -283,11 +297,12 @@ public final class ContactsRepairLinksAttachments implements UpdateTask {
         PreparedStatement ps = null;
         try {
             ps = con.prepareStatement(sql);
-            ps.setInt(1, id1);
-            ps.setInt(2, id2);
-            ps.setInt(3, mod1);
-            ps.setInt(4, mod2);
-            ps.setInt(5, cid);
+            int pos = 1;
+            ps.setInt(pos++, id1);
+            ps.setInt(pos++, id2);
+            ps.setInt(pos++, mod1);
+            ps.setInt(pos++, mod2);
+            ps.setInt(pos++, cid);
             ps.executeUpdate();
         } finally {
             closeSQLStuff(null, ps);

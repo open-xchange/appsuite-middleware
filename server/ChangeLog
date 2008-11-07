@@ -1,3 +1,7 @@
+* 2008-11-07 - marcus.klein@open-xchange.com
+
+ - Bugfix #12241: Improved performance of update task ContactsRepairLinksAttachments.
+
 * 2008-11-07 - thorben.betten@open-xchange.com
 
  - Bugfix #12186: Catching thrown TokenMgrError on a lexical parsing error
