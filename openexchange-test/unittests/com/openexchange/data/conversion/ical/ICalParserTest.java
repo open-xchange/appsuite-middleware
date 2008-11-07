@@ -104,7 +104,7 @@ public class ICalParserTest extends TestCase {
         
         assertEquals(start, appointment.getStartDate());
         assertEquals(end, appointment.getEndDate());
-        assertEquals("UTC", appointment.getTimezone());
+        assertEquals("UTC", appointment.getTimezoneFallbackUTC());
 
         // UTC
 
@@ -113,7 +113,7 @@ public class ICalParserTest extends TestCase {
 
         assertEquals(start, appointment.getStartDate());
         assertEquals(end, appointment.getEndDate());
-        assertEquals("UTC", appointment.getTimezone());
+        assertEquals("UTC", appointment.getTimezoneFallbackUTC());
 
         // Known TZID
 
@@ -125,7 +125,7 @@ public class ICalParserTest extends TestCase {
 
         assertEquals(recalculate(start, utc , timeZone), appointment.getStartDate());
         assertEquals(recalculate(end, utc, timeZone), appointment.getEndDate());
-        assertEquals(timeZone.getID(), appointment.getTimezone());
+        assertEquals(timeZone.getID(), appointment.getTimezoneFallbackUTC());
 
         // VTIMEZONE
 
@@ -134,7 +134,7 @@ public class ICalParserTest extends TestCase {
 
         assertEquals(D("24/02/1981 01:00"), appointment.getStartDate());
         assertEquals(D("24/02/1981 03:00"), appointment.getEndDate());
-        assertEquals("UTC", appointment.getTimezone());
+        assertEquals("UTC", appointment.getTimezoneFallbackUTC());
     }
 
     public void testDTSTARTAsDateWithoutValue() throws ConversionError {
@@ -159,7 +159,7 @@ public class ICalParserTest extends TestCase {
 
         assertEquals(start, appointment.getStartDate());
         assertEquals(end, appointment.getEndDate());
-        assertEquals("UTC", appointment.getTimezone());
+        assertEquals("UTC", appointment.getTimezoneFallbackUTC());
 
     }
 
@@ -566,7 +566,7 @@ public class ICalParserTest extends TestCase {
             assertTrue("Didn't expect: "+exception+ " Expected one of: "+expectedExceptions, expectedExceptions.remove(exception));
         }
         assertTrue(expectedExceptions.isEmpty());
-        assertEquals("UTC", appointment.getTimezone());
+        assertEquals("UTC", appointment.getTimezoneFallbackUTC());
 
 
     }
