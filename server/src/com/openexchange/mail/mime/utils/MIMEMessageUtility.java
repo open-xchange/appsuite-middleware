@@ -247,7 +247,7 @@ public final class MIMEMessageUtility {
 
 	// private static final String MULTI_SUBTYPE_MIXED = "MIXED";
 
-	private static final String MULTI_SUBTYPE_SIGNED = "SIGNED";
+	// private static final String MULTI_SUBTYPE_SIGNED = "SIGNED";
 
 	/**
 	 * Checks if given multipart contains (file) attachments
@@ -272,16 +272,18 @@ public final class MIMEMessageUtility {
 				return true;
 			}
 			return hasAttachments0(mp);
-		} else if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) {
+		}
+		// TODO: Think about special check for multipart/signed
+		/*if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) {
 			if (mp.getCount() > 2) {
 				return true;
 			}
 			return hasAttachments0(mp);
-		} else if (mp.getCount() > 1) {
+		}*/
+		if (mp.getCount() > 1) {
 			return true;
-		} else {
-			return hasAttachments0(mp);
 		}
+		return hasAttachments0(mp);
 	}
 
 	private static boolean hasAttachments0(final Multipart mp) throws MessagingException, MailException, IOException {
@@ -319,16 +321,18 @@ public final class MIMEMessageUtility {
 					return true;
 				}
 				return hasAttachments0(bodystructure);
-			} else if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(bodystructure.subtype)) {
+			}
+			// TODO: Think about special check for multipart/signed
+			/*if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(bodystructure.subtype)) {
 				if (bodystructure.bodies.length > 2) {
 					return true;
 				}
 				return hasAttachments0(bodystructure);
-			} else if (bodystructure.bodies.length > 1) {
+			}*/
+			if (bodystructure.bodies.length > 1) {
 				return true;
-			} else {
-				return hasAttachments0(bodystructure);
 			}
+			return hasAttachments0(bodystructure);
 		}
 		return false;
 	}
