@@ -94,7 +94,7 @@ public final class MailAccessWatcher {
 					/*
 					 * Start task
 					 */
-					watcherTask = new WatcherTask();
+					watcherTask = new WatcherTask(mailAccesses, LOG);
 					ServerTimer.getTimer().schedule(watcherTask, 1000, MailConfig.getWatcherFrequency());
 					initialized.set(true);
 					if (LOG.isInfoEnabled()) {
@@ -175,11 +175,18 @@ public final class MailAccessWatcher {
 	private static final String INFO_PREFIX3 = "\n\tDONE";
 
 	private static class WatcherTask extends TimerTask {
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.lang.Runnable#run()
-		 */
+
+		private final ConcurrentMap<MailAccess<?, ?>, Long> mailAccesses;
+
+		private final org.apache.commons.logging.Log logger;
+
+		public WatcherTask(final ConcurrentMap<MailAccess<?, ?>, Long> mailAccesses,
+				final org.apache.commons.logging.Log logger) {
+			super();
+			this.mailAccesses = mailAccesses;
+			this.logger = logger;
+		}
+
 		@Override
 		public void run() {
 			try {
@@ -196,7 +203,7 @@ public final class MailAccessWatcher {
 					} else {
 						if ((System.currentTimeMillis() - e.getValue().longValue()) > MailConfig.getWatcherTime()) {
 							sb.setLength(0);
-							LOG.info(sb.append(
+							logger.info(sb.append(
 									INFO_PREFIX.replaceFirst("#N#", String.valueOf(MailConfig.getWatcherTime())))
 									.append(e.getKey().getTrace()).toString());
 							exceededCons.add(e.getKey());
@@ -216,7 +223,7 @@ public final class MailAccessWatcher {
 								sb.append(INFO_PREFIX2).append(mailAccess.toString());
 								mailAccess.close(false);
 								sb.append(INFO_PREFIX3);
-								LOG.info(sb.toString());
+								logger.info(sb.toString());
 							}
 						} finally {
 							mailAccesses.remove(mailAccess);
@@ -224,7 +231,7 @@ public final class MailAccessWatcher {
 					}
 				}
 			} catch (final Exception e) {
-				LOG.error(e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 			}
 		}
 	}
