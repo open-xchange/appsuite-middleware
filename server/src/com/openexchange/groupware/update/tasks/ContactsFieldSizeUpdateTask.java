@@ -240,38 +240,36 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
 		}
 		ResultSet rs = null;
 		try {
-			try {
-				final DatabaseMetaData metadata = writeCon.getMetaData();
-				rs = metadata.getColumns(null, null, sqltable, null);
-				final Map<String, Integer> toChange = new HashMap<String, Integer>(100);
-				final Set<String> toDelete = new HashSet<String>(10);
-				while (rs.next()) {
-					final String name = rs.getString("COLUMN_NAME");
-					if (columnDelete.contains(name)) {
-						/*
-						 * A column that shall be dropped
-						 */
-						toDelete.add(name);
-					} else if (columnRefer.containsKey(name)) {
-						/*
-						 * A column whose VARCHAR size shall possibly be changed
-						 */
-						final int size = rs.getInt("COLUMN_SIZE");
-						final Integer desiredSize = columnRefer.get(name);
-						if (desiredSize.intValue() == size) {
-							LOG.info("FIELD " + sqltable + '.' + name + " WITH SIZE " + size + " IS CORRECT "
-									+ desiredSize);
-						} else {
-							LOG.warn("CHANGE FIELD " + sqltable + '.' + name + " WITH SIZE " + size + " TO NEW SIZE "
-									+ desiredSize);
-							toChange.put(name, desiredSize);
-						}
+			final DatabaseMetaData metadata = writeCon.getMetaData();
+			rs = metadata.getColumns(null, null, sqltable, null);
+			final Map<String, Integer> toChange = new HashMap<String, Integer>(100);
+			final Set<String> toDelete = new HashSet<String>(10);
+			while (rs.next()) {
+				final String name = rs.getString("COLUMN_NAME");
+				if (columnDelete.contains(name)) {
+					/*
+					 * A column that shall be dropped
+					 */
+					toDelete.add(name);
+				} else if (columnRefer.containsKey(name)) {
+					/*
+					 * A column whose VARCHAR size shall possibly be changed
+					 */
+					final int size = rs.getInt("COLUMN_SIZE");
+					final Integer desiredSize = columnRefer.get(name);
+					if (desiredSize.intValue() == size) {
+						LOG.info("FIELD " + sqltable + '.' + name + " WITH SIZE " + size + " IS CORRECT "
+								+ desiredSize);
+					} else {
+						LOG.warn("CHANGE FIELD " + sqltable + '.' + name + " WITH SIZE " + size + " TO NEW SIZE "
+								+ desiredSize);
+						toChange.put(name, desiredSize);
 					}
 				}
-				return new Result(toChange, toDelete);
-			} catch (final SQLException e) {
-				throw EXCEPTION.create(1, e, e.getMessage());
 			}
+			return new Result(toChange, toDelete);
+		} catch (final SQLException e) {
+			throw EXCEPTION.create(1, e, e.getMessage());
 		} finally {
 			closeSQLStuff(rs);
 			Database.back(contextId, true, writeCon);
