@@ -1,3 +1,8 @@
+* 2008-11-07 - choeger@open-xchange.com
+
+ - Bugfix ID#12461 Import servlet does not work
+   config.ini now regenerated with every restart
+
 * 2008-05-08 - choeger@open-xchange.com
 
  - Bugfix ID#11245 config.ini shoudn't be only created if the number of bundle

@@ -465,14 +465,8 @@ ox_update_config_init() {
 	    -n -e 's;,; ;gp' < $cini ) )
     fi
 
-    # check if amount of bundles installed in bundles directory does not
-    # match and if that's the case, generate new config.ini
-    #
-    if [ "${dirbundles[*]}" != "${configbundles[*]}" ]; then
-	echo "updating $cini"
-	cp $cinitemplate $cini
-	echo "osgi.bundles=$(echo ${dirbundles[@]} | sed 's; ;,;g')" >> $cini
-    fi
+    cp $cinitemplate $cini
+    echo "osgi.bundles=$(echo ${dirbundles[@]} | sed 's; ;,;g')" >> $cini
 }
 
 ox_add_hosts_hostip() {
