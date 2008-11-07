@@ -94,7 +94,9 @@ public class SessionWrapper {
         
         private int userid;
         
-        private int contextid;
+        private final int contextid;
+
+        private final boolean b_contextid;
 
         /**
          * @param username
@@ -106,6 +108,7 @@ public class SessionWrapper {
             this.password = password;
             this.userid = userid;
             this.contextid = contextid;
+            b_contextid = true;
         }
 
         /**
@@ -118,6 +121,8 @@ public class SessionWrapper {
             this.username = username;
             this.authname = authname;
             this.password = password;
+            contextid = -1;
+            b_contextid = false;
         }
 
         /**
@@ -180,11 +185,22 @@ public class SessionWrapper {
          * This method returns the right username. If username is null this is the authname otherwise the username
          */
         public final String getRightUsername() {
-            if (null != this.username) {
-                return this.username;
-            } else {
+            if (null == this.username) {
                 return this.authname;
             }
+			return this.username;
+        }
+
+        /**
+         * Gets the string value of context ID if a context ID is present; otherwise "unknown" is returned
+         * 
+         * @return The string value of context ID if a context ID is present; otherwise "unknown" is returned
+         */
+        public final String getContextString() {
+        	if (!b_contextid) {
+        		return "unknown";
+        	}
+        	return String.valueOf(contextid);
         }
         
         /* (non-Javadoc)

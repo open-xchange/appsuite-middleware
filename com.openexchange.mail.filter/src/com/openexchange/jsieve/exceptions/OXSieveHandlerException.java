@@ -48,43 +48,51 @@
  */
 package com.openexchange.jsieve.exceptions;
 
-
+/**
+ * {@link OXSieveHandlerException}
+ * 
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class OXSieveHandlerException extends Exception {
 
-    /**
-     * For serialization
-     */
-    private static final long serialVersionUID = 2990692657778743217L;
+	private static final long serialVersionUID = 2990692657778743217L;
 
-    /**
-     * 
-     */
-    public OXSieveHandlerException() {
+	private final String sieveHost;
 
-    }
+	private final int sieveHostPort;
 
-    /**
-     * @param message
-     */
-    public OXSieveHandlerException(final String message) {
-        super(message);
+	/**
+	 * Initializes a new {@link OXSieveHandlerException}
+	 * 
+	 * @param message
+	 *            The message
+	 * @param sieveHost
+	 *            The sieve host name
+	 * @param sieveHostPort
+	 *            The sieve host port
+	 */
+	public OXSieveHandlerException(final String message, final String sieveHost, final int sieveHostPort) {
+		super(message);
+		this.sieveHost = sieveHost;
+		this.sieveHostPort = sieveHostPort;
+	}
 
-    }
+	/**
+	 * Gets the name of the sieve host for which this exception was thrown
+	 * 
+	 * @return The name of the sieve host for which this exception was thrown
+	 */
+	public String getSieveHost() {
+		return sieveHost;
+	}
 
-    /**
-     * @param cause
-     */
-    public OXSieveHandlerException(final Throwable cause) {
-        super(cause);
-
-    }
-
-    /**
-     * @param message
-     * @param cause
-     */
-    public OXSieveHandlerException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
-
+	/**
+	 * Gets the port of the sieve host for which this exception was thrown
+	 * 
+	 * @return The port of the sieve host for which this exception was thrown
+	 */
+	public int getSieveHostPort() {
+		return sieveHostPort;
+	}
 }

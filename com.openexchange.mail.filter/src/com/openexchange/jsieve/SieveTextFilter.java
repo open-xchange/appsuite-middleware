@@ -103,7 +103,7 @@ public final class SieveTextFilter {
          * @param rules
          * @param require
          */
-        public ClientRulesAndRequire(ArrayList<Rule> rules, HashSet<String> require) {
+        public ClientRulesAndRequire(final ArrayList<Rule> rules, final HashSet<String> require) {
             this.rules = rules;
             this.require = require;
         }
@@ -166,7 +166,7 @@ public final class SieveTextFilter {
          * @param nextuid
          * @param error
          */
-        public NextUidAndError(int nextuid, boolean error) {
+        public NextUidAndError(final int nextuid, final boolean error) {
             this.nextuid = nextuid;
             this.error = error;
         }
@@ -292,7 +292,7 @@ public final class SieveTextFilter {
      *        we must keep the old requires line
      * @return
      */
-    public ClientRulesAndRequire splitClientRulesAndRequire(final ArrayList<Rule> rules, final String flag, boolean error) {
+    public ClientRulesAndRequire splitClientRulesAndRequire(final ArrayList<Rule> rules, final String flag, final boolean error) {
         final ArrayList<Rule> retval = new ArrayList<Rule>();
         final HashSet<String> requires = new HashSet<String>();
         // The flag is checked here because if no flag is given we can omit some checks which increases performance
@@ -589,9 +589,8 @@ public final class SieveTextFilter {
             addPlainTextToRule(wholetext, commentedtext, rulename, rightrule);
             printErrorForUser(new OXMailfilterException(Code.SIEVE_ERROR, errormsg));
             return true;
-        } else {
-            return false;
         }
+		return false;
     }
 
     private List<String> interweaving(final List<OwnType> noncommentedoutput, final List<OwnType> commentedoutput, final ArrayList<Rule> rules) {

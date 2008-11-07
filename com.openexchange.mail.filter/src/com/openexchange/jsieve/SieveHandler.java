@@ -53,6 +53,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -67,10 +68,12 @@ import com.openexchange.jsieve.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.exceptions.OXSieveHandlerInvalidCredentialsException;
 
 /**
- * This class is used to deal with the communication with sieve.
- * For a description of the communication system to sieve see {@see <a href="http://www.ietf.org/internet-drafts/draft-martin-managesieve-07.txt">http://www.ietf.org/internet-drafts/draft-martin-managesieve-07.txt</a>} 
- * @author d7
+ * This class is used to deal with the communication with sieve. For a
+ * description of the communication system to sieve see {@see <a
+ * href="http://www.ietf.org/internet-drafts/draft-martin-managesieve-07.txt"
+ * >http://www.ietf.org/internet-drafts/draft-martin-managesieve-07.txt</a>}
  * 
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public class SieveHandler {
 
@@ -127,6 +130,7 @@ public class SieveHandler {
     private static Log log = LogFactory.getLog(SieveHandler.class);
     
     public class Capabilities {
+
         private Boolean starttls = false;
 
         private String implementation = null;
@@ -238,7 +242,14 @@ public class SieveHandler {
      */
     public void initializeConnection() throws IOException, OXSieveHandlerException, UnsupportedEncodingException, OXSieveHandlerInvalidCredentialsException {
         measureStart();
-        s_sieve = new Socket(sieve_host, sieve_host_port);
+        s_sieve = new Socket();
+        /*
+         * Connect with a connect-timeout of 30sec
+         */
+        s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), 30000);
+        /*
+         * Set timeout to 30sec
+         */
         s_sieve.setSoTimeout(30000);
         bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(),"UTF-8"));
         bos_sieve = new BufferedOutputStream(s_sieve.getOutputStream());
@@ -246,7 +257,7 @@ public class SieveHandler {
         if (getServerWelcome()) {
             log.debug("Got welcome from sieve");
         } else {
-            throw new OXSieveHandlerException("No welcome from server");
+            throw new OXSieveHandlerException("No welcome from server", sieve_host, sieve_host_port);
         }
         measureEnd("getServerWelcome");
         
@@ -263,7 +274,7 @@ public class SieveHandler {
             }
             measureEnd("selectAuth");
         } else {
-            throw new OXSieveHandlerException("The server doesn't suppport PLAIN authentication");
+            throw new OXSieveHandlerException("The server doesn't suppport PLAIN authentication", sieve_host, sieve_host_port);
         }
     }
 
@@ -278,11 +289,11 @@ public class SieveHandler {
      */
     public void setScript(final String script_name, final byte[] script) throws OXSieveHandlerException, IOException, UnsupportedEncodingException {
         if (AUTH == false) {
-            throw new OXSieveHandlerException("Script upload not possible. Auth first.");
+            throw new OXSieveHandlerException("Script upload not possible. Auth first.", sieve_host, sieve_host_port);
         }
 
         if (script == null) {
-            throw new OXSieveHandlerException("Script upload not possible. No Script");
+            throw new OXSieveHandlerException("Script upload not possible. No Script", sieve_host, sieve_host_port);
         }
 
         final String put = SIEVE_PUT + '\"' + script_name + "\" {" + script.length + "+}" + CRLF;
@@ -311,9 +322,9 @@ public class SieveHandler {
                 sb.append(answer);
                 sb.append(CRLF);
             }
-            throw new OXSieveHandlerException(sb.toString());
+            throw new OXSieveHandlerException(sb.toString(), sieve_host, sieve_host_port);
         } else {
-            throw new OXSieveHandlerException("Unknown error occured");
+            throw new OXSieveHandlerException("Unknown error occured", sieve_host, sieve_host_port);
         }
     }
 
@@ -346,7 +357,7 @@ public class SieveHandler {
      */
     public byte[] getScript(final String script_name) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
         if (AUTH == false) {
-            throw new OXSieveHandlerException("Get script not possible. Auth first.");
+            throw new OXSieveHandlerException("Get script not possible. Auth first.", sieve_host, sieve_host_port);
         }
 
         final String get = SIEVE_GET_SCRIPT + "\"" + script_name + "\"" + CRLF;
@@ -386,7 +397,7 @@ public class SieveHandler {
      */
     public ArrayList<String> getScriptList() throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
         if (AUTH == false) {
-            throw new OXSieveHandlerException("List scripts not possible. Auth first.");
+            throw new OXSieveHandlerException("List scripts not possible. Auth first.", sieve_host, sieve_host_port);
         }
 
         final String active = SIEVE_LIST;
@@ -400,7 +411,7 @@ public class SieveHandler {
                 return list;
             }
             if (temp.startsWith(SIEVE_NO)) {
-                throw new OXSieveHandlerException("Sieve has no script list");
+                throw new OXSieveHandlerException("Sieve has no script list", sieve_host, sieve_host_port);
             }
             // Here we strip off the leading and trailing " and the ACTIVE at the
             // end if it occurs. We want a list of the script names only
@@ -411,7 +422,7 @@ public class SieveHandler {
     }
 
     /**
-     * Get the list of active sieveScripts
+     * Get the list of active sieve scripts
      * 
      * @return List of scripts
      * @throws IOException
@@ -420,7 +431,7 @@ public class SieveHandler {
      */
     public String getActiveScript() throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
         if (AUTH == false) {
-            throw new OXSieveHandlerException("List scripts not possible. Auth first.");
+            throw new OXSieveHandlerException("List scripts not possible. Auth first.", sieve_host, sieve_host_port);
         }
 
         final String active = SIEVE_LIST;
@@ -434,7 +445,7 @@ public class SieveHandler {
                 return scriptname;
             }
             if (temp.startsWith(SIEVE_NO)) {
-                throw new OXSieveHandlerException("Sieve has no script list");
+                throw new OXSieveHandlerException("Sieve has no script list", sieve_host, sieve_host_port);
             }
             
             if (temp.matches(".*ACTIVE")) {
@@ -446,7 +457,7 @@ public class SieveHandler {
 
     
     /**
-     * Remove the sieve script. If the script is active it is deactivate before removing
+     * Remove the sieve script. If the script is active it is deactivated before removing
      * 
      * @param script_name
      * @throws IOException
@@ -455,10 +466,10 @@ public class SieveHandler {
      */
     public void remove(final String script_name) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
         if (AUTH == false) {
-            throw new OXSieveHandlerException("Delete a script not possible. Auth first.");
+            throw new OXSieveHandlerException("Delete a script not possible. Auth first.", sieve_host, sieve_host_port);
         }
         if (null == script_name) {
-            throw new OXSieveHandlerException("Script can't be removed");
+            throw new OXSieveHandlerException("Script can't be removed", sieve_host, sieve_host_port);
         }
         
         setScriptStatus(script_name, false);
@@ -472,7 +483,7 @@ public class SieveHandler {
             if (temp.startsWith(SIEVE_OK)) {
                 return;
             } else if (temp.startsWith(SIEVE_NO)) {
-                throw new OXSieveHandlerException("Script can't be removed");
+                throw new OXSieveHandlerException("Script can't be removed", sieve_host, sieve_host_port);
             }
         }
     }
@@ -550,7 +561,7 @@ public class SieveHandler {
             if (temp.endsWith(SIEVE_AUTH_LOGIN_USERNAME)) {
                 break;
             } else if (temp.endsWith(SIEVE_AUTH_FAILD)) {
-                throw new OXSieveHandlerException("can't auth to SIEVE ");
+                throw new OXSieveHandlerException("can't auth to SIEVE ", sieve_host, sieve_host_port);
             }
         }
 
@@ -565,7 +576,7 @@ public class SieveHandler {
             if (temp.endsWith(SIEVE_AUTH_LOGIN_PASSWORD)) {
                 break;
             } else if (temp.endsWith(SIEVE_AUTH_FAILD)) {
-                throw new OXSieveHandlerException("can't auth to SIEVE ");
+                throw new OXSieveHandlerException("can't auth to SIEVE ", sieve_host, sieve_host_port);
             }
         }
 
@@ -581,14 +592,14 @@ public class SieveHandler {
                 AUTH = true;
                 return true;
             } else if (temp.startsWith(SIEVE_AUTH_FAILD)) {
-                throw new OXSieveHandlerException("can't auth to SIEVE ");
+                throw new OXSieveHandlerException("can't auth to SIEVE ", sieve_host, sieve_host_port);
             }
         }
     }
 
     private void activate(final String sieve_script_name) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
         if (AUTH == false) {
-            throw new OXSieveHandlerException("Activate a script not possible. Auth first.");
+            throw new OXSieveHandlerException("Activate a script not possible. Auth first.", sieve_host, sieve_host_port);
         }
 
         final String active = SIEVE_ACTIVE + '\"' + sieve_script_name + '\"' + CRLF;
@@ -600,14 +611,14 @@ public class SieveHandler {
             if (temp.startsWith(SIEVE_OK)) {
                 return;
             } else if (temp.startsWith(SIEVE_NO)) {
-                throw new OXSieveHandlerException("Error while activating script: " + sieve_script_name);
+                throw new OXSieveHandlerException("Error while activating script: " + sieve_script_name, sieve_host, sieve_host_port);
             }
         }
     }
 
     private void deactivate(final String sieve_script_name) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
         if (AUTH == false) {
-            throw new OXSieveHandlerException("Deactivate a script not possible. Auth first.");
+            throw new OXSieveHandlerException("Deactivate a script not possible. Auth first.", sieve_host, sieve_host_port);
         }
         
         boolean scriptactive = false;
@@ -624,7 +635,7 @@ public class SieveHandler {
                 if (temp.startsWith(SIEVE_OK)) {
                     return;
                 } else if (temp.startsWith(SIEVE_NO)) {
-                    throw new OXSieveHandlerException("Error while deactivating script: " + sieve_script_name);
+                    throw new OXSieveHandlerException("Error while deactivating script: " + sieve_script_name, sieve_host, sieve_host_port);
                 }
             }
         }

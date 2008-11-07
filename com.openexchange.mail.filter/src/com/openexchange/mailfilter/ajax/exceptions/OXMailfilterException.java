@@ -52,16 +52,25 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.EnumComponent;
 
+/**
+ * {@link OXMailfilterException}
+ *
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class OXMailfilterException extends AbstractOXException {
 
-    /**
-     * For serialization
-     */
     private static final long serialVersionUID = -4143376197058972709L;
 
     public static enum Code {
-        PROBLEM("%s", Category.CODE_ERROR, 1),
 
+    	/**
+    	 * %s
+    	 */
+    	PROBLEM("%s", Category.CODE_ERROR, 1),
+        /**
+         * %s
+         */
         SESSION_EXPIRED("%s", Category.PERMISSION, 200),
         /**
          * Missing parameter %s
@@ -80,29 +89,29 @@ public class OXMailfilterException extends AbstractOXException {
          */
         PROPERTY_ERROR("Property error: %s", Category.SETUP_ERROR, 4),
         /**
-         * Sieve error: %s
+         * Sieve error: %1$s
          */
-        SIEVE_ERROR("Sieve error: %s", Category.CODE_ERROR, 5),
+        SIEVE_ERROR("Sieve error: %1$s", Category.CODE_ERROR, 5),
         /**
-         * Servlet registration failed
+         * mail filter servlet cannot be registered: %s
          */
         SERVLET_REGISTRATION_FAILED("mail filter servlet cannot be registered: %s", Category.CODE_ERROR, 6),
         /**
-         * Position is not available in the array 
+         * The position where the rule should be added is too big
          */
         POSITION_TOO_BIG("The position where the rule should be added is too big", Category.CODE_ERROR, 7),
         /**
-         * No such id 
+         * A rule with the id %1$s does not exist for user %2$s in context %3$s
          */
-        NO_SUCH_ID("%s A rule with the id %s does not exist", Category.CODE_ERROR, 8),
+        NO_SUCH_ID("A rule with the id %1$s does not exist for user %2$s in context %3$s", Category.CODE_ERROR, 8),
         /**
          * The id is missing inside the update request
          */
         ID_MISSING("The id is missing inside the update request or has a non integer type", Category.CODE_ERROR, 9),
         /**
-         * A server name cannot be found in the server url
+         * A server name cannot be found in the server URL
          */
-        NO_SERVERNAME_IN_SERVERURL("A server name cannot be found in the server url", Category.CODE_ERROR, 10),
+        NO_SERVERNAME_IN_SERVERURL("A server name cannot be found in the server URL", Category.CODE_ERROR, 10),
         /**
          * The login type given in the config file is not a valid one
          */
@@ -120,9 +129,9 @@ public class OXMailfilterException extends AbstractOXException {
          */
         IO_CONNECTION_ERROR("Error in low level connection to sieve server", Category.CODE_ERROR, 14),
         /**
-         * Error while communicating with the sieve server: %1$s
+         * Error while communicating with the sieve server %1$s at port %2$s for user %3$s in context %4$s
          */
-        SIEVE_COMMUNICATION_ERROR("Error while communicating with the sieve server: %1$s", Category.CODE_ERROR, 15),
+        SIEVE_COMMUNICATION_ERROR("Error while communicating with the sieve server %1$s at port %2$s for user %3$s in context %4$s", Category.CODE_ERROR, 15),
         /**
          * Lexical error: %1$s
          */
