@@ -151,7 +151,7 @@ public abstract class DataParser {
         }
 
         final String tmp = jsonObj.getString(name);
-        if (tmp != null && tmp.length() == 0) {
+        if (tmp == null || jsonObj.isNull(name) || tmp.length() == 0) {
             return 0;
         }
 
@@ -176,7 +176,7 @@ public abstract class DataParser {
         }
 
         final String tmp = jsonObj.getString(name);
-        if (tmp != null && tmp.length() == 0) {
+        if (tmp == null || jsonObj.isNull(name) || tmp.length() == 0) {
             return 0;
         }
 
@@ -197,7 +197,7 @@ public abstract class DataParser {
         } catch (final JSONException e) {
             return 0;
         }
-        if (tmp != null && tmp.length() == 0) {
+        if (tmp == null || jsonObj.isNull(name) || tmp.length() == 0) {
             return 0;
         }
         final Parsing parsing = new Parsing() {
