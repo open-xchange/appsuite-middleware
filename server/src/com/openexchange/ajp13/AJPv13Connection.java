@@ -243,7 +243,7 @@ public final class AJPv13Connection {
 	 */
 	public OutputStream getOutputStream() throws IOException {
 		if (outputStream == null) {
-			throw new IOException("Output stream not availalbe");
+			throw new IOException("Output stream not available");
 		}
 		return outputStream;
 	}
