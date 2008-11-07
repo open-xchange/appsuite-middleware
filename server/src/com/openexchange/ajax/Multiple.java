@@ -168,7 +168,7 @@ public class Multiple extends SessionServlet {
 
 	protected static final void parseActionElement(final JSONArray respArr, final JSONArray dataArray, final int pos,
 			final Session session, final Context ctx, final HttpServletRequest req) throws JSONException,
-			AjaxException, OXException {
+			AjaxException {
 		final JSONObject jsonObj = dataArray.getJSONObject(pos);
 
 		final String module;
