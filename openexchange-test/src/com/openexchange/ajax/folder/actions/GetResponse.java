@@ -53,16 +53,21 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.ajax.parser.FolderParser;
+import com.openexchange.api2.OXException;
 
 /**
  * {@link GetResponse}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * 
  */
 public final class GetResponse extends AbstractAJAXResponse {
 
-	
+	private FolderObject folder;
 
 	/**
 	 * Initializes a new {@link GetResponse}
@@ -74,7 +79,16 @@ public final class GetResponse extends AbstractAJAXResponse {
 		super(response);
 	}
 
-	public JSONObject getFolder() {
-		return (JSONObject) getData();
-	}
+	/**
+     * @return the folder
+     * @throws OXJSONException parsing the folder out of the response fails.
+     */
+    public FolderObject getFolder() throws OXJSONException, OXException {
+        if (null == folder) {
+            final FolderObject parsed = new FolderObject();
+            new FolderParser().parse(parsed, (JSONObject) getData());//.parse(parsed, (JSONObject) getData());
+            this.folder = parsed;
+        }
+        return folder;
+    }
 }

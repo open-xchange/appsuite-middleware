@@ -77,6 +77,7 @@ public class UserValues {
     private String trashFolder;
     private String draftsFolder;
     private String sendAddress;
+    private Integer privateInfostoreFolder;
     private Locale locale;
     private int privateAppointmentFolder = -1;
     private int privateContactFolder = -1;
@@ -129,7 +130,16 @@ public class UserValues {
 	    }
 	    return draftsFolder;
 	}
-
+    
+    public int getPrivateInfostoreFolder() throws AjaxException, IOException,
+    SAXException, JSONException {
+	    if (null == privateInfostoreFolder) {
+	    	privateInfostoreFolder = ConfigTools.get(client,
+	            new GetRequest(Tree.PrivateInfostoreFolder)).getInteger();
+	    }
+	    return privateInfostoreFolder.intValue();
+	}
+    
     public String getSendAddress() throws AjaxException, IOException,
     SAXException, JSONException {
     	 if (null == sendAddress) {
