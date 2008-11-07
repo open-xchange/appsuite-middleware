@@ -60,6 +60,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
+import com.openexchange.groupware.contexts.Context;
 
 public class InfostoreQueryCatalog {
 	
@@ -137,6 +138,8 @@ public class InfostoreQueryCatalog {
         }
         return writableFields;
     }
+
+
 
     public static enum Table {
 		INFOSTORE(INFOSTORE_FIELDS, INFOSTORE_FIELDS_SET,"infostore"), 
@@ -278,8 +281,16 @@ public class InfostoreQueryCatalog {
 	public String getDocumentUpdate(final Metadata[] fields) {
 		return buildUpdateWithoutWhere(Table.INFOSTORE.getTablename(), fields, Table.INFOSTORE.getFieldSwitcher()).append(" WHERE cid = ? and id = ? and last_modified <= ?").toString();
 	}
-	
-	public Metadata[] getDocumentFields() {
+
+    public String getNumberOfVersionsQueryForOneDocument() {
+        Table table = Table.INFOSTORE_DOCUMENT;
+        String idColumn = (String)Metadata.ID_LITERAL.doSwitch(table.getFieldSwitcher());
+        StringBuilder builder = new StringBuilder(200);
+        builder.append("SELECT COUNT(infostore_id) AS number_of_versions FROM infostore_document WHERE ").append(idColumn).append(" = ? ").append("AND cid = ? GROUP BY infostore_id");
+        return builder.toString();
+    }
+
+    public Metadata[] getDocumentFields() {
 		return Table.INFOSTORE.getFields();
 	}
 
@@ -288,6 +299,8 @@ public class InfostoreQueryCatalog {
 
         return filterWritable(fields);
     }
+
+
 
     public Metadata[] filterForDocument(final Metadata[] modified) {
 		final List<Metadata> m = new ArrayList<Metadata>();
@@ -718,6 +731,10 @@ public class InfostoreQueryCatalog {
             return lastModified();
         }
 
+        public Object numberOfVersions() {
+            return null;
+        }
+
     }
 		
 	public static final class InfostoreDocumentColumnsSwitch implements MetadataSwitcher{
@@ -812,6 +829,10 @@ public class InfostoreQueryCatalog {
 
         public Object lastModifiedUTC() {
             return lastModified();
+        }
+
+        public Object numberOfVersions() {
+            return null;
         }
     }
 	

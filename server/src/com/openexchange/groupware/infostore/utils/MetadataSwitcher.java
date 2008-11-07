@@ -96,4 +96,6 @@ public interface MetadataSwitcher {
 	public Object filestoreLocation();
 
     public Object lastModifiedUTC();
+
+    public Object numberOfVersions();
 }

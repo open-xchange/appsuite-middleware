@@ -152,4 +152,8 @@ public class GetSwitch implements MetadataSwitcher {
         return metadata.getLastModified();
     }
 
+    public Object numberOfVersions() {
+        return metadata.getNumberOfVersions();
+    }
+
 }

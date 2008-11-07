@@ -84,9 +84,10 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 	private boolean currentVersion;
 	private int colorLabel;
 	private String filespoolPath;
+    private int numberOfVersions;
 
 
-	private Map<String,String> properties = new HashMap<String,String>();
+    private Map<String,String> properties = new HashMap<String,String>();
     private static final String DEFAULT_TYPE = "application/octet-stream";
 
 
@@ -330,5 +331,12 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 	public void setFilestoreLocation(final String string) {
 		setFileSpoolPath(string);
 	}
-	
+
+    public int getNumberOfVersions() {
+        return numberOfVersions;
+    }
+
+    public void setNumberOfVersions(int numberOfVersions) {
+        this.numberOfVersions = numberOfVersions;
+    }
 }

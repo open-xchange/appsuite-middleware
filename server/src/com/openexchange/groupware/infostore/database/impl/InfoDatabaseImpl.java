@@ -506,6 +506,10 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
             return lastModified();
         }
 
+        public Object numberOfVersions() {
+            return null;
+        }
+
     }
 		
 	private static final class InfostoreDocumentColumnsSwitch implements MetadataSwitcher{
@@ -601,6 +605,10 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 
         public Object lastModifiedUTC() {
             return lastModified();
+        }
+
+        public Object numberOfVersions() {
+            return null;
         }
     }
 	

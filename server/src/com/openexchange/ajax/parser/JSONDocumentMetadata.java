@@ -443,12 +443,29 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		return jsonObject.optString(Metadata.FILESTORE_LOCATION_LITERAL.getName());
 	}
 
-	public void setFilestoreLocation(final String string) {
+
+
+    public void setFilestoreLocation(final String string) {
 		try {
 			jsonObject.put(Metadata.FILESTORE_LOCATION_LITERAL.getName(), string);
 		} catch (final JSONException e) {
 			LOG.error("",e);
 		}
 	}
+    
+    public void setNumberOfVersions(int numberOfVersions) {
+        try {
+            jsonObject.put(Metadata.NUMBER_OF_VERSIONS_LITERAL.getName(), numberOfVersions);
+        } catch (JSONException e) {
+            LOG.error("", e);
+        }
+    }
+
+    public int getNumberOfVersions() {
+        if(jsonObject.has(Metadata.NUMBER_OF_VERSIONS_LITERAL.getName())) {
+            return jsonObject.optInt(Metadata.NUMBER_OF_VERSIONS_LITERAL.getName());
+        }
+        return -1;
+    }
 
 }

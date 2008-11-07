@@ -141,6 +141,10 @@ public interface DocumentMetadata extends Serializable{
 
 	public String getFilestoreLocation();
 
+    // virtual
+    public void setNumberOfVersions(int numberOfVersions);
+    public int getNumberOfVersions();
+
 	
 	
 	

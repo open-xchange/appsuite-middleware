@@ -1,3 +1,7 @@
+* 2008-11-07 - francisco.laguna@open-xchange.com
+
+ - Added field number_of_versions (711) to infostore attributes for bug #12427
+
 * 2008-11-07 - marcus.klein@open-xchange.com
 
  - Bugfix #12241: Improved performance of update task ContactsRepairLinksAttachments.

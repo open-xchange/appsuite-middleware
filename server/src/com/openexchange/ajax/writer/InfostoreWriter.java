@@ -330,6 +330,11 @@ public class InfostoreWriter extends TimedWriter {
             writeInteger(dm.getLastModified().getTime());
             return null;
         }
+
+        public Object numberOfVersions() {
+            writeInteger(dm.getNumberOfVersions());
+            return null;
+        }
     }
 
 	@Override

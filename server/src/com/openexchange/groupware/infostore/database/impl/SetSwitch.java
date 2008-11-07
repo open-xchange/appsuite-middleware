@@ -226,4 +226,9 @@ public class SetSwitch implements MetadataSwitcher{
        return lastModified();
     }
 
+    public Object numberOfVersions() {
+        impl.setNumberOfVersions(((Integer)value).intValue());
+        return null;
+    }
+
 }

@@ -215,7 +215,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			throw EXCEPTIONS.create(0);
 		}
 		
-		return addLocked(load(id,version,ctx), ctx, user, userConfig);
+		return addNumberOfVersions(addLocked(load(id,version,ctx), ctx, user, userConfig), ctx);
 	}
 
 	private DocumentMetadata load(final int id, final int version, final Context ctx) throws OXException {
@@ -358,7 +358,29 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		}
 	}
 
-	@OXThrows(category = Category.INTERNAL_ERROR, desc = "The system couldn't iterate the result dataset. This can have numerous exciting causes.", exceptionId = 14, msg = "Could not iterate result")
+    @OXThrows(category = Category.INTERNAL_ERROR, desc = "The system couldn't iterate the result dataset. This can have numerous exciting causes.", exceptionId = 44, msg = "Could not iterate result")
+	private Delta addNumberOfVersions(final Delta delta, final Context ctx) throws OXException {
+		try {
+			return new NumberOfVersionsDelta(delta, ctx);
+		} catch (final SearchIteratorException e) {
+			throw EXCEPTIONS.create(44,e);
+		}
+	}
+
+    @OXThrows(category = Category.INTERNAL_ERROR, desc = "The system couldn't iterate the result dataset. This can have numerous exciting causes.", exceptionId = 43, msg = "Could not iterate result")
+	private TimedResult addNumberOfVersions(final TimedResult tr, final Context ctx) throws InfostoreException {
+        try {
+            return new NumberOfVersionsTimedResult(tr, ctx);
+        } catch (SearchIteratorException x) {
+            throw EXCEPTIONS.create(43, x);
+        } catch (InfostoreException x) {
+            throw x;
+        } catch (OXException e) {
+            throw new InfostoreException(e);
+        }
+    }
+
+    @OXThrows(category = Category.INTERNAL_ERROR, desc = "The system couldn't iterate the result dataset. This can have numerous exciting causes.", exceptionId = 14, msg = "Could not iterate result")
 	private TimedResult addLocked(final TimedResult tr, final Context ctx, final User user,
 			final UserConfiguration userConfig) throws OXException {
 		try {
@@ -368,7 +390,32 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		}
 	}
 
-	private DocumentMetadata addLocked(final DocumentMetadata document, final Context ctx,
+    @OXThrows(category = Category.INTERNAL_ERROR, desc = "The query to cound the versions in a document failed.", exceptionId = 42, msg = "Could not determine number of versions for infoitem %s in context %s. Invalid Query: %s")
+    private DocumentMetadata addNumberOfVersions(final DocumentMetadata document, Context ctx) throws InfostoreException {
+
+        try {
+            return performQuery(ctx, QUERIES.getNumberOfVersionsQueryForOneDocument(), new ResultProcessor<DocumentMetadata>() {
+
+                public DocumentMetadata process(ResultSet rs) throws SQLException {
+                    if(!rs.next()) {
+                        LOG.error("Infoitem disappeared when trying to count versions");
+                        return document;
+                    }
+                    int numberOfVersions = rs.getInt(1);
+                    numberOfVersions -= 1; // ignore version 0 in count
+                    document.setNumberOfVersions(numberOfVersions);
+                    return document;
+                }
+            }, document.getId(), ctx.getContextId());
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            throw EXCEPTIONS.create(42, e, document.getId(), ctx.getContextId(), QUERIES.getNumberOfVersionsQueryForOneDocument());
+        } catch (TransactionException e) {
+            throw new InfostoreException(e);
+        }
+    }
+
+    private DocumentMetadata addLocked(final DocumentMetadata document, final Context ctx,
 			final User user, final UserConfiguration userConfig) throws OXException {
 		final List<Lock> locks = lockManager.findLocks(document.getId(), ctx, user,
 				userConfig);
@@ -382,15 +429,28 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		return document;
 	}
 
-	private SearchIterator<?> lockedUntilIterator(final SearchIterator<?> iter,
-			final Context ctx, final User user, final UserConfiguration userConfig)
-			throws SearchIteratorException, OXException {
-		final List<DocumentMetadata> list = new ArrayList<DocumentMetadata>();
+    private SearchIterator<?> numberOfVersionsIterator(SearchIterator<?> iter, Context ctx) throws OXException, SearchIteratorException {
+        final List<DocumentMetadata> list = new ArrayList<DocumentMetadata>();
 		while (iter.hasNext()) {
 			final DocumentMetadata m = (DocumentMetadata) iter.next();
 			// addLocked(m, ctx, user, userConfig);
 			list.add(m);
 		}
+        for (final DocumentMetadata m : list) {
+			addNumberOfVersions(m, ctx);
+		}
+        return new SearchIteratorAdapter(list.iterator());
+    }
+
+    private SearchIterator<?> lockedUntilIterator(final SearchIterator<?> iter,
+			final Context ctx, final User user, final UserConfiguration userConfig)
+		 throws SearchIteratorException, OXException {
+        final List<DocumentMetadata> list = new ArrayList<DocumentMetadata>();
+        while (iter.hasNext()) {
+            final DocumentMetadata m = (DocumentMetadata) iter.next();
+            // addLocked(m, ctx, user, userConfig);
+            list.add(m);
+        }
 		/*
 		 * Moving addLock() outside of iterator's loop to avoid a duplicate
 		 * connection fetch from DB pool since first invocation of hasNext()
@@ -583,7 +643,30 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		}
 	}
 
-	// FIXME Move 2 query builder
+    protected <T> T  performQuery(Context ctx, String query, ResultProcessor<T> rsp, Object...args) throws SQLException, TransactionException {
+        Connection readCon = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            readCon = getReadConnection(ctx);
+            stmt = readCon.prepareStatement(query);
+            for(int i = 0; i < args.length; i++) {
+                stmt.setObject(i+1, args[i]);   
+            }
+
+            rs = stmt.executeQuery();
+
+            return rsp.process(rs);
+        } finally {
+            close(stmt, rs);
+            if(readCon != null) {
+                releaseReadConnection(ctx, readCon);
+            }
+        }
+    }
+
+    // FIXME Move 2 query builder
 	private int getNextVersionNumberForInfostoreObject(final int cid,
 			final int infostore_id, final Connection con) throws SQLException {
 		int retval = 0;
@@ -1252,12 +1335,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			onlyOwn = true;
 		}
 		boolean addLocked = false;
-		for (final Metadata m : columns) {
+		boolean addNumberOfVersions = false;
+        for (final Metadata m : columns) {
 			if (m == Metadata.LOCKED_UNTIL_LITERAL) {
 				addLocked = true;
 				break;
 			}
-		}
+            if(m == Metadata.NUMBER_OF_VERSIONS_LITERAL) {
+                addNumberOfVersions = true;
+                break;
+            }
+        }
 		
 		InfostoreIterator iter = null;
 		if(onlyOwn) {
@@ -1265,11 +1353,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		} else {
 			iter = InfostoreIterator.documents(folderId, columns, sort, order, getProvider(), ctx);	
 		}
-		final TimedResult tr = new TimedResultImpl(iter, System.currentTimeMillis());
+		TimedResult tr = new TimedResultImpl(iter, System.currentTimeMillis());
 		if (addLocked) {
-			return addLocked(tr, ctx, user, userConfig);
+			tr = addLocked(tr, ctx, user, userConfig);
 		}
-		return tr;
+        if (addNumberOfVersions) {
+            tr = addNumberOfVersions(tr, ctx);
+        }
+        return tr;
 	}
 
 	public TimedResult getVersions(final int id, final Context ctx, final User user,
@@ -1332,13 +1423,16 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			throw EXCEPTIONS.create(9);
 		}
 		final InfostoreIterator iter = InfostoreIterator.list(ids, columns, getProvider(), ctx);	
-		final TimedResult tr = new TimedResultImpl(iter, System.currentTimeMillis());
+		TimedResult tr = new TimedResultImpl(iter, System.currentTimeMillis());
 		
 		for(final Metadata m : columns) {
 			if(m == Metadata.LOCKED_UNTIL_LITERAL) {
-				return addLocked(tr, ctx, user, userConfig);
+				tr = addLocked(tr, ctx, user, userConfig);
 			}
-		}
+            if(m == Metadata.NUMBER_OF_VERSIONS_LITERAL) {
+                tr = addNumberOfVersions(tr, ctx);
+            }
+        }
 		return tr;
 		
 	}
@@ -1363,13 +1457,18 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		} else if (isperm.getReadPermission() == EffectivePermission.READ_OWN_OBJECTS) {
 			onlyOwn = true;
 		}
-		boolean addLocked = true;
-		for (final Metadata m : columns) {
+		boolean addLocked = false;
+        boolean addNumberOfVersions = false;
+        for (final Metadata m : columns) {
 			if (m == Metadata.LOCKED_UNTIL_LITERAL) {
 				addLocked = true;
 				break;
 			}
-		}
+            if (m == Metadata.NUMBER_OF_VERSIONS_LITERAL) {
+                addNumberOfVersions = true;
+                break;
+			}
+        }
 		
 		final DBProvider reuse = new ReuseReadConProvider(getProvider());
 		
@@ -1391,13 +1490,16 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			}
 		}
 		
-		final Delta delta = new DeltaImpl(newIter, modIter, (ignoreDeleted ? SearchIteratorAdapter.createEmptyIterator() : delIter), System.currentTimeMillis());
+		Delta delta = new DeltaImpl(newIter, modIter, (ignoreDeleted ? SearchIteratorAdapter.createEmptyIterator() : delIter), System.currentTimeMillis());
 		
 		if (addLocked) {
-			return addLocked(delta, ctx,
+			delta = addLocked(delta, ctx,
 					user, userConfig);
 		}
-		return delta;
+        if (addNumberOfVersions) {
+            delta = addNumberOfVersions(delta, ctx);
+        }
+        return delta;
 	}
 
 	@OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 11, msg = "You do not have sufficient permissions to read objects in this folder.")
@@ -1581,7 +1683,31 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		return UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
 	}
 
-	private final class LockTimedResult implements TimedResult {
+    private final class NumberOfVersionsTimedResult implements TimedResult {
+
+		private final long sequenceNumber;
+
+		private final SearchIterator results;
+
+		public NumberOfVersionsTimedResult(final TimedResult delegate, final Context ctx) throws SearchIteratorException,
+				OXException {
+			sequenceNumber = delegate.sequenceNumber();
+
+			this.results = numberOfVersionsIterator(delegate.results(), ctx);
+		}
+
+		public SearchIterator results() {
+			return results;
+		}
+
+		public long sequenceNumber() {
+			return sequenceNumber;
+		}
+
+	}
+
+
+    private final class LockTimedResult implements TimedResult {
 
 		private final long sequenceNumber;
 
@@ -1658,4 +1784,57 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		}
 
 	}
+
+    private final class NumberOfVersionsDelta implements Delta {
+
+		private final long sequenceNumber;
+
+		private final SearchIterator newIter;
+
+		private final SearchIterator modified;
+
+		private SearchIterator deleted;
+
+		public NumberOfVersionsDelta(final Delta delegate, final Context ctx) throws SearchIteratorException,
+				OXException {
+			final SearchIterator deleted = delegate.getDeleted();
+			if(null != deleted) {
+				this.deleted = numberOfVersionsIterator(deleted, ctx);
+			}
+			this.modified = numberOfVersionsIterator(delegate.getModified(), ctx);
+			this.newIter = numberOfVersionsIterator(delegate.getNew(), ctx);
+			this.sequenceNumber = delegate.sequenceNumber();
+		}
+
+		public SearchIterator getDeleted() {
+			return deleted;
+		}
+
+		public SearchIterator getModified() {
+			return modified;
+		}
+
+		public SearchIterator getNew() {
+			return newIter;
+		}
+
+		public SearchIterator results() {
+			return new CombinedSearchIterator(newIter, modified);
+		}
+
+		public long sequenceNumber() {
+			return sequenceNumber;
+		}
+
+		public void close() throws SearchIteratorException {
+			newIter.close();
+			modified.close();
+			deleted.close();
+		}
+
+	}
+
+    private static interface ResultProcessor<T> {
+        public T process(ResultSet rs) throws SQLException;
+    }
 }

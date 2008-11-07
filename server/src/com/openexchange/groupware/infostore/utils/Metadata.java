@@ -78,7 +78,8 @@ public class Metadata {
 	public static final int FILE_MD5SUM = 708;
 	public static final int VERSION_COMMENT = 709;
 	public static final int CURRENT_VERSION = 710;
-	public static final int COLOR_LABEL = 102;
+    public static final int NUMBER_OF_VERSIONS = 711;
+    public static final int COLOR_LABEL = 102;
     public static final int LAST_MODIFIED_UTC = 6;
 
 
@@ -105,7 +106,7 @@ public class Metadata {
 	public static final Metadata COLOR_LABEL_LITERAL = new Metadata(COLOR_LABEL,"color_label");
 	public static final Metadata FILESTORE_LOCATION_LITERAL = new Metadata(FILESTORE_LOCATION,"filestore_location");
     public static final Metadata LAST_MODIFIED_UTC_LITERAL = new Metadata(LAST_MODIFIED_UTC, "last_modified_utc");
-
+    public static final Metadata NUMBER_OF_VERSIONS_LITERAL = new Metadata(NUMBER_OF_VERSIONS, "number_of_versions");
 
 
     public static final Metadata[] VALUES_ARRAY = new Metadata[]{
@@ -131,7 +132,8 @@ public class Metadata {
 		CURRENT_VERSION_LITERAL,
 		COLOR_LABEL_LITERAL,
 		FILESTORE_LOCATION_LITERAL,
-        LAST_MODIFIED_UTC_LITERAL
+        LAST_MODIFIED_UTC_LITERAL,
+        NUMBER_OF_VERSIONS_LITERAL
 
     };
 	
@@ -156,7 +158,8 @@ public class Metadata {
 		VERSION_COMMENT_LITERAL,
 		CURRENT_VERSION_LITERAL,
 		COLOR_LABEL_LITERAL,
-        LAST_MODIFIED_UTC_LITERAL
+        LAST_MODIFIED_UTC_LITERAL,
+        NUMBER_OF_VERSIONS_LITERAL
     };
 	
 	public static final List<Metadata> VALUES = Collections.unmodifiableList(Arrays.asList(VALUES_ARRAY));
@@ -204,6 +207,7 @@ public class Metadata {
 		case COLOR_LABEL: return COLOR_LABEL_LITERAL;
 		case FILESTORE_LOCATION : return FILESTORE_LOCATION_LITERAL;
         case LAST_MODIFIED_UTC : return LAST_MODIFIED_UTC_LITERAL;
+        case NUMBER_OF_VERSIONS : return NUMBER_OF_VERSIONS_LITERAL;
         default : return null;
 		}
 	}
@@ -242,6 +246,7 @@ public class Metadata {
 		case COLOR_LABEL: return switcher.colorLabel();
 		case FILESTORE_LOCATION : return switcher.filestoreLocation();
         case LAST_MODIFIED_UTC : return switcher.lastModifiedUTC();
+        case NUMBER_OF_VERSIONS : return switcher.numberOfVersions();
         default : return null;
 		}
 	}
