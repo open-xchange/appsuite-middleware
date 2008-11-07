@@ -90,7 +90,7 @@ public abstract class MailFolderStorage {
 	 *            The fullname
 	 * @return The corresponding instance of {@link MailFolder}
 	 * @throws MailException
-	 *             If folder could not be fetched
+	 *             If either folder does not exist or could not be fetched
 	 */
 	public abstract MailFolder getFolder(final String fullname) throws MailException;
 
@@ -110,7 +110,8 @@ public abstract class MailFolderStorage {
 	 *            <code>true</code>.
 	 * @return An array of {@link MailFolder} representing the subfolders
 	 * @throws MailException
-	 *             If subfolders cannot be delivered
+	 *             If either parent folder does not exist or its subfolders
+	 *             cannot be delivered
 	 */
 	public abstract MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException;
 
@@ -140,6 +141,7 @@ public abstract class MailFolderStorage {
 
 	/**
 	 * Creates a new mail folder with attributes taken from given mail folder
+	 * description
 	 * 
 	 * @param toCreate
 	 *            The mail folder to create
@@ -151,7 +153,7 @@ public abstract class MailFolderStorage {
 
 	/**
 	 * Updates an existing mail folder identified through given fullname. All
-	 * attributes set in given mail folder parameter are applied.
+	 * attributes set in given mail folder description are applied.
 	 * <p>
 	 * The currently known attributes that make sense being updated are:
 	 * <ul>
@@ -178,7 +180,7 @@ public abstract class MailFolderStorage {
 	 *            The mail folder to update containing only the modified fields
 	 * @return The fullname of the updated mail folder
 	 * @throws MailException
-	 *             If folder cannot be updated
+	 *             If either folder does not exist or cannot be updated
 	 */
 	public abstract String updateFolder(String fullname, MailFolderDescription toUpdate) throws MailException;
 
@@ -199,7 +201,7 @@ public abstract class MailFolderStorage {
 	 *            The new fullname to move to
 	 * @return The new fullname where the folder has been moved
 	 * @throws MailException
-	 *             If folder cannot be moved
+	 *             If either folder does not exist or cannot be moved
 	 */
 	public abstract String moveFolder(String fullname, String newFullname) throws MailException;
 
@@ -222,7 +224,7 @@ public abstract class MailFolderStorage {
 	 *            The new name
 	 * @return The new fullname
 	 * @throws MailException
-	 *             If folder cannot be renamed
+	 *             If either folder does not exist or cannot be renamed
 	 */
 	public String renameFolder(final String fullname, final String newName) throws MailException {
 		final MailFolder folder = getFolder(fullname);
@@ -247,7 +249,7 @@ public abstract class MailFolderStorage {
 	 *            The fullname of the mail folder to delete
 	 * @return The fullname of the deleted mail folder
 	 * @throws MailException
-	 *             If mail folder cannot be deleted
+	 *             If either folder does not exist or cannot be deleted
 	 */
 	public String deleteFolder(final String fullname) throws MailException {
 		return deleteFolder(fullname, false);
@@ -277,7 +279,7 @@ public abstract class MailFolderStorage {
 	 *            Whether to delete permanently or to backup into trash folder
 	 * @return The fullname of the deleted mail folder
 	 * @throws MailException
-	 *             If mail folder cannot be deleted
+	 *             If either folder does not exist or cannot be deleted
 	 */
 	public abstract String deleteFolder(String fullname, boolean hardDelete) throws MailException;
 
@@ -288,7 +290,8 @@ public abstract class MailFolderStorage {
 	 *            The fullname of the mail folder whose content should be
 	 *            cleared
 	 * @throws MailException
-	 *             If folder's content cannot be cleared
+	 *             If either folder does not exist or its content cannot be
+	 *             cleared
 	 */
 	public void clearFolder(final String fullname) throws MailException {
 		clearFolder(fullname, false);
@@ -303,7 +306,8 @@ public abstract class MailFolderStorage {
 	 * @param hardDelete
 	 *            Whether to delete permanently or to backup into trash folder
 	 * @throws MailException
-	 *             If folder's content cannot be cleared
+	 *             If either folder does not exist or its content cannot be
+	 *             cleared
 	 */
 	public abstract void clearFolder(String fullname, boolean hardDelete) throws MailException;
 
@@ -318,7 +322,7 @@ public abstract class MailFolderStorage {
 	 * @return All occurring folders in reverse order as an array of
 	 *         {@link MailFolder} instances.
 	 * @throws MailException
-	 *             If path cannot be determined
+	 *             If either folder does not exist or path cannot be determined
 	 */
 	public MailFolder[] getPath2DefaultFolder(final String fullname) throws MailException {
 		if (fullname.equals(MailFolder.DEFAULT_FOLDER_ID)) {
@@ -344,7 +348,8 @@ public abstract class MailFolderStorage {
 	 *            used)
 	 * @return The quota of STORAGE resource
 	 * @throws MailException
-	 *             If quota limit and/or quote usage cannot be determined
+	 *             If either folder does not exist or quota limit and/or quote
+	 *             usage cannot be determined
 	 */
 	public Quota getStorageQuota(final String folder) throws MailException {
 		return getQuotas(folder, STORAGE)[0];
@@ -361,7 +366,8 @@ public abstract class MailFolderStorage {
 	 *            used)
 	 * @return The quota of MESSAGE resource
 	 * @throws MailException
-	 *             If quota limit and/or quote usage cannot be determined
+	 *             If either folder does not exist or quota limit and/or quote
+	 *             usage cannot be determined
 	 */
 	public Quota getMessageQuota(final String folder) throws MailException {
 		return getQuotas(folder, MESSAGE)[0];
@@ -382,7 +388,8 @@ public abstract class MailFolderStorage {
 	 *            The desired quota resource types
 	 * @return The quotas for specified resource types
 	 * @throws MailException
-	 *             If quota limit and/or quote usage cannot be determined
+	 *             If either folder does not exist or quota limit and/or quote
+	 *             usage cannot be determined
 	 */
 	public abstract Quota[] getQuotas(String folder, Quota.Type[] types) throws MailException;
 
