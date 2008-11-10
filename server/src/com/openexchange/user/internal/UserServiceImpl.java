@@ -125,4 +125,10 @@ public final class UserServiceImpl implements UserService {
 		}
 	}
 
+    /**
+     * {@inheritDoc}
+     */
+    public boolean authenticate(final User user, final String password) throws UserException {
+        return UserStorage.authenticate(user, password);
+    }
 }

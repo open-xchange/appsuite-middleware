@@ -49,40 +49,34 @@
 
 package com.openexchange.authentication.database.osgi;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.util.tracker.ServiceTracker;
 
-import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.database.impl.DatabaseAuthentication;
+import com.openexchange.context.ContextService;
+import com.openexchange.user.UserService;
 
 public class Activator implements BundleActivator {
 	
-	private static transient final Log LOG = LogFactory.getLog(Activator.class);
+	private ServiceTracker tracker;
 
 	/**
-	 * Reference to the service registration.
-	 */
-	private ServiceRegistration registration;
-
-    /**
 	 * {@inheritDoc}
 	 */
 	public void start(final BundleContext context) throws Exception {
-		LOG.info("starting bundle: com.openexchange.authentication.database");
-
-	    registration = context.registerService(AuthenticationService.class.getName(),
-	        new DatabaseAuthentication(), null);
+	    final Filter filter = context.createFilter("(|("+ Constants.OBJECTCLASS
+	        + '=' + ContextService.class.getName() + ")("
+	        + Constants.OBJECTCLASS + '=' + UserService.class.getName() + "))");
+	    tracker = new ServiceTracker(context, filter, new AuthenticationRegisterer(context));
+	    tracker.open();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void stop(final BundleContext context) throws Exception {
-		LOG.info("stopping bundle: com.openexchange.authentication.database");
-		
-	    registration.unregister();
+	    tracker.close();
 	}
 }

@@ -187,14 +187,6 @@ public abstract class ContextStorage {
     protected abstract void shutDown() throws ContextException;
 
     /**
-     * Releases all resources associated with the implementation of this context
-     * storage.
-     */
-    public void close() {
-        // Do nothing because we use a singleton implementation.
-    }
-
-    /**
      * Initialization.
      * @throws ContextException if initialization of contexts fails.
      */

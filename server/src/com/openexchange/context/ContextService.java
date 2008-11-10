@@ -117,10 +117,4 @@ public interface ContextService {
 	 *             if reading the contexts fails.
 	 */
 	public abstract List<Integer> getAllContextIds() throws ContextException;
-
-	/**
-	 * Releases all resources associated with the implementation of this context
-	 * storage.
-	 */
-	public void close();
 }

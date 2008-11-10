@@ -55,13 +55,13 @@ import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.authentication.LoginException;
+import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
-import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.user.UserService;
 
 /**
  * This implementation authenticates the user against the database.
@@ -69,11 +69,18 @@ import com.openexchange.groupware.ldap.UserStorage;
  */
 public class DatabaseAuthentication implements AuthenticationService {
 
+    private final ContextService contextService;
+
+    private final UserService userService;
+
     /**
      * Default constructor.
      */
-    public DatabaseAuthentication() {
+    public DatabaseAuthentication(final ContextService contextService,
+        final UserService userService) {
         super();
+        this.contextService = contextService;
+        this.userService = userService;
     }
 
     /**
@@ -86,27 +93,23 @@ public class DatabaseAuthentication implements AuthenticationService {
             throw INVALID_CREDENTIALS.create();
         }
         final String[] splitted = split(loginInfo.getUsername());
-        final ContextStorage ctxStor = ContextStorage.getInstance();
         try {
-            final int ctxId = ctxStor.getContextId(splitted[0]);
+            final int ctxId = contextService.getContextId(splitted[0]);
             if (ContextStorage.NOT_FOUND == ctxId) {
                 throw INVALID_CREDENTIALS.create();
             }
-            final Context ctx = ctxStor.getContext(ctxId);
-            final UserStorage userStor = UserStorage.getInstance();
+            final Context ctx = contextService.getContext(ctxId);
             final int userId;
             try {
-                userId = userStor.getUserId(splitted[1], ctx);
-            } catch (LdapException e) {
+                userId = userService.getUserId(splitted[1], ctx);
+            } catch (final UserException e) {
                 throw INVALID_CREDENTIALS.create();
             }
-            final User user = userStor.getUser(userId, ctx);
-            if (!UserStorage.authenticate(user, password)) {
+            final User user = userService.getUser(userId, ctx);
+            if (!userService.authenticate(user, password)) {
                 throw INVALID_CREDENTIALS.create();
             }
         } catch (final ContextException e) {
-            throw new LoginException(e);
-        } catch (final LdapException e) {
             throw new LoginException(e);
         } catch (final UserException e) {
             throw new LoginException(e);

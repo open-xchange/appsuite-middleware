@@ -166,4 +166,13 @@ public interface UserService {
 	 */
 	public void invalidateUser(Context ctx, int userId) throws UserException;
 
+    /**
+     * Authenticates the given password against the given user object. 
+     * @param user user that password is compared with given one.
+     * @param password password to check.
+     * @return <code>true</code> if the password matches.
+     * @throws UserException if password check mechanism has problems.
+     */
+    public boolean authenticate(User user, String password) throws UserException;
+
 }

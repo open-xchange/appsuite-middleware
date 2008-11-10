@@ -110,14 +110,6 @@ public class SingleConRdbContextStorage extends ContextStorage {
      * {@inheritDoc}
      */
     @Override
-	public void close() {
-        // Nothing to do.
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
 	public int getContextId(final String loginInfo) throws ContextException {
         int contextId = NOT_FOUND;
         PreparedStatement stmt = null;

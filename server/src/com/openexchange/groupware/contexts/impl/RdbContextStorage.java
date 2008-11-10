@@ -108,14 +108,6 @@ public class RdbContextStorage extends ContextStorage {
      * {@inheritDoc}
      */
     @Override
-	public void close() {
-        // Nothing to do.
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
 	public int getContextId(final String loginInfo) throws ContextException {
         Connection con = null;
         try {

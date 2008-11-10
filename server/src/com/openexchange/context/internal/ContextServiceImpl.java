@@ -71,10 +71,6 @@ public final class ContextServiceImpl implements ContextService {
 		super();
 	}
 
-	public void close() {
-		ContextStorage.getInstance().close();
-	}
-
 	public List<Integer> getAllContextIds() throws ContextException {
 		return ContextStorage.getInstance().getAllContextIds();
 	}

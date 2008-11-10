@@ -111,14 +111,6 @@ public class CachingContextStorage extends ContextStorage {
      * {@inheritDoc}
      */
     @Override
-    public void close() {
-        persistantImpl.close();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public int getContextId(final String loginInfo) throws ContextException {
     	final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
     	if (null == cacheService) {
