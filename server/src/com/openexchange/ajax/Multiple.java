@@ -63,16 +63,7 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.ajax.request.AppointmentRequest;
-import com.openexchange.ajax.request.ContactRequest;
-import com.openexchange.ajax.request.FolderRequest;
-import com.openexchange.ajax.request.GroupRequest;
-import com.openexchange.ajax.request.InfostoreRequest;
-import com.openexchange.ajax.request.JSONSimpleRequest;
-import com.openexchange.ajax.request.MailRequest;
-import com.openexchange.ajax.request.ReminderRequest;
-import com.openexchange.ajax.request.ResourceRequest;
-import com.openexchange.ajax.request.TaskRequest;
+import com.openexchange.ajax.request.*;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
@@ -110,7 +101,9 @@ public class Multiple extends SessionServlet {
 
 	protected static final String MODULE_FOLDER = "folder";
 
-	private static final String ATTRIBUTE_MAIL_INTERFACE = "mi";
+    protected static final String MODULE_QUOTA = "quota";
+
+    private static final String ATTRIBUTE_MAIL_INTERFACE = "mi";
 
 	private static final String ATTRIBUTE_MAIL_REQUEST = "mr";
 
@@ -389,7 +382,10 @@ public class Multiple extends SessionServlet {
 					ResponseWriter.writeException(e, jsonWriter);
 					jsonWriter.endObject();
 				}
-			} else if (MODULE_FOLDER.equals(module)) {
+            } else if (MODULE_QUOTA.equals(module)) {
+                final QuotaRequest quotaRequest = new QuotaRequest(session, ctx, jsonWriter);
+                quotaRequest.action(action);
+            } else if (MODULE_FOLDER.equals(module)) {
 				writeMailRequest(req);
 				final FolderRequest folderequest = new FolderRequest(session, ctx, jsonWriter);
 				try {
