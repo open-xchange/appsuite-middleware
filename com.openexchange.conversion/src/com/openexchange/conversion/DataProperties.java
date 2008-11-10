@@ -52,11 +52,10 @@ package com.openexchange.conversion;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
- * {@link DataProperties} - Provides constants for {@link Properties properties}
- * obtained by {@link DataSource#getProperties()}
+ * {@link DataProperties} - Container for data properties like content type,
+ * version, character set, name , size, etc.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
