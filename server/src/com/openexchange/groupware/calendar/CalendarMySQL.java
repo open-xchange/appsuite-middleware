@@ -1710,7 +1710,15 @@ class CalendarMySQL implements CalendarSqlImp {
 
 		CalendarDataObject clone = null;
 
-		if (rec_action == CalendarRecurringCollection.CHANGE_RECURRING_TYPE) {
+		boolean changeMasterTime = checkRecurrenceMasterTimeUpdate(cdao, edao);
+
+		//Reset all exceptions (change and delete)
+		if(changeMasterTime) {
+            cdao.setExceptions(null);
+            cdao.setDelExceptions(null);
+		}
+		
+		if (rec_action == CalendarRecurringCollection.CHANGE_RECURRING_TYPE || changeMasterTime) {
 			if (edao.getRecurrenceID() > 0 && edao.getObjectID() != edao.getRecurrenceID()) {
 				throw new OXCalendarException(OXCalendarException.Code.INVALID_RECURRENCE_TYPE_CHANGE, new Object[0]);
 			}
@@ -2065,7 +2073,40 @@ class CalendarMySQL implements CalendarSqlImp {
 		return null;
 	}
 
-	private final void updateParticipants(final CalendarDataObject cdao, final CalendarDataObject edao, final int uid, final int cid, final Connection writecon, final MBoolean cup) throws SQLException, OXException, LdapException {
+	/**
+	 * Checks, if the start or end date of the whole sequence has been changed.
+	 * @param newObject new CalendarDataObject
+	 * @param currencObject old CalendarDataObject
+	 * @return
+	 */
+	private boolean checkRecurrenceMasterTimeUpdate(CalendarDataObject newObject, CalendarDataObject currentObject) {
+	    //Is Exception
+	    if(newObject.containsRecurrencePosition() && newObject.getRecurrencePosition() != 0) {
+	        return false;
+	    }
+	    
+	    Date newStart = newObject.getStartDate();
+	    Date newEnd = newObject.getEndDate();
+	    
+	    //No new dates
+	    if(newStart == null && newEnd == null) {
+	        return false;
+	    }
+	    
+	    //New start date
+	    if(newStart != null && !newStart.equals(currentObject.getStartDate())) {
+	        return true;
+	    }
+	    
+	    //New end date
+	    if(newEnd != null && !newEnd.equals(currentObject.getEndDate())) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    private final void updateParticipants(final CalendarDataObject cdao, final CalendarDataObject edao, final int uid, final int cid, final Connection writecon, final MBoolean cup) throws SQLException, OXException, LdapException {
 		final Participant[] participants = cdao.getParticipants();
 		UserParticipant[] users = cdao.getUsers();
 

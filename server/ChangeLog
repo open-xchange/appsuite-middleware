@@ -1,3 +1,8 @@
+* 2008-11-10 - martin.herfurth@open-xchange.com
+
+ - Bugfix #11463: Removing all change and delete exceptions after timeframe
+   update on sequence master.
+
 * 2008-11-10 - marcus.klein@open-xchange.com
 
  - Changed database authentication bundle to use only context and user OSGi
