@@ -8,10 +8,10 @@
 # Antje Faber <antje.faber@open-xchange.com>, 2008.
 msgid ""
 msgstr ""
-"Project-Id-Version: server\n"
+"Project-Id-Version: server.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2008-09-16 12:02+0200\n"
+"PO-Revision-Date: 2008-11-10 17:22+0100\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -20,78 +20,82 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: KBabel 1.10.2\n"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:62
+#. Name of the parent folder for the private user folders.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:59
 msgid "Private folders"
 msgstr "Persönliche Ordner"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:64
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:61
 msgid "Public folders"
 msgstr "Öffentliche Ordner"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:66
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:63
 msgid "Shared folders"
 msgstr "Freigegebene Ordner"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:68
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:65
 msgid "System"
 msgstr "System"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:70
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:67
 msgid "Shared address book"
 msgstr "Freigegebenes Adressbuch"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:72
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:69
 msgid "Global address book"
 msgstr "Globales Adressbuch"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:74
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:71
 msgid "OX folders"
 msgstr "OX-Ordner"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:76
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:73
 msgid "Projects"
 msgstr "Projekte"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:78
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:75
 msgid "Infostore"
 msgstr "InfoStore"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:80
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:77
 msgid "Userstore"
 msgstr "Userstore"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:82
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:79
+msgid "Public infostore"
+msgstr "Öffentlicher InfoStore"
+
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:81
 msgid "Other task folders"
 msgstr "Weitere Aufgabenordner"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:84
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:83
 msgid "Other calendar folders"
 msgstr "Weitere Kalenderordner"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:86
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:85
 msgid "Other contact folders"
 msgstr "Weitere Kontaktordner"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:88
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:87
 msgid "Other infostore folders"
 msgstr "Weitere InfoStore-Ordner"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:90
-msgid "My infostore folder"
-msgstr "Mein InfoStore-Ordner"
-
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:92
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:89
 msgid "Tasks"
 msgstr "Aufgaben"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:91
 msgid "Calendar"
 msgstr "Kalender"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:96
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:93
 msgid "Contacts"
 msgstr "Kontakte"
 
+#. *
+#. * Display name of group with identifier 0.
+#.
 #: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Groups.java:68
 msgid "All internal users"
 msgstr "Alle internen Anwender"
@@ -143,22 +147,26 @@ msgstr ""
 msgid "[No Subject]"
 msgstr "[Kein Betreff]"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:54
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:59
 msgid ""
-"A new appointment has been created by [created_by].\n"
-"\n"
-"Direct Link: [link]\n"
+"A new appointment was created by [created_by].\n"
+"You can check this appointment in your calendar:\n"
+"[link]\n"
 "\n"
 "Appointment\n"
 "===========\n"
-"Created by:  [created_by]\n"
-"Title:       [title]\n"
-"Location:    [location]\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[location]\n"
+"[folder_name]\n"
 "\n"
-"Start date:  [start]\n"
-"End date:    [end]\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
 "\n"
-"Description:\n"
 "[description]\n"
 "\n"
 "\n"
@@ -170,50 +178,241 @@ msgid ""
 "=========\n"
 "[resources]\n"
 "\n"
+"========================================== "
+msgstr ""
+"Ein neuer Termin wurde erstellt von [created_by].\n"
+"Sie können diesen Termin in Ihrem Kalender prüfen:\n"
+"[link]\n"
+"\n"
+"Termin\n"
+"======\n"
+"Erstellt von:  [created_by]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[location]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
+"\n"
+"[description]\n"
+"\n"
+"\n"
+"Teilnehmer\n"
+"==========\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"==========\n"
+"[resources]\n"
+"\n"
 "=========================================="
+
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:93
+msgid ""
+"A new appointment was created by [created_by].\n"
+"\n"
+"Appointment\n"
+"===========\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[location]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
+"\n"
+"[description]\n"
+"\n"
+"\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
 msgstr ""
 "Ein neuer Termin wurde erstellt von [created_by].\n"
 "\n"
-"Direkter Link: [link]\n"
-"\n"
 "Termin\n"
 "======\n"
 "Erstellt von:  [created_by]\n"
-"Titel:         [title]\n"
-"Ort:           [location]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[location]\n"
 "\n"
-"Beginnt am:  [start]\n"
-"Endet am:    [end]\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
 "\n"
-"Beschreibung:\n"
 "[description]\n"
 "\n"
 "\n"
 "Teilnehmer\n"
-"==========\n"
+"============\n"
 "[participants]\n"
 "\n"
 "Ressourcen\n"
-"==========\n"
+"=========\n"
 "[resources]\n"
 "\n"
-"=========================================="
+"====================="
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:83
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:124
 msgid ""
-"A new task has been created by [created_by].\n"
-"\n"
-"Direct Link: [link]\n"
+"A new task was created by [created_by].\n"
+"You can check this task in your tasks:\n"
+"[link]\n"
 "\n"
 "Task\n"
 "====\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
+"\n"
+"[description]\n"
+"\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
+msgstr ""
+"Eine neue Aufgabe wurde erstellt von [created_by].\n"
+"Sie können diese Aufgabe in Ihren Aufgaben prüfen:\n"
+"\n"
+"[link]\n"
+"\n"
+"Aufgabe\n"
+"=======\n"
+"Erstellt von: [created_by]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
+"\n"
+"[description]\n"
+"\n"
+"Teilnehmer\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
+
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:159
+msgid ""
+"A new task was created by [created_by].\n"
+"\n"
+"Task\n"
+"====\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
+"\n"
+"[description]\n"
+"\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
+msgstr ""
+"Eine neue Aufgabe wurde erstellt von [created_by].\n"
+"\n"
+"Aufgabe\n"
+"=======\n"
+"Erstellt von:  [created_by]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
+"\n"
+"[description]\n"
+"\n"
+"Teilnehmer\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
+
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:196
+msgid ""
+"This appointment does not take place.\n"
+"It was either deleted by [changed_by] or\n"
+"you have been removed from the list of participants.\n"
+"\n"
+"Appointment\n"
+"===========\n"
 "Created by:  [created_by]\n"
-"Title:       [title]\n"
+"Created at:  [creation_datetime]\n"
+"[title]\n"
+"[location]\n"
+"[folder_name]\n"
 "\n"
-"Start date:  [start]\n"
-"End date:    [end]\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
 "\n"
-"Description:\n"
 "[description]\n"
 "\n"
 "\n"
@@ -227,118 +426,183 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"Eine neue Aufgabe wurde erstellt von [created_by].\n"
-"\n"
-"Direkter Link: [link]\n"
-"\n"
-"Aufgabe\n"
-"=======\n"
-"Erstellt von:  [created_by]\n"
-"Titel:         [title]\n"
-"\n"
-"Beginnt am:  [start]\n"
-"Endet am:    [end]\n"
-"\n"
-"Beschreibung:\n"
-"[description]\n"
-"\n"
-"\n"
-"Teilnehmer\n"
-"==========\n"
-"[participants]\n"
-"\n"
-"Ressourcen\n"
-"==========\n"
-"[resources]\n"
-"\n"
-"=========================================="
-
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:111
-msgid ""
-"This appointment has been deleted by [changed_by].\n"
-"\n"
-"\n"
-"Appointment\n"
-"===========\n"
-"Created by:  [created_by]\n"
-"Title:       [title]\n"
-"Location:    [location]\n"
-"\n"
-"Start date:  [start]\n"
-"End date:    [end]\n"
-"\n"
-"Description:\n"
-"[description]\n"
-"\n"
-"\n"
-"=========================================="
-msgstr ""
-"Dieser Termin wurde gelöscht von [changed_by].\n"
-"\n"
+"Dieser Termin findet nicht statt.\n"
+"Er wurde entweder von [changed_by] gelöscht oder\n"
+"Sie wurden von der Liste der Teilnehmer entfernt.\n"
 "\n"
 "Termin\n"
 "======\n"
 "Erstellt von:  [created_by]\n"
-"Titel:         [title]\n"
-"Ort:           [location]\n"
+"Erstellt am:  [creation_datetime]\n"
+"[title]\n"
+"[location]\n"
+"[folder_name]\n"
 "\n"
-"Beginnt am:  [start]\n"
-"Endet am:    [end]\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
 "\n"
-"Beschreibung:\n"
 "[description]\n"
 "\n"
 "\n"
+"Teilnehmer\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"=========\n"
+"[resources]\n"
+"\n"
 "=========================================="
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:130
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:230
 msgid ""
-"This task has been deleted by [changed_by].\n"
-"\n"
+"This task was either deleted by [changed_by] or\n"
+"you have been removed from the list of participants.\n"
 "\n"
 "Task\n"
 "====\n"
 "Created by:  [created_by]\n"
-"Title:       [title]\n"
+"Created at:  [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
 "\n"
-"Start date:  [start]\n"
-"End date:    [end]\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
 "\n"
-"Description:\n"
 "[description]\n"
-"=========================================="
-msgstr ""
-"Diese Aufgabe wurde gelöscht von [changed_by].\n"
 "\n"
+"\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
+msgstr ""
+"Diese Aufgabe wurde entweder von [changed_by] gelöscht\n"
+"oder Sie wurden aus der Liste der Teilnehmer entfernt.\n"
 "\n"
 "Aufgabe\n"
 "=======\n"
 "Erstellt von:  [created_by]\n"
-"Titel:         [title]\n"
+"Erstellt am:  [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
 "\n"
-"Beginnt am:    [start]\n"
-"Endet am:      [end]\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
 "\n"
-"Beschreibung:\n"
 "[description]\n"
-"=========================================="
-
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:146
-msgid ""
-"This appointment has been changed by [changed_by].\n"
 "\n"
-"Direct Link: [link]\n"
+"\n"
+"Teilnehmer\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
+
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:268
+msgid ""
+"This appointment was changed by [changed_by].\n"
+"You can check this appointment in your calendar:\n"
+"[link]\n"
 "\n"
 "Appointment\n"
 "===========\n"
-"Created by:  [created_by]\n"
-"Title:       [title]\n"
-"Location:    [location]\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[location]\n"
+"[folder_name]\n"
 "\n"
-"Start date:  [start]\n"
-"End date:    [end]\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
 "\n"
-"Description:\n"
+"[description]\n"
+"\n"
+"\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+msgstr ""
+"Dieser Termin wurde geändert von [changed_by].\n"
+"Sie können diesen Termin in Ihrem Kalender prüfen:\n"
+"[link]\n"
+"\n"
+"Termin\n"
+"======\n"
+"Erstellt von:  [created_by]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[location]\n"
+"[folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
+"\n"
+"[description]\n"
+"\n"
+"\n"
+"Teilnehmer\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:302
+msgid ""
+"This appointment was changed by [changed_by].\n"
+"\n"
+"Appointment\n"
+"===========\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[location]\n"
+"[folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
+"\n"
 "[description]\n"
 "\n"
 "\n"
@@ -354,46 +618,118 @@ msgid ""
 msgstr ""
 "Dieser Termin wurde geändert von [changed_by].\n"
 "\n"
-"Direkter Link: [link]\n"
-"\n"
 "Termin\n"
 "======\n"
 "Erstellt von:  [created_by]\n"
-"Titel:         [title]\n"
-"Ort:           [location]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[location]\n"
+"[folder_name]\n"
 "\n"
-"Beginnt am:    [start]\n"
-"Endet am:      [end]\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
 "\n"
-"Beschreibung:\n"
 "[description]\n"
 "\n"
 "\n"
 "Teilnehmer\n"
-"==========\n"
+"============\n"
 "[participants]\n"
 "\n"
 "Ressourcen\n"
-"==========\n"
+"=========\n"
 "[resources]\n"
 "\n"
 "=========================================="
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:175
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:334
 msgid ""
-"This task has been changed by [changed_by].\n"
-"\n"
-"Direct Link: [link]\n"
+"This task was changed by [changed_by].\n"
+"You can check this task in your tasks:\n"
+"[link]\n"
 "\n"
 "Task\n"
 "====\n"
-"Created by:  [created_by]\n"
-"Title:       [title]\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
 "\n"
-"Start date:  [start]\n"
-"End date:    [end]\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
 "\n"
-"Description:\n"
+"[description]\n"
+"\n"
+"\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+msgstr ""
+"Diese Aufgabe wurde geändert von [changed_by].\n"
+"Sie können diese Aufgabe in Ihren Aufgaben prüfen:\n"
+"[link]\n"
+"\n"
+"Aufgabe\n"
+"=======\n"
+"Erstellt von:  [created_by]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
+"\n"
+"[description]\n"
+"\n"
+"\n"
+"Teilnehmer\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:369
+msgid ""
+"This task was changed by [changed_by].\n"
+"\n"
+"Task\n"
+"====\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
+"\n"
 "[description]\n"
 "\n"
 "\n"
@@ -409,292 +745,759 @@ msgid ""
 msgstr ""
 "Diese Aufgabe wurde geändert von [changed_by].\n"
 "\n"
-"Direkter Link: [link]\n"
-"\n"
 "Aufgabe\n"
 "=======\n"
 "Erstellt von:  [created_by]\n"
-"Titel:         [title]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
 "\n"
-"Beginnt am:  [start]\n"
-"Endet am:    [end]\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
 "\n"
-"Beschreibung:\n"
 "[description]\n"
 "\n"
 "\n"
 "Teilnehmer\n"
-"==========\n"
+"============\n"
 "[participants]\n"
 "\n"
 "Ressourcen\n"
-"==========\n"
+"=========\n"
 "[resources]\n"
 "\n"
 "=========================================="
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:203
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:406
 msgid ""
-"An appointment has been changed by [changed_by].\n"
-"\n"
-"You have been removed from the list of participants.\n"
+"[changed_by] has [confirmation_action] this appointment.\n"
+"You can check this appointment in your calendar:\n"
+"[link]\n"
 "\n"
 "Appointment\n"
 "===========\n"
-"Created by:  [created_by]\n"
-"Title:       [title]\n"
-"Location:    [location]\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[location]\n"
+"[folder_name]\n"
 "\n"
-"Start date:  [start]\n"
-"End date:    [end]\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
 "\n"
-"Description:\n"
 "[description]\n"
 "\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
 "\n"
 "=========================================="
 msgstr ""
-"Ein Termin wurde geändert von [changed_by].\n"
-"\n"
-"Sie wurden von der Liste der Teilnehmer entfernt.\n"
+"[changed_by] hat diesen Termin [confirmation_action].\n"
+"Sie können diesen Termin in Ihrem Kalender prüfen:\n"
+"[link]\n"
 "\n"
 "Termin\n"
 "======\n"
 "Erstellt von:  [created_by]\n"
-"Titel:         [title]\n"
-"Ort:           [location]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[location]\n"
+"[folder_name]\n"
 "\n"
-"Beginnt am:  [start]\n"
-"Endet am:    [end]\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
 "\n"
-"Beschreibung:\n"
 "[description]\n"
 "\n"
+"Teilnehmer\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"=========\n"
+"[resources]\n"
 "\n"
 "=========================================="
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:223
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:440
 msgid ""
-"A task has been changed by [changed_by].\n"
-"\n"
-"You have been removed from the list of participants.\n"
+"[changed_by] has [confirmation_action] this task.\n"
+"You can check this task in your tasks:\n"
+"[link]\n"
 "\n"
 "Task\n"
 "====\n"
-"Created by:  [created_by]\n"
-"Title:       [title]\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
 "\n"
-"Start date:  [start]\n"
-"End date:    [end]\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
 "\n"
-"Description:\n"
 "[description]\n"
 "\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
 "\n"
 "=========================================="
 msgstr ""
-"Eine Aufgabe wurde geändert von [changed_by].\n"
-"\n"
-"Sie wurden von der Liste der Teilnehmer entfernt.\n"
+"[changed_by] hat diese Aufgabe [confirmation_action].\n"
+"Sie können diese Aufgabe in Ihren Aufgaben prüfen:\n"
+"[link]\n"
 "\n"
 "Aufgabe\n"
 "=======\n"
 "Erstellt von:  [created_by]\n"
-"Titel:         [title]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
 "\n"
-"Beginnt am:    [start]\n"
-"Endet am:      [end]\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[delete_exceptions]\n"
+"[change_exceptions]\n"
 "\n"
-"Beschreibung:\n"
-"[description]\n"
-"=========================================="
-
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:242
-msgid ""
-"An appointment has been changed by [changed_by].\n"
-"\n"
-"You have been added to the list of participants.\n"
-"\n"
-"Direct Link: [link]\n"
-"\n"
-"Appointment\n"
-"===========\n"
-"Created by:  [created_by]\n"
-"Title:       [title]\n"
-"Location:    [location]\n"
-"\n"
-"Start date:  [start]\n"
-"End date:    [end]\n"
-"\n"
-"Description:\n"
 "[description]\n"
 "\n"
+"Teilnehmer\n"
+"============\n"
+"[participants]\n"
 "\n"
-"=========================================="
-msgstr ""
-"Ein Termin wurde geändert von [changed_by].\n"
-"\n"
-"Sie wurden zur Liste der Teilnehmer hinzugefügt.\n"
-"\n"
-"Termin\n"
-"======\n"
-"Erstellt von:  [created_by]\n"
-"Titel:         [title]\n"
-"Ort:           [location]\n"
-"\n"
-"Beginnt am:  [start]\n"
-"Endet am:    [end]\n"
-"\n"
-"Beschreibung:\n"
-"[description]\n"
-"\n"
+"Ressourcen\n"
+"=========\n"
+"[resources]\n"
 "\n"
 "=========================================="
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:264
-msgid ""
-"A task has been changed by [changed_by].\n"
-"\n"
-"You have been added to the list of participants.\n"
-"\n"
-"Direct Link: [link]\n"
-"\n"
-"Task\n"
-"====\n"
-"Created by:  [created_by]\n"
-"Title:       [title]\n"
-"\n"
-"Start date:  [start]\n"
-"End date:    [end]\n"
-"\n"
-"Description:\n"
-"[description]\n"
-"\n"
-"\n"
-"=========================================="
-msgstr ""
-"Eine Aufgabe wurde geändert von [changed_by].\n"
-"\n"
-"Sie wurden zur Liste der Teilnehmer hinzugefügt.\n"
-"\n"
-"Direkter Link: [link]\n"
-"\n"
-"Aufgabe\n"
-"=======\n"
-"Erstellt von:  [created_by]\n"
-"Titel:         [title]\n"
-"\n"
-"Beginnt am:    [start]\n"
-"Endet am:      [end]\n"
-"\n"
-"Beschreibung:\n"
-"[description]\n"
-"\n"
-"\n"
-"=========================================="
+#.
+#. * MESSAGE SUBJECT PREFIXES
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:478
+msgid "New Appointment"
+msgstr "Neuer Termin"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:285
-msgid ""
-"An appointment has been changed by [changed_by].\n"
-"\n"
-"You have been added to the list of participants.\n"
-"\n"
-"Appointment\n"
-"===========\n"
-"Created by:  [created_by]\n"
-"Title:       [title]\n"
-"Location:    [location]\n"
-"\n"
-"Start date:  [start]\n"
-"End date:    [end]\n"
-"\n"
-"Description:\n"
-"[description]\n"
-"\n"
-"\n"
-"=========================================="
-msgstr ""
-"Ein Termin wurde geändert von [changed_by].\n"
-"\n"
-"Sie wurden zur Liste der Teilnehmer hinzugefügt.\n"
-"\n"
-"Termin\n"
-"======\n"
-"Erstellt von:  [created_by]\n"
-"Titel:         [title]\n"
-"Ort:           [location]\n"
-"\n"
-"Beginnt am:  [start]\n"
-"Endet am:    [end]\n"
-"\n"
-"Beschreibung:\n"
-"[description]\n"
-"\n"
-"\n"
-"=========================================="
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:480
+msgid "Appointment changed"
+msgstr "Termin geändert"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:305
-msgid ""
-"A task has been changed by [changed_by].\n"
-"\n"
-"You have been added to the list of participants.\n"
-"\n"
-"Task\n"
-"====\n"
-"Created by:  [created_by]\n"
-"Title:       [title]\n"
-"\n"
-"Start date:  [start]\n"
-"End date:    [end]\n"
-"\n"
-"Description:\n"
-"[description]\n"
-"\n"
-"\n"
-"=========================================="
-msgstr ""
-"Eine Aufgabe wurde geändert von [changed_by].\n"
-"\n"
-"\n"
-"Aufgabe\n"
-"=======\n"
-"Erstellt von:  [created_by]\n"
-"Titel:         [title]\n"
-"\n"
-"Beginnt am:    [start]\n"
-"Endet am:      [end]\n"
-"\n"
-"Beschreibung:\n"
-"[description]\n"
-"\n"
-"\n"
-"=========================================="
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:482
+msgid "Appointment deleted"
+msgstr "Termin gelöscht"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:323
-msgid "A new appointment has been created"
-msgstr "Ein neuer Termin wurde erstellt"
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:484
+msgid "Appointment (accepted)"
+msgstr "Termin (akzeptiert)"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:324
-msgid "An appointment has been changed"
-msgstr "Ein Termin wurde geändert"
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:486
+msgid "Appointment (declined)"
+msgstr "Termin (abgelehnt)"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:325
-msgid "An appointment has been removed"
-msgstr "Ein Termin wurde gelöscht"
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:488
+msgid "Appointment (tentative)"
+msgstr "Termin (vorläufig)"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:326
-msgid "A new task has been created"
-msgstr "Eine neue Aufgabe wurde erstellt"
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:490
+msgid "New task"
+msgstr "Neue Aufgabe"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:327
-msgid "A task has been changed"
-msgstr "Eine Aufgabe wurde geändert"
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:492
+msgid "Task changed"
+msgstr "Aufgabe geändert"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:328
-msgid "A task has been removed"
-msgstr "Eine Aufgabe wurde gelöscht"
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:494
+msgid "Task deleted"
+msgstr "Aufgabe gelöscht"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:329
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:496
+msgid "Task (accepted)"
+msgstr "Aufgabe (akzeptiert)"
+
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:498
+msgid "Task (declined)"
+msgstr "Aufgabe (abgelehnt)"
+
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:500
+msgid "Task (tentative)"
+msgstr "Aufgabe (vorläufig)"
+
+#.
+#. * MISC
+#.
+#. *
+#. * No resources have been scheduled.
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:509
 msgid "No resources have been scheduled."
 msgstr "Es wurden keine Ressourcen zugewiesen."
+
+#. *
+#. * No series
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:514
+msgid "No series"
+msgstr "Keine Serie"
+
+#. *
+#. * No start date
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:519
+msgid "No start date"
+msgstr "Kein Startdatum"
+
+#. *
+#. * No end date
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:524
+msgid "No end date"
+msgstr "Kein Enddatum"
+
+#. *
+#. * No due date
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:529
+msgid "No due date"
+msgstr "Kein Fälligkeitsdatum"
+
+#. *
+#. * No delete exceptions
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:534
+msgid "No delete exceptions"
+msgstr "Keine Löschausnahmen"
+
+#. *
+#. * No change exceptions
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:539
+msgid "No change exceptions"
+msgstr "Keine Änderungsausnahmen"
+
+#. *
+#. * Mail to resource %1$s
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:544
+msgid "Mail to resource %1$s"
+msgstr "E-Mail an Ressource %1$s"
+
+#. *
+#. * Resource
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:549
+msgid "Resource"
+msgstr "Ressource"
+
+#. *
+#. * Not set
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:554
+msgid "Not set"
+msgstr "Nicht festgelegt"
+
+#.
+#. * Confirmation actions
+#.
+#. *
+#. * accepted
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:560
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:597
+msgid "accepted"
+msgstr "akzeptiert"
+
+#. *
+#. * declined
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:562
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:602
+msgid "declined"
+msgstr "abgelehnt"
+
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:564
+msgid "tentatively accepted"
+msgstr "vorübergehend akzeptiert"
+
+#.
+#. * TASK PRIORITIES
+#.
+#. *
+#. * low
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:573
+msgid "Low"
+msgstr "Niedrig"
+
+#. *
+#. * normal
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:578
+msgid "Normal"
+msgstr "Normal"
+
+#. *
+#. * high
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:583
+msgid "High"
+msgstr "Hoch"
+
+#.
+#. * Confirmation statuses
+#.
+#. *
+#. * waiting
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:592
+msgid "waiting"
+msgstr "Wartestatus"
+
+#. *
+#. * tentative
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:607
+msgid "tentative"
+msgstr "vorübergehend"
+
+#.
+#. * Line patterns
+#.
+#. *
+#. * Location: %1$s
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:616
+msgid "Location: %1$s"
+msgstr "Ort: %1$s"
+
+#. *
+#. * Description: %1$s
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:621
+msgid "Description: %1$s"
+msgstr "Beschreibung: %1$s"
+
+#. *
+#. * Folder: %1$s
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:626
+msgid "Folder: %1$s"
+msgstr "Ordner: %1$s"
+
+#. *
+#. * Start date: %1$s
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:631
+msgid "Start date: %1$s"
+msgstr "Startdatum: %1$s"
+
+#. *
+#. * End date: %1$s
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:636
+msgid "End date: %1$s"
+msgstr "Enddatum: %1$s"
+
+#. *
+#. * Due date: %1$s
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:641
+msgid "Due date: %1$s"
+msgstr "Fälligkeitsdatum: %1$s"
+
+#. *
+#. * Series: %1$s
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:646
+msgid "Series: %1$s"
+msgstr "Serie: %1$s"
+
+#. *
+#. * Comments:<br>
+#. * %1$s
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:652
+msgid ""
+"Comments:\n"
+"%1$s"
+msgstr ""
+"Kommentare:\n"
+"%1$s"
+
+#. *
+#. * Priority: %1$s
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:657
+msgid "Priority: %1$s"
+msgstr "Priorität: %1$s"
+
+#. *
+#. * Status: %1$s
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:662
+msgid "Status: %1$s"
+msgstr "Status: %1$s"
+
+#. *
+#. * Delete exceptions: %1$s
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:667
+msgid "Delete exceptions: %1$s"
+msgstr "Löschausnahme: %1$s"
+
+#. *
+#. * Change exceptions: %1$s
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:672
+msgid "Change exceptions: %1$s"
+msgstr "Änderungsausnahme: %1$s"
+
+#.
+#. * Task statuses
+#.
+#. *
+#. * Not started
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:681
+msgid "Not started"
+msgstr "Nicht begonnen"
+
+#. *
+#. * In progress
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:686
+msgid "In progress"
+msgstr "In Bearbeitung"
+
+#. *
+#. * Done
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:691
+msgid "Done"
+msgstr "Erledigt"
+
+#. *
+#. * Waiting
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:696
+msgid "Waiting"
+msgstr "Wartestatus"
+
+#. *
+#. * Deferred
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:701
+msgid "Deferred"
+msgstr "Verschoben"
+
+#.
+#. * Added/Removed participant
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:707
+msgid "Added"
+msgstr "Hinzugefügt"
+
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:709
+msgid "Removed"
+msgstr "Entfernt"
+
+#.
+#. * Recurrence templates
+#.
+#. *
+#. * and
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:718
+msgid "and"
+msgstr "und"
+
+#. *
+#. * Each day
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:723
+msgid "Each day"
+msgstr "Jeden Tag"
+
+#. *
+#. * Each %1$s days
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:728
+msgid "Each %1$s days"
+msgstr "Alle %1$s Tage"
+
+#. *
+#. * Each week on %1$s
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:733
+msgid "Each week on %1$s"
+msgstr "Jede Woche am %1$s"
+
+#. *
+#. * Each %1$s weeks on %2$s
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:738
+msgid "Each %1$s weeks on %2$s"
+msgstr "Alle %1$s Wochen am %2$s"
+
+#. *
+#. * On %1$s. day every month
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:743
+msgid "On %1$s. day every month"
+msgstr "Am %1$s. Tag jeden Monats"
+
+#. *
+#. * On %1$s. day every %2$s. month
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:748
+msgid "On %1$s. day every %2$s. month"
+msgstr "Am %1$s. Tag jeden %2$s. Monat"
+
+#. *
+#. * On %1$s %2$s each month
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:753
+msgid "On %1$s %2$s each month"
+msgstr "Am %1$s %2$s jeden Monats"
+
+#. *
+#. * On %1$s %2$s each %3$s. month
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:758
+msgid "On %1$s %2$s each %3$s. month"
+msgstr "Am %1$s %2$s jeden %3$s. Monats"
+
+#. *
+#. * Each %1$s. %2$s
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:763
+msgid "Each %1$s. %2$s"
+msgstr "Jeden %1$s. %2$s"
+
+#. *
+#. * On %1$s %2$s in %3$s
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:768
+msgid "On %1$s %2$s in %3$s"
+msgstr "Am %1$s %2$s in %3$s"
+
+#.
+#. * Months
+#.
+#. *
+#. * January
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:777
+msgid "January"
+msgstr "Januar"
+
+#. *
+#. * February
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:782
+msgid "February"
+msgstr "Februar"
+
+#. *
+#. * March
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:787
+msgid "March"
+msgstr "März"
+
+#. *
+#. * April
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:792
+msgid "April"
+msgstr "April"
+
+#. *
+#. * May
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:797
+msgid "May"
+msgstr "Mai"
+
+#. *
+#. * June
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:802
+msgid "June"
+msgstr "Juni"
+
+#. *
+#. * July
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:807
+msgid "July"
+msgstr "Juli"
+
+#. *
+#. * August
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:812
+msgid "August"
+msgstr "August"
+
+#. *
+#. * September
+#. *
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:818
+msgid "September"
+msgstr "September"
+
+#. *
+#. * October
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:823
+msgid "October"
+msgstr "Oktober"
+
+#. *
+#. * November
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:828
+msgid "November"
+msgstr "November"
+
+#. *
+#. * December
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:833
+msgid "December"
+msgstr "Dezember"
+
+#.
+#. * Weekdays
+#.
+#. *
+#. * Monday
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:842
+msgid "Monday"
+msgstr "Montag"
+
+#. *
+#. * Tuesday
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:847
+msgid "Tuesday"
+msgstr "Dienstag"
+
+#. *
+#. * Wednesday
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:852
+msgid "Wednesday"
+msgstr "Mittwoch"
+
+#. *
+#. * Thursday
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:857
+msgid "Thursday"
+msgstr "Donnerstag"
+
+#. *
+#. * Friday
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:862
+msgid "Friday"
+msgstr "Freitag"
+
+#. *
+#. * Saturday
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:867
+msgid "Saturday"
+msgstr "Samstag"
+
+#. *
+#. * Sunday
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:872
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:877
+msgid "Sunday"
+msgstr "Sonntag"
+
+#. *
+#. * Weekday
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:882
+msgid "Weekday"
+msgstr "Wochentag"
+
+#. *
+#. * Weekend day
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:887
+msgid "Weekend day"
+msgstr "Wochenendtag"
+
+#.
+#. * Monthly1 constants
+#.
+#. *
+#. * first
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:896
+msgid "first"
+msgstr "ersten"
+
+#. *
+#. * second
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:901
+msgid "second"
+msgstr "zweiten"
+
+#. *
+#. * third
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:906
+msgid "third"
+msgstr "dritten"
+
+#. *
+#. * fourth
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:911
+msgid "fourth"
+msgstr "vierten"
+
+#. *
+#. * last
+#.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:916
+msgid "last"
+msgstr "letzten"
 
