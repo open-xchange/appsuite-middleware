@@ -276,6 +276,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 * DESC (descending)
 	 */
 	public static final String PARAMETER_ORDER = "order";
+	
+	public static final String PARAMETER_RECURRENCE_MASTER = "recurrence_master";
 
 	public static final String LEFT_HAND_LIMIT = "left_hand_limit";
 
