@@ -67,6 +67,8 @@ import com.openexchange.conversion.DataSource;
  */
 public final class ConversionEngineCustomizer implements ServiceTrackerCustomizer {
 
+	private static final String PROP_IDENTIFIER = "identifier";
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ConversionEngineCustomizer.class);
 
@@ -89,7 +91,7 @@ public final class ConversionEngineCustomizer implements ServiceTrackerCustomize
 			LOG.warn("Added service is null!", new Throwable());
 		}
 		if (addedService instanceof DataHandler) {
-			final Object identifier = reference.getProperty("identifier");
+			final Object identifier = reference.getProperty(PROP_IDENTIFIER);
 			if (null == identifier) {
 				LOG.error("Missing identifier in data handler: " + addedService.getClass().getName());
 				return addedService;
@@ -102,7 +104,7 @@ public final class ConversionEngineCustomizer implements ServiceTrackerCustomize
 			LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier.toString())
 					.append("' successfully registered"));
 		} else if (addedService instanceof DataSource) {
-			final Object identifier = reference.getProperty("identifier");
+			final Object identifier = reference.getProperty(PROP_IDENTIFIER);
 			if (null == identifier) {
 				LOG.error("Missing identifier in data source: " + addedService.getClass().getName());
 				return addedService;
@@ -125,7 +127,7 @@ public final class ConversionEngineCustomizer implements ServiceTrackerCustomize
 	public void removedService(final ServiceReference reference, final Object service) {
 		try {
 			if (service instanceof DataHandler) {
-				final Object identifier = reference.getProperty("identifier");
+				final Object identifier = reference.getProperty(PROP_IDENTIFIER);
 				if (null == identifier) {
 					LOG.error("Missing identifier in data handler: " + service.getClass().getName());
 					return;
@@ -134,7 +136,7 @@ public final class ConversionEngineCustomizer implements ServiceTrackerCustomize
 				LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier.toString())
 						.append("' successfully unregistered"));
 			} else if (service instanceof DataSource) {
-				final Object identifier = reference.getProperty("identifier");
+				final Object identifier = reference.getProperty(PROP_IDENTIFIER);
 				if (null == identifier) {
 					LOG.error("Missing identifier in data source: " + service.getClass().getName());
 					return;
