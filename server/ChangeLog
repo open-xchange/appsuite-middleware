@@ -1,10 +1,18 @@
+* 2008-11-10 - marcus.klein@open-xchange.com
+
+ - Changed database authentication bundle to use only context and user OSGi
+   services instead of static interfaces.
+
 * 2008-11-07 - francisco.laguna@open-xchange.com
 
  - Added field number_of_versions (711) to infostore attributes for bug #12427
 
 * 2008-11-07 - marcus.klein@open-xchange.com
 
- - Bugfix #12241: Improved performance of update task ContactsRepairLinksAttachments.
+ - Bugfix #12241: Improved performance of update task
+   ContactsRepairLinksAttachments.
+ - Bugfix #11190: Implemented switching the series if recurrence days is set to
+   0.
 
 * 2008-11-07 - thorben.betten@open-xchange.com
 

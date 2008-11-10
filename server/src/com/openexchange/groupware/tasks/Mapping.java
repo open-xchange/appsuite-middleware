@@ -987,7 +987,11 @@ public final class Mapping {
             }
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
-                stmt.setInt(pos, task.getDays());
+                if (0 == task.getDays()) {
+                    stmt.setNull(pos, Types.INTEGER);
+                } else {
+                    stmt.setInt(pos, task.getDays());
+                }
             }
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {

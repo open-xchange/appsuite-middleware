@@ -343,6 +343,7 @@ public final class TaskLogic {
      */
     private static void checkRecurrence(final Task task, final Task oldTask)
         throws TaskException {
+        // First simple checks on start and end date.
         if (Task.NO_RECURRENCE != task.getRecurrenceType()) {
             if (null == oldTask) {
                 if (!task.containsStartDate()) {
@@ -364,11 +365,23 @@ public final class TaskLogic {
                 }
             }
         }
+        // Now copy not changed attributes from original task.
         copyRecurringValues(task, oldTask);
+        // Remove values for check
+        boolean daysRemoved = false;
+        if (Task.NO_RECURRENCE != task.getRecurrenceType()) {
+            if (task.containsDays() && 0 == task.getDays()) {
+                daysRemoved = true;
+                task.removeDays();
+            }
+        }
         try {
             CalendarRecurringCollection.checkRecurring(task);
         } catch (final OXException e) {
             throw new TaskException(e);
+        }
+        if (daysRemoved) {
+            task.setDays(0);
         }
     }
 
