@@ -55,6 +55,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.ArrayList;
 
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -78,6 +79,11 @@ import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
+import com.openexchange.data.conversion.ical.ICalEmitter;
+import com.openexchange.data.conversion.ical.ICalSession;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 public class AppointmentState extends LinkableState {
 
@@ -151,27 +157,23 @@ public class AppointmentState extends LinkableState {
 	}
 
 	private void addICALAttachment(final MailObject mail, final AppointmentObject obj, final ServerSession sessObj) {
-		OXContainerConverter oxContainerConverter = null;
-		try {
-			final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");
+		ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
+        if(emitter == null) {
+            LOGGER.warn("Could not find ical emitter service. Skipping attachment");
+            return;
+        }
+
+        try {
 			final InputStream icalFile;
 			{
 				final UnsynchronizedByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
-				final VersitDefinition.Writer versitWriter = versitDefinition.getWriter(byteArrayOutputStream, "UTF-8");
-				final VersitObject versitObjectContainer = OXContainerConverter.newCalendar("2.0");
-				versitDefinition.writeProperties(versitWriter, versitObjectContainer);
-				oxContainerConverter = new OXContainerConverter(sessObj.getContext(), TimeZone.getDefault());
-				final VersitDefinition eventDef = versitDefinition.getChildDef("VEVENT");
-
-				final VersitObject versitObject = oxContainerConverter.convertAppointment(obj);
-				eventDef.write(versitWriter, versitObject);
-				versitDefinition.writeEnd(versitWriter, versitObjectContainer);
-				versitWriter.flush();
-				versitWriter.close();
-				icalFile = new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray());
+                ICalSession session = emitter.createSession();
+                emitter.writeAppointment(session, obj, sessObj.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+                emitter.writeSession(session, byteArrayOutputStream);
+                icalFile = new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray());
 			}
 
-			final ContentType ct = new ContentType();
+            final ContentType ct = new ContentType();
 			ct.setPrimaryType("text");
 			ct.setSubType("calendar");
 			ct.setCharsetParameter("utf-8");
@@ -180,17 +182,11 @@ public class AppointmentState extends LinkableState {
 
 			mail.addFileAttachment(ct, filename, icalFile);
 
-		} catch (final IOException e) {
-			LOGGER.error("Can't convert appointment for notification mail.", e);
-		} catch (final ConverterException e) {
-			LOGGER.error("Can't convert appointment for notification mail.", e);
 		} catch (final MailException e) {
 			LOGGER.error("Can't add attachment", e);
-		} finally {
-			if (oxContainerConverter != null) {
-				oxContainerConverter.close();
-			}
-		}
+		} catch (ConversionError conversionError) {
+            LOGGER.error("Can't add attachment", conversionError);
+        }
 	}
 
 	public Template getTemplate() {
