@@ -50,6 +50,7 @@
 package com.openexchange.caching.objects;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -134,8 +135,25 @@ public final class CachedSession implements Serializable {
 		for (final Iterator<Map.Entry<String, Object>> iterator = parameters.entrySet().iterator(); iterator.hasNext();) {
 			final Map.Entry<String, Object> entry = iterator.next();
 			final Object value = entry.getValue();
-			if (Serializable.class.isInstance(value) && value.getClass().getName().startsWith("java.")) {
-				tmpparameters.put(entry.getKey(), (Serializable) entry.getValue());
+			final Object toCheck;
+			final boolean isEmptyArray;
+			if (value.getClass().isArray()) {
+				/*
+				 * Point to array's element at index 0 if non-empty; otherwise
+				 * point to array itself
+				 */
+				isEmptyArray = Array.getLength(value) == 0;
+				toCheck = isEmptyArray ? value : Array.get(value, 0);
+			} else {
+				/*
+				 * Value is not an array therefore point to value itself
+				 */
+				isEmptyArray = false;
+				toCheck = value;
+			}
+			if (isEmptyArray
+					|| (Serializable.class.isInstance(toCheck) && toCheck.getClass().getName().startsWith("java."))) {
+				tmpparameters.put(entry.getKey(), (Serializable) value);
 			}
 		}
 		this.parameters = Collections.unmodifiableMap(tmpparameters);

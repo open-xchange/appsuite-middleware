@@ -1750,9 +1750,11 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 		if (StorageUtility.INDEX_INBOX == index) {
 			return STR_INBOX;
 		}
-		if (isDefaultFoldersChecked()) {
-			return getDefaultMailFolder(index);
+		final String retval = getDefaultMailFolder(index);
+		if (retval != null) {
+			return retval;
 		}
+		setDefaultFoldersChecked(false);
 		checkDefaultFolders();
 		return getDefaultMailFolder(index);
 	}

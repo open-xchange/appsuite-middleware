@@ -1,3 +1,7 @@
+* 2008-11-10 - thorben.betten@open-xchange.com
+
+ - Bugfix #12487: Fixed loss of session parameters on session migration
+
 * 2008-11-10 - martin.herfurth@open-xchange.com
 
  - Bugfix #11463: Removing all change and delete exceptions after timeframe
