@@ -54,7 +54,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.fields.GroupFields;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.group.Group;
+
+import java.util.TimeZone;
 
 /**
  * {@link GroupWriter} - Writes a group object into a JSON.
@@ -64,16 +67,20 @@ import com.openexchange.group.Group;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class GroupWriter extends DataWriter {
+    private TimeZone utc = TimeZone.getTimeZone("utc");
 
-	public GroupWriter() {
+    public GroupWriter() {
 		super(null, null);
 	}
 
 	public void writeGroup(final Group group, final JSONObject json) throws JSONException {
-		writeParameter(GroupFields.IDENTIFIER, group.getIdentifier(), json);
+
+        writeParameter(GroupFields.IDENTIFIER, group.getIdentifier(), json);
 		writeParameter(GroupFields.DISPLAY_NAME, group.getDisplayName(), json);
 		writeParameter(GroupFields.NAME, group.getSimpleName(), json);
-		writeMembers(group, json);
+        writeParameter(DataFields.LAST_MODIFIED_UTC, group.getLastModified(), utc, json);
+
+        writeMembers(group, json);
 	}
 
 	protected void writeMembers(final Group group, final JSONObject json) throws JSONException {
