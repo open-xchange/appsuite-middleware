@@ -353,7 +353,8 @@ public class MailFolder implements Serializable {
 	/**
 	 * Gets the number of messages marked for deletion in this folder
 	 * 
-	 * @return The number of messages marked for deletion in this folder
+	 * @return The number of messages marked for deletion in this folder or
+	 *         <code>-1</code> if this mail folder does not hold messages
 	 */
 	public int getDeletedMessageCount() {
 		return deletedMessageCount;
@@ -379,7 +380,8 @@ public class MailFolder implements Serializable {
 	 * Sets the number of messages marked for deletion in this folder
 	 * 
 	 * @param deletedMessageCount
-	 *            the number of messages marked for deletion
+	 *            The number of messages marked for deletion or <code>-1</code>
+	 *            if this mail folder does not hold messages
 	 */
 	public void setDeletedMessageCount(final int deletedMessageCount) {
 		this.deletedMessageCount = deletedMessageCount;
@@ -427,7 +429,8 @@ public class MailFolder implements Serializable {
 	/**
 	 * Gets the number of messages
 	 * 
-	 * @return The number of messages
+	 * @return The number of messages or <code>-1</code> if this mail folder
+	 *         does not hold messages
 	 */
 	public int getMessageCount() {
 		return messageCount;
@@ -453,7 +456,8 @@ public class MailFolder implements Serializable {
 	 * Sets the number of messages
 	 * 
 	 * @param messageCount
-	 *            The number of messages
+	 *            The number of messages or <code>-1</code> if this mail folder
+	 *            does not hold messages
 	 */
 	public void setMessageCount(final int messageCount) {
 		this.messageCount = messageCount;
@@ -464,7 +468,9 @@ public class MailFolder implements Serializable {
 	 * Gets the number of new messages (since last time this folder was
 	 * accessed)
 	 * 
-	 * @return The number of new messages
+	 * @return The number of new messages or <code>-1</code> if this mail folder
+	 *         does not hold messages
+	 * @see #isHoldsMessages()
 	 */
 	public int getNewMessageCount() {
 		return newMessageCount;
@@ -490,7 +496,8 @@ public class MailFolder implements Serializable {
 	 * Sets the number of new messages
 	 * 
 	 * @param newMessageCount
-	 *            The number of new messages
+	 *            The number of new messages or <code>-1</code> if this mail
+	 *            folder does not hold messages
 	 */
 	public void setNewMessageCount(final int newMessageCount) {
 		this.newMessageCount = newMessageCount;
@@ -500,7 +507,8 @@ public class MailFolder implements Serializable {
 	/**
 	 * Gets the number of unread messages
 	 * 
-	 * @return The number of unread messages
+	 * @return The number of unread messages or <code>-1</code> if this mail
+	 *         folder does not hold messages
 	 */
 	public int getUnreadMessageCount() {
 		return unreadMessageCount;
@@ -526,7 +534,8 @@ public class MailFolder implements Serializable {
 	 * Sets the number of unread messages
 	 * 
 	 * @param unreadMessageCount
-	 *            The number of unread messages
+	 *            The number of unread messages or <code>-1</code> if this mail
+	 *            folder does not hold messages
 	 */
 	public void setUnreadMessageCount(final int unreadMessageCount) {
 		this.unreadMessageCount = unreadMessageCount;
