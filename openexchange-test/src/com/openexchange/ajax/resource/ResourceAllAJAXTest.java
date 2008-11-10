@@ -55,6 +55,8 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceAllRequest;
 import com.openexchange.ajax.resource.actions.ResourceAllResponse;
 import com.openexchange.resource.Resource;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * {@link ResourceAllAJAXTest} - Tests the ALL request on resource servlet
@@ -101,7 +103,15 @@ public final class ResourceAllAJAXTest extends AbstractResourceTest {
 
 			System.out.println("IDs: " + Arrays.toString(ids));
 
-		} catch (final Exception e) {
+            JSONArray arr = (JSONArray) allResponse.getData();
+            for(int i = 0, size = arr.length(); i < size; i++) {
+                JSONObject res = arr.optJSONObject(i);
+                assertNotNull(res);
+                assertTrue(res.has("last_modified_utc"));
+            }
+
+
+        } catch (final Exception e) {
 			fail("ALL request on resource servlet failed: " + e.getMessage());
 		} finally {
 			try {

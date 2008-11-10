@@ -53,6 +53,7 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceGetRequest;
 import com.openexchange.ajax.resource.actions.ResourceGetResponse;
 import com.openexchange.resource.Resource;
+import org.json.JSONObject;
 
 /**
  * {@link ResourceGetAJAXTest} - Tests the GET request on resource servlet
@@ -99,7 +100,9 @@ public final class ResourceGetAJAXTest extends AbstractResourceTest {
 
 			System.out.println("Get resource: " + resource.toString());
 
-		} catch (final Exception e) {
+            assertTrue(((JSONObject)response.getData()).has("last_modified_utc"));
+
+        } catch (final Exception e) {
 			fail("GET request on resource servlet failed: " + e.getMessage());
 		} finally {
 			try {
