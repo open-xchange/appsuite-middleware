@@ -1470,6 +1470,7 @@ public final class OXFolderSQL {
 			}
 			stmt = writeCon.prepareStatement(SQL_DROP_SYS_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
 			stmt.setInt(1, ctx.getContextId());
+			stmt.setInt(2, entity);
 			stmt.executeUpdate();
 		} finally {
 			closeResources(null, stmt, createReadCon ? writeCon : null, false, ctx);
