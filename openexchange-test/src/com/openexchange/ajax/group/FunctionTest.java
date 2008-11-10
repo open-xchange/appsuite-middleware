@@ -53,17 +53,12 @@ import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
+import org.json.JSONArray;
 
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.group.actions.ChangeRequest;
-import com.openexchange.ajax.group.actions.ChangeResponse;
-import com.openexchange.ajax.group.actions.CreateRequest;
-import com.openexchange.ajax.group.actions.CreateResponse;
-import com.openexchange.ajax.group.actions.DeleteRequest;
-import com.openexchange.ajax.group.actions.GetRequest;
-import com.openexchange.ajax.group.actions.ListRequest;
-import com.openexchange.ajax.group.actions.SearchRequest;
+import com.openexchange.ajax.group.actions.*;
 import com.openexchange.group.Group;
 
 /**
@@ -82,11 +77,16 @@ public final class FunctionTest extends AbstractAJAXSession {
     }
 
     public void testSearch() throws Throwable {
-        final Group[] groups = GroupTools.search(getClient(),
-            new SearchRequest("*")).getGroups();
+        SearchResponse response = GroupTools.search(getClient(),
+                new SearchRequest("*"));
+        final Group[] groups = response.getGroups();
         LOG.info("Found " + groups.length + " groups.");
         assertTrue("Size of group array should be more than 0.",
             groups.length > 0);
+
+        JSONArray arr = (JSONArray) response.getResponse().getData();
+        assertContainsLastModifiedUTC(arr);
+
     }
 
     public void testRealSearch() throws Throwable {
@@ -106,13 +106,25 @@ public final class FunctionTest extends AbstractAJAXSession {
         for (int i = 0; i < groupIds.length; i++) {
             groupIds[i] = groups[i].getIdentifier();
         }
-        groups = GroupTools.list(getClient(), new ListRequest(groupIds))
+        ListResponse listResponse = GroupTools.list(getClient(), new ListRequest(groupIds));
+        groups = listResponse
             .getGroups();
         LOG.info("Listed " + groups.length + " groups.");
         assertTrue("Size of group array should be more than 0.",
             groups.length > 0);
         assertEquals("Size of requested groups and listed groups should be equal.",
             groupIds.length, groups.length);
+
+        JSONArray arr = (JSONArray) listResponse.getResponse().getData();
+        assertContainsLastModifiedUTC(arr);
+    }
+
+    public void assertContainsLastModifiedUTC(JSONArray arr) {
+        for(int i = 0, size = arr.length(); i < size; i++) {
+            JSONObject entry = arr.optJSONObject(i);
+            assertNotNull(entry);
+            assertTrue(entry.has("last_modified_utc"));
+        }
     }
 
     public void testGet() throws Throwable {
@@ -122,10 +134,13 @@ public final class FunctionTest extends AbstractAJAXSession {
         assertTrue("Size of group array should be more than 0.",
             groups.length > 0);
         final int pos = new Random(System.currentTimeMillis()).nextInt(groups
-            .length); 
-        final Group group = GroupTools.get(getClient(),
-            new GetRequest(groups[pos].getIdentifier())).getGroup();
+            .length);
+        GetResponse response = GroupTools.get(getClient(),
+                new GetRequest(groups[pos].getIdentifier()));
+        final Group group = response.getGroup();
         LOG.info("Loaded group: " + group.toString());
+        JSONObject entry = (JSONObject) response.getData();
+        assertTrue(entry.has("last_modified_utc"));
     }
 
     public void testCreateChangeDelete() throws Throwable {
