@@ -53,7 +53,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.fields.ParticipantsFields;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.resource.Resource;
+
+import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * {@link ResourceWriter} - Writer for resources
@@ -62,8 +66,9 @@ import com.openexchange.resource.Resource;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ResourceWriter extends DataWriter {
+    private TimeZone utc = TimeZone.getTimeZone("utc");
 
-	/**
+    /**
 	 * Initializes a new {@link ResourceWriter}
 	 */
 	public ResourceWriter() {
@@ -83,5 +88,6 @@ public class ResourceWriter extends DataWriter {
 	public void writeResource(final Resource resource, final JSONObject jsonObj) throws JSONException {
 		writeParameter(ParticipantsFields.ID, resource.getIdentifier(), jsonObj, resource.getIdentifier() > 0);
 		writeParameter(ParticipantsFields.DISPLAY_NAME, resource.getDisplayName(), jsonObj);
-	}
+        writeParameter(DataFields.LAST_MODIFIED_UTC, resource.getLastModified(), utc, jsonObj);
+    }
 }
