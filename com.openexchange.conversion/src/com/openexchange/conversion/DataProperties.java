@@ -187,9 +187,9 @@ public final class DataProperties {
 	}
 
 	/**
-	 * Gets this data properties as a {@link Map map}
+	 * Gets this data properties as a {@link Map java.util.Map}
 	 * 
-	 * @return This data properties as a {@link Map map}
+	 * @return This data properties as a {@link Map java.util.Map}
 	 */
 	public Map<String, String> toMap() {
 		if (map.isEmpty()) {
