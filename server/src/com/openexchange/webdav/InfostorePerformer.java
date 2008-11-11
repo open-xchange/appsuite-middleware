@@ -273,10 +273,18 @@ public class InfostorePerformer implements SessionHolder {
 	}
 	
 	public ServerSession getSessionObject() {
-		return session.get();
+        sessionNotNull();
+        return session.get();
 	}
 
-	public Context getContext() {
+    private void sessionNotNull() {
+        if(session.get() == null) {
+            IllegalStateException exc = new IllegalStateException();
+            LOG.error("No session found in Session holder", exc.fillInStackTrace());
+        }
+    }
+
+    public Context getContext() {
 		return session.get().getContext();
 	}
 	

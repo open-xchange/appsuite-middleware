@@ -64,6 +64,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.ConflictException;
@@ -344,9 +345,11 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			dumpMetadataToDB();
             if(propertyHelper.mustWrite()) {
                 final ServerSession session = getSession();
-                final EffectiveInfostorePermission perm = security.getInfostorePermission(getId(),session.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()),
-					UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-							session.getContext()));
+                Context ctx = session.getContext();
+                int userId = session.getUserId();
+                final EffectiveInfostorePermission perm = security.getInfostorePermission(getId(), ctx, UserStorage.getStorageUser(userId, ctx),
+					UserConfigurationStorage.getInstance().getUserConfigurationSafe(userId,
+							ctx));
                 if(!perm.canWriteObject()) {
                     throw new WebdavException("No Write Permission", getUrl(), HttpServletResponse.SC_FORBIDDEN);    
                 }
