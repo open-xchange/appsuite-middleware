@@ -70,6 +70,7 @@ import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
+import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
 import com.openexchange.groupware.tx.AlwaysWriteConnectionProvider;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -166,7 +167,8 @@ public class InfostorePerformer implements SessionHolder {
 		infoFactory.setInfoProperties(new PropertyStoreImpl("infostore_property"));
 		infoFactory.setProvider(new AlwaysWriteConnectionProvider(new DBPoolProvider()));
 		infoFactory.setResolver(new PathResolverImpl(infoFactory.getDatabase()));
-		infoFactory.setSessionHolder(this);
+        infoFactory.setSecurity(new InfostoreSecurityImpl());
+        infoFactory.setSessionHolder(this);
 		this.factory = infoFactory;
 		
 		
