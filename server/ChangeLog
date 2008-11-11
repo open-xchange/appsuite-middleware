@@ -1,3 +1,9 @@
+* 2008-11-11 - marcus.klein@open-xchange.com
+
+ - Bugfix 12495: Setting recurrence date position if a change exception is
+   created. Added update task to fix change exception without recurrence date
+   position.
+
 * 2008-11-06 - marcus.klein@open-xchange.com
 
  - Bugfix #12442: Setting modified_by attribute if series is updated.
