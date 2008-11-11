@@ -355,6 +355,7 @@ public class MailFolder implements Serializable {
 	 * 
 	 * @return The number of messages marked for deletion in this folder or
 	 *         <code>-1</code> if this mail folder does not hold messages
+	 * @see #isHoldsMessages()
 	 */
 	public int getDeletedMessageCount() {
 		return deletedMessageCount;
@@ -431,6 +432,7 @@ public class MailFolder implements Serializable {
 	 * 
 	 * @return The number of messages or <code>-1</code> if this mail folder
 	 *         does not hold messages
+	 * @see #isHoldsMessages()
 	 */
 	public int getMessageCount() {
 		return messageCount;
@@ -509,6 +511,7 @@ public class MailFolder implements Serializable {
 	 * 
 	 * @return The number of unread messages or <code>-1</code> if this mail
 	 *         folder does not hold messages
+	 * @see #isHoldsMessages()
 	 */
 	public int getUnreadMessageCount() {
 		return unreadMessageCount;
