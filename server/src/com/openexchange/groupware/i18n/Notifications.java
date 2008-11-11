@@ -137,8 +137,6 @@ public class Notifications {
 		"[start]\n" +
 		"[end]\n" +
 		"[series]\n" + 
-		"[delete_exceptions]\n" + 
-		"[change_exceptions]\n" + 
 		"\n" + 
 		"[description]" + 
 		"\n" + 
@@ -170,8 +168,6 @@ public class Notifications {
 		"[start]\n" +
 		"[end]\n" + 
 		"[series]\n" + 
-		"[delete_exceptions]\n" + 
-		"[change_exceptions]\n" + 
 		"\n" + 
 		"[description]" + 
 		"\n" + 
@@ -242,8 +238,6 @@ public class Notifications {
 		"[start]\n" + 
 		"[end]\n" + 
 		"[series]\n" + 
-		"[delete_exceptions]\n" + 
-		"[change_exceptions]\n" + 
 		"\n" + 
 		"[description]\n" + 
 		"\n" + 
@@ -347,8 +341,6 @@ public class Notifications {
 		"[start]\n" + 
 		"[end]\n" + 
 		"[series]\n" + 
-		"[delete_exceptions]\n" + 
-		"[change_exceptions]\n" + 
 		"\n" + 
 		"[description]\n" + 
 		"\n" + 
@@ -380,8 +372,6 @@ public class Notifications {
 		"[start]\n" + 
 		"[end]\n" + 
 		"[series]\n" + 
-		"[delete_exceptions]\n" + 
-		"[change_exceptions]\n" + 
 		"\n" + 
 		"[description]\n" + 
 		"\n" + 
@@ -453,8 +443,6 @@ public class Notifications {
 		"[start]\n" + 
 		"[end]\n" + 
 		"[series]\n" + 
-		"[delete_exceptions]\n" + 
-		"[change_exceptions]\n" + 
 		"\n" + 
 		"[description]" + 
 		"\n" + 
