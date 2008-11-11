@@ -67,6 +67,6 @@ public class ContactsRepairLinksAttachments2 extends ContactsRepairLinksAttachme
      */
     @Override
     public int addedWithVersion() {
-        return 26;
+        return 27;
     }
 }

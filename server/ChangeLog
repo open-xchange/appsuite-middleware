@@ -15,6 +15,9 @@
 
  - Changed database authentication bundle to use only context and user OSGi
    services instead of static interfaces.
+ - Bugfix 12495: Setting recurrence date position if a change exception is
+   created. Added update task to fix change exception without recurrence date
+   position.
 
 * 2008-11-07 - francisco.laguna@open-xchange.com
 

@@ -83,7 +83,7 @@ public class TaskCreateUserSettingServer implements UpdateTask {
 	private static final Log LOG = LogFactory.getLog(TaskCreateUserSettingServer.class);
 	
 	public int addedWithVersion() {
-		return 24;
+		return 25;
 	}
 
 	public int getPriority() {

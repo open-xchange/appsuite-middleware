@@ -3392,11 +3392,12 @@ class CalendarMySQL implements CalendarSqlImp {
 							}
 						}
 
-						final java.util.Date deleted_exceptions[] = edao.getDeleteException();
-						final java.util.Date changed_exceptions[] = edao.getChangeException();
-						final java.util.Date calculated_exception = edao.getRecurrenceDatePosition();
+						final Date deleted_exceptions[] = edao.getDeleteException();
+						final Date changed_exceptions[] = edao.getChangeException();
+						final Date calculated_exception = edao.getRecurrenceDatePosition();
 						edao.removeDeleteExceptions();
 						edao.removeChangeExceptions();
+						edao.setChangeExceptions(new Date[] { calculated_exception });
 						CalendarCommonCollection.removeParticipant(edao, uid);
 						CalendarCommonCollection.removeUserParticipant(edao, uid);
 						edao.setModifiedBy(uid);
@@ -3413,7 +3414,6 @@ class CalendarMySQL implements CalendarSqlImp {
 						update.setContext(ctx);
 						update.setObjectID(edao.getRecurrenceID());
 						update.setDeleteExceptions(CalendarCommonCollection.removeException(deleted_exceptions, calculated_exception));
-						//update.setChangeExceptions(new java.util.Date[] { calculated_exception });
 						update.setModifiedBy(uid);
 						try {
 							final CalendarDataObject ldao = loadObjectForUpdate(update, so, ctx, fid);

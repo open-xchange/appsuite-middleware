@@ -87,7 +87,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
 			FolderAddPermColumnUpdateTask.class);
 
 	public int addedWithVersion() {
-		return 25;
+		return 26;
 	}
 
 	public int getPriority() {
