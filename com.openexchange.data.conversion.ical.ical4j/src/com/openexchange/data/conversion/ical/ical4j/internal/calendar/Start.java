@@ -55,6 +55,7 @@ import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.
 import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.parseDate;
 
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.List;
 import java.util.Calendar;
@@ -112,17 +113,20 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
     /**
      * {@inheritDoc}
      */
-    public void parse(int index, final T component, final U calendar, final TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) {
+    public void parse(int index, final T component, final U calendar,
+        final TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) {
         final DtStart dtStart = new DtStart();
-        final Date start = parseDate(component, dtStart, timeZone);
-        calendar.setStartDate(start);
-        if (!isDateTime(component, dtStart)) {
-            if (calendar instanceof AppointmentObject) {
-                setFullTime((AppointmentObject)calendar, start, TimeZone.getTimeZone("UTC"));
-            } else {
-                calendar.setEndDate(new Date(start.getTime() + 24 * 60 * 60 * 1000));
-            }
+        final boolean isDateTime = isDateTime(component, dtStart);
+        final TimeZone UTC = TimeZone.getTimeZone("UTC");
+        final Date start;
+        if (isDateTime) {
+            start = parseDate(component, dtStart, timeZone);
         } else {
+            start = parseDate(component, dtStart, UTC);
+        }
+        calendar.setStartDate(start);
+        // If an end is specified end date will be overwritten.
+        if (isDateTime) {
             /* RFC 2445 4.6.1:
              * For cases where a "VEVENT" calendar component specifies a "DTSTART"
              * property with a DATE-TIME data type but no "DTEND" property, the
@@ -130,21 +134,19 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
              * the "DTSTART" property.
              */
             calendar.setEndDate(start);
+        } else {
+            // Only the date is specified. Then we have to set the end to at
+            // least 1 day later. Will be overwritten if DTEND is specified.
+            final Calendar calendarUTC = new GregorianCalendar();
+            calendarUTC.setTimeZone(UTC);
+            calendarUTC.setTime(start);
+            calendarUTC.add(Calendar.DATE, 1);
+            calendar.setEndDate(calendarUTC.getTime());
+            // Special flag for appointments.
+            if (calendar instanceof AppointmentObject) {
+                final AppointmentObject appointment = (AppointmentObject) calendar;
+                appointment.setFullTime(true);
+            }
         }
-    }
-
-    private void setFullTime(final AppointmentObject appointment,
-        final Date start, final TimeZone tz) {
-        appointment.setFullTime(true);
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(start);
-        calendar.setTimeZone(tz);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND,0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        appointment.setStartDate(calendar.getTime());
-        calendar.add(Calendar.DATE, 1);
-        appointment.setEndDate(calendar.getTime());
     }
 }
