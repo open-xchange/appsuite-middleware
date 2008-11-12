@@ -84,7 +84,6 @@ import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.ajax.task.actions.DeleteRequest;
-import com.openexchange.ajax.task.actions.DeleteResponse;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
