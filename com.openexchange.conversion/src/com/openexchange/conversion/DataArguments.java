@@ -49,6 +49,7 @@
 
 package com.openexchange.conversion;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,6 +68,8 @@ public final class DataArguments {
 	public static final DataArguments EMPTY_ARGS = new DataArguments(true, 0);
 
 	private final Map<String, String> map;
+
+	private String id;
 
 	/**
 	 * Initializes a new {@link DataArguments} with the default initial capacity
@@ -143,6 +146,7 @@ public final class DataArguments {
 	 *         specified key.
 	 */
 	public String put(final String key, final String value) {
+		id = null;
 		return map.put(key, value);
 	}
 
@@ -157,6 +161,54 @@ public final class DataArguments {
 	 *         <code>null</code> if there was no mapping for key.
 	 */
 	public String remove(final String key) {
+		id = null;
 		return map.remove(key);
 	}
+
+	/**
+	 * Gets the ID for this data properties.
+	 * <p>
+	 * The ID is identical for equal instances of {@link DataArguments}.
+	 * 
+	 * @return The ID for this data properties
+	 */
+	public String getID() {
+		if (id != null) {
+			return id;
+		}
+		if (map.isEmpty()) {
+			return "";
+		}
+		/*
+		 * Sort keys
+		 */
+		final int size = map.size();
+		final String[] sortedKeys = map.keySet().toArray(new String[size]);
+		Arrays.sort(sortedKeys);
+		/*
+		 * Compute ID
+		 */
+		final StringBuilder builder = new StringBuilder(10 * size);
+		final int prime = 31;
+		{
+			final String key = sortedKeys[0];
+			int result = 1;
+			result = prime * result + ((key == null) ? 0 : key.hashCode());
+			final String val = map.get(key);
+			result = prime * result + ((val == null) ? 0 : val.hashCode());
+			builder.append(Math.abs(result));
+		}
+		for (int i = 1; i < size; i++) {
+			final String key = sortedKeys[i];
+			int result = 1;
+			result = prime * result + ((key == null) ? 0 : key.hashCode());
+			final String val = map.get(key);
+			result = prime * result + ((val == null) ? 0 : val.hashCode());
+			builder.append('-');
+			builder.append(Math.abs(result));
+		}
+		id = builder.toString();
+		return id;
+	}
+
 }
