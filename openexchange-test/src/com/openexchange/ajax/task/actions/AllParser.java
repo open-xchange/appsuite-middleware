@@ -55,6 +55,7 @@ import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAllParser;
+import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.ListIDInt;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.tasks.Task;
@@ -63,7 +64,7 @@ import com.openexchange.groupware.tasks.Task;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class AllParser extends AbstractAllParser<AllResponse> {
+public class AllParser extends AbstractAllParser<CommonAllResponse> {
 
     /**
      * Default constructor.
@@ -76,17 +77,17 @@ public class AllParser extends AbstractAllParser<AllResponse> {
      * {@inheritDoc}
      */
     @Override
-    protected AllResponse instanciateResponse(final Response response) {
-        return new AllResponse(response);
+    protected CommonAllResponse instanciateResponse(final Response response) {
+        return new CommonAllResponse(response);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected AllResponse createResponse(final Response response)
+    protected CommonAllResponse createResponse(final Response response)
         throws JSONException {
-        final AllResponse retval = super.createResponse(response);
+        final CommonAllResponse retval = super.createResponse(response);
         final Iterator<Object[]> iter = retval.iterator();
         final ListIDs list = new ListIDs();
         final int folderPos = retval.getColumnPos(Task.FOLDER_ID);

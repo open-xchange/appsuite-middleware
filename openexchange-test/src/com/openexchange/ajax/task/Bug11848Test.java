@@ -55,11 +55,11 @@ import java.util.TimeZone;
 
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.ListID;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.ajax.task.actions.AllRequest;
-import com.openexchange.ajax.task.actions.AllResponse;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
@@ -115,7 +115,7 @@ public final class Bug11848Test extends AbstractAJAXSession {
         }
         try {
             final AllRequest request = new AllRequest(folder, new int[] { Task.OBJECT_ID }, Task.END_DATE, Order.ASCENDING);
-            final AllResponse response = client.execute(request);
+            final CommonAllResponse response = client.execute(request);
             int pos = 0;
             for (final ListID identifier : response.getListIDs()) {
                 final Task task = tasks[pos];

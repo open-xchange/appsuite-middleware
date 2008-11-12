@@ -56,7 +56,6 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import com.openexchange.ajax.appointment.action.DeleteRequest;
-import com.openexchange.ajax.appointment.action.DeleteResponse;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -65,6 +64,7 @@ import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
@@ -258,7 +258,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
         //Try to delete the appointment
         deleteRequest = new DeleteRequest(appointment.getObjectID(), folderId, appointment.getLastModified());
         try {
-            DeleteResponse deleteResponse = client.execute(deleteRequest);
+            CommonDeleteResponse deleteResponse = client.execute(deleteRequest);
             String test = "123";
         } catch (Exception e) {
             fail("Exception during deletion of corrupted appointment.");

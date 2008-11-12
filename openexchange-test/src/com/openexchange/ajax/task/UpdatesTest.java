@@ -53,12 +53,12 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.ajax.framework.CommonUpdatesRequest.Ignore;
 import com.openexchange.ajax.task.actions.AllRequest;
-import com.openexchange.ajax.task.actions.AllResponse;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
@@ -106,7 +106,7 @@ public class UpdatesTest extends AbstractTaskTest {
         final MultipleResponse<InsertResponse> mInsert = client.execute(
             MultipleRequest.create(inserts));
         int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.FOLDER_ID };
-        final AllResponse allR = TaskTools.all(client, new AllRequest(
+        final CommonAllResponse allR = TaskTools.all(client, new AllRequest(
             folderId, columns, Task.TITLE, Order.ASCENDING));
         assertTrue("Can't find " + total + " inserted tasks.",
             allR.getArray().length >= total);

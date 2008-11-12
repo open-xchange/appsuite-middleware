@@ -58,13 +58,13 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.task.actions.AllRequest;
-import com.openexchange.ajax.task.actions.AllResponse;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
@@ -180,7 +180,7 @@ public class ListTest extends AbstractTaskTest {
 
         // A now gets all of the folder.
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.FOLDER_ID };
-        final AllResponse allR = TaskTools.all(clientA, new AllRequest(
+        final CommonAllResponse allR = TaskTools.all(clientA, new AllRequest(
             folderA, columns, Task.TITLE, Order.ASCENDING));
         
         // Now B deletes some of them.

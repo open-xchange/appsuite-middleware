@@ -57,10 +57,20 @@ import com.openexchange.ajax.container.Response;
  */
 public class CommonAllResponse extends AbstractAllResponse {
 
+	private ListIDs list;
+	
     /**
      * @param response
      */
     public CommonAllResponse(final Response response) {
         super(response);
+    }
+    
+    public void setListIDs(final ListIDs list) {
+        this.list = list;
+    }
+
+    public ListIDs getListIDs() {
+        return list;
     }
 }

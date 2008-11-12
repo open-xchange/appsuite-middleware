@@ -53,13 +53,13 @@ import java.util.Date;
 import java.util.Iterator;
 
 import com.openexchange.ajax.contact.action.AllRequest;
-import com.openexchange.ajax.contact.action.AllResponse;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.contact.action.ListRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
@@ -115,7 +115,7 @@ public class NewListTest extends AbstractAJAXSession {
         final int[] columns = new int[] { ContactObject.SUR_NAME, ContactObject.OBJECT_ID, ContactObject.FOLDER_ID };
         
         
-        final AllResponse allR = (AllResponse) Executor.execute(clientA, new AllRequest(folderA, columns, listStart, listEnd));
+        final CommonAllResponse allR = (CommonAllResponse) Executor.execute(clientA, new AllRequest(folderA, columns, listStart, listEnd));
         
         // Now B deletes some of them.
         final DeleteRequest[] deletes1 = new DeleteRequest[DELETES];

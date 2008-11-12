@@ -54,9 +54,9 @@ import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.task.actions.AbstractTaskRequest;
 import com.openexchange.ajax.task.actions.AllRequest;
-import com.openexchange.ajax.task.actions.AllResponse;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
@@ -105,7 +105,7 @@ public class SmokeTest extends AbstractTaskTest {
         final GetResponse getR = TaskTools.get(client, new GetRequest(insertR));
         final Task reload = getR.getTask(timeZone);
         TaskTools.compareAttributes(task, reload);
-        final AllResponse allR = TaskTools.all(client, new AllRequest(
+        final CommonAllResponse allR = TaskTools.all(client, new AllRequest(
             folderId, AbstractTaskRequest.GUI_COLUMNS, AllRequest.GUI_SORT,
             AllRequest.GUI_ORDER));
         boolean foundObject = false;

@@ -10,11 +10,11 @@ import org.apache.commons.logging.LogFactory;
 import com.meterware.httpunit.WebConversation;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
-import com.openexchange.ajax.appointment.action.DeleteResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.configuration.AJAXConfig;
@@ -125,6 +125,6 @@ public class Bug9742Test extends AbstractAJAXSession {
 		assertEquals("unexpected appointments size", 4, appointmentCounter);
 		
 		final DeleteRequest deleteRequest = new DeleteRequest(objectId, appointmentFolderId, modified);
-		final DeleteResponse deleteResponse = Executor.execute(ajaxSession, deleteRequest);
+		final CommonDeleteResponse deleteResponse = Executor.execute(ajaxSession, deleteRequest);
 	}
 }

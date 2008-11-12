@@ -55,13 +55,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.openexchange.ajax.appointment.action.AllRequest;
-import com.openexchange.ajax.appointment.action.AllResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
@@ -124,7 +124,7 @@ public class NewListTest extends AbstractAJAXSession {
         // A now gets all of the folder.
         final int[] columns = new int[] { AppointmentObject.TITLE, AppointmentObject
             .OBJECT_ID, AppointmentObject.FOLDER_ID };
-        final AllResponse allR = (AllResponse) Executor.execute(clientA,
+        final CommonAllResponse allR = (CommonAllResponse) Executor.execute(clientA,
             new AllRequest(folderA, columns, listStart, listEnd));
         
         // TODO This delete of B does not remove the appointments but only the

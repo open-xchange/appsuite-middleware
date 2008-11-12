@@ -55,13 +55,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.groupware.tasks.Task;
 
 /**
  * Stores parameters for the task delete request.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class DeleteRequest extends AbstractTaskRequest<DeleteResponse> {
+public class DeleteRequest extends AbstractTaskRequest<CommonDeleteResponse> {
 
     private final int folderId;
 

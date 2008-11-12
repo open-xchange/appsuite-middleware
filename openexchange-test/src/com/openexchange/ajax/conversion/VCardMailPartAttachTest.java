@@ -56,7 +56,7 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.contact.action.AllRequest;
-import com.openexchange.ajax.contact.action.AllResponse;
+import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.mail.netsol.FolderAndID;
@@ -101,7 +101,7 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
 			final int folderId = getPrivateContactFolder();
 			final Date listStart = new Date(TimeTools.getHour(-1));
 			final Date listEnd = new Date(TimeTools.getHour(2));
-			final AllResponse allR = (AllResponse) Executor.execute(getSession(), new AllRequest(folderId,
+			final CommonAllResponse allR = (CommonAllResponse) Executor.execute(getSession(), new AllRequest(folderId,
 					new int[] { DataObject.OBJECT_ID }, listStart, listEnd));
 			final ListIDs listIDs = allR.getListIDs();
 			if (listIDs.size() == 0) {

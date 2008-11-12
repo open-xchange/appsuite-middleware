@@ -51,12 +51,13 @@ package com.openexchange.ajax.contact.action;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
 
 /**
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class DeleteResponse extends AbstractAJAXResponse {
+public class DeleteResponse extends CommonDeleteResponse {
 
     /**
      * @param response

@@ -56,13 +56,14 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.groupware.container.ContactObject;
 
 /**
  * Stores parameters for the delete request.
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class DeleteRequest extends AbstractContactRequest<DeleteResponse> {
+public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> {
 
     private final int folderId;
 
