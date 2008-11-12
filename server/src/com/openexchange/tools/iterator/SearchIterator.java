@@ -71,6 +71,7 @@ public interface SearchIterator<T> {
 		}
 
 		public void close() throws SearchIteratorException {
+			// Not applicable
 		}
 
 		public int size() {
@@ -82,6 +83,7 @@ public interface SearchIterator<T> {
 		}
 
 		public void addWarning(final AbstractOXException warning) {
+			// Not applicable
 		}
 
 		public AbstractOXException[] getWarnings() {
