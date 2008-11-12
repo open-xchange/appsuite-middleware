@@ -541,6 +541,59 @@ public class HeaderCollection implements Serializable {
 		return sb.toString();
 	}
 
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final HeaderCollection other = (HeaderCollection) obj;
+		if (count != other.count) {
+			return false;
+		}
+		if (map.size() != other.map.size()) {
+			return false;
+		}
+		final HeaderName[] names = map.keySet().toArray(new HeaderName[map.size()]);
+		java.util.Arrays.sort(names);
+		final HeaderName[] otherNames = other.map.keySet().toArray(new HeaderName[other.map.size()]);
+		java.util.Arrays.sort(otherNames);
+		if (!java.util.Arrays.equals(names, otherNames)) {
+			return false;
+		}
+		for (int i = 0; i < names.length; i++) {
+			final List<String> list = map.get(names[i]);
+			final List<String> otherList = other.map.get(names[i]);
+			if (list == null) {
+				if (otherList != null) {
+					return false;
+				}
+			} else if (!list.equals(otherList)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		final HeaderName[] names = map.keySet().toArray(new HeaderName[map.size()]);
+		java.util.Arrays.sort(names);
+		result = prime * result + java.util.Arrays.hashCode(names);
+		for (int i = 0; i < names.length; i++) {
+			final List<String> list = map.get(names[i]);
+			result = prime * result + ((list == null) ? 0 : list.hashCode());
+		}
+		return result;
+	}
+
 	/*
 	 * ############ UTILITY METHODS ##############
 	 */
