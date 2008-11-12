@@ -204,13 +204,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     cdao.setRecurrence(setString(i++, load_resultset));
                     cdao.setDelExceptions(setString(i++, load_resultset));
                     cdao.setExceptions(setString(i++, load_resultset));
+                    extractRecurringInformation(cdao);
                     if (cdao.getObjectID() == cdao.getRecurrenceID()) {
                         cdao.calculateRecurrence();
-                        /*
-                        if (cdao.containsOccurrence()) {
-                            cdao.removeUntil();
-                        }
-                         */
                     }
                 }
             } else {
@@ -802,30 +798,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 }
             }
             
-            if (cdao.isSequence()) {
-                CalendarRecurringCollection.fillDAO(cdao);
-                if (cdao.getObjectID() != cdao.getRecurrenceID()) {
-                    // Recurring type on a exception must be removed.
-                    CalendarCommonCollection.removeRecurringType(cdao);
-                    if (cdao.getExceptions() != null) {
-                        try {
-                            final long exc = new Long(cdao.getExceptions()).longValue();
-                            cdao.setRecurrenceDatePosition(new Date(exc));
-                        } catch(final NumberFormatException nfe) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn("Unable to calculate exception oid:context:exceptions "+cdao.getObjectID()+":"+cdao.getContextID()+":"+cdao.getExceptions());
-                            }
-                        }
-                    }
-                } else {
-                    if (cdao.containsOccurrence()) {
-                        if (!cdao.containsUntil()) {
-                            // INFO: Sombody needs this value, have to check for side effects
-                            cdao.setUntil(new Date(CalendarRecurringCollection.normalizeLong((cdao.getStartDate().getTime() + (CalendarRecurringCollection.MILLI_DAY * cdao.getRecurrenceCalculator())))));
-                        }
-                    }
-                }
-            }
+            extractRecurringInformation(cdao);
             if (strict && oids != null) {
                 int index = result_counter;
                 if (oids[index][0] != cdao.getObjectID()) {
@@ -886,6 +859,38 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
         has_next = false;
         return null;
+    }
+
+    /**
+     * This method does the complex filling of the calendar object if some
+     * series appointment or some series exception appointment is loaded.
+     * @param cdao loaded object.
+     * @throws OXException if extracting the recurrence pattern string fails.
+     */
+    private void extractRecurringInformation(final CalendarDataObject cdao)
+        throws OXException {
+        if (cdao.isSequence()) {
+            CalendarRecurringCollection.fillDAO(cdao);
+            if (cdao.getObjectID() == cdao.getRecurrenceID()) {
+                if (cdao.containsOccurrence() && !cdao.containsUntil()) {
+                    // INFO: Sombody needs this value, have to check for side effects
+                    cdao.setUntil(new Date(CalendarRecurringCollection.normalizeLong((cdao.getStartDate().getTime() + (Constants.MILLI_DAY * cdao.getRecurrenceCalculator())))));
+                }
+            } else {
+                // Recurring type on a exception must be removed.
+                CalendarCommonCollection.removeRecurringType(cdao);
+                if (cdao.getExceptions() != null) {
+                    try {
+                        final long exc = new Long(cdao.getExceptions()).longValue();
+                        cdao.setRecurrenceDatePosition(new Date(exc));
+                    } catch(final NumberFormatException nfe) {
+                        if (LOG.isWarnEnabled()) {
+                            LOG.warn("Unable to calculate exception oid:context:exceptions "+cdao.getObjectID()+":"+cdao.getContextID()+":"+cdao.getExceptions());
+                        }
+                    }
+                }
+            }
+        }
     }
     
     public final SearchIterator<CalendarDataObject> setResultSet(final ResultSet rs, final PreparedStatement prep, final int[] cols, final CalendarSqlImp cimp, final Connection readcon, final int from, final int to, final Session so, final Context ctx) throws SQLException {
