@@ -62,6 +62,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.contact.Contacts.mapper;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -338,7 +339,7 @@ public class ContactMySql implements ContactSql {
 						final String field = Contacts.mapping[ContactObject.CATEGORIES].getDBFieldName();
 						String value = values[i];
 
-						if (!value.equals("*")) {
+						if (!"*".equals(value)) {
 							value = StringCollection.prepareForSearch(value, false);
 
 							if (value.indexOf(',') != -1) {
@@ -359,7 +360,7 @@ public class ContactMySql implements ContactSql {
 						final String field = Contacts.mapping[fields[i]].getDBFieldName();
 						String value = values[i];
 
-						if (!value.equals("*")) {
+						if (!"*".equals(value)) {
 							value = StringCollection.prepareForSearch(value);
 
 							sb.append("( co.").append(field).append(" LIKE ? ) ").append(search_habit).append(' ');
@@ -740,15 +741,14 @@ public class ContactMySql implements ContactSql {
 
 	public String buildContactSelectString(final int cols[]) {
 		final StringBuilder sb = new StringBuilder();
-
 		for (int a = 0; a < cols.length; a++) {
-			if (Contacts.mapping[cols[a]] != null) {
-				sb.append("co.").append(Contacts.mapping[cols[a]].getDBFieldName()).append(',');
-			} else {
+			final mapper m = Contacts.mapping[cols[a]];
+			if (m == null) {
 				LOG.warn("UNKNOWN FIELD -> " + cols[a]);
+			} else {
+				sb.append("co.").append(m.getDBFieldName()).append(',');
 			}
 		}
-
 		return sb.toString().substring(0, sb.length() - 1);
 	}
 
@@ -764,11 +764,11 @@ public class ContactMySql implements ContactSql {
 		if (b != null && b.length() > 0 && !b.equals("*")) {
 			bis = b;
 		}
-		if (!von.equals("*")) {
+		if (!"*".equals(von)) {
 			sb.append("co.").append(field).append(" >= ? ").append(sh).append(' ');
 			injectors.add(new StringSQLInjector(von));
 		}
-		if (!bis.equals("*")) {
+		if (!"*".equals(bis)) {
 			sb.append("co.").append(field).append(" <= ? ").append(sh).append(' ');
 			injectors.add(new StringSQLInjector(bis));
 		}
@@ -947,19 +947,30 @@ public class ContactMySql implements ContactSql {
 				.append(oid).append(" AND cid = ").append(cid).toString();
 	}
 
+	private static final String PREFIXED_FIELDS = "co.fid,co.cid,co.created_from,co.creating_date,"
+			+ "co.changed_from,co.changing_date, co.intfield01";
+
 	public StringBuilder iFgetColsStringFromDeleteTable(final int[] cols) {
-		final StringBuilder sb = new StringBuilder("SELECT ")
-				.append(buildContactSelectString(cols))
-				.append(
-						",co.fid,co.cid,co.created_from,co.creating_date,co.changed_from,co.changing_date, co.intfield01 from del_contacts AS co ");
+		final String fields = buildContactSelectString(cols);
+		final int len = fields.length();
+		final StringBuilder sb = new StringBuilder(len + 256).append("SELECT ");
+		sb.append(PREFIXED_FIELDS);
+		if (len > 0) {
+			sb.append(',').append(fields);
+		}
+		sb.append(" FROM del_contacts AS co ");
 		return sb;
 	}
 
 	public StringBuilder iFgetColsString(final int[] cols) {
-		final StringBuilder sb = new StringBuilder("SELECT ")
-				.append(buildContactSelectString(cols))
-				.append(
-						",co.fid,co.cid,co.created_from,co.creating_date,co.changed_from,co.changing_date, co.intfield01 from prg_contacts AS co ");
+		final String fields = buildContactSelectString(cols);
+		final int len = fields.length();
+		final StringBuilder sb = new StringBuilder(len + 256).append("SELECT ");
+		sb.append(PREFIXED_FIELDS);
+		if (len > 0) {
+			sb.append(',').append(fields);
+		}
+		sb.append(" FROM prg_contacts AS co ");
 		return sb;
 	}
 

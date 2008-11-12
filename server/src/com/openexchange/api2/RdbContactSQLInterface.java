@@ -83,6 +83,7 @@ import com.openexchange.groupware.contact.ContactExceptionFactory;
 import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.contact.Contacts;
+import com.openexchange.groupware.contact.Contacts.mapper;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -1273,31 +1274,35 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 	protected ContactObject convertResultSet2ContactObject(final ResultSet rs, final int cols[], final boolean check, final Connection readCon) throws OXException {
 		final ContactObject co = new ContactObject();
 		
-		try{
-			co.setContextId(rs.getInt(cols.length + 2));
-			co.setCreatedBy(rs.getInt(cols.length + 3));
+		try {
+			co.setContextId(rs.getInt(2));
+			co.setCreatedBy(rs.getInt(3));
 			
-			final long xx = rs.getLong((cols.length + 4));
+			final long xx = rs.getLong((4));
 			Date mi = new java.util.Date(xx);		
 			co.setCreationDate(mi);
 			
-			co.setModifiedBy(rs.getInt(cols.length + 5));
+			co.setModifiedBy(rs.getInt(5));
 
-			final long xx2 = rs.getLong((cols.length + 6));
+			final long xx2 = rs.getLong((6));
 			mi = new java.util.Date(xx2);		
 			co.setLastModified(mi);
 
-			co.setObjectID(rs.getInt(cols.length + 7));
-
-			int cnt = 1;
+			co.setObjectID(rs.getInt(7));
+			/*
+			 * Start at row count 8 to pass prefixed fields
+			 */
+			int cnt = 8;
 			for (int a = 0; a < cols.length; a++) {
-				Contacts.mapping[cols[a]].addToContactObject(rs, cnt, co, readCon, userId, memberInGroups, ctx,
-						userConfiguration);
-				cnt++;
+				final mapper m = Contacts.mapping[cols[a]];
+				if (m != null) {
+					m.addToContactObject(rs, cnt, co, readCon, userId, memberInGroups, ctx, userConfiguration);
+					cnt++;
+				}
 			}
 
 			if (!co.containsInternalUserId()){		
-				co.setParentFolderID(rs.getInt(cols.length+1));
+				co.setParentFolderID(rs.getInt(1));
 				if (check && !performSecurityReadCheck(co.getParentFolderID(), co.getCreatedBy(),userId,memberInGroups,session,readCon, ctx)){
 					throw EXCEPTIONS.createOXConflictException(50,Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 				}
