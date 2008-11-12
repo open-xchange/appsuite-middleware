@@ -744,7 +744,9 @@ public class ContactMySql implements ContactSql {
 		for (int a = 0; a < cols.length; a++) {
 			final mapper m = Contacts.mapping[cols[a]];
 			if (m == null) {
-				LOG.warn("UNKNOWN FIELD -> " + cols[a]);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("UNKNOWN FIELD -> " + cols[a]);
+				}
 			} else {
 				sb.append("co.").append(m.getDBFieldName()).append(',');
 			}
