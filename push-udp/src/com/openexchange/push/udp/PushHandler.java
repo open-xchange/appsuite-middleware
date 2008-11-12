@@ -63,7 +63,6 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;

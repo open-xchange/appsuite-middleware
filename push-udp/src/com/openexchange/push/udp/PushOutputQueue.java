@@ -193,6 +193,7 @@ public class PushOutputQueue implements Runnable {
 //                    action(pushDelayedObject);
 //                }
                 // Workaround for IBM Java (always sleeps 10 seconds even if push is added)
+                // Bug 11524
                 final PushDelayedObject pushDelayedObject = queue.poll();
                 if (pushDelayedObject != null) {
                     action(pushDelayedObject);
