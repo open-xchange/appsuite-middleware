@@ -8337,11 +8337,16 @@ public final class Contacts {
 				return "Object id";
 			}
 
-			public void setValueAsString(String s, final ContactObject co) {
+			public void setValueAsString(final String s, final ContactObject co) {
 				if (null == s) {
-					s = "0";
+					co.setObjectID(0);
+					return;
 				}
-				co.setObjectID(new Integer(s).intValue());
+				try {
+					co.setObjectID(Integer.parseInt(s));
+				} catch (final NumberFormatException e) {
+					co.setObjectID(0);
+				}
 			}
 		};
 		/** ************** * intfield02 * * ************ */
@@ -8389,11 +8394,16 @@ public final class Contacts {
 				return "Number of distributionlists";
 			}
 
-			public void setValueAsString(String s, final ContactObject co) {
+			public void setValueAsString(final String s, final ContactObject co) {
 				if (null == s) {
-					s = "0";
+					co.setNumberOfDistributionLists(0);
+					return;
 				}
-				co.setNumberOfDistributionLists(new Integer(s).intValue());
+				try {
+					co.setNumberOfDistributionLists(Integer.parseInt(s));
+				} catch (final NumberFormatException e) {
+					co.setNumberOfDistributionLists(0);
+				}
 			}
 		};
 		/** ************** * intfield03 * * ************ */
@@ -8441,11 +8451,16 @@ public final class Contacts {
 				return "Number of links";
 			}
 
-			public void setValueAsString(String s, final ContactObject co) {
+			public void setValueAsString(final String s, final ContactObject co) {
 				if (null == s) {
-					s = "0";
+					co.setNumberOfLinks(0);
+					return;
 				}
-				co.setNumberOfLinks(new Integer(s).intValue());
+				try {
+					co.setNumberOfLinks(Integer.parseInt(s));
+				} catch (final NumberFormatException e) {
+					co.setNumberOfLinks(0);
+				}
 			}
 		};
 		/** ************** * intfield02 Part 2 * * ************ */
@@ -8599,11 +8614,16 @@ public final class Contacts {
 				return "Folder id";
 			}
 
-			public void setValueAsString(String s, final ContactObject co) {
+			public void setValueAsString(final String s, final ContactObject co) {
 				if (null == s) {
-					s = "0";
+					co.setParentFolderID(0);
+					return;
 				}
-				co.setParentFolderID(new Integer(s).intValue());
+				try {
+					co.setParentFolderID(Integer.parseInt(s));
+				} catch (final NumberFormatException e) {
+					co.setParentFolderID(0);
+				}
 			}
 		};
 		/** ************** * cid * * ************ */
@@ -8651,11 +8671,16 @@ public final class Contacts {
 				return "Context id";
 			}
 
-			public void setValueAsString(String s, final ContactObject co) {
+			public void setValueAsString(final String s, final ContactObject co) {
 				if (null == s) {
-					s = "0";
+					co.setContextId(0);
+					return;
 				}
-				co.setContextId(new Integer(s).intValue());
+				try {
+					co.setContextId(Integer.parseInt(s));
+				} catch (final NumberFormatException e) {
+					co.setContextId(0);
+				}
 			}
 		};
 		/** ************** * pflag * * ************ */
@@ -8766,11 +8791,16 @@ public final class Contacts {
 				return "Created by";
 			}
 
-			public void setValueAsString(String s, final ContactObject co) {
+			public void setValueAsString(final String s, final ContactObject co) {
 				if (null == s) {
-					s = "0";
+					co.setCreatedBy(0);
+					return;
 				}
-				co.setCreatedBy(new Integer(s).intValue());
+				try {
+					co.setCreatedBy(Integer.parseInt(s));
+				} catch (final NumberFormatException e) {
+					co.setCreatedBy(0);
+				}
 			}
 		};
 		/** ************** * changed_from * * ************ */
@@ -8818,11 +8848,16 @@ public final class Contacts {
 				return "Modified by";
 			}
 
-			public void setValueAsString(String s, final ContactObject co) {
+			public void setValueAsString(final String s, final ContactObject co) {
 				if (null == s) {
-					s = "0";
+					co.setModifiedBy(0);
+					return;
 				}
-				co.setModifiedBy(new Integer(s).intValue());
+				try {
+					co.setModifiedBy(Integer.parseInt(s));
+				} catch (final NumberFormatException e) {
+					co.setModifiedBy(0);
+				}
 			}
 		};
 		/** ************** * creating_date * * ************ */
@@ -8968,10 +9003,10 @@ public final class Contacts {
 
 			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
 					throws SQLException {
-				if (co.getBirthday() != null) {
-					ps.setTimestamp(pos, new java.sql.Timestamp(co.getBirthday().getTime()));
-				} else {
+				if (co.getBirthday() == null) {
 					ps.setTimestamp(pos, null);
+				} else {
+					ps.setTimestamp(pos, new java.sql.Timestamp(co.getBirthday().getTime()));
 				}
 			}
 
@@ -8993,10 +9028,10 @@ public final class Contacts {
 			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
 					throws SQLException {
 				final java.util.Date d = (Date) ob;
-				if (d != null) {
-					ps.setTimestamp(position, new java.sql.Timestamp(d.getTime()));
-				} else {
+				if (d == null) {
 					ps.setTimestamp(position, null);
+				} else {
+					ps.setTimestamp(position, new java.sql.Timestamp(d.getTime()));
 				}
 			}
 
@@ -9046,10 +9081,10 @@ public final class Contacts {
 
 			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co)
 					throws SQLException {
-				if (co.getAnniversary() != null) {
-					ps.setTimestamp(pos, new java.sql.Timestamp(co.getAnniversary().getTime()));
-				} else {
+				if (co.getAnniversary() == null) {
 					ps.setTimestamp(pos, null);
+				} else {
+					ps.setTimestamp(pos, new java.sql.Timestamp(co.getAnniversary().getTime()));
 				}
 			}
 
@@ -9071,10 +9106,10 @@ public final class Contacts {
 			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
 					throws SQLException {
 				final java.util.Date d = (Date) ob;
-				if (d != null) {
-					ps.setTimestamp(position, new java.sql.Timestamp(d.getTime()));
-				} else {
+				if (d == null) {
 					ps.setTimestamp(position, null);
+				} else {
+					ps.setTimestamp(position, new java.sql.Timestamp(d.getTime()));
 				}
 			}
 
@@ -9143,12 +9178,12 @@ public final class Contacts {
 					final String y = new String(original.getImage1());
 
 					return (x.equals(y));
-				} else if (((co.getImage1() == null) && (original.getImage1() != null))
+				}
+				if (((co.getImage1() == null) && (original.getImage1() != null))
 						|| ((co.getImage1() != null) && (original.getImage1() == null))) {
 					return false;
-				} else {
-					return true;
 				}
+				return true;
 			}
 
 			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob)
@@ -9286,6 +9321,7 @@ public final class Contacts {
 			}
 
 			public void setValueAsString(final String s, final ContactObject co) {
+				// Nothing to do
 			}
 		};
 		/** ************** * intfield04 * * ************ */
@@ -9330,11 +9366,16 @@ public final class Contacts {
 				return null;
 			}
 
-			public void setValueAsString(String s, final ContactObject co) {
+			public void setValueAsString(final String s, final ContactObject co) {
 				if (null == s) {
-					s = "0";
+					co.setNumberOfImages(0);
+					return;
 				}
-				co.setNumberOfImages(new Integer(s).intValue());
+				try {
+					co.setNumberOfImages(Integer.parseInt(s));
+				} catch (final NumberFormatException e) {
+					co.setNumberOfImages(0);
+				}
 			}
 		};
 		/** ************** * userid * * ************ */
@@ -9386,11 +9427,16 @@ public final class Contacts {
 				return null;
 			}
 
-			public void setValueAsString(String s, final ContactObject co) {
+			public void setValueAsString(final String s, final ContactObject co) {
 				if (null == s) {
-					s = "0";
+					co.setInternalUserId(0);
+					return;
 				}
-				co.setInternalUserId(new Integer(s).intValue());
+				try {
+					co.setInternalUserId(Integer.parseInt(s));
+				} catch (final NumberFormatException e) {
+					co.setInternalUserId(0);
+				}
 			}
 		};
 		/** ************** * intfield05 * * ************ */
@@ -9446,11 +9492,16 @@ public final class Contacts {
 				return null;
 			}
 
-			public void setValueAsString(String s, final ContactObject co) {
+			public void setValueAsString(final String s, final ContactObject co) {
 				if (null == s) {
-					s = "0";
+					co.setLabel(0);
+					return;
 				}
-				co.setLabel(new Integer(s).intValue());
+				try {
+					co.setLabel(Integer.parseInt(s));
+				} catch (final NumberFormatException e) {
+					co.setLabel(0);
+				}
 			}
 		};
 		/** ************** * field90 * * ************ */
@@ -9510,6 +9561,7 @@ public final class Contacts {
 			}
 
 			public void setValueAsString(final String s, final ContactObject co) {
+				// Nothing to do
 			}
 		};
 		/** ************** * intfield06 * * ************ */
@@ -9565,11 +9617,16 @@ public final class Contacts {
 				return "Default address";
 			}
 
-			public void setValueAsString(String s, final ContactObject co) {
+			public void setValueAsString(final String s, final ContactObject co) {
 				if (null == s) {
-					s = "0";
+					co.setDefaultAddress(0);
+					return;
 				}
-				co.setDefaultAddress(new Integer(s).intValue());
+				try {
+					co.setDefaultAddress(Integer.parseInt(s));
+				} catch (final NumberFormatException e) {
+					co.setDefaultAddress(0);
+				}
 			}
 		};
 		/** ************** * intfield07 * * ************ */
@@ -9605,9 +9662,9 @@ public final class Contacts {
 			}
 
 			public boolean compare(final ContactObject co, final ContactObject original) {
-				if ((co.getMarkAsDistribtuionlist() == true) && (original.getMarkAsDistribtuionlist() == false)) {
+				if (co.getMarkAsDistribtuionlist() && (!original.getMarkAsDistribtuionlist())) {
 					return false;
-				} else if ((co.getMarkAsDistribtuionlist() == false) && (original.getMarkAsDistribtuionlist() == true)) {
+				} else if ((!co.getMarkAsDistribtuionlist()) && (original.getMarkAsDistribtuionlist())) {
 					return true;
 				} else if (co.getMarkAsDistribtuionlist() == original.getMarkAsDistribtuionlist()) {
 					return true;
@@ -9696,11 +9753,16 @@ public final class Contacts {
 				return null;
 			}
 
-			public void setValueAsString(String s, final ContactObject co) {
+			public void setValueAsString(final String s, final ContactObject co) {
 				if (null == s) {
-					s = "0";
+					co.setNumberOfAttachments(0);
+					return;
 				}
-				co.setNumberOfAttachments(new Integer(s).intValue());
+				try {
+					co.setNumberOfAttachments(Integer.parseInt(s));
+				} catch (final NumberFormatException e) {
+					co.setNumberOfAttachments(0);
+				}
 			}
 		};
 	}
