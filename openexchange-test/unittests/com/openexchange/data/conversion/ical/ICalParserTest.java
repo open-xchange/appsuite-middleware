@@ -635,8 +635,6 @@ public class ICalParserTest extends TestCase {
         assertEquals(0, end.get(Calendar.HOUR_OF_DAY));
         assertEquals(0, end.get(Calendar.MINUTE));
         assertEquals(0, end.get(Calendar.SECOND));
-
-
     }
 
     // Tasks
