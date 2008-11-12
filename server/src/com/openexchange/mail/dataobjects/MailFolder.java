@@ -447,7 +447,7 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Removes the messageCount
+	 * Removes the message-count
 	 */
 	public void removeMessageCount() {
 		messageCount = 0;
@@ -487,7 +487,7 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Removes the newMessageCount
+	 * Removes the new-message-count
 	 */
 	public void removeNewMessageCount() {
 		newMessageCount = 0;
@@ -526,7 +526,7 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Removes the unreadMessageCount
+	 * Removes the unread-message-count
 	 */
 	public void removeUnreadMessageCount() {
 		unreadMessageCount = 0;
@@ -702,17 +702,24 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Gets the ownPermission
+	 * Gets the permission for currently logged-in user accessing this folder
+	 * <p>
+	 * The returned permission should reflect user's permission regardless if
+	 * mailing system supports permissions or not. An instance of
+	 * {@link DefaultMailPermission} is supposed to be returned on missing
+	 * permissions support except for the root folder. The root folder should
+	 * indicate no object permissions in any case, but the folder permission
+	 * varies if mailing system allows subfolder creation below root folder or
+	 * not. The returned permission must reflect the allowed behavior.
 	 * 
-	 * @return the ownPermission or <code>null</code> if this mail folder
-	 *         denotes the root folder
+	 * @return The own permission
 	 */
 	public MailPermission getOwnPermission() {
 		return ownPermission;
 	}
 
 	/**
-	 * @return <code>true</code> if ownPermission is set; otherwise
+	 * @return <code>true</code> if own permission is set; otherwise
 	 *         <code>false</code>
 	 */
 	public boolean containsOwnPermission() {
@@ -720,7 +727,7 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Removes the ownPermission
+	 * Removes the own permission
 	 */
 	public void removeOwnPermission() {
 		ownPermission = null;
@@ -732,7 +739,9 @@ public class MailFolder implements Serializable {
 	 * <p>
 	 * Apply an instance of {@link DefaultMailPermission} if mailing system does
 	 * not support permissions, except if this mail folder denotes the root
-	 * folder, then apply <code>null</code>.
+	 * folder, then apply altered instance of {@link DefaultMailPermission} with
+	 * no object permissions but properly reflects folder permission as
+	 * described in {@link #getOwnPermission()}.
 	 * 
 	 * @param ownPermission
 	 *            the own permission to set
@@ -743,9 +752,10 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Gets the rootFolder
+	 * Checks if this folder denotes the root folder
 	 * 
-	 * @return the rootFolder
+	 * @return <code>true</code> if this folder denotes the root folder;
+	 *         otherwise <code>false</code>
 	 */
 	public boolean isRootFolder() {
 		return rootFolder;
@@ -760,7 +770,7 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Removes the rootFolder
+	 * Removes the root folder flag
 	 */
 	public void removeRootFolder() {
 		rootFolder = false;
@@ -768,10 +778,10 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Sets the rootFolder
+	 * Sets the root folder flag
 	 * 
 	 * @param rootFolder
-	 *            the rootFolder to set
+	 *            the root folder flag to set
 	 */
 	public void setRootFolder(final boolean rootFolder) {
 		this.rootFolder = rootFolder;
@@ -779,9 +789,11 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Gets the default folder status
+	 * Checks if this folder denotes a default folder (Drafts, Sent, Trash,
+	 * etc.)
 	 * 
-	 * @return the default folder status
+	 * @return <code>true</code> if this folder denotes a default folder;
+	 *         otherwise <code>false</code>
 	 */
 	public boolean isDefaultFolder() {
 		return defaultFolder;
@@ -796,7 +808,7 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Removes the default folder status
+	 * Removes the default folder flag
 	 */
 	public void removeDefaultFolder() {
 		defaultFolder = false;
@@ -804,10 +816,10 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Sets the default folder status
+	 * Sets the default folder flag
 	 * 
 	 * @param defaultFolder
-	 *            the default folder status to set
+	 *            the default folder flag to set
 	 */
 	public void setDefaultFolder(final boolean defaultFolder) {
 		this.defaultFolder = defaultFolder;
@@ -896,9 +908,10 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Gets the supportsUserFlags
+	 * Checks if this folder supports user flags
 	 * 
-	 * @return the supportsUserFlags
+	 * @return <code>true</code> if this folder supports user flags; otherwise
+	 *         <code>false</code>
 	 */
 	public boolean isSupportsUserFlags() {
 		return supportsUserFlags;
@@ -913,7 +926,7 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Removes the supportsUserFlags
+	 * Removes the supports-user-flags flag
 	 */
 	public void removeSupportsUserFlags() {
 		b_supportsUserFlags = false;
@@ -921,10 +934,10 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Sets the supportsUserFlags
+	 * Sets the supports-user-flags flag
 	 * 
 	 * @param supportsUserFlags
-	 *            the supportsUserFlags to set
+	 *            the supports-user-flags flag to set
 	 */
 	public void setSupportsUserFlags(final boolean supportsUserFlags) {
 		this.supportsUserFlags = supportsUserFlags;
