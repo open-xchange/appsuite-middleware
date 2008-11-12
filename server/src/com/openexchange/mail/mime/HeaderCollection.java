@@ -556,6 +556,12 @@ public class HeaderCollection implements Serializable {
 		if (count != other.count) {
 			return false;
 		}
+		if (map == null) {
+			if (other.map != null) {
+				return false;
+			}
+			return true;
+		}
 		if (map.size() != other.map.size()) {
 			return false;
 		}
