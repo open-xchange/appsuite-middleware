@@ -226,9 +226,12 @@ public class OXCalendarException extends OXException {
          */
         INVALID_RECURRENCE_POSITION_CHANGE("Changing recurrence position of a change exception denied.", 83, Category.USER_INPUT),
         /**
-         * User changing the appointment is missing.
+         * Internal problem detected. Please inform administrator. Unable to
+         * change the appointment. User information is missing.
          */
-        MODIFIED_BY_MISSING("User changing the appointment is missing.", 84, Category.CODE_ERROR);
+        MODIFIED_BY_MISSING("Internal problem detected. Please inform "
+            + "administrator. Unable to change the appointment. User "
+            + "information is missing.", 84, Category.CODE_ERROR);
         
         /**
          * Message of the exception.
