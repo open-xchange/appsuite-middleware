@@ -94,26 +94,26 @@ public final class ContactImageDataSource implements DataSource {
 		 */
 		final int folder;
 		{
-			final String val = dataArguments.get(ARGS[1]);
-			if (val == null) {
-				throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[1]);
-			}
-			try {
-				folder = Integer.parseInt(val);
-			} catch (final NumberFormatException e) {
-				throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ARGS[1], val);
-			}
-		}
-		final int objectId;
-		{
 			final String val = dataArguments.get(ARGS[0]);
 			if (val == null) {
 				throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[0]);
 			}
 			try {
-				objectId = Integer.parseInt(val);
+				folder = Integer.parseInt(val);
 			} catch (final NumberFormatException e) {
 				throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ARGS[0], val);
+			}
+		}
+		final int objectId;
+		{
+			final String val = dataArguments.get(ARGS[1]);
+			if (val == null) {
+				throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[1]);
+			}
+			try {
+				objectId = Integer.parseInt(val);
+			} catch (final NumberFormatException e) {
+				throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ARGS[1], val);
 			}
 		}
 		/*

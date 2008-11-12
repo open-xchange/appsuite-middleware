@@ -124,7 +124,10 @@ public final class ImageServlet extends HttpServlet {
 			}
 			final Session[] sessions = getSessions(req, sessiondService);
 			for (final Session session : sessions) {
-				final ImageData imageData = ImageRegistry.getInstance().getImageData(session, uid);
+				ImageData imageData = ImageRegistry.getInstance().getImageData(session, uid);
+				if (imageData == null) {
+					imageData = ImageRegistry.getInstance().getImageData(session.getContextId(), uid);
+				}
 				if (imageData != null) {
 					/*
 					 * Output to client
