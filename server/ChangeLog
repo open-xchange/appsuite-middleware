@@ -1,3 +1,7 @@
+* 2008-11-12 - marcus.klein@open-xchange.com
+
+ - Bugfix #12317: Appointments lasting an entire day start 00:00 UTC.
+
 * 2008-11-11 - francisco.laguna@open-xchange.com
 
  - Bugfix #12282 : Set Security service in infostore factory.
@@ -106,7 +110,6 @@
 * 2008-10-31 - francisco.laguna@open-xchange.com
 
  - Bugfix #11305: Fixed batching of deletes.
- - Bugfix #12317: Appointments lasting an entire day start 00:00 UTC.
 
 * 2008-10-31 - marcus.klein@open-xchange.com
 
