@@ -1,0 +1,39 @@
+#!/bin/bash
+
+OXFUNCTIONS=@oxfunctions@
+OXCONFIG=@oxscriptconf@
+OXPREFIX=@prefix@
+OXBUNDLES=$OXPREFIX/bundles
+
+
+test -f $OXFUNCTIONS || {
+	echo "missing common shell functions file"
+	exit 1
+}
+
+. $OXFUNCTIONS
+
+test -f $OXCONFIG && . $OXCONFIG
+
+warn() {
+    echo -e "\e[1m$1\e[0m"
+}
+
+CACHECCF=$OXPREFIX/etc/groupware/cache.ccf
+SESSIONCACHECCF=$OXPREFIX/etc/groupware/sessioncache.ccf
+
+if ox_exists_property jcs.auxiliary.SessionLTCP.attributes.UdpDiscoveryPort $SESSIONCACHECCF; then
+    SPORT=$(ox_read_property jcs.auxiliary.SessionLTCP.attributes.UdpDiscoveryPort $SESSIONCACHECCF)
+fi
+
+if ox_exists_property jcs.auxiliary.LTCP.attributes.UdpDiscoveryPort $CACHECCF; then
+    CPORT=$(ox_read_property jcs.auxiliary.LTCP.attributes.UdpDiscoveryPort $CACHECCF)
+fi
+
+if [ -n "$SPORT" ] && [ -n "$CPORT" ] && [ "$SPORT" == "$CPORT" ]; then
+    warn "jcs.auxiliary.SessionLTCP.attributes.UdpDiscoveryPort in"
+    warn "$SESSIONCACHECCF is configured to use the same port as"
+    warn "jcs.auxiliary.LTCP.attributes.UdpDiscoveryPort in"
+    warn "$CACHECCF"
+    warn "that will not work, please choose different ports"
+fi

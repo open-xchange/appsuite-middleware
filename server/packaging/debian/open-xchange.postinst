@@ -24,6 +24,9 @@ postFix() {
   local version=${1%-*}
   version=${version//[-.]/}
 
+  # run checkconfigconsistency once
+  /opt/open-xchange/sbin/checkconfigconsistency
+
   # -----------------------------------------------------------------------
   # bugfix id#12290
   local pfile=/opt/open-xchange/etc/groupware/ajp.properties
