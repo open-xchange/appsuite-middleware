@@ -452,7 +452,7 @@ public class ICalParserTest extends TestCase {
         assertEquals(2, appointment.getInterval());
         assertEquals(23, appointment.getDayInMonth());
 
-        // Second form : the 2nd monday and tuesday every 2 months
+        // Second form : the 3rd monday and tuesday every 2 months
 
         appointment = appointmentWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=MO,TU;BYWEEKNO=3", start, end);
         days = appointment.getDays();
