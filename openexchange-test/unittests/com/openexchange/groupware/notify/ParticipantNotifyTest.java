@@ -242,6 +242,7 @@ public class ParticipantNotifyTest extends TestCase{
 		final Message msg = notify.getMessages().get(0);
 		
 		final String[] participantNames = parseParticipants( msg );
+		assertEquals("Can't find 3 participants", 3, participantNames.length);
 		assertEquals("User 1 (waiting)", participantNames[0]);
 		assertEquals("User 2 (waiting)", participantNames[1]);
 		assertEquals("User 3 (waiting)", participantNames[2]);
