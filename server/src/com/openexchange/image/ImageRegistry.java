@@ -188,7 +188,7 @@ public final class ImageRegistry {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("Image data fetched from registry for UID: " + imageArguments.getID());
 			}
-			return imageData;
+			return imageData.touch();
 		}
 		imageData = new ImageData(imageSource, imageArguments);
 		m.put(imageArguments.getID(), imageData);
@@ -234,7 +234,7 @@ public final class ImageRegistry {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("Image data fetched from registry for UID: " + imageArguments.getID());
 			}
-			return imageData;
+			return imageData.touch();
 		}
 		imageData = new ImageData(imageSource, imageArguments);
 		m.put(imageArguments.getID(), imageData);
