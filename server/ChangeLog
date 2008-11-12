@@ -1,3 +1,8 @@
+* 2008-11-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #12165: Added a servlet for serving image requests with a session
+   ID contained in request's URL parameters
+
 * 2008-11-12 - marcus.klein@open-xchange.com
 
  - Bugfix #12317: Appointments lasting an entire day start 00:00 UTC.
