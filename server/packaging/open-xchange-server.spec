@@ -118,6 +118,9 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 
 %post -n open-xchange
 
+# run checkconfigconsistency once
+/opt/open-xchange/sbin/checkconfigconsistency
+
 if [ ${1:-0} -eq 2 ]; then
    # only when updating
    . /opt/open-xchange/etc/oxfunctions.sh
