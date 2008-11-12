@@ -160,7 +160,7 @@ public abstract class AbstractAllRequest<T extends AbstractAllResponse> implemen
     /**
      * @return the columns
      */
-    protected int[] getColumns() {
+    public int[] getColumns() {
         return columns;
     }
 
